@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+    
+<resources>
+    
+    <color name="silver">#dddddd</color>
+    <color name="gold">#ffff00</color>
+
+    <color name="notification_area">#220000ff</color>
+    <color name="notification_area_border">#990000ff</color>
+    
+</resources>

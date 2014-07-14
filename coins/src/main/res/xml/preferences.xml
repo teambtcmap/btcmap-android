@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="DATA">
+
+        <CheckBoxPreference
+            android:key="@string/pref_sync_merchants_key"
+            android:title="@string/pref_sync_merchants"
+            android:summaryOn="@string/pref_sync_merchants_summary_on"
+            android:summaryOff="@string/pref_sync_merchants_summary_off"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="NOTIFICATIONS">
+
+        <CheckBoxPreference
+            android:key="@string/pref_show_new_merchants_key"
+            android:title="@string/pref_show_new_merchants"
+            android:summaryOn="@string/pref_show_new_merchants_on"
+            android:summaryOff="@string/pref_show_new_merchants_off"
+            android:defaultValue="true" />
+
+        <Preference
+            android:dependency="@string/pref_show_new_merchants_key"
+            android:key="@string/pref_area_of_interest_key"
+            android:title="@string/pref_area_of_interest"
+            android:summary="@string/pref_area_of_interest_summary" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
