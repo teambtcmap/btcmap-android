@@ -6,21 +6,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.bubelov.coins.App;
+import com.bubelov.coins.manager.MerchantSyncManager;
 import com.bubelov.coins.manager.UserNotificationManager;
 import com.bubelov.coins.model.Currency;
-import com.bubelov.coins.manager.MerchantSyncManager;
+import com.bubelov.coins.receiver.SyncMerchantsWakefulReceiver;
 import com.bubelov.coins.server.ServerException;
 import com.bubelov.coins.database.Tables;
 import com.bubelov.coins.model.Merchant;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -31,20 +28,12 @@ import java.util.Collection;
 public class MerchantsSyncService extends IntentService {
     private static final String TAG = MerchantsSyncService.class.getName();
 
-    private static final String MESSENGER_KEY = "messenger";
-
-    private Collection<Messenger> callbacks = new ArrayList<>();
+    public static final String SYNC_COMPLETED_ACTION = TAG + ".SYNC_COMPLETED";
 
     private boolean active;
 
     public static Intent makeIntent(Context context) {
         return new Intent(context, MerchantsSyncService.class);
-    }
-
-    public static Intent makeIntent(Context context, Handler handler) {
-        Intent intent = new Intent(context, MerchantsSyncService.class);
-        intent.putExtra(MESSENGER_KEY, new Messenger(handler));
-        return intent;
     }
 
     public MerchantsSyncService() {
@@ -53,15 +42,7 @@ public class MerchantsSyncService extends IntentService {
 
     @Override
     public void onStart(Intent intent, int startId) {
-        Messenger messenger = intent.getParcelableExtra(MESSENGER_KEY);
-
-        if (messenger != null) {
-            callbacks.add(messenger);
-        }
-
-        if (active) {
-            Log.d(TAG, "Already syncing, skipping intent");
-        } else {
+        if (!active) {
             active = true;
             super.onStart(intent, startId);
         }
@@ -74,23 +55,12 @@ public class MerchantsSyncService extends IntentService {
         } catch (ServerException exception) {
             Log.e(TAG, "Couldn't synchronize merchants", exception);
         } finally {
-            MerchantSyncManager syncManager = new MerchantSyncManager(getApplicationContext());
-            syncManager.setLastSyncMillis(System.currentTimeMillis());
-            notifySyncCompleted();
             active = false;
+            new MerchantSyncManager(getApplicationContext()).setLastSyncMillis(System.currentTimeMillis());
+            SyncMerchantsWakefulReceiver.completeWakefulIntent(intent);
+            Intent syncCompletedIntent = new Intent(SYNC_COMPLETED_ACTION);
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(syncCompletedIntent);
         }
-    }
-
-    private void notifySyncCompleted() {
-        for (Messenger callback : callbacks) {
-            try {
-                callback.send(Message.obtain());
-            } catch (RemoteException exception) {
-                Log.e(TAG, "Couldn't notify subscriber", exception);
-            }
-        }
-
-        callbacks.clear();
     }
 
     private void syncMerchants() throws ServerException {

@@ -2,13 +2,14 @@ package com.bubelov.coins.ui;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Loader;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -45,6 +46,8 @@ public class MapActivity extends Activity implements LoaderManager.LoaderCallbac
 
     private SwipeRefreshLayout refreshLayout;
 
+    private BroadcastReceiver syncBroadcastReceiver;
+
     public static Intent makeIntent(Context context, double latitude, double longitude) {
         Intent intent = new Intent(context, MapActivity.class);
         intent.putExtra(SHOW_MERCHANT_EXTRA, true);
@@ -80,6 +83,21 @@ public class MapActivity extends Activity implements LoaderManager.LoaderCallbac
 
         LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
         getLoaderManager().initLoader(MERCHANTS_LOADER, PlacesLoader.prepareArguments(bounds), this);
+
+        syncBroadcastReceiver = new SyncMerchantsBroadcastReceiver();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter(MerchantsSyncService.SYNC_COMPLETED_ACTION);
+        LocalBroadcastManager.getInstance(this).registerReceiver(syncBroadcastReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(syncBroadcastReceiver);
+        super.onPause();
     }
 
     @Override
@@ -175,17 +193,8 @@ public class MapActivity extends Activity implements LoaderManager.LoaderCallbac
     }
 
     private void refreshData() {
-        Handler refreshCompletedHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                refreshLayout.setRefreshing(false);
-                LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-                getLoaderManager().restartLoader(MERCHANTS_LOADER, PlacesLoader.prepareArguments(bounds), MapActivity.this).forceLoad();
-            }
-        };
-
         refreshLayout.setRefreshing(true);
-        startService(MerchantsSyncService.makeIntent(this, refreshCompletedHandler));
+        startService(MerchantsSyncService.makeIntent(this));
     }
 
     private class PlacesRenderer extends DefaultClusterRenderer<Merchant> {
@@ -210,6 +219,15 @@ public class MapActivity extends Activity implements LoaderManager.LoaderCallbac
     private class CameraChangeListener implements GoogleMap.OnCameraChangeListener {
         @Override
         public void onCameraChange(CameraPosition cameraPosition) {
+            LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+            getLoaderManager().restartLoader(MERCHANTS_LOADER, PlacesLoader.prepareArguments(bounds), MapActivity.this).forceLoad();
+        }
+    }
+
+    private class SyncMerchantsBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            refreshLayout.setRefreshing(false);
             LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
             getLoaderManager().restartLoader(MERCHANTS_LOADER, PlacesLoader.prepareArguments(bounds), MapActivity.this).forceLoad();
         }

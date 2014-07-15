@@ -14,7 +14,6 @@ import com.bubelov.coins.manager.MerchantSyncManager;
 public class BootCompletedReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        MerchantSyncManager syncManager = new MerchantSyncManager(context);
-        syncManager.scheduleAlarm();
+        new MerchantSyncManager(context).scheduleAlarm();
     }
 }

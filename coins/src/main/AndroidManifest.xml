@@ -40,7 +40,14 @@
 
         <activity android:name=".ui.AreaSelectActivity" />
 
-        <service android:name=".service.MerchantsSyncService" />
+        <service
+            android:name=".service.MerchantsSyncService" />
+
+        <receiver
+            android:name=".receiver.BootCompletedReceiver"
+            android:enabled="true" />
+
+        <receiver android:name=".receiver.SyncMerchantsWakefulReceiver" />
 
         <meta-data
             android:name="com.google.android.gms.version"

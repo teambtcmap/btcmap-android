@@ -25,6 +25,7 @@ import java.util.Collection;
  */
 
 public class OsmServerFacade implements ServerFacade {
+    // TODO add @newer parameter http://www.overpass-api.de/api/xapi?node[payment:litecoin=yes][@newer=2014-05-01T00:00:00Z]
     public static final String QUERY = "http://overpass.osm.rambler.ru/cgi/interpreter?data=[out:json];node[%%22payment:%s%%22=yes];out;";
 
     public Collection<Merchant> getMerchants(Currency currency) throws ServerException {
