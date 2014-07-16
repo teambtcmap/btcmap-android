@@ -155,7 +155,7 @@ public class MapActivity extends Activity implements LoaderManager.LoaderCallbac
         LatLng location = getIntent().getParcelableExtra(MERCHANT_LOCATION_EXTRA);
 
         if (location != null) {
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 12));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 16));
             getIntent().removeExtra(MERCHANT_LOCATION_EXTRA);
         }
     }
