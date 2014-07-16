@@ -8,7 +8,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.service.MerchantsSyncService;
+import com.bubelov.coins.receiver.SyncMerchantsWakefulReceiver;
 
 import java.text.SimpleDateFormat;
 
@@ -23,7 +23,7 @@ public class MerchantSyncManager {
     private static final String SYNC_INTERVAL_KEY = "sync_interval";
     private static final String LAST_SYNC_MILLIS_KEY = "last_sync_millis";
 
-    private static final long SYNC_INTERVAL_IN_MILLIS = 1000 * 60 * 60 * 1;
+    private static final long SYNC_INTERVAL_IN_MILLIS = 1000 * 60 * 60;
 
     private long syncInterval;
     private long lastSyncMillis;
@@ -42,7 +42,7 @@ public class MerchantSyncManager {
         lastSyncMillis = preferences.getLong(LAST_SYNC_MILLIS_KEY, 0);
 
         alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        syncIntent = PendingIntent.getService(context, 0, MerchantsSyncService.makeIntent(context), PendingIntent.FLAG_CANCEL_CURRENT);
+        syncIntent = PendingIntent.getBroadcast(context, 0, SyncMerchantsWakefulReceiver.makeIntent(context), PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     public void scheduleAlarm() {
