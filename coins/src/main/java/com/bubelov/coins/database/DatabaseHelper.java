@@ -72,13 +72,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private void insertCurrencies(SQLiteDatabase db) {
         ContentValues values = new ContentValues();
 
-//        values.put(Tables.Currencies.NAME, "Bitcoin");
-//        values.put(Tables.Currencies.CODE, "BTC");
-//        db.insert(Tables.Currencies.TABLE_NAME, null, values);
-//
-//        values.put(Tables.Currencies.NAME, "Litecoin");
-//        values.put(Tables.Currencies.CODE, "LTC");
-//        db.insert(Tables.Currencies.TABLE_NAME, null, values);
+        values.put(Tables.Currencies.NAME, "Bitcoin");
+        values.put(Tables.Currencies.CODE, "BTC");
+        db.insert(Tables.Currencies.TABLE_NAME, null, values);
+
+        values.put(Tables.Currencies.NAME, "Litecoin");
+        values.put(Tables.Currencies.CODE, "LTC");
+        db.insert(Tables.Currencies.TABLE_NAME, null, values);
 
         values.put(Tables.Currencies.NAME, "Peercoin");
         values.put(Tables.Currencies.CODE, "PPC");

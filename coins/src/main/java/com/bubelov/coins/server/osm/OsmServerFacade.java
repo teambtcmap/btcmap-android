@@ -1,21 +1,19 @@
 package com.bubelov.coins.server.osm;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.util.Log;
+
 import com.bubelov.coins.server.ServerException;
 import com.bubelov.coins.server.ServerFacade;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
 import com.google.gson.Gson;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.util.EntityUtils;
-
-import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -25,31 +23,25 @@ import java.util.Collection;
  */
 
 public class OsmServerFacade implements ServerFacade {
-    // TODO add @newer parameter http://www.overpass-api.de/api/xapi?node[payment:litecoin=yes][@newer=2014-05-01T00:00:00Z]
-    public static final String QUERY = "http://overpass.osm.rambler.ru/cgi/interpreter?data=[out:json];node[%%22payment:%s%%22=yes];out;";
+    private static final String TAG = OsmServerFacade.class.getName();
+
+    private static final String SERVER_URL = "http://overpass.osm.rambler.ru/";
+
+    private SharedPreferences preferences;
+
+    public OsmServerFacade(Context context) {
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    }
 
     public Collection<Merchant> getMerchants(Currency currency) throws ServerException {
-        HttpParams httpParameters = new BasicHttpParams();
-        int timeoutConnection = 120000;
-        HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
-        int timeoutSocket = 120000;
-        HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-
-        HttpClient client = new DefaultHttpClient(httpParameters);
-        String requestUrl = String.format(QUERY, getQueryParameter(currency));
-        HttpGet post = new HttpGet(requestUrl);
-
         Collection<Merchant> merchants = new ArrayList<>();
+        HttpURLConnection connection = null;
 
         try {
-            HttpResponse response = client.execute(post);
-            String responseString = EntityUtils.toString(response.getEntity());
+            URL url = new URL(getRequestUrl(currency));
 
-            OsmQueryResult result = new Gson().fromJson(responseString, OsmQueryResult.class);
-
-            if (result == null) {
-                return merchants;
-            }
+            connection = (HttpURLConnection) url.openConnection();
+            OsmQueryResult result = new Gson().fromJson(new InputStreamReader(connection.getInputStream()), OsmQueryResult.class);
 
             for (Element element : result.getElements()) {
                 Merchant merchant = new Merchant();
@@ -67,14 +59,41 @@ public class OsmServerFacade implements ServerFacade {
                 }
             }
 
-            return merchants;
-        } catch (IOException exception) {
+            preferences.edit()
+                    .putString(getLastSyncKey(currency), result.getMetadata().getTimestampOsmBase())
+                    .commit();
+        } catch (Exception exception) {
             throw new ServerException(exception);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
+
+        return merchants;
+    }
+
+    private String getRequestUrl(Currency currency) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(SERVER_URL);
+        builder.append("cgi/interpreter?data=[out:json];node");
+
+        if (preferences.contains(getLastSyncKey(currency))) {
+            builder.append(String.format("(newer:%%22%s%%22)", preferences.getString(getLastSyncKey(currency), "")));
+        }
+
+        builder.append(String.format("[%%22payment:%s%%22=yes];out;", getQueryParameter(currency)));
+        Log.d(TAG, "Request URL: " + builder.toString());
+        return builder.toString();
     }
 
     private String getQueryParameter(Currency currency) {
         // TODO add mapping from http://wiki.openstreetmap.org/wiki/Key:payment
         return currency.getName().toLowerCase();
+    }
+
+    private String getLastSyncKey(Currency currency) {
+        return currency.getName().toLowerCase() + "_last_sync";
     }
 }

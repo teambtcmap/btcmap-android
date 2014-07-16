@@ -1,5 +1,7 @@
 package com.bubelov.coins.server.osm;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 
 /**
@@ -9,7 +11,12 @@ import java.util.ArrayList;
 
 public class OsmQueryResult {
     private String version;
+
     private String generator;
+
+    @SerializedName("osm3s")
+    private Metadata metadata;
+
     private ArrayList<Element> elements;
 
     public String getVersion() {
@@ -26,6 +33,14 @@ public class OsmQueryResult {
 
     public void setGenerator(String generator) {
         this.generator = generator;
+    }
+
+    public Metadata getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Metadata metadata) {
+        this.metadata = metadata;
     }
 
     public ArrayList<Element> getElements() {

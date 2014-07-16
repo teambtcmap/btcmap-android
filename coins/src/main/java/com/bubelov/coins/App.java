@@ -23,7 +23,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
-        serverFacade = new OsmServerFacade();
+        serverFacade = new OsmServerFacade(this);
         databaseHelper = new DatabaseHelper(this);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);

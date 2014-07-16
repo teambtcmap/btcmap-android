@@ -88,9 +88,9 @@ public class UserNotificationManager {
         Location.distanceBetween(notificationAreaCenter.latitude, notificationAreaCenter.longitude, merchant.getLatitude(), merchant.getLongitude(), distance);
         Log.d(TAG, "Distance: " + distance[0]);
 
-//        if (distance[0] > getNotificationAreaRadius()) {
-//            return;
-//        }
+        if (distance[0] > getNotificationAreaRadius()) {
+            return;
+        }
 
         App app = (App) context.getApplicationContext();
         SQLiteDatabase db = app.getDatabaseHelper().getReadableDatabase();
