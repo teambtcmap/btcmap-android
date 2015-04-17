@@ -78,8 +78,8 @@ public class PlacesLoader extends AsyncTaskLoader<Collection<Merchant>> {
             merchant.setLongitude(cursor.getFloat(2));
             merchant.setName(cursor.getString(3));
             merchant.setDescription(cursor.getString(4));
-            merchant.setPhone(cursor.getString(5));
-            merchant.setWebsite(cursor.getString(6));
+            //merchant.setPhone(cursor.getString(5));
+            //merchant.setWebsite(cursor.getString(6));
 
             merchants.add(merchant);
         }

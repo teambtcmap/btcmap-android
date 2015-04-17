@@ -18,7 +18,7 @@ import com.bubelov.coins.server.ServerException;
 import com.bubelov.coins.database.Tables;
 import com.bubelov.coins.model.Merchant;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Author: Igor Bubelov
@@ -68,7 +68,7 @@ public class MerchantsSyncService extends IntentService {
         SQLiteDatabase db = app.getDatabaseHelper().getReadableDatabase();
 
         Cursor currenciesCursor = db.query(Tables.Currencies.TABLE_NAME,
-                new String[] { Tables.Currencies._ID, Tables.Currencies.NAME, Tables.Currencies.CODE },
+                new String[]{Tables.Currencies._ID, Tables.Currencies.NAME, Tables.Currencies.CODE},
                 null,
                 null,
                 null,
@@ -84,20 +84,26 @@ public class MerchantsSyncService extends IntentService {
             currency.setCode(currenciesCursor.getString(2));
 
             syncMerchants(currency);
+
+            break;
         }
 
         currenciesCursor.close();
     }
 
-    private void syncMerchants(Currency currency) throws ServerException {
-        App app = (App)getApplication();
-        SQLiteDatabase db = app.getDatabaseHelper().getWritableDatabase();
-        ContentValues values = new ContentValues();
+    private void syncMerchants(final Currency currency) throws ServerException {
+        if (!currency.getName().equals("Bitcoin")) {
+            Log.d(TAG, String.format("Skipped currency %s. Only Bitcoin supported at this moment", currency.getName()));
+        }
 
-        Collection<Merchant> merchants = app.getServerFacade().getMerchants(currency);
+        App app = (App)getApplication();
+        final SQLiteDatabase db = app.getDatabaseHelper().getWritableDatabase();
+        final ContentValues values = new ContentValues();
+
+        List<Merchant> merchants = App.getInstance().getApi().getMerchants();
         Log.d(TAG, String.format("Downloaded %s merchants accepting %s", merchants.size(), currency.getName()));
 
-        UserNotificationManager notificationManager = new UserNotificationManager(this);
+        UserNotificationManager notificationManager = new UserNotificationManager(getApplicationContext());
 
         for (Merchant merchant : merchants) {
             notificationManager.onMerchantDownload(merchant);
@@ -107,10 +113,13 @@ public class MerchantsSyncService extends IntentService {
             values.put(Tables.Merchants.LONGITUDE, merchant.getLongitude());
             values.put(Tables.Merchants.NAME, merchant.getName());
             values.put(Tables.Merchants.DESCRIPTION, merchant.getDescription());
-            values.put(Tables.Merchants.PHONE, merchant.getPhone());
-            values.put(Tables.Merchants.WEBSITE, merchant.getWebsite());
+            //values.put(Tables.Merchants.PHONE, merchant.getPhone());
+            //values.put(Tables.Merchants.WEBSITE, merchant.getWebsite());
 
-            db.insertWithOnConflict(Tables.Merchants.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            if (db.insertWithOnConflict(Tables.Merchants.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE) == -1) {
+                Log.d(TAG, "Couldn't insert merchant");
+            }
+
             values.clear();
 
             values.put(Tables.MerchantsToCurrencies.MERCHANT_ID, merchant.getId());

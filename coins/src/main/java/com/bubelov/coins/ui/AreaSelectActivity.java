@@ -111,16 +111,16 @@ public class AreaSelectActivity extends ActionBarActivity implements Confirmatio
     private void initActions() {
         startSupportActionMode(new ActionModeCallback());
 
-        int doneButtonId = Resources.getSystem().getIdentifier("action_mode_close_button", "id", "android");
-        View doneButton = findViewById(doneButtonId);
-
-        doneButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveSelectedArea();
-                finish();
-            }
-        });
+//        int doneButtonId = Resources.getSystem().getIdentifier("action_mode_close_button", "id", "android");
+//        View doneButton = findViewById(doneButtonId);
+//
+//        doneButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                saveSelectedArea();
+//                finish();
+//            }
+//        });
     }
 
     private void findMyLocationAndMoveAreaHere() {

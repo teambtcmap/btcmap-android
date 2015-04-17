@@ -23,7 +23,7 @@ public class MerchantSyncManager {
     private static final String SYNC_INTERVAL_KEY = "sync_interval";
     private static final String LAST_SYNC_MILLIS_KEY = "last_sync_millis";
 
-    private static final long SYNC_INTERVAL_IN_MILLIS = 1000 * 60 * 60;
+    private static final long DEFAULT_SYNC_INTERVAL_IN_MILLIS = 1000 * 60 * 60;
 
     private long syncInterval;
     private long lastSyncMillis;
@@ -38,7 +38,7 @@ public class MerchantSyncManager {
         this.context = context;
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-        syncInterval = preferences.getLong(SYNC_INTERVAL_KEY, SYNC_INTERVAL_IN_MILLIS);
+        syncInterval = preferences.getLong(SYNC_INTERVAL_KEY, DEFAULT_SYNC_INTERVAL_IN_MILLIS);
         lastSyncMillis = preferences.getLong(LAST_SYNC_MILLIS_KEY, 0);
 
         alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
@@ -80,6 +80,7 @@ public class MerchantSyncManager {
 
         this.lastSyncMillis = lastSyncMillis;
         preferences.edit().putLong(LAST_SYNC_MILLIS_KEY, lastSyncMillis).commit();
+        scheduleAlarm();
     }
 
     private boolean isEnabled() {

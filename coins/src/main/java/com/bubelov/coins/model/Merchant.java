@@ -1,7 +1,6 @@
 package com.bubelov.coins.model;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.gson.annotations.SerializedName;
 import com.google.maps.android.clustering.ClusterItem;
 
 import java.util.Collection;
@@ -14,22 +13,17 @@ import java.util.Collection;
 public class Merchant implements ClusterItem {
     private long id;
 
-    @SerializedName("lat")
-    private double latitude;
-
-    @SerializedName("lon")
-    private double longitude;
-
     private String name;
 
     private String description;
 
-    private String phone;
+    private double latitude;
 
-    private String website;
+    private double longitude;
 
     private Collection<Currency> currencies;
 
+    // Ignore for serialization
     private LatLng position;
 
     @Override
@@ -84,22 +78,6 @@ public class Merchant implements ClusterItem {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getWebsite() {
-        return website;
-    }
-
-    public void setWebsite(String website) {
-        this.website = website;
     }
 
     public Collection<Currency> getCurrencies() {

@@ -58,7 +58,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_MERCHANTS_TABLE);
         db.execSQL(SQL_CREATE_CURRENCIES_TABLE);
         db.execSQL(SQL_CREATE_MERCHANTS_TO_CURRENCIES_TABLE);
-        insertCurrencies(db);
+        //insertCurrencies(db);
     }
 
     @Override

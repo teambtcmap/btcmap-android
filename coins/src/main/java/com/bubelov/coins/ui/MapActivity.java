@@ -1,6 +1,5 @@
 package com.bubelov.coins.ui;
 
-import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,6 +10,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,7 +34,7 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
 import java.util.Collection;
 
-public class MapActivity extends Activity implements LoaderManager.LoaderCallbacks<Collection<Merchant>> {
+public class MapActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Collection<Merchant>> {
     private static final String SHOW_MERCHANT_EXTRA = "show_merchant";
     private static final String MERCHANT_LOCATION_EXTRA = "merchant_location";
     private static final String MY_LOCATION_EXTRA = "my_location";
@@ -59,8 +59,6 @@ public class MapActivity extends Activity implements LoaderManager.LoaderCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        getActionBar().setBackgroundDrawable(null);
 
         refreshLayout = (SwipeRefreshLayout)findViewById(R.id.container);
         refreshLayout.setColorScheme(R.color.silver, R.color.gold, R.color.silver, R.color.gold);
