@@ -1,6 +1,5 @@
 package com.bubelov.coins.service;
 
-import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.bubelov.coins.App;
 import com.bubelov.coins.manager.MerchantSyncManager;
 import com.bubelov.coins.manager.UserNotificationManager;
 import com.bubelov.coins.model.Currency;
@@ -25,7 +23,7 @@ import java.util.List;
  * Date: 07/07/14 22:27
  */
 
-public class MerchantsSyncService extends IntentService {
+public class MerchantsSyncService extends CoinsIntentService {
     private static final String TAG = MerchantsSyncService.class.getName();
 
     public static final String SYNC_COMPLETED_ACTION = TAG + ".SYNC_COMPLETED";
@@ -64,44 +62,48 @@ public class MerchantsSyncService extends IntentService {
     }
 
     private void syncMerchants() throws ServerException {
-        App app = (App)getApplication();
-        SQLiteDatabase db = app.getDatabaseHelper().getReadableDatabase();
+        SQLiteDatabase db = getDatabaseHelper().getReadableDatabase();
 
         Cursor currenciesCursor = db.query(Tables.Currencies.TABLE_NAME,
-                new String[]{Tables.Currencies._ID, Tables.Currencies.NAME, Tables.Currencies.CODE},
+                new String[] { Tables.Currencies._ID, Tables.Currencies.NAME, Tables.Currencies.CODE },
                 null,
                 null,
                 null,
                 null,
                 null);
 
-        Log.d(TAG, currenciesCursor.getCount() + " currencies found");
+        Log.d(TAG, currenciesCursor.getCount() + " currencies found in DB");
 
-        while (currenciesCursor.moveToNext()) {
-            Currency currency = new Currency();
-            currency.setId(currenciesCursor.getLong(0));
-            currency.setName(currenciesCursor.getString(1));
-            currency.setCode(currenciesCursor.getString(2));
+        if (currenciesCursor.getCount() == 0) {
+            currenciesCursor.close();
+            Log.d(TAG, "Loading currencies from server");
 
-            syncMerchants(currency);
+            List<Currency> currencies = getApi().getCurrencies();
+            Log.d(TAG, String.format("Downloaded %s currencies", currencies.size()));
 
-            break;
+            for (Currency currency : currencies) {
+                saveCurrency(currency);
+                syncMerchants(currency);
+            }
+        } else {
+            while (currenciesCursor.moveToNext()) {
+                Currency currency = new Currency();
+                currency.setId(currenciesCursor.getLong(0));
+                currency.setName(currenciesCursor.getString(1));
+                currency.setCode(currenciesCursor.getString(2));
+                syncMerchants(currency);
+            }
+
+            currenciesCursor.close();
         }
-
-        currenciesCursor.close();
     }
 
     private void syncMerchants(final Currency currency) throws ServerException {
-        if (!currency.getName().equals("Bitcoin")) {
-            Log.d(TAG, String.format("Skipped currency %s. Only Bitcoin supported at this moment", currency.getName()));
-        }
-
-        App app = (App)getApplication();
-        final SQLiteDatabase db = app.getDatabaseHelper().getWritableDatabase();
-        final ContentValues values = new ContentValues();
-
-        List<Merchant> merchants = App.getInstance().getApi().getMerchants();
+        List<Merchant> merchants = getApi().getMerchants(currency.getCode());
         Log.d(TAG, String.format("Downloaded %s merchants accepting %s", merchants.size(), currency.getName()));
+
+        SQLiteDatabase db = getDatabaseHelper().getWritableDatabase();
+        ContentValues values = new ContentValues();
 
         UserNotificationManager notificationManager = new UserNotificationManager(getApplicationContext());
 
@@ -128,5 +130,15 @@ public class MerchantsSyncService extends IntentService {
             db.insertWithOnConflict(Tables.MerchantsToCurrencies.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
             values.clear();
         }
+    }
+
+    private boolean saveCurrency(Currency currency) {
+        SQLiteDatabase db = getDatabaseHelper().getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(Tables.Currencies._ID, currency.getId());
+        values.put(Tables.Currencies.NAME, currency.getName());
+        values.put(Tables.Currencies.CODE, currency.getCode());
+
+        return db.insertWithOnConflict(Tables.Currencies.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE) != -1;
     }
 }

@@ -1,10 +1,12 @@
 package com.bubelov.coins;
 
+import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
 
 import java.util.List;
 
 import retrofit.http.GET;
+import retrofit.http.Query;
 
 /**
  * Author: Igor Bubelov
@@ -13,5 +15,8 @@ import retrofit.http.GET;
 
 public interface Api {
     @GET("/merchants")
-    List<Merchant> getMerchants();
+    List<Merchant> getMerchants(@Query("currency") String currencyCode);
+
+    @GET("/currencies")
+    List<Currency> getCurrencies();
 }
