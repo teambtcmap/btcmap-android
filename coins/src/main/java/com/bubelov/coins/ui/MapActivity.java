@@ -1,13 +1,14 @@
 package com.bubelov.coins.ui;
 
-import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.Loader;
+import android.database.Cursor;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -16,10 +17,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.bubelov.coins.Constants;
+import com.bubelov.coins.loader.MerchantsLoader;
 import com.bubelov.coins.manager.UserNotificationManager;
 import com.bubelov.coins.service.MerchantsSyncService;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
-import com.bubelov.coins.loader.PlacesLoader;
 import com.bubelov.coins.R;
 import com.bubelov.coins.model.Merchant;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -32,9 +33,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
-public class MapActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Collection<Merchant>> {
+public class MapActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String SHOW_MERCHANT_EXTRA = "show_merchant";
     private static final String MERCHANT_LOCATION_EXTRA = "merchant_location";
     private static final String MY_LOCATION_EXTRA = "my_location";
@@ -80,7 +82,7 @@ public class MapActivity extends ActionBarActivity implements LoaderManager.Load
         map.setOnCameraChangeListener(new OnCameraChangeMultiplexer(placesManager, new CameraChangeListener()));
 
         LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        getLoaderManager().initLoader(MERCHANTS_LOADER, PlacesLoader.prepareArguments(bounds), this);
+        getSupportLoaderManager().initLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds), this);
 
         syncBroadcastReceiver = new SyncMerchantsBroadcastReceiver();
     }
@@ -121,32 +123,37 @@ public class MapActivity extends ActionBarActivity implements LoaderManager.Load
     }
 
     @Override
-    public Loader<Collection<Merchant>> onCreateLoader(int id, Bundle args) {
-        return new PlacesLoader(this, args);
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if (id == MERCHANTS_LOADER) {
+            return new MerchantsLoader(this, args);
+        } else {
+            return null;
+        }
     }
 
     @Override
-    public void onLoadFinished(Loader<Collection<Merchant>> loader, final Collection<Merchant> data) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                placesManager.clearItems();
-                placesManager.addItems(data);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        placesManager.cluster();
-                    }
-                });
-            }
-        }).start();
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        final Collection<Merchant> merchants = new ArrayList<>();
 
+        while (data.moveToNext()) {
+            Merchant merchant = new Merchant();
+            merchant.setId(data.getLong(0));
+            merchant.setLatitude(data.getFloat(1));
+            merchant.setLongitude(data.getFloat(2));
+            merchant.setName(data.getString(3));
+            merchant.setDescription(data.getString(4));
+
+            merchants.add(merchant);
+        }
+
+        placesManager.clearItems();
+        placesManager.addItems(merchants);
         placesManager.cluster();
     }
 
     @Override
-    public void onLoaderReset(Loader<Collection<Merchant>> loader) {
-        // Nothing to do here
+    public void onLoaderReset(Loader<Cursor> loader) {
+        placesManager.clearItems();
     }
 
     private void showMerchant() {
@@ -218,7 +225,7 @@ public class MapActivity extends ActionBarActivity implements LoaderManager.Load
         @Override
         public void onCameraChange(CameraPosition cameraPosition) {
             LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-            getLoaderManager().restartLoader(MERCHANTS_LOADER, PlacesLoader.prepareArguments(bounds), MapActivity.this).forceLoad();
+            getSupportLoaderManager().restartLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds), MapActivity.this).forceLoad();
         }
     }
 
@@ -227,7 +234,7 @@ public class MapActivity extends ActionBarActivity implements LoaderManager.Load
         public void onReceive(Context context, Intent intent) {
             refreshLayout.setRefreshing(false);
             LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-            getLoaderManager().restartLoader(MERCHANTS_LOADER, PlacesLoader.prepareArguments(bounds), MapActivity.this).forceLoad();
+            getSupportLoaderManager().restartLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds), MapActivity.this).forceLoad();
         }
     }
 }
