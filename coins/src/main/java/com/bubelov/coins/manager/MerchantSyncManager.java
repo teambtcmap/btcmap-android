@@ -47,12 +47,19 @@ public class MerchantSyncManager {
 
     public void scheduleAlarm() {
         if (isEnabled()) {
-            Log.d(TAG, "Scheduling an alarm for " + new SimpleDateFormat().format(lastSyncMillis + syncInterval));
-            alarmManager.setInexactRepeating(AlarmManager.RTC, lastSyncMillis + syncInterval, syncInterval, syncIntent);
+            long nextSync = lastSyncMillis + syncInterval;
+            Log.d(TAG, "Scheduling an alarm for " + SimpleDateFormat.getDateTimeInstance().format(nextSync));
+            alarmManager.setInexactRepeating(AlarmManager.RTC, nextSync, syncInterval, syncIntent);
         } else {
             Log.d(TAG, "Alarm cancelled");
             alarmManager.cancel(syncIntent);
         }
+    }
+
+    public void sheduleDelayed(long delayInMillis) {
+        long nextSync = System.currentTimeMillis() + delayInMillis;
+        Log.d(TAG, "Scheduling an alarm for " + SimpleDateFormat.getDateTimeInstance().format(nextSync));
+        alarmManager.setInexactRepeating(AlarmManager.RTC, nextSync, syncInterval, syncIntent);
     }
 
     public long getSyncInterval() {

@@ -15,8 +15,10 @@ import com.bubelov.coins.receiver.SyncMerchantsWakefulReceiver;
 import com.bubelov.coins.server.ServerException;
 import com.bubelov.coins.database.Tables;
 import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.util.Utils;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Author: Igor Bubelov
@@ -40,9 +42,19 @@ public class MerchantsSyncService extends CoinsIntentService {
 
     @Override
     public void onStart(Intent intent, int startId) {
+        Log.d(TAG, "Got new intent");
+
         if (!active) {
-            active = true;
-            super.onStart(intent, startId);
+            if (Utils.isOnline(this)) {
+                active = true;
+                super.onStart(intent, startId);
+            } else {
+                Log.d(TAG, "Network is unavailable. Will try later");
+                MerchantSyncManager syncManager = new MerchantSyncManager(getApplicationContext());
+                syncManager.sheduleDelayed(TimeUnit.MINUTES.toMillis(15));
+            }
+        } else {
+            Log.d(TAG, "Service already running");
         }
     }
 
@@ -50,7 +62,7 @@ public class MerchantsSyncService extends CoinsIntentService {
     protected void onHandleIntent(Intent intent) {
         try {
             syncMerchants();
-        } catch (ServerException exception) {
+        } catch (Exception exception) {
             Log.e(TAG, "Couldn't synchronize merchants", exception);
         } finally {
             active = false;
@@ -61,7 +73,7 @@ public class MerchantsSyncService extends CoinsIntentService {
         }
     }
 
-    private void syncMerchants() throws ServerException {
+    private void syncMerchants() throws Exception {
         SQLiteDatabase db = getDatabaseHelper().getReadableDatabase();
 
         Cursor currenciesCursor = db.query(Tables.Currencies.TABLE_NAME,
@@ -83,7 +95,12 @@ public class MerchantsSyncService extends CoinsIntentService {
 
             for (Currency currency : currencies) {
                 saveCurrency(currency);
-                syncMerchants(currency);
+
+                try {
+                    syncMerchants(currency);
+                } catch (Exception exception) {
+                    Log.e(TAG, String.format("Couldn't sync merchants for currency %s", currency.getCode()), exception);
+                }
             }
         } else {
             while (currenciesCursor.moveToNext()) {

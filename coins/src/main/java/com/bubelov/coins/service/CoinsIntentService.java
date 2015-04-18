@@ -2,7 +2,6 @@ package com.bubelov.coins.service;
 
 import android.app.IntentService;
 import android.database.sqlite.SQLiteOpenHelper;
-
 import com.bubelov.coins.Api;
 import com.bubelov.coins.App;
 
