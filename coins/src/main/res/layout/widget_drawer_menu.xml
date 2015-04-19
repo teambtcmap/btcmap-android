@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:clickable="true">
+
+    <com.bubelov.coins.ui.MenuItem
+        android:id="@+id/all"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:mi_icon="@drawable/ic_all"
+        app:text="All" />
+
+    <com.bubelov.coins.ui.MenuItem
+        android:id="@+id/atms"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:mi_icon="@drawable/ic_atm"
+        app:text="ATMs" />
+
+    <com.bubelov.coins.ui.MenuItem
+        android:id="@+id/cafes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:mi_icon="@drawable/ic_cafe"
+        app:text="Cafes" />
+
+    <com.bubelov.coins.ui.MenuItem
+        android:id="@+id/restaurants"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:mi_icon="@drawable/ic_restaurant"
+        app:text="Restaurants" />
+
+    <com.bubelov.coins.ui.MenuItem
+        android:id="@+id/bars"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:mi_icon="@drawable/ic_bar"
+        app:text="Bars" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/black" />
+
+    <com.bubelov.coins.ui.MenuItem
+        android:id="@+id/settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:mi_icon="@drawable/ic_settings"
+        app:text="Settings" />
+
+    <com.bubelov.coins.ui.MenuItem
+        android:id="@+id/help"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:mi_icon="@drawable/ic_help"
+        app:text="Help" />
+
+    <com.bubelov.coins.ui.MenuItem
+        android:id="@+id/donate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:mi_icon="@drawable/ic_donate"
+        app:text="Donate" />
+
+</LinearLayout>

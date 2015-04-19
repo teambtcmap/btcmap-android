@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primaryDark</item>
+        <item name="colorAccent">@color/accent</item>
+
+        <item name="windowActionBar">false</item>
+    </style>
+
+    <style name="Toolbar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">?attr/actionBarSize</item>
+        <item name="android:background">#FFC107</item>
+
+        <item name="android:theme">@style/ToolbarTheme</item>
+    </style>
+
+    <style name="ToolbarTheme" parent="AppTheme">
+        <item name="android:textColorPrimary">#ffffff</item>
+        <item name="android:textColorSecondary">#ffffff</item>
+    </style>
+
+    <style name="Toolbar.SemiTransparent" parent="Toolbar">
+        <item name="android:background">#DDFFC107</item>
+    </style>
+
+    <style name="Toolbar.WithBackNavigation" parent="Toolbar">
+        <item name="navigationIcon">?attr/homeAsUpIndicator</item>
+    </style>
+
+</resources>

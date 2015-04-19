@@ -1,13 +1,10 @@
 package com.bubelov.coins.ui;
 
-import android.content.res.Resources;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.SeekBar;
 
 import com.bubelov.coins.Constants;
@@ -110,26 +107,12 @@ public class AreaSelectActivity extends ActionBarActivity implements Confirmatio
 
     private void initActions() {
         startSupportActionMode(new ActionModeCallback());
-
-//        int doneButtonId = Resources.getSystem().getIdentifier("action_mode_close_button", "id", "android");
-//        View doneButton = findViewById(doneButtonId);
-//
-//        doneButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                saveSelectedArea();
-//                finish();
-//            }
-//        });
     }
 
     private void findMyLocationAndMoveAreaHere() {
-        map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-            @Override
-            public void onMyLocationChange(Location location) {
-                map.setOnMyLocationChangeListener(null);
-                moveArea(new LatLng(location.getLatitude(), location.getLongitude()));
-            }
+        map.setOnMyLocationChangeListener(location -> {
+            map.setOnMyLocationChangeListener(null);
+            moveArea(new LatLng(location.getLatitude(), location.getLongitude()));
         });
     }
 
@@ -197,7 +180,7 @@ public class AreaSelectActivity extends ActionBarActivity implements Confirmatio
             if (notificationManager.getNotificationAreaCenter() == null) {
                 ConfirmationDialog.newInstance(R.string.dialog_save_notification_area).show(getFragmentManager(), SAVE_DATA_DIALOG);
             } else {
-                finish();
+                supportFinishAfterTransition();
             }
         }
     }
