@@ -2,7 +2,6 @@ package com.bubelov.coins.ui;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -21,6 +20,7 @@ import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -54,6 +54,7 @@ public class MerchantsMapFragment extends Fragment implements LoaderManager.Load
         map = mapFragment.getMap();
         map.setMyLocationEnabled(false);
         map.getUiSettings().setZoomControlsEnabled(false);
+        map.getUiSettings().setCompassEnabled(false);
 
         findMyLocation();
 
@@ -132,6 +133,8 @@ public class MerchantsMapFragment extends Fragment implements LoaderManager.Load
         @Override
         protected void onBeforeClusterItemRendered(Merchant item, MarkerOptions markerOptions) {
             super.onBeforeClusterItemRendered(item, markerOptions);
+
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place_white_48dp));
 
             if (!TextUtils.isEmpty(item.getName())) {
                 markerOptions.title(item.getName());

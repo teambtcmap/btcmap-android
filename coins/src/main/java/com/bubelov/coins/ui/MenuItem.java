@@ -42,13 +42,13 @@ public class MenuItem extends FrameLayout {
     }
 
     public void setSelected(boolean selected) {
-        setBackground(selected
-                ? getResources().getDrawable(R.drawable.btn_menu_item_pressed)
-                : getResources().getDrawable(R.drawable.selector_menu_item));
+        setBackgroundColor(selected
+                ? getResources().getColor(R.color.drawer_list_item_background_selected)
+                : getResources().getColor(R.color.drawer_list_item_background));
 
         text.setTextColor(selected
-                ? getResources().getColor(R.color.accent)
-                : Color.parseColor("#444444"));
+                ? getResources().getColor(R.color.drawer_list_item_text_selected)
+                : getResources().getColor(R.color.drawer_list_item_text));
     }
 
     private void init() {

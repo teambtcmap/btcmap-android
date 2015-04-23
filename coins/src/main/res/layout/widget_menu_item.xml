@@ -1,34 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:gravity="center_vertical"
-    android:paddingLeft="16dp"
     android:orientation="horizontal"
-    android:background="?android:attr/selectableItemBackground"
-    tools:background="#FF0000">
+    android:background="?android:attr/selectableItemBackground">
 
     <ImageView
         android:id="@+id/icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="16dp"
         android:scaleType="fitXY"
-        tools:src="@drawable/ic_all" />
+        tools:src="@drawable/ic_store_mall_directory_grey600_24dp" />
 
     <TextView
         android:id="@+id/text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-2dp"
-        android:paddingLeft="24dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="72dp"
+        android:layout_marginTop="-2sp"
         android:paddingTop="4dp"
         android:textSize="14sp"
-        android:textColor="#444444"
+        android:textColor="@color/drawer_list_item_text"
         android:textStyle="bold"
         tools:text="Foo Bar" />
 
-</LinearLayout>
+</FrameLayout>
 

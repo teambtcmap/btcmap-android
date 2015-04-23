@@ -2,9 +2,9 @@
     
 <resources>
 
-    <color name="primary">#FFC107</color>
-    <color name="primaryDark">#FFA000</color>
-    <color name="accent">#FF5252</color>
+    <color name="primary">#FEBD0C</color>
+    <color name="primaryDark">#F99F00</color>
+    <color name="accent">#536DFE</color>
 
     <color name="icons">#727272</color>
 
@@ -13,5 +13,13 @@
 
     <color name="notification_area">#220000ff</color>
     <color name="notification_area_border">#990000ff</color>
-    
+
+    <color name="drawer_list_item_background">#FFFFFF</color>
+    <color name="drawer_list_item_background_selected">#E8E8E8</color>
+
+    <color name="drawer_list_item_text">#DE000000</color>
+    <color name="drawer_list_item_text_selected">#000000</color>
+
+    <color name="drawer_divider">#D7D7D7</color>
+
 </resources>
