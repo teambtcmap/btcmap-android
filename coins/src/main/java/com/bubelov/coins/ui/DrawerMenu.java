@@ -12,7 +12,26 @@ import com.bubelov.coins.R;
  */
 
 public class DrawerMenu extends FrameLayout {
-    private static int[] ITEMS = { R.id.all, R.id.atms, R.id.cafes, R.id.restaurants, R.id.bars, R.id.settings, R.id.help, R.id.donate };
+    private static int[] ITEMS = {
+            R.id.all,
+            R.id.atms,
+            R.id.cafes,
+            R.id.restaurants,
+            R.id.bars,
+            R.id.hotels,
+            R.id.car_washes,
+            R.id.gas_stations,
+            R.id.hospitals,
+            R.id.laundry,
+            R.id.movies,
+            R.id.parking,
+            R.id.pharmacies,
+            R.id.pizza,
+            R.id.taxi,
+            R.id.settings,
+            R.id.help,
+            R.id.donate
+    };
 
     private OnMenuItemSelectedListener itemSelectedListener;
 
