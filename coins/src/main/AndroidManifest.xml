@@ -24,7 +24,7 @@
         android:label="@string/app_name">
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.activity.MainActivity"
             android:label="@string/ma_title"
             android:launchMode="singleTop">
 
@@ -36,10 +36,10 @@
         </activity>
 
         <activity
-            android:name=".ui.SettingsActivity"
+            android:name=".ui.activity.SettingsActivity"
             android:label="@string/sa_title" />
 
-        <activity android:name=".ui.AreaSelectActivity" />
+        <activity android:name=".ui.activity.AreaSelectActivity" />
 
         <service
             android:name=".service.MerchantsSyncService" />

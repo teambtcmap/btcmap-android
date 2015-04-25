@@ -1,4 +1,4 @@
-package com.bubelov.coins.ui;
+package com.bubelov.coins.ui.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.ui.fragment.SettingsFragment;
 
 /**
  * Author: Igor Bubelov

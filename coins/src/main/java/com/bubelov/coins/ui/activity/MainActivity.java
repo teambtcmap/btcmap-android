@@ -1,4 +1,4 @@
-package com.bubelov.coins.ui;
+package com.bubelov.coins.ui.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -16,6 +16,8 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.ui.widget.DrawerMenu;
+import com.bubelov.coins.ui.fragment.MerchantsMapFragment;
 
 public class MainActivity extends ActionBarActivity implements DrawerMenu.OnMenuItemSelectedListener {
     private DrawerLayout drawerLayout;
@@ -90,7 +92,7 @@ public class MainActivity extends ActionBarActivity implements DrawerMenu.OnMenu
     }
 
     @Override
-    public void onMenuItemSelected(int id, com.bubelov.coins.ui.MenuItem menuItem) {
+    public void onMenuItemSelected(int id, com.bubelov.coins.ui.widget.MenuItem menuItem) {
         drawerLayout.closeDrawer(Gravity.LEFT);
 
         if (id != R.id.settings && id != R.id.help && id != R.id.donate) {

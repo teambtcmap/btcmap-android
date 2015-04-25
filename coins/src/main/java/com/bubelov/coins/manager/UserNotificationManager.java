@@ -18,7 +18,7 @@ import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Tables;
 import com.bubelov.coins.model.Merchant;
-import com.bubelov.coins.ui.MainActivity;
+import com.bubelov.coins.ui.activity.MainActivity;
 import com.google.android.gms.maps.model.LatLng;
 
 /**

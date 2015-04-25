@@ -1,4 +1,4 @@
-package com.bubelov.coins.ui;
+package com.bubelov.coins.ui.fragment;
 
 /**
  * Author: Igor Bubelov

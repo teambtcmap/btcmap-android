@@ -1,4 +1,4 @@
-package com.bubelov.coins.ui;
+package com.bubelov.coins.ui.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;

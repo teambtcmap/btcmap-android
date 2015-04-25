@@ -1,4 +1,4 @@
-package com.bubelov.coins.ui;
+package com.bubelov.coins.ui.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

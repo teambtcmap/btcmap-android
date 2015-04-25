@@ -1,4 +1,4 @@
-package com.bubelov.coins.ui;
+package com.bubelov.coins.ui.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -10,6 +10,8 @@ import android.widget.SeekBar;
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.R;
 import com.bubelov.coins.manager.UserNotificationManager;
+import com.bubelov.coins.ui.fragment.ConfirmationDialog;
+import com.bubelov.coins.ui.fragment.ConfirmationDialogListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;

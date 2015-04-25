@@ -1,4 +1,4 @@
-package com.bubelov.coins.ui;
+package com.bubelov.coins.ui.fragment;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,6 +10,7 @@ import android.support.v4.app.ActivityOptionsCompat;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.manager.MerchantSyncManager;
+import com.bubelov.coins.ui.activity.AreaSelectActivity;
 
 /**
  * Author: Igor Bubelov
