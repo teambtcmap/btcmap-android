@@ -16,6 +16,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_7
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -30,6 +31,7 @@ android {
             keyAlias "BitATM"
             keyPassword "abc345"
         }
+
         release {
             storeFile file("../release.jks")
             storePassword "abc345"
