@@ -39,7 +39,7 @@
             android:name=".ui.activity.SettingsActivity"
             android:label="@string/sa_title" />
 
-        <activity android:name=".ui.activity.AreaSelectActivity" />
+        <activity android:name=".ui.activity.SelectAreaActivity" />
 
         <service
             android:name=".service.MerchantsSyncService" />

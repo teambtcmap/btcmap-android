@@ -10,7 +10,7 @@ import android.support.v4.app.ActivityOptionsCompat;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.manager.MerchantSyncManager;
-import com.bubelov.coins.ui.activity.AreaSelectActivity;
+import com.bubelov.coins.ui.activity.SelectAreaActivity;
 
 /**
  * Author: Igor Bubelov
@@ -40,7 +40,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         if (preference.getKey().equals(getString(R.string.pref_area_of_interest_key))) {
-            startActivity(new Intent(getActivity(), AreaSelectActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity()).toBundle());
+            startActivity(new Intent(getActivity(), SelectAreaActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity()).toBundle());
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);

@@ -1,7 +1,6 @@
 package com.bubelov.coins.ui.activity;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
@@ -14,7 +13,7 @@ import com.bubelov.coins.ui.fragment.SettingsFragment;
  * Date: 11/07/14 20:32
  */
 
-public class SettingsActivity extends ActionBarActivity {
+public class SettingsActivity extends AbstractActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

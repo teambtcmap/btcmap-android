@@ -1,7 +1,6 @@
 package com.bubelov.coins.ui.activity;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,7 +25,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
  * Date: 12/07/14 16:24
  */
 
-public class AreaSelectActivity extends ActionBarActivity implements ConfirmationDialogListener {
+public class SelectAreaActivity extends AbstractActivity implements ConfirmationDialogListener {
     private static final String CENTER_EXTRA = "center";
     private static final String RADIUS_EXTRA = "radius";
 
@@ -52,7 +51,7 @@ public class AreaSelectActivity extends ActionBarActivity implements Confirmatio
         notificationManager = new UserNotificationManager(this);
 
         if (savedInstanceState != null) {
-            addArea((LatLng)savedInstanceState.getParcelable(CENTER_EXTRA), savedInstanceState.getInt(RADIUS_EXTRA));
+            addArea(savedInstanceState.getParcelable(CENTER_EXTRA), savedInstanceState.getInt(RADIUS_EXTRA));
         } else {
             LatLng center = notificationManager.getNotificationAreaCenter();
 
