@@ -1,8 +1,8 @@
 package com.bubelov.coins.ui.activity;
 
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.SeekBar;
 
@@ -41,7 +41,11 @@ public class SelectAreaActivity extends AbstractActivity implements Confirmation
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_area_select);
+        setContentView(R.layout.activity_select_area);
+
+        Toolbar toolbar = findView(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
 
         MapFragment mapFragment = (MapFragment)getFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
@@ -66,17 +70,31 @@ public class SelectAreaActivity extends AbstractActivity implements Confirmation
 
         SeekBar seekBar = (SeekBar)findViewById(R.id.seek_bar_radius);
         seekBar.setMax(500000);
-        seekBar.setProgress((int)circle.getRadius());
+        seekBar.setProgress((int) circle.getRadius());
         seekBar.setOnSeekBarChangeListener(new SeekBarChangeListener());
+    }
 
-        initActions();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_select_area, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_done) {
+            saveSelectedArea();
+            supportFinishAfterTransition();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         if (center != null && circle != null) {
             outState.putParcelable(CENTER_EXTRA, center.getPosition());
-            outState.putInt(RADIUS_EXTRA, (int)circle.getRadius());
+            outState.putInt(RADIUS_EXTRA, (int) circle.getRadius());
         }
 
         super.onSaveInstanceState(outState);
@@ -95,19 +113,15 @@ public class SelectAreaActivity extends AbstractActivity implements Confirmation
     public void onConfirmed(String tag) {
         if (SAVE_DATA_DIALOG.equals(tag)) {
             saveSelectedArea();
-            finish();
+            supportFinishAfterTransition();
         }
     }
 
     @Override
     public void onCancelled(String tag) {
         if (SAVE_DATA_DIALOG.equals(tag)) {
-            finish();
+            supportFinishAfterTransition();
         }
-    }
-
-    private void initActions() {
-        startSupportActionMode(new ActionModeCallback());
     }
 
     private void findMyLocationAndMoveAreaHere() {
@@ -155,34 +169,6 @@ public class SelectAreaActivity extends AbstractActivity implements Confirmation
         @Override
         public void onMarkerDragEnd(Marker marker) {
             circle.setFillColor(getResources().getColor(R.color.notification_area));
-        }
-    }
-
-    private class ActionModeCallback implements android.support.v7.view.ActionMode.Callback {
-        @Override
-        public boolean onCreateActionMode(android.support.v7.view.ActionMode actionMode, Menu menu) {
-            MenuInflater inflater = actionMode.getMenuInflater();
-            inflater.inflate(R.menu.empty, menu);
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(android.support.v7.view.ActionMode actionMode, Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(android.support.v7.view.ActionMode actionMode, MenuItem menuItem) {
-            return false;
-        }
-
-        @Override
-        public void onDestroyActionMode(android.support.v7.view.ActionMode actionMode) {
-            if (notificationManager.getNotificationAreaCenter() == null) {
-                ConfirmationDialog.newInstance(R.string.dialog_save_notification_area).show(getFragmentManager(), SAVE_DATA_DIALOG);
-            } else {
-                supportFinishAfterTransition();
-            }
         }
     }
 

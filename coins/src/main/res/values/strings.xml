@@ -9,6 +9,7 @@
 
     <string name="action_refresh">Refresh Data</string>
     <string name="action_filter">Filter</string>
+    <string name="action_done">Done</string>
     <string name="action_show_bitcoin">Show Bitcoin</string>
     <string name="action_show_litecoin">Show Litecoin</string>
 

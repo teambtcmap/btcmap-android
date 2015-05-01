@@ -53,7 +53,7 @@ public class MerchantsMapFragment extends Fragment implements LoaderManager.Load
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
         map.setMyLocationEnabled(false);
-        map.getUiSettings().setZoomControlsEnabled(false);
+        map.getUiSettings().setZoomControlsEnabled(true);
         map.getUiSettings().setCompassEnabled(false);
 
         findMyLocation();

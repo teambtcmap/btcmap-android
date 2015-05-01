@@ -6,6 +6,8 @@
     <color name="primaryDark">#F99F00</color>
     <color name="accent">#536DFE</color>
 
+    <color name="primary_semi_transparent">#DDFEBD0C</color>
+
     <color name="icons">#727272</color>
 
     <color name="silver">#dddddd</color>
