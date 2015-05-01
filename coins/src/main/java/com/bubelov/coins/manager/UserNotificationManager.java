@@ -18,7 +18,7 @@ import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Tables;
 import com.bubelov.coins.model.Merchant;
-import com.bubelov.coins.ui.activity.MainActivity;
+import com.bubelov.coins.ui.activity.MapActivity;
 import com.google.android.gms.maps.model.LatLng;
 
 /**
@@ -116,10 +116,10 @@ public class UserNotificationManager {
                 .setContentText(!TextUtils.isEmpty(merchant.getName()) ? merchant.getName() : context.getString(R.string.notification_new_merchant_no_name))
                 .setAutoCancel(true);
 
-        Intent resultIntent = MainActivity.newShowMerchantIntent(context, merchant.getLatitude(), merchant.getLongitude());
+        Intent resultIntent = MapActivity.newShowMerchantIntent(context, merchant.getLatitude(), merchant.getLongitude());
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addParentStack(MapActivity.class);
         stackBuilder.addNextIntent(resultIntent);
 
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent((int)merchant.getId(), PendingIntent.FLAG_UPDATE_CURRENT);
