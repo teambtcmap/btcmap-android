@@ -21,6 +21,7 @@ import android.view.View;
 import com.bubelov.coins.R;
 import com.bubelov.coins.loader.MerchantsLoader;
 import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.ui.fragment.CurrenciesFilterDialog;
 import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.google.android.gms.maps.GoogleMap;
@@ -105,7 +106,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         switch (id) {
             case R.id.action_filter:
-                // TODO
+                new CurrenciesFilterDialog(this).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
