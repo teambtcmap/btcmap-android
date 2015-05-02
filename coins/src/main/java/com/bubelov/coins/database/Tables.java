@@ -28,6 +28,7 @@ public final class Tables {
 
         public static final String NAME = "name";
         public static final String CODE = "code";
+        public static final String SHOW_ON_MAP = "show_on_map";
     }
 
     public static abstract class MerchantsToCurrencies implements BaseColumns {

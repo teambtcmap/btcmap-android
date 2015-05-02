@@ -2,10 +2,10 @@ package com.bubelov.coins.loader;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import com.bubelov.coins.App;
-import com.bubelov.coins.database.Tables;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 /**
@@ -14,6 +14,8 @@ import com.google.android.gms.maps.model.LatLngBounds;
  */
 
 public class MerchantsLoader extends SimpleCursorLoader {
+    private static final String TAG = MerchantsLoader.class.getSimpleName();
+
     private static final String BOUNDS_KEY = "bounds";
 
     private LatLngBounds bounds;
@@ -31,22 +33,9 @@ public class MerchantsLoader extends SimpleCursorLoader {
 
     @Override
     public Cursor loadInBackground() {
-        String[] projection = {
-                Tables.Merchants._ID,
-                Tables.Merchants.LATITUDE,
-                Tables.Merchants.LONGITUDE,
-                Tables.Merchants.NAME,
-                Tables.Merchants.DESCRIPTION
-        };
+        SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
 
-        return App.getInstance().getDatabaseHelper().getReadableDatabase().query(
-                Tables.Merchants.TABLE_NAME,
-                projection,
-                "(latitude between ? and ?) and (longitude between ? and ?)",
-                new String[] { String.valueOf(bounds.southwest.latitude), String.valueOf(bounds.northeast.latitude), String.valueOf(bounds.southwest.longitude), String.valueOf(bounds.northeast.longitude) },
-                null,
-                null,
-                null
-        );
+        return db.rawQuery("select m._id, m.latitude, m.longitude, m.name, m.description from merchants as m join merchants_to_currencies as mc on m._id = mc.merchant_id join currencies c on c._id = mc.currency_id where (latitude between ? and ?) and (longitude between ? and ?) and c.show_on_map = 1 group by m._ID",
+                new String[] { String.valueOf(bounds.southwest.latitude), String.valueOf(bounds.northeast.latitude), String.valueOf(bounds.southwest.longitude), String.valueOf(bounds.northeast.longitude) });
     }
 }

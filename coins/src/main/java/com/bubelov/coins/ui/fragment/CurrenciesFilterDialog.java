@@ -1,23 +1,19 @@
 package com.bubelov.coins.ui.fragment;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatDialog;
-import android.util.Log;
+import android.widget.CheckBox;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Tables;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Author: Igor Bubelov
@@ -34,41 +30,53 @@ public class CurrenciesFilterDialog extends AppCompatDialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ListView listView = (ListView) getLayoutInflater().inflate(R.layout.dialog_currencies_filter, null);
-
-        ListAdapter adapter = new SimpleAdapter(getContext(),
-                getData(),
-                R.layout.list_item_currency_filter,
-                new String[] { "name", "enabled" },
-                new int[] { R.id.name, R.id.enabled });
-
-        listView.setAdapter(adapter);
+        ListView listView = new ListView(getContext());
+        listView.setAdapter(getAdapter());
         setContentView(listView);
     }
 
-    private List<Map<String, Object>> getData() {
-        List<Map<String, Object>> data = new ArrayList<>();
+    private ListAdapter getAdapter() {
         SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
 
-        Cursor cursor = db.query(Tables.Currencies.TABLE_NAME,
-                new String[]{Tables.Currencies._ID, Tables.Currencies.NAME, Tables.Currencies.CODE},
+        Cursor currencies = db.query(Tables.Currencies.TABLE_NAME,
+                new String[]{Tables.Currencies._ID, Tables.Currencies.NAME, Tables.Currencies.SHOW_ON_MAP},
                 null,
                 null,
                 null,
                 null,
                 null);
 
-        Log.d(TAG, cursor.getCount() + " currencies found in DB");
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(getContext(),
+                R.layout.list_item_currency_filter,
+                currencies,
+                new String[] { Tables.Currencies.NAME, Tables.Currencies.SHOW_ON_MAP },
+                new int[] { R.id.name, R.id.enabled },
+                0);
 
-        while (cursor.moveToNext()) {
-            Map<String, Object> currency = new HashMap<>();
-            currency.put("name", cursor.getString(cursor.getColumnIndex(Tables.Currencies.NAME)));
-            currency.put("enabled", true);
-            data.add(currency);
-        }
+        int idIndex = currencies.getColumnIndex(Tables.Currencies._ID);
+        int showOnMapColumnIndex = currencies.getColumnIndex(Tables.Currencies.SHOW_ON_MAP);
 
-        cursor.close();
-        return data;
+        adapter.setViewBinder((view, cursor, columnIndex) -> {
+            if (columnIndex == showOnMapColumnIndex) {
+                CheckBox checkBox = (CheckBox) view;
+                checkBox.setOnCheckedChangeListener(null);
+                checkBox.setChecked(cursor.getInt(showOnMapColumnIndex) > 0);
+                String currencyId = cursor.getString(idIndex);
+                checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> setShowOnMap(currencyId, isChecked));
+
+                return true;
+            }
+
+            return false;
+        });
+
+        return adapter;
+    }
+
+    private void setShowOnMap(String currencyId, boolean showOnMap) {
+        SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(Tables.Currencies.SHOW_ON_MAP, showOnMap ? 1 : 0);
+        db.update(Tables.Currencies.TABLE_NAME, values, Tables.Currencies._ID + " = ?", new String[] { currencyId });
     }
 }

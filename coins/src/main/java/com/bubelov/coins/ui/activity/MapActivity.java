@@ -21,7 +21,7 @@ import android.view.View;
 import com.bubelov.coins.R;
 import com.bubelov.coins.loader.MerchantsLoader;
 import com.bubelov.coins.model.Merchant;
-import com.bubelov.coins.ui.fragment.CurrenciesFilterDialog;
+import com.bubelov.coins.ui.fragment.CurrenciesFilterDialogFragment;
 import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,7 +36,7 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.OnMenuItemSelectedListener {
+public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.OnMenuItemSelectedListener, CurrenciesFilterDialogFragment.Listener {
     private static final int MERCHANTS_LOADER = 0;
 
     private DrawerLayout drawer;
@@ -106,7 +106,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         switch (id) {
             case R.id.action_filter:
-                new CurrenciesFilterDialog(this).show();
+                new CurrenciesFilterDialogFragment().show(getSupportFragmentManager(), CurrenciesFilterDialogFragment.TAG);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -165,6 +165,12 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         if (id == R.id.settings) {
             startActivity(new Intent(this, SettingsActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
         }
+    }
+
+    @Override
+    public void onCurrenciesFilterDismissed() {
+        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+        getSupportLoaderManager().restartLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds), this);
     }
 
     private void initClustering() {

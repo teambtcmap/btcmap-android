@@ -14,6 +14,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TEXT_TYPE = " TEXT";
     private static final String REAL_TYPE = " REAL";
     private static final String INTEGER_TYPE = " INTEGER";
+    private static final String BOOLEAN_TYPE = " BOOLEAN";
 
     private static final String COMMA_SEP = ",";
 
@@ -32,7 +33,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + Tables.Currencies.TABLE_NAME + " (" +
                     Tables.Currencies._ID + INTEGER_TYPE + " PRIMARY KEY" + COMMA_SEP +
                     Tables.Currencies.NAME + TEXT_TYPE + COMMA_SEP +
-                    Tables.Currencies.CODE + INTEGER_TYPE +
+                    Tables.Currencies.CODE + INTEGER_TYPE + COMMA_SEP +
+                    Tables.Currencies.SHOW_ON_MAP + BOOLEAN_TYPE + " NOT NULL DEFAULT 1" +
                     " )";
 
     private static final String SQL_CREATE_MERCHANTS_TO_CURRENCIES_TABLE =
@@ -58,7 +60,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_MERCHANTS_TABLE);
         db.execSQL(SQL_CREATE_CURRENCIES_TABLE);
         db.execSQL(SQL_CREATE_MERCHANTS_TO_CURRENCIES_TABLE);
-        //insertCurrencies(db);
     }
 
     @Override
@@ -67,57 +68,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_DELETE_CURRENCIES_TABLE);
         db.execSQL(SQL_DELETE_MERCHANTS_TO_CURRENCIES_TABLE);
         onCreate(db);
-    }
-
-    private void insertCurrencies(SQLiteDatabase db) {
-        ContentValues values = new ContentValues();
-
-        values.put(Tables.Currencies.NAME, "Bitcoin");
-        values.put(Tables.Currencies.CODE, "BTC");
-        db.insert(Tables.Currencies.TABLE_NAME, null, values);
-
-        values.put(Tables.Currencies.NAME, "Litecoin");
-        values.put(Tables.Currencies.CODE, "LTC");
-        db.insert(Tables.Currencies.TABLE_NAME, null, values);
-
-        values.put(Tables.Currencies.NAME, "Peercoin");
-        values.put(Tables.Currencies.CODE, "PPC");
-        db.insert(Tables.Currencies.TABLE_NAME, null, values);
-
-        values.put(Tables.Currencies.NAME, "Ripple");
-        values.put(Tables.Currencies.CODE, "XRP");
-        db.insert(Tables.Currencies.TABLE_NAME, null, values);
-
-        values.put(Tables.Currencies.NAME, "Dogecoin");
-        values.put(Tables.Currencies.CODE, "DOGE");
-        db.insert(Tables.Currencies.TABLE_NAME, null, values);
-
-        values.put(Tables.Currencies.NAME, "Namecoin");
-        values.put(Tables.Currencies.CODE, "NMC");
-        db.insert(Tables.Currencies.TABLE_NAME, null, values);
-
-        values.put(Tables.Currencies.NAME, "Mastercoin");
-        values.put(Tables.Currencies.CODE, "MSC");
-        db.insert(Tables.Currencies.TABLE_NAME, null, values);
-
-        values.put(Tables.Currencies.NAME, "Darkcoin");
-        values.put(Tables.Currencies.CODE, "DRK");
-        db.insert(Tables.Currencies.TABLE_NAME, null, values);
-
-        values.put(Tables.Currencies.NAME, "Promecoin");
-        values.put(Tables.Currencies.CODE, "XPM");
-        db.insert(Tables.Currencies.TABLE_NAME, null, values);
-
-        values.put(Tables.Currencies.NAME, "Vertcoin");
-        values.put(Tables.Currencies.CODE, "VTC");
-        db.insert(Tables.Currencies.TABLE_NAME, null, values);
-
-        values.put(Tables.Currencies.NAME, "Auroracoin");
-        values.put(Tables.Currencies.CODE, "AUR");
-        db.insert(Tables.Currencies.TABLE_NAME, null, values);
-
-        values.put(Tables.Currencies.NAME, "MazaCoin");
-        values.put(Tables.Currencies.CODE, "MZC");
-        db.insert(Tables.Currencies.TABLE_NAME, null, values);
     }
 }
