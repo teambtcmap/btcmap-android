@@ -134,6 +134,7 @@ public class MerchantsSyncService extends CoinsIntentService {
             values.put(Tables.Merchants.DESCRIPTION, merchant.getDescription());
             //values.put(Tables.Merchants.PHONE, merchant.getPhone());
             //values.put(Tables.Merchants.WEBSITE, merchant.getWebsite());
+            values.put(Tables.Merchants.AMENITY, merchant.getAmenity());
 
             if (db.insertWithOnConflict(Tables.Merchants.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE) == -1) {
                 Log.d(TAG, "Couldn't insert merchant");
@@ -141,10 +142,10 @@ public class MerchantsSyncService extends CoinsIntentService {
 
             values.clear();
 
-            values.put(Tables.MerchantsToCurrencies.MERCHANT_ID, merchant.getId());
-            values.put(Tables.MerchantsToCurrencies.CURRENCY_ID, currency.getId());
+            values.put(Tables.CurrenciesMerchants.MERCHANT_ID, merchant.getId());
+            values.put(Tables.CurrenciesMerchants.CURRENCY_ID, currency.getId());
 
-            db.insertWithOnConflict(Tables.MerchantsToCurrencies.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            db.insertWithOnConflict(Tables.CurrenciesMerchants.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
             values.clear();
         }
     }

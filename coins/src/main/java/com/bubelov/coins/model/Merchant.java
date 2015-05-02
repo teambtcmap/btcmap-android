@@ -3,8 +3,6 @@ package com.bubelov.coins.model;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
 
-import java.util.Collection;
-
 /**
  * Author: Igor Bubelov
  * Date: 02/06/14 21:42
@@ -21,7 +19,7 @@ public class Merchant implements ClusterItem {
 
     private double longitude;
 
-    private Collection<Currency> currencies;
+    private String amenity;
 
     // Ignore for serialization
     private LatLng position;
@@ -80,11 +78,11 @@ public class Merchant implements ClusterItem {
         this.description = description;
     }
 
-    public Collection<Currency> getCurrencies() {
-        return currencies;
+    public String getAmenity() {
+        return amenity;
     }
 
-    public void setCurrencies(Collection<Currency> currencies) {
-        this.currencies = currencies;
+    public void setAmenity(String amenity) {
+        this.amenity = amenity;
     }
 }

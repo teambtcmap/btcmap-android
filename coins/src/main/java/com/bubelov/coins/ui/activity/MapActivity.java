@@ -47,6 +47,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private ClusterManager<Merchant> merchantsManager;
 
+    private String amenity;
+
     public static Intent newShowMerchantIntent(Context context, double latitude, double longitude) {
         return new Intent(context, MapActivity.class);
     }
@@ -58,7 +60,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setTitle("");
+        getSupportActionBar().setTitle("All");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
@@ -67,8 +69,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         drawer.setDrawerListener(drawerToggle);
 
         DrawerMenu drawerMenu = (DrawerMenu) findViewById(R.id.left_drawer);
-        drawerMenu.setItemSelectedListener(this);
         drawerMenu.setSelected(R.id.all);
+        drawerMenu.setItemSelectedListener(this);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
@@ -81,7 +83,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         map.setOnCameraChangeListener(new OnCameraChangeMultiplexer(merchantsManager, new CameraChangeListener()));
 
         LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        getSupportLoaderManager().initLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds), this);
+        getSupportLoaderManager().initLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds, amenity), this);
     }
 
     @Override
@@ -164,13 +166,63 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         if (id == R.id.settings) {
             startActivity(new Intent(this, SettingsActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
+            return;
         }
+
+        switch (id) {
+            case R.id.all:
+                amenity = null;
+                break;
+            case R.id.atms:
+                amenity = "atm";
+                break;
+            case R.id.cafes:
+                amenity = "cafe";
+                break;
+            case R.id.restaurants:
+                amenity = "restaurant";
+                break;
+            case R.id.bars:
+                amenity = "bar";
+                break;
+            case R.id.hotels:
+                amenity = "TODO";
+                break;
+            case R.id.car_washes:
+                amenity = "car_wash";
+                break;
+            case R.id.gas_stations:
+                amenity = "fuel";
+                break;
+            case R.id.hospitals:
+                amenity = "hospital";
+                break;
+            case R.id.laundry:
+                amenity = "TODO";
+                break;
+            case R.id.movies:
+                amenity = "cinema";
+                break;
+            case R.id.parking:
+                amenity = "parking";
+                break;
+            case R.id.pharmacies:
+                amenity = "pharmacy";
+                break;
+            case R.id.pizza:
+                amenity = "TODO";
+                break;
+            case R.id.taxi:
+                amenity = "taxi";
+                break;
+        }
+
+        reloadMerchants();
     }
 
     @Override
     public void onCurrenciesFilterDismissed() {
-        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        getSupportLoaderManager().restartLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds), this);
+        reloadMerchants();
     }
 
     private void initClustering() {
@@ -179,6 +231,11 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         map.setOnCameraChangeListener(merchantsManager);
         map.setOnMarkerClickListener(merchantsManager);
+    }
+
+    private void reloadMerchants() {
+        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+        getSupportLoaderManager().restartLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds, amenity), MapActivity.this);
     }
 
     private class DrawerToggle extends ActionBarDrawerToggle {
@@ -223,8 +280,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private class CameraChangeListener implements GoogleMap.OnCameraChangeListener {
         @Override
         public void onCameraChange(CameraPosition cameraPosition) {
-            LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-            getSupportLoaderManager().restartLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds), MapActivity.this);
+            reloadMerchants();
         }
     }
 }

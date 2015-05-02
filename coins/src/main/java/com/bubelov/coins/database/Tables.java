@@ -21,6 +21,7 @@ public final class Tables {
         public static final String DESCRIPTION = "description";
         public static final String PHONE = "phone";
         public static final String WEBSITE = "website";
+        public static final String AMENITY = "amenity";
     }
 
     public static abstract class Currencies implements BaseColumns {
@@ -31,10 +32,10 @@ public final class Tables {
         public static final String SHOW_ON_MAP = "show_on_map";
     }
 
-    public static abstract class MerchantsToCurrencies implements BaseColumns {
-        public static final String TABLE_NAME = "merchants_to_currencies";
+    public static abstract class CurrenciesMerchants implements BaseColumns {
+        public static final String TABLE_NAME = "currencies_merchants";
 
-        public static final String MERCHANT_ID = "merchant_id";
         public static final String CURRENCY_ID = "currency_id";
+        public static final String MERCHANT_ID = "merchant_id";
     }
 }

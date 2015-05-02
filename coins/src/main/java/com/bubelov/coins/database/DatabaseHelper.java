@@ -1,6 +1,5 @@
 package com.bubelov.coins.database;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -26,7 +25,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     Tables.Merchants.NAME + TEXT_TYPE + COMMA_SEP +
                     Tables.Merchants.DESCRIPTION + TEXT_TYPE + COMMA_SEP +
                     Tables.Merchants.PHONE + TEXT_TYPE + COMMA_SEP +
-                    Tables.Merchants.WEBSITE + TEXT_TYPE +
+                    Tables.Merchants.WEBSITE + TEXT_TYPE + COMMA_SEP +
+                    Tables.Merchants.AMENITY + TEXT_TYPE +
             " )";
 
     private static final String SQL_CREATE_CURRENCIES_TABLE =
@@ -38,15 +38,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     " )";
 
     private static final String SQL_CREATE_MERCHANTS_TO_CURRENCIES_TABLE =
-            "CREATE TABLE " + Tables.MerchantsToCurrencies.TABLE_NAME + " (" +
-                    Tables.MerchantsToCurrencies._ID + INTEGER_TYPE + " PRIMARY KEY" + COMMA_SEP +
-                    Tables.MerchantsToCurrencies.MERCHANT_ID + TEXT_TYPE + COMMA_SEP +
-                    Tables.MerchantsToCurrencies.CURRENCY_ID + INTEGER_TYPE +
+            "CREATE TABLE " + Tables.CurrenciesMerchants.TABLE_NAME + " (" +
+                    Tables.CurrenciesMerchants._ID + INTEGER_TYPE + " PRIMARY KEY" + COMMA_SEP +
+                    Tables.CurrenciesMerchants.MERCHANT_ID + TEXT_TYPE + COMMA_SEP +
+                    Tables.CurrenciesMerchants.CURRENCY_ID + INTEGER_TYPE +
                     " )";
 
     private static final String SQL_DELETE_MERCHANTS_TABLE = "DROP TABLE IF EXISTS " + Tables.Merchants.TABLE_NAME;
     private static final String SQL_DELETE_CURRENCIES_TABLE = "DROP TABLE IF EXISTS " + Tables.Currencies.TABLE_NAME;
-    private static final String SQL_DELETE_MERCHANTS_TO_CURRENCIES_TABLE = "DROP TABLE IF EXISTS " + Tables.MerchantsToCurrencies.TABLE_NAME;
+    private static final String SQL_DELETE_MERCHANTS_TO_CURRENCIES_TABLE = "DROP TABLE IF EXISTS " + Tables.CurrenciesMerchants.TABLE_NAME;
 
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "coins.db";
