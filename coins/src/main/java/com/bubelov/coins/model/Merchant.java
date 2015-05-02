@@ -21,6 +21,10 @@ public class Merchant implements ClusterItem {
 
     private String amenity;
 
+    private String phone;
+
+    private String website;
+
     // Ignore for serialization
     private LatLng position;
 
@@ -84,5 +88,21 @@ public class Merchant implements ClusterItem {
 
     public void setAmenity(String amenity) {
         this.amenity = amenity;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
     }
 }

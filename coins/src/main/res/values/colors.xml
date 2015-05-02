@@ -8,6 +8,9 @@
 
     <color name="primary_semi_transparent">#DDFEBD0C</color>
 
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+
     <color name="icons">#727272</color>
 
     <color name="silver">#dddddd</color>
