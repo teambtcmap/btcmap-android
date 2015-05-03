@@ -5,9 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.location.Address;
-import android.location.Geocoder;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
@@ -15,36 +12,30 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.loader.MerchantsLoader;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.ui.fragment.CurrenciesFilterDialogFragment;
 import com.bubelov.coins.ui.widget.DrawerMenu;
+import com.bubelov.coins.ui.widget.MerchantDetailsView;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
 
 public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.OnMenuItemSelectedListener, CurrenciesFilterDialogFragment.Listener {
     private static final int MERCHANTS_LOADER = 0;
@@ -61,19 +52,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private SlidingUpPanelLayout slidingLayout;
 
-    private View merchantHeader;
-
-    private TextView merchantName;
-
-    private TextView merchantAddress;
-
-    private TextView merchantDescription;
-
-    private ImageView callMerchantView;
-
-    private ImageView openMerchantWebsiteView;
-
-    private ImageView shareMerchantView;
+    private MerchantDetailsView merchantDetails;
 
     public static Intent newShowMerchantIntent(Context context, double latitude, double longitude) {
         return new Intent(context, MapActivity.class);
@@ -111,14 +90,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
         getSupportLoaderManager().initLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds, amenity), this);
 
-        merchantHeader = findView(R.id.merchant_header);
-        merchantName = findView(R.id.merchant_name);
-        merchantAddress = findView(R.id.merchant_address);
-        merchantDescription = findView(R.id.merchant_description);
-
-        callMerchantView = findView(R.id.call_merchant);
-        openMerchantWebsiteView = findView(R.id.open_merchant_website);
-        shareMerchantView = findView(R.id.share_merchant);
+        merchantDetails = findView(R.id.merchant_details);
     }
 
     @Override
@@ -127,7 +99,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         drawerToggle.syncState();
 
         slidingLayout = findView(R.id.sliding_panel);
-        slidingLayout.setPanelHeight(merchantName.getHeight());
         slidingLayout.setAnchorPoint(0.5f);
     }
 
@@ -320,73 +291,9 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private class ClusterItemClickListener implements ClusterManager.OnClusterItemClickListener<Merchant> {
         @Override
         public boolean onClusterItemClick(Merchant merchant) {
-            merchantName.setText(merchant.getName());
-            merchantDescription.setText(merchant.getDescription());
-            slidingLayout.setPanelHeight(merchantHeader.getHeight());
-
-            if (TextUtils.isEmpty(merchant.getPhone())) {
-                callMerchantView.setColorFilter(getResources().getColor(R.color.icons));
-            } else {
-                callMerchantView.setColorFilter(getResources().getColor(R.color.primary));
-            }
-
-            if (TextUtils.isEmpty(merchant.getWebsite())) {
-                openMerchantWebsiteView.setColorFilter(getResources().getColor(R.color.icons));
-            } else {
-                openMerchantWebsiteView.setColorFilter(getResources().getColor(R.color.primary));
-            }
-
-            shareMerchantView.setOnClickListener(v -> showToast("TODO"));
-
-            new LoadAddressTask().execute(merchant.getPosition());
-
+            merchantDetails.setMerchant(merchant);
+            slidingLayout.setPanelHeight(merchantDetails.getHeaderHeight());
             return false;
-        }
-    }
-
-    private class LoadAddressTask extends AsyncTask<LatLng, Void, String> {
-        @Override
-        protected void onPreExecute() {
-            merchantAddress.setText("Loading address...");
-        }
-
-        @Override
-        protected String doInBackground(LatLng... params) {
-            Geocoder geo = new Geocoder(getApplicationContext(), Locale.getDefault());
-
-            List<Address> addresses = null;
-
-            try {
-                addresses = geo.getFromLocation(params[0].latitude, params[0].longitude, 1);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            if (addresses.isEmpty()) {
-                merchantName.setText("Waiting for Location");
-            } else {
-                Address address = addresses.get(0);
-
-                if (addresses.size() > 0) {
-                    String addressText = String.format("%s, %s, %s",
-                            address.getMaxAddressLineIndex() > 0 ? address.getAddressLine(0) : "",
-                            address.getLocality(),
-                            address.getCountryName());
-
-                    return addressText;
-                }
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String address) {
-            if (TextUtils.isEmpty(address)) {
-                merchantAddress.setText("Couldn't load address");
-            } else {
-                merchantAddress.setText(address);
-            }
         }
     }
 }
