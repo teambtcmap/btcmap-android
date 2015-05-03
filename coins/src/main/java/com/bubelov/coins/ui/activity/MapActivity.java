@@ -1,5 +1,6 @@
 package com.bubelov.coins.ui.activity;
 
+import android.animation.Animator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,8 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
+import com.bubelov.coins.event.NewMerchantsLoadedEvent;
 import com.bubelov.coins.loader.MerchantsLoader;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.ui.fragment.CurrenciesFilterDialogFragment;
@@ -33,6 +36,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,6 +57,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private SlidingUpPanelLayout slidingLayout;
 
     private MerchantDetailsView merchantDetails;
+
+    private View loader;
 
     public static Intent newShowMerchantIntent(Context context, double latitude, double longitude) {
         return new Intent(context, MapActivity.class);
@@ -91,6 +97,33 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         getSupportLoaderManager().initLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds, amenity), this);
 
         merchantDetails = findView(R.id.merchant_details);
+
+        loader = findView(R.id.loader);
+        loader.animate().alpha(0.7f).setDuration(700).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (loader.getAlpha() == 0.7f) {
+                    loader.animate().alpha(1.0f).setDuration(700).setListener(this);
+                } else {
+                    loader.animate().alpha(0.7f).setDuration(700).setListener(this);
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
     }
 
     @Override
@@ -244,6 +277,17 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         map.setOnCameraChangeListener(merchantsManager);
         map.setOnMarkerClickListener(merchantsManager);
         map.setOnMapClickListener(latLng -> slidingLayout.setPanelHeight(0));
+    }
+
+    @Subscribe
+    public void onNewMerchantsLoaded(NewMerchantsLoadedEvent event) {
+        loader.setVisibility(View.VISIBLE);
+        reloadMerchants();
+    }
+
+    @Subscribe
+    public void onMerchantSyncFinished(MerchantsSyncFinishedEvent event) {
+        loader.setVisibility(View.GONE);
     }
 
     private void reloadMerchants() {

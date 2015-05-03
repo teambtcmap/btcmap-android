@@ -28,9 +28,29 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                style="@style/Toolbar.SemiTransparent" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    style="@style/Toolbar.SemiTransparent" />
+
+                <TextView
+                    android:id="@+id/loader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:text="LOADING MERCHANTS"
+                    android:textSize="16sp"
+                    android:textColor="@color/black"
+                    android:background="#DDFFFFFF"
+                    android:visibility="gone" />
+
+            </LinearLayout>
 
         </FrameLayout>
 

@@ -6,14 +6,14 @@ import android.preference.PreferenceManager;
 
 import com.bubelov.coins.database.DatabaseHelper;
 import com.bubelov.coins.manager.MerchantSyncManager;
+import com.bubelov.coins.receiver.SyncMerchantsWakefulReceiver;
+import com.bubelov.coins.service.MerchantsSyncService;
+import com.bubelov.coins.util.MainThreadBus;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import com.squareup.otto.Bus;
 
-import java.util.List;
-
-import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
 
@@ -25,6 +25,8 @@ import retrofit.converter.GsonConverter;
 public class App extends Application {
     private static App instance;
 
+    private Bus bus;
+
     private Api api;
 
     private SQLiteOpenHelper databaseHelper;
@@ -33,14 +35,24 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        bus = new MainThreadBus();
         initApi();
         databaseHelper = new DatabaseHelper(this);
-        new MerchantSyncManager(this).scheduleAlarm();
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+        MerchantSyncManager syncManager = new MerchantSyncManager(this);
+
+        if (syncManager.getLastSyncMillis() == 0) {
+            SyncMerchantsWakefulReceiver.startWakefulService(this, MerchantsSyncService.makeIntent(this));
+        }
     }
 
     public static App getInstance() {
         return instance;
+    }
+
+    public Bus getBus() {
+        return bus;
     }
 
     public Api getApi() {

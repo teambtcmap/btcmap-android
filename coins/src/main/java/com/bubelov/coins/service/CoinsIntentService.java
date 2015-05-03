@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.database.sqlite.SQLiteOpenHelper;
 import com.bubelov.coins.Api;
 import com.bubelov.coins.App;
+import com.squareup.otto.Bus;
 
 /**
  * Author: Igor Bubelov
@@ -18,11 +19,15 @@ public abstract class CoinsIntentService extends IntentService {
         app = App.getInstance();
     }
 
-    protected SQLiteOpenHelper getDatabaseHelper() {
-        return app.getDatabaseHelper();
+    protected Bus getBus() {
+        return app.getBus();
     }
 
     protected Api getApi() {
         return app.getApi();
+    }
+
+    protected SQLiteOpenHelper getDatabaseHelper() {
+        return app.getDatabaseHelper();
     }
 }

@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
+import com.bubelov.coins.event.NewMerchantsLoadedEvent;
 import com.bubelov.coins.manager.MerchantSyncManager;
 import com.bubelov.coins.manager.UserNotificationManager;
 import com.bubelov.coins.model.Currency;
@@ -95,7 +97,9 @@ public class MerchantsSyncService extends CoinsIntentService {
 
             for (Currency currency : currencies) {
                 saveCurrency(currency);
+            }
 
+            for (Currency currency : currencies) {
                 try {
                     syncMerchants(currency);
                 } catch (Exception exception) {
@@ -113,40 +117,57 @@ public class MerchantsSyncService extends CoinsIntentService {
 
             currenciesCursor.close();
         }
+
+        getBus().post(new MerchantsSyncFinishedEvent());
     }
 
-    private void syncMerchants(final Currency currency) throws ServerException {
-        List<Merchant> merchants = getApi().getMerchants(currency.getCode());
-        Log.d(TAG, String.format("Downloaded %s merchants accepting %s", merchants.size(), currency.getName()));
-
+    private void syncMerchants(Currency currency) throws ServerException {
         SQLiteDatabase db = getDatabaseHelper().getWritableDatabase();
         ContentValues values = new ContentValues();
 
         UserNotificationManager notificationManager = new UserNotificationManager(getApplicationContext());
 
-        for (Merchant merchant : merchants) {
-            notificationManager.onMerchantDownload(merchant);
+        int page = 1;
+        int perPage = 100;
 
-            values.put(Tables.Merchants._ID, merchant.getId());
-            values.put(Tables.Merchants.LATITUDE, merchant.getLatitude());
-            values.put(Tables.Merchants.LONGITUDE, merchant.getLongitude());
-            values.put(Tables.Merchants.NAME, merchant.getName());
-            values.put(Tables.Merchants.DESCRIPTION, merchant.getDescription());
-            //values.put(Tables.Merchants.PHONE, merchant.getPhone());
-            //values.put(Tables.Merchants.WEBSITE, merchant.getWebsite());
-            values.put(Tables.Merchants.AMENITY, merchant.getAmenity());
+        while (true) {
+            List<Merchant> merchants = getApi().getMerchants(currency.getCode(), page, perPage);
+            Log.d(TAG, String.format("Downloaded %s merchants accepting %s", merchants.size(), currency.getName()));
 
-            if (db.insertWithOnConflict(Tables.Merchants.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE) == -1) {
-                Log.d(TAG, "Couldn't insert merchant");
+            for (Merchant merchant : merchants) {
+                notificationManager.onMerchantDownload(merchant);
+
+                values.put(Tables.Merchants._ID, merchant.getId());
+                values.put(Tables.Merchants.LATITUDE, merchant.getLatitude());
+                values.put(Tables.Merchants.LONGITUDE, merchant.getLongitude());
+                values.put(Tables.Merchants.NAME, merchant.getName());
+                values.put(Tables.Merchants.DESCRIPTION, merchant.getDescription());
+                values.put(Tables.Merchants.PHONE, merchant.getPhone());
+                values.put(Tables.Merchants.WEBSITE, merchant.getWebsite());
+                values.put(Tables.Merchants.AMENITY, merchant.getAmenity());
+
+                if (db.insertWithOnConflict(Tables.Merchants.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE) == -1) {
+                    Log.d(TAG, "Couldn't insert merchant");
+                }
+
+                values.clear();
+
+                values.put(Tables.CurrenciesMerchants.MERCHANT_ID, merchant.getId());
+                values.put(Tables.CurrenciesMerchants.CURRENCY_ID, currency.getId());
+
+                db.insertWithOnConflict(Tables.CurrenciesMerchants.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+                values.clear();
             }
 
-            values.clear();
+            if (merchants.size() > 0) {
+                getBus().post(new NewMerchantsLoadedEvent());
+            }
 
-            values.put(Tables.CurrenciesMerchants.MERCHANT_ID, merchant.getId());
-            values.put(Tables.CurrenciesMerchants.CURRENCY_ID, currency.getId());
-
-            db.insertWithOnConflict(Tables.CurrenciesMerchants.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
-            values.clear();
+            if (merchants.size() < perPage) {
+                break;
+            } else {
+                page++;
+            }
         }
     }
 
