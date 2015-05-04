@@ -33,6 +33,10 @@ public abstract class AbstractActivity extends AppCompatActivity {
         super.onPause();
     }
 
+    public App getApp() {
+        return app;
+    }
+
     protected <T extends View> T findView(int id) {
         return (T) findViewById(id);
     }

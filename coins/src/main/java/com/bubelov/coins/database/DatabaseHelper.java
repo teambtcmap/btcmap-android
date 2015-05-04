@@ -60,6 +60,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_MERCHANTS_TABLE);
         db.execSQL(SQL_CREATE_CURRENCIES_TABLE);
         db.execSQL(SQL_CREATE_MERCHANTS_TO_CURRENCIES_TABLE);
+
+        db.execSQL("CREATE INDEX index_merchant_id_position ON merchants (_id, latitude, longitude)");
+        db.execSQL("CREATE INDEX index_currency_id ON currencies (_id)");
+        db.execSQL("CREATE INDEX index_currency_merchant_id ON currencies_merchants (_id)");
     }
 
     @Override

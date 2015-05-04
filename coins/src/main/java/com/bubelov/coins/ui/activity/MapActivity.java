@@ -18,7 +18,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
+import com.bubelov.coins.database.Tables;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
 import com.bubelov.coins.loader.MerchantsLoader;
@@ -30,6 +32,7 @@ import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -42,6 +45,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.OnMenuItemSelectedListener, CurrenciesFilterDialogFragment.Listener {
+    private static final String TAG = MapActivity.class.getSimpleName();
+
     private static final int MERCHANTS_LOADER = 0;
 
     private DrawerLayout drawer;
@@ -59,6 +64,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private MerchantDetailsView merchantDetails;
 
     private View loader;
+
+    private BitmapDescriptor merchantDescriptor;
 
     public static Intent newShowMerchantIntent(Context context, double latitude, double longitude) {
         return new Intent(context, MapActivity.class);
@@ -124,6 +131,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
             }
         });
+
+        merchantDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_place_white_48dp);
     }
 
     @Override
@@ -132,6 +141,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         drawerToggle.syncState();
 
         slidingLayout = findView(R.id.sliding_panel);
+        slidingLayout.setPanelHeight(0);
         slidingLayout.setAnchorPoint(0.5f);
     }
 
@@ -179,15 +189,18 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         while (data.moveToNext()) {
             Merchant merchant = new Merchant();
-            merchant.setId(data.getLong(0));
-            merchant.setLatitude(data.getFloat(1));
-            merchant.setLongitude(data.getFloat(2));
-            merchant.setName(data.getString(3));
-            merchant.setDescription(data.getString(4));
+            merchant.setId(data.getLong(data.getColumnIndex(Tables.Merchants._ID)));
+            merchant.setLatitude(data.getDouble(data.getColumnIndex(Tables.Merchants.LATITUDE)));
+            merchant.setLongitude(data.getDouble(data.getColumnIndex(Tables.Merchants.LONGITUDE)));
+            merchant.setAmenity(data.getString(data.getColumnIndex(Tables.Merchants.AMENITY)));
 
             merchants.add(merchant);
         }
 
+        onMerchantsLoaded(merchants);
+    }
+
+    private void onMerchantsLoaded(Collection<Merchant> merchants) {
         merchantsManager.clearItems();
         merchantsManager.addItems(merchants);
         merchantsManager.cluster();
@@ -292,7 +305,13 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private void reloadMerchants() {
         LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        getSupportLoaderManager().restartLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds, amenity), MapActivity.this);
+        MerchantsCache cache = getApp().getMerchantsCache();
+
+        if (cache.isInitialized()) {
+            onMerchantsLoaded(cache.getMerchants(bounds, amenity));
+        } else {
+            getSupportLoaderManager().restartLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds, amenity), MapActivity.this);
+        }
     }
 
     private class DrawerToggle extends ActionBarDrawerToggle {
@@ -321,7 +340,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         @Override
         protected void onBeforeClusterItemRendered(Merchant item, MarkerOptions markerOptions) {
             super.onBeforeClusterItemRendered(item, markerOptions);
-            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place_white_48dp));
+            markerOptions.icon(merchantDescriptor);
         }
     }
 
@@ -335,6 +354,34 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private class ClusterItemClickListener implements ClusterManager.OnClusterItemClickListener<Merchant> {
         @Override
         public boolean onClusterItemClick(Merchant merchant) {
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
+//
+//                    Random random = new Random(666);
+//
+//                    long start = System.currentTimeMillis();
+//
+//                    for (int i = 0; i < 500; i++) {
+//                        Cursor cursor = db.rawQuery("select distinct m._id, m.latitude, m.longitude, m.name, m.description from merchants as m join currencies_merchants as mc on m._id = mc.merchant_id join currencies c on c._id = mc.currency_id where (latitude between ? and ?) and (longitude between ? and ?) and c.show_on_map = 1",
+//                                new String[] { String.valueOf(-180.0f + random.nextFloat() * 360.0f), String.valueOf(-180.0f + random.nextFloat() * 360.0f), String.valueOf(-180.0f + random.nextFloat() * 360.0f), String.valueOf(-180.0f + random.nextFloat() * 360.0f) });
+//
+//                        //Log.d(TAG, "Count: " + cursor.getCount());
+//
+//                        while (cursor.moveToNext()) {
+//                            int x = 1;
+//                        }
+//
+//                        cursor.close();
+//                    }
+//
+//                    long execTime = System.currentTimeMillis() - start;
+//                    Log.d(TAG, "Execution time: " + execTime);
+//                    Log.d(TAG, "Avg query: " + (float) execTime / 10000.0f);
+//                }
+//            }).start();
+
             merchantDetails.setMerchant(merchant);
             slidingLayout.setPanelHeight(merchantDetails.getHeaderHeight());
             return false;

@@ -108,7 +108,7 @@ public class MerchantDetailsView extends FrameLayout {
                 e.printStackTrace();
             }
 
-            if (addresses.isEmpty()) {
+            if (addresses == null || addresses.isEmpty()) {
                 name.setText("Waiting for Location");
             } else {
                 Address address = addresses.get(0);

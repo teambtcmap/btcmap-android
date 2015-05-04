@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
@@ -29,8 +28,6 @@ import java.util.concurrent.TimeUnit;
 
 public class MerchantsSyncService extends CoinsIntentService {
     private static final String TAG = MerchantsSyncService.class.getName();
-
-    public static final String SYNC_COMPLETED_ACTION = TAG + ".SYNC_COMPLETED";
 
     private boolean active;
 
@@ -70,8 +67,6 @@ public class MerchantsSyncService extends CoinsIntentService {
             active = false;
             new MerchantSyncManager(getApplicationContext()).setLastSyncMillis(System.currentTimeMillis());
             SyncMerchantsWakefulReceiver.completeWakefulIntent(intent);
-            Intent syncCompletedIntent = new Intent(SYNC_COMPLETED_ACTION);
-            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(syncCompletedIntent);
         }
     }
 
@@ -128,7 +123,7 @@ public class MerchantsSyncService extends CoinsIntentService {
         UserNotificationManager notificationManager = new UserNotificationManager(getApplicationContext());
 
         int page = 1;
-        int perPage = 100;
+        int perPage = 150;
 
         while (true) {
             List<Merchant> merchants = getApi().getMerchants(currency.getCode(), page, perPage);
@@ -160,6 +155,7 @@ public class MerchantsSyncService extends CoinsIntentService {
             }
 
             if (merchants.size() > 0) {
+                getApp().getMerchantsCache().invalidate();
                 getBus().post(new NewMerchantsLoadedEvent());
             }
 

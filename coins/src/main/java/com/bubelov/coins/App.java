@@ -31,6 +31,8 @@ public class App extends Application {
 
     private SQLiteOpenHelper databaseHelper;
 
+    private MerchantsCache merchantsCache;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -38,6 +40,7 @@ public class App extends Application {
         bus = new MainThreadBus();
         initApi();
         databaseHelper = new DatabaseHelper(this);
+        merchantsCache = new MerchantsCache(databaseHelper.getReadableDatabase());
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         MerchantSyncManager syncManager = new MerchantSyncManager(this);
@@ -61,6 +64,10 @@ public class App extends Application {
 
     public SQLiteOpenHelper getDatabaseHelper() {
         return databaseHelper;
+    }
+
+    public MerchantsCache getMerchantsCache() {
+        return merchantsCache;
     }
 
     private void initApi() {
