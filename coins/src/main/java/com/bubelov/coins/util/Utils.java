@@ -45,4 +45,10 @@ public class Utils {
         intent.setType("text/plain");
         context.startActivity(intent);
     }
+
+    public static void showDirections(Context context, double latitude, double longitude) {
+        Uri uri = Uri.parse(String.format("geo:%s,%s", latitude, longitude));
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        context.startActivity(intent);
+    }
 }

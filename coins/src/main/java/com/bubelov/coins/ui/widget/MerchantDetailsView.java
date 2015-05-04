@@ -9,7 +9,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bubelov.coins.App;
@@ -37,11 +36,13 @@ public class MerchantDetailsView extends FrameLayout {
 
     private TextView description;
 
-    private ImageView call;
+    private View directions;
 
-    private ImageView openWebsite;
+    private View call;
 
-    private ImageView share;
+    private View openWebsite;
+
+    private View share;
 
     public MerchantDetailsView(Context context) {
         super(context);
@@ -85,6 +86,7 @@ public class MerchantDetailsView extends FrameLayout {
         call.setEnabled(!TextUtils.isEmpty(merchant.getPhone()));
         openWebsite.setEnabled(!TextUtils.isEmpty(merchant.getWebsite()));
 
+        directions.setOnClickListener(v -> Utils.showDirections(getContext(), merchant.getLatitude(), merchant.getLongitude()));
         call.setOnClickListener(v -> Utils.call(getContext(), merchant.getPhone()));
         openWebsite.setOnClickListener(v -> Utils.openUrl(getContext(), merchant.getWebsite()));
         share.setOnClickListener(v -> Utils.share(getContext(), "Check it out!", "This place accept cryptocurrency"));
@@ -100,9 +102,10 @@ public class MerchantDetailsView extends FrameLayout {
         address = (TextView) findViewById(R.id.merchant_address);
         description = (TextView) findViewById(R.id.merchant_description);
 
-        call = (ImageView) findViewById(R.id.call_merchant);
-        openWebsite = (ImageView) findViewById(R.id.open_merchant_website);
-        share = (ImageView) findViewById(R.id.share_merchant);
+        directions = findViewById(R.id.directions);
+        call = findViewById(R.id.call_merchant);
+        openWebsite = findViewById(R.id.open_merchant_website);
+        share = findViewById(R.id.share_merchant);
     }
 
     private class LoadAddressTask extends AsyncTask<LatLng, Void, String> {

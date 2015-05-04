@@ -50,7 +50,8 @@
 
             </LinearLayout>
 
-            <ImageView
+            <com.bubelov.coins.ui.widget.ClickableImageView
+                android:id="@+id/directions"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_directions_black_48dp"

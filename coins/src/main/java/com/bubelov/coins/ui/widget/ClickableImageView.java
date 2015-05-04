@@ -3,6 +3,7 @@ package com.bubelov.coins.ui.widget;
 import android.content.Context;
 import android.support.v7.internal.widget.TintImageView;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 
 import com.bubelov.coins.R;
 
@@ -33,5 +34,22 @@ public class ClickableImageView extends TintImageView {
         } else {
             setColorFilter(getResources().getColor(R.color.icons));
         }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (!isEnabled()) {
+            return false;
+        }
+
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            setColorFilter(getResources().getColor(R.color.primary_semi_transparent));
+        }
+
+        if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+            setColorFilter(getResources().getColor(R.color.primary));
+        }
+
+        return super.onTouchEvent(event);
     }
 }

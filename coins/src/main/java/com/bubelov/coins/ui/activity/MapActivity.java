@@ -49,6 +49,9 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private static final int MERCHANTS_LOADER = 0;
 
+    private static final float PIN_ANCHOR_U = 0.5f;
+    private static final float PIN_ANCHOR_V = 0.91145f;
+
     private DrawerLayout drawer;
 
     private ActionBarDrawerToggle drawerToggle;
@@ -340,7 +343,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         @Override
         protected void onBeforeClusterItemRendered(Merchant item, MarkerOptions markerOptions) {
             super.onBeforeClusterItemRendered(item, markerOptions);
-            markerOptions.icon(merchantDescriptor);
+            markerOptions.icon(merchantDescriptor).anchor(PIN_ANCHOR_U, PIN_ANCHOR_V);
         }
     }
 
