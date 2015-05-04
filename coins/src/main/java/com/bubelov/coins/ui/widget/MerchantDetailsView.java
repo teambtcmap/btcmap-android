@@ -1,6 +1,7 @@
 package com.bubelov.coins.ui.widget;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
@@ -11,8 +12,11 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bubelov.coins.App;
 import com.bubelov.coins.R;
+import com.bubelov.coins.database.Tables;
 import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.util.Utils;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
@@ -59,20 +63,31 @@ public class MerchantDetailsView extends FrameLayout {
     }
 
     public void setMerchant(Merchant merchant) {
+        if (TextUtils.isEmpty(merchant.getName())) {
+            Cursor cursor = App.getInstance().getDatabaseHelper().getReadableDatabase().query(Tables.Merchants.TABLE_NAME,
+                    new String[] { Tables.Merchants.NAME, Tables.Merchants.PHONE, Tables.Merchants.WEBSITE },
+                    "_id = ?",
+                    new String[] { String.valueOf(merchant.getId()) },
+                    null,
+                    null,
+                    null);
+
+            if (cursor.moveToNext()) {
+                merchant.setName(cursor.getString(cursor.getColumnIndex(Tables.Merchants.NAME)));
+                merchant.setPhone(cursor.getString(cursor.getColumnIndex(Tables.Merchants.PHONE)));
+                merchant.setWebsite(cursor.getString(cursor.getColumnIndex(Tables.Merchants.WEBSITE)));
+            }
+        }
+
         name.setText(merchant.getName());
         description.setText(merchant.getDescription());
 
-        if (TextUtils.isEmpty(merchant.getPhone())) {
-            call.setColorFilter(getResources().getColor(R.color.icons));
-        } else {
-            call.setColorFilter(getResources().getColor(R.color.primary));
-        }
+        call.setEnabled(!TextUtils.isEmpty(merchant.getPhone()));
+        openWebsite.setEnabled(!TextUtils.isEmpty(merchant.getWebsite()));
 
-        if (TextUtils.isEmpty(merchant.getWebsite())) {
-            openWebsite.setColorFilter(getResources().getColor(R.color.icons));
-        } else {
-            openWebsite.setColorFilter(getResources().getColor(R.color.primary));
-        }
+        call.setOnClickListener(v -> Utils.call(getContext(), merchant.getPhone()));
+        openWebsite.setOnClickListener(v -> Utils.openUrl(getContext(), merchant.getWebsite()));
+        share.setOnClickListener(v -> Utils.share(getContext(), "Check it out!", "This place accept cryptocurrency"));
 
         new LoadAddressTask().execute(merchant.getPosition());
     }
@@ -108,18 +123,14 @@ public class MerchantDetailsView extends FrameLayout {
                 e.printStackTrace();
             }
 
-            if (addresses == null || addresses.isEmpty()) {
-                name.setText("Waiting for Location");
-            } else {
+            if (addresses != null || !addresses.isEmpty()) {
                 Address address = addresses.get(0);
 
                 if (addresses.size() > 0) {
-                    String addressText = String.format("%s, %s, %s",
+                    return String.format("%s, %s, %s",
                             address.getMaxAddressLineIndex() > 0 ? address.getAddressLine(0) : "",
                             address.getLocality(),
                             address.getCountryName());
-
-                    return addressText;
                 }
             }
 

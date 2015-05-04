@@ -1,8 +1,10 @@
 package com.bubelov.coins.util;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 
 /**
  * Author: Igor Bubelov
@@ -21,5 +23,26 @@ public class Utils {
         } else {
             return false;
         }
+    }
+
+    public static void call(Context context, String phoneNumber) {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + phoneNumber));
+        context.startActivity(intent);
+    }
+
+    public static void openUrl(Context context, String url) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(url));
+        context.startActivity(intent);
+    }
+
+    public static void share(Context context, String subject, String text) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.putExtra(Intent.EXTRA_TEXT, text);
+        intent.setType("text/plain");
+        context.startActivity(intent);
     }
 }
