@@ -28,29 +28,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
-            <LinearLayout
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                style="@style/Toolbar.SemiTransparent" />
+
+            <TextView
+                android:id="@+id/loader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <android.support.v7.widget.Toolbar
-                    android:id="@+id/toolbar"
-                    style="@style/Toolbar.SemiTransparent" />
-
-                <TextView
-                    android:id="@+id/loader"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"
-                    android:text="LOADING MERCHANTS"
-                    android:textSize="16sp"
-                    android:textColor="@color/black"
-                    android:background="#DDFFFFFF"
-                    android:visibility="gone" />
-
-            </LinearLayout>
+                android:gravity="center"
+                android:layout_marginTop="?actionBarSize"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:elevation="4dp"
+                android:text="LOADING MERCHANTS"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:background="#DDFFFFFF"
+                android:visibility="visible" />
 
         </FrameLayout>
 
