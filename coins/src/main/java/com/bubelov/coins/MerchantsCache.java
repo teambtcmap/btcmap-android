@@ -62,13 +62,15 @@ public class MerchantsCache {
     private void initialize() {
         Log.d(TAG, "Initializing cache");
 
-        Cursor cursor = db.query(Tables.Merchants.TABLE_NAME,
-                new String[] { Tables.Merchants._ID, Tables.Merchants.LATITUDE, Tables.Merchants.LONGITUDE, Tables.Merchants.AMENITY },
-                null,
-                null,
-                null,
-                null,
-                null);
+        Cursor cursor = db.rawQuery("select distinct m._id, m.latitude, m.longitude, m.amenity from merchants as m join currencies_merchants as mc on m._id = mc.merchant_id join currencies c on c._id = mc.currency_id where c.show_on_map = 1", null);
+
+//        Cursor cursor = db.query(Tables.Merchants.TABLE_NAME,
+//                new String[] { Tables.Merchants._ID, Tables.Merchants.LATITUDE, Tables.Merchants.LONGITUDE, Tables.Merchants.AMENITY },
+//                null,
+//                null,
+//                null,
+//                null,
+//                null);
 
         while (cursor.moveToNext()) {
             Merchant merchant = new Merchant();

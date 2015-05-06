@@ -4,20 +4,19 @@
 
     <color name="primary">#FEBD0C</color>
     <color name="primaryDark">#F99F00</color>
+    <color name="primary_semi_transparent">#DDFEBD0C</color>
     <color name="accent">#536DFE</color>
 
-    <color name="primary_semi_transparent">#DDFEBD0C</color>
+    <color name="divider">#DADADA</color>
+    <color name="disabled_or_hint">#B8B8B8</color>
+    <color name="secondary_text_or_icons">#727272</color>
+    <color name="text">#202020</color>
 
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
 
-    <color name="icons">#727272</color>
-
-    <color name="silver">#dddddd</color>
-    <color name="gold">#ffff00</color>
-
-    <color name="notification_area">#220000ff</color>
-    <color name="notification_area_border">#990000ff</color>
+    <color name="notification_area">#220000FF</color>
+    <color name="notification_area_border">#990000FF</color>
 
     <color name="drawer_list_item_background">#FFFFFF</color>
     <color name="drawer_list_item_background_selected">#E8E8E8</color>

@@ -45,7 +45,7 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="8dp"
                     android:textSize="18sp"
-                    android:textColor="@color/icons"
+                    android:textColor="@color/secondary_text_or_icons"
                     android:singleLine="true" />
 
             </LinearLayout>

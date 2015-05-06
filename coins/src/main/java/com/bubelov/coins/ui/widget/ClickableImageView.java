@@ -32,7 +32,7 @@ public class ClickableImageView extends TintImageView {
         if (enabled) {
             setColorFilter(getResources().getColor(R.color.primary));
         } else {
-            setColorFilter(getResources().getColor(R.color.icons));
+            setColorFilter(getResources().getColor(R.color.secondary_text_or_icons));
         }
     }
 

@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.bubelov.coins.App;
 import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Tables;
@@ -281,6 +282,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     @Override
     public void onCurrenciesFilterDismissed() {
+        App.getInstance().getMerchantsCache().invalidate();
         reloadMerchants();
     }
 
