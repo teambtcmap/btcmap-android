@@ -23,22 +23,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
-
-    signingConfigs {
-        debug {
-            storeFile file("../release.jks")
-            storePassword "abc345"
-            keyAlias "BitATM"
-            keyPassword "abc345"
-        }
-
-        release {
-            storeFile file("../release.jks")
-            storePassword "abc345"
-            keyAlias "BitATM"
-            keyPassword "abc345"
-        }
-    }
 }
 
 dependencies {
