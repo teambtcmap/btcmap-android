@@ -33,7 +33,6 @@ public class UserNotificationManager {
     private static final String LONGITUDE_KEY = "longitude";
 
     private static final String RADIUS_KEY = "radius";
-    private static final int DEFAULT_RADIUS_METERS = 50000;
 
     private Context context;
     private SharedPreferences preferences;
@@ -59,8 +58,12 @@ public class UserNotificationManager {
                 .commit();
     }
 
-    public int getNotificationAreaRadius() {
-        return preferences.getInt(RADIUS_KEY, DEFAULT_RADIUS_METERS);
+    public Integer getNotificationAreaRadius() {
+        if (preferences.contains(RADIUS_KEY)) {
+            return preferences.getInt(RADIUS_KEY, -1);
+        } else {
+            return null;
+        }
     }
 
     public void setNotificationAreaRadius(int radius) {

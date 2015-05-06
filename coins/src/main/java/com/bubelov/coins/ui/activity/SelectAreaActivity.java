@@ -1,5 +1,8 @@
 package com.bubelov.coins.ui.activity;
 
+import android.content.Intent;
+import android.content.IntentSender;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -9,11 +12,19 @@ import android.widget.SeekBar;
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.R;
 import com.bubelov.coins.manager.UserNotificationManager;
-import com.bubelov.coins.ui.fragment.ConfirmationDialog;
-import com.bubelov.coins.ui.fragment.ConfirmationDialogListener;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -25,11 +36,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
  * Date: 12/07/14 16:24
  */
 
-public class SelectAreaActivity extends AbstractActivity implements ConfirmationDialogListener {
+public class SelectAreaActivity extends AbstractActivity {
+    private static final int REQUEST_CHECK_LOCATION_SETTINGS = 0;
+
     private static final String CENTER_EXTRA = "center";
     private static final String RADIUS_EXTRA = "radius";
 
-    private static final String SAVE_DATA_DIALOG = "save_data_dialog";
+    private static final int DEFAULT_RADIUS_METERS = 50000;
+
+    private static final int DEFAULT_ZOOM = 8;
 
     private GoogleMap map;
 
@@ -37,6 +52,8 @@ public class SelectAreaActivity extends AbstractActivity implements Confirmation
 
     private Marker center;
     private Circle circle;
+
+    private GoogleApiClient googleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,31 +64,41 @@ public class SelectAreaActivity extends AbstractActivity implements Confirmation
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
 
-        MapFragment mapFragment = (MapFragment)getFragmentManager().findFragmentById(R.id.map);
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
+        map.setMyLocationEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(false);
         map.getUiSettings().setZoomControlsEnabled(false);
         map.setOnMarkerDragListener(new OnMarkerDragListener());
 
         notificationManager = new UserNotificationManager(this);
 
+        boolean shouldFindLocation = false;
+
         if (savedInstanceState != null) {
             addArea(savedInstanceState.getParcelable(CENTER_EXTRA), savedInstanceState.getInt(RADIUS_EXTRA));
         } else {
             LatLng center = notificationManager.getNotificationAreaCenter();
+            Integer radius = notificationManager.getNotificationAreaRadius();
 
             if (center == null) {
                 center = new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE);
-                findMyLocationAndMoveAreaHere();
+                shouldFindLocation = true;
             }
 
-            addArea(center, notificationManager.getNotificationAreaRadius());
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 8));
+            addArea(center, radius == null ? DEFAULT_RADIUS_METERS : radius);
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(center, DEFAULT_ZOOM));
         }
 
-        SeekBar seekBar = (SeekBar)findViewById(R.id.seek_bar_radius);
-        seekBar.setMax(500000);
-        seekBar.setProgress((int) circle.getRadius());
-        seekBar.setOnSeekBarChangeListener(new SeekBarChangeListener());
+        if (shouldFindLocation) {
+            googleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(new LocationApiConnectionCallbacks())
+                    .addOnConnectionFailedListener(new LocationAliConnectionFailedListener())
+                    .build();
+
+            googleApiClient.connect();
+        }
     }
 
     @Override
@@ -91,6 +118,15 @@ public class SelectAreaActivity extends AbstractActivity implements Confirmation
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == RESULT_OK) {
+            findLocation();
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         if (center != null && circle != null) {
             outState.putParcelable(CENTER_EXTRA, center.getPosition());
@@ -100,48 +136,63 @@ public class SelectAreaActivity extends AbstractActivity implements Confirmation
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    public void onBackPressed() {
-        if (notificationManager.getNotificationAreaCenter() == null) {
-            ConfirmationDialog.newInstance(R.string.app_name).show(getFragmentManager(), SAVE_DATA_DIALOG);
+    private void findLocation() {
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+
+        if (lastLocation != null) {
+            LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+            moveArea(latLng);
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
         } else {
-            super.onBackPressed();
-        }
-    }
+            LocationRequest locationRequest = LocationRequest.create().setNumUpdates(1);
+            LocationSettingsRequest locationSettingsRequest = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build();
+            PendingResult<LocationSettingsResult> locationSettingsResult = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, locationSettingsRequest);
 
-    @Override
-    public void onConfirmed(String tag) {
-        if (SAVE_DATA_DIALOG.equals(tag)) {
-            saveSelectedArea();
-            supportFinishAfterTransition();
-        }
-    }
+            locationSettingsResult.setResultCallback(result -> {
+                switch (result.getStatus().getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, location -> {
+                            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            moveArea(latLng);
+                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
+                        });
 
-    @Override
-    public void onCancelled(String tag) {
-        if (SAVE_DATA_DIALOG.equals(tag)) {
-            supportFinishAfterTransition();
-        }
-    }
+                        break;
 
-    private void findMyLocationAndMoveAreaHere() {
-        map.setOnMyLocationChangeListener(location -> {
-            map.setOnMyLocationChangeListener(null);
-            moveArea(new LatLng(location.getLatitude(), location.getLongitude()));
-        });
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        try {
+                            result.getStatus().startResolutionForResult(SelectAreaActivity.this, REQUEST_CHECK_LOCATION_SETTINGS);
+                        } catch (IntentSender.SendIntentException exception) {
+                            // Ignoring
+                        }
+
+                        break;
+                }
+            });
+        }
     }
 
     private void addArea(LatLng center, int radius) {
-        this.center = map.addMarker(new MarkerOptions().position(center).draggable(true));
+        BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_place_white_48dp);
+        this.center = map.addMarker(new MarkerOptions()
+                .position(center)
+                .icon(markerDescriptor)
+                .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V)
+                .draggable(true));
 
         CircleOptions circleOptions = new CircleOptions()
                 .center(this.center.getPosition())
-                .radius(getIntent().getIntExtra(RADIUS_EXTRA, notificationManager.getNotificationAreaRadius()))
+                .radius(radius)
                 .fillColor(getResources().getColor(R.color.notification_area))
                 .strokeColor(getResources().getColor(R.color.notification_area_border))
                 .strokeWidth(4);
 
         circle = map.addCircle(circleOptions);
+
+        SeekBar seekBar = findView(R.id.seek_bar_radius);
+        seekBar.setMax(500000);
+        seekBar.setProgress((int) circle.getRadius());
+        seekBar.setOnSeekBarChangeListener(new SeekBarChangeListener());
     }
 
     private void moveArea(LatLng location) {
@@ -186,6 +237,25 @@ public class SelectAreaActivity extends AbstractActivity implements Confirmation
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
 
+        }
+    }
+
+    private class LocationApiConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks {
+        @Override
+        public void onConnected(Bundle bundle) {
+            findLocation();
+        }
+
+        @Override
+        public void onConnectionSuspended(int cause) {
+            showToast("Connection to location API was suspended");
+        }
+    }
+
+    private class LocationAliConnectionFailedListener implements GoogleApiClient.OnConnectionFailedListener {
+        @Override
+        public void onConnectionFailed(ConnectionResult connectionResult) {
+            showToast("Couldn't connect to location API");
         }
     }
 }

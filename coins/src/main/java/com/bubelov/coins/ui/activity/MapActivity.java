@@ -4,8 +4,10 @@ import android.animation.Animator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
@@ -19,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.bubelov.coins.App;
+import com.bubelov.coins.Constants;
 import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Tables;
@@ -31,11 +34,21 @@ import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.ui.widget.MerchantDetailsView;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
@@ -50,8 +63,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private static final int MERCHANTS_LOADER = 0;
 
-    private static final float PIN_ANCHOR_U = 0.5f;
-    private static final float PIN_ANCHOR_V = 0.91145f;
+    private static final int REQUEST_CHECK_LOCATION_SETTINGS = 0;
 
     private DrawerLayout drawer;
 
@@ -70,6 +82,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private View loader;
 
     private BitmapDescriptor merchantDescriptor;
+
+    private GoogleApiClient googleApiClient;
 
     public static Intent newShowMerchantIntent(Context context, double latitude, double longitude) {
         return new Intent(context, MapActivity.class);
@@ -96,7 +110,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
-        map.setMyLocationEnabled(false);
+        map.setMyLocationEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(false);
         map.getUiSettings().setZoomControlsEnabled(false);
         map.getUiSettings().setCompassEnabled(false);
 
@@ -137,6 +152,14 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         });
 
         merchantDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_place_white_48dp);
+
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new LocationApiConnectionCallbacks())
+                .addOnConnectionFailedListener(new LocationAliConnectionFailedListener())
+                .build();
+
+        googleApiClient.connect();
     }
 
     @Override
@@ -169,6 +192,17 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == RESULT_OK) {
+            findLocation();
+        }
+
+        if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == RESULT_CANCELED) {
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), 13));
         }
     }
 
@@ -286,6 +320,38 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         reloadMerchants();
     }
 
+    private void findLocation() {
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+
+        if (lastLocation != null) {
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 13));
+        } else {
+            LocationRequest locationRequest = LocationRequest.create().setNumUpdates(1);
+            LocationSettingsRequest locationSettingsRequest = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build();
+            PendingResult<LocationSettingsResult> locationSettingsResult = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, locationSettingsRequest);
+
+            locationSettingsResult.setResultCallback(result -> {
+                switch (result.getStatus().getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, location -> {
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13));
+                        });
+
+                        break;
+
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        try {
+                            result.getStatus().startResolutionForResult(MapActivity.this, REQUEST_CHECK_LOCATION_SETTINGS);
+                        } catch (IntentSender.SendIntentException exception) {
+                            // Ignoring
+                        }
+
+                        break;
+                }
+            });
+        }
+    }
+
     private void initClustering() {
         merchantsManager = new ClusterManager<>(this, map);
         PlacesRenderer renderer = new PlacesRenderer(this, map, merchantsManager);
@@ -345,7 +411,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         @Override
         protected void onBeforeClusterItemRendered(Merchant item, MarkerOptions markerOptions) {
             super.onBeforeClusterItemRendered(item, markerOptions);
-            markerOptions.icon(merchantDescriptor).anchor(PIN_ANCHOR_U, PIN_ANCHOR_V);
+            markerOptions.icon(merchantDescriptor).anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
         }
     }
 
@@ -390,6 +456,25 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             merchantDetails.setMerchant(merchant);
             slidingLayout.setPanelHeight(merchantDetails.getHeaderHeight());
             return false;
+        }
+    }
+
+    private class LocationApiConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks {
+        @Override
+        public void onConnected(Bundle bundle) {
+            findLocation();
+        }
+
+        @Override
+        public void onConnectionSuspended(int cause) {
+            showToast("Connection to location API was suspended");
+        }
+    }
+
+    private class LocationAliConnectionFailedListener implements GoogleApiClient.OnConnectionFailedListener {
+        @Override
+        public void onConnectionFailed(ConnectionResult connectionResult) {
+            showToast("Couldn't connect to location API");
         }
     }
 }
