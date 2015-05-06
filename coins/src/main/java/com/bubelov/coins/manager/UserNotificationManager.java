@@ -10,7 +10,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -20,6 +19,8 @@ import com.bubelov.coins.database.Tables;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.ui.activity.MapActivity;
 import com.google.android.gms.maps.model.LatLng;
+
+import java.util.UUID;
 
 /**
  * Author: Igor Bubelov
@@ -113,22 +114,21 @@ public class UserNotificationManager {
             return;
         }
 
+        notifyUser(merchant.getId(), merchant.getName());
+    }
+
+    public void notifyUser(long merchantId, String merchantName) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(context.getString(R.string.notification_new_merchant))
-                .setContentText(!TextUtils.isEmpty(merchant.getName()) ? merchant.getName() : context.getString(R.string.notification_new_merchant_no_name))
+                .setContentText(!TextUtils.isEmpty(merchantName) ? merchantName : context.getString(R.string.notification_new_merchant_no_name))
                 .setAutoCancel(true);
 
-        Intent resultIntent = MapActivity.newShowMerchantIntent(context, merchant.getLatitude(), merchant.getLongitude());
+        Intent intent = MapActivity.newShowMerchantIntent(context, merchantId);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, UUID.randomUUID().hashCode(), intent, 0);
+        builder.setContentIntent(pendingIntent);
 
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        stackBuilder.addParentStack(MapActivity.class);
-        stackBuilder.addNextIntent(resultIntent);
-
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent((int)merchant.getId(), PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(resultPendingIntent);
-
-        NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify((int)merchant.getId(), builder.build());
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(UUID.randomUUID().hashCode(), builder.build());
     }
 }

@@ -2,15 +2,22 @@ package com.bubelov.coins.ui.fragment;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.support.v4.app.ActivityOptionsCompat;
 
+import com.bubelov.coins.App;
 import com.bubelov.coins.R;
+import com.bubelov.coins.database.Tables;
 import com.bubelov.coins.manager.MerchantSyncManager;
+import com.bubelov.coins.manager.UserNotificationManager;
 import com.bubelov.coins.ui.activity.SelectAreaActivity;
+
+import java.util.Random;
 
 /**
  * Author: Igor Bubelov
@@ -41,6 +48,35 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         if (preference.getKey().equals(getString(R.string.pref_area_of_interest_key))) {
             startActivity(new Intent(getActivity(), SelectAreaActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity()).toBundle());
+        }
+
+        if (preference.getKey().equals("pref_test_notification")) {
+            SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
+
+            Cursor cursor = db.rawQuery("select count(_id) from " + Tables.Merchants.TABLE_NAME, null);
+
+            if (cursor.moveToNext()) {
+                int merchantsCount = cursor.getInt(0);
+                cursor.close();
+
+                Random random = new Random(System.currentTimeMillis());
+
+                cursor = db.query(Tables.Merchants.TABLE_NAME,
+                        new String[] { Tables.Merchants._ID, Tables.Merchants.NAME },
+                        "_id = ?",
+                        new String[] { String.valueOf(random.nextInt(merchantsCount + 1)) },
+                        null,
+                        null,
+                        null);
+
+                if (cursor.moveToNext()) {
+                    long id = cursor.getLong(cursor.getColumnIndex(Tables.Merchants._ID));
+                    String name = cursor.getString(cursor.getColumnIndex(Tables.Merchants.NAME));
+                    new UserNotificationManager(getActivity()).notifyUser(id, name);
+                }
+
+                cursor.close();
+            }
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);

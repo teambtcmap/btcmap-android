@@ -32,4 +32,13 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="DEVELOPMENT">
+
+        <Preference
+            android:key="pref_test_notification"
+            android:title="Test notification" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -61,6 +62,8 @@ import java.util.Collection;
 public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.OnMenuItemSelectedListener, CurrenciesFilterDialogFragment.Listener {
     private static final String TAG = MapActivity.class.getSimpleName();
 
+    private static final String MERCHANT_ID_EXTRA = "merchant_id";
+
     private static final int MERCHANTS_LOADER = 0;
 
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 0;
@@ -85,8 +88,11 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private GoogleApiClient googleApiClient;
 
-    public static Intent newShowMerchantIntent(Context context, double latitude, double longitude) {
-        return new Intent(context, MapActivity.class);
+    public static Intent newShowMerchantIntent(Context context, long merchantId) {
+        Intent intent = new Intent(context, MapActivity.class);
+        intent.putExtra(MERCHANT_ID_EXTRA, merchantId);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        return intent;
     }
 
     @Override
@@ -153,13 +159,17 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         merchantDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_place_white_48dp);
 
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(new LocationApiConnectionCallbacks())
-                .addOnConnectionFailedListener(new LocationAliConnectionFailedListener())
-                .build();
+        if (getIntent().hasExtra(MERCHANT_ID_EXTRA)) {
+            showMerchant(getIntent().getLongExtra(MERCHANT_ID_EXTRA, -1));
+        } else {
+            googleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(new LocationApiConnectionCallbacks())
+                    .addOnConnectionFailedListener(new LocationAliConnectionFailedListener())
+                    .build();
 
-        googleApiClient.connect();
+            googleApiClient.connect();
+        }
     }
 
     @Override
@@ -192,6 +202,33 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        if (intent.hasExtra(MERCHANT_ID_EXTRA)) {
+            showMerchant(intent.getLongExtra(MERCHANT_ID_EXTRA, -1));
+        }
+    }
+
+    private void showMerchant(long id) {
+        SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
+
+        Cursor cursor = db.query(Tables.Merchants.TABLE_NAME,
+                new String[] { Tables.Merchants.LATITUDE, Tables.Merchants.LONGITUDE },
+                "_id = ?",
+                new String[] { String.valueOf(id) },
+                null,
+                null,
+                null);
+
+        if (cursor.moveToNext()) {
+            double latitude = cursor.getDouble(cursor.getColumnIndex(Tables.Merchants.LATITUDE));
+            double longitude = cursor.getDouble(cursor.getColumnIndex(Tables.Merchants.LONGITUDE));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 13));
         }
     }
 

@@ -27,8 +27,8 @@
     <string name="pref_area_of_interest">Location</string>
     <string name="pref_area_of_interest_summary">Select your area of interest.</string>
 
-    <string name="notification_new_merchant">New merchant</string>
-    <string name="notification_new_merchant_no_name">Touch to see where.</string>
+    <string name="notification_new_merchant">New merchant in your area</string>
+    <string name="notification_new_merchant_no_name">Touch to see where</string>
 
     <string name="dialog_save_notification_area">You haven\'t confirm selected area. Do you want to save it?</string>
 
