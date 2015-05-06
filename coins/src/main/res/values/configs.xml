@@ -4,4 +4,6 @@
 
     <string name="api_url">http://91.121.144.57:3000</string>
 
+    <string name="google_api_key"></string>
+    
 </resources>

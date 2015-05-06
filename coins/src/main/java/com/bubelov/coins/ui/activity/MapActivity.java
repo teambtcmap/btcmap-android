@@ -220,7 +220,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     public void onMenuItemSelected(int id, com.bubelov.coins.ui.widget.MenuItem menuItem) {
         drawer.closeDrawer(Gravity.LEFT);
 
-        if (id != R.id.settings && id != R.id.help && id != R.id.donate) {
+        if (id != R.id.settings && id != R.id.help_and_feedback) {
             getSupportActionBar().setTitle(menuItem.getText());
         }
 

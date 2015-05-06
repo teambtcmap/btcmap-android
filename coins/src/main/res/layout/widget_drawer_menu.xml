@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="@color/white"
     android:clickable="true">
 
     <ScrollView
@@ -18,6 +18,81 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_alignTop="@+id/header"
+                    android:layout_alignBottom="@+id/header"
+                    android:src="@drawable/abstract_pattern"
+                    android:scaleType="centerCrop" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_alignTop="@+id/header"
+                    android:layout_alignBottom="@+id/header"
+                    android:background="#33000000" />
+
+                <LinearLayout
+                    android:id="@+id/header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingLeft="16dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/avatar"
+                            android:layout_width="70dp"
+                            android:layout_height="70dp"
+                            android:src="@drawable/bitcoin_logo" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:paddingLeft="16dp"
+                            android:text="$300.00"
+                            android:textColor="@color/white"
+                            android:textSize="26sp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Bitcoin price"
+                        android:textSize="14sp"
+                        android:textColor="@color/white"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Last check: 14:45 PM"
+                        android:textSize="14sp"
+                        android:textColor="@color/white" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="8dp"
+                android:background="@color/divider" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/all"
@@ -141,17 +216,10 @@
         app:text="Settings" />
 
     <com.bubelov.coins.ui.widget.MenuItem
-        android:id="@+id/help"
+        android:id="@+id/help_and_feedback"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:mi_icon="@drawable/ic_help_grey600_24dp"
-        app:text="Help" />
-
-    <com.bubelov.coins.ui.widget.MenuItem
-        android:id="@+id/donate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:mi_icon="@drawable/ic_donate"
-        app:text="Donate" />
+        app:text="Help &amp; feedback" />
 
 </LinearLayout>

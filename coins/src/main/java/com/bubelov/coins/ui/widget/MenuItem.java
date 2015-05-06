@@ -2,7 +2,6 @@ package com.bubelov.coins.ui.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -47,8 +46,14 @@ public class MenuItem extends FrameLayout {
                 : getResources().getColor(R.color.drawer_list_item_background));
 
         text.setTextColor(selected
-                ? getResources().getColor(R.color.drawer_list_item_text_selected)
+                ? getResources().getColor(R.color.primaryDark)
                 : getResources().getColor(R.color.drawer_list_item_text));
+
+        if (selected) {
+            icon.setColorFilter(getResources().getColor(R.color.primaryDark));
+        } else {
+            icon.setColorFilter(null);
+        }
     }
 
     private void init() {

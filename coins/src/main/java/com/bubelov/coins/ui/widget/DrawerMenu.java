@@ -29,8 +29,7 @@ public class DrawerMenu extends FrameLayout {
             R.id.pizza,
             R.id.taxi,
             R.id.settings,
-            R.id.help,
-            R.id.donate
+            R.id.help_and_feedback
     };
 
     private OnMenuItemSelectedListener itemSelectedListener;
@@ -51,7 +50,7 @@ public class DrawerMenu extends FrameLayout {
     }
 
     public void setSelected(int itemId) {
-        boolean justNotify = itemId == R.id.settings || itemId == R.id.help || itemId == R.id.donate;
+        boolean justNotify = itemId == R.id.settings || itemId == R.id.help_and_feedback;
 
         for (int id : ITEMS) {
             MenuItem item = (MenuItem) findViewById(id);
