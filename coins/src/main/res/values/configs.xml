@@ -2,8 +2,12 @@
 
 <resources>
 
-    <string name="api_url">http://91.121.144.57:3000</string>
+    <string name="api_url">http://91.121.144.57:3000/api/v1</string>
+    <!--<string name="api_url">http://192.168.1.2:3000/api/v1</string>-->
+
+    <string name="database_name">coins.db</string>
+    <integer name="database_version">2</integer>
 
     <string name="google_api_key"></string>
-    
+
 </resources>

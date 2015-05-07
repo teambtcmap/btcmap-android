@@ -32,6 +32,15 @@
                 android:id="@+id/toolbar"
                 style="@style/Toolbar.SemiTransparent" />
 
+            <View
+                android:id="@+id/anchor_upper_right"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="254dp"
+                android:layout_gravity="right"
+                android:background="#FF0000" />
+
             <TextView
                 android:id="@+id/loader"
                 android:layout_width="match_parent"

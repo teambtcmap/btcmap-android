@@ -1,52 +1,48 @@
-package com.bubelov.coins.ui.fragment;
+package com.bubelov.coins.ui.widget;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Bundle;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.support.v7.app.AppCompatDialog;
+import android.support.v7.widget.ListPopupWindow;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Tables;
+import com.bubelov.coins.util.Utils;
 
 /**
  * Author: Igor Bubelov
- * Date: 01/05/15 21:04
+ * Date: 07/05/15 23:29
  */
 
-public class CurrenciesFilterDialog extends AppCompatDialog {
-    private static final String TAG = CurrenciesFilterDialog.class.getSimpleName();
+public class CurrenciesFilterPopup extends ListPopupWindow {
+    private Context context;
 
-    public CurrenciesFilterDialog(Context context) {
+    public CurrenciesFilterPopup(Context context) {
         super(context);
+        this.context = context;
+        setAdapter(getAdapter());
+        setModal(true);
+        setWidth(Utils.dpToPx(context, 250));
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ListView listView = new ListView(getContext());
-        listView.setAdapter(getAdapter());
-        setContentView(listView);
-    }
-
-    private ListAdapter getAdapter() {
+    public ListAdapter getAdapter() {
         SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
 
         Cursor currencies = db.query(Tables.Currencies.TABLE_NAME,
-                new String[]{Tables.Currencies._ID, Tables.Currencies.NAME, Tables.Currencies.SHOW_ON_MAP},
+                new String[]{ Tables.Currencies._ID, Tables.Currencies.NAME, Tables.Currencies.SHOW_ON_MAP },
                 null,
                 null,
                 null,
                 null,
                 null);
 
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(getContext(),
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(context,
                 R.layout.list_item_currency_filter,
                 currencies,
                 new String[] { Tables.Currencies.NAME, Tables.Currencies.SHOW_ON_MAP },
@@ -63,6 +59,9 @@ public class CurrenciesFilterDialog extends AppCompatDialog {
                 checkBox.setChecked(cursor.getInt(showOnMapColumnIndex) > 0);
                 String currencyId = cursor.getString(idIndex);
                 checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> setShowOnMap(currencyId, isChecked));
+
+                ViewGroup parent = (ViewGroup) view.getParent();
+                parent.setOnClickListener(v -> checkBox.toggle());
 
                 return true;
             }

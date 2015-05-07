@@ -15,6 +15,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
@@ -30,7 +31,7 @@ import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
 import com.bubelov.coins.loader.MerchantsLoader;
 import com.bubelov.coins.model.Merchant;
-import com.bubelov.coins.ui.fragment.CurrenciesFilterDialogFragment;
+import com.bubelov.coins.ui.widget.CurrenciesFilterPopup;
 import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.ui.widget.MerchantDetailsView;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
@@ -59,7 +60,7 @@ import com.squareup.otto.Subscribe;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.OnMenuItemSelectedListener, CurrenciesFilterDialogFragment.Listener {
+public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.OnMenuItemSelectedListener {
     private static final String TAG = MapActivity.class.getSimpleName();
 
     private static final String MERCHANT_ID_EXTRA = "merchant_id";
@@ -198,7 +199,16 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         switch (id) {
             case R.id.action_filter:
-                new CurrenciesFilterDialogFragment().show(getSupportFragmentManager(), CurrenciesFilterDialogFragment.TAG);
+                ListPopupWindow popup = new CurrenciesFilterPopup(this);
+                popup.setAnchorView(findViewById(R.id.anchor_upper_right));
+                popup.setHeight(drawer.getHeight() / 10 * 9);
+                popup.show();
+
+                popup.setOnDismissListener(() -> {
+                    App.getInstance().getMerchantsCache().invalidate();
+                    reloadMerchants();
+                });
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -348,12 +358,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 break;
         }
 
-        reloadMerchants();
-    }
-
-    @Override
-    public void onCurrenciesFilterDismissed() {
-        App.getInstance().getMerchantsCache().invalidate();
         reloadMerchants();
     }
 

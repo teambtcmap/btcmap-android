@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.util.DisplayMetrics;
 
 /**
  * Author: Igor Bubelov
@@ -50,5 +51,15 @@ public class Utils {
         Uri uri = Uri.parse(String.format("geo:%s,%s", latitude, longitude));
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         context.startActivity(intent);
+    }
+
+    public static int dpToPx(Context context, int dp) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        return (int)((dp * displayMetrics.density) + 0.5);
+    }
+
+    public static int pxToDp(Context context, int px) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        return (int) ((px / displayMetrics.density) + 0.5);
     }
 }
