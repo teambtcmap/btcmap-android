@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.bubelov.coins.Constants;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
 import com.bubelov.coins.manager.MerchantSyncManager;
@@ -18,6 +19,7 @@ import com.bubelov.coins.database.Tables;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.util.Utils;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +30,8 @@ import java.util.concurrent.TimeUnit;
 
 public class MerchantsSyncService extends CoinsIntentService {
     private static final String TAG = MerchantsSyncService.class.getName();
+
+    private static final int MAX_MERCHANTS_PER_REQUEST = 250;
 
     private boolean active;
 
@@ -74,7 +78,7 @@ public class MerchantsSyncService extends CoinsIntentService {
         SQLiteDatabase db = getDatabaseHelper().getReadableDatabase();
 
         Cursor currenciesCursor = db.query(Tables.Currencies.TABLE_NAME,
-                new String[] { Tables.Currencies._ID, Tables.Currencies.NAME, Tables.Currencies.CODE },
+                new String[]{ Tables.Currencies._ID, Tables.Currencies.CODE },
                 null,
                 null,
                 null,
@@ -96,18 +100,16 @@ public class MerchantsSyncService extends CoinsIntentService {
 
             for (Currency currency : currencies) {
                 try {
-                    syncMerchants(currency);
+                    syncMerchants(currency.getId(), currency.getCode());
                 } catch (Exception exception) {
                     Log.e(TAG, String.format("Couldn't sync merchants for currency %s", currency.getCode()), exception);
                 }
             }
         } else {
             while (currenciesCursor.moveToNext()) {
-                Currency currency = new Currency();
-                currency.setId(currenciesCursor.getLong(0));
-                currency.setName(currenciesCursor.getString(1));
-                currency.setCode(currenciesCursor.getString(2));
-                syncMerchants(currency);
+                Long id = currenciesCursor.getLong(currenciesCursor.getColumnIndex(Tables.Currencies._ID));
+                String code = currenciesCursor.getString(currenciesCursor.getColumnIndex(Tables.Currencies.CODE));
+                syncMerchants(id, code);
             }
 
             currenciesCursor.close();
@@ -116,23 +118,35 @@ public class MerchantsSyncService extends CoinsIntentService {
         getBus().post(new MerchantsSyncFinishedEvent());
     }
 
-    private void syncMerchants(Currency currency) throws ServerException {
+    private void syncMerchants(long currencyId, String currencyCode) throws ServerException {
         SQLiteDatabase db = getDatabaseHelper().getWritableDatabase();
         ContentValues values = new ContentValues();
-
         UserNotificationManager notificationManager = new UserNotificationManager(getApplicationContext());
 
-        int page = 1;
-        int perPage = 150;
-
         while (true) {
-            List<Merchant> merchants = getApi().getMerchants(currency.getCode(), page, perPage);
-            Log.d(TAG, String.format("Downloaded %s merchants accepting %s", merchants.size(), currency.getName()));
+            long lastUpdateMillis;
+
+            Cursor cursor = db.rawQuery("select max(m._updated_at) from merchants as m join currencies_merchants as mc on m._id = mc.merchant_id join currencies c on c._id = mc.currency_id where c.code = ?",
+                    new String[] { currencyCode });
+
+            if (!cursor.moveToNext()) {
+                Log.e(TAG, "Couldn't get last update timestamp");
+                cursor.close();
+                break;
+            }
+
+            lastUpdateMillis = cursor.isNull(0) ? 0 : cursor.getLong(0);
+            cursor.close();
+
+            List<Merchant> merchants = getApi().getMerchants(currencyCode, new SimpleDateFormat(Constants.DATE_FORMAT).format(lastUpdateMillis), MAX_MERCHANTS_PER_REQUEST);
+            Log.d(TAG, String.format("Downloaded %s merchants accepting %s", merchants.size(), currencyCode));
 
             for (Merchant merchant : merchants) {
                 notificationManager.onMerchantDownload(merchant);
 
                 values.put(Tables.Merchants._ID, merchant.getId());
+                values.put(Tables.Merchants._CREATED_AT, merchant.getCreatedAt().getTime());
+                values.put(Tables.Merchants._UPDATED_AT, merchant.getUpdatedAt().getTime());
                 values.put(Tables.Merchants.LATITUDE, merchant.getLatitude());
                 values.put(Tables.Merchants.LONGITUDE, merchant.getLongitude());
                 values.put(Tables.Merchants.NAME, merchant.getName());
@@ -148,7 +162,7 @@ public class MerchantsSyncService extends CoinsIntentService {
                 values.clear();
 
                 values.put(Tables.CurrenciesMerchants.MERCHANT_ID, merchant.getId());
-                values.put(Tables.CurrenciesMerchants.CURRENCY_ID, currency.getId());
+                values.put(Tables.CurrenciesMerchants.CURRENCY_ID, currencyId);
 
                 db.insertWithOnConflict(Tables.CurrenciesMerchants.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
                 values.clear();
@@ -159,10 +173,8 @@ public class MerchantsSyncService extends CoinsIntentService {
                 getBus().post(new NewMerchantsLoadedEvent());
             }
 
-            if (merchants.size() < perPage) {
+            if (merchants.size() < MAX_MERCHANTS_PER_REQUEST) {
                 break;
-            } else {
-                page++;
             }
         }
     }
@@ -171,6 +183,8 @@ public class MerchantsSyncService extends CoinsIntentService {
         SQLiteDatabase db = getDatabaseHelper().getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(Tables.Currencies._ID, currency.getId());
+        values.put(Tables.Currencies._CREATED_AT, currency.getCreatedAt().getTime());
+        values.put(Tables.Currencies._UPDATED_AT, currency.getUpdatedAt().getTime());
         values.put(Tables.Currencies.NAME, currency.getName());
         values.put(Tables.Currencies.CODE, currency.getCode());
 

@@ -8,9 +8,7 @@ import com.google.maps.android.clustering.ClusterItem;
  * Date: 02/06/14 21:42
  */
 
-public class Merchant implements ClusterItem {
-    private long id;
-
+public class Merchant extends AbstractEntity implements ClusterItem {
     private String name;
 
     private String description;
@@ -25,8 +23,7 @@ public class Merchant implements ClusterItem {
 
     private String website;
 
-    // Ignore for serialization
-    private LatLng position;
+    private transient LatLng position;
 
     @Override
     public LatLng getPosition() {
@@ -39,15 +36,7 @@ public class Merchant implements ClusterItem {
 
     @Override
     public boolean equals(Object o) {
-        return o != null && o instanceof Merchant && ((Merchant) o).id == id;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
+        return o != null && o instanceof Merchant && ((Merchant) o).getId() == getId();
     }
 
     public double getLatitude() {

@@ -5,20 +5,10 @@ package com.bubelov.coins.model;
  * Date: 03/07/14 22:54
  */
 
-public class Currency {
-    private long id;
-
+public class Currency extends AbstractEntity {
     private String name;
 
     private String code;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

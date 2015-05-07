@@ -15,7 +15,7 @@ import retrofit.http.Query;
 
 public interface Api {
     @GET("/merchants")
-    List<Merchant> getMerchants(@Query("currency") String currencyCode, @Query("page") int page, @Query("per_page") int perPage);
+    List<Merchant> getMerchants(@Query("currency") String currencyCode, @Query("since") String since, @Query("limit") int limit);
 
     @GET("/currencies")
     List<Currency> getCurrencies();

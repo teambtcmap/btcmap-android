@@ -72,6 +72,7 @@ public class App extends Application {
 
     private void initApi() {
         Gson gson = new GsonBuilder()
+                .setDateFormat(Constants.DATE_FORMAT)
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .create();
 
