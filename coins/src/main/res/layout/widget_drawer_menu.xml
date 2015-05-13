@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    android:clickable="true">
+    android:clickable="true"
+    android:orientation="vertical">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -26,16 +25,16 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_alignTop="@+id/header"
                     android:layout_alignBottom="@+id/header"
-                    android:src="@drawable/abstract_pattern"
-                    android:scaleType="centerCrop" />
+                    android:layout_alignTop="@+id/header"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/abstract_pattern" />
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_alignTop="@+id/header"
                     android:layout_alignBottom="@+id/header"
+                    android:layout_alignTop="@+id/header"
                     android:background="#33000000" />
 
                 <LinearLayout
@@ -43,9 +42,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:paddingBottom="8dp"
                     android:paddingLeft="16dp"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="8dp">
+                    android:paddingTop="16dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -81,22 +80,23 @@
 
                     </LinearLayout>
 
-                    <TextView
+                    <com.bubelov.coins.ui.widget.TypefaceTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="Bitcoin price"
-                        android:textSize="14sp"
                         android:textColor="@color/white"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textSize="14sp"
+                        app:typeface="medium" />
 
-                    <TextView
+                    <com.bubelov.coins.ui.widget.TypefaceTextView
                         android:id="@+id/price_last_check"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Last check: 14:45 PM"
+                        android:textColor="@color/white"
                         android:textSize="14sp"
-                        android:textColor="@color/white" />
+                        app:typeface="regular" />
 
                 </LinearLayout>
 

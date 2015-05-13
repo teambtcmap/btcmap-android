@@ -2,6 +2,16 @@
 
 <resources>
 
+    <attr name="typeface" format="enum">
+        <enum name="medium" value="0" />
+        <enum name="regular" value="1" />
+        <enum name="bold" value="2" />
+    </attr>
+
+    <declare-styleable name="TypefaceTextView">
+        <attr name="typeface" />
+    </declare-styleable>
+
     <declare-styleable name="MenuItem">
         <attr name="mi_icon" format="reference" />
         <attr name="text" format="string"/>
