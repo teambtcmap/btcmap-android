@@ -4,6 +4,7 @@ import android.app.Application;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
+import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.database.DatabaseHelper;
 import com.bubelov.coins.manager.MerchantSyncManager;
 import com.bubelov.coins.receiver.SyncMerchantsWakefulReceiver;
@@ -27,7 +28,7 @@ public class App extends Application {
 
     private Bus bus;
 
-    private Api api;
+    private CoinsApi api;
 
     private SQLiteOpenHelper databaseHelper;
 
@@ -58,7 +59,7 @@ public class App extends Application {
         return bus;
     }
 
-    public Api getApi() {
+    public CoinsApi getApi() {
         return api;
     }
 
@@ -82,6 +83,6 @@ public class App extends Application {
                 .setLogLevel(RestAdapter.LogLevel.FULL)
                 .build();
 
-        api = restAdapter.create(Api.class);
+        api = restAdapter.create(CoinsApi.class);
     }
 }

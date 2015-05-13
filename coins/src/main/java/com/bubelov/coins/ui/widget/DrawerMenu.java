@@ -1,10 +1,19 @@
 package com.bubelov.coins.ui.widget;
 
 import android.content.Context;
+import android.database.ContentObserver;
+import android.database.Cursor;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.database.Database;
+import com.bubelov.coins.service.BitcoinPriceService;
+
+import java.text.DateFormat;
 
 /**
  * Author: Igor Bubelov
@@ -31,6 +40,10 @@ public class DrawerMenu extends FrameLayout {
             R.id.settings,
             R.id.help_and_feedback
     };
+
+    private TextView price;
+
+    private TextView priceLastCheck;
 
     private OnMenuItemSelectedListener itemSelectedListener;
 
@@ -78,8 +91,43 @@ public class DrawerMenu extends FrameLayout {
     private void init() {
         inflate(getContext(), R.layout.widget_drawer_menu, this);
 
+        price = (TextView) findViewById(R.id.price);
+        priceLastCheck = (TextView) findViewById(R.id.price_last_check);
+
+        findViewById(R.id.check).setOnClickListener(v -> getContext().startService(BitcoinPriceService.newInent(getContext(), true)));
+
         for (int id : ITEMS) {
             findViewById(id).setOnClickListener(v -> setSelected(v.getId()));
+        }
+
+        showPrice();
+
+        getContext().getContentResolver().registerContentObserver(Database.Currencies.CONTENT_URI, true, new ContentObserver(new Handler(Looper.getMainLooper())) {
+            @Override
+            public void onChange(boolean selfChange) {
+                showPrice();
+            }
+        });
+
+        getContext().startService(BitcoinPriceService.newInent(getContext(), true));
+    }
+
+    private void showPrice() {
+        Cursor priceCursor = getContext().getContentResolver().query(Database.Currencies.CONTENT_URI,
+                new String[] { Database.Currencies.PRICE, Database.Currencies.PRICE_LAST_CHECK },
+                "code = ?",
+                new String[] { "BTC" },
+                null);
+
+        if (priceCursor.moveToNext()) {
+            if (priceCursor.isNull(0)) {
+                price.setText("Loading...");
+                priceLastCheck.setText("Newer");
+                getContext().startService(BitcoinPriceService.newInent(getContext(), false));
+            } else {
+                price.setText("$" + String.valueOf(priceCursor.getDouble(0)));
+                priceLastCheck.setText("Last check: " + DateFormat.getTimeInstance().format(priceCursor.getLong(1)));
+            }
         }
     }
 

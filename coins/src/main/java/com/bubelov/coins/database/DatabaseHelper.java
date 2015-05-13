@@ -23,39 +23,41 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COMMA_SEP = ",";
 
     private static final String SQL_CREATE_MERCHANTS_TABLE =
-            "CREATE TABLE " + Tables.Merchants.TABLE_NAME + " (" +
-                    Tables.Merchants._ID + INTEGER_TYPE + " PRIMARY KEY" + COMMA_SEP +
-                    Tables.Merchants._CREATED_AT + INTEGER_TYPE + COMMA_SEP +
-                    Tables.Merchants._UPDATED_AT + INTEGER_TYPE + COMMA_SEP +
-                    Tables.Merchants.LATITUDE + REAL_TYPE + COMMA_SEP +
-                    Tables.Merchants.LONGITUDE + REAL_TYPE + COMMA_SEP +
-                    Tables.Merchants.NAME + TEXT_TYPE + COMMA_SEP +
-                    Tables.Merchants.DESCRIPTION + TEXT_TYPE + COMMA_SEP +
-                    Tables.Merchants.PHONE + TEXT_TYPE + COMMA_SEP +
-                    Tables.Merchants.WEBSITE + TEXT_TYPE + COMMA_SEP +
-                    Tables.Merchants.AMENITY + TEXT_TYPE +
+            "CREATE TABLE " + Database.Merchants.TABLE_NAME + " (" +
+                    Database.Merchants._ID + INTEGER_TYPE + " PRIMARY KEY" + COMMA_SEP +
+                    Database.Merchants._CREATED_AT + INTEGER_TYPE + COMMA_SEP +
+                    Database.Merchants._UPDATED_AT + INTEGER_TYPE + COMMA_SEP +
+                    Database.Merchants.LATITUDE + REAL_TYPE + COMMA_SEP +
+                    Database.Merchants.LONGITUDE + REAL_TYPE + COMMA_SEP +
+                    Database.Merchants.NAME + TEXT_TYPE + COMMA_SEP +
+                    Database.Merchants.DESCRIPTION + TEXT_TYPE + COMMA_SEP +
+                    Database.Merchants.PHONE + TEXT_TYPE + COMMA_SEP +
+                    Database.Merchants.WEBSITE + TEXT_TYPE + COMMA_SEP +
+                    Database.Merchants.AMENITY + TEXT_TYPE +
             " )";
 
     private static final String SQL_CREATE_CURRENCIES_TABLE =
-            "CREATE TABLE " + Tables.Currencies.TABLE_NAME + " (" +
-                    Tables.Currencies._ID + INTEGER_TYPE + " PRIMARY KEY" + COMMA_SEP +
-                    Tables.Currencies._CREATED_AT + INTEGER_TYPE + COMMA_SEP +
-                    Tables.Currencies._UPDATED_AT + INTEGER_TYPE + COMMA_SEP +
-                    Tables.Currencies.NAME + TEXT_TYPE + COMMA_SEP +
-                    Tables.Currencies.CODE + INTEGER_TYPE + COMMA_SEP +
-                    Tables.Currencies.SHOW_ON_MAP + BOOLEAN_TYPE + " NOT NULL DEFAULT 1" +
+            "CREATE TABLE " + Database.Currencies.TABLE_NAME + " (" +
+                    Database.Currencies._ID + INTEGER_TYPE + " PRIMARY KEY" + COMMA_SEP +
+                    Database.Currencies._CREATED_AT + INTEGER_TYPE + COMMA_SEP +
+                    Database.Currencies._UPDATED_AT + INTEGER_TYPE + COMMA_SEP +
+                    Database.Currencies.NAME + TEXT_TYPE + COMMA_SEP +
+                    Database.Currencies.CODE + INTEGER_TYPE + COMMA_SEP +
+                    Database.Currencies.SHOW_ON_MAP + BOOLEAN_TYPE + " NOT NULL DEFAULT 1" + COMMA_SEP +
+                    Database.Currencies.PRICE + REAL_TYPE + COMMA_SEP +
+                    Database.Currencies.PRICE_LAST_CHECK + INTEGER_TYPE +
                     " )";
 
     private static final String SQL_CREATE_MERCHANTS_TO_CURRENCIES_TABLE =
-            "CREATE TABLE " + Tables.CurrenciesMerchants.TABLE_NAME + " (" +
-                    Tables.CurrenciesMerchants._ID + INTEGER_TYPE + " PRIMARY KEY" + COMMA_SEP +
-                    Tables.CurrenciesMerchants.MERCHANT_ID + TEXT_TYPE + COMMA_SEP +
-                    Tables.CurrenciesMerchants.CURRENCY_ID + INTEGER_TYPE +
+            "CREATE TABLE " + Database.CurrenciesMerchants.TABLE_NAME + " (" +
+                    Database.CurrenciesMerchants._ID + INTEGER_TYPE + " PRIMARY KEY" + COMMA_SEP +
+                    Database.CurrenciesMerchants.MERCHANT_ID + TEXT_TYPE + COMMA_SEP +
+                    Database.CurrenciesMerchants.CURRENCY_ID + INTEGER_TYPE +
                     " )";
 
-    private static final String SQL_DELETE_MERCHANTS_TABLE = "DROP TABLE IF EXISTS " + Tables.Merchants.TABLE_NAME;
-    private static final String SQL_DELETE_CURRENCIES_TABLE = "DROP TABLE IF EXISTS " + Tables.Currencies.TABLE_NAME;
-    private static final String SQL_DELETE_MERCHANTS_TO_CURRENCIES_TABLE = "DROP TABLE IF EXISTS " + Tables.CurrenciesMerchants.TABLE_NAME;
+    private static final String SQL_DELETE_MERCHANTS_TABLE = "DROP TABLE IF EXISTS " + Database.Merchants.TABLE_NAME;
+    private static final String SQL_DELETE_CURRENCIES_TABLE = "DROP TABLE IF EXISTS " + Database.Currencies.TABLE_NAME;
+    private static final String SQL_DELETE_MERCHANTS_TO_CURRENCIES_TABLE = "DROP TABLE IF EXISTS " + Database.CurrenciesMerchants.TABLE_NAME;
 
     public DatabaseHelper(Context context) {
         super(context,

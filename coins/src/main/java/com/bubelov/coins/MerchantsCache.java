@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.bubelov.coins.database.Tables;
+import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Merchant;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -64,20 +64,12 @@ public class MerchantsCache {
 
         Cursor cursor = db.rawQuery("select distinct m._id, m.latitude, m.longitude, m.amenity from merchants as m join currencies_merchants as mc on m._id = mc.merchant_id join currencies c on c._id = mc.currency_id where c.show_on_map = 1", null);
 
-//        Cursor cursor = db.query(Tables.Merchants.TABLE_NAME,
-//                new String[] { Tables.Merchants._ID, Tables.Merchants.LATITUDE, Tables.Merchants.LONGITUDE, Tables.Merchants.AMENITY },
-//                null,
-//                null,
-//                null,
-//                null,
-//                null);
-
         while (cursor.moveToNext()) {
             Merchant merchant = new Merchant();
-            merchant.setId(cursor.getLong(cursor.getColumnIndex(Tables.Merchants._ID)));
-            merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(Tables.Merchants.LATITUDE)));
-            merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(Tables.Merchants.LONGITUDE)));
-            merchant.setAmenity(cursor.getString(cursor.getColumnIndex(Tables.Merchants.AMENITY)));
+            merchant.setId(cursor.getLong(cursor.getColumnIndex(Database.Merchants._ID)));
+            merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LATITUDE)));
+            merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LONGITUDE)));
+            merchant.setAmenity(cursor.getString(cursor.getColumnIndex(Database.Merchants.AMENITY)));
             data.add(merchant);
         }
 

@@ -1,4 +1,4 @@
-package com.bubelov.coins;
+package com.bubelov.coins.api;
 
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
@@ -13,7 +13,7 @@ import retrofit.http.Query;
  * Date: 17/04/15 10:42
  */
 
-public interface Api {
+public interface CoinsApi {
     @GET("/merchants")
     List<Merchant> getMerchants(@Query("currency") String currencyCode, @Query("since") String since, @Query("limit") int limit);
 

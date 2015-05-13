@@ -15,7 +15,7 @@ import android.util.Log;
 
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
-import com.bubelov.coins.database.Tables;
+import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.ui.activity.MapActivity;
 import com.google.android.gms.maps.model.LatLng;
@@ -99,8 +99,8 @@ public class UserNotificationManager {
         App app = (App) context.getApplicationContext();
         SQLiteDatabase db = app.getDatabaseHelper().getReadableDatabase();
 
-        Cursor cursor = db.query(Tables.Merchants.TABLE_NAME,
-                new String[]{Tables.Merchants._ID},
+        Cursor cursor = db.query(Database.Merchants.TABLE_NAME,
+                new String[]{Database.Merchants._ID},
                 "_id = ?",
                 new String[]{String.valueOf(merchant.getId())},
                 null,

@@ -12,7 +12,7 @@ import android.support.v4.app.ActivityOptionsCompat;
 
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
-import com.bubelov.coins.database.Tables;
+import com.bubelov.coins.database.Database;
 import com.bubelov.coins.manager.MerchantSyncManager;
 import com.bubelov.coins.manager.UserNotificationManager;
 import com.bubelov.coins.ui.activity.SelectAreaActivity;
@@ -53,7 +53,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         if (preference.getKey().equals("pref_test_notification")) {
             SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
 
-            Cursor cursor = db.rawQuery("select count(_id) from " + Tables.Merchants.TABLE_NAME, null);
+            Cursor cursor = db.rawQuery("select count(_id) from " + Database.Merchants.TABLE_NAME, null);
 
             if (cursor.moveToNext()) {
                 int merchantsCount = cursor.getInt(0);
@@ -61,8 +61,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
                 Random random = new Random(System.currentTimeMillis());
 
-                cursor = db.query(Tables.Merchants.TABLE_NAME,
-                        new String[] { Tables.Merchants._ID, Tables.Merchants.NAME },
+                cursor = db.query(Database.Merchants.TABLE_NAME,
+                        new String[] { Database.Merchants._ID, Database.Merchants.NAME },
                         "_id = ?",
                         new String[] { String.valueOf(random.nextInt(merchantsCount + 1)) },
                         null,
@@ -70,8 +70,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                         null);
 
                 if (cursor.moveToNext()) {
-                    long id = cursor.getLong(cursor.getColumnIndex(Tables.Merchants._ID));
-                    String name = cursor.getString(cursor.getColumnIndex(Tables.Merchants.NAME));
+                    long id = cursor.getLong(cursor.getColumnIndex(Database.Merchants._ID));
+                    String name = cursor.getString(cursor.getColumnIndex(Database.Merchants.NAME));
                     new UserNotificationManager(getActivity()).notifyUser(id, name);
                 }
 

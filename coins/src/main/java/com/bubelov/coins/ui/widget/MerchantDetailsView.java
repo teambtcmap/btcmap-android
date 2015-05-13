@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
-import com.bubelov.coins.database.Tables;
+import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.util.Utils;
 import com.google.android.gms.maps.model.LatLng;
@@ -65,8 +65,8 @@ public class MerchantDetailsView extends FrameLayout {
 
     public void setMerchant(Merchant merchant) {
         if (TextUtils.isEmpty(merchant.getName())) {
-            Cursor cursor = App.getInstance().getDatabaseHelper().getReadableDatabase().query(Tables.Merchants.TABLE_NAME,
-                    new String[] { Tables.Merchants.NAME, Tables.Merchants.PHONE, Tables.Merchants.WEBSITE },
+            Cursor cursor = App.getInstance().getDatabaseHelper().getReadableDatabase().query(Database.Merchants.TABLE_NAME,
+                    new String[] { Database.Merchants.NAME, Database.Merchants.PHONE, Database.Merchants.WEBSITE },
                     "_id = ?",
                     new String[] { String.valueOf(merchant.getId()) },
                     null,
@@ -74,9 +74,9 @@ public class MerchantDetailsView extends FrameLayout {
                     null);
 
             if (cursor.moveToNext()) {
-                merchant.setName(cursor.getString(cursor.getColumnIndex(Tables.Merchants.NAME)));
-                merchant.setPhone(cursor.getString(cursor.getColumnIndex(Tables.Merchants.PHONE)));
-                merchant.setWebsite(cursor.getString(cursor.getColumnIndex(Tables.Merchants.WEBSITE)));
+                merchant.setName(cursor.getString(cursor.getColumnIndex(Database.Merchants.NAME)));
+                merchant.setPhone(cursor.getString(cursor.getColumnIndex(Database.Merchants.PHONE)));
+                merchant.setWebsite(cursor.getString(cursor.getColumnIndex(Database.Merchants.WEBSITE)));
             }
         }
 

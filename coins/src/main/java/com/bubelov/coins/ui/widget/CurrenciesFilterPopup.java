@@ -1,18 +1,17 @@
 package com.bubelov.coins.ui.widget;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.widget.ListPopupWindow;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ListAdapter;
 
-import com.bubelov.coins.App;
 import com.bubelov.coins.R;
-import com.bubelov.coins.database.Tables;
+import com.bubelov.coins.database.Database;
 import com.bubelov.coins.util.Utils;
 
 /**
@@ -32,12 +31,8 @@ public class CurrenciesFilterPopup extends ListPopupWindow {
     }
 
     public ListAdapter getAdapter() {
-        SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
-
-        Cursor currencies = db.query(Tables.Currencies.TABLE_NAME,
-                new String[]{ Tables.Currencies._ID, Tables.Currencies.NAME, Tables.Currencies.SHOW_ON_MAP },
-                null,
-                null,
+        Cursor currencies = context.getContentResolver().query(Database.Currencies.CONTENT_URI,
+                new String[]{Database.Currencies._ID, Database.Currencies.NAME, Database.Currencies.SHOW_ON_MAP},
                 null,
                 null,
                 null);
@@ -45,19 +40,19 @@ public class CurrenciesFilterPopup extends ListPopupWindow {
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(context,
                 R.layout.list_item_currency_filter,
                 currencies,
-                new String[] { Tables.Currencies.NAME, Tables.Currencies.SHOW_ON_MAP },
+                new String[] { Database.Currencies.NAME, Database.Currencies.SHOW_ON_MAP },
                 new int[] { R.id.name, R.id.enabled },
                 0);
 
-        int idIndex = currencies.getColumnIndex(Tables.Currencies._ID);
-        int showOnMapColumnIndex = currencies.getColumnIndex(Tables.Currencies.SHOW_ON_MAP);
+        int idIndex = currencies.getColumnIndex(Database.Currencies._ID);
+        int showOnMapColumnIndex = currencies.getColumnIndex(Database.Currencies.SHOW_ON_MAP);
 
         adapter.setViewBinder((view, cursor, columnIndex) -> {
             if (columnIndex == showOnMapColumnIndex) {
                 CheckBox checkBox = (CheckBox) view;
                 checkBox.setOnCheckedChangeListener(null);
                 checkBox.setChecked(cursor.getInt(showOnMapColumnIndex) > 0);
-                String currencyId = cursor.getString(idIndex);
+                long currencyId = cursor.getLong(idIndex);
                 checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> setShowOnMap(currencyId, isChecked));
 
                 ViewGroup parent = (ViewGroup) view.getParent();
@@ -72,10 +67,9 @@ public class CurrenciesFilterPopup extends ListPopupWindow {
         return adapter;
     }
 
-    private void setShowOnMap(String currencyId, boolean showOnMap) {
-        SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
+    private void setShowOnMap(long currencyId, boolean showOnMap) {
         ContentValues values = new ContentValues();
-        values.put(Tables.Currencies.SHOW_ON_MAP, showOnMap ? 1 : 0);
-        db.update(Tables.Currencies.TABLE_NAME, values, Tables.Currencies._ID + " = ?", new String[] { currencyId });
+        values.put(Database.Currencies.SHOW_ON_MAP, showOnMap ? 1 : 0);
+        context.getContentResolver().update(ContentUris.withAppendedId(Database.Currencies.CONTENT_URI, currencyId), values, null, null);
     }
 }

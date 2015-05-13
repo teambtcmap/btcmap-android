@@ -26,7 +26,7 @@ import com.bubelov.coins.App;
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
-import com.bubelov.coins.database.Tables;
+import com.bubelov.coins.database.Database;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
 import com.bubelov.coins.loader.MerchantsLoader;
@@ -227,8 +227,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private void showMerchant(long id) {
         SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
 
-        Cursor cursor = db.query(Tables.Merchants.TABLE_NAME,
-                new String[] { Tables.Merchants.LATITUDE, Tables.Merchants.LONGITUDE },
+        Cursor cursor = db.query(Database.Merchants.TABLE_NAME,
+                new String[] { Database.Merchants.LATITUDE, Database.Merchants.LONGITUDE },
                 "_id = ?",
                 new String[] { String.valueOf(id) },
                 null,
@@ -236,8 +236,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 null);
 
         if (cursor.moveToNext()) {
-            double latitude = cursor.getDouble(cursor.getColumnIndex(Tables.Merchants.LATITUDE));
-            double longitude = cursor.getDouble(cursor.getColumnIndex(Tables.Merchants.LONGITUDE));
+            double latitude = cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LATITUDE));
+            double longitude = cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LONGITUDE));
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 13));
         }
     }
@@ -274,10 +274,10 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         while (data.moveToNext()) {
             Merchant merchant = new Merchant();
-            merchant.setId(data.getLong(data.getColumnIndex(Tables.Merchants._ID)));
-            merchant.setLatitude(data.getDouble(data.getColumnIndex(Tables.Merchants.LATITUDE)));
-            merchant.setLongitude(data.getDouble(data.getColumnIndex(Tables.Merchants.LONGITUDE)));
-            merchant.setAmenity(data.getString(data.getColumnIndex(Tables.Merchants.AMENITY)));
+            merchant.setId(data.getLong(data.getColumnIndex(Database.Merchants._ID)));
+            merchant.setLatitude(data.getDouble(data.getColumnIndex(Database.Merchants.LATITUDE)));
+            merchant.setLongitude(data.getDouble(data.getColumnIndex(Database.Merchants.LONGITUDE)));
+            merchant.setAmenity(data.getString(data.getColumnIndex(Database.Merchants.AMENITY)));
 
             merchants.add(merchant);
         }
