@@ -94,7 +94,7 @@
                         android:id="@+id/price_last_check"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Last check: 14:45 PM"
+                        android:text="Checked: 14:45 PM"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         app:typeface="regular" />
@@ -103,17 +103,16 @@
 
             </RelativeLayout>
 
-            <View
+            <Space
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginBottom="8dp"
-                android:background="@color/divider" />
+                android:layout_height="0px"
+                android:layout_marginBottom="8dp" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/all"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:mi_icon="@drawable/ic_store_mall_directory_grey600_24dp"
+                app:mi_icon="@drawable/ic_all_merchants_grey600_24dp"
                 app:text="All" />
 
             <com.bubelov.coins.ui.widget.MenuItem

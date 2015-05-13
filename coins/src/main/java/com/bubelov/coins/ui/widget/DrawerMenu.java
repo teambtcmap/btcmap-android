@@ -126,7 +126,7 @@ public class DrawerMenu extends FrameLayout {
                 getContext().startService(BitcoinPriceService.newInent(getContext(), false));
             } else {
                 price.setText("$" + String.valueOf(priceCursor.getDouble(0)));
-                priceLastCheck.setText("Last check: " + DateFormat.getTimeInstance().format(priceCursor.getLong(1)));
+                priceLastCheck.setText("Checked: " + DateFormat.getTimeInstance().format(priceCursor.getLong(1)));
             }
         }
     }
