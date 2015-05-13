@@ -12,6 +12,10 @@
         <attr name="typeface" />
     </declare-styleable>
 
+    <declare-styleable name="ScrimInsetsView">
+        <attr name="insetForeground" format="reference|color" />
+    </declare-styleable>
+
     <declare-styleable name="MenuItem">
         <attr name="mi_icon" format="reference" />
         <attr name="text" format="string"/>

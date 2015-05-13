@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
@@ -33,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 public class MerchantsSyncService extends CoinsIntentService {
-    private static final String TAG = MerchantsSyncService.class.getName();
+    private static final String TAG = MerchantsSyncService.class.getSimpleName();
 
     private static final int MAX_MERCHANTS_PER_REQUEST = 250;
 
@@ -79,6 +80,8 @@ public class MerchantsSyncService extends CoinsIntentService {
     }
 
     private void syncMerchants() throws Exception {
+        Toast.makeText(this, "Starting merchants sync", Toast.LENGTH_LONG).show();
+
         Cursor currenciesCursor = getContentResolver().query(Database.Currencies.CONTENT_URI,
                 new String[]{Database.Currencies._ID, Database.Currencies.CODE},
                 null,

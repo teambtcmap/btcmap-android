@@ -10,6 +10,8 @@
         <item name="windowActionBar">false</item>
     </style>
 
+    <style name="AppTheme.TransparentStatusBar" parent="AppTheme" />
+
     <style name="Toolbar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?attr/actionBarSize</item>

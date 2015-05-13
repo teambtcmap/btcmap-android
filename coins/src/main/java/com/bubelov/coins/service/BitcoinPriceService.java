@@ -57,8 +57,10 @@ public class BitcoinPriceService extends CoinsIntentService {
                     selectionArgs,
                     null);
 
-            if (lastCheckCursor.isNull(0) || System.currentTimeMillis() - lastCheckCursor.getLong(0) > CACHE_LIFETIME_IN_MILLIS) {
-                loadPrice();
+            if (lastCheckCursor.moveToNext()) {
+                if (lastCheckCursor.isNull(0) || System.currentTimeMillis() - lastCheckCursor.getLong(0) > CACHE_LIFETIME_IN_MILLIS) {
+                    loadPrice();
+                }
             }
 
             lastCheckCursor.close();
