@@ -9,14 +9,16 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.widget.Toast;
 
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Database;
-import com.bubelov.coins.manager.MerchantSyncManager;
+import com.bubelov.coins.manager.DatabaseSyncManager;
 import com.bubelov.coins.manager.UserNotificationManager;
 import com.bubelov.coins.ui.activity.SelectAreaActivity;
 
+import java.text.SimpleDateFormat;
 import java.util.Random;
 
 /**
@@ -36,6 +38,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         super.onResume();
         getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
+        DatabaseSyncManager syncManager = new DatabaseSyncManager(getActivity());
+        getPreferenceManager().findPreference("pref_update_merchants").setSummary("Last sync: " + SimpleDateFormat.getDateTimeInstance().format(syncManager.getLastSyncMillis()));
     }
 
     @Override
@@ -79,13 +83,38 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             }
         }
 
+        if (preference.getKey().equals("pref_update_merchants")) {
+            new DatabaseSyncManager(getActivity()).sheduleDelayed(0);
+        }
+
+        if (preference.getKey().equals("pref_remove_last_merchant")) {
+            SQLiteDatabase db = App.getInstance().getDatabaseHelper().getWritableDatabase();
+
+            Cursor cursor = db.query(Database.Merchants.TABLE_NAME, new String[] { Database.Merchants._ID }, null, null, null, null, Database.Merchants._UPDATED_AT + " DESC", "1");
+
+            if (cursor.moveToNext()) {
+                long id = cursor.getLong(0);
+                cursor.close();
+
+                int rowsAffected = db.delete(Database.Merchants.TABLE_NAME, Database.Merchants._ID + " = ?", new String[] { String.valueOf(id) } );
+
+                if (rowsAffected > 0) {
+                    Toast.makeText(getActivity(), "Removed!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity(), "Couldn't remove merchant", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                cursor.close();
+            }
+        }
+
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_sync_merchants_key))) {
-            MerchantSyncManager syncManager = new MerchantSyncManager(getActivity());
+            DatabaseSyncManager syncManager = new DatabaseSyncManager(getActivity());
             syncManager.scheduleAlarm();
         }
     }

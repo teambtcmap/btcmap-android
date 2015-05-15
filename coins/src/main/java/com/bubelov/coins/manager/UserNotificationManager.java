@@ -7,11 +7,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Location;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
@@ -56,7 +54,7 @@ public class UserNotificationManager {
                 .edit()
                 .putFloat(LATITUDE_KEY, (float) center.latitude)
                 .putFloat(LONGITUDE_KEY, (float) center.longitude)
-                .commit();
+                .apply();
     }
 
     public Integer getNotificationAreaRadius() {
@@ -68,30 +66,30 @@ public class UserNotificationManager {
     }
 
     public void setNotificationAreaRadius(int radius) {
-        preferences.edit().putInt(RADIUS_KEY, radius).commit();
+        preferences.edit().putInt(RADIUS_KEY, radius).apply();
     }
 
-    public void onMerchantDownload(Merchant merchant) {
-        if (new MerchantSyncManager(context).getLastSyncMillis() == 0) {
-            return;
+    public boolean shouldNotifyUser(Merchant merchant) {
+        if (new DatabaseSyncManager(context).getLastSyncMillis() == 0) {
+            return false;
         }
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         if (!preferences.getBoolean(context.getString(R.string.pref_show_new_merchants_key), true)) {
-            return;
+            return false;
         }
 
-        LatLng notificationAreaCenter = getNotificationAreaCenter();
-
-        if (getNotificationAreaCenter() == null) {
-            return;
-        }
-
-        float[] distance = new float[1];
-        Location.distanceBetween(notificationAreaCenter.latitude, notificationAreaCenter.longitude, merchant.getLatitude(), merchant.getLongitude(), distance);
-        Log.d(TAG, "Distance: " + distance[0]);
-
+//        LatLng notificationAreaCenter = getNotificationAreaCenter();
+//
+//        if (getNotificationAreaCenter() == null) {
+//            return;
+//        }
+//
+//        float[] distance = new float[1];
+//        Location.distanceBetween(notificationAreaCenter.latitude, notificationAreaCenter.longitude, merchant.getLatitude(), merchant.getLongitude(), distance);
+//        Log.d(TAG, "Distance: " + distance[0]);
+//
 //        if (distance[0] > getNotificationAreaRadius()) {
 //            return;
 //        }
@@ -100,9 +98,9 @@ public class UserNotificationManager {
         SQLiteDatabase db = app.getDatabaseHelper().getReadableDatabase();
 
         Cursor cursor = db.query(Database.Merchants.TABLE_NAME,
-                new String[]{Database.Merchants._ID},
+                new String[] { Database.Merchants._ID },
                 "_id = ?",
-                new String[]{String.valueOf(merchant.getId())},
+                new String[] { String.valueOf(merchant.getId()) },
                 null,
                 null,
                 null);
@@ -111,10 +109,10 @@ public class UserNotificationManager {
         cursor.close();
 
         if (alreadyExists) {
-            return;
+            return false;
         }
 
-        notifyUser(merchant.getId(), merchant.getName());
+        return true;
     }
 
     public void notifyUser(long merchantId, String merchantName) {

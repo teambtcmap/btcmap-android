@@ -5,16 +5,16 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.RemoteException;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
-import com.bubelov.coins.manager.MerchantSyncManager;
+import com.bubelov.coins.manager.DatabaseSyncManager;
 import com.bubelov.coins.manager.UserNotificationManager;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.receiver.SyncMerchantsWakefulReceiver;
@@ -33,18 +33,23 @@ import java.util.concurrent.TimeUnit;
  * Date: 07/07/14 22:27
  */
 
-public class MerchantsSyncService extends CoinsIntentService {
-    private static final String TAG = MerchantsSyncService.class.getSimpleName();
+public class DatabaseSyncService extends CoinsIntentService {
+    private static final String TAG = DatabaseSyncService.class.getSimpleName();
+
+    private static final String KEY_IS_SYNCING = "syncing";
 
     private static final int MAX_MERCHANTS_PER_REQUEST = 250;
 
-    private boolean active;
-
     public static Intent makeIntent(Context context) {
-        return new Intent(context, MerchantsSyncService.class);
+        return new Intent(context, DatabaseSyncService.class);
     }
 
-    public MerchantsSyncService() {
+    public static boolean isSyncing(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences(TAG, MODE_PRIVATE);
+        return preferences.getBoolean(KEY_IS_SYNCING, false);
+    }
+
+    public DatabaseSyncService() {
         super(TAG);
     }
 
@@ -52,13 +57,13 @@ public class MerchantsSyncService extends CoinsIntentService {
     public void onStart(Intent intent, int startId) {
         Log.d(TAG, "Got new intent");
 
-        if (!active) {
+        if (!isSyncing()) {
             if (Utils.isOnline(this)) {
-                active = true;
+                setSyncing(true);
                 super.onStart(intent, startId);
             } else {
                 Log.d(TAG, "Network is unavailable. Will try later");
-                MerchantSyncManager syncManager = new MerchantSyncManager(getApplicationContext());
+                DatabaseSyncManager syncManager = new DatabaseSyncManager(getApplicationContext());
                 syncManager.sheduleDelayed(TimeUnit.MINUTES.toMillis(15));
             }
         } else {
@@ -69,54 +74,53 @@ public class MerchantsSyncService extends CoinsIntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         try {
-            syncMerchants();
+            sync();
         } catch (Exception exception) {
-            Log.e(TAG, "Couldn't synchronize merchants", exception);
+            Log.e(TAG, "Couldn't synchronize database", exception);
         } finally {
-            active = false;
-            new MerchantSyncManager(getApplicationContext()).setLastSyncMillis(System.currentTimeMillis());
+            setSyncing(false);
+            getBus().post(new MerchantsSyncFinishedEvent());
+            new DatabaseSyncManager(getApplicationContext()).setLastSyncMillis(System.currentTimeMillis());
             SyncMerchantsWakefulReceiver.completeWakefulIntent(intent);
         }
     }
 
-    private void syncMerchants() throws Exception {
-        Toast.makeText(this, "Starting merchants sync", Toast.LENGTH_LONG).show();
+    private void sync() throws Exception {
+        syncCurrenciesIfNecessary();
 
-        Cursor currenciesCursor = getContentResolver().query(Database.Currencies.CONTENT_URI,
+        Cursor currencies = getContentResolver().query(Database.Currencies.CONTENT_URI,
                 new String[]{Database.Currencies._ID, Database.Currencies.CODE},
                 null,
                 null,
                 null);
 
-        Log.d(TAG, currenciesCursor.getCount() + " currencies found in DB");
-
-        if (currenciesCursor.getCount() == 0) {
-            currenciesCursor.close();
-            Log.d(TAG, "Loading currencies from server");
-
-            List<Currency> currencies = getApi().getCurrencies();
-            Log.d(TAG, String.format("Downloaded %s currencies", currencies.size()));
-
-            saveCurrencies(currencies);
-
-            for (Currency currency : currencies) {
-                try {
-                    syncMerchants(currency.getId(), currency.getCode());
-                } catch (Exception exception) {
-                    Log.e(TAG, String.format("Couldn't sync merchants for currency %s", currency.getCode()), exception);
-                }
-            }
-        } else {
-            while (currenciesCursor.moveToNext()) {
-                Long id = currenciesCursor.getLong(currenciesCursor.getColumnIndex(Database.Currencies._ID));
-                String code = currenciesCursor.getString(currenciesCursor.getColumnIndex(Database.Currencies.CODE));
-                syncMerchants(id, code);
-            }
-
-            currenciesCursor.close();
+        while (currencies.moveToNext()) {
+            Long id = currencies.getLong(currencies.getColumnIndex(Database.Currencies._ID));
+            String code = currencies.getString(currencies.getColumnIndex(Database.Currencies.CODE));
+            syncMerchants(id, code);
         }
 
-        getBus().post(new MerchantsSyncFinishedEvent());
+        currencies.close();
+    }
+
+    private void syncCurrenciesIfNecessary() throws RemoteException, OperationApplicationException {
+        Cursor countCursor = getContentResolver().query(Database.Currencies.CONTENT_URI,
+                new String[]{"count(*) AS count "},
+                null,
+                null,
+                null);
+
+        countCursor.moveToFirst();
+        int count = countCursor.getInt(0);
+
+        Log.d(TAG, count + " currencies found in DB");
+
+        if (count == 0) {
+            Log.d(TAG, "Loading currencies from server");
+            List<Currency> currencies = getApi().getCurrencies();
+            Log.d(TAG, String.format("Downloaded %s currencies", currencies.size()));
+            saveCurrencies(currencies);
+        }
     }
 
     private void syncMerchants(long currencyId, String currencyCode) {
@@ -143,7 +147,9 @@ public class MerchantsSyncService extends CoinsIntentService {
             Log.d(TAG, String.format("Downloaded %s merchants accepting %s", merchants.size(), currencyCode));
 
             for (Merchant merchant : merchants) {
-                notificationManager.onMerchantDownload(merchant);
+                if (notificationManager.shouldNotifyUser(merchant)) {
+                    notificationManager.notifyUser(merchant.getId(), merchant.getName());
+                }
 
                 values.put(Database.Merchants._ID, merchant.getId());
                 values.put(Database.Merchants._CREATED_AT, merchant.getCreatedAt().getTime());
@@ -195,5 +201,13 @@ public class MerchantsSyncService extends CoinsIntentService {
         }
 
         getContentResolver().applyBatch(Database.AUTHORITY, operations);
+    }
+
+    private boolean isSyncing() {
+        return isSyncing(this);
+    }
+
+    private void setSyncing(boolean syncing) {
+        getSharedPreferences(TAG, MODE_PRIVATE).edit().putBoolean(KEY_IS_SYNCING, syncing).apply();
     }
 }

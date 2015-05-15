@@ -17,8 +17,8 @@ import java.text.SimpleDateFormat;
  * Date: 10/07/14 21:38
  */
 
-public class MerchantSyncManager {
-    private static final String TAG = MerchantSyncManager.class.getName();
+public class DatabaseSyncManager {
+    private static final String TAG = DatabaseSyncManager.class.getName();
 
     private static final String SYNC_INTERVAL_KEY = "sync_interval";
     private static final String LAST_SYNC_MILLIS_KEY = "last_sync_millis";
@@ -34,7 +34,7 @@ public class MerchantSyncManager {
     private AlarmManager alarmManager;
     private PendingIntent syncIntent;
 
-    public MerchantSyncManager(Context context) {
+    public DatabaseSyncManager(Context context) {
         this.context = context;
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -72,7 +72,7 @@ public class MerchantSyncManager {
         }
 
         this.syncInterval = syncInterval;
-        preferences.edit().putLong(SYNC_INTERVAL_KEY, syncInterval).commit();
+        preferences.edit().putLong(SYNC_INTERVAL_KEY, syncInterval).apply();
         scheduleAlarm();
     }
 
@@ -86,7 +86,7 @@ public class MerchantSyncManager {
         }
 
         this.lastSyncMillis = lastSyncMillis;
-        preferences.edit().putLong(LAST_SYNC_MILLIS_KEY, lastSyncMillis).commit();
+        preferences.edit().putLong(LAST_SYNC_MILLIS_KEY, lastSyncMillis).apply();
         scheduleAlarm();
     }
 

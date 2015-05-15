@@ -51,7 +51,7 @@
             android:name=".ui.activity.SelectAreaActivity"
             android:label="" />
 
-        <service android:name=".service.MerchantsSyncService" />
+        <service android:name=".service.DatabaseSyncService" />
 
         <service android:name=".service.BitcoinPriceService" />
 

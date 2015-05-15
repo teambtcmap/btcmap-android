@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.receiver.SyncMerchantsWakefulReceiver;
-import com.bubelov.coins.service.MerchantsSyncService;
+import com.bubelov.coins.service.DatabaseSyncService;
 
 /**
  * Author: Igor Bubelov
@@ -85,6 +85,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
 
         Context context = App.getInstance();
-        SyncMerchantsWakefulReceiver.startWakefulService(context, MerchantsSyncService.makeIntent(context));
+        SyncMerchantsWakefulReceiver.startWakefulService(context, DatabaseSyncService.makeIntent(context));
     }
 }

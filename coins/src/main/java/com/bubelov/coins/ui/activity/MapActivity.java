@@ -31,6 +31,7 @@ import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
 import com.bubelov.coins.loader.MerchantsLoader;
 import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.service.DatabaseSyncService;
 import com.bubelov.coins.ui.widget.CurrenciesFilterPopup;
 import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.ui.widget.MerchantDetailsView;
@@ -54,6 +55,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.ClusterRenderer;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.squareup.otto.Subscribe;
 
@@ -181,6 +184,12 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         slidingLayout = findView(R.id.sliding_panel);
         slidingLayout.setPanelHeight(0);
         slidingLayout.setAnchorPoint(0.5f);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loader.setVisibility(DatabaseSyncService.isSyncing(this) ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -327,7 +336,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 amenity = "bar";
                 break;
             case R.id.hotels:
-                amenity = "TODO";
+                amenity = "hotel";
                 break;
             case R.id.car_washes:
                 amenity = "car_wash";
@@ -339,7 +348,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 amenity = "hospital";
                 break;
             case R.id.laundry:
-                amenity = "TODO";
+                amenity = "dry_cleaning";
                 break;
             case R.id.movies:
                 amenity = "cinema";
@@ -351,7 +360,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 amenity = "pharmacy";
                 break;
             case R.id.pizza:
-                amenity = "TODO";
+                amenity = "pizza";
                 break;
             case R.id.taxi:
                 amenity = "taxi";

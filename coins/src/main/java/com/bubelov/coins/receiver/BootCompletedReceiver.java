@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.bubelov.coins.manager.MerchantSyncManager;
+import com.bubelov.coins.manager.DatabaseSyncManager;
 
 /**
  * Author: Igor Bubelov
@@ -14,6 +14,6 @@ import com.bubelov.coins.manager.MerchantSyncManager;
 public class BootCompletedReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        new MerchantSyncManager(context).scheduleAlarm();
+        new DatabaseSyncManager(context).scheduleAlarm();
     }
 }

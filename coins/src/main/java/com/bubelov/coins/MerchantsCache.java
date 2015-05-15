@@ -40,13 +40,9 @@ public class MerchantsCache {
         Collection<Merchant> merchants = new ArrayList<>();
 
         for (Merchant merchant : data) {
-            if (merchant.getLatitude() >= bounds.southwest.latitude
-                    && merchant.getLatitude() <= bounds.northeast.latitude
-                    && merchant.getLongitude() >= bounds.southwest.longitude
-                    && merchant.getLongitude() <= bounds.northeast.longitude) {
-                if (TextUtils.isEmpty(amenity) || amenity.equals(merchant.getAmenity())) {
-                    merchants.add(merchant);
-                }
+            if (bounds.contains(merchant.getPosition())
+                    && (TextUtils.isEmpty(amenity) || amenity.equals(merchant.getAmenity()))) {
+                merchants.add(merchant);
             }
         }
 
