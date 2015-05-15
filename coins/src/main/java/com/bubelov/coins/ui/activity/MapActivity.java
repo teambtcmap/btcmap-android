@@ -163,16 +163,18 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         merchantDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_place_white_48dp);
 
-        if (getIntent().hasExtra(MERCHANT_ID_EXTRA)) {
-            showMerchant(getIntent().getLongExtra(MERCHANT_ID_EXTRA, -1));
-        } else {
-            googleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(LocationServices.API)
-                    .addConnectionCallbacks(new LocationApiConnectionCallbacks())
-                    .addOnConnectionFailedListener(new LocationAliConnectionFailedListener())
-                    .build();
+        if (savedInstanceState == null) {
+            if (getIntent().hasExtra(MERCHANT_ID_EXTRA)) {
+                showMerchant(getIntent().getLongExtra(MERCHANT_ID_EXTRA, -1));
+            } else {
+                googleApiClient = new GoogleApiClient.Builder(this)
+                        .addApi(LocationServices.API)
+                        .addConnectionCallbacks(new LocationApiConnectionCallbacks())
+                        .addOnConnectionFailedListener(new LocationAliConnectionFailedListener())
+                        .build();
 
-            googleApiClient.connect();
+                googleApiClient.connect();
+            }
         }
     }
 
@@ -231,6 +233,12 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         if (intent.hasExtra(MERCHANT_ID_EXTRA)) {
             showMerchant(intent.getLongExtra(MERCHANT_ID_EXTRA, -1));
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable("", map.getCameraPosition());
     }
 
     private void showMerchant(long id) {

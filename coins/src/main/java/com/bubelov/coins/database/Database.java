@@ -12,6 +12,7 @@ public interface Database {
 
     interface Merchants extends BaseColumns {
         String TABLE_NAME = "merchants";
+        Uri CONTENT_URI = Uri.parse(String.format("content://%s/%s", AUTHORITY, TABLE_NAME));
 
         String LATITUDE = "latitude";
         String LONGITUDE = "longitude";

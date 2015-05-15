@@ -112,6 +112,7 @@ public class DatabaseSyncService extends CoinsIntentService {
 
         countCursor.moveToFirst();
         int count = countCursor.getInt(0);
+        countCursor.close();
 
         Log.d(TAG, count + " currencies found in DB");
 
