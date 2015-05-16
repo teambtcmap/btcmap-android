@@ -30,6 +30,7 @@ import com.bubelov.coins.database.Database;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
 import com.bubelov.coins.loader.MerchantsLoader;
+import com.bubelov.coins.manager.UserNotificationManager;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.service.DatabaseSyncService;
 import com.bubelov.coins.ui.widget.CurrenciesFilterPopup;
@@ -380,9 +381,16 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private void findLocation() {
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        UserNotificationManager notificationManager = new UserNotificationManager(this);
+        boolean notificationAreaNotSet = notificationManager.getNotificationAreaCenter() == null;
 
         if (lastLocation != null) {
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 13));
+            LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
+
+            if (notificationAreaNotSet) {
+                notificationManager.setNotificationAreaCenter(latLng);
+            }
         } else {
             LocationRequest locationRequest = LocationRequest.create().setNumUpdates(1);
             LocationSettingsRequest locationSettingsRequest = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build();
@@ -392,7 +400,12 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 switch (result.getStatus().getStatusCode()) {
                     case LocationSettingsStatusCodes.SUCCESS:
                         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, location -> {
-                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13));
+                            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
+
+                            if (notificationAreaNotSet) {
+                                notificationManager.setNotificationAreaCenter(latLng);
+                            }
                         });
 
                         break;

@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.bubelov.coins.manager.DatabaseSyncManager;
+import com.bubelov.coins.service.DatabaseSyncService;
 
 /**
  * Author: Igor Bubelov
@@ -14,6 +14,6 @@ import com.bubelov.coins.manager.DatabaseSyncManager;
 public class BootCompletedReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        new DatabaseSyncManager(context).scheduleAlarm();
+        context.startService(DatabaseSyncService.makeIntent(context, false));
     }
 }

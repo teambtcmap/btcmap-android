@@ -72,12 +72,6 @@
                                 android:textColor="@color/white"
                                 android:textSize="26sp" />
 
-                            <Button
-                                android:id="@+id/check"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Check" />
-
                         </LinearLayout>
 
                     </LinearLayout>
@@ -101,6 +95,15 @@
                         app:typeface="regular" />
 
                 </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/check"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_refresh_white_24dp" />
 
             </RelativeLayout>
 

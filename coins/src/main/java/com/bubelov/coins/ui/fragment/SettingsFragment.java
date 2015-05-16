@@ -14,11 +14,10 @@ import android.widget.Toast;
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Database;
-import com.bubelov.coins.manager.DatabaseSyncManager;
 import com.bubelov.coins.manager.UserNotificationManager;
+import com.bubelov.coins.service.DatabaseSyncService;
 import com.bubelov.coins.ui.activity.SelectAreaActivity;
 
-import java.text.SimpleDateFormat;
 import java.util.Random;
 
 /**
@@ -37,9 +36,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public void onResume() {
         super.onResume();
         getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-
-        DatabaseSyncManager syncManager = new DatabaseSyncManager(getActivity());
-        getPreferenceManager().findPreference("pref_update_merchants").setSummary("Last sync: " + SimpleDateFormat.getDateTimeInstance().format(syncManager.getLastSyncMillis()));
     }
 
     @Override
@@ -84,7 +80,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
 
         if (preference.getKey().equals("pref_update_merchants")) {
-            new DatabaseSyncManager(getActivity()).sheduleDelayed(0);
+            getActivity().startService(DatabaseSyncService.makeIntent(getActivity(), true));
         }
 
         if (preference.getKey().equals("pref_remove_last_merchant")) {
@@ -114,8 +110,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_sync_merchants_key))) {
-            DatabaseSyncManager syncManager = new DatabaseSyncManager(getActivity());
-            syncManager.scheduleAlarm();
+            getActivity().startService(DatabaseSyncService.makeIntent(getActivity(), true));
         }
     }
 }

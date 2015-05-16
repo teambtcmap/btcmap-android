@@ -7,9 +7,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.Location;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
@@ -70,29 +72,25 @@ public class UserNotificationManager {
     }
 
     public boolean shouldNotifyUser(Merchant merchant) {
-        if (new DatabaseSyncManager(context).getLastSyncMillis() == 0) {
-            return false;
-        }
-
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         if (!preferences.getBoolean(context.getString(R.string.pref_show_new_merchants_key), true)) {
             return false;
         }
 
-//        LatLng notificationAreaCenter = getNotificationAreaCenter();
-//
-//        if (getNotificationAreaCenter() == null) {
-//            return;
-//        }
-//
-//        float[] distance = new float[1];
-//        Location.distanceBetween(notificationAreaCenter.latitude, notificationAreaCenter.longitude, merchant.getLatitude(), merchant.getLongitude(), distance);
-//        Log.d(TAG, "Distance: " + distance[0]);
-//
-//        if (distance[0] > getNotificationAreaRadius()) {
-//            return;
-//        }
+        LatLng notificationAreaCenter = getNotificationAreaCenter();
+
+        if (getNotificationAreaCenter() == null) {
+            return false;
+        }
+
+        float[] distance = new float[1];
+        Location.distanceBetween(notificationAreaCenter.latitude, notificationAreaCenter.longitude, merchant.getLatitude(), merchant.getLongitude(), distance);
+        Log.d(TAG, "Distance: " + distance[0]);
+
+        if (distance[0] > getNotificationAreaRadius()) {
+            //return false;
+        }
 
         App app = (App) context.getApplicationContext();
         SQLiteDatabase db = app.getDatabaseHelper().getReadableDatabase();

@@ -1,5 +1,7 @@
 package com.bubelov.coins.service;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,15 +11,15 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.bubelov.coins.Constants;
+import com.bubelov.coins.R;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
-import com.bubelov.coins.manager.DatabaseSyncManager;
 import com.bubelov.coins.manager.UserNotificationManager;
 import com.bubelov.coins.model.Currency;
-import com.bubelov.coins.receiver.SyncMerchantsWakefulReceiver;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.util.Utils;
@@ -36,12 +38,25 @@ import java.util.concurrent.TimeUnit;
 public class DatabaseSyncService extends CoinsIntentService {
     private static final String TAG = DatabaseSyncService.class.getSimpleName();
 
+    private static final String FORCE_SYNC_EXTRA = "force_sync";
+
     private static final String KEY_IS_SYNCING = "syncing";
+    private static final String KEY_INITIALIZED = "initialized";
+    private static final String KEY_LAST_SYNC_MILLIS = "last_sync_millis";
+
+    private static final long SYNC_INTERVAL_MILLIS = TimeUnit.HOURS.toMillis(1);
 
     private static final int MAX_MERCHANTS_PER_REQUEST = 250;
 
-    public static Intent makeIntent(Context context) {
-        return new Intent(context, DatabaseSyncService.class);
+    private SharedPreferences preferences;
+
+    private AlarmManager alarmManager;
+    private PendingIntent syncIntent;
+
+    public static Intent makeIntent(Context context, boolean forceSync) {
+        Intent intent = new Intent(context, DatabaseSyncService.class);
+        intent.putExtra(FORCE_SYNC_EXTRA, forceSync);
+        return intent;
     }
 
     public static boolean isSyncing(Context context) {
@@ -57,17 +72,32 @@ public class DatabaseSyncService extends CoinsIntentService {
     public void onStart(Intent intent, int startId) {
         Log.d(TAG, "Got new intent");
 
-        if (!isSyncing()) {
+        preferences = getSharedPreferences(TAG, MODE_PRIVATE);
+        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        syncIntent = PendingIntent.getService(this, 0, DatabaseSyncService.makeIntent(this, true), PendingIntent.FLAG_CANCEL_CURRENT);
+
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_sync_merchants_key), true)) {
+            Log.d(TAG, "Database sync turned off");
+        }
+
+        if (isSyncing()) {
+            Log.d(TAG, "Service already running");
+            return;
+        }
+
+        long lastSyncMillis = preferences.getLong(KEY_LAST_SYNC_MILLIS, 0);
+        alarmManager.set(AlarmManager.RTC, lastSyncMillis + SYNC_INTERVAL_MILLIS, syncIntent);
+
+        if (intent.getBooleanExtra(FORCE_SYNC_EXTRA, false) || System.currentTimeMillis() - preferences.getLong(KEY_LAST_SYNC_MILLIS, 0) > SYNC_INTERVAL_MILLIS) {
             if (Utils.isOnline(this)) {
                 setSyncing(true);
                 super.onStart(intent, startId);
             } else {
                 Log.d(TAG, "Network is unavailable. Will try later");
-                DatabaseSyncManager syncManager = new DatabaseSyncManager(getApplicationContext());
-                syncManager.sheduleDelayed(TimeUnit.MINUTES.toMillis(15));
+                alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5), syncIntent);
             }
         } else {
-            Log.d(TAG, "Service already running");
+            Log.d(TAG, "Too early for sync");
         }
     }
 
@@ -75,14 +105,21 @@ public class DatabaseSyncService extends CoinsIntentService {
     protected void onHandleIntent(Intent intent) {
         try {
             sync();
+            getSharedPreferences(TAG, MODE_PRIVATE).edit().putBoolean(KEY_INITIALIZED, true).apply();
         } catch (Exception exception) {
             Log.e(TAG, "Couldn't synchronize database", exception);
         } finally {
             setSyncing(false);
+            preferences.edit().putLong(KEY_LAST_SYNC_MILLIS, System.currentTimeMillis()).apply();
+            alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + SYNC_INTERVAL_MILLIS, syncIntent);
             getBus().post(new MerchantsSyncFinishedEvent());
-            new DatabaseSyncManager(getApplicationContext()).setLastSyncMillis(System.currentTimeMillis());
-            SyncMerchantsWakefulReceiver.completeWakefulIntent(intent);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        setSyncing(false);
+        super.onDestroy();
     }
 
     private void sync() throws Exception {
@@ -128,6 +165,7 @@ public class DatabaseSyncService extends CoinsIntentService {
         SQLiteDatabase db = getDatabaseHelper().getWritableDatabase();
         ContentValues values = new ContentValues();
         UserNotificationManager notificationManager = new UserNotificationManager(getApplicationContext());
+        boolean initialized = getSharedPreferences(TAG, MODE_PRIVATE).getBoolean(KEY_INITIALIZED, false);
 
         while (true) {
             long lastUpdateMillis;
@@ -148,7 +186,7 @@ public class DatabaseSyncService extends CoinsIntentService {
             Log.d(TAG, String.format("Downloaded %s merchants accepting %s", merchants.size(), currencyCode));
 
             for (Merchant merchant : merchants) {
-                if (notificationManager.shouldNotifyUser(merchant)) {
+                if (initialized && notificationManager.shouldNotifyUser(merchant)) {
                     notificationManager.notifyUser(merchant.getId(), merchant.getName());
                 }
 
@@ -209,6 +247,6 @@ public class DatabaseSyncService extends CoinsIntentService {
     }
 
     private void setSyncing(boolean syncing) {
-        getSharedPreferences(TAG, MODE_PRIVATE).edit().putBoolean(KEY_IS_SYNCING, syncing).apply();
+        preferences.edit().putBoolean(KEY_IS_SYNCING, syncing).apply();
     }
 }

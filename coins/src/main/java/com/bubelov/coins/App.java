@@ -6,8 +6,6 @@ import android.preference.PreferenceManager;
 
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.database.DatabaseHelper;
-import com.bubelov.coins.manager.DatabaseSyncManager;
-import com.bubelov.coins.receiver.SyncMerchantsWakefulReceiver;
 import com.bubelov.coins.service.DatabaseSyncService;
 import com.bubelov.coins.util.MainThreadBus;
 import com.google.gson.FieldNamingPolicy;
@@ -44,11 +42,7 @@ public class App extends Application {
         merchantsCache = new MerchantsCache(databaseHelper.getReadableDatabase());
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        DatabaseSyncManager syncManager = new DatabaseSyncManager(this);
-
-        if (syncManager.getLastSyncMillis() == 0) {
-            SyncMerchantsWakefulReceiver.startWakefulService(this, DatabaseSyncService.makeIntent(this));
-        }
+        startService(DatabaseSyncService.makeIntent(this, false));
     }
 
     public static App getInstance() {
