@@ -217,6 +217,7 @@ public class DatabaseSyncService extends CoinsIntentService {
                         .withValue(Database.Merchants.WEBSITE, merchant.getWebsite())
                         .withValue(Database.Merchants.AMENITY, merchant.getAmenity())
                         .withValue(Database.Merchants.OPENING_HOURS, merchant.getOpeningHours())
+                        .withValue(Database.Merchants.ADDRESS, merchant.getAddress())
                         .build());
 
                 operations.add(ContentProviderOperation
