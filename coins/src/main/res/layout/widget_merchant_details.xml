@@ -5,18 +5,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
     android:orientation="vertical"
     android:background="@color/white">
 
     <LinearLayout
-        android:id="@+id/merchant_header"
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp">
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -30,23 +30,22 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/merchant_name"
+                    android:id="@+id/name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="8dp"
                     android:textSize="22sp"
                     android:textColor="@color/black"
                     android:singleLine="true"
                     tools:text="Merchant name" />
 
                 <TextView
-                    android:id="@+id/merchant_address"
+                    android:id="@+id/address"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="8dp"
                     android:textSize="18sp"
                     android:textColor="@color/secondary_text_or_icons"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    tools:text="Address" />
 
             </LinearLayout>
 
@@ -68,7 +67,7 @@
         android:paddingBottom="16dp">
 
         <com.bubelov.coins.ui.widget.ClickableImageView
-            android:id="@+id/call_merchant"
+            android:id="@+id/call"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -76,7 +75,7 @@
             android:tint="@color/primary" />
 
         <com.bubelov.coins.ui.widget.ClickableImageView
-            android:id="@+id/open_merchant_website"
+            android:id="@+id/open_website"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -84,7 +83,7 @@
             android:tint="@color/primary" />
 
         <com.bubelov.coins.ui.widget.ClickableImageView
-            android:id="@+id/share_merchant"
+            android:id="@+id/share"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -94,11 +93,55 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/merchant_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Description:"
+        android:textSize="18sp"
+        android:textColor="@color/secondary_text_or_icons" />
+
+    <TextView
+        android:id="@+id/description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="16dp"
-        android:text="Description"
+        android:text="Not provided"
+        android:textSize="18sp"
+        android:textColor="@color/black" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Opening hours:"
+        android:textSize="18sp"
+        android:textColor="@color/secondary_text_or_icons"/>
+
+    <TextView
+        android:id="@+id/opening_hours"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Not provided"
+        android:textSize="18sp"
+        android:textColor="@color/black" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Accepted currencies:"
+        android:textSize="18sp"
+        android:textColor="@color/secondary_text_or_icons"/>
+
+    <TextView
+        android:id="@+id/accepted_currencies"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Not provided"
         android:textSize="18sp"
         android:textColor="@color/black" />
 

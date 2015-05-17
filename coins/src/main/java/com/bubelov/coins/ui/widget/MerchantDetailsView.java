@@ -1,7 +1,6 @@
 package com.bubelov.coins.ui.widget;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
@@ -11,9 +10,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.bubelov.coins.App;
 import com.bubelov.coins.R;
-import com.bubelov.coins.database.Database;
+import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.util.Utils;
 import com.google.android.gms.maps.model.LatLng;
@@ -34,8 +32,6 @@ public class MerchantDetailsView extends FrameLayout {
 
     private TextView address;
 
-    private TextView description;
-
     private View directions;
 
     private View call;
@@ -43,6 +39,12 @@ public class MerchantDetailsView extends FrameLayout {
     private View openWebsite;
 
     private View share;
+
+    private TextView description;
+
+    private TextView openingHours;
+
+    private TextView acceptedCurrencies;
 
     public MerchantDetailsView(Context context) {
         super(context);
@@ -64,24 +66,8 @@ public class MerchantDetailsView extends FrameLayout {
     }
 
     public void setMerchant(Merchant merchant) {
-        if (TextUtils.isEmpty(merchant.getName())) {
-            Cursor cursor = App.getInstance().getDatabaseHelper().getReadableDatabase().query(Database.Merchants.TABLE_NAME,
-                    new String[] { Database.Merchants.NAME, Database.Merchants.PHONE, Database.Merchants.WEBSITE },
-                    "_id = ?",
-                    new String[] { String.valueOf(merchant.getId()) },
-                    null,
-                    null,
-                    null);
-
-            if (cursor.moveToNext()) {
-                merchant.setName(cursor.getString(cursor.getColumnIndex(Database.Merchants.NAME)));
-                merchant.setPhone(cursor.getString(cursor.getColumnIndex(Database.Merchants.PHONE)));
-                merchant.setWebsite(cursor.getString(cursor.getColumnIndex(Database.Merchants.WEBSITE)));
-            }
-        }
-
         name.setText(merchant.getName());
-        description.setText(merchant.getDescription());
+        description.setText(TextUtils.isEmpty(merchant.getDescription()) ? "Not provided" : merchant.getDescription());
 
         call.setEnabled(!TextUtils.isEmpty(merchant.getPhone()));
         openWebsite.setEnabled(!TextUtils.isEmpty(merchant.getWebsite()));
@@ -92,20 +78,42 @@ public class MerchantDetailsView extends FrameLayout {
         share.setOnClickListener(v -> Utils.share(getContext(), "Check it out!", "This place accept cryptocurrency"));
 
         new LoadAddressTask().execute(merchant.getPosition());
+
+        openingHours.setText(TextUtils.isEmpty(merchant.getOpeningHours()) ? "Not provided" : merchant.getOpeningHours());
+
+        if (merchant.getCurrencies() != null && !merchant.getCurrencies().isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+
+            for (Currency currency : merchant.getCurrencies()) {
+                builder.append(currency.getName()).append("\n");
+            }
+
+            acceptedCurrencies.setText(builder.toString());
+        } else {
+            acceptedCurrencies.setText("Not provided");
+        }
+    }
+
+    public void setMultilineHeader(boolean multiline) {
+        name.setSingleLine(!multiline);
+        address.setSingleLine(!multiline);
     }
 
     private void init() {
         inflate(getContext(), R.layout.widget_merchant_details, this);
 
-        header = findViewById(R.id.merchant_header);
-        name = (TextView) findViewById(R.id.merchant_name);
-        address = (TextView) findViewById(R.id.merchant_address);
-        description = (TextView) findViewById(R.id.merchant_description);
+        header = findViewById(R.id.header);
+        name = (TextView) findViewById(R.id.name);
+        address = (TextView) findViewById(R.id.address);
 
         directions = findViewById(R.id.directions);
-        call = findViewById(R.id.call_merchant);
-        openWebsite = findViewById(R.id.open_merchant_website);
-        share = findViewById(R.id.share_merchant);
+        call = findViewById(R.id.call);
+        openWebsite = findViewById(R.id.open_website);
+        share = findViewById(R.id.share);
+
+        description = (TextView) findViewById(R.id.description);
+        openingHours = (TextView) findViewById(R.id.opening_hours);
+        acceptedCurrencies = (TextView) findViewById(R.id.accepted_currencies);
     }
 
     private class LoadAddressTask extends AsyncTask<LatLng, Void, String> {

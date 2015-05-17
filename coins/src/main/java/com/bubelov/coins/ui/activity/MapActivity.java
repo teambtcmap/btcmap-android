@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -31,6 +30,7 @@ import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
 import com.bubelov.coins.loader.MerchantsLoader;
 import com.bubelov.coins.manager.UserNotificationManager;
+import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.service.DatabaseSyncService;
 import com.bubelov.coins.ui.widget.CurrenciesFilterPopup;
@@ -38,6 +38,7 @@ import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.ui.widget.MerchantDetailsView;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
+import com.bubelov.coins.util.Utils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -56,8 +57,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
-import com.google.maps.android.clustering.view.ClusterRenderer;
-import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.squareup.otto.Subscribe;
 
@@ -72,6 +71,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private static final int MERCHANTS_LOADER = 0;
 
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 0;
+
+    private Toolbar merchantToolbar;
 
     private DrawerLayout drawer;
 
@@ -93,6 +94,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private GoogleApiClient googleApiClient;
 
+    private Merchant selectedMerchant;
+
     public static Intent newShowMerchantIntent(Context context, long merchantId) {
         Intent intent = new Intent(context, MapActivity.class);
         intent.putExtra(MERCHANT_ID_EXTRA, merchantId);
@@ -111,6 +114,9 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
+        merchantToolbar = findView(R.id.merchant_toolbar);
+        merchantToolbar.setNavigationOnClickListener(v -> slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED));
+
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle = new DrawerToggle(this, drawer, android.R.string.ok, android.R.string.ok);
         drawer.setDrawerListener(drawerToggle);
@@ -125,6 +131,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         map.getUiSettings().setMyLocationButtonEnabled(false);
         map.getUiSettings().setZoomControlsEnabled(false);
         map.getUiSettings().setCompassEnabled(false);
+        map.getUiSettings().setMapToolbarEnabled(false);
 
         initClustering();
 
@@ -166,7 +173,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         if (savedInstanceState == null) {
             if (getIntent().hasExtra(MERCHANT_ID_EXTRA)) {
-                showMerchant(getIntent().getLongExtra(MERCHANT_ID_EXTRA, -1));
+                selectMerchant(getIntent().getLongExtra(MERCHANT_ID_EXTRA, -1));
+                slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
             } else {
                 googleApiClient = new GoogleApiClient.Builder(this)
                         .addApi(LocationServices.API)
@@ -187,6 +195,48 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         slidingLayout = findView(R.id.sliding_panel);
         slidingLayout.setPanelHeight(0);
         slidingLayout.setAnchorPoint(0.5f);
+
+        slidingLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View view, float offset) {
+                if (offset < 0.2) {
+                    if (!getSupportActionBar().isShowing()) {
+                        getSupportActionBar().show();
+                        merchantToolbar.setVisibility(View.GONE);
+                    }
+                } else {
+                    if (getSupportActionBar().isShowing()) {
+                        getSupportActionBar().hide();
+                        merchantToolbar.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onPanelCollapsed(View view) {
+                map.setPadding(0, 0, 0, 0);
+                map.getUiSettings().setAllGesturesEnabled(true);
+                merchantDetails.setMultilineHeader(false);
+            }
+
+            @Override
+            public void onPanelExpanded(View view) {
+
+            }
+
+            @Override
+            public void onPanelAnchored(View view) {
+                map.setPadding(0, 0, 0, Utils.getScreenHeight(MapActivity.this) / 2 + Utils.getStatusBarHeight(getApplicationContext()));
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), 13));
+                map.getUiSettings().setAllGesturesEnabled(false);
+                merchantDetails.setMultilineHeader(true);
+            }
+
+            @Override
+            public void onPanelHidden(View view) {
+
+            }
+        });
     }
 
     @Override
@@ -197,7 +247,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.activity_map, menu);
         return true;
     }
 
@@ -232,7 +282,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         super.onNewIntent(intent);
 
         if (intent.hasExtra(MERCHANT_ID_EXTRA)) {
-            showMerchant(intent.getLongExtra(MERCHANT_ID_EXTRA, -1));
+            selectMerchant(intent.getLongExtra(MERCHANT_ID_EXTRA, -1));
+            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         }
     }
 
@@ -240,24 +291,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable("", map.getCameraPosition());
-    }
-
-    private void showMerchant(long id) {
-        SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
-
-        Cursor cursor = db.query(Database.Merchants.TABLE_NAME,
-                new String[] { Database.Merchants.LATITUDE, Database.Merchants.LONGITUDE },
-                "_id = ?",
-                new String[] { String.valueOf(id) },
-                null,
-                null,
-                null);
-
-        if (cursor.moveToNext()) {
-            double latitude = cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LATITUDE));
-            double longitude = cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LONGITUDE));
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 13));
-        }
     }
 
     @Override
@@ -456,6 +489,45 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         }
     }
 
+    private Merchant getMerchant(long id) {
+        Merchant merchant = new Merchant();
+
+        Cursor cursor = getContentResolver().query(Database.Merchants.CONTENT_URI,
+                new String[] { Database.Merchants.LATITUDE, Database.Merchants.LONGITUDE, Database.Merchants.NAME, Database.Merchants.DESCRIPTION, Database.Merchants.PHONE, Database.Merchants.WEBSITE },
+                "_id = ?",
+                new String[] { String.valueOf(id) },
+                null);
+
+        if (cursor.moveToNext()) {
+            merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LATITUDE)));
+            merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LONGITUDE)));
+            merchant.setName(cursor.getString(cursor.getColumnIndex(Database.Merchants.NAME)));
+            merchant.setDescription(cursor.getString(cursor.getColumnIndex(Database.Merchants.DESCRIPTION)));
+            merchant.setPhone(cursor.getString(cursor.getColumnIndex(Database.Merchants.PHONE)));
+            merchant.setWebsite(cursor.getString(cursor.getColumnIndex(Database.Merchants.WEBSITE)));
+        }
+
+        cursor.close();
+
+        cursor = getContentResolver().query(Database.Merchants.CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).appendPath("currencies").build(),
+                new String[] { Database.Currencies.NAME },
+                null,
+                null,
+                null);
+
+        merchant.setCurrencies(new ArrayList<>());
+
+        while (cursor.moveToNext()) {
+            Currency currency = new Currency();
+            currency.setName(cursor.getString(0));
+            merchant.getCurrencies().add(currency);
+        }
+
+        cursor.close();
+
+        return merchant;
+    }
+
     private class DrawerToggle extends ActionBarDrawerToggle {
         public DrawerToggle(Activity activity, DrawerLayout drawerLayout, int openDrawerContentDescRes, int closeDrawerContentDescRes) {
             super(activity, drawerLayout, openDrawerContentDescRes, closeDrawerContentDescRes);
@@ -524,10 +596,16 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 //                }
 //            }).start();
 
-            merchantDetails.setMerchant(merchant);
-            slidingLayout.setPanelHeight(merchantDetails.getHeaderHeight());
+            selectedMerchant = merchant;
+            selectMerchant(merchant.getId());
             return false;
         }
+    }
+
+    private void selectMerchant(long merchantId) {
+        selectedMerchant = getMerchant(merchantId);
+        merchantDetails.setMerchant(selectedMerchant);
+        slidingLayout.setPanelHeight(merchantDetails.getHeaderHeight());
     }
 
     private class LocationApiConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks {

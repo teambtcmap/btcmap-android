@@ -32,7 +32,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     Database.Merchants.DESCRIPTION + TEXT_TYPE + COMMA_SEP +
                     Database.Merchants.PHONE + TEXT_TYPE + COMMA_SEP +
                     Database.Merchants.WEBSITE + TEXT_TYPE + COMMA_SEP +
-                    Database.Merchants.AMENITY + TEXT_TYPE +
+                    Database.Merchants.AMENITY + TEXT_TYPE + COMMA_SEP +
+                    Database.Merchants.OPENING_HOURS + TEXT_TYPE + COMMA_SEP +
+                    Database.Merchants.ADDRESS + TEXT_TYPE +
             " )";
 
     private static final String SQL_CREATE_CURRENCIES_TABLE =

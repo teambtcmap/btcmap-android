@@ -1,11 +1,14 @@
 package com.bubelov.coins.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.DisplayMetrics;
+import android.view.Display;
 
 /**
  * Author: Igor Bubelov
@@ -61,5 +64,24 @@ public class Utils {
     public static int pxToDp(Context context, int px) {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         return (int) ((px / displayMetrics.density) + 0.5);
+    }
+
+    public static int getStatusBarHeight(Context context) {
+        int height = 0;
+
+        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+
+        if (resourceId > 0) {
+            height = context.getResources().getDimensionPixelSize(resourceId);
+        }
+
+        return height;
+    }
+
+    public static int getScreenHeight(Activity activity) {
+        Display display = activity.getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size.y;
     }
 }

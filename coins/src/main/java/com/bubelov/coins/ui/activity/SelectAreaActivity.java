@@ -42,8 +42,6 @@ public class SelectAreaActivity extends AbstractActivity {
     private static final String CENTER_EXTRA = "center";
     private static final String RADIUS_EXTRA = "radius";
 
-    private static final int DEFAULT_RADIUS_METERS = 50000;
-
     private static final int DEFAULT_ZOOM = 8;
 
     private GoogleMap map;
@@ -86,7 +84,7 @@ public class SelectAreaActivity extends AbstractActivity {
                 shouldFindLocation = true;
             }
 
-            addArea(center, radius == null ? DEFAULT_RADIUS_METERS : radius);
+            addArea(center, radius);
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(center, DEFAULT_ZOOM));
         }
 

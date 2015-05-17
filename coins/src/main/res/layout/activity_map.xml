@@ -13,6 +13,7 @@
         android:layout_height="match_parent"
         android:gravity="bottom"
         app:umanoOverlay="true"
+        app:umanoFadeColor="#00FFFFFF"
         app:umanoPanelHeight="68dp"
         app:umanoShadowHeight="4dp">
 
@@ -31,6 +32,12 @@
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 style="@style/Toolbar.SemiTransparent" />
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/merchant_toolbar"
+                style="@style/Toolbar.WithBackNavigation"
+                android:background="#00FFFFFF"
+                android:visibility="gone"/>
 
             <View
                 android:id="@+id/anchor_upper_right"

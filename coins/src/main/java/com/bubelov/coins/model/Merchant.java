@@ -3,6 +3,8 @@ package com.bubelov.coins.model;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
 
+import java.util.Collection;
+
 /**
  * Author: Igor Bubelov
  * Date: 02/06/14 21:42
@@ -22,6 +24,12 @@ public class Merchant extends AbstractEntity implements ClusterItem {
     private String phone;
 
     private String website;
+
+    private String openingHours;
+
+    private String address;
+
+    private Collection<Currency> currencies;
 
     private transient LatLng position;
 
@@ -93,5 +101,29 @@ public class Merchant extends AbstractEntity implements ClusterItem {
 
     public void setWebsite(String website) {
         this.website = website;
+    }
+
+    public String getOpeningHours() {
+        return openingHours;
+    }
+
+    public void setOpeningHours(String openingHours) {
+        this.openingHours = openingHours;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Collection<Currency> getCurrencies() {
+        return currencies;
+    }
+
+    public void setCurrencies(Collection<Currency> currencies) {
+        this.currencies = currencies;
     }
 }

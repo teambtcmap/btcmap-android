@@ -9,10 +9,11 @@ import android.net.Uri;
 
 public interface Database {
     String AUTHORITY = "com.bubelov.coins";
+    String BASE_CONTENT_URI = String.format("content://%s", AUTHORITY);
 
     interface Merchants extends BaseColumns {
         String TABLE_NAME = "merchants";
-        Uri CONTENT_URI = Uri.parse(String.format("content://%s/%s", AUTHORITY, TABLE_NAME));
+        Uri CONTENT_URI = Uri.parse(String.format("%s/%s", BASE_CONTENT_URI, TABLE_NAME));
 
         String LATITUDE = "latitude";
         String LONGITUDE = "longitude";
@@ -21,11 +22,13 @@ public interface Database {
         String PHONE = "phone";
         String WEBSITE = "website";
         String AMENITY = "amenity";
+        String OPENING_HOURS = "opening_hours";
+        String ADDRESS = "address";
     }
 
     interface Currencies extends BaseColumns {
         String TABLE_NAME = "currencies";
-        Uri CONTENT_URI = Uri.parse(String.format("content://%s/%s", AUTHORITY, TABLE_NAME));
+        Uri CONTENT_URI = Uri.parse(String.format("%s/%s", BASE_CONTENT_URI, TABLE_NAME));
 
         String NAME = "name";
         String CODE = "code";

@@ -30,6 +30,8 @@ import java.util.UUID;
 public class UserNotificationManager {
     private static final String TAG = UserNotificationManager.class.getName();
 
+    private static final int DEFAULT_RADIUS_METERS = 50000;
+
     private static final String LATITUDE_KEY = "latitude";
     private static final String LONGITUDE_KEY = "longitude";
 
@@ -59,12 +61,8 @@ public class UserNotificationManager {
                 .apply();
     }
 
-    public Integer getNotificationAreaRadius() {
-        if (preferences.contains(RADIUS_KEY)) {
-            return preferences.getInt(RADIUS_KEY, -1);
-        } else {
-            return null;
-        }
+    public int getNotificationAreaRadius() {
+        return preferences.getInt(RADIUS_KEY, DEFAULT_RADIUS_METERS);
     }
 
     public void setNotificationAreaRadius(int radius) {
@@ -80,7 +78,7 @@ public class UserNotificationManager {
 
         LatLng notificationAreaCenter = getNotificationAreaCenter();
 
-        if (getNotificationAreaCenter() == null) {
+        if (notificationAreaCenter == null) {
             return false;
         }
 
