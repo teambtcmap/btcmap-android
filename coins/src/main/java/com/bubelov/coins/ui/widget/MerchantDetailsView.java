@@ -67,6 +67,13 @@ public class MerchantDetailsView extends FrameLayout {
 
     public void setMerchant(Merchant merchant) {
         name.setText(merchant.getName());
+
+        if (!TextUtils.isEmpty(merchant.getAddress())) {
+            address.setText(merchant.getAddress());
+        } else {
+            new LoadAddressTask().execute(merchant.getPosition());
+        }
+
         description.setText(TextUtils.isEmpty(merchant.getDescription()) ? "Not provided" : merchant.getDescription());
 
         call.setEnabled(!TextUtils.isEmpty(merchant.getPhone()));
@@ -76,8 +83,6 @@ public class MerchantDetailsView extends FrameLayout {
         call.setOnClickListener(v -> Utils.call(getContext(), merchant.getPhone()));
         openWebsite.setOnClickListener(v -> Utils.openUrl(getContext(), merchant.getWebsite()));
         share.setOnClickListener(v -> Utils.share(getContext(), "Check it out!", "This place accept cryptocurrency"));
-
-        new LoadAddressTask().execute(merchant.getPosition());
 
         openingHours.setText(TextUtils.isEmpty(merchant.getOpeningHours()) ? "Not provided" : merchant.getOpeningHours());
 
