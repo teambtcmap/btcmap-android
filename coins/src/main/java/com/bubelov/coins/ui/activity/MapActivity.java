@@ -26,7 +26,8 @@ import com.bubelov.coins.Constants;
 import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Database;
-import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
+import com.bubelov.coins.event.DatabaseUpToDateEvent;
+import com.bubelov.coins.event.DatabaseSyncingEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
 import com.bubelov.coins.loader.MerchantsLoader;
 import com.bubelov.coins.manager.UserNotificationManager;
@@ -242,7 +243,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     @Override
     protected void onResume() {
         super.onResume();
-        loader.setVisibility(DatabaseSyncService.isSyncing(this) ? View.VISIBLE : View.GONE);
+        startService(DatabaseSyncService.makeIntent(this, false));
     }
 
     @Override
@@ -468,13 +469,18 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     }
 
     @Subscribe
+    public void onDatabaseSyncing(DatabaseSyncingEvent event) {
+        loader.setVisibility(View.VISIBLE);
+    }
+
+    @Subscribe
     public void onNewMerchantsLoaded(NewMerchantsLoadedEvent event) {
         loader.setVisibility(View.VISIBLE);
         reloadMerchants();
     }
 
     @Subscribe
-    public void onMerchantSyncFinished(MerchantsSyncFinishedEvent event) {
+    public void onDatabaseSyncFinished(DatabaseUpToDateEvent event) {
         loader.setVisibility(View.GONE);
     }
 
@@ -493,7 +499,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         Merchant merchant = new Merchant();
 
         Cursor cursor = getContentResolver().query(Database.Merchants.CONTENT_URI,
-                new String[] { Database.Merchants.LATITUDE, Database.Merchants.LONGITUDE, Database.Merchants.NAME, Database.Merchants.DESCRIPTION, Database.Merchants.PHONE, Database.Merchants.WEBSITE },
+                new String[] { Database.Merchants.LATITUDE, Database.Merchants.LONGITUDE, Database.Merchants.NAME, Database.Merchants.DESCRIPTION, Database.Merchants.PHONE, Database.Merchants.WEBSITE, Database.Merchants.ADDRESS, Database.Merchants.OPENING_HOURS },
                 "_id = ?",
                 new String[] { String.valueOf(id) },
                 null);
@@ -505,6 +511,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             merchant.setDescription(cursor.getString(cursor.getColumnIndex(Database.Merchants.DESCRIPTION)));
             merchant.setPhone(cursor.getString(cursor.getColumnIndex(Database.Merchants.PHONE)));
             merchant.setWebsite(cursor.getString(cursor.getColumnIndex(Database.Merchants.WEBSITE)));
+            merchant.setAddress(cursor.getString(cursor.getColumnIndex(Database.Merchants.ADDRESS)));
+            merchant.setOpeningHours(cursor.getString(cursor.getColumnIndex(Database.Merchants.OPENING_HOURS)));
         }
 
         cursor.close();

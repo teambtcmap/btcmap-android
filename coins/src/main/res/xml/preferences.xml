@@ -3,18 +3,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="DATA">
-
-        <CheckBoxPreference
-            android:key="@string/pref_sync_merchants_key"
-            android:title="@string/pref_sync_merchants"
-            android:summaryOn="@string/pref_sync_merchants_summary_on"
-            android:summaryOff="@string/pref_sync_merchants_summary_off"
-            android:defaultValue="true" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:title="NOTIFICATIONS">
 
         <CheckBoxPreference

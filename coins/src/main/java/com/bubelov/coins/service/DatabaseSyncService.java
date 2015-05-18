@@ -11,12 +11,11 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.bubelov.coins.Constants;
-import com.bubelov.coins.R;
-import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
+import com.bubelov.coins.event.DatabaseUpToDateEvent;
+import com.bubelov.coins.event.DatabaseSyncingEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
 import com.bubelov.coins.manager.UserNotificationManager;
 import com.bubelov.coins.model.Currency;
@@ -24,7 +23,9 @@ import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.util.Utils;
 
-import java.text.SimpleDateFormat;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -40,8 +41,7 @@ public class DatabaseSyncService extends CoinsIntentService {
 
     private static final String FORCE_SYNC_EXTRA = "force_sync";
 
-    private static final String KEY_IS_SYNCING = "syncing";
-    private static final String KEY_INITIALIZED = "initialized";
+    private static final String KEY_DATABASE_INITIALIZED = "database_initialized";
     private static final String KEY_LAST_SYNC_MILLIS = "last_sync_millis";
 
     private static final long SYNC_INTERVAL_MILLIS = TimeUnit.HOURS.toMillis(1);
@@ -53,15 +53,12 @@ public class DatabaseSyncService extends CoinsIntentService {
     private AlarmManager alarmManager;
     private PendingIntent syncIntent;
 
+    private volatile boolean syncing;
+
     public static Intent makeIntent(Context context, boolean forceSync) {
         Intent intent = new Intent(context, DatabaseSyncService.class);
         intent.putExtra(FORCE_SYNC_EXTRA, forceSync);
         return intent;
-    }
-
-    public static boolean isSyncing(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences(TAG, MODE_PRIVATE);
-        return preferences.getBoolean(KEY_IS_SYNCING, false);
     }
 
     public DatabaseSyncService() {
@@ -69,57 +66,63 @@ public class DatabaseSyncService extends CoinsIntentService {
     }
 
     @Override
-    public void onStart(Intent intent, int startId) {
-        Log.d(TAG, "Got new intent");
-
+    public void onCreate() {
+        super.onCreate();
         preferences = getSharedPreferences(TAG, MODE_PRIVATE);
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         syncIntent = PendingIntent.getService(this, 0, DatabaseSyncService.makeIntent(this, true), PendingIntent.FLAG_CANCEL_CURRENT);
+    }
 
-        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_sync_merchants_key), true)) {
-            Log.d(TAG, "Database sync turned off");
-        }
+    @Override
+    public void onStart(Intent intent, int startId) {
+        scheduleNextSync();
 
-        if (isSyncing()) {
-            Log.d(TAG, "Service already running");
+        if (syncing) {
+            getBus().post(new DatabaseSyncingEvent());
             return;
         }
 
-        long lastSyncMillis = preferences.getLong(KEY_LAST_SYNC_MILLIS, 0);
-        alarmManager.set(AlarmManager.RTC, lastSyncMillis + SYNC_INTERVAL_MILLIS, syncIntent);
+        boolean forceSync = intent.getBooleanExtra(FORCE_SYNC_EXTRA, false);
 
-        if (intent.getBooleanExtra(FORCE_SYNC_EXTRA, false) || System.currentTimeMillis() - preferences.getLong(KEY_LAST_SYNC_MILLIS, 0) > SYNC_INTERVAL_MILLIS) {
+        if (forceSync || isTimeForSync()) {
             if (Utils.isOnline(this)) {
-                setSyncing(true);
                 super.onStart(intent, startId);
             } else {
-                Log.d(TAG, "Network is unavailable. Will try later");
                 alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5), syncIntent);
             }
         } else {
-            Log.d(TAG, "Too early for sync");
+            getBus().post(new DatabaseUpToDateEvent());
         }
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        syncing = true;
+        getBus().post(new DatabaseSyncingEvent());
+
         try {
             sync();
-            getSharedPreferences(TAG, MODE_PRIVATE).edit().putBoolean(KEY_INITIALIZED, true).apply();
         } catch (Exception exception) {
             Log.e(TAG, "Couldn't synchronize database", exception);
         } finally {
-            setSyncing(false);
+            syncing = false;
+            getBus().post(new DatabaseUpToDateEvent());
             preferences.edit().putLong(KEY_LAST_SYNC_MILLIS, System.currentTimeMillis()).apply();
-            alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + SYNC_INTERVAL_MILLIS, syncIntent);
-            getBus().post(new MerchantsSyncFinishedEvent());
+            scheduleNextSync();
         }
     }
 
-    @Override
-    public void onDestroy() {
-        setSyncing(false);
-        super.onDestroy();
+    private void scheduleNextSync() {
+        if (syncing) {
+            alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + SYNC_INTERVAL_MILLIS, syncIntent);
+        } else {
+            long lastSyncMillis = preferences.getLong(KEY_LAST_SYNC_MILLIS, 0);
+            alarmManager.set(AlarmManager.RTC, lastSyncMillis + SYNC_INTERVAL_MILLIS, syncIntent);
+        }
+    }
+
+    private boolean isTimeForSync() {
+        return System.currentTimeMillis() - preferences.getLong(KEY_LAST_SYNC_MILLIS, 0) > SYNC_INTERVAL_MILLIS;
     }
 
     private void sync() throws Exception {
@@ -139,6 +142,7 @@ public class DatabaseSyncService extends CoinsIntentService {
         }
 
         currencies.close();
+        setInitialized(true);
     }
 
     private void checkInitialized() {
@@ -149,7 +153,7 @@ public class DatabaseSyncService extends CoinsIntentService {
                 null);
 
         if (merchantsCount.moveToNext() && merchantsCount.getInt(0) == 0) {
-            getSharedPreferences(TAG, MODE_PRIVATE).edit().putBoolean(KEY_INITIALIZED, false).apply();
+            getSharedPreferences(TAG, MODE_PRIVATE).edit().putBoolean(KEY_DATABASE_INITIALIZED, false).apply();
         }
     }
 
@@ -164,37 +168,26 @@ public class DatabaseSyncService extends CoinsIntentService {
         int count = countCursor.getInt(0);
         countCursor.close();
 
-        Log.d(TAG, count + " currencies found in DB");
-
         if (count == 0) {
-            Log.d(TAG, "Loading currencies from server");
-            List<Currency> currencies = getApi().getCurrencies();
-            Log.d(TAG, String.format("Downloaded %s currencies", currencies.size()));
-            saveCurrencies(currencies);
+            saveCurrencies(getApi().getCurrencies());
         }
     }
 
     private void syncMerchants(long currencyId, String currencyCode) throws RemoteException, OperationApplicationException {
         SQLiteDatabase db = getDatabaseHelper().getWritableDatabase();
         UserNotificationManager notificationManager = new UserNotificationManager(getApplicationContext());
-        boolean initialized = getSharedPreferences(TAG, MODE_PRIVATE).getBoolean(KEY_INITIALIZED, false);
+        boolean initialized = isInitialized();
 
         while (true) {
-            long lastUpdateMillis;
-
-            Cursor cursor = db.rawQuery("select max(m._updated_at) from merchants as m join currencies_merchants as mc on m._id = mc.merchant_id join currencies c on c._id = mc.currency_id where c.code = ?",
+            Cursor lastUpdateCursor = db.rawQuery("select max(m._updated_at) from merchants as m join currencies_merchants as mc on m._id = mc.merchant_id join currencies c on c._id = mc.currency_id where c.code = ?",
                     new String[] { currencyCode });
 
-            if (!cursor.moveToNext()) {
-                Log.e(TAG, "Couldn't get last update timestamp");
-                cursor.close();
-                break;
-            }
+            lastUpdateCursor.moveToNext();
+            long lastUpdateMillis = lastUpdateCursor.isNull(0) ? 0 : lastUpdateCursor.getLong(0);
+            lastUpdateCursor.close();
+            DateTime lastUpdateDateTime = new DateTime(DateTimeZone.UTC).withMillis(lastUpdateMillis);
 
-            lastUpdateMillis = cursor.isNull(0) ? 0 : cursor.getLong(0);
-            cursor.close();
-
-            List<Merchant> merchants = getApi().getMerchants(currencyCode, new SimpleDateFormat(Constants.DATE_FORMAT).format(lastUpdateMillis), MAX_MERCHANTS_PER_REQUEST);
+            List<Merchant> merchants = getApi().getMerchants(currencyCode, lastUpdateDateTime.toString(Constants.DATE_FORMAT), MAX_MERCHANTS_PER_REQUEST);
             Log.d(TAG, String.format("Downloaded %s merchants accepting %s", merchants.size(), currencyCode));
 
             ArrayList<ContentProviderOperation> operations = new ArrayList<>();
@@ -207,8 +200,8 @@ public class DatabaseSyncService extends CoinsIntentService {
                 operations.add(ContentProviderOperation
                         .newInsert(Database.Merchants.CONTENT_URI)
                         .withValue(Database.Merchants._ID, merchant.getId())
-                        .withValue(Database.Merchants._CREATED_AT, merchant.getCreatedAt().getTime())
-                        .withValue(Database.Merchants._UPDATED_AT, merchant.getUpdatedAt().getTime())
+                        .withValue(Database.Merchants._CREATED_AT, merchant.getCreatedAt().getMillis())
+                        .withValue(Database.Merchants._UPDATED_AT, merchant.getUpdatedAt().getMillis())
                         .withValue(Database.Merchants.LATITUDE, merchant.getLatitude())
                         .withValue(Database.Merchants.LONGITUDE, merchant.getLongitude())
                         .withValue(Database.Merchants.NAME, merchant.getName())
@@ -246,8 +239,8 @@ public class DatabaseSyncService extends CoinsIntentService {
             operations.add(ContentProviderOperation
                     .newInsert(Database.Currencies.CONTENT_URI)
                     .withValue(Database.Currencies._ID, currency.getId())
-                    .withValue(Database.Currencies._CREATED_AT, currency.getCreatedAt().getTime())
-                    .withValue(Database.Currencies._UPDATED_AT, currency.getUpdatedAt().getTime())
+                    .withValue(Database.Currencies._CREATED_AT, currency.getCreatedAt().getMillis())
+                    .withValue(Database.Currencies._UPDATED_AT, currency.getUpdatedAt().getMillis())
                     .withValue(Database.Currencies.NAME, currency.getName())
                     .withValue(Database.Currencies.CODE, currency.getCode())
                     .build());
@@ -256,11 +249,11 @@ public class DatabaseSyncService extends CoinsIntentService {
         getContentResolver().applyBatch(Database.AUTHORITY, operations);
     }
 
-    private boolean isSyncing() {
-        return isSyncing(this);
+    private void setInitialized(boolean initialized) {
+        preferences.edit().putBoolean(KEY_DATABASE_INITIALIZED, initialized).apply();
     }
 
-    private void setSyncing(boolean syncing) {
-        preferences.edit().putBoolean(KEY_IS_SYNCING, syncing).apply();
+    private boolean isInitialized() {
+        return preferences.getBoolean(KEY_DATABASE_INITIALIZED, false);
     }
 }

@@ -13,11 +13,6 @@
     <string name="action_show_bitcoin">Show Bitcoin</string>
     <string name="action_show_litecoin">Show Litecoin</string>
 
-    <string name="pref_sync_merchants_key">pref_auto_sync_merchants</string>
-    <string name="pref_sync_merchants">Auto update</string>
-    <string name="pref_sync_merchants_summary_on">Check for new merchants automatically.</string>
-    <string name="pref_sync_merchants_summary_off">Don\'t check for new merchants.</string>
-
     <string name="pref_show_new_merchants_key">pref_new_merchant_notifications</string>
     <string name="pref_show_new_merchants">Notifications</string>
     <string name="pref_show_new_merchants_on">Notify about new merchants nearby.</string>

@@ -5,6 +5,6 @@ package com.bubelov.coins.event;
  * Date: 03/05/15 19:49
  */
 
-public class MerchantsSyncFinishedEvent {
+public class DatabaseUpToDateEvent {
     // Nothing to do here
 }

@@ -11,7 +11,7 @@ import com.bubelov.coins.service.DatabaseSyncService;
  * Date: 10/07/14 21:22
  */
 
-public class BootCompletedReceiver extends BroadcastReceiver {
+public class SyncDatabaseReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         context.startService(DatabaseSyncService.makeIntent(context, false));

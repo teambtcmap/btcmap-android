@@ -1,6 +1,6 @@
 package com.bubelov.coins.model;
 
-import java.util.Date;
+import org.joda.time.DateTime;
 
 /**
  * Author: Igor Bubelov
@@ -10,9 +10,9 @@ import java.util.Date;
 public abstract class AbstractEntity {
     private long id;
 
-    private Date createdAt;
+    private DateTime createdAt;
 
-    private Date updatedAt;
+    private DateTime updatedAt;
 
     public long getId() {
         return id;
@@ -22,19 +22,19 @@ public abstract class AbstractEntity {
         this.id = id;
     }
 
-    public Date getCreatedAt() {
+    public DateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(DateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public DateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(DateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
 }
