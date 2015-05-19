@@ -94,7 +94,7 @@ public class DrawerMenu extends FrameLayout {
         price = (TextView) findViewById(R.id.price);
         priceLastCheck = (TextView) findViewById(R.id.price_last_check);
 
-        findViewById(R.id.check).setOnClickListener(v -> getContext().startService(BitcoinPriceService.newInent(getContext(), true)));
+        findViewById(R.id.check).setOnClickListener(v -> getContext().startService(BitcoinPriceService.newIntent(getContext(), true)));
 
         for (int id : ITEMS) {
             findViewById(id).setOnClickListener(v -> setSelected(v.getId()));
@@ -109,7 +109,7 @@ public class DrawerMenu extends FrameLayout {
             }
         });
 
-        getContext().startService(BitcoinPriceService.newInent(getContext(), true));
+        getContext().startService(BitcoinPriceService.newIntent(getContext(), true));
     }
 
     private void showPrice() {
@@ -123,7 +123,7 @@ public class DrawerMenu extends FrameLayout {
             if (priceCursor.isNull(0)) {
                 price.setText("Loading...");
                 priceLastCheck.setText("Newer");
-                getContext().startService(BitcoinPriceService.newInent(getContext(), false));
+                getContext().startService(BitcoinPriceService.newIntent(getContext(), false));
             } else {
                 price.setText("$" + String.valueOf(priceCursor.getDouble(0)));
                 priceLastCheck.setText("Checked: " + DateFormat.getTimeInstance().format(priceCursor.getLong(1)));

@@ -26,6 +26,7 @@ import com.bubelov.coins.Constants;
 import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Database;
+import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.DatabaseUpToDateEvent;
 import com.bubelov.coins.event.DatabaseSyncingEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
@@ -342,6 +343,11 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     }
 
     @Override
+    public void networkAvailable() {
+        startService(DatabaseSyncService.makeIntent(this, false));
+    }
+
+    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (id == MERCHANTS_LOADER) {
             return new MerchantsLoader(this, args);
@@ -514,6 +520,12 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     @Subscribe
     public void onDatabaseSyncFinished(DatabaseUpToDateEvent event) {
+        databaseSyncing = false;
+        loader.setVisibility(View.GONE);
+    }
+
+    @Subscribe
+    public void onDatabaseSyncFailed(DatabaseSyncFailedEvent event) {
         databaseSyncing = false;
         loader.setVisibility(View.GONE);
     }

@@ -69,9 +69,13 @@ public class MerchantDetailsView extends FrameLayout {
         name.setText(merchant.getName());
 
         if (!TextUtils.isEmpty(merchant.getAddress())) {
-            address.setText(merchant.getAddress());
+            address.setText("DB!");
         } else {
-            new LoadAddressTask().execute(merchant.getPosition());
+            if (Utils.isOnline(getContext())) {
+                new LoadAddressTask().execute(merchant.getPosition());
+            } else {
+                address.setText("Couldn't load address");
+            }
         }
 
         description.setText(TextUtils.isEmpty(merchant.getDescription()) ? "Not provided" : merchant.getDescription());
@@ -139,7 +143,7 @@ public class MerchantDetailsView extends FrameLayout {
                 e.printStackTrace();
             }
 
-            if (addresses != null || !addresses.isEmpty()) {
+            if (addresses != null && !addresses.isEmpty()) {
                 Address address = addresses.get(0);
 
                 if (addresses.size() > 0) {

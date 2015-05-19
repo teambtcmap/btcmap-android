@@ -14,6 +14,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.bubelov.coins.Constants;
+import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.DatabaseUpToDateEvent;
 import com.bubelov.coins.event.DatabaseSyncingEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
@@ -41,7 +42,6 @@ public class DatabaseSyncService extends CoinsIntentService {
 
     private static final String FORCE_SYNC_EXTRA = "force_sync";
 
-    private static final String KEY_DATABASE_INITIALIZED = "database_initialized";
     private static final String KEY_LAST_SYNC_MILLIS = "last_sync_millis";
 
     private static final long SYNC_INTERVAL_MILLIS = TimeUnit.HOURS.toMillis(1);
@@ -102,12 +102,13 @@ public class DatabaseSyncService extends CoinsIntentService {
 
         try {
             sync();
+            preferences.edit().putLong(KEY_LAST_SYNC_MILLIS, System.currentTimeMillis()).apply();
+            getBus().post(new DatabaseUpToDateEvent());
         } catch (Exception exception) {
+            getBus().post(new DatabaseSyncFailedEvent());
             Log.e(TAG, "Couldn't synchronize database", exception);
         } finally {
             syncing = false;
-            getBus().post(new DatabaseUpToDateEvent());
-            preferences.edit().putLong(KEY_LAST_SYNC_MILLIS, System.currentTimeMillis()).apply();
             scheduleNextSync();
         }
     }
@@ -126,7 +127,6 @@ public class DatabaseSyncService extends CoinsIntentService {
     }
 
     private void sync() throws Exception {
-        checkInitialized();
         syncCurrenciesIfNecessary();
 
         Cursor currencies = getContentResolver().query(Database.Currencies.CONTENT_URI,
@@ -142,19 +142,6 @@ public class DatabaseSyncService extends CoinsIntentService {
         }
 
         currencies.close();
-        setInitialized(true);
-    }
-
-    private void checkInitialized() {
-        Cursor merchantsCount = getContentResolver().query(Database.Currencies.CONTENT_URI,
-                new String[]{"count(*) AS count"},
-                null,
-                null,
-                null);
-
-        if (merchantsCount.moveToNext() && merchantsCount.getInt(0) == 0) {
-            getSharedPreferences(TAG, MODE_PRIVATE).edit().putBoolean(KEY_DATABASE_INITIALIZED, false).apply();
-        }
     }
 
     private void syncCurrenciesIfNecessary() throws RemoteException, OperationApplicationException {
@@ -249,11 +236,7 @@ public class DatabaseSyncService extends CoinsIntentService {
         getContentResolver().applyBatch(Database.AUTHORITY, operations);
     }
 
-    private void setInitialized(boolean initialized) {
-        preferences.edit().putBoolean(KEY_DATABASE_INITIALIZED, initialized).apply();
-    }
-
     private boolean isInitialized() {
-        return preferences.getBoolean(KEY_DATABASE_INITIALIZED, false);
+        return preferences.contains(KEY_LAST_SYNC_MILLIS);
     }
 }

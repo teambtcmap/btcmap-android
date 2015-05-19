@@ -9,6 +9,7 @@ import com.bubelov.coins.Constants;
 import com.bubelov.coins.api.external.PriceResponse;
 import com.bubelov.coins.api.external.WinkDexApi;
 import com.bubelov.coins.database.Database;
+import com.bubelov.coins.util.Utils;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,7 +41,7 @@ public class BitcoinPriceService extends CoinsIntentService {
         initApi();
     }
 
-    public static Intent newInent(Context context, boolean forceLoad) {
+    public static Intent newIntent(Context context, boolean forceLoad) {
         Intent intent = new Intent(context, BitcoinPriceService.class);
         intent.putExtra(FORCE_LOAD_EXTRA, forceLoad);
         return intent;
@@ -48,6 +49,10 @@ public class BitcoinPriceService extends CoinsIntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        if (!Utils.isOnline(this)) {
+            return;
+        }
+
         if (intent.getBooleanExtra(FORCE_LOAD_EXTRA, false)) {
             loadPrice();
         } else {
