@@ -626,34 +626,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private class ClusterItemClickListener implements ClusterManager.OnClusterItemClickListener<Merchant> {
         @Override
         public boolean onClusterItemClick(Merchant merchant) {
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
-//
-//                    Random random = new Random(666);
-//
-//                    long start = System.currentTimeMillis();
-//
-//                    for (int i = 0; i < 500; i++) {
-//                        Cursor cursor = db.rawQuery("select distinct m._id, m.latitude, m.longitude, m.name, m.description from merchants as m join currencies_merchants as mc on m._id = mc.merchant_id join currencies c on c._id = mc.currency_id where (latitude between ? and ?) and (longitude between ? and ?) and c.show_on_map = 1",
-//                                new String[] { String.valueOf(-180.0f + random.nextFloat() * 360.0f), String.valueOf(-180.0f + random.nextFloat() * 360.0f), String.valueOf(-180.0f + random.nextFloat() * 360.0f), String.valueOf(-180.0f + random.nextFloat() * 360.0f) });
-//
-//                        //Log.d(TAG, "Count: " + cursor.getCount());
-//
-//                        while (cursor.moveToNext()) {
-//                            int x = 1;
-//                        }
-//
-//                        cursor.close();
-//                    }
-//
-//                    long execTime = System.currentTimeMillis() - start;
-//                    Log.d(TAG, "Execution time: " + execTime);
-//                    Log.d(TAG, "Avg query: " + (float) execTime / 10000.0f);
-//                }
-//            }).start();
-
             selectedMerchant = merchant;
             selectMerchant(merchant.getId());
             return false;
