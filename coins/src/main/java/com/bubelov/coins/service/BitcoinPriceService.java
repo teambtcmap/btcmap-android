@@ -5,8 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 
-import com.bubelov.coins.Constants;
-import com.bubelov.coins.api.external.PriceResponse;
+import com.bubelov.coins.api.external.BitcoinAverageApi;
+import com.bubelov.coins.api.external.BitcoinAverageTickerResponse;
+import com.bubelov.coins.api.external.WinkDexPriceResponse;
 import com.bubelov.coins.api.external.WinkDexApi;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.util.Utils;
@@ -34,11 +35,13 @@ public class BitcoinPriceService extends CoinsIntentService {
     private static final String selection = "code = ?";
     private static final String[] selectionArgs = new String[] { "BTC" };
 
-    private WinkDexApi api;
+    private WinkDexApi winkDexApi;
+
+    private BitcoinAverageApi bitcoinAverageApi;
 
     public BitcoinPriceService() {
         super(TAG);
-        initApi();
+        initApis();
     }
 
     public static Intent newIntent(Context context, boolean forceLoad) {
@@ -73,27 +76,57 @@ public class BitcoinPriceService extends CoinsIntentService {
     }
 
     private void loadPrice() {
-        PriceResponse response = api.getPrice();
+        float price;
+
+        WinkDexPriceResponse winkDexResponse = winkDexApi.getPrice();
+
+        // Sometimes this shitty API returns 0!
+        if (winkDexResponse.getPrice() != 0) {
+            price = (float) winkDexResponse.getPrice() / 100.0f;
+        } else {
+            BitcoinAverageTickerResponse bitcoinAverageResponse = bitcoinAverageApi.getUsdTicker();
+            price = bitcoinAverageResponse.getLast();
+        }
+
+        if (price == 0.0f) {
+            return;
+        }
 
         ContentValues values = new ContentValues();
-        values.put(Database.Currencies.PRICE, (double) response.getPrice() / 100.0);
+        values.put(Database.Currencies.PRICE, price);
         values.put(Database.Currencies.PRICE_LAST_CHECK, System.currentTimeMillis());
 
         getContentResolver().update(Database.Currencies.CONTENT_URI, values, selection, selectionArgs);
     }
 
-    private void initApi() {
-        Gson gson = new GsonBuilder()
-                .setDateFormat(Constants.DATE_FORMAT)
-                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .create();
+    private void initApis() {
+        initWinkDexApi();
+        initBitcoinAverageApi();
+    }
 
+    private void initWinkDexApi() {
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint("https://winkdex.com/api/v0")
-                .setConverter(new GsonConverter(gson))
+                .setConverter(new GsonConverter(getGsonForApis()))
                 .setLogLevel(RestAdapter.LogLevel.FULL)
                 .build();
 
-        api = restAdapter.create(WinkDexApi.class);
+        winkDexApi = restAdapter.create(WinkDexApi.class);
+    }
+
+    private void initBitcoinAverageApi() {
+        RestAdapter restAdapter = new RestAdapter.Builder()
+                .setEndpoint("https://api.bitcoinaverage.com")
+                .setConverter(new GsonConverter(getGsonForApis()))
+                .setLogLevel(RestAdapter.LogLevel.FULL)
+                .build();
+
+        bitcoinAverageApi = restAdapter.create(BitcoinAverageApi.class);
+    }
+
+    private Gson getGsonForApis() {
+        return new GsonBuilder()
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .create();
     }
 }

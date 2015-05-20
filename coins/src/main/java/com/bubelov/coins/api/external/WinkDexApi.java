@@ -9,5 +9,5 @@ import retrofit.http.GET;
 
 public interface WinkDexApi {
     @GET("/price")
-    PriceResponse getPrice();
+    WinkDexPriceResponse getPrice();
 }

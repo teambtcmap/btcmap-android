@@ -14,6 +14,7 @@ import com.bubelov.coins.database.Database;
 import com.bubelov.coins.service.BitcoinPriceService;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 
 /**
  * Author: Igor Bubelov
@@ -125,7 +126,8 @@ public class DrawerMenu extends FrameLayout {
                 priceLastCheck.setText("Newer");
                 getContext().startService(BitcoinPriceService.newIntent(getContext(), false));
             } else {
-                price.setText("$" + String.valueOf(priceCursor.getDouble(0)));
+                DecimalFormat format = new DecimalFormat("#.##");
+                price.setText("$" + format.format(priceCursor.getDouble(0)));
                 priceLastCheck.setText("Checked: " + DateFormat.getTimeInstance().format(priceCursor.getLong(1)));
             }
         }
