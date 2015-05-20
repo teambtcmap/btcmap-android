@@ -2,4 +2,6 @@
 
 <resources>
     <dimen name="drawer_header_padding">0dp</dimen>
+
+    <dimen name="marker_size">64dp</dimen>
 </resources>

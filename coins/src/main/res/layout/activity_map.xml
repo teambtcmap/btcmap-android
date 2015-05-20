@@ -37,7 +37,14 @@
                 android:id="@+id/merchant_toolbar"
                 style="@style/Toolbar.WithBackNavigation"
                 android:background="#00FFFFFF"
-                android:visibility="gone"/>
+                android:visibility="gone" />
+
+            <View
+                android:id="@+id/merchant_top_gradient"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:background="@drawable/merchant_top_gradient"
+                android:visibility="gone" />
 
             <View
                 android:id="@+id/anchor_upper_right"

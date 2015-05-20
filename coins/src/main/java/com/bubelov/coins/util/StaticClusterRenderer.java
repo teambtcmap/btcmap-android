@@ -40,6 +40,7 @@ import com.google.maps.android.ui.IconGenerator;
 import com.google.maps.android.ui.SquareTextView;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -381,6 +382,17 @@ public class StaticClusterRenderer<T extends ClusterItem> implements ClusterRend
 
             // Don't remove any markers that were just added. This is basically anything that had
             // a hit in the MarkerCache.
+            boolean removed = false;
+
+            while (!removed) {
+                try {
+                    markersToRemove.removeAll(newMarkers);
+                    removed = true;
+                } catch (ConcurrentModificationException e) {
+                    // TODO remove this hack
+                }
+            }
+
             markersToRemove.removeAll(newMarkers);
 
             // Find all of the new clusters that were added on-screen. These are candidates for
