@@ -64,7 +64,6 @@ public class SelectAreaActivity extends AbstractActivity {
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
-        map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(false);
         map.getUiSettings().setZoomControlsEnabled(false);
         map.setOnMarkerDragListener(new OnMarkerDragListener());
@@ -171,7 +170,7 @@ public class SelectAreaActivity extends AbstractActivity {
     }
 
     private void addArea(LatLng center, int radius) {
-        BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_place_white_48dp);
+        BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_place_empty);
         this.center = map.addMarker(new MarkerOptions()
                 .position(center)
                 .icon(markerDescriptor)

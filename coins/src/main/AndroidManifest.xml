@@ -42,6 +42,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+
         </activity>
 
         <activity
@@ -60,7 +68,12 @@
             android:name=".provider.CoinsProvider"
             android:authorities="com.bubelov.coins"
             android:readPermission="com.bubelov.coins.permission.READ"
-            android:writePermission="com.bubelov.coins.permission.WRITE" />
+            android:writePermission="com.bubelov.coins.permission.WRITE">
+
+            <path-permission android:pathPrefix="/search_suggest_query"
+                android:readPermission="android.permission.GLOBAL_SEARCH" />
+
+        </provider>
 
         <receiver
             android:name=".receiver.SyncDatabaseReceiver"
@@ -73,6 +86,9 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
+        <meta-data android:name="android.app.default_searchable"
+            android:value=".ui.activity.MapActivity" />
 
         <meta-data
             android:name="com.google.android.gms.version"

@@ -5,6 +5,8 @@
     <string name="app_name">Coins</string>
     <string name="ma_title">Coins</string>
 
+    <string name="search">Search</string>
+
     <string name="sa_title">Settings</string>
 
     <string name="action_refresh">Refresh Data</string>

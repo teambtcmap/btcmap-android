@@ -1,9 +1,11 @@
 package com.bubelov.coins.provider;
 
+import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -44,6 +46,26 @@ public class CoinsProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        if (uri.getPathSegments().contains("search_suggest_query")) {
+            MatrixCursor resultCursor = new MatrixCursor(new String[]{BaseColumns._ID, SearchManager.SUGGEST_COLUMN_TEXT_1, SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID});
+
+            if (uri.getLastPathSegment().equals("search_suggest_query")) {
+                return resultCursor;
+            }
+
+            Cursor merchantsCursor = db.getReadableDatabase().query(Database.Merchants.TABLE_NAME, new String[]{Database.Merchants._ID, Database.Merchants.NAME}, "name like ? or amenity like ?", new String[]{"%" + uri.getLastPathSegment() + "%", "%" + uri.getLastPathSegment() + "%"}, null, null, null, null);
+
+            int i = 1;
+
+            while (merchantsCursor.moveToNext()) {
+                resultCursor.addRow(new Object[]{i++, merchantsCursor.getString(1), merchantsCursor.getLong(0)});
+            }
+
+            merchantsCursor.close();
+
+            return resultCursor;
+        }
+
         if (sURIMatcher.match(uri) == MERCHANT_CURRENCIES) {
             long merchantId = Long.valueOf(uri.getPathSegments().get(uri.getPathSegments().size() - 2));
 

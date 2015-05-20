@@ -74,7 +74,7 @@ public class DrawerMenu extends FrameLayout {
                 }
 
                 if (itemSelectedListener != null) {
-                    itemSelectedListener.onMenuItemSelected(id, item);
+                    itemSelectedListener.onMenuItemSelected(id, item.getText());
                 }
             } else {
                 if (!justNotify) {
@@ -132,6 +132,6 @@ public class DrawerMenu extends FrameLayout {
     }
 
     public interface OnMenuItemSelectedListener {
-        void onMenuItemSelected(int id, MenuItem item);
+        void onMenuItemSelected(int id, String title);
     }
 }

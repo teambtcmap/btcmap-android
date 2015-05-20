@@ -2,19 +2,23 @@ package com.bubelov.coins.ui.activity;
 
 import android.animation.Animator;
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.ListPopupWindow;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
@@ -38,6 +42,7 @@ import com.bubelov.coins.service.DatabaseSyncService;
 import com.bubelov.coins.ui.widget.CurrenciesFilterPopup;
 import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.ui.widget.MerchantDetailsView;
+import com.bubelov.coins.util.MapMarkersCache;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
 import com.bubelov.coins.util.Utils;
@@ -93,7 +98,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private View loader;
 
-    private BitmapDescriptor merchantDescriptor;
+    private MapMarkersCache markersCache;
 
     private GoogleApiClient googleApiClient;
 
@@ -178,7 +183,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             }
         });
 
-        merchantDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_place_white_48dp);
+        markersCache = new MapMarkersCache();
 
         if (savedInstanceState == null) {
             if (getIntent().hasExtra(MERCHANT_ID_EXTRA)) {
@@ -271,6 +276,11 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_map, menu);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search));
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
         return true;
     }
 
@@ -304,8 +314,23 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            showToast("Query: " + query);
+            return;
+        }
+
         if (intent.hasExtra(MERCHANT_ID_EXTRA)) {
             selectMerchant(intent.getLongExtra(MERCHANT_ID_EXTRA, -1));
+            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+            return;
+        }
+
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            onMenuItemSelected(R.id.all, "All");
+            Uri merchantUri = intent.getData();
+            long merchantId = Long.valueOf(merchantUri.getLastPathSegment());
+            selectMerchant(merchantId);
             slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         }
     }
@@ -386,11 +411,11 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     }
 
     @Override
-    public void onMenuItemSelected(int id, com.bubelov.coins.ui.widget.MenuItem menuItem) {
+    public void onMenuItemSelected(int id, String title) {
         drawer.closeDrawer(Gravity.LEFT);
 
         if (id != R.id.settings && id != R.id.help_and_feedback) {
-            getSupportActionBar().setTitle(menuItem.getText());
+            getSupportActionBar().setTitle(title);
         }
 
         if (id == R.id.settings) {
@@ -608,7 +633,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         @Override
         protected void onBeforeClusterItemRendered(Merchant item, MarkerOptions markerOptions) {
             super.onBeforeClusterItemRendered(item, markerOptions);
-            markerOptions.icon(merchantDescriptor).anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
+            markerOptions.icon(markersCache.getMarker(item.getAmenity())).anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
         }
     }
 
@@ -631,8 +656,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             return false;
         }
     }
-
-
 
     private void selectMerchant(long merchantId) {
         saveCameraPositionFlag = true;

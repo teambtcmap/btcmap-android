@@ -69,7 +69,7 @@ public class MerchantDetailsView extends FrameLayout {
         name.setText(merchant.getName());
 
         if (!TextUtils.isEmpty(merchant.getAddress())) {
-            address.setText("DB!");
+            address.setText(merchant.getAddress());
         } else {
             if (Utils.isOnline(getContext())) {
                 new LoadAddressTask().execute(merchant.getPosition());
