@@ -209,7 +209,6 @@ public class DatabaseSyncService extends CoinsIntentService {
             getContentResolver().applyBatch(Database.AUTHORITY, operations);
 
             if (merchants.size() > 0) {
-                getApp().getMerchantsCache().invalidate();
                 getBus().post(new NewMerchantsLoadedEvent());
             }
 

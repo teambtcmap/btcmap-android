@@ -25,7 +25,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.bubelov.coins.App;
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
@@ -39,6 +38,7 @@ import com.bubelov.coins.manager.UserNotificationManager;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.service.DatabaseSyncService;
+import com.bubelov.coins.ui.fragment.MerchantsCacheFragment;
 import com.bubelov.coins.ui.widget.CurrenciesFilterPopup;
 import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.ui.widget.MerchantDetailsView;
@@ -110,6 +110,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private boolean saveCameraPositionFlag;
 
     private CameraUpdate cameraBeforeSelection;
+
+    private MerchantsCacheFragment merchantsCacheFragment;
 
     public static Intent newShowMerchantIntent(Context context, long merchantId) {
         Intent intent = new Intent(context, MapActivity.class);
@@ -196,6 +198,13 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                     .build();
 
             googleApiClient.connect();
+        }
+
+        merchantsCacheFragment = (MerchantsCacheFragment) getSupportFragmentManager().findFragmentByTag(MerchantsCacheFragment.TAG);
+
+        if (merchantsCacheFragment == null) {
+            merchantsCacheFragment = new MerchantsCacheFragment();
+            getSupportFragmentManager().beginTransaction().add(merchantsCacheFragment, MerchantsCacheFragment.TAG);
         }
     }
 
@@ -307,7 +316,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 popup.show();
 
                 popup.setOnDismissListener(() -> {
-                    App.getInstance().getMerchantsCache().invalidate();
+                    merchantsCacheFragment.getMerchantsCache().invalidate();
                     reloadMerchants();
                 });
 
@@ -554,6 +563,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     @Subscribe
     public void onNewMerchantsLoaded(NewMerchantsLoadedEvent event) {
+        merchantsCacheFragment.getMerchantsCache().invalidate();
         reloadMerchants();
     }
 
@@ -576,7 +586,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         }
 
         LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        MerchantsCache cache = getApp().getMerchantsCache();
+        MerchantsCache cache = merchantsCacheFragment.getMerchantsCache();
 
         if (cache.isInitialized()) {
             onMerchantsLoaded(cache.getMerchants(bounds, amenity));
