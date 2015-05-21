@@ -116,7 +116,7 @@ public class DrawerMenu extends FrameLayout {
     private void showPrice() {
         Cursor priceCursor = getContext().getContentResolver().query(Database.Currencies.CONTENT_URI,
                 new String[] { Database.Currencies.PRICE, Database.Currencies.PRICE_LAST_CHECK },
-                "code = ?",
+                String.format("%s = ?", Database.Currencies.CODE),
                 new String[] { "BTC" },
                 null);
 
@@ -131,6 +131,8 @@ public class DrawerMenu extends FrameLayout {
                 priceLastCheck.setText("Checked: " + DateFormat.getTimeInstance().format(priceCursor.getLong(1)));
             }
         }
+
+        priceCursor.close();
     }
 
     public interface OnMenuItemSelectedListener {

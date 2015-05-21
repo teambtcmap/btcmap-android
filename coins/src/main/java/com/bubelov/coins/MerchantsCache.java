@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.bubelov.coins.database.Database;
+import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Merchant;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -36,12 +37,12 @@ public class MerchantsCache {
         return initialized;
     }
 
-    public Collection<Merchant> getMerchants(LatLngBounds bounds, String amenity) {
+    public Collection<Merchant> getMerchants(LatLngBounds bounds, Amenity amenity) {
         Collection<Merchant> merchants = new ArrayList<>();
 
         for (Merchant merchant : data) {
             if (bounds.contains(merchant.getPosition())
-                    && (TextUtils.isEmpty(amenity) || amenity.equals(merchant.getAmenity()))) {
+                    && (amenity == null || amenity.name().equalsIgnoreCase(merchant.getAmenity()))) {
                 merchants.add(merchant);
             }
         }

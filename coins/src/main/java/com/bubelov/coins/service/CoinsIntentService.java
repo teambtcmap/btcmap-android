@@ -19,10 +19,6 @@ public abstract class CoinsIntentService extends IntentService {
         app = App.getInstance();
     }
 
-    public App getApp() {
-        return app;
-    }
-
     protected Bus getBus() {
         return app.getBus();
     }

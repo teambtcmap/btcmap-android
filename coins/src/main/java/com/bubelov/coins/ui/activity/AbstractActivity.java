@@ -22,7 +22,7 @@ public abstract class AbstractActivity extends AppCompatActivity implements Netw
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        app = ((App) getApplication());
+        app = App.getInstance();
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
     }
@@ -49,10 +49,6 @@ public abstract class AbstractActivity extends AppCompatActivity implements Netw
     @Override
     public void networkUnavailable() {
         // Nothing to do here
-    }
-
-    public App getApp() {
-        return app;
     }
 
     protected <T extends View> T findView(int id) {

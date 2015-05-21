@@ -29,4 +29,33 @@
 
     <string name="dialog_save_notification_area">You haven\'t confirm selected area. Do you want to save it?</string>
 
+    <string name="bitcoin_price">Bitcoin price</string>
+
+    <string name="menu_item_all_merchants">All</string>
+    <string name="menu_item_atms">ATMs</string>
+    <string name="menu_item_cafes">Cafes</string>
+    <string name="menu_item_restaurants">Restaurants</string>
+    <string name="menu_item_bars">Bars</string>
+    <string name="menu_item_hotels">Hotels</string>
+    <string name="menu_item_car_washes">Car washes</string>
+    <string name="menu_item_gas_stations">Gas stations</string>
+    <string name="menu_item_hospitals">Hospitals</string>
+    <string name="menu_item_laundry_services">Laundry services</string>
+    <string name="menu_item_movies">Movies</string>
+    <string name="menu_item_parking">Parking</string>
+    <string name="menu_item_pharmacies">Pharmacies</string>
+    <string name="menu_item_pizza">Pizza</string>
+    <string name="menu_item_taxi">Taxi</string>
+
+    <string name="menu_item_settings">Settings</string>
+    <string name="menu_item_help_and_feedback">Help &amp; feedback</string>
+
+    <string name="loading_address">Loading address…</string>
+    <string name="could_not_load_address">Couldn\'t load address</string>
+
+    <string name="not_provided">Not provided</string>
+
+    <string name="share_merchant_message_title">Check it out!</string>
+    <string name="share_merchant_message_text">This place accept cryptocurrency</string>
+
 </resources>

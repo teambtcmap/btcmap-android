@@ -46,14 +46,21 @@ public class CoinsProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        if (uri.getPathSegments().contains("search_suggest_query")) {
+        if (uri.getPathSegments().contains(SearchManager.SUGGEST_URI_PATH_QUERY)) {
             MatrixCursor resultCursor = new MatrixCursor(new String[]{BaseColumns._ID, SearchManager.SUGGEST_COLUMN_TEXT_1, SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID});
 
-            if (uri.getLastPathSegment().equals("search_suggest_query")) {
+            if (uri.getLastPathSegment().equals(SearchManager.SUGGEST_URI_PATH_QUERY)) {
                 return resultCursor;
             }
 
-            Cursor merchantsCursor = db.getReadableDatabase().query(Database.Merchants.TABLE_NAME, new String[]{Database.Merchants._ID, Database.Merchants.NAME}, "name like ? or amenity like ?", new String[]{"%" + uri.getLastPathSegment() + "%", "%" + uri.getLastPathSegment() + "%"}, null, null, null, null);
+            Cursor merchantsCursor = db.getReadableDatabase().query(Database.Merchants.TABLE_NAME,
+                    new String[]{Database.Merchants._ID, Database.Merchants.NAME},
+                    String.format("%s like ? or %s like ?", Database.Merchants.NAME, Database.Merchants.AMENITY),
+                    new String[]{"%" + uri.getLastPathSegment() + "%", "%" + uri.getLastPathSegment() + "%"},
+                    null,
+                    null,
+                    null,
+                    null);
 
             int i = 1;
 
@@ -83,7 +90,15 @@ public class CoinsProvider extends ContentProvider {
                 }
             }
 
-            return db.getReadableDatabase().rawQuery("select " + selectionBuilder.toString() + " from currencies c join currencies_merchants cm on cm.currency_id = c._id and cm.merchant_id = " + merchantId, null);
+            String query = String.format("select %s from %s c join %s cm on cm.%s = c._id and cm.%s = %s",
+                    selectionBuilder.toString(),
+                    Database.Currencies.TABLE_NAME,
+                    Database.CurrenciesMerchants.TABLE_NAME,
+                    Database.CurrenciesMerchants.CURRENCY_ID,
+                    Database.CurrenciesMerchants.MERCHANT_ID,
+                    merchantId);
+
+            return db.getReadableDatabase().rawQuery(query, null);
         }
 
         return db.getReadableDatabase().query(getTableName(uri),

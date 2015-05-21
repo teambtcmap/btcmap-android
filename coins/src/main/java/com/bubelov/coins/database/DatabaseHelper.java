@@ -14,51 +14,51 @@ import com.bubelov.coins.service.DatabaseSyncService;
  */
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    private static final String TEXT_TYPE = " TEXT";
-    private static final String REAL_TYPE = " REAL";
-    private static final String INTEGER_TYPE = " INTEGER";
-    private static final String BOOLEAN_TYPE = " BOOLEAN";
+    private static final String TEXT = " TEXT";
+    private static final String REAL = " REAL";
+    private static final String INTEGER = " INTEGER";
+    private static final String BOOLEAN = " BOOLEAN";
 
     private static final String COMMA_SEP = ",";
 
     private static final String SQL_CREATE_MERCHANTS_TABLE =
             "CREATE TABLE " + Database.Merchants.TABLE_NAME + " (" +
-                    Database.Merchants._ID + INTEGER_TYPE + " PRIMARY KEY" + COMMA_SEP +
-                    Database.Merchants._CREATED_AT + INTEGER_TYPE + COMMA_SEP +
-                    Database.Merchants._UPDATED_AT + INTEGER_TYPE + COMMA_SEP +
-                    Database.Merchants.LATITUDE + REAL_TYPE + COMMA_SEP +
-                    Database.Merchants.LONGITUDE + REAL_TYPE + COMMA_SEP +
-                    Database.Merchants.NAME + TEXT_TYPE + COMMA_SEP +
-                    Database.Merchants.DESCRIPTION + TEXT_TYPE + COMMA_SEP +
-                    Database.Merchants.PHONE + TEXT_TYPE + COMMA_SEP +
-                    Database.Merchants.WEBSITE + TEXT_TYPE + COMMA_SEP +
-                    Database.Merchants.AMENITY + TEXT_TYPE + COMMA_SEP +
-                    Database.Merchants.OPENING_HOURS + TEXT_TYPE + COMMA_SEP +
-                    Database.Merchants.ADDRESS + TEXT_TYPE +
+                    Database.Merchants._ID + INTEGER + " PRIMARY KEY" + COMMA_SEP +
+                    Database.Merchants._CREATED_AT + INTEGER + COMMA_SEP +
+                    Database.Merchants._UPDATED_AT + INTEGER + COMMA_SEP +
+                    Database.Merchants.LATITUDE + REAL + COMMA_SEP +
+                    Database.Merchants.LONGITUDE + REAL + COMMA_SEP +
+                    Database.Merchants.NAME + TEXT + COMMA_SEP +
+                    Database.Merchants.DESCRIPTION + TEXT + COMMA_SEP +
+                    Database.Merchants.PHONE + TEXT + COMMA_SEP +
+                    Database.Merchants.WEBSITE + TEXT + COMMA_SEP +
+                    Database.Merchants.AMENITY + TEXT + COMMA_SEP +
+                    Database.Merchants.OPENING_HOURS + TEXT + COMMA_SEP +
+                    Database.Merchants.ADDRESS + TEXT +
             " )";
 
     private static final String SQL_CREATE_CURRENCIES_TABLE =
             "CREATE TABLE " + Database.Currencies.TABLE_NAME + " (" +
-                    Database.Currencies._ID + INTEGER_TYPE + " PRIMARY KEY" + COMMA_SEP +
-                    Database.Currencies._CREATED_AT + INTEGER_TYPE + COMMA_SEP +
-                    Database.Currencies._UPDATED_AT + INTEGER_TYPE + COMMA_SEP +
-                    Database.Currencies.NAME + TEXT_TYPE + COMMA_SEP +
-                    Database.Currencies.CODE + INTEGER_TYPE + COMMA_SEP +
-                    Database.Currencies.SHOW_ON_MAP + BOOLEAN_TYPE + " NOT NULL DEFAULT 1" + COMMA_SEP +
-                    Database.Currencies.PRICE + REAL_TYPE + COMMA_SEP +
-                    Database.Currencies.PRICE_LAST_CHECK + INTEGER_TYPE +
+                    Database.Currencies._ID + INTEGER + " PRIMARY KEY" + COMMA_SEP +
+                    Database.Currencies._CREATED_AT + INTEGER + COMMA_SEP +
+                    Database.Currencies._UPDATED_AT + INTEGER + COMMA_SEP +
+                    Database.Currencies.NAME + TEXT + COMMA_SEP +
+                    Database.Currencies.CODE + INTEGER + COMMA_SEP +
+                    Database.Currencies.SHOW_ON_MAP + BOOLEAN + " NOT NULL DEFAULT 1" + COMMA_SEP +
+                    Database.Currencies.PRICE + REAL + COMMA_SEP +
+                    Database.Currencies.PRICE_LAST_CHECK + INTEGER +
                     " )";
 
     private static final String SQL_CREATE_MERCHANTS_TO_CURRENCIES_TABLE =
             "CREATE TABLE " + Database.CurrenciesMerchants.TABLE_NAME + " (" +
-                    Database.CurrenciesMerchants._ID + INTEGER_TYPE + " PRIMARY KEY" + COMMA_SEP +
-                    Database.CurrenciesMerchants.MERCHANT_ID + TEXT_TYPE + COMMA_SEP +
-                    Database.CurrenciesMerchants.CURRENCY_ID + INTEGER_TYPE +
+                    Database.CurrenciesMerchants._ID + INTEGER + " PRIMARY KEY" + COMMA_SEP +
+                    Database.CurrenciesMerchants.MERCHANT_ID + TEXT + COMMA_SEP +
+                    Database.CurrenciesMerchants.CURRENCY_ID + INTEGER +
                     " )";
 
     private static final String SQL_DELETE_MERCHANTS_TABLE = "DROP TABLE IF EXISTS " + Database.Merchants.TABLE_NAME;
     private static final String SQL_DELETE_CURRENCIES_TABLE = "DROP TABLE IF EXISTS " + Database.Currencies.TABLE_NAME;
-    private static final String SQL_DELETE_MERCHANTS_TO_CURRENCIES_TABLE = "DROP TABLE IF EXISTS " + Database.CurrenciesMerchants.TABLE_NAME;
+    private static final String SQL_DELETE_CURRENCIES_TO_MERCHANTS_TABLE = "DROP TABLE IF EXISTS " + Database.CurrenciesMerchants.TABLE_NAME;
 
     public DatabaseHelper(Context context) {
         super(context,
@@ -73,16 +73,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_CURRENCIES_TABLE);
         db.execSQL(SQL_CREATE_MERCHANTS_TO_CURRENCIES_TABLE);
 
-        db.execSQL("CREATE INDEX index_merchant_id_position ON merchants (_id, latitude, longitude)");
-        db.execSQL("CREATE INDEX index_currency_id ON currencies (_id)");
-        db.execSQL("CREATE INDEX index_currency_merchant_id ON currencies_merchants (_id)");
+        db.execSQL(String.format("CREATE INDEX index_merchant_id_position ON merchants (%s, %s, %s)", Database.Merchants._ID, Database.Merchants.LATITUDE, Database.Merchants.LONGITUDE));
+        db.execSQL(String.format("CREATE INDEX index_currency_id ON currencies (%s)", Database.Currencies._ID));
+        db.execSQL(String.format("CREATE INDEX index_currency_merchant_id ON currencies_merchants (%s)", Database.CurrenciesMerchants._ID));
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(SQL_DELETE_MERCHANTS_TABLE);
         db.execSQL(SQL_DELETE_CURRENCIES_TABLE);
-        db.execSQL(SQL_DELETE_MERCHANTS_TO_CURRENCIES_TABLE);
+        db.execSQL(SQL_DELETE_CURRENCIES_TO_MERCHANTS_TABLE);
         onCreate(db);
 
         Context context = App.getInstance();

@@ -2,6 +2,7 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -80,7 +81,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Bitcoin price"
+                        android:text="@string/bitcoin_price"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         app:typeface="medium" />
@@ -89,10 +90,10 @@
                         android:id="@+id/price_last_check"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Checked: 14:45 PM"
                         android:textColor="@color/white"
                         android:textSize="14sp"
-                        app:typeface="regular" />
+                        app:typeface="regular"
+                        tools:text="Checked 15 minutes ago" />
 
                 </LinearLayout>
 
@@ -117,105 +118,105 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:mi_icon="@drawable/ic_all_merchants_grey600_24dp"
-                app:text="All" />
+                app:text="@string/menu_item_all_merchants" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/atms"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:mi_icon="@drawable/ic_local_atm_grey600_24dp"
-                app:text="ATMs" />
+                app:text="@string/menu_item_atms" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/cafes"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:mi_icon="@drawable/ic_local_cafe_grey600_24dp"
-                app:text="Cafes" />
+                app:text="@string/menu_item_cafes" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/restaurants"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:mi_icon="@drawable/ic_local_restaurant_grey600_24dp"
-                app:text="Restaurants" />
+                app:text="@string/menu_item_restaurants" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/bars"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:mi_icon="@drawable/ic_local_bar_grey600_24dp"
-                app:text="Bars" />
+                app:text="@string/menu_item_bars" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/hotels"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:mi_icon="@drawable/ic_local_hotel_grey600_24dp"
-                app:text="Hotels" />
+                app:text="@string/menu_item_hotels" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/car_washes"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:mi_icon="@drawable/ic_local_car_wash_grey600_24dp"
-                app:text="Car washes" />
+                app:text="@string/menu_item_car_washes" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/gas_stations"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:mi_icon="@drawable/ic_local_gas_station_grey600_24dp"
-                app:text="Gas stations" />
+                app:text="@string/menu_item_gas_stations" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/hospitals"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:mi_icon="@drawable/ic_local_hospital_grey600_24dp"
-                app:text="Hospitals" />
+                app:text="@string/menu_item_hospitals" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/laundry"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:mi_icon="@drawable/ic_local_laundry_service_grey600_24dp"
-                app:text="Laundry services" />
+                app:text="@string/menu_item_laundry_services" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/movies"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:mi_icon="@drawable/ic_local_movies_grey600_24dp"
-                app:text="Movies" />
+                app:text="@string/menu_item_movies" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/parking"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:mi_icon="@drawable/ic_local_parking_grey600_24dp"
-                app:text="Parking" />
+                app:text="@string/menu_item_parking" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/pharmacies"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:mi_icon="@drawable/ic_local_pharmacy_grey600_24dp"
-                app:text="Pharmacies" />
+                app:icon="@drawable/ic_local_pharmacy_grey600_24dp"
+                app:text="@string/menu_item_pharmacies" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/pizza"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:mi_icon="@drawable/ic_local_pizza_grey600_24dp"
-                app:text="Pizza" />
+                app:icon="@drawable/ic_local_pizza_grey600_24dp"
+                app:text="@string/menu_item_pizza" />
 
             <com.bubelov.coins.ui.widget.MenuItem
                 android:id="@+id/taxi"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:mi_icon="@drawable/ic_local_taxi_grey600_24dp"
-                app:text="Taxi" />
+                app:text="@string/menu_item_taxi" />
 
         </LinearLayout>
 
@@ -231,13 +232,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:mi_icon="@drawable/ic_settings_grey600_24dp"
-        app:text="Settings" />
+        app:text="@string/menu_item_settings" />
 
     <com.bubelov.coins.ui.widget.MenuItem
         android:id="@+id/help_and_feedback"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:mi_icon="@drawable/ic_help_grey600_24dp"
-        app:text="Help &amp; feedback" />
+        app:text="@string/menu_item_help_and_feedback" />
 
 </LinearLayout>

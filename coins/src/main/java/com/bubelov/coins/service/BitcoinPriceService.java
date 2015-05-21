@@ -32,7 +32,7 @@ public class BitcoinPriceService extends CoinsIntentService {
 
     private static final long CACHE_LIFETIME_IN_MILLIS = TimeUnit.MINUTES.toMillis(15);
 
-    private static final String selection = "code = ?";
+    private static final String selection = String.format("%s = ?", Database.Currencies.CODE);
     private static final String[] selectionArgs = new String[] { "BTC" };
 
     private WinkDexApi winkDexApi;

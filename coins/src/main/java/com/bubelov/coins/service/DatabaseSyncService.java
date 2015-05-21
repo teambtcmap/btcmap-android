@@ -146,7 +146,7 @@ public class DatabaseSyncService extends CoinsIntentService {
 
     private void syncCurrenciesIfNecessary() throws RemoteException, OperationApplicationException {
         Cursor countCursor = getContentResolver().query(Database.Currencies.CONTENT_URI,
-                new String[]{"count(*) AS count "},
+                new String[]{"count(*) AS count"},
                 null,
                 null,
                 null);
@@ -166,9 +166,17 @@ public class DatabaseSyncService extends CoinsIntentService {
         boolean initialized = isInitialized();
 
         while (true) {
-            Cursor lastUpdateCursor = db.rawQuery("select max(m._updated_at) from merchants as m join currencies_merchants as mc on m._id = mc.merchant_id join currencies c on c._id = mc.currency_id where c.code = ?",
-                    new String[] { currencyCode });
+            String lastUpdateQuery = String.format("select max(m.%s) from %s as m join %s as cm on m.%s = cm.%s join %s c on c.%s = cm.%s where c.code = ?",
+                    Database.Merchants._UPDATED_AT,
+                    Database.Merchants.TABLE_NAME,
+                    Database.CurrenciesMerchants.TABLE_NAME,
+                    Database.Merchants._ID,
+                    Database.CurrenciesMerchants.MERCHANT_ID,
+                    Database.Currencies.TABLE_NAME,
+                    Database.Currencies._ID,
+                    Database.CurrenciesMerchants.CURRENCY_ID);
 
+            Cursor lastUpdateCursor = db.rawQuery(lastUpdateQuery, new String[] { currencyCode });
             lastUpdateCursor.moveToNext();
             long lastUpdateMillis = lastUpdateCursor.isNull(0) ? 0 : lastUpdateCursor.getLong(0);
             lastUpdateCursor.close();

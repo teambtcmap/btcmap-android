@@ -74,11 +74,11 @@ public class MerchantDetailsView extends FrameLayout {
             if (Utils.isOnline(getContext())) {
                 new LoadAddressTask().execute(merchant.getPosition());
             } else {
-                address.setText("Couldn't load address");
+                address.setText(R.string.could_not_load_address);
             }
         }
 
-        description.setText(TextUtils.isEmpty(merchant.getDescription()) ? "Not provided" : merchant.getDescription());
+        description.setText(TextUtils.isEmpty(merchant.getDescription()) ? getResources().getString(R.string.not_provided) : merchant.getDescription());
 
         call.setEnabled(!TextUtils.isEmpty(merchant.getPhone()));
         openWebsite.setEnabled(!TextUtils.isEmpty(merchant.getWebsite()));
@@ -86,9 +86,9 @@ public class MerchantDetailsView extends FrameLayout {
         directions.setOnClickListener(v -> Utils.showDirections(getContext(), merchant.getLatitude(), merchant.getLongitude()));
         call.setOnClickListener(v -> Utils.call(getContext(), merchant.getPhone()));
         openWebsite.setOnClickListener(v -> Utils.openUrl(getContext(), merchant.getWebsite()));
-        share.setOnClickListener(v -> Utils.share(getContext(), "Check it out!", "This place accept cryptocurrency"));
+        share.setOnClickListener(v -> Utils.share(getContext(), getResources().getString(R.string.share_merchant_message_title), getResources().getString(R.string.share_merchant_message_text)));
 
-        openingHours.setText(TextUtils.isEmpty(merchant.getOpeningHours()) ? "Not provided" : merchant.getOpeningHours());
+        openingHours.setText(TextUtils.isEmpty(merchant.getOpeningHours()) ? getResources().getString(R.string.not_provided) : merchant.getOpeningHours());
 
         if (merchant.getCurrencies() != null && !merchant.getCurrencies().isEmpty()) {
             StringBuilder builder = new StringBuilder();
@@ -99,7 +99,7 @@ public class MerchantDetailsView extends FrameLayout {
 
             acceptedCurrencies.setText(builder.toString());
         } else {
-            acceptedCurrencies.setText("Not provided");
+            acceptedCurrencies.setText(getResources().getString(R.string.not_provided));
         }
     }
 
@@ -128,7 +128,7 @@ public class MerchantDetailsView extends FrameLayout {
     private class LoadAddressTask extends AsyncTask<LatLng, Void, String> {
         @Override
         protected void onPreExecute() {
-            address.setText("Loading address...");
+            address.setText(R.string.loading_address);
         }
 
         @Override
@@ -160,7 +160,7 @@ public class MerchantDetailsView extends FrameLayout {
         @Override
         protected void onPostExecute(String address) {
             if (TextUtils.isEmpty(address)) {
-                MerchantDetailsView.this.address.setText("Couldn't load address");
+                MerchantDetailsView.this.address.setText(R.string.could_not_load_address);
             } else {
                 MerchantDetailsView.this.address.setText(address);
             }

@@ -35,6 +35,7 @@ import com.bubelov.coins.event.DatabaseSyncingEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
 import com.bubelov.coins.loader.MerchantsLoader;
 import com.bubelov.coins.manager.UserNotificationManager;
+import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.service.DatabaseSyncService;
@@ -91,7 +92,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private ClusterManager<Merchant> merchantsManager;
 
-    private String amenity;
+    private Amenity amenity;
 
     private SlidingUpPanelLayout slidingLayout;
 
@@ -125,9 +126,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findView(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("All");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
@@ -136,11 +136,11 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         merchantTopGradient = findView(R.id.merchant_top_gradient);
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = findView(R.id.drawer_layout);
         drawerToggle = new DrawerToggle(this, drawer, android.R.string.ok, android.R.string.ok);
         drawer.setDrawerListener(drawerToggle);
 
-        DrawerMenu drawerMenu = (DrawerMenu) findViewById(R.id.left_drawer);
+        DrawerMenu drawerMenu = findView(R.id.left_drawer);
         drawerMenu.setSelected(R.id.all);
         drawerMenu.setItemSelectedListener(this);
 
@@ -336,7 +336,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-            showToast("Query: " + query);
+            // TODO
             return;
         }
 
@@ -350,7 +350,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         }
 
         if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-            onMenuItemSelected(R.id.all, "All");
             Uri merchantUri = intent.getData();
             long merchantId = Long.valueOf(merchantUri.getLastPathSegment());
             selectMerchant(merchantId, false);
@@ -451,46 +450,46 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 amenity = null;
                 break;
             case R.id.atms:
-                amenity = "atm";
+                amenity = Amenity.ATM;
                 break;
             case R.id.cafes:
-                amenity = "cafe";
+                amenity = Amenity.CAFE;
                 break;
             case R.id.restaurants:
-                amenity = "restaurant";
+                amenity = Amenity.RESTAURANT;
                 break;
             case R.id.bars:
-                amenity = "bar";
+                amenity = Amenity.BAR;
                 break;
             case R.id.hotels:
-                amenity = "hotel";
+                amenity = Amenity.HOTEL;
                 break;
             case R.id.car_washes:
-                amenity = "car_wash";
+                amenity = Amenity.CAR_WASH;
                 break;
             case R.id.gas_stations:
-                amenity = "fuel";
+                amenity = Amenity.FUEL;
                 break;
             case R.id.hospitals:
-                amenity = "hospital";
+                amenity = Amenity.HOSPITAL;
                 break;
             case R.id.laundry:
-                amenity = "dry_cleaning";
+                amenity = Amenity.DRY_CLEANING;
                 break;
             case R.id.movies:
-                amenity = "cinema";
+                amenity = Amenity.CINEMA;
                 break;
             case R.id.parking:
-                amenity = "parking";
+                amenity = Amenity.PARKING;
                 break;
             case R.id.pharmacies:
-                amenity = "pharmacy";
+                amenity = Amenity.PHARMACY;
                 break;
             case R.id.pizza:
-                amenity = "pizza";
+                amenity = Amenity.PIZZA;
                 break;
             case R.id.taxi:
-                amenity = "taxi";
+                amenity = Amenity.TAXI;
                 break;
         }
 

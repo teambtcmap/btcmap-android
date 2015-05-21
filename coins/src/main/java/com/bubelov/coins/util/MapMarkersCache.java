@@ -1,6 +1,7 @@
 package com.bubelov.coins.util;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.model.Amenity;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
@@ -24,59 +25,59 @@ public class MapMarkersCache {
     }
 
     private BitmapDescriptor createBitmapDescriptor(String amenity) {
-        if ("atm".equals(amenity)) {
+        if (Amenity.ATM.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_atm);
         }
 
-        if ("cafe".equals(amenity)) {
+        if (Amenity.CAFE.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_cafe);
         }
 
-        if ("restaurant".equals(amenity)) {
+        if (Amenity.RESTAURANT.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_restaurant);
         }
 
-        if ("bar".equals(amenity)) {
+        if (Amenity.BAR.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_bar);
         }
 
-        if ("hotel".equals(amenity)) {
+        if (Amenity.HOTEL.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_hotel);
         }
 
-        if ("car_wash".equals(amenity)) {
+        if (Amenity.CAR_WASH.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_car_wash);
         }
 
-        if ("fuel".equals(amenity)) {
+        if (Amenity.FUEL.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_fuel);
         }
 
-        if ("hospital".equals(amenity)) {
+        if (Amenity.HOSPITAL.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_hospital);
         }
 
-        if ("dry_cleaning".equals(amenity)) {
+        if (Amenity.DRY_CLEANING.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_dry_cleaning);
         }
 
-        if ("cinema".equals(amenity)) {
+        if (Amenity.CINEMA.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_cinema);
         }
 
-        if ("parking".equals(amenity)) {
+        if (Amenity.PARKING.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_parking);
         }
 
-        if ("pharmacy".equals(amenity)) {
+        if (Amenity.PHARMACY.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_pharmacy);
         }
 
-        if ("pizza".equals(amenity)) {
+        if (Amenity.PIZZA.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_pizza);
         }
 
-        if ("taxi".equals(amenity)) {
+        if (Amenity.TAXI.name().equalsIgnoreCase(amenity)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_taxi);
         }
 

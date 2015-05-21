@@ -29,7 +29,7 @@ public class SettingsActivity extends AbstractActivity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
+        LinearLayout root = (LinearLayout) findView(android.R.id.list).getParent().getParent().getParent();
         Toolbar toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_toolbar, root, false);
         toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         root.addView(toolbar, 0);
