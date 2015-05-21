@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <string name="app_name">Coins</string>
+    <string name="ma_title">Coins</string>
+
+    <string name="search">Поиск</string>
+
+    <string name="sa_title">Настройки</string>
+
+    <string name="action_filter">Фильтр</string>
+    <string name="action_done">Готово</string>
+
+    <string name="pref_category_notifications">УВЕДОМЛЕНИЯ</string>
+
+    <string name="pref_show_new_merchants_key">pref_new_merchant_notifications</string>
+    <string name="pref_show_new_merchants">Новые торговцы</string>
+    <string name="pref_show_new_merchants_on">Уведомлять о новых торговцах рядом</string>
+    <string name="pref_show_new_merchants_off">Не уведомлять о новых торговцах</string>
+
+    <string name="pref_area_of_interest_key">pref_area_of_interest</string>
+    <string name="pref_area_of_interest">Местоположение</string>
+    <string name="pref_area_of_interest_summary">Выберете зону уведомлений</string>
+
+    <string name="notification_new_merchant">Новый место принимает криптовалюту</string>
+    <string name="notification_new_merchant_no_name">Нажмите чтобы его увидеть</string>
+
+    <string name="bitcoin_price">Цена Bitcoin</string>
+
+    <string name="menu_item_all_merchants">Все</string>
+    <string name="menu_item_atms">Банкоматы</string>
+    <string name="menu_item_cafes">Кафе</string>
+    <string name="menu_item_restaurants">Рестораны</string>
+    <string name="menu_item_bars">Бары</string>
+    <string name="menu_item_hotels">Отели</string>
+    <string name="menu_item_car_washes">Автомойки</string>
+    <string name="menu_item_gas_stations">Авозаправки</string>
+    <string name="menu_item_hospitals">Госпитали</string>
+    <string name="menu_item_laundry_services">Прачечные</string>
+    <string name="menu_item_movies">Кино</string>
+    <string name="menu_item_parking">Парковки</string>
+    <string name="menu_item_pharmacies">Аптеки</string>
+    <string name="menu_item_pizza">Пиццерии</string>
+    <string name="menu_item_taxi">Такси</string>
+
+    <string name="menu_item_settings">Настройки</string>
+    <string name="menu_item_help_and_feedback">Справка/отзыв</string>
+
+    <string name="loading_address">Получение адреса…</string>
+    <string name="could_not_load_address">Не удалось получить адрес</string>
+
+    <string name="not_provided">Информация отсутствует</string>
+
+    <string name="share_merchant_message_title">Зацени!</string>
+    <string name="share_merchant_message_text">Это место принимает криптовалюту</string>
+
+</resources>
