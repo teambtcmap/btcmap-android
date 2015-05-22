@@ -12,10 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom"
-        app:umanoOverlay="true"
-        app:umanoFadeColor="#00FFFFFF"
-        app:umanoPanelHeight="68dp"
-        app:umanoShadowHeight="4dp">
+        app:overlay="true"
+        app:fadeColor="#00FFFFFF"
+        app:panelHeight="68dp"
+        app:shadowHeight="4dp">
 
         <FrameLayout
             android:layout_width="match_parent"

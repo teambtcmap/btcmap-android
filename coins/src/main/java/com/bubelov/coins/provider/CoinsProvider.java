@@ -90,15 +90,14 @@ public class CoinsProvider extends ContentProvider {
                 }
             }
 
-            String query = String.format("select %s from %s c join %s cm on cm.%s = c._id and cm.%s = %s",
+            String query = String.format("select distinct %s from %s c join %s cm on cm.%s = c._id and cm.%s = ?",
                     selectionBuilder.toString(),
                     Database.Currencies.TABLE_NAME,
                     Database.CurrenciesMerchants.TABLE_NAME,
                     Database.CurrenciesMerchants.CURRENCY_ID,
-                    Database.CurrenciesMerchants.MERCHANT_ID,
-                    merchantId);
+                    Database.CurrenciesMerchants.MERCHANT_ID);
 
-            return db.getReadableDatabase().rawQuery(query, null);
+            return db.getReadableDatabase().rawQuery(query, new String[]{String.valueOf(merchantId)});
         }
 
         return db.getReadableDatabase().query(getTableName(uri),

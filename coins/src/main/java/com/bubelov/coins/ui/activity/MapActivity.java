@@ -1,6 +1,5 @@
 package com.bubelov.coins.ui.activity;
 
-import android.animation.Animator;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
@@ -24,6 +23,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.MerchantsCache;
@@ -132,7 +132,9 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         getSupportActionBar().setHomeButtonEnabled(true);
 
         merchantToolbar = findView(R.id.merchant_toolbar);
-        merchantToolbar.setNavigationOnClickListener(v -> slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED));
+        merchantToolbar.setNavigationOnClickListener(v -> {
+            slidingLayout.collapsePanel();
+        });
 
         merchantTopGradient = findView(R.id.merchant_top_gradient);
 
@@ -161,32 +163,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         merchantDetails = findView(R.id.merchant_details);
 
-        loader = findView(R.id.loader);
-        loader.animate().alpha(0.7f).setDuration(700).setListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (loader.getAlpha() == 0.7f) {
-                    loader.animate().alpha(1.0f).setDuration(700).setListener(this);
-                } else {
-                    loader.animate().alpha(0.7f).setDuration(700).setListener(this);
-                }
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
+        initLoader();
 
         markersCache = new MapMarkersCache();
 
@@ -214,71 +191,19 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         drawerToggle.syncState();
 
         slidingLayout = findView(R.id.sliding_panel);
-        slidingLayout.setPanelHeight(0);
+
+        if (savedInstanceState == null) {
+            slidingLayout.hidePanel();
+        } else {
+            if (savedInstanceState.containsKey(MERCHANT_ID_EXTRA)){
+                long merchantId = savedInstanceState.getLong(MERCHANT_ID_EXTRA);
+                selectedMerchant = getMerchant(merchantId);
+                merchantDetails.setMerchant(selectedMerchant);
+            }
+        }
+
         slidingLayout.setAnchorPoint(0.5f);
-
-        slidingLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
-            @Override
-            public void onPanelSlide(View view, float offset) {
-                if (saveCameraPositionFlag) {
-                    cameraBeforeSelection = CameraUpdateFactory.newCameraPosition(map.getCameraPosition());
-                    saveCameraPositionFlag = false;
-                }
-
-                if (offset < 0.2) {
-                    if (!getSupportActionBar().isShowing()) {
-                        getSupportActionBar().show();
-                        merchantToolbar.setVisibility(View.GONE);
-                        merchantTopGradient.setVisibility(View.GONE);
-                    }
-
-                    if (databaseSyncing) {
-                        loader.setVisibility(View.VISIBLE);
-                    }
-                } else {
-                    if (getSupportActionBar().isShowing()) {
-                        getSupportActionBar().hide();
-                        merchantToolbar.setVisibility(View.VISIBLE);
-                        merchantTopGradient.setVisibility(View.VISIBLE);
-                    }
-
-                    if (loader.getVisibility() == View.VISIBLE) {
-                        loader.setVisibility(View.GONE);
-                    }
-                }
-            }
-
-            @Override
-            public void onPanelCollapsed(View view) {
-                map.setPadding(0, 0, 0, 0);
-                map.getUiSettings().setAllGesturesEnabled(true);
-                merchantDetails.setMultilineHeader(false);
-
-                if (cameraBeforeSelection != null) {
-                    map.moveCamera(cameraBeforeSelection);
-                    cameraBeforeSelection = null;
-                    merchantDetails.postDelayed(() -> reloadMerchants(), 1);
-                }
-            }
-
-            @Override
-            public void onPanelExpanded(View view) {
-
-            }
-
-            @Override
-            public void onPanelAnchored(View view) {
-                map.setPadding(0, getResources().getDimensionPixelSize(R.dimen.marker_size) / 2, 0, Utils.getScreenHeight(MapActivity.this) / 2 + Utils.getStatusBarHeight(getApplicationContext()));
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), 13));
-                map.getUiSettings().setAllGesturesEnabled(false);
-                merchantDetails.setMultilineHeader(true);
-            }
-
-            @Override
-            public void onPanelHidden(View view) {
-
-            }
-        });
+        slidingLayout.setPanelSlideListener(new PanelSlideListener());
 
         handleIntent(getIntent());
     }
@@ -343,7 +268,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         if (intent.hasExtra(MERCHANT_ID_EXTRA)) {
             slidingLayout.postDelayed(() -> {
                 selectMerchant(intent.getLongExtra(MERCHANT_ID_EXTRA, -1), false);
-                slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+                slidingLayout.anchorPanel();
             }, 1);
 
             return;
@@ -353,14 +278,17 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             Uri merchantUri = intent.getData();
             long merchantId = Long.valueOf(merchantUri.getLastPathSegment());
             selectMerchant(merchantId, false);
-            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+            slidingLayout.anchorPanel();
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable("", map.getCameraPosition());
+
+        if (selectedMerchant != null) {
+            outState.putLong(MERCHANT_ID_EXTRA, selectedMerchant.getId());
+        }
     }
 
     @Override
@@ -383,7 +311,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     @Override
     public void onBackPressed() {
         if (slidingLayout.getPanelState().equals(SlidingUpPanelLayout.PanelState.ANCHORED) || slidingLayout.getPanelState().equals(SlidingUpPanelLayout.PanelState.EXPANDED)) {
-            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            slidingLayout.collapsePanel();
         } else {
             super.onBackPressed();
         }
@@ -496,6 +424,15 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         reloadMerchants();
     }
 
+    private void initLoader() {
+        AlphaAnimation animation = new AlphaAnimation(0.7f, 1.0f);
+        animation.setDuration(700);
+        animation.setRepeatCount(AlphaAnimation.INFINITE);
+        animation.setRepeatMode(AlphaAnimation.REVERSE);
+        loader = findView(R.id.loader);
+        loader.startAnimation(animation);
+    }
+
     private void findLocation() {
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         UserNotificationManager notificationManager = new UserNotificationManager(this);
@@ -548,7 +485,10 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         map.setOnCameraChangeListener(merchantsManager);
         map.setOnMarkerClickListener(merchantsManager);
-        map.setOnMapClickListener(latLng -> slidingLayout.setPanelHeight(0));
+        map.setOnMapClickListener(latLng -> {
+            slidingLayout.hidePanel();
+            selectedMerchant = null;
+        });
     }
 
     @Subscribe
@@ -598,12 +538,13 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         Merchant merchant = new Merchant();
 
         Cursor cursor = getContentResolver().query(Database.Merchants.CONTENT_URI,
-                new String[] { Database.Merchants.LATITUDE, Database.Merchants.LONGITUDE, Database.Merchants.NAME, Database.Merchants.DESCRIPTION, Database.Merchants.PHONE, Database.Merchants.WEBSITE, Database.Merchants.ADDRESS, Database.Merchants.OPENING_HOURS },
+                new String[] {Database.Merchants._ID, Database.Merchants.LATITUDE, Database.Merchants.LONGITUDE, Database.Merchants.NAME, Database.Merchants.DESCRIPTION, Database.Merchants.PHONE, Database.Merchants.WEBSITE, Database.Merchants.ADDRESS, Database.Merchants.OPENING_HOURS, Database.Merchants.AMENITY },
                 "_id = ?",
                 new String[] { String.valueOf(id) },
                 null);
 
         if (cursor.moveToNext()) {
+            merchant.setId(cursor.getLong(cursor.getColumnIndex(Database.Merchants._ID)));
             merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LATITUDE)));
             merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LONGITUDE)));
             merchant.setName(cursor.getString(cursor.getColumnIndex(Database.Merchants.NAME)));
@@ -612,6 +553,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             merchant.setWebsite(cursor.getString(cursor.getColumnIndex(Database.Merchants.WEBSITE)));
             merchant.setAddress(cursor.getString(cursor.getColumnIndex(Database.Merchants.ADDRESS)));
             merchant.setOpeningHours(cursor.getString(cursor.getColumnIndex(Database.Merchants.OPENING_HOURS)));
+            merchant.setAmenity(cursor.getString(cursor.getColumnIndex(Database.Merchants.AMENITY)));
         }
 
         cursor.close();
@@ -689,7 +631,9 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         saveCameraPositionFlag = saveCameraPosition;
         selectedMerchant = getMerchant(merchantId);
         merchantDetails.setMerchant(selectedMerchant);
+
         slidingLayout.setPanelHeight(merchantDetails.getHeaderHeight());
+        slidingLayout.showPanel();
     }
 
     private class LocationApiConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks {
@@ -708,6 +652,77 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         @Override
         public void onConnectionFailed(ConnectionResult connectionResult) {
             showToast("Couldn't connect to location API");
+        }
+    }
+
+    private class PanelSlideListener implements SlidingUpPanelLayout.PanelSlideListener {
+        private boolean wasExpanded;
+
+        @Override
+        public void onPanelSlide(View view, float offset) {
+            if (saveCameraPositionFlag) {
+                cameraBeforeSelection = CameraUpdateFactory.newCameraPosition(map.getCameraPosition());
+                saveCameraPositionFlag = false;
+            }
+
+            if (offset < 0.2) {
+                if (!getSupportActionBar().isShowing()) {
+                    getSupportActionBar().show();
+                    merchantToolbar.setVisibility(View.GONE);
+                    merchantTopGradient.setVisibility(View.GONE);
+                }
+
+                if (databaseSyncing) {
+                    loader.setVisibility(View.VISIBLE);
+                }
+            } else {
+                if (getSupportActionBar().isShowing()) {
+                    getSupportActionBar().hide();
+                    merchantToolbar.setVisibility(View.VISIBLE);
+                    merchantTopGradient.setVisibility(View.VISIBLE);
+                }
+
+                if (loader.getVisibility() == View.VISIBLE) {
+                    loader.setVisibility(View.GONE);
+                }
+            }
+        }
+
+        @Override
+        public void onPanelCollapsed(View view) {
+            if (!wasExpanded) {
+                return;
+            }
+
+            map.setPadding(0, 0, 0, 0);
+            map.getUiSettings().setAllGesturesEnabled(true);
+            merchantDetails.setMultilineHeader(false);
+
+            if (cameraBeforeSelection != null) {
+                map.moveCamera(cameraBeforeSelection);
+                cameraBeforeSelection = null;
+                merchantDetails.postDelayed(() -> reloadMerchants(), 1);
+            }
+        }
+
+        @Override
+        public void onPanelExpanded(View view) {
+            wasExpanded = true;
+        }
+
+        @Override
+        public void onPanelAnchored(View view) {
+            wasExpanded = true;
+            map.setPadding(0, getResources().getDimensionPixelSize(R.dimen.marker_size) / 2, 0, Utils.getScreenHeight(MapActivity.this) / 2 + Utils.getStatusBarHeight(getApplicationContext()));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), 13));
+            map.getUiSettings().setAllGesturesEnabled(false);
+            merchantDetails.setMultilineHeader(true);
+        }
+
+        @Override
+        public void onPanelHidden(View view) {
+            selectedMerchant = null;
+            wasExpanded = false;
         }
     }
 }
