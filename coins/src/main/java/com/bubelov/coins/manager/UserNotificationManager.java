@@ -87,7 +87,7 @@ public class UserNotificationManager {
         Log.d(TAG, "Distance: " + distance[0]);
 
         if (distance[0] > getNotificationAreaRadius()) {
-            //return false;
+            return false;
         }
 
         App app = (App) context.getApplicationContext();

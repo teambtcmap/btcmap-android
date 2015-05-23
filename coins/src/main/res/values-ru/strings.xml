@@ -57,4 +57,16 @@
     <string name="share_merchant_message_title">Зацени!</string>
     <string name="share_merchant_message_text">Это место принимает криптовалюту</string>
 
+    <string name="fa_title">Справка/отзыв</string>
+
+    <string name="fa_description">Если у вас появились вопросы или предложения - можете оставить их в Google Play или связаться с кем-нибудь из команды.</string>
+    <string name="fa_programming">Программирование:</string>
+    <string name="fa_programmer_name">Игорь Бубелов</string>
+    <string name="fa_design">Дизайн:</string>
+    <string name="fa_designer_name">Виталий Юшков</string>
+    <string name="fa_linkedin_profile">Профиль на LinkedIn</string>
+    <string name="fa_dribble_profile">Профиль на Dribble</string>
+    <string name="fa_donation_address">Помочь проекту можно этот кошелек =)</string>
+    <string name="fa_copy_to_clipboard">Копировать адрес</string>
+
 </resources>

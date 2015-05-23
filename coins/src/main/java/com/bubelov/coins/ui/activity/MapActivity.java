@@ -382,6 +382,11 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             return;
         }
 
+        if (id == R.id.help_and_feedback) {
+            startActivity(new Intent(this, FeedbackActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
+            return;
+        }
+
         switch (id) {
             case R.id.all:
                 amenity = null;
@@ -708,6 +713,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         @Override
         public void onPanelCollapsed(View view) {
+            merchantDetails.setMultilineHeader(false);
             slidingLayout.post(() -> slidingLayout.setPanelHeight(merchantDetails.getHeaderHeight()));
 
             if (!wasExpanded) {
@@ -743,6 +749,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         public void onPanelHidden(View view) {
             selectedMerchant = null;
             wasExpanded = false;
+            map.setPadding(0, 0, 0, 0);
             map.getUiSettings().setAllGesturesEnabled(true);
         }
     }

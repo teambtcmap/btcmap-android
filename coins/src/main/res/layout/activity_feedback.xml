@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        style="@style/Toolbar.WithBackNavigation" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/fa_description"
+                app:typeface="regular" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="16dp" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/fa_programming"
+                android:textColor="@color/secondary_text_or_icons"
+                app:typeface="regular" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/fa_programmer_name"
+                android:textColor="@color/text"
+                app:typeface="regular" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ibubelov@gmail.com"
+                android:textColor="@color/text"
+                app:typeface="regular" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onOpenDeveloperProfileClicked"
+                android:text="@string/fa_linkedin_profile"
+                android:textColor="@color/link"
+                app:typeface="regular" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="16dp" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/fa_design"
+                android:textColor="@color/secondary_text_or_icons"
+                app:typeface="regular" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/fa_designer_name"
+                android:textColor="@color/text"
+                app:typeface="regular" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hi@turboyushkov.ru"
+                android:textColor="@color/text"
+                app:typeface="regular" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onDesignerProfileClicked"
+                android:text="@string/fa_dribble_profile"
+                android:textColor="@color/link"
+                app:typeface="regular" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="16dp" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/fa_donation_address"
+                android:textColor="@color/secondary_text_or_icons"
+                app:typeface="regular" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="8dp" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/donation_qr" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="4dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:onClick="onCopyDonationAddress"
+                android:text="@string/fa_copy_to_clipboard" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

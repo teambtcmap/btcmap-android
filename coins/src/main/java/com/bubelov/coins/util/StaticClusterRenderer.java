@@ -164,9 +164,9 @@ public class StaticClusterRenderer<T extends ClusterItem> implements ClusterRend
     private LayerDrawable makeClusterBackground() {
         mColoredCircleBackground = new ShapeDrawable(new OvalShape());
         ShapeDrawable outline = new ShapeDrawable(new OvalShape());
-        outline.getPaint().setColor(0x80ffffff); // Transparent white.
+        outline.getPaint().setColor(Color.WHITE); // Transparent white.
         LayerDrawable background = new LayerDrawable(new Drawable[]{outline, mColoredCircleBackground});
-        int strokeWidth = (int) (mDensity * 3);
+        int strokeWidth = (int) (mDensity * 1.5f);
         background.setLayerInset(1, strokeWidth, strokeWidth, strokeWidth, strokeWidth);
         return background;
     }
@@ -182,13 +182,35 @@ public class StaticClusterRenderer<T extends ClusterItem> implements ClusterRend
     }
 
     private int getColor(int clusterSize) {
-        final float hueRange = 220;
-        final float sizeRange = 300;
-        final float size = Math.min(clusterSize, sizeRange);
-        final float hue = (sizeRange - size) * (sizeRange - size) / (sizeRange * sizeRange) * hueRange;
-        return Color.HSVToColor(new float[]{
-                hue, 1f, .6f
-        });
+        if (clusterSize >= 1000) {
+            return Color.parseColor("#FF1744");
+        }
+
+        if (clusterSize >= 500) {
+            return Color.parseColor("#f44336");
+        }
+
+        if (clusterSize >= 200) {
+            return Color.parseColor("#5C6BC0");
+        }
+
+        if (clusterSize >= 100) {
+            return Color.parseColor("#F06292");
+        }
+
+        if (clusterSize >= 50) {
+            return Color.parseColor("#BA68C8");
+        }
+
+        if (clusterSize >= 20) {
+            return Color.parseColor("#7CB342");
+        }
+
+        if (clusterSize >= 10) {
+            return Color.parseColor("#039BE5");
+        }
+
+        return Color.parseColor("#26A69A");
     }
 
     protected String getClusterText(int bucket) {

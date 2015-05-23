@@ -60,6 +60,10 @@
             android:name=".ui.activity.SelectAreaActivity"
             android:label="" />
 
+        <activity
+            android:name=".ui.activity.FeedbackActivity"
+            android:label="@string/fa_title" />
+
         <service android:name=".service.DatabaseSyncService" />
 
         <service android:name=".service.BitcoinPriceService" />
