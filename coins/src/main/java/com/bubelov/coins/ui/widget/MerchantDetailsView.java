@@ -66,7 +66,11 @@ public class MerchantDetailsView extends FrameLayout {
     }
 
     public void setMerchant(Merchant merchant) {
-        name.setText(merchant.getName());
+        if (TextUtils.isEmpty(merchant.getName())) {
+            name.setText(R.string.name_unknown);
+        } else {
+            name.setText(merchant.getName());
+        }
 
         if (!TextUtils.isEmpty(merchant.getAddress())) {
             address.setText(merchant.getAddress());

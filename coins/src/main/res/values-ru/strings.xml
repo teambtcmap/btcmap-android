@@ -47,6 +47,8 @@
     <string name="menu_item_settings">Настройки</string>
     <string name="menu_item_help_and_feedback">Справка/отзыв</string>
 
+    <string name="name_unknown">Без названия</string>
+
     <string name="loading_address">Получение адреса…</string>
     <string name="could_not_load_address">Не удалось получить адрес</string>
 

@@ -47,6 +47,8 @@
     <string name="menu_item_settings">Settings</string>
     <string name="menu_item_help_and_feedback">Help &amp; feedback</string>
 
+    <string name="name_unknown">Unknown</string>
+
     <string name="loading_address">Loading address…</string>
     <string name="could_not_load_address">Couldn\'t load address</string>
 

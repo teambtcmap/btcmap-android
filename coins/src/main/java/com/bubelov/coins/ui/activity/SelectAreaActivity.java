@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.SeekBar;
 
 import com.bubelov.coins.Constants;
@@ -66,6 +67,7 @@ public class SelectAreaActivity extends AbstractActivity {
         map = mapFragment.getMap();
         map.getUiSettings().setMyLocationButtonEnabled(false);
         map.getUiSettings().setZoomControlsEnabled(false);
+        map.getUiSettings().setCompassEnabled(false);
         map.setOnMarkerDragListener(new OnMarkerDragListener());
 
         notificationManager = new UserNotificationManager(this);
@@ -96,6 +98,13 @@ public class SelectAreaActivity extends AbstractActivity {
 
             googleApiClient.connect();
         }
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        View bottomPanel = findView(R.id.bottom_panel);
+        bottomPanel.post(() -> map.setPadding(0, 0, 0, bottomPanel.getHeight()));
     }
 
     @Override
