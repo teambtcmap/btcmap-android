@@ -113,7 +113,7 @@ public class UserNotificationManager {
 
     public void notifyUser(long merchantId, String merchantName) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(context.getString(R.string.notification_new_merchant))
                 .setContentText(!TextUtils.isEmpty(merchantName) ? merchantName : context.getString(R.string.notification_new_merchant_no_name))
                 .setAutoCancel(true);
