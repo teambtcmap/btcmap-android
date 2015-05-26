@@ -58,6 +58,7 @@
                 android:onClick="onOpenDeveloperProfileClicked"
                 android:text="@string/fa_linkedin_profile"
                 android:textColor="@color/link"
+                android:clickable="true"
                 app:typeface="regular" />
 
             <Space
@@ -89,8 +90,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="onDesignerProfileClicked"
-                android:text="@string/fa_dribble_profile"
+                android:text="@string/fa_behance_profile"
                 android:textColor="@color/link"
+                android:clickable="true"
                 app:typeface="regular" />
 
             <Space

@@ -3,13 +3,13 @@ apply plugin: 'me.tatarka.retrolambda'
 
 android {
     compileSdkVersion 22
-    buildToolsVersion '21.1.2'
+    buildToolsVersion "22.0.1"
 
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 22
-        versionCode 13
-        versionName "1.0"
+        versionCode 14
+        versionName "1.0.1"
     }
 
     compileOptions {
@@ -26,8 +26,8 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:22.1.0'
-    compile 'com.google.android.gms:play-services:7.0.0'
+    compile 'com.android.support:appcompat-v7:22.1.1'
+    compile 'com.google.android.gms:play-services:7.3.0'
 
     compile 'com.squareup.retrofit:retrofit:1.9.0'
     compile 'com.squareup:otto:1.3.6'

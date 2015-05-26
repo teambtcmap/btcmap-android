@@ -39,6 +39,7 @@ public interface Database {
 
     interface CurrenciesMerchants extends BaseColumns {
         String TABLE_NAME = "currencies_merchants";
+        Uri CONTENT_URI = Uri.parse(String.format("%s/%s", BASE_CONTENT_URI, TABLE_NAME));
 
         String CURRENCY_ID = "currency_id";
         String MERCHANT_ID = "merchant_id";

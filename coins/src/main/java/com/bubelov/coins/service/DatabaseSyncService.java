@@ -3,7 +3,7 @@ package com.bubelov.coins.service;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ContentProviderOperation;
-import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
@@ -46,7 +46,7 @@ public class DatabaseSyncService extends CoinsIntentService {
 
     private static final long SYNC_INTERVAL_MILLIS = TimeUnit.HOURS.toMillis(1);
 
-    private static final int MAX_MERCHANTS_PER_REQUEST = 250;
+    private static final int MAX_MERCHANTS_PER_REQUEST = 500;
 
     private SharedPreferences preferences;
 
@@ -185,36 +185,41 @@ public class DatabaseSyncService extends CoinsIntentService {
             List<Merchant> merchants = getApi().getMerchants(currencyCode, lastUpdateDateTime.toString(Constants.DATE_FORMAT), MAX_MERCHANTS_PER_REQUEST);
             Log.d(TAG, String.format("Downloaded %s merchants accepting %s", merchants.size(), currencyCode));
 
-            ArrayList<ContentProviderOperation> operations = new ArrayList<>();
+            ContentValues[] merchantsValues = new ContentValues[merchants.size()];
+            ContentValues[] currenciesMerchantsValues = new ContentValues[merchants.size()];
 
-            for (Merchant merchant : merchants) {
+            for (int i = 0; i < merchants.size(); i++) {
+                Merchant merchant = merchants.get(i);
+
                 if (initialized && notificationManager.shouldNotifyUser(merchant)) {
                     notificationManager.notifyUser(merchant.getId(), merchant.getName());
                 }
 
-                operations.add(ContentProviderOperation
-                        .newInsert(Database.Merchants.CONTENT_URI)
-                        .withValue(Database.Merchants._ID, merchant.getId())
-                        .withValue(Database.Merchants._CREATED_AT, merchant.getCreatedAt().getMillis())
-                        .withValue(Database.Merchants._UPDATED_AT, merchant.getUpdatedAt().getMillis())
-                        .withValue(Database.Merchants.LATITUDE, merchant.getLatitude())
-                        .withValue(Database.Merchants.LONGITUDE, merchant.getLongitude())
-                        .withValue(Database.Merchants.NAME, merchant.getName())
-                        .withValue(Database.Merchants.DESCRIPTION, merchant.getDescription())
-                        .withValue(Database.Merchants.PHONE, merchant.getPhone())
-                        .withValue(Database.Merchants.WEBSITE, merchant.getWebsite())
-                        .withValue(Database.Merchants.AMENITY, merchant.getAmenity())
-                        .withValue(Database.Merchants.OPENING_HOURS, merchant.getOpeningHours())
-                        .withValue(Database.Merchants.ADDRESS, merchant.getAddress())
-                        .build());
+                ContentValues merchantValues = new ContentValues();
+                merchantValues.put(Database.Merchants._ID, merchant.getId());
+                merchantValues.put(Database.Merchants._CREATED_AT, merchant.getCreatedAt().getMillis());
+                merchantValues.put(Database.Merchants._UPDATED_AT, merchant.getUpdatedAt().getMillis());
+                merchantValues.put(Database.Merchants.LATITUDE, merchant.getLatitude());
+                merchantValues.put(Database.Merchants.LONGITUDE, merchant.getLongitude());
+                merchantValues.put(Database.Merchants.NAME, merchant.getName());
+                merchantValues.put(Database.Merchants.DESCRIPTION, merchant.getDescription());
+                merchantValues.put(Database.Merchants.PHONE, merchant.getPhone());
+                merchantValues.put(Database.Merchants.WEBSITE, merchant.getWebsite());
+                merchantValues.put(Database.Merchants.AMENITY, merchant.getAmenity());
+                merchantValues.put(Database.Merchants.OPENING_HOURS, merchant.getOpeningHours());
+                merchantValues.put(Database.Merchants.ADDRESS, merchant.getAddress());
 
-                operations.add(ContentProviderOperation
-                        .newInsert(ContentUris.withAppendedId(Database.Merchants.CONTENT_URI, merchant.getId()).buildUpon().appendPath("currencies").build())
-                        .withValue(Database.Currencies._ID, currencyId)
-                        .build());
+                merchantsValues[i] = merchantValues;
+
+                ContentValues currencyMerchantValues = new ContentValues();
+                currencyMerchantValues.put(Database.CurrenciesMerchants.CURRENCY_ID, currencyId);
+                currencyMerchantValues.put(Database.CurrenciesMerchants.MERCHANT_ID, merchant.getId());
+
+                currenciesMerchantsValues[i] = currencyMerchantValues;
             }
 
-            getContentResolver().applyBatch(Database.AUTHORITY, operations);
+            getContentResolver().bulkInsert(Database.Merchants.CONTENT_URI, merchantsValues);
+            getContentResolver().bulkInsert(Database.CurrenciesMerchants.CONTENT_URI, currenciesMerchantsValues);
 
             if (merchants.size() > 0) {
                 getBus().post(new NewMerchantsLoadedEvent());
