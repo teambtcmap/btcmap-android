@@ -1,6 +1,5 @@
 package com.bubelov.coins.util;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
@@ -9,6 +8,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.WindowManager;
 
 /**
  * Author: Igor Bubelov
@@ -78,8 +78,17 @@ public class Utils {
         return height;
     }
 
-    public static int getScreenHeight(Activity activity) {
-        Display display = activity.getWindowManager().getDefaultDisplay();
+    public static int getScreenWidth(Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size.x;
+    }
+
+    public static int getScreenHeight(Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
         return size.y;

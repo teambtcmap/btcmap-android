@@ -79,8 +79,8 @@
 
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
-    <com.bubelov.coins.ui.widget.ScrimInsetsFrameLayout
-        android:layout_width="320dp"
+    <com.bubelov.coins.ui.widget.DrawerMenuRootLayout
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="left"
         android:fitsSystemWindows="true"
@@ -91,6 +91,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-    </com.bubelov.coins.ui.widget.ScrimInsetsFrameLayout>
+    </com.bubelov.coins.ui.widget.DrawerMenuRootLayout>
 
 </android.support.v4.widget.DrawerLayout>
