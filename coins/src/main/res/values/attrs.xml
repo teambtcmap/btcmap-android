@@ -13,7 +13,7 @@
     </declare-styleable>
 
     <declare-styleable name="ScrimInsetsView">
-        <attr name="insetForeground" format="reference|color" />
+        <attr name="insetForeground" />
     </declare-styleable>
 
     <declare-styleable name="MenuItem">

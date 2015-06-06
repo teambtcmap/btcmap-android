@@ -3,8 +3,9 @@
 <resources>
 
     <color name="primary">#FEBD0C</color>
-    <color name="primaryDark">#F99F00</color>
     <color name="primary_semi_transparent">#DDFEBD0C</color>
+    <color name="primary_dark">#F99F00</color>
+    <color name="primary_dark_semi_transparent">#DDF99F00</color>
     <color name="accent">#536DFE</color>
 
     <color name="divider">#DADADA</color>
@@ -17,8 +18,8 @@
     <color name="white">#FFFFFF</color>
     <color name="transparent">#00000000</color>
 
-    <color name="notification_area">#220000FF</color>
-    <color name="notification_area_border">#990000FF</color>
+    <color name="notification_area">#44F99F00</color>
+    <color name="notification_area_border">@color/primary_dark</color>
 
     <color name="drawer_list_item_background">#FFFFFF</color>
     <color name="drawer_list_item_background_selected">#E8E8E8</color>

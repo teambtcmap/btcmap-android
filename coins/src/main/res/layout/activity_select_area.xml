@@ -22,13 +22,13 @@
         android:layout_height="wrap_content"
         android:padding="16dp"
         android:layout_gravity="bottom"
-        android:background="@color/primary_semi_transparent"
+        android:background="@color/primary_dark_semi_transparent"
         android:elevation="4dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="DISTANCE:"
+            android:text="Distance:"
             android:textStyle="bold"
             android:textColor="@color/white"
             android:layout_gravity="center"/>

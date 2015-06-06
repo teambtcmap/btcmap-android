@@ -5,7 +5,7 @@
     <PreferenceCategory
         android:title="@string/pref_category_notifications">
 
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="@string/pref_show_new_merchants_key"
             android:title="@string/pref_show_new_merchants"
             android:summaryOn="@string/pref_show_new_merchants_on"

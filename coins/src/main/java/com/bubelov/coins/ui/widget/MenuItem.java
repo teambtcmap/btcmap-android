@@ -46,11 +46,11 @@ public class MenuItem extends FrameLayout {
                 : getResources().getColor(R.color.drawer_list_item_background));
 
         text.setTextColor(selected
-                ? getResources().getColor(R.color.primaryDark)
+                ? getResources().getColor(R.color.primary_dark)
                 : getResources().getColor(R.color.drawer_list_item_text));
 
         if (selected) {
-            icon.setColorFilter(getResources().getColor(R.color.primaryDark));
+            icon.setColorFilter(getResources().getColor(R.color.primary_dark));
         } else {
             icon.setColorFilter(null);
         }

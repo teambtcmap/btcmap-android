@@ -114,6 +114,10 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private MerchantsCacheFragment merchantsCacheFragment;
 
+    private View locateButton;
+
+    private boolean firstLaunch;
+
     public static Intent newShowMerchantIntent(Context context, long merchantId) {
         Intent intent = new Intent(context, MapActivity.class);
         intent.putExtra(MERCHANT_ID_EXTRA, merchantId);
@@ -145,6 +149,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         DrawerMenu drawerMenu = findView(R.id.left_drawer);
         drawerMenu.setSelected(R.id.all);
         drawerMenu.setItemSelectedListener(this);
+        getSupportActionBar().setTitle(R.string.menu_item_all_merchants);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
@@ -167,15 +172,15 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         markersCache = new MapMarkersCache();
 
-        if (getIntent().getExtras() == null && savedInstanceState == null) {
-            googleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(LocationServices.API)
-                    .addConnectionCallbacks(new LocationApiConnectionCallbacks())
-                    .addOnConnectionFailedListener(new LocationAliConnectionFailedListener())
-                    .build();
+        firstLaunch = savedInstanceState == null;
 
-            googleApiClient.connect();
-        }
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new LocationApiConnectionCallbacks())
+                .addOnConnectionFailedListener(new LocationAliConnectionFailedListener())
+                .build();
+
+        googleApiClient.connect();
 
         merchantsCacheFragment = (MerchantsCacheFragment) getSupportFragmentManager().findFragmentByTag(MerchantsCacheFragment.TAG);
 
@@ -183,6 +188,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             merchantsCacheFragment = new MerchantsCacheFragment();
             getSupportFragmentManager().beginTransaction().add(merchantsCacheFragment, MerchantsCacheFragment.TAG);
         }
+
+        locateButton = findView(R.id.locate_button);
     }
 
     @Override
@@ -303,7 +310,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == RESULT_OK) {
-            findLocation();
+            moveToUserLocation();
         }
 
         if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == RESULT_CANCELED) {
@@ -456,47 +463,47 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         loader.setVisibility(View.GONE);
     }
 
-    private void findLocation() {
+    private void moveToUserLocation() {
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        UserNotificationManager notificationManager = new UserNotificationManager(this);
-        boolean notificationAreaNotSet = notificationManager.getNotificationAreaCenter() == null;
 
         if (lastLocation != null) {
-            LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
-
-            if (notificationAreaNotSet) {
-                notificationManager.setNotificationAreaCenter(latLng);
-            }
+            onUserLocationReceived(lastLocation);
         } else {
-            LocationRequest locationRequest = LocationRequest.create().setNumUpdates(1);
-            LocationSettingsRequest locationSettingsRequest = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build();
-            PendingResult<LocationSettingsResult> locationSettingsResult = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, locationSettingsRequest);
+            requestLocationUpdate();
+        }
+    }
 
-            locationSettingsResult.setResultCallback(result -> {
-                switch (result.getStatus().getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, location -> {
-                            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
+    private void requestLocationUpdate() {
+        LocationRequest locationRequest = LocationRequest.create().setNumUpdates(1);
+        LocationSettingsRequest locationSettingsRequest = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build();
+        PendingResult<LocationSettingsResult> locationSettingsResult = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, locationSettingsRequest);
 
-                            if (notificationAreaNotSet) {
-                                notificationManager.setNotificationAreaCenter(latLng);
-                            }
-                        });
+        locationSettingsResult.setResultCallback(result -> {
+            switch (result.getStatus().getStatusCode()) {
+                case LocationSettingsStatusCodes.SUCCESS:
+                    LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this::onUserLocationReceived);
+                    break;
 
-                        break;
+                case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                    try {
+                        result.getStatus().startResolutionForResult(MapActivity.this, REQUEST_CHECK_LOCATION_SETTINGS);
+                    } catch (IntentSender.SendIntentException exception) {
+                        // Ignoring
+                    }
 
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        try {
-                            result.getStatus().startResolutionForResult(MapActivity.this, REQUEST_CHECK_LOCATION_SETTINGS);
-                        } catch (IntentSender.SendIntentException exception) {
-                            // Ignoring
-                        }
+                    break;
+            }
+        });
+    }
 
-                        break;
-                }
-            });
+    private void onUserLocationReceived(Location location) {
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
+
+        UserNotificationManager notificationManager = new UserNotificationManager(this);
+
+        if (notificationManager.getNotificationAreaCenter() == null) {
+            notificationManager.setNotificationAreaCenter(latLng);
         }
     }
 
@@ -600,6 +607,10 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         return merchant;
     }
 
+    public void onLocateMeClicked(View view) {
+        moveToUserLocation();
+    }
+
     private class DrawerToggle extends ActionBarDrawerToggle {
         public DrawerToggle(Activity activity, DrawerLayout drawerLayout, int openDrawerContentDescRes, int closeDrawerContentDescRes) {
             super(activity, drawerLayout, openDrawerContentDescRes, closeDrawerContentDescRes);
@@ -662,7 +673,9 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private class LocationApiConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks {
         @Override
         public void onConnected(Bundle bundle) {
-            findLocation();
+            if (firstLaunch) {
+                moveToUserLocation();
+            }
         }
 
         @Override
@@ -683,6 +696,9 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         @Override
         public void onPanelSlide(View view, float offset) {
+            float locateButtonOffset = -offset * (view.getHeight() - merchantDetails.getHeaderHeight()) - merchantDetails.getHeaderHeight();
+            locateButton.setTranslationY(Math.min(locateButtonOffset, 0));
+
             if (saveCameraPositionFlag) {
                 cameraBeforeSelection = CameraUpdateFactory.newCameraPosition(map.getCameraPosition());
                 saveCameraPositionFlag = false;
@@ -714,7 +730,10 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         @Override
         public void onPanelCollapsed(View view) {
             merchantDetails.setMultilineHeader(false);
-            slidingLayout.post(() -> slidingLayout.setPanelHeight(merchantDetails.getHeaderHeight()));
+            slidingLayout.post(() -> {
+                slidingLayout.setPanelHeight(merchantDetails.getHeaderHeight());
+                locateButton.setTranslationY(-merchantDetails.getHeaderHeight());
+            });
 
             if (!wasExpanded) {
                 return;
@@ -751,6 +770,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             wasExpanded = false;
             map.setPadding(0, 0, 0, 0);
             map.getUiSettings().setAllGesturesEnabled(true);
+            locateButton.setTranslationY(0);
         }
     }
 }

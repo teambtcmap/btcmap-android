@@ -12,7 +12,7 @@
     <string name="action_filter">Filter</string>
     <string name="action_done">Done</string>
 
-    <string name="pref_category_notifications">NOTIFICATIONS</string>
+    <string name="pref_category_notifications">Notifications</string>
 
     <string name="pref_show_new_merchants_key">pref_new_merchant_notifications</string>
     <string name="pref_show_new_merchants">New merchants</string>

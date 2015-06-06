@@ -12,8 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom"
-        app:overlay="true"
         app:fadeColor="#00FFFFFF"
+        app:overlay="true"
         app:panelHeight="68dp"
         app:shadowHeight="4dp">
 
@@ -69,6 +69,18 @@
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:visibility="gone" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/locate_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|right"
+                android:layout_marginBottom="16dp"
+                android:layout_marginRight="16dp"
+                android:onClick="onLocateMeClicked"
+                android:src="@drawable/fab_location"
+                app:backgroundTint="@color/white"
+                app:elevation="4dp" />
 
         </FrameLayout>
 

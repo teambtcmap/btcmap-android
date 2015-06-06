@@ -5,8 +5,6 @@ import android.content.IntentSender;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.SeekBar;
 
@@ -61,7 +59,11 @@ public class SelectAreaActivity extends AbstractActivity {
 
         Toolbar toolbar = findView(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
+
+        toolbar.setNavigationOnClickListener(v -> {
+            saveSelectedArea();
+            supportFinishAfterTransition();
+        });
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
@@ -105,22 +107,6 @@ public class SelectAreaActivity extends AbstractActivity {
         super.onPostCreate(savedInstanceState);
         View bottomPanel = findView(R.id.bottom_panel);
         bottomPanel.post(() -> map.setPadding(0, 0, 0, bottomPanel.getHeight()));
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_select_area, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_done) {
-            saveSelectedArea();
-            supportFinishAfterTransition();
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -179,7 +165,7 @@ public class SelectAreaActivity extends AbstractActivity {
     }
 
     private void addArea(LatLng center, int radius) {
-        BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_place_empty);
+        BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_location_marker);
         this.center = map.addMarker(new MarkerOptions()
                 .position(center)
                 .icon(markerDescriptor)

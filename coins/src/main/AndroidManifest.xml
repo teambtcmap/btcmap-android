@@ -58,7 +58,7 @@
 
         <activity
             android:name=".ui.activity.SelectAreaActivity"
-            android:label="" />
+            android:label="Location" />
 
         <activity
             android:name=".ui.activity.FeedbackActivity"

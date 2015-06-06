@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 22
-        versionCode 14
-        versionName "1.0.1"
+        versionCode 15
+        versionName "1.0.2"
     }
 
     compileOptions {
@@ -26,7 +26,8 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:22.1.1'
+    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.android.support:design:22.2.0'
     compile 'com.google.android.gms:play-services:7.3.0'
 
     compile 'com.squareup.retrofit:retrofit:1.9.0'
