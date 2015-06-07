@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -114,7 +115,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private MerchantsCacheFragment merchantsCacheFragment;
 
-    private View locateButton;
+    private FloatingActionButton actionButton;
 
     private boolean firstLaunch;
 
@@ -189,7 +190,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             getSupportFragmentManager().beginTransaction().add(merchantsCacheFragment, MerchantsCacheFragment.TAG);
         }
 
-        locateButton = findView(R.id.locate_button);
+        actionButton = findView(R.id.locate_button);
     }
 
     @Override
@@ -607,8 +608,12 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         return merchant;
     }
 
-    public void onLocateMeClicked(View view) {
-        moveToUserLocation();
+    public void onActionButtonClicked(View view) {
+        if (slidingLayout.getPanelState().equals(SlidingUpPanelLayout.PanelState.ANCHORED)) {
+            Utils.showDirections(this, selectedMerchant.getLatitude(), selectedMerchant.getLongitude());
+        } else {
+            moveToUserLocation();
+        }
     }
 
     private class DrawerToggle extends ActionBarDrawerToggle {
@@ -697,7 +702,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         @Override
         public void onPanelSlide(View view, float offset) {
             float locateButtonOffset = -offset * (view.getHeight() - merchantDetails.getHeaderHeight()) - merchantDetails.getHeaderHeight();
-            locateButton.setTranslationY(Math.min(locateButtonOffset, 0));
+            actionButton.setTranslationY(Math.min(locateButtonOffset, 0));
 
             if (saveCameraPositionFlag) {
                 cameraBeforeSelection = CameraUpdateFactory.newCameraPosition(map.getCameraPosition());
@@ -732,7 +737,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             merchantDetails.setMultilineHeader(false);
             slidingLayout.post(() -> {
                 slidingLayout.setPanelHeight(merchantDetails.getHeaderHeight());
-                locateButton.setTranslationY(-merchantDetails.getHeaderHeight());
+                actionButton.setTranslationY(-merchantDetails.getHeaderHeight());
             });
 
             if (!wasExpanded) {
@@ -748,6 +753,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 cameraBeforeSelection = null;
                 merchantDetails.postDelayed(() -> reloadMerchants(), 1);
             }
+
+            actionButton.setImageResource(R.drawable.fab_location);
         }
 
         @Override
@@ -762,6 +769,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), 13));
             map.getUiSettings().setAllGesturesEnabled(false);
             merchantDetails.setMultilineHeader(true);
+            actionButton.setImageResource(R.drawable.fab_directions);
         }
 
         @Override
@@ -770,7 +778,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             wasExpanded = false;
             map.setPadding(0, 0, 0, 0);
             map.getUiSettings().setAllGesturesEnabled(true);
-            locateButton.setTranslationY(0);
+            actionButton.setTranslationY(0);
+            actionButton.setImageResource(R.drawable.fab_location);
         }
     }
 }

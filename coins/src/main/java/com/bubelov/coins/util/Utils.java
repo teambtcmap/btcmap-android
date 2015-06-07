@@ -1,5 +1,6 @@
 package com.bubelov.coins.util;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
@@ -51,8 +52,8 @@ public class Utils {
     }
 
     public static void showDirections(Context context, double latitude, double longitude) {
-        Uri uri = Uri.parse(String.format("geo:%s,%s", latitude, longitude));
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("http://maps.google.com/maps?f=d&daddr=%s,%s", latitude, longitude)));
+        intent.setComponent(new ComponentName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity"));
         context.startActivity(intent);
     }
 

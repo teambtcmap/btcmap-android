@@ -77,7 +77,7 @@
                 android:layout_gravity="bottom|right"
                 android:layout_marginBottom="16dp"
                 android:layout_marginRight="16dp"
-                android:onClick="onLocateMeClicked"
+                android:onClick="onActionButtonClicked"
                 android:src="@drawable/fab_location"
                 app:backgroundTint="@color/white"
                 app:elevation="4dp" />
