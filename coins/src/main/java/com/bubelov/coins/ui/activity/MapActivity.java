@@ -734,7 +734,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         @Override
         public void onPanelCollapsed(View view) {
-            merchantDetails.setMultilineHeader(false);
             slidingLayout.post(() -> {
                 slidingLayout.setPanelHeight(merchantDetails.getHeaderHeight());
                 actionButton.setTranslationY(-merchantDetails.getHeaderHeight());
@@ -746,7 +745,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
             map.setPadding(0, 0, 0, 0);
             map.getUiSettings().setAllGesturesEnabled(true);
-            merchantDetails.setMultilineHeader(false);
 
             if (cameraBeforeSelection != null) {
                 map.moveCamera(cameraBeforeSelection);
@@ -768,7 +766,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             map.setPadding(0, getResources().getDimensionPixelSize(R.dimen.marker_size) / 2, 0, Utils.getScreenHeight(MapActivity.this) / 2 + Utils.getStatusBarHeight(getApplicationContext()));
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), 13));
             map.getUiSettings().setAllGesturesEnabled(false);
-            merchantDetails.setMultilineHeader(true);
             actionButton.setImageResource(R.drawable.fab_directions);
         }
 

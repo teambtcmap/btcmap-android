@@ -55,7 +55,7 @@
     <string name="not_provided">Информация отсутствует</string>
 
     <string name="share_merchant_message_title">Зацени!</string>
-    <string name="share_merchant_message_text">Это место принимает криптовалюту</string>
+    <string name="share_merchant_message_text">Это место принимает криптовалюту: %1$s</string>
 
     <string name="fa_title">Справка/отзыв</string>
 

@@ -55,7 +55,7 @@
     <string name="not_provided">Not provided</string>
 
     <string name="share_merchant_message_title">Check it out!</string>
-    <string name="share_merchant_message_text">This place accept cryptocurrency</string>
+    <string name="share_merchant_message_text">This place accept cryptocurrency: %1$s</string>
 
     <string name="fa_title">Help &amp; feedback</string>
 

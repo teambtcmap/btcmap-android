@@ -32,9 +32,7 @@ public class MerchantDetailsView extends FrameLayout {
 
     private TextView address;
 
-    private View directions;
-
-    private View call;
+    private MerchantActionButton call;
 
     private View openWebsite;
 
@@ -87,10 +85,9 @@ public class MerchantDetailsView extends FrameLayout {
         call.setEnabled(!TextUtils.isEmpty(merchant.getPhone()));
         openWebsite.setEnabled(!TextUtils.isEmpty(merchant.getWebsite()));
 
-        directions.setOnClickListener(v -> Utils.showDirections(getContext(), merchant.getLatitude(), merchant.getLongitude()));
         call.setOnClickListener(v -> Utils.call(getContext(), merchant.getPhone()));
         openWebsite.setOnClickListener(v -> Utils.openUrl(getContext(), merchant.getWebsite()));
-        share.setOnClickListener(v -> Utils.share(getContext(), getResources().getString(R.string.share_merchant_message_title), getResources().getString(R.string.share_merchant_message_text)));
+        share.setOnClickListener(v -> Utils.share(getContext(), getResources().getString(R.string.share_merchant_message_title), getResources().getString(R.string.share_merchant_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", merchant.getLatitude(), merchant.getLongitude()))));
 
         openingHours.setText(TextUtils.isEmpty(merchant.getOpeningHours()) ? getResources().getString(R.string.not_provided) : merchant.getOpeningHours());
 
@@ -107,11 +104,6 @@ public class MerchantDetailsView extends FrameLayout {
         }
     }
 
-    public void setMultilineHeader(boolean multiline) {
-        name.setSingleLine(!multiline);
-        address.setSingleLine(!multiline);
-    }
-
     private void init() {
         inflate(getContext(), R.layout.widget_merchant_details, this);
 
@@ -119,8 +111,7 @@ public class MerchantDetailsView extends FrameLayout {
         name = (TextView) findViewById(R.id.name);
         address = (TextView) findViewById(R.id.address);
 
-        directions = findViewById(R.id.directions);
-        call = findViewById(R.id.call);
+        call = (MerchantActionButton) findViewById(R.id.call);
         openWebsite = findViewById(R.id.open_website);
         share = findViewById(R.id.share);
 

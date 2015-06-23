@@ -21,4 +21,9 @@
         <attr name="text" format="string"/>
     </declare-styleable>
 
+    <declare-styleable name="MerchantActionButton">
+        <attr name="mab_icon" format="reference" />
+        <attr name="text" />
+    </declare-styleable>
+
 </resources>
