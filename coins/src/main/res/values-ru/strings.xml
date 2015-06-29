@@ -60,6 +60,8 @@
     <string name="fa_title">Справка/отзыв</string>
 
     <string name="fa_description">Если у вас появились вопросы или предложения - можете оставить их в Google Play или связаться с кем-нибудь из команды.</string>
+    <string name="fa_data_provided_by">Данные предоставлены</string>
+    <string name="fa_osm_credits">Пользователями OpenStreetMap</string>
     <string name="fa_programming">Программирование:</string>
     <string name="fa_programmer_name">Игорь Бубелов</string>
     <string name="fa_design">Дизайн:</string>
@@ -68,5 +70,9 @@
     <string name="fa_behance_profile">Профиль на Behance</string>
     <string name="fa_donation_address">Помочь проекту можно этот кошелек =)</string>
     <string name="fa_copy_to_clipboard">Копировать адрес</string>
+
+    <string name="ma_loading_merchants">ЗАГРУЗКА ДАННЫХ</string>
+
+    <string name="saa_distance">Расстояние:</string>
 
 </resources>

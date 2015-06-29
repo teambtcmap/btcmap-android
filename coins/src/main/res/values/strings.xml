@@ -60,6 +60,8 @@
     <string name="fa_title">Help &amp; feedback</string>
 
     <string name="fa_description">Feel free to contact us if you have any questions.</string>
+    <string name="fa_data_provided_by">Data provided by:</string>
+    <string name="fa_osm_credits">OpenStreetMap contributors</string>
     <string name="fa_programming">Programming:</string>
     <string name="fa_programmer_name">Igor Bubelov</string>
     <string name="fa_design">Design:</string>
@@ -68,5 +70,9 @@
     <string name="fa_behance_profile">Behance profile</string>
     <string name="fa_donation_address">Donation address</string>
     <string name="fa_copy_to_clipboard">Copy to clipboard</string>
+
+    <string name="ma_loading_merchants">LOADING MERCHANTS</string>
+
+    <string name="saa_distance">Distance:</string>
 
 </resources>

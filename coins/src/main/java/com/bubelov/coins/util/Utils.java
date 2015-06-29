@@ -31,7 +31,7 @@ public class Utils {
     }
 
     public static void call(Context context, String phoneNumber) {
-        Intent intent = new Intent(Intent.ACTION_CALL);
+        Intent intent = new Intent(Intent.ACTION_DIAL);
         intent.setData(Uri.parse("tel:" + phoneNumber));
         context.startActivity(intent);
     }
@@ -59,7 +59,7 @@ public class Utils {
 
     public static int dpToPx(Context context, int dp) {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        return (int)((dp * displayMetrics.density) + 0.5);
+        return (int) ((dp * displayMetrics.density) + 0.5);
     }
 
     public static int pxToDp(Context context, int px) {

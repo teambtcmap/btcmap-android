@@ -2,6 +2,7 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -34,6 +35,23 @@
             <com.bubelov.coins.ui.widget.TypefaceTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="@string/fa_data_provided_by"
+                app:typeface="regular" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/fa_osm_credits"
+                android:textColor="@color/text"
+                app:typeface="regular" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="16dp" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="@string/fa_programming"
                 android:textColor="@color/secondary_text_or_icons"
                 app:typeface="regular" />
@@ -50,15 +68,16 @@
                 android:layout_height="wrap_content"
                 android:text="ibubelov@gmail.com"
                 android:textColor="@color/text"
-                app:typeface="regular" />
+                app:typeface="regular"
+                tools:ignore="HardcodedText" />
 
             <com.bubelov.coins.ui.widget.TypefaceTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:clickable="true"
                 android:onClick="onOpenDeveloperProfileClicked"
                 android:text="@string/fa_linkedin_profile"
                 android:textColor="@color/link"
-                android:clickable="true"
                 app:typeface="regular" />
 
             <Space
@@ -84,15 +103,16 @@
                 android:layout_height="wrap_content"
                 android:text="hi@turboyushkov.ru"
                 android:textColor="@color/text"
-                app:typeface="regular" />
+                app:typeface="regular"
+                tools:ignore="HardcodedText" />
 
             <com.bubelov.coins.ui.widget.TypefaceTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:clickable="true"
                 android:onClick="onDesignerProfileClicked"
                 android:text="@string/fa_behance_profile"
                 android:textColor="@color/link"
-                android:clickable="true"
                 app:typeface="regular" />
 
             <Space
