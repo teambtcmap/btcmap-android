@@ -1,10 +1,16 @@
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.database.DatabaseHelper;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
 
 import java.util.Random;
 
@@ -13,10 +19,12 @@ import java.util.Random;
  * Date: 19/05/15 17:33
  */
 
-public class DatabaseTest extends InstrumentationTestCase {
-    @SmallTest
+@RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class, emulateSdk = 21)
+public class DatabaseTest {
+    @Test
     public void testMerchantsRetrieval() {
-        SQLiteOpenHelper databaseHelper = new DatabaseHelper(getInstrumentation().getTargetContext());
+        SQLiteOpenHelper databaseHelper = new DatabaseHelper(RuntimeEnvironment.application);
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
 
         Random random = new Random(666);
@@ -32,9 +40,6 @@ public class DatabaseTest extends InstrumentationTestCase {
         }
 
         long execTime = System.currentTimeMillis() - start;
-        //Log.d("Test", "Execution time: " + execTime);
-        //Log.d("Test", "Avg query: " + (float) execTime / 10000.0f);
-
-        assertTrue(true);
+        Assert.assertTrue(execTime < 30000);
     }
 }

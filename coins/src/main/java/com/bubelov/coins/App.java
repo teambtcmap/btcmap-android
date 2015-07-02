@@ -70,7 +70,7 @@ public class App extends Application {
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(getString(R.string.api_url))
                 .setConverter(new GsonConverter(gson))
-                .setLogLevel(RestAdapter.LogLevel.FULL)
+                .setLogLevel(RestAdapter.LogLevel.NONE)
                 .build();
 
         api = restAdapter.create(CoinsApi.class);
