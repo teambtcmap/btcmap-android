@@ -35,16 +35,17 @@ import com.bubelov.coins.event.DatabaseUpToDateEvent;
 import com.bubelov.coins.event.DatabaseSyncingEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
 import com.bubelov.coins.loader.MerchantsLoader;
-import com.bubelov.coins.manager.UserNotificationManager;
+import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
-import com.bubelov.coins.service.DatabaseSyncService;
+import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 import com.bubelov.coins.ui.fragment.MerchantsCacheFragment;
 import com.bubelov.coins.ui.widget.CurrenciesFilterPopup;
 import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.ui.widget.MerchantDetailsView;
 import com.bubelov.coins.util.MapMarkersCache;
+import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
 import com.bubelov.coins.util.Utils;
@@ -73,8 +74,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.OnMenuItemSelectedListener {
-    private static final String TAG = MapActivity.class.getSimpleName();
-
     private static final String MERCHANT_ID_EXTRA = "merchant_id";
 
     private static final int MERCHANTS_LOADER = 0;
@@ -228,7 +227,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     @Override
     protected void onResume() {
         super.onResume();
-        startService(DatabaseSyncService.makeIntent(this, false));
+        startService(MerchantsSyncService.makeIntent(this, false));
     }
 
     @Override
@@ -336,7 +335,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     @Override
     public void networkAvailable() {
-        startService(DatabaseSyncService.makeIntent(this, false));
+        startService(MerchantsSyncService.makeIntent(this, false));
     }
 
     @Override
@@ -501,10 +500,10 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
 
-        UserNotificationManager notificationManager = new UserNotificationManager(this);
+        NotificationAreaProvider notificationAreaProvider = new NotificationAreaProvider(this);
 
-        if (notificationManager.getNotificationAreaCenter() == null) {
-            notificationManager.setNotificationAreaCenter(latLng);
+        if (notificationAreaProvider.get() == null) {
+            notificationAreaProvider.save(new NotificationArea(latLng));
         }
     }
 

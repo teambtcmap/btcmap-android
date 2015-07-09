@@ -1,4 +1,4 @@
-package com.bubelov.coins.manager;
+package com.bubelov.coins.service.sync.merchants;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -11,14 +11,14 @@ import android.location.Location;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.model.NotificationArea;
+import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.ui.activity.MapActivity;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.UUID;
 
@@ -27,46 +27,11 @@ import java.util.UUID;
  * Date: 12/07/14 14:46
  */
 
-public class UserNotificationManager {
-    private static final String TAG = UserNotificationManager.class.getName();
-
-    private static final int DEFAULT_RADIUS_METERS = 50000;
-
-    private static final String LATITUDE_KEY = "latitude";
-    private static final String LONGITUDE_KEY = "longitude";
-
-    private static final String RADIUS_KEY = "radius";
-
+public class UserNotificationController {
     private Context context;
-    private SharedPreferences preferences;
 
-    public UserNotificationManager(Context context) {
+    public UserNotificationController(Context context) {
         this.context = context;
-        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    }
-
-    public LatLng getNotificationAreaCenter() {
-        if (!preferences.contains(LATITUDE_KEY) || !preferences.contains(LONGITUDE_KEY)) {
-            return null;
-        }
-
-        return new LatLng(preferences.getFloat(LATITUDE_KEY, 0), preferences.getFloat(LONGITUDE_KEY, 0));
-    }
-
-    public void setNotificationAreaCenter(LatLng center) {
-        preferences
-                .edit()
-                .putFloat(LATITUDE_KEY, (float) center.latitude)
-                .putFloat(LONGITUDE_KEY, (float) center.longitude)
-                .apply();
-    }
-
-    public int getNotificationAreaRadius() {
-        return preferences.getInt(RADIUS_KEY, DEFAULT_RADIUS_METERS);
-    }
-
-    public void setNotificationAreaRadius(int radius) {
-        preferences.edit().putInt(RADIUS_KEY, radius).apply();
     }
 
     public boolean shouldNotifyUser(Merchant merchant) {
@@ -76,17 +41,16 @@ public class UserNotificationManager {
             return false;
         }
 
-        LatLng notificationAreaCenter = getNotificationAreaCenter();
+        NotificationArea notificationArea = new NotificationAreaProvider(context).get();
 
-        if (notificationAreaCenter == null) {
+        if (notificationArea == null) {
             return false;
         }
 
         float[] distance = new float[1];
-        Location.distanceBetween(notificationAreaCenter.latitude, notificationAreaCenter.longitude, merchant.getLatitude(), merchant.getLongitude(), distance);
-        Log.d(TAG, "Distance: " + distance[0]);
+        Location.distanceBetween(notificationArea.getCenter().latitude, notificationArea.getCenter().longitude, merchant.getLatitude(), merchant.getLongitude(), distance);
 
-        if (distance[0] > getNotificationAreaRadius()) {
+        if (distance[0] > notificationArea.getRadiusMeters()) {
             return false;
         }
 
@@ -104,11 +68,8 @@ public class UserNotificationManager {
         boolean alreadyExists = cursor.getCount() > 0;
         cursor.close();
 
-        if (alreadyExists) {
-            return false;
-        }
+        return !alreadyExists;
 
-        return true;
     }
 
     public void notifyUser(long merchantId, String merchantName) {

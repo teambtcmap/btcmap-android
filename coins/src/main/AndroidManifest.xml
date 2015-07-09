@@ -64,7 +64,7 @@
             android:name=".ui.activity.FeedbackActivity"
             android:label="@string/fa_title" />
 
-        <service android:name=".service.DatabaseSyncService" />
+        <service android:name=".service.sync.merchants.MerchantsSyncService" />
 
         <service android:name=".service.BitcoinPriceService" />
 

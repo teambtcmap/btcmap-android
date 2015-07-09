@@ -1,4 +1,4 @@
-package com.bubelov.coins.service;
+package com.bubelov.coins.service.sync.merchants;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -18,10 +18,10 @@ import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.DatabaseUpToDateEvent;
 import com.bubelov.coins.event.DatabaseSyncingEvent;
 import com.bubelov.coins.event.NewMerchantsLoadedEvent;
-import com.bubelov.coins.manager.UserNotificationManager;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.service.CoinsIntentService;
 import com.bubelov.coins.util.Utils;
 
 import org.joda.time.DateTime;
@@ -37,8 +37,8 @@ import java.util.concurrent.TimeUnit;
  * Date: 07/07/14 22:27
  */
 
-public class DatabaseSyncService extends CoinsIntentService {
-    private static final String TAG = DatabaseSyncService.class.getSimpleName();
+public class MerchantsSyncService extends CoinsIntentService {
+    private static final String TAG = MerchantsSyncService.class.getSimpleName();
 
     private static final String FORCE_SYNC_EXTRA = "force_sync";
 
@@ -56,12 +56,12 @@ public class DatabaseSyncService extends CoinsIntentService {
     private volatile boolean syncing;
 
     public static Intent makeIntent(Context context, boolean forceSync) {
-        Intent intent = new Intent(context, DatabaseSyncService.class);
+        Intent intent = new Intent(context, MerchantsSyncService.class);
         intent.putExtra(FORCE_SYNC_EXTRA, forceSync);
         return intent;
     }
 
-    public DatabaseSyncService() {
+    public MerchantsSyncService() {
         super(TAG);
     }
 
@@ -70,7 +70,7 @@ public class DatabaseSyncService extends CoinsIntentService {
         super.onCreate();
         preferences = getSharedPreferences(TAG, MODE_PRIVATE);
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        syncIntent = PendingIntent.getService(this, 0, DatabaseSyncService.makeIntent(this, true), PendingIntent.FLAG_CANCEL_CURRENT);
+        syncIntent = PendingIntent.getService(this, 0, MerchantsSyncService.makeIntent(this, true), PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     @Override
@@ -162,7 +162,7 @@ public class DatabaseSyncService extends CoinsIntentService {
 
     private void syncMerchants(long currencyId, String currencyCode) throws RemoteException, OperationApplicationException {
         SQLiteDatabase db = getDatabaseHelper().getWritableDatabase();
-        UserNotificationManager notificationManager = new UserNotificationManager(getApplicationContext());
+        UserNotificationController notificationManager = new UserNotificationController(getApplicationContext());
         boolean initialized = isInitialized();
 
         while (true) {

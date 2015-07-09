@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
-import com.bubelov.coins.service.DatabaseSyncService;
+import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 
 /**
  * Author: Igor Bubelov
@@ -86,6 +86,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
 
         Context context = App.getInstance();
-        context.startService(DatabaseSyncService.makeIntent(context, true));
+        context.startService(MerchantsSyncService.makeIntent(context, true));
     }
 }

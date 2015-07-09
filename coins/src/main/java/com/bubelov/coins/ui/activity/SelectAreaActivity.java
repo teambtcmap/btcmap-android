@@ -10,7 +10,8 @@ import android.widget.SeekBar;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.R;
-import com.bubelov.coins.manager.UserNotificationManager;
+import com.bubelov.coins.model.NotificationArea;
+import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -45,10 +46,9 @@ public class SelectAreaActivity extends AbstractActivity {
 
     private GoogleMap map;
 
-    private UserNotificationManager notificationManager;
+    private Marker areaCenter;
 
-    private Marker center;
-    private Circle circle;
+    private Circle areaCircle;
 
     private GoogleApiClient googleApiClient;
 
@@ -72,26 +72,22 @@ public class SelectAreaActivity extends AbstractActivity {
         map.getUiSettings().setCompassEnabled(false);
         map.setOnMarkerDragListener(new OnMarkerDragListener());
 
-        notificationManager = new UserNotificationManager(this);
-
-        boolean shouldFindLocation = false;
+        NotificationArea notificationArea = new NotificationAreaProvider(this).get();
+        boolean findLocationAndMoveArea = false;
 
         if (savedInstanceState != null) {
             addArea(savedInstanceState.getParcelable(CENTER_EXTRA), savedInstanceState.getInt(RADIUS_EXTRA));
         } else {
-            LatLng center = notificationManager.getNotificationAreaCenter();
-            Integer radius = notificationManager.getNotificationAreaRadius();
-
-            if (center == null) {
-                center = new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE);
-                shouldFindLocation = true;
+            if (notificationArea == null) {
+                notificationArea = new NotificationArea(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE));
+                findLocationAndMoveArea = true;
             }
 
-            addArea(center, radius);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(center, DEFAULT_ZOOM));
+            addArea(notificationArea.getCenter(), notificationArea.getRadiusMeters());
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), DEFAULT_ZOOM));
         }
 
-        if (shouldFindLocation) {
+        if (findLocationAndMoveArea) {
             googleApiClient = new GoogleApiClient.Builder(this)
                     .addApi(LocationServices.API)
                     .addConnectionCallbacks(new LocationApiConnectionCallbacks())
@@ -120,9 +116,9 @@ public class SelectAreaActivity extends AbstractActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (center != null && circle != null) {
-            outState.putParcelable(CENTER_EXTRA, center.getPosition());
-            outState.putInt(RADIUS_EXTRA, (int) circle.getRadius());
+        if (areaCenter != null && areaCircle != null) {
+            outState.putParcelable(CENTER_EXTRA, areaCenter.getPosition());
+            outState.putInt(RADIUS_EXTRA, (int) areaCircle.getRadius());
         }
 
         super.onSaveInstanceState(outState);
@@ -166,59 +162,59 @@ public class SelectAreaActivity extends AbstractActivity {
 
     private void addArea(LatLng center, int radius) {
         BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_location_marker);
-        this.center = map.addMarker(new MarkerOptions()
+        areaCenter = map.addMarker(new MarkerOptions()
                 .position(center)
                 .icon(markerDescriptor)
                 .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V)
                 .draggable(true));
 
         CircleOptions circleOptions = new CircleOptions()
-                .center(this.center.getPosition())
+                .center(areaCenter.getPosition())
                 .radius(radius)
                 .fillColor(getResources().getColor(R.color.notification_area))
                 .strokeColor(getResources().getColor(R.color.notification_area_border))
                 .strokeWidth(4);
 
-        circle = map.addCircle(circleOptions);
+        areaCircle = map.addCircle(circleOptions);
 
         SeekBar seekBar = findView(R.id.seek_bar_radius);
         seekBar.setMax(500000);
-        seekBar.setProgress((int) circle.getRadius());
+        seekBar.setProgress((int) areaCircle.getRadius());
         seekBar.setOnSeekBarChangeListener(new SeekBarChangeListener());
     }
 
     private void moveArea(LatLng location) {
-        center.setPosition(location);
-        circle.setCenter(location);
+        areaCenter.setPosition(location);
+        areaCircle.setCenter(location);
     }
 
     private void saveSelectedArea() {
-        notificationManager.setNotificationAreaCenter(circle.getCenter());
-        notificationManager.setNotificationAreaRadius((int) circle.getRadius());
+        NotificationAreaProvider provider = new NotificationAreaProvider(this);
+        provider.save(new NotificationArea(areaCircle.getCenter(), (int)areaCircle.getRadius()));
     }
 
     private class OnMarkerDragListener implements GoogleMap.OnMarkerDragListener {
         @Override
         public void onMarkerDragStart(Marker marker) {
-            circle.setFillColor(getResources().getColor(android.R.color.transparent));
+            areaCircle.setFillColor(getResources().getColor(android.R.color.transparent));
         }
 
         @Override
         public void onMarkerDrag(Marker marker) {
-            circle.setCenter(marker.getPosition());
+            areaCircle.setCenter(marker.getPosition());
             map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
         }
 
         @Override
         public void onMarkerDragEnd(Marker marker) {
-            circle.setFillColor(getResources().getColor(R.color.notification_area));
+            areaCircle.setFillColor(getResources().getColor(R.color.notification_area));
         }
     }
 
     private class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            circle.setRadius(progress);
+            areaCircle.setRadius(progress);
         }
 
         @Override

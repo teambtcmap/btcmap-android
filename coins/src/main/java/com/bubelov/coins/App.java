@@ -7,7 +7,7 @@ import android.preference.PreferenceManager;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.database.DatabaseHelper;
 import com.bubelov.coins.serializer.DateTimeDeserializer;
-import com.bubelov.coins.service.DatabaseSyncService;
+import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 import com.bubelov.coins.util.MainThreadBus;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -42,7 +42,7 @@ public class App extends Application {
         databaseHelper = new DatabaseHelper(this);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        startService(DatabaseSyncService.makeIntent(this, false));
+        startService(MerchantsSyncService.makeIntent(this, false));
     }
 
     public static App getInstance() {

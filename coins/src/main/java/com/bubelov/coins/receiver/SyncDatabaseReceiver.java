@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.bubelov.coins.service.DatabaseSyncService;
+import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 
 /**
  * Author: Igor Bubelov
@@ -14,6 +14,6 @@ import com.bubelov.coins.service.DatabaseSyncService;
 public class SyncDatabaseReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        context.startService(DatabaseSyncService.makeIntent(context, false));
+        context.startService(MerchantsSyncService.makeIntent(context, false));
     }
 }

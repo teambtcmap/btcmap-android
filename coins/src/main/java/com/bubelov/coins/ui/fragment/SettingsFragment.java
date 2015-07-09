@@ -13,8 +13,8 @@ import android.widget.Toast;
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Database;
-import com.bubelov.coins.manager.UserNotificationManager;
-import com.bubelov.coins.service.DatabaseSyncService;
+import com.bubelov.coins.service.sync.merchants.UserNotificationController;
+import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 import com.bubelov.coins.ui.activity.SelectAreaActivity;
 
 import java.util.Random;
@@ -59,7 +59,7 @@ public class SettingsFragment extends PreferenceFragment {
                 if (cursor.moveToNext()) {
                     long id = cursor.getLong(cursor.getColumnIndex(Database.Merchants._ID));
                     String name = cursor.getString(cursor.getColumnIndex(Database.Merchants.NAME));
-                    new UserNotificationManager(getActivity()).notifyUser(id, name);
+                    new UserNotificationController(getActivity()).notifyUser(id, name);
                 }
 
                 cursor.close();
@@ -67,7 +67,7 @@ public class SettingsFragment extends PreferenceFragment {
         }
 
         if (preference.getKey().equals("pref_update_merchants")) {
-            getActivity().startService(DatabaseSyncService.makeIntent(getActivity(), true));
+            getActivity().startService(MerchantsSyncService.makeIntent(getActivity(), true));
         }
 
         if (preference.getKey().equals("pref_remove_last_merchant")) {
