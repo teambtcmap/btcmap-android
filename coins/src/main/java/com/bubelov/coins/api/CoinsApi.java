@@ -5,6 +5,7 @@ import com.bubelov.coins.model.Merchant;
 
 import java.util.List;
 
+import retrofit.Call;
 import retrofit.http.GET;
 import retrofit.http.Query;
 
@@ -14,9 +15,9 @@ import retrofit.http.Query;
  */
 
 public interface CoinsApi {
-    @GET("/merchants")
-    List<Merchant> getMerchants(@Query("currency") String currencyCode, @Query("since") String since, @Query("limit") int limit);
+    @GET("merchants")
+    Call<List<Merchant>> getMerchants(@Query("currency") String currencyCode, @Query("since") String since, @Query("limit") int limit);
 
-    @GET("/currencies")
-    List<Currency> getCurrencies();
+    @GET("currencies")
+    Call<List<Currency>> getCurrencies();
 }

@@ -1,5 +1,6 @@
 package com.bubelov.coins.api.external;
 
+import retrofit.Call;
 import retrofit.http.GET;
 
 /**
@@ -8,6 +9,6 @@ import retrofit.http.GET;
  */
 
 public interface BitcoinAverageApi {
-    @GET("/ticker/global/USD/")
-    BitcoinAverageTickerResponse getUsdTicker();
+    @GET("ticker/global/USD")
+    Call<BitcoinAverageTickerResponse> getUsdTicker();
 }

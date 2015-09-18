@@ -16,8 +16,9 @@ import com.squareup.otto.Bus;
 
 import org.joda.time.DateTime;
 
-import retrofit.RestAdapter;
-import retrofit.converter.GsonConverter;
+import retrofit.GsonConverterFactory;
+import retrofit.Retrofit;
+import retrofit.RxJavaCallAdapterFactory;
 
 /**
  * Author: Igor Bubelov
@@ -67,12 +68,11 @@ public class App extends Application {
                 .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
                 .create();
 
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint(getString(R.string.api_url))
-                .setConverter(new GsonConverter(gson))
-                .setLogLevel(RestAdapter.LogLevel.NONE)
-                .build();
-
-        api = restAdapter.create(CoinsApi.class);
+        api = new Retrofit.Builder()
+                .baseUrl(getString(R.string.api_url))
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build()
+                .create(CoinsApi.class);
     }
 }

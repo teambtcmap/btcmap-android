@@ -15,10 +15,12 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import retrofit.RestAdapter;
-import retrofit.converter.GsonConverter;
+import retrofit.GsonConverterFactory;
+import retrofit.Retrofit;
+import retrofit.RxJavaCallAdapterFactory;
 
 /**
  * Author: Igor Bubelov
@@ -57,7 +59,11 @@ public class BitcoinPriceService extends CoinsIntentService {
         }
 
         if (intent.getBooleanExtra(FORCE_LOAD_EXTRA, false)) {
-            loadPrice();
+            try {
+                loadPrice();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } else {
             Cursor lastCheckCursor = getContentResolver().query(Database.Currencies.CONTENT_URI,
                     new String[]{Database.Currencies.PRICE_LAST_CHECK},
@@ -67,7 +73,11 @@ public class BitcoinPriceService extends CoinsIntentService {
 
             if (lastCheckCursor.moveToNext()) {
                 if (lastCheckCursor.isNull(0) || System.currentTimeMillis() - lastCheckCursor.getLong(0) > CACHE_LIFETIME_IN_MILLIS) {
-                    loadPrice();
+                    try {
+                        loadPrice();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -75,16 +85,16 @@ public class BitcoinPriceService extends CoinsIntentService {
         }
     }
 
-    private void loadPrice() {
+    private void loadPrice() throws IOException {
         float price;
 
-        WinkDexPriceResponse winkDexResponse = winkDexApi.getPrice();
+        WinkDexPriceResponse winkDexResponse = winkDexApi.getPrice().execute().body();
 
         // Sometimes this shitty API returns 0!
         if (winkDexResponse.getPrice() != 0) {
             price = (float) winkDexResponse.getPrice() / 100.0f;
         } else {
-            BitcoinAverageTickerResponse bitcoinAverageResponse = bitcoinAverageApi.getUsdTicker();
+            BitcoinAverageTickerResponse bitcoinAverageResponse = bitcoinAverageApi.getUsdTicker().execute().body();
             price = bitcoinAverageResponse.getLast();
         }
 
@@ -105,23 +115,22 @@ public class BitcoinPriceService extends CoinsIntentService {
     }
 
     private void initWinkDexApi() {
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint("https://winkdex.com/api/v0")
-                .setConverter(new GsonConverter(getGsonForApis()))
-                .setLogLevel(RestAdapter.LogLevel.FULL)
-                .build();
-
-        winkDexApi = restAdapter.create(WinkDexApi.class);
+        winkDexApi = new Retrofit.Builder()
+                .baseUrl("https://winkdex.com/api/v0/")
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(getGsonForApis()))
+                .build()
+                .create(WinkDexApi.class);
     }
 
     private void initBitcoinAverageApi() {
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint("https://api.bitcoinaverage.com")
-                .setConverter(new GsonConverter(getGsonForApis()))
-                .setLogLevel(RestAdapter.LogLevel.FULL)
-                .build();
+        bitcoinAverageApi = new Retrofit.Builder()
+                .baseUrl("https://api.bitcoinaverage.com/")
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
 
-        bitcoinAverageApi = restAdapter.create(BitcoinAverageApi.class);
+                .addConverterFactory(GsonConverterFactory.create(getGsonForApis()))
+                .build()
+                .create(BitcoinAverageApi.class);
     }
 
     private Gson getGsonForApis() {

@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.RemoteException;
-import android.util.Log;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
@@ -27,6 +26,7 @@ import com.bubelov.coins.util.Utils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -106,7 +106,6 @@ public class MerchantsSyncService extends CoinsIntentService {
             getBus().post(new DatabaseUpToDateEvent());
         } catch (Exception exception) {
             getBus().post(new DatabaseSyncFailedEvent());
-            Log.e(TAG, "Couldn't synchronize database", exception);
         } finally {
             syncing = false;
             scheduleNextSync();
@@ -144,7 +143,7 @@ public class MerchantsSyncService extends CoinsIntentService {
         currencies.close();
     }
 
-    private void syncCurrenciesIfNecessary() throws RemoteException, OperationApplicationException {
+    private void syncCurrenciesIfNecessary() throws RemoteException, OperationApplicationException, IOException {
         Cursor countCursor = getContentResolver().query(Database.Currencies.CONTENT_URI,
                 new String[]{"count(*) AS count"},
                 null,
@@ -156,11 +155,11 @@ public class MerchantsSyncService extends CoinsIntentService {
         countCursor.close();
 
         if (count == 0) {
-            saveCurrencies(getApi().getCurrencies());
+            saveCurrencies(getApi().getCurrencies().execute().body());
         }
     }
 
-    private void syncMerchants(long currencyId, String currencyCode) throws RemoteException, OperationApplicationException {
+    private void syncMerchants(long currencyId, String currencyCode) throws RemoteException, OperationApplicationException, IOException {
         SQLiteDatabase db = getDatabaseHelper().getWritableDatabase();
         UserNotificationController notificationManager = new UserNotificationController(getApplicationContext());
         boolean initialized = isInitialized();
@@ -182,8 +181,7 @@ public class MerchantsSyncService extends CoinsIntentService {
             lastUpdateCursor.close();
             DateTime lastUpdateDateTime = new DateTime(DateTimeZone.UTC).withMillis(lastUpdateMillis);
 
-            List<Merchant> merchants = getApi().getMerchants(currencyCode, lastUpdateDateTime.toString(Constants.DATE_FORMAT), MAX_MERCHANTS_PER_REQUEST);
-            Log.d(TAG, String.format("Downloaded %s merchants accepting %s", merchants.size(), currencyCode));
+            List<Merchant> merchants = getApi().getMerchants(currencyCode, lastUpdateDateTime.toString(Constants.DATE_FORMAT), MAX_MERCHANTS_PER_REQUEST).execute().body();
 
             ContentValues[] merchantsValues = new ContentValues[merchants.size()];
             ContentValues[] currenciesMerchantsValues = new ContentValues[merchants.size()];

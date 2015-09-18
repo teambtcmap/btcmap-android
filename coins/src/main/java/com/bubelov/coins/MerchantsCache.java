@@ -2,8 +2,6 @@ package com.bubelov.coins;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.text.TextUtils;
-import android.util.Log;
 
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Amenity;
@@ -57,8 +55,6 @@ public class MerchantsCache {
     }
 
     private void initialize() {
-        Log.d(TAG, "Initializing cache");
-
         Cursor cursor = db.rawQuery("select distinct m._id, m.latitude, m.longitude, m.amenity from merchants as m join currencies_merchants as mc on m._id = mc.merchant_id join currencies c on c._id = mc.currency_id where c.show_on_map = 1", null);
 
         while (cursor.moveToNext()) {
@@ -72,7 +68,5 @@ public class MerchantsCache {
 
         initialized = true;
         cursor.close();
-
-        Log.d(TAG, "Cache initialized");
     }
 }
