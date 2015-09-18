@@ -2,12 +2,14 @@ package com.bubelov.coins.model;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.Serializable;
+
 /**
  * Author: Igor Bubelov
  * Date: 7/8/15 11:47 PM
  */
 
-public class NotificationArea {
+public class NotificationArea implements Serializable {
     public static final int DEFAULT_RADIUS_METERS = 50_000;
 
     private double centerLatitude;

@@ -39,18 +39,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class SelectAreaActivity extends AbstractActivity {
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 0;
 
-    private static final String CENTER_EXTRA = "center";
-    private static final String RADIUS_EXTRA = "radius";
+    private static final String AREA_EXTRA = "area";
 
     private static final int DEFAULT_ZOOM = 8;
 
     private GoogleMap map;
+    private GoogleApiClient googleApiClient;
 
     private Marker areaCenter;
-
     private Circle areaCircle;
-
-    private GoogleApiClient googleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,15 +72,15 @@ public class SelectAreaActivity extends AbstractActivity {
         NotificationArea notificationArea = new NotificationAreaProvider(this).get();
         boolean findLocationAndMoveArea = false;
 
-        if (savedInstanceState != null) {
-            addArea(savedInstanceState.getParcelable(CENTER_EXTRA), savedInstanceState.getInt(RADIUS_EXTRA));
+        if (savedInstanceState != null && savedInstanceState.containsKey(AREA_EXTRA)) {
+            addArea((NotificationArea) savedInstanceState.getSerializable(AREA_EXTRA));
         } else {
             if (notificationArea == null) {
                 notificationArea = new NotificationArea(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE));
                 findLocationAndMoveArea = true;
             }
 
-            addArea(notificationArea.getCenter(), notificationArea.getRadiusMeters());
+            addArea(notificationArea);
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), DEFAULT_ZOOM));
         }
 
@@ -117,8 +114,7 @@ public class SelectAreaActivity extends AbstractActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         if (areaCenter != null && areaCircle != null) {
-            outState.putParcelable(CENTER_EXTRA, areaCenter.getPosition());
-            outState.putInt(RADIUS_EXTRA, (int) areaCircle.getRadius());
+            outState.putSerializable(AREA_EXTRA, new NotificationArea(areaCenter.getPosition(), (int) areaCircle.getRadius()));
         }
 
         super.onSaveInstanceState(outState);
@@ -160,17 +156,17 @@ public class SelectAreaActivity extends AbstractActivity {
         }
     }
 
-    private void addArea(LatLng center, int radius) {
+    private void addArea(NotificationArea area) {
         BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_location_marker);
         areaCenter = map.addMarker(new MarkerOptions()
-                .position(center)
+                .position(area.getCenter())
                 .icon(markerDescriptor)
                 .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V)
                 .draggable(true));
 
         CircleOptions circleOptions = new CircleOptions()
                 .center(areaCenter.getPosition())
-                .radius(radius)
+                .radius(area.getRadiusMeters())
                 .fillColor(getResources().getColor(R.color.notification_area))
                 .strokeColor(getResources().getColor(R.color.notification_area_border))
                 .strokeWidth(4);
