@@ -17,8 +17,6 @@ import java.util.Collection;
  */
 
 public class MerchantsCache {
-    private static final String TAG = MerchantsCache.class.getSimpleName();
-
     private final SQLiteDatabase db;
 
     private final Collection<Merchant> data;

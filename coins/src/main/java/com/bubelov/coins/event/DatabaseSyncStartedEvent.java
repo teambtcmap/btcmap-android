@@ -2,9 +2,9 @@ package com.bubelov.coins.event;
 
 /**
  * Author: Igor Bubelov
- * Date: 03/05/15 19:49
+ * Date: 18/05/15 15:10
  */
 
-public class DatabaseUpToDateEvent {
+public class DatabaseSyncStartedEvent {
     // Nothing to do here
 }

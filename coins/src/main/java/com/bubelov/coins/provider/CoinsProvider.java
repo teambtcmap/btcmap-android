@@ -7,12 +7,13 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
-import com.bubelov.coins.database.DatabaseHelper;
 import com.bubelov.coins.database.Database;
+import com.bubelov.coins.database.DatabaseFactory;
 
 /**
  * Author: Igor Bubelov
@@ -20,7 +21,7 @@ import com.bubelov.coins.database.Database;
  */
 
 public class CoinsProvider extends ContentProvider {
-    private DatabaseHelper db;
+    private SQLiteOpenHelper db;
 
     private static final int MERCHANTS = 100;
     private static final int MERCHANT_ID = 101;
@@ -44,7 +45,7 @@ public class CoinsProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        db = new DatabaseHelper(getContext());
+        db = DatabaseFactory.newHelper(getContext());
         return true;
     }
 

@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.api.CoinsApi;
-import com.bubelov.coins.database.DatabaseHelper;
+import com.bubelov.coins.database.DatabaseFactory;
 import com.bubelov.coins.serializer.DateTimeDeserializer;
 import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 import com.bubelov.coins.util.MainThreadBus;
@@ -40,7 +40,7 @@ public class App extends Application {
         instance = this;
         bus = new MainThreadBus();
         initApi();
-        databaseHelper = new DatabaseHelper(this);
+        databaseHelper = DatabaseFactory.newHelper(this);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         startService(MerchantsSyncService.makeIntent(this, false));

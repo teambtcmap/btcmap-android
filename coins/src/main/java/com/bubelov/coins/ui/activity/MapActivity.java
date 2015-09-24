@@ -31,9 +31,8 @@ import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
-import com.bubelov.coins.event.DatabaseUpToDateEvent;
-import com.bubelov.coins.event.DatabaseSyncingEvent;
-import com.bubelov.coins.event.NewMerchantsLoadedEvent;
+import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
+import com.bubelov.coins.event.DatabaseSyncStartedEvent;
 import com.bubelov.coins.loader.MerchantsLoader;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.model.Amenity;
@@ -227,7 +226,11 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     @Override
     protected void onResume() {
         super.onResume();
-        startService(MerchantsSyncService.makeIntent(this, false));
+        setDatabaseSyncing(MerchantsSyncService.isSyncing());
+
+        if (!databaseSyncing) {
+            startService(MerchantsSyncService.makeIntent(this, false));
+        }
     }
 
     @Override
@@ -522,30 +525,23 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     }
 
     @Subscribe
-    public void onDatabaseSyncing(DatabaseSyncingEvent event) {
-        databaseSyncing = true;
+    public void onDatabaseSyncStarted(DatabaseSyncStartedEvent event) {
+        setDatabaseSyncing(true);
+    }
 
-        if (!slidingLayout.getPanelState().equals(SlidingUpPanelLayout.PanelState.ANCHORED)) {
-            showLoader();
+    @Subscribe
+    public void onDatabaseSyncFinished(MerchantsSyncFinishedEvent event) {
+        setDatabaseSyncing(false);
+
+        if (event.isDataChanged()) {
+            merchantsCacheFragment.getMerchantsCache().invalidate();
+            reloadMerchants();
         }
     }
 
     @Subscribe
-    public void onNewMerchantsLoaded(NewMerchantsLoadedEvent event) {
-        merchantsCacheFragment.getMerchantsCache().invalidate();
-        reloadMerchants();
-    }
-
-    @Subscribe
-    public void onDatabaseSyncFinished(DatabaseUpToDateEvent event) {
-        databaseSyncing = false;
-        hideLoader();
-    }
-
-    @Subscribe
     public void onDatabaseSyncFailed(DatabaseSyncFailedEvent event) {
-        databaseSyncing = false;
-        hideLoader();
+        setDatabaseSyncing(false);
     }
 
     private void reloadMerchants() {
@@ -612,6 +608,22 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             Utils.showDirections(this, selectedMerchant.getLatitude(), selectedMerchant.getLongitude());
         } else {
             moveToUserLocation();
+        }
+    }
+
+    private void setDatabaseSyncing(boolean syncing) {
+        if (databaseSyncing == syncing) {
+            return;
+        }
+
+        databaseSyncing = syncing;
+
+        if (databaseSyncing) {
+            if (!slidingLayout.getPanelState().equals(SlidingUpPanelLayout.PanelState.ANCHORED)) {
+                showLoader();
+            }
+        } else {
+            hideLoader();
         }
     }
 
