@@ -128,7 +128,7 @@ public class DrawerMenu extends FrameLayout {
             } else {
                 DecimalFormat format = new DecimalFormat("#.##");
                 price.setText("$" + format.format(priceCursor.getDouble(0)));
-                priceLastCheck.setText("Checked: " + DateFormat.getTimeInstance().format(priceCursor.getLong(1)));
+                priceLastCheck.setText("Checked at: " + DateFormat.getTimeInstance(DateFormat.SHORT).format(priceCursor.getLong(1)));
             }
         }
 
