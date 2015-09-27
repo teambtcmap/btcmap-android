@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.database.Cursor;
 
 import com.bubelov.coins.api.external.BitcoinAverageApi;
-import com.bubelov.coins.api.external.BitcoinAverageTickerResponse;
-import com.bubelov.coins.api.external.WinkDexPriceResponse;
 import com.bubelov.coins.api.external.WinkDexApi;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.util.Utils;
@@ -27,8 +25,10 @@ import retrofit.RxJavaCallAdapterFactory;
  * Date: 08/05/15 19:44
  */
 
-public class BitcoinPriceService extends CoinsIntentService {
-    private static final String TAG = BitcoinPriceService.class.getSimpleName();
+public class ExchangeRatesService extends CoinsIntentService {
+    private static final String TAG = ExchangeRatesService.class.getSimpleName();
+
+    private static final String PROVIDER_EXTRA = "provider";
 
     private static final String FORCE_LOAD_EXTRA = "force_load";
 
@@ -41,13 +41,14 @@ public class BitcoinPriceService extends CoinsIntentService {
 
     private BitcoinAverageApi bitcoinAverageApi;
 
-    public BitcoinPriceService() {
+    public ExchangeRatesService() {
         super(TAG);
         initApis();
     }
 
-    public static Intent newIntent(Context context, boolean forceLoad) {
-        Intent intent = new Intent(context, BitcoinPriceService.class);
+    public static Intent newIntent(Context context, ExchangeRatesSource provider, boolean forceLoad) {
+        Intent intent = new Intent(context, ExchangeRatesService.class);
+        intent.putExtra(PROVIDER_EXTRA, provider);
         intent.putExtra(FORCE_LOAD_EXTRA, forceLoad);
         return intent;
     }
@@ -58,9 +59,11 @@ public class BitcoinPriceService extends CoinsIntentService {
             return;
         }
 
+        ExchangeRatesSource exchangeRatesSource = ((ExchangeRatesSource) intent.getSerializableExtra(PROVIDER_EXTRA));
+
         if (intent.getBooleanExtra(FORCE_LOAD_EXTRA, false)) {
             try {
-                loadPrice();
+                loadPrice(exchangeRatesSource);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -74,7 +77,7 @@ public class BitcoinPriceService extends CoinsIntentService {
             if (lastCheckCursor.moveToNext()) {
                 if (lastCheckCursor.isNull(0) || System.currentTimeMillis() - lastCheckCursor.getLong(0) > CACHE_LIFETIME_IN_MILLIS) {
                     try {
-                        loadPrice();
+                        loadPrice(exchangeRatesSource);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -85,20 +88,16 @@ public class BitcoinPriceService extends CoinsIntentService {
         }
     }
 
-    private void loadPrice() throws IOException {
-        float price;
+    private void loadPrice(ExchangeRatesSource provider) throws IOException {
+        float price = 0;
 
-        WinkDexPriceResponse winkDexResponse = winkDexApi.getPrice().execute().body();
-
-        // Sometimes this shitty API returns 0!
-        if (winkDexResponse.getPrice() != 0) {
-            price = (float) winkDexResponse.getPrice() / 100.0f;
-        } else {
-            BitcoinAverageTickerResponse bitcoinAverageResponse = bitcoinAverageApi.getUsdTicker().execute().body();
-            price = bitcoinAverageResponse.getLast();
+        if (provider.equals(ExchangeRatesSource.WINKDEX)) {
+            price = (float) winkDexApi.getPrice().execute().body().getPrice() / 100.0f;
+        } else if (provider.equals(ExchangeRatesSource.BITCOIN_AVERAGE)) {
+            price = bitcoinAverageApi.getUsdTicker().execute().body().getLast();
         }
 
-        if (price == 0.0f) {
+        if (price == 0) {
             return;
         }
 
