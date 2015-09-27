@@ -26,6 +26,10 @@
     <string name="notification_new_merchant">New merchant in your area</string>
     <string name="notification_new_merchant_no_name">Touch to see where</string>
 
+    <string name="pref_exchange_rates_source_key">pref_exchange_rates_source</string>
+    <string name="pref_exchange_rates_source">Exchange rates source</string>
+    <string name="pref_exchange_rates_source_summary">Select source for obtaining exchange rates between Bitcoin and USD</string>
+
     <string name="bitcoin_price">Bitcoin price</string>
 
     <string name="menu_item_all_merchants">All</string>
@@ -74,5 +78,15 @@
     <string name="ma_loading_merchants">LOADING MERCHANTS</string>
 
     <string name="saa_distance">Distance:</string>
+
+    <string-array name="exchange_rates_sources">
+        <item>WINKDEX</item>
+        <item>BitcoinAverage</item>
+    </string-array>
+
+    <string-array name="exchange_rates_sources_values">
+        <item>WINKDEX</item>
+        <item>BITCOIN_AVERAGE</item>
+    </string-array>
 
 </resources>

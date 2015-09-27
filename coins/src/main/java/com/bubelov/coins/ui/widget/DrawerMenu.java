@@ -1,17 +1,20 @@
 package com.bubelov.coins.ui.widget;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Database;
-import com.bubelov.coins.service.BitcoinPriceService;
+import com.bubelov.coins.service.ExchangeRatesService;
+import com.bubelov.coins.service.ExchangeRatesSource;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -95,7 +98,7 @@ public class DrawerMenu extends FrameLayout {
         price = (TextView) findViewById(R.id.price);
         priceLastCheck = (TextView) findViewById(R.id.price_last_check);
 
-        findViewById(R.id.check).setOnClickListener(v -> getContext().startService(BitcoinPriceService.newIntent(getContext(), true)));
+        findViewById(R.id.check).setOnClickListener(v -> updateExchangeRates(true));
 
         for (int id : ITEMS) {
             findViewById(id).setOnClickListener(v -> setSelected(v.getId()));
@@ -110,7 +113,7 @@ public class DrawerMenu extends FrameLayout {
             }
         });
 
-        getContext().startService(BitcoinPriceService.newIntent(getContext(), true));
+        updateExchangeRates(true);
     }
 
     private void showPrice() {
@@ -124,15 +127,24 @@ public class DrawerMenu extends FrameLayout {
             if (priceCursor.isNull(0)) {
                 price.setText("Loading...");
                 priceLastCheck.setText("Newer");
-                getContext().startService(BitcoinPriceService.newIntent(getContext(), false));
+                updateExchangeRates(false);
             } else {
-                DecimalFormat format = new DecimalFormat("#.##");
+                DecimalFormat format = new DecimalFormat();
+                format.setMinimumFractionDigits(2);
+                format.setMaximumFractionDigits(2);
+
                 price.setText("$" + format.format(priceCursor.getDouble(0)));
                 priceLastCheck.setText("Checked at: " + DateFormat.getTimeInstance(DateFormat.SHORT).format(priceCursor.getLong(1)));
             }
         }
 
         priceCursor.close();
+    }
+
+    private void updateExchangeRates(boolean forceLoad) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        ExchangeRatesSource source = ExchangeRatesSource.valueOf(preferences.getString(getContext().getString(R.string.pref_exchange_rates_source_key), null));
+        getContext().startService(ExchangeRatesService.newIntent(getContext(), source, forceLoad));
     }
 
     public interface OnMenuItemSelectedListener {

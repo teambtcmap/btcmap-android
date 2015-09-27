@@ -20,6 +20,19 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="Other">
+
+        <ListPreference
+            android:key="@string/pref_exchange_rates_source_key"
+            android:title="@string/pref_exchange_rates_source"
+            android:summary="@string/pref_exchange_rates_source_summary"
+            android:entries="@array/exchange_rates_sources"
+            android:entryValues="@array/exchange_rates_sources_values"
+            android:defaultValue="WINKDEX" />
+
+    </PreferenceCategory>
+
     <!--<PreferenceCategory-->
         <!--android:title="DEVELOPMENT">-->
 
