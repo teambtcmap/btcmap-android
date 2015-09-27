@@ -33,4 +33,25 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="Development">
+
+        <Preference
+            android:key="pref_test_notification"
+            android:title="Test notification" />
+
+        <Preference
+            android:key="pref_update_merchants"
+            android:title="Update merchants" />
+
+        <Preference
+            android:key="pref_remove_last_merchant"
+            android:title="Remove last merchant" />
+
+        <Preference
+            android:key="pref_export_database"
+            android:title="Export database" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>
