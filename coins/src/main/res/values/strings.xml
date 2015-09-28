@@ -65,7 +65,8 @@
 
     <string name="fa_description">Feel free to contact us if you have any questions.</string>
     <string name="fa_data_provided_by">Data provided by:</string>
-    <string name="fa_osm_credits">OpenStreetMap contributors</string>
+    <string name="fa_osm_credits">• OpenStreetMap contributors</string>
+    <string name="fa_coin_atm_radar_credits">• Coin ATM Radar</string>
     <string name="fa_programming">Programming:</string>
     <string name="fa_programmer_name">Igor Bubelov</string>
     <string name="fa_design">Design:</string>
