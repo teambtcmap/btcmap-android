@@ -26,6 +26,10 @@
     <string name="notification_new_merchant">Новый место принимает криптовалюту</string>
     <string name="notification_new_merchant_no_name">Нажмите чтобы его увидеть</string>
 
+    <string name="pref_exchange_rates_source_key">pref_exchange_rates_source</string>
+    <string name="pref_exchange_rates_source">Обменный курс</string>
+    <string name="pref_exchange_rates_source_summary">Вы можете выбрать откуда приложение будет брать информацию об обменном курсе</string>
+
     <string name="bitcoin_price">Цена Bitcoin</string>
 
     <string name="menu_item_all_merchants">Все</string>
@@ -62,6 +66,7 @@
     <string name="fa_description">Если у вас появились вопросы или предложения - можете оставить их в Google Play или связаться с кем-нибудь из команды.</string>
     <string name="fa_data_provided_by">Данные предоставлены</string>
     <string name="fa_osm_credits">Пользователями OpenStreetMap</string>
+    <string name="fa_coin_atm_radar_credits">Сервисом Coin ATM Radar</string>
     <string name="fa_programming">Программирование:</string>
     <string name="fa_programmer_name">Игорь Бубелов</string>
     <string name="fa_design">Дизайн:</string>

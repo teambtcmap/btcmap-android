@@ -25,12 +25,20 @@ public class FeedbackActivity extends AbstractActivity {
         toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
     }
 
+    public void onOSMContributorsClicked(View view) {
+        Utils.openUrl(this, "https://www.openstreetmap.org/");
+    }
+
+    public void onCoinAtmRadarClicked(View view) {
+        Utils.openUrl(this, "http://coinatmradar.com/");
+    }
+
     public void onOpenDeveloperProfileClicked(View view) {
         Utils.openUrl(this, "https://linkedin.com/in/bubelov");
     }
 
     public void onDesignerProfileClicked(View view) {
-        Utils.openUrl(this, "http://be.net/yushkov");
+        Utils.openUrl(this, "https://www.behance.net/yushkov");
     }
 
     public void onCopyDonationAddress(View view) {

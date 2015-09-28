@@ -26,6 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/fa_description"
+                android:textColor="@color/text"
                 app:typeface="regular" />
 
             <Space
@@ -38,11 +39,24 @@
                 android:text="@string/fa_data_provided_by"
                 app:typeface="regular" />
 
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="8dp" />
+
             <com.bubelov.coins.ui.widget.TypefaceTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/fa_osm_credits"
-                android:textColor="@color/text"
+                android:textColor="@color/link"
+                android:onClick="onOSMContributorsClicked"
+                app:typeface="regular" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/fa_coin_atm_radar_credits"
+                android:textColor="@color/link"
+                android:onClick="onCoinAtmRadarClicked"
                 app:typeface="regular" />
 
             <Space
@@ -55,6 +69,10 @@
                 android:text="@string/fa_programming"
                 android:textColor="@color/secondary_text_or_icons"
                 app:typeface="regular" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="8dp" />
 
             <com.bubelov.coins.ui.widget.TypefaceTextView
                 android:layout_width="wrap_content"
@@ -90,6 +108,10 @@
                 android:text="@string/fa_design"
                 android:textColor="@color/secondary_text_or_icons"
                 app:typeface="regular" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="8dp" />
 
             <com.bubelov.coins.ui.widget.TypefaceTextView
                 android:layout_width="wrap_content"
