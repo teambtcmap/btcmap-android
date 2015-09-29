@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.database.Cursor;
 
 import com.bubelov.coins.api.external.BitcoinAverageApi;
+import com.bubelov.coins.api.external.BitstampApi;
+import com.bubelov.coins.api.external.CoinbaseApi;
 import com.bubelov.coins.api.external.WinkDexApi;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.util.Utils;
@@ -37,9 +39,10 @@ public class ExchangeRatesService extends CoinsIntentService {
     private static final String selection = String.format("%s = ?", Database.Currencies.CODE);
     private static final String[] selectionArgs = new String[] { "BTC" };
 
-    private WinkDexApi winkDexApi;
-
+    private BitstampApi bitstampApi;
+    private CoinbaseApi coinbaseApi;
     private BitcoinAverageApi bitcoinAverageApi;
+    private WinkDexApi winkDexApi;
 
     public ExchangeRatesService() {
         super(TAG);
@@ -91,10 +94,14 @@ public class ExchangeRatesService extends CoinsIntentService {
     private void loadPrice(ExchangeRatesSource provider) throws IOException {
         float price = 0;
 
-        if (provider.equals(ExchangeRatesSource.WINKDEX)) {
-            price = (float) winkDexApi.getPrice().execute().body().getPrice() / 100.0f;
+        if (provider.equals(ExchangeRatesSource.COINBASE)) {
+            price = coinbaseApi.getTicker().execute().body().getPrice();
+        } else if (provider.equals(ExchangeRatesSource.BITSTAMP)) {
+            price = bitstampApi.getTicker().execute().body().getLast();
         } else if (provider.equals(ExchangeRatesSource.BITCOIN_AVERAGE)) {
             price = bitcoinAverageApi.getUsdTicker().execute().body().getLast();
+        } else if (provider.equals(ExchangeRatesSource.WINKDEX)) {
+            price = (float) winkDexApi.getPrice().execute().body().getPrice() / 100.0f;
         }
 
         if (price == 0) {
@@ -109,8 +116,37 @@ public class ExchangeRatesService extends CoinsIntentService {
     }
 
     private void initApis() {
-        initWinkDexApi();
+        initBitstampApi();
+        initCoinbaseApi();
         initBitcoinAverageApi();
+        initWinkDexApi();
+    }
+
+    private void initBitstampApi() {
+        bitstampApi = new Retrofit.Builder()
+                .baseUrl("https://www.bitstamp.net/api/")
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(getGsonForApis()))
+                .build()
+                .create(BitstampApi.class);
+    }
+
+    private void initCoinbaseApi() {
+        coinbaseApi = new Retrofit.Builder()
+                .baseUrl("https://api.exchange.coinbase.com/")
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(getGsonForApis()))
+                .build()
+                .create(CoinbaseApi.class);
+    }
+
+    private void initBitcoinAverageApi() {
+        bitcoinAverageApi = new Retrofit.Builder()
+                .baseUrl("https://api.bitcoinaverage.com/")
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(getGsonForApis()))
+                .build()
+                .create(BitcoinAverageApi.class);
     }
 
     private void initWinkDexApi() {
@@ -120,16 +156,6 @@ public class ExchangeRatesService extends CoinsIntentService {
                 .addConverterFactory(GsonConverterFactory.create(getGsonForApis()))
                 .build()
                 .create(WinkDexApi.class);
-    }
-
-    private void initBitcoinAverageApi() {
-        bitcoinAverageApi = new Retrofit.Builder()
-                .baseUrl("https://api.bitcoinaverage.com/")
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-
-                .addConverterFactory(GsonConverterFactory.create(getGsonForApis()))
-                .build()
-                .create(BitcoinAverageApi.class);
     }
 
     private Gson getGsonForApis() {
