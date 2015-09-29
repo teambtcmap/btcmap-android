@@ -6,6 +6,8 @@ package com.bubelov.coins.service;
  */
 
 public enum ExchangeRatesSource {
-    WINKDEX,
-    BITCOIN_AVERAGE
+    BITSTAMP,
+    COINBASE,
+    BITCOIN_AVERAGE,
+    WINKDEX
 }

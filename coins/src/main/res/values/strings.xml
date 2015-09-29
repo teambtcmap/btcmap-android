@@ -81,13 +81,17 @@
     <string name="saa_distance">Distance:</string>
 
     <string-array name="exchange_rates_sources">
-        <item>WINKDEX</item>
+        <item>Bitstamp</item>
+        <item>Coinbase</item>
         <item>BitcoinAverage</item>
+        <item>WINKDEX</item>
     </string-array>
 
     <string-array name="exchange_rates_sources_values">
-        <item>WINKDEX</item>
+        <item>BITSTAMP</item>
+        <item>COINBASE</item>
         <item>BITCOIN_AVERAGE</item>
+        <item>WINKDEX</item>
     </string-array>
 
 </resources>

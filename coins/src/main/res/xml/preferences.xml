@@ -29,7 +29,7 @@
             android:summary="@string/pref_exchange_rates_source_summary"
             android:entries="@array/exchange_rates_sources"
             android:entryValues="@array/exchange_rates_sources_values"
-            android:defaultValue="WINKDEX" />
+            android:defaultValue="BITSTAMP" />
 
     </PreferenceCategory>
 
