@@ -26,11 +26,12 @@
     <string name="notification_new_merchant">New merchant in your area</string>
     <string name="notification_new_merchant_no_name">Touch to see where</string>
 
-    <string name="pref_exchange_rates_source_key">pref_exchange_rates_source</string>
-    <string name="pref_exchange_rates_source">Exchange rates source</string>
-    <string name="pref_exchange_rates_source_summary">Select source for obtaining exchange rates between Bitcoin and USD</string>
+    <string name="pref_exchange_rates_provider_key">pref_exchange_rates_provider</string>
+    <string name="pref_exchange_rates_provider">Exchange rates source</string>
+    <string name="pref_exchange_rates_provider_summary">Select source for obtaining exchange rates between Bitcoin and USD</string>
 
-    <string name="bitcoin_price">Bitcoin price</string>
+    <string name="bitcoin_price">Exchange rate</string>
+    <string name="bitcoin_price_checked_at">Checked at: </string>
 
     <string name="menu_item_all_merchants">All</string>
     <string name="menu_item_atms">ATMs</string>

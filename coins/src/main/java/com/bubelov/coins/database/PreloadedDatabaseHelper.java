@@ -16,5 +16,6 @@ public class PreloadedDatabaseHelper extends SQLiteAssetHelper {
                 context.getResources().getString(R.string.database_name),
                 null,
                 context.getResources().getInteger(R.integer.database_version));
+        setForcedUpgrade();
     }
 }

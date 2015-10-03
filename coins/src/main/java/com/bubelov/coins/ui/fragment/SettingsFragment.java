@@ -1,6 +1,7 @@
 package com.bubelov.coins.ui.fragment;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Database;
+import com.bubelov.coins.service.ExchangeRatesService;
 import com.bubelov.coins.service.sync.merchants.UserNotificationController;
 import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 import com.bubelov.coins.ui.activity.SelectAreaActivity;
@@ -29,11 +31,23 @@ import java.util.Random;
  * Date: 11/07/14 20:31
  */
 
-public class SettingsFragment extends PreferenceFragment {
+public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onPause() {
+        getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+        super.onPause();
     }
 
     @Override
@@ -119,5 +133,12 @@ public class SettingsFragment extends PreferenceFragment {
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_exchange_rates_provider_key))) {
+            getActivity().startService(ExchangeRatesService.newIntent(getActivity(), "BTC", "USD", true));
+        }
     }
 }

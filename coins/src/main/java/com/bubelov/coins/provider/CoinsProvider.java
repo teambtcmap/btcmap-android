@@ -32,6 +32,8 @@ public class CoinsProvider extends ContentProvider {
 
     private static final int CURRENCIES_MERCHANTS = 300;
 
+    private static final int EXCHANGE_RATES = 400;
+
     private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
@@ -41,6 +43,7 @@ public class CoinsProvider extends ContentProvider {
         sURIMatcher.addURI(Database.AUTHORITY, Database.Currencies.TABLE_NAME, CURRENCIES);
         sURIMatcher.addURI(Database.AUTHORITY, Database.Currencies.TABLE_NAME + "/*", CURRENCY_ID);
         sURIMatcher.addURI(Database.AUTHORITY, Database.CurrenciesMerchants.TABLE_NAME, CURRENCIES_MERCHANTS);
+        sURIMatcher.addURI(Database.AUTHORITY, Database.ExchangeRates.TABLE_NAME, EXCHANGE_RATES);
     }
 
     @Override
@@ -243,6 +246,8 @@ public class CoinsProvider extends ContentProvider {
                 return Database.Currencies.TABLE_NAME;
             case CURRENCIES_MERCHANTS:
                 return Database.CurrenciesMerchants.TABLE_NAME;
+            case EXCHANGE_RATES:
+                return Database.ExchangeRates.TABLE_NAME;
             default:
                 throw new IllegalArgumentException("Unsupported URI");
         }
