@@ -26,11 +26,12 @@
     <string name="notification_new_merchant">Новый место принимает криптовалюту</string>
     <string name="notification_new_merchant_no_name">Нажмите чтобы его увидеть</string>
 
-    <string name="pref_exchange_rates_source_key">pref_exchange_rates_source</string>
-    <string name="pref_exchange_rates_source">Обменный курс</string>
-    <string name="pref_exchange_rates_source_summary">Вы можете выбрать откуда приложение будет брать информацию об обменном курсе</string>
+    <string name="pref_exchange_rates_provider_key">pref_exchange_rates_source</string>
+    <string name="pref_exchange_rates_provider">Обменный курс</string>
+    <string name="pref_exchange_rates_provider_summary">Вы можете выбрать откуда приложение будет брать информацию об обменном курсе</string>
 
-    <string name="bitcoin_price">Цена Bitcoin</string>
+    <string name="bitcoin_price">Биржевой курс</string>
+    <string name="bitcoin_price_checked_at">Актуален на: </string>
 
     <string name="menu_item_all_merchants">Все</string>
     <string name="menu_item_atms">Банкоматы</string>

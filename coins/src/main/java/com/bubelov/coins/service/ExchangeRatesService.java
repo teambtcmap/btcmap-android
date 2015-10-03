@@ -3,8 +3,12 @@ package com.bubelov.coins.service;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
+import com.bubelov.coins.R;
 import com.bubelov.coins.api.external.BitcoinAverageApi;
 import com.bubelov.coins.api.external.BitstampApi;
 import com.bubelov.coins.api.external.CoinbaseApi;
@@ -30,14 +34,13 @@ import retrofit.RxJavaCallAdapterFactory;
 public class ExchangeRatesService extends CoinsIntentService {
     private static final String TAG = ExchangeRatesService.class.getSimpleName();
 
-    private static final String PROVIDER_EXTRA = "provider";
+    private static final String SOURCE_CURRENCY_CODE_EXTRA = "source_currency_code";
+
+    private static final String TARGET_CURRENCY_CODE_EXTRA = "target_currency_code";
 
     private static final String FORCE_LOAD_EXTRA = "force_load";
 
     private static final long CACHE_LIFETIME_IN_MILLIS = TimeUnit.MINUTES.toMillis(15);
-
-    private static final String selection = String.format("%s = ?", Database.Currencies.CODE);
-    private static final String[] selectionArgs = new String[] { "BTC" };
 
     private BitstampApi bitstampApi;
     private CoinbaseApi coinbaseApi;
@@ -49,9 +52,10 @@ public class ExchangeRatesService extends CoinsIntentService {
         initApis();
     }
 
-    public static Intent newIntent(Context context, ExchangeRatesSource provider, boolean forceLoad) {
+    public static Intent newIntent(Context context, String sourceCurrencyCode, String targetCurrencyCode, boolean forceLoad) {
         Intent intent = new Intent(context, ExchangeRatesService.class);
-        intent.putExtra(PROVIDER_EXTRA, provider);
+        intent.putExtra(SOURCE_CURRENCY_CODE_EXTRA, sourceCurrencyCode);
+        intent.putExtra(TARGET_CURRENCY_CODE_EXTRA, targetCurrencyCode);
         intent.putExtra(FORCE_LOAD_EXTRA, forceLoad);
         return intent;
     }
@@ -62,57 +66,93 @@ public class ExchangeRatesService extends CoinsIntentService {
             return;
         }
 
-        ExchangeRatesSource exchangeRatesSource = ((ExchangeRatesSource) intent.getSerializableExtra(PROVIDER_EXTRA));
+        String sourceCurrencyCode = intent.getStringExtra(SOURCE_CURRENCY_CODE_EXTRA);
+        String targetCurrencyCode = intent.getStringExtra(TARGET_CURRENCY_CODE_EXTRA);
 
-        if (intent.getBooleanExtra(FORCE_LOAD_EXTRA, false)) {
-            try {
-                loadPrice(exchangeRatesSource);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            Cursor lastCheckCursor = getContentResolver().query(Database.Currencies.CONTENT_URI,
-                    new String[]{Database.Currencies.PRICE_LAST_CHECK},
-                    selection,
-                    selectionArgs,
-                    null);
+        long sourceCurrencyId = getCurrencyId(sourceCurrencyCode);
+        long targetCurrencyId = getCurrencyId(targetCurrencyCode);
 
-            if (lastCheckCursor.moveToNext()) {
-                if (lastCheckCursor.isNull(0) || System.currentTimeMillis() - lastCheckCursor.getLong(0) > CACHE_LIFETIME_IN_MILLIS) {
-                    try {
-                        loadPrice(exchangeRatesSource);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            lastCheckCursor.close();
-        }
-    }
-
-    private void loadPrice(ExchangeRatesSource provider) throws IOException {
-        float price = 0;
-
-        if (provider.equals(ExchangeRatesSource.COINBASE)) {
-            price = coinbaseApi.getTicker().execute().body().getPrice();
-        } else if (provider.equals(ExchangeRatesSource.BITSTAMP)) {
-            price = bitstampApi.getTicker().execute().body().getLast();
-        } else if (provider.equals(ExchangeRatesSource.BITCOIN_AVERAGE)) {
-            price = bitcoinAverageApi.getUsdTicker().execute().body().getLast();
-        } else if (provider.equals(ExchangeRatesSource.WINKDEX)) {
-            price = (float) winkDexApi.getPrice().execute().body().getPrice() / 100.0f;
-        }
-
-        if (price == 0) {
+        if (sourceCurrencyId == -1 || targetCurrencyId == -1) {
+            Log.i(TAG, "Couldn't find currency pair");
             return;
         }
 
-        ContentValues values = new ContentValues();
-        values.put(Database.Currencies.PRICE, price);
-        values.put(Database.Currencies.PRICE_LAST_CHECK, System.currentTimeMillis());
+        if (intent.getBooleanExtra(FORCE_LOAD_EXTRA, false) || !isCacheUpToDate(sourceCurrencyId, targetCurrencyId)) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            ExchangeRatesProviderType provider = ExchangeRatesProviderType.valueOf(preferences.getString(getString(R.string.pref_exchange_rates_provider_key), null));
 
-        getContentResolver().update(Database.Currencies.CONTENT_URI, values, selection, selectionArgs);
+            try {
+                float exchangeRate = loadExchangeRate(sourceCurrencyCode, targetCurrencyCode, provider);
+                long now = System.currentTimeMillis();
+
+                ContentValues values = new ContentValues();
+                values.put(Database.ExchangeRates.SOURCE_CURRENCY_ID, sourceCurrencyId);
+                values.put(Database.ExchangeRates.TARGET_CURRENCY_ID, targetCurrencyId);
+                values.put(Database.ExchangeRates.VALUE, exchangeRate);
+                values.put(Database.ExchangeRates._CREATED_AT, now);
+                values.put(Database.ExchangeRates._UPDATED_AT, now);
+
+                getContentResolver().insert(Database.ExchangeRates.CONTENT_URI, values);
+            } catch (IOException exception) {
+                Log.e(TAG, "Couldn't load exchange rate", exception);
+            }
+        }
+    }
+
+    private boolean isCacheUpToDate(long sourceCurrencyId, long targetCurrencyId) {
+        Cursor ratesCursor = getContentResolver().query(Database.ExchangeRates.CONTENT_URI,
+                new String[]{Database.ExchangeRates._UPDATED_AT, Database.ExchangeRates.VALUE},
+                String.format("%s = ? and %s = ?", Database.ExchangeRates.SOURCE_CURRENCY_ID, Database.ExchangeRates.TARGET_CURRENCY_ID),
+                new String[]{String.valueOf(sourceCurrencyId), String.valueOf(targetCurrencyId)},
+                String.format("%s DESC", Database.ExchangeRates._UPDATED_AT));
+
+        if (!ratesCursor.moveToNext()) {
+            ratesCursor.close();
+            return false;
+        } else {
+            long lastCheckTime = ratesCursor.getLong(ratesCursor.getColumnIndex(Database.ExchangeRates._UPDATED_AT));
+
+            if (System.currentTimeMillis() - lastCheckTime > CACHE_LIFETIME_IN_MILLIS) {
+                ratesCursor.close();
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+
+    private float loadExchangeRate(String sourceCurrencyCode, String targetCurrencyCode, ExchangeRatesProviderType provider) throws IOException {
+        float exchangeRate = 0;
+
+        if (provider.equals(ExchangeRatesProviderType.COINBASE)) {
+            exchangeRate = coinbaseApi.getTicker().execute().body().getPrice();
+        } else if (provider.equals(ExchangeRatesProviderType.BITSTAMP)) {
+            exchangeRate = bitstampApi.getTicker().execute().body().getLast();
+        } else if (provider.equals(ExchangeRatesProviderType.BITCOIN_AVERAGE)) {
+            exchangeRate = bitcoinAverageApi.getUsdTicker().execute().body().getLast();
+        } else if (provider.equals(ExchangeRatesProviderType.WINKDEX)) {
+            exchangeRate = (float) winkDexApi.getPrice().execute().body().getPrice() / 100.0f;
+        }
+
+        return exchangeRate;
+    }
+
+    private long getCurrencyId(String code) {
+        Cursor cursor = getContentResolver().query(Database.Currencies.CONTENT_URI,
+                new String[]{Database.Currencies._ID},
+                String.format("%s = ?", Database.Currencies.CODE),
+                new String[]{code},
+                null);
+
+        try {
+            if (cursor.moveToNext()) {
+                return cursor.getLong(0);
+            } else {
+                return -1;
+            }
+        } finally {
+            cursor.close();
+        }
     }
 
     private void initApis() {

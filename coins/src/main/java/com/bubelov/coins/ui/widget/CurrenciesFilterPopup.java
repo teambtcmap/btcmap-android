@@ -33,8 +33,8 @@ public class CurrenciesFilterPopup extends ListPopupWindow {
     public ListAdapter getAdapter() {
         Cursor currencies = context.getContentResolver().query(Database.Currencies.CONTENT_URI,
                 new String[]{Database.Currencies._ID, Database.Currencies.NAME, Database.Currencies.SHOW_ON_MAP},
-                null,
-                null,
+                String.format("%s = ?", Database.Currencies.CRYPTO),
+                new String[]{String.valueOf(1)},
                 null);
 
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(context,

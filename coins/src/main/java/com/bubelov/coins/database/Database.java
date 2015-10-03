@@ -32,9 +32,8 @@ public interface Database {
 
         String NAME = "name";
         String CODE = "code";
+        String CRYPTO = "crypto";
         String SHOW_ON_MAP = "show_on_map";
-        String PRICE = "price";
-        String PRICE_LAST_CHECK = "price_last_check";
     }
 
     interface CurrenciesMerchants extends BaseColumns {
@@ -43,5 +42,14 @@ public interface Database {
 
         String CURRENCY_ID = "currency_id";
         String MERCHANT_ID = "merchant_id";
+    }
+
+    interface ExchangeRates extends BaseColumns {
+        String TABLE_NAME = "exchange_rates";
+        Uri CONTENT_URI = Uri.parse(String.format("%s/%s", BASE_CONTENT_URI, TABLE_NAME));
+
+        String SOURCE_CURRENCY_ID = "source_currency_id";
+        String TARGET_CURRENCY_ID = "target_currency_id";
+        String VALUE = "value";
     }
 }

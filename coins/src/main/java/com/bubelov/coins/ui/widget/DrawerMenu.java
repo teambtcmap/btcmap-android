@@ -6,7 +6,6 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -14,7 +13,6 @@ import android.widget.TextView;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.service.ExchangeRatesService;
-import com.bubelov.coins.service.ExchangeRatesSource;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -98,53 +96,72 @@ public class DrawerMenu extends FrameLayout {
         price = (TextView) findViewById(R.id.price);
         priceLastCheck = (TextView) findViewById(R.id.price_last_check);
 
-        findViewById(R.id.check).setOnClickListener(v -> updateExchangeRates(true));
+        findViewById(R.id.check).setOnClickListener(v -> updateExchangeRate(true));
 
         for (int id : ITEMS) {
             findViewById(id).setOnClickListener(v -> setSelected(v.getId()));
         }
 
-        showPrice();
+        showExchangeRate();
 
         getContext().getContentResolver().registerContentObserver(Database.Currencies.CONTENT_URI, true, new ContentObserver(new Handler(Looper.getMainLooper())) {
             @Override
             public void onChange(boolean selfChange) {
-                showPrice();
+                showExchangeRate();
             }
         });
 
-        updateExchangeRates(true);
+        getContext().getContentResolver().registerContentObserver(Database.ExchangeRates.CONTENT_URI, true, new ContentObserver(new Handler(Looper.getMainLooper())) {
+            @Override
+            public void onChange(boolean selfChange) {
+                showExchangeRate();
+            }
+        });
+
+        updateExchangeRate(true);
     }
 
-    private void showPrice() {
-        Cursor priceCursor = getContext().getContentResolver().query(Database.Currencies.CONTENT_URI,
-                new String[] { Database.Currencies.PRICE, Database.Currencies.PRICE_LAST_CHECK },
-                String.format("%s = ?", Database.Currencies.CODE),
-                new String[] { "BTC" },
-                null);
+    private void showExchangeRate() {
+        Cursor ratesCursor = getContext().getContentResolver().query(Database.ExchangeRates.CONTENT_URI,
+                new String[]{Database.ExchangeRates.VALUE, Database.ExchangeRates._UPDATED_AT},
+                String.format("%s = ? and %s = ?", Database.ExchangeRates.SOURCE_CURRENCY_ID, Database.ExchangeRates.TARGET_CURRENCY_ID),
+                new String[]{String.valueOf(getCurrencyId("BTC")), String.valueOf(getCurrencyId("USD"))},
+                String.format("%s DESC", Database.ExchangeRates._UPDATED_AT));
 
-        if (priceCursor.moveToNext()) {
-            if (priceCursor.isNull(0)) {
-                price.setText("Loading...");
-                priceLastCheck.setText("Newer");
-                updateExchangeRates(false);
-            } else {
-                DecimalFormat format = new DecimalFormat();
-                format.setMinimumFractionDigits(2);
-                format.setMaximumFractionDigits(2);
+        if (ratesCursor.moveToNext()) {
+            DecimalFormat format = new DecimalFormat();
+            format.setMinimumFractionDigits(2);
+            format.setMaximumFractionDigits(2);
 
-                price.setText("$" + format.format(priceCursor.getDouble(0)));
-                priceLastCheck.setText("Checked at: " + DateFormat.getTimeInstance(DateFormat.SHORT).format(priceCursor.getLong(1)));
-            }
+            price.setText("$" + format.format(ratesCursor.getFloat(0)));
+            priceLastCheck.setText(getResources().getString(R.string.bitcoin_price_checked_at) + DateFormat.getTimeInstance(DateFormat.SHORT).format(ratesCursor.getLong(1)));
+        } else {
+            updateExchangeRate(false);
         }
 
-        priceCursor.close();
+        ratesCursor.close();
     }
 
-    private void updateExchangeRates(boolean forceLoad) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        ExchangeRatesSource source = ExchangeRatesSource.valueOf(preferences.getString(getContext().getString(R.string.pref_exchange_rates_source_key), null));
-        getContext().startService(ExchangeRatesService.newIntent(getContext(), source, forceLoad));
+    private void updateExchangeRate(boolean forceLoad) {
+        getContext().startService(ExchangeRatesService.newIntent(getContext(), "BTC", "USD", forceLoad));
+    }
+
+    private long getCurrencyId(String code) {
+        Cursor cursor = getContext().getContentResolver().query(Database.Currencies.CONTENT_URI,
+                new String[]{Database.Currencies._ID},
+                String.format("%s = ?", Database.Currencies.CODE),
+                new String[]{code},
+                null);
+
+        try {
+            if (cursor.moveToNext()) {
+                return cursor.getLong(0);
+            } else {
+                return -1;
+            }
+        } finally {
+            cursor.close();
+        }
     }
 
     public interface OnMenuItemSelectedListener {

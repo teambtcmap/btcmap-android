@@ -136,19 +136,19 @@ public class MerchantsSyncService extends CoinsIntentService {
     private void sync() throws Exception {
         syncCurrenciesIfNecessary();
 
-        Cursor currencies = getContentResolver().query(Database.Currencies.CONTENT_URI,
+        Cursor cryptoCurrencies = getContentResolver().query(Database.Currencies.CONTENT_URI,
                 new String[]{Database.Currencies._ID, Database.Currencies.CODE},
-                null,
-                null,
+                String.format("%s = ?", Database.Currencies.CRYPTO),
+                new String[]{String.valueOf(1)},
                 null);
 
-        while (currencies.moveToNext()) {
-            Long id = currencies.getLong(currencies.getColumnIndex(Database.Currencies._ID));
-            String code = currencies.getString(currencies.getColumnIndex(Database.Currencies.CODE));
+        while (cryptoCurrencies.moveToNext()) {
+            Long id = cryptoCurrencies.getLong(cryptoCurrencies.getColumnIndex(Database.Currencies._ID));
+            String code = cryptoCurrencies.getString(cryptoCurrencies.getColumnIndex(Database.Currencies.CODE));
             syncMerchants(id, code);
         }
 
-        currencies.close();
+        cryptoCurrencies.close();
     }
 
     private void syncCurrenciesIfNecessary() throws RemoteException, OperationApplicationException, IOException {
@@ -248,6 +248,7 @@ public class MerchantsSyncService extends CoinsIntentService {
                     .withValue(Database.Currencies._UPDATED_AT, currency.getUpdatedAt().getMillis())
                     .withValue(Database.Currencies.NAME, currency.getName())
                     .withValue(Database.Currencies.CODE, currency.getCode())
+                    .withValue(Database.Currencies.CRYPTO, currency.isCrypto())
                     .build());
         }
 

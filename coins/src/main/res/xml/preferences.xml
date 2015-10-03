@@ -24,9 +24,9 @@
         android:title="Other">
 
         <ListPreference
-            android:key="@string/pref_exchange_rates_source_key"
-            android:title="@string/pref_exchange_rates_source"
-            android:summary="@string/pref_exchange_rates_source_summary"
+            android:key="@string/pref_exchange_rates_provider_key"
+            android:title="@string/pref_exchange_rates_provider"
+            android:summary="@string/pref_exchange_rates_provider_summary"
             android:entries="@array/exchange_rates_sources"
             android:entryValues="@array/exchange_rates_sources_values"
             android:defaultValue="BITSTAMP" />

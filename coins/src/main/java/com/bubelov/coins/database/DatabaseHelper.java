@@ -44,9 +44,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     Database.Currencies._UPDATED_AT + INTEGER + COMMA_SEP +
                     Database.Currencies.NAME + TEXT + COMMA_SEP +
                     Database.Currencies.CODE + INTEGER + COMMA_SEP +
-                    Database.Currencies.SHOW_ON_MAP + BOOLEAN + " NOT NULL DEFAULT 1" + COMMA_SEP +
-                    Database.Currencies.PRICE + REAL + COMMA_SEP +
-                    Database.Currencies.PRICE_LAST_CHECK + INTEGER +
+                    Database.Currencies.CRYPTO + BOOLEAN + " NOT NULL" + COMMA_SEP +
+                    Database.Currencies.SHOW_ON_MAP + BOOLEAN + " NOT NULL DEFAULT 1" +
                     " )";
 
     private static final String SQL_CREATE_MERCHANTS_TO_CURRENCIES_TABLE =
@@ -56,9 +55,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     Database.CurrenciesMerchants.CURRENCY_ID + INTEGER +
                     " )";
 
+    private static final String SQL_CREATE_EXCHANGE_RATES_TABLE =
+            "CREATE TABLE " + Database.ExchangeRates.TABLE_NAME + " (" +
+                    Database.ExchangeRates._ID + INTEGER + " PRIMARY KEY" + COMMA_SEP +
+                    Database.ExchangeRates._CREATED_AT + INTEGER + COMMA_SEP +
+                    Database.ExchangeRates._UPDATED_AT + INTEGER + COMMA_SEP +
+                    Database.ExchangeRates.SOURCE_CURRENCY_ID + INTEGER + COMMA_SEP +
+                    Database.ExchangeRates.TARGET_CURRENCY_ID + INTEGER + COMMA_SEP +
+                    Database.ExchangeRates.VALUE + REAL +
+                    " )";
+
     private static final String SQL_DELETE_MERCHANTS_TABLE = "DROP TABLE IF EXISTS " + Database.Merchants.TABLE_NAME;
     private static final String SQL_DELETE_CURRENCIES_TABLE = "DROP TABLE IF EXISTS " + Database.Currencies.TABLE_NAME;
     private static final String SQL_DELETE_CURRENCIES_TO_MERCHANTS_TABLE = "DROP TABLE IF EXISTS " + Database.CurrenciesMerchants.TABLE_NAME;
+    private static final String SQL_DELETE_EXCHANGE_RATES_TABLE = "DROP TABLE IF EXISTS " + Database.ExchangeRates.TABLE_NAME;
 
     public DatabaseHelper(Context context) {
         super(context,
@@ -72,6 +82,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_MERCHANTS_TABLE);
         db.execSQL(SQL_CREATE_CURRENCIES_TABLE);
         db.execSQL(SQL_CREATE_MERCHANTS_TO_CURRENCIES_TABLE);
+        db.execSQL(SQL_CREATE_EXCHANGE_RATES_TABLE);
 
         db.execSQL(String.format("CREATE INDEX index_merchant_id_position ON merchants (%s, %s, %s)", Database.Merchants._ID, Database.Merchants.LATITUDE, Database.Merchants.LONGITUDE));
         db.execSQL(String.format("CREATE INDEX index_currency_id ON currencies (%s)", Database.Currencies._ID));
@@ -83,6 +94,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_DELETE_MERCHANTS_TABLE);
         db.execSQL(SQL_DELETE_CURRENCIES_TABLE);
         db.execSQL(SQL_DELETE_CURRENCIES_TO_MERCHANTS_TABLE);
+        db.execSQL(SQL_DELETE_EXCHANGE_RATES_TABLE);
         onCreate(db);
 
         Context context = App.getInstance();

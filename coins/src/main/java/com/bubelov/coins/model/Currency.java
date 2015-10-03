@@ -10,6 +10,8 @@ public class Currency extends AbstractEntity {
 
     private String code;
 
+    private boolean crypto;
+
     public String getName() {
         return name;
     }
@@ -24,5 +26,13 @@ public class Currency extends AbstractEntity {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public boolean isCrypto() {
+        return crypto;
+    }
+
+    public void setCrypto(boolean crypto) {
+        this.crypto = crypto;
     }
 }
