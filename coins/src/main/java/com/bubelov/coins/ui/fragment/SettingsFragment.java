@@ -15,7 +15,8 @@ import android.widget.Toast;
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Database;
-import com.bubelov.coins.service.ExchangeRatesService;
+import com.bubelov.coins.model.Currency;
+import com.bubelov.coins.service.rates.ExchangeRatesService;
 import com.bubelov.coins.service.sync.merchants.UserNotificationController;
 import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 import com.bubelov.coins.ui.activity.SelectAreaActivity;
@@ -138,7 +139,10 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_exchange_rates_provider_key))) {
-            getActivity().startService(ExchangeRatesService.newIntent(getActivity(), "BTC", "USD", true));
+            getActivity().startService(ExchangeRatesService.newIntent(getActivity(),
+                    Currency.query(getActivity(), "BTC"),
+                    Currency.query(getActivity(), "USD"),
+                    true));
         }
     }
 }

@@ -2,12 +2,14 @@ package com.bubelov.coins.model;
 
 import org.joda.time.DateTime;
 
+import java.io.Serializable;
+
 /**
  * Author: Igor Bubelov
  * Date: 07/05/15 12:38
  */
 
-public abstract class AbstractEntity {
+public abstract class AbstractEntity implements Serializable {
     private long id;
 
     private DateTime createdAt;
