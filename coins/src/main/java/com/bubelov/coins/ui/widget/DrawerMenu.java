@@ -1,9 +1,7 @@
 package com.bubelov.coins.ui.widget;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.ContentObserver;
-import android.database.Cursor;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
@@ -12,7 +10,9 @@ import android.widget.TextView;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Database;
-import com.bubelov.coins.service.ExchangeRatesService;
+import com.bubelov.coins.model.Currency;
+import com.bubelov.coins.model.ExchangeRate;
+import com.bubelov.coins.service.rates.ExchangeRatesService;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -122,46 +122,31 @@ public class DrawerMenu extends FrameLayout {
     }
 
     private void showExchangeRate() {
-        Cursor ratesCursor = getContext().getContentResolver().query(Database.ExchangeRates.CONTENT_URI,
-                new String[]{Database.ExchangeRates.VALUE, Database.ExchangeRates._UPDATED_AT},
-                String.format("%s = ? and %s = ?", Database.ExchangeRates.SOURCE_CURRENCY_ID, Database.ExchangeRates.TARGET_CURRENCY_ID),
-                new String[]{String.valueOf(getCurrencyId("BTC")), String.valueOf(getCurrencyId("USD"))},
-                String.format("%s DESC", Database.ExchangeRates._UPDATED_AT));
+        try {
+            ExchangeRate exchangeRate = ExchangeRate.queryForLast(getContext(),
+                    Currency.query(getContext(), "BTC"),
+                    Currency.query(getContext(), "USD"));
 
-        if (ratesCursor.moveToNext()) {
-            DecimalFormat format = new DecimalFormat();
-            format.setMinimumFractionDigits(2);
-            format.setMaximumFractionDigits(2);
+            if (exchangeRate != null) {
+                DecimalFormat format = new DecimalFormat();
+                format.setMinimumFractionDigits(2);
+                format.setMaximumFractionDigits(2);
 
-            price.setText("$" + format.format(ratesCursor.getFloat(0)));
-            priceLastCheck.setText(getResources().getString(R.string.bitcoin_price_checked_at) + DateFormat.getTimeInstance(DateFormat.SHORT).format(ratesCursor.getLong(1)));
-        } else {
-            updateExchangeRate(false);
+                price.setText("$" + format.format(exchangeRate.getValue()));
+                priceLastCheck.setText(getResources().getString(R.string.bitcoin_price_checked_at) + DateFormat.getTimeInstance(DateFormat.SHORT).format(exchangeRate.getUpdatedAt().getMillis()));
+            } else {
+                updateExchangeRate(false);
+            }
+        } catch (Exception ignored) {
+
         }
-
-        ratesCursor.close();
     }
 
     private void updateExchangeRate(boolean forceLoad) {
-        getContext().startService(ExchangeRatesService.newIntent(getContext(), "BTC", "USD", forceLoad));
-    }
-
-    private long getCurrencyId(String code) {
-        Cursor cursor = getContext().getContentResolver().query(Database.Currencies.CONTENT_URI,
-                new String[]{Database.Currencies._ID},
-                String.format("%s = ?", Database.Currencies.CODE),
-                new String[]{code},
-                null);
-
-        try {
-            if (cursor.moveToNext()) {
-                return cursor.getLong(0);
-            } else {
-                return -1;
-            }
-        } finally {
-            cursor.close();
-        }
+        getContext().startService(ExchangeRatesService.newIntent(getContext(),
+                Currency.query(getContext(), "BTC"),
+                Currency.query(getContext(), "USD"),
+                forceLoad));
     }
 
     public interface OnMenuItemSelectedListener {

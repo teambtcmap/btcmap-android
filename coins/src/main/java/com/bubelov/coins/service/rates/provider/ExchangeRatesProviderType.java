@@ -1,4 +1,4 @@
-package com.bubelov.coins.service;
+package com.bubelov.coins.service.rates.provider;
 
 /**
  * Author: Igor Bubelov
