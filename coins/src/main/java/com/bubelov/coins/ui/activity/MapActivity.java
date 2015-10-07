@@ -73,6 +73,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.OnMenuItemSelectedListener {
+    private static final String KEY_AMENITY = "amenity";
+
     private static final String MERCHANT_ID_EXTRA = "merchant_id";
 
     private static final int MERCHANTS_LOADER = 0;
@@ -141,14 +143,14 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         merchantTopGradient = findView(R.id.merchant_top_gradient);
 
+        amenity = savedInstanceState == null ? null : (Amenity) savedInstanceState.getSerializable(KEY_AMENITY);
+
         drawer = findView(R.id.drawer_layout);
         drawerToggle = new DrawerToggle(this, drawer, android.R.string.ok, android.R.string.ok);
         drawer.setDrawerListener(drawerToggle);
 
         DrawerMenu drawerMenu = findView(R.id.left_drawer);
-        drawerMenu.setSelected(R.id.all);
         drawerMenu.setItemSelectedListener(this);
-        getSupportActionBar().setTitle(R.string.menu_item_all_merchants);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
@@ -161,9 +163,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         initClustering();
 
         map.setOnCameraChangeListener(new OnCameraChangeMultiplexer(merchantsManager, new CameraChangeListener()));
-
-        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        getSupportLoaderManager().initLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds, amenity), this);
 
         merchantDetails = findView(R.id.merchant_details);
 
@@ -189,6 +188,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         }
 
         actionButton = findView(R.id.locate_button);
+
+        drawerMenu.setSelected(amenity);
     }
 
     @Override
@@ -304,6 +305,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
+        outState.putSerializable(KEY_AMENITY, amenity);
 
         if (selectedMerchant != null) {
             outState.putLong(MERCHANT_ID_EXTRA, selectedMerchant.getId());

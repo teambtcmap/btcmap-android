@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.Database;
+import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.ExchangeRate;
 import com.bubelov.coins.service.rates.ExchangeRatesService;
@@ -62,6 +63,57 @@ public class DrawerMenu extends FrameLayout {
     public DrawerMenu(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
+    }
+
+    public void setSelected(Amenity amenity) {
+        if (amenity == null) {
+            setSelected(R.id.all);
+            return;
+        }
+
+        switch (amenity) {
+            case ATM:
+                setSelected(R.id.atms);
+                break;
+            case CAFE:
+                setSelected(R.id.cafes);
+                break;
+            case RESTAURANT:
+                setSelected(R.id.restaurants);
+                break;
+            case BAR:
+                setSelected(R.id.bars);
+                break;
+            case HOTEL:
+                setSelected(R.id.hotels);
+                break;
+            case CAR_WASH:
+                setSelected(R.id.car_washes);
+                break;
+            case FUEL:
+                setSelected(R.id.gas_stations);
+                break;
+            case HOSPITAL:
+                setSelected(R.id.hospitals);
+                break;
+            case DRY_CLEANING:
+                setSelected(R.id.laundry);
+                break;
+            case CINEMA:
+                setSelected(R.id.movies);
+                break;
+            case PARKING:
+                setSelected(R.id.parking);
+                break;
+            case PHARMACY:
+                setSelected(R.id.pharmacies);
+                break;
+            case PIZZA:
+                setSelected(R.id.pizza);
+                break;
+            case TAXI:
+                setSelected(R.id.taxi);
+        }
     }
 
     public void setSelected(int itemId) {
