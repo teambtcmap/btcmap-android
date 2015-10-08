@@ -72,7 +72,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.OnMenuItemSelectedListener {
+public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.Listener {
     private static final String KEY_AMENITY = "amenity";
 
     private static final String MERCHANT_ID_EXTRA = "merchant_id";
@@ -189,7 +189,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         actionButton = findView(R.id.locate_button);
 
-        drawerMenu.setSelected(amenity);
+        drawerMenu.setAmenity(amenity);
     }
 
     @Override
@@ -383,72 +383,23 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     }
 
     @Override
-    public void onMenuItemSelected(int id, String title) {
+    public void onAmenitySelected(Amenity amenity, String title) {
         drawer.closeDrawer(Gravity.LEFT);
-
-        if (id != R.id.settings && id != R.id.help_and_feedback) {
-            getSupportActionBar().setTitle(title);
-        }
-
-        if (id == R.id.settings) {
-            startActivity(new Intent(this, SettingsActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
-            return;
-        }
-
-        if (id == R.id.help_and_feedback) {
-            startActivity(new Intent(this, FeedbackActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
-            return;
-        }
-
-        switch (id) {
-            case R.id.all:
-                amenity = null;
-                break;
-            case R.id.atms:
-                amenity = Amenity.ATM;
-                break;
-            case R.id.cafes:
-                amenity = Amenity.CAFE;
-                break;
-            case R.id.restaurants:
-                amenity = Amenity.RESTAURANT;
-                break;
-            case R.id.bars:
-                amenity = Amenity.BAR;
-                break;
-            case R.id.hotels:
-                amenity = Amenity.HOTEL;
-                break;
-            case R.id.car_washes:
-                amenity = Amenity.CAR_WASH;
-                break;
-            case R.id.gas_stations:
-                amenity = Amenity.FUEL;
-                break;
-            case R.id.hospitals:
-                amenity = Amenity.HOSPITAL;
-                break;
-            case R.id.laundry:
-                amenity = Amenity.DRY_CLEANING;
-                break;
-            case R.id.movies:
-                amenity = Amenity.CINEMA;
-                break;
-            case R.id.parking:
-                amenity = Amenity.PARKING;
-                break;
-            case R.id.pharmacies:
-                amenity = Amenity.PHARMACY;
-                break;
-            case R.id.pizza:
-                amenity = Amenity.PIZZA;
-                break;
-            case R.id.taxi:
-                amenity = Amenity.TAXI;
-                break;
-        }
-
+        getSupportActionBar().setTitle(title);
+        this.amenity = amenity;
         reloadMerchants();
+    }
+
+    @Override
+    public void onSettingsSelected() {
+        drawer.closeDrawer(Gravity.LEFT);
+        startActivity(new Intent(this, SettingsActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
+    }
+
+    @Override
+    public void onFeedbackSelected() {
+        drawer.closeDrawer(Gravity.LEFT);
+        startActivity(new Intent(this, FeedbackActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
     }
 
     private void showLoader() {
