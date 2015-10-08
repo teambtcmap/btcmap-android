@@ -5,6 +5,7 @@ import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.util.Pair;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -17,6 +18,8 @@ import com.bubelov.coins.service.rates.ExchangeRatesService;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Author: Igor Bubelov
@@ -44,11 +47,13 @@ public class DrawerMenu extends FrameLayout {
             R.id.help_and_feedback
     };
 
+    private List<Pair<Integer, Amenity>> itemsToAmenities = new ArrayList<>();
+
     private TextView price;
 
     private TextView priceLastCheck;
 
-    private OnMenuItemSelectedListener itemSelectedListener;
+    private Listener listener;
 
     public DrawerMenu(Context context) {
         super(context);
@@ -65,70 +70,31 @@ public class DrawerMenu extends FrameLayout {
         init();
     }
 
-    public void setSelected(Amenity amenity) {
+    public void setAmenity(Amenity amenity) {
         if (amenity == null) {
             setSelected(R.id.all);
             return;
         }
 
-        switch (amenity) {
-            case ATM:
-                setSelected(R.id.atms);
-                break;
-            case CAFE:
-                setSelected(R.id.cafes);
-                break;
-            case RESTAURANT:
-                setSelected(R.id.restaurants);
-                break;
-            case BAR:
-                setSelected(R.id.bars);
-                break;
-            case HOTEL:
-                setSelected(R.id.hotels);
-                break;
-            case CAR_WASH:
-                setSelected(R.id.car_washes);
-                break;
-            case FUEL:
-                setSelected(R.id.gas_stations);
-                break;
-            case HOSPITAL:
-                setSelected(R.id.hospitals);
-                break;
-            case DRY_CLEANING:
-                setSelected(R.id.laundry);
-                break;
-            case CINEMA:
-                setSelected(R.id.movies);
-                break;
-            case PARKING:
-                setSelected(R.id.parking);
-                break;
-            case PHARMACY:
-                setSelected(R.id.pharmacies);
-                break;
-            case PIZZA:
-                setSelected(R.id.pizza);
-                break;
-            case TAXI:
-                setSelected(R.id.taxi);
+        for (Pair<Integer, Amenity> pair : itemsToAmenities) {
+            if (pair.second.equals(amenity)) {
+                setSelected(pair.first);
+            }
         }
     }
 
-    public void setSelected(int itemId) {
+    private void setSelected(int itemId) {
+        MenuItem selectedItem = null;
         boolean justNotify = itemId == R.id.settings || itemId == R.id.help_and_feedback;
 
         for (int id : ITEMS) {
             MenuItem item = (MenuItem) findViewById(id);
 
             if (id == itemId) {
+                selectedItem = item;
+
                 if (!justNotify) {
                     item.setSelected(true);
-                }
-
-                if (itemSelectedListener != null) {
-                    itemSelectedListener.onMenuItemSelected(id, item.getText());
                 }
             } else {
                 if (!justNotify) {
@@ -136,14 +102,34 @@ public class DrawerMenu extends FrameLayout {
                 }
             }
         }
+
+        switch (itemId) {
+            case R.id.all:
+                listener.onAmenitySelected(null, selectedItem.getText());
+                break;
+            case R.id.settings:
+                listener.onSettingsSelected();
+                break;
+            case R.id.help_and_feedback:
+                listener.onFeedbackSelected();
+                break;
+            default:
+                for (Pair<Integer, Amenity> pair : itemsToAmenities) {
+                    if (pair.first == itemId) {
+                        listener.onAmenitySelected(pair.second, selectedItem.getText());
+                    }
+                }
+        }
     }
 
-    public void setItemSelectedListener(OnMenuItemSelectedListener itemSelectedListener) {
-        this.itemSelectedListener = itemSelectedListener;
+    public void setItemSelectedListener(Listener itemSelectedListener) {
+        this.listener = itemSelectedListener;
     }
 
     private void init() {
         inflate(getContext(), R.layout.widget_drawer_menu, this);
+
+        initItemsToAmenities();
 
         price = (TextView) findViewById(R.id.price);
         priceLastCheck = (TextView) findViewById(R.id.price_last_check);
@@ -171,6 +157,23 @@ public class DrawerMenu extends FrameLayout {
         });
 
         updateExchangeRate(true);
+    }
+
+    private void initItemsToAmenities() {
+        itemsToAmenities.add(new Pair<>(R.id.atms, Amenity.ATM));
+        itemsToAmenities.add(new Pair<>(R.id.cafes, Amenity.CAFE));
+        itemsToAmenities.add(new Pair<>(R.id.restaurants, Amenity.RESTAURANT));
+        itemsToAmenities.add(new Pair<>(R.id.bars, Amenity.BAR));
+        itemsToAmenities.add(new Pair<>(R.id.hotels, Amenity.HOTEL));
+        itemsToAmenities.add(new Pair<>(R.id.car_washes, Amenity.CAR_WASH));
+        itemsToAmenities.add(new Pair<>(R.id.gas_stations, Amenity.FUEL));
+        itemsToAmenities.add(new Pair<>(R.id.hospitals, Amenity.HOSPITAL));
+        itemsToAmenities.add(new Pair<>(R.id.laundry, Amenity.DRY_CLEANING));
+        itemsToAmenities.add(new Pair<>(R.id.movies, Amenity.CINEMA));
+        itemsToAmenities.add(new Pair<>(R.id.parking, Amenity.PARKING));
+        itemsToAmenities.add(new Pair<>(R.id.pharmacies, Amenity.PHARMACY));
+        itemsToAmenities.add(new Pair<>(R.id.pizza, Amenity.PIZZA));
+        itemsToAmenities.add(new Pair<>(R.id.taxi, Amenity.TAXI));
     }
 
     private void showExchangeRate() {
@@ -201,7 +204,11 @@ public class DrawerMenu extends FrameLayout {
                 forceLoad));
     }
 
-    public interface OnMenuItemSelectedListener {
-        void onMenuItemSelected(int id, String title);
+    public interface Listener {
+        void onAmenitySelected(Amenity amenity, String title);
+
+        void onSettingsSelected();
+
+        void onFeedbackSelected();
     }
 }
