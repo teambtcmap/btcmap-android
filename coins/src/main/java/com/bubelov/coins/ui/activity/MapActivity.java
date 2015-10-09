@@ -14,6 +14,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -81,6 +82,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 0;
 
+    private Toolbar toolbar;
+
     private Toolbar merchantToolbar;
 
     private View merchantTopGradient;
@@ -131,7 +134,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        Toolbar toolbar = findView(R.id.toolbar);
+        toolbar = findView(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -241,6 +244,22 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search));
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
+        searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                drawerToggle.setDrawerIndicatorEnabled(false);
+
+                toolbar.setNavigationOnClickListener(v1 -> {
+                    searchView.setIconified(true);
+                    searchView.onActionViewCollapsed();
+                });
+            } else {
+                searchView.setIconified(true);
+                searchView.onActionViewCollapsed();
+                drawerToggle.setDrawerIndicatorEnabled(true);
+                toolbar.setNavigationOnClickListener(v1 -> drawer.openDrawer(GravityCompat.START));
+            }
+        });
 
         return true;
     }
