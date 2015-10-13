@@ -1,7 +1,13 @@
 package com.bubelov.coins.model;
 
+import android.content.Context;
+import android.database.Cursor;
+
+import com.bubelov.coins.database.Database;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
+
+import org.joda.time.DateTime;
 
 import java.util.Collection;
 
@@ -125,5 +131,40 @@ public class Merchant extends AbstractEntity implements ClusterItem {
 
     public void setCurrencies(Collection<Currency> currencies) {
         this.currencies = currencies;
+    }
+
+    public static final String[] PROJECTION_FULL = new String[]{Database.Merchants._ID, Database.Merchants.NAME, Database.Merchants.DESCRIPTION, Database.Merchants.LATITUDE, Database.Merchants.LONGITUDE, Database.Merchants.AMENITY, Database.Merchants.PHONE, Database.Merchants.WEBSITE, Database.Merchants.OPENING_HOURS, Database.Merchants.ADDRESS, Database.Merchants._CREATED_AT, Database.Merchants._UPDATED_AT};
+
+    public static Merchant query(Context context, long id) {
+        Cursor cursor = context.getContentResolver().query(Database.Merchants.CONTENT_URI,
+                PROJECTION_FULL,
+                String.format("%s = ?", Database.Merchants._ID),
+                new String[]{String.valueOf(id)},
+                null);
+
+        Merchant merchant = null;
+
+        if (cursor.moveToNext()) {
+            merchant = getMerchant(cursor);
+        }
+
+        cursor.close();
+        return merchant;
+    }
+
+    public static Merchant getMerchant(Cursor cursor) {
+        Merchant merchant = new Merchant();
+        merchant.setId(cursor.getLong(cursor.getColumnIndex(Database.Currencies._ID)));
+        merchant.setName(cursor.getString(cursor.getColumnIndex(Database.Merchants.NAME)));
+        merchant.setDescription(cursor.getString(cursor.getColumnIndex(Database.Merchants.DESCRIPTION)));
+        merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LATITUDE)));
+        merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LONGITUDE)));
+        merchant.setAmenity(cursor.getString(cursor.getColumnIndex(Database.Merchants.AMENITY)));
+        merchant.setPhone(cursor.getString(cursor.getColumnIndex(Database.Merchants.PHONE)));
+        merchant.setWebsite(cursor.getString(cursor.getColumnIndex(Database.Merchants.WEBSITE)));
+        merchant.setOpeningHours(cursor.getString(cursor.getColumnIndex(Database.Merchants.OPENING_HOURS)));
+        merchant.setCreatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(Database.Merchants._CREATED_AT))));
+        merchant.setUpdatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(Database.Merchants._UPDATED_AT))));
+        return merchant;
     }
 }

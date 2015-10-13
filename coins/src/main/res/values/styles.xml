@@ -26,9 +26,19 @@
         <item name="android:theme">@style/ToolbarTheme</item>
     </style>
 
+    <style name="SearchToolbar" parent="Toolbar.WithBackNavigation">
+        <item name="android:background">@color/white</item>
+        <item name="android:theme">@style/SearchToolbarTheme</item>
+    </style>
+
     <style name="ToolbarTheme" parent="AppTheme">
         <item name="android:textColorPrimary">#ffffff</item>
         <item name="android:textColorSecondary">#ffffff</item>
+    </style>
+
+    <style name="SearchToolbarTheme" parent="AppTheme">
+        <item name="android:textColorPrimary">#757575</item>
+        <item name="android:textColorSecondary">#757575</item>
     </style>
 
     <style name="Toolbar.WithBackNavigation" parent="Toolbar">

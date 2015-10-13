@@ -1,7 +1,6 @@
 package com.bubelov.coins.ui.activity;
 
 import android.app.Activity;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -14,12 +13,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.ListPopupWindow;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
@@ -35,9 +31,9 @@ import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.DatabaseSyncStartedEvent;
 import com.bubelov.coins.loader.MerchantsLoader;
+import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.model.Amenity;
-import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 import com.bubelov.coins.ui.fragment.MerchantsCacheFragment;
@@ -81,6 +77,10 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private static final int MERCHANTS_LOADER = 0;
 
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 0;
+
+    private static final int REQUEST_FIND_MERCHANT = 10;
+
+    private static final int MAP_ANIMATION_DURATION_MILLIS = 350;
 
     private Toolbar toolbar;
 
@@ -240,27 +240,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_map, menu);
-
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search));
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-
-        searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) {
-                drawerToggle.setDrawerIndicatorEnabled(false);
-
-                toolbar.setNavigationOnClickListener(v1 -> {
-                    searchView.setIconified(true);
-                    searchView.onActionViewCollapsed();
-                });
-            } else {
-                searchView.setIconified(true);
-                searchView.onActionViewCollapsed();
-                drawerToggle.setDrawerIndicatorEnabled(true);
-                toolbar.setNavigationOnClickListener(v1 -> drawer.openDrawer(GravityCompat.START));
-            }
-        });
-
         return true;
     }
 
@@ -285,6 +264,9 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 });
 
                 return true;
+            case R.id.search:
+                MerchantsSearchActivity.startForResult(this, REQUEST_FIND_MERCHANT);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -298,12 +280,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     }
 
     private void handleIntent(Intent intent) {
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            // TODO
-            return;
-        }
-
         if (intent.hasExtra(MERCHANT_ID_EXTRA)) {
             slidingLayout.postDelayed(() -> {
                 selectMerchant(intent.getLongExtra(MERCHANT_ID_EXTRA, -1), false);
@@ -339,8 +315,16 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         }
 
         if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == RESULT_CANCELED) {
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), 13));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), 13));
         }
+
+        if (requestCode == REQUEST_FIND_MERCHANT && resultCode == RESULT_OK) {
+            Merchant merchant = (Merchant) data.getSerializableExtra(MerchantsSearchActivity.MERCHANT_EXTRA);
+            selectMerchant(merchant.getId(), false);
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), 13));
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -534,45 +518,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     }
 
     private Merchant getMerchant(long id) {
-        Merchant merchant = new Merchant();
-
-        Cursor cursor = getContentResolver().query(Database.Merchants.CONTENT_URI,
-                new String[] {Database.Merchants._ID, Database.Merchants.LATITUDE, Database.Merchants.LONGITUDE, Database.Merchants.NAME, Database.Merchants.DESCRIPTION, Database.Merchants.PHONE, Database.Merchants.WEBSITE, Database.Merchants.ADDRESS, Database.Merchants.OPENING_HOURS, Database.Merchants.AMENITY },
-                "_id = ?",
-                new String[] { String.valueOf(id) },
-                null);
-
-        if (cursor.moveToNext()) {
-            merchant.setId(cursor.getLong(cursor.getColumnIndex(Database.Merchants._ID)));
-            merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LATITUDE)));
-            merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LONGITUDE)));
-            merchant.setName(cursor.getString(cursor.getColumnIndex(Database.Merchants.NAME)));
-            merchant.setDescription(cursor.getString(cursor.getColumnIndex(Database.Merchants.DESCRIPTION)));
-            merchant.setPhone(cursor.getString(cursor.getColumnIndex(Database.Merchants.PHONE)));
-            merchant.setWebsite(cursor.getString(cursor.getColumnIndex(Database.Merchants.WEBSITE)));
-            merchant.setAddress(cursor.getString(cursor.getColumnIndex(Database.Merchants.ADDRESS)));
-            merchant.setOpeningHours(cursor.getString(cursor.getColumnIndex(Database.Merchants.OPENING_HOURS)));
-            merchant.setAmenity(cursor.getString(cursor.getColumnIndex(Database.Merchants.AMENITY)));
-        }
-
-        cursor.close();
-
-        cursor = getContentResolver().query(Database.Merchants.CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).appendPath("currencies").build(),
-                new String[] { Database.Currencies.NAME },
-                null,
-                null,
-                null);
-
-        merchant.setCurrencies(new ArrayList<>());
-
-        while (cursor.moveToNext()) {
-            Currency currency = new Currency();
-            currency.setName(cursor.getString(0));
-            merchant.getCurrencies().add(currency);
-        }
-
-        cursor.close();
-
+        Merchant merchant = Merchant.query(this, id);
+        merchant.setCurrencies(Currency.query(this, merchant));
         return merchant;
     }
 
@@ -644,7 +591,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private class ClusterItemClickListener implements ClusterManager.OnClusterItemClickListener<Merchant> {
         @Override
         public boolean onClusterItemClick(Merchant merchant) {
-            selectedMerchant = merchant;
             selectMerchant(merchant.getId(), true);
             return false;
         }
@@ -731,7 +677,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             map.getUiSettings().setAllGesturesEnabled(true);
 
             if (cameraBeforeSelection != null) {
-                map.moveCamera(cameraBeforeSelection);
+                map.animateCamera(cameraBeforeSelection, MAP_ANIMATION_DURATION_MILLIS, null);
                 cameraBeforeSelection = null;
                 merchantDetails.postDelayed(() -> reloadMerchants(), 1);
             }
@@ -748,7 +694,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         public void onPanelAnchored(View view) {
             wasExpanded = true;
             map.setPadding(0, getResources().getDimensionPixelSize(R.dimen.marker_size) / 2, 0, Utils.getScreenHeight(MapActivity.this) / 2 + Utils.getStatusBarHeight(getApplicationContext()));
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), 13));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), 13), MAP_ANIMATION_DURATION_MILLIS, null);
             map.getUiSettings().setAllGesturesEnabled(false);
             actionButton.setImageResource(R.drawable.fab_directions);
         }
