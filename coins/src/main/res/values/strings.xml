@@ -81,6 +81,8 @@
 
     <string name="saa_distance">Distance:</string>
 
+    <string name="msa_search">Search</string>
+
     <string-array name="exchange_rates_sources">
         <item>Bitstamp</item>
         <item>Coinbase</item>
