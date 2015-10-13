@@ -1,17 +1,21 @@
 package com.bubelov.coins.ui.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -79,6 +83,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 0;
 
     private static final int REQUEST_FIND_MERCHANT = 10;
+
+    private static final int REQUEST_ACCESS_LOCATION = 20;
 
     private static final int MAP_ANIMATION_DURATION_MILLIS = 350;
 
@@ -175,13 +181,19 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
         firstLaunch = savedInstanceState == null;
 
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(new LocationApiConnectionCallbacks())
-                .addOnConnectionFailedListener(new LocationAliConnectionFailedListener())
-                .build();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            initLocation();
+        } else {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), 13));
 
-        googleApiClient.connect();
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_ACCESS_LOCATION);
+            } else {
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), 13));
+            }
+        }
 
         merchantsCacheFragment = (MerchantsCacheFragment) getSupportFragmentManager().findFragmentByTag(MerchantsCacheFragment.TAG);
 
@@ -314,10 +326,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             moveToUserLocation();
         }
 
-        if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == RESULT_CANCELED) {
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), 13));
-        }
-
         if (requestCode == REQUEST_FIND_MERCHANT && resultCode == RESULT_OK) {
             Merchant merchant = (Merchant) data.getSerializableExtra(MerchantsSearchActivity.MERCHANT_EXTRA);
             selectMerchant(merchant.getId(), false);
@@ -325,6 +333,26 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_ACCESS_LOCATION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    initLocation();
+                }
+        }
+    }
+
+    private void initLocation() {
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new LocationApiConnectionCallbacks())
+                .addOnConnectionFailedListener(new LocationAliConnectionFailedListener())
+                .build();
+
+        googleApiClient.connect();
     }
 
     @Override
@@ -527,7 +555,13 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         if (slidingLayout.getPanelState().equals(SlidingUpPanelLayout.PanelState.ANCHORED)) {
             Utils.showDirections(this, selectedMerchant.getLatitude(), selectedMerchant.getLongitude());
         } else {
-            moveToUserLocation();
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                moveToUserLocation();
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_ACCESS_LOCATION);
+            }
         }
     }
 

@@ -1,9 +1,13 @@
 package com.bubelov.coins.ui.activity;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.SeekBar;
@@ -38,6 +42,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class SelectAreaActivity extends AbstractActivity {
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 0;
+
+    private static final int REQUEST_ACCESS_LOCATION = 10;
 
     private static final String AREA_EXTRA = "area";
 
@@ -78,6 +84,7 @@ public class SelectAreaActivity extends AbstractActivity {
             if (notificationArea == null) {
                 notificationArea = new NotificationArea(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE));
                 findLocationAndMoveArea = true;
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), DEFAULT_ZOOM));
             }
 
             addArea(notificationArea);
@@ -85,13 +92,13 @@ public class SelectAreaActivity extends AbstractActivity {
         }
 
         if (findLocationAndMoveArea) {
-            googleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(LocationServices.API)
-                    .addConnectionCallbacks(new LocationApiConnectionCallbacks())
-                    .addOnConnectionFailedListener(new LocationAliConnectionFailedListener())
-                    .build();
-
-            googleApiClient.connect();
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                initLocation();
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_ACCESS_LOCATION);
+            }
         }
     }
 
@@ -112,12 +119,32 @@ public class SelectAreaActivity extends AbstractActivity {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_ACCESS_LOCATION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    initLocation();
+                }
+        }
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         if (areaCenter != null && areaCircle != null) {
             outState.putSerializable(AREA_EXTRA, new NotificationArea(areaCenter.getPosition(), (int) areaCircle.getRadius()));
         }
 
         super.onSaveInstanceState(outState);
+    }
+
+    private void initLocation() {
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new LocationApiConnectionCallbacks())
+                .addOnConnectionFailedListener(new LocationAliConnectionFailedListener())
+                .build();
+
+        googleApiClient.connect();
     }
 
     private void findLocation() {
@@ -146,8 +173,8 @@ public class SelectAreaActivity extends AbstractActivity {
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         try {
                             result.getStatus().startResolutionForResult(SelectAreaActivity.this, REQUEST_CHECK_LOCATION_SETTINGS);
-                        } catch (IntentSender.SendIntentException exception) {
-                            // Ignoring
+                        } catch (IntentSender.SendIntentException ignored) {
+
                         }
 
                         break;
