@@ -41,7 +41,7 @@ public class App extends Application {
         bus = new MainThreadBus();
         initApi();
         databaseHelper = DatabaseFactory.newHelper(this);
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
 
         startService(MerchantsSyncService.makeIntent(this, false));
     }
