@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.dao.ExchangeRateDao;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.ExchangeRate;
@@ -69,7 +70,7 @@ public class ExchangeRatesService extends CoinsIntentService {
     }
 
     private boolean isCacheUpToDate() {
-        ExchangeRate latestRate = ExchangeRate.queryForLast(this, sourceCurrency, targetCurrency);
+        ExchangeRate latestRate = ExchangeRateDao.queryForLast(this, sourceCurrency, targetCurrency);
         return latestRate != null && latestRate.getUpdatedAt().isAfter(System.currentTimeMillis() - CACHE_LIFETIME_IN_MILLIS);
     }
 

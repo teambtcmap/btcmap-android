@@ -10,9 +10,10 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.dao.CurrencyDAO;
+import com.bubelov.coins.dao.ExchangeRateDao;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Amenity;
-import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.ExchangeRate;
 import com.bubelov.coins.service.rates.ExchangeRatesService;
 
@@ -178,9 +179,9 @@ public class DrawerMenu extends FrameLayout {
 
     private void showExchangeRate() {
         try {
-            ExchangeRate exchangeRate = ExchangeRate.queryForLast(getContext(),
-                    Currency.query(getContext(), "BTC"),
-                    Currency.query(getContext(), "USD"));
+            ExchangeRate exchangeRate = ExchangeRateDao.queryForLast(getContext(),
+                    CurrencyDAO.query(getContext(), "BTC"),
+                    CurrencyDAO.query(getContext(), "USD"));
 
             if (exchangeRate != null) {
                 DecimalFormat format = new DecimalFormat();
@@ -199,8 +200,8 @@ public class DrawerMenu extends FrameLayout {
 
     private void updateExchangeRate(boolean forceLoad) {
         getContext().startService(ExchangeRatesService.newIntent(getContext(),
-                Currency.query(getContext(), "BTC"),
-                Currency.query(getContext(), "USD"),
+                CurrencyDAO.query(getContext(), "BTC"),
+                CurrencyDAO.query(getContext(), "USD"),
                 forceLoad));
     }
 

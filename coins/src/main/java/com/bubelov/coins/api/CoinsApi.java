@@ -16,7 +16,7 @@ import retrofit.http.Query;
 
 public interface CoinsApi {
     @GET("merchants")
-    Call<List<Merchant>> getMerchants(@Query("currency") String currencyCode, @Query("since") String since, @Query("limit") int limit);
+    Call<List<Merchant>> getMerchants(@Query("since") String since, @Query("limit") int limit);
 
     @GET("currencies")
     Call<List<Currency>> getCurrencies();

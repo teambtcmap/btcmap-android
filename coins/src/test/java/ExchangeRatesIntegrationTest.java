@@ -1,4 +1,5 @@
 import com.bubelov.coins.BuildConfig;
+import com.bubelov.coins.dao.CurrencyDAO;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.ExchangeRate;
 import com.bubelov.coins.service.rates.provider.ExchangeRatesProviderFactory;
@@ -40,8 +41,8 @@ public class ExchangeRatesIntegrationTest {
     }
 
     private void testProvider(ExchangeRatesProviderType providerType) {
-        Currency btc = Currency.query(RuntimeEnvironment.application, "BTC");
-        Currency usd = Currency.query(RuntimeEnvironment.application, "USD");
+        Currency btc = CurrencyDAO.query(RuntimeEnvironment.application, "BTC");
+        Currency usd = CurrencyDAO.query(RuntimeEnvironment.application, "USD");
 
         ExchangeRate exchangeRate = null;
 

@@ -15,6 +15,7 @@ import android.text.Editable;
 import android.widget.EditText;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.dao.MerchantDAO;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.ui.adapter.MerchantsSearchResultsAdapter;
@@ -83,7 +84,7 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
 
         return new CursorLoader(this,
                 Database.Merchants.CONTENT_URI,
-                Merchant.PROJECTION_FULL,
+                MerchantDAO.FULL_PROJECTION,
                 String.format("%s like ? or %s like ?", Database.Merchants.NAME, Database.Merchants.AMENITY),
                 new String[]{"%" + query + "%", "%" + query + "%"},
                 null);
@@ -94,7 +95,7 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
         List<Merchant> merchants = new ArrayList<>();
 
         while (cursor.moveToNext()) {
-            merchants.add(Merchant.query(this, cursor.getLong(0)));
+            merchants.add(MerchantDAO.query(this, cursor.getLong(0)));
         }
 
         resultsAdapter.getMerchants().clear();

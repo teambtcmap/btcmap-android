@@ -30,12 +30,13 @@ import android.view.animation.AlphaAnimation;
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
+import com.bubelov.coins.dao.CurrencyDAO;
+import com.bubelov.coins.dao.MerchantDAO;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.DatabaseSyncStartedEvent;
 import com.bubelov.coins.loader.MerchantsLoader;
-import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Merchant;
@@ -546,8 +547,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     }
 
     private Merchant getMerchant(long id) {
-        Merchant merchant = Merchant.query(this, id);
-        merchant.setCurrencies(Currency.query(this, merchant));
+        Merchant merchant = MerchantDAO.query(this, id);
+        merchant.setCurrencies(CurrencyDAO.query(this, merchant));
         return merchant;
     }
 
