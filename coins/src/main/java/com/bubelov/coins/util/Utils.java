@@ -1,5 +1,6 @@
 package com.bubelov.coins.util;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +8,7 @@ import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.support.customtabs.CustomTabsIntent;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
@@ -37,9 +39,13 @@ public class Utils {
     }
 
     public static void openUrl(Context context, String url) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(url));
-        context.startActivity(intent);
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+
+        builder.setStartAnimations(context, android.R.anim.fade_in, android.R.anim.fade_out);
+        builder.setExitAnimations(context, android.R.anim.fade_in, android.R.anim.fade_out);
+
+        CustomTabsIntent customTabsIntent = builder.build();
+        customTabsIntent.launchUrl((Activity) context, Uri.parse(url));
     }
 
     public static void share(Context context, String subject, String text) {
