@@ -1,5 +1,6 @@
 package com.bubelov.coins.dao;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 
@@ -43,5 +44,16 @@ public class ExchangeRateDao {
         } finally {
             cursor.close();
         }
+    }
+
+    public static void insert(Context context, ExchangeRate exchangeRate) {
+        ContentValues values = new ContentValues();
+        values.put(Database.ExchangeRates.SOURCE_CURRENCY_ID, exchangeRate.getSourceCurrencyId());
+        values.put(Database.ExchangeRates.TARGET_CURRENCY_ID, exchangeRate.getTargetCurrencyId());
+        values.put(Database.ExchangeRates.VALUE, exchangeRate.getValue());
+        values.put(Database.ExchangeRates._CREATED_AT, exchangeRate.getCreatedAt().getMillis());
+        values.put(Database.ExchangeRates._UPDATED_AT, exchangeRate.getUpdatedAt().getMillis());
+
+        context.getContentResolver().insert(Database.ExchangeRates.CONTENT_URI, values);
     }
 }

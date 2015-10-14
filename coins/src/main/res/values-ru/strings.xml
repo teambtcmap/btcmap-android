@@ -31,7 +31,7 @@
     <string name="pref_exchange_rates_provider_summary">Вы можете выбрать откуда приложение будет брать информацию об обменном курсе</string>
 
     <string name="bitcoin_price">Биржевой курс</string>
-    <string name="bitcoin_price_checked_at">Актуален на: </string>
+    <string name="bitcoin_price_checked_at">Актуален на: %1$s</string>
 
     <string name="menu_item_all_merchants">Все</string>
     <string name="menu_item_atms">Банкоматы</string>

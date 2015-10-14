@@ -31,7 +31,7 @@
     <string name="pref_exchange_rates_provider_summary">Select source for obtaining exchange rates between Bitcoin and USD</string>
 
     <string name="bitcoin_price">Exchange rate</string>
-    <string name="bitcoin_price_checked_at">Checked at: </string>
+    <string name="bitcoin_price_checked_at">Checked at: %1$s</string>
 
     <string name="menu_item_all_merchants">All</string>
     <string name="menu_item_atms">ATMs</string>

@@ -74,7 +74,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.Listener {
+public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.OnItemClickListener {
     private static final String KEY_AMENITY = "amenity";
 
     private static final String MERCHANT_ID_EXTRA = "merchant_id";
