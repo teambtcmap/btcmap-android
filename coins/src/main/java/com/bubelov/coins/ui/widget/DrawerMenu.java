@@ -1,21 +1,27 @@
 package com.bubelov.coins.ui.widget;
 
 import android.content.Context;
-import android.database.ContentObserver;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Pair;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dao.CurrencyDAO;
 import com.bubelov.coins.dao.ExchangeRateDao;
-import com.bubelov.coins.database.Database;
+import com.bubelov.coins.event.ExchangeRateLoadFinishedEvent;
+import com.bubelov.coins.event.ExchangeRateLoadStartedEvent;
 import com.bubelov.coins.model.Amenity;
+import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.ExchangeRate;
 import com.bubelov.coins.service.rates.ExchangeRatesService;
+import com.bubelov.coins.util.AnimationListenerAdapter;
+import com.squareup.otto.Subscribe;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -28,6 +34,14 @@ import java.util.List;
  */
 
 public class DrawerMenu extends FrameLayout {
+    private Currency btc;
+    private Currency usd;
+
+    private TextView exchangeRate;
+    private TextView exchangeRateLastCheck;
+    private View checkExchangeRateButton;
+    private boolean exchangeRateLoading;
+
     private static int[] ITEMS = {
             R.id.all,
             R.id.atms,
@@ -50,11 +64,7 @@ public class DrawerMenu extends FrameLayout {
 
     private List<Pair<Integer, Amenity>> itemsToAmenities = new ArrayList<>();
 
-    private TextView price;
-
-    private TextView priceLastCheck;
-
-    private Listener listener;
+    private OnItemClickListener listener;
 
     public DrawerMenu(Context context) {
         super(context);
@@ -123,41 +133,34 @@ public class DrawerMenu extends FrameLayout {
         }
     }
 
-    public void setItemSelectedListener(Listener itemSelectedListener) {
+    public void setItemSelectedListener(OnItemClickListener itemSelectedListener) {
         this.listener = itemSelectedListener;
     }
 
     private void init() {
         inflate(getContext(), R.layout.widget_drawer_menu, this);
-
         initItemsToAmenities();
+        App.getInstance().getBus().register(this);
 
-        price = (TextView) findViewById(R.id.price);
-        priceLastCheck = (TextView) findViewById(R.id.price_last_check);
+        exchangeRate = (TextView) findViewById(R.id.exchange_rate);
+        exchangeRateLastCheck = (TextView) findViewById(R.id.exchange_rate_last_check);
 
-        findViewById(R.id.check).setOnClickListener(v -> updateExchangeRate(true));
+        checkExchangeRateButton = findViewById(R.id.check);
+
+        checkExchangeRateButton.setOnClickListener(v -> {
+            checkExchangeRateButton.setClickable(false);
+            updateExchangeRate(true);
+        });
+
+        btc = CurrencyDAO.query(getContext(), "BTC");
+        usd = CurrencyDAO.query(getContext(), "USD");
+
+        showLastExchangeRate();
+        updateExchangeRate(false);
 
         for (int id : ITEMS) {
             findViewById(id).setOnClickListener(v -> setSelected(v.getId()));
         }
-
-        showExchangeRate();
-
-        getContext().getContentResolver().registerContentObserver(Database.Currencies.CONTENT_URI, true, new ContentObserver(new Handler(Looper.getMainLooper())) {
-            @Override
-            public void onChange(boolean selfChange) {
-                showExchangeRate();
-            }
-        });
-
-        getContext().getContentResolver().registerContentObserver(Database.ExchangeRates.CONTENT_URI, true, new ContentObserver(new Handler(Looper.getMainLooper())) {
-            @Override
-            public void onChange(boolean selfChange) {
-                showExchangeRate();
-            }
-        });
-
-        updateExchangeRate(true);
     }
 
     private void initItemsToAmenities() {
@@ -177,35 +180,57 @@ public class DrawerMenu extends FrameLayout {
         itemsToAmenities.add(new Pair<>(R.id.taxi, Amenity.TAXI));
     }
 
-    private void showExchangeRate() {
-        try {
-            ExchangeRate exchangeRate = ExchangeRateDao.queryForLast(getContext(),
-                    CurrencyDAO.query(getContext(), "BTC"),
-                    CurrencyDAO.query(getContext(), "USD"));
+    private void showLastExchangeRate() {
+        ExchangeRate exchangeRate = ExchangeRateDao.queryForLast(getContext(), btc, usd);
 
-            if (exchangeRate != null) {
-                DecimalFormat format = new DecimalFormat();
-                format.setMinimumFractionDigits(2);
-                format.setMaximumFractionDigits(2);
+        if (exchangeRate != null) {
+            DecimalFormat format = new DecimalFormat();
+            format.setMinimumFractionDigits(2);
+            format.setMaximumFractionDigits(2);
 
-                price.setText("$" + format.format(exchangeRate.getValue()));
-                priceLastCheck.setText(getResources().getString(R.string.bitcoin_price_checked_at) + DateFormat.getTimeInstance(DateFormat.SHORT).format(exchangeRate.getUpdatedAt().getMillis()));
-            } else {
-                updateExchangeRate(false);
-            }
-        } catch (Exception ignored) {
-
+            this.exchangeRate.setText("$" + format.format(exchangeRate.getValue()));
+            exchangeRateLastCheck.setText(getResources().getString(R.string.bitcoin_price_checked_at, DateFormat.getTimeInstance(DateFormat.SHORT).format(exchangeRate.getUpdatedAt().getMillis())));
         }
     }
 
     private void updateExchangeRate(boolean forceLoad) {
-        getContext().startService(ExchangeRatesService.newIntent(getContext(),
-                CurrencyDAO.query(getContext(), "BTC"),
-                CurrencyDAO.query(getContext(), "USD"),
-                forceLoad));
+        getContext().startService(ExchangeRatesService.newIntent(getContext(), btc, usd, forceLoad));
     }
 
-    public interface Listener {
+    @Subscribe
+    public void onExchangeRateLoadStarted(ExchangeRateLoadStartedEvent event) {
+        exchangeRateLoading = true;
+
+        if (checkExchangeRateButton.getAnimation() == null) {
+            RotateAnimation rotateAnimation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+            rotateAnimation.setDuration(1000);
+            rotateAnimation.setRepeatCount(Animation.INFINITE);
+            rotateAnimation.setInterpolator(new LinearInterpolator());
+            checkExchangeRateButton.startAnimation(rotateAnimation);
+
+            rotateAnimation.setAnimationListener(new AnimationListenerAdapter() {
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                    if (!exchangeRateLoading) {
+                        checkExchangeRateButton.clearAnimation();
+                        checkExchangeRateButton.setClickable(true);
+                    }
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    showLastExchangeRate();
+                }
+            });
+        }
+    }
+
+    @Subscribe
+    public void onExchangeRateLoadFinished(ExchangeRateLoadFinishedEvent event) {
+        exchangeRateLoading = false;
+    }
+
+    public interface OnItemClickListener {
         void onAmenitySelected(Amenity amenity, String title);
 
         void onSettingsSelected();

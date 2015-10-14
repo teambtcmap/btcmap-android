@@ -48,7 +48,7 @@
                 android:layout_gravity="center_vertical">
 
                 <TextView
-                    android:id="@+id/price"
+                    android:id="@+id/exchange_rate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
@@ -71,7 +71,7 @@
             app:typeface="medium" />
 
         <com.bubelov.coins.ui.widget.TypefaceTextView
-            android:id="@+id/price_last_check"
+            android:id="@+id/exchange_rate_last_check"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"

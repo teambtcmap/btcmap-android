@@ -1,6 +1,5 @@
 package com.bubelov.coins.service.rates;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,7 +8,8 @@ import android.util.Log;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.dao.ExchangeRateDao;
-import com.bubelov.coins.database.Database;
+import com.bubelov.coins.event.ExchangeRateLoadFinishedEvent;
+import com.bubelov.coins.event.ExchangeRateLoadStartedEvent;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.ExchangeRate;
 import com.bubelov.coins.service.CoinsIntentService;
@@ -65,7 +65,9 @@ public class ExchangeRatesService extends CoinsIntentService {
         }
 
         if (intent.getBooleanExtra(FORCE_LOAD_EXTRA, false) || !isCacheUpToDate()) {
+            getBus().post(new ExchangeRateLoadStartedEvent());
             updateExchangeRate();
+            getBus().post(new ExchangeRateLoadFinishedEvent());
         }
     }
 
@@ -83,16 +85,9 @@ public class ExchangeRatesService extends CoinsIntentService {
                     .newProvider(provider)
                     .getExchangeRate(sourceCurrency, targetCurrency);
 
-            ContentValues values = new ContentValues();
-            values.put(Database.ExchangeRates.SOURCE_CURRENCY_ID, exchangeRate.getSourceCurrencyId());
-            values.put(Database.ExchangeRates.TARGET_CURRENCY_ID, exchangeRate.getTargetCurrencyId());
-            values.put(Database.ExchangeRates.VALUE, exchangeRate.getValue());
-            values.put(Database.ExchangeRates._CREATED_AT, exchangeRate.getCreatedAt().getMillis());
-            values.put(Database.ExchangeRates._UPDATED_AT, exchangeRate.getUpdatedAt().getMillis());
-
-            getContentResolver().insert(Database.ExchangeRates.CONTENT_URI, values);
+            ExchangeRateDao.insert(this, exchangeRate);
         } catch (Exception exception) {
-            Log.e(TAG, "Couldn't load exchange rate", exception);
+            Log.e(TAG, "Can't load the exchange rate", exception);
         }
     }
 }
