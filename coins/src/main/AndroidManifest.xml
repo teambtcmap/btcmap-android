@@ -57,6 +57,7 @@
 
         <activity
             android:name=".ui.activity.MerchantsSearchActivity"
+            android:theme="@style/AppTheme.SearchActivity"
             android:windowSoftInputMode="stateVisible" />
 
         <service android:name=".service.sync.merchants.MerchantsSyncService" />
