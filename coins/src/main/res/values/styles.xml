@@ -12,6 +12,10 @@
         <item name="searchViewStyle">@style/AppTheme.SearchView</item>
     </style>
 
+    <style name="AppTheme.SearchActivity" parent="AppTheme">
+        <item name="colorPrimaryDark">#B3B3B3</item>
+    </style>
+
     <style name="AppTheme.SearchView" parent="Widget.AppCompat.SearchView">
         <item name="suggestionRowLayout">@layout/list_item_search_suggestion</item>
     </style>

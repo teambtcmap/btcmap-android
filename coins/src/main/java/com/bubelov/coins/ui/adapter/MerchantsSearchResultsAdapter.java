@@ -5,9 +5,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.util.DistanceUtils;
 
@@ -50,6 +52,19 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
             float distanceInMeters = DistanceUtils.getDistance(merchant.getPosition(), userLocation);
             holder.distance.setText(String.format("%.02f km", distanceInMeters / 1000.0f));
         }
+
+        boolean amenityFound = false;
+
+        for (Amenity amenity : Amenity.values()) {
+            if (merchant.getAmenity().toUpperCase().equals(amenity.name())) {
+                amenityFound = true;
+                holder.icon.setImageResource(amenity.getIconId());
+            }
+        }
+
+        if (!amenityFound) {
+            holder.icon.setImageResource(R.drawable.ic_place_24dp);
+        }
     }
 
     @Override
@@ -62,12 +77,15 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
     }
 
     public static class ResultViewHolder extends RecyclerView.ViewHolder {
+        private ImageView icon;
+
         private TextView name;
 
         private TextView distance;
 
         public ResultViewHolder(View itemView) {
             super(itemView);
+            icon = (ImageView) itemView.findViewById(R.id.icon);
             name = (TextView) itemView.findViewById(R.id.name);
             distance = (TextView) itemView.findViewById(R.id.distance);
         }
