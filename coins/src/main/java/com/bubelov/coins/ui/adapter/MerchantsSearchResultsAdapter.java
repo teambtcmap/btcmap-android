@@ -1,5 +1,6 @@
 package com.bubelov.coins.ui.adapter;
 
+import android.location.Location;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.util.DistanceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +24,11 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
 
     private OnMerchantSelectedListener listener;
 
-    public MerchantsSearchResultsAdapter(OnMerchantSelectedListener listener) {
+    private Location userLocation;
+
+    public MerchantsSearchResultsAdapter(OnMerchantSelectedListener listener, Location userLocation) {
         this.listener = listener;
+        this.userLocation = userLocation;
     }
 
     @Override
@@ -37,6 +42,14 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
         Merchant merchant = merchants.get(position);
         holder.name.setText(merchant.getName());
         holder.itemView.setOnClickListener(v -> listener.onMerchantSelected(merchant));
+
+        if (userLocation == null) {
+            holder.distance.setVisibility(View.GONE);
+        } else {
+            holder.distance.setVisibility(View.VISIBLE);
+            float distanceInMeters = DistanceUtils.getDistance(merchant.getPosition(), userLocation);
+            holder.distance.setText(String.format("%.02f km", distanceInMeters / 1000.0f));
+        }
     }
 
     @Override
@@ -51,9 +64,12 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
     public static class ResultViewHolder extends RecyclerView.ViewHolder {
         private TextView name;
 
+        private TextView distance;
+
         public ResultViewHolder(View itemView) {
             super(itemView);
             name = (TextView) itemView.findViewById(R.id.name);
+            distance = (TextView) itemView.findViewById(R.id.distance);
         }
     }
 
