@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Location;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
@@ -19,6 +18,7 @@ import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.ui.activity.MapActivity;
+import com.bubelov.coins.util.DistanceUtils;
 
 import java.util.UUID;
 
@@ -47,10 +47,7 @@ public class UserNotificationController {
             return false;
         }
 
-        float[] distance = new float[1];
-        Location.distanceBetween(notificationArea.getCenter().latitude, notificationArea.getCenter().longitude, merchant.getLatitude(), merchant.getLongitude(), distance);
-
-        if (distance[0] > notificationArea.getRadiusMeters()) {
+        if (DistanceUtils.getDistance(notificationArea.getCenter(), merchant.getPosition()) > notificationArea.getRadiusMeters()) {
             return false;
         }
 

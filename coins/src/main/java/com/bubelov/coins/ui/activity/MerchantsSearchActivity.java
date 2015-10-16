@@ -6,6 +6,7 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,9 +20,12 @@ import com.bubelov.coins.dao.MerchantDAO;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.ui.adapter.MerchantsSearchResultsAdapter;
+import com.bubelov.coins.util.DistanceComparator;
 import com.bubelov.coins.util.TextWatcherAdapter;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -30,6 +34,8 @@ import java.util.List;
  */
 
 public class MerchantsSearchActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, MerchantsSearchResultsAdapter.OnMerchantSelectedListener {
+    public static final String USER_LOCATION_EXTRA = "user_location";
+
     public static final String MERCHANT_EXTRA = "merchant";
 
     private static final int MERCHANTS_LOADER = 0;
@@ -38,8 +44,11 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
 
     private MerchantsSearchResultsAdapter resultsAdapter;
 
-    public static void startForResult(Activity activity, int requestCode) {
+    private Location userLocation;
+
+    public static void startForResult(Activity activity, Location userLocation, int requestCode) {
         Intent intent = new Intent(activity, MerchantsSearchActivity.class);
+        intent.putExtra(USER_LOCATION_EXTRA, userLocation);
         activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
     }
 
@@ -57,7 +66,9 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
         resultsView.setLayoutManager(new LinearLayoutManager(this));
         resultsView.setHasFixedSize(true);
 
-        resultsAdapter = new MerchantsSearchResultsAdapter(this);
+        userLocation = getIntent().getParcelableExtra(USER_LOCATION_EXTRA);
+
+        resultsAdapter = new MerchantsSearchResultsAdapter(this, userLocation);
         resultsView.setAdapter(resultsAdapter);
 
         ((EditText) findView(R.id.query)).addTextChangedListener(new TextWatcherAdapter() {
@@ -96,6 +107,10 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
 
         while (cursor.moveToNext()) {
             merchants.add(MerchantDAO.query(this, cursor.getLong(0)));
+        }
+
+        if (userLocation != null) {
+            Collections.sort(merchants, new DistanceComparator(userLocation));
         }
 
         resultsAdapter.getMerchants().clear();

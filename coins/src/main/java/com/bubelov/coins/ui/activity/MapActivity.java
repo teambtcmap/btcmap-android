@@ -278,7 +278,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
                 return true;
             case R.id.search:
-                MerchantsSearchActivity.startForResult(this, REQUEST_FIND_MERCHANT);
+                MerchantsSearchActivity.startForResult(this, map.getMyLocation(), REQUEST_FIND_MERCHANT);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
