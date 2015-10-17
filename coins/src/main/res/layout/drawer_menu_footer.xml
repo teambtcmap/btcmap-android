@@ -19,7 +19,7 @@
         android:id="@+id/help_and_feedback"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:mi_icon="@drawable/ic_help"
+        app:mi_icon="@drawable/ic_help_24dp"
         app:text="@string/menu_item_help_and_feedback" />
 
 </merge>

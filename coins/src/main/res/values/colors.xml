@@ -29,4 +29,7 @@
 
     <color name="drawer_divider">#D7D7D7</color>
 
+    <color name="drawer_icon_active">@color/primary_dark</color>
+    <color name="drawer_icon_inactive">#8B8B8B</color>
+
 </resources>

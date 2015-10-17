@@ -16,7 +16,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="16dp"
         android:scaleType="fitXY"
-        tools:src="@drawable/ic_all_merchants" />
+        tools:src="@drawable/ic_all_24dp" />
 
     <com.bubelov.coins.ui.widget.TypefaceTextView
         android:id="@+id/text"

@@ -50,9 +50,9 @@ public class MenuItem extends FrameLayout {
                 : getResources().getColor(R.color.drawer_list_item_text));
 
         if (selected) {
-            icon.setColorFilter(getResources().getColor(R.color.primary_dark));
+            icon.setColorFilter(getResources().getColor(R.color.drawer_icon_active));
         } else {
-            icon.setColorFilter(null);
+            icon.setColorFilter(getResources().getColor(R.color.drawer_icon_inactive));
         }
     }
 
