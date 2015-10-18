@@ -42,7 +42,7 @@ public enum Amenity {
             case HOSPITAL:
                 return R.drawable.ic_hospital_24dp;
             case DRY_CLEANING:
-                return R.drawable.ic_laundry;
+                return R.drawable.ic_laundry_24dp;
             case CINEMA:
                 return R.drawable.ic_cinema_24dp;
             case PARKING:
