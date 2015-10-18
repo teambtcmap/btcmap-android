@@ -30,6 +30,6 @@
     <color name="drawer_divider">#D7D7D7</color>
 
     <color name="drawer_icon_active">@color/primary_dark</color>
-    <color name="drawer_icon_inactive">#8B8B8B</color>
+    <color name="drawer_icon_inactive">@color/secondary_text_or_icons</color>
 
 </resources>

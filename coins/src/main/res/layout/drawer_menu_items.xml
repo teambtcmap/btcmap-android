@@ -70,7 +70,7 @@
         android:id="@+id/laundry"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:mi_icon="@drawable/ic_laundry"
+        app:mi_icon="@drawable/ic_laundry_24dp"
         app:text="@string/menu_item_laundry_services" />
 
     <com.bubelov.coins.ui.widget.MenuItem
