@@ -56,7 +56,7 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
         boolean amenityFound = false;
 
         for (Amenity amenity : Amenity.values()) {
-            if (merchant.getAmenity().toUpperCase().equals(amenity.name())) {
+            if (merchant.getAmenity().equalsIgnoreCase(amenity.name())) {
                 amenityFound = true;
                 holder.icon.setImageResource(amenity.getIconId());
             }

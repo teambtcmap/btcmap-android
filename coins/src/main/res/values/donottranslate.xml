@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <string-array name="exchange_rates_sources">
+        <item>Bitstamp</item>
+        <item>Coinbase</item>
+        <item>BitcoinAverage</item>
+        <item>WINKDEX</item>
+    </string-array>
+
+    <string-array name="exchange_rates_sources_values">
+        <item>BITSTAMP</item>
+        <item>COINBASE</item>
+        <item>BITCOIN_AVERAGE</item>
+        <item>WINKDEX</item>
+    </string-array>
+
+</resources>
