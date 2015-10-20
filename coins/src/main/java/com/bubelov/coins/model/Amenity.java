@@ -57,4 +57,39 @@ public enum Amenity {
                 return R.drawable.ic_place_24dp;
         }
     }
+
+    public int getMarkerIconId() {
+        switch (this) {
+            case ATM:
+                return R.drawable.ic_place_atm;
+            case CAFE:
+                return R.drawable.ic_place_cafe;
+            case RESTAURANT:
+                return R.drawable.ic_place_restaurant;
+            case BAR:
+                return R.drawable.ic_place_bar;
+            case HOTEL:
+                return R.drawable.ic_place_hotel;
+            case CAR_WASH:
+                return R.drawable.ic_place_car_wash;
+            case FUEL:
+                return R.drawable.ic_place_fuel;
+            case HOSPITAL:
+                return R.drawable.ic_place_hospital;
+            case DRY_CLEANING:
+                return R.drawable.ic_place_dry_cleaning;
+            case CINEMA:
+                return R.drawable.ic_place_cinema;
+            case PARKING:
+                return R.drawable.ic_place_parking;
+            case PHARMACY:
+                return R.drawable.ic_place_pharmacy;
+            case PIZZA:
+                return R.drawable.ic_place_pizza;
+            case TAXI:
+                return R.drawable.ic_place_taxi;
+            default:
+                return R.drawable.ic_place_empty;
+        }
+    }
 }
