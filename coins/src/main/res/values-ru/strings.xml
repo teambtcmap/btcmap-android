@@ -14,21 +14,20 @@
 
     <string name="pref_category_notifications">Уведомления</string>
 
-    <string name="pref_show_new_merchants_key">pref_new_merchant_notifications</string>
     <string name="pref_show_new_merchants">Новые торговцы</string>
-    <string name="pref_show_new_merchants_on">Уведомлять о новых торговцах рядом</string>
+    <string name="pref_show_new_merchants_on">Уведомлять о новых торговцах в округе</string>
     <string name="pref_show_new_merchants_off">Не уведомлять о новых торговцах</string>
 
-    <string name="pref_area_of_interest_key">pref_area_of_interest</string>
     <string name="pref_area_of_interest">Местоположение</string>
     <string name="pref_area_of_interest_summary">Выберете зону уведомлений</string>
 
     <string name="notification_new_merchant">Новый место принимает криптовалюту</string>
     <string name="notification_new_merchant_no_name">Нажмите чтобы его увидеть</string>
 
-    <string name="pref_exchange_rates_provider_key">pref_exchange_rates_source</string>
     <string name="pref_exchange_rates_provider">Обменный курс</string>
     <string name="pref_exchange_rates_provider_summary">Вы можете выбрать откуда приложение будет брать информацию об обменном курсе</string>
+
+    <string name="pref_distance_units">Километры/мили</string>
 
     <string name="bitcoin_price">Биржевой курс</string>
     <string name="bitcoin_price_checked_at">Актуален на: %1$s</string>
@@ -85,5 +84,11 @@
 
     <string name="msa_distance_kilometers">%1$.2f км</string>
     <string name="msa_distance_miles">%1$.2f мил.</string>
+
+    <string-array name="distance_units">
+        <item>Автоматически</item>
+        <item>Километры</item>
+        <item>Мили</item>
+    </string-array>
 
 </resources>

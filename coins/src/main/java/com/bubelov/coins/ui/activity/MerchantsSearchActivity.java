@@ -5,9 +5,11 @@ import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,8 +23,8 @@ import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.ui.adapter.MerchantsSearchResultsAdapter;
 import com.bubelov.coins.util.DistanceComparator;
+import com.bubelov.coins.util.DistanceUnits;
 import com.bubelov.coins.util.TextWatcherAdapter;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,7 +70,7 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
 
         userLocation = getIntent().getParcelableExtra(USER_LOCATION_EXTRA);
 
-        resultsAdapter = new MerchantsSearchResultsAdapter(this, userLocation);
+        resultsAdapter = new MerchantsSearchResultsAdapter(this, userLocation, getDistanceUnits());
         resultsView.setAdapter(resultsAdapter);
 
         ((EditText) findView(R.id.query)).addTextChangedListener(new TextWatcherAdapter() {
@@ -77,16 +79,6 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
                 search(s.toString());
             }
         });
-    }
-
-    private void search(String query) {
-        if (query.length() >= 3) {
-            Bundle args = new Bundle();
-            args.putString(QUERY_KEY, query);
-            getLoaderManager().restartLoader(MERCHANTS_LOADER, args, this);
-        } else {
-            getLoaderManager().destroyLoader(MERCHANTS_LOADER);
-        }
     }
 
     @Override
@@ -130,5 +122,26 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
         data.putExtra(MERCHANT_EXTRA, merchant);
         setResult(RESULT_OK, data);
         supportFinishAfterTransition();
+    }
+
+    private void search(String query) {
+        if (query.length() >= 3) {
+            Bundle args = new Bundle();
+            args.putString(QUERY_KEY, query);
+            getLoaderManager().restartLoader(MERCHANTS_LOADER, args, this);
+        } else {
+            getLoaderManager().destroyLoader(MERCHANTS_LOADER);
+        }
+    }
+
+    private DistanceUnits getDistanceUnits() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String distanceUnitsString = sharedPreferences.getString(getString(R.string.pref_distance_units_key), getString(R.string.pref_distance_units_automatic));
+
+        if (distanceUnitsString.equals(getString(R.string.pref_distance_units_automatic))) {
+            return DistanceUnits.getDefault();
+        } else {
+            return DistanceUnits.valueOf(distanceUnitsString);
+        }
     }
 }
