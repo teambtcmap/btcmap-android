@@ -19,10 +19,10 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Other">
+    <PreferenceCategory android:title="@string/pref_category_other">
 
         <ListPreference
-            android:defaultValue="BITSTAMP"
+            android:defaultValue="@string/pref_exchange_rates_source_bitstamp"
             android:entries="@array/exchange_rates_sources"
             android:entryValues="@array/exchange_rates_sources_values"
             android:key="@string/pref_exchange_rates_provider_key"

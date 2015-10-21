@@ -9,6 +9,8 @@
 
     <string name="pref_distance_units_automatic">AUTOMATIC</string>
 
+    <string name="pref_exchange_rates_source_bitstamp">BITSTAMP</string>
+
     <string-array name="exchange_rates_sources">
         <item>Bitstamp</item>
         <item>Coinbase</item>
@@ -17,7 +19,7 @@
     </string-array>
 
     <string-array name="exchange_rates_sources_values">
-        <item>BITSTAMP</item>
+        <item>@string/pref_exchange_rates_source_bitstamp</item>
         <item>COINBASE</item>
         <item>BITCOIN_AVERAGE</item>
         <item>WINKDEX</item>
