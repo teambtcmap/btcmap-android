@@ -2,6 +2,13 @@
 
 <resources>
 
+    <string name="pref_show_new_merchants_key">pref_new_merchant_notifications</string>
+    <string name="pref_area_of_interest_key">pref_area_of_interest</string>
+    <string name="pref_exchange_rates_provider_key">pref_exchange_rates_provider</string>
+    <string name="pref_distance_units_key">pref_distance_units</string>
+
+    <string name="pref_distance_units_automatic">AUTOMATIC</string>
+
     <string-array name="exchange_rates_sources">
         <item>Bitstamp</item>
         <item>Coinbase</item>
@@ -14,6 +21,12 @@
         <item>COINBASE</item>
         <item>BITCOIN_AVERAGE</item>
         <item>WINKDEX</item>
+    </string-array>
+
+    <string-array name="distance_units_values">
+        <item>@string/pref_distance_units_automatic</item>
+        <item>KILOMETERS</item>
+        <item>MILES</item>
     </string-array>
 
 </resources>

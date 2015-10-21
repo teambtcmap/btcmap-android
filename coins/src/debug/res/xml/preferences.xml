@@ -2,39 +2,43 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory
-        android:title="@string/pref_category_notifications">
+    <PreferenceCategory android:title="@string/pref_category_notifications">
 
         <SwitchPreference
+            android:defaultValue="true"
             android:key="@string/pref_show_new_merchants_key"
-            android:title="@string/pref_show_new_merchants"
-            android:summaryOn="@string/pref_show_new_merchants_on"
             android:summaryOff="@string/pref_show_new_merchants_off"
-            android:defaultValue="true" />
+            android:summaryOn="@string/pref_show_new_merchants_on"
+            android:title="@string/pref_show_new_merchants" />
 
         <Preference
             android:dependency="@string/pref_show_new_merchants_key"
             android:key="@string/pref_area_of_interest_key"
-            android:title="@string/pref_area_of_interest"
-            android:summary="@string/pref_area_of_interest_summary" />
+            android:summary="@string/pref_area_of_interest_summary"
+            android:title="@string/pref_area_of_interest" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="Other">
+    <PreferenceCategory android:title="Other">
 
         <ListPreference
-            android:key="@string/pref_exchange_rates_provider_key"
-            android:title="@string/pref_exchange_rates_provider"
-            android:summary="@string/pref_exchange_rates_provider_summary"
+            android:defaultValue="BITSTAMP"
             android:entries="@array/exchange_rates_sources"
             android:entryValues="@array/exchange_rates_sources_values"
-            android:defaultValue="BITSTAMP" />
+            android:key="@string/pref_exchange_rates_provider_key"
+            android:summary="@string/pref_exchange_rates_provider_summary"
+            android:title="@string/pref_exchange_rates_provider" />
+
+        <ListPreference
+            android:defaultValue="@string/pref_distance_units_automatic"
+            android:entries="@array/distance_units"
+            android:entryValues="@array/distance_units_values"
+            android:key="@string/pref_distance_units_key"
+            android:title="@string/pref_distance_units" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="Development">
+    <PreferenceCategory android:title="Development">
 
         <Preference
             android:key="pref_test_notification"

@@ -14,21 +14,20 @@
 
     <string name="pref_category_notifications">Notifications</string>
 
-    <string name="pref_show_new_merchants_key">pref_new_merchant_notifications</string>
     <string name="pref_show_new_merchants">New merchants</string>
     <string name="pref_show_new_merchants_on">Notify about new merchants nearby</string>
     <string name="pref_show_new_merchants_off">Don\'t notify about new merchants</string>
 
-    <string name="pref_area_of_interest_key">pref_area_of_interest</string>
     <string name="pref_area_of_interest">Location</string>
     <string name="pref_area_of_interest_summary">Select your area of interest</string>
 
     <string name="notification_new_merchant">New merchant in your area</string>
     <string name="notification_new_merchant_no_name">Touch to see where</string>
 
-    <string name="pref_exchange_rates_provider_key">pref_exchange_rates_provider</string>
     <string name="pref_exchange_rates_provider">Exchange rates source</string>
     <string name="pref_exchange_rates_provider_summary">Select source for obtaining exchange rates between Bitcoin and USD</string>
+
+    <string name="pref_distance_units">Distance units</string>
 
     <string name="bitcoin_price">Exchange rate</string>
     <string name="bitcoin_price_checked_at">Checked at: %1$s</string>
@@ -85,5 +84,11 @@
 
     <string name="msa_distance_kilometers">%1$.2f km</string>
     <string name="msa_distance_miles">%1$.2f mi</string>
+
+    <string-array name="distance_units">
+        <item>Automatic</item>
+        <item>Kilometers</item>
+        <item>Miles</item>
+    </string-array>
 
 </resources>

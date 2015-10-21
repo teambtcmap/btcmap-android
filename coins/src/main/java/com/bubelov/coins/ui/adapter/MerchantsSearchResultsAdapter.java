@@ -30,9 +30,12 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
 
     private Location userLocation;
 
-    public MerchantsSearchResultsAdapter(OnMerchantSelectedListener listener, Location userLocation) {
+    private DistanceUnits distanceUnits;
+
+    public MerchantsSearchResultsAdapter(OnMerchantSelectedListener listener, Location userLocation, DistanceUnits distanceUnits) {
         this.listener = listener;
         this.userLocation = userLocation;
+        this.distanceUnits = distanceUnits;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
             Context context = holder.name.getContext();
             float distanceInKilometers = DistanceUtils.getDistance(merchant.getPosition(), userLocation) / 1000.0f;
 
-            if (DistanceUnits.getDefault().equals(DistanceUnits.KILOMETERS)) {
+            if (distanceUnits.equals(DistanceUnits.KILOMETERS)) {
                 holder.distance.setText(context.getString(R.string.msa_distance_kilometers, distanceInKilometers));
             } else {
                 float distanceInMiles = DistanceUtils.toMiles(distanceInKilometers);
