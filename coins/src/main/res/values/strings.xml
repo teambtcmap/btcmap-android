@@ -83,4 +83,7 @@
 
     <string name="msa_search">Search</string>
 
+    <string name="msa_distance_kilometers">%1$.2f km</string>
+    <string name="msa_distance_miles">%1$.2f mi</string>
+
 </resources>

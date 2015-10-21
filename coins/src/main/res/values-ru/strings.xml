@@ -83,4 +83,7 @@
 
     <string name="msa_search">Поиск</string>
 
+    <string name="msa_distance_kilometers">%1$.2f км</string>
+    <string name="msa_distance_miles">%1$.2f мил.</string>
+
 </resources>

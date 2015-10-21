@@ -1,5 +1,6 @@
 package com.bubelov.coins.ui.adapter;
 
+import android.content.Context;
 import android.location.Location;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 import com.bubelov.coins.R;
 import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.util.DistanceUnits;
 import com.bubelov.coins.util.DistanceUtils;
 
 import java.util.ArrayList;
@@ -49,8 +51,16 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
             holder.distance.setVisibility(View.GONE);
         } else {
             holder.distance.setVisibility(View.VISIBLE);
-            float distanceInMeters = DistanceUtils.getDistance(merchant.getPosition(), userLocation);
-            holder.distance.setText(String.format("%.02f km", distanceInMeters / 1000.0f));
+
+            Context context = holder.name.getContext();
+            float distanceInKilometers = DistanceUtils.getDistance(merchant.getPosition(), userLocation) / 1000.0f;
+
+            if (DistanceUnits.getDefault().equals(DistanceUnits.KILOMETERS)) {
+                holder.distance.setText(context.getString(R.string.msa_distance_kilometers, distanceInKilometers));
+            } else {
+                float distanceInMiles = DistanceUtils.toMiles(distanceInKilometers);
+                holder.distance.setText(context.getString(R.string.msa_distance_miles, distanceInMiles));
+            }
         }
 
         boolean amenityFound = false;
