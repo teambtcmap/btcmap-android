@@ -24,6 +24,8 @@
     <string name="notification_new_merchant">New merchant in your area</string>
     <string name="notification_new_merchant_no_name">Touch to see where</string>
 
+    <string name="pref_category_other">Other</string>
+
     <string name="pref_exchange_rates_provider">Exchange rates source</string>
     <string name="pref_exchange_rates_provider_summary">Select source for obtaining exchange rates between Bitcoin and USD</string>
 

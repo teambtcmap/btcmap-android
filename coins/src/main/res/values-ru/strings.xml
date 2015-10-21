@@ -21,8 +21,10 @@
     <string name="pref_area_of_interest">Местоположение</string>
     <string name="pref_area_of_interest_summary">Выберете зону уведомлений</string>
 
-    <string name="notification_new_merchant">Новый место принимает криптовалюту</string>
+    <string name="notification_new_merchant">Новое место принимает криптовалюту</string>
     <string name="notification_new_merchant_no_name">Нажмите чтобы его увидеть</string>
+
+    <string name="pref_category_other">Прочее</string>
 
     <string name="pref_exchange_rates_provider">Обменный курс</string>
     <string name="pref_exchange_rates_provider_summary">Вы можете выбрать откуда приложение будет брать информацию об обменном курсе</string>
