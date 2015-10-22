@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dao.CurrencyDAO;
-import com.bubelov.coins.dao.ExchangeRateDao;
+import com.bubelov.coins.dao.ExchangeRateDAO2;
 import com.bubelov.coins.event.ExchangeRateLoadFinishedEvent;
 import com.bubelov.coins.event.ExchangeRateLoadStartedEvent;
 import com.bubelov.coins.model.Amenity;
@@ -181,7 +181,7 @@ public class DrawerMenu extends FrameLayout {
     }
 
     private void showLastExchangeRate() {
-        ExchangeRate exchangeRate = ExchangeRateDao.queryForLast(getContext(), btc, usd);
+        ExchangeRate exchangeRate = ExchangeRateDAO2.queryForLast(getContext(), btc, usd);
 
         if (exchangeRate != null) {
             DecimalFormat format = new DecimalFormat();
