@@ -15,7 +15,7 @@ import org.joda.time.DateTime;
  * Date: 10/13/15 9:25 PM
  */
 
-public class ExchangeRateDao {
+public class ExchangeRateDAO2 {
     public static ExchangeRate queryForLast(Context context, Currency sourceCurrency, Currency targetCurrency) {
         if (sourceCurrency == null || targetCurrency == null) {
             return null;

@@ -2,6 +2,7 @@ package com.bubelov.coins.ui.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -32,6 +33,7 @@ import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dao.CurrencyDAO;
 import com.bubelov.coins.dao.MerchantDAO;
+import com.bubelov.coins.dao.MerchantNotificationDAO;
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
@@ -78,6 +80,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private static final String KEY_AMENITY = "amenity";
 
     private static final String MERCHANT_ID_EXTRA = "merchant_id";
+
+    private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
 
     private static final int MERCHANTS_LOADER = 0;
 
@@ -132,6 +136,13 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     public static Intent newShowMerchantIntent(Context context, long merchantId) {
         Intent intent = new Intent(context, MapActivity.class);
         intent.putExtra(MERCHANT_ID_EXTRA, merchantId);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        return intent;
+    }
+
+    public static Intent newShowNotificationAreaIntent(Context context, NotificationArea notificationArea) {
+        Intent intent = new Intent(context, MapActivity.class);
+        intent.putExtra(NOTIFICATION_AREA_EXTRA, notificationArea);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         return intent;
     }
@@ -298,6 +309,17 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 selectMerchant(intent.getLongExtra(MERCHANT_ID_EXTRA, -1), false);
                 slidingLayout.anchorPanel();
             }, 1);
+
+            return;
+        }
+
+        if (intent.hasExtra(NOTIFICATION_AREA_EXTRA)) {
+            NotificationArea notificationArea = (NotificationArea) intent.getSerializableExtra(NOTIFICATION_AREA_EXTRA);
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), 13));
+
+            new MerchantNotificationDAO(this).deleteAll();
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancelAll();
 
             return;
         }
@@ -643,7 +665,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private class LocationApiConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks {
         @Override
         public void onConnected(Bundle bundle) {
-            if (firstLaunch) {
+            if (firstLaunch && !getIntent().hasExtra(NOTIFICATION_AREA_EXTRA)) {
                 moveToUserLocation();
             }
         }
