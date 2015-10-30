@@ -2,7 +2,6 @@ package com.bubelov.coins.ui.activity;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -10,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -83,6 +81,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
 
+    public static final String CLEAR_MERCHANT_NOTIFICATIONS_EXTRA = "clear_merchant_notifications";
+
     private static final int MERCHANTS_LOADER = 0;
 
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 0;
@@ -92,6 +92,8 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private static final int REQUEST_ACCESS_LOCATION = 20;
 
     private static final int MAP_ANIMATION_DURATION_MILLIS = 350;
+
+    private static final float DEFAULT_ZOOM = 13;
 
     private Toolbar toolbar;
 
@@ -197,13 +199,13 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             initLocation();
         } else {
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), 13));
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), DEFAULT_ZOOM));
 
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         REQUEST_ACCESS_LOCATION);
             } else {
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), 13));
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), DEFAULT_ZOOM));
             }
         }
 
@@ -304,31 +306,20 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     }
 
     private void handleIntent(Intent intent) {
+        if (intent.getBooleanExtra(CLEAR_MERCHANT_NOTIFICATIONS_EXTRA, false)) {
+            new MerchantNotificationDAO(this).deleteAll();
+        }
+
         if (intent.hasExtra(MERCHANT_ID_EXTRA)) {
             slidingLayout.postDelayed(() -> {
                 selectMerchant(intent.getLongExtra(MERCHANT_ID_EXTRA, -1), false);
                 slidingLayout.anchorPanel();
             }, 1);
-
-            return;
         }
 
         if (intent.hasExtra(NOTIFICATION_AREA_EXTRA)) {
             NotificationArea notificationArea = (NotificationArea) intent.getSerializableExtra(NOTIFICATION_AREA_EXTRA);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), 13));
-
-            new MerchantNotificationDAO(this).deleteAll();
-            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.cancelAll();
-
-            return;
-        }
-
-        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-            Uri merchantUri = intent.getData();
-            long merchantId = Long.valueOf(merchantUri.getLastPathSegment());
-            selectMerchant(merchantId, false);
-            slidingLayout.anchorPanel();
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), DEFAULT_ZOOM));
         }
     }
 
@@ -352,7 +343,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         if (requestCode == REQUEST_FIND_MERCHANT && resultCode == RESULT_OK) {
             Merchant merchant = (Merchant) data.getSerializableExtra(MerchantsSearchActivity.MERCHANT_EXTRA);
             selectMerchant(merchant.getId(), false);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), 13));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), DEFAULT_ZOOM));
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -509,7 +500,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private void onUserLocationReceived(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
 
         NotificationAreaProvider notificationAreaProvider = new NotificationAreaProvider(this);
 
@@ -751,7 +742,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         public void onPanelAnchored(View view) {
             wasExpanded = true;
             map.setPadding(0, getResources().getDimensionPixelSize(R.dimen.marker_size) / 2, 0, Utils.getScreenHeight(MapActivity.this) / 2 + Utils.getStatusBarHeight(getApplicationContext()));
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), 13), MAP_ANIMATION_DURATION_MILLIS, null);
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), DEFAULT_ZOOM), MAP_ANIMATION_DURATION_MILLIS, null);
             map.getUiSettings().setAllGesturesEnabled(false);
             actionButton.setImageResource(R.drawable.fab_directions);
         }
