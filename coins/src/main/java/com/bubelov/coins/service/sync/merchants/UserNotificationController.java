@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -18,6 +19,7 @@ import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
+import com.bubelov.coins.receiver.ClearMerchantNotificationsReceiver;
 import com.bubelov.coins.ui.activity.MapActivity;
 import com.bubelov.coins.util.DistanceUtils;
 
@@ -78,10 +80,12 @@ public class UserNotificationController {
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(context.getString(R.string.notification_new_merchant))
                 .setContentText(!TextUtils.isEmpty(merchantName) ? merchantName : context.getString(R.string.notification_new_merchant_no_name))
+                .setDeleteIntent(prepareClearMerchantsIntent())
                 .setAutoCancel(true)
                 .setGroup(NEW_MERCHANT_NOTIFICATION_GROUP);
 
         Intent intent = MapActivity.newShowMerchantIntent(context, merchantId);
+        intent.putExtra(MapActivity.CLEAR_MERCHANT_NOTIFICATIONS_EXTRA, true);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, UUID.randomUUID().hashCode(), intent, 0);
         builder.setContentIntent(pendingIntent);
 
@@ -100,6 +104,7 @@ public class UserNotificationController {
         NotificationArea notificationArea = new NotificationAreaProvider(context).get();
 
         Intent intent = MapActivity.newShowNotificationAreaIntent(context, notificationArea);
+        intent.putExtra(MapActivity.CLEAR_MERCHANT_NOTIFICATIONS_EXTRA, true);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, NEW_MERCHANT_NOTIFICATION_GROUP.hashCode(), intent, 0);
 
         NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();
@@ -114,6 +119,7 @@ public class UserNotificationController {
                 .setContentIntent(pendingIntent)
                 .setContentTitle(context.getString(R.string.notification_new_merchants_content_title, pendingMerchants.size()))
                 .setContentText(context.getString(R.string.notification_new_merchants_content_text))
+                .setDeleteIntent(prepareClearMerchantsIntent())
                 .setStyle(style)
                 .setAutoCancel(true)
                 .setGroup(NEW_MERCHANT_NOTIFICATION_GROUP)
@@ -121,5 +127,12 @@ public class UserNotificationController {
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NEW_MERCHANT_NOTIFICATION_GROUP.hashCode(), builder.build());
+    }
+
+    private PendingIntent prepareClearMerchantsIntent() {
+        Intent deleteIntent = new Intent(ClearMerchantNotificationsReceiver.ACTION);
+        PendingIntent deletePendingIntent = PendingIntent.getBroadcast(context, 0, deleteIntent, 0);
+        context.registerReceiver(new ClearMerchantNotificationsReceiver(), new IntentFilter(ClearMerchantNotificationsReceiver.ACTION));
+        return deletePendingIntent;
     }
 }
