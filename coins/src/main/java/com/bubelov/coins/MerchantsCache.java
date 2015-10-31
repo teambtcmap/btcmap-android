@@ -2,6 +2,7 @@ package com.bubelov.coins;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 
 import com.bubelov.coins.database.Database;
 import com.bubelov.coins.model.Amenity;
@@ -10,6 +11,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Author: Igor Bubelov
@@ -22,6 +24,8 @@ public class MerchantsCache {
     private final Collection<Merchant> data;
 
     private volatile boolean initialized;
+
+    private List<MerchantsCacheListener> listeners = new ArrayList<>();
 
     public MerchantsCache(SQLiteDatabase db) {
         this.db = db;
@@ -48,23 +52,51 @@ public class MerchantsCache {
 
     public void invalidate() {
         initialized = false;
-        data.clear();
         initialize();
     }
 
-    private void initialize() {
-        Cursor cursor = db.rawQuery("select distinct m._id, m.latitude, m.longitude, m.amenity from merchants as m join currencies_merchants as mc on m._id = mc.merchant_id join currencies c on c._id = mc.currency_id where c.show_on_map = 1", null);
+    public List<MerchantsCacheListener> getListeners() {
+        return listeners;
+    }
 
-        while (cursor.moveToNext()) {
-            Merchant merchant = new Merchant();
-            merchant.setId(cursor.getLong(cursor.getColumnIndex(Database.Merchants._ID)));
-            merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LATITUDE)));
-            merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LONGITUDE)));
-            merchant.setAmenity(cursor.getString(cursor.getColumnIndex(Database.Merchants.AMENITY)));
-            data.add(merchant);
+    private void initialize() {
+        new InitCacheTask().execute();
+    }
+
+    private class InitCacheTask extends AsyncTask<Void, Void, List<Merchant>> {
+        @Override
+        protected List<Merchant> doInBackground(Void... params) {
+            List<Merchant> newestData = new ArrayList<>();
+
+            Cursor cursor = db.rawQuery("select distinct m._id, m.latitude, m.longitude, m.amenity from merchants as m join currencies_merchants as mc on m._id = mc.merchant_id join currencies c on c._id = mc.currency_id where c.show_on_map = 1", null);
+
+            while (cursor.moveToNext()) {
+                Merchant merchant = new Merchant();
+                merchant.setId(cursor.getLong(cursor.getColumnIndex(Database.Merchants._ID)));
+                merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LATITUDE)));
+                merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LONGITUDE)));
+                merchant.setAmenity(cursor.getString(cursor.getColumnIndex(Database.Merchants.AMENITY)));
+                newestData.add(merchant);
+            }
+
+            cursor.close();
+
+            return newestData;
         }
 
-        initialized = true;
-        cursor.close();
+        @Override
+        protected void onPostExecute(List<Merchant> newestData) {
+            data.clear();
+            data.addAll(newestData);
+            initialized = true;
+
+            for (MerchantsCacheListener listener : listeners) {
+                listener.onMerchantsCacheInitialized();
+            }
+        }
+    }
+
+    public interface MerchantsCacheListener {
+        void onMerchantsCacheInitialized();
     }
 }

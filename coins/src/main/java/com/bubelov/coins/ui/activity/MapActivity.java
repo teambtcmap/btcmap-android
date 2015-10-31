@@ -7,15 +7,12 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.ListPopupWindow;
@@ -32,11 +29,9 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.dao.CurrencyDAO;
 import com.bubelov.coins.dao.MerchantDAO;
 import com.bubelov.coins.dao.MerchantNotificationDAO;
-import com.bubelov.coins.database.Database;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.DatabaseSyncStartedEvent;
-import com.bubelov.coins.loader.MerchantsLoader;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Merchant;
@@ -70,11 +65,10 @@ import com.google.maps.android.clustering.ClusterManager;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.squareup.otto.Subscribe;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-public class MapActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, DrawerMenu.OnItemClickListener {
+public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemClickListener {
     private static final String KEY_AMENITY = "amenity";
 
     private static final String MERCHANT_ID_EXTRA = "merchant_id";
@@ -82,8 +76,6 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
     private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
 
     public static final String CLEAR_MERCHANT_NOTIFICATIONS_EXTRA = "clear_merchant_notifications";
-
-    private static final int MERCHANTS_LOADER = 0;
 
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 0;
 
@@ -129,7 +121,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
 
     private CameraUpdate cameraBeforeSelection;
 
-    private MerchantsCacheFragment merchantsCacheFragment;
+    private MerchantsCache merchantsCache;
 
     private FloatingActionButton actionButton;
 
@@ -209,12 +201,14 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
             }
         }
 
-        merchantsCacheFragment = (MerchantsCacheFragment) getSupportFragmentManager().findFragmentByTag(MerchantsCacheFragment.TAG);
+        MerchantsCacheFragment merchantsCacheFragment = (MerchantsCacheFragment) getSupportFragmentManager().findFragmentByTag(MerchantsCacheFragment.TAG);
 
         if (merchantsCacheFragment == null) {
             merchantsCacheFragment = new MerchantsCacheFragment();
             getSupportFragmentManager().beginTransaction().add(merchantsCacheFragment, MerchantsCacheFragment.TAG);
         }
+
+        merchantsCache = merchantsCacheFragment.getMerchantsCache();
 
         actionButton = findView(R.id.locate_button);
 
@@ -285,7 +279,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
                 popup.show();
 
                 popup.setOnDismissListener(() -> {
-                    merchantsCacheFragment.getMerchantsCache().invalidate();
+                    merchantsCache.invalidate();
                     reloadMerchants();
                 });
 
@@ -389,41 +383,9 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         startService(MerchantsSyncService.makeIntent(this, false));
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if (id == MERCHANTS_LOADER) {
-            return new MerchantsLoader(this, args);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Collection<Merchant> merchants = new ArrayList<>();
-
-        while (data.moveToNext()) {
-            Merchant merchant = new Merchant();
-            merchant.setId(data.getLong(data.getColumnIndex(Database.Merchants._ID)));
-            merchant.setLatitude(data.getDouble(data.getColumnIndex(Database.Merchants.LATITUDE)));
-            merchant.setLongitude(data.getDouble(data.getColumnIndex(Database.Merchants.LONGITUDE)));
-            merchant.setAmenity(data.getString(data.getColumnIndex(Database.Merchants.AMENITY)));
-
-            merchants.add(merchant);
-        }
-
-        onMerchantsLoaded(merchants);
-    }
-
     private void onMerchantsLoaded(Collection<Merchant> merchants) {
         merchantsManager.clearItems();
         merchantsManager.addItems(merchants);
-        merchantsManager.cluster();
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        merchantsManager.clearItems();
         merchantsManager.cluster();
     }
 
@@ -533,7 +495,7 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         setDatabaseSyncing(false);
 
         if (event.isDataChanged()) {
-            merchantsCacheFragment.getMerchantsCache().invalidate();
+            merchantsCache.invalidate();
             reloadMerchants();
         }
     }
@@ -550,12 +512,17 @@ public class MapActivity extends AbstractActivity implements LoaderManager.Loade
         }
 
         LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        MerchantsCache cache = merchantsCacheFragment.getMerchantsCache();
 
-        if (cache.isInitialized()) {
-            onMerchantsLoaded(cache.getMerchants(bounds, amenity));
+        if (merchantsCache.isInitialized()) {
+            onMerchantsLoaded(merchantsCache.getMerchants(bounds, amenity));
         } else {
-            getSupportLoaderManager().restartLoader(MERCHANTS_LOADER, MerchantsLoader.prepareArguments(bounds, amenity), MapActivity.this);
+            merchantsCache.getListeners().add(new MerchantsCache.MerchantsCacheListener() {
+                @Override
+                public void onMerchantsCacheInitialized() {
+                    onMerchantsLoaded(merchantsCache.getMerchants(bounds, amenity));
+                    merchantsCache.getListeners().remove(this);
+                }
+            });
         }
     }
 
