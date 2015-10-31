@@ -22,7 +22,10 @@
     <string name="pref_area_of_interest_summary">Выберете зону уведомлений</string>
 
     <string name="notification_new_merchant">Новое место принимает криптовалюту</string>
-    <string name="notification_new_merchant_no_name">Нажмите чтобы его увидеть</string>
+    <string name="notification_new_merchant_no_name">Нажмите чтобы посмотреть</string>
+
+    <string name="notification_new_merchants_content_title">%1$s новых торговцев</string>
+    <string name="notification_new_merchants_content_text">Нажмите чтобы посмотреть</string>
 
     <string name="pref_category_other">Прочее</string>
 
