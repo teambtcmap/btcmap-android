@@ -53,7 +53,7 @@ public class ExchangeRatesService extends CoinsIntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if (!Utils.isOnline(this)) {
+        if (intent == null || !Utils.isOnline(this)) {
             return;
         }
 
