@@ -9,11 +9,13 @@ import com.bubelov.coins.database.DatabaseFactory;
 import com.bubelov.coins.serializer.DateTimeDeserializer;
 import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 import com.bubelov.coins.util.MainThreadBus;
+import com.crashlytics.android.Crashlytics;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.otto.Bus;
 
+import io.fabric.sdk.android.Fabric;
 import org.joda.time.DateTime;
 
 import retrofit.GsonConverterFactory;
@@ -37,6 +39,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         instance = this;
         bus = new MainThreadBus();
         initApi();
