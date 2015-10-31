@@ -75,6 +75,11 @@ public class MerchantsSyncService extends CoinsIntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        if (intent == null) {
+            scheduleNextSync();
+            return;
+        }
+
         boolean forceSync = intent.getBooleanExtra(FORCE_SYNC_EXTRA, false);
 
         if (!isTimeForSync() && !forceSync) {
