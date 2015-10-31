@@ -96,6 +96,10 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_api_key" />
 
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="5471d91384b3af13f6be10b2083e5a3625fe6019" />
+
     </application>
 
 </manifest>
