@@ -90,7 +90,7 @@ public class MerchantsCache {
             data.addAll(newestData);
             initialized = true;
 
-            for (MerchantsCacheListener listener : listeners) {
+            for (MerchantsCacheListener listener : new ArrayList<>(listeners)) {
                 listener.onMerchantsCacheInitialized();
             }
         }
