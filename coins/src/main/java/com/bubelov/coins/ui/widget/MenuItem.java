@@ -9,15 +9,18 @@ import android.widget.TextView;
 
 import com.bubelov.coins.R;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Author: Igor Bubelov
  * Date: 06/04/15 19:48
  */
 
 public class MenuItem extends FrameLayout {
-    private ImageView icon;
+    @Bind(R.id.icon) ImageView icon;
 
-    private TextView text;
+    @Bind(R.id.text) TextView text;
 
     public MenuItem(Context context) {
         super(context);
@@ -58,8 +61,7 @@ public class MenuItem extends FrameLayout {
 
     private void init() {
         inflate(getContext(), R.layout.widget_menu_item, this);
-        icon = (ImageView) findViewById(R.id.icon);
-        text = (TextView) findViewById(R.id.text);
+        ButterKnife.bind(this);
         setSelected(false);
     }
 

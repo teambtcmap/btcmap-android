@@ -3,7 +3,6 @@ package com.bubelov.coins.ui.activity;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.Toast;
 
 import com.bubelov.coins.App;
@@ -49,10 +48,6 @@ public abstract class AbstractActivity extends AppCompatActivity implements Netw
     @Override
     public void networkUnavailable() {
         // Nothing to do here
-    }
-
-    protected <T extends View> T findView(int id) {
-        return (T) findViewById(id);
     }
 
     protected void showToast(String message) {

@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import butterknife.ButterKnife;
+
 /**
  * Author: Igor Bubelov
  * Date: 10/11/15 4:07 PM
@@ -58,13 +60,14 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_merchants_search);
+        ButterKnife.bind(this);
 
-        Toolbar toolbar = findView(R.id.toolbar);
+        Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         getSupportActionBar().setTitle(null);
 
-        RecyclerView resultsView = (RecyclerView) findViewById(R.id.results);
+        RecyclerView resultsView = ButterKnife.findById(this, R.id.results);
         resultsView.setLayoutManager(new LinearLayoutManager(this));
         resultsView.setHasFixedSize(true);
 
@@ -73,7 +76,7 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
         resultsAdapter = new MerchantsSearchResultsAdapter(this, userLocation, getDistanceUnits());
         resultsView.setAdapter(resultsAdapter);
 
-        ((EditText) findView(R.id.query)).addTextChangedListener(new TextWatcherAdapter() {
+        ((EditText) ButterKnife.findById(this, R.id.query)).addTextChangedListener(new TextWatcherAdapter() {
             @Override
             public void afterTextChanged(Editable s) {
                 search(s.toString());

@@ -10,13 +10,16 @@ import android.widget.TextView;
 
 import com.bubelov.coins.R;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Author: Igor Bubelov
  * Date: 6/20/15 9:02 PM
  */
 
 public class MerchantActionButton extends FrameLayout {
-    private TextView text;
+    @Bind(R.id.text) TextView text;
 
     public MerchantActionButton(Context context) {
         super(context);
@@ -50,7 +53,7 @@ public class MerchantActionButton extends FrameLayout {
 
     private void init() {
         inflate(getContext(), R.layout.widget_merchant_action_button, this);
-        text = (TextView) findViewById(R.id.text);
+        ButterKnife.bind(this);
     }
 
     private void applyAttributes(AttributeSet attrs) {

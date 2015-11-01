@@ -68,6 +68,9 @@ import com.squareup.otto.Subscribe;
 import java.util.Collection;
 import java.util.Collections;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemClickListener {
     private static final String KEY_AMENITY = "amenity";
 
@@ -87,13 +90,13 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     private static final float DEFAULT_ZOOM = 13;
 
-    private Toolbar toolbar;
+    @Bind(R.id.toolbar) Toolbar toolbar;
 
-    private Toolbar merchantToolbar;
+    @Bind(R.id.merchant_toolbar) Toolbar merchantToolbar;
 
-    private View merchantTopGradient;
+    @Bind(R.id.merchant_top_gradient) View merchantTopGradient;
 
-    private DrawerLayout drawer;
+    @Bind(R.id.drawer_layout) DrawerLayout drawer;
 
     private ActionBarDrawerToggle drawerToggle;
 
@@ -103,11 +106,11 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     private Amenity amenity;
 
-    private SlidingUpPanelLayout slidingLayout;
+    @Bind(R.id.sliding_panel) SlidingUpPanelLayout slidingLayout;
 
-    private MerchantDetailsView merchantDetails;
+    @Bind(R.id.merchant_details) MerchantDetailsView merchantDetails;
 
-    private View loader;
+    @Bind(R.id.loader) View loader;
 
     private MapMarkersCache markersCache;
 
@@ -123,7 +126,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     private MerchantsCache merchantsCache;
 
-    private FloatingActionButton actionButton;
+    @Bind(R.id.locate_button) FloatingActionButton actionButton;
 
     private boolean firstLaunch;
 
@@ -145,26 +148,20 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        ButterKnife.bind(this);
 
-        toolbar = findView(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        merchantToolbar = findView(R.id.merchant_toolbar);
-        merchantToolbar.setNavigationOnClickListener(v -> {
-            slidingLayout.collapsePanel();
-        });
-
-        merchantTopGradient = findView(R.id.merchant_top_gradient);
+        merchantToolbar.setNavigationOnClickListener(v -> slidingLayout.collapsePanel());
 
         amenity = savedInstanceState == null ? null : (Amenity) savedInstanceState.getSerializable(KEY_AMENITY);
 
-        drawer = findView(R.id.drawer_layout);
         drawerToggle = new DrawerToggle(this, drawer, android.R.string.ok, android.R.string.ok);
         drawer.setDrawerListener(drawerToggle);
 
-        DrawerMenu drawerMenu = findView(R.id.left_drawer);
+        DrawerMenu drawerMenu = ButterKnife.findById(this, R.id.left_drawer);
         drawerMenu.setItemSelectedListener(this);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -178,10 +175,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         initClustering();
 
         map.setOnCameraChangeListener(new OnCameraChangeMultiplexer(merchantsManager, new CameraChangeListener()));
-
-        merchantDetails = findView(R.id.merchant_details);
-
-        loader = findView(R.id.loader);
 
         markersCache = new MapMarkersCache();
 
@@ -210,8 +203,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
         merchantsCache = merchantsCacheFragment.getMerchantsCache();
 
-        actionButton = findView(R.id.locate_button);
-
         drawerMenu.setAmenity(amenity);
     }
 
@@ -219,8 +210,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         drawerToggle.syncState();
-
-        slidingLayout = findView(R.id.sliding_panel);
 
         if (savedInstanceState == null) {
             slidingLayout.hidePanel();
@@ -274,7 +263,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         switch (id) {
             case R.id.action_filter:
                 ListPopupWindow popup = new CurrenciesFilterPopup(this);
-                popup.setAnchorView(findViewById(R.id.anchor_upper_right));
+                popup.setAnchorView(ButterKnife.findById(this, R.id.anchor_upper_right));
                 popup.setHeight(drawer.getHeight() / 10 * 9);
                 popup.show();
 

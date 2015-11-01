@@ -28,6 +28,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Author: Igor Bubelov
  * Date: 18/04/15 18:27
@@ -37,9 +40,12 @@ public class DrawerMenu extends FrameLayout {
     private Currency btc;
     private Currency usd;
 
-    private TextView exchangeRate;
-    private TextView exchangeRateLastCheck;
-    private View checkExchangeRateButton;
+    @Bind(R.id.exchange_rate) TextView exchangeRate;
+
+    @Bind(R.id.exchange_rate_last_check) TextView exchangeRateLastCheck;
+
+    @Bind(R.id.check) View checkExchangeRateButton;
+
     private boolean exchangeRateLoading;
 
     private static int[] ITEMS = {
@@ -139,13 +145,9 @@ public class DrawerMenu extends FrameLayout {
 
     private void init() {
         inflate(getContext(), R.layout.widget_drawer_menu, this);
+        ButterKnife.bind(this);
         initItemsToAmenities();
         App.getInstance().getBus().register(this);
-
-        exchangeRate = (TextView) findViewById(R.id.exchange_rate);
-        exchangeRateLastCheck = (TextView) findViewById(R.id.exchange_rate_last_check);
-
-        checkExchangeRateButton = findViewById(R.id.check);
 
         checkExchangeRateButton.setOnClickListener(v -> {
             checkExchangeRateButton.setClickable(false);

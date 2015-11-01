@@ -20,29 +20,32 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Author: Igor Bubelov
  * Date: 03/05/15 11:03
  */
 
 public class MerchantDetailsView extends FrameLayout {
-    private View header;
+    @Bind(R.id.header) View header;
 
-    private TextView name;
+    @Bind(R.id.name) TextView name;
 
-    private TextView address;
+    @Bind(R.id.address) TextView address;
 
-    private MerchantActionButton call;
+    @Bind(R.id.call) MerchantActionButton call;
 
-    private View openWebsite;
+    @Bind(R.id.open_website) View openWebsite;
 
-    private View share;
+    @Bind(R.id.share) View share;
 
-    private TextView description;
+    @Bind(R.id.description) TextView description;
 
-    private TextView openingHours;
+    @Bind(R.id.opening_hours) TextView openingHours;
 
-    private TextView acceptedCurrencies;
+    @Bind(R.id.accepted_currencies) TextView acceptedCurrencies;
 
     public MerchantDetailsView(Context context) {
         super(context);
@@ -106,18 +109,7 @@ public class MerchantDetailsView extends FrameLayout {
 
     private void init() {
         inflate(getContext(), R.layout.widget_merchant_details, this);
-
-        header = findViewById(R.id.header);
-        name = (TextView) findViewById(R.id.name);
-        address = (TextView) findViewById(R.id.address);
-
-        call = (MerchantActionButton) findViewById(R.id.call);
-        openWebsite = findViewById(R.id.open_website);
-        share = findViewById(R.id.share);
-
-        description = (TextView) findViewById(R.id.description);
-        openingHours = (TextView) findViewById(R.id.opening_hours);
-        acceptedCurrencies = (TextView) findViewById(R.id.accepted_currencies);
+        ButterKnife.bind(this);
     }
 
     private class LoadAddressTask extends AsyncTask<LatLng, Void, String> {
