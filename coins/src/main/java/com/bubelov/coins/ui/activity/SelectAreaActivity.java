@@ -35,6 +35,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Author: Igor Bubelov
  * Date: 12/07/14 16:24
@@ -49,6 +52,12 @@ public class SelectAreaActivity extends AbstractActivity {
 
     private static final int DEFAULT_ZOOM = 8;
 
+    @Bind(R.id.toolbar) Toolbar toolbar;
+
+    @Bind(R.id.bottom_panel) View bottomPanel;
+
+    @Bind(R.id.seek_bar_radius) SeekBar radiusSeekBar;
+
     private GoogleMap map;
     private GoogleApiClient googleApiClient;
 
@@ -59,8 +68,8 @@ public class SelectAreaActivity extends AbstractActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_area);
+        ButterKnife.bind(this);
 
-        Toolbar toolbar = findView(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         toolbar.setNavigationOnClickListener(v -> {
@@ -105,7 +114,6 @@ public class SelectAreaActivity extends AbstractActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        View bottomPanel = findView(R.id.bottom_panel);
         bottomPanel.post(() -> map.setPadding(0, 0, 0, bottomPanel.getHeight()));
     }
 
@@ -200,10 +208,9 @@ public class SelectAreaActivity extends AbstractActivity {
 
         areaCircle = map.addCircle(circleOptions);
 
-        SeekBar seekBar = findView(R.id.seek_bar_radius);
-        seekBar.setMax(500000);
-        seekBar.setProgress((int) areaCircle.getRadius());
-        seekBar.setOnSeekBarChangeListener(new SeekBarChangeListener());
+        radiusSeekBar.setMax(500000);
+        radiusSeekBar.setProgress((int) areaCircle.getRadius());
+        radiusSeekBar.setOnSeekBarChangeListener(new SeekBarChangeListener());
     }
 
     private void moveArea(LatLng location) {

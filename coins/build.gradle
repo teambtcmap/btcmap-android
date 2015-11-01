@@ -31,6 +31,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    lintOptions {
+        disable 'InvalidPackage'
+    }
 }
 
 dependencies {
@@ -55,6 +59,8 @@ dependencies {
     compile 'joda-time:joda-time:2.8.2'
 
     compile 'com.readystatesoftware.sqliteasset:sqliteassethelper:2.0.1'
+
+    compile 'com.jakewharton:butterknife:7.0.1'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.robolectric:robolectric:3.0'
