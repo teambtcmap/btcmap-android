@@ -36,8 +36,8 @@
     </style>
 
     <style name="ToolbarTheme" parent="AppTheme">
-        <item name="android:textColorPrimary">#ffffff</item>
-        <item name="android:textColorSecondary">#ffffff</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
     </style>
 
     <style name="SearchToolbarTheme" parent="AppTheme">

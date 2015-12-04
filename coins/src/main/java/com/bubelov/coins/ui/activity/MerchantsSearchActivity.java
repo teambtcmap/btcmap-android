@@ -90,7 +90,7 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
 
         return new CursorLoader(this,
                 Database.Merchants.CONTENT_URI,
-                MerchantDAO.FULL_PROJECTION,
+                null,
                 String.format("%s like ? or %s like ?", Database.Merchants.NAME, Database.Merchants.AMENITY),
                 new String[]{"%" + query + "%", "%" + query + "%"},
                 null);
