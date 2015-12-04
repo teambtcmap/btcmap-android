@@ -19,11 +19,9 @@ import java.util.List;
  */
 
 public class MerchantDAO {
-    public static final String[] FULL_PROJECTION = new String[]{Database.Merchants._ID, Database.Merchants.NAME, Database.Merchants.DESCRIPTION, Database.Merchants.LATITUDE, Database.Merchants.LONGITUDE, Database.Merchants.AMENITY, Database.Merchants.PHONE, Database.Merchants.WEBSITE, Database.Merchants.OPENING_HOURS, Database.Merchants.ADDRESS, Database.Merchants._CREATED_AT, Database.Merchants._UPDATED_AT};
-
     public static Merchant query(Context context, long id) {
         Cursor cursor = context.getContentResolver().query(Database.Merchants.CONTENT_URI,
-                FULL_PROJECTION,
+                null,
                 String.format("%s = ?", Database.Merchants._ID),
                 new String[]{String.valueOf(id)},
                 null);

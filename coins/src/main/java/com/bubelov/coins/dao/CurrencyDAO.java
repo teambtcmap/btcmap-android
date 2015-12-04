@@ -19,11 +19,9 @@ import java.util.List;
  */
 
 public class CurrencyDAO {
-    private static String[] FULL_PROJECTION = new String[]{Database.Currencies._ID, Database.Currencies.NAME, Database.Currencies.CODE, Database.Currencies.CRYPTO, Database.Currencies._CREATED_AT, Database.Currencies._UPDATED_AT};
-
     public static Currency query(Context context, String code) {
         Cursor cursor = context.getContentResolver().query(Database.Currencies.CONTENT_URI,
-                FULL_PROJECTION,
+                null,
                 String.format("%s = ?", Database.Currencies.CODE),
                 new String[]{code},
                 null);
@@ -42,7 +40,7 @@ public class CurrencyDAO {
         List<Currency> currencies = new ArrayList<>();
 
         Cursor cursor = context.getContentResolver().query(Database.Merchants.CONTENT_URI.buildUpon().appendPath(String.valueOf(merchant.getId())).appendPath("currencies").build(),
-                FULL_PROJECTION,
+                null,
                 null,
                 null,
                 null);
