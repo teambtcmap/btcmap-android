@@ -22,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.widget.PopupWindow;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.MerchantsCache;
@@ -45,9 +46,13 @@ import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
 import com.bubelov.coins.util.Utils;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.ContentViewEvent;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -154,7 +159,12 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        merchantToolbar.setNavigationOnClickListener(v -> slidingLayout.collapsePanel());
+        merchantToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                slidingLayout.collapsePanel();
+            }
+        });
 
         amenity = savedInstanceState == null ? null : (Amenity) savedInstanceState.getSerializable(KEY_AMENITY);
 
@@ -204,6 +214,11 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         merchantsCache = merchantsCacheFragment.getMerchantsCache();
 
         drawerMenu.setAmenity(amenity);
+
+        Answers.getInstance().logContentView(new ContentViewEvent()
+                .putContentName("Map")
+                .putContentType("Screens")
+                .putContentId("Map"));
     }
 
     @Override
@@ -267,9 +282,12 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
                 popup.setHeight(drawer.getHeight() / 10 * 9);
                 popup.show();
 
-                popup.setOnDismissListener(() -> {
-                    merchantsCache.invalidate();
-                    reloadMerchants();
+                popup.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                    @Override
+                    public void onDismiss() {
+                        merchantsCache.invalidate();
+                        MapActivity.this.reloadMerchants();
+                    }
                 });
 
                 return true;
@@ -288,15 +306,18 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         handleIntent(intent);
     }
 
-    private void handleIntent(Intent intent) {
+    private void handleIntent(final Intent intent) {
         if (intent.getBooleanExtra(CLEAR_MERCHANT_NOTIFICATIONS_EXTRA, false)) {
             new MerchantNotificationDAO(this).deleteAll();
         }
 
         if (intent.hasExtra(MERCHANT_ID_EXTRA)) {
-            slidingLayout.postDelayed(() -> {
-                selectMerchant(intent.getLongExtra(MERCHANT_ID_EXTRA, -1), false);
-                slidingLayout.anchorPanel();
+            slidingLayout.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    MapActivity.this.selectMerchant(intent.getLongExtra(MERCHANT_ID_EXTRA, -1), false);
+                    slidingLayout.anchorPanel();
+                }
             }, 1);
         }
 
@@ -384,6 +405,13 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         getSupportActionBar().setTitle(title);
         this.amenity = amenity;
         reloadMerchants();
+
+        if (amenity != null) {
+            Answers.getInstance().logContentView(new ContentViewEvent()
+                    .putContentName("Amenity")
+                    .putContentType("Amenities")
+                    .putContentId(amenity.name()));
+        }
     }
 
     @Override
@@ -427,24 +455,32 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     }
 
     private void requestLocationUpdate() {
-        LocationRequest locationRequest = LocationRequest.create().setNumUpdates(1);
+        final LocationRequest locationRequest = LocationRequest.create().setNumUpdates(1);
         LocationSettingsRequest locationSettingsRequest = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build();
         PendingResult<LocationSettingsResult> locationSettingsResult = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, locationSettingsRequest);
 
-        locationSettingsResult.setResultCallback(result -> {
-            switch (result.getStatus().getStatusCode()) {
-                case LocationSettingsStatusCodes.SUCCESS:
-                    LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this::onUserLocationReceived);
-                    break;
+        locationSettingsResult.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult result) {
+                switch (result.getStatus().getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, new LocationListener() {
+                            @Override
+                            public void onLocationChanged(Location location) {
+                                onUserLocationReceived(location);
+                            }
+                        });
+                        break;
 
-                case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                    try {
-                        result.getStatus().startResolutionForResult(MapActivity.this, REQUEST_CHECK_LOCATION_SETTINGS);
-                    } catch (IntentSender.SendIntentException exception) {
-                        // Ignoring
-                    }
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        try {
+                            result.getStatus().startResolutionForResult(MapActivity.this, REQUEST_CHECK_LOCATION_SETTINGS);
+                        } catch (IntentSender.SendIntentException exception) {
+                            // Ignoring
+                        }
 
-                    break;
+                        break;
+                }
             }
         });
     }
@@ -468,9 +504,12 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
         map.setOnCameraChangeListener(merchantsManager);
         map.setOnMarkerClickListener(merchantsManager);
-        map.setOnMapClickListener(latLng -> {
-            slidingLayout.hidePanel();
-            selectedMerchant = null;
+        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                slidingLayout.hidePanel();
+                selectedMerchant = null;
+            }
         });
     }
 
@@ -500,7 +539,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
             return;
         }
 
-        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+        final LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
 
         if (merchantsCache.isInitialized()) {
             onMerchantsLoaded(merchantsCache.getMerchants(bounds, amenity));
@@ -668,9 +707,12 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
         @Override
         public void onPanelCollapsed(View view) {
-            slidingLayout.post(() -> {
-                slidingLayout.setPanelHeight(merchantDetails.getHeaderHeight());
-                actionButton.setTranslationY(-merchantDetails.getHeaderHeight());
+            slidingLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    slidingLayout.setPanelHeight(merchantDetails.getHeaderHeight());
+                    actionButton.setTranslationY(-merchantDetails.getHeaderHeight());
+                }
             });
 
             if (!wasExpanded) {
@@ -683,7 +725,12 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
             if (cameraBeforeSelection != null) {
                 map.animateCamera(cameraBeforeSelection, MAP_ANIMATION_DURATION_MILLIS, null);
                 cameraBeforeSelection = null;
-                merchantDetails.postDelayed(() -> reloadMerchants(), 1);
+                merchantDetails.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        reloadMerchants();
+                    }
+                }, 1);
             }
 
             actionButton.setImageResource(R.drawable.fab_location);

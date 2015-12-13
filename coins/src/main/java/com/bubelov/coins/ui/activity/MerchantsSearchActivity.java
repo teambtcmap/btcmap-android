@@ -15,6 +15,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.view.View;
 import android.widget.EditText;
 
 import com.bubelov.coins.R;
@@ -25,6 +26,8 @@ import com.bubelov.coins.ui.adapter.MerchantsSearchResultsAdapter;
 import com.bubelov.coins.util.DistanceComparator;
 import com.bubelov.coins.util.DistanceUnits;
 import com.bubelov.coins.util.TextWatcherAdapter;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.ContentViewEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,7 +67,12 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
 
         Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                supportFinishAfterTransition();
+            }
+        });
         getSupportActionBar().setTitle(null);
 
         RecyclerView resultsView = ButterKnife.findById(this, R.id.results);
@@ -82,6 +90,11 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
                 search(s.toString());
             }
         });
+
+        Answers.getInstance().logContentView(new ContentViewEvent()
+                .putContentName("Merchants search")
+                .putContentType("Screens")
+                .putContentId("Merchants search"));
     }
 
     @Override

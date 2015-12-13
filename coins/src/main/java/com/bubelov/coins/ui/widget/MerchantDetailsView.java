@@ -66,7 +66,7 @@ public class MerchantDetailsView extends FrameLayout {
         return header.getHeight();
     }
 
-    public void setMerchant(Merchant merchant) {
+    public void setMerchant(final Merchant merchant) {
         if (TextUtils.isEmpty(merchant.getName())) {
             name.setText(R.string.name_unknown);
         } else {
@@ -88,9 +88,26 @@ public class MerchantDetailsView extends FrameLayout {
         call.setEnabled(!TextUtils.isEmpty(merchant.getPhone()));
         openWebsite.setEnabled(!TextUtils.isEmpty(merchant.getWebsite()));
 
-        call.setOnClickListener(v -> Utils.call(getContext(), merchant.getPhone()));
-        openWebsite.setOnClickListener(v -> Utils.openUrl(getContext(), merchant.getWebsite()));
-        share.setOnClickListener(v -> Utils.share(getContext(), getResources().getString(R.string.share_merchant_message_title), getResources().getString(R.string.share_merchant_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", merchant.getLatitude(), merchant.getLongitude()))));
+        call.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Utils.call(getContext(), merchant.getPhone());
+            }
+        });
+
+        openWebsite.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Utils.openUrl(getContext(), merchant.getWebsite());
+            }
+        });
+
+        share.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Utils.share(getContext(), getResources().getString(R.string.share_merchant_message_title), getResources().getString(R.string.share_merchant_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", merchant.getLatitude(), merchant.getLongitude())));
+            }
+        });
 
         openingHours.setText(TextUtils.isEmpty(merchant.getOpeningHours()) ? getResources().getString(R.string.not_provided) : merchant.getOpeningHours());
 

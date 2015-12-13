@@ -18,7 +18,12 @@ public class MainThreadBus extends Bus {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             super.post(event);
         } else {
-            mHandler.post(() -> MainThreadBus.super.post(event));
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    MainThreadBus.super.post(event);
+                }
+            });
         }
     }
 }

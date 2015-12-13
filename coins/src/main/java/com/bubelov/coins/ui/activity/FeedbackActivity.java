@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.util.Utils;
@@ -27,7 +28,12 @@ public class FeedbackActivity extends AbstractActivity {
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                supportFinishAfterTransition();
+            }
+        });
     }
 
     @OnClick(R.id.osm_contributors)

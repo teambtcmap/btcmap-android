@@ -3,10 +3,13 @@ package com.bubelov.coins.ui.activity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.LinearLayout;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.ui.fragment.SettingsFragment;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.ContentViewEvent;
 
 import butterknife.ButterKnife;
 
@@ -25,6 +28,11 @@ public class SettingsActivity extends AbstractActivity {
                     .add(android.R.id.content, new SettingsFragment())
                     .commit();
         }
+
+        Answers.getInstance().logContentView(new ContentViewEvent()
+                .putContentName("Settings")
+                .putContentType("Screens")
+                .putContentId("Settings"));
     }
 
     @Override
@@ -33,7 +41,12 @@ public class SettingsActivity extends AbstractActivity {
 
         LinearLayout root = (LinearLayout) ButterKnife.findById(this, android.R.id.list).getParent().getParent().getParent();
         Toolbar toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_toolbar, root, false);
-        toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                supportFinishAfterTransition();
+            }
+        });
         root.addView(toolbar, 0);
     }
 }
