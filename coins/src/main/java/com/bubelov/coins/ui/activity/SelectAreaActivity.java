@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.SeekBar;
 
@@ -76,14 +77,6 @@ public class SelectAreaActivity extends AbstractActivity {
 
         setSupportActionBar(toolbar);
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveSelectedArea();
-                supportFinishAfterTransition();
-            }
-        });
-
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
         map.getUiSettings().setMyLocationButtonEnabled(false);
@@ -132,6 +125,15 @@ public class SelectAreaActivity extends AbstractActivity {
                 map.setPadding(0, 0, 0, bottomPanel.getHeight());
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            saveSelectedArea();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

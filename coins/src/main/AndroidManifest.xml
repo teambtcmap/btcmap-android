@@ -33,7 +33,7 @@
         <activity
             android:name=".ui.activity.MapActivity"
             android:launchMode="singleTop"
-            android:theme="@style/AppTheme.TransparentStatusBar">
+            android:theme="@style/AppTheme.MapActivity">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -44,18 +44,22 @@
 
         <activity
             android:name=".ui.activity.SettingsActivity"
-            android:label="@string/sa_title" />
+            android:label="@string/sa_title"
+            android:parentActivityName=".ui.activity.MapActivity" />
 
         <activity
             android:name=".ui.activity.SelectAreaActivity"
-            android:label="Location" />
+            android:label="Location"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".ui.activity.FeedbackActivity"
-            android:label="@string/fa_title" />
+            android:label="@string/fa_title"
+            android:parentActivityName=".ui.activity.MapActivity" />
 
         <activity
             android:name=".ui.activity.MerchantsSearchActivity"
+            android:label=""
             android:theme="@style/AppTheme.SearchActivity"
             android:windowSoftInputMode="stateVisible" />
 

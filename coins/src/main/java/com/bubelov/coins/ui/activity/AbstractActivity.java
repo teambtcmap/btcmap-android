@@ -3,6 +3,7 @@ package com.bubelov.coins.ui.activity;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.bubelov.coins.App;
@@ -31,6 +32,16 @@ public abstract class AbstractActivity extends AppCompatActivity implements Netw
         super.onResume();
         app.getBus().register(this);
         registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            supportFinishAfterTransition();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
