@@ -2,11 +2,11 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
-    <string name="api_url">http://91.121.144.57:3000/api/v1/</string>
+    <string name="api_url" translatable="false">http://91.121.144.57:3000/api/v1/</string>
 
-    <string name="database_name">coins.db</string>
+    <string name="database_name" translatable="false">coins.db</string>
     <integer name="database_version">15</integer>
 
-    <string name="google_api_key">AIzaSyCFlG9gZj-6ja-CQC6cAgvQXq6fs0foYVQ</string>
+    <string name="google_api_key" translatable="false">AIzaSyCFlG9gZj-6ja-CQC6cAgvQXq6fs0foYVQ</string>
 
 </resources>

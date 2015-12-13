@@ -273,7 +273,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
                 });
 
                 return true;
-            case R.id.search:
+            case R.id.action_search:
                 MerchantsSearchActivity.startForResult(this, map.getMyLocation(), REQUEST_FIND_MERCHANT);
                 return true;
             default:

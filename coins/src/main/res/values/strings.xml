@@ -3,14 +3,12 @@
 <resources>
 
     <string name="app_name">Coins</string>
-    <string name="ma_title">Coins</string>
 
-    <string name="search">Search</string>
+    <string name="action_search">Search</string>
 
     <string name="sa_title">Settings</string>
 
     <string name="action_filter">Filter</string>
-    <string name="action_done">Done</string>
 
     <string name="pref_category_notifications">Notifications</string>
 
@@ -46,7 +44,7 @@
     <string name="menu_item_car_washes">Car washes</string>
     <string name="menu_item_gas_stations">Gas stations</string>
     <string name="menu_item_hospitals">Hospitals</string>
-    <string name="menu_item_laundry_services">Laundry services</string>
+    <string name="menu_item_laundry_services">Laundry</string>
     <string name="menu_item_movies">Movies</string>
     <string name="menu_item_parking">Parking</string>
     <string name="menu_item_pharmacies">Pharmacies</string>
