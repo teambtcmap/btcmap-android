@@ -16,9 +16,13 @@ import com.bubelov.coins.Constants;
 import com.bubelov.coins.R;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.ContentViewEvent;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -72,9 +76,12 @@ public class SelectAreaActivity extends AbstractActivity {
 
         setSupportActionBar(toolbar);
 
-        toolbar.setNavigationOnClickListener(v -> {
-            saveSelectedArea();
-            supportFinishAfterTransition();
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveSelectedArea();
+                supportFinishAfterTransition();
+            }
         });
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
@@ -109,12 +116,22 @@ public class SelectAreaActivity extends AbstractActivity {
                         REQUEST_ACCESS_LOCATION);
             }
         }
+
+        Answers.getInstance().logContentView(new ContentViewEvent()
+                .putContentName("Area select")
+                .putContentType("Screens")
+                .putContentId("Area select"));
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        bottomPanel.post(() -> map.setPadding(0, 0, 0, bottomPanel.getHeight()));
+        bottomPanel.post(new Runnable() {
+            @Override
+            public void run() {
+                map.setPadding(0, 0, 0, bottomPanel.getHeight());
+            }
+        });
     }
 
     @Override
@@ -163,29 +180,35 @@ public class SelectAreaActivity extends AbstractActivity {
             moveArea(latLng);
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
         } else {
-            LocationRequest locationRequest = LocationRequest.create().setNumUpdates(1);
+            final LocationRequest locationRequest = LocationRequest.create().setNumUpdates(1);
             LocationSettingsRequest locationSettingsRequest = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build();
             PendingResult<LocationSettingsResult> locationSettingsResult = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, locationSettingsRequest);
 
-            locationSettingsResult.setResultCallback(result -> {
-                switch (result.getStatus().getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, location -> {
-                            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                            moveArea(latLng);
-                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
-                        });
+            locationSettingsResult.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+                @Override
+                public void onResult(LocationSettingsResult result) {
+                    switch (result.getStatus().getStatusCode()) {
+                        case LocationSettingsStatusCodes.SUCCESS:
+                            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, new LocationListener() {
+                                @Override
+                                public void onLocationChanged(Location location) {
+                                    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                                    SelectAreaActivity.this.moveArea(latLng);
+                                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
+                                }
+                            });
 
-                        break;
+                            break;
 
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        try {
-                            result.getStatus().startResolutionForResult(SelectAreaActivity.this, REQUEST_CHECK_LOCATION_SETTINGS);
-                        } catch (IntentSender.SendIntentException ignored) {
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            try {
+                                result.getStatus().startResolutionForResult(SelectAreaActivity.this, REQUEST_CHECK_LOCATION_SETTINGS);
+                            } catch (IntentSender.SendIntentException ignored) {
 
-                        }
+                            }
 
-                        break;
+                            break;
+                    }
                 }
             });
         }

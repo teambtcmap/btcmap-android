@@ -49,9 +49,14 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
 
     @Override
     public void onBindViewHolder(ResultViewHolder holder, int position) {
-        Merchant merchant = merchants.get(position);
+        final Merchant merchant = merchants.get(position);
         holder.name.setText(merchant.getName());
-        holder.itemView.setOnClickListener(v -> listener.onMerchantSelected(merchant));
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onMerchantSelected(merchant);
+            }
+        });
 
         if (userLocation == null) {
             holder.distance.setVisibility(View.GONE);

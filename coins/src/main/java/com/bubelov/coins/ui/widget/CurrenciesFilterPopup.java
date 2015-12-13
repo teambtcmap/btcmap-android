@@ -6,8 +6,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.widget.ListPopupWindow;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ListAdapter;
 
 import com.bubelov.coins.R;
@@ -44,24 +46,37 @@ public class CurrenciesFilterPopup extends ListPopupWindow {
                 new int[] { R.id.name, R.id.enabled },
                 0);
 
-        int idIndex = currencies.getColumnIndex(Database.Currencies._ID);
-        int showOnMapColumnIndex = currencies.getColumnIndex(Database.Currencies.SHOW_ON_MAP);
+        final int idIndex = currencies.getColumnIndex(Database.Currencies._ID);
+        final int showOnMapColumnIndex = currencies.getColumnIndex(Database.Currencies.SHOW_ON_MAP);
 
-        adapter.setViewBinder((view, cursor, columnIndex) -> {
-            if (columnIndex == showOnMapColumnIndex) {
-                CheckBox checkBox = (CheckBox) view;
-                checkBox.setOnCheckedChangeListener(null);
-                checkBox.setChecked(cursor.getInt(showOnMapColumnIndex) > 0);
-                long currencyId = cursor.getLong(idIndex);
-                checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> setShowOnMap(currencyId, isChecked));
+        adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            @Override
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+                if (columnIndex == showOnMapColumnIndex) {
+                    final CheckBox checkBox = (CheckBox) view;
+                    checkBox.setOnCheckedChangeListener(null);
+                    checkBox.setChecked(cursor.getInt(showOnMapColumnIndex) > 0);
+                    final long currencyId = cursor.getLong(idIndex);
+                    checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                            setShowOnMap(currencyId, isChecked);
+                        }
+                    });
 
-                ViewGroup parent = (ViewGroup) view.getParent();
-                parent.setOnClickListener(v -> checkBox.toggle());
+                    ViewGroup parent = (ViewGroup) view.getParent();
+                    parent.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            checkBox.toggle();
+                        }
+                    });
 
-                return true;
+                    return true;
+                }
+
+                return false;
             }
-
-            return false;
         });
 
         return adapter;

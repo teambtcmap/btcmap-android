@@ -149,9 +149,12 @@ public class DrawerMenu extends FrameLayout {
         initItemsToAmenities();
         App.getInstance().getBus().register(this);
 
-        checkExchangeRateButton.setOnClickListener(v -> {
-            checkExchangeRateButton.setClickable(false);
-            updateExchangeRate(true);
+        checkExchangeRateButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkExchangeRateButton.setClickable(false);
+                DrawerMenu.this.updateExchangeRate(true);
+            }
         });
 
         btc = CurrencyDAO.query(getContext(), "BTC");
@@ -161,7 +164,12 @@ public class DrawerMenu extends FrameLayout {
         updateExchangeRate(false);
 
         for (int id : ITEMS) {
-            findViewById(id).setOnClickListener(v -> setSelected(v.getId()));
+            findViewById(id).setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    setSelected(v.getId());
+                }
+            });
         }
     }
 
