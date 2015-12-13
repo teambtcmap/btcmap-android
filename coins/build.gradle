@@ -14,9 +14,9 @@ android {
     signingConfigs {
         release {
             keyAlias 'coins'
-            keyPassword 'firmerry1415'
+            keyPassword ''
             storeFile file('/Users/Igor/Dropbox/projects/coins/keystore.jks')
-            storePassword 'firmerry1415'
+            storePassword ''
         }
     }
     buildTypes {
