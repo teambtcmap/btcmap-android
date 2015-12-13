@@ -3,14 +3,12 @@
 <resources>
 
     <string name="app_name">Coins</string>
-    <string name="ma_title">Coins</string>
 
-    <string name="search">Поиск</string>
+    <string name="action_search">Поиск</string>
 
     <string name="sa_title">Настройки</string>
 
     <string name="action_filter">Фильтр</string>
-    <string name="action_done">Готово</string>
 
     <string name="pref_category_notifications">Уведомления</string>
 
