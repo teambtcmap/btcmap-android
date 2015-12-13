@@ -67,13 +67,6 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
 
         Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                supportFinishAfterTransition();
-            }
-        });
-        getSupportActionBar().setTitle(null);
 
         RecyclerView resultsView = ButterKnife.findById(this, R.id.results);
         resultsView.setLayoutManager(new LinearLayoutManager(this));

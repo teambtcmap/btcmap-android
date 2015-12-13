@@ -3,13 +3,10 @@ package com.bubelov.coins.ui.activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.util.Utils;
 
-import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -19,21 +16,11 @@ import butterknife.OnClick;
  */
 
 public class FeedbackActivity extends AbstractActivity {
-    @Bind(R.id.toolbar) Toolbar toolbar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feedback);
         ButterKnife.bind(this);
-
-        setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                supportFinishAfterTransition();
-            }
-        });
     }
 
     @OnClick(R.id.osm_contributors)

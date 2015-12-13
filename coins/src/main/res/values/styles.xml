@@ -2,17 +2,21 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
 
-        <item name="windowActionBar">false</item>
-
+        <item name="actionBarTheme">@style/ToolbarTheme</item>
         <item name="searchViewStyle">@style/AppTheme.SearchView</item>
     </style>
 
-    <style name="AppTheme.SearchActivity" parent="AppTheme">
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.SearchActivity" parent="AppTheme.NoActionBar">
         <item name="colorPrimaryDark">#B3B3B3</item>
     </style>
 
@@ -20,7 +24,9 @@
         <item name="suggestionRowLayout">@layout/list_item_search_suggestion</item>
     </style>
 
-    <style name="AppTheme.TransparentStatusBar" parent="AppTheme" />
+    <style name="AppTheme.MapActivity" parent="AppTheme.NoActionBar">
+        <item name="android:statusBarColor" tools:targetApi="lollipop">@android:color/transparent</item>
+    </style>
 
     <style name="Toolbar">
         <item name="android:layout_width">match_parent</item>
@@ -35,7 +41,7 @@
         <item name="android:theme">@style/SearchToolbarTheme</item>
     </style>
 
-    <style name="ToolbarTheme" parent="AppTheme">
+    <style name="ToolbarTheme">
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/white</item>
     </style>
