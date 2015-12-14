@@ -2,7 +2,9 @@ package com.bubelov.coins.ui.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -49,6 +51,7 @@ import com.bubelov.coins.util.Utils;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ContentViewEvent;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
@@ -90,6 +93,8 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     private static final int REQUEST_FIND_MERCHANT = 10;
 
     private static final int REQUEST_ACCESS_LOCATION = 20;
+
+    private static final int REQUEST_RESOLVE_PLAY_SERVICES = 30;
 
     private static final int MAP_ANIMATION_DURATION_MILLIS = 350;
 
@@ -174,46 +179,24 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         DrawerMenu drawerMenu = ButterKnife.findById(this, R.id.left_drawer);
         drawerMenu.setItemSelectedListener(this);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        map = mapFragment.getMap();
-        map.setMyLocationEnabled(true);
-        map.getUiSettings().setMyLocationButtonEnabled(false);
-        map.getUiSettings().setZoomControlsEnabled(false);
-        map.getUiSettings().setCompassEnabled(false);
-        map.getUiSettings().setMapToolbarEnabled(false);
-
-        initClustering();
-
-        map.setOnCameraChangeListener(new OnCameraChangeMultiplexer(merchantsManager, new CameraChangeListener()));
-
-        markersCache = new MapMarkersCache();
-
         firstLaunch = savedInstanceState == null;
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            initLocation();
+        int playServicesAvailabilityResult = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+
+        if (playServicesAvailabilityResult == ConnectionResult.SUCCESS) {
+            onPlayServicesAvailable();
         } else {
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), DEFAULT_ZOOM));
+            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(playServicesAvailabilityResult, this, REQUEST_RESOLVE_PLAY_SERVICES);
 
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        REQUEST_ACCESS_LOCATION);
-            } else {
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), DEFAULT_ZOOM));
-            }
+            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    supportFinishAfterTransition();
+                }
+            });
+
+            dialog.show();
         }
-
-        MerchantsCacheFragment merchantsCacheFragment = (MerchantsCacheFragment) getSupportFragmentManager().findFragmentByTag(MerchantsCacheFragment.TAG);
-
-        if (merchantsCacheFragment == null) {
-            merchantsCacheFragment = new MerchantsCacheFragment();
-            getSupportFragmentManager().beginTransaction().add(merchantsCacheFragment, MerchantsCacheFragment.TAG);
-        }
-
-        merchantsCache = merchantsCacheFragment.getMerchantsCache();
-
-        drawerMenu.setAmenity(amenity);
 
         Answers.getInstance().logContentView(new ContentViewEvent()
                 .putContentName("Map")
@@ -350,6 +333,14 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), DEFAULT_ZOOM));
         }
 
+        if (requestCode == REQUEST_RESOLVE_PLAY_SERVICES) {
+            supportFinishAfterTransition();
+
+            if (resultCode == RESULT_OK) {
+                startActivity(new Intent(this, MapActivity.class));
+            }
+        }
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -424,6 +415,48 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     public void onFeedbackSelected() {
         drawer.closeDrawer(Gravity.LEFT);
         startActivity(new Intent(this, FeedbackActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
+    }
+
+    private void onPlayServicesAvailable() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        map = mapFragment.getMap();
+        map.setMyLocationEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(false);
+        map.getUiSettings().setZoomControlsEnabled(false);
+        map.getUiSettings().setCompassEnabled(false);
+        map.getUiSettings().setMapToolbarEnabled(false);
+
+        initClustering();
+
+        map.setOnCameraChangeListener(new OnCameraChangeMultiplexer(merchantsManager, new CameraChangeListener()));
+
+        markersCache = new MapMarkersCache();
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            initLocation();
+        } else {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), DEFAULT_ZOOM));
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_ACCESS_LOCATION);
+            } else {
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), DEFAULT_ZOOM));
+            }
+        }
+
+        MerchantsCacheFragment merchantsCacheFragment = (MerchantsCacheFragment) getSupportFragmentManager().findFragmentByTag(MerchantsCacheFragment.TAG);
+
+        if (merchantsCacheFragment == null) {
+            merchantsCacheFragment = new MerchantsCacheFragment();
+            getSupportFragmentManager().beginTransaction().add(merchantsCacheFragment, MerchantsCacheFragment.TAG);
+        }
+
+        merchantsCache = merchantsCacheFragment.getMerchantsCache();
+
+        DrawerMenu drawerMenu = ButterKnife.findById(this, R.id.left_drawer);
+        drawerMenu.setAmenity(amenity);
     }
 
     private void showLoader() {
@@ -515,11 +548,19 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     @Subscribe
     public void onDatabaseSyncStarted(DatabaseSyncStartedEvent event) {
+        if (map == null) {
+            return;
+        }
+
         setDatabaseSyncing(true);
     }
 
     @Subscribe
     public void onDatabaseSyncFinished(MerchantsSyncFinishedEvent event) {
+        if (map == null) {
+            return;
+        }
+
         setDatabaseSyncing(false);
 
         if (event.isDataChanged()) {
@@ -530,6 +571,10 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     @Subscribe
     public void onDatabaseSyncFailed(DatabaseSyncFailedEvent event) {
+        if (map == null) {
+            return;
+        }
+
         setDatabaseSyncing(false);
     }
 
