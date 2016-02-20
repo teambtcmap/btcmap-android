@@ -355,6 +355,8 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     }
 
     private void initLocation() {
+        map.setMyLocationEnabled(true);
+
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(new LocationApiConnectionCallbacks())
@@ -420,7 +422,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     private void onPlayServicesAvailable() {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
-        map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(false);
         map.getUiSettings().setZoomControlsEnabled(false);
         map.getUiSettings().setCompassEnabled(false);
