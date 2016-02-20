@@ -12,10 +12,10 @@ import android.preference.PreferenceScreen;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.widget.Toast;
 
-import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dao.CurrencyDAO;
 import com.bubelov.coins.database.Database;
+import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.service.rates.ExchangeRatesService;
 import com.bubelov.coins.service.sync.merchants.UserNotificationController;
 import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
@@ -58,9 +58,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
 
         if (preference.getKey().equals("pref_test_notification")) {
-            SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
+            SQLiteDatabase db = Database.get();
 
-            Cursor cursor = db.rawQuery("select count(_id) from " + Database.Merchants.TABLE_NAME, null);
+            Cursor cursor = db.rawQuery("select count(_id) from " + DbContract.Merchants.TABLE_NAME, null);
 
             if (cursor.moveToNext()) {
                 int merchantsCount = cursor.getInt(0);
@@ -68,8 +68,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
                 Random random = new Random(System.currentTimeMillis());
 
-                cursor = db.query(Database.Merchants.TABLE_NAME,
-                        new String[] { Database.Merchants._ID, Database.Merchants.NAME },
+                cursor = db.query(DbContract.Merchants.TABLE_NAME,
+                        new String[] { DbContract.Merchants._ID, DbContract.Merchants.NAME },
                         "_id = ?",
                         new String[] { String.valueOf(random.nextInt(merchantsCount + 1)) },
                         null,
@@ -77,8 +77,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                         null);
 
                 if (cursor.moveToNext()) {
-                    long id = cursor.getLong(cursor.getColumnIndex(Database.Merchants._ID));
-                    String name = cursor.getString(cursor.getColumnIndex(Database.Merchants.NAME));
+                    long id = cursor.getLong(cursor.getColumnIndex(DbContract.Merchants._ID));
+                    String name = cursor.getString(cursor.getColumnIndex(DbContract.Merchants.NAME));
                     new UserNotificationController(getActivity()).notifyUser(id, name);
                 }
 
@@ -91,15 +91,15 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
 
         if (preference.getKey().equals("pref_remove_last_merchant")) {
-            SQLiteDatabase db = App.getInstance().getDatabaseHelper().getWritableDatabase();
+            SQLiteDatabase db = Database.get();
 
-            Cursor cursor = db.query(Database.Merchants.TABLE_NAME, new String[] { Database.Merchants._ID }, null, null, null, null, Database.Merchants._UPDATED_AT + " DESC", "1");
+            Cursor cursor = db.query(DbContract.Merchants.TABLE_NAME, new String[] { DbContract.Merchants._ID }, null, null, null, null, DbContract.Merchants._UPDATED_AT + " DESC", "1");
 
             if (cursor.moveToNext()) {
                 long id = cursor.getLong(0);
                 cursor.close();
 
-                int rowsAffected = db.delete(Database.Merchants.TABLE_NAME, Database.Merchants._ID + " = ?", new String[] { String.valueOf(id) } );
+                int rowsAffected = db.delete(DbContract.Merchants.TABLE_NAME, DbContract.Merchants._ID + " = ?", new String[] { String.valueOf(id) } );
 
                 if (rowsAffected > 0) {
                     Toast.makeText(getActivity(), "Removed!", Toast.LENGTH_SHORT).show();

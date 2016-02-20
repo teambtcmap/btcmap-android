@@ -13,7 +13,7 @@ import android.widget.CompoundButton;
 import android.widget.ListAdapter;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.database.Database;
+import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.util.Utils;
 
 /**
@@ -33,21 +33,21 @@ public class CurrenciesFilterPopup extends ListPopupWindow {
     }
 
     public ListAdapter getAdapter() {
-        Cursor currencies = context.getContentResolver().query(Database.Currencies.CONTENT_URI,
-                new String[]{Database.Currencies._ID, Database.Currencies.NAME, Database.Currencies.SHOW_ON_MAP},
-                String.format("%s = ?", Database.Currencies.CRYPTO),
+        Cursor currencies = context.getContentResolver().query(DbContract.Currencies.CONTENT_URI,
+                new String[]{DbContract.Currencies._ID, DbContract.Currencies.NAME, DbContract.Currencies.SHOW_ON_MAP},
+                String.format("%s = ?", DbContract.Currencies.CRYPTO),
                 new String[]{String.valueOf(1)},
                 null);
 
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(context,
                 R.layout.list_item_currency_filter,
                 currencies,
-                new String[] { Database.Currencies.NAME, Database.Currencies.SHOW_ON_MAP },
+                new String[] { DbContract.Currencies.NAME, DbContract.Currencies.SHOW_ON_MAP },
                 new int[] { R.id.name, R.id.enabled },
                 0);
 
-        final int idIndex = currencies.getColumnIndex(Database.Currencies._ID);
-        final int showOnMapColumnIndex = currencies.getColumnIndex(Database.Currencies.SHOW_ON_MAP);
+        final int idIndex = currencies.getColumnIndex(DbContract.Currencies._ID);
+        final int showOnMapColumnIndex = currencies.getColumnIndex(DbContract.Currencies.SHOW_ON_MAP);
 
         adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             @Override
@@ -84,7 +84,7 @@ public class CurrenciesFilterPopup extends ListPopupWindow {
 
     private void setShowOnMap(long currencyId, boolean showOnMap) {
         ContentValues values = new ContentValues();
-        values.put(Database.Currencies.SHOW_ON_MAP, showOnMap ? 1 : 0);
-        context.getContentResolver().update(ContentUris.withAppendedId(Database.Currencies.CONTENT_URI, currencyId), values, null, null);
+        values.put(DbContract.Currencies.SHOW_ON_MAP, showOnMap ? 1 : 0);
+        context.getContentResolver().update(ContentUris.withAppendedId(DbContract.Currencies.CONTENT_URI, currencyId), values, null, null);
     }
 }

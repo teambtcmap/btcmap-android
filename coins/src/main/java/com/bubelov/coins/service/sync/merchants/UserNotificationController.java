@@ -12,10 +12,10 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
-import com.bubelov.coins.App;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dao.MerchantNotificationDAO;
 import com.bubelov.coins.database.Database;
+import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
@@ -58,10 +58,10 @@ public class UserNotificationController {
             return false;
         }
 
-        SQLiteDatabase db = App.getInstance().getDatabaseHelper().getReadableDatabase();
+        SQLiteDatabase db = Database.get();
 
-        Cursor cursor = db.query(Database.Merchants.TABLE_NAME,
-                new String[] { Database.Merchants._ID },
+        Cursor cursor = db.query(DbContract.Merchants.TABLE_NAME,
+                new String[] { DbContract.Merchants._ID },
                 "_id = ?",
                 new String[] { String.valueOf(merchant.getId()) },
                 null,

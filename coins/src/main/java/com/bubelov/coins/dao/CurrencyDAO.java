@@ -4,7 +4,7 @@ import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.database.Cursor;
 
-import com.bubelov.coins.database.Database;
+import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
 
@@ -20,9 +20,9 @@ import java.util.List;
 
 public class CurrencyDAO {
     public static Currency query(Context context, String code) {
-        Cursor cursor = context.getContentResolver().query(Database.Currencies.CONTENT_URI,
+        Cursor cursor = context.getContentResolver().query(DbContract.Currencies.CONTENT_URI,
                 null,
-                String.format("%s = ?", Database.Currencies.CODE),
+                String.format("%s = ?", DbContract.Currencies.CODE),
                 new String[]{code},
                 null);
 
@@ -39,7 +39,7 @@ public class CurrencyDAO {
     public static List<Currency> query(Context context, Merchant merchant) {
         List<Currency> currencies = new ArrayList<>();
 
-        Cursor cursor = context.getContentResolver().query(Database.Merchants.CONTENT_URI.buildUpon().appendPath(String.valueOf(merchant.getId())).appendPath("currencies").build(),
+        Cursor cursor = context.getContentResolver().query(DbContract.Merchants.CONTENT_URI.buildUpon().appendPath(String.valueOf(merchant.getId())).appendPath("currencies").build(),
                 null,
                 null,
                 null,
@@ -60,27 +60,27 @@ public class CurrencyDAO {
 
         for (Currency currency : currencies) {
             operations.add(ContentProviderOperation
-                    .newInsert(Database.Currencies.CONTENT_URI)
-                    .withValue(Database.Currencies._ID, currency.getId())
-                    .withValue(Database.Currencies._CREATED_AT, currency.getCreatedAt().getMillis())
-                    .withValue(Database.Currencies._UPDATED_AT, currency.getUpdatedAt().getMillis())
-                    .withValue(Database.Currencies.NAME, currency.getName())
-                    .withValue(Database.Currencies.CODE, currency.getCode())
-                    .withValue(Database.Currencies.CRYPTO, currency.isCrypto())
+                    .newInsert(DbContract.Currencies.CONTENT_URI)
+                    .withValue(DbContract.Currencies._ID, currency.getId())
+                    .withValue(DbContract.Currencies._CREATED_AT, currency.getCreatedAt().getMillis())
+                    .withValue(DbContract.Currencies._UPDATED_AT, currency.getUpdatedAt().getMillis())
+                    .withValue(DbContract.Currencies.NAME, currency.getName())
+                    .withValue(DbContract.Currencies.CODE, currency.getCode())
+                    .withValue(DbContract.Currencies.CRYPTO, currency.isCrypto())
                     .build());
         }
 
-        context.getContentResolver().applyBatch(Database.AUTHORITY, operations);
+        context.getContentResolver().applyBatch(DbContract.AUTHORITY, operations);
     }
 
     private static Currency getCurrency(Cursor cursor) {
         Currency currency = new Currency();
-        currency.setId(cursor.getLong(cursor.getColumnIndex(Database.Currencies._ID)));
-        currency.setName(cursor.getString(cursor.getColumnIndex(Database.Currencies.NAME)));
-        currency.setCode(cursor.getString(cursor.getColumnIndex(Database.Currencies.CODE)));
-        currency.setCrypto(cursor.getInt(cursor.getColumnIndex(Database.Currencies.CRYPTO)) == 1);
-        currency.setCreatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(Database.Currencies._CREATED_AT))));
-        currency.setUpdatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(Database.Currencies._UPDATED_AT))));
+        currency.setId(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._ID)));
+        currency.setName(cursor.getString(cursor.getColumnIndex(DbContract.Currencies.NAME)));
+        currency.setCode(cursor.getString(cursor.getColumnIndex(DbContract.Currencies.CODE)));
+        currency.setCrypto(cursor.getInt(cursor.getColumnIndex(DbContract.Currencies.CRYPTO)) == 1);
+        currency.setCreatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._CREATED_AT))));
+        currency.setUpdatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._UPDATED_AT))));
         return currency;
     }
 }

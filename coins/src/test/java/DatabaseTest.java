@@ -3,7 +3,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.bubelov.coins.BuildConfig;
-import com.bubelov.coins.database.DatabaseHelper;
+import com.bubelov.coins.database.DbHelper;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,7 +24,7 @@ import java.util.Random;
 public class DatabaseTest {
     @Test
     public void testMerchantsRetrieval() {
-        SQLiteOpenHelper databaseHelper = new DatabaseHelper(RuntimeEnvironment.application);
+        SQLiteOpenHelper databaseHelper = new DbHelper(RuntimeEnvironment.application);
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
 
         Random random = new Random(666);

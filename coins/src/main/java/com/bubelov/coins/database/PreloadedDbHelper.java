@@ -10,8 +10,8 @@ import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
  * Date: 9/22/15 10:00 PM
  */
 
-public class PreloadedDatabaseHelper extends SQLiteAssetHelper {
-    public PreloadedDatabaseHelper(Context context) {
+public class PreloadedDbHelper extends SQLiteAssetHelper {
+    public PreloadedDbHelper(Context context) {
         super(context,
                 context.getResources().getString(R.string.database_name),
                 null,
