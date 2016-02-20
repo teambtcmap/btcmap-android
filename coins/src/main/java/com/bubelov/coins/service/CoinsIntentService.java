@@ -1,7 +1,6 @@
 package com.bubelov.coins.service;
 
 import android.app.IntentService;
-import android.database.sqlite.SQLiteOpenHelper;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.App;
 import com.squareup.otto.Bus;
@@ -25,9 +24,5 @@ public abstract class CoinsIntentService extends IntentService {
 
     protected CoinsApi getApi() {
         return app.getApi();
-    }
-
-    protected SQLiteOpenHelper getDatabaseHelper() {
-        return app.getDatabaseHelper();
     }
 }

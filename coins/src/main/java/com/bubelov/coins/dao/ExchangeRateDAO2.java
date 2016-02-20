@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 
-import com.bubelov.coins.database.Database;
+import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.ExchangeRate;
 
@@ -21,21 +21,21 @@ public class ExchangeRateDAO2 {
             return null;
         }
 
-        Cursor cursor = context.getContentResolver().query(Database.ExchangeRates.CONTENT_URI,
-                new String[]{Database.ExchangeRates._ID, Database.ExchangeRates.VALUE, Database.ExchangeRates._CREATED_AT, Database.ExchangeRates._UPDATED_AT},
-                String.format("%s = ? and %s = ?", Database.ExchangeRates.SOURCE_CURRENCY_ID, Database.ExchangeRates.TARGET_CURRENCY_ID),
+        Cursor cursor = context.getContentResolver().query(DbContract.ExchangeRates.CONTENT_URI,
+                new String[]{DbContract.ExchangeRates._ID, DbContract.ExchangeRates.VALUE, DbContract.ExchangeRates._CREATED_AT, DbContract.ExchangeRates._UPDATED_AT},
+                String.format("%s = ? and %s = ?", DbContract.ExchangeRates.SOURCE_CURRENCY_ID, DbContract.ExchangeRates.TARGET_CURRENCY_ID),
                 new String[]{String.valueOf(sourceCurrency.getId()), String.valueOf(targetCurrency.getId())},
-                Database.ExchangeRates._UPDATED_AT + " DESC");
+                DbContract.ExchangeRates._UPDATED_AT + " DESC");
 
         try {
             if (cursor.moveToNext()) {
                 ExchangeRate rate = new ExchangeRate();
-                rate.setId(cursor.getLong(cursor.getColumnIndex(Database.ExchangeRates._ID)));
+                rate.setId(cursor.getLong(cursor.getColumnIndex(DbContract.ExchangeRates._ID)));
                 rate.setSourceCurrencyId(sourceCurrency.getId());
                 rate.setTargetCurrencyId(targetCurrency.getId());
-                rate.setValue(cursor.getFloat(cursor.getColumnIndex(Database.ExchangeRates.VALUE)));
-                rate.setCreatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(Database.Currencies._CREATED_AT))));
-                rate.setUpdatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(Database.Currencies._UPDATED_AT))));
+                rate.setValue(cursor.getFloat(cursor.getColumnIndex(DbContract.ExchangeRates.VALUE)));
+                rate.setCreatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._CREATED_AT))));
+                rate.setUpdatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._UPDATED_AT))));
 
                 return rate;
             } else {
@@ -48,12 +48,12 @@ public class ExchangeRateDAO2 {
 
     public static void insert(Context context, ExchangeRate exchangeRate) {
         ContentValues values = new ContentValues();
-        values.put(Database.ExchangeRates.SOURCE_CURRENCY_ID, exchangeRate.getSourceCurrencyId());
-        values.put(Database.ExchangeRates.TARGET_CURRENCY_ID, exchangeRate.getTargetCurrencyId());
-        values.put(Database.ExchangeRates.VALUE, exchangeRate.getValue());
-        values.put(Database.ExchangeRates._CREATED_AT, exchangeRate.getCreatedAt().getMillis());
-        values.put(Database.ExchangeRates._UPDATED_AT, exchangeRate.getUpdatedAt().getMillis());
+        values.put(DbContract.ExchangeRates.SOURCE_CURRENCY_ID, exchangeRate.getSourceCurrencyId());
+        values.put(DbContract.ExchangeRates.TARGET_CURRENCY_ID, exchangeRate.getTargetCurrencyId());
+        values.put(DbContract.ExchangeRates.VALUE, exchangeRate.getValue());
+        values.put(DbContract.ExchangeRates._CREATED_AT, exchangeRate.getCreatedAt().getMillis());
+        values.put(DbContract.ExchangeRates._UPDATED_AT, exchangeRate.getUpdatedAt().getMillis());
 
-        context.getContentResolver().insert(Database.ExchangeRates.CONTENT_URI, values);
+        context.getContentResolver().insert(DbContract.ExchangeRates.CONTENT_URI, values);
     }
 }

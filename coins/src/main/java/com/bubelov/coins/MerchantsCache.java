@@ -4,7 +4,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
-import com.bubelov.coins.database.Database;
+import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Merchant;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -72,10 +72,10 @@ public class MerchantsCache {
 
             while (cursor.moveToNext()) {
                 Merchant merchant = new Merchant();
-                merchant.setId(cursor.getLong(cursor.getColumnIndex(Database.Merchants._ID)));
-                merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LATITUDE)));
-                merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LONGITUDE)));
-                merchant.setAmenity(cursor.getString(cursor.getColumnIndex(Database.Merchants.AMENITY)));
+                merchant.setId(cursor.getLong(cursor.getColumnIndex(DbContract.Merchants._ID)));
+                merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Merchants.LATITUDE)));
+                merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Merchants.LONGITUDE)));
+                merchant.setAmenity(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.AMENITY)));
                 newestData.add(merchant);
             }
 

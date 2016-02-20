@@ -1,11 +1,9 @@
 package com.bubelov.coins;
 
 import android.app.Application;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.api.CoinsApi;
-import com.bubelov.coins.database.DatabaseFactory;
 import com.bubelov.coins.serializer.DateTimeDeserializer;
 import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 import com.bubelov.coins.util.MainThreadBus;
@@ -34,16 +32,13 @@ public class App extends Application {
 
     private CoinsApi api;
 
-    private SQLiteOpenHelper databaseHelper;
-
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics());
         instance = this;
+        Fabric.with(this, new Crashlytics());
         bus = new MainThreadBus();
         initApi();
-        databaseHelper = DatabaseFactory.newHelper(this);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
 
         startService(MerchantsSyncService.makeIntent(this, false));
@@ -59,10 +54,6 @@ public class App extends Application {
 
     public CoinsApi getApi() {
         return api;
-    }
-
-    public SQLiteOpenHelper getDatabaseHelper() {
-        return databaseHelper;
     }
 
     private void initApi() {

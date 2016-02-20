@@ -15,12 +15,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.view.View;
 import android.widget.EditText;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.dao.MerchantDAO;
-import com.bubelov.coins.database.Database;
+import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.ui.adapter.MerchantsSearchResultsAdapter;
 import com.bubelov.coins.util.DistanceComparator;
@@ -95,9 +94,9 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
         String query = args == null ? "" : args.getString(QUERY_KEY);
 
         return new CursorLoader(this,
-                Database.Merchants.CONTENT_URI,
+                DbContract.Merchants.CONTENT_URI,
                 null,
-                String.format("%s like ? or %s like ?", Database.Merchants.NAME, Database.Merchants.AMENITY),
+                String.format("%s like ? or %s like ?", DbContract.Merchants.NAME, DbContract.Merchants.AMENITY),
                 new String[]{"%" + query + "%", "%" + query + "%"},
                 null);
     }

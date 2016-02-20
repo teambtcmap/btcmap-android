@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 
-import com.bubelov.coins.database.Database;
+import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
 
@@ -20,9 +20,9 @@ import java.util.List;
 
 public class MerchantDAO {
     public static Merchant query(Context context, long id) {
-        Cursor cursor = context.getContentResolver().query(Database.Merchants.CONTENT_URI,
+        Cursor cursor = context.getContentResolver().query(DbContract.Merchants.CONTENT_URI,
                 null,
-                String.format("%s = ?", Database.Merchants._ID),
+                String.format("%s = ?", DbContract.Merchants._ID),
                 new String[]{String.valueOf(id)},
                 null);
 
@@ -38,17 +38,17 @@ public class MerchantDAO {
 
     public static Merchant getMerchant(Cursor cursor) {
         Merchant merchant = new Merchant();
-        merchant.setId(cursor.getLong(cursor.getColumnIndex(Database.Currencies._ID)));
-        merchant.setName(cursor.getString(cursor.getColumnIndex(Database.Merchants.NAME)));
-        merchant.setDescription(cursor.getString(cursor.getColumnIndex(Database.Merchants.DESCRIPTION)));
-        merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LATITUDE)));
-        merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(Database.Merchants.LONGITUDE)));
-        merchant.setAmenity(cursor.getString(cursor.getColumnIndex(Database.Merchants.AMENITY)));
-        merchant.setPhone(cursor.getString(cursor.getColumnIndex(Database.Merchants.PHONE)));
-        merchant.setWebsite(cursor.getString(cursor.getColumnIndex(Database.Merchants.WEBSITE)));
-        merchant.setOpeningHours(cursor.getString(cursor.getColumnIndex(Database.Merchants.OPENING_HOURS)));
-        merchant.setCreatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(Database.Merchants._CREATED_AT))));
-        merchant.setUpdatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(Database.Merchants._UPDATED_AT))));
+        merchant.setId(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._ID)));
+        merchant.setName(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.NAME)));
+        merchant.setDescription(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.DESCRIPTION)));
+        merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Merchants.LATITUDE)));
+        merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Merchants.LONGITUDE)));
+        merchant.setAmenity(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.AMENITY)));
+        merchant.setPhone(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.PHONE)));
+        merchant.setWebsite(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.WEBSITE)));
+        merchant.setOpeningHours(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.OPENING_HOURS)));
+        merchant.setCreatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Merchants._CREATED_AT))));
+        merchant.setUpdatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Merchants._UPDATED_AT))));
         return merchant;
     }
 
@@ -60,30 +60,30 @@ public class MerchantDAO {
             Merchant merchant = merchants.get(i);
 
             ContentValues merchantValues = new ContentValues();
-            merchantValues.put(Database.Merchants._ID, merchant.getId());
-            merchantValues.put(Database.Merchants._CREATED_AT, merchant.getCreatedAt().getMillis());
-            merchantValues.put(Database.Merchants._UPDATED_AT, merchant.getUpdatedAt().getMillis());
-            merchantValues.put(Database.Merchants.LATITUDE, merchant.getLatitude());
-            merchantValues.put(Database.Merchants.LONGITUDE, merchant.getLongitude());
-            merchantValues.put(Database.Merchants.NAME, merchant.getName());
-            merchantValues.put(Database.Merchants.DESCRIPTION, merchant.getDescription());
-            merchantValues.put(Database.Merchants.PHONE, merchant.getPhone());
-            merchantValues.put(Database.Merchants.WEBSITE, merchant.getWebsite());
-            merchantValues.put(Database.Merchants.AMENITY, merchant.getAmenity());
-            merchantValues.put(Database.Merchants.OPENING_HOURS, merchant.getOpeningHours());
-            merchantValues.put(Database.Merchants.ADDRESS, merchant.getAddress());
+            merchantValues.put(DbContract.Merchants._ID, merchant.getId());
+            merchantValues.put(DbContract.Merchants._CREATED_AT, merchant.getCreatedAt().getMillis());
+            merchantValues.put(DbContract.Merchants._UPDATED_AT, merchant.getUpdatedAt().getMillis());
+            merchantValues.put(DbContract.Merchants.LATITUDE, merchant.getLatitude());
+            merchantValues.put(DbContract.Merchants.LONGITUDE, merchant.getLongitude());
+            merchantValues.put(DbContract.Merchants.NAME, merchant.getName());
+            merchantValues.put(DbContract.Merchants.DESCRIPTION, merchant.getDescription());
+            merchantValues.put(DbContract.Merchants.PHONE, merchant.getPhone());
+            merchantValues.put(DbContract.Merchants.WEBSITE, merchant.getWebsite());
+            merchantValues.put(DbContract.Merchants.AMENITY, merchant.getAmenity());
+            merchantValues.put(DbContract.Merchants.OPENING_HOURS, merchant.getOpeningHours());
+            merchantValues.put(DbContract.Merchants.ADDRESS, merchant.getAddress());
 
             merchantsValues[i] = merchantValues;
 
             for (Currency currency : merchant.getCurrencies()) {
                 ContentValues currencyMerchantValues = new ContentValues();
-                currencyMerchantValues.put(Database.CurrenciesMerchants.CURRENCY_ID, currency.getId());
-                currencyMerchantValues.put(Database.CurrenciesMerchants.MERCHANT_ID, merchant.getId());
+                currencyMerchantValues.put(DbContract.CurrenciesMerchants.CURRENCY_ID, currency.getId());
+                currencyMerchantValues.put(DbContract.CurrenciesMerchants.MERCHANT_ID, merchant.getId());
                 currenciesMerchantsValues.add(currencyMerchantValues);
             }
         }
 
-        context.getContentResolver().bulkInsert(Database.Merchants.CONTENT_URI, merchantsValues);
-        context.getContentResolver().bulkInsert(Database.CurrenciesMerchants.CONTENT_URI, currenciesMerchantsValues.toArray(new ContentValues[currenciesMerchantsValues.size()]));
+        context.getContentResolver().bulkInsert(DbContract.Merchants.CONTENT_URI, merchantsValues);
+        context.getContentResolver().bulkInsert(DbContract.CurrenciesMerchants.CONTENT_URI, currenciesMerchantsValues.toArray(new ContentValues[currenciesMerchantsValues.size()]));
     }
 }

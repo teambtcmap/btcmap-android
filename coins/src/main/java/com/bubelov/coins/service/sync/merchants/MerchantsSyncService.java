@@ -12,10 +12,11 @@ import com.bubelov.coins.App;
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.dao.CurrencyDAO;
 import com.bubelov.coins.dao.MerchantDAO;
+import com.bubelov.coins.database.Database;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.DatabaseSyncStartedEvent;
-import com.bubelov.coins.database.Database;
+import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.service.CoinsIntentService;
 import com.bubelov.coins.util.Utils;
@@ -109,7 +110,7 @@ public class MerchantsSyncService extends CoinsIntentService {
     }
 
     private int getMerchantsCount() {
-        Cursor countCursor = getContentResolver().query(Database.Merchants.CONTENT_URI,
+        Cursor countCursor = getContentResolver().query(DbContract.Merchants.CONTENT_URI,
                 new String[]{"count(*) AS count"},
                 null,
                 null,
@@ -134,7 +135,7 @@ public class MerchantsSyncService extends CoinsIntentService {
     private void sync() throws Exception {
         CurrencyDAO.insert(this, getApi().getCurrencies().execute().body());
 
-        SQLiteDatabase db = getDatabaseHelper().getWritableDatabase();
+        SQLiteDatabase db = Database.get();
         UserNotificationController notificationManager = new UserNotificationController(getApplicationContext());
         boolean initialized = isInitialized();
 
@@ -161,13 +162,13 @@ public class MerchantsSyncService extends CoinsIntentService {
     }
 
     private DateTime getLatestMerchantUpdateDate(SQLiteDatabase db) {
-        Cursor lastUpdateCursor = db.query(Database.Merchants.TABLE_NAME,
-                new String[]{Database.Merchants._UPDATED_AT},
+        Cursor lastUpdateCursor = db.query(DbContract.Merchants.TABLE_NAME,
+                new String[]{DbContract.Merchants._UPDATED_AT},
                 null,
                 null,
                 null,
                 null,
-                Database.Merchants._UPDATED_AT + " DESC",
+                DbContract.Merchants._UPDATED_AT + " DESC",
                 "1");
 
         long lastUpdateMillis = 0;

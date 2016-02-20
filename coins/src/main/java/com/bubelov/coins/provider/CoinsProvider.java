@@ -5,13 +5,12 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
 import com.bubelov.coins.database.Database;
-import com.bubelov.coins.database.DatabaseFactory;
+import com.bubelov.coins.database.DbContract;
 
 /**
  * Author: Igor Bubelov
@@ -19,7 +18,7 @@ import com.bubelov.coins.database.DatabaseFactory;
  */
 
 public class CoinsProvider extends ContentProvider {
-    private SQLiteOpenHelper db;
+    private SQLiteDatabase db;
 
     private static final int MERCHANTS = 100;
     private static final int MERCHANT_ID = 101;
@@ -35,18 +34,18 @@ public class CoinsProvider extends ContentProvider {
     private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
-        sURIMatcher.addURI(Database.AUTHORITY, Database.Merchants.TABLE_NAME, MERCHANTS);
-        sURIMatcher.addURI(Database.AUTHORITY, Database.Merchants.TABLE_NAME + "/#", MERCHANT_ID);
-        sURIMatcher.addURI(Database.AUTHORITY, Database.Merchants.TABLE_NAME + "/#/currencies", CURRENCIES_FOR_MERCHANT);
-        sURIMatcher.addURI(Database.AUTHORITY, Database.Currencies.TABLE_NAME, CURRENCIES);
-        sURIMatcher.addURI(Database.AUTHORITY, Database.Currencies.TABLE_NAME + "/*", CURRENCY_ID);
-        sURIMatcher.addURI(Database.AUTHORITY, Database.CurrenciesMerchants.TABLE_NAME, CURRENCIES_MERCHANTS);
-        sURIMatcher.addURI(Database.AUTHORITY, Database.ExchangeRates.TABLE_NAME, EXCHANGE_RATES);
+        sURIMatcher.addURI(DbContract.AUTHORITY, DbContract.Merchants.TABLE_NAME, MERCHANTS);
+        sURIMatcher.addURI(DbContract.AUTHORITY, DbContract.Merchants.TABLE_NAME + "/#", MERCHANT_ID);
+        sURIMatcher.addURI(DbContract.AUTHORITY, DbContract.Merchants.TABLE_NAME + "/#/currencies", CURRENCIES_FOR_MERCHANT);
+        sURIMatcher.addURI(DbContract.AUTHORITY, DbContract.Currencies.TABLE_NAME, CURRENCIES);
+        sURIMatcher.addURI(DbContract.AUTHORITY, DbContract.Currencies.TABLE_NAME + "/*", CURRENCY_ID);
+        sURIMatcher.addURI(DbContract.AUTHORITY, DbContract.CurrenciesMerchants.TABLE_NAME, CURRENCIES_MERCHANTS);
+        sURIMatcher.addURI(DbContract.AUTHORITY, DbContract.ExchangeRates.TABLE_NAME, EXCHANGE_RATES);
     }
 
     @Override
     public boolean onCreate() {
-        db = DatabaseFactory.newHelper(getContext());
+        db = Database.get();
         return true;
     }
 
@@ -71,15 +70,15 @@ public class CoinsProvider extends ContentProvider {
 
             String query = String.format("select distinct %s from %s c join %s cm on cm.%s = c._id and cm.%s = ?",
                     selectionBuilder.toString(),
-                    Database.Currencies.TABLE_NAME,
-                    Database.CurrenciesMerchants.TABLE_NAME,
-                    Database.CurrenciesMerchants.CURRENCY_ID,
-                    Database.CurrenciesMerchants.MERCHANT_ID);
+                    DbContract.Currencies.TABLE_NAME,
+                    DbContract.CurrenciesMerchants.TABLE_NAME,
+                    DbContract.CurrenciesMerchants.CURRENCY_ID,
+                    DbContract.CurrenciesMerchants.MERCHANT_ID);
 
-            return db.getReadableDatabase().rawQuery(query, new String[]{String.valueOf(merchantId)});
+            return db.rawQuery(query, new String[]{String.valueOf(merchantId)});
         }
 
-        return db.getReadableDatabase().query(getTableName(uri),
+        return db.query(getTableName(uri),
                 projection,
                 selection,
                 selectionArgs,
@@ -100,84 +99,82 @@ public class CoinsProvider extends ContentProvider {
             long currencyId = values.getAsLong(BaseColumns._ID);
 
             values.clear();
-            values.put(Database.CurrenciesMerchants.MERCHANT_ID, merchantId);
-            values.put(Database.CurrenciesMerchants.CURRENCY_ID, currencyId);
+            values.put(DbContract.CurrenciesMerchants.MERCHANT_ID, merchantId);
+            values.put(DbContract.CurrenciesMerchants.CURRENCY_ID, currencyId);
 
-            db.getWritableDatabase().insertWithOnConflict(Database.CurrenciesMerchants.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
-            return Uri.parse(Database.Currencies.CONTENT_URI + "/" + currencyId);
+            db.insertWithOnConflict(DbContract.CurrenciesMerchants.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            return Uri.parse(DbContract.Currencies.CONTENT_URI + "/" + currencyId);
         }
 
         String tableName = getTableName(uri);
-        long id = db.getWritableDatabase().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        long id = db.insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         getContext().getContentResolver().notifyChange(uri, null);
-        return Uri.parse(String.format("%s/%s/%s", Database.BASE_CONTENT_URI, tableName, id));
+        return Uri.parse(String.format("%s/%s/%s", DbContract.BASE_CONTENT_URI, tableName, id));
     }
 
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
-        SQLiteDatabase database = db.getWritableDatabase();
-
         switch (sURIMatcher.match(uri)) {
             case MERCHANTS:
-                database.beginTransaction();
+                db.beginTransaction();
 
                 try {
                     String insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                            Database.Merchants.TABLE_NAME,
-                            Database.Merchants._ID,
-                            Database.Merchants._CREATED_AT,
-                            Database.Merchants._UPDATED_AT,
-                            Database.Merchants.LATITUDE,
-                            Database.Merchants.LONGITUDE,
-                            Database.Merchants.NAME,
-                            Database.Merchants.DESCRIPTION,
-                            Database.Merchants.PHONE,
-                            Database.Merchants.WEBSITE,
-                            Database.Merchants.AMENITY,
-                            Database.Merchants.OPENING_HOURS,
-                            Database.Merchants.ADDRESS);
+                            DbContract.Merchants.TABLE_NAME,
+                            DbContract.Merchants._ID,
+                            DbContract.Merchants._CREATED_AT,
+                            DbContract.Merchants._UPDATED_AT,
+                            DbContract.Merchants.LATITUDE,
+                            DbContract.Merchants.LONGITUDE,
+                            DbContract.Merchants.NAME,
+                            DbContract.Merchants.DESCRIPTION,
+                            DbContract.Merchants.PHONE,
+                            DbContract.Merchants.WEBSITE,
+                            DbContract.Merchants.AMENITY,
+                            DbContract.Merchants.OPENING_HOURS,
+                            DbContract.Merchants.ADDRESS);
 
-                    SQLiteStatement insertStatement = database.compileStatement(insertQuery);
+                    SQLiteStatement insertStatement = db.compileStatement(insertQuery);
 
                     for (ContentValues value : values) {
-                        insertStatement.bindLong(1, value.getAsLong(Database.Merchants._ID));
-                        insertStatement.bindLong(2, value.getAsLong(Database.Merchants._CREATED_AT));
-                        insertStatement.bindLong(3, value.getAsLong(Database.Merchants._UPDATED_AT));
-                        insertStatement.bindDouble(4, value.getAsDouble(Database.Merchants.LATITUDE));
-                        insertStatement.bindDouble(5, value.getAsDouble(Database.Merchants.LONGITUDE));
-                        insertStatement.bindString(6, getString(value, Database.Merchants.NAME));
-                        insertStatement.bindString(7, getString(value, Database.Merchants.DESCRIPTION));
-                        insertStatement.bindString(8, getString(value, Database.Merchants.PHONE));
-                        insertStatement.bindString(9, getString(value, Database.Merchants.WEBSITE));
-                        insertStatement.bindString(10, getString(value, Database.Merchants.AMENITY));
-                        insertStatement.bindString(11, getString(value, Database.Merchants.OPENING_HOURS));
-                        insertStatement.bindString(12, getString(value, Database.Merchants.ADDRESS));
+                        insertStatement.bindLong(1, value.getAsLong(DbContract.Merchants._ID));
+                        insertStatement.bindLong(2, value.getAsLong(DbContract.Merchants._CREATED_AT));
+                        insertStatement.bindLong(3, value.getAsLong(DbContract.Merchants._UPDATED_AT));
+                        insertStatement.bindDouble(4, value.getAsDouble(DbContract.Merchants.LATITUDE));
+                        insertStatement.bindDouble(5, value.getAsDouble(DbContract.Merchants.LONGITUDE));
+                        insertStatement.bindString(6, getString(value, DbContract.Merchants.NAME));
+                        insertStatement.bindString(7, getString(value, DbContract.Merchants.DESCRIPTION));
+                        insertStatement.bindString(8, getString(value, DbContract.Merchants.PHONE));
+                        insertStatement.bindString(9, getString(value, DbContract.Merchants.WEBSITE));
+                        insertStatement.bindString(10, getString(value, DbContract.Merchants.AMENITY));
+                        insertStatement.bindString(11, getString(value, DbContract.Merchants.OPENING_HOURS));
+                        insertStatement.bindString(12, getString(value, DbContract.Merchants.ADDRESS));
                         insertStatement.execute();
                     }
 
-                    database.setTransactionSuccessful();
+                    db.setTransactionSuccessful();
                     return values.length;
                 } finally {
-                    database.endTransaction();
+                    db.endTransaction();
                 }
 
             case CURRENCIES_MERCHANTS:
-                database.beginTransaction();
+                db.beginTransaction();
 
                 try {
-                    String insertQuery = String.format("insert or replace into %s (%s, %s) values (?, ?)", Database.CurrenciesMerchants.TABLE_NAME, Database.CurrenciesMerchants.CURRENCY_ID, Database.CurrenciesMerchants.MERCHANT_ID);
-                    SQLiteStatement insertStatement = database.compileStatement(insertQuery);
+                    String insertQuery = String.format("insert or replace into %s (%s, %s) values (?, ?)", DbContract.CurrenciesMerchants.TABLE_NAME, DbContract.CurrenciesMerchants.CURRENCY_ID, DbContract.CurrenciesMerchants.MERCHANT_ID);
+                    SQLiteStatement insertStatement = db.compileStatement(insertQuery);
 
                     for (ContentValues value : values) {
-                        insertStatement.bindLong(1, value.getAsLong(Database.CurrenciesMerchants.CURRENCY_ID));
-                        insertStatement.bindLong(2, value.getAsLong(Database.CurrenciesMerchants.MERCHANT_ID));
+                        insertStatement.bindLong(1, value.getAsLong(DbContract.CurrenciesMerchants.CURRENCY_ID));
+                        insertStatement.bindLong(2, value.getAsLong(DbContract.CurrenciesMerchants.MERCHANT_ID));
                         insertStatement.execute();
                     }
 
-                    database.setTransactionSuccessful();
+                    db.setTransactionSuccessful();
                     return values.length;
                 } finally {
-                    database.endTransaction();
+                    db.endTransaction();
                 }
 
             default:
@@ -187,22 +184,22 @@ public class CoinsProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return db.getWritableDatabase().delete(getTableName(uri), selection, selectionArgs);
+        return db.delete(getTableName(uri), selection, selectionArgs);
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         if (sURIMatcher.match(uri) == CURRENCY_ID) {
-            selection = String.format("%s = ?", Database.Currencies._ID);
+            selection = String.format("%s = ?", DbContract.Currencies._ID);
             selectionArgs = new String[]{uri.getLastPathSegment()};
         }
 
         if (sURIMatcher.match(uri) == MERCHANT_ID) {
-            selection = String.format("%s = ?", Database.Merchants._ID);
+            selection = String.format("%s = ?", DbContract.Merchants._ID);
             selectionArgs = new String[]{uri.getLastPathSegment()};
         }
 
-        int result = db.getWritableDatabase().update(getTableName(uri), values, selection, selectionArgs);
+        int result = db.update(getTableName(uri), values, selection, selectionArgs);
         getContext().getContentResolver().notifyChange(uri, null);
         return result;
     }
@@ -211,14 +208,14 @@ public class CoinsProvider extends ContentProvider {
         switch (sURIMatcher.match(uri)) {
             case MERCHANTS:
             case MERCHANT_ID:
-                return Database.Merchants.TABLE_NAME;
+                return DbContract.Merchants.TABLE_NAME;
             case CURRENCIES:
             case CURRENCY_ID:
-                return Database.Currencies.TABLE_NAME;
+                return DbContract.Currencies.TABLE_NAME;
             case CURRENCIES_MERCHANTS:
-                return Database.CurrenciesMerchants.TABLE_NAME;
+                return DbContract.CurrenciesMerchants.TABLE_NAME;
             case EXCHANGE_RATES:
-                return Database.ExchangeRates.TABLE_NAME;
+                return DbContract.ExchangeRates.TABLE_NAME;
             default:
                 throw new IllegalArgumentException("Unsupported URI");
         }
