@@ -9,14 +9,7 @@ android {
         targetSdkVersion 23
         versionCode 21
         versionName "1.2.2"
-    }
-    signingConfigs {
-        release {
-            keyAlias 'coins'
-            keyPassword ''
-            storeFile file('/Users/Igor/Dropbox/projects/coins/keystore.jks')
-            storePassword ''
-        }
+        resConfigs "en", "ru", "th"
     }
     buildTypes {
         debug {
@@ -26,16 +19,16 @@ android {
         }
         release {
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
         }
-    }
-    lintOptions {
-        disable 'InvalidPackage'
     }
 }
 
 dependencies {
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.robolectric:robolectric:3.0'
+
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile 'com.android.support:recyclerview-v7:23.1.1'
@@ -46,14 +39,12 @@ dependencies {
     compile 'com.squareup.retrofit:adapter-rxjava:2.0.0-beta2'
     compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
     compile 'com.squareup:otto:1.3.8'
-    compile 'com.google.code.gson:gson:2.4'
     compile 'com.google.maps.android:android-maps-utils:0.4'
     compile 'com.sothree.slidinguppanel:library:2.0.4'
     compile 'joda-time:joda-time:2.8.2'
     compile 'com.readystatesoftware.sqliteasset:sqliteassethelper:2.0.1'
     compile 'com.jakewharton:butterknife:7.0.1'
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.robolectric:robolectric:3.0'
+
     compile('com.crashlytics.sdk.android:crashlytics:2.5.2@aar') {
         transitive = true;
     }
