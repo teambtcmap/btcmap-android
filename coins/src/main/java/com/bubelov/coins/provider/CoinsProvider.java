@@ -45,7 +45,7 @@ public class CoinsProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        db = Database.get();
+        db = Database.get(getContext());
         return true;
     }
 
