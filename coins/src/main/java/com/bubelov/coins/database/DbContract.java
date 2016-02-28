@@ -48,8 +48,8 @@ public interface DbContract {
         String TABLE_NAME = "exchange_rates";
         Uri CONTENT_URI = Uri.parse(String.format("%s/%s", BASE_CONTENT_URI, TABLE_NAME));
 
-        String SOURCE_CURRENCY_ID = "source_currency_id";
-        String TARGET_CURRENCY_ID = "target_currency_id";
+        String BASE_CURRENCY_ID = "base_currency_id";
+        String CURRENCY_ID = "currency_id";
         String VALUE = "value";
     }
 }
