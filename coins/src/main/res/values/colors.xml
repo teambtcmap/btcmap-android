@@ -8,7 +8,6 @@
     <color name="primary_dark_semi_transparent">#DDF99F00</color>
     <color name="accent">#536DFE</color>
 
-    <color name="divider">#DADADA</color>
     <color name="disabled_or_hint">#B8B8B8</color>
     <color name="secondary_text_or_icons">#757575</color>
     <color name="text">#202020</color>
@@ -25,7 +24,6 @@
     <color name="drawer_list_item_background_selected">#E8E8E8</color>
 
     <color name="drawer_list_item_text">#DE000000</color>
-    <color name="drawer_list_item_text_selected">#000000</color>
 
     <color name="drawer_divider">#D7D7D7</color>
 
