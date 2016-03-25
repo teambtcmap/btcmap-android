@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<merge xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <com.bubelov.coins.ui.widget.MenuItem
         android:id="@+id/all"
@@ -113,13 +114,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:mi_icon="@drawable/ic_settings"
-        app:text="@string/menu_item_settings" />
+        app:text="@string/menu_item_settings"
+        tools:ignore="InconsistentLayout" />
 
     <com.bubelov.coins.ui.widget.MenuItem
         android:id="@+id/help_and_feedback"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:mi_icon="@drawable/ic_help_24dp"
-        app:text="@string/menu_item_help_and_feedback" />
+        app:text="@string/menu_item_help_and_feedback"
+        tools:ignore="InconsistentLayout" />
 
 </merge>
