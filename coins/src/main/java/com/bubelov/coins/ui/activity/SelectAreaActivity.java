@@ -57,11 +57,14 @@ public class SelectAreaActivity extends AbstractActivity {
 
     private static final int DEFAULT_ZOOM = 8;
 
-    @Bind(R.id.toolbar) Toolbar toolbar;
+    @Bind(R.id.toolbar)
+    Toolbar toolbar;
 
-    @Bind(R.id.bottom_panel) View bottomPanel;
+    @Bind(R.id.bottom_panel)
+    View bottomPanel;
 
-    @Bind(R.id.seek_bar_radius) SeekBar radiusSeekBar;
+    @Bind(R.id.seek_bar_radius)
+    SeekBar radiusSeekBar;
 
     private GoogleMap map;
     private GoogleApiClient googleApiClient;
@@ -175,6 +178,10 @@ public class SelectAreaActivity extends AbstractActivity {
     }
 
     private void findLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
 
         if (lastLocation != null) {
@@ -191,6 +198,10 @@ public class SelectAreaActivity extends AbstractActivity {
                 public void onResult(LocationSettingsResult result) {
                     switch (result.getStatus().getStatusCode()) {
                         case LocationSettingsStatusCodes.SUCCESS:
+                            if (ActivityCompat.checkSelfPermission(SelectAreaActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(SelectAreaActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                return;
+                            }
+
                             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, new LocationListener() {
                                 @Override
                                 public void onLocationChanged(Location location) {

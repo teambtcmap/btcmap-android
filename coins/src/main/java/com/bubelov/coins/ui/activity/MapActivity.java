@@ -100,13 +100,17 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     private static final float DEFAULT_ZOOM = 13;
 
-    @Bind(R.id.toolbar) Toolbar toolbar;
+    @Bind(R.id.toolbar)
+    Toolbar toolbar;
 
-    @Bind(R.id.merchant_toolbar) Toolbar merchantToolbar;
+    @Bind(R.id.merchant_toolbar)
+    Toolbar merchantToolbar;
 
-    @Bind(R.id.merchant_top_gradient) View merchantTopGradient;
+    @Bind(R.id.merchant_top_gradient)
+    View merchantTopGradient;
 
-    @Bind(R.id.drawer_layout) DrawerLayout drawer;
+    @Bind(R.id.drawer_layout)
+    DrawerLayout drawer;
 
     private ActionBarDrawerToggle drawerToggle;
 
@@ -116,11 +120,14 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     private Amenity amenity;
 
-    @Bind(R.id.sliding_panel) SlidingUpPanelLayout slidingLayout;
+    @Bind(R.id.sliding_panel)
+    SlidingUpPanelLayout slidingLayout;
 
-    @Bind(R.id.merchant_details) MerchantDetailsView merchantDetails;
+    @Bind(R.id.merchant_details)
+    MerchantDetailsView merchantDetails;
 
-    @Bind(R.id.loader) View loader;
+    @Bind(R.id.loader)
+    View loader;
 
     private MapMarkersCache markersCache;
 
@@ -136,7 +143,8 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     private MerchantsCache merchantsCache;
 
-    @Bind(R.id.locate_button) FloatingActionButton actionButton;
+    @Bind(R.id.locate_button)
+    FloatingActionButton actionButton;
 
     private boolean firstLaunch;
 
@@ -212,7 +220,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         if (savedInstanceState == null) {
             slidingLayout.hidePanel();
         } else {
-            if (savedInstanceState.containsKey(MERCHANT_ID_EXTRA)){
+            if (savedInstanceState.containsKey(MERCHANT_ID_EXTRA)) {
                 long merchantId = savedInstanceState.getLong(MERCHANT_ID_EXTRA);
                 selectedMerchant = getMerchant(merchantId);
                 merchantDetails.setMerchant(selectedMerchant);
@@ -355,6 +363,10 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     }
 
     private void initLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
         map.setMyLocationEnabled(true);
 
         googleApiClient = new GoogleApiClient.Builder(this)
@@ -479,6 +491,10 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     }
 
     private void moveToUserLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
 
         if (lastLocation != null) {
@@ -498,6 +514,10 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
             public void onResult(LocationSettingsResult result) {
                 switch (result.getStatus().getStatusCode()) {
                     case LocationSettingsStatusCodes.SUCCESS:
+                        if (ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            return;
+                        }
+
                         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, new LocationListener() {
                             @Override
                             public void onLocationChanged(Location location) {
