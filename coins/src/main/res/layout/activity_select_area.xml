@@ -21,7 +21,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="@color/primary_dark_semi_transparent"
-        android:elevation="4dp"
         android:padding="16dp">
 
         <TextView

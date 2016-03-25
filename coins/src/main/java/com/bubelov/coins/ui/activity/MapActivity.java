@@ -463,7 +463,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
         if (merchantsCacheFragment == null) {
             merchantsCacheFragment = new MerchantsCacheFragment();
-            getSupportFragmentManager().beginTransaction().add(merchantsCacheFragment, MerchantsCacheFragment.TAG);
+            getSupportFragmentManager().beginTransaction().add(merchantsCacheFragment, MerchantsCacheFragment.TAG).commit();
         }
 
         merchantsCache = merchantsCacheFragment.getMerchantsCache();
