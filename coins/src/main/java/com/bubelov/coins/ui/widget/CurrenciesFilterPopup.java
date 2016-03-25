@@ -33,21 +33,19 @@ public class CurrenciesFilterPopup extends ListPopupWindow {
     }
 
     public ListAdapter getAdapter() {
-        Cursor currencies = context.getContentResolver().query(DbContract.Currencies.CONTENT_URI,
-                new String[]{DbContract.Currencies._ID, DbContract.Currencies.NAME, DbContract.Currencies.SHOW_ON_MAP},
-                String.format("%s = ?", DbContract.Currencies.CRYPTO),
-                new String[]{String.valueOf(1)},
-                null);
-
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(context,
                 R.layout.list_item_currency_filter,
-                currencies,
+                context.getContentResolver().query(DbContract.Currencies.CONTENT_URI,
+                        new String[]{DbContract.Currencies._ID, DbContract.Currencies.NAME, DbContract.Currencies.SHOW_ON_MAP},
+                        String.format("%s = ?", DbContract.Currencies.CRYPTO),
+                        new String[]{String.valueOf(1)},
+                        null),
                 new String[] { DbContract.Currencies.NAME, DbContract.Currencies.SHOW_ON_MAP },
                 new int[] { R.id.name, R.id.enabled },
                 0);
 
-        final int idIndex = currencies.getColumnIndex(DbContract.Currencies._ID);
-        final int showOnMapColumnIndex = currencies.getColumnIndex(DbContract.Currencies.SHOW_ON_MAP);
+        final int idIndex = 0;
+        final int showOnMapColumnIndex = 2;
 
         adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             @Override
