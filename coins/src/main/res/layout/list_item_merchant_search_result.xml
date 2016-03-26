@@ -16,18 +16,18 @@
         android:layout_width="72dp"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:layout_width="72dp"
-            android:layout_height="wrap_content"
-            android:src="@drawable/search_row_icon_background" />
+        <View
+            android:layout_width="40dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_height="40dp"
+            android:background="@drawable/search_row_icon_background" />
 
-        <ImageView
+        <View
             android:id="@+id/icon"
-            android:layout_width="72dp"
-            android:layout_height="wrap_content"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_gravity="center"
-            android:tint="@color/white"
-            tools:src="@drawable/ic_place_24dp" />
+            tools:background="@drawable/ic_place_24dp" />
 
     </FrameLayout>
 

@@ -79,12 +79,12 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
         for (Amenity amenity : Amenity.values()) {
             if (merchant.getAmenity().equalsIgnoreCase(amenity.name())) {
                 amenityFound = true;
-                holder.icon.setImageResource(amenity.getIconId());
+                holder.icon.setBackgroundResource(amenity.getIconId());
             }
         }
 
         if (!amenityFound) {
-            holder.icon.setImageResource(R.drawable.ic_place_24dp);
+            holder.icon.setBackgroundResource(R.drawable.ic_place_24dp);
         }
     }
 
