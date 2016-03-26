@@ -174,7 +174,7 @@
             android:layout_width="72dp"
             android:layout_height="wrap_content"
             android:paddingTop="11dp"
-            android:src="@drawable/ic_accepting_currencies" />
+            android:src="@drawable/ic_store_24dp" />
 
         <LinearLayout
             android:layout_width="match_parent"

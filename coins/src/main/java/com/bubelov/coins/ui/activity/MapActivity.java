@@ -799,7 +799,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
                 }, 1);
             }
 
-            actionButton.setImageResource(R.drawable.fab_location);
+            actionButton.setImageResource(R.drawable.ic_my_location_24dp);
         }
 
         @Override
@@ -813,7 +813,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
             map.setPadding(0, getResources().getDimensionPixelSize(R.dimen.marker_size) / 2, 0, Utils.getScreenHeight(MapActivity.this) / 2 + Utils.getStatusBarHeight(getApplicationContext()));
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), DEFAULT_ZOOM), MAP_ANIMATION_DURATION_MILLIS, null);
             map.getUiSettings().setAllGesturesEnabled(false);
-            actionButton.setImageResource(R.drawable.fab_directions);
+            actionButton.setImageResource(R.drawable.ic_directions_24dp);
         }
 
         @Override
@@ -823,7 +823,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
             map.setPadding(0, 0, 0, 0);
             map.getUiSettings().setAllGesturesEnabled(true);
             actionButton.setTranslationY(0);
-            actionButton.setImageResource(R.drawable.fab_location);
+            actionButton.setImageResource(R.drawable.ic_my_location_24dp);
         }
     }
 }
