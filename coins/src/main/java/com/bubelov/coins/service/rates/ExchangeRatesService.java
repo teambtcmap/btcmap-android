@@ -16,8 +16,11 @@ import com.bubelov.coins.service.CoinsIntentService;
 import com.bubelov.coins.service.rates.provider.ExchangeRatesProviderFactory;
 import com.bubelov.coins.service.rates.provider.ExchangeRatesProviderType;
 import com.bubelov.coins.util.Utils;
+import com.crashlytics.android.Crashlytics;
 
 import java.util.concurrent.TimeUnit;
+
+import timber.log.Timber;
 
 /**
  * Author: Igor Bubelov
@@ -86,8 +89,9 @@ public class ExchangeRatesService extends CoinsIntentService {
                     .getExchangeRate(sourceCurrency, targetCurrency);
 
             ExchangeRateDAO2.insert(this, exchangeRate);
-        } catch (Exception exception) {
-            Log.e(TAG, "Can't load the exchange rate", exception);
+        } catch (Exception e) {
+            Timber.e(e, "Can't load the exchange rate");
+            Crashlytics.logException(e);
         }
     }
 }

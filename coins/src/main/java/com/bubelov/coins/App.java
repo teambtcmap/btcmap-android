@@ -19,6 +19,7 @@ import org.joda.time.DateTime;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
 import retrofit.RxJavaCallAdapterFactory;
+import timber.log.Timber;
 
 /**
  * Author: Igor Bubelov
@@ -37,6 +38,11 @@ public class App extends Application {
         super.onCreate();
         instance = this;
         Fabric.with(this, new Crashlytics());
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        }
+
         bus = new MainThreadBus();
         initApi();
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
