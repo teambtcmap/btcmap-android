@@ -32,7 +32,8 @@
 
     <string name="pref_distance_units">Distance units</string>
 
-    <string name="bitcoin_price">Exchange rate</string>
+    <string name="exchange_rate">Exchange rate</string>
+    <string name="price_in_dollars" translatable="false">$%1$s</string>
     <string name="bitcoin_price_checked_at">Checked at: %1$s</string>
 
     <string name="menu_item_all_merchants">All</string>
@@ -93,5 +94,9 @@
         <item>Kilometers</item>
         <item>Miles</item>
     </string-array>
+
+    <string name="merchant_description">Description:</string>
+    <string name="merchant_opening_hours">Opening hours:</string>
+    <string name="merchant_accepted_currencies">Accepted currencies:</string>
 
 </resources>

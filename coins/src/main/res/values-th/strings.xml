@@ -32,7 +32,7 @@
 
     <string name="pref_distance_units">หน่วยระยะทาง</string>
 
-    <string name="bitcoin_price">อัตราแลกเปลี่ยน</string>
+    <string name="exchange_rate">อัตราแลกเปลี่ยน</string>
     <string name="bitcoin_price_checked_at">อัพเดทล่าสุด %1$s</string>
 
     <string name="menu_item_all_merchants">ทั้งหมด</string>
@@ -93,5 +93,9 @@
         <item>Kilometers</item>
         <item>Miles</item>
     </string-array>
+
+    <string name="merchant_description">Description:</string>
+    <string name="merchant_opening_hours">Opening hours:</string>
+    <string name="merchant_accepted_currencies">Accepted currencies:</string>
 
 </resources>

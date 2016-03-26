@@ -198,7 +198,7 @@ public class DrawerMenu extends FrameLayout {
             format.setMinimumFractionDigits(2);
             format.setMaximumFractionDigits(2);
 
-            this.exchangeRate.setText("$" + format.format(exchangeRate.getValue()));
+            this.exchangeRate.setText(getResources().getString(R.string.price_in_dollars, format.format(exchangeRate.getValue())));
             exchangeRateLastCheck.setText(getResources().getString(R.string.bitcoin_price_checked_at, DateFormat.getTimeInstance(DateFormat.SHORT).format(exchangeRate.getUpdatedAt().getMillis())));
         }
     }

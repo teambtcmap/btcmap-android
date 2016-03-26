@@ -108,7 +108,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Description:"
+                android:text="@string/merchant_description"
                 android:textColor="@color/secondary_text_or_icons"
                 android:textSize="18sp" />
 
@@ -116,7 +116,7 @@
                 android:id="@+id/description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Not provided"
+                android:text="@string/not_provided"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
 
@@ -146,7 +146,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Opening hours:"
+                android:text="@string/merchant_opening_hours"
                 android:textColor="@color/secondary_text_or_icons"
                 android:textSize="18sp" />
 
@@ -154,7 +154,7 @@
                 android:id="@+id/opening_hours"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Not provided"
+                android:text="@string/not_provided"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
 
@@ -184,7 +184,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Accepted currencies:"
+                android:text="@string/merchant_accepted_currencies"
                 android:textColor="@color/secondary_text_or_icons"
                 android:textSize="18sp" />
 
@@ -192,7 +192,7 @@
                 android:id="@+id/accepted_currencies"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Not provided"
+                android:text="@string/not_provided"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
 
