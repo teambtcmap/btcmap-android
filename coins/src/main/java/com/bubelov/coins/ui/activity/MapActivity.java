@@ -15,11 +15,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -269,7 +269,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         switch (id) {
             case R.id.action_filter:
                 ListPopupWindow popup = new CurrenciesFilterPopup(this);
-                popup.setAnchorView(ButterKnife.findById(this, R.id.anchor_upper_right));
+                popup.setAnchorView(findViewById(id));
                 popup.setHeight(drawer.getHeight() / 10 * 9);
                 popup.show();
 
@@ -406,7 +406,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     @Override
     public void onAmenitySelected(Amenity amenity, String title) {
-        drawer.closeDrawer(Gravity.LEFT);
+        drawer.closeDrawer(GravityCompat.START);
         getSupportActionBar().setTitle(title);
         this.amenity = amenity;
         reloadMerchants();
@@ -421,13 +421,13 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     @Override
     public void onSettingsSelected() {
-        drawer.closeDrawer(Gravity.LEFT);
+        drawer.closeDrawer(GravityCompat.START);
         startActivity(new Intent(this, SettingsActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
     }
 
     @Override
     public void onFeedbackSelected() {
-        drawer.closeDrawer(Gravity.LEFT);
+        drawer.closeDrawer(GravityCompat.START);
         startActivity(new Intent(this, FeedbackActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
     }
 

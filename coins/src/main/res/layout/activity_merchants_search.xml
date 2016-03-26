@@ -14,6 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:layout_marginLeft="72dp"
+        android:layout_marginStart="72dp"
         android:background="@color/transparent"
         android:hint="@string/msa_search"
         android:textColorHint="@color/secondary_text_or_icons" />

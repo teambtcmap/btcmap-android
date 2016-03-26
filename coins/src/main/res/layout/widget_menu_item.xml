@@ -15,6 +15,7 @@
         android:layout_height="24dp"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:scaleType="fitXY"
         tools:background="@drawable/ic_all_24dp" />
 
@@ -24,6 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="72dp"
+        android:layout_marginStart="72dp"
         android:layout_marginTop="-2sp"
         android:paddingTop="4dp"
         android:textSize="14sp"
