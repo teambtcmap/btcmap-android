@@ -228,7 +228,7 @@ public class SelectAreaActivity extends AbstractActivity {
     }
 
     private void addArea(NotificationArea area) {
-        BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_location_marker);
+        BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_user_location_48dp);
         areaCenter = map.addMarker(new MarkerOptions()
                 .position(area.getCenter())
                 .icon(markerDescriptor)
