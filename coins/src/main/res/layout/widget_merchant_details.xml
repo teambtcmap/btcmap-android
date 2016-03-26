@@ -94,11 +94,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:layout_width="72dp"
-            android:layout_height="wrap_content"
-            android:paddingTop="11dp"
-            android:src="@drawable/ic_description" />
+        <View
+            android:layout_width="24dp"
+            android:layout_marginLeft="24dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/ic_description" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -132,11 +134,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:layout_width="72dp"
-            android:layout_height="wrap_content"
-            android:paddingTop="11dp"
-            android:src="@drawable/ic_opening_hours" />
+        <View
+            android:layout_width="24dp"
+            android:layout_marginLeft="24dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/ic_opening_hours" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -170,11 +174,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:layout_width="72dp"
-            android:layout_height="wrap_content"
-            android:paddingTop="11dp"
-            android:src="@drawable/ic_store_24dp" />
+        <View
+            android:layout_width="24dp"
+            android:layout_marginLeft="24dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/ic_store_24dp" />
 
         <LinearLayout
             android:layout_width="match_parent"

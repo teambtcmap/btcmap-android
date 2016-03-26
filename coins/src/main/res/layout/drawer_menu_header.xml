@@ -8,6 +8,7 @@
     android:layout_height="wrap_content">
 
     <ImageView
+        android:contentDescription="@null"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_alignBottom="@+id/header"
@@ -37,7 +38,7 @@
             android:paddingTop="@dimen/drawer_header_padding">
 
             <ImageView
-                android:id="@+id/avatar"
+                android:contentDescription="@string/cd_bitcoin_logo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_bitcoin" />
@@ -81,8 +82,9 @@
 
     </LinearLayout>
 
-    <ImageView
+    <ImageButton
         android:id="@+id/check"
+        android:contentDescription="@string/cd_update_exchange_rate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

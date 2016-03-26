@@ -9,14 +9,14 @@
     android:orientation="horizontal"
     android:background="?android:attr/selectableItemBackground">
 
-    <ImageView
+    <View
         android:id="@+id/icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="16dp"
         android:scaleType="fitXY"
-        tools:src="@drawable/ic_all_24dp" />
+        tools:background="@drawable/ic_all_24dp" />
 
     <com.bubelov.coins.ui.widget.TypefaceTextView
         android:id="@+id/text"

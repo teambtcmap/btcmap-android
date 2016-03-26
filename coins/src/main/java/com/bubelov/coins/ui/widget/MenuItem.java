@@ -72,7 +72,7 @@ public class MenuItem extends FrameLayout {
                 0, 0);
 
         try {
-            icon.setImageResource(a.getResourceId(R.styleable.MenuItem_mi_icon, 0));
+            icon.setBackgroundResource(a.getResourceId(R.styleable.MenuItem_mi_icon, 0));
             text.setText(a.getString(R.styleable.MenuItem_text));
         } finally {
             a.recycle();

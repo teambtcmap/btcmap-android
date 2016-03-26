@@ -99,4 +99,8 @@
     <string name="merchant_opening_hours">Opening hours:</string>
     <string name="merchant_accepted_currencies">Accepted currencies:</string>
 
+    <string name="cd_donation_qr" translatable="false">QR code for receiving donations</string>
+    <string name="cd_bitcoin_logo" translatable="false">Bitcoin logo</string>
+    <string name="cd_update_exchange_rate" translatable="false">Refresh exchange rate</string>
+
 </resources>
