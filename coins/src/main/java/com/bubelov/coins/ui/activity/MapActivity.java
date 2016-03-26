@@ -29,6 +29,7 @@ import android.widget.PopupWindow;
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
+import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.dao.CurrencyDAO;
 import com.bubelov.coins.dao.MerchantDAO;
 import com.bubelov.coins.dao.MerchantNotificationDAO;
@@ -128,8 +129,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     @Bind(R.id.loader)
     View loader;
-
-    private MapMarkersCache markersCache;
 
     private GoogleApiClient googleApiClient;
 
@@ -443,8 +442,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
         map.setOnCameraChangeListener(new OnCameraChangeMultiplexer(merchantsManager, new CameraChangeListener()));
 
-        markersCache = new MapMarkersCache();
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             initLocation();
         } else {
@@ -675,14 +672,17 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     }
 
     private class PlacesRenderer extends StaticClusterRenderer<Merchant> {
+        private MapMarkersCache cache;
+
         public PlacesRenderer(Context context, GoogleMap map, ClusterManager<Merchant> clusterManager) {
             super(context, map, clusterManager);
+            cache = Injector.INSTANCE.getAppComponent().getMarkersCache();
         }
 
         @Override
         protected void onBeforeClusterItemRendered(Merchant item, MarkerOptions markerOptions) {
             super.onBeforeClusterItemRendered(item, markerOptions);
-            markerOptions.icon(markersCache.getMarker(item.getAmenity())).anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
+            markerOptions.icon(cache.getMarker(item.getAmenity())).anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
         }
     }
 
