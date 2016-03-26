@@ -32,7 +32,7 @@
 
     <string name="pref_distance_units">Километры/мили</string>
 
-    <string name="bitcoin_price">Биржевой курс</string>
+    <string name="exchange_rate">Биржевой курс</string>
     <string name="bitcoin_price_checked_at">Актуален на: %1$s</string>
 
     <string name="menu_item_all_merchants">Все</string>
@@ -93,5 +93,9 @@
         <item>Километры</item>
         <item>Мили</item>
     </string-array>
+
+    <string name="merchant_description">Описание:</string>
+    <string name="merchant_opening_hours">Время работы:</string>
+    <string name="merchant_accepted_currencies">Принимаемые валюты:</string>
 
 </resources>
