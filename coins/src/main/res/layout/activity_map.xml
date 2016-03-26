@@ -46,15 +46,6 @@
                 android:background="@drawable/merchant_top_gradient"
                 android:visibility="gone" />
 
-            <View
-                android:id="@+id/anchor_upper_right"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_gravity="right"
-                android:layout_marginRight="254dp"
-                android:layout_marginTop="8dp"
-                android:background="#FF0000" />
-
             <TextView
                 android:id="@+id/loader"
                 android:layout_width="match_parent"
@@ -73,9 +64,10 @@
                 android:id="@+id/locate_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|right"
+                android:layout_gravity="bottom|end"
                 android:layout_marginBottom="16dp"
                 android:layout_marginRight="16dp"
+                android:layout_marginEnd="16dp"
                 android:onClick="onActionButtonClicked"
                 android:src="@drawable/ic_my_location_24dp"
                 app:backgroundTint="@color/white"
@@ -94,7 +86,7 @@
     <com.bubelov.coins.ui.widget.DrawerMenuRootLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="left"
+        android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:insetForeground="#4000">
 
