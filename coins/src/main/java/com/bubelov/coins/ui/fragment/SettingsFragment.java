@@ -13,8 +13,8 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.widget.Toast;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.dao.CurrencyDAO;
-import com.bubelov.coins.database.Database;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.service.rates.ExchangeRatesService;
 import com.bubelov.coins.service.sync.merchants.UserNotificationController;
@@ -58,7 +58,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
 
         if (preference.getKey().equals("pref_test_notification")) {
-            SQLiteDatabase db = Database.get();
+            SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
 
             Cursor cursor = db.rawQuery("select count(_id) from " + DbContract.Merchants.TABLE_NAME, null);
 
@@ -91,7 +91,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
 
         if (preference.getKey().equals("pref_remove_last_merchant")) {
-            SQLiteDatabase db = Database.get();
+            SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
 
             Cursor cursor = db.query(DbContract.Merchants.TABLE_NAME, new String[] { DbContract.Merchants._ID }, null, null, null, null, DbContract.Merchants._UPDATED_AT + " DESC", "1");
 

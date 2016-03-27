@@ -4,7 +4,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.Fragment;
 
 import com.bubelov.coins.MerchantsCache;
-import com.bubelov.coins.database.Database;
+import com.bubelov.coins.dagger.Injector;
 
 /**
  * Author: Igor Bubelov
@@ -18,7 +18,7 @@ public class MerchantsCacheFragment extends Fragment {
 
     public MerchantsCacheFragment() {
         super();
-        SQLiteDatabase db = Database.get();
+        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
         merchantsCache = new MerchantsCache(db);
         setRetainInstance(true);
     }

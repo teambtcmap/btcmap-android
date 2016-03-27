@@ -3,8 +3,8 @@ package com.bubelov.coins.ui.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
@@ -18,9 +18,11 @@ import butterknife.ButterKnife;
  */
 
 public class MenuItem extends FrameLayout {
-    @Bind(R.id.icon) ImageView icon;
+    @Bind(R.id.icon)
+    View icon;
 
-    @Bind(R.id.text) TextView text;
+    @Bind(R.id.text)
+    TextView text;
 
     public MenuItem(Context context) {
         super(context);
@@ -53,9 +55,9 @@ public class MenuItem extends FrameLayout {
                 : getResources().getColor(R.color.drawer_list_item_text));
 
         if (selected) {
-            icon.setColorFilter(getResources().getColor(R.color.drawer_icon_active));
+            //icon.setColorFilter(getResources().getColor(R.color.drawer_icon_active));
         } else {
-            icon.setColorFilter(getResources().getColor(R.color.drawer_icon_inactive));
+            //icon.setColorFilter(getResources().getColor(R.color.drawer_icon_inactive));
         }
     }
 

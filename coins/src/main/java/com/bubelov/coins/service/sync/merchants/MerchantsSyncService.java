@@ -10,9 +10,9 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.bubelov.coins.App;
 import com.bubelov.coins.Constants;
+import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.dao.CurrencyDAO;
 import com.bubelov.coins.dao.MerchantDAO;
-import com.bubelov.coins.database.Database;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.DatabaseSyncStartedEvent;
@@ -135,7 +135,7 @@ public class MerchantsSyncService extends CoinsIntentService {
     private void sync() throws Exception {
         CurrencyDAO.insert(this, getApi().getCurrencies().execute().body());
 
-        SQLiteDatabase db = Database.get();
+        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
         UserNotificationController notificationManager = new UserNotificationController(getApplicationContext());
         boolean initialized = isInitialized();
 

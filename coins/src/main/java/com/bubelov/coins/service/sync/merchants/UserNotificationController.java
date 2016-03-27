@@ -13,8 +13,8 @@ import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.dao.MerchantNotificationDAO;
-import com.bubelov.coins.database.Database;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.model.NotificationArea;
@@ -58,7 +58,7 @@ public class UserNotificationController {
             return false;
         }
 
-        SQLiteDatabase db = Database.get();
+        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
 
         Cursor cursor = db.query(DbContract.Merchants.TABLE_NAME,
                 new String[] { DbContract.Merchants._ID },
