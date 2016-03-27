@@ -9,7 +9,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 /**
@@ -41,8 +40,8 @@ public class ExchangeRatesIntegrationTest {
     }
 
     private void testProvider(ExchangeRatesProviderType providerType) {
-        Currency btc = CurrencyDAO.query(RuntimeEnvironment.application, "BTC");
-        Currency usd = CurrencyDAO.query(RuntimeEnvironment.application, "USD");
+        Currency btc = CurrencyDAO.query("BTC");
+        Currency usd = CurrencyDAO.query("USD");
 
         ExchangeRate exchangeRate = null;
 

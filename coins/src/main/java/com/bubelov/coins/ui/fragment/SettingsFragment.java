@@ -140,8 +140,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_exchange_rates_provider_key))) {
             getActivity().startService(ExchangeRatesService.newIntent(getActivity(),
-                    CurrencyDAO.query(getActivity(), "BTC"),
-                    CurrencyDAO.query(getActivity(), "USD"),
+                    CurrencyDAO.query("BTC"),
+                    CurrencyDAO.query("USD"),
                     true));
         }
     }

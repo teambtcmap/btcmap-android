@@ -3,7 +3,9 @@ package com.bubelov.coins.dao;
 import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
+import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
@@ -19,21 +21,19 @@ import java.util.List;
  */
 
 public class CurrencyDAO {
-    public static Currency query(Context context, String code) {
-        Cursor cursor = context.getContentResolver().query(DbContract.Currencies.CONTENT_URI,
-                null,
-                String.format("%s = ?", DbContract.Currencies.CODE),
-                new String[]{code},
-                null);
+    public static Currency query(String code) {
+        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
 
-        Currency currency = null;
+        Cursor cursor = db.query(DbContract.Currencies.TABLE_NAME, null, "code = ?", new String[]{code}, null, null, null);
 
         if (cursor.moveToNext()) {
-            currency = getCurrency(cursor);
+            Currency currency = getCurrency(cursor);
+            cursor.close();
+            return currency;
+        } else {
+            cursor.close();
+            return null;
         }
-
-        cursor.close();
-        return currency;
     }
 
     public static List<Currency> query(Context context, Merchant merchant) {
