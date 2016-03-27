@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.PopupWindow;
 
+import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
@@ -437,6 +438,11 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         map.getUiSettings().setZoomControlsEnabled(false);
         map.getUiSettings().setCompassEnabled(false);
         map.getUiSettings().setMapToolbarEnabled(false);
+
+        if (BuildConfig.DEBUG) {
+            map.getUiSettings().setZoomControlsEnabled(true);
+            actionButton.setTranslationX(-Utils.dpToPx(this, 48));
+        }
 
         initClustering();
 

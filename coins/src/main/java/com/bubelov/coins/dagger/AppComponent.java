@@ -1,6 +1,11 @@
 package com.bubelov.coins.dagger;
 
+import android.database.sqlite.SQLiteDatabase;
+
+import com.bubelov.coins.provider.CoinsProvider;
 import com.bubelov.coins.util.MapMarkersCache;
+
+import javax.inject.Singleton;
 
 import dagger.Component;
 
@@ -9,7 +14,12 @@ import dagger.Component;
  * Date: 26/03/16 17:57
  */
 
-@Component(modules = CacheModule.class)
+@Singleton
+@Component(modules = {AppContextModule.class, DatabaseModule.class, CacheModule.class})
 public interface AppComponent {
+    SQLiteDatabase database();
+
     MapMarkersCache getMarkersCache();
+
+    void inject(CoinsProvider provider);
 }

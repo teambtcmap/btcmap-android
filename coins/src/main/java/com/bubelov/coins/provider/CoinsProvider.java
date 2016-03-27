@@ -9,8 +9,12 @@ import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
-import com.bubelov.coins.database.Database;
+import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
+
+import javax.inject.Inject;
+
+import dagger.Lazy;
 
 /**
  * Author: Igor Bubelov
@@ -18,7 +22,8 @@ import com.bubelov.coins.database.DbContract;
  */
 
 public class CoinsProvider extends ContentProvider {
-    private SQLiteDatabase db;
+    @Inject
+    Lazy<SQLiteDatabase> db;
 
     private static final int MERCHANTS = 100;
     private static final int MERCHANT_ID = 101;
@@ -45,12 +50,13 @@ public class CoinsProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        db = Database.get(getContext());
         return true;
     }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        Injector.INSTANCE.getAppComponent().inject(this);
+
         if (sURIMatcher.match(uri) == CURRENCIES_FOR_MERCHANT) {
             long merchantId = Long.valueOf(uri.getPathSegments().get(uri.getPathSegments().size() - 2));
 
@@ -75,10 +81,10 @@ public class CoinsProvider extends ContentProvider {
                     DbContract.CurrenciesMerchants.CURRENCY_ID,
                     DbContract.CurrenciesMerchants.MERCHANT_ID);
 
-            return db.rawQuery(query, new String[]{String.valueOf(merchantId)});
+            return db.get().rawQuery(query, new String[]{String.valueOf(merchantId)});
         }
 
-        return db.query(getTableName(uri),
+        return db.get().query(getTableName(uri),
                 projection,
                 selection,
                 selectionArgs,
@@ -94,6 +100,8 @@ public class CoinsProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
+        Injector.INSTANCE.getAppComponent().inject(this);
+
         if (sURIMatcher.match(uri) == CURRENCIES_FOR_MERCHANT) {
             long merchantId = Long.valueOf(uri.getPathSegments().get(uri.getPathSegments().size() - 2));
             long currencyId = values.getAsLong(BaseColumns._ID);
@@ -102,21 +110,23 @@ public class CoinsProvider extends ContentProvider {
             values.put(DbContract.CurrenciesMerchants.MERCHANT_ID, merchantId);
             values.put(DbContract.CurrenciesMerchants.CURRENCY_ID, currencyId);
 
-            db.insertWithOnConflict(DbContract.CurrenciesMerchants.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            db.get().insertWithOnConflict(DbContract.CurrenciesMerchants.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
             return Uri.parse(DbContract.Currencies.CONTENT_URI + "/" + currencyId);
         }
 
         String tableName = getTableName(uri);
-        long id = db.insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        long id = db.get().insertWithOnConflict(tableName, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         getContext().getContentResolver().notifyChange(uri, null);
         return Uri.parse(String.format("%s/%s/%s", DbContract.BASE_CONTENT_URI, tableName, id));
     }
 
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
+        Injector.INSTANCE.getAppComponent().inject(this);
+
         switch (sURIMatcher.match(uri)) {
             case MERCHANTS:
-                db.beginTransaction();
+                db.get().beginTransaction();
 
                 try {
                     String insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -134,7 +144,7 @@ public class CoinsProvider extends ContentProvider {
                             DbContract.Merchants.OPENING_HOURS,
                             DbContract.Merchants.ADDRESS);
 
-                    SQLiteStatement insertStatement = db.compileStatement(insertQuery);
+                    SQLiteStatement insertStatement = db.get().compileStatement(insertQuery);
 
                     for (ContentValues value : values) {
                         insertStatement.bindLong(1, value.getAsLong(DbContract.Merchants._ID));
@@ -152,18 +162,18 @@ public class CoinsProvider extends ContentProvider {
                         insertStatement.execute();
                     }
 
-                    db.setTransactionSuccessful();
+                    db.get().setTransactionSuccessful();
                     return values.length;
                 } finally {
-                    db.endTransaction();
+                    db.get().endTransaction();
                 }
 
             case CURRENCIES_MERCHANTS:
-                db.beginTransaction();
+                db.get().beginTransaction();
 
                 try {
                     String insertQuery = String.format("insert or replace into %s (%s, %s) values (?, ?)", DbContract.CurrenciesMerchants.TABLE_NAME, DbContract.CurrenciesMerchants.CURRENCY_ID, DbContract.CurrenciesMerchants.MERCHANT_ID);
-                    SQLiteStatement insertStatement = db.compileStatement(insertQuery);
+                    SQLiteStatement insertStatement = db.get().compileStatement(insertQuery);
 
                     for (ContentValues value : values) {
                         insertStatement.bindLong(1, value.getAsLong(DbContract.CurrenciesMerchants.CURRENCY_ID));
@@ -171,10 +181,10 @@ public class CoinsProvider extends ContentProvider {
                         insertStatement.execute();
                     }
 
-                    db.setTransactionSuccessful();
+                    db.get().setTransactionSuccessful();
                     return values.length;
                 } finally {
-                    db.endTransaction();
+                    db.get().endTransaction();
                 }
 
             default:
@@ -184,11 +194,14 @@ public class CoinsProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return db.delete(getTableName(uri), selection, selectionArgs);
+        Injector.INSTANCE.getAppComponent().inject(this);
+        return db.get().delete(getTableName(uri), selection, selectionArgs);
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        Injector.INSTANCE.getAppComponent().inject(this);
+
         if (sURIMatcher.match(uri) == CURRENCY_ID) {
             selection = String.format("%s = ?", DbContract.Currencies._ID);
             selectionArgs = new String[]{uri.getLastPathSegment()};
@@ -199,7 +212,7 @@ public class CoinsProvider extends ContentProvider {
             selectionArgs = new String[]{uri.getLastPathSegment()};
         }
 
-        int result = db.update(getTableName(uri), values, selection, selectionArgs);
+        int result = db.get().update(getTableName(uri), values, selection, selectionArgs);
         getContext().getContentResolver().notifyChange(uri, null);
         return result;
     }

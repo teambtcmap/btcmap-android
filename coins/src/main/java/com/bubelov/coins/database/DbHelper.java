@@ -28,10 +28,6 @@ public class DbHelper extends SQLiteOpenHelper {
         for (String statement : new AssetSqlQuery(context, "create_tables").getStatements()) {
             db.execSQL(statement);
         }
-
-        //db.execSQL(String.format("CREATE INDEX index_merchant_id_position ON merchants (%s, %s, %s)", DbContract.Merchants._ID, DbContract.Merchants.LATITUDE, DbContract.Merchants.LONGITUDE));
-        //db.execSQL(String.format("CREATE INDEX index_currency_id ON currencies (%s)", DbContract.Currencies._ID));
-        //db.execSQL(String.format("CREATE INDEX index_currency_merchant_id ON currencies_merchants (%s)", DbContract.CurrenciesMerchants._ID));
     }
 
     @Override

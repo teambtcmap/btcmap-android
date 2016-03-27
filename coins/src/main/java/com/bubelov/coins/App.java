@@ -4,6 +4,7 @@ import android.app.Application;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.api.CoinsApi;
+import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.serializer.DateTimeDeserializer;
 import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 import com.bubelov.coins.util.MainThreadBus;
@@ -42,6 +43,8 @@ public class App extends Application {
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
         }
+
+        Injector.INSTANCE.initAppComponent(this);
 
         bus = new MainThreadBus();
         initApi();
