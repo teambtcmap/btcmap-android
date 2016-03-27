@@ -3,7 +3,9 @@ package com.bubelov.coins.dao;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
+import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.ExchangeRate;
@@ -16,16 +18,20 @@ import org.joda.time.DateTime;
  */
 
 public class ExchangeRateDAO2 {
-    public static ExchangeRate queryForLast(Context context, Currency sourceCurrency, Currency targetCurrency) {
+    public static ExchangeRate queryForLast(Currency sourceCurrency, Currency targetCurrency) {
         if (sourceCurrency == null || targetCurrency == null) {
             return null;
         }
 
-        Cursor cursor = context.getContentResolver().query(DbContract.ExchangeRates.CONTENT_URI,
-                new String[]{DbContract.ExchangeRates._ID, DbContract.ExchangeRates.VALUE, DbContract.ExchangeRates._CREATED_AT, DbContract.ExchangeRates._UPDATED_AT},
-                String.format("%s = ? and %s = ?", DbContract.ExchangeRates.BASE_CURRENCY_ID, DbContract.ExchangeRates.CURRENCY_ID),
+        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+
+        Cursor cursor = db.query(DbContract.ExchangeRates.TABLE_NAME,
+                null,
+                "base_currency_id = ? and currency_id = ?",
                 new String[]{String.valueOf(sourceCurrency.getId()), String.valueOf(targetCurrency.getId())},
-                DbContract.ExchangeRates._UPDATED_AT + " DESC");
+                null,
+                null,
+                "_updated_at desc");
 
         try {
             if (cursor.moveToNext()) {
@@ -46,14 +52,16 @@ public class ExchangeRateDAO2 {
         }
     }
 
-    public static void insert(Context context, ExchangeRate exchangeRate) {
+    public static void insert(ExchangeRate exchangeRate) {
         ContentValues values = new ContentValues();
+
         values.put(DbContract.ExchangeRates.BASE_CURRENCY_ID, exchangeRate.getSourceCurrencyId());
         values.put(DbContract.ExchangeRates.CURRENCY_ID, exchangeRate.getTargetCurrencyId());
         values.put(DbContract.ExchangeRates.VALUE, exchangeRate.getValue());
         values.put(DbContract.ExchangeRates._CREATED_AT, exchangeRate.getCreatedAt().getMillis());
         values.put(DbContract.ExchangeRates._UPDATED_AT, exchangeRate.getUpdatedAt().getMillis());
 
-        context.getContentResolver().insert(DbContract.ExchangeRates.CONTENT_URI, values);
+        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        db.insert(DbContract.ExchangeRates.TABLE_NAME, null, values);
     }
 }

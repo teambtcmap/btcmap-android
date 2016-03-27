@@ -41,7 +41,6 @@ import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
-import com.bubelov.coins.ui.fragment.MerchantsCacheFragment;
 import com.bubelov.coins.ui.widget.CurrenciesFilterPopup;
 import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.ui.widget.MerchantDetailsView;
@@ -462,14 +461,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
             }
         }
 
-        MerchantsCacheFragment merchantsCacheFragment = (MerchantsCacheFragment) getSupportFragmentManager().findFragmentByTag(MerchantsCacheFragment.TAG);
-
-        if (merchantsCacheFragment == null) {
-            merchantsCacheFragment = new MerchantsCacheFragment();
-            getSupportFragmentManager().beginTransaction().add(merchantsCacheFragment, MerchantsCacheFragment.TAG).commit();
-        }
-
-        merchantsCache = merchantsCacheFragment.getMerchantsCache();
+        merchantsCache = Injector.INSTANCE.getAppComponent().getMerchantsCache();
 
         DrawerMenu drawerMenu = ButterKnife.findById(this, R.id.left_drawer);
         drawerMenu.setAmenity(amenity);

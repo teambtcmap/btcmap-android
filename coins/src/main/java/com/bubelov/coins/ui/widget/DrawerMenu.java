@@ -157,8 +157,8 @@ public class DrawerMenu extends FrameLayout {
             }
         });
 
-        btc = CurrencyDAO.query(getContext(), "BTC");
-        usd = CurrencyDAO.query(getContext(), "USD");
+        btc = CurrencyDAO.query("BTC");
+        usd = CurrencyDAO.query("USD");
 
         showLastExchangeRate();
         updateExchangeRate(false);
@@ -191,7 +191,7 @@ public class DrawerMenu extends FrameLayout {
     }
 
     private void showLastExchangeRate() {
-        ExchangeRate exchangeRate = ExchangeRateDAO2.queryForLast(getContext(), btc, usd);
+        ExchangeRate exchangeRate = ExchangeRateDAO2.queryForLast(btc, usd);
 
         if (exchangeRate != null) {
             DecimalFormat format = new DecimalFormat();
