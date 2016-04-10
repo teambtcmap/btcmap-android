@@ -1,6 +1,5 @@
 package com.bubelov.coins.dao;
 
-import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -53,24 +52,6 @@ public class CurrencyDAO {
 
         cursor.close();
         return currencies;
-    }
-
-    public static void insert(Context context, List<Currency> currencies) throws Exception {
-        ArrayList<ContentProviderOperation> operations = new ArrayList<>();
-
-        for (Currency currency : currencies) {
-            operations.add(ContentProviderOperation
-                    .newInsert(DbContract.Currencies.CONTENT_URI)
-                    .withValue(DbContract.Currencies._ID, currency.getId())
-                    .withValue(DbContract.Currencies._CREATED_AT, currency.getCreatedAt().getMillis())
-                    .withValue(DbContract.Currencies._UPDATED_AT, currency.getUpdatedAt().getMillis())
-                    .withValue(DbContract.Currencies.NAME, currency.getName())
-                    .withValue(DbContract.Currencies.CODE, currency.getCode())
-                    .withValue(DbContract.Currencies.CRYPTO, currency.isCrypto())
-                    .build());
-        }
-
-        context.getContentResolver().applyBatch(DbContract.AUTHORITY, operations);
     }
 
     private static Currency getCurrency(Cursor cursor) {
