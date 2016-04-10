@@ -6,7 +6,6 @@ import android.preference.PreferenceManager;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.serializer.DateTimeDeserializer;
-import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 import com.bubelov.coins.util.MainThreadBus;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.FieldNamingPolicy;
@@ -49,8 +48,6 @@ public class App extends Application {
         bus = new MainThreadBus();
         initApi();
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
-
-        startService(MerchantsSyncService.makeIntent(this, false));
     }
 
     public static App getInstance() {

@@ -40,7 +40,6 @@ import com.bubelov.coins.event.DatabaseSyncStartedEvent;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Merchant;
-import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
 import com.bubelov.coins.ui.widget.CurrenciesFilterPopup;
 import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.ui.widget.MerchantDetailsView;
@@ -242,16 +241,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        setDatabaseSyncing(MerchantsSyncService.isSyncing());
-
-        if (!databaseSyncing) {
-            startService(MerchantsSyncService.makeIntent(this, false));
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_map, menu);
         return true;
@@ -390,11 +379,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public void networkAvailable() {
-        startService(MerchantsSyncService.makeIntent(this, false));
     }
 
     private void onMerchantsLoaded(Collection<Merchant> merchants) {

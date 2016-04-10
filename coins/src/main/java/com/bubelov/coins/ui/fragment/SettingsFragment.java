@@ -18,7 +18,7 @@ import com.bubelov.coins.dao.CurrencyDAO;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.service.rates.ExchangeRatesService;
 import com.bubelov.coins.service.sync.merchants.UserNotificationController;
-import com.bubelov.coins.service.sync.merchants.MerchantsSyncService;
+import com.bubelov.coins.service.sync.merchants.DatabaseSyncService;
 import com.bubelov.coins.ui.activity.SelectAreaActivity;
 
 import java.io.File;
@@ -87,7 +87,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
 
         if (preference.getKey().equals("pref_update_merchants")) {
-            getActivity().startService(MerchantsSyncService.makeIntent(getActivity(), true));
+            DatabaseSyncService.start(getActivity());
         }
 
         if (preference.getKey().equals("pref_remove_last_merchant")) {

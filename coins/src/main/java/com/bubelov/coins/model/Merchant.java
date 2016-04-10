@@ -1,5 +1,10 @@
 package com.bubelov.coins.model;
 
+import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
+
+import com.bubelov.coins.dagger.Injector;
+import com.bubelov.coins.database.DbContract;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
 
@@ -32,6 +37,11 @@ public class Merchant extends AbstractEntity implements ClusterItem {
     private Collection<Currency> currencies;
 
     private transient LatLng position;
+
+    public static long getCount() {
+        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        return DatabaseUtils.queryNumEntries(db, DbContract.Merchants.TABLE_NAME);
+    }
 
     @Override
     public LatLng getPosition() {
