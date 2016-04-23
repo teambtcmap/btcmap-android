@@ -7,10 +7,10 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.event.DatabaseSyncFailedEvent;
-import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
-import com.bubelov.coins.event.DatabaseSyncStartedEvent;
 import com.bubelov.coins.database.DbContract;
+import com.bubelov.coins.event.DatabaseSyncFailedEvent;
+import com.bubelov.coins.event.DatabaseSyncStartedEvent;
+import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.service.CoinsIntentService;

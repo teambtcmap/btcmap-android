@@ -17,8 +17,8 @@ import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.service.rates.ExchangeRatesService;
-import com.bubelov.coins.service.sync.merchants.UserNotificationController;
 import com.bubelov.coins.service.sync.merchants.DatabaseSyncService;
+import com.bubelov.coins.service.sync.merchants.UserNotificationController;
 import com.bubelov.coins.ui.activity.SelectAreaActivity;
 
 import java.io.File;
