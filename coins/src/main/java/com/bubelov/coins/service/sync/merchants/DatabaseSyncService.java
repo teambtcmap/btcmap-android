@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.dao.MerchantDAO;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.event.DatabaseSyncStartedEvent;
@@ -29,7 +28,7 @@ import timber.log.Timber;
  */
 
 public class DatabaseSyncService extends CoinsIntentService {
-    private static final int MAX_MERCHANTS_PER_REQUEST = 500;
+    private static final int MAX_MERCHANTS_PER_REQUEST = 1000;
 
     public static void start(Context context) {
         context.startService(new Intent(context, DatabaseSyncService.class));
@@ -78,7 +77,10 @@ public class DatabaseSyncService extends CoinsIntentService {
             DateTime lastUpdate = getLatestMerchantUpdateDate(db);
             List<Merchant> merchants = getApi().getMerchants(lastUpdate.toString(Constants.DATE_FORMAT), MAX_MERCHANTS_PER_REQUEST).execute().body();
 
-            MerchantDAO.insertMerchants(this, merchants);
+            Timber.d("Inserting %s merchants", merchants.size());
+            time = System.currentTimeMillis();
+            Merchant.insert(merchants);
+            Timber.d("Inserted. Time: %s", System.currentTimeMillis() - time);
 
             for (Merchant merchant : merchants) {
                 if (!initialSync && notificationManager.shouldNotifyUser(merchant)) {
