@@ -1,8 +1,9 @@
 package com.bubelov.coins.service;
 
 import android.app.IntentService;
-import com.bubelov.coins.api.CoinsApi;
+
 import com.bubelov.coins.App;
+import com.bubelov.coins.api.CoinsApi;
 import com.squareup.otto.Bus;
 
 /**

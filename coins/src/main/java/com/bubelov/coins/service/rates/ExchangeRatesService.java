@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.dao.ExchangeRateDAO2;
 import com.bubelov.coins.event.ExchangeRateLoadFinishedEvent;
 import com.bubelov.coins.event.ExchangeRateLoadStartedEvent;
 import com.bubelov.coins.model.Currency;
@@ -74,7 +73,7 @@ public class ExchangeRatesService extends CoinsIntentService {
     }
 
     private boolean isCacheUpToDate() {
-        ExchangeRate latestRate = ExchangeRateDAO2.queryForLast(sourceCurrency, targetCurrency);
+        ExchangeRate latestRate = ExchangeRate.last(sourceCurrency, targetCurrency);
         return latestRate != null && latestRate.getUpdatedAt().isAfter(System.currentTimeMillis() - CACHE_LIFETIME_IN_MILLIS);
     }
 
@@ -87,7 +86,7 @@ public class ExchangeRatesService extends CoinsIntentService {
                     .newProvider(provider)
                     .getExchangeRate(sourceCurrency, targetCurrency);
 
-            ExchangeRateDAO2.insert(exchangeRate);
+            exchangeRate.create();
         } catch (Exception e) {
             Timber.e(e, "Can't load the exchange rate");
             Crashlytics.logException(e);
