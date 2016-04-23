@@ -1,13 +1,19 @@
 package com.bubelov.coins.model;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 
+import org.joda.time.DateTime;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+
+import timber.log.Timber;
 
 /**
  * Author: Igor Bubelov
@@ -47,6 +53,35 @@ public class Currency extends AbstractEntity implements Serializable {
 
     // Database stuff
 
+    public static Currency findByCode(String code) {
+        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        Cursor cursor = db.query(DbContract.Currencies.TABLE_NAME, null, "code = ?", new String[]{code}, null, null, null);
+
+        try {
+            return fromCursor(cursor);
+        } finally {
+            cursor.close();
+        }
+    }
+
+    public static List<Currency> findByMerchant(Merchant merchant) {
+        List<Currency> currencies = new ArrayList<>();
+        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        Cursor cursor = db.query(DbContract.CurrenciesMerchants.TABLE_NAME, null, "merchant_id = ?", new String[]{String.valueOf(merchant.getId())}, null, null, null);
+
+        try {
+            while (cursor.moveToNext()) {
+                currencies.add(fromCursor(cursor));
+            }
+        } catch (Exception e) {
+            Timber.e(e, "Failed to fetch currencies");
+        } finally {
+            cursor.close();
+        }
+
+        return currencies;
+    }
+
     public static void insert(List<Currency> currencies) throws Exception {
         for (Currency currency : currencies) {
             currency.insert();
@@ -78,5 +113,20 @@ public class Currency extends AbstractEntity implements Serializable {
         values.put(DbContract.Currencies.CRYPTO, isCrypto());
 
         return values;
+    }
+
+    private static Currency fromCursor(Cursor cursor) {
+        if (cursor == null) {
+            return null;
+        }
+
+        Currency currency = new Currency();
+        currency.setId(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._ID)));
+        currency.setName(cursor.getString(cursor.getColumnIndex(DbContract.Currencies.NAME)));
+        currency.setCode(cursor.getString(cursor.getColumnIndex(DbContract.Currencies.CODE)));
+        currency.setCrypto(cursor.getInt(cursor.getColumnIndex(DbContract.Currencies.CRYPTO)) == 1);
+        currency.setCreatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._CREATED_AT))));
+        currency.setUpdatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._UPDATED_AT))));
+        return currency;
     }
 }

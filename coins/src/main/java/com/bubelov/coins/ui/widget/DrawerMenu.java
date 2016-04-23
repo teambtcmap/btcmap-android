@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import com.bubelov.coins.App;
 import com.bubelov.coins.R;
-import com.bubelov.coins.dao.CurrencyDAO;
 import com.bubelov.coins.dao.ExchangeRateDAO2;
 import com.bubelov.coins.event.ExchangeRateLoadFinishedEvent;
 import com.bubelov.coins.event.ExchangeRateLoadStartedEvent;
@@ -157,8 +156,8 @@ public class DrawerMenu extends FrameLayout {
             }
         });
 
-        btc = CurrencyDAO.query("BTC");
-        usd = CurrencyDAO.query("USD");
+        btc = Currency.findByCode("BTC");
+        usd = Currency.findByCode("USD");
 
         showLastExchangeRate();
         updateExchangeRate(false);
