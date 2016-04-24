@@ -31,7 +31,6 @@ import com.bubelov.coins.Constants;
 import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.dao.MerchantDAO;
 import com.bubelov.coins.dao.MerchantNotificationDAO;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.DatabaseSyncStartedEvent;
@@ -600,7 +599,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     }
 
     private Merchant getMerchant(long id) {
-        Merchant merchant = MerchantDAO.query(this, id);
+        Merchant merchant = Merchant.find(id);
         merchant.setCurrencies(Currency.findByMerchant(merchant));
         return merchant;
     }
