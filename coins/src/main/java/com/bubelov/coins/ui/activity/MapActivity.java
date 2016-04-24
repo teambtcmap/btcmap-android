@@ -31,13 +31,13 @@ import com.bubelov.coins.Constants;
 import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.dao.MerchantNotificationDAO;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.DatabaseSyncStartedEvent;
 import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
 import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.model.MerchantNotification;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.ui.widget.CurrenciesFilterPopup;
@@ -286,7 +286,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     private void handleIntent(final Intent intent) {
         if (intent.getBooleanExtra(CLEAR_MERCHANT_NOTIFICATIONS_EXTRA, false)) {
-            new MerchantNotificationDAO(this).deleteAll();
+            MerchantNotification.deleteAll();
         }
 
         if (intent.hasExtra(MERCHANT_ID_EXTRA)) {

@@ -1,5 +1,6 @@
 package com.bubelov.coins.dagger;
 
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.bubelov.coins.MerchantsCache;
@@ -18,6 +19,8 @@ import dagger.Component;
 @Singleton
 @Component(modules = {AppContextModule.class, DatabaseModule.class, CacheModule.class})
 public interface AppComponent {
+    Context getContext();
+
     SQLiteDatabase database();
 
     MerchantsCache getMerchantsCache();
