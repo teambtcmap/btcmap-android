@@ -1,7 +1,7 @@
 package com.bubelov.coins.api.external;
 
-import retrofit.Call;
-import retrofit.http.GET;
+import retrofit2.Call;
+import retrofit2.http.GET;
 
 /**
  * Author: Igor Bubelov

@@ -58,7 +58,7 @@ public class Currency extends AbstractEntity implements Serializable {
         Cursor cursor = db.query(DbContract.Currencies.TABLE_NAME, null, "code = ?", new String[]{code}, null, null, null);
 
         try {
-            return fromCursor(cursor);
+            return cursor.moveToNext() ? fromCursor(cursor) : null;
         } finally {
             cursor.close();
         }

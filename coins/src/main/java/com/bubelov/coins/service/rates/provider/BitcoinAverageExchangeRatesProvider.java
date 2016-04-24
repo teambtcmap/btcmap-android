@@ -7,9 +7,8 @@ import com.bubelov.coins.util.ExchangeRatesFactory;
 
 import java.io.IOException;
 
-import retrofit.GsonConverterFactory;
-import retrofit.Retrofit;
-import retrofit.RxJavaCallAdapterFactory;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Author: Igor Bubelov
@@ -22,7 +21,6 @@ public class BitcoinAverageExchangeRatesProvider extends JsonApiRatesProvider {
     public BitcoinAverageExchangeRatesProvider() {
         api = new Retrofit.Builder()
                 .baseUrl("https://api.bitcoinaverage.com/")
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(getGsonForApis()))
                 .build()
                 .create(BitcoinAverageApi.class);
