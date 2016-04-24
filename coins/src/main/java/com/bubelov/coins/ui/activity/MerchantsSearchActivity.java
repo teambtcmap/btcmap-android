@@ -18,7 +18,6 @@ import android.text.Editable;
 import android.widget.EditText;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.dao.MerchantDAO;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.ui.adapter.MerchantsSearchResultsAdapter;
@@ -106,7 +105,7 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
         List<Merchant> merchants = new ArrayList<>();
 
         while (cursor.moveToNext()) {
-            merchants.add(MerchantDAO.query(this, cursor.getLong(0)));
+            merchants.add(Merchant.find(cursor.getLong(0)));
         }
 
         if (userLocation != null) {

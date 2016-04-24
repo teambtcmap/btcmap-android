@@ -1,5 +1,6 @@
 package com.bubelov.coins.model;
 
+import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
@@ -8,6 +9,8 @@ import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
+
+import org.joda.time.DateTime;
 
 import java.util.Collection;
 import java.util.List;
@@ -142,6 +145,33 @@ public class Merchant extends AbstractEntity implements ClusterItem {
     }
 
     // Database stuff
+
+    public static Merchant find(long id) {
+        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        Cursor cursor = db.query(DbContract.Merchants.TABLE_NAME, null, "_id = ?", new String[]{String.valueOf(id)}, null, null, null);
+
+        try {
+            return cursor.moveToNext() ? fromCursor(cursor) : null;
+        } finally {
+            cursor.close();
+        }
+    }
+
+    private static Merchant fromCursor(Cursor cursor) {
+        Merchant merchant = new Merchant();
+        merchant.setId(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._ID)));
+        merchant.setName(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.NAME)));
+        merchant.setDescription(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.DESCRIPTION)));
+        merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Merchants.LATITUDE)));
+        merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Merchants.LONGITUDE)));
+        merchant.setAmenity(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.AMENITY)));
+        merchant.setPhone(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.PHONE)));
+        merchant.setWebsite(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.WEBSITE)));
+        merchant.setOpeningHours(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.OPENING_HOURS)));
+        merchant.setCreatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Merchants._CREATED_AT))));
+        merchant.setUpdatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Merchants._UPDATED_AT))));
+        return merchant;
+    }
 
     public static void insert(List<Merchant> merchants) {
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
