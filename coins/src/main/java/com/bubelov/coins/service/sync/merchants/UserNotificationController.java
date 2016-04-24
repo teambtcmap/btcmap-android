@@ -14,9 +14,9 @@ import android.text.TextUtils;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.dao.MerchantNotificationDAO;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.model.MerchantNotification;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.receiver.ClearMerchantNotificationsReceiver;
@@ -92,15 +92,16 @@ public class UserNotificationController {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(UUID.randomUUID().hashCode(), builder.build());
 
-        MerchantNotificationDAO notificationDAO = new MerchantNotificationDAO(context);
-        notificationDAO.insert(merchantName);
+        MerchantNotification merchantNotification = new MerchantNotification();
+        merchantNotification.setMerchantId(merchantId);
+        MerchantNotification.insert(merchantNotification);
 
-        if (notificationDAO.queryForAll().size() > 1) {
-            issueGroupNotification(notificationDAO.queryForAll());
+        if (MerchantNotification.queryForAll().size() > 1) {
+            issueGroupNotification(MerchantNotification.queryForAll());
         }
     }
 
-    private void issueGroupNotification(List<String> pendingMerchants) {
+    private void issueGroupNotification(List<MerchantNotification> pendingMerchants) {
         NotificationArea notificationArea = new NotificationAreaProvider(context).get();
 
         Intent intent = MapActivity.newShowNotificationAreaIntent(context, notificationArea);
@@ -110,8 +111,9 @@ public class UserNotificationController {
         NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();
         style.setBigContentTitle(context.getString(R.string.notification_new_merchants_content_title, pendingMerchants.size()));
 
-        for (String merchant : pendingMerchants) {
-            style.addLine(merchant);
+        for (MerchantNotification notification : pendingMerchants) {
+            Merchant merchant = Merchant.find(notification.getMerchantId());
+            style.addLine(merchant.getName());
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)

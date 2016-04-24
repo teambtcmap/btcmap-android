@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.bubelov.coins.dao.MerchantNotificationDAO;
+import com.bubelov.coins.model.MerchantNotification;
 
 /**
  * Author: Igor Bubelov
@@ -16,7 +16,7 @@ public class ClearMerchantNotificationsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        new MerchantNotificationDAO(context).deleteAll();
+        MerchantNotification.deleteAll();
         context.unregisterReceiver(this);
     }
 }
