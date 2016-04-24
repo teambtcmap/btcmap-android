@@ -16,9 +16,8 @@ import com.squareup.otto.Bus;
 import org.joda.time.DateTime;
 
 import io.fabric.sdk.android.Fabric;
-import retrofit.GsonConverterFactory;
-import retrofit.Retrofit;
-import retrofit.RxJavaCallAdapterFactory;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import timber.log.Timber;
 
 /**
@@ -70,7 +69,6 @@ public class App extends Application {
 
         api = new Retrofit.Builder()
                 .baseUrl(getString(R.string.api_url))
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
                 .create(CoinsApi.class);
