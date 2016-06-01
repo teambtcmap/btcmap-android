@@ -4,8 +4,10 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.bubelov.coins.MerchantsCache;
+import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.provider.CoinsProvider;
 import com.bubelov.coins.util.MapMarkersCache;
+import com.google.gson.Gson;
 
 import javax.inject.Singleton;
 
@@ -17,7 +19,7 @@ import dagger.Component;
  */
 
 @Singleton
-@Component(modules = {AppContextModule.class, DatabaseModule.class, CacheModule.class})
+@Component(modules = {AppContextModule.class, DatabaseModule.class, CacheModule.class, ApiModule.class, ConverterModule.class})
 public interface AppComponent {
     Context getContext();
 
@@ -26,6 +28,10 @@ public interface AppComponent {
     MerchantsCache getMerchantsCache();
 
     MapMarkersCache getMarkersCache();
+
+    CoinsApi provideApi();
+
+    Gson provideGson();
 
     void inject(CoinsProvider provider);
     void inject(MerchantsCache cache);
