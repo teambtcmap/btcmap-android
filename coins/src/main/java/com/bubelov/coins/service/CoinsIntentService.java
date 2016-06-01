@@ -2,8 +2,8 @@ package com.bubelov.coins.service;
 
 import android.app.IntentService;
 
-import com.bubelov.coins.App;
 import com.bubelov.coins.api.CoinsApi;
+import com.bubelov.coins.dagger.Injector;
 
 /**
  * Author: Igor Bubelov
@@ -11,14 +11,11 @@ import com.bubelov.coins.api.CoinsApi;
  */
 
 public abstract class CoinsIntentService extends IntentService {
-    private App app;
-
     public CoinsIntentService(String name) {
         super(name);
-        app = App.getInstance();
     }
 
     protected CoinsApi getApi() {
-        return app.getApi();
+        return Injector.INSTANCE.getAppComponent().provideApi();
     }
 }
