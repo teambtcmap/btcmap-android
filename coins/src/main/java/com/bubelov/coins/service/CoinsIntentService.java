@@ -4,7 +4,6 @@ import android.app.IntentService;
 
 import com.bubelov.coins.App;
 import com.bubelov.coins.api.CoinsApi;
-import com.squareup.otto.Bus;
 
 /**
  * Author: Igor Bubelov
@@ -17,10 +16,6 @@ public abstract class CoinsIntentService extends IntentService {
     public CoinsIntentService(String name) {
         super(name);
         app = App.getInstance();
-    }
-
-    protected Bus getBus() {
-        return app.getBus();
     }
 
     protected CoinsApi getApi() {

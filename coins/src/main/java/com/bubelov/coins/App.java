@@ -6,12 +6,10 @@ import android.preference.PreferenceManager;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.serializer.DateTimeDeserializer;
-import com.bubelov.coins.util.MainThreadBus;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.squareup.otto.Bus;
 
 import org.joda.time.DateTime;
 
@@ -28,8 +26,6 @@ import timber.log.Timber;
 public class App extends Application {
     private static App instance;
 
-    private Bus bus;
-
     private CoinsApi api;
 
     @Override
@@ -44,17 +40,12 @@ public class App extends Application {
 
         Injector.INSTANCE.initAppComponent(this);
 
-        bus = new MainThreadBus();
         initApi();
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
     }
 
     public static App getInstance() {
         return instance;
-    }
-
-    public Bus getBus() {
-        return bus;
     }
 
     public CoinsApi getApi() {

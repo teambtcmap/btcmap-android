@@ -10,7 +10,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.bubelov.coins.App;
+import com.bubelov.coins.EventBus;
 import com.bubelov.coins.R;
 import com.bubelov.coins.event.ExchangeRateLoadFinishedEvent;
 import com.bubelov.coins.event.ExchangeRateLoadStartedEvent;
@@ -145,7 +145,7 @@ public class DrawerMenu extends FrameLayout {
         inflate(getContext(), R.layout.widget_drawer_menu, this);
         ButterKnife.bind(this);
         initItemsToAmenities();
-        App.getInstance().getBus().register(this);
+        EventBus.getInstance().register(this);
 
         checkExchangeRateButton.setOnClickListener(new OnClickListener() {
             @Override

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.bubelov.coins.Constants;
+import com.bubelov.coins.EventBus;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
@@ -45,16 +46,16 @@ public class DatabaseSyncService extends CoinsIntentService {
             return;
         }
 
-        getBus().post(new DatabaseSyncStartedEvent());
+        EventBus.getInstance().post(new DatabaseSyncStartedEvent());
 
         try {
             long merchantsBeforeSync = Merchant.getCount();
             long time = System.currentTimeMillis();
             sync();
             Timber.d("Sync time: %s", System.currentTimeMillis() - time);
-            getBus().post(new MerchantsSyncFinishedEvent(Merchant.getCount() != merchantsBeforeSync));
+            EventBus.getInstance().post(new MerchantsSyncFinishedEvent(Merchant.getCount() != merchantsBeforeSync));
         } catch (Exception exception) {
-            getBus().post(new DatabaseSyncFailedEvent());
+            EventBus.getInstance().post(new DatabaseSyncFailedEvent());
         }
     }
 
