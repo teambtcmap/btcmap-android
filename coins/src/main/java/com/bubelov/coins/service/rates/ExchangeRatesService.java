@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.bubelov.coins.EventBus;
 import com.bubelov.coins.R;
 import com.bubelov.coins.event.ExchangeRateLoadFinishedEvent;
 import com.bubelov.coins.event.ExchangeRateLoadStartedEvent;
@@ -66,9 +67,9 @@ public class ExchangeRatesService extends CoinsIntentService {
         }
 
         if (intent.getBooleanExtra(FORCE_LOAD_EXTRA, false) || !isCacheUpToDate()) {
-            getBus().post(new ExchangeRateLoadStartedEvent());
+            EventBus.getInstance().post(new ExchangeRateLoadStartedEvent());
             updateExchangeRate();
-            getBus().post(new ExchangeRateLoadFinishedEvent());
+            EventBus.getInstance().post(new ExchangeRateLoadFinishedEvent());
         }
     }
 

@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.bubelov.coins.App;
+import com.bubelov.coins.EventBus;
 import com.bubelov.coins.receiver.NetworkStateReceiver;
 
 /**
@@ -15,14 +15,11 @@ import com.bubelov.coins.receiver.NetworkStateReceiver;
  */
 
 public abstract class AbstractActivity extends AppCompatActivity implements NetworkStateReceiver.NetworkStateListener {
-    private App app;
-
     private NetworkStateReceiver networkStateReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        app = App.getInstance();
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
     }
@@ -30,7 +27,7 @@ public abstract class AbstractActivity extends AppCompatActivity implements Netw
     @Override
     protected void onResume() {
         super.onResume();
-        app.getBus().register(this);
+        EventBus.getInstance().register(this);
         registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
@@ -47,7 +44,7 @@ public abstract class AbstractActivity extends AppCompatActivity implements Netw
     @Override
     protected void onPause() {
         unregisterReceiver(networkStateReceiver);
-        app.getBus().unregister(this);
+        EventBus.getInstance().unregister(this);
         super.onPause();
     }
 
