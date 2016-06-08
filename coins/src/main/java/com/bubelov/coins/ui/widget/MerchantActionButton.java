@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.bubelov.coins.R;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -19,7 +19,8 @@ import butterknife.ButterKnife;
  */
 
 public class MerchantActionButton extends FrameLayout {
-    @Bind(R.id.text) TextView text;
+    @BindView(R.id.text)
+    TextView text;
 
     public MerchantActionButton(Context context) {
         super(context);

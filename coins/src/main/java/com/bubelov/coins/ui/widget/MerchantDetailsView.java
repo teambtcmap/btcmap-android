@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -29,23 +29,32 @@ import butterknife.ButterKnife;
  */
 
 public class MerchantDetailsView extends FrameLayout {
-    @Bind(R.id.header) View header;
+    @BindView(R.id.header)
+    View header;
 
-    @Bind(R.id.name) TextView name;
+    @BindView(R.id.name)
+    TextView name;
 
-    @Bind(R.id.address) TextView address;
+    @BindView(R.id.address)
+    TextView address;
 
-    @Bind(R.id.call) MerchantActionButton call;
+    @BindView(R.id.call)
+    MerchantActionButton call;
 
-    @Bind(R.id.open_website) View openWebsite;
+    @BindView(R.id.open_website)
+    View openWebsite;
 
-    @Bind(R.id.share) View share;
+    @BindView(R.id.share)
+    View share;
 
-    @Bind(R.id.description) TextView description;
+    @BindView(R.id.description)
+    TextView description;
 
-    @Bind(R.id.opening_hours) TextView openingHours;
+    @BindView(R.id.opening_hours)
+    TextView openingHours;
 
-    @Bind(R.id.accepted_currencies) TextView acceptedCurrencies;
+    @BindView(R.id.accepted_currencies)
+    TextView acceptedCurrencies;
 
     public MerchantDetailsView(Context context) {
         super(context);

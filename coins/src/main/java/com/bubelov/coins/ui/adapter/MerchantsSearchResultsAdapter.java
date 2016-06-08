@@ -18,7 +18,7 @@ import com.bubelov.coins.util.DistanceUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -98,11 +98,14 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
     }
 
     public static class ResultViewHolder extends RecyclerView.ViewHolder {
-        @Bind(R.id.icon) ImageView icon;
+        @BindView(R.id.icon)
+        ImageView icon;
 
-        @Bind(R.id.name) TextView name;
+        @BindView(R.id.name)
+        TextView name;
 
-        @Bind(R.id.distance) TextView distance;
+        @BindView(R.id.distance)
+        TextView distance;
 
         public ResultViewHolder(View itemView) {
             super(itemView);

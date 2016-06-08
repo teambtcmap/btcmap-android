@@ -47,7 +47,7 @@ dependencies {
     compile 'com.sothree.slidinguppanel:library:2.0.4'
     compile 'joda-time:joda-time:2.8.2'
     compile 'com.readystatesoftware.sqliteasset:sqliteassethelper:2.0.1'
-    compile 'com.jakewharton:butterknife:7.0.1'
+    compile 'com.jakewharton:butterknife:8.0.1'
     compile 'com.jakewharton.timber:timber:4.1.1'
 
     compile 'com.google.code.gson:gson:2.4'

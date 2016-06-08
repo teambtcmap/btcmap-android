@@ -40,7 +40,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -57,13 +57,13 @@ public class SelectAreaActivity extends AbstractActivity {
 
     private static final int DEFAULT_ZOOM = 8;
 
-    @Bind(R.id.toolbar)
+    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
-    @Bind(R.id.bottom_panel)
+    @BindView(R.id.bottom_panel)
     View bottomPanel;
 
-    @Bind(R.id.seek_bar_radius)
+    @BindView(R.id.seek_bar_radius)
     SeekBar radiusSeekBar;
 
     private GoogleMap map;

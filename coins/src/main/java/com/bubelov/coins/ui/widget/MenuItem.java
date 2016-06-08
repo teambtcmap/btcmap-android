@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import com.bubelov.coins.R;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -18,10 +18,10 @@ import butterknife.ButterKnife;
  */
 
 public class MenuItem extends FrameLayout {
-    @Bind(R.id.icon)
+    @BindView(R.id.icon)
     View icon;
 
-    @Bind(R.id.text)
+    @BindView(R.id.text)
     TextView text;
 
     public MenuItem(Context context) {

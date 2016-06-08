@@ -75,7 +75,7 @@ import com.squareup.otto.Subscribe;
 import java.util.Collection;
 import java.util.Collections;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemClickListener {
@@ -99,16 +99,16 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     private static final float DEFAULT_ZOOM = 13;
 
-    @Bind(R.id.toolbar)
+    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
-    @Bind(R.id.merchant_toolbar)
+    @BindView(R.id.merchant_toolbar)
     Toolbar merchantToolbar;
 
-    @Bind(R.id.merchant_top_gradient)
+    @BindView(R.id.merchant_top_gradient)
     View merchantTopGradient;
 
-    @Bind(R.id.drawer_layout)
+    @BindView(R.id.drawer_layout)
     DrawerLayout drawer;
 
     private ActionBarDrawerToggle drawerToggle;
@@ -119,13 +119,13 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     private Amenity amenity;
 
-    @Bind(R.id.sliding_panel)
+    @BindView(R.id.sliding_panel)
     SlidingUpPanelLayout slidingLayout;
 
-    @Bind(R.id.merchant_details)
+    @BindView(R.id.merchant_details)
     MerchantDetailsView merchantDetails;
 
-    @Bind(R.id.loader)
+    @BindView(R.id.loader)
     View loader;
 
     private GoogleApiClient googleApiClient;
@@ -140,7 +140,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     private MerchantsCache merchantsCache;
 
-    @Bind(R.id.locate_button)
+    @BindView(R.id.locate_button)
     FloatingActionButton actionButton;
 
     private boolean firstLaunch;
