@@ -26,7 +26,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -38,11 +38,14 @@ public class DrawerMenu extends FrameLayout {
     private Currency btc;
     private Currency usd;
 
-    @Bind(R.id.exchange_rate) TextView exchangeRate;
+    @BindView(R.id.exchange_rate)
+    TextView exchangeRate;
 
-    @Bind(R.id.exchange_rate_last_check) TextView exchangeRateLastCheck;
+    @BindView(R.id.exchange_rate_last_check)
+    TextView exchangeRateLastCheck;
 
-    @Bind(R.id.check) View checkExchangeRateButton;
+    @BindView(R.id.check)
+    View checkExchangeRateButton;
 
     private boolean exchangeRateLoading;
 
