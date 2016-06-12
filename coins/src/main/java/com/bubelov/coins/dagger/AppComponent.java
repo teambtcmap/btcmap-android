@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.api.CoinsApi;
-import com.bubelov.coins.provider.CoinsProvider;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.google.gson.Gson;
 
@@ -33,6 +32,5 @@ public interface AppComponent {
 
     Gson provideGson();
 
-    void inject(CoinsProvider provider);
     void inject(MerchantsCache cache);
 }
