@@ -42,19 +42,24 @@ public class DatabaseSyncService extends CoinsIntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         Timber.d("New intent");
+
         if (intent == null) {
             return;
         }
 
+        Timber.d("Posting sync started event");
         EventBus.getInstance().post(new DatabaseSyncStartedEvent());
 
         try {
             long merchantsBeforeSync = Merchant.getCount();
+            Timber.d("Merchants before sync: %s", merchantsBeforeSync);
             long time = System.currentTimeMillis();
             sync();
             Timber.d("Sync time: %s", System.currentTimeMillis() - time);
+            Timber.d("Posting sync finished event");
             EventBus.getInstance().post(new MerchantsSyncFinishedEvent(Merchant.getCount() != merchantsBeforeSync));
-        } catch (Exception exception) {
+        } catch (Exception e) {
+            Timber.e(e, "Couldn't sync database");
             EventBus.getInstance().post(new DatabaseSyncFailedEvent());
         }
     }
