@@ -4,6 +4,7 @@ import android.app.Application;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.dagger.Injector;
+import com.bubelov.coins.service.sync.merchants.DatabaseSyncService;
 import com.crashlytics.android.Crashlytics;
 
 import net.danlew.android.joda.JodaTimeAndroid;
@@ -29,5 +30,7 @@ public class App extends Application {
         }
 
         Injector.INSTANCE.initAppComponent(this);
+
+        DatabaseSyncService.startIfNeverSynced(this);
     }
 }
