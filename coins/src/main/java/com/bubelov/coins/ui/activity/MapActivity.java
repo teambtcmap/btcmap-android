@@ -562,10 +562,8 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
         setDatabaseSyncing(false);
 
-        if (event.isDataChanged()) {
-            merchantsCache.invalidate();
-            reloadMerchants();
-        }
+        merchantsCache.invalidate();
+        reloadMerchants();
     }
 
     @Subscribe

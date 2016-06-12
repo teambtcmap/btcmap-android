@@ -6,13 +6,5 @@ package com.bubelov.coins.event;
  */
 
 public class MerchantsSyncFinishedEvent {
-    private boolean dataChanged;
-
-    public MerchantsSyncFinishedEvent(boolean dataChanged) {
-        this.dataChanged = dataChanged;
-    }
-
-    public boolean isDataChanged() {
-        return dataChanged;
-    }
+    // Nothing to do here
 }

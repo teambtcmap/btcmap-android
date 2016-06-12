@@ -2,11 +2,14 @@ package com.bubelov.coins.service.sync.merchants;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.preference.PreferenceManager;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.EventBus;
+import com.bubelov.coins.PreferenceKeys;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
@@ -29,7 +32,15 @@ import timber.log.Timber;
  */
 
 public class DatabaseSyncService extends CoinsIntentService {
-    private static final int MAX_MERCHANTS_PER_REQUEST = 1000;
+    private static final int MAX_MERCHANTS_PER_REQUEST = 2500;
+
+    public static void startIfNeverSynced(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        if (!preferences.contains(PreferenceKeys.DATABASE_SYNC_DATE)) {
+            start(context);
+        }
+    }
 
     public static void start(Context context) {
         context.startService(new Intent(context, DatabaseSyncService.class));
@@ -57,7 +68,7 @@ public class DatabaseSyncService extends CoinsIntentService {
             sync();
             Timber.d("Sync time: %s", System.currentTimeMillis() - time);
             Timber.d("Posting sync finished event");
-            EventBus.getInstance().post(new MerchantsSyncFinishedEvent(Merchant.getCount() != merchantsBeforeSync));
+            EventBus.getInstance().post(new MerchantsSyncFinishedEvent());
         } catch (Exception e) {
             Timber.e(e, "Couldn't sync database");
             EventBus.getInstance().post(new DatabaseSyncFailedEvent());
@@ -98,6 +109,11 @@ public class DatabaseSyncService extends CoinsIntentService {
                 break;
             }
         }
+
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putLong(PreferenceKeys.DATABASE_SYNC_DATE, System.currentTimeMillis())
+                .apply();
     }
 
     private DateTime getLatestMerchantUpdateDate(SQLiteDatabase db) {
