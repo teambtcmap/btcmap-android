@@ -4,16 +4,6 @@
     package="com.bubelov.coins"
     android:installLocation="auto">
 
-    <permission
-        android:name="com.bubelov.coins.permission.READ"
-        android:label="Read Coins data" />
-
-    <permission
-        android:name="com.bubelov.coins.permission.WRITE"
-        android:label="Write Coins data" />
-
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
     <application
         android:name=".App"
         android:allowBackup="false"
@@ -58,22 +48,6 @@
         <service android:name=".service.sync.merchants.DatabaseSyncService" />
 
         <service android:name=".service.rates.ExchangeRatesService" />
-
-        <provider
-            android:name=".provider.CoinsProvider"
-            android:authorities="com.bubelov.coins"
-            android:readPermission="com.bubelov.coins.permission.READ"
-            android:writePermission="com.bubelov.coins.permission.WRITE">
-
-            <path-permission
-                android:pathPrefix="/search_suggest_query"
-                android:readPermission="android.permission.GLOBAL_SEARCH" />
-
-        </provider>
-
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
