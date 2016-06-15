@@ -1,6 +1,5 @@
 package com.bubelov.coins.ui.fragment;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -9,7 +8,6 @@ import android.os.Environment;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.widget.Toast;
 
 import com.bubelov.coins.R;
@@ -19,7 +17,7 @@ import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.service.rates.ExchangeRatesService;
 import com.bubelov.coins.service.sync.merchants.DatabaseSyncService;
 import com.bubelov.coins.service.sync.merchants.UserNotificationController;
-import com.bubelov.coins.ui.activity.SelectAreaActivity;
+import com.bubelov.coins.ui.activity.NotificationAreaActivity;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,7 +52,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         if (preference.getKey().equals(getString(R.string.pref_area_of_interest_key))) {
-            startActivity(new Intent(getActivity(), SelectAreaActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity()).toBundle());
+            NotificationAreaActivity.start(getActivity());
         }
 
         if (preference.getKey().equals("pref_test_notification")) {
@@ -69,9 +67,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                 Random random = new Random(System.currentTimeMillis());
 
                 cursor = db.query(DbContract.Merchants.TABLE_NAME,
-                        new String[] { DbContract.Merchants._ID, DbContract.Merchants.NAME },
+                        new String[]{DbContract.Merchants._ID, DbContract.Merchants.NAME},
                         "_id = ?",
-                        new String[] { String.valueOf(random.nextInt(merchantsCount + 1)) },
+                        new String[]{String.valueOf(random.nextInt(merchantsCount + 1))},
                         null,
                         null,
                         null);
@@ -93,13 +91,13 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         if (preference.getKey().equals("pref_remove_last_merchant")) {
             SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
 
-            Cursor cursor = db.query(DbContract.Merchants.TABLE_NAME, new String[] { DbContract.Merchants._ID }, null, null, null, null, DbContract.Merchants._UPDATED_AT + " DESC", "1");
+            Cursor cursor = db.query(DbContract.Merchants.TABLE_NAME, new String[]{DbContract.Merchants._ID}, null, null, null, null, DbContract.Merchants._UPDATED_AT + " DESC", "1");
 
             if (cursor.moveToNext()) {
                 long id = cursor.getLong(0);
                 cursor.close();
 
-                int rowsAffected = db.delete(DbContract.Merchants.TABLE_NAME, DbContract.Merchants._ID + " = ?", new String[] { String.valueOf(id) } );
+                int rowsAffected = db.delete(DbContract.Merchants.TABLE_NAME, DbContract.Merchants._ID + " = ?", new String[]{String.valueOf(id)});
 
                 if (rowsAffected > 0) {
                     Toast.makeText(getActivity(), "Removed!", Toast.LENGTH_SHORT).show();

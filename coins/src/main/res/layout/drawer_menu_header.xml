@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -21,7 +20,7 @@
         android:layout_height="wrap_content"
         android:background="#11000000"
         android:orientation="vertical"
-        android:paddingBottom="8dp"
+        android:paddingBottom="16dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:paddingTop="16dp">
@@ -38,54 +37,35 @@
                 android:src="@drawable/ic_bitcoin" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical">
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical">
 
                 <TextView
                     android:id="@+id/exchange_rate"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
                     android:textColor="@color/white"
-                    android:textSize="24sp"
+                    android:textSize="28sp"
                     tools:text="$300.00" />
+
+                <ImageView
+                    android:id="@+id/check"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:contentDescription="@string/cd_update_exchange_rate"
+                    android:src="@drawable/ic_refresh_price" />
 
             </LinearLayout>
 
         </LinearLayout>
 
-        <com.bubelov.coins.ui.widget.TypefaceTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/exchange_rate"
-            android:textColor="@color/white"
-            android:textSize="14sp"
-            app:typeface="medium" />
-
-        <com.bubelov.coins.ui.widget.TypefaceTextView
-            android:id="@+id/exchange_rate_last_check"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:textSize="14sp"
-            app:typeface="regular"
-            tools:text="Checked 15 minutes ago" />
-
     </LinearLayout>
-
-    <ImageView
-        android:id="@+id/check"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:contentDescription="@string/cd_update_exchange_rate"
-        android:padding="8dp"
-        android:src="@drawable/ic_refresh_price" />
 
 </RelativeLayout>

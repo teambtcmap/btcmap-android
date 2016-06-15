@@ -103,4 +103,6 @@
     <string name="cd_bitcoin_logo" translatable="false">Bitcoin logo</string>
     <string name="cd_update_exchange_rate" translatable="false">Refresh exchange rate</string>
 
+    <string name="notification_area_activity_title">Notification area</string>
+
 </resources>

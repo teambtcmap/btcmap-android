@@ -21,7 +21,6 @@ import com.bubelov.coins.service.rates.ExchangeRatesService;
 import com.bubelov.coins.util.AnimationListenerAdapter;
 import com.squareup.otto.Subscribe;
 
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,13 +35,11 @@ import butterknife.ButterKnife;
 
 public class DrawerMenu extends FrameLayout {
     private Currency btc;
+
     private Currency usd;
 
     @BindView(R.id.exchange_rate)
-    TextView exchangeRate;
-
-    @BindView(R.id.exchange_rate_last_check)
-    TextView exchangeRateLastCheck;
+    TextView exchangeRateView;
 
     @BindView(R.id.check)
     View checkExchangeRateButton;
@@ -198,9 +195,7 @@ public class DrawerMenu extends FrameLayout {
             DecimalFormat format = new DecimalFormat();
             format.setMinimumFractionDigits(2);
             format.setMaximumFractionDigits(2);
-
-            this.exchangeRate.setText(getResources().getString(R.string.price_in_dollars, format.format(exchangeRate.getValue())));
-            exchangeRateLastCheck.setText(getResources().getString(R.string.bitcoin_price_checked_at, DateFormat.getTimeInstance(DateFormat.SHORT).format(exchangeRate.getUpdatedAt().getMillis())));
+            exchangeRateView.setText(getResources().getString(R.string.price_in_dollars, format.format(exchangeRate.getValue())));
         }
     }
 

@@ -32,8 +32,8 @@
             android:parentActivityName=".ui.activity.MapActivity" />
 
         <activity
-            android:name=".ui.activity.SelectAreaActivity"
-            android:label="Location"
+            android:name=".ui.activity.NotificationAreaActivity"
+            android:label="@string/notification_area_activity_title"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
@@ -43,7 +43,6 @@
 
         <activity
             android:name=".ui.activity.MerchantsSearchActivity"
-            android:label=""
             android:theme="@style/AppTheme.SearchActivity" />
 
         <service android:name=".service.sync.merchants.DatabaseSyncService" />
