@@ -53,6 +53,17 @@ public class Currency extends AbstractEntity implements Serializable {
 
     // Database stuff
 
+    public static Currency find(long id) {
+        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        Cursor cursor = db.query(DbContract.Currencies.TABLE_NAME, null, "_id = ?", new String[]{String.valueOf(id)}, null, null, null);
+
+        try {
+            return cursor.moveToNext() ? fromCursor(cursor) : null;
+        } finally {
+            cursor.close();
+        }
+    }
+
     public static Currency findByCode(String code) {
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
         Cursor cursor = db.query(DbContract.Currencies.TABLE_NAME, null, "code = ?", new String[]{code}, null, null, null);
@@ -71,7 +82,8 @@ public class Currency extends AbstractEntity implements Serializable {
 
         try {
             while (cursor.moveToNext()) {
-                currencies.add(fromCursor(cursor));
+                long currencyId = cursor.getLong(cursor.getColumnIndex(DbContract.CurrenciesMerchants.CURRENCY_ID));
+                currencies.add(find(currencyId));
             }
         } catch (Exception e) {
             Timber.e(e, "Failed to fetch currencies");
