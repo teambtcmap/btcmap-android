@@ -1,9 +1,9 @@
 package com.bubelov.coins.ui.widget;
 
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.widget.ListPopupWindow;
 import android.view.View;
@@ -13,6 +13,7 @@ import android.widget.CompoundButton;
 import android.widget.ListAdapter;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.util.Utils;
 
@@ -33,15 +34,20 @@ public class CurrenciesFilterPopup extends ListPopupWindow {
     }
 
     public ListAdapter getAdapter() {
+        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+
+        Cursor cursor = db.query(DbContract.Currencies.TABLE_NAME,
+                new String[]{DbContract.Currencies._ID, DbContract.Currencies.NAME, DbContract.Currencies.SHOW_ON_MAP},
+                String.format("%s = ?", DbContract.Currencies.CRYPTO), new String[]{String.valueOf(1)},
+                null,
+                null,
+                null);
+
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(context,
                 R.layout.list_item_currency_filter,
-                context.getContentResolver().query(DbContract.Currencies.CONTENT_URI,
-                        new String[]{DbContract.Currencies._ID, DbContract.Currencies.NAME, DbContract.Currencies.SHOW_ON_MAP},
-                        String.format("%s = ?", DbContract.Currencies.CRYPTO),
-                        new String[]{String.valueOf(1)},
-                        null),
-                new String[] { DbContract.Currencies.NAME, DbContract.Currencies.SHOW_ON_MAP },
-                new int[] { R.id.name, R.id.enabled },
+                cursor,
+                new String[]{DbContract.Currencies.NAME, DbContract.Currencies.SHOW_ON_MAP},
+                new int[]{R.id.name, R.id.enabled},
                 0);
 
         final int idIndex = 0;
@@ -83,6 +89,8 @@ public class CurrenciesFilterPopup extends ListPopupWindow {
     private void setShowOnMap(long currencyId, boolean showOnMap) {
         ContentValues values = new ContentValues();
         values.put(DbContract.Currencies.SHOW_ON_MAP, showOnMap ? 1 : 0);
-        context.getContentResolver().update(ContentUris.withAppendedId(DbContract.Currencies.CONTENT_URI, currencyId), values, null, null);
+
+        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        db.update(DbContract.Currencies.TABLE_NAME, values, "_id = ?", new String[]{String.valueOf(currencyId)});
     }
 }

@@ -4,12 +4,14 @@
     package="com.bubelov.coins"
     android:installLocation="auto">
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:name=".App"
         android:allowBackup="false"
-        android:supportsRtl="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
         <activity
@@ -42,8 +44,7 @@
         <activity
             android:name=".ui.activity.MerchantsSearchActivity"
             android:label=""
-            android:theme="@style/AppTheme.SearchActivity"
-            android:windowSoftInputMode="stateVisible" />
+            android:theme="@style/AppTheme.SearchActivity" />
 
         <service android:name=".service.sync.merchants.DatabaseSyncService" />
 

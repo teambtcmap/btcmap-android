@@ -2,7 +2,7 @@ package com.bubelov.coins.ui.activity;
 
 import android.app.Activity;
 import android.app.LoaderManager;
-import android.content.CursorLoader;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
@@ -14,16 +14,19 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
+import com.bubelov.coins.loader.LocalCursorLoader;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.ui.adapter.MerchantsSearchResultsAdapter;
 import com.bubelov.coins.util.DistanceComparator;
 import com.bubelov.coins.util.DistanceUnits;
-import com.bubelov.coins.util.TextWatcherAdapter;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ContentViewEvent;
 
@@ -31,7 +34,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnEditorAction;
+import butterknife.OnTextChanged;
 
 /**
  * Author: Igor Bubelov
@@ -47,6 +53,11 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
 
     private static final String QUERY_KEY = "query";
 
+    private static final int MIN_QUERY_LENGTH = 3;
+
+    @BindView(R.id.query)
+    EditText queryView;
+
     private MerchantsSearchResultsAdapter resultsAdapter;
 
     private Location userLocation;
@@ -55,6 +66,11 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
         Intent intent = new Intent(activity, MerchantsSearchActivity.class);
         intent.putExtra(USER_LOCATION_EXTRA, userLocation);
         activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
+
+        Answers.getInstance().logContentView(new ContentViewEvent()
+                .putContentName("Merchants search screen")
+                .putContentType("Screens")
+                .putContentId("Merchants search"));
     }
 
     @Override
@@ -74,26 +90,16 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
 
         resultsAdapter = new MerchantsSearchResultsAdapter(this, userLocation, getDistanceUnits());
         resultsView.setAdapter(resultsAdapter);
-
-        ((EditText) ButterKnife.findById(this, R.id.query)).addTextChangedListener(new TextWatcherAdapter() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                search(s.toString());
-            }
-        });
-
-        Answers.getInstance().logContentView(new ContentViewEvent()
-                .putContentName("Merchants search")
-                .putContentType("Screens")
-                .putContentId("Merchants search"));
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String query = args == null ? "" : args.getString(QUERY_KEY);
 
-        return new CursorLoader(this,
-                DbContract.Merchants.CONTENT_URI,
+        return new LocalCursorLoader(this,
+                Injector.INSTANCE.getAppComponent().database(),
+                DbContract.Merchants.TABLE_NAME,
+                null,
                 null,
                 String.format("%s like ? or %s like ?", DbContract.Merchants.NAME, DbContract.Merchants.AMENITY),
                 new String[]{"%" + query + "%", "%" + query + "%"},
@@ -131,13 +137,25 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
         supportFinishAfterTransition();
     }
 
-    private void search(String query) {
-        if (query.length() >= 3) {
+    @OnTextChanged(R.id.query)
+    void onQueryTextChanged(CharSequence query) {
+        if (query.length() >= MIN_QUERY_LENGTH) {
             Bundle args = new Bundle();
-            args.putString(QUERY_KEY, query);
+            args.putString(QUERY_KEY, query.toString());
             getLoaderManager().restartLoader(MERCHANTS_LOADER, args, this);
         } else {
             getLoaderManager().destroyLoader(MERCHANTS_LOADER);
+        }
+    }
+
+    @OnEditorAction(R.id.query)
+    boolean onEditorAction(int actionId) {
+        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+            InputMethodManager inputMethodManager = (InputMethodManager) queryView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(queryView.getWindowToken(), 0);
+            return true;
+        } else {
+            return false;
         }
     }
 

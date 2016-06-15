@@ -1,7 +1,9 @@
 package com.bubelov.coins.ui.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.location.Location;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -80,11 +82,13 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
             if (merchant.getAmenity().equalsIgnoreCase(amenity.name())) {
                 amenityFound = true;
                 holder.icon.setBackgroundResource(amenity.getIconId());
+                DrawableCompat.setTint(holder.icon.getBackground(), Color.WHITE);
             }
         }
 
         if (!amenityFound) {
             holder.icon.setBackgroundResource(R.drawable.ic_place_24dp);
+            DrawableCompat.setTint(holder.icon.getBackground(), Color.WHITE);
         }
     }
 
@@ -99,7 +103,7 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
 
     public static class ResultViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.icon)
-        ImageView icon;
+        View icon;
 
         @BindView(R.id.name)
         TextView name;
