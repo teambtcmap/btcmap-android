@@ -113,7 +113,7 @@
         android:id="@+id/settings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:mi_icon="@drawable/ic_settings"
+        app:mi_icon="@drawable/ic_settings_24dp"
         app:text="@string/menu_item_settings"
         tools:ignore="InconsistentLayout" />
 

@@ -1,32 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <ImageView
-        android:contentDescription="@null"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_alignBottom="@+id/header"
         android:layout_alignTop="@+id/header"
+        android:contentDescription="@null"
         android:scaleType="centerCrop"
         android:src="@drawable/drawer_header_background" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_alignBottom="@+id/header"
-        android:layout_alignTop="@+id/header"
-        android:background="#11000000" />
 
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#11000000"
         android:orientation="vertical"
         android:paddingBottom="8dp"
         android:paddingLeft="16dp"
@@ -39,9 +32,9 @@
             android:paddingTop="@dimen/drawer_header_padding">
 
             <ImageView
-                android:contentDescription="@string/cd_bitcoin_logo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/cd_bitcoin_logo"
                 android:src="@drawable/ic_bitcoin" />
 
             <LinearLayout
@@ -84,14 +77,14 @@
 
     </LinearLayout>
 
-    <ImageButton
+    <ImageView
         android:id="@+id/check"
-        android:contentDescription="@string/cd_update_exchange_rate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:contentDescription="@string/cd_update_exchange_rate"
         android:padding="8dp"
         android:src="@drawable/ic_refresh_price" />
 
