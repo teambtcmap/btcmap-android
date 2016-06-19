@@ -1,6 +1,7 @@
 package com.bubelov.coins.ui.widget;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.View;
@@ -14,8 +15,8 @@ import com.bubelov.coins.EventBus;
 import com.bubelov.coins.R;
 import com.bubelov.coins.event.ExchangeRateLoadFinishedEvent;
 import com.bubelov.coins.event.ExchangeRateLoadStartedEvent;
+import com.bubelov.coins.event.DatabaseSyncedEvent;
 import com.bubelov.coins.model.Amenity;
-import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.ExchangeRate;
 import com.bubelov.coins.service.rates.ExchangeRatesService;
 import com.bubelov.coins.util.AnimationListenerAdapter;
@@ -34,10 +35,6 @@ import butterknife.ButterKnife;
  */
 
 public class DrawerMenu extends FrameLayout {
-    private Currency btc;
-
-    private Currency usd;
-
     @BindView(R.id.exchange_rate)
     TextView exchangeRateView;
 
@@ -155,9 +152,6 @@ public class DrawerMenu extends FrameLayout {
             }
         });
 
-        btc = Currency.findByCode("BTC");
-        usd = Currency.findByCode("USD");
-
         showLastExchangeRate();
         updateExchangeRate(false);
 
@@ -189,7 +183,7 @@ public class DrawerMenu extends FrameLayout {
     }
 
     private void showLastExchangeRate() {
-        ExchangeRate exchangeRate = ExchangeRate.last(btc, usd);
+        ExchangeRate exchangeRate = ExchangeRate.last("BTC", "USD");
 
         if (exchangeRate != null) {
             DecimalFormat format = new DecimalFormat();
@@ -200,7 +194,7 @@ public class DrawerMenu extends FrameLayout {
     }
 
     private void updateExchangeRate(boolean forceLoad) {
-        getContext().startService(ExchangeRatesService.newIntent(getContext(), btc, usd, forceLoad));
+        getContext().startService(ExchangeRatesService.newIntent(getContext(), "BTC", "USD", forceLoad));
     }
 
     @Subscribe
@@ -234,6 +228,13 @@ public class DrawerMenu extends FrameLayout {
     @Subscribe
     public void onExchangeRateLoadFinished(ExchangeRateLoadFinishedEvent event) {
         exchangeRateLoading = false;
+    }
+
+    @Subscribe
+    public void onDatabaseSynced(DatabaseSyncedEvent e) {
+        if (TextUtils.isEmpty(exchangeRateView.getText())) {
+            updateExchangeRate(false);
+        }
     }
 
     public interface OnItemClickListener {

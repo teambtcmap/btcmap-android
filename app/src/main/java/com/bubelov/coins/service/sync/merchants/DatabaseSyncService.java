@@ -14,7 +14,7 @@ import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.DatabaseSyncStartedEvent;
-import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
+import com.bubelov.coins.event.DatabaseSyncedEvent;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.service.CoinsIntentService;
@@ -68,7 +68,7 @@ public class DatabaseSyncService extends CoinsIntentService {
             sync();
             Timber.d("Sync time: %s", System.currentTimeMillis() - time);
             Timber.d("Posting sync finished event");
-            EventBus.getInstance().post(new MerchantsSyncFinishedEvent());
+            EventBus.getInstance().post(new DatabaseSyncedEvent());
         } catch (Exception e) {
             Timber.e(e, "Couldn't sync database");
             EventBus.getInstance().post(new DatabaseSyncFailedEvent());

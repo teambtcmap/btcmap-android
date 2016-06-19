@@ -1,19 +1,13 @@
 package com.bubelov.coins.database;
 
-import android.net.Uri;
-
 /**
  * Author: Igor Bubelov
  * Date: 07/07/14 22:12
  */
 
 public interface DbContract {
-    String AUTHORITY = "com.bubelov.coins";
-    String BASE_CONTENT_URI = String.format("content://%s", AUTHORITY);
-
     interface Merchants extends BaseColumns {
         String TABLE_NAME = "merchants";
-        Uri CONTENT_URI = Uri.parse(String.format("%s/%s", BASE_CONTENT_URI, TABLE_NAME));
 
         String LATITUDE = "latitude";
         String LONGITUDE = "longitude";
@@ -28,7 +22,6 @@ public interface DbContract {
 
     interface Currencies extends BaseColumns {
         String TABLE_NAME = "currencies";
-        Uri CONTENT_URI = Uri.parse(String.format("%s/%s", BASE_CONTENT_URI, TABLE_NAME));
 
         String NAME = "name";
         String CODE = "code";
@@ -38,7 +31,6 @@ public interface DbContract {
 
     interface CurrenciesMerchants extends BaseColumns {
         String TABLE_NAME = "currencies_merchants";
-        Uri CONTENT_URI = Uri.parse(String.format("%s/%s", BASE_CONTENT_URI, TABLE_NAME));
 
         String CURRENCY_ID = "currency_id";
         String MERCHANT_ID = "merchant_id";
@@ -46,10 +38,9 @@ public interface DbContract {
 
     interface ExchangeRates extends BaseColumns {
         String TABLE_NAME = "exchange_rates";
-        Uri CONTENT_URI = Uri.parse(String.format("%s/%s", BASE_CONTENT_URI, TABLE_NAME));
 
-        String BASE_CURRENCY_ID = "base_currency_id";
-        String CURRENCY_ID = "currency_id";
+        String CURRENCY = "currency";
+        String BASE_CURRENCY = "base_currency";
         String VALUE = "value";
     }
 }

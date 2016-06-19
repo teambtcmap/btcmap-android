@@ -10,11 +10,11 @@ import java.io.Serializable;
  */
 
 public abstract class AbstractEntity implements Serializable {
-    private long id;
+    protected long id;
 
-    private DateTime createdAt;
+    protected DateTime createdAt;
 
-    private DateTime updatedAt;
+    protected DateTime updatedAt;
 
     public long getId() {
         return id;

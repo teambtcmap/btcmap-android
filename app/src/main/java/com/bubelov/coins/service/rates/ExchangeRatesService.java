@@ -4,12 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 import com.bubelov.coins.EventBus;
 import com.bubelov.coins.R;
 import com.bubelov.coins.event.ExchangeRateLoadFinishedEvent;
 import com.bubelov.coins.event.ExchangeRateLoadStartedEvent;
-import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.ExchangeRate;
 import com.bubelov.coins.service.CoinsIntentService;
 import com.bubelov.coins.service.rates.provider.ExchangeRatesProviderFactory;
@@ -29,26 +29,26 @@ import timber.log.Timber;
 public class ExchangeRatesService extends CoinsIntentService {
     private static final String TAG = ExchangeRatesService.class.getSimpleName();
 
-    private static final String SOURCE_CURRENCY_EXTRA = "source_currency";
+    private static final String BASE_CURRENCY_EXTRA = "base_currency";
 
-    private static final String TARGET_CURRENCY_EXTRA = "target_currency";
+    private static final String CURRENCY_EXTRA = "target_currency";
 
     private static final String FORCE_LOAD_EXTRA = "force_load";
 
     private static final long CACHE_LIFETIME_IN_MILLIS = TimeUnit.MINUTES.toMillis(15);
 
-    private Currency sourceCurrency;
+    private String currency;
 
-    private Currency targetCurrency;
+    private String baseCurrency;
 
     public ExchangeRatesService() {
         super(TAG);
     }
 
-    public static Intent newIntent(Context context, Currency sourceCurrency, Currency targetCurrency, boolean forceLoad) {
+    public static Intent newIntent(Context context, String currency, String baseCurrency, boolean forceLoad) {
         Intent intent = new Intent(context, ExchangeRatesService.class);
-        intent.putExtra(SOURCE_CURRENCY_EXTRA, sourceCurrency);
-        intent.putExtra(TARGET_CURRENCY_EXTRA, targetCurrency);
+        intent.putExtra(CURRENCY_EXTRA, currency);
+        intent.putExtra(BASE_CURRENCY_EXTRA, baseCurrency);
         intent.putExtra(FORCE_LOAD_EXTRA, forceLoad);
         return intent;
     }
@@ -59,10 +59,11 @@ public class ExchangeRatesService extends CoinsIntentService {
             return;
         }
 
-        sourceCurrency = (Currency) intent.getSerializableExtra(SOURCE_CURRENCY_EXTRA);
-        targetCurrency = (Currency) intent.getSerializableExtra(TARGET_CURRENCY_EXTRA);
+        currency = intent.getStringExtra(CURRENCY_EXTRA);
+        baseCurrency = intent.getStringExtra(BASE_CURRENCY_EXTRA);
 
-        if (sourceCurrency == null || targetCurrency == null) {
+
+        if (TextUtils.isEmpty(currency) || TextUtils.isEmpty(baseCurrency)) {
             return;
         }
 
@@ -74,7 +75,7 @@ public class ExchangeRatesService extends CoinsIntentService {
     }
 
     private boolean isCacheUpToDate() {
-        ExchangeRate latestRate = ExchangeRate.last(sourceCurrency, targetCurrency);
+        ExchangeRate latestRate = ExchangeRate.last(currency, baseCurrency);
         return latestRate != null && latestRate.getUpdatedAt().isAfter(System.currentTimeMillis() - CACHE_LIFETIME_IN_MILLIS);
     }
 
@@ -85,7 +86,7 @@ public class ExchangeRatesService extends CoinsIntentService {
         try {
             ExchangeRate exchangeRate = ExchangeRatesProviderFactory
                     .newProvider(provider)
-                    .getExchangeRate(sourceCurrency, targetCurrency);
+                    .getExchangeRate(currency, baseCurrency);
 
             exchangeRate.create();
         } catch (Exception e) {

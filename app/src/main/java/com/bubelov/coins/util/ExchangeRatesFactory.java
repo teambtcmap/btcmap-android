@@ -1,6 +1,5 @@
 package com.bubelov.coins.util;
 
-import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.ExchangeRate;
 
 import org.joda.time.DateTime;
@@ -11,10 +10,10 @@ import org.joda.time.DateTime;
  */
 
 public class ExchangeRatesFactory {
-    public static ExchangeRate newExchangeRate(Currency sourceCurrency, Currency targetCurrency, float value) {
+    public static ExchangeRate newExchangeRate(String currency, String baseCurrency, float value) {
         ExchangeRate rate = new ExchangeRate();
-        rate.setSourceCurrencyId(sourceCurrency.getId());
-        rate.setTargetCurrencyId(targetCurrency.getId());
+        rate.setCurrency(currency);
+        rate.setBaseCurrency(baseCurrency);
         rate.setValue(value);
         long now = System.currentTimeMillis();
         rate.setCreatedAt(new DateTime(now));

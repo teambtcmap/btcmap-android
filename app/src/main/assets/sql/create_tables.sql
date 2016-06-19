@@ -35,7 +35,7 @@ CREATE TABLE exchange_rates (
     _id integer primary key,
     _created_at integer,
     _updated_at integer,
-    currency_id integer,
-    base_currency_id integer,
+    currency text,
+    base_currency text,
     value real
 );

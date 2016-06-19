@@ -33,7 +33,7 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.DatabaseSyncStartedEvent;
-import com.bubelov.coins.event.MerchantsSyncFinishedEvent;
+import com.bubelov.coins.event.DatabaseSyncedEvent;
 import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
@@ -555,7 +555,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     }
 
     @Subscribe
-    public void onDatabaseSyncFinished(MerchantsSyncFinishedEvent event) {
+    public void onDatabaseSyncFinished(DatabaseSyncedEvent event) {
         if (map == null) {
             return;
         }
