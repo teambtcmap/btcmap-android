@@ -15,49 +15,45 @@ import org.joda.time.DateTime;
  */
 
 public class ExchangeRate extends AbstractEntity {
-    private long sourceCurrencyId;
+    private String currency;
 
-    private long targetCurrencyId;
+    private String baseCurrency;
 
-    private float value;
+    private double value;
 
-    public long getSourceCurrencyId() {
-        return sourceCurrencyId;
+    public String getCurrency() {
+        return currency;
     }
 
-    public void setSourceCurrencyId(long sourceCurrencyId) {
-        this.sourceCurrencyId = sourceCurrencyId;
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
-    public long getTargetCurrencyId() {
-        return targetCurrencyId;
+    public String getBaseCurrency() {
+        return baseCurrency;
     }
 
-    public void setTargetCurrencyId(long targetCurrencyId) {
-        this.targetCurrencyId = targetCurrencyId;
+    public void setBaseCurrency(String baseCurrency) {
+        this.baseCurrency = baseCurrency;
     }
 
-    public float getValue() {
+    public double getValue() {
         return value;
     }
 
-    public void setValue(float value) {
+    public void setValue(double value) {
         this.value = value;
     }
 
     // Database stuff
 
-    public static ExchangeRate last(Currency sourceCurrency, Currency targetCurrency) {
-        if (sourceCurrency == null || targetCurrency == null) {
-            return null;
-        }
-
+    public static ExchangeRate last(String currency, String baseCurrency) {
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
 
         Cursor cursor = db.query(DbContract.ExchangeRates.TABLE_NAME,
                 null,
-                "base_currency_id = ? and currency_id = ?",
-                new String[]{String.valueOf(sourceCurrency.getId()), String.valueOf(targetCurrency.getId())},
+                "currency = ? and base_currency = ?",
+                new String[]{currency, baseCurrency},
                 null,
                 null,
                 "_updated_at desc");
@@ -66,8 +62,8 @@ public class ExchangeRate extends AbstractEntity {
             if (cursor.moveToNext()) {
                 ExchangeRate rate = new ExchangeRate();
                 rate.setId(cursor.getLong(cursor.getColumnIndex(DbContract.ExchangeRates._ID)));
-                rate.setSourceCurrencyId(sourceCurrency.getId());
-                rate.setTargetCurrencyId(targetCurrency.getId());
+                rate.setCurrency(currency);
+                rate.setBaseCurrency(baseCurrency);
                 rate.setValue(cursor.getFloat(cursor.getColumnIndex(DbContract.ExchangeRates.VALUE)));
                 rate.setCreatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._CREATED_AT))));
                 rate.setUpdatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._UPDATED_AT))));
@@ -84,11 +80,11 @@ public class ExchangeRate extends AbstractEntity {
     public void create() {
         ContentValues values = new ContentValues();
 
-        values.put(DbContract.ExchangeRates.BASE_CURRENCY_ID, getSourceCurrencyId());
-        values.put(DbContract.ExchangeRates.CURRENCY_ID, getTargetCurrencyId());
-        values.put(DbContract.ExchangeRates.VALUE, getValue());
-        values.put(DbContract.ExchangeRates._CREATED_AT, getCreatedAt().getMillis());
-        values.put(DbContract.ExchangeRates._UPDATED_AT, getUpdatedAt().getMillis());
+        values.put(DbContract.ExchangeRates.CURRENCY, currency);
+        values.put(DbContract.ExchangeRates.BASE_CURRENCY, baseCurrency);
+        values.put(DbContract.ExchangeRates.VALUE, value);
+        values.put(DbContract.ExchangeRates._CREATED_AT, createdAt.getMillis());
+        values.put(DbContract.ExchangeRates._UPDATED_AT, updatedAt.getMillis());
 
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
         db.insert(DbContract.ExchangeRates.TABLE_NAME, null, values);

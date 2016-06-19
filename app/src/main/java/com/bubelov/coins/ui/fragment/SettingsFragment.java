@@ -13,7 +13,6 @@ import android.widget.Toast;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
-import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.service.rates.ExchangeRatesService;
 import com.bubelov.coins.service.sync.merchants.DatabaseSyncService;
 import com.bubelov.coins.service.sync.merchants.UserNotificationController;
@@ -138,8 +137,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_exchange_rates_provider_key))) {
             getActivity().startService(ExchangeRatesService.newIntent(getActivity(),
-                    Currency.findByCode("BTC"),
-                    Currency.findByCode("USD"),
+                    "BTC",
+                    "USD",
                     true));
         }
     }

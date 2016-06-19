@@ -1,6 +1,5 @@
 package com.bubelov.coins.service.rates.provider;
 
-import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.ExchangeRate;
 
 /**
@@ -9,5 +8,5 @@ import com.bubelov.coins.model.ExchangeRate;
  */
 
 public interface ExchangeRatesProvider {
-    ExchangeRate getExchangeRate(Currency sourceCurrency, Currency targetCurrency) throws Exception;
+    ExchangeRate getExchangeRate(String currency, String baseCurrency) throws Exception;
 }

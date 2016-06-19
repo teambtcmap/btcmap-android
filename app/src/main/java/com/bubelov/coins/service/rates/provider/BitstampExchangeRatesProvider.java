@@ -1,7 +1,6 @@
 package com.bubelov.coins.service.rates.provider;
 
 import com.bubelov.coins.api.external.BitstampApi;
-import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.ExchangeRate;
 import com.bubelov.coins.util.ExchangeRatesFactory;
 
@@ -27,11 +26,11 @@ public class BitstampExchangeRatesProvider extends JsonApiRatesProvider {
     }
 
     @Override
-    public ExchangeRate getExchangeRate(Currency sourceCurrency, Currency targetCurrency) throws IOException {
-        if (sourceCurrency.getCode().equals("BTC") && targetCurrency.getCode().equals("USD")) {
+    public ExchangeRate getExchangeRate(String currency, String baseCurrency) throws IOException {
+        if ("BTC".equalsIgnoreCase(currency) && "USD".equalsIgnoreCase(baseCurrency)) {
             return ExchangeRatesFactory.newExchangeRate(
-                    sourceCurrency,
-                    targetCurrency,
+                    currency,
+                    baseCurrency,
                     api.getTicker().execute().body().getLast()
             );
         }
