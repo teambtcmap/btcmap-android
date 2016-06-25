@@ -11,13 +11,16 @@ import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.KeyEvent;
+import android.text.TextUtils;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
@@ -36,6 +39,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.OnEditorAction;
 import butterknife.OnTextChanged;
 
@@ -56,7 +60,10 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
     private static final int MIN_QUERY_LENGTH = 3;
 
     @BindView(R.id.query)
-    EditText queryView;
+    EditText query;
+
+    @BindView(R.id.clear)
+    ImageView clear;
 
     private MerchantsSearchResultsAdapter resultsAdapter;
 
@@ -90,6 +97,8 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
 
         resultsAdapter = new MerchantsSearchResultsAdapter(this, userLocation, getDistanceUnits());
         resultsView.setAdapter(resultsAdapter);
+
+        DrawableCompat.setTint(clear.getDrawable(), getResources().getColor(R.color.secondary_text_or_icons));
     }
 
     @Override
@@ -146,17 +155,24 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
         } else {
             getLoaderManager().destroyLoader(MERCHANTS_LOADER);
         }
+
+        clear.setVisibility(TextUtils.isEmpty(query) ? View.GONE : View.VISIBLE);
     }
 
     @OnEditorAction(R.id.query)
     boolean onEditorAction(int actionId) {
         if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-            InputMethodManager inputMethodManager = (InputMethodManager) queryView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(queryView.getWindowToken(), 0);
+            InputMethodManager inputMethodManager = (InputMethodManager) query.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(query.getWindowToken(), 0);
             return true;
         } else {
             return false;
         }
+    }
+
+    @OnClick(R.id.clear)
+    void onClearSearch() {
+        query.setText("");
     }
 
     private DistanceUnits getDistanceUnits() {

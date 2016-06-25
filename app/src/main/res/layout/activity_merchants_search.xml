@@ -9,16 +9,35 @@
         android:id="@+id/toolbar"
         style="@style/SearchToolbar">
 
-        <EditText
-            android:id="@+id/query"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/transparent"
-            android:hint="@string/msa_search"
-            android:imeOptions="actionSearch"
-            android:inputType="text"
-            android:textColor="@color/text"
-            android:textColorHint="@color/secondary_text_or_icons" />
+            android:layout_height="match_parent">
+
+            <EditText
+                android:id="@+id/query"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginRight="56dp"
+                android:background="@android:color/transparent"
+                android:hint="@string/msa_search"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:maxLines="1"
+                android:textColor="@color/text"
+                android:textColorHint="@color/secondary_text_or_icons" />
+
+            <ImageView
+                android:id="@+id/clear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|center_vertical"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_close_24dp"
+                android:visibility="gone" />
+
+        </FrameLayout>
 
     </android.support.v7.widget.Toolbar>
 
