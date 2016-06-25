@@ -35,21 +35,21 @@
     <string name="exchange_rate">อัตราแลกเปลี่ยน</string>
     <string name="bitcoin_price_checked_at">อัพเดทล่าสุด %1$s</string>
 
-    <string name="menu_item_all_merchants">ทั้งหมด</string>
-    <string name="menu_item_atms">ATMs</string>
-    <string name="menu_item_cafes">คาเฟ่</string>
-    <string name="menu_item_restaurants">ร้านอาหาร</string>
-    <string name="menu_item_bars">บาร์</string>
-    <string name="menu_item_hotels">โรงแรม</string>
-    <string name="menu_item_car_washes">ร้านล้างรถ</string>
-    <string name="menu_item_gas_stations">ปั๊มน้ำมัน</string>
-    <string name="menu_item_hospitals">โรงพยาบาล</string>
-    <string name="menu_item_laundry_services">ซักผ้า</string>
-    <string name="menu_item_movies">โรงหนัง</string>
-    <string name="menu_item_parking">ที่จอดรถ</string>
-    <string name="menu_item_pharmacies">ร้านขายยา</string>
-    <string name="menu_item_pizza">พิซซ่า</string>
-    <string name="menu_item_taxi">แท็กซี่</string>
+    <string name="all_places">ทั้งหมด</string>
+    <string name="atms">ATMs</string>
+    <string name="cafes">คาเฟ่</string>
+    <string name="restaurants">ร้านอาหาร</string>
+    <string name="bars">บาร์</string>
+    <string name="hotels">โรงแรม</string>
+    <string name="car_washes">ร้านล้างรถ</string>
+    <string name="gas_stations">ปั๊มน้ำมัน</string>
+    <string name="hospitals">โรงพยาบาล</string>
+    <string name="laundry">ซักผ้า</string>
+    <string name="movies">โรงหนัง</string>
+    <string name="parking">ที่จอดรถ</string>
+    <string name="pharmacies">ร้านขายยา</string>
+    <string name="pizza">พิซซ่า</string>
+    <string name="taxi">แท็กซี่</string>
 
     <string name="menu_item_settings">ตั้งค่า</string>
     <string name="menu_item_help_and_feedback">Help &amp; feedback</string>

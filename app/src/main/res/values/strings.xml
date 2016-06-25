@@ -36,21 +36,21 @@
     <string name="price_in_dollars" translatable="false">$%1$s</string>
     <string name="bitcoin_price_checked_at">Checked at: %1$s</string>
 
-    <string name="menu_item_all_merchants">All</string>
-    <string name="menu_item_atms">ATMs</string>
-    <string name="menu_item_cafes">Cafes</string>
-    <string name="menu_item_restaurants">Restaurants</string>
-    <string name="menu_item_bars">Bars</string>
-    <string name="menu_item_hotels">Hotels</string>
-    <string name="menu_item_car_washes">Car washes</string>
-    <string name="menu_item_gas_stations">Gas stations</string>
-    <string name="menu_item_hospitals">Hospitals</string>
-    <string name="menu_item_laundry_services">Laundry</string>
-    <string name="menu_item_movies">Movies</string>
-    <string name="menu_item_parking">Parking</string>
-    <string name="menu_item_pharmacies">Pharmacies</string>
-    <string name="menu_item_pizza">Pizza</string>
-    <string name="menu_item_taxi">Taxi</string>
+    <string name="all_places">All places</string>
+    <string name="atms">ATMs</string>
+    <string name="cafes">Cafes</string>
+    <string name="restaurants">Restaurants</string>
+    <string name="bars">Bars</string>
+    <string name="hotels">Hotels</string>
+    <string name="car_washes">Car washes</string>
+    <string name="gas_stations">Gas stations</string>
+    <string name="hospitals">Hospitals</string>
+    <string name="laundry">Laundry</string>
+    <string name="movies">Movies</string>
+    <string name="parking">Parking</string>
+    <string name="pharmacies">Pharmacies</string>
+    <string name="pizza">Pizza</string>
+    <string name="taxi">Taxi</string>
 
     <string name="menu_item_settings">Settings</string>
     <string name="menu_item_help_and_feedback">Help &amp; feedback</string>
