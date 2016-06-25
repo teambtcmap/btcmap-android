@@ -35,21 +35,21 @@
     <string name="exchange_rate">Биржевой курс</string>
     <string name="bitcoin_price_checked_at">Актуален на: %1$s</string>
 
-    <string name="menu_item_all_merchants">Все</string>
-    <string name="menu_item_atms">Банкоматы</string>
-    <string name="menu_item_cafes">Кафе</string>
-    <string name="menu_item_restaurants">Рестораны</string>
-    <string name="menu_item_bars">Бары</string>
-    <string name="menu_item_hotels">Отели</string>
-    <string name="menu_item_car_washes">Автомойки</string>
-    <string name="menu_item_gas_stations">Авозаправки</string>
-    <string name="menu_item_hospitals">Госпитали</string>
-    <string name="menu_item_laundry_services">Прачечные</string>
-    <string name="menu_item_movies">Кино</string>
-    <string name="menu_item_parking">Парковки</string>
-    <string name="menu_item_pharmacies">Аптеки</string>
-    <string name="menu_item_pizza">Пиццерии</string>
-    <string name="menu_item_taxi">Такси</string>
+    <string name="all_places">Все места</string>
+    <string name="atms">Банкоматы</string>
+    <string name="cafes">Кафе</string>
+    <string name="restaurants">Рестораны</string>
+    <string name="bars">Бары</string>
+    <string name="hotels">Отели</string>
+    <string name="car_washes">Автомойки</string>
+    <string name="gas_stations">Авозаправки</string>
+    <string name="hospitals">Госпитали</string>
+    <string name="laundry">Прачечные</string>
+    <string name="movies">Кино</string>
+    <string name="parking">Парковки</string>
+    <string name="pharmacies">Аптеки</string>
+    <string name="pizza">Пиццерии</string>
+    <string name="taxi">Такси</string>
 
     <string name="menu_item_settings">Настройки</string>
     <string name="menu_item_help_and_feedback">Справка/отзыв</string>
