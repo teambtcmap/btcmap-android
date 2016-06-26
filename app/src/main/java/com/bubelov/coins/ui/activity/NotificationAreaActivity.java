@@ -1,8 +1,11 @@
 package com.bubelov.coins.ui.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -13,6 +16,7 @@ import com.bubelov.coins.Constants;
 import com.bubelov.coins.R;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
+import com.bubelov.coins.util.OnSeekBarChangeAdapter;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ContentViewEvent;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -36,6 +40,8 @@ import butterknife.ButterKnife;
  */
 
 public class NotificationAreaActivity extends AbstractActivity implements OnMapReadyCallback {
+    private static final NotificationArea DEFAULT_NOTIFICATION_AREA = new NotificationArea(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE));
+
     private static final int DEFAULT_ZOOM = 8;
 
     @BindView(R.id.toolbar)
@@ -87,7 +93,7 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            saveSelectedArea();
+            saveArea();
         }
 
         return super.onOptionsItemSelected(item);
@@ -101,17 +107,15 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
         map.getUiSettings().setCompassEnabled(false);
         map.setOnMarkerDragListener(new OnMarkerDragListener());
 
-        NotificationArea notificationArea = new NotificationAreaProvider(this).get();
-
-        if (notificationArea == null) {
-            notificationArea = new NotificationArea(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE));
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            map.setMyLocationEnabled(true);
         }
 
-        addArea(notificationArea);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), DEFAULT_ZOOM));
+        NotificationArea notificationArea = new NotificationAreaProvider(this).get();
+        setArea(notificationArea == null ? DEFAULT_NOTIFICATION_AREA : notificationArea);
     }
 
-    private void addArea(NotificationArea area) {
+    private void setArea(NotificationArea area) {
         BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_location_marker);
 
         Marker areaCenter = map.addMarker(new MarkerOptions()
@@ -132,9 +136,11 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
         radiusSeekBar.setMax(500000);
         radiusSeekBar.setProgress((int) areaCircle.getRadius());
         radiusSeekBar.setOnSeekBarChangeListener(new SeekBarChangeListener());
+
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(area.getCenter(), DEFAULT_ZOOM));
     }
 
-    private void saveSelectedArea() {
+    private void saveArea() {
         NotificationAreaProvider provider = new NotificationAreaProvider(this);
         provider.save(new NotificationArea(areaCircle.getCenter(), (int) areaCircle.getRadius()));
     }
@@ -157,20 +163,10 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
         }
     }
 
-    private class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
+    private class SeekBarChangeListener extends OnSeekBarChangeAdapter {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             areaCircle.setRadius(progress);
-        }
-
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-
         }
     }
 }
