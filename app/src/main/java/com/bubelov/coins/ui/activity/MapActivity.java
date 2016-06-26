@@ -23,7 +23,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 import android.widget.PopupWindow;
 
 import com.bubelov.coins.BuildConfig;
@@ -31,8 +30,6 @@ import com.bubelov.coins.Constants;
 import com.bubelov.coins.MerchantsCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.event.DatabaseSyncFailedEvent;
-import com.bubelov.coins.event.DatabaseSyncStartedEvent;
 import com.bubelov.coins.event.DatabaseSyncedEvent;
 import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Currency;
@@ -125,14 +122,9 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     @BindView(R.id.merchant_details)
     MerchantDetailsView merchantDetails;
 
-    @BindView(R.id.loader)
-    View loader;
-
     private GoogleApiClient googleApiClient;
 
     private Merchant selectedMerchant;
-
-    private boolean databaseSyncing;
 
     private boolean saveCameraPositionFlag;
 
@@ -450,24 +442,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         drawerMenu.setAmenity(amenity);
     }
 
-    private void showLoader() {
-        if (loader.getVisibility() == View.VISIBLE) {
-            return;
-        }
-
-        AlphaAnimation animation = new AlphaAnimation(0.7f, 1.0f);
-        animation.setDuration(700);
-        animation.setRepeatCount(AlphaAnimation.INFINITE);
-        animation.setRepeatMode(AlphaAnimation.REVERSE);
-        loader.setVisibility(View.VISIBLE);
-        loader.startAnimation(animation);
-    }
-
-    private void hideLoader() {
-        loader.setAnimation(null);
-        loader.setVisibility(View.GONE);
-    }
-
     private void moveToUserLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -546,33 +520,14 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     }
 
     @Subscribe
-    public void onDatabaseSyncStarted(DatabaseSyncStartedEvent event) {
-        if (map == null) {
-            return;
-        }
-
-        setDatabaseSyncing(true);
-    }
-
-    @Subscribe
     public void onDatabaseSyncFinished(DatabaseSyncedEvent event) {
-        if (map == null) {
-            return;
-        }
-
-        setDatabaseSyncing(false);
-
         merchantsCache.invalidate();
-        reloadMerchants();
-    }
 
-    @Subscribe
-    public void onDatabaseSyncFailed(DatabaseSyncFailedEvent event) {
         if (map == null) {
             return;
         }
 
-        setDatabaseSyncing(false);
+        reloadMerchants();
     }
 
     private void reloadMerchants() {
@@ -613,22 +568,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         REQUEST_ACCESS_LOCATION);
             }
-        }
-    }
-
-    private void setDatabaseSyncing(boolean syncing) {
-        if (databaseSyncing == syncing) {
-            return;
-        }
-
-        databaseSyncing = syncing;
-
-        if (databaseSyncing) {
-            if (!slidingLayout.getPanelState().equals(SlidingUpPanelLayout.PanelState.ANCHORED)) {
-                showLoader();
-            }
-        } else {
-            hideLoader();
         }
     }
 
@@ -733,19 +672,11 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
                     merchantToolbar.setVisibility(View.GONE);
                     merchantTopGradient.setVisibility(View.GONE);
                 }
-
-                if (databaseSyncing) {
-                    showLoader();
-                }
             } else {
                 if (getSupportActionBar().isShowing()) {
                     getSupportActionBar().hide();
                     merchantToolbar.setVisibility(View.VISIBLE);
                     merchantTopGradient.setVisibility(View.VISIBLE);
-                }
-
-                if (loader.getVisibility() == View.VISIBLE) {
-                    hideLoader();
                 }
             }
         }

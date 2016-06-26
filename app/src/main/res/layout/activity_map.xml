@@ -46,28 +46,14 @@
                 android:background="@drawable/merchant_top_gradient"
                 android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/loader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="?actionBarSize"
-                android:background="#DDFFFFFF"
-                android:gravity="center"
-                android:paddingBottom="8dp"
-                android:paddingTop="8dp"
-                android:text="@string/ma_loading_merchants"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:visibility="gone" />
-
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/locate_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
                 android:layout_marginBottom="16dp"
-                android:layout_marginRight="16dp"
                 android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
                 android:onClick="onActionButtonClicked"
                 android:src="@drawable/ic_my_location_24dp"
                 app:backgroundTint="@color/white"
