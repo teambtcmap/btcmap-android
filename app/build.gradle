@@ -39,6 +39,13 @@ android {
             signingConfig signingConfigs.release
         }
     }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def projectName = 'coins'
+            output.outputFile = file("$project.buildDir/apk/$projectName-$variant.versionName" + '.apk')
+        }
+    }
 }
 
 dependencies {
