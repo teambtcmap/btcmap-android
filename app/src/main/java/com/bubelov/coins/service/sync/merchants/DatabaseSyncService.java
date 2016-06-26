@@ -18,6 +18,8 @@ import com.bubelov.coins.event.DatabaseSyncedEvent;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.service.CoinsIntentService;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
 
@@ -112,6 +114,9 @@ public class DatabaseSyncService extends CoinsIntentService {
             for (Merchant merchant : merchants) {
                 if (!initialSync && notificationManager.shouldNotifyUser(merchant)) {
                     notificationManager.notifyUser(merchant.getId(), merchant.getName());
+                    Answers.getInstance().logCustom(new CustomEvent("Notified about new place")
+                            .putCustomAttribute("Place id", merchant.getId())
+                            .putCustomAttribute("Place name", merchant.getName()));
                 }
             }
 
