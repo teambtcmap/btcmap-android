@@ -15,6 +15,15 @@ android {
         resConfigs "en", "ru", "th"
     }
 
+    signingConfigs {
+        release {
+            storeFile file(KEYSTORE_PATH)
+            storePassword KEYSTORE_PASSWORD
+            keyAlias "coins"
+            keyPassword KEYSTORE_PASSWORD
+        }
+    }
+
     buildTypes {
         debug {
             versionNameSuffix "-dev"
@@ -27,6 +36,7 @@ android {
             useProguard true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
