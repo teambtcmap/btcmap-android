@@ -18,11 +18,14 @@ import com.bubelov.coins.event.DatabaseSyncedEvent;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.service.CoinsIntentService;
+import com.google.android.gms.gcm.GcmNetworkManager;
+import com.google.android.gms.gcm.PeriodicTask;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
@@ -73,6 +76,13 @@ public class DatabaseSyncService extends CoinsIntentService {
             Timber.e(e, "Couldn't sync database");
             EventBus.getInstance().post(new DatabaseSyncFailedEvent());
         }
+
+        GcmNetworkManager.getInstance(this).schedule(new PeriodicTask.Builder()
+                .setService(DatabaseGcmSyncService.class)
+                .setTag(DatabaseGcmSyncService.TAG)
+                .setPeriod(TimeUnit.DAYS.toSeconds(1))
+                .setPersisted(true)
+                .build());
     }
 
     private void sync() throws Exception {
