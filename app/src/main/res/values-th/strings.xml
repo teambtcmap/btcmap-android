@@ -97,5 +97,6 @@
     <string name="merchant_description">Description:</string>
     <string name="merchant_opening_hours">Opening hours:</string>
     <string name="merchant_accepted_currencies">Accepted currencies:</string>
+    <string name="notification_area_activity_title">Notification area</string>
 
 </resources>

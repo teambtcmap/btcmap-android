@@ -97,5 +97,6 @@
     <string name="merchant_description">Описание:</string>
     <string name="merchant_opening_hours">Время работы:</string>
     <string name="merchant_accepted_currencies">Принимаемые валюты:</string>
+    <string name="notification_area_activity_title">Зона уведомлений</string>
 
 </resources>
