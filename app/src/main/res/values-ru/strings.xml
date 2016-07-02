@@ -8,8 +8,6 @@
 
     <string name="sa_title">Настройки</string>
 
-    <string name="action_filter">Фильтр</string>
-
     <string name="pref_category_notifications">Уведомления</string>
 
     <string name="pref_show_new_merchants">Новые торговцы</string>

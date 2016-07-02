@@ -57,7 +57,7 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
 
     private static final String QUERY_KEY = "query";
 
-    private static final int MIN_QUERY_LENGTH = 3;
+    private static final int MIN_QUERY_LENGTH = 2;
 
     @BindView(R.id.query)
     EditText query;

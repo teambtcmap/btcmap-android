@@ -52,6 +52,7 @@
 
     <style name="Toolbar.SemiTransparent" parent="Toolbar">
         <item name="android:background">@color/primary_semi_transparent</item>
+        <item name="android:elevation" tools:targetApi="lollipop">1dp</item>
     </style>
 
     <style name="Toolbar.SemiTransparent.WithBackNavigation" parent="Toolbar.SemiTransparent">

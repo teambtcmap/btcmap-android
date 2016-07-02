@@ -3,7 +3,7 @@
 <resources>
 
     <color name="primary">#FEBD0C</color>
-    <color name="primary_semi_transparent">#DDFEBD0C</color>
+    <color name="primary_semi_transparent">#EEFEBD0C</color>
     <color name="primary_dark">#F99F00</color>
     <color name="primary_dark_semi_transparent">#DDF99F00</color>
     <color name="accent">#536DFE</color>
