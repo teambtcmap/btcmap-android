@@ -84,8 +84,7 @@ public class UserNotificationController {
                 .setAutoCancel(true)
                 .setGroup(NEW_MERCHANT_NOTIFICATION_GROUP);
 
-        Intent intent = MapActivity.newShowMerchantIntent(context, merchantId);
-        intent.putExtra(MapActivity.CLEAR_MERCHANT_NOTIFICATIONS_EXTRA, true);
+        Intent intent = MapActivity.newShowMerchantIntent(context, merchantId, true);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, UUID.randomUUID().hashCode(), intent, 0);
         builder.setContentIntent(pendingIntent);
 

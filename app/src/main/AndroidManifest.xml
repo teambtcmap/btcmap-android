@@ -29,7 +29,8 @@
         <activity
             android:name=".ui.activity.SettingsActivity"
             android:label="@string/sa_title"
-            android:parentActivityName=".ui.activity.MapActivity" />
+            android:parentActivityName=".ui.activity.MapActivity"
+            android:theme="@style/AppTheme.SettingsActivity" />
 
         <activity
             android:name=".ui.activity.NotificationAreaActivity"
