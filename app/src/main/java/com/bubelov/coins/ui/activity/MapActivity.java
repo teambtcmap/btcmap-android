@@ -6,7 +6,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
@@ -46,14 +45,7 @@ import com.crashlytics.android.answers.ContentViewEvent;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -72,26 +64,22 @@ import java.util.Collections;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+/**
+ * @author Igor Bubelov
+ */
+
 public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemClickListener {
-    private static final String KEY_AMENITY = "amenity";
-
     private static final String MERCHANT_ID_EXTRA = "merchant_id";
-
     private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
+    private static final String CLEAR_MERCHANT_NOTIFICATIONS_EXTRA = "clear_merchant_notifications";
 
-    public static final String CLEAR_MERCHANT_NOTIFICATIONS_EXTRA = "clear_merchant_notifications";
-
-    private static final int REQUEST_CHECK_LOCATION_SETTINGS = 0;
-
-    private static final int REQUEST_FIND_MERCHANT = 10;
-
+    private static final int REQUEST_CHECK_LOCATION_SETTINGS = 10;
     private static final int REQUEST_ACCESS_LOCATION = 20;
-
     private static final int REQUEST_RESOLVE_PLAY_SERVICES = 30;
+    private static final int REQUEST_FIND_MERCHANT = 40;
 
     private static final int MAP_ANIMATION_DURATION_MILLIS = 350;
-
-    private static final float DEFAULT_ZOOM = 13;
+    private static final float MAP_DEFAULT_ZOOM = 13;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -105,6 +93,15 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     @BindView(R.id.drawer_layout)
     DrawerLayout drawer;
 
+    @BindView(R.id.sliding_panel)
+    SlidingUpPanelLayout slidingLayout;
+
+    @BindView(R.id.merchant_details)
+    MerchantDetailsView merchantDetails;
+
+    @BindView(R.id.locate_button)
+    FloatingActionButton actionButton;
+
     private ActionBarDrawerToggle drawerToggle;
 
     private GoogleMap map;
@@ -112,12 +109,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     private ClusterManager<Merchant> merchantsManager;
 
     private Amenity amenity;
-
-    @BindView(R.id.sliding_panel)
-    SlidingUpPanelLayout slidingLayout;
-
-    @BindView(R.id.merchant_details)
-    MerchantDetailsView merchantDetails;
 
     private GoogleApiClient googleApiClient;
 
@@ -129,9 +120,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     private MerchantsCache merchantsCache;
 
-    @BindView(R.id.locate_button)
-    FloatingActionButton actionButton;
-
     private boolean firstLaunch;
 
     public static Intent newShowMerchantIntent(Context context, long merchantId) {
@@ -141,9 +129,10 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         return intent;
     }
 
-    public static Intent newShowNotificationAreaIntent(Context context, NotificationArea notificationArea) {
+    public static Intent newShowNotificationAreaIntent(Context context, NotificationArea notificationArea, boolean clearNotifications) {
         Intent intent = new Intent(context, MapActivity.class);
         intent.putExtra(NOTIFICATION_AREA_EXTRA, notificationArea);
+        intent.putExtra(CLEAR_MERCHANT_NOTIFICATIONS_EXTRA, clearNotifications);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         return intent;
     }
@@ -164,8 +153,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
                 slidingLayout.collapsePanel();
             }
         });
-
-        amenity = savedInstanceState == null ? null : (Amenity) savedInstanceState.getSerializable(KEY_AMENITY);
 
         drawerToggle = new DrawerToggle(this, drawer, android.R.string.ok, android.R.string.ok);
         drawer.setDrawerListener(drawerToggle);
@@ -203,16 +190,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         super.onPostCreate(savedInstanceState);
         drawerToggle.syncState();
 
-        if (savedInstanceState == null) {
-            slidingLayout.hidePanel();
-        } else {
-            if (savedInstanceState.containsKey(MERCHANT_ID_EXTRA)) {
-                long merchantId = savedInstanceState.getLong(MERCHANT_ID_EXTRA);
-                selectedMerchant = getMerchant(merchantId);
-                merchantDetails.setMerchant(selectedMerchant);
-            }
-        }
-
+        slidingLayout.hidePanel();
         slidingLayout.setAnchorPoint(0.5f);
         PanelSlideListener slideListener = new PanelSlideListener();
         slidingLayout.setPanelSlideListener(slideListener);
@@ -275,18 +253,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
         if (intent.hasExtra(NOTIFICATION_AREA_EXTRA)) {
             NotificationArea notificationArea = (NotificationArea) intent.getSerializableExtra(NOTIFICATION_AREA_EXTRA);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), DEFAULT_ZOOM));
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putSerializable(KEY_AMENITY, amenity);
-
-        if (selectedMerchant != null) {
-            outState.putLong(MERCHANT_ID_EXTRA, selectedMerchant.getId());
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), MAP_DEFAULT_ZOOM));
         }
     }
 
@@ -299,7 +266,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         if (requestCode == REQUEST_FIND_MERCHANT && resultCode == RESULT_OK) {
             Merchant merchant = (Merchant) data.getSerializableExtra(MerchantsSearchActivity.MERCHANT_EXTRA);
             selectMerchant(merchant.getId(), false);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), DEFAULT_ZOOM));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), MAP_DEFAULT_ZOOM));
         }
 
         if (requestCode == REQUEST_RESOLVE_PLAY_SERVICES) {
@@ -408,13 +375,13 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
             initLocation();
         } else {
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), DEFAULT_ZOOM));
+                moveToDefaultLocation();
 
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         REQUEST_ACCESS_LOCATION);
             } else {
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE), DEFAULT_ZOOM));
+                moveToDefaultLocation();
             }
         }
 
@@ -434,48 +401,17 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         if (lastLocation != null) {
             onUserLocationReceived(lastLocation);
         } else {
-            requestLocationUpdate();
+            moveToDefaultLocation();
         }
     }
 
-    private void requestLocationUpdate() {
-        final LocationRequest locationRequest = LocationRequest.create().setNumUpdates(1);
-        LocationSettingsRequest locationSettingsRequest = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build();
-        PendingResult<LocationSettingsResult> locationSettingsResult = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, locationSettingsRequest);
-
-        locationSettingsResult.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(LocationSettingsResult result) {
-                switch (result.getStatus().getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        if (ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            return;
-                        }
-
-                        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, new LocationListener() {
-                            @Override
-                            public void onLocationChanged(Location location) {
-                                onUserLocationReceived(location);
-                            }
-                        });
-                        break;
-
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        try {
-                            result.getStatus().startResolutionForResult(MapActivity.this, REQUEST_CHECK_LOCATION_SETTINGS);
-                        } catch (IntentSender.SendIntentException exception) {
-                            // Ignoring
-                        }
-
-                        break;
-                }
-            }
-        });
+    private void moveToDefaultLocation() {
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(Constants.DEFAULT_LOCATION, MAP_DEFAULT_ZOOM));
     }
 
     private void onUserLocationReceived(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_DEFAULT_ZOOM));
 
         NotificationAreaProvider notificationAreaProvider = new NotificationAreaProvider(this);
 
@@ -703,7 +639,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         public void onPanelAnchored(View view) {
             wasExpanded = true;
             map.setPadding(0, getResources().getDimensionPixelSize(R.dimen.marker_size) / 2, 0, Utils.getScreenHeight(MapActivity.this) / 2 + Utils.getStatusBarHeight(getApplicationContext()));
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), DEFAULT_ZOOM), MAP_ANIMATION_DURATION_MILLIS, null);
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), MAP_DEFAULT_ZOOM), MAP_ANIMATION_DURATION_MILLIS, null);
             map.getUiSettings().setAllGesturesEnabled(false);
             actionButton.setImageResource(R.drawable.ic_directions_24dp);
         }
