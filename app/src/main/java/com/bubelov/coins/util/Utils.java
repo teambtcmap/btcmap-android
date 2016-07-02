@@ -39,6 +39,10 @@ public class Utils {
     }
 
     public static void openUrl(Context context, String url) {
+        if (url.startsWith("www.")) {
+            url = "http://" + url;
+        }
+
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
 
         builder.setStartAnimations(context, android.R.anim.fade_in, android.R.anim.fade_out);
