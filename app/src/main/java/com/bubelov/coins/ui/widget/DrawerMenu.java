@@ -30,8 +30,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Author: Igor Bubelov
- * Date: 18/04/15 18:27
+ * @author Igor Bubelov
  */
 
 public class DrawerMenu extends FrameLayout {
@@ -43,7 +42,7 @@ public class DrawerMenu extends FrameLayout {
 
     private boolean exchangeRateLoading;
 
-    private static int[] ITEMS = {
+    private static int[] ITEM_IDS = {
             R.id.all,
             R.id.atms,
             R.id.cafes,
@@ -58,9 +57,7 @@ public class DrawerMenu extends FrameLayout {
             R.id.parking,
             R.id.pharmacies,
             R.id.pizza,
-            R.id.taxi,
-            R.id.settings,
-            R.id.help_and_feedback
+            R.id.taxi
     };
 
     private List<Pair<Integer, Amenity>> itemsToAmenities = new ArrayList<>();
@@ -95,43 +92,29 @@ public class DrawerMenu extends FrameLayout {
         }
     }
 
-    private void setSelected(int itemId) {
+    private void setSelected(int selectedItemId) {
         MenuItem selectedItem = null;
-        boolean justNotify = itemId == R.id.settings || itemId == R.id.help_and_feedback;
 
-        for (int id : ITEMS) {
-            MenuItem item = (MenuItem) findViewById(id);
+        for (int itemId : ITEM_IDS) {
+            MenuItem itemView = (MenuItem) findViewById(itemId);
 
-            if (id == itemId) {
-                selectedItem = item;
-
-                if (!justNotify) {
-                    item.setSelected(true);
-                }
+            if (itemId == selectedItemId) {
+                selectedItem = itemView;
+                itemView.setSelected(true);
             } else {
-                if (!justNotify) {
-                    item.setSelected(false);
-                }
+                itemView.setSelected(false);
             }
         }
 
-        switch (itemId) {
-            case R.id.all:
-                listener.onAmenitySelected(null, selectedItem.getText());
-                break;
-            case R.id.settings:
-                listener.onSettingsSelected();
-                break;
-            case R.id.help_and_feedback:
-                listener.onFeedbackSelected();
-                break;
-            default:
-                for (Pair<Integer, Amenity> pair : itemsToAmenities) {
-                    if (pair.first == itemId) {
-                        listener.onAmenitySelected(pair.second, selectedItem.getText());
-                    }
-                }
+        Amenity selectedAmenity = null;
+
+        for (Pair<Integer, Amenity> pair : itemsToAmenities) {
+            if (pair.first == selectedItemId) {
+                selectedAmenity = pair.second;
+            }
         }
+
+        listener.onAmenitySelected(selectedAmenity, selectedItem.getText());
     }
 
     public void setItemSelectedListener(OnItemClickListener itemSelectedListener) {
@@ -155,7 +138,7 @@ public class DrawerMenu extends FrameLayout {
         showLastExchangeRate();
         updateExchangeRate(false);
 
-        for (int id : ITEMS) {
+        for (int id : ITEM_IDS) {
             findViewById(id).setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -239,9 +222,5 @@ public class DrawerMenu extends FrameLayout {
 
     public interface OnItemClickListener {
         void onAmenitySelected(Amenity amenity, String title);
-
-        void onSettingsSelected();
-
-        void onFeedbackSelected();
     }
 }

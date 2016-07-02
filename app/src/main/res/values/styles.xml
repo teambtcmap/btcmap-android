@@ -15,6 +15,10 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="AppTheme.SettingsActivity" parent="AppTheme.NoActionBar">
+        <item name="colorAccent">@color/primary_dark</item>
+    </style>
+
     <style name="AppTheme.SearchActivity" parent="AppTheme.NoActionBar">
         <item name="colorPrimaryDark">#B3B3B3</item>
     </style>

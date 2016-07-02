@@ -12,7 +12,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -122,10 +121,11 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     private boolean firstLaunch;
 
-    public static Intent newShowMerchantIntent(Context context, long merchantId) {
+    public static Intent newShowMerchantIntent(Context context, long merchantId, boolean clearNotifications) {
         Intent intent = new Intent(context, MapActivity.class);
         intent.putExtra(MERCHANT_ID_EXTRA, merchantId);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(CLEAR_MERCHANT_NOTIFICATIONS_EXTRA, clearNotifications);
         return intent;
     }
 
@@ -208,7 +208,7 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_map, menu);
+        getMenuInflater().inflate(R.menu.menu_map_activity, menu);
         return true;
     }
 
@@ -221,6 +221,9 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         int id = item.getItemId();
 
         switch (id) {
+            case R.id.action_settings:
+                SettingsActivity.start(this);
+                return true;
             case R.id.action_search:
                 MerchantsSearchActivity.startForResult(this, map.getMyLocation(), REQUEST_FIND_MERCHANT);
                 return true;
@@ -340,18 +343,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
                     .putContentType("Amenities")
                     .putContentId(amenity.name()));
         }
-    }
-
-    @Override
-    public void onSettingsSelected() {
-        drawer.closeDrawer(GravityCompat.START);
-        startActivity(new Intent(this, SettingsActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
-    }
-
-    @Override
-    public void onFeedbackSelected() {
-        drawer.closeDrawer(GravityCompat.START);
-        startActivity(new Intent(this, FeedbackActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
     }
 
     private void onPlayServicesAvailable() {
