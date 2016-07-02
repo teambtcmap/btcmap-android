@@ -1,5 +1,7 @@
 package com.bubelov.coins;
 
+import com.google.android.gms.maps.model.LatLng;
+
 /**
  * Author: Igor Bubelov
  * Date: 14/07/14 21:35
@@ -10,6 +12,8 @@ public interface Constants {
 
     double SAN_FRANCISCO_LATITUDE = 34.05;
     double SAN_FRANCISCO_LONGITUDE = -118.25;
+
+    LatLng DEFAULT_LOCATION = new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE);
 
     float MAP_MARKER_ANCHOR_U = 0.5f;
     float MAP_MARKER_ANCHOR_V = 0.91145f;

@@ -27,7 +27,6 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -40,7 +39,7 @@ import butterknife.ButterKnife;
  */
 
 public class NotificationAreaActivity extends AbstractActivity implements OnMapReadyCallback {
-    private static final NotificationArea DEFAULT_NOTIFICATION_AREA = new NotificationArea(new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE));
+    private static final NotificationArea DEFAULT_NOTIFICATION_AREA = new NotificationArea(Constants.DEFAULT_LOCATION);
 
     private static final int DEFAULT_ZOOM = 8;
 

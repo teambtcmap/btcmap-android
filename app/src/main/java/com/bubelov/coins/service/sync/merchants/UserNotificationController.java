@@ -104,8 +104,7 @@ public class UserNotificationController {
     private void issueGroupNotification(List<MerchantNotification> pendingMerchants) {
         NotificationArea notificationArea = new NotificationAreaProvider(context).get();
 
-        Intent intent = MapActivity.newShowNotificationAreaIntent(context, notificationArea);
-        intent.putExtra(MapActivity.CLEAR_MERCHANT_NOTIFICATIONS_EXTRA, true);
+        Intent intent = MapActivity.newShowNotificationAreaIntent(context, notificationArea, true);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, NEW_MERCHANT_NOTIFICATION_GROUP.hashCode(), intent, 0);
 
         NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();
