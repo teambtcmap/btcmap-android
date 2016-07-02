@@ -18,12 +18,10 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.PopupWindow;
 
 import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.Constants;
@@ -37,7 +35,6 @@ import com.bubelov.coins.model.Merchant;
 import com.bubelov.coins.model.MerchantNotification;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
-import com.bubelov.coins.ui.widget.CurrenciesFilterPopup;
 import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.ui.widget.MerchantDetailsView;
 import com.bubelov.coins.util.MapMarkersCache;
@@ -246,21 +243,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         int id = item.getItemId();
 
         switch (id) {
-            case R.id.action_filter:
-                ListPopupWindow popup = new CurrenciesFilterPopup(this);
-                popup.setAnchorView(findViewById(id));
-                popup.setHeight(drawer.getHeight() / 10 * 9);
-                popup.show();
-
-                popup.setOnDismissListener(new PopupWindow.OnDismissListener() {
-                    @Override
-                    public void onDismiss() {
-                        merchantsCache.invalidate();
-                        MapActivity.this.reloadMerchants();
-                    }
-                });
-
-                return true;
             case R.id.action_search:
                 MerchantsSearchActivity.startForResult(this, map.getMyLocation(), REQUEST_FIND_MERCHANT);
                 return true;

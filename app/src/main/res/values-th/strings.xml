@@ -8,8 +8,6 @@
 
     <string name="sa_title">ตั้งค่า</string>
 
-    <string name="action_filter">กรอง</string>
-
     <string name="pref_category_notifications">การแจ้งเตือน</string>
 
     <string name="pref_show_new_merchants">ร้านค้าใหม่</string>
