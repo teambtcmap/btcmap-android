@@ -4,6 +4,8 @@
     package="com.bubelov.coins"
     android:installLocation="auto">
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
