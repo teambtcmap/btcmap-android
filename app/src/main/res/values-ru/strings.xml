@@ -96,5 +96,8 @@
     <string name="merchant_opening_hours">Время работы:</string>
     <string name="merchant_accepted_currencies">Принимаемые валюты:</string>
     <string name="notification_area_activity_title">Зона уведомлений</string>
+    <string name="currencies">Currencies</string>
+    <string name="pref_currencies_summary">Select the currencies you are interested in</string>
+    <string name="pref_currencies_title">Currencies</string>
 
 </resources>
