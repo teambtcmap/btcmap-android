@@ -15,6 +15,11 @@ public class DatabaseGcmSyncService extends GcmTaskService {
     public static final String TAG = DatabaseGcmSyncService.class.getName();
 
     @Override
+    public void onInitializeTasks() {
+        onRunTask(null);
+    }
+
+    @Override
     public int onRunTask(TaskParams taskParams) {
         DatabaseSyncService.start(this);
         Answers.getInstance().logCustom(new CustomEvent("Started DB sync over GCM"));

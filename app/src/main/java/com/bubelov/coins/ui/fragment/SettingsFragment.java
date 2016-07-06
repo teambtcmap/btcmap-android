@@ -16,6 +16,7 @@ import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.service.rates.ExchangeRatesService;
 import com.bubelov.coins.service.sync.merchants.DatabaseSyncService;
 import com.bubelov.coins.service.sync.merchants.UserNotificationController;
+import com.bubelov.coins.ui.activity.CurrenciesActivity;
 import com.bubelov.coins.ui.activity.NotificationAreaActivity;
 
 import java.io.File;
@@ -25,8 +26,7 @@ import java.nio.channels.FileChannel;
 import java.util.Random;
 
 /**
- * Author: Igor Bubelov
- * Date: 11/07/14 20:31
+ * @author Igor Bubelov
  */
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -52,6 +52,10 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         if (preference.getKey().equals(getString(R.string.pref_area_of_interest_key))) {
             NotificationAreaActivity.start(getActivity());
+        }
+
+        if (preference.getKey().equals(getString(R.string.pref_currencies_key))) {
+            CurrenciesActivity.start(getActivity());
         }
 
         if (preference.getKey().equals("pref_test_notification")) {

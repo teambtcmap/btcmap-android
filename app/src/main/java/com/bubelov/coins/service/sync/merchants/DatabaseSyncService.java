@@ -22,6 +22,7 @@ import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
+import com.google.android.gms.gcm.Task;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -83,20 +84,24 @@ public class DatabaseSyncService extends CoinsIntentService {
                 .setService(DatabaseGcmSyncService.class)
                 .setTag(DatabaseGcmSyncService.TAG)
                 .setPeriod(TimeUnit.DAYS.toSeconds(1))
+                .setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)
                 .setPersisted(true)
                 .build());
     }
 
     private void sync() throws Exception {
-        Timber.d("Requesting currencies");
         long time = System.currentTimeMillis();
-        List<Currency> currencies = getApi().getCurrencies().execute().body();
-        Timber.d("%s currencies loaded. Time: %s", currencies.size(), System.currentTimeMillis() - time);
 
-        Timber.d("Inserting currencies");
-        time = System.currentTimeMillis();
-        Currency.insert(currencies);
-        Timber.d("Inserted. Time: %s", System.currentTimeMillis() - time);
+        if (Currency.getCount() == 0) {
+            Timber.d("Requesting currencies");
+            List<Currency> currencies = getApi().getCurrencies().execute().body();
+            Timber.d("%s currencies loaded. Time: %s", currencies.size(), System.currentTimeMillis() - time);
+
+            Timber.d("Inserting currencies");
+            time = System.currentTimeMillis();
+            Currency.insert(currencies);
+            Timber.d("Inserted. Time: %s", System.currentTimeMillis() - time);
+        }
 
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
         UserNotificationController notificationManager = new UserNotificationController(getApplicationContext());

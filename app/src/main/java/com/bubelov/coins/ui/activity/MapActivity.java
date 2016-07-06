@@ -207,6 +207,12 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        reloadMerchants();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_map_activity, menu);
         return true;
