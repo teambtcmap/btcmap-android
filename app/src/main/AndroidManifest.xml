@@ -29,6 +29,10 @@
         </activity>
 
         <activity
+            android:name=".ui.activity.MerchantsSearchActivity"
+            android:theme="@style/AppTheme.SearchActivity" />
+
+        <activity
             android:name=".ui.activity.SettingsActivity"
             android:label="@string/sa_title"
             android:parentActivityName=".ui.activity.MapActivity"
@@ -36,17 +40,9 @@
 
         <activity
             android:name=".ui.activity.NotificationAreaActivity"
-            android:label="@string/notification_area_activity_title"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:label="@string/notification_area_activity_title" />
 
-        <activity
-            android:name=".ui.activity.FeedbackActivity"
-            android:label="@string/fa_title"
-            android:parentActivityName=".ui.activity.MapActivity" />
-
-        <activity
-            android:name=".ui.activity.MerchantsSearchActivity"
-            android:theme="@style/AppTheme.SearchActivity" />
+        <activity android:name=".ui.activity.CurrenciesActivity" />
 
         <service android:name=".service.sync.merchants.DatabaseSyncService" />
 
