@@ -16,6 +16,7 @@ public class DatabaseGcmSyncService extends GcmTaskService {
 
     @Override
     public void onInitializeTasks() {
+        Answers.getInstance().logCustom(new CustomEvent("Initialized GCM sync task"));
         onRunTask(null);
     }
 
