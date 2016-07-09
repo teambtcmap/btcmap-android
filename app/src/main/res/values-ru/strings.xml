@@ -8,22 +8,14 @@
 
     <string name="sa_title">Настройки</string>
 
-    <string name="pref_category_notifications">Уведомления</string>
-
-    <string name="pref_show_new_merchants">Новые торговцы</string>
-    <string name="pref_show_new_merchants_on">Уведомлять о новых торговцах в округе</string>
-    <string name="pref_show_new_merchants_off">Не уведомлять о новых торговцах</string>
-
-    <string name="pref_area_of_interest">Местоположение</string>
+    <string name="pref_area_of_interest">Уведомления</string>
     <string name="pref_area_of_interest_summary">Выберете зону уведомлений</string>
 
     <string name="notification_new_merchant">Новое место принимает криптовалюту</string>
     <string name="notification_new_merchant_no_name">Нажмите чтобы посмотреть</string>
 
-    <string name="notification_new_merchants_content_title">%1$s новых торговцев</string>
+    <string name="notification_new_merchants_content_title">%1$s новых мест</string>
     <string name="notification_new_merchants_content_text">Нажмите чтобы посмотреть</string>
-
-    <string name="pref_category_other">Прочее</string>
 
     <string name="pref_exchange_rates_provider">Обменный курс</string>
     <string name="pref_exchange_rates_provider_summary">Вы можете выбрать откуда приложение будет брать информацию об обменном курсе</string>

@@ -8,12 +8,6 @@
 
     <string name="sa_title">ตั้งค่า</string>
 
-    <string name="pref_category_notifications">การแจ้งเตือน</string>
-
-    <string name="pref_show_new_merchants">ร้านค้าใหม่</string>
-    <string name="pref_show_new_merchants_on">แจ้งเตือนเกี่ยวกับร้านค้าใกล้เคียง</string>
-    <string name="pref_show_new_merchants_off">Don\'t notify about new merchants</string>
-
     <string name="pref_area_of_interest">สถานที่</string>
     <string name="pref_area_of_interest_summary">เลือกสถานที่ที่คุณสนใจ</string>
 
@@ -22,8 +16,6 @@
 
     <string name="notification_new_merchants_content_title">%1$s new merchants</string>
     <string name="notification_new_merchants_content_text">Touch to see them</string>
-
-    <string name="pref_category_other">อื่นๆ</string>
 
     <string name="pref_exchange_rates_provider">เลือกอัตราการแลกเปลี่ยน</string>
     <string name="pref_exchange_rates_provider_summary">เลือกอัตราการแลกเปลี่ยนระหว่าง Bitcoin และดอลลาร์สหรัฐ</string>

@@ -2,46 +2,30 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="@string/pref_category_notifications">
+    <Preference
+        android:key="@string/pref_area_of_interest_key"
+        android:summary="@string/pref_area_of_interest_summary"
+        android:title="@string/pref_area_of_interest" />
 
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="@string/pref_show_new_merchants_key"
-            android:summaryOff="@string/pref_show_new_merchants_off"
-            android:summaryOn="@string/pref_show_new_merchants_on"
-            android:title="@string/pref_show_new_merchants" />
+    <Preference
+        android:key="@string/pref_currencies_key"
+        android:summary="@string/pref_currencies_summary"
+        android:title="@string/pref_currencies_title" />
 
-        <Preference
-            android:dependency="@string/pref_show_new_merchants_key"
-            android:key="@string/pref_area_of_interest_key"
-            android:summary="@string/pref_area_of_interest_summary"
-            android:title="@string/pref_area_of_interest" />
+    <ListPreference
+        android:defaultValue="@string/pref_exchange_rates_source_bitstamp"
+        android:entries="@array/exchange_rates_sources"
+        android:entryValues="@array/exchange_rates_sources_values"
+        android:key="@string/pref_exchange_rates_provider_key"
+        android:summary="@string/pref_exchange_rates_provider_summary"
+        android:title="@string/pref_exchange_rates_provider" />
 
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="@string/pref_category_other">
-
-        <Preference
-            android:key="@string/pref_currencies_key"
-            android:summary="@string/pref_currencies_summary"
-            android:title="@string/pref_currencies_title" />
-
-        <ListPreference
-            android:defaultValue="@string/pref_exchange_rates_source_bitstamp"
-            android:entries="@array/exchange_rates_sources"
-            android:entryValues="@array/exchange_rates_sources_values"
-            android:key="@string/pref_exchange_rates_provider_key"
-            android:summary="@string/pref_exchange_rates_provider_summary"
-            android:title="@string/pref_exchange_rates_provider" />
-
-        <ListPreference
-            android:defaultValue="@string/pref_distance_units_automatic"
-            android:entries="@array/distance_units"
-            android:entryValues="@array/distance_units_values"
-            android:key="@string/pref_distance_units_key"
-            android:title="@string/pref_distance_units" />
-
-    </PreferenceCategory>
+    <ListPreference
+        android:defaultValue="@string/pref_distance_units_automatic"
+        android:entries="@array/distance_units"
+        android:entryValues="@array/distance_units_values"
+        android:key="@string/pref_distance_units_key"
+        android:title="@string/pref_distance_units" />
 
     <PreferenceCategory android:title="Development">
 

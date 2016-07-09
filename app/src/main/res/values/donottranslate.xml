@@ -2,7 +2,6 @@
 
 <resources>
 
-    <string name="pref_show_new_merchants_key" translatable="false">pref_new_merchant_notifications</string>
     <string name="pref_area_of_interest_key" translatable="false">pref_area_of_interest</string>
     <string name="pref_currencies_key" translatable="false">pref_currencies</string>
     <string name="pref_exchange_rates_provider_key" translatable="false">pref_exchange_rates_provider</string>
