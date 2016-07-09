@@ -98,7 +98,7 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
         resultsAdapter = new MerchantsSearchResultsAdapter(this, userLocation, getDistanceUnits());
         resultsView.setAdapter(resultsAdapter);
 
-        DrawableCompat.setTint(clear.getDrawable(), getResources().getColor(R.color.secondary_text_or_icons));
+        DrawableCompat.setTint(clear.getDrawable().mutate(), getResources().getColor(R.color.secondary_text_or_icons));
     }
 
     @Override
