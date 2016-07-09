@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-    
+
 <resources>
 
     <color name="primary">#FEBD0C</color>
@@ -29,5 +29,7 @@
 
     <color name="drawer_icon_active">@color/primary_dark</color>
     <color name="drawer_icon_inactive">@color/secondary_text_or_icons</color>
+
+    <color name="window_gray">#EEEEEE</color>
 
 </resources>

@@ -19,28 +19,20 @@
         <activity
             android:name=".ui.activity.MapActivity"
             android:launchMode="singleTop"
-            android:theme="@style/AppTheme.MapActivity">
-
+            android:theme="@style/AppTheme.TransparentStatusBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <activity
             android:name=".ui.activity.MerchantsSearchActivity"
-            android:theme="@style/AppTheme.SearchActivity" />
+            android:theme="@style/AppTheme.GrayStatusBar" />
 
-        <activity
-            android:name=".ui.activity.SettingsActivity"
-            android:label="@string/sa_title"
-            android:parentActivityName=".ui.activity.MapActivity"
-            android:theme="@style/AppTheme.SettingsActivity" />
+        <activity android:name=".ui.activity.SettingsActivity" />
 
-        <activity
-            android:name=".ui.activity.NotificationAreaActivity"
-            android:label="@string/notification_area_activity_title" />
+        <activity android:name=".ui.activity.NotificationAreaActivity" />
 
         <activity android:name=".ui.activity.CurrenciesActivity" />
 
