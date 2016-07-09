@@ -4,8 +4,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
@@ -37,7 +37,7 @@ public class CurrenciesAdapter extends RecyclerView.Adapter<CurrenciesAdapter.Cu
     }
 
     @Override
-    public void onBindViewHolder(CurrencyViewHolder holder, int position) {
+    public void onBindViewHolder(final CurrencyViewHolder holder, int position) {
         final Currency item = items.get(position);
         holder.name.setText(item.getName());
 
@@ -49,6 +49,13 @@ public class CurrenciesAdapter extends RecyclerView.Adapter<CurrenciesAdapter.Cu
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 item.setShowOnMap(isChecked);
                 listener.onMapVisibilityChanged(item);
+            }
+        });
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                holder.showOnMap.toggle();
             }
         });
     }
@@ -63,7 +70,7 @@ public class CurrenciesAdapter extends RecyclerView.Adapter<CurrenciesAdapter.Cu
         TextView name;
 
         @BindView(R.id.show_on_map)
-        CheckBox showOnMap;
+        Switch showOnMap;
 
         public CurrencyViewHolder(View itemView) {
             super(itemView);

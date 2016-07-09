@@ -1,61 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
-    android:clickable="true"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingBottom="16dp"
-    android:paddingTop="16dp">
-
-    <FrameLayout
-        android:layout_width="72dp"
-        android:layout_height="wrap_content">
-
-        <View
-            android:layout_width="40dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_height="40dp"
-            android:background="@drawable/search_row_icon_background" />
-
-        <View
-            android:id="@+id/icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="center"
-            tools:background="@drawable/ic_place_24dp" />
-
-    </FrameLayout>
+    android:background="@color/white">
 
     <LinearLayout
+        android:id="@+id/ripple"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginRight="16dp"
-        android:layout_marginEnd="16dp"
-        android:orientation="vertical">
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingBottom="16dp"
+        android:paddingTop="16dp">
 
-        <com.bubelov.coins.ui.widget.TypefaceTextView
-            android:id="@+id/name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/text"
-            android:textSize="16sp"
-            app:typeface="regular"
-            tools:text="Merchant Name" />
+        <FrameLayout
+            android:layout_width="72dp"
+            android:layout_height="wrap_content">
 
-        <com.bubelov.coins.ui.widget.TypefaceTextView
-            android:id="@+id/distance"
-            android:layout_width="wrap_content"
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/search_row_icon_background" />
+
+            <View
+                android:id="@+id/icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                tools:background="@drawable/ic_place_24dp" />
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/disabled_or_hint"
-            android:textSize="14sp"
-            app:typeface="regular"
-            tools:text="1.2 mi" />
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:orientation="vertical">
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text"
+                android:textSize="16sp"
+                app:typeface="regular"
+                tools:text="Merchant Name" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:id="@+id/distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/disabled_or_hint"
+                android:textSize="14sp"
+                app:typeface="regular"
+                tools:text="1.2 mi" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>
+
+

@@ -53,7 +53,7 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
     public void onBindViewHolder(ResultViewHolder holder, int position) {
         final Merchant merchant = merchants.get(position);
         holder.name.setText(merchant.getName());
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+        holder.ripple.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 listener.onMerchantSelected(merchant);
@@ -102,6 +102,9 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
     }
 
     public static class ResultViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.ripple)
+        View ripple;
+
         @BindView(R.id.icon)
         View icon;
 

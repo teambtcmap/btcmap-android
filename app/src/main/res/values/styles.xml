@@ -5,49 +5,27 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
-        <item name="colorAccent">@color/accent</item>
+        <item name="colorAccent">@color/primary_dark</item>
 
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.SettingsActivity" parent="AppTheme">
-        <item name="colorAccent">@color/primary_dark</item>
+    <style name="AppTheme.TransparentStatusBar" parent="AppTheme">
+        <item name="android:statusBarColor" tools:targetApi="lollipop">@android:color/transparent
+        </item>
     </style>
 
-    <style name="AppTheme.SearchActivity" parent="AppTheme">
+    <style name="AppTheme.GrayStatusBar" parent="AppTheme">
         <item name="colorPrimaryDark">#B3B3B3</item>
-    </style>
-
-    <style name="AppTheme.MapActivity" parent="AppTheme">
-        <item name="android:statusBarColor" tools:targetApi="lollipop">@android:color/transparent</item>
     </style>
 
     <style name="Toolbar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?attr/actionBarSize</item>
         <item name="android:background">@color/primary</item>
-        <item name="android:elevation" tools:targetApi="lollipop">4dp</item>
+        <item name="android:elevation" tools:targetApi="lollipop">1dp</item>
         <item name="android:theme">@style/ToolbarTheme</item>
-    </style>
-
-    <style name="SearchToolbar" parent="Toolbar.WithBackNavigation">
-        <item name="android:background">@color/white</item>
-        <item name="android:theme">@style/SearchToolbarTheme</item>
-    </style>
-
-    <style name="ToolbarTheme">
-        <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:textColorSecondary">@color/white</item>
-    </style>
-
-    <style name="SearchToolbarTheme" parent="AppTheme">
-        <item name="android:textColorPrimary">#757575</item>
-        <item name="android:textColorSecondary">#757575</item>
-    </style>
-
-    <style name="Toolbar.WithBackNavigation" parent="Toolbar">
-        <item name="navigationIcon">?attr/homeAsUpIndicator</item>
     </style>
 
     <style name="Toolbar.SemiTransparent" parent="Toolbar">
@@ -57,6 +35,30 @@
 
     <style name="Toolbar.SemiTransparent.WithBackNavigation" parent="Toolbar.SemiTransparent">
         <item name="navigationIcon">?attr/homeAsUpIndicator</item>
+    </style>
+
+    <style name="Toolbar.WithBackNavigation" parent="Toolbar">
+        <item name="navigationIcon">?attr/homeAsUpIndicator</item>
+    </style>
+
+    <style name="SearchToolbar" parent="Toolbar.WithBackNavigation">
+        <item name="android:background">@color/white</item>
+        <item name="android:theme">@style/SearchToolbarTheme</item>
+        <item name="android:elevation" tools:targetApi="lollipop">4dp</item>
+    </style>
+
+    <style name="ToolbarTheme">
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+    </style>
+
+    <style name="SearchToolbarTheme" parent="AppTheme">
+        <item name="android:textColorPrimary">@color/secondary_text_or_icons</item>
+        <item name="android:textColorSecondary">@color/secondary_text_or_icons</item>
+    </style>
+
+    <style name="BlueAccent">
+        <item name="colorAccent">@color/accent</item>
     </style>
 
 </resources>
