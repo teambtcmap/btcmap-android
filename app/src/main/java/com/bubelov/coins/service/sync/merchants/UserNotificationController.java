@@ -5,10 +5,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
@@ -36,18 +34,11 @@ public class UserNotificationController {
 
     private Context context;
 
-    private SharedPreferences preferences;
-
     public UserNotificationController(Context context) {
         this.context = context;
-        preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public boolean shouldNotifyUser(Merchant merchant) {
-        if (!preferences.getBoolean(context.getString(R.string.pref_show_new_merchants_key), true)) {
-            return false;
-        }
-
         NotificationArea notificationArea = new NotificationAreaProvider(context).get();
 
         if (notificationArea == null) {

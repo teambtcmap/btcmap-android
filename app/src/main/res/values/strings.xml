@@ -8,13 +8,7 @@
 
     <string name="sa_title">Settings</string>
 
-    <string name="pref_category_notifications">Notifications</string>
-
-    <string name="pref_show_new_merchants">New merchants</string>
-    <string name="pref_show_new_merchants_on">Notify about new merchants nearby</string>
-    <string name="pref_show_new_merchants_off">Don\'t notify about new merchants</string>
-
-    <string name="pref_area_of_interest">Location</string>
+    <string name="pref_area_of_interest">Notifications</string>
     <string name="pref_area_of_interest_summary">Select your area of interest</string>
 
     <string name="notification_new_merchant">New merchant in your area</string>
@@ -22,8 +16,6 @@
 
     <string name="notification_new_merchants_content_title">%1$s new merchants</string>
     <string name="notification_new_merchants_content_text">Touch to see them</string>
-
-    <string name="pref_category_other">Other</string>
 
     <string name="pref_exchange_rates_provider">Exchange rates source</string>
     <string name="pref_exchange_rates_provider_summary">Select source for obtaining exchange rates between Bitcoin and USD</string>
