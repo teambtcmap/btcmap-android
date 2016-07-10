@@ -18,12 +18,14 @@
 
     <declare-styleable name="MenuItem">
         <attr name="mi_icon" format="reference" />
-        <attr name="text" format="string"/>
+        <attr name="text" format="string" />
     </declare-styleable>
 
     <declare-styleable name="MerchantActionButton">
         <attr name="mab_icon" format="reference" />
         <attr name="text" />
     </declare-styleable>
+
+    <attr name="runtimeTheme" format="reference" />
 
 </resources>

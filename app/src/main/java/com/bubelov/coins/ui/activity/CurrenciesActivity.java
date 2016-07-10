@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -28,7 +27,7 @@ import butterknife.ButterKnife;
  * @author Igor Bubelov
  */
 
-public class CurrenciesActivity extends AppCompatActivity implements CurrenciesAdapter.CurrenciesAdapterListener {
+public class CurrenciesActivity extends AbstractActivity implements CurrenciesAdapter.CurrenciesAdapterListener {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
