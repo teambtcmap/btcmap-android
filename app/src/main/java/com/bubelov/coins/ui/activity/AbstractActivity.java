@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import com.bubelov.coins.EventBus;
 import com.bubelov.coins.receiver.NetworkStateReceiver;
+import com.bubelov.coins.util.ThemeUtils;
 
 /**
  * Author: Igor Bubelov
@@ -19,6 +20,7 @@ public abstract class AbstractActivity extends AppCompatActivity implements Netw
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeUtils.ensureRuntimeTheme(this);
         super.onCreate(savedInstanceState);
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
