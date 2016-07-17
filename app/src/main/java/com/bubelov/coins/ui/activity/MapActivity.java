@@ -2,9 +2,7 @@ package com.bubelov.coins.ui.activity;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -42,7 +40,6 @@ import com.bubelov.coins.util.Utils;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ContentViewEvent;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
@@ -74,7 +71,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
 
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 10;
     private static final int REQUEST_ACCESS_LOCATION = 20;
-    private static final int REQUEST_RESOLVE_PLAY_SERVICES = 30;
     private static final int REQUEST_FIND_MERCHANT = 40;
 
     private static final int MAP_ANIMATION_DURATION_MILLIS = 350;
@@ -161,28 +157,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
         drawerMenu.setItemSelectedListener(this);
 
         firstLaunch = savedInstanceState == null;
-
-        int playServicesAvailabilityResult = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-
-        if (playServicesAvailabilityResult == ConnectionResult.SUCCESS) {
-            onPlayServicesAvailable();
-        } else {
-            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(playServicesAvailabilityResult, this, REQUEST_RESOLVE_PLAY_SERVICES);
-
-            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    supportFinishAfterTransition();
-                }
-            });
-
-            dialog.show();
-        }
-
-        Answers.getInstance().logContentView(new ContentViewEvent()
-                .putContentName("Map")
-                .putContentType("Screens")
-                .putContentId("Map"));
     }
 
     @Override
@@ -276,14 +250,6 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
             Merchant merchant = (Merchant) data.getSerializableExtra(MerchantsSearchActivity.MERCHANT_EXTRA);
             selectMerchant(merchant.getId(), false);
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), MAP_DEFAULT_ZOOM));
-        }
-
-        if (requestCode == REQUEST_RESOLVE_PLAY_SERVICES) {
-            supportFinishAfterTransition();
-
-            if (resultCode == RESULT_OK) {
-                startActivity(new Intent(this, MapActivity.class));
-            }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -446,6 +412,10 @@ public class MapActivity extends AbstractActivity implements DrawerMenu.OnItemCl
     }
 
     private void reloadMerchants() {
+        if (map == null) {
+            return;
+        }
+
         if (selectedMerchant != null && slidingLayout.getPanelState().equals(SlidingUpPanelLayout.PanelState.ANCHORED)) {
             onMerchantsLoaded(Collections.singletonList(selectedMerchant));
             return;
