@@ -26,14 +26,7 @@ public class LauncherActivity extends AbstractActivity {
             onPlayServicesAvailable();
         } else {
             Dialog dialog = GooglePlayServicesUtil.getErrorDialog(playServicesAvailabilityResult, this, REQUEST_RESOLVE_PLAY_SERVICES);
-
-            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    supportFinishAfterTransition();
-                }
-            });
-
+            dialog.setCancelable(false);
             dialog.show();
         }
     }
