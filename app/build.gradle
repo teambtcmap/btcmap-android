@@ -53,9 +53,9 @@ dependencies {
     compile 'com.android.support:design:23.4.0'
     compile 'com.android.support:customtabs:23.4.0'
 
-    compile 'com.google.android.gms:play-services-gcm:8.4.0'
-    compile 'com.google.android.gms:play-services-location:8.4.0'
-    compile 'com.google.android.gms:play-services-maps:8.4.0'
+    compile 'com.google.android.gms:play-services-gcm:9.4.0'
+    compile 'com.google.android.gms:play-services-location:9.4.0'
+    compile 'com.google.android.gms:play-services-maps:9.4.0'
     compile 'com.google.maps.android:android-maps-utils:0.4'
 
     compile 'com.squareup.retrofit2:retrofit:2.0.2'
