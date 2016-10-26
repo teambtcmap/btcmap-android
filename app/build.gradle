@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
-apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'android-apt'
 
 android {
