@@ -8,6 +8,10 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -30,6 +34,7 @@ import com.bubelov.coins.model.MerchantNotification;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.ui.widget.DrawerMenu;
+import com.bubelov.coins.ui.widget.MerchantDetailsView;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
@@ -49,6 +54,7 @@ import java.util.Collection;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * @author Igor Bubelov
@@ -77,6 +83,9 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     @BindView(R.id.fab)
     FloatingActionButton actionButton;
 
+    @BindView(R.id.merchant_details)
+    MerchantDetailsView merchantDetails;
+
     private ActionBarDrawerToggle drawerToggle;
 
     private GoogleMap map;
@@ -92,6 +101,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     private MerchantsCache merchantsCache;
 
     private boolean firstLaunch;
+
+    private BottomSheetBehavior bottomSheetBehavior;
 
     public static Intent newShowMerchantIntent(Context context, long merchantId, boolean clearNotifications) {
         Intent intent = new Intent(context, MapActivity.class);
@@ -128,6 +139,37 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        bottomSheetBehavior = BottomSheetBehavior.from(merchantDetails);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        });
+
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                bottomSheetBehavior.setPeekHeight(merchantDetails.getHeaderHeight());
+            }
+        }, 1000);
+    }
+
+    @OnClick(R.id.merchant_details)
+    public void onMerchantDetailsClick() {
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        } else {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
     }
 
     @Override
@@ -318,6 +360,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             @Override
             public void onMapClick(LatLng latLng) {
                 selectedMerchant = null;
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
         });
     }
@@ -345,6 +388,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     private void selectMerchant(long merchantId) {
         selectedMerchant = Merchant.find(merchantId);
         selectedMerchant.setCurrencies(Currency.findByMerchant(selectedMerchant));
+        merchantDetails.setMerchant(selectedMerchant);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
     public void onActionButtonClicked(View view) {
