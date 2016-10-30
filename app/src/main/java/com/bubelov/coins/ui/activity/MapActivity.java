@@ -153,7 +153,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
+                actionButton.setVisibility(slideOffset > 0.5f ? View.GONE : View.VISIBLE);
             }
         });
 
