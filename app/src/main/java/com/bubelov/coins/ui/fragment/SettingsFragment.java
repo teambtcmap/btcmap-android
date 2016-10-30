@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
@@ -19,10 +18,6 @@ import com.bubelov.coins.service.sync.merchants.UserNotificationController;
 import com.bubelov.coins.ui.activity.CurrenciesActivity;
 import com.bubelov.coins.ui.activity.NotificationAreaActivity;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
 import java.util.Random;
 
 /**
@@ -110,28 +105,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             } else {
                 cursor.close();
             }
-        }
-
-        if (preference.getKey().equals("pref_export_database")) try {
-            File sd = Environment.getExternalStorageDirectory();
-            File data = Environment.getDataDirectory();
-
-            if (sd.canWrite()) {
-                String currentDBPath = "//data//com.bubelov.coins//databases//" + getResources().getString(R.string.database_name);
-                String backupDBPath = getResources().getString(R.string.database_name);
-                File currentDB = new File(data, currentDBPath);
-                File backupDB = new File(sd, backupDBPath);
-
-                if (currentDB.exists()) {
-                    FileChannel src = new FileInputStream(currentDB).getChannel();
-                    FileChannel dst = new FileOutputStream(backupDB).getChannel();
-                    dst.transferFrom(src, 0, src.size());
-                    src.close();
-                    dst.close();
-                }
-            }
-        } catch (Exception ignored) {
-
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);
