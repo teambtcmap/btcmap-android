@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -76,6 +77,9 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        radiusSeekBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.accent), PorterDuff.Mode.SRC_IN);
+        radiusSeekBar.getThumb().setColorFilter(getResources().getColor(R.color.accent), PorterDuff.Mode.SRC_IN);
     }
 
     @Override

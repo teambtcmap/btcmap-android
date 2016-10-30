@@ -98,7 +98,7 @@ public class UserNotificationController {
         PendingIntent pendingIntent = PendingIntent.getActivity(context, NEW_MERCHANT_NOTIFICATION_GROUP.hashCode(), intent, 0);
 
         NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();
-        style.setBigContentTitle(context.getString(R.string.notification_new_merchants_content_title, pendingMerchants.size()));
+        style.setBigContentTitle(context.getString(R.string.notification_new_merchants_content_title, String.valueOf(pendingMerchants.size())));
 
         for (MerchantNotification notification : pendingMerchants) {
             Merchant merchant = Merchant.find(notification.getMerchantId());
@@ -108,7 +108,7 @@ public class UserNotificationController {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentIntent(pendingIntent)
-                .setContentTitle(context.getString(R.string.notification_new_merchants_content_title, pendingMerchants.size()))
+                .setContentTitle(context.getString(R.string.notification_new_merchants_content_title, String.valueOf(pendingMerchants.size())))
                 .setContentText(context.getString(R.string.notification_new_merchants_content_text))
                 .setDeleteIntent(prepareClearMerchantsIntent())
                 .setStyle(style)
