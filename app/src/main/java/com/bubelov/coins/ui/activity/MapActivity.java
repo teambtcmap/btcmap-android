@@ -38,6 +38,8 @@ import com.bubelov.coins.ui.widget.MerchantDetailsView;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.ContentViewEvent;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -397,6 +399,11 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         selectedMerchant.setCurrencies(Currency.findByMerchant(selectedMerchant));
         merchantDetails.setMerchant(selectedMerchant);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+        Answers.getInstance().logContentView(new ContentViewEvent()
+                .putContentName(selectedMerchant.getName())
+                .putContentType("Merchant")
+                .putContentId(String.valueOf(selectedMerchant.getId())));
     }
 
     public void onActionButtonClicked(View view) {
