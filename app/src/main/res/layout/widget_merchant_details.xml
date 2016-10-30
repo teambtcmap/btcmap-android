@@ -1,74 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="@color/white"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/header"
+    <ViewSwitcher
+        android:id="@+id/header_switcher"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/primary_dark"
-        android:orientation="vertical">
+        android:measureAllChildren="false">
 
-        <TextView
-            android:id="@+id/name"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:padding="24dp"
-            android:textColor="@color/white"
-            android:textSize="24sp"
-            tools:text="Merchant name" />
+            android:background="@color/primary_dark"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:padding="24dp"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                tools:text="Merchant name" />
+
+        </LinearLayout>
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            style="@style/Toolbar.WithBackNavigation"
+            android:layout_width="match_parent" />
+
+    </ViewSwitcher>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="16dp">
+
+        <View
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp"
+            android:background="@drawable/ic_phone_24dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/merchant_phone"
+                android:textColor="@color/secondary_text_or_icons"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:autoLink="phone"
+                android:paddingRight="16dp"
+                android:text="@string/not_provided"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clickable="true">
+        android:paddingTop="16dp">
 
-        <com.bubelov.coins.ui.widget.MerchantActionButton
-            android:id="@+id/call"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingBottom="16dp"
-            android:paddingTop="16dp"
-            app:mab_icon="@drawable/ic_call_merchant"
-            app:text="CALL" />
+        <View
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp"
+            android:background="@drawable/ic_globe_24dp" />
 
-        <com.bubelov.coins.ui.widget.MerchantActionButton
-            android:id="@+id/open_website"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingBottom="16dp"
-            android:paddingTop="16dp"
-            app:mab_icon="@drawable/ic_website"
-            app:text="WEBSITE" />
+            android:orientation="vertical">
 
-        <com.bubelov.coins.ui.widget.MerchantActionButton
-            android:id="@+id/share"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingBottom="16dp"
-            android:paddingTop="16dp"
-            app:mab_icon="@drawable/ic_share"
-            app:text="SHARE" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/merchant_website"
+                android:textColor="@color/secondary_text_or_icons"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/website"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="16dp"
+                android:text="@string/not_provided"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+        </LinearLayout>
 
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="@color/disabled_or_hint" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -99,6 +145,7 @@
                 android:id="@+id/description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingRight="16dp"
                 android:text="@string/not_provided"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
@@ -136,6 +183,7 @@
                 android:id="@+id/opening_hours"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingRight="16dp"
                 android:text="@string/not_provided"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
@@ -174,6 +222,7 @@
                 android:id="@+id/accepted_currencies"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingRight="16dp"
                 android:text="@string/not_provided"
                 android:textColor="@color/black"
                 android:textSize="18sp" />

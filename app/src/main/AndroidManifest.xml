@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.bubelov.coins"
-    android:installLocation="auto">
+    package="com.bubelov.coins">
 
+    <!-- Required for GCM tasks -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Allows location-aware functionality, user can opt out if he's on Android v21+ -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
@@ -15,6 +16,14 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Launcher">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_api_key" />
+
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="5471d91384b3af13f6be10b2083e5a3625fe6019" />
 
         <activity
             android:name=".ui.activity.LauncherActivity"
@@ -52,14 +61,6 @@
                 <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY" />
             </intent-filter>
         </service>
-
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_api_key" />
-
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="5471d91384b3af13f6be10b2083e5a3625fe6019" />
 
     </application>
 

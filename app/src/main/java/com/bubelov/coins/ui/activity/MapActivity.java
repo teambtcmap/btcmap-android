@@ -146,7 +146,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-
+                merchantDetails.setFullScreen(newState == BottomSheetBehavior.STATE_EXPANDED);
             }
 
             @Override
@@ -161,6 +161,13 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                 bottomSheetBehavior.setPeekHeight(merchantDetails.getHeaderHeight());
             }
         }, 1000);
+
+        merchantDetails.setListener(new MerchantDetailsView.Listener() {
+            @Override
+            public void onDismissed() {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
+        });
     }
 
     @OnClick(R.id.merchant_details)
