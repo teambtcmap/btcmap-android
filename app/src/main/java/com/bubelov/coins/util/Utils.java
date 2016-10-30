@@ -1,6 +1,5 @@
 package com.bubelov.coins.util;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -32,12 +31,6 @@ public class Utils {
         }
     }
 
-    public static void call(Context context, String phoneNumber) {
-        Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.setData(Uri.parse("tel:" + phoneNumber));
-        context.startActivity(intent);
-    }
-
     public static void openUrl(Context context, String url) {
         if (url.startsWith("www.")) {
             url = "http://" + url;
@@ -49,7 +42,7 @@ public class Utils {
         builder.setExitAnimations(context, android.R.anim.fade_in, android.R.anim.fade_out);
 
         CustomTabsIntent customTabsIntent = builder.build();
-        customTabsIntent.launchUrl((Activity) context, Uri.parse(url));
+        customTabsIntent.launchUrl(context, Uri.parse(url));
     }
 
     public static void share(Context context, String subject, String text) {

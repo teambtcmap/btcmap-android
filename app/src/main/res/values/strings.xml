@@ -5,6 +5,7 @@
     <string name="app_name">Coins</string>
 
     <string name="action_search">Search</string>
+    <string name="action_share">Share</string>
 
     <string name="sa_title">Settings</string>
 
@@ -56,7 +57,7 @@
     <string name="not_provided">Not provided</string>
 
     <string name="share_merchant_message_title">Check it out!</string>
-    <string name="share_merchant_message_text">This place accept cryptocurrency: %1$s</string>
+    <string name="share_merchant_message_text">This place accepts cryptocurrency: %1$s</string>
 
     <string name="fa_title">Help &amp; feedback</string>
 
@@ -88,6 +89,8 @@
         <item>Miles</item>
     </string-array>
 
+    <string name="merchant_phone">Phone:</string>
+    <string name="merchant_website">Website:</string>
     <string name="merchant_description">Description:</string>
     <string name="merchant_opening_hours">Opening hours:</string>
     <string name="merchant_accepted_currencies">Accepted currencies:</string>
