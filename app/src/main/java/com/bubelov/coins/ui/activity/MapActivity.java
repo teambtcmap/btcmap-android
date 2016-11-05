@@ -202,8 +202,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         if (requestCode == REQUEST_FIND_MERCHANT && resultCode == RESULT_OK) {
             drawerMenu.setAmenity(null);
-            Merchant merchant = (Merchant) data.getSerializableExtra(MerchantsSearchActivity.MERCHANT_EXTRA);
-            selectMerchant(merchant.getId());
+            selectMerchant(data.getIntExtra(MerchantsSearchActivity.MERCHANT_ID_EXTRA, -1));
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), MAP_DEFAULT_ZOOM));
         }
 
