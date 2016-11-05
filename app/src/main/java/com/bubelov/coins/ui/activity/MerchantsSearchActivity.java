@@ -51,7 +51,7 @@ import butterknife.OnTextChanged;
 public class MerchantsSearchActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, MerchantsSearchResultsAdapter.OnMerchantSelectedListener {
     public static final String USER_LOCATION_EXTRA = "user_location";
 
-    public static final String MERCHANT_EXTRA = "merchant";
+    public static final String MERCHANT_ID_EXTRA = "merchant";
 
     private static final int MERCHANTS_LOADER = 0;
 
@@ -141,7 +141,7 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
     @Override
     public void onMerchantSelected(Merchant merchant) {
         Intent data = new Intent();
-        data.putExtra(MERCHANT_EXTRA, merchant);
+        data.putExtra(MERCHANT_ID_EXTRA, merchant.getId());
         setResult(RESULT_OK, data);
         supportFinishAfterTransition();
     }
