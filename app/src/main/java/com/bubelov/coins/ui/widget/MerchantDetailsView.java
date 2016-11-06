@@ -1,5 +1,6 @@
 package com.bubelov.coins.ui.widget;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Paint;
 import android.support.v7.widget.Toolbar;
@@ -13,12 +14,14 @@ import android.widget.ViewSwitcher;
 import com.bubelov.coins.R;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.ui.activity.EditPlaceActivity;
 import com.bubelov.coins.util.Utils;
 
 import java.util.Iterator;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Author: Igor Bubelov
@@ -162,7 +165,7 @@ public class MerchantDetailsView extends FrameLayout {
             }
         });
 
-        toolbar.inflateMenu(R.menu.menu_merchant_details);
+        toolbar.inflateMenu(R.menu.menu_place_details);
 
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -178,5 +181,10 @@ public class MerchantDetailsView extends FrameLayout {
 
     public interface Listener {
         void onDismissed();
+    }
+
+    @OnClick(R.id.edit)
+    public void onEditClick() {
+        EditPlaceActivity.start((Activity) getContext(), merchant.getId());
     }
 }

@@ -22,9 +22,6 @@
 
     <string name="pref_distance_units">หน่วยระยะทาง</string>
 
-    <string name="exchange_rate">อัตราแลกเปลี่ยน</string>
-    <string name="bitcoin_price_checked_at">อัพเดทล่าสุด %1$s</string>
-
     <string name="all_places">ทั้งหมด</string>
     <string name="atms">ATMs</string>
     <string name="cafes">คาเฟ่</string>
@@ -42,34 +39,13 @@
     <string name="taxi">แท็กซี่</string>
 
     <string name="menu_item_settings">ตั้งค่า</string>
-    <string name="menu_item_help_and_feedback">Help &amp; feedback</string>
 
     <string name="name_unknown">Unknown</string>
-
-    <string name="loading_address">Loading address…</string>
-    <string name="could_not_load_address">Couldn\'t load address</string>
 
     <string name="not_provided">Not provided</string>
 
     <string name="share_merchant_message_title">Check it out!</string>
     <string name="share_merchant_message_text">This place accept cryptocurrency: %1$s</string>
-
-    <string name="fa_title">Help &amp; feedback</string>
-
-    <string name="fa_description">Feel free to contact us if you have any questions.</string>
-    <string name="fa_data_provided_by">Data provided by:</string>
-    <string name="fa_osm_credits">• OpenStreetMap contributors</string>
-    <string name="fa_coin_atm_radar_credits">• Coin ATM Radar</string>
-    <string name="fa_programming">Programming:</string>
-    <string name="fa_programmer_name">Igor Bubelov</string>
-    <string name="fa_design">Design:</string>
-    <string name="fa_designer_name">Vitaly Yushkov</string>
-    <string name="fa_linkedin_profile">LinkedIn profile</string>
-    <string name="fa_behance_profile">Behance profile</string>
-    <string name="fa_donation_address">Donation address</string>
-    <string name="fa_copy_to_clipboard">Copy to clipboard</string>
-
-    <string name="ma_loading_merchants">LOADING MERCHANTS</string>
 
     <string name="saa_distance">Distance:</string>
 
@@ -94,5 +70,8 @@
     <string name="action_share">Share</string>
     <string name="merchant_phone">Phone:</string>
     <string name="merchant_website">Website:</string>
+    <string name="action_send">Send</string>
+    <string name="merchant_name">Name</string>
+    <string name="suggest_an_edit">Suggest an edit</string>
 
 </resources>

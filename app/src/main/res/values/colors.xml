@@ -11,11 +11,9 @@
     <color name="disabled_or_hint">#B8B8B8</color>
     <color name="secondary_text_or_icons">#757575</color>
     <color name="text">#202020</color>
-    <color name="link">#4285f4</color>
 
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
-    <color name="transparent">#00000000</color>
 
     <color name="notification_area">#44F99F00</color>
     <color name="notification_area_border">@color/primary_dark</color>
@@ -24,8 +22,6 @@
     <color name="drawer_list_item_background_selected">#E8E8E8</color>
 
     <color name="drawer_list_item_text">#DE000000</color>
-
-    <color name="drawer_divider">#D7D7D7</color>
 
     <color name="drawer_icon_active">@color/primary_dark</color>
     <color name="drawer_icon_inactive">@color/secondary_text_or_icons</color>
