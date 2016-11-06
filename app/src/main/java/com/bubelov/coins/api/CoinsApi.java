@@ -7,6 +7,7 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 /**
@@ -20,4 +21,7 @@ public interface CoinsApi {
 
     @GET("currencies")
     Call<List<Currency>> getCurrencies();
+
+    @POST("place_suggestions")
+    Call<Void> addPlaceSuggestion(@Query("message") String message);
 }

@@ -82,4 +82,7 @@
 
     <string name="suggest_an_edit">Suggest an edit</string>
 
+    <string name="thanks_for_suggestion">Thank you for improving the data. Your changes will appear shortly.</string>
+    <string name="could_not_send_suggestion">Could not send your edits. Pleas try again or contact developer.</string>
+
 </resources>
