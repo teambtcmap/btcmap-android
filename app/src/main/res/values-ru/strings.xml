@@ -22,9 +22,6 @@
 
     <string name="pref_distance_units">Километры/мили</string>
 
-    <string name="exchange_rate">Биржевой курс</string>
-    <string name="bitcoin_price_checked_at">Актуален на: %1$s</string>
-
     <string name="all_places">Все места</string>
     <string name="atms">Банкоматы</string>
     <string name="cafes">Кафе</string>
@@ -42,34 +39,13 @@
     <string name="taxi">Такси</string>
 
     <string name="menu_item_settings">Настройки</string>
-    <string name="menu_item_help_and_feedback">Справка/отзыв</string>
 
     <string name="name_unknown">Без названия</string>
-
-    <string name="loading_address">Получение адреса…</string>
-    <string name="could_not_load_address">Не удалось получить адрес</string>
 
     <string name="not_provided">Информация отсутствует</string>
 
     <string name="share_merchant_message_title">Зацени!</string>
     <string name="share_merchant_message_text">Это место принимает криптовалюту: %1$s</string>
-
-    <string name="fa_title">Справка/отзыв</string>
-
-    <string name="fa_description">Если у вас появились вопросы или предложения - можете оставить их в Google Play или связаться с кем-нибудь из команды.</string>
-    <string name="fa_data_provided_by">Данные предоставлены</string>
-    <string name="fa_osm_credits">Пользователями OpenStreetMap</string>
-    <string name="fa_coin_atm_radar_credits">Сервисом Coin ATM Radar</string>
-    <string name="fa_programming">Программирование:</string>
-    <string name="fa_programmer_name">Игорь Бубелов</string>
-    <string name="fa_design">Дизайн:</string>
-    <string name="fa_designer_name">Виталий Юшков</string>
-    <string name="fa_linkedin_profile">Профиль на LinkedIn</string>
-    <string name="fa_behance_profile">Профиль на Behance</string>
-    <string name="fa_donation_address">Помочь проекту можно этот кошелек =)</string>
-    <string name="fa_copy_to_clipboard">Копировать адрес</string>
-
-    <string name="ma_loading_merchants">ЗАГРУЗКА ДАННЫХ</string>
 
     <string name="saa_distance">Расстояние:</string>
 
@@ -94,5 +70,8 @@
     <string name="action_share">Share</string>
     <string name="merchant_phone">Телефон:</string>
     <string name="merchant_website">Вебсайт:</string>
+    <string name="action_send">Отправить</string>
+    <string name="merchant_name">Название</string>
+    <string name="suggest_an_edit">Предложить правку</string>
 
 </resources>

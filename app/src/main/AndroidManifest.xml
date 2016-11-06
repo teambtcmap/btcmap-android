@@ -49,6 +49,8 @@
 
         <activity android:name=".ui.activity.CurrenciesActivity" />
 
+        <activity android:name=".ui.activity.EditPlaceActivity" />
+
         <service android:name=".service.sync.merchants.DatabaseSyncService" />
 
         <service android:name=".service.rates.ExchangeRatesService" />
