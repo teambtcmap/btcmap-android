@@ -73,5 +73,7 @@
     <string name="action_send">Отправить</string>
     <string name="merchant_name">Название</string>
     <string name="suggest_an_edit">Предложить правку</string>
+    <string name="could_not_send_suggestion">Could not send your edits. Pleas try again or contact developer.</string>
+    <string name="thanks_for_suggestion">Thank you for improving the data. Your changes will appear shortly.</string>
 
 </resources>

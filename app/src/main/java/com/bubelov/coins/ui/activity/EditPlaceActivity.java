@@ -1,21 +1,31 @@
 package com.bubelov.coins.ui.activity;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.api.CoinsApi;
+import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.model.Merchant;
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * @author Igor Bubelov
@@ -48,6 +58,7 @@ public class EditPlaceActivity extends AbstractActivity {
         Intent intent = new Intent(activity, EditPlaceActivity.class);
         intent.putExtra(ID_EXTRA, placeId);
         activity.startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
+        Answers.getInstance().logCustom(new CustomEvent("Edit place"));
     }
 
     @Override
@@ -76,8 +87,41 @@ public class EditPlaceActivity extends AbstractActivity {
                             "Description: " + description.getText() + "\n" +
                             "Opening hours: " + openingHours.getText();
 
-                    Toast.makeText(EditPlaceActivity.this, suggestion, Toast.LENGTH_SHORT).show();
-                    supportFinishAfterTransition();
+                    CoinsApi api = Injector.INSTANCE.getAppComponent().provideApi();
+
+                    api.addPlaceSuggestion(suggestion).enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if (response.isSuccessful()) {
+                                showAlert(R.string.thanks_for_suggestion, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int i) {
+                                        dialog.dismiss();
+                                        supportFinishAfterTransition();
+                                    }
+                                });
+                            } else {
+                                showAlert(R.string.could_not_send_suggestion, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int i) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Void> call, final Throwable t) {
+                            showAlert(R.string.could_not_send_suggestion, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int i) {
+                                    dialog.dismiss();
+                                    Crashlytics.logException(t);
+                                }
+                            });
+                        }
+                    });
+
                     return true;
                 }
 
@@ -92,5 +136,12 @@ public class EditPlaceActivity extends AbstractActivity {
         website.setText(place.getWebsite());
         description.setText(place.getDescription());
         openingHours.setText(place.getOpeningHours());
+    }
+
+    private void showAlert(@StringRes int messageId, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(this)
+                .setMessage(messageId)
+                .setPositiveButton(android.R.string.ok, okListener)
+                .show();
     }
 }
