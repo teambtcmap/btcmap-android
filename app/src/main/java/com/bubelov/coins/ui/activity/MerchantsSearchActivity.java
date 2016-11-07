@@ -51,7 +51,7 @@ import butterknife.OnTextChanged;
 public class MerchantsSearchActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, MerchantsSearchResultsAdapter.OnMerchantSelectedListener {
     public static final String USER_LOCATION_EXTRA = "user_location";
 
-    public static final String MERCHANT_ID_EXTRA = "merchant";
+    public static final String MERCHANT_ID_EXTRA = "merchant_id";
 
     private static final int MERCHANTS_LOADER = 0;
 
