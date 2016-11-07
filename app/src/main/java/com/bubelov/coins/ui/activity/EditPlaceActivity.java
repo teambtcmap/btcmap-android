@@ -11,6 +11,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
@@ -23,6 +24,7 @@ import com.crashlytics.android.answers.CustomEvent;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -33,6 +35,9 @@ import retrofit2.Response;
 
 public class EditPlaceActivity extends AbstractActivity {
     private static final String ID_EXTRA = "id";
+
+    @BindView(R.id.closed_switch)
+    Switch closedSwitch;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -80,16 +85,22 @@ public class EditPlaceActivity extends AbstractActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.action_send) {
-                    String suggestion = "ID: " + place.getId() + "\n" +
-                            "Name: " + name.getText() + "\n" +
-                            "Phone: " + phone.getText() + "\n" +
-                            "Website: " + website.getText() + "\n" +
-                            "Description: " + description.getText() + "\n" +
-                            "Opening hours: " + openingHours.getText();
+                    StringBuilder suggestionBuilder = new StringBuilder();
+                    suggestionBuilder.append("ID: ").append(place.getId()).append("\n");
+
+                    if (closedSwitch.isChecked()) {
+                        suggestionBuilder.append("Closed");
+                    } else {
+                        suggestionBuilder.append("Name: ").append(name.getText()).append("\n");
+                        suggestionBuilder.append("Phone: ").append(phone.getText()).append("\n");
+                        suggestionBuilder.append("Website: ").append(website.getText()).append("\n");
+                        suggestionBuilder.append("Description: ").append(description.getText()).append("\n");
+                        suggestionBuilder.append("Opening hours: ").append(openingHours.getText());
+                    }
 
                     CoinsApi api = Injector.INSTANCE.getAppComponent().provideApi();
 
-                    api.addPlaceSuggestion(suggestion).enqueue(new Callback<Void>() {
+                    api.addPlaceSuggestion(suggestionBuilder.toString()).enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             if (response.isSuccessful()) {
@@ -143,5 +154,16 @@ public class EditPlaceActivity extends AbstractActivity {
                 .setMessage(messageId)
                 .setPositiveButton(android.R.string.ok, okListener)
                 .show();
+    }
+
+    @OnCheckedChanged(R.id.closed_switch)
+    public void onClosedSwitchChanged() {
+        boolean closed = closedSwitch.isChecked();
+
+        name.setEnabled(!closed);
+        phone.setEnabled(!closed);
+        website.setEnabled(!closed);
+        description.setEnabled(!closed);
+        openingHours.setEnabled(!closed);
     }
 }
