@@ -32,7 +32,7 @@ public class Utils {
     }
 
     public static void openUrl(Context context, String url) {
-        if (url.startsWith("www.")) {
+        if (url.startsWith("www.") || !url.contains("http")) {
             url = "http://" + url;
         }
 
