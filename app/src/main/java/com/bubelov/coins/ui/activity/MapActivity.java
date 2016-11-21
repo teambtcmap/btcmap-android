@@ -19,6 +19,8 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -223,6 +225,15 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_map_activity, menu);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem settingsMenuItem = menu.findItem(R.id.action_settings);
+        SpannableString string = new SpannableString(settingsMenuItem.getTitle());
+        string.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.black)), 0, string.length(), 0);
+        settingsMenuItem.setTitle(string);
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override

@@ -4,6 +4,7 @@
 
     <string name="app_name">Coins</string>
 
+    <string name="action_add_place">Add place</string>
     <string name="action_search">Search</string>
     <string name="action_share">Share</string>
     <string name="action_send">Send</string>

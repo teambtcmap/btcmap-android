@@ -30,3 +30,7 @@
     @com.squareup.otto.Subscribe public *;
     @com.squareup.otto.Produce public *;
 }
+
+# Google Maps
+
+-keep class com.google.android.gms.** { *; }

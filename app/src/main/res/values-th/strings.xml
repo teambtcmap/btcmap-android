@@ -76,5 +76,6 @@
     <string name="could_not_send_suggestion">Could not send your edits. Pleas try again or contact developer.</string>
     <string name="thanks_for_suggestion">Thank you for improving the data. Your changes will appear shortly.</string>
     <string name="place_is_closed">This place does not exist or closed or no longer accept crypto currency</string>
+    <string name="action_add_place">Add place</string>
 
 </resources>
