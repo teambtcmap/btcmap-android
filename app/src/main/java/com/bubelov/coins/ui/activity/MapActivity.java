@@ -245,11 +245,14 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         int id = item.getItemId();
 
         switch (id) {
-            case R.id.action_settings:
-                SettingsActivity.start(this);
+            case R.id.action_add:
+                EditPlaceActivity.start(this, 0);
                 return true;
             case R.id.action_search:
                 MerchantsSearchActivity.startForResult(this, map.getMyLocation(), REQUEST_FIND_MERCHANT);
+                return true;
+            case R.id.action_settings:
+                SettingsActivity.start(this);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

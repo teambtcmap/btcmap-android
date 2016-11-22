@@ -11,6 +11,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -44,6 +45,9 @@ public class EditPlaceActivity extends AbstractActivity {
 
     @BindView(R.id.name)
     TextView name;
+
+    @BindView(R.id.change_location)
+    Button changeLocation;
 
     @BindView(R.id.phone)
     TextView phone;
@@ -142,11 +146,18 @@ public class EditPlaceActivity extends AbstractActivity {
 
         place = Merchant.find(getIntent().getLongExtra(ID_EXTRA, -1));
 
-        name.setText(place.getName());
-        phone.setText(place.getPhone());
-        website.setText(place.getWebsite());
-        description.setText(place.getDescription());
-        openingHours.setText(place.getOpeningHours());
+        if (place == null) {
+            toolbar.setTitle(R.string.action_add_place);
+            closedSwitch.setVisibility(View.GONE);
+            changeLocation.setText(R.string.set_location);
+        } else {
+            name.setText(place.getName());
+            changeLocation.setText(R.string.change_location);
+            phone.setText(place.getPhone());
+            website.setText(place.getWebsite());
+            description.setText(place.getDescription());
+            openingHours.setText(place.getOpeningHours());
+        }
     }
 
     private void showAlert(@StringRes int messageId, DialogInterface.OnClickListener okListener) {
