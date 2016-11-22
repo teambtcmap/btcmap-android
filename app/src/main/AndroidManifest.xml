@@ -49,7 +49,9 @@
 
         <activity android:name=".ui.activity.CurrenciesActivity" />
 
-        <activity android:name=".ui.activity.EditPlaceActivity" />
+        <activity
+            android:name=".ui.activity.EditPlaceActivity"
+            android:windowSoftInputMode="stateHidden" />
 
         <service android:name=".service.sync.merchants.DatabaseSyncService" />
 

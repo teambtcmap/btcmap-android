@@ -77,5 +77,7 @@
     <string name="thanks_for_suggestion">Thank you for improving the data. Your changes will appear shortly.</string>
     <string name="place_is_closed">This place does not exist or closed or no longer accept crypto currency</string>
     <string name="action_add_place">Add place</string>
+    <string name="change_location">Change Location</string>
+    <string name="set_location">Set Location</string>
 
 </resources>
