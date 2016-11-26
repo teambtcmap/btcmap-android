@@ -21,6 +21,7 @@ import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -51,6 +52,8 @@ import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import timber.log.Timber;
 
 import static com.google.maps.android.clustering.algo.NonHierarchicalDistanceBasedAlgorithm.MAX_DISTANCE_AT_ZOOM;
 
@@ -411,11 +414,17 @@ public class StaticClusterRenderer<T extends ClusterItem> implements ClusterRend
                     markersToRemove.removeAll(newMarkers);
                     removed = true;
                 } catch (ConcurrentModificationException e) {
-                    // TODO remove this hack
+                    Timber.e(e, "Clustering error");
+                    Crashlytics.logException(e);
                 }
             }
 
-            markersToRemove.removeAll(newMarkers);
+            try {
+                markersToRemove.removeAll(newMarkers);
+            } catch (ConcurrentModificationException e) {
+                Timber.e(e, "Clustering error");
+                Crashlytics.logException(e);
+            }
 
             // Find all of the new clusters that were added on-screen. These are candidates for
             // markers to animate from.

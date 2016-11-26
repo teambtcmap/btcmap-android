@@ -1,11 +1,11 @@
 package com.bubelov.coins.dagger;
 
-import com.bubelov.coins.serializer.DateTimeDeserializer;
+import com.bubelov.coins.util.UtcDateTypeAdapter;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import org.joda.time.DateTime;
+import java.util.Date;
 
 import javax.inject.Singleton;
 
@@ -23,7 +23,7 @@ public class ConverterModule {
     Gson provideGson() {
         return new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
+                .registerTypeAdapter(Date.class, new UtcDateTypeAdapter())
                 .create();
     }
 }

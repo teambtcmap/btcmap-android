@@ -10,9 +10,8 @@ import com.bubelov.coins.database.DbContract;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
 
-import org.joda.time.DateTime;
-
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import timber.log.Timber;
@@ -168,8 +167,7 @@ public class Merchant extends AbstractEntity implements ClusterItem {
         merchant.setPhone(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.PHONE)));
         merchant.setWebsite(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.WEBSITE)));
         merchant.setOpeningHours(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.OPENING_HOURS)));
-        merchant.setCreatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Merchants._CREATED_AT))));
-        merchant.setUpdatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Merchants._UPDATED_AT))));
+        merchant.setUpdatedAt(new Date(cursor.getLong(cursor.getColumnIndex(DbContract.Merchants._UPDATED_AT))));
         return merchant;
     }
 
@@ -191,10 +189,9 @@ public class Merchant extends AbstractEntity implements ClusterItem {
     private static void insertMerchants(List<Merchant> merchants) {
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
 
-        String insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        String insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 DbContract.Merchants.TABLE_NAME,
                 DbContract.Merchants._ID,
-                DbContract.Merchants._CREATED_AT,
                 DbContract.Merchants._UPDATED_AT,
                 DbContract.Merchants.LATITUDE,
                 DbContract.Merchants.LONGITUDE,
@@ -210,17 +207,16 @@ public class Merchant extends AbstractEntity implements ClusterItem {
 
         for (Merchant merchant : merchants) {
             insertStatement.bindLong(1, merchant.getId());
-            insertStatement.bindLong(2, merchant.getCreatedAt().getMillis());
-            insertStatement.bindLong(3, merchant.getUpdatedAt().getMillis());
-            insertStatement.bindDouble(4, merchant.getLatitude());
-            insertStatement.bindDouble(5, merchant.getLongitude());
-            insertStatement.bindString(6, getEmptyStringIfNull(merchant.getName()));
-            insertStatement.bindString(7, getEmptyStringIfNull(merchant.getDescription()));
-            insertStatement.bindString(8, getEmptyStringIfNull(merchant.getPhone()));
-            insertStatement.bindString(9, getEmptyStringIfNull(merchant.getWebsite()));
-            insertStatement.bindString(10, getEmptyStringIfNull(merchant.getAmenity()));
-            insertStatement.bindString(11, getEmptyStringIfNull(merchant.getOpeningHours()));
-            insertStatement.bindString(12, getEmptyStringIfNull(merchant.getAddress()));
+            insertStatement.bindLong(2, merchant.getUpdatedAt().getTime());
+            insertStatement.bindDouble(3, merchant.getLatitude());
+            insertStatement.bindDouble(4, merchant.getLongitude());
+            insertStatement.bindString(5, getEmptyStringIfNull(merchant.getName()));
+            insertStatement.bindString(6, getEmptyStringIfNull(merchant.getDescription()));
+            insertStatement.bindString(7, getEmptyStringIfNull(merchant.getPhone()));
+            insertStatement.bindString(8, getEmptyStringIfNull(merchant.getWebsite()));
+            insertStatement.bindString(9, getEmptyStringIfNull(merchant.getAmenity()));
+            insertStatement.bindString(10, getEmptyStringIfNull(merchant.getOpeningHours()));
+            insertStatement.bindString(11, getEmptyStringIfNull(merchant.getAddress()));
             insertStatement.execute();
         }
     }
