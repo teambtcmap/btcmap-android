@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 
-import org.joda.time.DateTime;
+import java.util.Date;
 
 /**
  * Author: Igor Bubelov
@@ -65,8 +65,7 @@ public class ExchangeRate extends AbstractEntity {
                 rate.setCurrency(currency);
                 rate.setBaseCurrency(baseCurrency);
                 rate.setValue(cursor.getFloat(cursor.getColumnIndex(DbContract.ExchangeRates.VALUE)));
-                rate.setCreatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._CREATED_AT))));
-                rate.setUpdatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._UPDATED_AT))));
+                rate.setUpdatedAt(new Date(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._UPDATED_AT))));
 
                 return rate;
             } else {
@@ -83,8 +82,7 @@ public class ExchangeRate extends AbstractEntity {
         values.put(DbContract.ExchangeRates.CURRENCY, currency);
         values.put(DbContract.ExchangeRates.BASE_CURRENCY, baseCurrency);
         values.put(DbContract.ExchangeRates.VALUE, value);
-        values.put(DbContract.ExchangeRates._CREATED_AT, createdAt.getMillis());
-        values.put(DbContract.ExchangeRates._UPDATED_AT, updatedAt.getMillis());
+        values.put(DbContract.ExchangeRates._UPDATED_AT, updatedAt.getTime());
 
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
         db.insert(DbContract.ExchangeRates.TABLE_NAME, null, values);

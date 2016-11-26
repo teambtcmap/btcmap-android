@@ -1,8 +1,7 @@
 package com.bubelov.coins.model;
 
-import org.joda.time.DateTime;
-
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Author: Igor Bubelov
@@ -12,9 +11,7 @@ import java.io.Serializable;
 public abstract class AbstractEntity implements Serializable {
     protected long id;
 
-    protected DateTime createdAt;
-
-    protected DateTime updatedAt;
+    protected Date updatedAt;
 
     public long getId() {
         return id;
@@ -24,19 +21,11 @@ public abstract class AbstractEntity implements Serializable {
         this.id = id;
     }
 
-    public DateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(DateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public DateTime getUpdatedAt() {
+    public Date getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(DateTime updatedAt) {
+    public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
 }

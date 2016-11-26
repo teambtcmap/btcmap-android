@@ -24,10 +24,11 @@ import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
 import com.google.android.gms.gcm.Task;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
@@ -107,9 +108,12 @@ public class DatabaseSyncService extends CoinsIntentService {
         UserNotificationController notificationManager = new UserNotificationController(getApplicationContext());
         boolean initialSync = Merchant.getCount() == 0;
 
+        SimpleDateFormat dateFormat = new SimpleDateFormat(Constants.DATE_FORMAT, Locale.US);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
         while (true) {
-            DateTime lastUpdate = getLatestMerchantUpdateDate(db);
-            List<Merchant> merchants = getApi().getMerchants(lastUpdate.toString(Constants.DATE_FORMAT), MAX_MERCHANTS_PER_REQUEST).execute().body();
+            Date lastUpdate = getLatestMerchantUpdateDate(db);
+            List<Merchant> merchants = getApi().getMerchants(dateFormat.format(lastUpdate), MAX_MERCHANTS_PER_REQUEST).execute().body();
 
             Timber.d("Inserting %s merchants", merchants.size());
             time = System.currentTimeMillis();
@@ -136,7 +140,7 @@ public class DatabaseSyncService extends CoinsIntentService {
                 .apply();
     }
 
-    private DateTime getLatestMerchantUpdateDate(SQLiteDatabase db) {
+    private Date getLatestMerchantUpdateDate(SQLiteDatabase db) {
         Cursor lastUpdateCursor = db.query(DbContract.Merchants.TABLE_NAME,
                 new String[]{DbContract.Merchants._UPDATED_AT},
                 null,
@@ -153,6 +157,6 @@ public class DatabaseSyncService extends CoinsIntentService {
         }
 
         lastUpdateCursor.close();
-        return new DateTime(DateTimeZone.UTC).withMillis(lastUpdateMillis);
+        return new Date(lastUpdateMillis);
     }
 }

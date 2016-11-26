@@ -7,8 +7,6 @@ import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.service.sync.merchants.DatabaseSyncService;
 import com.crashlytics.android.Crashlytics;
 
-import net.danlew.android.joda.JodaTimeAndroid;
-
 import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
 
@@ -23,7 +21,6 @@ public class App extends Application {
         super.onCreate();
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
         Fabric.with(this, new Crashlytics());
-        JodaTimeAndroid.init(this);
 
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());

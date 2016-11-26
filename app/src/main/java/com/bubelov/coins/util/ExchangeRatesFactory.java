@@ -2,7 +2,7 @@ package com.bubelov.coins.util;
 
 import com.bubelov.coins.model.ExchangeRate;
 
-import org.joda.time.DateTime;
+import java.util.Date;
 
 /**
  * Author: Igor Bubelov
@@ -15,9 +15,7 @@ public class ExchangeRatesFactory {
         rate.setCurrency(currency);
         rate.setBaseCurrency(baseCurrency);
         rate.setValue(value);
-        long now = System.currentTimeMillis();
-        rate.setCreatedAt(new DateTime(now));
-        rate.setUpdatedAt(new DateTime(now));
+        rate.setUpdatedAt(new Date(System.currentTimeMillis()));
         return rate;
     }
 }

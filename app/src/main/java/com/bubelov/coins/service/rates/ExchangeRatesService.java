@@ -76,7 +76,7 @@ public class ExchangeRatesService extends CoinsIntentService {
 
     private boolean isCacheUpToDate() {
         ExchangeRate latestRate = ExchangeRate.last(currency, baseCurrency);
-        return latestRate != null && latestRate.getUpdatedAt().isAfter(System.currentTimeMillis() - CACHE_LIFETIME_IN_MILLIS);
+        return latestRate != null && latestRate.getUpdatedAt().getTime() > (System.currentTimeMillis() - CACHE_LIFETIME_IN_MILLIS);
     }
 
     void updateExchangeRate() {

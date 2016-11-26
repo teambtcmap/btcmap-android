@@ -10,10 +10,9 @@ import android.support.annotation.NonNull;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 
-import org.joda.time.DateTime;
-
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import timber.log.Timber;
@@ -151,7 +150,7 @@ public class Currency extends AbstractEntity implements Serializable {
             values.put(DbContract.Currencies._ID, getId());
         }
 
-        values.put(DbContract.Currencies._UPDATED_AT, getUpdatedAt().getMillis());
+        values.put(DbContract.Currencies._UPDATED_AT, updatedAt.getTime());
         values.put(DbContract.Currencies.NAME, getName());
         values.put(DbContract.Currencies.CODE, getCode());
         values.put(DbContract.Currencies.CRYPTO, isCrypto());
@@ -170,8 +169,7 @@ public class Currency extends AbstractEntity implements Serializable {
             currency.setCode(cursor.getString(cursor.getColumnIndex(DbContract.Currencies.CODE)));
             currency.setCrypto(cursor.getInt(cursor.getColumnIndex(DbContract.Currencies.CRYPTO)) == 1);
             currency.setShowOnMap(cursor.getInt(cursor.getColumnIndex(DbContract.Currencies.SHOW_ON_MAP)) == 1);
-            currency.setCreatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._CREATED_AT))));
-            currency.setUpdatedAt(new DateTime(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._UPDATED_AT))));
+            currency.setUpdatedAt(new Date(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._UPDATED_AT))));
             currencies.add(currency);
         }
 
