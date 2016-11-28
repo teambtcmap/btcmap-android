@@ -18,8 +18,7 @@ import java.util.List;
 import timber.log.Timber;
 
 /**
- * Author: Igor Bubelov
- * Date: 03/07/14 22:54
+ * @author Igor Bubelov
  */
 
 public class Currency extends AbstractEntity implements Serializable {
@@ -106,14 +105,14 @@ public class Currency extends AbstractEntity implements Serializable {
         ));
     }
 
-    public static List<Currency> findByMerchant(Merchant merchant) {
+    public static List<Currency> findByPlace(Place place) {
         List<Currency> currencies = new ArrayList<>();
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
-        Cursor cursor = db.query(DbContract.CurrenciesMerchants.TABLE_NAME, null, "merchant_id = ?", new String[]{String.valueOf(merchant.getId())}, null, null, null);
+        Cursor cursor = db.query(DbContract.CurrenciesPlaces.TABLE_NAME, null, "place_id = ?", new String[]{String.valueOf(place.getId())}, null, null, null);
 
         try {
             while (cursor.moveToNext()) {
-                long currencyId = cursor.getLong(cursor.getColumnIndex(DbContract.CurrenciesMerchants.CURRENCY_ID));
+                long currencyId = cursor.getLong(cursor.getColumnIndex(DbContract.CurrenciesPlaces.CURRENCY_ID));
                 currencies.add(find(currencyId));
             }
         } catch (Exception e) {

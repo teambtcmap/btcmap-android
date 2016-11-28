@@ -5,11 +5,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.service.sync.merchants.DatabaseSyncService;
+import com.bubelov.coins.service.sync.DatabaseSyncService;
 
 /**
- * Author: Igor Bubelov
- * Date: 07/07/14 22:18
+ * @author Igor Bubelov
  */
 
 public class DbHelper extends SQLiteOpenHelper {

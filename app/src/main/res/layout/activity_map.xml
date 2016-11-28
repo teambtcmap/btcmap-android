@@ -27,8 +27,8 @@
 
         </FrameLayout>
 
-        <com.bubelov.coins.ui.widget.MerchantDetailsView
-            android:id="@+id/merchant_details"
+        <com.bubelov.coins.ui.widget.PlaceDetailsView
+            android:id="@+id/place_details"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:behavior_hideable="true"
@@ -44,7 +44,7 @@
             app:backgroundTint="@color/white"
             app:borderWidth="0dp"
             app:elevation="4dp"
-            app:layout_anchor="@+id/merchant_details"
+            app:layout_anchor="@+id/place_details"
             app:layout_anchorGravity="top|end" />
 
     </android.support.design.widget.CoordinatorLayout>

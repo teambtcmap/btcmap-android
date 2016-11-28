@@ -1,4 +1,4 @@
-package com.bubelov.coins.service.sync.merchants;
+package com.bubelov.coins.service.sync;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.EventBus;
+import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.PreferenceKeys;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
@@ -16,7 +17,7 @@ import com.bubelov.coins.event.DatabaseSyncFailedEvent;
 import com.bubelov.coins.event.DatabaseSyncStartedEvent;
 import com.bubelov.coins.event.DatabaseSyncedEvent;
 import com.bubelov.coins.model.Currency;
-import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.model.Place;
 import com.bubelov.coins.service.CoinsIntentService;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
@@ -34,12 +35,11 @@ import java.util.concurrent.TimeUnit;
 import timber.log.Timber;
 
 /**
- * Author: Igor Bubelov
- * Date: 07/07/14 22:27
+ * @author Igor Bubelov
  */
 
 public class DatabaseSyncService extends CoinsIntentService {
-    private static final int MAX_MERCHANTS_PER_REQUEST = 2500;
+    private static final int MAX_PLACES_PER_REQUEST = 2500;
 
     public static void startIfNeverSynced(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -69,12 +69,15 @@ public class DatabaseSyncService extends CoinsIntentService {
         EventBus.getInstance().post(new DatabaseSyncStartedEvent());
 
         try {
-            long merchantsBeforeSync = Merchant.getCount();
-            Timber.d("Merchants before sync: %s", merchantsBeforeSync);
+            long placesBeforeSync = Place.getCount();
+            Timber.d("Places before sync: %s", placesBeforeSync);
             long time = System.currentTimeMillis();
             sync();
             Timber.d("Sync time: %s", System.currentTimeMillis() - time);
-            Timber.d("Posting sync finished event");
+
+            PlacesCache cache = Injector.INSTANCE.getAppComponent().getPlacesCache();
+            cache.invalidate();
+
             EventBus.getInstance().post(new DatabaseSyncedEvent());
         } catch (Exception e) {
             Timber.e(e, "Couldn't sync database");
@@ -106,30 +109,30 @@ public class DatabaseSyncService extends CoinsIntentService {
 
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
         UserNotificationController notificationManager = new UserNotificationController(getApplicationContext());
-        boolean initialSync = Merchant.getCount() == 0;
+        boolean initialSync = Place.getCount() == 0;
 
         SimpleDateFormat dateFormat = new SimpleDateFormat(Constants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         while (true) {
-            Date lastUpdate = getLatestMerchantUpdateDate(db);
-            List<Merchant> merchants = getApi().getMerchants(dateFormat.format(lastUpdate), MAX_MERCHANTS_PER_REQUEST).execute().body();
+            Date lastUpdate = getLatestPlaceUpdateDate(db);
+            List<Place> places = getApi().getPlaces(dateFormat.format(lastUpdate), MAX_PLACES_PER_REQUEST).execute().body();
 
-            Timber.d("Inserting %s merchants", merchants.size());
+            Timber.d("Inserting %s places", places.size());
             time = System.currentTimeMillis();
-            Merchant.insert(merchants);
+            Place.insert(places);
             Timber.d("Inserted. Time: %s", System.currentTimeMillis() - time);
 
-            for (Merchant merchant : merchants) {
-                if (!initialSync && notificationManager.shouldNotifyUser(merchant)) {
-                    notificationManager.notifyUser(merchant.getId(), merchant.getName());
+            for (Place place : places) {
+                if (!initialSync && notificationManager.shouldNotifyUser(place)) {
+                    notificationManager.notifyUser(place.getId(), place.getName());
                     Answers.getInstance().logCustom(new CustomEvent("Notified about new place")
-                            .putCustomAttribute("Place id", merchant.getId())
-                            .putCustomAttribute("Place name", merchant.getName()));
+                            .putCustomAttribute("Place id", place.getId())
+                            .putCustomAttribute("Place name", place.getName()));
                 }
             }
 
-            if (merchants.size() < MAX_MERCHANTS_PER_REQUEST) {
+            if (places.size() < MAX_PLACES_PER_REQUEST) {
                 break;
             }
         }
@@ -140,14 +143,14 @@ public class DatabaseSyncService extends CoinsIntentService {
                 .apply();
     }
 
-    private Date getLatestMerchantUpdateDate(SQLiteDatabase db) {
-        Cursor lastUpdateCursor = db.query(DbContract.Merchants.TABLE_NAME,
-                new String[]{DbContract.Merchants._UPDATED_AT},
+    private Date getLatestPlaceUpdateDate(SQLiteDatabase db) {
+        Cursor lastUpdateCursor = db.query(DbContract.Places.TABLE_NAME,
+                new String[]{DbContract.Places._UPDATED_AT},
                 null,
                 null,
                 null,
                 null,
-                DbContract.Merchants._UPDATED_AT + " DESC",
+                DbContract.Places._UPDATED_AT + " DESC",
                 "1");
 
         long lastUpdateMillis = 0;

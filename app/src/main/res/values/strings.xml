@@ -14,11 +14,11 @@
     <string name="pref_area_of_interest">Notifications</string>
     <string name="pref_area_of_interest_summary">Select your area of interest</string>
 
-    <string name="notification_new_merchant">New merchant in your area</string>
-    <string name="notification_new_merchant_no_name">Touch to see where</string>
+    <string name="notification_new_place">New place in your area</string>
+    <string name="notification_new_place_no_name">Touch to see where</string>
 
-    <string name="notification_new_merchants_content_title">%1$s new merchants</string>
-    <string name="notification_new_merchants_content_text">Touch to see them</string>
+    <string name="notification_new_places_content_title">%1$s new places</string>
+    <string name="notification_new_places_content_text">Touch to see them</string>
 
     <string name="pref_exchange_rates_provider">Exchange rates source</string>
     <string name="pref_exchange_rates_provider_summary">Select source for obtaining exchange rates between Bitcoin and USD</string>
@@ -52,8 +52,8 @@
 
     <string name="not_provided">Not provided</string>
 
-    <string name="share_merchant_message_title">Check it out!</string>
-    <string name="share_merchant_message_text">This place accepts cryptocurrency: %1$s</string>
+    <string name="share_place_message_title">Check it out!</string>
+    <string name="share_place_message_text">This place accepts cryptocurrency: %1$s</string>
 
     <string name="saa_distance">Distance:</string>
 
@@ -68,12 +68,12 @@
         <item>Miles</item>
     </string-array>
 
-    <string name="merchant_name">Name</string>
-    <string name="merchant_phone">Phone</string>
-    <string name="merchant_website">Website</string>
-    <string name="merchant_description">Description</string>
-    <string name="merchant_opening_hours">Opening hours</string>
-    <string name="merchant_accepted_currencies">Accepted currencies</string>
+    <string name="name">Name</string>
+    <string name="phone">Phone</string>
+    <string name="website">Website</string>
+    <string name="description">Description</string>
+    <string name="opening_hours">Opening hours</string>
+    <string name="accepted_currencies">Accepted currencies</string>
 
     <string name="cd_bitcoin_logo" translatable="false">Bitcoin logo</string>
     <string name="cd_update_exchange_rate" translatable="false">Refresh exchange rate</string>

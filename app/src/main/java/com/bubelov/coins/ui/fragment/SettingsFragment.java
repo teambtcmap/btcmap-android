@@ -13,8 +13,8 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.service.rates.ExchangeRatesService;
-import com.bubelov.coins.service.sync.merchants.DatabaseSyncService;
-import com.bubelov.coins.service.sync.merchants.UserNotificationController;
+import com.bubelov.coins.service.sync.DatabaseSyncService;
+import com.bubelov.coins.service.sync.UserNotificationController;
 import com.bubelov.coins.ui.activity.CurrenciesActivity;
 import com.bubelov.coins.ui.activity.NotificationAreaActivity;
 
@@ -56,25 +56,25 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         if (preference.getKey().equals("pref_test_notification")) {
             SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
 
-            Cursor cursor = db.rawQuery("select count(_id) from " + DbContract.Merchants.TABLE_NAME, null);
+            Cursor cursor = db.rawQuery("select count(_id) from " + DbContract.Places.TABLE_NAME, null);
 
             if (cursor.moveToNext()) {
-                int merchantsCount = cursor.getInt(0);
+                int placesCount = cursor.getInt(0);
                 cursor.close();
 
                 Random random = new Random(System.currentTimeMillis());
 
-                cursor = db.query(DbContract.Merchants.TABLE_NAME,
-                        new String[]{DbContract.Merchants._ID, DbContract.Merchants.NAME},
+                cursor = db.query(DbContract.Places.TABLE_NAME,
+                        new String[]{DbContract.Places._ID, DbContract.Places.NAME},
                         "_id = ?",
-                        new String[]{String.valueOf(random.nextInt(merchantsCount + 1))},
+                        new String[]{String.valueOf(random.nextInt(placesCount + 1))},
                         null,
                         null,
                         null);
 
                 if (cursor.moveToNext()) {
-                    long id = cursor.getLong(cursor.getColumnIndex(DbContract.Merchants._ID));
-                    String name = cursor.getString(cursor.getColumnIndex(DbContract.Merchants.NAME));
+                    long id = cursor.getLong(cursor.getColumnIndex(DbContract.Places._ID));
+                    String name = cursor.getString(cursor.getColumnIndex(DbContract.Places.NAME));
                     new UserNotificationController(getActivity()).notifyUser(id, name);
                 }
 
@@ -82,25 +82,25 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             }
         }
 
-        if (preference.getKey().equals("pref_update_merchants")) {
+        if (preference.getKey().equals("pref_update_places")) {
             DatabaseSyncService.start(getActivity());
         }
 
-        if (preference.getKey().equals("pref_remove_last_merchant")) {
+        if (preference.getKey().equals("pref_remove_last_place")) {
             SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
 
-            Cursor cursor = db.query(DbContract.Merchants.TABLE_NAME, new String[]{DbContract.Merchants._ID}, null, null, null, null, DbContract.Merchants._UPDATED_AT + " DESC", "1");
+            Cursor cursor = db.query(DbContract.Places.TABLE_NAME, new String[]{DbContract.Places._ID}, null, null, null, null, DbContract.Places._UPDATED_AT + " DESC", "1");
 
             if (cursor.moveToNext()) {
                 long id = cursor.getLong(0);
                 cursor.close();
 
-                int rowsAffected = db.delete(DbContract.Merchants.TABLE_NAME, DbContract.Merchants._ID + " = ?", new String[]{String.valueOf(id)});
+                int rowsAffected = db.delete(DbContract.Places.TABLE_NAME, DbContract.Places._ID + " = ?", new String[]{String.valueOf(id)});
 
                 if (rowsAffected > 0) {
                     Toast.makeText(getActivity(), "Removed!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getActivity(), "Couldn't remove merchant", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Couldn't remove place", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 cursor.close();

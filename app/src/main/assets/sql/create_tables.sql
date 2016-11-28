@@ -1,4 +1,4 @@
-CREATE TABLE merchants (
+create table places (
     _id integer primary key,
     _created_at integer,
     _updated_at integer,
@@ -13,7 +13,7 @@ CREATE TABLE merchants (
     address text
 );
 
-CREATE TABLE currencies (
+create table currencies (
     _id integer primary key,
     _created_at integer,
     _updated_at integer,
@@ -23,15 +23,15 @@ CREATE TABLE currencies (
     show_on_map boolean not null default 1
 );
 
-CREATE TABLE currencies_merchants (
+create table currencies_places (
     _id integer primary key,
     _created_at integer,
     _updated_at integer,
     currency_id integer,
-    merchant_id integer
+    place_id integer
 );
 
-CREATE TABLE exchange_rates (
+create table exchange_rates (
     _id integer primary key,
     _created_at integer,
     _updated_at integer,

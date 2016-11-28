@@ -1,4 +1,4 @@
-package com.bubelov.coins.service.sync.merchants;
+package com.bubelov.coins.service.sync;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
@@ -7,8 +7,7 @@ import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
 
 /**
- * Author: Igor Bubelov
- * Date: 17/02/16 16:58
+ * @author Igor Bubelov
  */
 
 public class DatabaseGcmSyncService extends GcmTaskService {

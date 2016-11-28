@@ -39,7 +39,7 @@
                     android:id="@+id/name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/merchant_name" />
+                    android:hint="@string/name" />
 
             </android.support.design.widget.TextInputLayout>
 
@@ -82,7 +82,7 @@
                     android:id="@+id/phone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/merchant_phone"
+                    android:hint="@string/phone"
                     android:inputType="phone" />
 
             </android.support.design.widget.TextInputLayout>
@@ -96,7 +96,7 @@
                     android:id="@+id/website"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/merchant_website" />
+                    android:hint="@string/website" />
 
             </android.support.design.widget.TextInputLayout>
 
@@ -109,7 +109,7 @@
                     android:id="@+id/description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/merchant_description" />
+                    android:hint="@string/description" />
 
             </android.support.design.widget.TextInputLayout>
 
@@ -122,7 +122,7 @@
                     android:id="@+id/opening_hours"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/merchant_opening_hours" />
+                    android:hint="@string/opening_hours" />
 
             </android.support.design.widget.TextInputLayout>
 

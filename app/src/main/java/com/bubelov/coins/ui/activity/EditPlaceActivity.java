@@ -18,7 +18,7 @@ import android.widget.TextView;
 import com.bubelov.coins.R;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.model.Place;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
@@ -61,7 +61,7 @@ public class EditPlaceActivity extends AbstractActivity {
     @BindView(R.id.opening_hours)
     TextView openingHours;
 
-    private Merchant place;
+    private Place place;
 
     public static void start(Activity activity, long placeId) {
         Intent intent = new Intent(activity, EditPlaceActivity.class);
@@ -144,7 +144,7 @@ public class EditPlaceActivity extends AbstractActivity {
             }
         });
 
-        place = Merchant.find(getIntent().getLongExtra(ID_EXTRA, -1));
+        place = Place.find(getIntent().getLongExtra(ID_EXTRA, -1));
 
         if (place == null) {
             toolbar.setTitle(R.string.action_add_place);

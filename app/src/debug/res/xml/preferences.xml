@@ -34,12 +34,12 @@
             android:title="Test notification" />
 
         <Preference
-            android:key="pref_update_merchants"
-            android:title="Update merchants" />
+            android:key="pref_update_places"
+            android:title="Update places" />
 
         <Preference
-            android:key="pref_remove_last_merchant"
-            android:title="Remove last merchant" />
+            android:key="pref_remove_last_place"
+            android:title="Remove last place" />
 
     </PreferenceCategory>
 

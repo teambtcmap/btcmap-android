@@ -6,8 +6,7 @@ import com.bubelov.coins.R;
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
 /**
- * Author: Igor Bubelov
- * Date: 9/22/15 10:00 PM
+ * @author Igor Bubelov
  */
 
 public class PreloadedDbHelper extends SQLiteAssetHelper {
