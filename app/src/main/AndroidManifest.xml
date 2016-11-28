@@ -3,10 +3,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bubelov.coins">
 
-    <!-- Required for GCM tasks -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!-- Allows location-aware functionality, user can opt out if he's on Android v21+ -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
@@ -40,7 +38,7 @@
             android:theme="@style/AppTheme.TransparentStatusBar" />
 
         <activity
-            android:name=".ui.activity.MerchantsSearchActivity"
+            android:name=".ui.activity.FindPlaceActivity"
             android:theme="@style/AppTheme.GrayStatusBar" />
 
         <activity android:name=".ui.activity.SettingsActivity" />
@@ -53,12 +51,12 @@
             android:name=".ui.activity.EditPlaceActivity"
             android:windowSoftInputMode="stateHidden" />
 
-        <service android:name=".service.sync.merchants.DatabaseSyncService" />
+        <service android:name=".service.sync.DatabaseSyncService" />
 
         <service android:name=".service.rates.ExchangeRatesService" />
 
         <service
-            android:name=".service.sync.merchants.DatabaseGcmSyncService"
+            android:name=".service.sync.DatabaseGcmSyncService"
             android:exported="true"
             android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
             <intent-filter>

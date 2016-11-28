@@ -37,11 +37,6 @@ public class CurrenciesActivity extends AbstractActivity implements CurrenciesAd
     public static void start(Activity activity) {
         Intent intent = new Intent(activity, CurrenciesActivity.class);
         activity.startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
-
-        Answers.getInstance().logContentView(new ContentViewEvent()
-                .putContentName("Currencies screen")
-                .putContentType("Screens")
-                .putContentId("Currencies"));
     }
 
     @Override
@@ -64,7 +59,7 @@ public class CurrenciesActivity extends AbstractActivity implements CurrenciesAd
 
     @Override
     protected void onStop() {
-        Injector.INSTANCE.getAppComponent().getMerchantsCache().invalidate();
+        Injector.INSTANCE.getAppComponent().getPlacesCache().invalidate();
         super.onStop();
     }
 

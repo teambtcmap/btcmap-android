@@ -17,11 +17,10 @@ import java.util.List;
 import timber.log.Timber;
 
 /**
- * Author: Igor Bubelov
- * Date: 02/06/14 21:42
+ * @author Igor Bubelov
  */
 
-public class Merchant extends AbstractEntity implements ClusterItem {
+public class Place extends AbstractEntity implements ClusterItem {
     private String name;
 
     private String description;
@@ -46,7 +45,7 @@ public class Merchant extends AbstractEntity implements ClusterItem {
 
     public static long getCount() {
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
-        return DatabaseUtils.queryNumEntries(db, DbContract.Merchants.TABLE_NAME);
+        return DatabaseUtils.queryNumEntries(db, DbContract.Places.TABLE_NAME);
     }
 
     @Override
@@ -60,7 +59,7 @@ public class Merchant extends AbstractEntity implements ClusterItem {
 
     @Override
     public boolean equals(Object o) {
-        return o != null && o instanceof Merchant && ((Merchant) o).getId() == getId();
+        return o != null && o instanceof Place && ((Place) o).getId() == getId();
     }
 
     public double getLatitude() {
@@ -145,9 +144,9 @@ public class Merchant extends AbstractEntity implements ClusterItem {
 
     // Database stuff
 
-    public static Merchant find(long id) {
+    public static Place find(long id) {
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
-        Cursor cursor = db.query(DbContract.Merchants.TABLE_NAME, null, "_id = ?", new String[]{String.valueOf(id)}, null, null, null);
+        Cursor cursor = db.query(DbContract.Places.TABLE_NAME, null, "_id = ?", new String[]{String.valueOf(id)}, null, null, null);
 
         try {
             return cursor.moveToNext() ? fromCursor(cursor) : null;
@@ -156,80 +155,80 @@ public class Merchant extends AbstractEntity implements ClusterItem {
         }
     }
 
-    private static Merchant fromCursor(Cursor cursor) {
-        Merchant merchant = new Merchant();
-        merchant.setId(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._ID)));
-        merchant.setName(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.NAME)));
-        merchant.setDescription(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.DESCRIPTION)));
-        merchant.setLatitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Merchants.LATITUDE)));
-        merchant.setLongitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Merchants.LONGITUDE)));
-        merchant.setAmenity(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.AMENITY)));
-        merchant.setPhone(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.PHONE)));
-        merchant.setWebsite(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.WEBSITE)));
-        merchant.setOpeningHours(cursor.getString(cursor.getColumnIndex(DbContract.Merchants.OPENING_HOURS)));
-        merchant.setUpdatedAt(new Date(cursor.getLong(cursor.getColumnIndex(DbContract.Merchants._UPDATED_AT))));
-        return merchant;
+    private static Place fromCursor(Cursor cursor) {
+        Place place = new Place();
+        place.setId(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._ID)));
+        place.setName(cursor.getString(cursor.getColumnIndex(DbContract.Places.NAME)));
+        place.setDescription(cursor.getString(cursor.getColumnIndex(DbContract.Places.DESCRIPTION)));
+        place.setLatitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Places.LATITUDE)));
+        place.setLongitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Places.LONGITUDE)));
+        place.setAmenity(cursor.getString(cursor.getColumnIndex(DbContract.Places.AMENITY)));
+        place.setPhone(cursor.getString(cursor.getColumnIndex(DbContract.Places.PHONE)));
+        place.setWebsite(cursor.getString(cursor.getColumnIndex(DbContract.Places.WEBSITE)));
+        place.setOpeningHours(cursor.getString(cursor.getColumnIndex(DbContract.Places.OPENING_HOURS)));
+        place.setUpdatedAt(new Date(cursor.getLong(cursor.getColumnIndex(DbContract.Places._UPDATED_AT))));
+        return place;
     }
 
-    public static void insert(List<Merchant> merchants) {
+    public static void insert(List<Place> places) {
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
         db.beginTransaction();
 
         try {
-            insertMerchants(merchants);
-            insertCurrenciesMerchants(merchants);
+            insertPlaces(places);
+            insertCurrenciesPlaces(places);
             db.setTransactionSuccessful();
         } catch (Exception e) {
-            Timber.e(e, "Failed to insert merchants");
+            Timber.e(e, "Failed to insert places");
         } finally {
             db.endTransaction();
         }
     }
 
-    private static void insertMerchants(List<Merchant> merchants) {
+    private static void insertPlaces(List<Place> places) {
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
 
         String insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                DbContract.Merchants.TABLE_NAME,
-                DbContract.Merchants._ID,
-                DbContract.Merchants._UPDATED_AT,
-                DbContract.Merchants.LATITUDE,
-                DbContract.Merchants.LONGITUDE,
-                DbContract.Merchants.NAME,
-                DbContract.Merchants.DESCRIPTION,
-                DbContract.Merchants.PHONE,
-                DbContract.Merchants.WEBSITE,
-                DbContract.Merchants.AMENITY,
-                DbContract.Merchants.OPENING_HOURS,
-                DbContract.Merchants.ADDRESS);
+                DbContract.Places.TABLE_NAME,
+                DbContract.Places._ID,
+                DbContract.Places._UPDATED_AT,
+                DbContract.Places.LATITUDE,
+                DbContract.Places.LONGITUDE,
+                DbContract.Places.NAME,
+                DbContract.Places.DESCRIPTION,
+                DbContract.Places.PHONE,
+                DbContract.Places.WEBSITE,
+                DbContract.Places.AMENITY,
+                DbContract.Places.OPENING_HOURS,
+                DbContract.Places.ADDRESS);
 
         SQLiteStatement insertStatement = db.compileStatement(insertQuery);
 
-        for (Merchant merchant : merchants) {
-            insertStatement.bindLong(1, merchant.getId());
-            insertStatement.bindLong(2, merchant.getUpdatedAt().getTime());
-            insertStatement.bindDouble(3, merchant.getLatitude());
-            insertStatement.bindDouble(4, merchant.getLongitude());
-            insertStatement.bindString(5, getEmptyStringIfNull(merchant.getName()));
-            insertStatement.bindString(6, getEmptyStringIfNull(merchant.getDescription()));
-            insertStatement.bindString(7, getEmptyStringIfNull(merchant.getPhone()));
-            insertStatement.bindString(8, getEmptyStringIfNull(merchant.getWebsite()));
-            insertStatement.bindString(9, getEmptyStringIfNull(merchant.getAmenity()));
-            insertStatement.bindString(10, getEmptyStringIfNull(merchant.getOpeningHours()));
-            insertStatement.bindString(11, getEmptyStringIfNull(merchant.getAddress()));
+        for (Place place : places) {
+            insertStatement.bindLong(1, place.getId());
+            insertStatement.bindLong(2, place.getUpdatedAt().getTime());
+            insertStatement.bindDouble(3, place.getLatitude());
+            insertStatement.bindDouble(4, place.getLongitude());
+            insertStatement.bindString(5, getEmptyStringIfNull(place.getName()));
+            insertStatement.bindString(6, getEmptyStringIfNull(place.getDescription()));
+            insertStatement.bindString(7, getEmptyStringIfNull(place.getPhone()));
+            insertStatement.bindString(8, getEmptyStringIfNull(place.getWebsite()));
+            insertStatement.bindString(9, getEmptyStringIfNull(place.getAmenity()));
+            insertStatement.bindString(10, getEmptyStringIfNull(place.getOpeningHours()));
+            insertStatement.bindString(11, getEmptyStringIfNull(place.getAddress()));
             insertStatement.execute();
         }
     }
 
-    private static void insertCurrenciesMerchants(List<Merchant> merchants) {
+    private static void insertCurrenciesPlaces(List<Place> places) {
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
-        String insertQuery = "insert or replace into currencies_merchants (currency_id, merchant_id) values (?, ?)";
+        String insertQuery = "insert or replace into currencies_places (currency_id, place_id) values (?, ?)";
         SQLiteStatement insertStatement = db.compileStatement(insertQuery);
 
-        for (Merchant merchant : merchants) {
-            for (Currency currency : merchant.getCurrencies()) {
+        for (Place place : places) {
+            for (Currency currency : place.getCurrencies()) {
                 insertStatement.bindLong(1, currency.getId());
-                insertStatement.bindLong(2, merchant.getId());
+                insertStatement.bindLong(2, place.getId());
                 insertStatement.execute();
             }
         }

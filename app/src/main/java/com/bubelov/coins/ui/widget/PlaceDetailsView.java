@@ -13,7 +13,7 @@ import android.widget.ViewSwitcher;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.model.Currency;
-import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.model.Place;
 import com.bubelov.coins.ui.activity.EditPlaceActivity;
 import com.bubelov.coins.util.Utils;
 
@@ -24,11 +24,10 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 /**
- * Author: Igor Bubelov
- * Date: 03/05/15 11:03
+ * @author Igor Bubelov
  */
 
-public class MerchantDetailsView extends FrameLayout {
+public class PlaceDetailsView extends FrameLayout {
     @BindView(R.id.header_switcher)
     ViewSwitcher headerSwitcher;
 
@@ -53,21 +52,21 @@ public class MerchantDetailsView extends FrameLayout {
     @BindView(R.id.accepted_currencies)
     TextView acceptedCurrencies;
 
-    Merchant merchant;
+    Place place;
 
     Listener listener;
 
-    public MerchantDetailsView(Context context) {
+    public PlaceDetailsView(Context context) {
         super(context);
         init();
     }
 
-    public MerchantDetailsView(Context context, AttributeSet attrs) {
+    public PlaceDetailsView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public MerchantDetailsView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public PlaceDetailsView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
@@ -84,56 +83,56 @@ public class MerchantDetailsView extends FrameLayout {
         }
     }
 
-    public void setMerchant(final Merchant merchant) {
-        this.merchant = merchant;
+    public void setPlace(final Place place) {
+        this.place = place;
 
-        if (TextUtils.isEmpty(merchant.getName())) {
+        if (TextUtils.isEmpty(place.getName())) {
             name.setText(R.string.name_unknown);
             toolbar.setTitle(R.string.name_unknown);
         } else {
-            name.setText(merchant.getName());
-            toolbar.setTitle(merchant.getName());
+            name.setText(place.getName());
+            toolbar.setTitle(place.getName());
         }
 
-        if (TextUtils.isEmpty(merchant.getPhone())) {
+        if (TextUtils.isEmpty(place.getPhone())) {
             phone.setText(R.string.not_provided);
         } else {
-            phone.setText(merchant.getPhone());
+            phone.setText(place.getPhone());
         }
 
-        if (TextUtils.isEmpty(merchant.getWebsite())) {
+        if (TextUtils.isEmpty(place.getWebsite())) {
             website.setText(R.string.not_provided);
             website.setTextColor(getResources().getColor(R.color.black));
             website.setPaintFlags(website.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
 
             website.setOnClickListener(null);
         } else {
-            website.setText(merchant.getWebsite());
+            website.setText(place.getWebsite());
             website.setTextColor(getResources().getColor(R.color.primary_dark));
             website.setPaintFlags(website.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
             website.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Utils.openUrl(MerchantDetailsView.this.getContext(), merchant.getWebsite());
+                    Utils.openUrl(PlaceDetailsView.this.getContext(), place.getWebsite());
                 }
             });
         }
 
-        if (TextUtils.isEmpty(merchant.getDescription())) {
+        if (TextUtils.isEmpty(place.getDescription())) {
             description.setText(R.string.not_provided);
         } else {
-            description.setText(merchant.getDescription());
+            description.setText(place.getDescription());
         }
 
-        if (TextUtils.isEmpty(merchant.getOpeningHours())) {
+        if (TextUtils.isEmpty(place.getOpeningHours())) {
             openingHours.setText(R.string.not_provided);
         } else {
-            openingHours.setText(merchant.getOpeningHours());
+            openingHours.setText(place.getOpeningHours());
         }
 
         StringBuilder currenciesString = new StringBuilder();
-        Iterator<Currency> currenciesIterator = merchant.getCurrencies().iterator();
+        Iterator<Currency> currenciesIterator = place.getCurrencies().iterator();
 
         while (currenciesIterator.hasNext()) {
             currenciesString.append(currenciesIterator.next().getName());
@@ -153,7 +152,7 @@ public class MerchantDetailsView extends FrameLayout {
     }
 
     private void init() {
-        inflate(getContext(), R.layout.widget_merchant_details, this);
+        inflate(getContext(), R.layout.widget_place_details, this);
         ButterKnife.bind(this);
 
         toolbar.setNavigationOnClickListener(new OnClickListener() {
@@ -171,7 +170,7 @@ public class MerchantDetailsView extends FrameLayout {
             @Override
             public boolean onMenuItemClick(android.view.MenuItem item) {
                 if (item.getItemId() == R.id.action_share) {
-                    Utils.share(getContext(), getResources().getString(R.string.share_merchant_message_title), getResources().getString(R.string.share_merchant_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", merchant.getLatitude(), merchant.getLongitude())));
+                    Utils.share(getContext(), getResources().getString(R.string.share_place_message_title), getResources().getString(R.string.share_place_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", place.getLatitude(), place.getLongitude())));
                 }
 
                 return false;
@@ -185,6 +184,6 @@ public class MerchantDetailsView extends FrameLayout {
 
     @OnClick(R.id.edit)
     public void onEditClick() {
-        EditPlaceActivity.start((Activity) getContext(), merchant.getId());
+        EditPlaceActivity.start((Activity) getContext(), place.getId());
     }
 }

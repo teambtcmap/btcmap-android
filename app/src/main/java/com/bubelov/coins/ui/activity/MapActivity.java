@@ -20,23 +20,25 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.bubelov.coins.Constants;
-import com.bubelov.coins.MerchantsCache;
+import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
+import com.bubelov.coins.event.DatabaseSyncedEvent;
 import com.bubelov.coins.model.Amenity;
 import com.bubelov.coins.model.Currency;
-import com.bubelov.coins.model.Merchant;
-import com.bubelov.coins.model.MerchantNotification;
+import com.bubelov.coins.model.Place;
+import com.bubelov.coins.model.PlaceNotification;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.ui.widget.DrawerMenu;
-import com.bubelov.coins.ui.widget.MerchantDetailsView;
+import com.bubelov.coins.ui.widget.PlaceDetailsView;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
@@ -53,6 +55,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
+import com.squareup.otto.Subscribe;
 
 import java.util.Collection;
 
@@ -65,13 +68,13 @@ import butterknife.OnClick;
  */
 
 public class MapActivity extends AbstractActivity implements OnMapReadyCallback, DrawerMenu.OnItemClickListener {
-    private static final String MERCHANT_ID_EXTRA = "merchant_id";
+    private static final String PLACE_ID_EXTRA = "place_id";
     private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
-    private static final String CLEAR_MERCHANT_NOTIFICATIONS_EXTRA = "clear_merchant_notifications";
+    private static final String CLEAR_PLACE_NOTIFICATIONS_EXTRA = "clear_place_notifications";
 
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 10;
     private static final int REQUEST_ACCESS_LOCATION = 20;
-    private static final int REQUEST_FIND_MERCHANT = 30;
+    private static final int REQUEST_FIND_PLACE = 30;
 
     private static final float MAP_DEFAULT_ZOOM = 13;
 
@@ -87,39 +90,39 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     @BindView(R.id.fab)
     FloatingActionButton actionButton;
 
-    @BindView(R.id.merchant_details)
-    MerchantDetailsView merchantDetails;
+    @BindView(R.id.place_details)
+    PlaceDetailsView placeDetails;
 
     private ActionBarDrawerToggle drawerToggle;
 
     private GoogleMap map;
 
-    private ClusterManager<Merchant> placesManager;
+    private ClusterManager<Place> placesManager;
 
     private Amenity selectedAmenity;
 
-    private Merchant selectedMerchant;
+    private Place selectedPlace;
 
     private GoogleApiClient googleApiClient;
 
-    private MerchantsCache merchantsCache;
+    private PlacesCache placesCache;
 
     private boolean firstLaunch;
 
     private BottomSheetBehavior bottomSheetBehavior;
 
-    public static Intent newShowMerchantIntent(Context context, long merchantId, boolean clearNotifications) {
+    public static Intent newShowPlaceIntent(Context context, long placeId, boolean clearNotifications) {
         Intent intent = new Intent(context, MapActivity.class);
-        intent.putExtra(MERCHANT_ID_EXTRA, merchantId);
+        intent.putExtra(PLACE_ID_EXTRA, placeId);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(CLEAR_MERCHANT_NOTIFICATIONS_EXTRA, clearNotifications);
+        intent.putExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, clearNotifications);
         return intent;
     }
 
     public static Intent newShowNotificationAreaIntent(Context context, NotificationArea notificationArea, boolean clearNotifications) {
         Intent intent = new Intent(context, MapActivity.class);
         intent.putExtra(NOTIFICATION_AREA_EXTRA, notificationArea);
-        intent.putExtra(CLEAR_MERCHANT_NOTIFICATIONS_EXTRA, clearNotifications);
+        intent.putExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, clearNotifications);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         return intent;
     }
@@ -144,13 +147,13 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        bottomSheetBehavior = BottomSheetBehavior.from(merchantDetails);
+        bottomSheetBehavior = BottomSheetBehavior.from(placeDetails);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                merchantDetails.setFullScreen(newState == BottomSheetBehavior.STATE_EXPANDED);
+                placeDetails.setFullScreen(newState == BottomSheetBehavior.STATE_EXPANDED);
             }
 
             @Override
@@ -162,11 +165,11 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                bottomSheetBehavior.setPeekHeight(merchantDetails.getHeaderHeight());
+                bottomSheetBehavior.setPeekHeight(placeDetails.getHeaderHeight());
             }
         }, 1000);
 
-        merchantDetails.setListener(new MerchantDetailsView.Listener() {
+        placeDetails.setListener(new PlaceDetailsView.Listener() {
             @Override
             public void onDismissed() {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -174,8 +177,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         });
     }
 
-    @OnClick(R.id.merchant_details)
-    public void onMerchantDetailsClick() {
+    @OnClick(R.id.place_details)
+    public void onPlaceDetailsClick() {
         if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         } else {
@@ -202,10 +205,10 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             moveToLastLocation();
         }
 
-        if (requestCode == REQUEST_FIND_MERCHANT && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_FIND_PLACE && resultCode == RESULT_OK) {
             drawerMenu.setAmenity(null);
-            selectMerchant(data.getLongExtra(MerchantsSearchActivity.MERCHANT_ID_EXTRA, -1));
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedMerchant.getPosition(), MAP_DEFAULT_ZOOM));
+            selectPlace(data.getLongExtra(FindPlaceActivity.PLACE_ID_EXTRA, -1));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedPlace.getPosition(), MAP_DEFAULT_ZOOM));
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -249,7 +252,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                 EditPlaceActivity.start(this, 0);
                 return true;
             case R.id.action_search:
-                MerchantsSearchActivity.startForResult(this, map.getMyLocation(), REQUEST_FIND_MERCHANT);
+                FindPlaceActivity.startForResult(this, map.getMyLocation(), REQUEST_FIND_PLACE);
                 return true;
             case R.id.action_settings:
                 SettingsActivity.start(this);
@@ -291,7 +294,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             }
         }
 
-        merchantsCache = Injector.INSTANCE.getAppComponent().getMerchantsCache();
+        placesCache = Injector.INSTANCE.getAppComponent().getPlacesCache();
         drawerMenu.setAmenity(selectedAmenity);
 
         handleIntent(getIntent());
@@ -302,16 +305,21 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         drawerLayout.closeDrawer(GravityCompat.START);
         getSupportActionBar().setTitle(title);
         this.selectedAmenity = amenity;
-        reloadMerchants();
+        reloadPlaces();
+    }
+
+    @Subscribe
+    public void onDatabaseSynced(DatabaseSyncedEvent e) {
+        reloadPlaces();
     }
 
     private void handleIntent(final Intent intent) {
-        if (intent.getBooleanExtra(CLEAR_MERCHANT_NOTIFICATIONS_EXTRA, false)) {
-            MerchantNotification.deleteAll();
+        if (intent.getBooleanExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, false)) {
+            PlaceNotification.deleteAll();
         }
 
-        if (intent.hasExtra(MERCHANT_ID_EXTRA)) {
-            selectMerchant(intent.getLongExtra(MERCHANT_ID_EXTRA, -1));
+        if (intent.hasExtra(PLACE_ID_EXTRA)) {
+            selectPlace(intent.getLongExtra(PLACE_ID_EXTRA, -1));
         }
 
         if (intent.hasExtra(NOTIFICATION_AREA_EXTRA)) {
@@ -335,9 +343,9 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         googleApiClient.connect();
     }
 
-    private void onMerchantsLoaded(Collection<Merchant> merchants) {
+    private void onPlacesLoaded(Collection<Place> places) {
         placesManager.clearItems();
-        placesManager.addItems(merchants);
+        placesManager.addItems(places);
         placesManager.cluster();
     }
 
@@ -381,42 +389,42 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                selectedMerchant = null;
+                selectedPlace = null;
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
         });
     }
 
-    private void reloadMerchants() {
+    private void reloadPlaces() {
         if (map == null) {
             return;
         }
 
         final LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
 
-        if (merchantsCache.isInitialized()) {
-            onMerchantsLoaded(merchantsCache.getMerchants(bounds, selectedAmenity));
+        if (placesCache.isInitialized()) {
+            onPlacesLoaded(placesCache.getPlaces(bounds, selectedAmenity));
         } else {
-            merchantsCache.getListeners().add(new MerchantsCache.MerchantsCacheListener() {
+            placesCache.getListeners().add(new PlacesCache.PlacesCacheListener() {
                 @Override
-                public void onMerchantsCacheInitialized() {
-                    onMerchantsLoaded(merchantsCache.getMerchants(bounds, selectedAmenity));
-                    merchantsCache.getListeners().remove(this);
+                public void onPlacesCacheInitialized() {
+                    onPlacesLoaded(placesCache.getPlaces(bounds, selectedAmenity));
+                    placesCache.getListeners().remove(this);
                 }
             });
         }
     }
 
-    private void selectMerchant(long merchantId) {
-        selectedMerchant = Merchant.find(merchantId);
-        selectedMerchant.setCurrencies(Currency.findByMerchant(selectedMerchant));
-        merchantDetails.setMerchant(selectedMerchant);
+    private void selectPlace(long placeId) {
+        selectedPlace = Place.find(placeId);
+        selectedPlace.setCurrencies(Currency.findByPlace(selectedPlace));
+        placeDetails.setPlace(selectedPlace);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
         Answers.getInstance().logContentView(new ContentViewEvent()
-                .putContentName(selectedMerchant.getName())
-                .putContentType("Merchant")
-                .putContentId(String.valueOf(selectedMerchant.getId())));
+                .putContentName(selectedPlace.getName())
+                .putContentType("Place")
+                .putContentId(String.valueOf(selectedPlace.getId())));
     }
 
     public void onActionButtonClicked(View view) {
@@ -447,16 +455,16 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
     }
 
-    private class PlacesRenderer extends StaticClusterRenderer<Merchant> {
+    private class PlacesRenderer extends StaticClusterRenderer<Place> {
         private MapMarkersCache cache;
 
-        public PlacesRenderer(Context context, GoogleMap map, ClusterManager<Merchant> clusterManager) {
+        public PlacesRenderer(Context context, GoogleMap map, ClusterManager<Place> clusterManager) {
             super(context, map, clusterManager);
             cache = Injector.INSTANCE.getAppComponent().getMarkersCache();
         }
 
         @Override
-        protected void onBeforeClusterItemRendered(Merchant item, MarkerOptions markerOptions) {
+        protected void onBeforeClusterItemRendered(Place item, MarkerOptions markerOptions) {
             super.onBeforeClusterItemRendered(item, markerOptions);
             markerOptions.icon(cache.getMarker(item.getAmenity())).anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
         }
@@ -465,14 +473,14 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     private class CameraChangeListener implements GoogleMap.OnCameraChangeListener {
         @Override
         public void onCameraChange(CameraPosition cameraPosition) {
-            reloadMerchants();
+            reloadPlaces();
         }
     }
 
-    private class ClusterItemClickListener implements ClusterManager.OnClusterItemClickListener<Merchant> {
+    private class ClusterItemClickListener implements ClusterManager.OnClusterItemClickListener<Place> {
         @Override
-        public boolean onClusterItemClick(Merchant merchant) {
-            selectMerchant(merchant.getId());
+        public boolean onClusterItemClick(Place place) {
+            selectPlace(place.getId());
             return false;
         }
     }

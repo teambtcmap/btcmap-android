@@ -2,16 +2,15 @@ package com.bubelov.coins.util;
 
 import android.location.Location;
 
-import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.model.Place;
 
 import java.util.Comparator;
 
 /**
- * Author: Igor Bubelov
- * Date: 10/16/15 6:39 PM
+ * @author Igor Bubelov
  */
 
-public class DistanceComparator implements Comparator<Merchant> {
+public class DistanceComparator implements Comparator<Place> {
     private Location target;
 
     public DistanceComparator(Location target) {
@@ -19,9 +18,9 @@ public class DistanceComparator implements Comparator<Merchant> {
     }
 
     @Override
-    public int compare(Merchant merchant1, Merchant merchant2) {
-        Float distance1 = DistanceUtils.getDistance(merchant1.getPosition(), target);
-        Float distance2 = DistanceUtils.getDistance(merchant2.getPosition(), target);
+    public int compare(Place place1, Place place2) {
+        Float distance1 = DistanceUtils.getDistance(place1.getPosition(), target);
+        Float distance2 = DistanceUtils.getDistance(place2.getPosition(), target);
         return distance1.compareTo(distance2);
     }
 }

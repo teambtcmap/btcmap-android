@@ -1,13 +1,12 @@
 package com.bubelov.coins.database;
 
 /**
- * Author: Igor Bubelov
- * Date: 07/07/14 22:12
+ * @author Igor Bubelov
  */
 
 public interface DbContract {
-    interface Merchants extends BaseColumns {
-        String TABLE_NAME = "merchants";
+    interface Places extends BaseColumns {
+        String TABLE_NAME = "places";
 
         String LATITUDE = "latitude";
         String LONGITUDE = "longitude";
@@ -29,11 +28,11 @@ public interface DbContract {
         String SHOW_ON_MAP = "show_on_map";
     }
 
-    interface CurrenciesMerchants extends BaseColumns {
-        String TABLE_NAME = "currencies_merchants";
+    interface CurrenciesPlaces extends BaseColumns {
+        String TABLE_NAME = "currencies_places";
 
         String CURRENCY_ID = "currency_id";
-        String MERCHANT_ID = "merchant_id";
+        String PLACE_ID = "place_id";
     }
 
     interface ExchangeRates extends BaseColumns {

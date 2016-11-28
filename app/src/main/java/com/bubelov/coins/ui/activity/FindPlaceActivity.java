@@ -26,8 +26,8 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.loader.LocalCursorLoader;
-import com.bubelov.coins.model.Merchant;
-import com.bubelov.coins.ui.adapter.MerchantsSearchResultsAdapter;
+import com.bubelov.coins.model.Place;
+import com.bubelov.coins.ui.adapter.PlacesSearchResultsAdapter;
 import com.bubelov.coins.util.DistanceComparator;
 import com.bubelov.coins.util.DistanceUnits;
 import com.crashlytics.android.answers.Answers;
@@ -44,16 +44,15 @@ import butterknife.OnEditorAction;
 import butterknife.OnTextChanged;
 
 /**
- * Author: Igor Bubelov
- * Date: 10/11/15 4:07 PM
+ * @author Igor Bubelov
  */
 
-public class MerchantsSearchActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, MerchantsSearchResultsAdapter.OnMerchantSelectedListener {
+public class FindPlaceActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<Cursor>, PlacesSearchResultsAdapter.OnPlaceSelectedListener {
     public static final String USER_LOCATION_EXTRA = "user_location";
 
-    public static final String MERCHANT_ID_EXTRA = "merchant_id";
+    public static final String PLACE_ID_EXTRA = "place_id";
 
-    private static final int MERCHANTS_LOADER = 0;
+    private static final int PLACES_LOADER = 0;
 
     private static final String QUERY_KEY = "query";
 
@@ -65,25 +64,25 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
     @BindView(R.id.clear)
     ImageView clear;
 
-    private MerchantsSearchResultsAdapter resultsAdapter;
+    private PlacesSearchResultsAdapter resultsAdapter;
 
     private Location userLocation;
 
     public static void startForResult(Activity activity, Location userLocation, int requestCode) {
-        Intent intent = new Intent(activity, MerchantsSearchActivity.class);
+        Intent intent = new Intent(activity, FindPlaceActivity.class);
         intent.putExtra(USER_LOCATION_EXTRA, userLocation);
         activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
 
         Answers.getInstance().logContentView(new ContentViewEvent()
-                .putContentName("Merchants search screen")
+                .putContentName("Places search screen")
                 .putContentType("Screens")
-                .putContentId("Merchants search"));
+                .putContentId("Places search"));
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_merchants_search);
+        setContentView(R.layout.activity_find_place);
         ButterKnife.bind(this);
 
         Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
@@ -95,7 +94,7 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
 
         userLocation = getIntent().getParcelableExtra(USER_LOCATION_EXTRA);
 
-        resultsAdapter = new MerchantsSearchResultsAdapter(this, userLocation, getDistanceUnits());
+        resultsAdapter = new PlacesSearchResultsAdapter(this, userLocation, getDistanceUnits());
         resultsView.setAdapter(resultsAdapter);
 
         DrawableCompat.setTint(clear.getDrawable().mutate(), getResources().getColor(R.color.secondary_text_or_icons));
@@ -107,41 +106,41 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
 
         return new LocalCursorLoader(this,
                 Injector.INSTANCE.getAppComponent().database(),
-                DbContract.Merchants.TABLE_NAME,
+                DbContract.Places.TABLE_NAME,
                 null,
                 null,
-                String.format("%s like ? or %s like ?", DbContract.Merchants.NAME, DbContract.Merchants.AMENITY),
+                String.format("%s like ? or %s like ?", DbContract.Places.NAME, DbContract.Places.AMENITY),
                 new String[]{"%" + query + "%", "%" + query + "%"},
                 null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        List<Merchant> merchants = new ArrayList<>();
+        List<Place> places = new ArrayList<>();
 
         while (cursor.moveToNext()) {
-            merchants.add(Merchant.find(cursor.getLong(0)));
+            places.add(Place.find(cursor.getLong(0)));
         }
 
         if (userLocation != null) {
-            Collections.sort(merchants, new DistanceComparator(userLocation));
+            Collections.sort(places, new DistanceComparator(userLocation));
         }
 
-        resultsAdapter.getMerchants().clear();
-        resultsAdapter.getMerchants().addAll(merchants);
+        resultsAdapter.getPlaces().clear();
+        resultsAdapter.getPlaces().addAll(places);
         resultsAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        resultsAdapter.getMerchants().clear();
+        resultsAdapter.getPlaces().clear();
         resultsAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onMerchantSelected(Merchant merchant) {
+    public void onPlaceSelected(Place place) {
         Intent data = new Intent();
-        data.putExtra(MERCHANT_ID_EXTRA, merchant.getId());
+        data.putExtra(PLACE_ID_EXTRA, place.getId());
         setResult(RESULT_OK, data);
         supportFinishAfterTransition();
     }
@@ -151,9 +150,9 @@ public class MerchantsSearchActivity extends AbstractActivity implements LoaderM
         if (query.length() >= MIN_QUERY_LENGTH) {
             Bundle args = new Bundle();
             args.putString(QUERY_KEY, query.toString());
-            getLoaderManager().restartLoader(MERCHANTS_LOADER, args, this);
+            getLoaderManager().restartLoader(PLACES_LOADER, args, this);
         } else {
-            getLoaderManager().destroyLoader(MERCHANTS_LOADER);
+            getLoaderManager().destroyLoader(PLACES_LOADER);
         }
 
         clear.setVisibility(TextUtils.isEmpty(query) ? View.GONE : View.VISIBLE);

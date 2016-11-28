@@ -51,7 +51,7 @@
                 android:textColor="@color/text"
                 android:textSize="16sp"
                 app:typeface="regular"
-                tools:text="Merchant Name" />
+                tools:text="Place Name" />
 
             <com.bubelov.coins.ui.widget.TypefaceTextView
                 android:id="@+id/distance"

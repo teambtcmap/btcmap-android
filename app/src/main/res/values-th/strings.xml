@@ -11,11 +11,11 @@
     <string name="pref_area_of_interest">สถานที่</string>
     <string name="pref_area_of_interest_summary">เลือกสถานที่ที่คุณสนใจ</string>
 
-    <string name="notification_new_merchant">New merchant in your area</string>
-    <string name="notification_new_merchant_no_name">Touch to see where</string>
+    <string name="notification_new_place">New place in your area</string>
+    <string name="notification_new_place_no_name">Touch to see where</string>
 
-    <string name="notification_new_merchants_content_title">%1$s new merchants</string>
-    <string name="notification_new_merchants_content_text">Touch to see them</string>
+    <string name="notification_new_places_content_title">%1$s new places</string>
+    <string name="notification_new_places_content_text">Touch to see them</string>
 
     <string name="pref_exchange_rates_provider">เลือกอัตราการแลกเปลี่ยน</string>
     <string name="pref_exchange_rates_provider_summary">เลือกอัตราการแลกเปลี่ยนระหว่าง Bitcoin และดอลลาร์สหรัฐ</string>
@@ -44,8 +44,8 @@
 
     <string name="not_provided">Not provided</string>
 
-    <string name="share_merchant_message_title">Check it out!</string>
-    <string name="share_merchant_message_text">This place accept cryptocurrency: %1$s</string>
+    <string name="share_place_message_title">Check it out!</string>
+    <string name="share_place_message_text">This place accept cryptocurrency: %1$s</string>
 
     <string name="saa_distance">Distance:</string>
 
@@ -60,18 +60,18 @@
         <item>Miles</item>
     </string-array>
 
-    <string name="merchant_description">Description:</string>
-    <string name="merchant_opening_hours">Opening hours:</string>
-    <string name="merchant_accepted_currencies">Accepted currencies:</string>
+    <string name="description">Description:</string>
+    <string name="opening_hours">Opening hours:</string>
+    <string name="accepted_currencies">Accepted currencies:</string>
     <string name="notification_area_activity_title">Notification area</string>
     <string name="currencies">Currencies</string>
     <string name="pref_currencies_summary">Select the currencies you are interested in</string>
     <string name="pref_currencies_title">Currencies</string>
     <string name="action_share">Share</string>
-    <string name="merchant_phone">Phone:</string>
-    <string name="merchant_website">Website:</string>
+    <string name="phone">Phone:</string>
+    <string name="website">Website:</string>
     <string name="action_send">Send</string>
-    <string name="merchant_name">Name</string>
+    <string name="name">Name</string>
     <string name="suggest_an_edit">Suggest an edit</string>
     <string name="could_not_send_suggestion">Could not send your edits. Pleas try again or contact developer.</string>
     <string name="thanks_for_suggestion">Thank you for improving the data. Your changes will appear shortly.</string>

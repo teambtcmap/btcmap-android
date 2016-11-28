@@ -3,7 +3,7 @@ package com.bubelov.coins.dagger;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.bubelov.coins.MerchantsCache;
+import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.google.gson.Gson;
@@ -13,8 +13,7 @@ import javax.inject.Singleton;
 import dagger.Component;
 
 /**
- * Author: Igor Bubelov
- * Date: 26/03/16 17:57
+ * @author Igor Bubelov
  */
 
 @Singleton
@@ -24,7 +23,7 @@ public interface AppComponent {
 
     SQLiteDatabase database();
 
-    MerchantsCache getMerchantsCache();
+    PlacesCache getPlacesCache();
 
     MapMarkersCache getMarkersCache();
 
@@ -32,5 +31,5 @@ public interface AppComponent {
 
     Gson provideGson();
 
-    void inject(MerchantsCache cache);
+    void inject(PlacesCache cache);
 }

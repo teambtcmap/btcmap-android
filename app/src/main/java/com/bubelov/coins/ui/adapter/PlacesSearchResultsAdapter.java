@@ -8,12 +8,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.model.Amenity;
-import com.bubelov.coins.model.Merchant;
+import com.bubelov.coins.model.Place;
 import com.bubelov.coins.util.DistanceUnits;
 import com.bubelov.coins.util.DistanceUtils;
 
@@ -24,20 +23,19 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Author: Igor Bubelov
- * Date: 10/12/15 2:36 PM
+ * @author Igor Bubelov
  */
 
-public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<MerchantsSearchResultsAdapter.ResultViewHolder> {
-    private List<Merchant> merchants = new ArrayList<>();
+public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearchResultsAdapter.ResultViewHolder> {
+    private List<Place> places = new ArrayList<>();
 
-    private OnMerchantSelectedListener listener;
+    private OnPlaceSelectedListener listener;
 
     private Location userLocation;
 
     private DistanceUnits distanceUnits;
 
-    public MerchantsSearchResultsAdapter(OnMerchantSelectedListener listener, Location userLocation, DistanceUnits distanceUnits) {
+    public PlacesSearchResultsAdapter(OnPlaceSelectedListener listener, Location userLocation, DistanceUnits distanceUnits) {
         this.listener = listener;
         this.userLocation = userLocation;
         this.distanceUnits = distanceUnits;
@@ -45,18 +43,18 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
 
     @Override
     public ResultViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_merchant_search_result, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_places_search_result, parent, false);
         return new ResultViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ResultViewHolder holder, int position) {
-        final Merchant merchant = merchants.get(position);
-        holder.name.setText(merchant.getName());
+        final Place place = places.get(position);
+        holder.name.setText(place.getName());
         holder.ripple.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.onMerchantSelected(merchant);
+                listener.onPlaceSelected(place);
             }
         });
 
@@ -66,7 +64,7 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
             holder.distance.setVisibility(View.VISIBLE);
 
             Context context = holder.name.getContext();
-            float distanceInKilometers = DistanceUtils.getDistance(merchant.getPosition(), userLocation) / 1000.0f;
+            float distanceInKilometers = DistanceUtils.getDistance(place.getPosition(), userLocation) / 1000.0f;
 
             if (distanceUnits.equals(DistanceUnits.KILOMETERS)) {
                 holder.distance.setText(context.getString(R.string.msa_distance_kilometers, distanceInKilometers));
@@ -79,7 +77,7 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
         boolean amenityFound = false;
 
         for (Amenity amenity : Amenity.values()) {
-            if (merchant.getAmenity().equalsIgnoreCase(amenity.name())) {
+            if (place.getAmenity().equalsIgnoreCase(amenity.name())) {
                 amenityFound = true;
                 holder.icon.setBackgroundResource(amenity.getIconId());
                 DrawableCompat.setTint(holder.icon.getBackground(), Color.WHITE);
@@ -94,11 +92,11 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
 
     @Override
     public int getItemCount() {
-        return merchants.size();
+        return places.size();
     }
 
-    public List<Merchant> getMerchants() {
-        return merchants;
+    public List<Place> getPlaces() {
+        return places;
     }
 
     public static class ResultViewHolder extends RecyclerView.ViewHolder {
@@ -120,7 +118,7 @@ public class MerchantsSearchResultsAdapter extends RecyclerView.Adapter<Merchant
         }
     }
 
-    public interface OnMerchantSelectedListener {
-        void onMerchantSelected(Merchant merchant);
+    public interface OnPlaceSelectedListener {
+        void onPlaceSelected(Place place);
     }
 }

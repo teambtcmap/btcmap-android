@@ -4,15 +4,14 @@ import android.app.Application;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.service.sync.merchants.DatabaseSyncService;
+import com.bubelov.coins.service.sync.DatabaseSyncService;
 import com.crashlytics.android.Crashlytics;
 
 import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
 
 /**
- * Author: Igor Bubelov
- * Date: 03/11/13
+ * @author Igor Bubelov
  */
 
 public class App extends Application {
