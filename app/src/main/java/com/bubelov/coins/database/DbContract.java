@@ -17,6 +17,7 @@ public interface DbContract {
         String AMENITY = "amenity";
         String OPENING_HOURS = "opening_hours";
         String ADDRESS = "address";
+        String VISIBLE = "visible";
     }
 
     interface Currencies extends BaseColumns {

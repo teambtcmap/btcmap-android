@@ -109,7 +109,7 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
                 DbContract.Places.TABLE_NAME,
                 null,
                 null,
-                String.format("%s like ? or %s like ?", DbContract.Places.NAME, DbContract.Places.AMENITY),
+                String.format("%s = 1 and (%s like ? or %s like ?)", DbContract.Places.VISIBLE, DbContract.Places.NAME, DbContract.Places.AMENITY),
                 new String[]{"%" + query + "%", "%" + query + "%"},
                 null);
     }

@@ -39,6 +39,8 @@ public class Place extends AbstractEntity implements ClusterItem {
 
     private String address;
 
+    private boolean visible;
+
     private Collection<Currency> currencies;
 
     private transient LatLng position;
@@ -134,6 +136,14 @@ public class Place extends AbstractEntity implements ClusterItem {
         this.address = address;
     }
 
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
     public Collection<Currency> getCurrencies() {
         return currencies;
     }
@@ -166,6 +176,8 @@ public class Place extends AbstractEntity implements ClusterItem {
         place.setPhone(cursor.getString(cursor.getColumnIndex(DbContract.Places.PHONE)));
         place.setWebsite(cursor.getString(cursor.getColumnIndex(DbContract.Places.WEBSITE)));
         place.setOpeningHours(cursor.getString(cursor.getColumnIndex(DbContract.Places.OPENING_HOURS)));
+        place.setAddress(cursor.getString(cursor.getColumnIndex(DbContract.Places.ADDRESS)));
+        place.setVisible(cursor.getLong(cursor.getColumnIndex(DbContract.Places.VISIBLE)) == 1);
         place.setUpdatedAt(new Date(cursor.getLong(cursor.getColumnIndex(DbContract.Places._UPDATED_AT))));
         return place;
     }
@@ -188,7 +200,7 @@ public class Place extends AbstractEntity implements ClusterItem {
     private static void insertPlaces(List<Place> places) {
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
 
-        String insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        String insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 DbContract.Places.TABLE_NAME,
                 DbContract.Places._ID,
                 DbContract.Places._UPDATED_AT,
@@ -200,7 +212,8 @@ public class Place extends AbstractEntity implements ClusterItem {
                 DbContract.Places.WEBSITE,
                 DbContract.Places.AMENITY,
                 DbContract.Places.OPENING_HOURS,
-                DbContract.Places.ADDRESS);
+                DbContract.Places.ADDRESS,
+                DbContract.Places.VISIBLE);
 
         SQLiteStatement insertStatement = db.compileStatement(insertQuery);
 
@@ -216,13 +229,14 @@ public class Place extends AbstractEntity implements ClusterItem {
             insertStatement.bindString(9, getEmptyStringIfNull(place.getAmenity()));
             insertStatement.bindString(10, getEmptyStringIfNull(place.getOpeningHours()));
             insertStatement.bindString(11, getEmptyStringIfNull(place.getAddress()));
+            insertStatement.bindLong(12, place.isVisible() ? 1 : 0);
             insertStatement.execute();
         }
     }
 
     private static void insertCurrenciesPlaces(List<Place> places) {
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
-        String insertQuery = "insert or replace into currencies_places (currency_id, place_id) values (?, ?)";
+        String insertQuery = String.format("insert or replace into %s (%s, %s) values (?, ?)", DbContract.CurrenciesPlaces.TABLE_NAME, DbContract.CurrenciesPlaces.CURRENCY_ID, DbContract.CurrenciesPlaces.PLACE_ID);
         SQLiteStatement insertStatement = db.compileStatement(insertQuery);
 
         for (Place place : places) {
