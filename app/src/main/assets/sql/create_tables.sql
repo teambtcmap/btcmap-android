@@ -10,7 +10,8 @@ create table places (
     website text,
     amenity text,
     opening_hours text,
-    address text
+    address text,
+    visible boolean
 );
 
 create table currencies (
