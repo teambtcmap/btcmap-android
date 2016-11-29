@@ -8,6 +8,7 @@
     <string name="action_search">Search</string>
     <string name="action_share">Share</string>
     <string name="action_send">Send</string>
+    <string name="action_done">Done</string>
 
     <string name="sa_title">Settings</string>
 
@@ -88,7 +89,7 @@
 
     <string name="place_is_closed">This place does not exist or closed or no longer accept crypto currency</string>
 
-    <string name="set_location">Set Location</string>
-    <string name="change_location">Change Location</string>
+    <string name="set_location">Set location</string>
+    <string name="change_location">Change location</string>
 
 </resources>

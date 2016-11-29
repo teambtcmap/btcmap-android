@@ -51,6 +51,8 @@
             android:name=".ui.activity.EditPlaceActivity"
             android:windowSoftInputMode="stateHidden" />
 
+        <activity android:name=".ui.activity.PickLocationActivity" />
+
         <service android:name=".service.sync.DatabaseSyncService" />
 
         <service android:name=".service.rates.ExchangeRatesService" />
