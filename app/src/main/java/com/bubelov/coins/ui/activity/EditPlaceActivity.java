@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.api.CoinsApi;
@@ -22,10 +23,12 @@ import com.bubelov.coins.model.Place;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
+import com.google.android.gms.maps.model.LatLng;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
+import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,6 +39,8 @@ import retrofit2.Response;
 
 public class EditPlaceActivity extends AbstractActivity {
     private static final String ID_EXTRA = "id";
+
+    private static final int REQUEST_PICK_LOCATION = 10;
 
     @BindView(R.id.closed_switch)
     Switch closedSwitch;
@@ -160,6 +165,16 @@ public class EditPlaceActivity extends AbstractActivity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_PICK_LOCATION && resultCode == RESULT_OK) {
+            LatLng location = data.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA);
+            Toast.makeText(getApplicationContext(), location.toString(), Toast.LENGTH_LONG).show();
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     private void showAlert(@StringRes int messageId, DialogInterface.OnClickListener okListener) {
         new AlertDialog.Builder(this)
                 .setMessage(messageId)
@@ -176,5 +191,10 @@ public class EditPlaceActivity extends AbstractActivity {
         website.setEnabled(!closed);
         description.setEnabled(!closed);
         openingHours.setEnabled(!closed);
+    }
+
+    @OnClick(R.id.change_location)
+    public void onChangeLocationClick() {
+        PickLocationActivity.startForResult(this, place == null ? null : place.getPosition(), REQUEST_PICK_LOCATION);
     }
 }
