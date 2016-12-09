@@ -248,7 +248,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         switch (id) {
             case R.id.action_add:
-                EditPlaceActivity.start(this, 0);
+                EditPlaceActivity.start(this, 0, map.getCameraPosition());
                 return true;
             case R.id.action_search:
                 Location lastLocation = null;

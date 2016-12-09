@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.api.CoinsApi;
@@ -23,6 +22,11 @@ import com.bubelov.coins.model.Place;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
 import butterknife.BindView;
@@ -37,10 +41,14 @@ import retrofit2.Response;
  * @author Igor Bubelov
  */
 
-public class EditPlaceActivity extends AbstractActivity {
+public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCallback {
     private static final String ID_EXTRA = "id";
 
+    private static final String MAP_CAMERA_POSITION_EXTRA = "map_camera_position";
+
     private static final int REQUEST_PICK_LOCATION = 10;
+
+    private static final float DEFAULT_ZOOM = 13;
 
     @BindView(R.id.closed_switch)
     Switch closedSwitch;
@@ -68,9 +76,14 @@ public class EditPlaceActivity extends AbstractActivity {
 
     private Place place;
 
-    public static void start(Activity activity, long placeId) {
+    private GoogleMap map;
+
+    private LatLng pickedLocation;
+
+    public static void start(Activity activity, long placeId, CameraPosition mapCameraPosition) {
         Intent intent = new Intent(activity, EditPlaceActivity.class);
         intent.putExtra(ID_EXTRA, placeId);
+        intent.putExtra(MAP_CAMERA_POSITION_EXTRA, mapCameraPosition);
         activity.startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
         Answers.getInstance().logCustom(new CustomEvent("Edit place"));
     }
@@ -94,8 +107,25 @@ public class EditPlaceActivity extends AbstractActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.action_send) {
+                    if (place == null) {
+                        if (name.length() == 0) {
+                            showAlert(R.string.name_is_not_specified, null);
+                            return true;
+                        }
+
+                        if (pickedLocation == null) {
+                            showAlert(R.string.location_is_not_specified, null);
+                            return true;
+                        }
+                    }
+
                     StringBuilder suggestionBuilder = new StringBuilder();
-                    suggestionBuilder.append("ID: ").append(place.getId()).append("\n");
+
+                    if (place != null) {
+                        suggestionBuilder.append("ID: ").append(place.getId()).append("\n");
+                    } else {
+                        suggestionBuilder.append("NEW PLACE").append("\n");
+                    }
 
                     if (closedSwitch.isChecked()) {
                         suggestionBuilder.append("Closed");
@@ -105,6 +135,12 @@ public class EditPlaceActivity extends AbstractActivity {
                         suggestionBuilder.append("Website: ").append(website.getText()).append("\n");
                         suggestionBuilder.append("Description: ").append(description.getText()).append("\n");
                         suggestionBuilder.append("Opening hours: ").append(openingHours.getText());
+                    }
+
+                    if (pickedLocation != null) {
+                        suggestionBuilder.append("\n");
+                        suggestionBuilder.append("Latitude: ").append(pickedLocation.latitude).append("\n");
+                        suggestionBuilder.append("Longitude: ").append(pickedLocation.longitude).append("\n");
                     }
 
                     CoinsApi api = Injector.INSTANCE.getAppComponent().provideApi();
@@ -163,16 +199,29 @@ public class EditPlaceActivity extends AbstractActivity {
             description.setText(place.getDescription());
             openingHours.setText(place.getOpeningHours());
         }
+
+        SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_PICK_LOCATION && resultCode == RESULT_OK) {
-            LatLng location = data.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA);
-            Toast.makeText(getApplicationContext(), location.toString(), Toast.LENGTH_LONG).show();
+            pickedLocation = data.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(pickedLocation, DEFAULT_ZOOM));
+            changeLocation.setText(R.string.change_location);
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+
+        if (place != null) {
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getPosition(), DEFAULT_ZOOM));
+        }
     }
 
     private void showAlert(@StringRes int messageId, DialogInterface.OnClickListener okListener) {
@@ -195,6 +244,6 @@ public class EditPlaceActivity extends AbstractActivity {
 
     @OnClick(R.id.change_location)
     public void onChangeLocationClick() {
-        PickLocationActivity.startForResult(this, place == null ? null : place.getPosition(), REQUEST_PICK_LOCATION);
+        PickLocationActivity.startForResult(this, place == null ? null : place.getPosition(), (CameraPosition) getIntent().getParcelableExtra(MAP_CAMERA_POSITION_EXTRA), REQUEST_PICK_LOCATION);
     }
 }
