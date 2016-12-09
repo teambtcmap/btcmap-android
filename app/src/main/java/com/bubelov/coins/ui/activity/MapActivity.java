@@ -280,7 +280,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         map.getUiSettings().setZoomControlsEnabled(false);
         map.getUiSettings().setCompassEnabled(false);
         map.getUiSettings().setMapToolbarEnabled(false);
-        map.setMyLocationEnabled(true);
 
         initClustering();
 
