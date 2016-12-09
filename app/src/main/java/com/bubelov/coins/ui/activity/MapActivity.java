@@ -20,7 +20,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
-import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -252,7 +251,13 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                 EditPlaceActivity.start(this, 0);
                 return true;
             case R.id.action_search:
-                FindPlaceActivity.startForResult(this, map.getMyLocation(), REQUEST_FIND_PLACE);
+                Location lastLocation = null;
+
+                if (googleApiClient != null && googleApiClient.isConnected() && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+                }
+
+                FindPlaceActivity.startForResult(this, lastLocation, REQUEST_FIND_PLACE);
                 return true;
             case R.id.action_settings:
                 SettingsActivity.start(this);
@@ -275,6 +280,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         map.getUiSettings().setZoomControlsEnabled(false);
         map.getUiSettings().setCompassEnabled(false);
         map.getUiSettings().setMapToolbarEnabled(false);
+        map.setMyLocationEnabled(true);
 
         initClustering();
 
