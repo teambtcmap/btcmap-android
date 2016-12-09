@@ -13,6 +13,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
 import butterknife.BindView;
@@ -25,6 +26,8 @@ import butterknife.ButterKnife;
 public class PickLocationActivity extends AbstractActivity implements OnMapReadyCallback {
     public static final String LOCATION_EXTRA = "location";
 
+    public static final String MAP_CAMERA_POSITION_EXTRA = "map_camera_position";
+
     private static final float DEFAULT_ZOOM = 13;
 
     @BindView(R.id.toolbar)
@@ -34,9 +37,10 @@ public class PickLocationActivity extends AbstractActivity implements OnMapReady
 
     private LatLng initialLocation;
 
-    public static void startForResult(Activity activity, LatLng initialLocation, int requestCode) {
+    public static void startForResult(Activity activity, LatLng initialLocation, CameraPosition mapCameraPosition, int requestCode) {
         Intent intent = new Intent(activity, PickLocationActivity.class);
         intent.putExtra(LOCATION_EXTRA, initialLocation);
+        intent.putExtra(MAP_CAMERA_POSITION_EXTRA, mapCameraPosition);
         activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
     }
 
@@ -47,12 +51,6 @@ public class PickLocationActivity extends AbstractActivity implements OnMapReady
         ButterKnife.bind(this);
 
         initialLocation = getIntent().getParcelableExtra(LOCATION_EXTRA);
-
-        if (initialLocation == null) {
-            toolbar.setTitle(R.string.set_location);
-        } else {
-            toolbar.setTitle(R.string.change_location);
-        }
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,6 +86,12 @@ public class PickLocationActivity extends AbstractActivity implements OnMapReady
 
         if (initialLocation != null) {
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(initialLocation, DEFAULT_ZOOM));
+        } else {
+            CameraPosition cameraPosition = getIntent().getParcelableExtra(MAP_CAMERA_POSITION_EXTRA);
+
+            if (cameraPosition != null) {
+                map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            }
         }
     }
 }

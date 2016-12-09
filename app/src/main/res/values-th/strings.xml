@@ -78,7 +78,10 @@
     <string name="place_is_closed">This place does not exist or closed or no longer accept crypto currency</string>
     <string name="action_add_place">Add place</string>
     <string name="change_location">Change location</string>
-    <string name="set_location">Set location</string>
+    <string name="place_location">Place location</string>
     <string name="action_done">Done</string>
+    <string name="location_is_not_specified">Place location is not specified</string>
+    <string name="name_is_not_specified">Name is not specified</string>
+    <string name="set_location">Set location</string>
 
 </resources>

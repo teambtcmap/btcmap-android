@@ -184,6 +184,6 @@ public class PlaceDetailsView extends FrameLayout {
 
     @OnClick(R.id.edit)
     public void onEditClick() {
-        EditPlaceActivity.start((Activity) getContext(), place.getId());
+        EditPlaceActivity.start((Activity) getContext(), place.getId(), null);
     }
 }
