@@ -6,7 +6,5 @@ package com.bubelov.coins.database;
  */
 
 public interface BaseColumns extends android.provider.BaseColumns {
-    String _CREATED_AT = "_created_at";
-
     String _UPDATED_AT = "_updated_at";
 }
