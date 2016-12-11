@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
-apply plugin: 'android-apt'
 
 android {
     compileSdkVersion 25
@@ -72,8 +71,8 @@ dependencies {
 
     compile 'com.google.code.gson:gson:2.4'
 
-    compile 'com.google.dagger:dagger:2.1'
-    apt 'com.google.dagger:dagger-compiler:2.1'
+    compile 'com.google.dagger:dagger:2.8'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.8'
 
     compile('com.crashlytics.sdk.android:crashlytics:2.6.5@aar') {
         transitive = true;
