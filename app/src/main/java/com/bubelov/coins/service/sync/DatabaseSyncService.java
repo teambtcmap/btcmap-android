@@ -19,8 +19,6 @@ import com.bubelov.coins.event.DatabaseSyncedEvent;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.service.CoinsIntentService;
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.CustomEvent;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
 import com.google.android.gms.gcm.Task;
@@ -118,19 +116,16 @@ public class DatabaseSyncService extends CoinsIntentService {
             Date lastUpdate = getLatestPlaceUpdateDate(db);
             List<Place> places = getApi().getPlaces(dateFormat.format(lastUpdate), MAX_PLACES_PER_REQUEST).execute().body();
 
+            for (Place place : places) {
+                if (!initialSync && notificationManager.shouldNotifyUser(place)) {
+                    notificationManager.notifyUser(place.getId(), place.getName());
+                }
+            }
+
             Timber.d("Inserting %s places", places.size());
             time = System.currentTimeMillis();
             Place.insert(places);
             Timber.d("Inserted. Time: %s", System.currentTimeMillis() - time);
-
-            for (Place place : places) {
-                if (!initialSync && notificationManager.shouldNotifyUser(place)) {
-                    notificationManager.notifyUser(place.getId(), place.getName());
-                    Answers.getInstance().logCustom(new CustomEvent("Notified about new place")
-                            .putCustomAttribute("Place id", place.getId())
-                            .putCustomAttribute("Place name", place.getName()));
-                }
-            }
 
             if (places.size() < MAX_PLACES_PER_REQUEST) {
                 break;

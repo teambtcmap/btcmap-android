@@ -16,10 +16,6 @@ public class DistanceUtils {
         return getDistance(point1.latitude, point1.longitude, point2.latitude, point2.longitude);
     }
 
-    public static float getDistance(Location point1, Location point2) {
-        return getDistance(point1.getLatitude(), point1.getLongitude(), point2.getLatitude(), point2.getLongitude());
-    }
-
     public static float getDistance(LatLng point1, Location point2) {
         return getDistance(point1.latitude, point1.longitude, point2.getLatitude(), point2.getLongitude());
     }

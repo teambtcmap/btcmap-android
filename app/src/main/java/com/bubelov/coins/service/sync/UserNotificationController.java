@@ -5,7 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
@@ -20,9 +20,13 @@ import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.receiver.ClearPlaceNotificationsReceiver;
 import com.bubelov.coins.ui.activity.MapActivity;
 import com.bubelov.coins.util.DistanceUtils;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 
 import java.util.List;
 import java.util.UUID;
+
+import timber.log.Timber;
 
 /**
  * @author Igor Bubelov
@@ -41,28 +45,23 @@ public class UserNotificationController {
         NotificationArea notificationArea = new NotificationAreaProvider(context).get();
 
         if (notificationArea == null) {
+            Timber.d("Notification area was not set");
             return false;
         }
 
-        if (DistanceUtils.getDistance(notificationArea.getCenter(), place.getPosition()) > notificationArea.getRadiusMeters()) {
+        Timber.d("Notification area center: %s", notificationArea.getCenter());
+        Timber.d("Notification area radius: %s", notificationArea.getRadiusMeters());
+
+        float distance = DistanceUtils.getDistance(notificationArea.getCenter(), place.getPosition());
+
+        Timber.d("Distance: %s", distance);
+
+        if (distance > notificationArea.getRadiusMeters()) {
             return false;
         }
 
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
-
-        Cursor cursor = db.query(DbContract.Places.TABLE_NAME,
-                new String[] { DbContract.Places._ID },
-                "_id = ?",
-                new String[] { String.valueOf(place.getId()) },
-                null,
-                null,
-                null);
-
-        boolean alreadyExists = cursor.getCount() > 0;
-        cursor.close();
-
-        return !alreadyExists;
-
+        return DatabaseUtils.queryNumEntries(db, DbContract.Places.TABLE_NAME, "_id = ?", new String[]{String.valueOf(place.getId())}) == 0;
     }
 
     public void notifyUser(long placeId, String placeName) {
@@ -88,6 +87,9 @@ public class UserNotificationController {
         if (PlaceNotification.queryForAll().size() > 1) {
             issueGroupNotification(PlaceNotification.queryForAll());
         }
+
+        Answers.getInstance().logCustom(new CustomEvent("Notified about new place")
+                .putCustomAttribute("ID", placeId));
     }
 
     private void issueGroupNotification(List<PlaceNotification> pendingPlaces) {
