@@ -325,11 +325,15 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         if (intent.hasExtra(PLACE_ID_EXTRA)) {
             selectPlace(intent.getLongExtra(PLACE_ID_EXTRA, -1));
+
+            if (selectedPlace != null) {
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedPlace.getPosition(), MAP_DEFAULT_ZOOM));
+            }
         }
 
         if (intent.hasExtra(NOTIFICATION_AREA_EXTRA)) {
             NotificationArea notificationArea = (NotificationArea) intent.getSerializableExtra(NOTIFICATION_AREA_EXTRA);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), MAP_DEFAULT_ZOOM));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), MAP_DEFAULT_ZOOM));
         }
     }
 
