@@ -88,8 +88,8 @@ public class UserNotificationController {
             issueGroupNotification(PlaceNotification.queryForAll());
         }
 
-        Answers.getInstance().logCustom(new CustomEvent("Notified about new place")
-                .putCustomAttribute("ID", placeId));
+        Answers.getInstance().logCustom(new CustomEvent("Notified user about new place")
+                .putCustomAttribute("id", placeId));
     }
 
     private void issueGroupNotification(List<PlaceNotification> pendingPlaces) {

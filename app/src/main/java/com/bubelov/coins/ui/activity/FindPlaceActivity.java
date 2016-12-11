@@ -32,6 +32,7 @@ import com.bubelov.coins.util.DistanceComparator;
 import com.bubelov.coins.util.DistanceUnits;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ContentViewEvent;
+import com.crashlytics.android.answers.SearchEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,11 +73,6 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
         Intent intent = new Intent(activity, FindPlaceActivity.class);
         intent.putExtra(USER_LOCATION_EXTRA, userLocation);
         activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
-
-        Answers.getInstance().logContentView(new ContentViewEvent()
-                .putContentName("Places search screen")
-                .putContentType("Screens")
-                .putContentId("Places search"));
     }
 
     @Override
@@ -151,6 +147,7 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
             Bundle args = new Bundle();
             args.putString(QUERY_KEY, query.toString());
             getLoaderManager().restartLoader(PLACES_LOADER, args, this);
+            Answers.getInstance().logSearch(new SearchEvent().putQuery(query.toString()));
         } else {
             getLoaderManager().destroyLoader(PLACES_LOADER);
         }

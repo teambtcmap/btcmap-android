@@ -10,6 +10,7 @@ import android.view.View;
 import com.bubelov.coins.R;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ContentViewEvent;
+import com.crashlytics.android.answers.CustomEvent;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,11 +26,7 @@ public class SettingsActivity extends AbstractActivity {
     public static void start(Activity activity) {
         Intent intent = new Intent(activity, SettingsActivity.class);
         activity.startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
-
-        Answers.getInstance().logContentView(new ContentViewEvent()
-                .putContentName("Settings screen")
-                .putContentType("Screens")
-                .putContentId("Settings"));
+        Answers.getInstance().logCustom(new CustomEvent("Opened settings screen"));
     }
 
     @Override

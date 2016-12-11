@@ -85,7 +85,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
         intent.putExtra(ID_EXTRA, placeId);
         intent.putExtra(MAP_CAMERA_POSITION_EXTRA, mapCameraPosition);
         activity.startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
-        Answers.getInstance().logCustom(new CustomEvent("Edit place"));
+        Answers.getInstance().logCustom(new CustomEvent("Opened edit place screen"));
     }
 
     @Override
@@ -123,8 +123,10 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
                     if (place != null) {
                         suggestionBuilder.append("ID: ").append(place.getId()).append("\n");
+                        Answers.getInstance().logCustom(new CustomEvent("Changed place info"));
                     } else {
                         suggestionBuilder.append("NEW PLACE").append("\n");
+                        Answers.getInstance().logCustom(new CustomEvent("Added new place"));
                     }
 
                     if (closedSwitch.isChecked()) {
