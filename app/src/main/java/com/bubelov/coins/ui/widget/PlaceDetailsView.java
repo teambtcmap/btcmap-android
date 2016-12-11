@@ -16,6 +16,8 @@ import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.ui.activity.EditPlaceActivity;
 import com.bubelov.coins.util.Utils;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.ShareEvent;
 
 import java.util.Iterator;
 
@@ -171,6 +173,11 @@ public class PlaceDetailsView extends FrameLayout {
             public boolean onMenuItemClick(android.view.MenuItem item) {
                 if (item.getItemId() == R.id.action_share) {
                     Utils.share(getContext(), getResources().getString(R.string.share_place_message_title), getResources().getString(R.string.share_place_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", place.getLatitude(), place.getLongitude())));
+
+                    Answers.getInstance().logShare(new ShareEvent()
+                            .putContentName(place.getName())
+                            .putContentType("place")
+                            .putContentId(String.valueOf(place.getId())));
                 }
 
                 return false;

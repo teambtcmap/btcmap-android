@@ -432,7 +432,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         Answers.getInstance().logContentView(new ContentViewEvent()
                 .putContentName(selectedPlace.getName())
-                .putContentType("Place")
+                .putContentType("place")
                 .putContentId(String.valueOf(selectedPlace.getId())));
     }
 

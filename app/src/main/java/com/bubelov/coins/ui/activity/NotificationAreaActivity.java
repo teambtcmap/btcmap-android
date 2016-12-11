@@ -20,6 +20,7 @@ import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.util.OnSeekBarChangeAdapter;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ContentViewEvent;
+import com.crashlytics.android.answers.CustomEvent;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -60,11 +61,7 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
     public static void start(Activity activity) {
         Intent intent = new Intent(activity, NotificationAreaActivity.class);
         activity.startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
-
-        Answers.getInstance().logContentView(new ContentViewEvent()
-                .putContentName("Notification area screen")
-                .putContentType("Screens")
-                .putContentId("Notification area"));
+        Answers.getInstance().logCustom(new CustomEvent("Opened notification area screen"));
     }
 
     @Override
