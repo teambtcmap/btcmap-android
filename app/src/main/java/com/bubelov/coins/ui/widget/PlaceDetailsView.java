@@ -1,6 +1,5 @@
 package com.bubelov.coins.ui.widget;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Paint;
 import android.support.v7.widget.Toolbar;
@@ -14,7 +13,6 @@ import android.widget.ViewSwitcher;
 import com.bubelov.coins.R;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
-import com.bubelov.coins.ui.activity.EditPlaceActivity;
 import com.bubelov.coins.util.Utils;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ShareEvent;
@@ -186,11 +184,15 @@ public class PlaceDetailsView extends FrameLayout {
     }
 
     public interface Listener {
+        void onEditPlaceClick(Place place);
+
         void onDismissed();
     }
 
     @OnClick(R.id.edit)
     public void onEditClick() {
-        EditPlaceActivity.start((Activity) getContext(), place.getId(), null);
+        if (listener != null) {
+            listener.onEditPlaceClick(place);
+        }
     }
 }

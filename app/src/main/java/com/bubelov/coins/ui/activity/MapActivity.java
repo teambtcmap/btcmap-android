@@ -38,6 +38,7 @@ import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.ui.widget.PlaceDetailsView;
+import com.bubelov.coins.util.AuthUtils;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
@@ -74,6 +75,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 10;
     private static final int REQUEST_ACCESS_LOCATION = 20;
     private static final int REQUEST_FIND_PLACE = 30;
+    private static final int REQUEST_SIGN_IN_TO_ADD_PLACE = 40;
+    private static final int REQUEST_SIGN_IN_TO_EDIT_PLACE = 50;
 
     private static final float MAP_DEFAULT_ZOOM = 13;
 
@@ -170,6 +173,15 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         placeDetails.setListener(new PlaceDetailsView.Listener() {
             @Override
+            public void onEditPlaceClick(Place place) {
+                if (AuthUtils.isAuthorized()) {
+                    EditPlaceActivity.start(MapActivity.this, place.getId(), null);
+                } else {
+                    SignInActivity.startForResult(MapActivity.this, REQUEST_SIGN_IN_TO_EDIT_PLACE);
+                }
+            }
+
+            @Override
             public void onDismissed() {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
@@ -210,6 +222,15 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedPlace.getPosition(), MAP_DEFAULT_ZOOM));
         }
 
+        if (requestCode == REQUEST_SIGN_IN_TO_ADD_PLACE && resultCode == RESULT_OK) {
+            EditPlaceActivity.start(this, 0, map.getCameraPosition());
+        }
+
+
+        if (requestCode == REQUEST_SIGN_IN_TO_EDIT_PLACE && resultCode == RESULT_OK) {
+            EditPlaceActivity.start(MapActivity.this, selectedPlace.getId(), null);
+        }
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -248,7 +269,12 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         switch (id) {
             case R.id.action_add:
-                EditPlaceActivity.start(this, 0, map.getCameraPosition());
+                if (AuthUtils.isAuthorized()) {
+                    EditPlaceActivity.start(this, 0, map.getCameraPosition());
+                } else {
+                    SignInActivity.startForResult(this, REQUEST_SIGN_IN_TO_ADD_PLACE);
+                }
+
                 return true;
             case R.id.action_search:
                 Location lastLocation = null;

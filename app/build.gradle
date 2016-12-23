@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 apply plugin: 'io.fabric'
 
 android {
@@ -14,6 +15,13 @@ android {
     }
 
     signingConfigs {
+        debug {
+            storeFile file(KEYSTORE_PATH)
+            storePassword KEYSTORE_PASSWORD
+            keyAlias "coins"
+            keyPassword KEYSTORE_PASSWORD
+        }
+
         release {
             storeFile file(KEYSTORE_PATH)
             storePassword KEYSTORE_PASSWORD
@@ -51,9 +59,10 @@ dependencies {
     compile 'com.android.support:design:25.0.1'
     compile 'com.android.support:customtabs:25.0.1'
 
-    compile 'com.google.android.gms:play-services-gcm:10.0.0'
-    compile 'com.google.android.gms:play-services-location:10.0.0'
-    compile 'com.google.android.gms:play-services-maps:10.0.0'
+    compile 'com.google.android.gms:play-services-gcm:9.0.0'
+    compile 'com.google.android.gms:play-services-location:9.0.0'
+    compile 'com.google.android.gms:play-services-maps:9.0.0'
+    compile 'com.google.android.gms:play-services-auth:9.0.0'
     compile 'com.google.maps.android:android-maps-utils:0.4'
 
     compile 'com.squareup.retrofit2:retrofit:2.1.0'

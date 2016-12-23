@@ -7,6 +7,8 @@
     <string name="database_name" translatable="false">coins.db</string>
     <integer name="database_version">19</integer>
 
-    <string name="google_api_key" translatable="false">AIzaSyCFlG9gZj-6ja-CQC6cAgvQXq6fs0foYVQ</string>
+    <string name="maps_api_key" translatable="false">AIzaSyCFlG9gZj-6ja-CQC6cAgvQXq6fs0foYVQ</string>
+
+    <string name="server_client_id" translatable="false">557789430086-hnt5bk65a636mgi7phhn5t9b1porppik.apps.googleusercontent.com</string>
 
 </resources>
