@@ -17,7 +17,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_api_key" />
+            android:value="@string/maps_api_key" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
@@ -46,6 +46,8 @@
         <activity android:name=".ui.activity.NotificationAreaActivity" />
 
         <activity android:name=".ui.activity.CurrenciesActivity" />
+
+        <activity android:name=".ui.activity.SignInActivity" />
 
         <activity
             android:name=".ui.activity.EditPlaceActivity"
