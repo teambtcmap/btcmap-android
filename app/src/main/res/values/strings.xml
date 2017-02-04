@@ -100,5 +100,6 @@
 
     <string name="sign_in">Sign in</string>
     <string name="authorization_hint">Authorized users can add new places and suggest edits.</string>
+    <string name="failed_to_sign_in">Failed to sign in</string>
 
 </resources>
