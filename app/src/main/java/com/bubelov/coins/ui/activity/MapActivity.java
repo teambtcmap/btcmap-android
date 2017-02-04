@@ -223,12 +223,21 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         if (requestCode == REQUEST_SIGN_IN_TO_ADD_PLACE && resultCode == RESULT_OK) {
-            EditPlaceActivity.start(this, 0, map.getCameraPosition());
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    EditPlaceActivity.start(MapActivity.this, 0, map.getCameraPosition());
+                }
+            });
         }
 
-
         if (requestCode == REQUEST_SIGN_IN_TO_EDIT_PLACE && resultCode == RESULT_OK) {
-            EditPlaceActivity.start(MapActivity.this, selectedPlace.getId(), null);
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    EditPlaceActivity.start(MapActivity.this, selectedPlace.getId(), null);
+                }
+            });
         }
 
         super.onActivityResult(requestCode, resultCode, data);

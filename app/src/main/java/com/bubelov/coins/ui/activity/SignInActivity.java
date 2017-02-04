@@ -3,14 +3,21 @@ package com.bubelov.coins.ui.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Toast;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.api.CoinsApi;
+import com.bubelov.coins.dagger.Injector;
+import com.bubelov.coins.model.SessionResponse;
+import com.bubelov.coins.util.AuthUtils;
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -24,6 +31,8 @@ import com.google.android.gms.common.api.ResultCallback;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 /**
  * @author Igor Bubelov
@@ -122,9 +131,45 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
-            Toast.makeText(this, "Token: " + account.getIdToken(), Toast.LENGTH_LONG).show();
-        } else {
+            CoinsApi api = Injector.INSTANCE.getAppComponent().provideApi();
 
+            api.getSession(account.getIdToken()).enqueue(new Callback<SessionResponse>() {
+                @Override
+                public void onResponse(Call<SessionResponse> call, final retrofit2.Response<SessionResponse> response) {
+                    if (response.isSuccessful()) {
+                        new Handler().post(new Runnable() {
+                            @Override
+                            public void run() {
+                                AuthUtils.setToken(response.body().token);
+                                setResult(RESULT_OK);
+                                supportFinishAfterTransition();
+                            }
+                        });
+                    } else {
+                        SessionResponse body = Injector.INSTANCE.getAppComponent().provideGson().fromJson(response.errorBody().charStream(), SessionResponse.class);
+
+                        StringBuilder errorMessageBuilder = new StringBuilder();
+
+                        for (String error : body.errors) {
+                            errorMessageBuilder.append(error).append("\n");
+                            Crashlytics.log(error);
+                        }
+
+                        new AlertDialog.Builder(SignInActivity.this)
+                                .setMessage(errorMessageBuilder.toString())
+                                .setPositiveButton(android.R.string.ok, null)
+                                .show();
+
+                        Crashlytics.logException(new Exception("Google sign in failed"));
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<SessionResponse> call, Throwable t) {
+                    Crashlytics.logException(t);
+                    Toast.makeText(SignInActivity.this, R.string.failed_to_sign_in, Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 }
