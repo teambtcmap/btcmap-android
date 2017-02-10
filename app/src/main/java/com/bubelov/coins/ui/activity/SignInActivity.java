@@ -133,7 +133,7 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
             GoogleSignInAccount account = result.getSignInAccount();
             CoinsApi api = Injector.INSTANCE.getAppComponent().provideApi();
 
-            api.getSession(account.getIdToken()).enqueue(new Callback<SessionResponse>() {
+            api.authWithGoogle(account.getIdToken()).enqueue(new Callback<SessionResponse>() {
                 @Override
                 public void onResponse(Call<SessionResponse> call, final retrofit2.Response<SessionResponse> response) {
                     if (response.isSuccessful()) {

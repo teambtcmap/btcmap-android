@@ -5,11 +5,15 @@ import com.bubelov.coins.model.Place;
 import com.bubelov.coins.model.SessionResponse;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
@@ -18,14 +22,17 @@ import retrofit2.http.Query;
 
 public interface CoinsApi {
     @POST("auth/google-token")
-    Call<SessionResponse> getSession(@Header("token") String token);
+    Call<SessionResponse> authWithGoogle(@Header("token") String token);
 
-    @GET("merchants")
+    @GET("places")
     Call<List<Place>> getPlaces(@Query("since") String since, @Query("limit") int limit);
+
+    @POST("places")
+    Call<Place> addPlace(@Header("session") String session, @Body Map<String, Object> args);
+
+    @PATCH("places/{id}")
+    Call<Place> updatePlace(@Path("id") long id, @Header("session") String session, @Body Map<String, Object> args);
 
     @GET("currencies")
     Call<List<Currency>> getCurrencies();
-
-    @POST("place_suggestions")
-    Call<Void> addPlaceSuggestion(@Query("message") String message);
 }
