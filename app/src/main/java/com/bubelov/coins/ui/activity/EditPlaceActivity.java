@@ -3,22 +3,26 @@ package com.bubelov.coins.ui.activity;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.model.Place;
+import com.bubelov.coins.util.AuthUtils;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
@@ -29,12 +33,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
@@ -119,68 +125,13 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
                         }
                     }
 
-                    StringBuilder suggestionBuilder = new StringBuilder();
-
-                    if (place != null) {
-                        suggestionBuilder.append("ID: ").append(place.getId()).append("\n");
-                        Answers.getInstance().logCustom(new CustomEvent("Changed place info"));
+                    if (place == null) {
+                        new AddPlaceTask().execute();
+                        return true;
                     } else {
-                        suggestionBuilder.append("NEW PLACE").append("\n");
-                        Answers.getInstance().logCustom(new CustomEvent("Added new place"));
+                        new UpdatePlaceTask().execute();
+                        return true;
                     }
-
-                    if (closedSwitch.isChecked()) {
-                        suggestionBuilder.append("Closed");
-                    } else {
-                        suggestionBuilder.append("Name: ").append(name.getText()).append("\n");
-                        suggestionBuilder.append("Phone: ").append(phone.getText()).append("\n");
-                        suggestionBuilder.append("Website: ").append(website.getText()).append("\n");
-                        suggestionBuilder.append("Description: ").append(description.getText()).append("\n");
-                        suggestionBuilder.append("Opening hours: ").append(openingHours.getText());
-                    }
-
-                    if (pickedLocation != null) {
-                        suggestionBuilder.append("\n");
-                        suggestionBuilder.append("Latitude: ").append(pickedLocation.latitude).append("\n");
-                        suggestionBuilder.append("Longitude: ").append(pickedLocation.longitude).append("\n");
-                    }
-
-                    CoinsApi api = Injector.INSTANCE.getAppComponent().provideApi();
-
-                    api.addPlaceSuggestion(suggestionBuilder.toString()).enqueue(new Callback<Void>() {
-                        @Override
-                        public void onResponse(Call<Void> call, Response<Void> response) {
-                            if (response.isSuccessful()) {
-                                showAlert(R.string.thanks_for_suggestion, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int i) {
-                                        dialog.dismiss();
-                                        supportFinishAfterTransition();
-                                    }
-                                });
-                            } else {
-                                showAlert(R.string.could_not_send_suggestion, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int i) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<Void> call, final Throwable t) {
-                            showAlert(R.string.could_not_send_suggestion, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int i) {
-                                    dialog.dismiss();
-                                    Crashlytics.logException(t);
-                                }
-                            });
-                        }
-                    });
-
-                    return true;
                 }
 
                 return false;
@@ -233,6 +184,46 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
                 .show();
     }
 
+    private Map<String, Object> getRequestArgs() {
+        Map<String, Object> args = new HashMap<>();
+
+        if (pickedLocation == null && place != null) {
+            pickedLocation = new LatLng(place.getLatitude(), place.getLongitude());
+        }
+
+        if ((place == null && name.length() > 0) || (place != null && !TextUtils.equals(name.getText(), place.getName()))) {
+            args.put("name", name.getText().toString());
+        }
+
+        if (place == null || place.getLatitude() != pickedLocation.latitude) {
+            args.put("latitude", pickedLocation.latitude);
+        }
+
+        if (place == null || place.getLongitude() != pickedLocation.longitude) {
+            args.put("longitude", pickedLocation.longitude);
+        }
+
+        if ((place == null && phone.length() > 0) || (place != null && !TextUtils.equals(phone.getText(), place.getPhone()))) {
+            args.put("phone", phone.getText().toString());
+        }
+
+        if ((place == null && website.length() > 0) || (place != null && !TextUtils.equals(website.getText(), place.getWebsite()))) {
+            args.put("website", website.getText().toString());
+        }
+
+        if ((place == null && description.length() > 0) || (place != null && !TextUtils.equals(description.getText(), place.getDescription()))) {
+            args.put("description", description.getText().toString());
+        }
+
+        if ((place == null && openingHours.length() > 0) || (place != null && !TextUtils.equals(openingHours.getText(), place.getOpeningHours()))) {
+            args.put("opening_hours", openingHours.getText().toString());
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("place", args);
+        return result;
+    }
+
     @OnCheckedChanged(R.id.closed_switch)
     public void onClosedSwitchChanged() {
         boolean closed = closedSwitch.isChecked();
@@ -247,5 +238,93 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
     @OnClick(R.id.change_location)
     public void onChangeLocationClick() {
         PickLocationActivity.startForResult(this, place == null ? null : place.getPosition(), (CameraPosition) getIntent().getParcelableExtra(MAP_CAMERA_POSITION_EXTRA), REQUEST_PICK_LOCATION);
+    }
+
+    private class AddPlaceTask extends AsyncTask<Void, Void, Boolean> {
+        private Map<String, Object> requestArgs;
+
+        @Override
+        protected void onPreExecute() {
+            requestArgs = getRequestArgs();
+            showProgress();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... args) {
+            CoinsApi api = Injector.INSTANCE.getAppComponent().provideApi();
+
+            try {
+                Response<Place> response = api.addPlace(AuthUtils.getToken(), requestArgs).execute();
+
+                if (response.isSuccessful()) {
+                    Place.insert(Collections.singletonList(response.body()));
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (Exception e) {
+                Crashlytics.logException(e);
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            hideProgress();
+
+            if (success) {
+                Answers.getInstance().logCustom(new CustomEvent("Added new place"));
+                supportFinishAfterTransition();
+            } else {
+                Toast.makeText(EditPlaceActivity.this, "Couldn't add place", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private class UpdatePlaceTask extends AsyncTask<Void, Void, Boolean> {
+        private Map<String, Object> requestArgs;
+
+        @Override
+        protected void onPreExecute() {
+            requestArgs = getRequestArgs();
+
+            if (closedSwitch.isChecked()) {
+                requestArgs.clear();
+                requestArgs.put("visible", false);
+            }
+
+            showProgress();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            CoinsApi api = Injector.INSTANCE.getAppComponent().provideApi();
+
+            try {
+                Response<Place> response = api.updatePlace(place.getId(), AuthUtils.getToken(), requestArgs).execute();
+
+                if (response.isSuccessful()) {
+                    Place.insert(Collections.singletonList(response.body()));
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (Exception e) {
+                Crashlytics.logException(e);
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            hideProgress();
+
+            if (success) {
+                Answers.getInstance().logCustom(new CustomEvent("Changed place info"));
+                supportFinishAfterTransition();
+            } else {
+                Toast.makeText(EditPlaceActivity.this, "Couldn't update place", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }

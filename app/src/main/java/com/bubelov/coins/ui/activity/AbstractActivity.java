@@ -4,10 +4,10 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.bubelov.coins.EventBus;
 import com.bubelov.coins.receiver.NetworkStateReceiver;
+import com.bubelov.coins.ui.ProgressDialog;
 import com.bubelov.coins.util.ThemeUtils;
 
 /**
@@ -17,6 +17,8 @@ import com.bubelov.coins.util.ThemeUtils;
 
 public abstract class AbstractActivity extends AppCompatActivity implements NetworkStateReceiver.NetworkStateListener {
     private NetworkStateReceiver networkStateReceiver;
+
+    public ProgressDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +62,19 @@ public abstract class AbstractActivity extends AppCompatActivity implements Netw
         // Nothing to do here
     }
 
-    protected void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    protected void showProgress() {
+        hideProgress();
+        loadingDialog = ProgressDialog.show(this, "", "", true, false);
+    }
+
+    protected void hideProgress() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (loadingDialog != null) {
+                    loadingDialog.hide();
+                }
+            }
+        });
     }
 }
