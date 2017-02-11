@@ -23,7 +23,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
@@ -44,8 +43,8 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
-    @BindView(R.id.google_sign_in)
-    SignInButton googleSignInButton;
+    @BindView(R.id.sign_in_with_google)
+    View googleSignInButton;
 
     private GoogleApiClient googleApiClient;
 
@@ -66,8 +65,6 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
                 supportFinishAfterTransition();
             }
         });
-
-        googleSignInButton.setSize(SignInButton.SIZE_WIDE);
 
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.server_client_id))
@@ -122,7 +119,7 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
         Toast.makeText(this, R.string.cant_connect_to_google_services, Toast.LENGTH_LONG).show();
     }
 
-    @OnClick(R.id.google_sign_in)
+    @OnClick(R.id.sign_in_with_google)
     public void onGoogleSignInClick() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
         startActivityForResult(signInIntent, REQUEST_GOOGLE_SIGN_IN);

@@ -99,7 +99,9 @@
     <string name="cant_connect_to_google_services">Can\'t connect to Google services</string>
 
     <string name="sign_in">Sign in</string>
-    <string name="authorization_hint">Authorized users can add new places and suggest edits.</string>
+    <string name="authorization_hint">Authorized users can add new places and suggest edits</string>
     <string name="failed_to_sign_in">Failed to sign in</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_in_with_email">Sign in with email</string>
 
 </resources>
