@@ -77,6 +77,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     private static final int REQUEST_FIND_PLACE = 30;
     private static final int REQUEST_SIGN_IN_TO_ADD_PLACE = 40;
     private static final int REQUEST_SIGN_IN_TO_EDIT_PLACE = 50;
+    private static final int REQUEST_ADD_PLACE = 60;
+    private static final int REQUEST_EDIT_PLACE = 70;
 
     private static final float MAP_DEFAULT_ZOOM = 13;
 
@@ -175,7 +177,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             @Override
             public void onEditPlaceClick(Place place) {
                 if (AuthUtils.isAuthorized()) {
-                    EditPlaceActivity.start(MapActivity.this, place.getId(), null);
+                    EditPlaceActivity.startForResult(MapActivity.this, place.getId(), null, REQUEST_EDIT_PLACE);
                 } else {
                     SignInActivity.startForResult(MapActivity.this, REQUEST_SIGN_IN_TO_EDIT_PLACE);
                 }
@@ -226,7 +228,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
-                    EditPlaceActivity.start(MapActivity.this, 0, map.getCameraPosition());
+                    EditPlaceActivity.startForResult(MapActivity.this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
                 }
             });
         }
@@ -235,9 +237,21 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
-                    EditPlaceActivity.start(MapActivity.this, selectedPlace.getId(), null);
+                    EditPlaceActivity.startForResult(MapActivity.this, selectedPlace.getId(), null, REQUEST_EDIT_PLACE);
                 }
             });
+        }
+
+        if (requestCode == REQUEST_ADD_PLACE && resultCode == RESULT_OK) {
+            reloadPlaces();
+        }
+
+        if (requestCode == REQUEST_EDIT_PLACE && resultCode == RESULT_OK) {
+            reloadPlaces();
+
+            if (selectedPlace != null) {
+                selectPlace(selectedPlace.getId());
+            }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -279,7 +293,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         switch (id) {
             case R.id.action_add:
                 if (AuthUtils.isAuthorized()) {
-                    EditPlaceActivity.start(this, 0, map.getCameraPosition());
+                    EditPlaceActivity.startForResult(this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
                 } else {
                     SignInActivity.startForResult(this, REQUEST_SIGN_IN_TO_ADD_PLACE);
                 }

@@ -18,6 +18,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
@@ -86,11 +87,11 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
     private LatLng pickedLocation;
 
-    public static void start(Activity activity, long placeId, CameraPosition mapCameraPosition) {
+    public static void startForResult(Activity activity, long placeId, CameraPosition mapCameraPosition, int requestCode) {
         Intent intent = new Intent(activity, EditPlaceActivity.class);
         intent.putExtra(ID_EXTRA, placeId);
         intent.putExtra(MAP_CAMERA_POSITION_EXTRA, mapCameraPosition);
-        activity.startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
+        activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
         Answers.getInstance().logCustom(new CustomEvent("Opened edit place screen"));
     }
 
@@ -257,7 +258,10 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
                 Response<Place> response = api.addPlace(AuthUtils.getToken(), requestArgs).execute();
 
                 if (response.isSuccessful()) {
-                    Place.insert(Collections.singletonList(response.body()));
+                    Place place = response.body();
+                    Place.insert(Collections.singletonList(place));
+                    PlacesCache cache = Injector.INSTANCE.getAppComponent().getPlacesCache();
+                    cache.invalidate(place);
                     return true;
                 } else {
                     return false;
@@ -273,7 +277,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
             hideProgress();
 
             if (success) {
-                Answers.getInstance().logCustom(new CustomEvent("Added new place"));
+                setResult(RESULT_OK);
                 supportFinishAfterTransition();
             } else {
                 Toast.makeText(EditPlaceActivity.this, "Couldn't add place", Toast.LENGTH_LONG).show();
@@ -304,7 +308,10 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
                 Response<Place> response = api.updatePlace(place.getId(), AuthUtils.getToken(), requestArgs).execute();
 
                 if (response.isSuccessful()) {
-                    Place.insert(Collections.singletonList(response.body()));
+                    Place place = response.body();
+                    Place.insert(Collections.singletonList(place));
+                    PlacesCache cache = Injector.INSTANCE.getAppComponent().getPlacesCache();
+                    cache.invalidate(place);
                     return true;
                 } else {
                     return false;
@@ -320,7 +327,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
             hideProgress();
 
             if (success) {
-                Answers.getInstance().logCustom(new CustomEvent("Changed place info"));
+                setResult(RESULT_OK);
                 supportFinishAfterTransition();
             } else {
                 Toast.makeText(EditPlaceActivity.this, "Couldn't update place", Toast.LENGTH_LONG).show();

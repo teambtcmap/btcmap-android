@@ -69,6 +69,11 @@ public class PlacesCache {
         initialize();
     }
 
+    public void invalidate(Place place) {
+        data.remove(place);
+        data.add(place);
+    }
+
     public List<PlacesCacheListener> getListeners() {
         return listeners;
     }
