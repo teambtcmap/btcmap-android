@@ -49,9 +49,9 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
 
     private GoogleApiClient googleApiClient;
 
-    public static void startForResult(Activity activity, int requestCode) {
+    public static void start(Activity activity) {
         Intent intent = new Intent(activity, SignInActivity.class);
-        activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
+        activity.startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
     }
 
     @Override
@@ -141,7 +141,6 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
                             @Override
                             public void run() {
                                 AuthUtils.setToken(response.body().token);
-                                setResult(RESULT_OK);
                                 supportFinishAfterTransition();
                             }
                         });

@@ -75,10 +75,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 10;
     private static final int REQUEST_ACCESS_LOCATION = 20;
     private static final int REQUEST_FIND_PLACE = 30;
-    private static final int REQUEST_SIGN_IN_TO_ADD_PLACE = 40;
-    private static final int REQUEST_SIGN_IN_TO_EDIT_PLACE = 50;
-    private static final int REQUEST_ADD_PLACE = 60;
-    private static final int REQUEST_EDIT_PLACE = 70;
+    private static final int REQUEST_ADD_PLACE = 40;
+    private static final int REQUEST_EDIT_PLACE = 50;
 
     private static final float MAP_DEFAULT_ZOOM = 13;
 
@@ -179,7 +177,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                 if (AuthUtils.isAuthorized()) {
                     EditPlaceActivity.startForResult(MapActivity.this, place.getId(), null, REQUEST_EDIT_PLACE);
                 } else {
-                    SignInActivity.startForResult(MapActivity.this, REQUEST_SIGN_IN_TO_EDIT_PLACE);
+                    SignInActivity.start(MapActivity.this);
                 }
             }
 
@@ -222,24 +220,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             drawerMenu.setAmenity(null);
             selectPlace(data.getLongExtra(FindPlaceActivity.PLACE_ID_EXTRA, -1));
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedPlace.getPosition(), MAP_DEFAULT_ZOOM));
-        }
-
-        if (requestCode == REQUEST_SIGN_IN_TO_ADD_PLACE && resultCode == RESULT_OK) {
-            new Handler().post(new Runnable() {
-                @Override
-                public void run() {
-                    EditPlaceActivity.startForResult(MapActivity.this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
-                }
-            });
-        }
-
-        if (requestCode == REQUEST_SIGN_IN_TO_EDIT_PLACE && resultCode == RESULT_OK) {
-            new Handler().post(new Runnable() {
-                @Override
-                public void run() {
-                    EditPlaceActivity.startForResult(MapActivity.this, selectedPlace.getId(), null, REQUEST_EDIT_PLACE);
-                }
-            });
         }
 
         if (requestCode == REQUEST_ADD_PLACE && resultCode == RESULT_OK) {
@@ -295,7 +275,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                 if (AuthUtils.isAuthorized()) {
                     EditPlaceActivity.startForResult(this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
                 } else {
-                    SignInActivity.startForResult(this, REQUEST_SIGN_IN_TO_ADD_PLACE);
+                    SignInActivity.start(this);
                 }
 
                 return true;
