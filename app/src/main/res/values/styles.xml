@@ -69,4 +69,19 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
+    <style name="Button" />
+
+    <style name="Button.SignIn">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingRight">48sp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:gravity">center</item>
+        <item name="android:stateListAnimator" tools:targetApi="lollipop">@null</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textSize">14sp</item>
+        <item name="typeface">medium</item>
+    </style>
+
 </resources>
