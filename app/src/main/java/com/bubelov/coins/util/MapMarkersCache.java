@@ -26,7 +26,7 @@ public class MapMarkersCache {
 
     private BitmapDescriptor createBitmapDescriptor(String amenityString) {
         for (Amenity amenity : Amenity.values()) {
-            if (amenityString.equalsIgnoreCase(amenity.name())) {
+            if (amenity.name().equalsIgnoreCase(amenityString)) {
                 return BitmapDescriptorFactory.fromResource(amenity.getMarkerIconId());
             }
         }
