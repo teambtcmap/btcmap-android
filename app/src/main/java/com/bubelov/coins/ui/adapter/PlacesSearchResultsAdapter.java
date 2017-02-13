@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.model.Amenity;
+import com.bubelov.coins.model.PlaceCategory;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.util.DistanceUnits;
 import com.bubelov.coins.util.DistanceUtils;
@@ -76,10 +76,10 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
 
         boolean amenityFound = false;
 
-        for (Amenity amenity : Amenity.values()) {
-            if (place.getAmenity().equalsIgnoreCase(amenity.name())) {
+        for (PlaceCategory category : PlaceCategory.values()) {
+            if (place.getAmenity().equalsIgnoreCase(category.name())) {
                 amenityFound = true;
-                holder.icon.setBackgroundResource(amenity.getIconId());
+                holder.icon.setBackgroundResource(category.getIconId());
                 DrawableCompat.setTint(holder.icon.getBackground(), Color.WHITE);
             }
         }

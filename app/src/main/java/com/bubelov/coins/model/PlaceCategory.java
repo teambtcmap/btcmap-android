@@ -3,11 +3,10 @@ package com.bubelov.coins.model;
 import com.bubelov.coins.R;
 
 /**
- * Author: Igor Bubelov
- * Date: 21/05/15 12:40
+ * @author Igor Bubelov
  */
 
-public enum Amenity {
+public enum PlaceCategory {
     ATM,
     CAFE,
     RESTAURANT,

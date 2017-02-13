@@ -6,7 +6,7 @@ import android.os.AsyncTask;
 
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
-import com.bubelov.coins.model.Amenity;
+import com.bubelov.coins.model.PlaceCategory;
 import com.bubelov.coins.model.Place;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -44,7 +44,7 @@ public class PlacesCache {
         return initialized;
     }
 
-    public Collection<Place> getPlaces(LatLngBounds bounds, Amenity amenity) {
+    public Collection<Place> getPlaces(LatLngBounds bounds, PlaceCategory category) {
         Timber.d("getPlaces called");
         long time = System.currentTimeMillis();
 
@@ -52,7 +52,7 @@ public class PlacesCache {
 
         for (Place place : data) {
             if (bounds.contains(place.getPosition())
-                    && (amenity == null || amenity.name().equalsIgnoreCase(place.getAmenity()))) {
+                    && (category == null || category.name().equalsIgnoreCase(place.getAmenity()))) {
                 places.add(place);
             }
         }
