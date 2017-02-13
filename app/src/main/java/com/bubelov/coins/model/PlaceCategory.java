@@ -91,4 +91,39 @@ public enum PlaceCategory {
                 return R.drawable.ic_place_empty;
         }
     }
+
+    public int getPluralStringId() {
+        switch (this) {
+            case ATM:
+                return R.string.atms;
+            case CAFE:
+                return R.string.cafes;
+            case RESTAURANT:
+                return R.string.restaurants;
+            case BAR:
+                return R.string.bars;
+            case HOTEL:
+                return R.string.hotels;
+            case CAR_WASH:
+                return R.string.car_washes;
+            case FUEL:
+                return R.string.gas_stations;
+            case HOSPITAL:
+                return R.string.hospitals;
+            case DRY_CLEANING:
+                return R.string.laundry;
+            case CINEMA:
+                return R.string.movies;
+            case PARKING:
+                return R.string.parking;
+            case PHARMACY:
+                return R.string.pharmacies;
+            case PIZZA:
+                return R.string.pizza;
+            case TAXI:
+                return R.string.taxi;
+            default:
+                return 0;
+        }
+    }
 }

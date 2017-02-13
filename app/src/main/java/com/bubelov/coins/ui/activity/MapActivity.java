@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -16,7 +17,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.PlacesCache;
@@ -29,6 +30,8 @@ import com.bubelov.coins.model.Place;
 import com.bubelov.coins.model.PlaceNotification;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
+import com.bubelov.coins.ui.adapter.PlaceCategoriesAdapter;
+import com.bubelov.coins.ui.dialog.PlaceCategoryDialog;
 import com.bubelov.coins.ui.widget.PlaceDetailsView;
 import com.bubelov.coins.util.AuthUtils;
 import com.bubelov.coins.util.MapMarkersCache;
@@ -59,7 +62,7 @@ import butterknife.OnClick;
  * @author Igor Bubelov
  */
 
-public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener {
+public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener, PlaceCategoriesAdapter.Listener {
     private static final String PLACE_ID_EXTRA = "place_id";
     private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
     private static final String CLEAR_PLACE_NOTIFICATIONS_EXTRA = "clear_place_notifications";
@@ -74,6 +77,9 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+
+    @BindView(R.id.category)
+    TextView categoryView;
 
     @BindView(R.id.fab)
     FloatingActionButton actionButton;
@@ -270,6 +276,14 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
     }
 
+    @Override
+    public void onPlaceCategorySelected(PlaceCategory category) {
+        selectedCategory = category;
+        @StringRes int textResId = category == null ? R.string.all_places : category.getPluralStringId();
+        categoryView.setText(textResId);
+        reloadPlaces();
+    }
+
     private void handleIntent(final Intent intent) {
         if (intent.getBooleanExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, false)) {
             PlaceNotification.deleteAll();
@@ -405,7 +419,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     @OnClick(R.id.categories_spinner)
     public void onCategoriesSpinnerClick() {
-        Toast.makeText(this, android.R.string.ok, Toast.LENGTH_SHORT).show();
+        new PlaceCategoryDialog().show(getSupportFragmentManager(), PlaceCategoryDialog.TAG);
     }
 
     @OnClick(R.id.place_details)
