@@ -24,17 +24,8 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?attr/actionBarSize</item>
         <item name="android:background">@color/primary</item>
-        <item name="android:elevation" tools:targetApi="lollipop">1dp</item>
+        <item name="android:elevation" tools:targetApi="lollipop">0dp</item>
         <item name="android:theme">@style/ToolbarTheme</item>
-    </style>
-
-    <style name="Toolbar.SemiTransparent" parent="Toolbar">
-        <item name="android:background">@color/primary_semi_transparent</item>
-        <item name="android:elevation" tools:targetApi="lollipop">1dp</item>
-    </style>
-
-    <style name="Toolbar.SemiTransparent.WithBackNavigation" parent="Toolbar.SemiTransparent">
-        <item name="navigationIcon">?attr/homeAsUpIndicator</item>
     </style>
 
     <style name="Toolbar.WithBackNavigation" parent="Toolbar">

@@ -13,7 +13,8 @@
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
-        style="@style/Toolbar.SemiTransparent.WithBackNavigation"
+        style="@style/Toolbar"
+        app:navigationIcon="?attr/homeAsUpIndicator"
         app:title="@string/notification_area_activity_title" />
 
     <LinearLayout

@@ -16,7 +16,7 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.event.ExchangeRateLoadFinishedEvent;
 import com.bubelov.coins.event.ExchangeRateLoadStartedEvent;
 import com.bubelov.coins.event.DatabaseSyncedEvent;
-import com.bubelov.coins.model.Amenity;
+import com.bubelov.coins.model.PlaceCategory;
 import com.bubelov.coins.model.ExchangeRate;
 import com.bubelov.coins.service.rates.ExchangeRatesService;
 import com.bubelov.coins.util.AnimationListenerAdapter;
@@ -60,7 +60,7 @@ public class DrawerMenu extends FrameLayout {
             R.id.taxi
     };
 
-    private List<Pair<Integer, Amenity>> itemsToAmenities = new ArrayList<>();
+    private List<Pair<Integer, PlaceCategory>> itemsToAmenities = new ArrayList<>();
 
     private OnItemClickListener listener;
 
@@ -79,14 +79,14 @@ public class DrawerMenu extends FrameLayout {
         init();
     }
 
-    public void setAmenity(Amenity amenity) {
-        if (amenity == null) {
+    public void setAmenity(PlaceCategory category) {
+        if (category == null) {
             setSelected(R.id.all);
             return;
         }
 
-        for (Pair<Integer, Amenity> pair : itemsToAmenities) {
-            if (pair.second.equals(amenity)) {
+        for (Pair<Integer, PlaceCategory> pair : itemsToAmenities) {
+            if (pair.second.equals(category)) {
                 setSelected(pair.first);
             }
         }
@@ -106,15 +106,15 @@ public class DrawerMenu extends FrameLayout {
             }
         }
 
-        Amenity selectedAmenity = null;
+        PlaceCategory selectedCategory = null;
 
-        for (Pair<Integer, Amenity> pair : itemsToAmenities) {
+        for (Pair<Integer, PlaceCategory> pair : itemsToAmenities) {
             if (pair.first == selectedItemId) {
-                selectedAmenity = pair.second;
+                selectedCategory = pair.second;
             }
         }
 
-        listener.onAmenitySelected(selectedAmenity, selectedItem.getText());
+        listener.onAmenitySelected(selectedCategory, selectedItem.getText());
     }
 
     public void setItemSelectedListener(OnItemClickListener itemSelectedListener) {
@@ -149,20 +149,20 @@ public class DrawerMenu extends FrameLayout {
     }
 
     private void initItemsToAmenities() {
-        itemsToAmenities.add(new Pair<>(R.id.atms, Amenity.ATM));
-        itemsToAmenities.add(new Pair<>(R.id.cafes, Amenity.CAFE));
-        itemsToAmenities.add(new Pair<>(R.id.restaurants, Amenity.RESTAURANT));
-        itemsToAmenities.add(new Pair<>(R.id.bars, Amenity.BAR));
-        itemsToAmenities.add(new Pair<>(R.id.hotels, Amenity.HOTEL));
-        itemsToAmenities.add(new Pair<>(R.id.car_washes, Amenity.CAR_WASH));
-        itemsToAmenities.add(new Pair<>(R.id.gas_stations, Amenity.FUEL));
-        itemsToAmenities.add(new Pair<>(R.id.hospitals, Amenity.HOSPITAL));
-        itemsToAmenities.add(new Pair<>(R.id.laundry, Amenity.DRY_CLEANING));
-        itemsToAmenities.add(new Pair<>(R.id.movies, Amenity.CINEMA));
-        itemsToAmenities.add(new Pair<>(R.id.parking, Amenity.PARKING));
-        itemsToAmenities.add(new Pair<>(R.id.pharmacies, Amenity.PHARMACY));
-        itemsToAmenities.add(new Pair<>(R.id.pizza, Amenity.PIZZA));
-        itemsToAmenities.add(new Pair<>(R.id.taxi, Amenity.TAXI));
+        itemsToAmenities.add(new Pair<>(R.id.atms, PlaceCategory.ATM));
+        itemsToAmenities.add(new Pair<>(R.id.cafes, PlaceCategory.CAFE));
+        itemsToAmenities.add(new Pair<>(R.id.restaurants, PlaceCategory.RESTAURANT));
+        itemsToAmenities.add(new Pair<>(R.id.bars, PlaceCategory.BAR));
+        itemsToAmenities.add(new Pair<>(R.id.hotels, PlaceCategory.HOTEL));
+        itemsToAmenities.add(new Pair<>(R.id.car_washes, PlaceCategory.CAR_WASH));
+        itemsToAmenities.add(new Pair<>(R.id.gas_stations, PlaceCategory.FUEL));
+        itemsToAmenities.add(new Pair<>(R.id.hospitals, PlaceCategory.HOSPITAL));
+        itemsToAmenities.add(new Pair<>(R.id.laundry, PlaceCategory.DRY_CLEANING));
+        itemsToAmenities.add(new Pair<>(R.id.movies, PlaceCategory.CINEMA));
+        itemsToAmenities.add(new Pair<>(R.id.parking, PlaceCategory.PARKING));
+        itemsToAmenities.add(new Pair<>(R.id.pharmacies, PlaceCategory.PHARMACY));
+        itemsToAmenities.add(new Pair<>(R.id.pizza, PlaceCategory.PIZZA));
+        itemsToAmenities.add(new Pair<>(R.id.taxi, PlaceCategory.TAXI));
     }
 
     private void showLastExchangeRate() {
@@ -221,6 +221,6 @@ public class DrawerMenu extends FrameLayout {
     }
 
     public interface OnItemClickListener {
-        void onAmenitySelected(Amenity amenity, String title);
+        void onAmenitySelected(PlaceCategory category, String title);
     }
 }

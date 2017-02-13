@@ -1,7 +1,7 @@
 package com.bubelov.coins.util;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.model.Amenity;
+import com.bubelov.coins.model.PlaceCategory;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
@@ -9,8 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Author: Igor Bubelov
- * Date: 20/05/15 10:46
+ * @author Igor Bubelov
  */
 
 public class MapMarkersCache {
@@ -24,10 +23,10 @@ public class MapMarkersCache {
         return cache.get(amenity);
     }
 
-    private BitmapDescriptor createBitmapDescriptor(String amenityString) {
-        for (Amenity amenity : Amenity.values()) {
-            if (amenity.name().equalsIgnoreCase(amenityString)) {
-                return BitmapDescriptorFactory.fromResource(amenity.getMarkerIconId());
+    private BitmapDescriptor createBitmapDescriptor(String categoryString) {
+        for (PlaceCategory category : PlaceCategory.values()) {
+            if (category.name().equalsIgnoreCase(categoryString)) {
+                return BitmapDescriptorFactory.fromResource(category.getMarkerIconId());
             }
         }
 

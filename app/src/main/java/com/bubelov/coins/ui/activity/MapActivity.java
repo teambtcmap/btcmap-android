@@ -1,11 +1,9 @@
 package com.bubelov.coins.ui.activity;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,28 +13,22 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.event.DatabaseSyncedEvent;
-import com.bubelov.coins.model.Amenity;
+import com.bubelov.coins.model.PlaceCategory;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.model.PlaceNotification;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
-import com.bubelov.coins.ui.widget.DrawerMenu;
 import com.bubelov.coins.ui.widget.PlaceDetailsView;
 import com.bubelov.coins.util.AuthUtils;
 import com.bubelov.coins.util.MapMarkersCache;
@@ -67,7 +59,7 @@ import butterknife.OnClick;
  * @author Igor Bubelov
  */
 
-public class MapActivity extends AbstractActivity implements OnMapReadyCallback, DrawerMenu.OnItemClickListener {
+public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener {
     private static final String PLACE_ID_EXTRA = "place_id";
     private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
     private static final String CLEAR_PLACE_NOTIFICATIONS_EXTRA = "clear_place_notifications";
@@ -83,25 +75,17 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
-    @BindView(R.id.drawer_layout)
-    DrawerLayout drawerLayout;
-
-    @BindView(R.id.drawer_menu)
-    DrawerMenu drawerMenu;
-
     @BindView(R.id.fab)
     FloatingActionButton actionButton;
 
     @BindView(R.id.place_details)
     PlaceDetailsView placeDetails;
 
-    private ActionBarDrawerToggle drawerToggle;
-
     private GoogleMap map;
 
     private ClusterManager<Place> placesManager;
 
-    private Amenity selectedAmenity;
+    private PlaceCategory selectedCategory;
 
     private Place selectedPlace;
 
@@ -134,15 +118,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         ButterKnife.bind(this);
-
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-
-        drawerToggle = new DrawerToggle(this, drawerLayout, android.R.string.ok, android.R.string.ok);
-        drawerLayout.setDrawerListener(drawerToggle);
-
-        drawerMenu.setItemSelectedListener(this);
 
         firstLaunch = savedInstanceState == null;
 
@@ -186,21 +161,9 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
         });
-    }
 
-    @OnClick(R.id.place_details)
-    public void onPlaceDetailsClick() {
-        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        } else {
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        drawerToggle.syncState();
+        toolbar.inflateMenu(R.menu.menu_map_activity);
+        toolbar.setOnMenuItemClickListener(this);
     }
 
     @Override
@@ -217,7 +180,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         if (requestCode == REQUEST_FIND_PLACE && resultCode == RESULT_OK) {
-            drawerMenu.setAmenity(null);
             selectPlace(data.getLongExtra(FindPlaceActivity.PLACE_ID_EXTRA, -1));
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedPlace.getPosition(), MAP_DEFAULT_ZOOM));
         }
@@ -248,61 +210,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_map_activity, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem settingsMenuItem = menu.findItem(R.id.action_settings);
-        SpannableString string = new SpannableString(settingsMenuItem.getTitle());
-        string.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.black)), 0, string.length(), 0);
-        settingsMenuItem.setTitle(string);
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (drawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-
-        int id = item.getItemId();
-
-        switch (id) {
-            case R.id.action_add:
-                if (AuthUtils.isAuthorized()) {
-                    EditPlaceActivity.startForResult(this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
-                } else {
-                    SignInActivity.start(this);
-                }
-
-                return true;
-            case R.id.action_search:
-                Location lastLocation = null;
-
-                if (googleApiClient != null && googleApiClient.isConnected() && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-                }
-
-                FindPlaceActivity.startForResult(this, lastLocation, REQUEST_FIND_PLACE);
-                return true;
-            case R.id.action_settings:
-                SettingsActivity.start(this);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        drawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
         map.getUiSettings().setMyLocationButtonEnabled(false);
@@ -329,22 +236,38 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         placesCache = Injector.INSTANCE.getAppComponent().getPlacesCache();
-        drawerMenu.setAmenity(selectedAmenity);
 
         handleIntent(getIntent());
     }
 
     @Override
-    public void onAmenitySelected(Amenity amenity, String title) {
-        drawerLayout.closeDrawer(GravityCompat.START);
-        getSupportActionBar().setTitle(title);
-        this.selectedAmenity = amenity;
-        reloadPlaces();
-    }
+    public boolean onMenuItemClick(MenuItem item) {
+        int id = item.getItemId();
 
-    @Subscribe
-    public void onDatabaseSynced(DatabaseSyncedEvent e) {
-        reloadPlaces();
+        switch (id) {
+            case R.id.action_add:
+                if (AuthUtils.isAuthorized()) {
+                    EditPlaceActivity.startForResult(this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
+                } else {
+                    SignInActivity.start(this);
+                }
+
+                return true;
+            case R.id.action_search:
+                Location lastLocation = null;
+
+                if (googleApiClient != null && googleApiClient.isConnected() && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+                }
+
+                FindPlaceActivity.startForResult(this, lastLocation, REQUEST_FIND_PLACE);
+                return true;
+            case R.id.action_settings:
+                SettingsActivity.start(this);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void handleIntent(final Intent intent) {
@@ -441,12 +364,12 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         final LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
 
         if (placesCache.isInitialized()) {
-            onPlacesLoaded(placesCache.getPlaces(bounds, selectedAmenity));
+            onPlacesLoaded(placesCache.getPlaces(bounds, selectedCategory));
         } else {
             placesCache.getListeners().add(new PlacesCache.PlacesCacheListener() {
                 @Override
                 public void onPlacesCacheInitialized() {
-                    onPlacesLoaded(placesCache.getPlaces(bounds, selectedAmenity));
+                    onPlacesLoaded(placesCache.getPlaces(bounds, selectedCategory));
                     placesCache.getListeners().remove(this);
                 }
             });
@@ -475,21 +398,22 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
     }
 
-    private class DrawerToggle extends ActionBarDrawerToggle {
-        public DrawerToggle(Activity activity, DrawerLayout drawerLayout, int openDrawerContentDescRes, int closeDrawerContentDescRes) {
-            super(activity, drawerLayout, openDrawerContentDescRes, closeDrawerContentDescRes);
-        }
+    @Subscribe
+    public void onDatabaseSynced(DatabaseSyncedEvent e) {
+        reloadPlaces();
+    }
 
-        @Override
-        public void onDrawerOpened(View drawerView) {
-            super.onDrawerOpened(drawerView);
-            invalidateOptionsMenu();
-        }
+    @OnClick(R.id.categories_spinner)
+    public void onCategoriesSpinnerClick() {
+        Toast.makeText(this, android.R.string.ok, Toast.LENGTH_SHORT).show();
+    }
 
-        @Override
-        public void onDrawerClosed(View drawerView) {
-            super.onDrawerClosed(drawerView);
-            invalidateOptionsMenu();
+    @OnClick(R.id.place_details)
+    public void onPlaceDetailsClick() {
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        } else {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
     }
 
