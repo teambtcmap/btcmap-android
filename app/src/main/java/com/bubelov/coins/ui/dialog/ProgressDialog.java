@@ -1,4 +1,4 @@
-package com.bubelov.coins.ui;
+package com.bubelov.coins.ui.dialog;
 
 import android.app.Dialog;
 import android.content.Context;

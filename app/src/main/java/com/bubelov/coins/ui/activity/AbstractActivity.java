@@ -7,7 +7,7 @@ import android.view.MenuItem;
 
 import com.bubelov.coins.EventBus;
 import com.bubelov.coins.receiver.NetworkStateReceiver;
-import com.bubelov.coins.ui.ProgressDialog;
+import com.bubelov.coins.ui.dialog.ProgressDialog;
 import com.bubelov.coins.util.ThemeUtils;
 
 /**
