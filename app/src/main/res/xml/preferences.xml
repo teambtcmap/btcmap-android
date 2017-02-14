@@ -7,11 +7,6 @@
         android:summary="@string/pref_area_of_interest_summary"
         android:title="@string/pref_area_of_interest" />
 
-    <Preference
-        android:key="@string/pref_currencies_key"
-        android:summary="@string/pref_currencies_summary"
-        android:title="@string/pref_currencies_title" />
-
     <ListPreference
         android:defaultValue="@string/pref_exchange_rates_source_bitstamp"
         android:entries="@array/exchange_rates_sources"
