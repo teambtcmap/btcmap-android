@@ -17,8 +17,6 @@ import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.ui.adapter.CurrenciesAdapter;
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.ContentViewEvent;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
