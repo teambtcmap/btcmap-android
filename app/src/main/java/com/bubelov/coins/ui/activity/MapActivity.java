@@ -31,6 +31,7 @@ import com.bubelov.coins.model.PlaceNotification;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.ui.adapter.PlaceCategoriesAdapter;
+import com.bubelov.coins.ui.dialog.MapPopupMenu;
 import com.bubelov.coins.ui.dialog.PlaceCategoryDialog;
 import com.bubelov.coins.ui.widget.PlaceDetailsView;
 import com.bubelov.coins.util.AuthUtils;
@@ -62,7 +63,7 @@ import butterknife.OnClick;
  * @author Igor Bubelov
  */
 
-public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener, PlaceCategoriesAdapter.Listener {
+public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener, PlaceCategoriesAdapter.Listener, MapPopupMenu.Listener {
     private static final String PLACE_ID_EXTRA = "place_id";
     private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
     private static final String CLEAR_PLACE_NOTIFICATIONS_EXTRA = "clear_place_notifications";
@@ -268,8 +269,9 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
                 FindPlaceActivity.startForResult(this, lastLocation, REQUEST_FIND_PLACE);
                 return true;
-            case R.id.action_settings:
-                SettingsActivity.start(this);
+            case R.id.action_popup:
+                MapPopupMenu popupMenu = new MapPopupMenu(MapActivity.this);
+                popupMenu.showAsDropDown(findViewById(R.id.top_right_corner));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -282,6 +284,21 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         @StringRes int textResId = category == null ? R.string.all_places : category.getPluralStringId();
         categoryView.setText(textResId);
         reloadPlaces();
+    }
+
+    @Override
+    public void onSettingsClick() {
+        SettingsActivity.start(this);
+    }
+
+    @Override
+    public void onSignInClick() {
+        SignInActivity.start(this);
+    }
+
+    @Override
+    public void onSignOutClick() {
+        AuthUtils.setToken("");
     }
 
     private void handleIntent(final Intent intent) {

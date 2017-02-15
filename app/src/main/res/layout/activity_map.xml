@@ -69,4 +69,11 @@
         app:layout_anchor="@+id/place_details"
         app:layout_anchorGravity="top|end" />
 
+    <View
+        android:id="@+id/top_right_corner"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:layout_gravity="top|right"
+        android:background="@android:color/transparent" />
+
 </android.support.design.widget.CoordinatorLayout>
