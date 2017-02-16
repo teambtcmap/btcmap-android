@@ -1,6 +1,5 @@
 package com.bubelov.coins.ui.fragment;
 
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -12,9 +11,8 @@ import android.widget.Toast;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
-import com.bubelov.coins.service.rates.ExchangeRatesService;
-import com.bubelov.coins.service.sync.DatabaseSyncService;
-import com.bubelov.coins.service.sync.UserNotificationController;
+import com.bubelov.coins.service.DatabaseSyncService;
+import com.bubelov.coins.service.UserNotificationController;
 import com.bubelov.coins.ui.activity.NotificationAreaActivity;
 
 import java.util.Random;
@@ -23,23 +21,11 @@ import java.util.Random;
  * @author Igor Bubelov
  */
 
-public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    public void onPause() {
-        getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
-        super.onPause();
     }
 
     @Override
@@ -103,15 +89,5 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(getString(R.string.pref_exchange_rates_provider_key))) {
-            getActivity().startService(ExchangeRatesService.newIntent(getActivity(),
-                    "BTC",
-                    "USD",
-                    true));
-        }
     }
 }

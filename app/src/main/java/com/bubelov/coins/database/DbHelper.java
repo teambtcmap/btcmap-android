@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.service.sync.DatabaseSyncService;
+import com.bubelov.coins.service.DatabaseSyncService;
 
 /**
  * @author Igor Bubelov

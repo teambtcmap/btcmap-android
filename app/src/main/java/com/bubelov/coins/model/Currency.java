@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 
 import com.bubelov.coins.dagger.Injector;
@@ -27,8 +26,6 @@ public class Currency extends AbstractEntity implements Serializable {
     private String code;
 
     private boolean crypto;
-
-    private boolean showOnMap = true;
 
     public String getName() {
         return name;
@@ -54,14 +51,6 @@ public class Currency extends AbstractEntity implements Serializable {
         this.crypto = crypto;
     }
 
-    public boolean isShowOnMap() {
-        return showOnMap;
-    }
-
-    public void setShowOnMap(boolean showOnMap) {
-        this.showOnMap = showOnMap;
-    }
-
     // Database stuff
 
     public static long getCount() {
@@ -78,31 +67,6 @@ public class Currency extends AbstractEntity implements Serializable {
         } finally {
             cursor.close();
         }
-    }
-
-    public static Currency findByCode(String code) {
-        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
-        Cursor cursor = db.query(DbContract.Currencies.TABLE_NAME, null, "code = ?", new String[]{code}, null, null, null);
-
-        try {
-            return fromCursor(cursor).get(0);
-        } finally {
-            cursor.close();
-        }
-    }
-
-    public static List<Currency> find(boolean fiat) {
-        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
-
-        return fromCursor(db.query(
-                DbContract.Currencies.TABLE_NAME,
-                null,
-                String.format("%s = ?", DbContract.Currencies.CRYPTO),
-                new String[]{fiat ? "0" : "1"},
-                null,
-                null,
-                BaseColumns._ID + " asc"
-        ));
     }
 
     public static List<Currency> findByPlace(Place place) {
@@ -153,7 +117,6 @@ public class Currency extends AbstractEntity implements Serializable {
         values.put(DbContract.Currencies.NAME, getName());
         values.put(DbContract.Currencies.CODE, getCode());
         values.put(DbContract.Currencies.CRYPTO, isCrypto());
-        values.put(DbContract.Currencies.SHOW_ON_MAP, isShowOnMap());
 
         return values;
     }
@@ -167,7 +130,6 @@ public class Currency extends AbstractEntity implements Serializable {
             currency.setName(cursor.getString(cursor.getColumnIndex(DbContract.Currencies.NAME)));
             currency.setCode(cursor.getString(cursor.getColumnIndex(DbContract.Currencies.CODE)));
             currency.setCrypto(cursor.getInt(cursor.getColumnIndex(DbContract.Currencies.CRYPTO)) == 1);
-            currency.setShowOnMap(cursor.getInt(cursor.getColumnIndex(DbContract.Currencies.SHOW_ON_MAP)) == 1);
             currency.setUpdatedAt(new Date(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._UPDATED_AT))));
             currencies.add(currency);
         }

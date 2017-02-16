@@ -1,6 +1,6 @@
-package com.bubelov.coins.service.rates.provider;
+package com.bubelov.coins.api.rates.provider;
 
-import com.bubelov.coins.api.external.WinkDexApi;
+import com.bubelov.coins.api.rates.BitstampApi;
 import com.bubelov.coins.model.ExchangeRate;
 import com.bubelov.coins.util.ExchangeRatesFactory;
 
@@ -11,18 +11,18 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Author: Igor Bubelov
- * Date: 10/4/15 7:00 PM
+ * Date: 10/4/15 6:35 PM
  */
 
-public class WinkdexExchangeRatesProvider extends JsonApiRatesProvider {
-    private WinkDexApi api;
+public class BitstampExchangeRatesProvider extends JsonApiRatesProvider {
+    private BitstampApi api;
 
-    public WinkdexExchangeRatesProvider() {
+    public BitstampExchangeRatesProvider() {
         api = new Retrofit.Builder()
-                .baseUrl("https://winkdex.com/api/v0/")
+                .baseUrl("https://www.bitstamp.net/api/")
                 .addConverterFactory(GsonConverterFactory.create(getGsonForApis()))
                 .build()
-                .create(WinkDexApi.class);
+                .create(BitstampApi.class);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class WinkdexExchangeRatesProvider extends JsonApiRatesProvider {
             return ExchangeRatesFactory.newExchangeRate(
                     currency,
                     baseCurrency,
-                    (float) api.getPrice().execute().body().getPrice() / 100.0f
+                    api.getTicker().execute().body().getLast()
             );
         }
 

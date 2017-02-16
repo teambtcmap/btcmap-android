@@ -1,4 +1,4 @@
-package com.bubelov.coins.service.sync;
+package com.bubelov.coins.service;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;

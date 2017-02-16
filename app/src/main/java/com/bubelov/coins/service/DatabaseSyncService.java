@@ -1,5 +1,6 @@
-package com.bubelov.coins.service.sync;
+package com.bubelov.coins.service;
 
+import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +12,7 @@ import com.bubelov.coins.Constants;
 import com.bubelov.coins.EventBus;
 import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.PreferenceKeys;
+import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.event.DatabaseSyncFailedEvent;
@@ -18,7 +20,6 @@ import com.bubelov.coins.event.DatabaseSyncStartedEvent;
 import com.bubelov.coins.event.DatabaseSyncedEvent;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
-import com.bubelov.coins.service.CoinsIntentService;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
 import com.google.android.gms.gcm.Task;
@@ -36,7 +37,7 @@ import timber.log.Timber;
  * @author Igor Bubelov
  */
 
-public class DatabaseSyncService extends CoinsIntentService {
+public class DatabaseSyncService extends IntentService {
     private static final int MAX_PLACES_PER_REQUEST = 2500;
 
     public static void startIfNeverSynced(Context context) {
@@ -96,7 +97,8 @@ public class DatabaseSyncService extends CoinsIntentService {
 
         if (Currency.getCount() == 0) {
             Timber.d("Requesting currencies");
-            List<Currency> currencies = getApi().getCurrencies().execute().body();
+            CoinsApi api = Injector.INSTANCE.getAppComponent().provideApi();
+            List<Currency> currencies = api.getCurrencies().execute().body();
             Timber.d("%s currencies loaded. Time: %s", currencies.size(), System.currentTimeMillis() - time);
 
             Timber.d("Inserting currencies");
@@ -114,7 +116,8 @@ public class DatabaseSyncService extends CoinsIntentService {
 
         while (true) {
             Date lastUpdate = getLatestPlaceUpdateDate(db);
-            List<Place> places = getApi().getPlaces(dateFormat.format(lastUpdate), MAX_PLACES_PER_REQUEST).execute().body();
+            CoinsApi api = Injector.INSTANCE.getAppComponent().provideApi();
+            List<Place> places = api.getPlaces(dateFormat.format(lastUpdate), MAX_PLACES_PER_REQUEST).execute().body();
 
             for (Place place : places) {
                 if (!initialSync && notificationManager.shouldNotifyUser(place)) {

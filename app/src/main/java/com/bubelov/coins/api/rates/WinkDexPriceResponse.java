@@ -1,4 +1,4 @@
-package com.bubelov.coins.api.external;
+package com.bubelov.coins.api.rates;
 
 /**
  * Author: Igor Bubelov

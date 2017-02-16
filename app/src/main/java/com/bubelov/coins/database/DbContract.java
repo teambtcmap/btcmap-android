@@ -26,7 +26,6 @@ public interface DbContract {
         String NAME = "name";
         String CODE = "code";
         String CRYPTO = "crypto";
-        String SHOW_ON_MAP = "show_on_map";
     }
 
     interface CurrenciesPlaces extends BaseColumns {
@@ -34,13 +33,5 @@ public interface DbContract {
 
         String CURRENCY_ID = "currency_id";
         String PLACE_ID = "place_id";
-    }
-
-    interface ExchangeRates extends BaseColumns {
-        String TABLE_NAME = "exchange_rates";
-
-        String CURRENCY = "currency";
-        String BASE_CURRENCY = "base_currency";
-        String VALUE = "value";
     }
 }

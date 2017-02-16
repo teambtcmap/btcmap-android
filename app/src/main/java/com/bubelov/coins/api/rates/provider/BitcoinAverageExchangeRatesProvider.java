@@ -1,6 +1,6 @@
-package com.bubelov.coins.service.rates.provider;
+package com.bubelov.coins.api.rates.provider;
 
-import com.bubelov.coins.api.external.BitcoinAverageApi;
+import com.bubelov.coins.api.rates.BitcoinAverageApi;
 import com.bubelov.coins.model.ExchangeRate;
 import com.bubelov.coins.util.ExchangeRatesFactory;
 

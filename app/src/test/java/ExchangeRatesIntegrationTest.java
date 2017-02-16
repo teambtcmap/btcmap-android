@@ -1,6 +1,6 @@
 import com.bubelov.coins.model.ExchangeRate;
-import com.bubelov.coins.service.rates.provider.ExchangeRatesProviderFactory;
-import com.bubelov.coins.service.rates.provider.ExchangeRatesProviderType;
+import com.bubelov.coins.api.rates.provider.ExchangeRatesProviderFactory;
+import com.bubelov.coins.api.rates.provider.ExchangeRatesProviderType;
 
 import org.junit.Assert;
 import org.junit.Test;
