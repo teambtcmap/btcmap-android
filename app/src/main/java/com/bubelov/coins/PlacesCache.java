@@ -87,7 +87,7 @@ public class PlacesCache {
         protected List<Place> doInBackground(Void... params) {
             Timber.d("Querying data from DB");
             long time = System.currentTimeMillis();
-            Cursor cursor = db.get().rawQuery("select distinct p._id, p.latitude, p.longitude, p.amenity from places as p join currencies_places as cp on p._id = cp.place_id join currencies c on c._id = cp.currency_id where p.visible = 1 and c.show_on_map = 1", null);
+            Cursor cursor = db.get().rawQuery("select distinct p._id, p.latitude, p.longitude, p.amenity from places as p join currencies_places as cp on p._id = cp.place_id join currencies c on c._id = cp.currency_id where p.visible = 1", null);
             Timber.d("Query time: %s", System.currentTimeMillis() - time);
 
             List<Place> newestData = new ArrayList<>(10000);
