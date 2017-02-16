@@ -4,7 +4,7 @@ import android.app.Application;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.service.sync.DatabaseSyncService;
+import com.bubelov.coins.service.DatabaseSyncService;
 import com.crashlytics.android.Crashlytics;
 
 import io.fabric.sdk.android.Fabric;

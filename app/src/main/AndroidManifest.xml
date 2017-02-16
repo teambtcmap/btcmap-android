@@ -55,12 +55,10 @@
 
         <activity android:name=".ui.activity.ExchangeRatesActivity" />
 
-        <service android:name=".service.sync.DatabaseSyncService" />
-
-        <service android:name=".service.rates.ExchangeRatesService" />
+        <service android:name=".service.DatabaseSyncService" />
 
         <service
-            android:name=".service.sync.DatabaseGcmSyncService"
+            android:name=".service.DatabaseGcmSyncService"
             android:exported="true"
             android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
             <intent-filter>

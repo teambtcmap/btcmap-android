@@ -1,4 +1,4 @@
-package com.bubelov.coins.service.sync;
+package com.bubelov.coins.service;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;

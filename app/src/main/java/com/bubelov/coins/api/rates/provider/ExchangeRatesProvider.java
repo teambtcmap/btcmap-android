@@ -1,4 +1,4 @@
-package com.bubelov.coins.service.rates.provider;
+package com.bubelov.coins.api.rates.provider;
 
 import com.bubelov.coins.model.ExchangeRate;
 
