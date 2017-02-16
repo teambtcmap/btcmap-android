@@ -17,7 +17,7 @@ create table currencies (
     _id integer primary key,
     name text,
     code text,
-    crypto boolean not null,
+    crypto boolean not null
 );
 
 create table currencies_places (

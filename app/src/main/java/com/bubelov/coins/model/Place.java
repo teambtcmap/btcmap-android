@@ -45,6 +45,8 @@ public class Place extends AbstractEntity implements ClusterItem {
 
     private transient LatLng position;
 
+    protected Date updatedAt;
+
     public static long getCount() {
         SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
         return DatabaseUtils.queryNumEntries(db, DbContract.Places.TABLE_NAME);
@@ -150,6 +152,14 @@ public class Place extends AbstractEntity implements ClusterItem {
 
     public void setCurrencies(Collection<Currency> currencies) {
         this.currencies = currencies;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     // Database stuff
