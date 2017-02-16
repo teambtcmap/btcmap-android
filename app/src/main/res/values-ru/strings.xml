@@ -88,5 +88,6 @@
     <string name="sign_in_with_email">Sign in with email</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="sign_out">Sign Out</string>
+    <string name="exchange_rates">Exchange Rates</string>
 
 </resources>

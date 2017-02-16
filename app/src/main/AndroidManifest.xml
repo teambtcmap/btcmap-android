@@ -55,6 +55,8 @@
 
         <activity android:name=".ui.activity.PickLocationActivity" />
 
+        <activity android:name=".ui.activity.ExchangeRatesActivity" />
+
         <service android:name=".service.sync.DatabaseSyncService" />
 
         <service android:name=".service.rates.ExchangeRatesService" />

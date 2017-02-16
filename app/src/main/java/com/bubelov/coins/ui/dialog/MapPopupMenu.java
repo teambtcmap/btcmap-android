@@ -62,6 +62,12 @@ public class MapPopupMenu extends PopupWindow {
         dismiss();
     }
 
+    @OnClick(R.id.exchange_rates)
+    public void onExchangeRatesClick() {
+        listener.onExchangeRatesClick();
+        dismiss();
+    }
+
     @OnClick(R.id.sign_in)
     public void onSignInClick() {
         listener.onSignInClick();
@@ -76,6 +82,8 @@ public class MapPopupMenu extends PopupWindow {
 
     public interface Listener {
         void onSettingsClick();
+
+        void onExchangeRatesClick();
 
         void onSignInClick();
 
