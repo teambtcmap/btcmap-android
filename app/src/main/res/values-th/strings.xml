@@ -38,7 +38,7 @@
     <string name="pizza">พิซซ่า</string>
     <string name="taxi">แท็กซี่</string>
 
-    <string name="menu_item_settings">ตั้งค่า</string>
+    <string name="settings">ตั้งค่า</string>
 
     <string name="name_unknown">Unknown</string>
 
@@ -87,5 +87,6 @@
     <string name="failed_to_sign_in">Failed to sign in</string>
     <string name="sign_in_with_email">Sign in with email</string>
     <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_out">Sign Out</string>
 
 </resources>

@@ -44,7 +44,7 @@
     <string name="pizza">Pizza</string>
     <string name="taxi">Taxi</string>
 
-    <string name="menu_item_settings">Settings</string>
+    <string name="settings">Settings</string>
 
     <string name="name_unknown">Unknown</string>
 
@@ -95,7 +95,8 @@
 
     <string name="cant_connect_to_google_services">Can\'t connect to Google services</string>
 
-    <string name="sign_in">Sign in</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_out">Sign Out</string>
     <string name="authorization_hint">Authorized users can add new places and suggest edits</string>
     <string name="failed_to_sign_in">Failed to sign in</string>
     <string name="sign_in_with_google">Sign in with Google</string>
