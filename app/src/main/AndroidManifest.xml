@@ -45,8 +45,6 @@
 
         <activity android:name=".ui.activity.NotificationAreaActivity" />
 
-        <activity android:name=".ui.activity.CurrenciesActivity" />
-
         <activity android:name=".ui.activity.SignInActivity" />
 
         <activity
