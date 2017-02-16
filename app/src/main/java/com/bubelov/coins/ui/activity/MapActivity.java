@@ -13,6 +13,7 @@ import android.support.annotation.StringRes;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -289,6 +290,12 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     @Override
     public void onSettingsClick() {
         SettingsActivity.start(this);
+    }
+
+    @Override
+    public void onExchangeRatesClick() {
+        Intent intent = new Intent(this, ExchangeRatesActivity.class);
+        startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
     }
 
     @Override
