@@ -2,13 +2,14 @@ package com.bubelov.coins.ui.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.model.ExchangeRate;
+import com.bubelov.coins.api.rates.provider.CryptoExchange;
 import com.bubelov.coins.ui.adapter.ExchangeRatesAdapter;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class ExchangeRatesActivity extends AbstractActivity {
 
     ExchangeRatesAdapter ratesAdapter;
 
-    List<ExchangeRate> ratesList = new ArrayList<>();
+    List<Pair<CryptoExchange, Double>> ratesList = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

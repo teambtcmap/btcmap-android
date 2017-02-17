@@ -1,45 +1,46 @@
-import com.bubelov.coins.model.ExchangeRate;
-import com.bubelov.coins.api.rates.provider.ExchangeRatesProviderFactory;
-import com.bubelov.coins.api.rates.provider.ExchangeRatesProviderType;
+import com.bubelov.coins.api.rates.provider.BitcoinAverage;
+import com.bubelov.coins.api.rates.provider.Bitstamp;
+import com.bubelov.coins.api.rates.provider.Coinbase;
+import com.bubelov.coins.api.rates.provider.CryptoExchange;
+import com.bubelov.coins.api.rates.provider.Winkdex;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Author: Igor Bubelov
- * Date: 10/9/15 11:52 AM
+ * @author Igor Bubelov
  */
 
 public class ExchangeRatesIntegrationTest {
     @Test
     public void testBitstamp() {
-        testProvider(ExchangeRatesProviderType.BITSTAMP);
+        testExchange(new Bitstamp());
     }
 
     @Test
     public void testCoinbase() {
-        testProvider(ExchangeRatesProviderType.COINBASE);
+        testExchange(new Coinbase());
     }
 
     @Test
     public void testBitcoinAverage() {
-        testProvider(ExchangeRatesProviderType.BITCOIN_AVERAGE);
+        testExchange(new BitcoinAverage());
     }
 
     @Test
     public void testWinkdex() {
-        testProvider(ExchangeRatesProviderType.WINKDEX);
+        testExchange(new Winkdex());
     }
 
-    private void testProvider(ExchangeRatesProviderType providerType) {
-        ExchangeRate exchangeRate = null;
+    private void testExchange(CryptoExchange exchange) {
+        double currentRate = 0;
 
         try {
-            exchangeRate = ExchangeRatesProviderFactory.newProvider(providerType).getExchangeRate("BTC", "USD");
+            currentRate = exchange.getCurrentRate();
         } catch (Exception ignored) {
             // Nothing to do here
         }
 
-        Assert.assertTrue(exchangeRate != null && exchangeRate.getValue() > 0);
+        Assert.assertTrue(currentRate > 0);
     }
 }
