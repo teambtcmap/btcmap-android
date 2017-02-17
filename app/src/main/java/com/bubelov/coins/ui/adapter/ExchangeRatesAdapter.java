@@ -1,19 +1,14 @@
 package com.bubelov.coins.ui.adapter;
 
+import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
-import android.widget.Switch;
-import android.widget.TextView;
 
-import com.bubelov.coins.R;
-import com.bubelov.coins.model.Currency;
-import com.bubelov.coins.model.ExchangeRate;
+import com.bubelov.coins.api.rates.provider.CryptoExchange;
 
 import java.util.List;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -21,9 +16,9 @@ import butterknife.ButterKnife;
  */
 
 public class ExchangeRatesAdapter extends RecyclerView.Adapter<ExchangeRatesAdapter.ExchangeRateViewHolder> {
-    private List<ExchangeRate> items;
+    private List<Pair<CryptoExchange, Double>> items;
 
-    public ExchangeRatesAdapter(List<ExchangeRate> items) {
+    public ExchangeRatesAdapter(List<Pair<CryptoExchange, Double>> items) {
         this.items = items;
     }
 
