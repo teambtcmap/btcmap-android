@@ -28,12 +28,8 @@
     <string name="restaurants">Рестораны</string>
     <string name="bars">Бары</string>
     <string name="hotels">Отели</string>
-    <string name="car_washes">Автомойки</string>
     <string name="gas_stations">Авозаправки</string>
     <string name="hospitals">Госпитали</string>
-    <string name="laundry">Прачечные</string>
-    <string name="movies">Кино</string>
-    <string name="parking">Парковки</string>
     <string name="pharmacies">Аптеки</string>
     <string name="pizza">Пиццерии</string>
     <string name="taxi">Такси</string>
@@ -89,5 +85,6 @@
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="sign_out">Sign Out</string>
     <string name="exchange_rates">Exchange Rates</string>
+    <string name="fast_food">Fast food</string>
 
 </resources>
