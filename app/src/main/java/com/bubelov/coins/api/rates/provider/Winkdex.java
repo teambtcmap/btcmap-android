@@ -18,7 +18,7 @@ public class Winkdex implements CryptoExchange {
     public Winkdex() {
         api = new Retrofit.Builder()
                 .baseUrl("https://winkdex.com/api/v0/")
-                .addConverterFactory(GsonConverterFactory.create(Injector.INSTANCE.getAppComponent().provideGson()))
+                .addConverterFactory(GsonConverterFactory.create(Injector.INSTANCE.getGeneralComponent().provideGson()))
                 .build()
                 .create(WinkDexApi.class);
     }

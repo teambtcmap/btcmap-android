@@ -128,7 +128,7 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
-            CoinsApi api = Injector.INSTANCE.getAppComponent().provideApi();
+            CoinsApi api = Injector.INSTANCE.getAndroidComponent().provideApi();
 
             api.authWithGoogle(account.getIdToken()).enqueue(new Callback<SessionResponse>() {
                 @Override
@@ -142,7 +142,7 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
                             }
                         });
                     } else {
-                        SessionResponse body = Injector.INSTANCE.getAppComponent().provideGson().fromJson(response.errorBody().charStream(), SessionResponse.class);
+                        SessionResponse body = Injector.INSTANCE.getGeneralComponent().provideGson().fromJson(response.errorBody().charStream(), SessionResponse.class);
 
                         StringBuilder errorMessageBuilder = new StringBuilder();
 

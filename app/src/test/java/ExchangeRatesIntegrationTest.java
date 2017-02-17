@@ -3,8 +3,10 @@ import com.bubelov.coins.api.rates.provider.Bitstamp;
 import com.bubelov.coins.api.rates.provider.Coinbase;
 import com.bubelov.coins.api.rates.provider.CryptoExchange;
 import com.bubelov.coins.api.rates.provider.Winkdex;
+import com.bubelov.coins.dagger.Injector;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -12,6 +14,11 @@ import org.junit.Test;
  */
 
 public class ExchangeRatesIntegrationTest {
+    @Before
+    public void initDagger() {
+        Injector.INSTANCE.initGeneralComponent();
+    }
+
     @Test
     public void testBitstamp() {
         testExchange(new Bitstamp());
@@ -37,8 +44,8 @@ public class ExchangeRatesIntegrationTest {
 
         try {
             currentRate = exchange.getCurrentRate();
-        } catch (Exception ignored) {
-            // Nothing to do here
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         Assert.assertTrue(currentRate > 0);

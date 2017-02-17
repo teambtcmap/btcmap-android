@@ -25,7 +25,8 @@ public class App extends Application {
             Timber.plant(new Timber.DebugTree());
         }
 
-        Injector.INSTANCE.initAppComponent(this);
+        Injector.INSTANCE.initGeneralComponent();
+        Injector.INSTANCE.initAndroidComponent(this);
 
         DatabaseSyncService.startIfNeverSynced(this);
     }

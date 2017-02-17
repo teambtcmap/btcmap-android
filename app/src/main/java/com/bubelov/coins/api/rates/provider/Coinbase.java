@@ -17,14 +17,14 @@ public class Coinbase implements CryptoExchange {
 
     public Coinbase() {
         api = new Retrofit.Builder()
-                .baseUrl("https://api.exchange.coinbase.com/")
-                .addConverterFactory(GsonConverterFactory.create(Injector.INSTANCE.getAppComponent().provideGson()))
+                .baseUrl("https://api.coinbase.com/v2/")
+                .addConverterFactory(GsonConverterFactory.create(Injector.INSTANCE.getGeneralComponent().provideGson()))
                 .build()
                 .create(CoinbaseApi.class);
     }
 
     @Override
     public double getCurrentRate() throws IOException {
-        return api.getTicker().execute().body().getPrice();
+        return api.getExchangeRates().execute().body().data.rates.get("USD");
     }
 }

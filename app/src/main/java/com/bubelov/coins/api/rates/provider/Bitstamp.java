@@ -18,7 +18,7 @@ public class Bitstamp implements CryptoExchange {
     public Bitstamp() {
         api = new Retrofit.Builder()
                 .baseUrl("https://www.bitstamp.net/api/")
-                .addConverterFactory(GsonConverterFactory.create(Injector.INSTANCE.getAppComponent().provideGson()))
+                .addConverterFactory(GsonConverterFactory.create(Injector.INSTANCE.getGeneralComponent().provideGson()))
                 .build()
                 .create(BitstampApi.class);
     }

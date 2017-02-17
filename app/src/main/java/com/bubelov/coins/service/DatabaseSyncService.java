@@ -74,7 +74,7 @@ public class DatabaseSyncService extends IntentService {
             sync();
             Timber.d("Sync time: %s", System.currentTimeMillis() - time);
 
-            PlacesCache cache = Injector.INSTANCE.getAppComponent().getPlacesCache();
+            PlacesCache cache = Injector.INSTANCE.getAndroidComponent().getPlacesCache();
             cache.invalidate();
 
             EventBus.getInstance().post(new DatabaseSyncedEvent());
@@ -97,7 +97,7 @@ public class DatabaseSyncService extends IntentService {
 
         if (Currency.getCount() == 0) {
             Timber.d("Requesting currencies");
-            CoinsApi api = Injector.INSTANCE.getAppComponent().provideApi();
+            CoinsApi api = Injector.INSTANCE.getAndroidComponent().provideApi();
             List<Currency> currencies = api.getCurrencies().execute().body();
             Timber.d("%s currencies loaded. Time: %s", currencies.size(), System.currentTimeMillis() - time);
 
@@ -107,7 +107,7 @@ public class DatabaseSyncService extends IntentService {
             Timber.d("Inserted. Time: %s", System.currentTimeMillis() - time);
         }
 
-        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
         UserNotificationController notificationManager = new UserNotificationController(getApplicationContext());
         boolean initialSync = Place.getCount() == 0;
 
@@ -116,7 +116,7 @@ public class DatabaseSyncService extends IntentService {
 
         while (true) {
             Date lastUpdate = getLatestPlaceUpdateDate(db);
-            CoinsApi api = Injector.INSTANCE.getAppComponent().provideApi();
+            CoinsApi api = Injector.INSTANCE.getAndroidComponent().provideApi();
             List<Place> places = api.getPlaces(dateFormat.format(lastUpdate), MAX_PLACES_PER_REQUEST).execute().body();
 
             for (Place place : places) {

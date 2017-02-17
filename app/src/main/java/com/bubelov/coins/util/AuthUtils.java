@@ -27,7 +27,7 @@ public class AuthUtils {
     }
 
     private static SharedPreferences getPreferences() {
-        Context context = Injector.INSTANCE.getAppComponent().getContext();
+        Context context = Injector.INSTANCE.getAndroidComponent().getContext();
         return PreferenceManager.getDefaultSharedPreferences(context);
     }
 }

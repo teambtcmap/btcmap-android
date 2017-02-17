@@ -31,7 +31,6 @@ import com.bubelov.coins.ui.adapter.PlacesSearchResultsAdapter;
 import com.bubelov.coins.util.DistanceComparator;
 import com.bubelov.coins.util.DistanceUnits;
 import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.ContentViewEvent;
 import com.crashlytics.android.answers.SearchEvent;
 
 import java.util.ArrayList;
@@ -101,7 +100,7 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
         String query = args == null ? "" : args.getString(QUERY_KEY);
 
         return new LocalCursorLoader(this,
-                Injector.INSTANCE.getAppComponent().database(),
+                Injector.INSTANCE.getAndroidComponent().database(),
                 DbContract.Places.TABLE_NAME,
                 null,
                 null,

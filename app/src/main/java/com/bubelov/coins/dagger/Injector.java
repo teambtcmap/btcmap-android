@@ -3,20 +3,29 @@ package com.bubelov.coins.dagger;
 import com.bubelov.coins.App;
 
 /**
- * Author: Igor Bubelov
- * Date: 26/03/16 17:59
+ * @author Igor Bubelov
  */
 
 public enum Injector {
     INSTANCE;
 
-    AppComponent appComponent;
+    GeneralComponent generalComponent;
 
-    public void initAppComponent(App app) {
-        appComponent = DaggerAppComponent.builder().appContextModule(new AppContextModule(app)).build();
+    AndroidComponent androidComponent;
+
+    public void initGeneralComponent() {
+        generalComponent = DaggerGeneralComponent.builder().build();
     }
 
-    public AppComponent getAppComponent() {
-        return appComponent;
+    public void initAndroidComponent(App app) {
+        androidComponent = DaggerAndroidComponent.builder().appContextModule(new AppContextModule(app)).build();
+    }
+
+    public GeneralComponent getGeneralComponent() {
+        return generalComponent;
+    }
+
+    public AndroidComponent getAndroidComponent() {
+        return androidComponent;
     }
 }

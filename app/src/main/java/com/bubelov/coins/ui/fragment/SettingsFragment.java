@@ -35,7 +35,7 @@ public class SettingsFragment extends PreferenceFragment {
         }
 
         if (preference.getKey().equals("pref_test_notification")) {
-            SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+            SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
 
             Cursor cursor = db.rawQuery("select count(_id) from " + DbContract.Places.TABLE_NAME, null);
 
@@ -68,7 +68,7 @@ public class SettingsFragment extends PreferenceFragment {
         }
 
         if (preference.getKey().equals("pref_remove_last_place")) {
-            SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+            SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
 
             Cursor cursor = db.query(DbContract.Places.TABLE_NAME, new String[]{DbContract.Places._ID}, null, null, null, null, DbContract.Places._UPDATED_AT + " DESC", "1");
 
