@@ -30,19 +30,17 @@
 
     <string name="all_places">All places</string>
     <string name="atms">ATMs</string>
-    <string name="cafes">Cafes</string>
     <string name="restaurants">Restaurants</string>
+    <string name="cafes">Cafes</string>
     <string name="bars">Bars</string>
     <string name="hotels">Hotels</string>
-    <string name="car_washes">Car washes</string>
-    <string name="gas_stations">Gas stations</string>
-    <string name="hospitals">Hospitals</string>
-    <string name="laundry">Laundry</string>
-    <string name="movies">Movies</string>
-    <string name="parking">Parking</string>
-    <string name="pharmacies">Pharmacies</string>
     <string name="pizza">Pizza</string>
+    <string name="fast_food">Fast food</string>
+    <string name="hospitals">Hospitals</string>
+    <string name="pharmacies">Pharmacies</string>
     <string name="taxi">Taxi</string>
+    <string name="gas_stations">Gas stations</string>
+
 
     <string name="settings">Settings</string>
 

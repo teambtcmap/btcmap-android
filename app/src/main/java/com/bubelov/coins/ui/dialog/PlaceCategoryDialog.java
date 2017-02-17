@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -31,7 +31,7 @@ public class PlaceCategoryDialog extends DialogFragment implements PlaceCategori
         ViewGroup content = (ViewGroup) LayoutInflater.from(getActivity()).inflate(R.layout.dialog_place_category, null);
 
         RecyclerView categoriesView = ButterKnife.findById(content, R.id.categories);
-        categoriesView.setLayoutManager(new LinearLayoutManager(getContext()));
+        categoriesView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         PlaceCategoriesAdapter adapter = new PlaceCategoriesAdapter();
         adapter.setListener(this);
         categoriesView.setAdapter(adapter);

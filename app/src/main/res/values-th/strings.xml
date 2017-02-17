@@ -28,12 +28,8 @@
     <string name="restaurants">ร้านอาหาร</string>
     <string name="bars">บาร์</string>
     <string name="hotels">โรงแรม</string>
-    <string name="car_washes">ร้านล้างรถ</string>
     <string name="gas_stations">ปั๊มน้ำมัน</string>
     <string name="hospitals">โรงพยาบาล</string>
-    <string name="laundry">ซักผ้า</string>
-    <string name="movies">โรงหนัง</string>
-    <string name="parking">ที่จอดรถ</string>
     <string name="pharmacies">ร้านขายยา</string>
     <string name="pizza">พิซซ่า</string>
     <string name="taxi">แท็กซี่</string>
@@ -89,5 +85,6 @@
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="sign_out">Sign Out</string>
     <string name="exchange_rates">Exchange Rates</string>
+    <string name="fast_food">Fast food</string>
 
 </resources>
