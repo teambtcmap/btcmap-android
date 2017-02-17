@@ -173,6 +173,8 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
 
+        map.getUiSettings().setAllGesturesEnabled(false);
+
         if (place != null) {
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getPosition(), DEFAULT_ZOOM));
         }
