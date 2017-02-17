@@ -27,7 +27,7 @@ public class PlaceCategoriesAdapter extends RecyclerView.Adapter<PlaceCategories
     }
 
     @Override
-    public void onBindViewHolder(PlaceCategoryViewHolder holder, final int position) {
+    public void onBindViewHolder(final PlaceCategoryViewHolder holder, int position) {
         if (position == 0) {
             holder.icon.setImageResource(R.drawable.ic_all_24dp);
             holder.name.setText(R.string.all_places);
@@ -41,6 +41,7 @@ public class PlaceCategoriesAdapter extends RecyclerView.Adapter<PlaceCategories
             @Override
             public void onClick(View view) {
                 if (listener != null) {
+                    int position = holder.getAdapterPosition();
                     listener.onPlaceCategorySelected(position == 0 ? null : PlaceCategory.values()[position - 1]);
                 }
             }
