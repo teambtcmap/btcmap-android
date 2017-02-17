@@ -48,7 +48,7 @@ public class Place extends AbstractEntity implements ClusterItem {
     protected Date updatedAt;
 
     public static long getCount() {
-        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
         return DatabaseUtils.queryNumEntries(db, DbContract.Places.TABLE_NAME);
     }
 
@@ -165,7 +165,7 @@ public class Place extends AbstractEntity implements ClusterItem {
     // Database stuff
 
     public static Place find(long id) {
-        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
         Cursor cursor = db.query(DbContract.Places.TABLE_NAME, null, "_id = ?", new String[]{String.valueOf(id)}, null, null, null);
 
         try {
@@ -193,7 +193,7 @@ public class Place extends AbstractEntity implements ClusterItem {
     }
 
     public static void insert(List<Place> places) {
-        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
         db.beginTransaction();
 
         try {
@@ -208,7 +208,7 @@ public class Place extends AbstractEntity implements ClusterItem {
     }
 
     private static void insertPlaces(List<Place> places) {
-        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
 
         String insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 DbContract.Places.TABLE_NAME,
@@ -245,7 +245,7 @@ public class Place extends AbstractEntity implements ClusterItem {
     }
 
     private static void insertCurrenciesPlaces(List<Place> places) {
-        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
         String insertQuery = String.format("insert or replace into %s (%s, %s) values (?, ?)", DbContract.CurrenciesPlaces.TABLE_NAME, DbContract.CurrenciesPlaces.CURRENCY_ID, DbContract.CurrenciesPlaces.PLACE_ID);
         SQLiteStatement insertStatement = db.compileStatement(insertQuery);
 

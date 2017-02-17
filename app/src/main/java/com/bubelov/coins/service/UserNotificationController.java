@@ -60,7 +60,7 @@ public class UserNotificationController {
             return false;
         }
 
-        SQLiteDatabase db = Injector.INSTANCE.getAppComponent().database();
+        SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
         return DatabaseUtils.queryNumEntries(db, DbContract.Places.TABLE_NAME, "_id = ?", new String[]{String.valueOf(place.getId())}) == 0;
     }
 

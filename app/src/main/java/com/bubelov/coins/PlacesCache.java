@@ -35,7 +35,7 @@ public class PlacesCache {
 
     public PlacesCache() {
         Timber.d("Creating...");
-        Injector.INSTANCE.getAppComponent().inject(this);
+        Injector.INSTANCE.getAndroidComponent().inject(this);
         initialize();
         Timber.d("Created");
     }
