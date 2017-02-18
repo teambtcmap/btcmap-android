@@ -24,7 +24,6 @@ import com.bubelov.coins.Constants;
 import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.event.DatabaseSyncedEvent;
 import com.bubelov.coins.model.PlaceCategory;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
@@ -52,7 +51,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
-import com.squareup.otto.Subscribe;
 
 import java.util.Collection;
 
@@ -64,7 +62,7 @@ import butterknife.OnClick;
  * @author Igor Bubelov
  */
 
-public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener, PlaceCategoriesAdapter.Listener, MapPopupMenu.Listener {
+public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener, PlaceCategoriesAdapter.Listener, MapPopupMenu.Listener, PlacesCache.PlacesCacheListener {
     private static final String PLACE_ID_EXTRA = "place_id";
     private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
     private static final String CLEAR_PLACE_NOTIFICATIONS_EXTRA = "clear_place_notifications";
@@ -244,6 +242,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         placesCache = Injector.INSTANCE.getAndroidComponent().getPlacesCache();
+        placesCache.getListeners().add(this);
 
         handleIntent(getIntent());
     }
@@ -306,6 +305,11 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     @Override
     public void onSignOutClick() {
         AuthUtils.setToken("");
+    }
+
+    @Override
+    public void onPlacesCacheInitialized() {
+        reloadPlaces();
     }
 
     private void handleIntent(final Intent intent) {
@@ -434,11 +438,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     REQUEST_ACCESS_LOCATION);
         }
-    }
-
-    @Subscribe
-    public void onDatabaseSynced(DatabaseSyncedEvent e) {
-        reloadPlaces();
     }
 
     @OnClick(R.id.categories_spinner)

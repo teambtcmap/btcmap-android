@@ -5,14 +5,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-import com.bubelov.coins.EventBus;
 import com.bubelov.coins.receiver.NetworkStateReceiver;
 import com.bubelov.coins.ui.dialog.ProgressDialog;
 import com.bubelov.coins.util.ThemeUtils;
 
 /**
- * Author: Igor Bubelov
- * Date: 26/04/15 10:15
+ * @author Igor Bubelov
  */
 
 public abstract class AbstractActivity extends AppCompatActivity implements NetworkStateReceiver.NetworkStateListener {
@@ -31,7 +29,6 @@ public abstract class AbstractActivity extends AppCompatActivity implements Netw
     @Override
     protected void onResume() {
         super.onResume();
-        EventBus.getInstance().register(this);
         registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
@@ -48,7 +45,6 @@ public abstract class AbstractActivity extends AppCompatActivity implements Netw
     @Override
     protected void onPause() {
         unregisterReceiver(networkStateReceiver);
-        EventBus.getInstance().unregister(this);
         super.onPause();
     }
 

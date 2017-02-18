@@ -32,12 +32,12 @@ import timber.log.Timber;
  * @author Igor Bubelov
  */
 
-public class UserNotificationController {
+public class NotificationsController {
     public static final String NEW_PLACE_NOTIFICATION_GROUP = "NEW_PLACE";
 
     private Context context;
 
-    public UserNotificationController(Context context) {
+    public NotificationsController(Context context) {
         this.context = context;
     }
 

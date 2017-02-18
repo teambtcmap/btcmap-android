@@ -12,7 +12,7 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.service.DatabaseSyncService;
-import com.bubelov.coins.service.UserNotificationController;
+import com.bubelov.coins.service.NotificationsController;
 import com.bubelov.coins.ui.activity.NotificationAreaActivity;
 
 import java.util.Random;
@@ -56,7 +56,7 @@ public class SettingsFragment extends PreferenceFragment {
                 if (cursor.moveToNext()) {
                     long id = cursor.getLong(cursor.getColumnIndex(DbContract.Places._ID));
                     String name = cursor.getString(cursor.getColumnIndex(DbContract.Places.NAME));
-                    new UserNotificationController(getActivity()).notifyUser(id, name);
+                    new NotificationsController(getActivity()).notifyUser(id, name);
                 }
 
                 cursor.close();
