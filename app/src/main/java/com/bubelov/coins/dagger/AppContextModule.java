@@ -2,8 +2,6 @@ package com.bubelov.coins.dagger;
 
 import android.content.Context;
 
-import com.bubelov.coins.App;
-
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -16,19 +14,15 @@ import dagger.Provides;
 
 @Module
 public class AppContextModule {
-    private App app;
+    private Context context;
 
-    public AppContextModule(App app) {
-        this.app = app;
+    public AppContextModule(Context context) {
+        this.context = context;
     }
 
-    @Provides @Singleton
-    App app() {
-        return app;
-    }
-
-    @Provides @Singleton
+    @Provides
+    @Singleton
     Context context() {
-        return app;
+        return context;
     }
 }

@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.api.CoinsApi;
+import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.util.MapMarkersCache;
 
 import javax.inject.Singleton;
@@ -16,9 +17,9 @@ import dagger.Component;
  */
 
 @Singleton
-@Component(modules = {AppContextModule.class, DatabaseModule.class, CacheModule.class, ApiModule.class, ConverterModule.class})
+@Component(modules = {AppContextModule.class, DatabaseModule.class, CacheModule.class, ApiModule.class, ConverterModule.class, NotificationsModule.class})
 public interface AndroidComponent {
-    Context getContext();
+    Context context();
 
     SQLiteDatabase database();
 
@@ -27,6 +28,10 @@ public interface AndroidComponent {
     MapMarkersCache getMarkersCache();
 
     CoinsApi provideApi();
+
+    DatabaseSync databaseSync();
+
+    void inject(DatabaseSync sync);
 
     void inject(PlacesCache cache);
 }
