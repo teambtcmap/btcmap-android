@@ -17,9 +17,6 @@
     <string name="notification_new_places_content_title">%1$s новых мест</string>
     <string name="notification_new_places_content_text">Нажмите чтобы посмотреть</string>
 
-    <string name="pref_exchange_rates_provider">Обменный курс</string>
-    <string name="pref_exchange_rates_provider_summary">Вы можете выбрать откуда приложение будет брать информацию об обменном курсе</string>
-
     <string name="pref_distance_units">Километры/мили</string>
 
     <string name="all_places">Все места</string>
