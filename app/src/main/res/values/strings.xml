@@ -21,9 +21,6 @@
     <string name="notification_new_places_content_title">%1$s new places</string>
     <string name="notification_new_places_content_text">Touch to see them</string>
 
-    <string name="pref_exchange_rates_provider">Exchange rates source</string>
-    <string name="pref_exchange_rates_provider_summary">Select source for obtaining exchange rates between Bitcoin and USD</string>
-
     <string name="pref_distance_units">Distance units</string>
 
     <string name="price_in_dollars" translatable="false">$%1$s</string>
