@@ -279,6 +279,15 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     @Override
+    public void onBackPressed() {
+        if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public void onPlaceCategorySelected(PlaceCategory category) {
         selectedCategory = category;
         @StringRes int textResId = category == null ? R.string.all_places : category.getPluralStringId();
