@@ -1,5 +1,7 @@
 package com.bubelov.coins.database;
 
+import android.provider.BaseColumns;
+
 /**
  * @author Igor Bubelov
  */
@@ -18,6 +20,8 @@ public interface DbContract {
         String OPENING_HOURS = "opening_hours";
         String ADDRESS = "address";
         String VISIBLE = "visible";
+
+        String _UPDATED_AT = "_updated_at";
     }
 
     interface Currencies extends BaseColumns {
