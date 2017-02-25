@@ -34,7 +34,7 @@ import com.bubelov.coins.ui.adapter.PlaceCategoriesAdapter;
 import com.bubelov.coins.ui.dialog.MapPopupMenu;
 import com.bubelov.coins.ui.dialog.PlaceCategoryDialog;
 import com.bubelov.coins.ui.widget.PlaceDetailsView;
-import com.bubelov.coins.util.AuthUtils;
+import com.bubelov.coins.util.AuthController;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
@@ -155,7 +155,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         placeDetails.setListener(new PlaceDetailsView.Listener() {
             @Override
             public void onEditPlaceClick(Place place) {
-                if (AuthUtils.isAuthorized()) {
+                if (new AuthController().isAuthorized()) {
                     EditPlaceActivity.startForResult(MapActivity.this, place.getId(), null, REQUEST_EDIT_PLACE);
                 } else {
                     SignInActivity.start(MapActivity.this);
@@ -253,7 +253,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         switch (id) {
             case R.id.action_add:
-                if (AuthUtils.isAuthorized()) {
+                if (new AuthController().isAuthorized()) {
                     EditPlaceActivity.startForResult(this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
                 } else {
                     SignInActivity.start(this);
@@ -313,7 +313,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     @Override
     public void onSignOutClick() {
-        AuthUtils.setToken("");
+        new AuthController().setUser(null);
+        new AuthController().setToken("");
     }
 
     @Override

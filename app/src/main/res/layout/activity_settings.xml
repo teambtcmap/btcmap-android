@@ -19,7 +19,7 @@
         style="@style/Toolbar"
         android:elevation="1dp"
         app:navigationIcon="@drawable/ic_close_24dp"
-        app:title="@string/sa_title"
+        app:title="@string/settings"
         tools:targetApi="lollipop" />
 
 </FrameLayout>

@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.service.DatabaseSync;
+import com.bubelov.coins.util.AuthController;
 import com.bubelov.coins.util.MapMarkersCache;
 
 import javax.inject.Singleton;
@@ -34,4 +35,6 @@ public interface AndroidComponent {
     void inject(DatabaseSync sync);
 
     void inject(PlacesCache cache);
+
+    void inject(AuthController authController);
 }

@@ -48,7 +48,7 @@
                 android:id="@+id/name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/text"
+                android:textColor="@color/text_primary"
                 android:textSize="16sp"
                 app:typeface="regular"
                 tools:text="Place Name" />
@@ -57,7 +57,7 @@
                 android:id="@+id/distance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/disabled_or_hint"
+                android:textColor="@color/text_secondary"
                 android:textSize="14sp"
                 app:typeface="regular"
                 tools:text="1.2 mi" />
@@ -67,5 +67,3 @@
     </LinearLayout>
 
 </FrameLayout>
-
-

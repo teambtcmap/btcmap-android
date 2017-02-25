@@ -67,10 +67,10 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
             float distanceInKilometers = DistanceUtils.getDistance(place.getPosition(), userLocation) / 1000.0f;
 
             if (distanceUnits.equals(DistanceUnits.KILOMETERS)) {
-                holder.distance.setText(context.getString(R.string.msa_distance_kilometers, distanceInKilometers));
+                holder.distance.setText(context.getString(R.string.n_kilometers, distanceInKilometers));
             } else {
                 float distanceInMiles = DistanceUtils.toMiles(distanceInKilometers);
-                holder.distance.setText(context.getString(R.string.msa_distance_miles, distanceInMiles));
+                holder.distance.setText(context.getString(R.string.n_miles, distanceInMiles));
             }
         }
 

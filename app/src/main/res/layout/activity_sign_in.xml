@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="@string/authorization_hint"
-                android:textColor="@color/text"
+                android:textColor="@color/text_primary"
                 android:textSize="18sp" />
 
             <com.bubelov.coins.ui.widget.TypefaceTextView

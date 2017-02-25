@@ -18,8 +18,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Author: Igor Bubelov
- * Date: 01/06/16 22:07
+ * @author Igor Bubelov
  */
 
 @Module
@@ -27,7 +26,7 @@ public class ApiModule {
     @Provides @Singleton
     CoinsApi provideApi(Gson gson, Context context) {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.NONE);
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)

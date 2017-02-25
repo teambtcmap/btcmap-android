@@ -6,8 +6,6 @@
 
     <string name="action_search">ค้นหา</string>
 
-    <string name="sa_title">ตั้งค่า</string>
-
     <string name="pref_area_of_interest">สถานที่</string>
     <string name="pref_area_of_interest_summary">เลือกสถานที่ที่คุณสนใจ</string>
 
@@ -32,40 +30,24 @@
     <string name="taxi">แท็กซี่</string>
 
     <string name="settings">ตั้งค่า</string>
-
     <string name="name_unknown">Unknown</string>
-
     <string name="not_provided">Not provided</string>
-
     <string name="share_place_message_title">Check it out!</string>
     <string name="share_place_message_text">This place accept cryptocurrency: %1$s</string>
-
     <string name="saa_distance">Distance:</string>
-
-    <string name="msa_search">ค้นหา</string>
-
-    <string name="msa_distance_kilometers">%1$.2f km</string>
-    <string name="msa_distance_miles">%1$.2f mi</string>
-
-    <string-array name="distance_units">
-        <item>Automatic</item>
-        <item>Kilometers</item>
-        <item>Miles</item>
-    </string-array>
-
+    <string name="search">ค้นหา</string>
+    <string name="n_kilometers">%1$.2f km</string>
+    <string name="n_miles">%1$.2f mi</string>
     <string name="description">Description:</string>
     <string name="opening_hours">Opening hours:</string>
     <string name="accepted_currencies">Accepted currencies:</string>
     <string name="notification_area_activity_title">Notification area</string>
-    <string name="currencies">Currencies</string>
     <string name="action_share">Share</string>
     <string name="phone">Phone:</string>
     <string name="website">Website:</string>
     <string name="action_send">Send</string>
     <string name="name">Name</string>
     <string name="suggest_an_edit">Suggest an edit</string>
-    <string name="could_not_send_suggestion">Could not send your edits. Pleas try again or contact developer.</string>
-    <string name="thanks_for_suggestion">Thank you for improving the data. Your changes will appear shortly.</string>
     <string name="place_is_closed">This place does not exist or closed or no longer accept crypto currency</string>
     <string name="action_add_place">Add place</string>
     <string name="change_location">Change location</string>
@@ -83,5 +65,16 @@
     <string name="sign_out">Sign Out</string>
     <string name="exchange_rates">Exchange Rates</string>
     <string name="fast_food">Fast food</string>
+    <string name="could_not_connect_to_server">Could not connect to server</string>
+    <string name="could_not_update_place">Couldn\'t update place</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="sign_up">Sign Up</string>
+
+    <string-array name="distance_units">
+        <item>Automatic</item>
+        <item>Kilometers</item>
+        <item>Miles</item>
+    </string-array>
 
 </resources>

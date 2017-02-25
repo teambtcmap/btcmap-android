@@ -23,7 +23,7 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.model.Place;
-import com.bubelov.coins.util.AuthUtils;
+import com.bubelov.coins.util.AuthController;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
@@ -195,7 +195,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
         }
 
         if ((place == null && name.length() > 0) || (place != null && !TextUtils.equals(name.getText(), place.getName()))) {
-            args.put("name", name.getText().toString());
+            args.put("firstName", name.getText().toString());
         }
 
         if (place == null || place.getLatitude() != pickedLocation.latitude) {
@@ -257,7 +257,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
             CoinsApi api = Injector.INSTANCE.getAndroidComponent().provideApi();
 
             try {
-                Response<Place> response = api.addPlace(AuthUtils.getToken(), requestArgs).execute();
+                Response<Place> response = api.addPlace(new AuthController().getToken(), requestArgs).execute();
 
                 if (response.isSuccessful()) {
                     Place place = response.body();
@@ -307,7 +307,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
             CoinsApi api = Injector.INSTANCE.getAndroidComponent().provideApi();
 
             try {
-                Response<Place> response = api.updatePlace(place.getId(), AuthUtils.getToken(), requestArgs).execute();
+                Response<Place> response = api.updatePlace(place.getId(), new AuthController().getToken(), requestArgs).execute();
 
                 if (response.isSuccessful()) {
                     Place place = response.body();
@@ -332,7 +332,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
                 setResult(RESULT_OK);
                 supportFinishAfterTransition();
             } else {
-                Toast.makeText(EditPlaceActivity.this, "Couldn't update place", Toast.LENGTH_LONG).show();
+                Toast.makeText(EditPlaceActivity.this, R.string.could_not_update_place, Toast.LENGTH_LONG).show();
             }
         }
     }

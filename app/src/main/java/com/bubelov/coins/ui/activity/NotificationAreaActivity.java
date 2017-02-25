@@ -77,6 +77,13 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
 
         radiusSeekBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.accent), PorterDuff.Mode.SRC_IN);
         radiusSeekBar.getThumb().setColorFilter(getResources().getColor(R.color.accent), PorterDuff.Mode.SRC_IN);
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                supportFinishAfterTransition();
+            }
+        });
     }
 
     @Override

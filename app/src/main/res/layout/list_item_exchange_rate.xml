@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
-            android:textColor="@color/text"
+            android:textColor="@color/text_primary"
             android:textSize="16sp"
             app:typeface="medium"
             tools:text="Name" />
@@ -61,7 +61,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:textColor="@color/text"
+                android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 app:typeface="medium"
                 tools:text="$1000" />
