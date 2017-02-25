@@ -47,9 +47,9 @@
 
         <activity android:name=".ui.activity.SignInActivity" />
 
-        <activity
-            android:name=".ui.activity.EditPlaceActivity"
-            android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".ui.activity.EmailSignInActivity" />
+
+        <activity android:name=".ui.activity.EditPlaceActivity" />
 
         <activity android:name=".ui.activity.PickLocationActivity" />
 

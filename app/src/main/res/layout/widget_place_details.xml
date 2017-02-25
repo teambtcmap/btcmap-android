@@ -71,7 +71,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/phone"
-                        android:textColor="@color/secondary_text_or_icons"
+                        android:textColor="@color/text_secondary"
                         android:textSize="18sp" />
 
                     <TextView
@@ -110,7 +110,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/website"
-                        android:textColor="@color/secondary_text_or_icons"
+                        android:textColor="@color/text_secondary"
                         android:textSize="18sp" />
 
                     <TextView
@@ -148,7 +148,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/description"
-                        android:textColor="@color/secondary_text_or_icons"
+                        android:textColor="@color/text_secondary"
                         android:textSize="18sp" />
 
                     <TextView
@@ -186,7 +186,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/opening_hours"
-                        android:textColor="@color/secondary_text_or_icons"
+                        android:textColor="@color/text_secondary"
                         android:textSize="18sp" />
 
                     <TextView
@@ -225,7 +225,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/accepted_currencies"
-                        android:textColor="@color/secondary_text_or_icons"
+                        android:textColor="@color/text_secondary"
                         android:textSize="18sp" />
 
                     <TextView

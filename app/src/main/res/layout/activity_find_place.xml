@@ -19,12 +19,12 @@
                 android:layout_height="match_parent"
                 android:layout_marginRight="56dp"
                 android:background="@android:color/transparent"
-                android:hint="@string/msa_search"
+                android:hint="@string/search"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
                 android:maxLines="1"
-                android:textColor="@color/text"
-                android:textColorHint="@color/secondary_text_or_icons" />
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary" />
 
             <ImageView
                 android:id="@+id/clear"
@@ -46,6 +46,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
-        android:background="@color/window_gray" />
+        android:background="@color/search_activity_background" />
 
 </merge>

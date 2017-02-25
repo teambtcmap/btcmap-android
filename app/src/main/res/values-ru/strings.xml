@@ -6,8 +6,6 @@
 
     <string name="action_search">Поиск</string>
 
-    <string name="sa_title">Настройки</string>
-
     <string name="pref_area_of_interest">Уведомления</string>
     <string name="pref_area_of_interest_summary">Выберете зону уведомлений</string>
 
@@ -32,40 +30,24 @@
     <string name="taxi">Такси</string>
 
     <string name="settings">Настройки</string>
-
     <string name="name_unknown">Без названия</string>
-
     <string name="not_provided">Информация отсутствует</string>
-
     <string name="share_place_message_title">Зацени!</string>
     <string name="share_place_message_text">Это место принимает криптовалюту: %1$s</string>
-
     <string name="saa_distance">Расстояние:</string>
-
-    <string name="msa_search">Поиск</string>
-
-    <string name="msa_distance_kilometers">%1$.2f км</string>
-    <string name="msa_distance_miles">%1$.2f мил.</string>
-
-    <string-array name="distance_units">
-        <item>Автоматически</item>
-        <item>Километры</item>
-        <item>Мили</item>
-    </string-array>
-
+    <string name="search">Поиск</string>
+    <string name="n_kilometers">%1$.2f км</string>
+    <string name="n_miles">%1$.2f мил.</string>
     <string name="description">Описание:</string>
     <string name="opening_hours">Время работы:</string>
     <string name="accepted_currencies">Принимаемые валюты:</string>
     <string name="notification_area_activity_title">Зона уведомлений</string>
-    <string name="currencies">Currencies</string>
     <string name="action_share">Share</string>
     <string name="phone">Телефон:</string>
     <string name="website">Вебсайт:</string>
     <string name="action_send">Отправить</string>
     <string name="name">Название</string>
     <string name="suggest_an_edit">Предложить правку</string>
-    <string name="could_not_send_suggestion">Could not send your edits. Pleas try again or contact developer.</string>
-    <string name="thanks_for_suggestion">Thank you for improving the data. Your changes will appear shortly.</string>
     <string name="place_is_closed">This place does not exist or closed or no longer accept crypto currency</string>
     <string name="action_add_place">Добавить точку</string>
     <string name="change_location">Change location</string>
@@ -83,5 +65,16 @@
     <string name="sign_out">Sign Out</string>
     <string name="exchange_rates">Exchange Rates</string>
     <string name="fast_food">Fast food</string>
+    <string name="could_not_connect_to_server">Could not connect to server</string>
+    <string name="could_not_update_place">Couldn\'t update place</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="sign_up">Sign Up</string>
+
+    <string-array name="distance_units">
+        <item>Автоматически</item>
+        <item>Километры</item>
+        <item>Мили</item>
+    </string-array>
 
 </resources>

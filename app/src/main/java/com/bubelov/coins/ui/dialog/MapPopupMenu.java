@@ -9,7 +9,7 @@ import android.view.WindowManager;
 import android.widget.PopupWindow;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.util.AuthUtils;
+import com.bubelov.coins.util.AuthController;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,7 +49,7 @@ public class MapPopupMenu extends PopupWindow {
 
         setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-        if (AuthUtils.isAuthorized()) {
+        if (new AuthController().isAuthorized()) {
             signIn.setVisibility(View.GONE);
         } else {
             signOut.setVisibility(View.GONE);

@@ -58,6 +58,9 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
 
     private static final int MIN_QUERY_LENGTH = 2;
 
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
     @BindView(R.id.query)
     EditText query;
 
@@ -92,7 +95,14 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
         resultsAdapter = new PlacesSearchResultsAdapter(this, userLocation, getDistanceUnits());
         resultsView.setAdapter(resultsAdapter);
 
-        DrawableCompat.setTint(clear.getDrawable().mutate(), getResources().getColor(R.color.secondary_text_or_icons));
+        DrawableCompat.setTint(clear.getDrawable().mutate(), getResources().getColor(R.color.icon));
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                supportFinishAfterTransition();
+            }
+        });
     }
 
     @Override

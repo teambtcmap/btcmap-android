@@ -15,8 +15,8 @@ import android.widget.Toast;
 import com.bubelov.coins.R;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.model.SessionResponse;
-import com.bubelov.coins.util.AuthUtils;
+import com.bubelov.coins.model.AuthResponse;
+import com.bubelov.coins.util.AuthController;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -125,28 +125,34 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
         startActivityForResult(signInIntent, REQUEST_GOOGLE_SIGN_IN);
     }
 
+    @OnClick(R.id.sign_in_with_email)
+    public void onEmailSignInClick() {
+        Intent intent = new Intent(this, EmailSignInActivity.class);
+        startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
+    }
+
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
             CoinsApi api = Injector.INSTANCE.getAndroidComponent().provideApi();
 
-            api.authWithGoogle(account.getIdToken()).enqueue(new Callback<SessionResponse>() {
+            api.authWithGoogle(account.getIdToken()).enqueue(new Callback<AuthResponse>() {
                 @Override
-                public void onResponse(Call<SessionResponse> call, final retrofit2.Response<SessionResponse> response) {
+                public void onResponse(Call<AuthResponse> call, final retrofit2.Response<AuthResponse> response) {
                     if (response.isSuccessful()) {
                         new Handler().post(new Runnable() {
                             @Override
                             public void run() {
-                                AuthUtils.setToken(response.body().token);
+                                new AuthController().setToken(response.body().getToken());
                                 supportFinishAfterTransition();
                             }
                         });
                     } else {
-                        SessionResponse body = Injector.INSTANCE.getGeneralComponent().provideGson().fromJson(response.errorBody().charStream(), SessionResponse.class);
+                        AuthResponse body = Injector.INSTANCE.getGeneralComponent().provideGson().fromJson(response.errorBody().charStream(), AuthResponse.class);
 
                         StringBuilder errorMessageBuilder = new StringBuilder();
 
-                        for (String error : body.errors) {
+                        for (String error : body.getErrors()) {
                             errorMessageBuilder.append(error).append("\n");
                             Crashlytics.log(error);
                         }
@@ -155,13 +161,11 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
                                 .setMessage(errorMessageBuilder.toString())
                                 .setPositiveButton(android.R.string.ok, null)
                                 .show();
-
-                        Crashlytics.logException(new Exception("Google sign in failed"));
                     }
                 }
 
                 @Override
-                public void onFailure(Call<SessionResponse> call, Throwable t) {
+                public void onFailure(Call<AuthResponse> call, Throwable t) {
                     Crashlytics.logException(t);
                     Toast.makeText(SignInActivity.this, R.string.failed_to_sign_in, Toast.LENGTH_SHORT).show();
                 }

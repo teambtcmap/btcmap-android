@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@color/primary_dark_semi_transparent"
+        android:background="@color/primary_dark"
         android:padding="16dp">
 
         <TextView
