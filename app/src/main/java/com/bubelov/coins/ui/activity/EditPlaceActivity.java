@@ -195,7 +195,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
         }
 
         if ((place == null && name.length() > 0) || (place != null && !TextUtils.equals(name.getText(), place.getName()))) {
-            args.put("firstName", name.getText().toString());
+            args.put("name", name.getText().toString());
         }
 
         if (place == null || place.getLatitude() != pickedLocation.latitude) {
@@ -220,6 +220,12 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
         if ((place == null && openingHours.length() > 0) || (place != null && !TextUtils.equals(openingHours.getText(), place.getOpeningHours()))) {
             args.put("opening_hours", openingHours.getText().toString());
+        }
+
+        if (closedSwitch.isChecked()) {
+            args.put("visible", false);
+        } else {
+            args.put("visible", true);
         }
 
         Map<String, Object> result = new HashMap<>();
@@ -293,12 +299,6 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
         @Override
         protected void onPreExecute() {
             requestArgs = getRequestArgs();
-
-            if (closedSwitch.isChecked()) {
-                requestArgs.clear();
-                requestArgs.put("visible", false);
-            }
-
             showProgress();
         }
 
