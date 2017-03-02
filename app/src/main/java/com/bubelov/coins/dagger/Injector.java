@@ -9,20 +9,20 @@ import com.bubelov.coins.App;
 public enum Injector {
     INSTANCE;
 
-    GeneralComponent generalComponent;
+    private CoreComponent coreComponent;
 
-    AndroidComponent androidComponent;
+    private AndroidComponent androidComponent;
 
     public void initGeneralComponent() {
-        generalComponent = DaggerGeneralComponent.builder().build();
+        coreComponent = DaggerCoreComponent.builder().build();
     }
 
     public void initAndroidComponent(App app) {
-        androidComponent = DaggerAndroidComponent.builder().appContextModule(new AppContextModule(app)).build();
+        androidComponent = DaggerAndroidComponent.builder().androidModule(new AndroidModule(app)).build();
     }
 
-    public GeneralComponent getGeneralComponent() {
-        return generalComponent;
+    public CoreComponent getCoreComponent() {
+        return coreComponent;
     }
 
     public AndroidComponent getAndroidComponent() {

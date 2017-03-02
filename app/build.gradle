@@ -36,6 +36,8 @@ android {
             minifyEnabled true
             useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v2/\""
         }
         release {
             minifyEnabled true
@@ -43,6 +45,8 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+
+            buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v2/\""
         }
     }
 

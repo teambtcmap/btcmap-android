@@ -18,17 +18,17 @@ import dagger.Component;
  */
 
 @Singleton
-@Component(modules = {AppContextModule.class, DatabaseModule.class, CacheModule.class, ApiModule.class, ConverterModule.class, NotificationsModule.class})
+@Component(modules = {CoreModule.class, AndroidModule.class})
 public interface AndroidComponent {
     Context context();
 
     SQLiteDatabase database();
 
-    PlacesCache getPlacesCache();
+    PlacesCache placesCache();
 
-    MapMarkersCache getMarkersCache();
+    MapMarkersCache markersCache();
 
-    CoinsApi provideApi();
+    CoinsApi api();
 
     DatabaseSync databaseSync();
 

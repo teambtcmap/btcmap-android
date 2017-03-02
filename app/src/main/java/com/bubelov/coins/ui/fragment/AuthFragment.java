@@ -35,7 +35,7 @@ public abstract class AuthFragment extends Fragment {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         } else {
-            Gson gson = Injector.INSTANCE.getGeneralComponent().provideGson();
+            Gson gson = Injector.INSTANCE.getCoreComponent().gson();
             List<String> errors = gson.fromJson(response.errorBody().charStream(), new TypeToken<List<String>>(){}.getType());
             Utils.showErrors(getContext(), errors);
         }
