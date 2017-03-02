@@ -28,12 +28,13 @@
                 android:layout_gravity="center_horizontal"
                 android:background="@drawable/search_row_icon_background" />
 
-            <View
+            <ImageView
                 android:id="@+id/icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="center"
-                tools:background="@drawable/ic_place_24dp" />
+                android:tint="@color/white"
+                tools:src="@drawable/ic_place_24dp" />
 
         </FrameLayout>
 

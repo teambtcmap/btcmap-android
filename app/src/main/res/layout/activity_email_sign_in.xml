@@ -12,7 +12,9 @@
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
-            style="@style/Toolbar.WithBackNavigation"
+            style="@style/Toolbar"
+            android:navigationIcon="?homeAsUpIndicator"
+            app:navigationIcon="?homeAsUpIndicator"
             app:title="@string/email" />
 
         <android.support.design.widget.TabLayout

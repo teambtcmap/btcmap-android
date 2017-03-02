@@ -28,12 +28,9 @@
         <item name="android:theme">@style/ToolbarTheme</item>
     </style>
 
-    <style name="Toolbar.WithBackNavigation">
-        <item name="navigationIcon">?attr/homeAsUpIndicator</item>
-    </style>
-
-    <style name="SearchToolbar" parent="Toolbar.WithBackNavigation">
+    <style name="Toolbar.Search">
         <item name="android:background">@color/white</item>
+        <item name="navigationIcon">?attr/homeAsUpIndicator</item>
         <item name="android:theme">@style/SearchToolbarTheme</item>
         <item name="android:elevation" tools:targetApi="lollipop">4dp</item>
     </style>

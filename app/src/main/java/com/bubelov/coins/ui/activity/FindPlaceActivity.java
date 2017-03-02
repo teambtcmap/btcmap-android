@@ -11,7 +11,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -94,8 +93,6 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
 
         resultsAdapter = new PlacesSearchResultsAdapter(this, userLocation, getDistanceUnits());
         resultsView.setAdapter(resultsAdapter);
-
-        DrawableCompat.setTint(clear.getDrawable().mutate(), getResources().getColor(R.color.icon));
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
