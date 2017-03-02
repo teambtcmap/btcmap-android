@@ -241,7 +241,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             }
         }
 
-        placesCache = Injector.INSTANCE.getAndroidComponent().getPlacesCache();
+        placesCache = Injector.INSTANCE.getAndroidComponent().placesCache();
         placesCache.getListeners().add(this);
 
         handleIntent(getIntent());
@@ -476,7 +476,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         public PlacesRenderer(Context context, GoogleMap map, ClusterManager<Place> clusterManager) {
             super(context, map, clusterManager);
-            cache = Injector.INSTANCE.getAndroidComponent().getMarkersCache();
+            cache = Injector.INSTANCE.getAndroidComponent().markersCache();
         }
 
         @Override

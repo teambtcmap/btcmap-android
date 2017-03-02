@@ -95,7 +95,7 @@ public class SignUpFragment extends AuthFragment  implements TextView.OnEditorAc
 
         @Override
         protected Void doInBackground(UserParams... params) {
-            CoinsApi api = Injector.INSTANCE.getAndroidComponent().provideApi();
+            CoinsApi api = Injector.INSTANCE.getAndroidComponent().api();
 
             try {
                 response = api.createUser(params[0]).execute();

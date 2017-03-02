@@ -1,11 +1,13 @@
 package com.bubelov.coins.dagger;
 
-import android.content.Context;
-
-import com.bubelov.coins.R;
+import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.api.CoinsApi;
+import com.bubelov.coins.util.UtcDateTypeAdapter;
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
@@ -22,9 +24,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 @Module
-public class ApiModule {
-    @Provides @Singleton
-    CoinsApi provideApi(Gson gson, Context context) {
+public class CoreModule {
+    @Provides
+    @Singleton
+    CoinsApi api(Gson gson) {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
@@ -36,10 +39,19 @@ public class ApiModule {
                 .build();
 
         return new Retrofit.Builder()
-                .baseUrl(context.getString(R.string.api_url))
+                .baseUrl(BuildConfig.API_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(client)
                 .build()
                 .create(CoinsApi.class);
+    }
+
+    @Provides
+    @Singleton
+    Gson gson() {
+        return new GsonBuilder()
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .registerTypeAdapter(Date.class, new UtcDateTypeAdapter())
+                .create();
     }
 }

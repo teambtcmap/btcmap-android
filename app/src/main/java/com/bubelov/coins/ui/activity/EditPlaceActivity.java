@@ -260,7 +260,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
         @Override
         protected Boolean doInBackground(Void... args) {
-            CoinsApi api = Injector.INSTANCE.getAndroidComponent().provideApi();
+            CoinsApi api = Injector.INSTANCE.getAndroidComponent().api();
 
             try {
                 Response<Place> response = api.addPlace(new AuthController().getToken(), requestArgs).execute();
@@ -268,7 +268,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
                 if (response.isSuccessful()) {
                     Place place = response.body();
                     Place.insert(Collections.singletonList(place));
-                    PlacesCache cache = Injector.INSTANCE.getAndroidComponent().getPlacesCache();
+                    PlacesCache cache = Injector.INSTANCE.getAndroidComponent().placesCache();
                     cache.invalidate(place);
                     return true;
                 } else {
@@ -304,7 +304,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            CoinsApi api = Injector.INSTANCE.getAndroidComponent().provideApi();
+            CoinsApi api = Injector.INSTANCE.getAndroidComponent().api();
 
             try {
                 Response<Place> response = api.updatePlace(place.getId(), new AuthController().getToken(), requestArgs).execute();
@@ -312,7 +312,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
                 if (response.isSuccessful()) {
                     Place place = response.body();
                     Place.insert(Collections.singletonList(place));
-                    PlacesCache cache = Injector.INSTANCE.getAndroidComponent().getPlacesCache();
+                    PlacesCache cache = Injector.INSTANCE.getAndroidComponent().placesCache();
                     cache.invalidate(place);
                     return true;
                 } else {

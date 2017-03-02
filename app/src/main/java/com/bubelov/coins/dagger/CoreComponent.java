@@ -11,7 +11,7 @@ import dagger.Component;
  */
 
 @Singleton
-@Component(modules = {ConverterModule.class})
-public interface GeneralComponent {
-    Gson provideGson();
+@Component(modules = {CoreModule.class})
+public interface CoreComponent {
+    Gson gson();
 }

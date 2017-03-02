@@ -6,8 +6,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
+import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.database.DbHelper;
 import com.bubelov.coins.service.DatabaseSync;
+import com.bubelov.coins.service.NotificationsController;
+import com.bubelov.coins.util.MapMarkersCache;
 
 import javax.inject.Singleton;
 
@@ -19,7 +22,31 @@ import dagger.Provides;
  */
 
 @Module
-public class DatabaseModule {
+public class AndroidModule {
+    private Context context;
+
+    public AndroidModule(Context context) {
+        this.context = context;
+    }
+
+    @Provides
+    @Singleton
+    Context context() {
+        return context;
+    }
+
+    @Provides
+    @Singleton
+    PlacesCache placesCache() {
+        return new PlacesCache();
+    }
+
+    @Provides
+    @Singleton
+    MapMarkersCache markersCache() {
+        return new MapMarkersCache();
+    }
+
     @Provides
     @Singleton
     SQLiteDatabase database(Context context) {
@@ -37,5 +64,11 @@ public class DatabaseModule {
     @Singleton
     SharedPreferences preferences(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context);
+    }
+
+    @Provides
+    @Singleton
+    NotificationsController notificationsController(Context context) {
+        return new NotificationsController(context);
     }
 }

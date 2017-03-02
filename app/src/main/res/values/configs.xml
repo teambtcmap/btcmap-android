@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-
-    <string name="api_url" translatable="false">http://192.168.1.7:3000/api/v2/</string>
-
     <string name="database_name" translatable="false">coins.db</string>
     <integer name="database_version">19</integer>
 
