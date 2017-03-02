@@ -35,8 +35,9 @@
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
-            style="@style/Toolbar.WithBackNavigation"
-            android:layout_width="match_parent" />
+            style="@style/Toolbar"
+            android:layout_width="match_parent"
+            app:navigationIcon="?homeAsUpIndicator" />
 
     </ViewSwitcher>
 
