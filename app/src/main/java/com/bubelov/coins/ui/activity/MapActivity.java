@@ -437,6 +437,11 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     private void selectPlace(long placeId) {
         selectedPlace = Place.find(placeId);
+
+        if (selectedPlace == null) {
+            return;
+        }
+
         selectedPlace.setCurrencies(Currency.findByPlace(selectedPlace));
         placeDetails.setPlace(selectedPlace);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
