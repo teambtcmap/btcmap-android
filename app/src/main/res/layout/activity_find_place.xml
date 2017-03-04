@@ -34,7 +34,7 @@
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_close_24dp"
+                android:src="@drawable/ic_close"
                 android:visibility="gone" />
 
         </FrameLayout>

@@ -19,6 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.PlacesCache;
@@ -40,7 +41,11 @@ import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ContentViewEvent;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -124,6 +129,20 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         ButterKnife.bind(this);
+
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addApi(Auth.GOOGLE_SIGN_IN_API)
+                .addConnectionCallbacks(new LocationApiConnectionCallbacks())
+                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        Toast.makeText(MapActivity.this, connectionResult.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .build();
+
+        googleApiClient.connect();
 
         firstLaunch = savedInstanceState == null;
 
@@ -320,8 +339,23 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     @Override
     public void onSignOutClick() {
-        new AuthController().setUser(null);
-        new AuthController().setToken("");
+        final AuthController authController = new AuthController();
+
+        if ("google".equalsIgnoreCase(authController.getMethod())) {
+            Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(@NonNull Status status) {
+                    authController.setUser(null);
+                    authController.setToken(null);
+                    authController.setMethod(null);
+                    Toast.makeText(MapActivity.this, status.getStatusMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            authController.setUser(null);
+            authController.setToken(null);
+            authController.setMethod(null);
+        }
     }
 
     @Override
@@ -354,13 +388,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         map.setMyLocationEnabled(true);
-
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(new LocationApiConnectionCallbacks())
-                .build();
-
-        googleApiClient.connect();
     }
 
     private void onPlacesLoaded(Collection<Place> places) {

@@ -143,7 +143,10 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
                         new Handler().post(new Runnable() {
                             @Override
                             public void run() {
-                                new AuthController().setToken(response.body().getToken());
+                                AuthController authController = new AuthController();
+                                authController.setUser(response.body().getUser());
+                                authController.setToken(response.body().getToken());
+                                authController.setMethod("google");
                                 supportFinishAfterTransition();
                             }
                         });
