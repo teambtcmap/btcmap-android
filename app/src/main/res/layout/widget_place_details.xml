@@ -17,19 +17,38 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/primary_dark"
-            android:orientation="vertical">
+            android:background="@color/white"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/name"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:padding="24dp"
-                android:textColor="@color/white"
-                android:textSize="24sp"
+                android:paddingBottom="24dp"
+                android:paddingLeft="24dp"
+                android:paddingRight="8dp"
+                android:paddingTop="24dp"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp"
                 tools:text="Place name" />
+
+            <ImageView
+                android:id="@+id/check_mark"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_check_circle"
+                android:tint="@color/green_700" />
+
+            <ImageView
+                android:id="@+id/warning"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_warning"
+                android:tint="@color/red_500" />
 
         </LinearLayout>
 
@@ -49,6 +68,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:id="@+id/opened_claims"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/green_700"
+                android:paddingBottom="8dp"
+                android:paddingLeft="24dp"
+                android:paddingTop="8dp"
+                tools:text="Confirmed by 1 user"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:typeface="regular" />
+
+            <com.bubelov.coins.ui.widget.TypefaceTextView
+                android:id="@+id/closed_claims"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/red_500"
+                android:paddingBottom="8dp"
+                android:paddingLeft="24dp"
+                android:paddingTop="8dp"
+                tools:text="Marked as closed by 1 user"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:typeface="regular" />
 
             <LinearLayout
                 android:layout_width="match_parent"

@@ -43,6 +43,10 @@ public class Place extends AbstractEntity implements ClusterItem {
 
     private Collection<Currency> currencies;
 
+    private int openedClaims;
+
+    private int closedClaims;
+
     private transient LatLng position;
 
     protected Date updatedAt;
@@ -154,6 +158,22 @@ public class Place extends AbstractEntity implements ClusterItem {
         this.currencies = currencies;
     }
 
+    public int getOpenedClaims() {
+        return openedClaims;
+    }
+
+    public void setOpenedClaims(int openedClaims) {
+        this.openedClaims = openedClaims;
+    }
+
+    public int getClosedClaims() {
+        return closedClaims;
+    }
+
+    public void setClosedClaims(int closedClaims) {
+        this.closedClaims = closedClaims;
+    }
+
     public Date getUpdatedAt() {
         return updatedAt;
     }
@@ -188,6 +208,8 @@ public class Place extends AbstractEntity implements ClusterItem {
         place.setOpeningHours(cursor.getString(cursor.getColumnIndex(DbContract.Places.OPENING_HOURS)));
         place.setAddress(cursor.getString(cursor.getColumnIndex(DbContract.Places.ADDRESS)));
         place.setVisible(cursor.getLong(cursor.getColumnIndex(DbContract.Places.VISIBLE)) == 1);
+        place.setOpenedClaims(cursor.getInt(cursor.getColumnIndex(DbContract.Places.OPENED_CLAIMS)));
+        place.setClosedClaims(cursor.getInt(cursor.getColumnIndex(DbContract.Places.CLOSED_CLAIMS)));
         place.setUpdatedAt(new Date(cursor.getLong(cursor.getColumnIndex(DbContract.Places._UPDATED_AT))));
         return place;
     }
@@ -210,7 +232,7 @@ public class Place extends AbstractEntity implements ClusterItem {
     private static void insertPlaces(List<Place> places) {
         SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
 
-        String insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        String insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 DbContract.Places.TABLE_NAME,
                 DbContract.Places._ID,
                 DbContract.Places._UPDATED_AT,
@@ -223,7 +245,9 @@ public class Place extends AbstractEntity implements ClusterItem {
                 DbContract.Places.AMENITY,
                 DbContract.Places.OPENING_HOURS,
                 DbContract.Places.ADDRESS,
-                DbContract.Places.VISIBLE);
+                DbContract.Places.VISIBLE,
+                DbContract.Places.OPENED_CLAIMS,
+                DbContract.Places.CLOSED_CLAIMS);
 
         SQLiteStatement insertStatement = db.compileStatement(insertQuery);
 
@@ -240,6 +264,8 @@ public class Place extends AbstractEntity implements ClusterItem {
             insertStatement.bindString(10, getEmptyStringIfNull(place.getOpeningHours()));
             insertStatement.bindString(11, getEmptyStringIfNull(place.getAddress()));
             insertStatement.bindLong(12, place.isVisible() ? 1 : 0);
+            insertStatement.bindLong(13, place.getOpenedClaims());
+            insertStatement.bindLong(14, place.getClosedClaims());
             insertStatement.execute();
         }
     }
