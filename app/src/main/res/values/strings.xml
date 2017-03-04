@@ -77,4 +77,14 @@
         <item>Miles</item>
     </string-array>
 
+    <plurals name="confirmed_by_d_users">
+        <item quantity="one">Confirmed by %d user</item>
+        <item quantity="other">Confirmed by %d users</item>
+    </plurals>
+
+    <plurals name="marked_as_closed_by_d_users">
+        <item quantity="one">Marked as closed by %d user</item>
+        <item quantity="other">Marked as closed by %d users</item>
+    </plurals>
+
 </resources>

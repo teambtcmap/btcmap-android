@@ -65,7 +65,6 @@
         android:src="@drawable/ic_my_location_24dp"
         app:backgroundTint="@color/white"
         app:borderWidth="0dp"
-        app:elevation="4dp"
         app:layout_anchor="@+id/place_details"
         app:layout_anchorGravity="top|end" />
 

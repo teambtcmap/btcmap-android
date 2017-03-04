@@ -10,7 +10,9 @@ create table places (
     amenity text,
     opening_hours text,
     address text,
-    visible boolean
+    visible boolean,
+    opened_claims integer,
+    closed_claims integer
 );
 
 create table currencies (

@@ -34,8 +34,20 @@ public class PlaceDetailsView extends FrameLayout {
     @BindView(R.id.name)
     TextView name;
 
+    @BindView(R.id.check_mark)
+    View checkMark;
+
+    @BindView(R.id.warning)
+    View warning;
+
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+
+    @BindView(R.id.opened_claims)
+    TextView openedClaims;
+
+    @BindView(R.id.closed_claims)
+    TextView closedClaims;
 
     @BindView(R.id.phone)
     TextView phone;
@@ -85,6 +97,32 @@ public class PlaceDetailsView extends FrameLayout {
 
     public void setPlace(final Place place) {
         this.place = place;
+
+        if (place.getOpenedClaims() > 0 && place.getClosedClaims() == 0) {
+            checkMark.setVisibility(VISIBLE);
+        } else {
+            checkMark.setVisibility(GONE);
+        }
+
+        if (place.getClosedClaims() > 0) {
+            warning.setVisibility(VISIBLE);
+        } else {
+            warning.setVisibility(GONE);
+        }
+
+        if (place.getOpenedClaims() > 0) {
+            openedClaims.setVisibility(VISIBLE);
+            openedClaims.setText(getResources().getQuantityString(R.plurals.confirmed_by_d_users, place.getOpenedClaims(), place.getOpenedClaims()));
+        } else {
+            openedClaims.setVisibility(GONE);
+        }
+
+        if (place.getClosedClaims() > 0) {
+            closedClaims.setVisibility(VISIBLE);
+            closedClaims.setText(getResources().getQuantityString(R.plurals.marked_as_closed_by_d_users, place.getClosedClaims(), place.getClosedClaims()));
+        } else {
+            closedClaims.setVisibility(GONE);
+        }
 
         if (TextUtils.isEmpty(place.getName())) {
             name.setText(R.string.name_unknown);

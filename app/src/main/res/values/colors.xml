@@ -20,4 +20,7 @@
 
     <color name="tab_indicator">#FFFBD0</color>
 
+    <color name="red_500">#F44336</color>
+    <color name="green_700">#388E3C</color>
+
 </resources>
