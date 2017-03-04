@@ -8,7 +8,7 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         style="@style/Toolbar"
-        app:navigationIcon="@drawable/ic_close_24dp"
+        app:navigationIcon="@drawable/ic_close"
         app:title="@string/suggest_an_edit" />
 
     <ScrollView

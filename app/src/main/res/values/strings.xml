@@ -49,7 +49,7 @@
     <string name="description">Description</string>
     <string name="opening_hours">Opening hours</string>
     <string name="accepted_currencies">Accepted currencies</string>
-    <string name="notification_area_activity_title">Notification area</string>
+    <string name="notification_area_activity_title">Notification Area</string>
     <string name="suggest_an_edit">Suggest an edit</string>
     <string name="place_is_closed">This place does not exist or closed or no longer accept crypto currency</string>
     <string name="set_location">Set location</string>

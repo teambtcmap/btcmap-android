@@ -7,7 +7,7 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         style="@style/Toolbar"
-        app:navigationIcon="@drawable/ic_close_24dp"
+        app:navigationIcon="?homeAsUpIndicator"
         app:title="@string/sign_in" />
 
     <FrameLayout
