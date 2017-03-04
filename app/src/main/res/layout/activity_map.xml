@@ -54,19 +54,28 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:behavior_hideable="true"
-        app:layout_behavior="@string/bottom_sheet_behavior" />
+        app:layout_behavior="@string/bottom_sheet_behavior"
+        app:layout_insetEdge="bottom" />
 
-    <android.support.design.widget.FloatingActionButton
+    <FrameLayout
         android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="right|bottom"
         android:layout_margin="16dp"
-        android:onClick="onActionButtonClicked"
-        android:src="@drawable/ic_my_location_24dp"
-        app:backgroundTint="@color/white"
-        app:borderWidth="0dp"
-        app:layout_anchor="@+id/place_details"
-        app:layout_anchorGravity="top|end" />
+        android:background="@drawable/shape_oval_white"
+        android:clickable="true"
+        android:elevation="4dp"
+        app:layout_dodgeInsetEdges="bottom">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_my_location"
+            android:tint="@color/primary_dark" />
+
+    </FrameLayout>
 
     <View
         android:id="@+id/top_right_corner"

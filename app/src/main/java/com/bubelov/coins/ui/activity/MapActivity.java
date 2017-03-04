@@ -11,7 +11,6 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.design.widget.BottomSheetBehavior;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
@@ -87,7 +86,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     TextView categoryView;
 
     @BindView(R.id.fab)
-    FloatingActionButton actionButton;
+    View actionButton;
 
     @BindView(R.id.place_details)
     PlaceDetailsView placeDetails;
@@ -479,7 +478,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                 .putContentId(String.valueOf(selectedPlace.getId())));
     }
 
-    public void onActionButtonClicked(View view) {
+    @OnClick(R.id.fab)
+    public void onActionButtonClick() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             moveToLastLocation();
         } else {
