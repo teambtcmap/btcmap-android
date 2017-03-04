@@ -2,7 +2,7 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="database_name" translatable="false">coins.db</string>
-    <integer name="database_version">19</integer>
+    <integer name="database_version">20</integer>
 
     <string name="maps_api_key" translatable="false">AIzaSyCFlG9gZj-6ja-CQC6cAgvQXq6fs0foYVQ</string>
 
