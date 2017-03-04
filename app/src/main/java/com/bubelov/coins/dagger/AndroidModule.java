@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.PlacesCache;
+import com.bubelov.coins.R;
+import com.bubelov.coins.database.AssetDbHelper;
 import com.bubelov.coins.database.DbHelper;
 import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.service.NotificationsController;
@@ -50,7 +52,7 @@ public class AndroidModule {
     @Provides
     @Singleton
     SQLiteDatabase database(Context context) {
-        SQLiteOpenHelper helper = new DbHelper(context);
+        SQLiteOpenHelper helper = new AssetDbHelper(context, context.getResources().getString(R.string.database_name), context.getResources().getInteger(R.integer.database_version));
         return helper.getWritableDatabase();
     }
 
