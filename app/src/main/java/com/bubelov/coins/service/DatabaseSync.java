@@ -19,6 +19,7 @@ import com.google.android.gms.gcm.PeriodicTask;
 import com.google.android.gms.gcm.Task;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -74,6 +75,7 @@ public class DatabaseSync implements Runnable {
 
                 for (Place place : places) {
                     if (!initialSync && notificationsController.shouldNotifyUser(place)) {
+                        Place.insert(Collections.singletonList(place));
                         notificationsController.notifyUser(place.getId(), place.getName());
                     }
                 }
