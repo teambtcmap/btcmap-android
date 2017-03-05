@@ -531,6 +531,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         @Override
         public void onConnected(Bundle bundle) {
             if (firstLaunch && !getIntent().hasExtra(NOTIFICATION_AREA_EXTRA)) {
+                firstLaunch = false;
                 moveToLastLocation();
             }
         }
