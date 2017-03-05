@@ -25,5 +25,6 @@ create table currencies (
 create table currencies_places (
     _id integer primary key,
     currency_id integer,
-    place_id integer
+    place_id integer,
+    unique (currency_id, place_id)
 );
