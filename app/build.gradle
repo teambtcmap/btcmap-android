@@ -8,7 +8,7 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 29
+        versionCode 30
         versionName "1.8"
         resConfigs "en", "ru", "th"
     }
