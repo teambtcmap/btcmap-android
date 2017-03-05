@@ -39,6 +39,7 @@
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:layout_gravity="center_vertical"
+                android:layout_marginTop="2dp"
                 android:src="@drawable/ic_check_circle"
                 android:tint="@color/green_700" />
 
@@ -47,6 +48,7 @@
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:layout_gravity="center_vertical"
+                android:layout_marginTop="2dp"
                 android:src="@drawable/ic_warning"
                 android:tint="@color/red_500" />
 
@@ -77,10 +79,10 @@
                 android:paddingBottom="8dp"
                 android:paddingLeft="24dp"
                 android:paddingTop="8dp"
-                tools:text="Confirmed by 1 user"
                 android:textColor="@color/white"
                 android:textSize="16sp"
-                app:typeface="regular" />
+                app:typeface="regular"
+                tools:text="Confirmed by 1 user" />
 
             <com.bubelov.coins.ui.widget.TypefaceTextView
                 android:id="@+id/closed_claims"
@@ -90,10 +92,10 @@
                 android:paddingBottom="8dp"
                 android:paddingLeft="24dp"
                 android:paddingTop="8dp"
-                tools:text="Marked as closed by 1 user"
                 android:textColor="@color/white"
                 android:textSize="16sp"
-                app:typeface="regular" />
+                app:typeface="regular"
+                tools:text="Marked as closed by 1 user" />
 
             <LinearLayout
                 android:layout_width="match_parent"
