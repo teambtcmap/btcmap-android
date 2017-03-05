@@ -228,7 +228,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         switch (requestCode) {
             case REQUEST_ACCESS_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    initLocation();
+                    map.setMyLocationEnabled(true);
+                    moveToLastLocation();
                 }
         }
     }
@@ -246,7 +247,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         map.setOnCameraChangeListener(new OnCameraChangeMultiplexer(placesManager, new CameraChangeListener()));
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            initLocation();
+            map.setMyLocationEnabled(true);
+            moveToLastLocation();
         } else {
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 moveToDefaultLocation();
@@ -379,14 +381,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             NotificationArea notificationArea = (NotificationArea) intent.getSerializableExtra(NOTIFICATION_AREA_EXTRA);
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), MAP_DEFAULT_ZOOM));
         }
-    }
-
-    private void initLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-
-        map.setMyLocationEnabled(true);
     }
 
     private void onPlacesLoaded(Collection<Place> places) {
