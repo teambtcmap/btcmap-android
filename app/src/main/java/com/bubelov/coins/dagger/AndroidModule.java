@@ -9,7 +9,6 @@ import android.preference.PreferenceManager;
 import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.database.AssetDbHelper;
-import com.bubelov.coins.database.DbHelper;
 import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.service.NotificationsController;
 import com.bubelov.coins.util.MapMarkersCache;
