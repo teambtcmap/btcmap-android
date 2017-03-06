@@ -23,7 +23,7 @@
     <string name="restaurants">Рестораны</string>
     <string name="bars">Бары</string>
     <string name="hotels">Отели</string>
-    <string name="gas_stations">Авозаправки</string>
+    <string name="gas_stations">Заправки</string>
     <string name="hospitals">Госпитали</string>
     <string name="pharmacies">Аптеки</string>
     <string name="pizza">Пиццерии</string>
@@ -38,45 +38,45 @@
     <string name="search">Поиск</string>
     <string name="n_kilometers">%1$.2f км</string>
     <string name="n_miles">%1$.2f мил.</string>
-    <string name="description">Описание:</string>
-    <string name="opening_hours">Время работы:</string>
-    <string name="accepted_currencies">Принимаемые валюты:</string>
+    <string name="description">Описание</string>
+    <string name="opening_hours">Время работы</string>
+    <string name="accepted_currencies">Валюты</string>
     <string name="notification_area_activity_title">Зона уведомлений</string>
-    <string name="action_share">Share</string>
-    <string name="phone">Телефон:</string>
-    <string name="website">Вебсайт:</string>
+    <string name="action_share">Поделиться</string>
+    <string name="phone">Телефон</string>
+    <string name="website">Вебсайт</string>
     <string name="action_send">Отправить</string>
     <string name="name">Название</string>
     <string name="suggest_an_edit">Предложить правку</string>
-    <string name="place_is_closed">This place does not exist or closed or no longer accept crypto currency</string>
-    <string name="action_add_place">Добавить точку</string>
-    <string name="change_location">Change location</string>
-    <string name="place_location">Place location</string>
-    <string name="action_done">Done</string>
-    <string name="location_is_not_specified">Place location is not specified</string>
-    <string name="name_is_not_specified">Name is not specified</string>
-    <string name="set_location">Set location</string>
-    <string name="authorization_hint">Authorized users can add new places and suggest edits</string>
+    <string name="place_is_closed">Этого меса не существует или оно не принимает криптовалюту</string>
+    <string name="action_add_place">Добавить место</string>
+    <string name="change_location">Изменить месторасположение</string>
+    <string name="place_location">Месторасположение</string>
+    <string name="action_done">Готово</string>
+    <string name="location_is_not_specified">Месторасположение не задано</string>
+    <string name="name_is_not_specified">Не указано название</string>
+    <string name="set_location">Задать месторасположение</string>
+    <string name="authorization_hint">Авторизованные пользователи могут добавлять новые места и делать правки уже существующих</string>
     <string name="cant_connect_to_google_services">Can\'t connect to Google services</string>
-    <string name="sign_in">Sign in</string>
-    <string name="failed_to_sign_in">Failed to sign in</string>
-    <string name="sign_in_with_email">Sign in with email</string>
-    <string name="sign_in_with_google">Sign in with Google</string>
-    <string name="sign_out">Sign Out</string>
-    <string name="exchange_rates">Exchange Rates</string>
-    <string name="fast_food">Fast food</string>
-    <string name="could_not_connect_to_server">Could not connect to server</string>
-    <string name="could_not_update_place">Couldn\'t update place</string>
+    <string name="sign_in">Вход</string>
+    <string name="failed_to_sign_in">Ошибка авторизации</string>
+    <string name="sign_in_with_email">Войти используя email</string>
+    <string name="sign_in_with_google">Войти используя Google аккаунт</string>
+    <string name="sign_out">Выйти из аккаунта</string>
+    <string name="exchange_rates">Обменный Курс</string>
+    <string name="fast_food">Фаст фуд</string>
+    <string name="could_not_connect_to_server">Не получилось подключиться к серверу</string>
+    <string name="could_not_update_place">Не получилось обновить данные</string>
     <string name="email">Email</string>
-    <string name="password">Password</string>
-    <string name="sign_up">Sign Up</string>
+    <string name="password">Пароль</string>
+    <string name="sign_up">Регистрация</string>
 
     <string-array name="distance_units">
         <item>Автоматически</item>
         <item>Километры</item>
         <item>Мили</item>
     </string-array>
-    <string name="first_name">First name</string>
-    <string name="last_name">Last name</string>
+    <string name="first_name">Имя</string>
+    <string name="last_name">Фамилия</string>
 
 </resources>
