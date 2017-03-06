@@ -71,7 +71,7 @@
                     android:layout_gravity="center"
                     android:background="?selectableItemBackground"
                     android:padding="16dp"
-                    android:text="Change Location"
+                    android:text="@string/change_location"
                     android:textColor="@color/white" />
 
             </FrameLayout>

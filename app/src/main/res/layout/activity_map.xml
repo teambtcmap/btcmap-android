@@ -2,6 +2,7 @@
 
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -31,7 +32,7 @@
                     android:id="@+id/category"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="All places"
+                    android:text="@string/all_places"
                     android:textColor="@color/white"
                     android:textSize="20sp"
                     app:typeface="medium" />
@@ -66,7 +67,8 @@
         android:background="@drawable/shape_oval_white"
         android:clickable="true"
         android:elevation="4dp"
-        app:layout_dodgeInsetEdges="bottom">
+        app:layout_dodgeInsetEdges="bottom"
+        tools:targetApi="lollipop">
 
         <ImageView
             android:layout_width="24dp"

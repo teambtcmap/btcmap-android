@@ -76,5 +76,7 @@
         <item>Kilometers</item>
         <item>Miles</item>
     </string-array>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
 
 </resources>
