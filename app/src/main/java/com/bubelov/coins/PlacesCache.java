@@ -4,7 +4,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
-import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.PlaceCategory;
 import com.bubelov.coins.model.Place;
@@ -16,7 +15,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
 import timber.log.Timber;
 
 /**
@@ -24,8 +22,7 @@ import timber.log.Timber;
  */
 
 public class PlacesCache {
-    @Inject
-    Lazy<SQLiteDatabase> db;
+    SQLiteDatabase db;
 
     private final Collection<Place> data = new ArrayList<>();
 
@@ -33,11 +30,10 @@ public class PlacesCache {
 
     private List<PlacesCacheListener> listeners = new ArrayList<>();
 
-    public PlacesCache() {
-        Timber.d("Creating...");
-        Injector.INSTANCE.getAndroidComponent().inject(this);
+    @Inject
+    public PlacesCache(SQLiteDatabase db) {
+        this.db = db;
         initialize();
-        Timber.d("Created");
     }
 
     public boolean isInitialized() {
@@ -61,6 +57,10 @@ public class PlacesCache {
         Timber.d("%s places found. Time: %s", places.size(), time);
 
         return places;
+    }
+
+    public int getSize() {
+        return data.size();
     }
 
     public void invalidate() {
@@ -87,7 +87,7 @@ public class PlacesCache {
         protected List<Place> doInBackground(Void... params) {
             Timber.d("Querying data from DB");
             long time = System.currentTimeMillis();
-            Cursor cursor = db.get().rawQuery("select distinct p._id, p.latitude, p.longitude, p.amenity from places as p join currencies_places as cp on p._id = cp.place_id join currencies c on c._id = cp.currency_id where p.visible = 1", null);
+            Cursor cursor = db.rawQuery("select distinct p._id, p.latitude, p.longitude, p.amenity from places as p join currencies_places as cp on p._id = cp.place_id join currencies c on c._id = cp.currency_id where p.visible = 1", null);
             Timber.d("Query time: %s", System.currentTimeMillis() - time);
 
             List<Place> newestData = new ArrayList<>(10000);
