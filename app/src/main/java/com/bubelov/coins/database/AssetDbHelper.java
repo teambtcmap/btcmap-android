@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.bubelov.coins.R;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -24,14 +26,14 @@ public class AssetDbHelper extends SQLiteOpenHelper {
 
     private SQLiteDatabase db = null;
 
-    public AssetDbHelper(Context context, String name, int version) {
-        super(context, name, null, version);
+    public AssetDbHelper(Context context) {
+        super(context, context.getResources().getString(R.string.database_name), null, context.getResources().getInteger(R.integer.database_version));
 
         this.context = context;
-        this.version = version;
+        this.version = context.getResources().getInteger(R.integer.database_version);
 
-        assetsDbFilePath = String.format("databases/%s", name);
-        internalDbFilePath = String.format("%s/databases/%s", context.getApplicationInfo().dataDir, name);
+        assetsDbFilePath = String.format("databases/%s", getDatabaseName());
+        internalDbFilePath = String.format("%s/databases/%s", context.getApplicationInfo().dataDir, getDatabaseName());
     }
 
     @Override
