@@ -22,11 +22,3 @@
 
 -keep class com.bubelov.coins.model.** { *; }
 -keep class com.bubelov.coins.api.** { *; }
-
-# Otto
-
--keepattributes *Annotation*
--keepclassmembers class ** {
-    @com.squareup.otto.Subscribe public *;
-    @com.squareup.otto.Produce public *;
-}
