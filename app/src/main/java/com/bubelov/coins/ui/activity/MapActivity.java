@@ -228,6 +228,10 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         switch (requestCode) {
             case REQUEST_ACCESS_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
+
                     map.setMyLocationEnabled(true);
                     moveToLastLocation();
                 }

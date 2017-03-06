@@ -2,6 +2,7 @@ package com.bubelov.coins.ui.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
@@ -9,11 +10,10 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.TypefaceManager;
 
 /**
- * Author: Igor Bubelov
- * Date: 13/05/15 14:48
+ * @author Igor Bubelov
  */
 
-public class TypefaceTextView extends TextView {
+public class TypefaceTextView extends AppCompatTextView {
     public TypefaceTextView(Context context) {
         super(context);
     }

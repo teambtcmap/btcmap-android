@@ -76,5 +76,7 @@
         <item>Километры</item>
         <item>Мили</item>
     </string-array>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
 
 </resources>
