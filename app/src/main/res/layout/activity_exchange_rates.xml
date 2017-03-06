@@ -9,7 +9,7 @@
         android:id="@+id/toolbar"
         style="@style/Toolbar"
         app:navigationIcon="?homeAsUpIndicator"
-        app:title="Exchange Rates" />
+        app:title="@string/exchange_rates" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list"
