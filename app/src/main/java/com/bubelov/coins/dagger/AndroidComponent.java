@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.bubelov.coins.PlacesCache;
-import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.util.AuthController;
 import com.bubelov.coins.util.MapMarkersCache;
@@ -27,8 +26,6 @@ public interface AndroidComponent {
     PlacesCache placesCache();
 
     MapMarkersCache markersCache();
-
-    CoinsApi api();
 
     DatabaseSync databaseSync();
 

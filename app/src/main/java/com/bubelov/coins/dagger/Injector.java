@@ -13,7 +13,7 @@ public enum Injector {
 
     private AndroidComponent androidComponent;
 
-    public void initGeneralComponent() {
+    public void initCoreComponent() {
         coreComponent = DaggerCoreComponent.builder().build();
     }
 
