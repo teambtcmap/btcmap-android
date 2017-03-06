@@ -15,8 +15,8 @@ import org.junit.Test;
 
 public class ExchangeRatesIntegrationTest {
     @Before
-    public void initDagger() {
-        Injector.INSTANCE.initGeneralComponent();
+    public void setUp() {
+        Injector.INSTANCE.initCoreComponent();
     }
 
     @Test

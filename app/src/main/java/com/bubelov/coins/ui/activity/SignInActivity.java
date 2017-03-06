@@ -134,7 +134,7 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
-            CoinsApi api = Injector.INSTANCE.getAndroidComponent().api();
+            CoinsApi api = Injector.INSTANCE.getCoreComponent().api();
 
             api.authWithGoogle(account.getIdToken()).enqueue(new Callback<AuthResponse>() {
                 @Override
