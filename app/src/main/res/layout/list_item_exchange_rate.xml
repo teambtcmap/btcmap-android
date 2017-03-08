@@ -20,7 +20,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_gravity="center_horizontal"
-            android:background="@drawable/search_row_icon_background" />
+            android:background="@drawable/shape_oval_grey" />
 
     </FrameLayout>
 
