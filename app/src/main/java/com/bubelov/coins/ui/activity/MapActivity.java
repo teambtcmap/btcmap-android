@@ -38,8 +38,6 @@ import com.bubelov.coins.util.AuthController;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.ContentViewEvent;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -469,11 +467,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         selectedPlace.setCurrencies(Currency.findByPlace(selectedPlace));
         placeDetails.setPlace(selectedPlace);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
-        Answers.getInstance().logContentView(new ContentViewEvent()
-                .putContentName(selectedPlace.getName())
-                .putContentType("place")
-                .putContentId(String.valueOf(selectedPlace.getId())));
     }
 
     @OnClick(R.id.fab)

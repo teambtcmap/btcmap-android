@@ -13,7 +13,6 @@ import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
 import com.google.android.gms.gcm.Task;
@@ -95,7 +94,6 @@ public class DatabaseSync implements Runnable {
             placesCache.invalidate();
         } catch (Exception e) {
             Timber.e(e, "Couldn't sync database");
-            Crashlytics.logException(e);
         }
 
         GcmNetworkManager.getInstance(context).schedule(new PeriodicTask.Builder()

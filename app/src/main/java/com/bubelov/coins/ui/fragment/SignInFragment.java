@@ -16,7 +16,6 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.model.AuthResponse;
-import com.crashlytics.android.Crashlytics;
 
 import java.io.IOException;
 
@@ -101,7 +100,7 @@ public class SignInFragment extends AuthFragment implements TextView.OnEditorAct
             try {
                 response = api.authWithEmail(email, password).execute();
             } catch (IOException e) {
-                Crashlytics.logException(e);
+                // TODO
             }
 
             return null;

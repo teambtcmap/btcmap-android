@@ -29,8 +29,6 @@ import com.bubelov.coins.model.Place;
 import com.bubelov.coins.ui.adapter.PlacesSearchResultsAdapter;
 import com.bubelov.coins.util.DistanceComparator;
 import com.bubelov.coins.util.DistanceUnits;
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.SearchEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -153,7 +151,6 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
             Bundle args = new Bundle();
             args.putString(QUERY_KEY, query.toString());
             getLoaderManager().restartLoader(PLACES_LOADER, args, this);
-            Answers.getInstance().logSearch(new SearchEvent().putQuery(query.toString()));
         } else {
             getLoaderManager().destroyLoader(PLACES_LOADER);
         }

@@ -24,9 +24,6 @@ import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.util.AuthController;
-import com.crashlytics.android.Crashlytics;
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.CustomEvent;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -92,7 +89,6 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
         intent.putExtra(ID_EXTRA, placeId);
         intent.putExtra(MAP_CAMERA_POSITION_EXTRA, mapCameraPosition);
         activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
-        Answers.getInstance().logCustom(new CustomEvent("Opened edit place screen"));
     }
 
     @Override
@@ -275,7 +271,6 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
                     return false;
                 }
             } catch (Exception e) {
-                Crashlytics.logException(e);
                 return false;
             }
         }
@@ -319,7 +314,6 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
                     return false;
                 }
             } catch (Exception e) {
-                Crashlytics.logException(e);
                 return false;
             }
         }
