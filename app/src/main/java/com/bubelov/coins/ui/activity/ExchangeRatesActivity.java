@@ -16,7 +16,6 @@ import com.bubelov.coins.api.rates.provider.Coinbase;
 import com.bubelov.coins.api.rates.provider.CryptoExchange;
 import com.bubelov.coins.api.rates.provider.Winkdex;
 import com.bubelov.coins.ui.adapter.ExchangeRatesAdapter;
-import com.crashlytics.android.Crashlytics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,7 +82,7 @@ public class ExchangeRatesActivity extends AbstractActivity {
                 try {
                     publishProgress(new Pair<>(exchange, exchange.getCurrentRate()));
                 } catch (Exception e) {
-                    Crashlytics.logException(e);
+                    // TODO
                 }
             }
 

@@ -18,9 +18,6 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.util.OnSeekBarChangeAdapter;
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.ContentViewEvent;
-import com.crashlytics.android.answers.CustomEvent;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -36,8 +33,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Author: Igor Bubelov
- * Date: 12/07/14 16:24
+ * @author Igor Bubelov
  */
 
 public class NotificationAreaActivity extends AbstractActivity implements OnMapReadyCallback {
@@ -61,7 +57,6 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
     public static void start(Activity activity) {
         Intent intent = new Intent(activity, NotificationAreaActivity.class);
         activity.startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
-        Answers.getInstance().logCustom(new CustomEvent("Opened notification area screen"));
     }
 
     @Override

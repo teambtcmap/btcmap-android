@@ -21,7 +21,6 @@ import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -415,7 +414,6 @@ public class StaticClusterRenderer<T extends ClusterItem> implements ClusterRend
                     removed = true;
                 } catch (ConcurrentModificationException e) {
                     Timber.e(e, "Clustering error");
-                    Crashlytics.logException(e);
                 }
             }
 
@@ -423,7 +421,6 @@ public class StaticClusterRenderer<T extends ClusterItem> implements ClusterRend
                 markersToRemove.removeAll(newMarkers);
             } catch (ConcurrentModificationException e) {
                 Timber.e(e, "Clustering error");
-                Crashlytics.logException(e);
             }
 
             // Find all of the new clusters that were added on-screen. These are candidates for
