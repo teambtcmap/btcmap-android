@@ -68,6 +68,7 @@ dependencies {
     compile "com.google.android.gms:play-services-location:${rootProject.ext.googlePlayServicesVersion}"
     compile "com.google.android.gms:play-services-maps:${rootProject.ext.googlePlayServicesVersion}"
     compile "com.google.android.gms:play-services-auth:${rootProject.ext.googlePlayServicesVersion}"
+    compile "com.google.firebase:firebase-crash:${rootProject.ext.googlePlayServicesVersion}"
 
     compile 'com.google.maps.android:android-maps-utils:0.4'
 
@@ -88,3 +89,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     testCompile 'org.robolectric:robolectric:3.3'
 }
+
+apply plugin: 'com.google.gms.google-services'

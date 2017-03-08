@@ -1,7 +1,9 @@
 {
   "project_info": {
     "project_number": "557789430086",
-    "project_id": "plasma-range-93702"
+    "firebase_url": "https://plasma-range-93702.firebaseio.com",
+    "project_id": "plasma-range-93702",
+    "storage_bucket": "plasma-range-93702.appspot.com"
   },
   "client": [
     {
@@ -13,11 +15,15 @@
       },
       "oauth_client": [
         {
+          "client_id": "557789430086-4vgon23a6t9f8vt5p6lbstodj77p504h.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
           "client_id": "557789430086-h8h6r2lf1hqj35qpk3vpt5tc45tmuld8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.bubelov.coins",
-            "certificate_hash": "2A6BD1A06CC9C4C16B1F8E46646C96067F4120BB"
+            "certificate_hash": "2a6bd1a06cc9c4c16b1f8e46646c96067f4120bb"
           }
         },
         {
@@ -27,7 +33,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAWjpfSEdasxfeD4PgvV5IbmSWK0SrnuBs"
+          "current_key": "AIzaSyA0xfz6hAc3W3RGmi1tUw2GgFsZmB1Une0"
         }
       ],
       "services": {
@@ -35,11 +41,16 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "557789430086-4vgon23a6t9f8vt5p6lbstodj77p504h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     }
