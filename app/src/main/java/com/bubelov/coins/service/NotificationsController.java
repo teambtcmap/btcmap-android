@@ -20,8 +20,6 @@ import com.bubelov.coins.provider.NotificationAreaProvider;
 import com.bubelov.coins.receiver.ClearPlaceNotificationsReceiver;
 import com.bubelov.coins.ui.activity.MapActivity;
 import com.bubelov.coins.util.DistanceUtils;
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.CustomEvent;
 
 import java.util.List;
 import java.util.UUID;
@@ -87,9 +85,6 @@ public class NotificationsController {
         if (PlaceNotification.queryForAll().size() > 1) {
             issueGroupNotification(PlaceNotification.queryForAll());
         }
-
-        Answers.getInstance().logCustom(new CustomEvent("Notified user about new place")
-                .putCustomAttribute("id", placeId));
     }
 
     private void issueGroupNotification(List<PlaceNotification> pendingPlaces) {

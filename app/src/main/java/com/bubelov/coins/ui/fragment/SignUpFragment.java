@@ -17,7 +17,6 @@ import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.api.UserParams;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.model.AuthResponse;
-import com.crashlytics.android.Crashlytics;
 
 import java.io.IOException;
 
@@ -101,7 +100,6 @@ public class SignUpFragment extends AuthFragment  implements TextView.OnEditorAc
                 response = api.createUser(params[0]).execute();
             } catch (IOException e) {
                 Timber.e(e, "Couldn't sign up");
-                Crashlytics.logException(e);
             }
 
             return null;

@@ -3,8 +3,6 @@ package com.bubelov.coins.database;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.crashlytics.android.Crashlytics;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,8 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Author: Igor Bubelov
- * Date: 24/02/16 21:56
+ * @author Igor Bubelov
  */
 
 public class AssetSqlQuery {
@@ -48,7 +45,6 @@ public class AssetSqlQuery {
             reader.close();
             return builder.toString();
         } catch (Exception e) {
-            Crashlytics.logException(e);
             return null;
         }
     }

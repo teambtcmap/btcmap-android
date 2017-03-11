@@ -17,7 +17,6 @@ import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.model.AuthResponse;
 import com.bubelov.coins.util.AuthController;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -157,7 +156,6 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
 
                         for (String error : body.getErrors()) {
                             errorMessageBuilder.append(error).append("\n");
-                            Crashlytics.log(error);
                         }
 
                         new AlertDialog.Builder(SignInActivity.this)
@@ -169,7 +167,6 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
 
                 @Override
                 public void onFailure(Call<AuthResponse> call, Throwable t) {
-                    Crashlytics.logException(t);
                     Toast.makeText(SignInActivity.this, R.string.failed_to_sign_in, Toast.LENGTH_SHORT).show();
                 }
             });
