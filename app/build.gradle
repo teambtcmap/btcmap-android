@@ -10,6 +10,8 @@ android {
         versionCode 30
         versionName "1.8"
         resConfigs "en", "ru", "th"
+
+        buildConfigField "boolean", "USE_DB_SNAPSHOT", "false"
     }
 
     signingConfigs {
