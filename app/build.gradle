@@ -7,11 +7,12 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 30
-        versionName "1.8"
+        versionCode 31
+        versionName "1.8.1"
         resConfigs "en", "ru", "th"
 
-        buildConfigField "boolean", "USE_DB_SNAPSHOT", "false"
+        buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v2/\""
+        buildConfigField "boolean", "USE_DB_SNAPSHOT", "true"
     }
 
     signingConfigs {
@@ -21,7 +22,6 @@ android {
             keyAlias "coins"
             keyPassword KEYSTORE_PASSWORD
         }
-
         release {
             storeFile file(KEYSTORE_PATH)
             storePassword KEYSTORE_PASSWORD
@@ -38,6 +38,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
             buildConfigField "String", "API_URL", "\"http://192.168.1.7:3000/api/v2/\""
+            buildConfigField "boolean", "USE_DB_SNAPSHOT", "false"
         }
         release {
             minifyEnabled true
@@ -45,8 +46,6 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-
-            buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v2/\""
         }
     }
 
