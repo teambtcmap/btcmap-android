@@ -16,12 +16,6 @@ android {
     }
 
     signingConfigs {
-        debug {
-            storeFile file(KEYSTORE_PATH)
-            storePassword KEYSTORE_PASSWORD
-            keyAlias "coins"
-            keyPassword KEYSTORE_PASSWORD
-        }
         release {
             storeFile file(KEYSTORE_PATH)
             storePassword KEYSTORE_PASSWORD
