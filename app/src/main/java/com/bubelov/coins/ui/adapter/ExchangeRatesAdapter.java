@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.ViewSwitcher;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.api.rates.provider.CryptoExchange;
@@ -40,18 +39,19 @@ public class ExchangeRatesAdapter extends RecyclerView.Adapter<ExchangeRatesAdap
     @Override
     public void onBindViewHolder(final ExchangeRateViewHolder holder, int position) {
         CryptoExchange exchange = exchanges.get(position);
-        holder.exchangeName.setText(exchange.getClass().getSimpleName());
+        String name = exchange.getClass().getSimpleName();
+        holder.firstLetter.setText(name.substring(0, 1));
+        holder.exchangeName.setText(name);
         double price = rates.containsKey(exchange) ? rates.get(exchange) : 0;
 
-        if (price == 0 && holder.priceSwitcher.getDisplayedChild() == 1) {
-            holder.priceSwitcher.setDisplayedChild(0);
+        if (price == 0) {
+            holder.price.setVisibility(View.GONE);
+            holder.progressBar.setVisibility(View.VISIBLE);
+        } else {
+            holder.price.setVisibility(View.VISIBLE);
+            holder.price.setText(String.format(Locale.US, "$%.2f", price));
+            holder.progressBar.setVisibility(View.GONE);
         }
-
-        if (price > 0 && holder.priceSwitcher.getDisplayedChild() == 0) {
-            holder.priceSwitcher.setDisplayedChild(1);
-        }
-
-        holder.price.setText(String.format(Locale.US, "$%.2f", price));
     }
 
     @Override
@@ -60,14 +60,17 @@ public class ExchangeRatesAdapter extends RecyclerView.Adapter<ExchangeRatesAdap
     }
 
     public static class ExchangeRateViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.first_letter)
+        TextView firstLetter;
+
         @BindView(R.id.exchange_name)
         TextView exchangeName;
 
-        @BindView(R.id.price_flipper)
-        ViewSwitcher priceSwitcher;
-
         @BindView(R.id.price)
         TextView price;
+
+        @BindView(R.id.progress)
+        View progressBar;
 
         public ExchangeRateViewHolder(View itemView) {
             super(itemView);
