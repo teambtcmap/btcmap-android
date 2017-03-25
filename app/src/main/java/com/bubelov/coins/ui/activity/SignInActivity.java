@@ -2,21 +2,23 @@ package com.bubelov.coins.ui.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
+import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.R;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.model.AuthResponse;
 import com.bubelov.coins.util.AuthController;
+import com.bubelov.coins.util.Utils;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -25,12 +27,18 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.firebase.crash.FirebaseCrash;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.io.IOException;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import retrofit2.Call;
-import retrofit2.Callback;
+import retrofit2.Response;
+import timber.log.Timber;
 
 /**
  * @author Igor Bubelov
@@ -41,6 +49,9 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+
+    @BindView(R.id.view_switcher)
+    ViewSwitcher viewSwitcher;
 
     @BindView(R.id.sign_in_with_google)
     View googleSignInButton;
@@ -66,7 +77,7 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
         });
 
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.server_client_id))
+                .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
                 .requestEmail()
                 .build();
 
@@ -133,43 +144,61 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
-            CoinsApi api = Injector.INSTANCE.getCoreComponent().api();
+            new AuthWithGoogleTask(account.getIdToken()).execute();
+        }
+    }
 
-            api.authWithGoogle(account.getIdToken()).enqueue(new Callback<AuthResponse>() {
-                @Override
-                public void onResponse(Call<AuthResponse> call, final retrofit2.Response<AuthResponse> response) {
-                    if (response.isSuccessful()) {
-                        new Handler().post(new Runnable() {
-                            @Override
-                            public void run() {
-                                AuthController authController = new AuthController();
-                                authController.setUser(response.body().getUser());
-                                authController.setToken(response.body().getToken());
-                                authController.setMethod("google");
-                                supportFinishAfterTransition();
-                            }
-                        });
-                    } else {
-                        AuthResponse body = Injector.INSTANCE.getCoreComponent().gson().fromJson(response.errorBody().charStream(), AuthResponse.class);
+    private void setLoading(boolean loading) {
+        viewSwitcher.setDisplayedChild(loading ? 1 : 0);
+    }
 
-                        StringBuilder errorMessageBuilder = new StringBuilder();
+    private class AuthWithGoogleTask extends AsyncTask<Void, Void, Void> {
+        private final String token;
 
-                        for (String error : body.getErrors()) {
-                            errorMessageBuilder.append(error).append("\n");
-                        }
+        Response<AuthResponse> response;
 
-                        new AlertDialog.Builder(SignInActivity.this)
-                                .setMessage(errorMessageBuilder.toString())
-                                .setPositiveButton(android.R.string.ok, null)
-                                .show();
-                    }
-                }
+        public AuthWithGoogleTask(String token) {
+            this.token = token;
+        }
 
-                @Override
-                public void onFailure(Call<AuthResponse> call, Throwable t) {
-                    Toast.makeText(SignInActivity.this, R.string.failed_to_sign_in, Toast.LENGTH_SHORT).show();
-                }
-            });
+        @Override
+        protected void onPreExecute() {
+            setLoading(true);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                CoinsApi api = Injector.INSTANCE.getCoreComponent().api();
+                response = api.authWithGoogle(token).execute();
+            } catch (IOException e) {
+                Timber.e(e, "Couldn't authorize with Google token");
+                FirebaseCrash.report(e);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (response == null) {
+                setLoading(false);
+                Toast.makeText(SignInActivity.this, R.string.could_not_connect_to_server, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (response.isSuccessful()) {
+                AuthController authController = new AuthController();
+                authController.setUser(response.body().getUser());
+                authController.setToken(response.body().getToken());
+                authController.setMethod("google");
+                supportFinishAfterTransition();
+            } else {
+                setLoading(false);
+                Gson gson = Injector.INSTANCE.getCoreComponent().gson();
+                List<String> errors = gson.fromJson(response.errorBody().charStream(), new TypeToken<List<String>>(){}.getType());
+                Utils.showErrors(SignInActivity.this, errors);
+            }
         }
     }
 }

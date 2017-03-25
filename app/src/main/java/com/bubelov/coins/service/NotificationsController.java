@@ -40,6 +40,10 @@ public class NotificationsController {
     }
 
     public boolean shouldNotifyUser(Place place) {
+        if (!place.isVisible()) {
+            return false;
+        }
+
         NotificationArea notificationArea = new NotificationAreaProvider(context).get();
 
         if (notificationArea == null) {

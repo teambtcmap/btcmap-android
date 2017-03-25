@@ -12,10 +12,17 @@ android {
         resConfigs "en", "ru", "th"
 
         buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v2/\""
+        buildConfigField "String", "GOOGLE_CLIENT_ID", "\"557789430086-hnt5bk65a636mgi7phhn5t9b1porppik.apps.googleusercontent.com\""
         buildConfigField "boolean", "USE_DB_SNAPSHOT", "true"
     }
 
     signingConfigs {
+        debug {
+            storeFile file(KEYSTORE_PATH)
+            storePassword KEYSTORE_PASSWORD
+            keyAlias "coins"
+            keyPassword KEYSTORE_PASSWORD
+        }
         release {
             storeFile file(KEYSTORE_PATH)
             storePassword KEYSTORE_PASSWORD
