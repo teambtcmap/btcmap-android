@@ -11,6 +11,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.api.CoinsApi;
@@ -32,6 +33,12 @@ import timber.log.Timber;
  */
 
 public class SignUpFragment extends AuthFragment  implements TextView.OnEditorActionListener {
+    private static final int STATE_FILL_FORM = 0;
+    private static final int STATE_PROGRESS = 1;
+
+    @BindView(R.id.state_switcher)
+    ViewSwitcher stateSwitcher;
+
     @BindView(R.id.email)
     EditText email;
 
@@ -49,6 +56,8 @@ public class SignUpFragment extends AuthFragment  implements TextView.OnEditorAc
 
     private Unbinder unbinder;
 
+    private SignUpTask signUpTask;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -63,6 +72,10 @@ public class SignUpFragment extends AuthFragment  implements TextView.OnEditorAc
         super.onDestroyView();
         lastName.setOnEditorActionListener(null);
         unbinder.unbind();
+
+        if (signUpTask != null) {
+            signUpTask.cancel(true);
+        }
     }
 
     @Override
@@ -81,7 +94,12 @@ public class SignUpFragment extends AuthFragment  implements TextView.OnEditorAc
     }
 
     private void signUp(String email, String password, String firstName, String lastName) {
-        new SignUpTask().execute(new UserParams(email, password, firstName, lastName));
+        signUpTask = new SignUpTask();
+        signUpTask.execute(new UserParams(email, password, firstName, lastName));
+    }
+
+    private void setState(int state) {
+        stateSwitcher.setDisplayedChild(state);
     }
 
     private class SignUpTask extends AsyncTask<UserParams, Void, Void> {
@@ -89,7 +107,7 @@ public class SignUpFragment extends AuthFragment  implements TextView.OnEditorAc
 
         @Override
         protected void onPreExecute() {
-            signUpButton.setEnabled(false);
+            setState(STATE_PROGRESS);
         }
 
         @Override
@@ -107,7 +125,10 @@ public class SignUpFragment extends AuthFragment  implements TextView.OnEditorAc
 
         @Override
         protected void onPostExecute(Void result) {
-            signUpButton.setEnabled(true);
+            if (response == null || !response.isSuccessful()) {
+                setState(STATE_FILL_FORM);
+            }
+
             onAuthResponse(response);
         }
     }
