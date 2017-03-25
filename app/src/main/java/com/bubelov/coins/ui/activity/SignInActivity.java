@@ -27,6 +27,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crash.FirebaseCrash;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -193,6 +194,11 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
                 authController.setToken(response.body().getToken());
                 authController.setMethod("google");
                 supportFinishAfterTransition();
+
+                FirebaseAnalytics analytics = Injector.INSTANCE.getAndroidComponent().analytics();
+                Bundle bundle = new Bundle();
+                bundle.putString(FirebaseAnalytics.Param.SIGN_UP_METHOD, "google");
+                analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle);
             } else {
                 setLoading(false);
                 Gson gson = Injector.INSTANCE.getCoreComponent().gson();

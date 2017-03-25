@@ -13,6 +13,7 @@ import com.bubelov.coins.database.DbHelper;
 import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.service.NotificationsController;
 import com.bubelov.coins.util.MapMarkersCache;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import javax.inject.Singleton;
 
@@ -72,5 +73,11 @@ public class AndroidModule {
     @Singleton
     NotificationsController notificationsController(Context context) {
         return new NotificationsController(context);
+    }
+
+    @Provides
+    @Singleton
+    FirebaseAnalytics analytics(Context context) {
+        return FirebaseAnalytics.getInstance(context);
     }
 }

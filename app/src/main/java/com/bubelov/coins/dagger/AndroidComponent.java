@@ -7,6 +7,7 @@ import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.util.AuthController;
 import com.bubelov.coins.util.MapMarkersCache;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import javax.inject.Singleton;
 
@@ -28,6 +29,8 @@ public interface AndroidComponent {
     MapMarkersCache markersCache();
 
     DatabaseSync databaseSync();
+
+    FirebaseAnalytics analytics();
 
     void inject(DatabaseSync sync);
 

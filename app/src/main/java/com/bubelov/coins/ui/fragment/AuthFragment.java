@@ -1,6 +1,7 @@
 package com.bubelov.coins.ui.fragment;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.widget.Toast;
 
@@ -10,6 +11,7 @@ import com.bubelov.coins.model.AuthResponse;
 import com.bubelov.coins.ui.activity.MapActivity;
 import com.bubelov.coins.util.AuthController;
 import com.bubelov.coins.util.Utils;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -34,6 +36,11 @@ public abstract class AuthFragment extends Fragment {
             Intent intent = new Intent(getContext(), MapActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
+
+            FirebaseAnalytics analytics = Injector.INSTANCE.getAndroidComponent().analytics();
+            Bundle bundle = new Bundle();
+            bundle.putString(FirebaseAnalytics.Param.SIGN_UP_METHOD, "email");
+            analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle);
         } else {
             Gson gson = Injector.INSTANCE.getCoreComponent().gson();
             List<String> errors = gson.fromJson(response.errorBody().charStream(), new TypeToken<List<String>>(){}.getType());
