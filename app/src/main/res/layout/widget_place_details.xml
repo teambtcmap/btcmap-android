@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@android:color/transparent"
     android:orientation="vertical">
 
     <ViewSwitcher
@@ -17,40 +17,54 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:orientation="horizontal">
+            android:background="@android:color/transparent"
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/name"
-                android:layout_width="wrap_content"
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:alpha="0.5"
+                android:background="@drawable/shape_place_details_shadow" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:paddingBottom="24dp"
-                android:paddingLeft="24dp"
-                android:paddingRight="8dp"
-                android:paddingTop="24dp"
-                android:textColor="@color/text_primary"
-                android:textSize="20sp"
-                tools:text="Place name" />
+                android:background="@color/white"
+                android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/check_mark"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginTop="2dp"
-                android:src="@drawable/ic_check_circle"
-                android:tint="@color/green_700" />
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:paddingBottom="24dp"
+                    android:paddingLeft="24dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="24dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="20sp"
+                    tools:text="Place name" />
 
-            <ImageView
-                android:id="@+id/warning"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginTop="2dp"
-                android:src="@drawable/ic_warning"
-                android:tint="@color/red_500" />
+                <ImageView
+                    android:id="@+id/check_mark"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="2dp"
+                    android:src="@drawable/ic_check_circle"
+                    android:tint="@color/green_700" />
+
+                <ImageView
+                    android:id="@+id/warning"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="2dp"
+                    android:src="@drawable/ic_warning"
+                    android:tint="@color/red_500" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -64,7 +78,8 @@
 
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
