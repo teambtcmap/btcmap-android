@@ -37,12 +37,12 @@ public abstract class AuthFragment extends Fragment {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
 
-            FirebaseAnalytics analytics = Injector.INSTANCE.getAndroidComponent().analytics();
+            FirebaseAnalytics analytics = Injector.INSTANCE.mainComponent().analytics();
             Bundle bundle = new Bundle();
             bundle.putString(FirebaseAnalytics.Param.SIGN_UP_METHOD, "email");
             analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle);
         } else {
-            Gson gson = Injector.INSTANCE.getCoreComponent().gson();
+            Gson gson = Injector.INSTANCE.mainComponent().gson();
             List<String> errors = gson.fromJson(response.errorBody().charStream(), new TypeToken<List<String>>(){}.getType());
             Utils.showErrors(getContext(), errors);
         }

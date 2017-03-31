@@ -24,7 +24,7 @@ public class AuthController {
     Gson gson;
 
     public AuthController() {
-        Injector.INSTANCE.getAndroidComponent().inject(this);
+        Injector.INSTANCE.mainComponent().inject(this);
     }
 
     public @Nullable User getUser() {

@@ -16,15 +16,13 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
 
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
         }
 
-        Injector.INSTANCE.initCoreComponent();
-        Injector.INSTANCE.initAndroidComponent(this);
-
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
+        Injector.INSTANCE.initMainComponent(this);
         DatabaseSyncService.startIfNeverSynced(this);
     }
 }

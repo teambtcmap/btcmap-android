@@ -36,6 +36,6 @@ public class DatabaseSyncService extends IntentService {
             return;
         }
 
-        Injector.INSTANCE.getAndroidComponent().databaseSync().run();
+        Injector.INSTANCE.mainComponent().databaseSync().run();
     }
 }

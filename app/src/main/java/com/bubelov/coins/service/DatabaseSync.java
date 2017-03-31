@@ -52,7 +52,7 @@ public class DatabaseSync implements Runnable {
     PlacesCache placesCache;
 
     public DatabaseSync() {
-        Injector.INSTANCE.getAndroidComponent().inject(this);
+        Injector.INSTANCE.mainComponent().inject(this);
     }
 
     @Override

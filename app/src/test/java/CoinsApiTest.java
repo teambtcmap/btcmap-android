@@ -26,8 +26,8 @@ public class CoinsApiTest {
 
     @Before
     public void setUp() {
-        Injector.INSTANCE.initCoreComponent();
-        api = Injector.INSTANCE.getCoreComponent().api();
+        Injector.INSTANCE.initMainComponent(null);
+        api = Injector.INSTANCE.mainComponent().api();
     }
 
     @Test

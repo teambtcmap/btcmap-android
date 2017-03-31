@@ -12,8 +12,12 @@ android {
         resConfigs "en", "ru", "th"
 
         buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v2/\""
-        buildConfigField "String", "GOOGLE_CLIENT_ID", "\"557789430086-hnt5bk65a636mgi7phhn5t9b1porppik.apps.googleusercontent.com\""
         buildConfigField "boolean", "USE_DB_SNAPSHOT", "true"
+        buildConfigField "String", "DATABASE_NAME", "\"coins.db\""
+        buildConfigField "int", "DATABASE_VERSION", "22"
+        buildConfigField "String", "GOOGLE_CLIENT_ID", "\"557789430086-hnt5bk65a636mgi7phhn5t9b1porppik.apps.googleusercontent.com\""
+
+        resValue "string", "maps_api_key", "AIzaSyCFlG9gZj-6ja-CQC6cAgvQXq6fs0foYVQ"
     }
 
     signingConfigs {

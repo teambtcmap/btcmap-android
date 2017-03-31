@@ -105,7 +105,7 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
         String query = args == null ? "" : args.getString(QUERY_KEY);
 
         return new LocalCursorLoader(this,
-                Injector.INSTANCE.getAndroidComponent().database(),
+                Injector.INSTANCE.mainComponent().database(),
                 DbContract.Places.TABLE_NAME,
                 null,
                 null,

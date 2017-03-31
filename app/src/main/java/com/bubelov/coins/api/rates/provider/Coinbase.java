@@ -18,7 +18,7 @@ public class Coinbase implements CryptoExchange {
     public Coinbase() {
         api = new Retrofit.Builder()
                 .baseUrl("https://api.coinbase.com/v2/")
-                .addConverterFactory(GsonConverterFactory.create(Injector.INSTANCE.getCoreComponent().gson()))
+                .addConverterFactory(GsonConverterFactory.create(Injector.INSTANCE.mainComponent().gson()))
                 .build()
                 .create(CoinbaseApi.class);
     }

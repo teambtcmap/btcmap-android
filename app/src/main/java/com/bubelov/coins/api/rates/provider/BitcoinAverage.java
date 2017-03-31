@@ -18,7 +18,7 @@ public class BitcoinAverage implements CryptoExchange {
     public BitcoinAverage() {
         api = new Retrofit.Builder()
                 .baseUrl("https://api.bitcoinaverage.com/")
-                .addConverterFactory(GsonConverterFactory.create(Injector.INSTANCE.getCoreComponent().gson()))
+                .addConverterFactory(GsonConverterFactory.create(Injector.INSTANCE.mainComponent().gson()))
                 .build()
                 .create(BitcoinAverageApi.class);
     }

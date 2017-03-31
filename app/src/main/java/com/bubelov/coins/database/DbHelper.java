@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.bubelov.coins.R;
+import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.service.DatabaseSyncService;
 
 /**
@@ -16,9 +16,9 @@ public class DbHelper extends SQLiteOpenHelper {
 
     public DbHelper(Context context) {
         super(context,
-                context.getResources().getString(R.string.database_name),
+                BuildConfig.DATABASE_NAME,
                 null,
-                context.getResources().getInteger(R.integer.database_version));
+                BuildConfig.DATABASE_VERSION);
         this.context = context;
     }
 

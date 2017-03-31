@@ -62,7 +62,7 @@ public class NotificationsController {
             return false;
         }
 
-        SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
+        SQLiteDatabase db = Injector.INSTANCE.mainComponent().database();
         return DatabaseUtils.queryNumEntries(db, DbContract.Places.TABLE_NAME, "_id = ?", new String[]{String.valueOf(place.getId())}) == 0;
     }
 

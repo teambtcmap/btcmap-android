@@ -29,7 +29,7 @@ public class PlaceNotification {
     }
 
     public static List<PlaceNotification> queryForAll() {
-        Context context = Injector.INSTANCE.getAndroidComponent().context();
+        Context context = Injector.INSTANCE.mainComponent().context();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         if (preferences.contains(KEY_PENDING_PLACES)) {
@@ -47,13 +47,13 @@ public class PlaceNotification {
     }
 
     public static void deleteAll() {
-        Context context = Injector.INSTANCE.getAndroidComponent().context();
+        Context context = Injector.INSTANCE.mainComponent().context();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         preferences.edit().remove(KEY_PENDING_PLACES).apply();
     }
 
     private static void replaceWith(List<PlaceNotification> places) {
-        Context context = Injector.INSTANCE.getAndroidComponent().context();
+        Context context = Injector.INSTANCE.mainComponent().context();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         preferences.edit().putString(KEY_PENDING_PLACES, new Gson().toJson(places)).apply();
     }

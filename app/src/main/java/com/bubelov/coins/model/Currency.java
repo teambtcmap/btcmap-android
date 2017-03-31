@@ -53,12 +53,12 @@ public class Currency extends AbstractEntity implements Serializable {
     // Database stuff
 
     public static long getCount() {
-        SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
+        SQLiteDatabase db = Injector.INSTANCE.mainComponent().database();
         return DatabaseUtils.queryNumEntries(db, DbContract.Currencies.TABLE_NAME);
     }
 
     public static Currency find(long id) {
-        SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
+        SQLiteDatabase db = Injector.INSTANCE.mainComponent().database();
         Cursor cursor = db.query(DbContract.Currencies.TABLE_NAME, null, "_id = ?", new String[]{String.valueOf(id)}, null, null, null);
 
         try {
@@ -70,7 +70,7 @@ public class Currency extends AbstractEntity implements Serializable {
 
     public static List<Currency> findByPlace(Place place) {
         List<Currency> currencies = new ArrayList<>();
-        SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
+        SQLiteDatabase db = Injector.INSTANCE.mainComponent().database();
         Cursor cursor = db.query(DbContract.CurrenciesPlaces.TABLE_NAME, null, "place_id = ?", new String[]{String.valueOf(place.getId())}, null, null, null);
 
         try {
@@ -94,7 +94,7 @@ public class Currency extends AbstractEntity implements Serializable {
     }
 
     public boolean insert() {
-        SQLiteDatabase db = Injector.INSTANCE.getAndroidComponent().database();
+        SQLiteDatabase db = Injector.INSTANCE.mainComponent().database();
         long rowId = db.insertWithOnConflict(DbContract.Currencies.TABLE_NAME, null, toValues(), SQLiteDatabase.CONFLICT_REPLACE);
 
         if (rowId == -1) {

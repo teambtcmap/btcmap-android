@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.bubelov.coins.R;
+import com.bubelov.coins.BuildConfig;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,10 +27,10 @@ public class AssetDbHelper extends SQLiteOpenHelper {
     private SQLiteDatabase db = null;
 
     public AssetDbHelper(Context context) {
-        super(context, context.getResources().getString(R.string.database_name), null, context.getResources().getInteger(R.integer.database_version));
+        super(context, BuildConfig.DATABASE_NAME, null, BuildConfig.DATABASE_VERSION);
 
         this.context = context;
-        this.version = context.getResources().getInteger(R.integer.database_version);
+        this.version = BuildConfig.DATABASE_VERSION;
 
         assetsDbFilePath = String.format("databases/%s", getDatabaseName());
         internalDbFilePath = String.format("%s/databases/%s", context.getApplicationInfo().dataDir, getDatabaseName());

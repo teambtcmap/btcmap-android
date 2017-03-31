@@ -95,7 +95,7 @@ public class SignInFragment extends AuthFragment implements TextView.OnEditorAct
 
         @Override
         protected Void doInBackground(Void... params) {
-            CoinsApi api = Injector.INSTANCE.getCoreComponent().api();
+            CoinsApi api = Injector.INSTANCE.mainComponent().api();
 
             try {
                 response = api.authWithEmail(email, password).execute();

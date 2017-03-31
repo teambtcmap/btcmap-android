@@ -170,7 +170,7 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                CoinsApi api = Injector.INSTANCE.getCoreComponent().api();
+                CoinsApi api = Injector.INSTANCE.mainComponent().api();
                 response = api.authWithGoogle(token).execute();
             } catch (IOException e) {
                 Timber.e(e, "Couldn't authorize with Google token");
@@ -195,13 +195,13 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
                 authController.setMethod("google");
                 supportFinishAfterTransition();
 
-                FirebaseAnalytics analytics = Injector.INSTANCE.getAndroidComponent().analytics();
+                FirebaseAnalytics analytics = Injector.INSTANCE.mainComponent().analytics();
                 Bundle bundle = new Bundle();
                 bundle.putString(FirebaseAnalytics.Param.SIGN_UP_METHOD, "google");
                 analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle);
             } else {
                 setLoading(false);
-                Gson gson = Injector.INSTANCE.getCoreComponent().gson();
+                Gson gson = Injector.INSTANCE.mainComponent().gson();
                 List<String> errors = gson.fromJson(response.errorBody().charStream(), new TypeToken<List<String>>(){}.getType());
                 Utils.showErrors(SignInActivity.this, errors);
             }
