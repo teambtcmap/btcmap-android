@@ -52,6 +52,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.Collection;
@@ -467,6 +468,16 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         selectedPlace.setCurrencies(Currency.findByPlace(selectedPlace));
         placeDetails.setPlace(selectedPlace);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+        logSelectPlaceEvent(selectedPlace);
+    }
+
+    private void logSelectPlaceEvent(@NonNull Place place) {
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, String.valueOf(place.getId()));
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, place.getName());
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "place");
+        Injector.INSTANCE.mainComponent().analytics().logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
     }
 
     @OnClick(R.id.fab)
