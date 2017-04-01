@@ -2,6 +2,8 @@ package com.bubelov.coins.ui.widget;
 
 import android.content.Context;
 import android.graphics.Paint;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -11,9 +13,11 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.bubelov.coins.R;
+import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.util.Utils;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.Iterator;
 
@@ -207,11 +211,20 @@ public class PlaceDetailsView extends FrameLayout {
             public boolean onMenuItemClick(android.view.MenuItem item) {
                 if (item.getItemId() == R.id.action_share) {
                     Utils.share(getContext(), getResources().getString(R.string.share_place_message_title), getResources().getString(R.string.share_place_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", place.getLatitude(), place.getLongitude())));
+                    logSharePlaceEvent(place);
+                    return true;
                 }
 
                 return false;
             }
         });
+    }
+
+    private void logSharePlaceEvent(@NonNull Place place) {
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, String.valueOf(place.getId()));
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "place");
+        Injector.INSTANCE.mainComponent().analytics().logEvent(FirebaseAnalytics.Event.SHARE, bundle);
     }
 
     public interface Listener {
