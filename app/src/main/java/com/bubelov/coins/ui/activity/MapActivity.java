@@ -493,6 +493,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     public void onPlaceDetailsClick() {
         if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            Analytics.logViewContentEvent(String.valueOf(selectedPlace.getId()), selectedPlace.getName(), "place");
         } else {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }

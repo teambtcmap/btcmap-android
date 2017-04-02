@@ -17,6 +17,10 @@ public class Analytics {
         logContentEvent(FirebaseAnalytics.Event.SELECT_CONTENT, itemId, itemName, contentType);
     }
 
+    public static void logViewContentEvent(@NonNull String itemId, @Nullable String itemName, @NonNull String contentType) {
+        logContentEvent(FirebaseAnalytics.Event.VIEW_ITEM, itemId, itemName, contentType);
+    }
+
     public static void logShareContentEvent(@NonNull String itemId, @Nullable String itemName, @NonNull String contentType) {
         logContentEvent(FirebaseAnalytics.Event.SHARE, itemId, itemName, contentType);
     }
