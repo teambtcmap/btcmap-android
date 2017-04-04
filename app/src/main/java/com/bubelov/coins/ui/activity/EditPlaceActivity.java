@@ -265,7 +265,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
                     Place place = response.body();
                     Place.insert(Collections.singletonList(place));
                     PlacesCache cache = Injector.INSTANCE.mainComponent().placesCache();
-                    cache.invalidate(place);
+                    cache.invalidate();
                     return true;
                 } else {
                     return false;
@@ -308,7 +308,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
                     Place place = response.body();
                     Place.insert(Collections.singletonList(place));
                     PlacesCache cache = Injector.INSTANCE.mainComponent().placesCache();
-                    cache.invalidate(place);
+                    cache.invalidate();
                     return true;
                 } else {
                     return false;

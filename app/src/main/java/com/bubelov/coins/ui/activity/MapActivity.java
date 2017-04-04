@@ -66,7 +66,7 @@ import butterknife.OnClick;
  * @author Igor Bubelov
  */
 
-public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener, PlaceCategoriesAdapter.Listener, MapPopupMenu.Listener, PlacesCache.PlacesCacheListener {
+public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener, PlaceCategoriesAdapter.Listener, MapPopupMenu.Listener, PlacesCache.Callback {
     private static final String PLACE_ID_EXTRA = "place_id";
     private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
     private static final String CLEAR_PLACE_NOTIFICATIONS_EXTRA = "clear_place_notifications";
@@ -266,7 +266,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         placesCache = Injector.INSTANCE.mainComponent().placesCache();
-        placesCache.getListeners().add(this);
+        placesCache.setCallback(this);
 
         handleIntent(getIntent());
     }
@@ -394,12 +394,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
     }
 
-    private void onPlacesLoaded(Collection<Place> places) {
-        placesManager.clearItems();
-        placesManager.addItems(places);
-        placesManager.cluster();
-    }
-
     private void moveToLastLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -451,19 +445,12 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             return;
         }
 
-        final LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+        Collection<Place> places = placesCache.getPlaces(bounds, selectedCategory);
 
-        if (placesCache.isInitialized()) {
-            onPlacesLoaded(placesCache.getPlaces(bounds, selectedCategory));
-        } else {
-            placesCache.getListeners().add(new PlacesCache.PlacesCacheListener() {
-                @Override
-                public void onPlacesCacheInitialized() {
-                    onPlacesLoaded(placesCache.getPlaces(bounds, selectedCategory));
-                    placesCache.getListeners().remove(this);
-                }
-            });
-        }
+        placesManager.clearItems();
+        placesManager.addItems(places);
+        placesManager.cluster();
     }
 
     private void selectPlace(long placeId) {

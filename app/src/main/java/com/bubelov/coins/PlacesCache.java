@@ -5,13 +5,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
 import com.bubelov.coins.database.DbContract;
-import com.bubelov.coins.model.PlaceCategory;
 import com.bubelov.coins.model.Place;
+import com.bubelov.coins.model.PlaceCategory;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -22,75 +22,65 @@ import timber.log.Timber;
  */
 
 public class PlacesCache {
-    SQLiteDatabase db;
+    private final SQLiteDatabase db;
 
-    private final Collection<Place> data = new ArrayList<>();
+    private Place[] places = new Place[0];
 
-    private volatile boolean initialized;
-
-    private List<PlacesCacheListener> listeners = new ArrayList<>();
+    private Callback callback;
 
     @Inject
     public PlacesCache(SQLiteDatabase db) {
         this.db = db;
-        initialize();
-    }
-
-    public boolean isInitialized() {
-        return initialized;
+        invalidate();
     }
 
     public Collection<Place> getPlaces(LatLngBounds bounds, PlaceCategory category) {
-        Timber.d("getPlaces called");
+        Timber.d("Retrieving places for area %s", bounds);
         long time = System.currentTimeMillis();
+        Collection<Place> result = new ArrayList<>();
+        int placeCount = this.places.length;
 
-        Collection<Place> places = new ArrayList<>();
+        for (int i = 0; i < placeCount; i++) {
+            Place place = this.places[i];
 
-        for (Place place : data) {
             if (bounds.contains(place.getPosition())
                     && (category == null || category.name().equalsIgnoreCase(place.getAmenity()))) {
-                places.add(place);
+                result.add(place);
             }
         }
 
         time = System.currentTimeMillis() - time;
-        Timber.d("%s places found. Time: %s", places.size(), time);
-
-        return places;
+        Timber.d("%s places found. Time: %s", result.size(), time);
+        return result;
     }
 
-    public int getSize() {
-        return data.size();
+    public void setCallback(Callback callback) {
+        this.callback = callback;
     }
 
     public void invalidate() {
-        Timber.d("Invalidating...");
-        initialized = false;
-        initialize();
+        new InitCacheTask().executeOnExecutor(Executors.newSingleThreadExecutor());
     }
 
-    public void invalidate(Place place) {
-        data.remove(place);
-        data.add(place);
-    }
+    private class InitCacheTask extends AsyncTask<Void, Void, Place[]> {
+        private long startTime;
 
-    public List<PlacesCacheListener> getListeners() {
-        return listeners;
-    }
-
-    private void initialize() {
-        new InitCacheTask().execute();
-    }
-
-    private class InitCacheTask extends AsyncTask<Void, Void, List<Place>> {
         @Override
-        protected List<Place> doInBackground(Void... params) {
-            Timber.d("Querying data from DB");
-            long time = System.currentTimeMillis();
-            Cursor cursor = db.rawQuery("select distinct p._id, p.latitude, p.longitude, p.amenity from places as p join currencies_places as cp on p._id = cp.place_id join currencies c on c._id = cp.currency_id where p.visible = 1", null);
-            Timber.d("Query time: %s", System.currentTimeMillis() - time);
+        protected void onPreExecute() {
+            Timber.d("Cache initialization started");
+            startTime = System.currentTimeMillis();
+        }
 
-            List<Place> newestData = new ArrayList<>(10000);
+        @Override
+        protected Place[] doInBackground(Void... params) {
+            long time = System.currentTimeMillis();
+            Cursor cursor = db.rawQuery("select _id, latitude, longitude, amenity from places where visible = 1", null);
+            Timber.d("%s places retrieved from DB", cursor.getCount());
+            Timber.d("DB query time: %s", System.currentTimeMillis() - time);
+            time = System.currentTimeMillis();
+
+            Place[] places = new Place[cursor.getCount()];
+            int index = 0;
 
             while (cursor.moveToNext()) {
                 Place place = new Place();
@@ -98,27 +88,27 @@ public class PlacesCache {
                 place.setLatitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Places.LATITUDE)));
                 place.setLongitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Places.LONGITUDE)));
                 place.setAmenity(cursor.getString(cursor.getColumnIndex(DbContract.Places.AMENITY)));
-                newestData.add(place);
+                places[index++] = place;
             }
 
-            Timber.d("%s places loaded. Overall time: %s", newestData.size(), System.currentTimeMillis() - time);
+            Timber.d("Object mapping time: %s", System.currentTimeMillis() - time);
             cursor.close();
-            return newestData;
+            return places;
         }
 
         @Override
-        protected void onPostExecute(List<Place> newestData) {
-            data.clear();
-            data.addAll(newestData);
-            initialized = true;
+        protected void onPostExecute(Place[] places) {
+            PlacesCache.this.places = places;
 
-            for (PlacesCacheListener listener : new ArrayList<>(listeners)) {
-                listener.onPlacesCacheInitialized();
+            Timber.d("Cache initialization finished. Total time: %s", System.currentTimeMillis() - startTime);
+
+            if (callback != null) {
+                callback.onPlacesCacheInitialized();
             }
         }
     }
 
-    public interface PlacesCacheListener {
+    public interface Callback {
         void onPlacesCacheInitialized();
     }
 }
