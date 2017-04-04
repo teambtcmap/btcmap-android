@@ -68,6 +68,12 @@ public class MapPopupMenu extends PopupWindow {
         dismiss();
     }
 
+    @OnClick(R.id.chat)
+    public void onChatClick() {
+        listener.onChatClick();
+        dismiss();
+    }
+
     @OnClick(R.id.sign_in)
     public void onSignInClick() {
         listener.onSignInClick();
@@ -84,6 +90,8 @@ public class MapPopupMenu extends PopupWindow {
         void onSettingsClick();
 
         void onExchangeRatesClick();
+
+        void onChatClick();
 
         void onSignInClick();
 

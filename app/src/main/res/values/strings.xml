@@ -72,6 +72,7 @@
     <string name="could_not_update_place">Could not update place</string>
     <string name="first_name">First name</string>
     <string name="last_name">Last name</string>
+    <string name="chat">Chat</string>
 
     <string-array name="distance_units">
         <item>Automatic</item>

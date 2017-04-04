@@ -78,5 +78,6 @@
     </string-array>
     <string name="first_name">Имя</string>
     <string name="last_name">Фамилия</string>
+    <string name="chat">Chat</string>
 
 </resources>

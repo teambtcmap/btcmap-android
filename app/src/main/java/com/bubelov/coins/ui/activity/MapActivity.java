@@ -39,6 +39,7 @@ import com.bubelov.coins.util.AuthController;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
+import com.bubelov.coins.util.Utils;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -335,6 +336,12 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         Intent intent = new Intent(this, ExchangeRatesActivity.class);
         startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
         Analytics.logSelectContentEvent("exchange_rates", null, "screen");
+    }
+
+    @Override
+    public void onChatClick() {
+        Utils.openUrl(this, "https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw");
+        Analytics.logSelectContentEvent("chat", null, "screen");
     }
 
     @Override
