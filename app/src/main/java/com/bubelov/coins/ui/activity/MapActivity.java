@@ -4,19 +4,25 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,15 +30,12 @@ import com.bubelov.coins.Constants;
 import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.model.PlaceCategory;
 import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.model.PlaceNotification;
 import com.bubelov.coins.model.NotificationArea;
+import com.bubelov.coins.model.User;
 import com.bubelov.coins.provider.NotificationAreaProvider;
-import com.bubelov.coins.ui.adapter.PlaceCategoriesAdapter;
-import com.bubelov.coins.ui.dialog.MapPopupMenu;
-import com.bubelov.coins.ui.dialog.PlaceCategoryDialog;
 import com.bubelov.coins.ui.widget.PlaceDetailsView;
 import com.bubelov.coins.util.Analytics;
 import com.bubelov.coins.util.AuthController;
@@ -66,7 +69,7 @@ import butterknife.OnClick;
  * @author Igor Bubelov
  */
 
-public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener, PlaceCategoriesAdapter.Listener, MapPopupMenu.Listener, PlacesCache.Callback {
+public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener, PlacesCache.Callback {
     private static final String PLACE_ID_EXTRA = "place_id";
     private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
     private static final String CLEAR_PLACE_NOTIFICATIONS_EXTRA = "clear_place_notifications";
@@ -79,11 +82,18 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     private static final float MAP_DEFAULT_ZOOM = 13;
 
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawerLayout;
+
+    @BindView(R.id.navigation_view)
+    NavigationView navigationView;
+
+    ImageView avatar;
+
+    TextView userName;
+
     @BindView(R.id.toolbar)
     Toolbar toolbar;
-
-    @BindView(R.id.category)
-    TextView categoryView;
 
     @BindView(R.id.fab)
     View actionButton;
@@ -91,11 +101,11 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     @BindView(R.id.place_details)
     PlaceDetailsView placeDetails;
 
+    private ActionBarDrawerToggle drawerToggle;
+
     private GoogleMap map;
 
     private ClusterManager<Place> placesManager;
-
-    private PlaceCategory selectedCategory;
 
     private Place selectedPlace;
 
@@ -128,6 +138,10 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         ButterKnife.bind(this);
+
+        View header = navigationView.getHeaderView(0);
+        avatar = ButterKnife.findById(header, R.id.avatar);
+        userName = ButterKnife.findById(header, R.id.user_name);
 
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -188,6 +202,75 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         toolbar.inflateMenu(R.menu.menu_map_activity);
         toolbar.setOnMenuItemClickListener(this);
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(navigationView);
+            }
+        });
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_exchange_rates:
+                        drawerLayout.closeDrawers();
+                        openExchangeRatesScreen();
+                        return true;
+
+                    case R.id.action_notification_area:
+                        drawerLayout.closeDrawers();
+                        openNotificationAreaScreen();
+                        return true;
+
+                    case R.id.action_chat:
+                        drawerLayout.closeDrawers();
+                        openChat();
+                        return true;
+
+                    case R.id.action_settings:
+                        drawerLayout.closeDrawers();
+                        openSettingsScreen();
+                        return true;
+                }
+
+                return false;
+            }
+        });
+
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
+        drawerLayout.addDrawerListener(drawerToggle);
+
+        final AuthController authController = new AuthController();
+
+        if (authController.isAuthorized()) {
+            User user = authController.getUser();
+
+            if (!TextUtils.isEmpty(user.getFirstName())) {
+                userName.setText(String.format("%s %s", user.getFirstName(), user.getLastName()));
+            } else {
+                userName.setText(user.getEmail());
+            }
+        } else {
+            avatar.setImageResource(R.drawable.ic_no_avatar);
+            userName.setText(R.string.guest);
+        }
+
+        header.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!authController.isAuthorized()) {
+                    signIn();
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        drawerToggle.syncState();
     }
 
     @Override
@@ -224,6 +307,33 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.action_add:
+                if (new AuthController().isAuthorized()) {
+                    EditPlaceActivity.startForResult(this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
+                } else {
+                    SignInActivity.start(this);
+                }
+
+                return true;
+            case R.id.action_search:
+                Location lastLocation = null;
+
+                if (googleApiClient != null && googleApiClient.isConnected() && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+                }
+
+                FindPlaceActivity.startForResult(this, lastLocation, REQUEST_FIND_PLACE);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case REQUEST_ACCESS_LOCATION:
@@ -235,6 +345,33 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                     map.setMyLocationEnabled(true);
                     moveToLastLocation();
                 }
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(navigationView)) {
+            drawerLayout.closeDrawer(navigationView);
+            return;
+        }
+
+        switch (bottomSheetBehavior.getState()) {
+            case BottomSheetBehavior.STATE_EXPANDED:
+            case BottomSheetBehavior.STATE_SETTLING:
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                break;
+            case BottomSheetBehavior.STATE_COLLAPSED:
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                break;
+            case BottomSheetBehavior.STATE_HIDDEN:
+                super.onBackPressed();
+                break;
         }
     }
 
@@ -272,105 +409,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        int id = item.getItemId();
-
-        switch (id) {
-            case R.id.action_add:
-                if (new AuthController().isAuthorized()) {
-                    EditPlaceActivity.startForResult(this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
-                } else {
-                    SignInActivity.start(this);
-                }
-
-                return true;
-            case R.id.action_search:
-                Location lastLocation = null;
-
-                if (googleApiClient != null && googleApiClient.isConnected() && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-                }
-
-                FindPlaceActivity.startForResult(this, lastLocation, REQUEST_FIND_PLACE);
-                return true;
-            case R.id.action_popup:
-                MapPopupMenu popupMenu = new MapPopupMenu(MapActivity.this);
-                popupMenu.showAsDropDown(findViewById(R.id.top_right_corner));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        switch (bottomSheetBehavior.getState()) {
-            case BottomSheetBehavior.STATE_EXPANDED:
-            case BottomSheetBehavior.STATE_SETTLING:
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                break;
-            case BottomSheetBehavior.STATE_COLLAPSED:
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-                break;
-            case BottomSheetBehavior.STATE_HIDDEN:
-                super.onBackPressed();
-                break;
-        }
-    }
-
-    @Override
-    public void onPlaceCategorySelected(PlaceCategory category) {
-        selectedCategory = category;
-        @StringRes int textResId = category == null ? R.string.all_places : category.getPluralStringId();
-        categoryView.setText(textResId);
-        reloadPlaces();
-    }
-
-    @Override
-    public void onSettingsClick() {
-        SettingsActivity.start(this);
-    }
-
-    @Override
-    public void onExchangeRatesClick() {
-        Intent intent = new Intent(this, ExchangeRatesActivity.class);
-        startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
-        Analytics.logSelectContentEvent("exchange_rates", null, "screen");
-    }
-
-    @Override
-    public void onChatClick() {
-        Utils.openUrl(this, "https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw");
-        Analytics.logSelectContentEvent("chat", null, "screen");
-    }
-
-    @Override
-    public void onSignInClick() {
-        SignInActivity.start(this);
-    }
-
-    @Override
-    public void onSignOutClick() {
-        final AuthController authController = new AuthController();
-
-        if ("google".equalsIgnoreCase(authController.getMethod())) {
-            Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallback<Status>() {
-                @Override
-                public void onResult(@NonNull Status status) {
-                    authController.setUser(null);
-                    authController.setToken(null);
-                    authController.setMethod(null);
-                    Toast.makeText(MapActivity.this, status.getStatusMessage(), Toast.LENGTH_LONG).show();
-                }
-            });
-        } else {
-            authController.setUser(null);
-            authController.setToken(null);
-            authController.setMethod(null);
-        }
-    }
-
-    @Override
     public void onPlacesCacheInitialized() {
         reloadPlaces();
     }
@@ -392,6 +430,51 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             NotificationArea notificationArea = (NotificationArea) intent.getSerializableExtra(NOTIFICATION_AREA_EXTRA);
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), MAP_DEFAULT_ZOOM));
         }
+    }
+
+    private void signIn() {
+        SignInActivity.start(this);
+    }
+
+    private void signOut() {
+        final AuthController authController = new AuthController();
+
+        if ("google".equalsIgnoreCase(authController.getMethod())) {
+            Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(@NonNull Status status) {
+                    authController.setUser(null);
+                    authController.setToken(null);
+                    authController.setMethod(null);
+                    Toast.makeText(MapActivity.this, status.getStatusMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            authController.setUser(null);
+            authController.setToken(null);
+            authController.setMethod(null);
+        }
+    }
+
+    private void openExchangeRatesScreen() {
+        Intent intent = new Intent(MapActivity.this, ExchangeRatesActivity.class);
+        startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(MapActivity.this).toBundle());
+        Analytics.logSelectContentEvent("exchange_rates", null, "screen");
+    }
+
+    private void openNotificationAreaScreen() {
+        Intent intent = new Intent(this, NotificationAreaActivity.class);
+        startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
+        Analytics.logSelectContentEvent("notification_area", null, "screen");
+    }
+
+    private void openChat() {
+        Utils.openUrl(this, "https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw");
+        Analytics.logSelectContentEvent("chat", null, "screen");
+    }
+
+    private void openSettingsScreen() {
+        SettingsActivity.start(this);
     }
 
     private void moveToLastLocation() {
@@ -446,7 +529,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        Collection<Place> places = placesCache.getPlaces(bounds, selectedCategory);
+        Collection<Place> places = placesCache.getPlaces(bounds, null);
 
         placesManager.clearItems();
         placesManager.addItems(places);
@@ -476,11 +559,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     REQUEST_ACCESS_LOCATION);
         }
-    }
-
-    @OnClick(R.id.categories_spinner)
-    public void onCategoriesSpinnerClick() {
-        new PlaceCategoryDialog().show(getSupportFragmentManager(), PlaceCategoryDialog.TAG);
     }
 
     @OnClick(R.id.place_details)

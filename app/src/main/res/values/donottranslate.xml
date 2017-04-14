@@ -2,7 +2,6 @@
 
 <resources>
 
-    <string name="pref_area_of_interest_key" translatable="false">pref_area_of_interest</string>
     <string name="pref_distance_units_key" translatable="false">pref_distance_units</string>
 
     <string name="pref_distance_units_automatic" translatable="false">AUTOMATIC</string>

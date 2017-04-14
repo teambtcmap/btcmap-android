@@ -2,11 +2,6 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <Preference
-        android:key="@string/pref_area_of_interest_key"
-        android:summary="@string/pref_area_of_interest_summary"
-        android:title="@string/pref_area_of_interest" />
-
     <ListPreference
         android:defaultValue="@string/pref_distance_units_automatic"
         android:entries="@array/distance_units"

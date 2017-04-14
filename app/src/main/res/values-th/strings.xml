@@ -6,9 +6,6 @@
 
     <string name="action_search">ค้นหา</string>
 
-    <string name="pref_area_of_interest">สถานที่</string>
-    <string name="pref_area_of_interest_summary">เลือกสถานที่ที่คุณสนใจ</string>
-
     <string name="notification_new_place">New place in your area</string>
     <string name="notification_new_place_no_name">Touch to see where</string>
 
@@ -79,5 +76,11 @@
     <string name="first_name">First name</string>
     <string name="last_name">Last name</string>
     <string name="chat">Chat</string>
+    <string name="close">Close</string>
+    <string name="open">Open</string>
+    <string name="menu_item_exchange_rates">Exchange rates</string>
+    <string name="menu_item_notification_area">Notification area</string>
+    <string name="menu_item_chat">Chat</string>
+    <string name="menu_item_settings">Settings</string>
 
 </resources>

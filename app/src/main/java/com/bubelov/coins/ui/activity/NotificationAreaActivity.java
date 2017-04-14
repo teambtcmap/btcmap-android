@@ -1,13 +1,10 @@
 package com.bubelov.coins.ui.activity;
 
 import android.Manifest;
-import android.app.Activity;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.SeekBar;
@@ -52,11 +49,6 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
     private GoogleMap map;
 
     private Circle areaCircle;
-
-    public static void start(Activity activity) {
-        Intent intent = new Intent(activity, NotificationAreaActivity.class);
-        activity.startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -13,7 +13,6 @@ import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.service.DatabaseSyncService;
 import com.bubelov.coins.service.NotificationsController;
-import com.bubelov.coins.ui.activity.NotificationAreaActivity;
 
 import java.util.Random;
 
@@ -30,10 +29,6 @@ public class SettingsFragment extends PreferenceFragment {
 
     @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
-        if (preference.getKey().equals(getString(R.string.pref_area_of_interest_key))) {
-            NotificationAreaActivity.start(getActivity());
-        }
-
         if (preference.getKey().equals("pref_test_notification")) {
             SQLiteDatabase db = Injector.INSTANCE.mainComponent().database();
 
