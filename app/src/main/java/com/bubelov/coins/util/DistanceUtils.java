@@ -6,7 +6,6 @@ import com.google.android.gms.maps.model.LatLng;
 
 /**
  * Author: Igor Bubelov
- * Date: 10/16/15 6:55 PM
  */
 
 public class DistanceUtils {

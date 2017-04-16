@@ -50,12 +50,7 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
     public void onBindViewHolder(ResultViewHolder holder, int position) {
         final Place place = places.get(position);
         holder.name.setText(place.getName());
-        holder.ripple.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                listener.onPlaceSelected(place);
-            }
-        });
+        holder.ripple.setOnClickListener(v -> listener.onPlaceSelected(place));
 
         if (userLocation == null) {
             holder.distance.setVisibility(View.GONE);

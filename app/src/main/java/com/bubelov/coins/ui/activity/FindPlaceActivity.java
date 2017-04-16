@@ -92,12 +92,7 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
         resultsAdapter = new PlacesSearchResultsAdapter(this, userLocation, getDistanceUnits());
         resultsView.setAdapter(resultsAdapter);
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                supportFinishAfterTransition();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
     }
 
     @Override

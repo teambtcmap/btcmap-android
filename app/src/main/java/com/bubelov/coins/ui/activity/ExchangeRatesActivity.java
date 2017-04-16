@@ -7,7 +7,6 @@ import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.api.rates.provider.BitcoinAverage;
@@ -48,12 +47,7 @@ public class ExchangeRatesActivity extends AbstractActivity {
         setContentView(R.layout.activity_exchange_rates);
         ButterKnife.bind(this);
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                supportFinishAfterTransition();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
 
         ratesView.setLayoutManager(new LinearLayoutManager(this));
         ratesView.setHasFixedSize(true);

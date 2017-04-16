@@ -147,13 +147,7 @@ public class PlaceDetailsView extends FrameLayout {
             website.setText(place.getWebsite());
             website.setTextColor(getResources().getColor(R.color.primary_dark));
             website.setPaintFlags(website.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-
-            website.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Utils.openUrl(PlaceDetailsView.this.getContext(), place.getWebsite());
-                }
-            });
+            website.setOnClickListener(view -> Utils.openUrl(PlaceDetailsView.this.getContext(), place.getWebsite()));
         }
 
         if (TextUtils.isEmpty(place.getDescription())) {
@@ -192,28 +186,22 @@ public class PlaceDetailsView extends FrameLayout {
         inflate(getContext(), R.layout.widget_place_details, this);
         ButterKnife.bind(this);
 
-        toolbar.setNavigationOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (listener != null) {
-                    listener.onDismissed();
-                }
+        toolbar.setNavigationOnClickListener(view -> {
+            if (listener != null) {
+                listener.onDismissed();
             }
         });
 
         toolbar.inflateMenu(R.menu.menu_place_details);
 
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(android.view.MenuItem item) {
-                if (item.getItemId() == R.id.action_share) {
-                    Utils.share(getContext(), getResources().getString(R.string.share_place_message_title), getResources().getString(R.string.share_place_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", place.getLatitude(), place.getLongitude())));
-                    Analytics.logShareContentEvent(String.valueOf(place.getId()), place.getName(), "place");
-                    return true;
-                }
-
-                return false;
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_share) {
+                Utils.share(getContext(), getResources().getString(R.string.share_place_message_title), getResources().getString(R.string.share_place_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", place.getLatitude(), place.getLongitude())));
+                Analytics.logShareContentEvent(String.valueOf(place.getId()), place.getName(), "place");
+                return true;
             }
+
+            return false;
         });
     }
 

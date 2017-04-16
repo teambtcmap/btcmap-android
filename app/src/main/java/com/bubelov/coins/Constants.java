@@ -4,7 +4,6 @@ import com.google.android.gms.maps.model.LatLng;
 
 /**
  * Author: Igor Bubelov
- * Date: 14/07/14 21:35
  */
 
 public interface Constants {

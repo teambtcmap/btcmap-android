@@ -5,7 +5,6 @@ import retrofit2.http.GET;
 
 /**
  * Author: Igor Bubelov
- * Date: 9/28/15 10:03 PM
  */
 
 public interface BitstampApi {

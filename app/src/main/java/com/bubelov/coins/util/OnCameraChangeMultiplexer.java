@@ -5,7 +5,6 @@ import com.google.android.gms.maps.model.CameraPosition;
 
 /**
  * Author: Igor Bubelov
- * Date: 06/07/14 16:07
  */
 
 public class OnCameraChangeMultiplexer implements GoogleMap.OnCameraChangeListener {

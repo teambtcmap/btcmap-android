@@ -1,7 +1,6 @@
 package com.bubelov.coins.ui.activity;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;

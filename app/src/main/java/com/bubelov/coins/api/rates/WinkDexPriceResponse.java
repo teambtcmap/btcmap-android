@@ -2,7 +2,6 @@ package com.bubelov.coins.api.rates;
 
 /**
  * Author: Igor Bubelov
- * Date: 12/05/15 22:18
  */
 
 public class WinkDexPriceResponse {

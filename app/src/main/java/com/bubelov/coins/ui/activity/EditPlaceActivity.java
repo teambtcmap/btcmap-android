@@ -1,7 +1,6 @@
 package com.bubelov.coins.ui.activity;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,7 +10,6 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Switch;
@@ -97,42 +95,33 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
         setContentView(R.layout.activity_edit_place);
         ButterKnife.bind(this);
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                supportFinishAfterTransition();
-            }
-        });
-
+        toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         toolbar.inflateMenu(R.menu.menu_edit_place);
 
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.action_send) {
-                    if (place == null) {
-                        if (name.length() == 0) {
-                            showAlert(R.string.name_is_not_specified, null);
-                            return true;
-                        }
-
-                        if (pickedLocation == null) {
-                            showAlert(R.string.location_is_not_specified, null);
-                            return true;
-                        }
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_send) {
+                if (place == null) {
+                    if (name.length() == 0) {
+                        showAlert(R.string.name_is_not_specified);
+                        return true;
                     }
 
-                    if (place == null) {
-                        new AddPlaceTask().execute();
-                        return true;
-                    } else {
-                        new UpdatePlaceTask().execute();
+                    if (pickedLocation == null) {
+                        showAlert(R.string.location_is_not_specified);
                         return true;
                     }
                 }
 
-                return false;
+                if (place == null) {
+                    new AddPlaceTask().execute();
+                    return true;
+                } else {
+                    new UpdatePlaceTask().execute();
+                    return true;
+                }
             }
+
+            return false;
         });
 
         place = Place.find(getIntent().getLongExtra(ID_EXTRA, -1));
@@ -176,10 +165,10 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
         }
     }
 
-    private void showAlert(@StringRes int messageId, DialogInterface.OnClickListener okListener) {
+    private void showAlert(@StringRes int messageId) {
         new AlertDialog.Builder(this)
                 .setMessage(messageId)
-                .setPositiveButton(android.R.string.ok, okListener)
+                .setPositiveButton(android.R.string.ok, null)
                 .show();
     }
 
@@ -242,7 +231,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
     @OnClick(R.id.change_location)
     public void onChangeLocationClick() {
-        PickLocationActivity.startForResult(this, place == null ? null : place.getPosition(), (CameraPosition) getIntent().getParcelableExtra(MAP_CAMERA_POSITION_EXTRA), REQUEST_PICK_LOCATION);
+        PickLocationActivity.startForResult(this, place == null ? null : place.getPosition(), getIntent().getParcelableExtra(MAP_CAMERA_POSITION_EXTRA), REQUEST_PICK_LOCATION);
     }
 
     private class AddPlaceTask extends AsyncTask<Void, Void, Boolean> {

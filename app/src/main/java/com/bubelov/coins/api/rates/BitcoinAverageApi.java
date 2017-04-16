@@ -5,7 +5,6 @@ import retrofit2.http.GET;
 
 /**
  * Author: Igor Bubelov
- * Date: 20/05/15 21:43
  */
 
 public interface BitcoinAverageApi {

@@ -37,13 +37,10 @@ public class PlaceCategoriesAdapter extends RecyclerView.Adapter<PlaceCategories
             holder.name.setText(category.getPluralStringId());
         }
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (listener != null) {
-                    int position = holder.getAdapterPosition();
-                    listener.onPlaceCategorySelected(position == 0 ? null : PlaceCategory.values()[position - 1]);
-                }
+        holder.itemView.setOnClickListener(view -> {
+            if (listener != null) {
+                int position1 = holder.getAdapterPosition();
+                listener.onPlaceCategorySelected(position1 == 0 ? null : PlaceCategory.values()[position1 - 1]);
             }
         });
     }

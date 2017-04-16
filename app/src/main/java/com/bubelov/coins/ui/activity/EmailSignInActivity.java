@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.ui.fragment.SignInFragment;
@@ -44,12 +43,7 @@ public class EmailSignInActivity extends AbstractActivity {
         tabPager.setAdapter(new TabsAdapter(getSupportFragmentManager()));
         tabLayout.setupWithViewPager(tabPager);
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                supportFinishAfterTransition();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
     }
 
     private class TabsAdapter extends FragmentPagerAdapter {
@@ -58,8 +52,8 @@ public class EmailSignInActivity extends AbstractActivity {
         TabsAdapter(FragmentManager fm) {
             super(fm);
             pages = new ArrayList<>();
-            pages.add(new Pair<Fragment, String>(new SignInFragment(), getString(R.string.sign_in)));
-            pages.add(new Pair<Fragment, String>(new SignUpFragment(), getString(R.string.sign_up)));
+            pages.add(new Pair<>(new SignInFragment(), getString(R.string.sign_in)));
+            pages.add(new Pair<>(new SignUpFragment(), getString(R.string.sign_up)));
         }
 
         @Override

@@ -75,7 +75,7 @@ public class NotificationsController {
                 .setAutoCancel(true)
                 .setGroup(NEW_PLACE_NOTIFICATION_GROUP);
 
-        Intent intent = MapActivity.newShowPlaceIntent(context, placeId, true);
+        Intent intent = MapActivity.newShowPlaceIntent(context, placeId);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, UUID.randomUUID().hashCode(), intent, 0);
         builder.setContentIntent(pendingIntent);
 
@@ -94,7 +94,7 @@ public class NotificationsController {
     private void issueGroupNotification(List<PlaceNotification> pendingPlaces) {
         NotificationArea notificationArea = new NotificationAreaProvider(context).get();
 
-        Intent intent = MapActivity.newShowNotificationAreaIntent(context, notificationArea, true);
+        Intent intent = MapActivity.newShowNotificationAreaIntent(context, notificationArea);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, NEW_PLACE_NOTIFICATION_GROUP.hashCode(), intent, 0);
 
         NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();

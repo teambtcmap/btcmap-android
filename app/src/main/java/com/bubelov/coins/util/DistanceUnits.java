@@ -6,7 +6,6 @@ import java.util.Set;
 
 /**
  * Author: Igor Bubelov
- * Date: 10/21/15 10:10 PM
  */
 
 public enum DistanceUnits {

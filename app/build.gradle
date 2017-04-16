@@ -20,6 +20,11 @@ android {
         resValue "string", "maps_api_key", "AIzaSyCFlG9gZj-6ja-CQC6cAgvQXq6fs0foYVQ"
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     signingConfigs {
         debug {
             storeFile file(KEYSTORE_PATH)

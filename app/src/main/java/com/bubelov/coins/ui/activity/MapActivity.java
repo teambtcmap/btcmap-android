@@ -44,7 +44,6 @@ import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
 import com.bubelov.coins.util.Utils;
 import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -117,18 +116,18 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     private BottomSheetBehavior bottomSheetBehavior;
 
-    public static Intent newShowPlaceIntent(Context context, long placeId, boolean clearNotifications) {
+    public static Intent newShowPlaceIntent(Context context, long placeId) {
         Intent intent = new Intent(context, MapActivity.class);
         intent.putExtra(PLACE_ID_EXTRA, placeId);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, clearNotifications);
+        intent.putExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, true);
         return intent;
     }
 
-    public static Intent newShowNotificationAreaIntent(Context context, NotificationArea notificationArea, boolean clearNotifications) {
+    public static Intent newShowNotificationAreaIntent(Context context, NotificationArea notificationArea) {
         Intent intent = new Intent(context, MapActivity.class);
         intent.putExtra(NOTIFICATION_AREA_EXTRA, notificationArea);
-        intent.putExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, clearNotifications);
+        intent.putExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, true);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         return intent;
     }
@@ -147,12 +146,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                 .addApi(LocationServices.API)
                 .addApi(Auth.GOOGLE_SIGN_IN_API)
                 .addConnectionCallbacks(new LocationApiConnectionCallbacks())
-                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        Toast.makeText(MapActivity.this, connectionResult.getErrorMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                })
+                .enableAutoManage(this, connectionResult -> Toast.makeText(MapActivity.this, connectionResult.getErrorMessage(), Toast.LENGTH_SHORT).show())
                 .build();
 
         googleApiClient.connect();
@@ -177,12 +171,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             }
         });
 
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                bottomSheetBehavior.setPeekHeight(placeDetails.getHeaderHeight());
-            }
-        }, 1000);
+        new Handler(Looper.getMainLooper()).postDelayed(() -> bottomSheetBehavior.setPeekHeight(placeDetails.getHeaderHeight()), 1000);
 
         placeDetails.setListener(new PlaceDetailsView.Listener() {
             @Override
@@ -200,43 +189,34 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             }
         });
 
+        toolbar.setNavigationOnClickListener(v -> drawerLayout.openDrawer(navigationView));
         toolbar.inflateMenu(R.menu.menu_map_activity);
         toolbar.setOnMenuItemClickListener(this);
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                drawerLayout.openDrawer(navigationView);
+        navigationView.setNavigationItemSelectedListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.action_exchange_rates:
+                    drawerLayout.closeDrawers();
+                    openExchangeRatesScreen();
+                    return true;
+
+                case R.id.action_notification_area:
+                    drawerLayout.closeDrawers();
+                    openNotificationAreaScreen();
+                    return true;
+
+                case R.id.action_chat:
+                    drawerLayout.closeDrawers();
+                    openChat();
+                    return true;
+
+                case R.id.action_settings:
+                    drawerLayout.closeDrawers();
+                    openSettingsScreen();
+                    return true;
             }
-        });
 
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_exchange_rates:
-                        drawerLayout.closeDrawers();
-                        openExchangeRatesScreen();
-                        return true;
-
-                    case R.id.action_notification_area:
-                        drawerLayout.closeDrawers();
-                        openNotificationAreaScreen();
-                        return true;
-
-                    case R.id.action_chat:
-                        drawerLayout.closeDrawers();
-                        openChat();
-                        return true;
-
-                    case R.id.action_settings:
-                        drawerLayout.closeDrawers();
-                        openSettingsScreen();
-                        return true;
-                }
-
-                return false;
-            }
+            return false;
         });
 
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
@@ -257,12 +237,9 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             userName.setText(R.string.guest);
         }
 
-        header.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!authController.isAuthorized()) {
-                    signIn();
-                }
+        header.setOnClickListener(v -> {
+            if (!authController.isAuthorized()) {
+                signIn();
             }
         });
     }
@@ -440,14 +417,11 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         final AuthController authController = new AuthController();
 
         if ("google".equalsIgnoreCase(authController.getMethod())) {
-            Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallback<Status>() {
-                @Override
-                public void onResult(@NonNull Status status) {
-                    authController.setUser(null);
-                    authController.setToken(null);
-                    authController.setMethod(null);
-                    Toast.makeText(MapActivity.this, status.getStatusMessage(), Toast.LENGTH_LONG).show();
-                }
+            Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(status -> {
+                authController.setUser(null);
+                authController.setToken(null);
+                authController.setMethod(null);
+                Toast.makeText(MapActivity.this, status.getStatusMessage(), Toast.LENGTH_LONG).show();
             });
         } else {
             authController.setUser(null);
@@ -514,12 +488,9 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         map.setOnCameraChangeListener(placesManager);
         map.setOnMarkerClickListener(placesManager);
-        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                selectedPlace = null;
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-            }
+        map.setOnMapClickListener(latLng -> {
+            selectedPlace = null;
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         });
     }
 

@@ -6,7 +6,6 @@ import java.io.Serializable;
 
 /**
  * Author: Igor Bubelov
- * Date: 7/8/15 11:47 PM
  */
 
 public class NotificationArea implements Serializable {

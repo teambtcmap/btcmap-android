@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
-import android.view.View;
 
 import com.bubelov.coins.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -52,28 +50,19 @@ public class PickLocationActivity extends AbstractActivity implements OnMapReady
 
         initialLocation = getIntent().getParcelableExtra(LOCATION_EXTRA);
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                supportFinishAfterTransition();
-            }
-        });
-
+        toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         toolbar.inflateMenu(R.menu.menu_pick_location);
 
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.action_done) {
-                    Intent data = new Intent();
-                    data.putExtra(LOCATION_EXTRA, map.getCameraPosition().target);
-                    setResult(RESULT_OK, data);
-                    supportFinishAfterTransition();
-                    return true;
-                }
-
-                return false;
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_done) {
+                Intent data = new Intent();
+                data.putExtra(LOCATION_EXTRA, map.getCameraPosition().target);
+                setResult(RESULT_OK, data);
+                supportFinishAfterTransition();
+                return true;
             }
+
+            return false;
         });
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);

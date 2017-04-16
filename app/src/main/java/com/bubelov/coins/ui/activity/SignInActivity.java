@@ -26,7 +26,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crash.FirebaseCrash;
 import com.google.gson.Gson;
@@ -70,12 +69,7 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
         setContentView(R.layout.activity_sign_in);
         ButterKnife.bind(this);
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                supportFinishAfterTransition();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
 
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
@@ -105,12 +99,9 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
             // this asynchronous branch will attempt to sign in the user silently. Cross-device
             // single sign-on will occur in this branch.
             googleSignInButton.setEnabled(false);
-            pendingResult.setResultCallback(new ResultCallback<GoogleSignInResult>() {
-                @Override
-                public void onResult(GoogleSignInResult googleSignInResult) {
-                    googleSignInButton.setEnabled(true);
-                    handleSignInResult(googleSignInResult);
-                }
+            pendingResult.setResultCallback(googleSignInResult -> {
+                googleSignInButton.setEnabled(true);
+                handleSignInResult(googleSignInResult);
             });
         }
     }
