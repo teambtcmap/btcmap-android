@@ -23,6 +23,6 @@ public class App extends Application {
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
         Injector.INSTANCE.initMainComponent(this);
-        DatabaseSyncService.startIfNeverSynced(this);
+        DatabaseSyncService.start(this);
     }
 }
