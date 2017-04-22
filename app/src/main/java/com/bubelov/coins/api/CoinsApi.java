@@ -1,6 +1,6 @@
 package com.bubelov.coins.api;
 
-import com.bubelov.coins.model.Currency;
+import com.bubelov.coins.model.Currency2;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.model.AuthResponse;
 
@@ -40,5 +40,5 @@ public interface CoinsApi {
     Call<Place> updatePlace(@Path("id") long id, @Header("session") String session, @Body Map<String, Object> args);
 
     @GET("currencies")
-    Call<List<Currency>> getCurrencies();
+    Call<List<Currency2>> getCurrencies();
 }

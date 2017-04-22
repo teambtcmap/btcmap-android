@@ -7,10 +7,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.BuildConfig;
+import com.bubelov.coins.DataStorage;
 import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.database.AssetDbHelper;
 import com.bubelov.coins.database.DbHelper;
+import com.bubelov.coins.gson.AutoValueAdapterFactory;
 import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.service.NotificationsController;
 import com.bubelov.coins.util.AuthController;
@@ -78,6 +80,7 @@ public class MainModule {
     Gson gson() {
         return new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .registerTypeAdapterFactory(new AutoValueAdapterFactory())
                 .registerTypeAdapter(Date.class, new UtcDateTypeAdapter())
                 .create();
     }
@@ -129,5 +132,11 @@ public class MainModule {
     @Singleton
     AuthController authController(SharedPreferences preferences, Gson gson) {
         return new AuthController(preferences, gson);
+    }
+
+    @Provides
+    @Singleton
+    DataStorage dataStorage(SQLiteDatabase db, SharedPreferences preferences) {
+        return new DataStorage(db, preferences);
     }
 }

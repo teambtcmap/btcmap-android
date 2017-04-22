@@ -27,10 +27,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bubelov.coins.Constants;
+import com.bubelov.coins.DataStorage;
 import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.model.PlaceNotification;
 import com.bubelov.coins.model.NotificationArea;
@@ -121,6 +121,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     private AuthController authController;
 
+    private DataStorage dataStorage;
+
     public static Intent newShowPlaceIntent(Context context, long placeId) {
         Intent intent = new Intent(context, MapActivity.class);
         intent.putExtra(PLACE_ID_EXTRA, placeId);
@@ -157,6 +159,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         googleApiClient.connect();
 
         authController = Injector.INSTANCE.mainComponent().authController();
+        dataStorage = Injector.INSTANCE.mainComponent().dataStorage();
 
         firstLaunch = savedInstanceState == null;
 
@@ -525,7 +528,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             return;
         }
 
-        selectedPlace.setCurrencies(Currency.findByPlace(selectedPlace));
+        selectedPlace.setCurrencies(dataStorage.getCurrencies(selectedPlace));
         placeDetails.setPlace(selectedPlace);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 

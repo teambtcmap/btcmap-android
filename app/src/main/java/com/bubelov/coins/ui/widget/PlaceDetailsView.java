@@ -11,12 +11,9 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.util.Analytics;
 import com.bubelov.coins.util.Utils;
-
-import java.util.Iterator;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -59,9 +56,6 @@ public class PlaceDetailsView extends FrameLayout {
 
     @BindView(R.id.opening_hours)
     TextView openingHours;
-
-    @BindView(R.id.accepted_currencies)
-    TextView acceptedCurrencies;
 
     Place place;
 
@@ -161,21 +155,6 @@ public class PlaceDetailsView extends FrameLayout {
         } else {
             openingHours.setText(place.getOpeningHours());
         }
-
-        StringBuilder currenciesString = new StringBuilder();
-        Iterator<Currency> currenciesIterator = place.getCurrencies().iterator();
-
-        while (currenciesIterator.hasNext()) {
-            currenciesString.append(currenciesIterator.next().getName());
-
-            if (currenciesIterator.hasNext()) {
-                currenciesString.append(", ");
-            }
-        }
-
-        acceptedCurrencies.setText(currenciesString.length() == 0
-                ? getContext().getString(R.string.not_provided)
-                : currenciesString.toString());
     }
 
     public void setListener(Listener listener) {

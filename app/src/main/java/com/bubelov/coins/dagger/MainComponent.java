@@ -3,6 +3,7 @@ package com.bubelov.coins.dagger;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.bubelov.coins.DataStorage;
 import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.service.DatabaseSync;
@@ -39,6 +40,8 @@ public interface MainComponent {
     FirebaseAnalytics analytics();
 
     AuthController authController();
+
+    DataStorage dataStorage();
 
     void inject(DatabaseSync sync);
 }

@@ -6,12 +6,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.Constants;
+import com.bubelov.coins.DataStorage;
 import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.PreferenceKeys;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
-import com.bubelov.coins.model.Currency;
+import com.bubelov.coins.model.Currency2;
 import com.bubelov.coins.model.Place;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
@@ -51,6 +52,9 @@ public class DatabaseSync implements Runnable {
     @Inject
     PlacesCache placesCache;
 
+    @Inject
+    DataStorage dataStorage;
+
     public DatabaseSync() {
         Injector.INSTANCE.mainComponent().inject(this);
     }
@@ -58,9 +62,10 @@ public class DatabaseSync implements Runnable {
     @Override
     public void run() {
         try {
-            if (Currency.getCount() == 0) {
-                List<Currency> currencies = api.getCurrencies().execute().body();
-                Currency.insert(currencies);
+            List<Currency2> currencies = api.getCurrencies().execute().body();
+
+            for (Currency2 currency : currencies) {
+                dataStorage.insertCurrency(currency);
             }
 
             boolean initialSync = Place.getCount() == 0;
