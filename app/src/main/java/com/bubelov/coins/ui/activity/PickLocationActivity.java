@@ -51,7 +51,7 @@ public class PickLocationActivity extends AbstractActivity implements OnMapReady
         initialLocation = getIntent().getParcelableExtra(LOCATION_EXTRA);
 
         toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
-        toolbar.inflateMenu(R.menu.menu_pick_location);
+        toolbar.inflateMenu(R.menu.pick_location);
 
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_done) {

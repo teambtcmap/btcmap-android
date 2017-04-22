@@ -22,3 +22,7 @@
 
 -keep class com.bubelov.coins.model.** { *; }
 -keep class com.bubelov.coins.api.** { *; }
+
+# Picasso
+
+-dontwarn com.squareup.okhttp.**

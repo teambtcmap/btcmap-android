@@ -1,0 +1,121 @@
+package com.bubelov.coins.ui.activity;
+
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.bubelov.coins.R;
+import com.bubelov.coins.dagger.Injector;
+import com.bubelov.coins.model.User;
+import com.bubelov.coins.util.AuthController;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.squareup.picasso.Picasso;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * Author: Igor Bubelov
+ */
+
+public class ProfileActivity extends AbstractActivity implements Toolbar.OnMenuItemClickListener {
+    public static final int RESULT_SIGN_OUT = 10;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.avatar)
+    ImageView avatar;
+
+    @BindView(R.id.user_name)
+    TextView userName;
+
+    private AuthController authController;
+
+    private GoogleApiClient googleApiClient;
+
+    public static Intent newIntent(Context context) {
+        return new Intent(context, ProfileActivity.class);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_profile);
+        ButterKnife.bind(this);
+
+        toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
+        toolbar.inflateMenu(R.menu.profile);
+        toolbar.setOnMenuItemClickListener(this);
+
+        authController = Injector.INSTANCE.mainComponent().authController();
+
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API)
+                .enableAutoManage(this, connectionResult -> Toast.makeText(ProfileActivity.this, connectionResult.getErrorMessage(), Toast.LENGTH_SHORT).show())
+                .build();
+
+        if (authController.isAuthorized()) {
+            User user = authController.getUser();
+
+            if (!TextUtils.isEmpty(user.getAvatarUrl())) {
+                Picasso.with(this).load(user.getAvatarUrl()).into(avatar);
+            } else {
+                avatar.setImageResource(R.drawable.ic_no_avatar);
+            }
+
+            if (!TextUtils.isEmpty(user.getFirstName())) {
+                userName.setText(String.format("%s %s", user.getFirstName(), user.getLastName()));
+            } else {
+                userName.setText(user.getEmail());
+            }
+        } else {
+            avatar.setImageResource(R.drawable.ic_no_avatar);
+            userName.setText(R.string.guest);
+        }
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        if (item.getItemId() == R.id.action_sign_out) {
+            signOut();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void signOut() {
+        if ("google".equalsIgnoreCase(authController.getMethod())) {
+            googleSignOut();
+        } else {
+            onSignOut();
+        }
+    }
+
+    private void googleSignOut() {
+        if (!googleApiClient.isConnected()) {
+            showAlert("Couldn't connect to Google services.");
+            return;
+        }
+
+        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(status -> {
+            onSignOut();
+        });
+    }
+
+    private void onSignOut() {
+        authController.setUser(null);
+        authController.setToken(null);
+        authController.setMethod(null);
+        setResult(RESULT_SIGN_OUT);
+        supportFinishAfterTransition();
+    }
+}

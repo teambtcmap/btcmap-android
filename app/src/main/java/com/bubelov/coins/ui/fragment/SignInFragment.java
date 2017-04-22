@@ -41,6 +41,8 @@ public class SignInFragment extends AuthFragment implements TextView.OnEditorAct
 
     private Unbinder unbinder;
 
+    private SignInTask signInTask;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -55,6 +57,10 @@ public class SignInFragment extends AuthFragment implements TextView.OnEditorAct
         super.onDestroyView();
         password.setOnEditorActionListener(null);
         unbinder.unbind();
+
+        if (signInTask != null) {
+            signInTask.cancel(true);
+        }
     }
 
     @Override
@@ -73,7 +79,8 @@ public class SignInFragment extends AuthFragment implements TextView.OnEditorAct
     }
 
     private void signIn(String email, String password) {
-        new SignInTask(email, password).execute();
+        signInTask = new SignInTask(email, password);
+        signInTask.execute();
     }
 
     private class SignInTask extends AsyncTask<Void, Void, Void> {

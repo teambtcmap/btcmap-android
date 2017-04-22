@@ -192,7 +192,7 @@ public class PlaceDetailsView extends FrameLayout {
             }
         });
 
-        toolbar.inflateMenu(R.menu.menu_place_details);
+        toolbar.inflateMenu(R.menu.place_details);
 
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_share) {

@@ -45,8 +45,6 @@ import com.bubelov.coins.util.StaticClusterRenderer;
 import com.bubelov.coins.util.Utils;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -57,6 +55,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
+import com.squareup.picasso.Picasso;
 
 import java.util.Collection;
 
@@ -78,6 +77,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     private static final int REQUEST_FIND_PLACE = 30;
     private static final int REQUEST_ADD_PLACE = 40;
     private static final int REQUEST_EDIT_PLACE = 50;
+    private static final int REQUEST_SIGN_IN = 60;
+    private static final int REQUEST_PROFILE = 70;
 
     private static final float MAP_DEFAULT_ZOOM = 13;
 
@@ -86,6 +87,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     @BindView(R.id.navigation_view)
     NavigationView navigationView;
+
+    View drawerHeader;
 
     ImageView avatar;
 
@@ -116,6 +119,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     private BottomSheetBehavior bottomSheetBehavior;
 
+    private AuthController authController;
+
     public static Intent newShowPlaceIntent(Context context, long placeId) {
         Intent intent = new Intent(context, MapActivity.class);
         intent.putExtra(PLACE_ID_EXTRA, placeId);
@@ -138,9 +143,9 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         setContentView(R.layout.activity_map);
         ButterKnife.bind(this);
 
-        View header = navigationView.getHeaderView(0);
-        avatar = ButterKnife.findById(header, R.id.avatar);
-        userName = ButterKnife.findById(header, R.id.user_name);
+        drawerHeader = navigationView.getHeaderView(0);
+        avatar = ButterKnife.findById(drawerHeader, R.id.avatar);
+        userName = ButterKnife.findById(drawerHeader, R.id.user_name);
 
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -150,6 +155,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                 .build();
 
         googleApiClient.connect();
+
+        authController = Injector.INSTANCE.mainComponent().authController();
 
         firstLaunch = savedInstanceState == null;
 
@@ -176,10 +183,10 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         placeDetails.setListener(new PlaceDetailsView.Listener() {
             @Override
             public void onEditPlaceClick(Place place) {
-                if (new AuthController().isAuthorized()) {
+                if (authController.isAuthorized()) {
                     EditPlaceActivity.startForResult(MapActivity.this, place.getId(), null, REQUEST_EDIT_PLACE);
                 } else {
-                    SignInActivity.start(MapActivity.this);
+                    signIn();
                 }
             }
 
@@ -190,7 +197,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         });
 
         toolbar.setNavigationOnClickListener(v -> drawerLayout.openDrawer(navigationView));
-        toolbar.inflateMenu(R.menu.menu_map_activity);
+        toolbar.inflateMenu(R.menu.map);
         toolbar.setOnMenuItemClickListener(this);
 
         navigationView.setNavigationItemSelectedListener(item -> {
@@ -222,26 +229,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
         drawerLayout.addDrawerListener(drawerToggle);
 
-        final AuthController authController = new AuthController();
-
-        if (authController.isAuthorized()) {
-            User user = authController.getUser();
-
-            if (!TextUtils.isEmpty(user.getFirstName())) {
-                userName.setText(String.format("%s %s", user.getFirstName(), user.getLastName()));
-            } else {
-                userName.setText(user.getEmail());
-            }
-        } else {
-            avatar.setImageResource(R.drawable.ic_no_avatar);
-            userName.setText(R.string.guest);
-        }
-
-        header.setOnClickListener(v -> {
-            if (!authController.isAuthorized()) {
-                signIn();
-            }
-        });
+        updateDrawerHeader();
     }
 
     @Override
@@ -280,6 +268,14 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             }
         }
 
+        if (requestCode == REQUEST_SIGN_IN && resultCode == RESULT_OK) {
+            updateDrawerHeader();
+        }
+
+        if (requestCode == REQUEST_PROFILE && resultCode == ProfileActivity.RESULT_SIGN_OUT) {
+            updateDrawerHeader();
+        }
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -289,10 +285,10 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         switch (id) {
             case R.id.action_add:
-                if (new AuthController().isAuthorized()) {
+                if (authController.isAuthorized()) {
                     EditPlaceActivity.startForResult(this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
                 } else {
-                    SignInActivity.start(this);
+                    signIn();
                 }
 
                 return true;
@@ -390,6 +386,37 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         reloadPlaces();
     }
 
+    private void updateDrawerHeader() {
+        if (authController.isAuthorized()) {
+            User user = authController.getUser();
+
+            if (!TextUtils.isEmpty(user.getAvatarUrl())) {
+                Picasso.with(this).load(user.getAvatarUrl()).into(avatar);
+            } else {
+                avatar.setImageResource(R.drawable.ic_no_avatar);
+            }
+
+            if (!TextUtils.isEmpty(user.getFirstName())) {
+                userName.setText(String.format("%s %s", user.getFirstName(), user.getLastName()));
+            } else {
+                userName.setText(user.getEmail());
+            }
+        } else {
+            avatar.setImageResource(R.drawable.ic_no_avatar);
+            userName.setText(R.string.guest);
+        }
+
+        drawerHeader.setOnClickListener(v -> {
+            if (authController.isAuthorized()) {
+                startActivityForResult(ProfileActivity.newIntent(this),  REQUEST_PROFILE, ActivityOptionsCompat.makeBasic().toBundle());
+            } else {
+                signIn();
+            }
+
+            drawerLayout.closeDrawers();
+        });
+    }
+
     private void handleIntent(final Intent intent) {
         if (intent.getBooleanExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, false)) {
             PlaceNotification.deleteAll();
@@ -410,24 +437,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     private void signIn() {
-        SignInActivity.start(this);
-    }
-
-    private void signOut() {
-        final AuthController authController = new AuthController();
-
-        if ("google".equalsIgnoreCase(authController.getMethod())) {
-            Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(status -> {
-                authController.setUser(null);
-                authController.setToken(null);
-                authController.setMethod(null);
-                Toast.makeText(MapActivity.this, status.getStatusMessage(), Toast.LENGTH_LONG).show();
-            });
-        } else {
-            authController.setUser(null);
-            authController.setToken(null);
-            authController.setMethod(null);
-        }
+        Intent intent = SignInActivity.newIntent(this);
+        startActivityForResult(intent, REQUEST_SIGN_IN, ActivityOptionsCompat.makeBasic().toBundle());
     }
 
     private void openExchangeRatesScreen() {

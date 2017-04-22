@@ -11,6 +11,8 @@ public class User extends AbstractEntity {
 
     private String lastName;
 
+    private String avatarUrl;
+
     public String getEmail() {
         return email;
     }
@@ -33,5 +35,13 @@ public class User extends AbstractEntity {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

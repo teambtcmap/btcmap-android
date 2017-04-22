@@ -1,6 +1,6 @@
 package com.bubelov.coins.ui.activity;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -58,9 +58,10 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
 
     private GoogleApiClient googleApiClient;
 
-    public static void start(Activity activity) {
-        Intent intent = new Intent(activity, SignInActivity.class);
-        activity.startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle());
+    private AuthController authController;
+
+    public static Intent newIntent(Context context) {
+        return new Intent(context, SignInActivity.class);
     }
 
     @Override
@@ -81,6 +82,8 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
                 .addApi(Auth.GOOGLE_SIGN_IN_API, signInOptions)
                 .addApi(Auth.CREDENTIALS_API)
                 .build();
+
+        authController = Injector.INSTANCE.mainComponent().authController();
     }
 
     @Override
@@ -180,10 +183,10 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
             }
 
             if (response.isSuccessful()) {
-                AuthController authController = new AuthController();
                 authController.setUser(response.body().getUser());
                 authController.setToken(response.body().getToken());
                 authController.setMethod("google");
+                setResult(RESULT_OK);
                 supportFinishAfterTransition();
 
                 FirebaseAnalytics analytics = Injector.INSTANCE.mainComponent().analytics();

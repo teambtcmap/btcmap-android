@@ -9,6 +9,8 @@
 
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+
+        <item name="android:itemTextAppearance">@style/MenuItemTextAppearance</item>
     </style>
 
     <style name="AppTheme.TransparentStatusBar">
@@ -45,6 +47,10 @@
     <style name="SearchToolbarTheme" parent="AppTheme">
         <item name="android:textColorPrimary">@color/text_secondary</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
+    </style>
+
+    <style name="MenuItemTextAppearance">
+        <item name="android:textColor">@color/text_primary</item>
     </style>
 
     <style name="ProgressDialog">

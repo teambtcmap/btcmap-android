@@ -6,25 +6,21 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.bubelov.coins.PreferenceKeys;
-import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.model.User;
 import com.google.gson.Gson;
-
-import javax.inject.Inject;
 
 /**
  * @author Igor Bubelov
  */
 
 public class AuthController {
-    @Inject
-    SharedPreferences preferences;
+    private final SharedPreferences preferences;
 
-    @Inject
-    Gson gson;
+    private final Gson gson;
 
-    public AuthController() {
-        Injector.INSTANCE.mainComponent().inject(this);
+    public AuthController(SharedPreferences preferences, Gson gson) {
+        this.preferences = preferences;
+        this.gson = gson;
     }
 
     public @Nullable User getUser() {

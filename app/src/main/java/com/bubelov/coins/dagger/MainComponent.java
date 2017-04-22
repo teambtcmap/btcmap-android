@@ -38,9 +38,7 @@ public interface MainComponent {
 
     FirebaseAnalytics analytics();
 
+    AuthController authController();
+
     void inject(DatabaseSync sync);
-
-    void inject(PlacesCache cache);
-
-    void inject(AuthController authController);
 }

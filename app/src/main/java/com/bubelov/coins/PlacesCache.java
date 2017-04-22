@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Executors;
 
-import javax.inject.Inject;
-
 import timber.log.Timber;
 
 /**
@@ -28,7 +26,6 @@ public class PlacesCache {
 
     private Callback callback;
 
-    @Inject
     public PlacesCache(SQLiteDatabase db) {
         this.db = db;
         invalidate();

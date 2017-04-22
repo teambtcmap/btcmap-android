@@ -13,6 +13,7 @@ import com.bubelov.coins.database.AssetDbHelper;
 import com.bubelov.coins.database.DbHelper;
 import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.service.NotificationsController;
+import com.bubelov.coins.util.AuthController;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.bubelov.coins.util.UtcDateTypeAdapter;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -122,5 +123,11 @@ public class MainModule {
     @Singleton
     FirebaseAnalytics analytics(Context context) {
         return FirebaseAnalytics.getInstance(context);
+    }
+
+    @Provides
+    @Singleton
+    AuthController authController(SharedPreferences preferences, Gson gson) {
+        return new AuthController(preferences, gson);
     }
 }

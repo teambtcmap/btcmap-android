@@ -5,9 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
@@ -82,6 +80,8 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
     private LatLng pickedLocation;
 
+    private AuthController authController;
+
     public static void startForResult(Activity activity, long placeId, CameraPosition mapCameraPosition, int requestCode) {
         Intent intent = new Intent(activity, EditPlaceActivity.class);
         intent.putExtra(ID_EXTRA, placeId);
@@ -96,7 +96,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
         ButterKnife.bind(this);
 
         toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
-        toolbar.inflateMenu(R.menu.menu_edit_place);
+        toolbar.inflateMenu(R.menu.edit_place);
 
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_send) {
@@ -123,6 +123,8 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
             return false;
         });
+
+        authController = Injector.INSTANCE.mainComponent().authController();
 
         place = Place.find(getIntent().getLongExtra(ID_EXTRA, -1));
 
@@ -163,13 +165,6 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
         if (place != null) {
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getPosition(), DEFAULT_ZOOM));
         }
-    }
-
-    private void showAlert(@StringRes int messageId) {
-        new AlertDialog.Builder(this)
-                .setMessage(messageId)
-                .setPositiveButton(android.R.string.ok, null)
-                .show();
     }
 
     private Map<String, Object> getRequestArgs() {
@@ -248,7 +243,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
             CoinsApi api = Injector.INSTANCE.mainComponent().api();
 
             try {
-                Response<Place> response = api.addPlace(new AuthController().getToken(), requestArgs).execute();
+                Response<Place> response = api.addPlace(authController.getToken(), requestArgs).execute();
 
                 if (response.isSuccessful()) {
                     Place place = response.body();
@@ -291,7 +286,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
             CoinsApi api = Injector.INSTANCE.mainComponent().api();
 
             try {
-                Response<Place> response = api.updatePlace(place.getId(), new AuthController().getToken(), requestArgs).execute();
+                Response<Place> response = api.updatePlace(place.getId(), authController.getToken(), requestArgs).execute();
 
                 if (response.isSuccessful()) {
                     Place place = response.body();

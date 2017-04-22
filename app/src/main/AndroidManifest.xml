@@ -33,25 +33,29 @@
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.TransparentStatusBar" />
 
-        <activity
-            android:name=".ui.activity.FindPlaceActivity"
-            android:theme="@style/AppTheme.GrayStatusBar" />
-
-        <activity android:name=".ui.activity.SettingsActivity" />
-
-        <activity android:name=".ui.activity.NotificationAreaActivity" />
-
         <activity android:name=".ui.activity.SignInActivity" />
 
         <activity
             android:name=".ui.activity.EmailSignInActivity"
             android:windowSoftInputMode="adjustResize" />
 
+        <activity
+            android:name=".ui.activity.ProfileActivity"
+            android:theme="@style/AppTheme.TransparentStatusBar" />
+
+        <activity android:name=".ui.activity.ExchangeRatesActivity" />
+
+        <activity android:name=".ui.activity.NotificationAreaActivity" />
+
+        <activity android:name=".ui.activity.SettingsActivity" />
+
+        <activity
+            android:name=".ui.activity.FindPlaceActivity"
+            android:theme="@style/AppTheme.GrayStatusBar" />
+
         <activity android:name=".ui.activity.EditPlaceActivity" />
 
         <activity android:name=".ui.activity.PickLocationActivity" />
-
-        <activity android:name=".ui.activity.ExchangeRatesActivity" />
 
         <service android:name=".service.DatabaseSyncService" />
 
