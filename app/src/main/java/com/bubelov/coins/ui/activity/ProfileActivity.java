@@ -62,23 +62,18 @@ public class ProfileActivity extends AbstractActivity implements Toolbar.OnMenuI
                 .enableAutoManage(this, connectionResult -> Toast.makeText(ProfileActivity.this, connectionResult.getErrorMessage(), Toast.LENGTH_SHORT).show())
                 .build();
 
-        if (authController.isAuthorized()) {
-            User user = authController.getUser();
+        User user = authController.getUser();
 
-            if (!TextUtils.isEmpty(user.getAvatarUrl())) {
-                Picasso.with(this).load(user.getAvatarUrl()).into(avatar);
-            } else {
-                avatar.setImageResource(R.drawable.ic_no_avatar);
-            }
-
-            if (!TextUtils.isEmpty(user.getFirstName())) {
-                userName.setText(String.format("%s %s", user.getFirstName(), user.getLastName()));
-            } else {
-                userName.setText(user.getEmail());
-            }
+        if (!TextUtils.isEmpty(user.avatarUrl())) {
+            Picasso.with(this).load(user.avatarUrl()).into(avatar);
         } else {
             avatar.setImageResource(R.drawable.ic_no_avatar);
-            userName.setText(R.string.guest);
+        }
+
+        if (!TextUtils.isEmpty(user.firstName())) {
+            userName.setText(String.format("%s %s", user.firstName(), user.lastName()));
+        } else {
+            userName.setText(user.email());
         }
     }
 

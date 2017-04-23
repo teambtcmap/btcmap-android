@@ -393,16 +393,16 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         if (authController.isAuthorized()) {
             User user = authController.getUser();
 
-            if (!TextUtils.isEmpty(user.getAvatarUrl())) {
-                Picasso.with(this).load(user.getAvatarUrl()).into(avatar);
+            if (!TextUtils.isEmpty(user.avatarUrl())) {
+                Picasso.with(this).load(user.avatarUrl()).into(avatar);
             } else {
                 avatar.setImageResource(R.drawable.ic_no_avatar);
             }
 
-            if (!TextUtils.isEmpty(user.getFirstName())) {
-                userName.setText(String.format("%s %s", user.getFirstName(), user.getLastName()));
+            if (!TextUtils.isEmpty(user.firstName())) {
+                userName.setText(String.format("%s %s", user.firstName(), user.lastName()));
             } else {
-                userName.setText(user.getEmail());
+                userName.setText(user.email());
             }
         } else {
             avatar.setImageResource(R.drawable.ic_no_avatar);

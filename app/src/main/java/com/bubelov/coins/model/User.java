@@ -1,47 +1,33 @@
 package com.bubelov.coins.model;
 
+import android.os.Parcelable;
+
+import com.bubelov.coins.gson.AutoGson;
+import com.google.auto.value.AutoValue;
+
 /**
  * @author Igor Bubelov
  */
 
-public class User extends AbstractEntity {
-    private String email;
+@AutoValue
+@AutoGson
+public abstract class User implements Parcelable {
+    public abstract long id();
+    public abstract String email();
+    public abstract String firstName();
+    public abstract String lastName();
+    public abstract String avatarUrl();
 
-    private String firstName;
-
-    private String lastName;
-
-    private String avatarUrl;
-
-    public String getEmail() {
-        return email;
+    public static Builder builder() {
+        return new AutoValue_User.Builder();
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
+    @AutoValue.Builder public static abstract class Builder {
+        public abstract Builder id(long id);
+        public abstract Builder email(String email);
+        public abstract Builder firstName(String firstName);
+        public abstract Builder lastName(String lastName);
+        public abstract Builder avatarUrl(String avatarUrl);
+        public abstract User build();
     }
 }
