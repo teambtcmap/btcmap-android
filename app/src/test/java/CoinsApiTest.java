@@ -1,7 +1,7 @@
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.model.Currency2;
+import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
 
 import junit.framework.Assert;
@@ -32,7 +32,7 @@ public class CoinsApiTest {
 
     @Test
     public void returnsCurrencies() throws Exception {
-        Response<List<Currency2>> response = api.getCurrencies().execute();
+        Response<List<Currency>> response = api.getCurrencies().execute();
         Assert.assertTrue(response.isSuccessful() && response.body().size() > 0);
     }
 

@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 
 import com.bubelov.coins.database.DbContract;
-import com.bubelov.coins.model.Currency2;
+import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class DataStorage {
         this.preferences = preferences;
     }
 
-    public Currency2 getCurrency(long id) {
+    public Currency getCurrency(long id) {
         Cursor cursor = db.query(DbContract.Currencies.TABLE_NAME,
                 null,
                 "_id = ?",
@@ -43,8 +43,8 @@ public class DataStorage {
         }
     }
 
-    public List<Currency2> getCurrencies(Place place) {
-        List<Currency2> currencies = new ArrayList<>();
+    public List<Currency> getCurrencies(Place place) {
+        List<Currency> currencies = new ArrayList<>();
 
         Cursor cursor = db.query(DbContract.CurrenciesPlaces.TABLE_NAME,
                 null,
@@ -66,18 +66,18 @@ public class DataStorage {
         return currencies;
     }
 
-    public void insertCurrency(Currency2 currency) {
+    public void insertCurrency(Currency currency) {
         db.insertWithOnConflict(DbContract.Currencies.TABLE_NAME,
                 null,
                 getContentValues(currency),
                 SQLiteDatabase.CONFLICT_REPLACE);
     }
 
-    private List<Currency2> getCurrencies(@NonNull Cursor cursor) {
-        List<Currency2> currencies = new ArrayList<>();
+    private List<Currency> getCurrencies(@NonNull Cursor cursor) {
+        List<Currency> currencies = new ArrayList<>();
 
         while (cursor.moveToNext()) {
-            Currency2 currency = Currency2.builder()
+            Currency currency = Currency.builder()
                     .id(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._ID)))
                     .name(cursor.getString(cursor.getColumnIndex(DbContract.Currencies.NAME)))
                     .code(cursor.getString(cursor.getColumnIndex(DbContract.Currencies.CODE)))
@@ -90,7 +90,7 @@ public class DataStorage {
         return currencies;
     }
 
-    private ContentValues getContentValues(Currency2 currency) {
+    private ContentValues getContentValues(Currency currency) {
         ContentValues values = new ContentValues();
         values.put(DbContract.Currencies._ID, currency.id());
         values.put(DbContract.Currencies.NAME, currency.name());

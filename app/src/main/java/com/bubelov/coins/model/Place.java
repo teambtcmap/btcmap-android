@@ -41,7 +41,7 @@ public class Place extends AbstractEntity implements ClusterItem {
 
     private boolean visible;
 
-    private Collection<Currency2> currencies;
+    private Collection<Currency> currencies;
 
     private int openedClaims;
 
@@ -150,11 +150,11 @@ public class Place extends AbstractEntity implements ClusterItem {
         this.visible = visible;
     }
 
-    public Collection<Currency2> getCurrencies() {
+    public Collection<Currency> getCurrencies() {
         return currencies;
     }
 
-    public void setCurrencies(Collection<Currency2> currencies) {
+    public void setCurrencies(Collection<Currency> currencies) {
         this.currencies = currencies;
     }
 
@@ -276,7 +276,7 @@ public class Place extends AbstractEntity implements ClusterItem {
         SQLiteStatement insertStatement = db.compileStatement(insertQuery);
 
         for (Place place : places) {
-            for (Currency2 currency : place.getCurrencies()) {
+            for (Currency currency : place.getCurrencies()) {
                 insertStatement.bindLong(1, currency.id());
                 insertStatement.bindLong(2, place.getId());
                 insertStatement.execute();

@@ -12,7 +12,7 @@ import com.bubelov.coins.PreferenceKeys;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
-import com.bubelov.coins.model.Currency2;
+import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
@@ -62,9 +62,9 @@ public class DatabaseSync implements Runnable {
     @Override
     public void run() {
         try {
-            List<Currency2> currencies = api.getCurrencies().execute().body();
+            List<Currency> currencies = api.getCurrencies().execute().body();
 
-            for (Currency2 currency : currencies) {
+            for (Currency currency : currencies) {
                 dataStorage.insertCurrency(currency);
             }
 

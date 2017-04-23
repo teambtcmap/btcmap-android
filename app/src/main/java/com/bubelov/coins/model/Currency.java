@@ -11,14 +11,14 @@ import com.google.auto.value.AutoValue;
 
 @AutoValue
 @AutoGson
-public abstract class Currency2 implements Parcelable {
+public abstract class Currency implements Parcelable {
     public abstract long id();
     public abstract String name();
     public abstract String code();
     public abstract boolean crypto();
 
     public static Builder builder() {
-        return new AutoValue_Currency2.Builder();
+        return new AutoValue_Currency.Builder();
     }
 
     @AutoValue.Builder public static abstract class Builder {
@@ -26,6 +26,6 @@ public abstract class Currency2 implements Parcelable {
         public abstract Builder name(String name);
         public abstract Builder code(String code);
         public abstract Builder crypto(boolean crypto);
-        public abstract Currency2 build();
+        public abstract Currency build();
     }
 }
