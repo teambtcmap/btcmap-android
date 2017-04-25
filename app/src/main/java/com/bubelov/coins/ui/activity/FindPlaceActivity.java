@@ -21,6 +21,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.bubelov.coins.DataStorage;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
@@ -68,6 +69,8 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
 
     private Location userLocation;
 
+    private DataStorage dataStorage;
+
     public static void startForResult(Activity activity, Location userLocation, int requestCode) {
         Intent intent = new Intent(activity, FindPlaceActivity.class);
         intent.putExtra(USER_LOCATION_EXTRA, userLocation);
@@ -88,6 +91,8 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
         resultsView.setHasFixedSize(true);
 
         userLocation = getIntent().getParcelableExtra(USER_LOCATION_EXTRA);
+
+        dataStorage = Injector.INSTANCE.mainComponent().dataStorage();
 
         resultsAdapter = new PlacesSearchResultsAdapter(this, userLocation, getDistanceUnits());
         resultsView.setAdapter(resultsAdapter);
@@ -114,7 +119,7 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
         List<Place> places = new ArrayList<>();
 
         while (cursor.moveToNext()) {
-            places.add(Place.find(cursor.getLong(0)));
+            places.add(dataStorage.getPlace(cursor.getLong(0)));
         }
 
         if (userLocation != null) {
@@ -135,7 +140,7 @@ public class FindPlaceActivity extends AbstractActivity implements LoaderManager
     @Override
     public void onPlaceSelected(Place place) {
         Intent data = new Intent();
-        data.putExtra(PLACE_ID_EXTRA, place.getId());
+        data.putExtra(PLACE_ID_EXTRA, place.id());
         setResult(RESULT_OK, data);
         supportFinishAfterTransition();
     }

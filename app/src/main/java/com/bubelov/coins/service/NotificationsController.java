@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
+import com.bubelov.coins.DataStorage;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
@@ -33,14 +34,17 @@ import timber.log.Timber;
 public class NotificationsController {
     public static final String NEW_PLACE_NOTIFICATION_GROUP = "NEW_PLACE";
 
-    private Context context;
+    private final Context context;
 
-    public NotificationsController(Context context) {
+    private final DataStorage dataStorage;
+
+    public NotificationsController(Context context, DataStorage dataStorage) {
         this.context = context;
+        this.dataStorage = dataStorage;
     }
 
     public boolean shouldNotifyUser(Place place) {
-        if (!place.isVisible()) {
+        if (!place.visible()) {
             return false;
         }
 
@@ -63,7 +67,7 @@ public class NotificationsController {
         }
 
         SQLiteDatabase db = Injector.INSTANCE.mainComponent().database();
-        return DatabaseUtils.queryNumEntries(db, DbContract.Places.TABLE_NAME, "_id = ?", new String[]{String.valueOf(place.getId())}) == 0;
+        return DatabaseUtils.queryNumEntries(db, DbContract.Places.TABLE_NAME, "_id = ?", new String[]{String.valueOf(place.id())}) == 0;
     }
 
     public void notifyUser(long placeId, String placeName) {
@@ -101,8 +105,8 @@ public class NotificationsController {
         style.setBigContentTitle(context.getString(R.string.notification_new_places_content_title, String.valueOf(pendingPlaces.size())));
 
         for (PlaceNotification notification : pendingPlaces) {
-            Place place = Place.find(notification.getPlaceId());
-            style.addLine(place.getName());
+            Place place = dataStorage.getPlace(notification.getPlaceId());
+            style.addLine(place.name());
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)

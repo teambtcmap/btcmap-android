@@ -14,10 +14,12 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bubelov.coins.DataStorage;
 import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
+import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.util.AuthController;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -82,6 +84,8 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
     private AuthController authController;
 
+    private DataStorage dataStorage;
+
     public static void startForResult(Activity activity, long placeId, CameraPosition mapCameraPosition, int requestCode) {
         Intent intent = new Intent(activity, EditPlaceActivity.class);
         intent.putExtra(ID_EXTRA, placeId);
@@ -125,20 +129,21 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
         });
 
         authController = Injector.INSTANCE.mainComponent().authController();
+        dataStorage = Injector.INSTANCE.mainComponent().dataStorage();
 
-        place = Place.find(getIntent().getLongExtra(ID_EXTRA, -1));
+        place = dataStorage.getPlace(getIntent().getLongExtra(ID_EXTRA, -1));
 
         if (place == null) {
             toolbar.setTitle(R.string.action_add_place);
             closedSwitch.setVisibility(View.GONE);
             changeLocation.setText(R.string.set_location);
         } else {
-            name.setText(place.getName());
+            name.setText(place.name());
             changeLocation.setText(R.string.change_location);
-            phone.setText(place.getPhone());
-            website.setText(place.getWebsite());
-            description.setText(place.getDescription());
-            openingHours.setText(place.getOpeningHours());
+            phone.setText(place.phone());
+            website.setText(place.website());
+            description.setText(place.description());
+            openingHours.setText(place.openingHours());
         }
 
         SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
@@ -171,34 +176,34 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
         Map<String, Object> args = new HashMap<>();
 
         if (pickedLocation == null && place != null) {
-            pickedLocation = new LatLng(place.getLatitude(), place.getLongitude());
+            pickedLocation = new LatLng(place.latitude(), place.longitude());
         }
 
-        if ((place == null && name.length() > 0) || (place != null && !TextUtils.equals(name.getText(), place.getName()))) {
+        if ((place == null && name.length() > 0) || (place != null && !TextUtils.equals(name.getText(), place.name()))) {
             args.put("name", name.getText().toString());
         }
 
-        if (place == null || place.getLatitude() != pickedLocation.latitude) {
+        if (place == null || place.latitude() != pickedLocation.latitude) {
             args.put("latitude", pickedLocation.latitude);
         }
 
-        if (place == null || place.getLongitude() != pickedLocation.longitude) {
+        if (place == null || place.longitude() != pickedLocation.longitude) {
             args.put("longitude", pickedLocation.longitude);
         }
 
-        if ((place == null && phone.length() > 0) || (place != null && !TextUtils.equals(phone.getText(), place.getPhone()))) {
+        if ((place == null && phone.length() > 0) || (place != null && !TextUtils.equals(phone.getText(), place.phone()))) {
             args.put("phone", phone.getText().toString());
         }
 
-        if ((place == null && website.length() > 0) || (place != null && !TextUtils.equals(website.getText(), place.getWebsite()))) {
+        if ((place == null && website.length() > 0) || (place != null && !TextUtils.equals(website.getText(), place.website()))) {
             args.put("website", website.getText().toString());
         }
 
-        if ((place == null && description.length() > 0) || (place != null && !TextUtils.equals(description.getText(), place.getDescription()))) {
+        if ((place == null && description.length() > 0) || (place != null && !TextUtils.equals(description.getText(), place.description()))) {
             args.put("description", description.getText().toString());
         }
 
-        if ((place == null && openingHours.length() > 0) || (place != null && !TextUtils.equals(openingHours.getText(), place.getOpeningHours()))) {
+        if ((place == null && openingHours.length() > 0) || (place != null && !TextUtils.equals(openingHours.getText(), place.openingHours()))) {
             args.put("opening_hours", openingHours.getText().toString());
         }
 
@@ -247,7 +252,9 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
                 if (response.isSuccessful()) {
                     Place place = response.body();
-                    Place.insert(Collections.singletonList(place));
+                    dataStorage.insertPlaces(Collections.singleton(place));
+                    Currency bitcoin = dataStorage.getCurrency("BTC");
+                    dataStorage.insertCurrencyForPlaces(place, Collections.singleton(bitcoin));
                     PlacesCache cache = Injector.INSTANCE.mainComponent().placesCache();
                     cache.invalidate();
                     return true;
@@ -286,11 +293,13 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
             CoinsApi api = Injector.INSTANCE.mainComponent().api();
 
             try {
-                Response<Place> response = api.updatePlace(place.getId(), authController.getToken(), requestArgs).execute();
+                Response<Place> response = api.updatePlace(place.id(), authController.getToken(), requestArgs).execute();
 
                 if (response.isSuccessful()) {
                     Place place = response.body();
-                    Place.insert(Collections.singletonList(place));
+                    dataStorage.insertPlaces(Collections.singleton(place));
+                    Currency bitcoin = dataStorage.getCurrency("BTC");
+                    dataStorage.insertCurrencyForPlaces(place, Collections.singleton(bitcoin));
                     PlacesCache cache = Injector.INSTANCE.mainComponent().placesCache();
                     cache.invalidate();
                     return true;

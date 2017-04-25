@@ -22,12 +22,15 @@ import timber.log.Timber;
 public class PlacesCache {
     private final SQLiteDatabase db;
 
+    private final DataStorage dataStorage;
+
     private Place[] places = new Place[0];
 
     private Callback callback;
 
-    public PlacesCache(SQLiteDatabase db) {
+    public PlacesCache(SQLiteDatabase db, DataStorage dataStorage) {
         this.db = db;
+        this.dataStorage = dataStorage;
         invalidate();
     }
 
@@ -41,7 +44,7 @@ public class PlacesCache {
             Place place = this.places[i];
 
             if (bounds.contains(place.getPosition())
-                    && (category == null || category.name().equalsIgnoreCase(place.getAmenity()))) {
+                    && (category == null || category.name().equalsIgnoreCase(place.amenity()))) {
                 result.add(place);
             }
         }
@@ -80,12 +83,7 @@ public class PlacesCache {
             int index = 0;
 
             while (cursor.moveToNext()) {
-                Place place = new Place();
-                place.setId(cursor.getLong(cursor.getColumnIndex(DbContract.Places._ID)));
-                place.setLatitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Places.LATITUDE)));
-                place.setLongitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Places.LONGITUDE)));
-                place.setAmenity(cursor.getString(cursor.getColumnIndex(DbContract.Places.AMENITY)));
-                places[index++] = place;
+                places[index++] = dataStorage.getPlace(cursor.getLong(cursor.getColumnIndex(DbContract.Places._ID)));
             }
 
             Timber.d("Object mapping time: %s", System.currentTimeMillis() - time);

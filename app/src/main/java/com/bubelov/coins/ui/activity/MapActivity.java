@@ -187,7 +187,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             @Override
             public void onEditPlaceClick(Place place) {
                 if (authController.isAuthorized()) {
-                    EditPlaceActivity.startForResult(MapActivity.this, place.getId(), null, REQUEST_EDIT_PLACE);
+                    EditPlaceActivity.startForResult(MapActivity.this, place.id(), null, REQUEST_EDIT_PLACE);
                 } else {
                     signIn();
                 }
@@ -267,7 +267,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             reloadPlaces();
 
             if (selectedPlace != null) {
-                selectPlace(selectedPlace.getId());
+                selectPlace(selectedPlace.id());
             }
         }
 
@@ -522,17 +522,16 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     private void selectPlace(long placeId) {
-        selectedPlace = Place.find(placeId);
+        selectedPlace = dataStorage.getPlace(placeId);
 
         if (selectedPlace == null) {
             return;
         }
 
-        selectedPlace.setCurrencies(dataStorage.getCurrencies(selectedPlace));
         placeDetails.setPlace(selectedPlace);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
-        Analytics.logSelectContentEvent(String.valueOf(selectedPlace.getId()), selectedPlace.getName(), "place");
+        Analytics.logSelectContentEvent(String.valueOf(selectedPlace.id()), selectedPlace.name(), "place");
     }
 
     @OnClick(R.id.fab)
@@ -550,7 +549,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     public void onPlaceDetailsClick() {
         if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-            Analytics.logViewContentEvent(String.valueOf(selectedPlace.getId()), selectedPlace.getName(), "place");
+            Analytics.logViewContentEvent(String.valueOf(selectedPlace.id()), selectedPlace.name(), "place");
         } else {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
@@ -567,7 +566,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         @Override
         protected void onBeforeClusterItemRendered(Place item, MarkerOptions markerOptions) {
             super.onBeforeClusterItemRendered(item, markerOptions);
-            markerOptions.icon(cache.getMarker(item.getAmenity())).anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
+            markerOptions.icon(cache.getMarker(item.amenity())).anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
         }
     }
 
@@ -581,7 +580,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     private class ClusterItemClickListener implements ClusterManager.OnClusterItemClickListener<Place> {
         @Override
         public boolean onClusterItemClick(Place place) {
-            selectPlace(place.getId());
+            selectPlace(place.id());
             return false;
         }
     }

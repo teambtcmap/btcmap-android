@@ -12,7 +12,6 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.DbContract;
 import com.bubelov.coins.service.DatabaseSyncService;
-import com.bubelov.coins.service.NotificationsController;
 
 import java.util.Random;
 
@@ -51,7 +50,7 @@ public class SettingsFragment extends PreferenceFragment {
                 if (cursor.moveToNext()) {
                     long id = cursor.getLong(cursor.getColumnIndex(DbContract.Places._ID));
                     String name = cursor.getString(cursor.getColumnIndex(DbContract.Places.NAME));
-                    new NotificationsController(getActivity()).notifyUser(id, name);
+                    Injector.INSTANCE.mainComponent().notificationsController().notifyUser(id, name);
                 }
 
                 cursor.close();

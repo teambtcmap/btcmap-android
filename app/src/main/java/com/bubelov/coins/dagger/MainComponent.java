@@ -7,6 +7,7 @@ import com.bubelov.coins.DataStorage;
 import com.bubelov.coins.PlacesCache;
 import com.bubelov.coins.api.CoinsApi;
 import com.bubelov.coins.service.DatabaseSync;
+import com.bubelov.coins.service.NotificationsController;
 import com.bubelov.coins.util.AuthController;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -42,6 +43,8 @@ public interface MainComponent {
     AuthController authController();
 
     DataStorage dataStorage();
+
+    NotificationsController notificationsController();
 
     void inject(DatabaseSync sync);
 }

@@ -88,7 +88,8 @@ public class MainModule {
     @Provides
     @Singleton
     PlacesCache placesCache() {
-        return new PlacesCache(database(context()));
+        SQLiteDatabase db = database(context());
+        return new PlacesCache(db, dataStorage(db, preferences(context())));
     }
 
     @Provides
@@ -119,7 +120,7 @@ public class MainModule {
     @Provides
     @Singleton
     NotificationsController notificationsController(Context context) {
-        return new NotificationsController(context);
+        return new NotificationsController(context, dataStorage(database(context), preferences(context)));
     }
 
     @Provides

@@ -49,7 +49,7 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
     @Override
     public void onBindViewHolder(ResultViewHolder holder, int position) {
         final Place place = places.get(position);
-        holder.name.setText(place.getName());
+        holder.name.setText(place.name());
         holder.ripple.setOnClickListener(v -> listener.onPlaceSelected(place));
 
         if (userLocation == null) {
@@ -71,7 +71,7 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
         boolean amenityFound = false;
 
         for (PlaceCategory category : PlaceCategory.values()) {
-            if (place.getAmenity().equalsIgnoreCase(category.name())) {
+            if (place.amenity().equalsIgnoreCase(category.name())) {
                 amenityFound = true;
                 holder.icon.setImageResource(category.getIconId());
             }

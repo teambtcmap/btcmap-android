@@ -91,69 +91,69 @@ public class PlaceDetailsView extends FrameLayout {
     public void setPlace(final Place place) {
         this.place = place;
 
-        if (place.getOpenedClaims() > 0 && place.getClosedClaims() == 0) {
+        if (place.openedClaims() > 0 && place.closedClaims() == 0) {
             checkMark.setVisibility(VISIBLE);
         } else {
             checkMark.setVisibility(GONE);
         }
 
-        if (place.getClosedClaims() > 0) {
+        if (place.closedClaims() > 0) {
             warning.setVisibility(VISIBLE);
         } else {
             warning.setVisibility(GONE);
         }
 
-        if (place.getOpenedClaims() > 0) {
+        if (place.openedClaims() > 0) {
             openedClaims.setVisibility(VISIBLE);
-            openedClaims.setText(getResources().getQuantityString(R.plurals.confirmed_by_d_users, place.getOpenedClaims(), place.getOpenedClaims()));
+            openedClaims.setText(getResources().getQuantityString(R.plurals.confirmed_by_d_users, place.openedClaims(), place.openedClaims()));
         } else {
             openedClaims.setVisibility(GONE);
         }
 
-        if (place.getClosedClaims() > 0) {
+        if (place.closedClaims() > 0) {
             closedClaims.setVisibility(VISIBLE);
-            closedClaims.setText(getResources().getQuantityString(R.plurals.marked_as_closed_by_d_users, place.getClosedClaims(), place.getClosedClaims()));
+            closedClaims.setText(getResources().getQuantityString(R.plurals.marked_as_closed_by_d_users, place.closedClaims(), place.closedClaims()));
         } else {
             closedClaims.setVisibility(GONE);
         }
 
-        if (TextUtils.isEmpty(place.getName())) {
+        if (TextUtils.isEmpty(place.name())) {
             name.setText(R.string.name_unknown);
             toolbar.setTitle(R.string.name_unknown);
         } else {
-            name.setText(place.getName());
-            toolbar.setTitle(place.getName());
+            name.setText(place.name());
+            toolbar.setTitle(place.name());
         }
 
-        if (TextUtils.isEmpty(place.getPhone())) {
+        if (TextUtils.isEmpty(place.phone())) {
             phone.setText(R.string.not_provided);
         } else {
-            phone.setText(place.getPhone());
+            phone.setText(place.phone());
         }
 
-        if (TextUtils.isEmpty(place.getWebsite())) {
+        if (TextUtils.isEmpty(place.website())) {
             website.setText(R.string.not_provided);
             website.setTextColor(getResources().getColor(R.color.black));
             website.setPaintFlags(website.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
 
             website.setOnClickListener(null);
         } else {
-            website.setText(place.getWebsite());
+            website.setText(place.website());
             website.setTextColor(getResources().getColor(R.color.primary_dark));
             website.setPaintFlags(website.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-            website.setOnClickListener(view -> Utils.openUrl(PlaceDetailsView.this.getContext(), place.getWebsite()));
+            website.setOnClickListener(view -> Utils.openUrl(PlaceDetailsView.this.getContext(), place.website()));
         }
 
-        if (TextUtils.isEmpty(place.getDescription())) {
+        if (TextUtils.isEmpty(place.description())) {
             description.setText(R.string.not_provided);
         } else {
-            description.setText(place.getDescription());
+            description.setText(place.description());
         }
 
-        if (TextUtils.isEmpty(place.getOpeningHours())) {
+        if (TextUtils.isEmpty(place.openingHours())) {
             openingHours.setText(R.string.not_provided);
         } else {
-            openingHours.setText(place.getOpeningHours());
+            openingHours.setText(place.openingHours());
         }
     }
 
@@ -175,8 +175,8 @@ public class PlaceDetailsView extends FrameLayout {
 
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_share) {
-                Utils.share(getContext(), getResources().getString(R.string.share_place_message_title), getResources().getString(R.string.share_place_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", place.getLatitude(), place.getLongitude())));
-                Analytics.logShareContentEvent(String.valueOf(place.getId()), place.getName(), "place");
+                Utils.share(getContext(), getResources().getString(R.string.share_place_message_title), getResources().getString(R.string.share_place_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", place.latitude(), place.longitude())));
+                Analytics.logShareContentEvent(String.valueOf(place.id()), place.name(), "place");
                 return true;
             }
 
