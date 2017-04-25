@@ -91,19 +91,15 @@ public class DataStorage {
     }
 
     public Place getLatestPlace() {
-        Cursor cursor = db.query(DbContract.Places.TABLE_NAME,
+        try (Cursor cursor = db.query(DbContract.Places.TABLE_NAME,
                 null,
                 null,
                 null,
                 null,
                 null,
                 DbContract.Places._UPDATED_AT + " desc",
-                "1");
-
-        try {
+                "1")) {
             return cursor.getCount() == 0 ? null : getPlace(cursor);
-        } finally {
-            cursor.close();
         }
     }
 
@@ -126,19 +122,15 @@ public class DataStorage {
                 .build();
     }
 
-    public Currency getCurrency(String code) {
-        Cursor cursor = db.query(DbContract.Currencies.TABLE_NAME,
+    public Currency getCurrency(@NonNull String code) {
+        try (Cursor cursor = db.query(DbContract.Currencies.TABLE_NAME,
                 null,
                 "code = ?",
                 new String[]{code},
                 null,
                 null,
-                null);
-
-        try {
+                null)) {
             return getCurrencies(cursor).get(0);
-        } finally {
-            cursor.close();
         }
     }
 
