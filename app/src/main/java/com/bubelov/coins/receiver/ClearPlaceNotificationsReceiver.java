@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.bubelov.coins.model.PlaceNotification;
+import com.bubelov.coins.data.api.coins.model.PlaceNotification;
 
 /**
  * @author Igor Bubelov

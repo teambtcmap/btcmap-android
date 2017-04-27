@@ -7,16 +7,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.BuildConfig;
-import com.bubelov.coins.DataStorage;
-import com.bubelov.coins.PlacesCache;
-import com.bubelov.coins.api.CoinsApi;
-import com.bubelov.coins.database.AssetDbHelper;
-import com.bubelov.coins.database.DbHelper;
-import com.bubelov.coins.gson.AutoValueAdapterFactory;
+import com.bubelov.coins.data.DataManager;
+import com.bubelov.coins.util.PlacesCache;
+import com.bubelov.coins.data.db.AssetDbHelper;
+import com.bubelov.coins.data.db.DbHelper;
+import com.bubelov.coins.data.gson.AutoValueAdapterFactory;
 import com.bubelov.coins.service.DatabaseSync;
-import com.bubelov.coins.service.NotificationsController;
-import com.bubelov.coins.util.AuthController;
+import com.bubelov.coins.util.PlaceNotificationManager;
 import com.bubelov.coins.util.MapMarkersCache;
+import com.bubelov.coins.util.StringAdapter;
 import com.bubelov.coins.util.UtcDateTypeAdapter;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.FieldNamingPolicy;
@@ -24,16 +23,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * @author Igor Bubelov
@@ -55,47 +49,38 @@ public class MainModule {
 
     @Provides
     @Singleton
-    CoinsApi api(Gson gson) {
-        OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS);
-
-        if (BuildConfig.DEBUG) {
-            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-            httpClientBuilder.addInterceptor(loggingInterceptor);
-        }
-
-        return new Retrofit.Builder()
-                .baseUrl(BuildConfig.API_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .client(httpClientBuilder.build())
-                .build()
-                .create(CoinsApi.class);
+    DataManager dataManager(SQLiteDatabase db, SharedPreferences preferences, Gson gson) {
+        return new DataManager(db, preferences, gson);
     }
 
     @Provides
     @Singleton
-    Gson gson() {
-        return new GsonBuilder()
-                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .registerTypeAdapterFactory(new AutoValueAdapterFactory())
-                .registerTypeAdapter(Date.class, new UtcDateTypeAdapter())
-                .create();
-    }
-
-    @Provides
-    @Singleton
-    PlacesCache placesCache() {
-        SQLiteDatabase db = database(context());
-        return new PlacesCache(db, dataStorage(db, preferences(context())));
+    PlacesCache placesCache(DataManager dataManager) {
+        return new PlacesCache(dataManager);
     }
 
     @Provides
     @Singleton
     MapMarkersCache markersCache() {
         return new MapMarkersCache();
+    }
+
+    @Provides
+    @Singleton
+    DatabaseSync databaseSync() {
+        return new DatabaseSync();
+    }
+
+    @Provides
+    @Singleton
+    FirebaseAnalytics analytics(Context context) {
+        return FirebaseAnalytics.getInstance(context);
+    }
+
+    @Provides
+    @Singleton
+    PlaceNotificationManager placeNotificationManager(Context context, DataManager dataManager) {
+        return new PlaceNotificationManager(context, dataManager);
     }
 
     @Provides
@@ -107,37 +92,18 @@ public class MainModule {
 
     @Provides
     @Singleton
-    DatabaseSync databaseSync() {
-        return new DatabaseSync();
-    }
-
-    @Provides
-    @Singleton
     SharedPreferences preferences(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     @Provides
     @Singleton
-    NotificationsController notificationsController(Context context) {
-        return new NotificationsController(context, dataStorage(database(context), preferences(context)));
-    }
-
-    @Provides
-    @Singleton
-    FirebaseAnalytics analytics(Context context) {
-        return FirebaseAnalytics.getInstance(context);
-    }
-
-    @Provides
-    @Singleton
-    AuthController authController(SharedPreferences preferences, Gson gson) {
-        return new AuthController(preferences, gson);
-    }
-
-    @Provides
-    @Singleton
-    DataStorage dataStorage(SQLiteDatabase db, SharedPreferences preferences) {
-        return new DataStorage(db, preferences);
+    Gson gson() {
+        return new GsonBuilder()
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .registerTypeAdapterFactory(new AutoValueAdapterFactory())
+                .registerTypeAdapter(Date.class, new UtcDateTypeAdapter())
+                .registerTypeAdapter(String.class, new StringAdapter())
+                .create();
     }
 }

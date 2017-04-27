@@ -6,6 +6,8 @@ import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
+import com.bubelov.coins.dagger.Injector;
+import com.bubelov.coins.dagger.MainComponent;
 import com.bubelov.coins.ui.dialog.ProgressDialog;
 import com.bubelov.coins.util.ThemeUtils;
 
@@ -42,5 +44,9 @@ public abstract class AbstractActivity extends AppCompatActivity {
         if (progressDialog != null) {
             progressDialog.hide();
         }
+    }
+
+    protected MainComponent dependencies() {
+        return Injector.INSTANCE.mainComponent();
     }
 }

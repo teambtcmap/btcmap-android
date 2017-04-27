@@ -3,23 +3,17 @@ package com.bubelov.coins.ui.activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.api.rates.provider.BitcoinAverage;
-import com.bubelov.coins.api.rates.provider.Bitstamp;
-import com.bubelov.coins.api.rates.provider.Coinbase;
-import com.bubelov.coins.api.rates.provider.CryptoExchange;
-import com.bubelov.coins.api.rates.provider.Winkdex;
+import com.bubelov.coins.data.RatesApi;
+import com.bubelov.coins.data.api.rates.model.ExchangeRate;
 import com.bubelov.coins.ui.adapter.ExchangeRatesAdapter;
+import com.google.firebase.crash.FirebaseCrash;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -37,10 +31,6 @@ public class ExchangeRatesActivity extends AbstractActivity {
 
     private ExchangeRatesAdapter ratesAdapter;
 
-    private List<CryptoExchange> exchanges = new ArrayList<>();
-
-    private Map<CryptoExchange, Double> rates = new HashMap<>();
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,41 +42,54 @@ public class ExchangeRatesActivity extends AbstractActivity {
         ratesView.setLayoutManager(new LinearLayoutManager(this));
         ratesView.setHasFixedSize(true);
 
-        exchanges.add(new Bitstamp());
-        exchanges.add(new Coinbase());
-        exchanges.add(new Winkdex());
-        exchanges.add(new BitcoinAverage());
-
-        ratesAdapter = new ExchangeRatesAdapter(exchanges, rates);
+        ratesAdapter = new ExchangeRatesAdapter();
         ratesView.setAdapter(ratesAdapter);
 
         new LoadExchangeRatesTask().execute();
     }
 
-    private class LoadExchangeRatesTask extends AsyncTask<Void, Pair<CryptoExchange, Double>, Void> {
+    private class LoadExchangeRatesTask extends AsyncTask<Void, ExchangeRate, Void> {
         @Override
         protected void onPreExecute() {
-            rates.clear();
+            ratesAdapter.getItems().clear();
             ratesAdapter.notifyDataSetChanged();
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            for (CryptoExchange exchange : exchanges) {
-                try {
-                    publishProgress(new Pair<>(exchange, exchange.getCurrentRate()));
-                } catch (Exception e) {
-                    // TODO
-                }
+            RatesApi api = dependencies().dataManager().ratesApi();
+
+            try {
+                publishProgress(api.getBitstampRate());
+            } catch (IOException e) {
+                FirebaseCrash.report(e);
+            }
+
+            try {
+                publishProgress(api.getCoinbaseRate());
+            } catch (IOException e) {
+                FirebaseCrash.report(e);
+            }
+
+            try {
+                publishProgress(api.getWinkDexRate());
+            } catch (IOException e) {
+                FirebaseCrash.report(e);
+            }
+
+            try {
+                publishProgress(api.getBitcoinAverageRate());
+            } catch (IOException e) {
+                FirebaseCrash.report(e);
             }
 
             return null;
         }
 
         @Override
-        protected void onProgressUpdate(Pair<CryptoExchange, Double>... values) {
-            for (Pair<CryptoExchange, Double> rate : values) {
-                rates.put(rate.first, rate.second);
+        protected void onProgressUpdate(ExchangeRate... values) {
+            for (ExchangeRate rate : values) {
+                ratesAdapter.getItems().add(rate);
                 ratesAdapter.notifyDataSetChanged();
             }
         }

@@ -6,7 +6,7 @@ import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.TypefaceManager;
+import com.bubelov.coins.util.TypefaceManager;
 
 /**
  * @author Igor Bubelov

@@ -11,7 +11,7 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.model.Place;
+import com.bubelov.coins.data.api.coins.model.Place;
 import com.bubelov.coins.util.Analytics;
 import com.bubelov.coins.util.Utils;
 

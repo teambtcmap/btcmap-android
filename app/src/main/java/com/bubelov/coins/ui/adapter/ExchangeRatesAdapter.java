@@ -7,11 +7,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.api.rates.provider.CryptoExchange;
+import com.bubelov.coins.data.api.rates.model.ExchangeRate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -21,14 +21,7 @@ import butterknife.ButterKnife;
  */
 
 public class ExchangeRatesAdapter extends RecyclerView.Adapter<ExchangeRatesAdapter.ExchangeRateViewHolder> {
-    private final List<CryptoExchange> exchanges;
-
-    private final Map<CryptoExchange, Double> rates;
-
-    public ExchangeRatesAdapter(List<CryptoExchange> exchanges, Map<CryptoExchange, Double> rates) {
-        this.exchanges = exchanges;
-        this.rates = rates;
-    }
+    private final List<ExchangeRate> items = new ArrayList<>();
 
     @Override
     public ExchangeRateViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -38,25 +31,27 @@ public class ExchangeRatesAdapter extends RecyclerView.Adapter<ExchangeRatesAdap
 
     @Override
     public void onBindViewHolder(final ExchangeRateViewHolder holder, int position) {
-        CryptoExchange exchange = exchanges.get(position);
-        String name = exchange.getClass().getSimpleName();
-        holder.firstLetter.setText(name.substring(0, 1));
-        holder.exchangeName.setText(name);
-        double price = rates.containsKey(exchange) ? rates.get(exchange) : 0;
+        ExchangeRate rate = items.get(position);
+        holder.firstLetter.setText(rate.source.substring(0, 1));
+        holder.exchangeName.setText(rate.source);
 
-        if (price == 0) {
+        if (rate.rate == 0) {
             holder.price.setVisibility(View.GONE);
             holder.progressBar.setVisibility(View.VISIBLE);
         } else {
             holder.price.setVisibility(View.VISIBLE);
-            holder.price.setText(String.format(Locale.US, "$%.2f", price));
+            holder.price.setText(String.format(Locale.US, "$%.2f", rate.rate));
             holder.progressBar.setVisibility(View.GONE);
         }
     }
 
     @Override
     public int getItemCount() {
-        return exchanges.size();
+        return items.size();
+    }
+
+    public List<ExchangeRate> getItems() {
+        return items;
     }
 
     public static class ExchangeRateViewHolder extends RecyclerView.ViewHolder {

@@ -2,7 +2,7 @@ package com.bubelov.coins.util;
 
 import android.location.Location;
 
-import com.bubelov.coins.model.Place;
+import com.bubelov.coins.data.api.coins.model.Place;
 
 import java.util.Comparator;
 

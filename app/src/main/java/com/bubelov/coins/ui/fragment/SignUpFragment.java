@@ -14,10 +14,10 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.api.CoinsApi;
-import com.bubelov.coins.api.UserParams;
+import com.bubelov.coins.data.api.coins.CoinsApi;
+import com.bubelov.coins.data.api.coins.UserParams;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.model.AuthResponse;
+import com.bubelov.coins.data.api.coins.model.AuthResponse;
 
 import java.io.IOException;
 
@@ -112,7 +112,7 @@ public class SignUpFragment extends AuthFragment  implements TextView.OnEditorAc
 
         @Override
         protected Void doInBackground(UserParams... params) {
-            CoinsApi api = Injector.INSTANCE.mainComponent().api();
+            CoinsApi api = Injector.INSTANCE.mainComponent().dataManager().coinsApi();
 
             try {
                 response = api.createUser(params[0]).execute();

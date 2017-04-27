@@ -13,9 +13,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.api.CoinsApi;
+import com.bubelov.coins.data.api.coins.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.model.AuthResponse;
+import com.bubelov.coins.data.api.coins.model.AuthResponse;
 
 import java.io.IOException;
 
@@ -102,7 +102,7 @@ public class SignInFragment extends AuthFragment implements TextView.OnEditorAct
 
         @Override
         protected Void doInBackground(Void... params) {
-            CoinsApi api = Injector.INSTANCE.mainComponent().api();
+            CoinsApi api = Injector.INSTANCE.mainComponent().dataManager().coinsApi();
 
             try {
                 response = api.authWithEmail(email, password).execute();

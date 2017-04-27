@@ -1,14 +1,11 @@
 package com.bubelov.coins.dagger;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 
-import com.bubelov.coins.DataStorage;
-import com.bubelov.coins.PlacesCache;
-import com.bubelov.coins.api.CoinsApi;
+import com.bubelov.coins.data.DataManager;
+import com.bubelov.coins.util.PlacesCache;
 import com.bubelov.coins.service.DatabaseSync;
-import com.bubelov.coins.service.NotificationsController;
-import com.bubelov.coins.util.AuthController;
+import com.bubelov.coins.util.PlaceNotificationManager;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
@@ -26,11 +23,7 @@ import dagger.Component;
 public interface MainComponent {
     Context context();
 
-    CoinsApi api();
-
-    Gson gson();
-
-    SQLiteDatabase database();
+    DataManager dataManager();
 
     PlacesCache placesCache();
 
@@ -40,11 +33,9 @@ public interface MainComponent {
 
     FirebaseAnalytics analytics();
 
-    AuthController authController();
+    PlaceNotificationManager notificationManager();
 
-    DataStorage dataStorage();
-
-    NotificationsController notificationsController();
+    Gson gson();
 
     void inject(DatabaseSync sync);
 }

@@ -14,10 +14,9 @@ import android.widget.ViewSwitcher;
 
 import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.R;
-import com.bubelov.coins.api.CoinsApi;
+import com.bubelov.coins.data.DataManager;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.model.AuthResponse;
-import com.bubelov.coins.util.AuthController;
+import com.bubelov.coins.data.api.coins.model.AuthResponse;
 import com.bubelov.coins.util.Utils;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -58,7 +57,7 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
 
     private GoogleApiClient googleApiClient;
 
-    private AuthController authController;
+    private DataManager dataManager;
 
     public static Intent newIntent(Context context) {
         return new Intent(context, SignInActivity.class);
@@ -83,7 +82,7 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
                 .addApi(Auth.CREDENTIALS_API)
                 .build();
 
-        authController = Injector.INSTANCE.mainComponent().authController();
+        dataManager = dependencies().dataManager();
     }
 
     @Override
@@ -164,8 +163,7 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                CoinsApi api = Injector.INSTANCE.mainComponent().api();
-                response = api.authWithGoogle(token).execute();
+                response = dataManager.coinsApi().authWithGoogle(token).execute();
             } catch (IOException e) {
                 Timber.e(e, "Couldn't authorize with Google token");
                 FirebaseCrash.report(e);
@@ -183,9 +181,9 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
             }
 
             if (response.isSuccessful()) {
-                authController.setUser(response.body().getUser());
-                authController.setToken(response.body().getToken());
-                authController.setMethod("google");
+                dataManager.preferences().setUser(response.body().getUser());
+                dataManager.preferences().setToken(response.body().getToken());
+                dataManager.preferences().setMethod("google");
                 setResult(RESULT_OK);
                 supportFinishAfterTransition();
 

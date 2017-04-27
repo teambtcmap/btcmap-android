@@ -14,14 +14,10 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bubelov.coins.DataStorage;
-import com.bubelov.coins.PlacesCache;
+import com.bubelov.coins.data.DataManager;
 import com.bubelov.coins.R;
-import com.bubelov.coins.api.CoinsApi;
-import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.model.Currency;
-import com.bubelov.coins.model.Place;
-import com.bubelov.coins.util.AuthController;
+import com.bubelov.coins.data.api.coins.model.Currency;
+import com.bubelov.coins.data.api.coins.model.Place;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -82,9 +78,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
     private LatLng pickedLocation;
 
-    private AuthController authController;
-
-    private DataStorage dataStorage;
+    private DataManager dataManager;
 
     public static void startForResult(Activity activity, long placeId, CameraPosition mapCameraPosition, int requestCode) {
         Intent intent = new Intent(activity, EditPlaceActivity.class);
@@ -128,10 +122,9 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
             return false;
         });
 
-        authController = Injector.INSTANCE.mainComponent().authController();
-        dataStorage = Injector.INSTANCE.mainComponent().dataStorage();
+        dataManager = dependencies().dataManager();
 
-        place = dataStorage.getPlace(getIntent().getLongExtra(ID_EXTRA, -1));
+        place = dataManager.database().getPlace(getIntent().getLongExtra(ID_EXTRA, -1));
 
         if (place == null) {
             toolbar.setTitle(R.string.action_add_place);
@@ -245,18 +238,15 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
         @Override
         protected Boolean doInBackground(Void... args) {
-            CoinsApi api = Injector.INSTANCE.mainComponent().api();
-
             try {
-                Response<Place> response = api.addPlace(authController.getToken(), requestArgs).execute();
+                Response<Place> response = dataManager.coinsApi().addPlace(dataManager.preferences().getToken(), requestArgs).execute();
 
                 if (response.isSuccessful()) {
                     Place place = response.body();
-                    dataStorage.insertPlaces(Collections.singleton(place));
-                    Currency bitcoin = dataStorage.getCurrency("BTC");
-                    dataStorage.insertCurrencyForPlaces(place, Collections.singleton(bitcoin));
-                    PlacesCache cache = Injector.INSTANCE.mainComponent().placesCache();
-                    cache.invalidate();
+                    Currency bitcoin = dataManager.database().getCurrency("BTC");
+                    place.currencies = Collections.singleton(bitcoin);
+                    dataManager.database().insertPlaces(Collections.singleton(place));
+                    dependencies().placesCache().invalidate();
                     return true;
                 } else {
                     return false;
@@ -290,18 +280,15 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            CoinsApi api = Injector.INSTANCE.mainComponent().api();
-
             try {
-                Response<Place> response = api.updatePlace(place.id(), authController.getToken(), requestArgs).execute();
+                Response<Place> response = dataManager.coinsApi().updatePlace(place.id(), dataManager.preferences().getToken(), requestArgs).execute();
 
                 if (response.isSuccessful()) {
                     Place place = response.body();
-                    dataStorage.insertPlaces(Collections.singleton(place));
-                    Currency bitcoin = dataStorage.getCurrency("BTC");
-                    dataStorage.insertCurrencyForPlaces(place, Collections.singleton(bitcoin));
-                    PlacesCache cache = Injector.INSTANCE.mainComponent().placesCache();
-                    cache.invalidate();
+                    Currency bitcoin = dataManager.database().getCurrency("BTC");
+                    place.currencies = Collections.singleton(bitcoin);
+                    dataManager.database().insertPlaces(Collections.singleton(place));
+                    dependencies().placesCache().invalidate();
                     return true;
                 } else {
                     return false;

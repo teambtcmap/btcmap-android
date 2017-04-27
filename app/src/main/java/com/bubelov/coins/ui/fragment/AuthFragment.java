@@ -6,10 +6,9 @@ import android.support.v4.app.Fragment;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.model.AuthResponse;
+import com.bubelov.coins.data.api.coins.model.AuthResponse;
 import com.bubelov.coins.ui.activity.AbstractActivity;
 import com.bubelov.coins.ui.activity.MapActivity;
-import com.bubelov.coins.util.AuthController;
 import com.bubelov.coins.util.Utils;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
@@ -35,8 +34,7 @@ public abstract class AuthFragment extends Fragment {
         }
 
         if (response.isSuccessful()) {
-            AuthController authController = Injector.INSTANCE.mainComponent().authController();
-            authController.setToken(response.body().getToken());
+            Injector.INSTANCE.mainComponent().dataManager().preferences().setToken(response.body().getToken());
 
             Intent intent = new Intent(getContext(), MapActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -11,8 +11,9 @@ import android.widget.SeekBar;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.R;
-import com.bubelov.coins.model.NotificationArea;
-import com.bubelov.coins.provider.NotificationAreaProvider;
+import com.bubelov.coins.dagger.Injector;
+import com.bubelov.coins.data.DataManager;
+import com.bubelov.coins.data.model.NotificationArea;
 import com.bubelov.coins.util.OnSeekBarChangeAdapter;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -50,6 +51,8 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
 
     private Circle areaCircle;
 
+    private DataManager dataManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +71,8 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
             saveArea();
             supportFinishAfterTransition();
         });
+
+        dataManager = Injector.INSTANCE.mainComponent().dataManager();
     }
 
     @Override
@@ -88,7 +93,7 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
             map.setMyLocationEnabled(true);
         }
 
-        NotificationArea notificationArea = new NotificationAreaProvider(this).get();
+        NotificationArea notificationArea = dataManager.preferences().getNotificationArea();
         setArea(notificationArea == null ? DEFAULT_NOTIFICATION_AREA : notificationArea);
     }
 
@@ -118,8 +123,7 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
     }
 
     private void saveArea() {
-        NotificationAreaProvider provider = new NotificationAreaProvider(this);
-        provider.save(new NotificationArea(areaCircle.getCenter(), (int) areaCircle.getRadius()));
+        dataManager.preferences().setNotificationArea(new NotificationArea(areaCircle.getCenter(), (int) areaCircle.getRadius()));
     }
 
     private class OnMarkerDragListener implements GoogleMap.OnMarkerDragListener {

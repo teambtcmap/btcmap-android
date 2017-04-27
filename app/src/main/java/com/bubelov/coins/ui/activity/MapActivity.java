@@ -27,18 +27,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bubelov.coins.Constants;
-import com.bubelov.coins.DataStorage;
-import com.bubelov.coins.PlacesCache;
+import com.bubelov.coins.data.DataManager;
+import com.bubelov.coins.util.PlacesCache;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.model.Place;
-import com.bubelov.coins.model.PlaceNotification;
-import com.bubelov.coins.model.NotificationArea;
-import com.bubelov.coins.model.User;
-import com.bubelov.coins.provider.NotificationAreaProvider;
+import com.bubelov.coins.data.api.coins.model.Place;
+import com.bubelov.coins.data.api.coins.model.PlaceNotification;
+import com.bubelov.coins.data.model.NotificationArea;
+import com.bubelov.coins.data.api.coins.model.User;
 import com.bubelov.coins.ui.widget.PlaceDetailsView;
 import com.bubelov.coins.util.Analytics;
-import com.bubelov.coins.util.AuthController;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
@@ -119,9 +117,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     private BottomSheetBehavior bottomSheetBehavior;
 
-    private AuthController authController;
-
-    private DataStorage dataStorage;
+    private DataManager dataManager;
 
     public static Intent newShowPlaceIntent(Context context, long placeId) {
         Intent intent = new Intent(context, MapActivity.class);
@@ -158,8 +154,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         googleApiClient.connect();
 
-        authController = Injector.INSTANCE.mainComponent().authController();
-        dataStorage = Injector.INSTANCE.mainComponent().dataStorage();
+        dataManager = dependencies().dataManager();
 
         firstLaunch = savedInstanceState == null;
 
@@ -186,7 +181,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         placeDetails.setListener(new PlaceDetailsView.Listener() {
             @Override
             public void onEditPlaceClick(Place place) {
-                if (authController.isAuthorized()) {
+                if (dataManager.preferences().isAuthorized()) {
                     EditPlaceActivity.startForResult(MapActivity.this, place.id(), null, REQUEST_EDIT_PLACE);
                 } else {
                     signIn();
@@ -288,7 +283,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         switch (id) {
             case R.id.action_add:
-                if (authController.isAuthorized()) {
+                if (dataManager.preferences().isAuthorized()) {
                     EditPlaceActivity.startForResult(this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
                 } else {
                     signIn();
@@ -390,8 +385,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     private void updateDrawerHeader() {
-        if (authController.isAuthorized()) {
-            User user = authController.getUser();
+        if (dataManager.preferences().isAuthorized()) {
+            User user = dataManager.preferences().getUser();
 
             if (!TextUtils.isEmpty(user.avatarUrl())) {
                 Picasso.with(this).load(user.avatarUrl()).into(avatar);
@@ -410,7 +405,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         drawerHeader.setOnClickListener(v -> {
-            if (authController.isAuthorized()) {
+            if (dataManager.preferences().isAuthorized()) {
                 startActivityForResult(ProfileActivity.newIntent(this),  REQUEST_PROFILE, ActivityOptionsCompat.makeBasic().toBundle());
             } else {
                 signIn();
@@ -487,10 +482,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_DEFAULT_ZOOM));
 
-        NotificationAreaProvider notificationAreaProvider = new NotificationAreaProvider(this);
-
-        if (notificationAreaProvider.get() == null) {
-            notificationAreaProvider.save(new NotificationArea(latLng));
+        if (dataManager.preferences().getNotificationArea() == null) {
+            dataManager.preferences().setNotificationArea(new NotificationArea(latLng));
         }
     }
 
@@ -522,7 +515,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     private void selectPlace(long placeId) {
-        selectedPlace = dataStorage.getPlace(placeId);
+        selectedPlace = dataManager.database().getPlace(placeId);
 
         if (selectedPlace == null) {
             return;

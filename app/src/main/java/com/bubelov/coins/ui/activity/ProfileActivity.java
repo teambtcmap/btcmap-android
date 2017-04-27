@@ -11,9 +11,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.model.User;
-import com.bubelov.coins.util.AuthController;
+import com.bubelov.coins.data.DataManager;
+import com.bubelov.coins.data.api.coins.model.User;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.squareup.picasso.Picasso;
@@ -37,7 +36,7 @@ public class ProfileActivity extends AbstractActivity implements Toolbar.OnMenuI
     @BindView(R.id.user_name)
     TextView userName;
 
-    private AuthController authController;
+    private DataManager dataManager;
 
     private GoogleApiClient googleApiClient;
 
@@ -55,14 +54,13 @@ public class ProfileActivity extends AbstractActivity implements Toolbar.OnMenuI
         toolbar.inflateMenu(R.menu.profile);
         toolbar.setOnMenuItemClickListener(this);
 
-        authController = Injector.INSTANCE.mainComponent().authController();
-
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API)
                 .enableAutoManage(this, connectionResult -> Toast.makeText(ProfileActivity.this, connectionResult.getErrorMessage(), Toast.LENGTH_SHORT).show())
                 .build();
 
-        User user = authController.getUser();
+        dataManager = dependencies().dataManager();
+        User user = dataManager.preferences().getUser();
 
         if (!TextUtils.isEmpty(user.avatarUrl())) {
             Picasso.with(this).load(user.avatarUrl()).into(avatar);
@@ -88,7 +86,7 @@ public class ProfileActivity extends AbstractActivity implements Toolbar.OnMenuI
     }
 
     private void signOut() {
-        if ("google".equalsIgnoreCase(authController.getMethod())) {
+        if ("google".equalsIgnoreCase(dataManager.preferences().getMethod())) {
             googleSignOut();
         } else {
             onSignOut();
@@ -107,9 +105,9 @@ public class ProfileActivity extends AbstractActivity implements Toolbar.OnMenuI
     }
 
     private void onSignOut() {
-        authController.setUser(null);
-        authController.setToken(null);
-        authController.setMethod(null);
+        dataManager.preferences().setUser(null);
+        dataManager.preferences().setToken(null);
+        dataManager.preferences().setMethod(null);
         setResult(RESULT_SIGN_OUT);
         supportFinishAfterTransition();
     }
