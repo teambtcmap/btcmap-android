@@ -1,8 +1,10 @@
 package com.bubelov.coins.ui.fragment;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,25 +16,22 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.api.coins.CoinsApi;
-import com.bubelov.coins.data.api.coins.UserParams;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.data.api.coins.model.AuthResponse;
+import com.bubelov.coins.data.repository.user.UserRepository;
+import com.bubelov.coins.ui.activity.MapActivity;
 
-import java.io.IOException;
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
-import retrofit2.Response;
-import timber.log.Timber;
 
 /**
  * @author Igor Bubelov
  */
 
-public class SignUpFragment extends AuthFragment  implements TextView.OnEditorActionListener {
+public class SignUpFragment extends Fragment implements TextView.OnEditorActionListener {
     private static final int STATE_FILL_FORM = 0;
     private static final int STATE_PROGRESS = 1;
 
@@ -54,9 +53,18 @@ public class SignUpFragment extends AuthFragment  implements TextView.OnEditorAc
     @BindView(R.id.sign_up)
     Button signUpButton;
 
+    @Inject
+    UserRepository userRepository;
+
     private Unbinder unbinder;
 
     private SignUpTask signUpTask;
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Injector.INSTANCE.mainComponent().inject(this);
+    }
 
     @Nullable
     @Override
@@ -94,16 +102,29 @@ public class SignUpFragment extends AuthFragment  implements TextView.OnEditorAc
     }
 
     private void signUp(String email, String password, String firstName, String lastName) {
-        signUpTask = new SignUpTask();
-        signUpTask.execute(new UserParams(email, password, firstName, lastName));
+        signUpTask = new SignUpTask(email, password, firstName, lastName);
+        signUpTask.execute();
     }
 
     private void setState(int state) {
         stateSwitcher.setDisplayedChild(state);
     }
 
-    private class SignUpTask extends AsyncTask<UserParams, Void, Void> {
-        private Response<AuthResponse> response;
+    private class SignUpTask extends AsyncTask<Void, Void, Boolean> {
+        private final String email;
+
+        private final String password;
+
+        private final String firstName;
+
+        private final String lastName;
+
+        SignUpTask(String email, String password, String firstName, String lastName) {
+            this.email = email;
+            this.password = password;
+            this.firstName = firstName;
+            this.lastName = lastName;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -111,25 +132,20 @@ public class SignUpFragment extends AuthFragment  implements TextView.OnEditorAc
         }
 
         @Override
-        protected Void doInBackground(UserParams... params) {
-            CoinsApi api = Injector.INSTANCE.mainComponent().dataManager().coinsApi();
-
-            try {
-                response = api.createUser(params[0]).execute();
-            } catch (IOException e) {
-                Timber.e(e, "Couldn't sign up");
-            }
-
-            return null;
+        protected Boolean doInBackground(Void... params) {
+            return userRepository.signUp(email, password, firstName, lastName);
         }
 
         @Override
-        protected void onPostExecute(Void result) {
-            if (response == null || !response.isSuccessful()) {
-                setState(STATE_FILL_FORM);
+        protected void onPostExecute(Boolean success) {
+            if (!success) {
+                setState(STATE_FILL_FORM); // TODO
+                return;
             }
 
-            onAuthResponse(response);
+            Intent intent = new Intent(getContext(), MapActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
         }
     }
 }

@@ -1,9 +1,9 @@
 package com.bubelov.coins.data.api.coins;
 
-import com.bubelov.coins.data.api.coins.model.Currency;
-import com.bubelov.coins.data.api.coins.model.Place;
-import com.bubelov.coins.data.api.coins.model.AuthResponse;
+import com.bubelov.coins.domain.Currency;
+import com.bubelov.coins.domain.Place;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +22,7 @@ import retrofit2.http.Query;
 
 public interface CoinsApi {
     @POST("users")
-    Call<AuthResponse> createUser(@Body UserParams user);
+    Call<AuthResponse> createUser(@Body NewUserParams user);
 
     @POST("auth/email")
     Call<AuthResponse> authWithEmail(@Query("email") String email, @Query("password") String password);
@@ -31,7 +31,7 @@ public interface CoinsApi {
     Call<AuthResponse> authWithGoogle(@Header("token") String token);
 
     @GET("places")
-    Call<List<Place>> getPlaces(@Query("since") String since, @Query("limit") int limit);
+    Call<List<Place>> getPlaces(@Query("since") Date since, @Query("limit") int limit);
 
     @POST("places")
     Call<Place> addPlace(@Header("session") String session, @Body Map<String, Object> args);

@@ -1,7 +1,7 @@
 package com.bubelov.coins.util;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.model.PlaceCategory;
+import com.bubelov.coins.domain.PlaceCategory;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 

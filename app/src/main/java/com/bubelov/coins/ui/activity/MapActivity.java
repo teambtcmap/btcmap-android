@@ -27,14 +27,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bubelov.coins.Constants;
-import com.bubelov.coins.data.DataManager;
-import com.bubelov.coins.util.PlacesCache;
+import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
+import com.bubelov.coins.data.repository.place.PlacesRepository;
+import com.bubelov.coins.data.repository.user.UserRepository;
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.data.api.coins.model.Place;
-import com.bubelov.coins.data.api.coins.model.PlaceNotification;
-import com.bubelov.coins.data.model.NotificationArea;
-import com.bubelov.coins.data.api.coins.model.User;
+import com.bubelov.coins.domain.Place;
+import com.bubelov.coins.domain.PlaceNotification;
+import com.bubelov.coins.domain.NotificationArea;
+import com.bubelov.coins.domain.User;
 import com.bubelov.coins.ui.widget.PlaceDetailsView;
 import com.bubelov.coins.util.Analytics;
 import com.bubelov.coins.util.MapMarkersCache;
@@ -57,6 +58,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.Collection;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -65,7 +68,7 @@ import butterknife.OnClick;
  * @author Igor Bubelov
  */
 
-public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener, PlacesCache.Callback {
+public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener {
     private static final String PLACE_ID_EXTRA = "place_id";
     private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
     private static final String CLEAR_PLACE_NOTIFICATIONS_EXTRA = "clear_place_notifications";
@@ -101,6 +104,15 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     @BindView(R.id.place_details)
     PlaceDetailsView placeDetails;
 
+    @Inject
+    UserRepository userRepository;
+
+    @Inject
+    NotificationAreaRepository notificationAreaRepository;
+
+    @Inject
+    PlacesRepository placesRepository;
+
     private ActionBarDrawerToggle drawerToggle;
 
     private GoogleMap map;
@@ -111,13 +123,9 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     private GoogleApiClient googleApiClient;
 
-    private PlacesCache placesCache;
-
     private boolean firstLaunch;
 
     private BottomSheetBehavior bottomSheetBehavior;
-
-    private DataManager dataManager;
 
     public static Intent newShowPlaceIntent(Context context, long placeId) {
         Intent intent = new Intent(context, MapActivity.class);
@@ -138,6 +146,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dependencies().inject(this);
         setContentView(R.layout.activity_map);
         ButterKnife.bind(this);
 
@@ -153,8 +162,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                 .build();
 
         googleApiClient.connect();
-
-        dataManager = dependencies().dataManager();
 
         firstLaunch = savedInstanceState == null;
 
@@ -181,7 +188,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         placeDetails.setListener(new PlaceDetailsView.Listener() {
             @Override
             public void onEditPlaceClick(Place place) {
-                if (dataManager.preferences().isAuthorized()) {
+                if (!TextUtils.isEmpty(userRepository.getUserAuthToken())) {
                     EditPlaceActivity.startForResult(MapActivity.this, place.id(), null, REQUEST_EDIT_PLACE);
                 } else {
                     signIn();
@@ -283,7 +290,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         switch (id) {
             case R.id.action_add:
-                if (dataManager.preferences().isAuthorized()) {
+                if (!TextUtils.isEmpty(userRepository.getUserAuthToken())) {
                     EditPlaceActivity.startForResult(this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
                 } else {
                     signIn();
@@ -373,20 +380,12 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             }
         }
 
-        placesCache = Injector.INSTANCE.mainComponent().placesCache();
-        placesCache.setCallback(this);
-
         handleIntent(getIntent());
     }
 
-    @Override
-    public void onPlacesCacheInitialized() {
-        reloadPlaces();
-    }
-
     private void updateDrawerHeader() {
-        if (dataManager.preferences().isAuthorized()) {
-            User user = dataManager.preferences().getUser();
+        if (!TextUtils.isEmpty(userRepository.getUserAuthToken())) {
+            User user = userRepository.getUser();
 
             if (!TextUtils.isEmpty(user.avatarUrl())) {
                 Picasso.with(this).load(user.avatarUrl()).into(avatar);
@@ -405,7 +404,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         drawerHeader.setOnClickListener(v -> {
-            if (dataManager.preferences().isAuthorized()) {
+            if (!TextUtils.isEmpty(userRepository.getUserAuthToken())) {
                 startActivityForResult(ProfileActivity.newIntent(this),  REQUEST_PROFILE, ActivityOptionsCompat.makeBasic().toBundle());
             } else {
                 signIn();
@@ -482,8 +481,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_DEFAULT_ZOOM));
 
-        if (dataManager.preferences().getNotificationArea() == null) {
-            dataManager.preferences().setNotificationArea(new NotificationArea(latLng));
+        if (notificationAreaRepository.getNotificationArea() == null) {
+            notificationAreaRepository.setNotificationArea(new NotificationArea(latLng));
         }
     }
 
@@ -507,7 +506,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        Collection<Place> places = placesCache.getPlaces(bounds, null);
+        Collection<Place> places = placesRepository.getAll();
 
         placesManager.clearItems();
         placesManager.addItems(places);
@@ -515,7 +514,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     private void selectPlace(long placeId) {
-        selectedPlace = dataManager.database().getPlace(placeId);
+        selectedPlace = placesRepository.get(placeId);
 
         if (selectedPlace == null) {
             return;

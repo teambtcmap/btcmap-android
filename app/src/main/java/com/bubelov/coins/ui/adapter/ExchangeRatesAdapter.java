@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.api.rates.model.ExchangeRate;
+import com.bubelov.coins.domain.ExchangeRate;
 
 import java.util.ArrayList;
 import java.util.List;

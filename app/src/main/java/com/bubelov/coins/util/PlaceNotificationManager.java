@@ -6,41 +6,75 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.app.NotificationCompat;
-import android.text.TextUtils;
 
-import com.bubelov.coins.data.DataManager;
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.api.coins.model.Place;
-import com.bubelov.coins.data.api.coins.model.PlaceNotification;
-import com.bubelov.coins.data.model.NotificationArea;
-import com.bubelov.coins.receiver.ClearPlaceNotificationsReceiver;
+import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
+import com.bubelov.coins.domain.Place;
+import com.bubelov.coins.domain.PlaceNotification;
+import com.bubelov.coins.domain.NotificationArea;
 import com.bubelov.coins.ui.activity.MapActivity;
 
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * @author Igor Bubelov
  */
 
+@Singleton
 public class PlaceNotificationManager {
     private static final String NEW_PLACE_NOTIFICATION_GROUP = "NEW_PLACE";
 
     private final Context context;
 
-    private final DataManager dataManager;
+    private final NotificationAreaRepository notificationAreaRepository;
 
-    public PlaceNotificationManager(Context context, DataManager dataManager) {
+    @Inject
+    public PlaceNotificationManager(Context context, NotificationAreaRepository notificationAreaRepository) {
         this.context = context;
-        this.dataManager = dataManager;
+        this.notificationAreaRepository = notificationAreaRepository;
     }
 
-    public boolean shouldNotifyUser(Place newPlace) {
+    public void notifyUserIfNecessary(Place newPlace) {
+        if (shouldNotifyUser(newPlace)) {
+            notifyUser(newPlace);
+        }
+    }
+
+    public void notifyUser(Place newPlace) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle(context.getString(R.string.notification_new_place))
+                .setContentText(newPlace.name())
+                .setDeleteIntent(prepareClearPlacesIntent())
+                .setAutoCancel(true)
+                .setGroup(NEW_PLACE_NOTIFICATION_GROUP);
+
+        Intent intent = MapActivity.newShowPlaceIntent(context, newPlace.id());
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, UUID.randomUUID().hashCode(), intent, 0);
+        builder.setContentIntent(pendingIntent);
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(UUID.randomUUID().hashCode(), builder.build());
+
+        PlaceNotification placeNotification = new PlaceNotification();
+        placeNotification.setPlaceId(newPlace.id());
+        PlaceNotification.insert(placeNotification);
+
+        if (PlaceNotification.queryForAll().size() > 1) {
+            issueGroupNotification(PlaceNotification.queryForAll());
+        }
+    }
+
+    private boolean shouldNotifyUser(Place newPlace) {
         if (!newPlace.visible()) {
             return false;
         }
 
-        NotificationArea notificationArea = dataManager.preferences().getNotificationArea();
+        NotificationArea notificationArea = notificationAreaRepository.getNotificationArea();
 
         if (notificationArea == null) {
             return false;
@@ -50,33 +84,8 @@ public class PlaceNotificationManager {
         return distance <= notificationArea.getRadiusMeters();
     }
 
-    public void notifyUser(long placeId, String placeName) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle(context.getString(R.string.notification_new_place))
-                .setContentText(!TextUtils.isEmpty(placeName) ? placeName : context.getString(R.string.notification_new_place_no_name))
-                .setDeleteIntent(prepareClearPlacesIntent())
-                .setAutoCancel(true)
-                .setGroup(NEW_PLACE_NOTIFICATION_GROUP);
-
-        Intent intent = MapActivity.newShowPlaceIntent(context, placeId);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, UUID.randomUUID().hashCode(), intent, 0);
-        builder.setContentIntent(pendingIntent);
-
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(UUID.randomUUID().hashCode(), builder.build());
-
-        PlaceNotification placeNotification = new PlaceNotification();
-        placeNotification.setPlaceId(placeId);
-        PlaceNotification.insert(placeNotification);
-
-        if (PlaceNotification.queryForAll().size() > 1) {
-            issueGroupNotification(PlaceNotification.queryForAll());
-        }
-    }
-
     private void issueGroupNotification(List<PlaceNotification> pendingPlaces) {
-        NotificationArea notificationArea = dataManager.preferences().getNotificationArea();
+        NotificationArea notificationArea = notificationAreaRepository.getNotificationArea();
 
         Intent intent = MapActivity.newShowNotificationAreaIntent(context, notificationArea);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, NEW_PLACE_NOTIFICATION_GROUP.hashCode(), intent, 0);
@@ -85,12 +94,8 @@ public class PlaceNotificationManager {
         style.setBigContentTitle(context.getString(R.string.notification_new_places_content_title, String.valueOf(pendingPlaces.size())));
 
         for (PlaceNotification notification : pendingPlaces) {
-            Place place = dataManager.database().getPlace(notification.getPlaceId());
-
-            if (place != null) {
-                // TODO add place name to place notification model
-                style.addLine(place.name());
-            }
+            // TODO add place name to place notification model
+            style.addLine(String.valueOf(notification.getPlaceId()));
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)

@@ -2,8 +2,17 @@ package com.bubelov.coins.dagger;
 
 import android.content.Context;
 
-import com.bubelov.coins.data.DataManager;
-import com.bubelov.coins.util.PlacesCache;
+import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
+import com.bubelov.coins.data.repository.place.PlacesRepository;
+import com.bubelov.coins.ui.activity.EditPlaceActivity;
+import com.bubelov.coins.ui.activity.ExchangeRatesActivity;
+import com.bubelov.coins.ui.activity.FindPlaceActivity;
+import com.bubelov.coins.ui.activity.MapActivity;
+import com.bubelov.coins.ui.activity.NotificationAreaActivity;
+import com.bubelov.coins.ui.activity.ProfileActivity;
+import com.bubelov.coins.ui.fragment.SettingsFragment;
+import com.bubelov.coins.ui.fragment.SignInFragment;
+import com.bubelov.coins.ui.fragment.SignUpFragment;
 import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.util.PlaceNotificationManager;
 import com.bubelov.coins.util.MapMarkersCache;
@@ -23,10 +32,6 @@ import dagger.Component;
 public interface MainComponent {
     Context context();
 
-    DataManager dataManager();
-
-    PlacesCache placesCache();
-
     MapMarkersCache markersCache();
 
     DatabaseSync databaseSync();
@@ -35,7 +40,22 @@ public interface MainComponent {
 
     PlaceNotificationManager notificationManager();
 
+    NotificationAreaRepository notificationAreaRepository();
+
+    PlacesRepository placesRepository();
+
     Gson gson();
 
     void inject(DatabaseSync sync);
+
+    void inject(MapActivity target);
+    void inject(EditPlaceActivity target);
+    void inject(FindPlaceActivity target);
+    void inject(NotificationAreaActivity target);
+    void inject(ProfileActivity target);
+    void inject(ExchangeRatesActivity target);
+
+    void inject(SignInFragment target);
+    void inject(SignUpFragment target);
+    void inject(SettingsFragment target);
 }

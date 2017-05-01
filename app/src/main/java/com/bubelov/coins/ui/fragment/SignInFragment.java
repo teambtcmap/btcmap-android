@@ -1,8 +1,10 @@
 package com.bubelov.coins.ui.fragment;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,23 +15,23 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.api.coins.CoinsApi;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.data.api.coins.model.AuthResponse;
+import com.bubelov.coins.data.repository.user.UserRepository;
+import com.bubelov.coins.ui.activity.AbstractActivity;
+import com.bubelov.coins.ui.activity.MapActivity;
 
-import java.io.IOException;
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
-import retrofit2.Response;
 
 /**
  * @author Igor Bubelov
  */
 
-public class SignInFragment extends AuthFragment implements TextView.OnEditorActionListener {
+public class SignInFragment extends Fragment implements TextView.OnEditorActionListener {
     @BindView(R.id.email)
     EditText email;
 
@@ -39,9 +41,18 @@ public class SignInFragment extends AuthFragment implements TextView.OnEditorAct
     @BindView(R.id.sign_in)
     Button signInButton;
 
+    @Inject
+    UserRepository userRepository;
+
     private Unbinder unbinder;
 
     private SignInTask signInTask;
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Injector.INSTANCE.mainComponent().inject(this);
+    }
 
     @Nullable
     @Override
@@ -83,14 +94,12 @@ public class SignInFragment extends AuthFragment implements TextView.OnEditorAct
         signInTask.execute();
     }
 
-    private class SignInTask extends AsyncTask<Void, Void, Void> {
+    private class SignInTask extends AsyncTask<Void, Void, Boolean> {
         private String email;
 
         private String password;
 
-        private Response<AuthResponse> response;
-
-        public SignInTask(String email, String password) {
+        SignInTask(String email, String password) {
             this.email = email;
             this.password = password;
         }
@@ -101,22 +110,26 @@ public class SignInFragment extends AuthFragment implements TextView.OnEditorAct
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            CoinsApi api = Injector.INSTANCE.mainComponent().dataManager().coinsApi();
-
-            try {
-                response = api.authWithEmail(email, password).execute();
-            } catch (IOException e) {
-                // TODO
-            }
-
-            return null;
+        protected Boolean doInBackground(Void... params) {
+            return userRepository.signIn(email, password);
         }
 
         @Override
-        protected void onPostExecute(Void success) {
+        protected void onPostExecute(Boolean success) {
             signInButton.setEnabled(true);
-            onAuthResponse(response);
+
+            if (!success) { // TODO
+                if (getActivity() != null) {
+                    AbstractActivity abstractActivity = (AbstractActivity) getActivity();
+                    abstractActivity.showAlert(R.string.could_not_connect_to_server);
+                }
+
+                return;
+            }
+
+            Intent intent = new Intent(getContext(), MapActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
         }
     }
 }

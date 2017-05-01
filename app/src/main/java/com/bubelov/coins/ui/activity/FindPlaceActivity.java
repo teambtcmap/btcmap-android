@@ -18,15 +18,18 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.bubelov.coins.data.DataManager;
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.api.coins.model.Place;
+import com.bubelov.coins.data.repository.place.PlacesRepository;
+import com.bubelov.coins.domain.Place;
 import com.bubelov.coins.ui.adapter.PlacesSearchResultsAdapter;
 import com.bubelov.coins.util.DistanceComparator;
 import com.bubelov.coins.util.DistanceUnits;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -54,11 +57,12 @@ public class FindPlaceActivity extends AbstractActivity implements PlacesSearchR
     @BindView(R.id.clear)
     ImageView clear;
 
+    @Inject
+    PlacesRepository placesRepository;
+
     private PlacesSearchResultsAdapter resultsAdapter;
 
     private Location userLocation;
-
-    private DataManager dataManager;
 
     public static void startForResult(Activity activity, Location userLocation, int requestCode) {
         Intent intent = new Intent(activity, FindPlaceActivity.class);
@@ -69,6 +73,7 @@ public class FindPlaceActivity extends AbstractActivity implements PlacesSearchR
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dependencies().inject(this);
         setContentView(R.layout.activity_find_place);
         ButterKnife.bind(this);
 
@@ -80,8 +85,6 @@ public class FindPlaceActivity extends AbstractActivity implements PlacesSearchR
         resultsView.setHasFixedSize(true);
 
         userLocation = getIntent().getParcelableExtra(USER_LOCATION_EXTRA);
-
-        dataManager = dependencies().dataManager();
 
         resultsAdapter = new PlacesSearchResultsAdapter(this, userLocation, getDistanceUnits());
         resultsView.setAdapter(resultsAdapter);
@@ -102,7 +105,7 @@ public class FindPlaceActivity extends AbstractActivity implements PlacesSearchR
         resultsAdapter.getPlaces().clear();
 
         if (query.length() >= MIN_QUERY_LENGTH) {
-            List<Place> places = dataManager.database().getPlaces(query.toString());
+            List<Place> places = new ArrayList<>(placesRepository.getAll());
 
             if (userLocation != null) {
                 Collections.sort(places, new DistanceComparator(userLocation));

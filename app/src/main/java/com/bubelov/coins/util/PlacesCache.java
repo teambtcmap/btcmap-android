@@ -2,15 +2,17 @@ package com.bubelov.coins.util;
 
 import android.os.AsyncTask;
 
-import com.bubelov.coins.data.DataManager;
-import com.bubelov.coins.data.api.coins.model.Place;
-import com.bubelov.coins.data.model.PlaceCategory;
+import com.bubelov.coins.data.repository.place.PlacesRepository;
+import com.bubelov.coins.domain.Place;
+import com.bubelov.coins.domain.PlaceCategory;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import timber.log.Timber;
 
@@ -18,15 +20,17 @@ import timber.log.Timber;
  * @author Igor Bubelov
  */
 
+@Singleton
 public class PlacesCache {
-    private final DataManager dataManager;
+    private final PlacesRepository placesRepository;
 
-    private List<Place> places = new ArrayList<>();
+    private Collection<Place> places = new ArrayList<>();
 
     private Callback callback;
 
-    public PlacesCache(DataManager dataManager) {
-        this.dataManager = dataManager;
+    @Inject
+    public PlacesCache(PlacesRepository placesRepository) {
+        this.placesRepository = placesRepository;
         invalidate();
     }
 
@@ -55,7 +59,7 @@ public class PlacesCache {
         new InitCacheTask().executeOnExecutor(Executors.newSingleThreadExecutor());
     }
 
-    private class InitCacheTask extends AsyncTask<Void, Void, List<Place>> {
+    private class InitCacheTask extends AsyncTask<Void, Void, Collection<Place>> {
         private long startTime;
 
         @Override
@@ -65,12 +69,12 @@ public class PlacesCache {
         }
 
         @Override
-        protected List<Place> doInBackground(Void... params) {
-            return dataManager.database().getAllPlaces();
+        protected Collection<Place> doInBackground(Void... params) {
+            return placesRepository.getAll();
         }
 
         @Override
-        protected void onPostExecute(List<Place> places) {
+        protected void onPostExecute(Collection<Place> places) {
             PlacesCache.this.places = places;
 
             Timber.d("Cache initialization finished. Total time: %s", System.currentTimeMillis() - startTime);

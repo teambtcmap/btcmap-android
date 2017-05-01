@@ -14,10 +14,7 @@ import android.widget.ViewSwitcher;
 
 import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.DataManager;
-import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.data.api.coins.model.AuthResponse;
-import com.bubelov.coins.util.Utils;
+import com.bubelov.coins.data.repository.user.UserRepository;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -26,18 +23,12 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.crash.FirebaseCrash;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.io.IOException;
-import java.util.List;
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import retrofit2.Response;
-import timber.log.Timber;
 
 /**
  * @author Igor Bubelov
@@ -55,9 +46,13 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
     @BindView(R.id.sign_in_with_google)
     View googleSignInButton;
 
-    private GoogleApiClient googleApiClient;
+    @Inject
+    UserRepository userRepository;
 
-    private DataManager dataManager;
+    @Inject
+    FirebaseAnalytics analytics;
+
+    private GoogleApiClient googleApiClient;
 
     public static Intent newIntent(Context context) {
         return new Intent(context, SignInActivity.class);
@@ -81,8 +76,6 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
                 .addApi(Auth.GOOGLE_SIGN_IN_API, signInOptions)
                 .addApi(Auth.CREDENTIALS_API)
                 .build();
-
-        dataManager = dependencies().dataManager();
     }
 
     @Override
@@ -146,10 +139,8 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
         viewSwitcher.setDisplayedChild(loading ? 1 : 0);
     }
 
-    private class AuthWithGoogleTask extends AsyncTask<Void, Void, Void> {
+    private class AuthWithGoogleTask extends AsyncTask<Void, Void, Boolean> {
         private final String token;
-
-        Response<AuthResponse> response;
 
         public AuthWithGoogleTask(String token) {
             this.token = token;
@@ -161,42 +152,24 @@ public class SignInActivity extends AbstractActivity implements GoogleApiClient.
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            try {
-                response = dataManager.coinsApi().authWithGoogle(token).execute();
-            } catch (IOException e) {
-                Timber.e(e, "Couldn't authorize with Google token");
-                FirebaseCrash.report(e);
-            }
-
-            return null;
+        protected Boolean doInBackground(Void... params) {
+            return userRepository.signIn(token);
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            if (response == null) {
+        protected void onPostExecute(Boolean result) {
+            if (result == null) {
                 setLoading(false);
                 Toast.makeText(SignInActivity.this, R.string.could_not_connect_to_server, Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            if (response.isSuccessful()) {
-                dataManager.preferences().setUser(response.body().getUser());
-                dataManager.preferences().setToken(response.body().getToken());
-                dataManager.preferences().setMethod("google");
-                setResult(RESULT_OK);
-                supportFinishAfterTransition();
+            Bundle bundle = new Bundle();
+            bundle.putString(FirebaseAnalytics.Param.SIGN_UP_METHOD, "google");
+            analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle);
 
-                FirebaseAnalytics analytics = Injector.INSTANCE.mainComponent().analytics();
-                Bundle bundle = new Bundle();
-                bundle.putString(FirebaseAnalytics.Param.SIGN_UP_METHOD, "google");
-                analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle);
-            } else {
-                setLoading(false);
-                Gson gson = Injector.INSTANCE.mainComponent().gson();
-                List<String> errors = gson.fromJson(response.errorBody().charStream(), new TypeToken<List<String>>(){}.getType());
-                Utils.showErrors(SignInActivity.this, errors);
-            }
+            setResult(RESULT_OK);
+            supportFinishAfterTransition();
         }
     }
 }

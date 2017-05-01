@@ -7,13 +7,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.BuildConfig;
-import com.bubelov.coins.data.DataManager;
-import com.bubelov.coins.util.PlacesCache;
-import com.bubelov.coins.data.db.AssetDbHelper;
-import com.bubelov.coins.data.db.DbHelper;
-import com.bubelov.coins.data.gson.AutoValueAdapterFactory;
+import com.bubelov.coins.data.api.coins.CoinsApi;
+import com.bubelov.coins.data.database.AssetDbHelper;
+import com.bubelov.coins.data.database.DbHelper;
+import com.bubelov.coins.util.AutoValueAdapterFactory;
 import com.bubelov.coins.service.DatabaseSync;
-import com.bubelov.coins.util.PlaceNotificationManager;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.bubelov.coins.util.StringAdapter;
 import com.bubelov.coins.util.UtcDateTypeAdapter;
@@ -23,11 +21,16 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * @author Igor Bubelov
@@ -45,18 +48,6 @@ public class MainModule {
     @Singleton
     Context context() {
         return context;
-    }
-
-    @Provides
-    @Singleton
-    DataManager dataManager(SQLiteDatabase db, SharedPreferences preferences, Gson gson) {
-        return new DataManager(db, preferences, gson);
-    }
-
-    @Provides
-    @Singleton
-    PlacesCache placesCache(DataManager dataManager) {
-        return new PlacesCache(dataManager);
     }
 
     @Provides
@@ -79,13 +70,7 @@ public class MainModule {
 
     @Provides
     @Singleton
-    PlaceNotificationManager placeNotificationManager(Context context, DataManager dataManager) {
-        return new PlaceNotificationManager(context, dataManager);
-    }
-
-    @Provides
-    @Singleton
-    SQLiteDatabase database(Context context) {
+    SQLiteDatabase sqlDatabase(Context context) {
         SQLiteOpenHelper helper = BuildConfig.USE_DB_SNAPSHOT ? new AssetDbHelper(context) : new DbHelper(context);
         return helper.getWritableDatabase();
     }
@@ -105,5 +90,27 @@ public class MainModule {
                 .registerTypeAdapter(Date.class, new UtcDateTypeAdapter())
                 .registerTypeAdapter(String.class, new StringAdapter())
                 .create();
+    }
+
+    @Provides
+    @Singleton
+    CoinsApi api(Gson gson) {
+        OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS);
+
+        if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
+            httpClientBuilder.addInterceptor(loggingInterceptor);
+        }
+
+        return new Retrofit.Builder()
+                .baseUrl(BuildConfig.API_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .client(httpClientBuilder.build())
+                .build()
+                .create(CoinsApi.class);
     }
 }

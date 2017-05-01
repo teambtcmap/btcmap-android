@@ -7,18 +7,24 @@ import android.preference.PreferenceScreen;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.data.DataManager;
-import com.bubelov.coins.data.api.coins.model.Place;
+import com.bubelov.coins.data.repository.place.PlacesRepository;
+import com.bubelov.coins.domain.Place;
 import com.bubelov.coins.service.DatabaseSyncService;
+
+import javax.inject.Inject;
 
 /**
  * @author Igor Bubelov
  */
 
 public class SettingsFragment extends PreferenceFragment {
+    @Inject
+    PlacesRepository placesRepository;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Injector.INSTANCE.mainComponent().inject(this);
         addPreferencesFromResource(R.xml.preferences);
     }
 
@@ -36,11 +42,10 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     private void showRandomPlaceNotification() {
-        DataManager dataManager = Injector.INSTANCE.mainComponent().dataManager();
-        Place randomPlace = dataManager.database().getRandomPlace();
+        Place randomPlace = placesRepository.getAll().iterator().next(); // TODO
 
         if (randomPlace != null) {
-            Injector.INSTANCE.mainComponent().notificationManager().notifyUser(randomPlace.id(), randomPlace.name());
+            Injector.INSTANCE.mainComponent().notificationManager().notifyUser(randomPlace);
         }
     }
 }

@@ -6,14 +6,16 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.widget.ViewSwitcher;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.RatesApi;
-import com.bubelov.coins.data.api.rates.model.ExchangeRate;
+import com.bubelov.coins.data.repository.rate.ExchangeRatesRepository;
+import com.bubelov.coins.domain.ExchangeRate;
 import com.bubelov.coins.ui.adapter.ExchangeRatesAdapter;
-import com.google.firebase.crash.FirebaseCrash;
 
-import java.io.IOException;
+import java.util.Collection;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -26,14 +28,21 @@ public class ExchangeRatesActivity extends AbstractActivity {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
+    @BindView(R.id.state_switcher)
+    ViewSwitcher stateSwitcher;
+
     @BindView(R.id.list)
     RecyclerView ratesView;
+
+    @Inject
+    ExchangeRatesRepository exchangeRatesRepository;
 
     private ExchangeRatesAdapter ratesAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dependencies().inject(this);
         setContentView(R.layout.activity_exchange_rates);
         ButterKnife.bind(this);
 
@@ -48,50 +57,28 @@ public class ExchangeRatesActivity extends AbstractActivity {
         new LoadExchangeRatesTask().execute();
     }
 
-    private class LoadExchangeRatesTask extends AsyncTask<Void, ExchangeRate, Void> {
+    private void setLoading(boolean loading) {
+        stateSwitcher.setDisplayedChild(loading ? 1 : 0);
+    }
+
+    private class LoadExchangeRatesTask extends AsyncTask<Void, Void, Collection<ExchangeRate>> {
         @Override
         protected void onPreExecute() {
+            setLoading(true);
             ratesAdapter.getItems().clear();
             ratesAdapter.notifyDataSetChanged();
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
-            RatesApi api = dependencies().dataManager().ratesApi();
-
-            try {
-                publishProgress(api.getBitstampRate());
-            } catch (IOException e) {
-                FirebaseCrash.report(e);
-            }
-
-            try {
-                publishProgress(api.getCoinbaseRate());
-            } catch (IOException e) {
-                FirebaseCrash.report(e);
-            }
-
-            try {
-                publishProgress(api.getWinkDexRate());
-            } catch (IOException e) {
-                FirebaseCrash.report(e);
-            }
-
-            try {
-                publishProgress(api.getBitcoinAverageRate());
-            } catch (IOException e) {
-                FirebaseCrash.report(e);
-            }
-
-            return null;
+        protected Collection<ExchangeRate> doInBackground(Void... voids) {
+            return exchangeRatesRepository.getExchangeRates();
         }
 
         @Override
-        protected void onProgressUpdate(ExchangeRate... values) {
-            for (ExchangeRate rate : values) {
-                ratesAdapter.getItems().add(rate);
-                ratesAdapter.notifyDataSetChanged();
-            }
+        protected void onPostExecute(Collection<ExchangeRate> exchangeRates) {
+            ratesAdapter.getItems().addAll(exchangeRates);
+            ratesAdapter.notifyDataSetChanged();
+            setLoading(false);
         }
     }
 }

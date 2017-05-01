@@ -11,9 +11,8 @@ import android.widget.SeekBar;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.R;
-import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.data.DataManager;
-import com.bubelov.coins.data.model.NotificationArea;
+import com.bubelov.coins.domain.NotificationArea;
+import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
 import com.bubelov.coins.util.OnSeekBarChangeAdapter;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -25,6 +24,8 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,15 +48,17 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
     @BindView(R.id.seek_bar_radius)
     SeekBar radiusSeekBar;
 
+    @Inject
+    NotificationAreaRepository notificationAreaRepository;
+
     private GoogleMap map;
 
     private Circle areaCircle;
 
-    private DataManager dataManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dependencies().inject(this);
         setContentView(R.layout.activity_select_area);
         ButterKnife.bind(this);
 
@@ -71,8 +74,6 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
             saveArea();
             supportFinishAfterTransition();
         });
-
-        dataManager = Injector.INSTANCE.mainComponent().dataManager();
     }
 
     @Override
@@ -93,7 +94,7 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
             map.setMyLocationEnabled(true);
         }
 
-        NotificationArea notificationArea = dataManager.preferences().getNotificationArea();
+        NotificationArea notificationArea = notificationAreaRepository.getNotificationArea();
         setArea(notificationArea == null ? DEFAULT_NOTIFICATION_AREA : notificationArea);
     }
 
@@ -123,7 +124,7 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
     }
 
     private void saveArea() {
-        dataManager.preferences().setNotificationArea(new NotificationArea(areaCircle.getCenter(), (int) areaCircle.getRadius()));
+        notificationAreaRepository.setNotificationArea(new NotificationArea(areaCircle.getCenter(), (int) areaCircle.getRadius()));
     }
 
     private class OnMarkerDragListener implements GoogleMap.OnMarkerDragListener {

@@ -14,10 +14,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bubelov.coins.data.DataManager;
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.api.coins.model.Currency;
-import com.bubelov.coins.data.api.coins.model.Place;
+import com.bubelov.coins.data.repository.place.PlacesRepository;
+import com.bubelov.coins.domain.Place;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -25,15 +24,15 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
-import retrofit2.Response;
 
 /**
  * @author Igor Bubelov
@@ -72,13 +71,14 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
     @BindView(R.id.opening_hours)
     TextView openingHours;
 
+    @Inject
+    PlacesRepository placesRepository;
+
     private Place place;
 
     private GoogleMap map;
 
     private LatLng pickedLocation;
-
-    private DataManager dataManager;
 
     public static void startForResult(Activity activity, long placeId, CameraPosition mapCameraPosition, int requestCode) {
         Intent intent = new Intent(activity, EditPlaceActivity.class);
@@ -90,6 +90,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dependencies().inject(this);
         setContentView(R.layout.activity_edit_place);
         ButterKnife.bind(this);
 
@@ -122,9 +123,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
             return false;
         });
 
-        dataManager = dependencies().dataManager();
-
-        place = dataManager.database().getPlace(getIntent().getLongExtra(ID_EXTRA, -1));
+        place = placesRepository.get(getIntent().getLongExtra(ID_EXTRA, -1));
 
         if (place == null) {
             toolbar.setTitle(R.string.action_add_place);
@@ -228,32 +227,14 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
     }
 
     private class AddPlaceTask extends AsyncTask<Void, Void, Boolean> {
-        private Map<String, Object> requestArgs;
-
         @Override
         protected void onPreExecute() {
-            requestArgs = getRequestArgs();
             showProgress();
         }
 
         @Override
         protected Boolean doInBackground(Void... args) {
-            try {
-                Response<Place> response = dataManager.coinsApi().addPlace(dataManager.preferences().getToken(), requestArgs).execute();
-
-                if (response.isSuccessful()) {
-                    Place place = response.body();
-                    Currency bitcoin = dataManager.database().getCurrency("BTC");
-                    place.currencies = Collections.singleton(bitcoin);
-                    dataManager.database().insertPlaces(Collections.singleton(place));
-                    dependencies().placesCache().invalidate();
-                    return true;
-                } else {
-                    return false;
-                }
-            } catch (Exception e) {
-                return false;
-            }
+            return placesRepository.add(place);
         }
 
         @Override
@@ -280,22 +261,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            try {
-                Response<Place> response = dataManager.coinsApi().updatePlace(place.id(), dataManager.preferences().getToken(), requestArgs).execute();
-
-                if (response.isSuccessful()) {
-                    Place place = response.body();
-                    Currency bitcoin = dataManager.database().getCurrency("BTC");
-                    place.currencies = Collections.singleton(bitcoin);
-                    dataManager.database().insertPlaces(Collections.singleton(place));
-                    dependencies().placesCache().invalidate();
-                    return true;
-                } else {
-                    return false;
-                }
-            } catch (Exception e) {
-                return false;
-            }
+            return placesRepository.update(place);
         }
 
         @Override

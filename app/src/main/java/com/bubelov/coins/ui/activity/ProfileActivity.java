@@ -11,17 +11,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.DataManager;
-import com.bubelov.coins.data.api.coins.model.User;
+import com.bubelov.coins.domain.User;
+import com.bubelov.coins.data.repository.user.UserRepository;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.squareup.picasso.Picasso;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Author: Igor Bubelov
+ * @author Igor Bubelov
  */
 
 public class ProfileActivity extends AbstractActivity implements Toolbar.OnMenuItemClickListener {
@@ -36,7 +38,8 @@ public class ProfileActivity extends AbstractActivity implements Toolbar.OnMenuI
     @BindView(R.id.user_name)
     TextView userName;
 
-    private DataManager dataManager;
+    @Inject
+    UserRepository userRepository;
 
     private GoogleApiClient googleApiClient;
 
@@ -47,6 +50,7 @@ public class ProfileActivity extends AbstractActivity implements Toolbar.OnMenuI
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dependencies().inject(this);
         setContentView(R.layout.activity_profile);
         ButterKnife.bind(this);
 
@@ -59,8 +63,7 @@ public class ProfileActivity extends AbstractActivity implements Toolbar.OnMenuI
                 .enableAutoManage(this, connectionResult -> Toast.makeText(ProfileActivity.this, connectionResult.getErrorMessage(), Toast.LENGTH_SHORT).show())
                 .build();
 
-        dataManager = dependencies().dataManager();
-        User user = dataManager.preferences().getUser();
+        User user = userRepository.getUser();
 
         if (!TextUtils.isEmpty(user.avatarUrl())) {
             Picasso.with(this).load(user.avatarUrl()).into(avatar);
@@ -86,7 +89,7 @@ public class ProfileActivity extends AbstractActivity implements Toolbar.OnMenuI
     }
 
     private void signOut() {
-        if ("google".equalsIgnoreCase(dataManager.preferences().getMethod())) {
+        if ("google".equalsIgnoreCase(userRepository.getUserAuthMethod())) {
             googleSignOut();
         } else {
             onSignOut();
@@ -105,9 +108,9 @@ public class ProfileActivity extends AbstractActivity implements Toolbar.OnMenuI
     }
 
     private void onSignOut() {
-        dataManager.preferences().setUser(null);
-        dataManager.preferences().setToken(null);
-        dataManager.preferences().setMethod(null);
+        userRepository.setUser(null);
+        userRepository.setUserAuthToken(null);
+        userRepository.setUserAuthMethod(null);
         setResult(RESULT_SIGN_OUT);
         supportFinishAfterTransition();
     }
