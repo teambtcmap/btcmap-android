@@ -25,7 +25,7 @@ public class CurrenciesDataSourceDisk {
         this.db = db;
     }
 
-    public Currency getCurrency(String code) {
+    Currency getCurrency(String code) {
         try (Cursor cursor = db.query(DbContract.Currencies.TABLE_NAME,
                 null,
                 "code = ?",
@@ -34,7 +34,7 @@ public class CurrenciesDataSourceDisk {
                 null,
                 null,
                 null)) {
-            return cursor.getCount() == 1 ? fromCursor(cursor) : null;
+            return fromCursor(cursor);
         }
     }
 
@@ -56,12 +56,16 @@ public class CurrenciesDataSourceDisk {
     }
 
     private Currency fromCursor(Cursor cursor) {
-        return Currency.builder()
-                .id(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._ID)))
-                .name(cursor.getString(cursor.getColumnIndex(DbContract.Currencies.NAME)))
-                .code(cursor.getString(cursor.getColumnIndex(DbContract.Currencies.CODE)))
-                .crypto(cursor.getInt(cursor.getColumnIndex(DbContract.Currencies.CRYPTO)) == 1)
-                .build();
+        if (cursor.moveToNext()) {
+            return Currency.builder()
+                    .id(cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._ID)))
+                    .name(cursor.getString(cursor.getColumnIndex(DbContract.Currencies.NAME)))
+                    .code(cursor.getString(cursor.getColumnIndex(DbContract.Currencies.CODE)))
+                    .crypto(cursor.getInt(cursor.getColumnIndex(DbContract.Currencies.CRYPTO)) == 1)
+                    .build();
+        } else {
+            return null;
+        }
     }
 
     private ContentValues toContentValues(Currency currency) {

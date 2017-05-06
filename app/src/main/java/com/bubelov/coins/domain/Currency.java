@@ -18,7 +18,7 @@ public abstract class Currency implements Parcelable {
     public abstract boolean crypto();
 
     public static Builder builder() {
-        return new $AutoValue_Currency.Builder();
+        return new AutoValue_Currency.Builder();
     }
 
     @AutoValue.Builder public static abstract class Builder {

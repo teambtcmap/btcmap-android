@@ -19,7 +19,7 @@ public abstract class User implements Parcelable {
     public abstract String avatarUrl();
 
     public static Builder builder() {
-        return new $AutoValue_User.Builder();
+        return new AutoValue_User.Builder();
     }
 
     @AutoValue.Builder public static abstract class Builder {

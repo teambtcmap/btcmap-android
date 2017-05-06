@@ -35,7 +35,7 @@ public abstract class Place implements Parcelable, ClusterItem {
     public Collection<Currency> currencies;
 
     public static Builder builder() {
-        return new $AutoValue_Place.Builder();
+        return new AutoValue_Place.Builder();
     }
 
     @AutoValue.Builder public static abstract class Builder {

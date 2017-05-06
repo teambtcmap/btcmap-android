@@ -67,6 +67,13 @@ android {
             output.outputFile = file("$project.buildDir/apk/$projectName-$variant.versionName" + '.apk')
         }
     }
+
+    // TODO remove after fix on Google side
+    applicationVariants.all { variant ->
+        def productFlavor = variant.productFlavors[0] != null ? "${variant.productFlavors[0].name.capitalize()}" : ""
+        def buildType = "${variant.buildType.name.capitalize()}"
+        tasks["compile${productFlavor}${buildType}UnitTestSources"].dependsOn(tasks["merge${productFlavor}${buildType}Assets"])
+    }
 }
 
 dependencies {
@@ -107,7 +114,8 @@ dependencies {
     annotationProcessor 'com.google.dagger:dagger-compiler:2.8'
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.robolectric:robolectric:3.3'
+
+    testCompile 'org.robolectric:robolectric:3.3.2'
 
     androidTestCompile('com.android.support.test:runner:0.5', {
         exclude group: 'com.android.support', module: 'support-annotations'

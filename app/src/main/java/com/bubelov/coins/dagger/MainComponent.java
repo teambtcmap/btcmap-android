@@ -3,7 +3,10 @@ package com.bubelov.coins.dagger;
 import android.content.Context;
 
 import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
+import com.bubelov.coins.data.repository.currency.CurrenciesRepository;
+import com.bubelov.coins.data.repository.notification.PlaceNotificationsRepository;
 import com.bubelov.coins.data.repository.place.PlacesRepository;
+import com.bubelov.coins.data.repository.rate.ExchangeRatesRepository;
 import com.bubelov.coins.ui.activity.EditPlaceActivity;
 import com.bubelov.coins.ui.activity.ExchangeRatesActivity;
 import com.bubelov.coins.ui.activity.FindPlaceActivity;
@@ -17,7 +20,6 @@ import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.util.PlaceNotificationManager;
 import com.bubelov.coins.util.MapMarkersCache;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.gson.Gson;
 
 import javax.inject.Singleton;
 
@@ -41,12 +43,10 @@ public interface MainComponent {
     PlaceNotificationManager notificationManager();
 
     NotificationAreaRepository notificationAreaRepository();
-
     PlacesRepository placesRepository();
-
-    Gson gson();
-
-    void inject(DatabaseSync sync);
+    CurrenciesRepository currenciesRepository();
+    ExchangeRatesRepository exchangeRatesRepository();
+    PlaceNotificationsRepository placeNotificationsRepository();
 
     void inject(MapActivity target);
     void inject(EditPlaceActivity target);
@@ -58,4 +58,6 @@ public interface MainComponent {
     void inject(SignInFragment target);
     void inject(SignUpFragment target);
     void inject(SettingsFragment target);
+
+    void inject(DatabaseSync sync);
 }

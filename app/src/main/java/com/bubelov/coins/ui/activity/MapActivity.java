@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
+import com.bubelov.coins.data.repository.notification.PlaceNotificationsRepository;
 import com.bubelov.coins.data.repository.place.PlacesRepository;
 import com.bubelov.coins.data.repository.user.UserRepository;
 import com.bubelov.coins.R;
@@ -112,6 +113,9 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     @Inject
     PlacesRepository placesRepository;
+
+    @Inject
+    PlaceNotificationsRepository placeNotificationsRepository;
 
     private ActionBarDrawerToggle drawerToggle;
 
@@ -416,7 +420,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     private void handleIntent(final Intent intent) {
         if (intent.getBooleanExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, false)) {
-            PlaceNotification.deleteAll();
+            placeNotificationsRepository.clear();
         }
 
         if (intent.hasExtra(PLACE_ID_EXTRA)) {

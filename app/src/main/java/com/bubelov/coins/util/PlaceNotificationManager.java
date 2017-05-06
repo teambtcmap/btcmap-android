@@ -9,12 +9,13 @@ import android.support.v4.app.NotificationCompat;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
+import com.bubelov.coins.data.repository.notification.PlaceNotificationsRepository;
 import com.bubelov.coins.domain.Place;
 import com.bubelov.coins.domain.PlaceNotification;
 import com.bubelov.coins.domain.NotificationArea;
 import com.bubelov.coins.ui.activity.MapActivity;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -32,10 +33,13 @@ public class PlaceNotificationManager {
 
     private final NotificationAreaRepository notificationAreaRepository;
 
+    private final PlaceNotificationsRepository notificationsRepository;
+
     @Inject
-    public PlaceNotificationManager(Context context, NotificationAreaRepository notificationAreaRepository) {
+    public PlaceNotificationManager(Context context, NotificationAreaRepository notificationAreaRepository, PlaceNotificationsRepository placeNotificationsRepository) {
         this.context = context;
         this.notificationAreaRepository = notificationAreaRepository;
+        this.notificationsRepository = placeNotificationsRepository;
     }
 
     public void notifyUserIfNecessary(Place newPlace) {
@@ -60,12 +64,17 @@ public class PlaceNotificationManager {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(UUID.randomUUID().hashCode(), builder.build());
 
-        PlaceNotification placeNotification = new PlaceNotification();
-        placeNotification.setPlaceId(newPlace.id());
-        PlaceNotification.insert(placeNotification);
+        PlaceNotification placeNotification = PlaceNotification.builder()
+                .placeId(newPlace.id())
+                .placeName(newPlace.name())
+                .build();
 
-        if (PlaceNotification.queryForAll().size() > 1) {
-            issueGroupNotification(PlaceNotification.queryForAll());
+        notificationsRepository.addNotification(placeNotification);
+
+        Collection<PlaceNotification> notifications = notificationsRepository.getNotifications();
+
+        if (notifications.size() > 1) {
+            issueGroupNotification(notifications);
         }
     }
 
@@ -84,7 +93,7 @@ public class PlaceNotificationManager {
         return distance <= notificationArea.getRadiusMeters();
     }
 
-    private void issueGroupNotification(List<PlaceNotification> pendingPlaces) {
+    private void issueGroupNotification(Collection<PlaceNotification> pendingPlaces) {
         NotificationArea notificationArea = notificationAreaRepository.getNotificationArea();
 
         Intent intent = MapActivity.newShowNotificationAreaIntent(context, notificationArea);
@@ -94,8 +103,7 @@ public class PlaceNotificationManager {
         style.setBigContentTitle(context.getString(R.string.notification_new_places_content_title, String.valueOf(pendingPlaces.size())));
 
         for (PlaceNotification notification : pendingPlaces) {
-            // TODO add place name to place notification model
-            style.addLine(String.valueOf(notification.getPlaceId()));
+            style.addLine(notification.placeName());
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
