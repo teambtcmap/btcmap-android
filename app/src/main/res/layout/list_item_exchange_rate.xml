@@ -5,8 +5,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
-    android:clickable="true"
     android:padding="16dp">
 
     <FrameLayout
@@ -32,7 +30,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="56dp"
         android:layout_marginStart="56dp"
         android:textColor="@color/text_primary"
         android:textSize="16sp"
@@ -48,11 +45,5 @@
         android:textSize="18sp"
         app:typeface="regular"
         tools:text="$1000" />
-
-    <ProgressBar
-        android:id="@+id/progress"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_gravity="end|center_vertical" />
 
 </FrameLayout>

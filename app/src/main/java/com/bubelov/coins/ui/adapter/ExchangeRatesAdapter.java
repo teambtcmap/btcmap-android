@@ -32,17 +32,9 @@ public class ExchangeRatesAdapter extends RecyclerView.Adapter<ExchangeRatesAdap
     @Override
     public void onBindViewHolder(final ExchangeRateViewHolder holder, int position) {
         ExchangeRate rate = items.get(position);
-        holder.firstLetter.setText(rate.source.substring(0, 1));
-        holder.exchangeName.setText(rate.source);
-
-        if (rate.rate == 0) {
-            holder.price.setVisibility(View.GONE);
-            holder.progressBar.setVisibility(View.VISIBLE);
-        } else {
-            holder.price.setVisibility(View.VISIBLE);
-            holder.price.setText(String.format(Locale.US, "$%.2f", rate.rate));
-            holder.progressBar.setVisibility(View.GONE);
-        }
+        holder.firstLetter.setText(rate.source().substring(0, 1));
+        holder.exchangeName.setText(rate.source());
+        holder.price.setText(String.format(Locale.US, "$%.2f", rate.rate()));
     }
 
     @Override
@@ -54,7 +46,7 @@ public class ExchangeRatesAdapter extends RecyclerView.Adapter<ExchangeRatesAdap
         return items;
     }
 
-    public static class ExchangeRateViewHolder extends RecyclerView.ViewHolder {
+    static class ExchangeRateViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.first_letter)
         TextView firstLetter;
 
@@ -64,10 +56,7 @@ public class ExchangeRatesAdapter extends RecyclerView.Adapter<ExchangeRatesAdap
         @BindView(R.id.price)
         TextView price;
 
-        @BindView(R.id.progress)
-        View progressBar;
-
-        public ExchangeRateViewHolder(View itemView) {
+        ExchangeRateViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }

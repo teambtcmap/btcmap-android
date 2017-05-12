@@ -99,21 +99,53 @@ public class ExchangeRatesRepository {
 
     private ExchangeRate getBitcoinAverageRate() throws IOException {
         double rate = bitcoinAverageApi.getUsdTicker().execute().body().last;
-        return new ExchangeRate("BitcoinAverage","USD", "BTC", rate);
+
+        return ExchangeRate.builder()
+                .id(0)
+                .source("BitcoinAverage")
+                .baseCurrencyCode("USD")
+                .targetCurrencyCode("BTC")
+                .rate(rate)
+                .date(System.currentTimeMillis())
+                .build();
     }
 
     private ExchangeRate getBitstampRate() throws IOException {
         double rate = bitstampApi.getTicker().execute().body().last;
-        return new ExchangeRate("Bitstamp","USD", "BTC", rate);
+
+        return ExchangeRate.builder()
+                .id(0)
+                .source("Bitstamp")
+                .baseCurrencyCode("USD")
+                .targetCurrencyCode("BTC")
+                .rate(rate)
+                .date(System.currentTimeMillis())
+                .build();
     }
 
     private ExchangeRate getCoinbaseRate() throws IOException {
         double rate = coinbaseApi.getExchangeRates().execute().body().data.rates.get("USD");
-        return new ExchangeRate("Coinbase","USD", "BTC", rate);
+
+        return ExchangeRate.builder()
+                .id(0)
+                .source("Coinbase")
+                .baseCurrencyCode("USD")
+                .targetCurrencyCode("BTC")
+                .rate(rate)
+                .date(System.currentTimeMillis())
+                .build();
     }
 
     private ExchangeRate getWinkDexRate() throws IOException {
         double rate = (double) winkDexApi.getPrice().execute().body().getPrice() / 100.0f;
-        return new ExchangeRate("WinkDex","USD", "BTC", rate);
+
+        return ExchangeRate.builder()
+                .id(0)
+                .source("WinkDex")
+                .baseCurrencyCode("USD")
+                .targetCurrencyCode("BTC")
+                .rate(rate)
+                .date(System.currentTimeMillis())
+                .build();
     }
 }

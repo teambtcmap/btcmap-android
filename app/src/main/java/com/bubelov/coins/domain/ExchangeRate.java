@@ -1,22 +1,35 @@
 package com.bubelov.coins.domain;
 
+import android.os.Parcelable;
+
+import com.bubelov.coins.util.AutoGson;
+import com.google.auto.value.AutoValue;
+
 /**
  * @author Igor Bubelov
  */
 
-public class ExchangeRate {
-    public String source;
+@AutoValue
+@AutoGson
+public abstract class ExchangeRate implements Parcelable {
+    public abstract long id();
+    public abstract String source();
+    public abstract String baseCurrencyCode();
+    public abstract String targetCurrencyCode();
+    public abstract double rate();
+    public abstract long date();
 
-    public String baseCurrencyCode;
+    public static Builder builder() {
+        return new AutoValue_ExchangeRate.Builder();
+    }
 
-    public String targetCurrencyCode;
-
-    public double rate;
-
-    public ExchangeRate(String source, String baseCurrencyCode, String targetCurrencyCode, double rate) {
-        this.source = source;
-        this.baseCurrencyCode = baseCurrencyCode;
-        this.targetCurrencyCode = targetCurrencyCode;
-        this.rate = rate;
+    @AutoValue.Builder public static abstract class Builder {
+        public abstract Builder id(long id);
+        public abstract Builder source(String source);
+        public abstract Builder baseCurrencyCode(String code);
+        public abstract Builder targetCurrencyCode(String code);
+        public abstract Builder rate(double rate);
+        public abstract Builder date(long date);
+        public abstract ExchangeRate build();
     }
 }
