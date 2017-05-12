@@ -30,16 +30,16 @@ import com.bubelov.coins.Constants;
 import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
 import com.bubelov.coins.data.repository.notification.PlaceNotificationsRepository;
 import com.bubelov.coins.data.repository.place.PlacesRepository;
+import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesRepository;
 import com.bubelov.coins.data.repository.user.UserRepository;
 import com.bubelov.coins.R;
-import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.domain.Place;
-import com.bubelov.coins.domain.PlaceNotification;
 import com.bubelov.coins.domain.NotificationArea;
+import com.bubelov.coins.domain.PlaceCategory;
 import com.bubelov.coins.domain.User;
 import com.bubelov.coins.ui.widget.PlaceDetailsView;
 import com.bubelov.coins.util.Analytics;
-import com.bubelov.coins.util.MapMarkersCache;
+import com.bubelov.coins.data.repository.placecategory.marker.PlaceCategoriesMarkersRepository;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
 import com.bubelov.coins.util.Utils;
@@ -116,6 +116,12 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     @Inject
     PlaceNotificationsRepository placeNotificationsRepository;
+
+    @Inject
+    PlaceCategoriesRepository placeCategoriesRepository;
+
+    @Inject
+    PlaceCategoriesMarkersRepository placeCategoriesMarkersRepository;
 
     private ActionBarDrawerToggle drawerToggle;
 
@@ -552,17 +558,15 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     private class PlacesRenderer extends StaticClusterRenderer<Place> {
-        private MapMarkersCache cache;
-
-        public PlacesRenderer(Context context, GoogleMap map, ClusterManager<Place> clusterManager) {
+        PlacesRenderer(Context context, GoogleMap map, ClusterManager<Place> clusterManager) {
             super(context, map, clusterManager);
-            cache = Injector.INSTANCE.mainComponent().markersCache();
         }
 
         @Override
-        protected void onBeforeClusterItemRendered(Place item, MarkerOptions markerOptions) {
-            super.onBeforeClusterItemRendered(item, markerOptions); // TODO
-            markerOptions.icon(cache.getMarker(null)).anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
+        protected void onBeforeClusterItemRendered(Place place, MarkerOptions markerOptions) {
+            super.onBeforeClusterItemRendered(place, markerOptions); // TODO
+            PlaceCategory category = placeCategoriesRepository.getPlaceCategory(place.categoryId());
+            markerOptions.icon(placeCategoriesMarkersRepository.getMarker(category)).anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
         }
     }
 

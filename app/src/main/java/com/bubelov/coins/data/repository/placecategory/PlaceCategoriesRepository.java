@@ -2,6 +2,8 @@ package com.bubelov.coins.data.repository.placecategory;
 
 import com.bubelov.coins.domain.PlaceCategory;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -36,20 +38,23 @@ public class PlaceCategoriesRepository implements PlaceCategoriesDataSource {
 
         if (category != null) {
             memorySource.addPlaceCategory(category);
-            return category;
-        }
-
-        category = networkSource.getPlaceCategory(id);
-
-        if (category != null) {
-            dbSource.addPlaceCategory(category);
-            memorySource.addPlaceCategory(category);
         }
 
         return category;
     }
 
-    public void reloadFromNetworkSource() {
+    public boolean reloadFromNetwork() {
+        List<PlaceCategory> categories = networkSource.getPlaceCategories();
 
+        if (categories != null) {
+            for (PlaceCategory category : categories) {
+                dbSource.addPlaceCategory(category);
+                memorySource.addPlaceCategory(category);
+            }
+
+            return true;
+        } else {
+            return false;
+        }
     }
 }

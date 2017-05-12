@@ -61,12 +61,14 @@ public class PlaceCategoriesRepositoryTest {
     }
 
     @Test
-    public void networkSource_loadsCategory() {
-        Assert.assertNotNull(networkSource.getPlaceCategory(TEST_CATEGORY_ID));
+    public void networkSource_loadsCategories() {
+        Assert.assertTrue(repository.reloadFromNetwork());
+        Assert.assertNotNull(repository.getPlaceCategory(TEST_CATEGORY_ID));
     }
 
     @Test
     public void repository_cachesCategory() {
+        Assert.assertTrue(repository.reloadFromNetwork());
         Assert.assertNotNull(repository.getPlaceCategory(TEST_CATEGORY_ID));
         Assert.assertNotNull(dbSource.getPlaceCategory(TEST_CATEGORY_ID));
         Assert.assertNotNull(memorySource.getPlaceCategory(TEST_CATEGORY_ID));

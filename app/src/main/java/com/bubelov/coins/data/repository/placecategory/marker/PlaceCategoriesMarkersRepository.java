@@ -1,4 +1,6 @@
-package com.bubelov.coins.util;
+package com.bubelov.coins.data.repository.placecategory.marker;
+
+import android.support.annotation.Nullable;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.domain.PlaceCategory;
@@ -8,14 +10,21 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * @author Igor Bubelov
  */
 
-public class MapMarkersCache {
+@Singleton
+public class PlaceCategoriesMarkersRepository {
     private Map<PlaceCategory, BitmapDescriptor> cache = new HashMap<>();
 
-    public BitmapDescriptor getMarker(PlaceCategory placeCategory) {
+    @Inject
+    PlaceCategoriesMarkersRepository() {}
+
+    public BitmapDescriptor getMarker(@Nullable PlaceCategory placeCategory) {
         if (!cache.containsKey(placeCategory)) {
             cache.put(placeCategory, createBitmapDescriptor(placeCategory));
         }
@@ -23,7 +32,11 @@ public class MapMarkersCache {
         return cache.get(placeCategory);
     }
 
-    private BitmapDescriptor createBitmapDescriptor(PlaceCategory placeCategory) {
+    private BitmapDescriptor createBitmapDescriptor(@Nullable PlaceCategory placeCategory) {
+        if (placeCategory == null) {
+            return BitmapDescriptorFactory.fromResource(R.drawable.ic_place_empty);
+        }
+
         int resourceId;
 
         switch (placeCategory.name().toLowerCase()) {

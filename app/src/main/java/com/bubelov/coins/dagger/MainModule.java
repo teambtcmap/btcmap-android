@@ -12,7 +12,6 @@ import com.bubelov.coins.data.database.AssetDbHelper;
 import com.bubelov.coins.data.database.DbHelper;
 import com.bubelov.coins.util.AutoValueAdapterFactory;
 import com.bubelov.coins.service.DatabaseSync;
-import com.bubelov.coins.util.MapMarkersCache;
 import com.bubelov.coins.util.StringAdapter;
 import com.bubelov.coins.util.UtcDateTypeAdapter;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -48,12 +47,6 @@ public class MainModule {
     @Singleton
     Context context() {
         return context;
-    }
-
-    @Provides
-    @Singleton
-    MapMarkersCache markersCache() {
-        return new MapMarkersCache();
     }
 
     @Provides

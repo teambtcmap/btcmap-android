@@ -7,6 +7,7 @@ import com.bubelov.coins.data.repository.currency.CurrenciesRepository;
 import com.bubelov.coins.data.repository.place.PlacesRepository;
 import com.bubelov.coins.PreferenceKeys;
 import com.bubelov.coins.dagger.Injector;
+import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesRepository;
 import com.bubelov.coins.domain.Place;
 import com.bubelov.coins.util.PlaceNotificationManager;
 import com.google.android.gms.gcm.GcmNetworkManager;
@@ -30,6 +31,9 @@ public class DatabaseSync implements Runnable {
     CurrenciesRepository currenciesRepository;
 
     @Inject
+    PlaceCategoriesRepository placeCategoriesRepository;
+
+    @Inject
     PlacesRepository placesRepository;
 
     @Inject
@@ -44,7 +48,12 @@ public class DatabaseSync implements Runnable {
 
     @Override
     public void run() {
-        if (!currenciesRepository.sync()) {
+        if (!currenciesRepository.reloadFromNetwork()) {
+            scheduleNextSync();
+            return;
+        }
+
+        if (!placeCategoriesRepository.reloadFromNetwork()) {
             scheduleNextSync();
             return;
         }

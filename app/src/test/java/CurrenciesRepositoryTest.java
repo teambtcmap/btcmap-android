@@ -28,12 +28,12 @@ public class CurrenciesRepositoryTest {
 
     @Test
     public void currenciesRepository_SyncReturnsTrue() {
-        Assert.assertTrue(currenciesRepository.sync());
+        Assert.assertTrue(currenciesRepository.reloadFromNetwork());
     }
 
     @Test
     public void currenciesRepository_FetchesBitcoin() {
-        currenciesRepository.sync();
+        currenciesRepository.reloadFromNetwork();
         Assert.assertTrue(currenciesRepository.getCurrency("BTC") != null);
     }
 }

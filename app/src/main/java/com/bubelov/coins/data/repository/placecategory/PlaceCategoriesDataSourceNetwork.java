@@ -4,6 +4,8 @@ import com.bubelov.coins.data.api.coins.CoinsApi;
 import com.bubelov.coins.domain.PlaceCategory;
 import com.google.firebase.crash.FirebaseCrash;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -29,6 +31,16 @@ public class PlaceCategoriesDataSourceNetwork implements PlaceCategoriesDataSour
         } catch (Exception e) {
             FirebaseCrash.report(e);
             Timber.e(e, "Couldn't load place category");
+            return null;
+        }
+    }
+
+    public List<PlaceCategory> getPlaceCategories() {
+        try {
+            return api.getPlaceCategories().execute().body();
+        } catch (Exception e) {
+            FirebaseCrash.report(e);
+            Timber.e(e, "Couldn't load place categories");
             return null;
         }
     }

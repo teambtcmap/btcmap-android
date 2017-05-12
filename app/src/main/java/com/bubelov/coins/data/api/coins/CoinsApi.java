@@ -40,6 +40,9 @@ public interface CoinsApi {
     @PATCH("places/{id}")
     Call<Place> updatePlace(@Path("id") long id, @Header("session") String session, @Body Map<String, Object> args);
 
+    @GET("place_categories")
+    Call<List<PlaceCategory>> getPlaceCategories();
+
     @GET("place_categories/{id}")
     Call<PlaceCategory> getPlaceCategory(@Path("id") long id);
 

@@ -21,6 +21,7 @@
 # Here include the POJO's that have you have created for mapping JSON response to POJO for example.
 
 -keep class com.bubelov.coins.data.api.** { *; }
+-keep class com.bubelov.coins.domain.** { *; }
 
 # Picasso
 

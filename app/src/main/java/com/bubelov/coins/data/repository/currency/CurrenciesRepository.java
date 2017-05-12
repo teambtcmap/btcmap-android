@@ -31,14 +31,14 @@ public class CurrenciesRepository {
         return diskDataSource.getCurrency(code);
     }
 
-    public boolean sync() {
+    public boolean reloadFromNetwork() {
         try {
             Collection<Currency> currencies = networkDataSource.getCurrencies();
             diskDataSource.insert(currencies);
             return true;
         } catch (IOException e) {
             FirebaseCrash.report(e);
-            Timber.e(e, "Couldn't sync currencies");
+            Timber.e(e, "Couldn't load currencies");
             return false;
         }
     }

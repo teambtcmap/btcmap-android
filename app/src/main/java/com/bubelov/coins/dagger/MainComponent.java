@@ -22,7 +22,7 @@ import com.bubelov.coins.ui.fragment.SignInFragment;
 import com.bubelov.coins.ui.fragment.SignUpFragment;
 import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.util.PlaceNotificationManager;
-import com.bubelov.coins.util.MapMarkersCache;
+import com.bubelov.coins.data.repository.placecategory.marker.PlaceCategoriesMarkersRepository;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import javax.inject.Singleton;
@@ -37,8 +37,6 @@ import dagger.Component;
 @Component(modules = {MainModule.class})
 public interface MainComponent {
     Context context();
-
-    MapMarkersCache markersCache();
 
     DatabaseSync databaseSync();
 
