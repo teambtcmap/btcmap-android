@@ -1,55 +1,29 @@
 package com.bubelov.coins.domain;
 
-import com.google.android.gms.maps.model.LatLng;
+import android.os.Parcelable;
 
-import java.io.Serializable;
+import com.bubelov.coins.util.AutoGson;
+import com.google.auto.value.AutoValue;
 
 /**
  * @author Igor Bubelov
  */
 
-public class NotificationArea implements Serializable {
-    public static final int DEFAULT_RADIUS_METERS = 50_000;
+@AutoValue
+@AutoGson
+public abstract class NotificationArea implements Parcelable {
+    public abstract double latitude();
+    public abstract double longitude();
+    public abstract double radius();
 
-    private double centerLatitude;
-
-    private double centerLongitude;
-
-    private int radiusMeters;
-
-    public NotificationArea(LatLng center) {
-        this(center, DEFAULT_RADIUS_METERS);
+    public static Builder builder() {
+        return new AutoValue_NotificationArea.Builder();
     }
 
-    public NotificationArea(LatLng center, int radiusMeters) {
-        this.centerLatitude = center.latitude;
-        this.centerLongitude = center.longitude;
-        this.radiusMeters = radiusMeters;
-    }
-
-    public LatLng getCenter() {
-        return new LatLng(centerLatitude, centerLongitude);
-    }
-
-    public int getRadiusMeters() {
-        return radiusMeters;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-
-        if (other == null || getClass() != other.getClass()) {
-            return false;
-        }
-
-        NotificationArea otherArea = (NotificationArea) other;
-
-        return Double.compare(otherArea.centerLatitude, centerLatitude) == 0
-                && Double.compare(otherArea.centerLongitude, centerLongitude) == 0
-                && radiusMeters == otherArea.radiusMeters;
-
+    @AutoValue.Builder public static abstract class Builder {
+        public abstract Builder latitude(double latitude);
+        public abstract Builder longitude(double longitude);
+        public abstract Builder radius(double radius);
+        public abstract NotificationArea build();
     }
 }

@@ -1,9 +1,12 @@
 package com.bubelov.coins.ui.activity;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -20,8 +23,10 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -35,9 +40,7 @@ import butterknife.ButterKnife;
  */
 
 public class NotificationAreaActivity extends AbstractActivity implements OnMapReadyCallback {
-    private static final NotificationArea DEFAULT_NOTIFICATION_AREA = new NotificationArea(Constants.DEFAULT_LOCATION);
-
-    private static final int DEFAULT_ZOOM = 8;
+    public static final String DEFAULT_CAMERA_POSITION_EXTRA = "default_camera_position";
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -55,6 +58,14 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
 
     private Circle areaCircle;
 
+    private CameraPosition defaultCameraPosition;
+
+    public static Intent newIntent(Context context, CameraPosition defaultCameraPosition) {
+        Intent intent = new Intent(context, NotificationAreaActivity.class);
+        intent.putExtra(DEFAULT_CAMERA_POSITION_EXTRA, defaultCameraPosition);
+        return intent;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +74,8 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
+
+        defaultCameraPosition = getIntent().getParcelableExtra(DEFAULT_CAMERA_POSITION_EXTRA);
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -95,21 +108,30 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
         }
 
         NotificationArea notificationArea = notificationAreaRepository.getNotificationArea();
-        setArea(notificationArea == null ? DEFAULT_NOTIFICATION_AREA : notificationArea);
+
+        if (notificationArea == null) {
+            notificationArea = NotificationArea.builder()
+                    .latitude(defaultCameraPosition.target.latitude)
+                    .longitude(defaultCameraPosition.target.longitude)
+                    .radius(Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS)
+                    .build();
+        }
+
+        setArea(notificationArea);
     }
 
     private void setArea(NotificationArea area) {
         BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_location_marker);
 
-        Marker areaCenter = map.addMarker(new MarkerOptions()
-                .position(area.getCenter())
+        Marker marker = map.addMarker(new MarkerOptions()
+                .position(new LatLng(area.latitude(), area.longitude()))
                 .icon(markerDescriptor)
                 .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V)
                 .draggable(true));
 
         CircleOptions circleOptions = new CircleOptions()
-                .center(areaCenter.getPosition())
-                .radius(area.getRadiusMeters())
+                .center(marker.getPosition())
+                .radius(area.radius())
                 .fillColor(getResources().getColor(R.color.notification_area))
                 .strokeColor(getResources().getColor(R.color.notification_area_border))
                 .strokeWidth(4);
@@ -120,11 +142,24 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
         radiusSeekBar.setProgress((int) areaCircle.getRadius());
         radiusSeekBar.setOnSeekBarChangeListener(new SeekBarChangeListener());
 
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(area.getCenter(), DEFAULT_ZOOM));
+        LatLng areaCenter = new LatLng(area.latitude(), area.longitude());
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(areaCenter, getZoomLevel(areaCircle) - 1));
     }
 
     private void saveArea() {
-        notificationAreaRepository.setNotificationArea(new NotificationArea(areaCircle.getCenter(), (int) areaCircle.getRadius()));
+        NotificationArea area = NotificationArea.builder()
+                .latitude(areaCircle.getCenter().latitude)
+                .longitude(areaCircle.getCenter().longitude)
+                .radius(areaCircle.getRadius())
+                .build();
+
+        notificationAreaRepository.setNotificationArea(area);
+    }
+
+    public int getZoomLevel(@NonNull Circle circle) {
+        double radius = circle.getRadius();
+        double scale = radius / 500;
+        return (int) (16 - Math.log(scale) / Math.log(2));
     }
 
     private class OnMarkerDragListener implements GoogleMap.OnMarkerDragListener {

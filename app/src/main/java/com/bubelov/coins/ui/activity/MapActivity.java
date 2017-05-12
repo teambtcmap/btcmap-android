@@ -54,6 +54,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.crash.FirebaseCrash;
 import com.google.maps.android.clustering.ClusterManager;
 import com.squareup.picasso.Picasso;
 
@@ -438,25 +439,31 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         if (intent.hasExtra(NOTIFICATION_AREA_EXTRA)) {
-            NotificationArea notificationArea = (NotificationArea) intent.getSerializableExtra(NOTIFICATION_AREA_EXTRA);
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(notificationArea.getCenter(), MAP_DEFAULT_ZOOM));
+            NotificationArea area = intent.getParcelableExtra(NOTIFICATION_AREA_EXTRA);
+            LatLng areaCenter = new LatLng(area.latitude(), area.longitude());
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(areaCenter, MAP_DEFAULT_ZOOM));
         }
     }
 
     private void signIn() {
         Intent intent = SignInActivity.newIntent(this);
-        startActivityForResult(intent, REQUEST_SIGN_IN, ActivityOptionsCompat.makeBasic().toBundle());
+        startActivityForResult(intent, REQUEST_SIGN_IN);
     }
 
     private void openExchangeRatesScreen() {
         Intent intent = new Intent(MapActivity.this, ExchangeRatesActivity.class);
-        startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(MapActivity.this).toBundle());
+        startActivity(intent);
         Analytics.logSelectContentEvent("exchange_rates", null, "screen");
     }
 
     private void openNotificationAreaScreen() {
-        Intent intent = new Intent(this, NotificationAreaActivity.class);
-        startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
+        if (map == null) {
+            FirebaseCrash.report(new IllegalStateException("Map is not initialized"));
+            return;
+        }
+
+        Intent intent = NotificationAreaActivity.newIntent(this, map.getCameraPosition());
+        startActivity(intent);
         Analytics.logSelectContentEvent("notification_area", null, "screen");
     }
 
@@ -484,7 +491,8 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     private void moveToDefaultLocation() {
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(Constants.DEFAULT_LOCATION, MAP_DEFAULT_ZOOM));
+        LatLng defaultLocation = new LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, MAP_DEFAULT_ZOOM));
     }
 
     private void onUserLocationReceived(Location location) {
@@ -492,7 +500,13 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_DEFAULT_ZOOM));
 
         if (notificationAreaRepository.getNotificationArea() == null) {
-            notificationAreaRepository.setNotificationArea(new NotificationArea(latLng));
+            NotificationArea area = NotificationArea.builder()
+                    .latitude(location.getLatitude())
+                    .longitude(location.getLongitude())
+                    .radius(Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS)
+                    .build();
+
+            notificationAreaRepository.setNotificationArea(area);
         }
     }
 

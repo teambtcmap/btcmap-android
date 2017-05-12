@@ -2,7 +2,6 @@ import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
 import com.bubelov.coins.domain.NotificationArea;
-import com.google.android.gms.maps.model.LatLng;
 
 import junit.framework.Assert;
 
@@ -35,14 +34,24 @@ public class NotificationAreaRepositoryTest {
 
     @Test
     public void notificationAreaRepository_AreaSaved() {
-        NotificationArea area = new NotificationArea(new LatLng(50.0d, 0d), 100);
+        NotificationArea area = NotificationArea.builder()
+                .latitude(50)
+                .longitude(0)
+                .radius(100)
+                .build();
+
         repository.setNotificationArea(area);
         Assert.assertEquals(repository.getNotificationArea(), area);
     }
 
     @Test
     public void notificationAreaRepository_areaCleared() {
-        NotificationArea area = new NotificationArea(new LatLng(50.0d, 0d), 100);
+        NotificationArea area = NotificationArea.builder()
+                .latitude(50)
+                .longitude(0)
+                .radius(100)
+                .build();
+
         repository.setNotificationArea(area);
         repository.setNotificationArea(null);
         Assert.assertTrue(repository.getNotificationArea() == null);

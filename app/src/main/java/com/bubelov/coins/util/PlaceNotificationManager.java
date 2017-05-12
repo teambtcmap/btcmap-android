@@ -89,8 +89,12 @@ public class PlaceNotificationManager {
             return false;
         }
 
-        float distance = DistanceUtils.getDistance(notificationArea.getCenter(), newPlace.getPosition());
-        return distance <= notificationArea.getRadiusMeters();
+        return DistanceUtils.getDistance(
+                notificationArea.latitude(),
+                notificationArea.longitude(),
+                newPlace.latitude(),
+                newPlace.longitude()
+        ) <= notificationArea.radius();
     }
 
     private void issueGroupNotification(Collection<PlaceNotification> pendingPlaces) {

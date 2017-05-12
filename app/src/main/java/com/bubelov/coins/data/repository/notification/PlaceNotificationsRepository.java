@@ -13,11 +13,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * @author Igor Bubelov
  */
 
+@Singleton
 public class PlaceNotificationsRepository {
     private static final String PLACE_NOTIFICATIONS = "place_notifications";
 
