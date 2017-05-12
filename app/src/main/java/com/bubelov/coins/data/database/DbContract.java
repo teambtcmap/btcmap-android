@@ -16,7 +16,7 @@ public interface DbContract {
         String DESCRIPTION = "description";
         String PHONE = "phone";
         String WEBSITE = "website";
-        String AMENITY = "amenity";
+        String CATEGORY_ID = "category_id";
         String OPENING_HOURS = "opening_hours";
         String ADDRESS = "address";
         String VISIBLE = "visible";
@@ -24,6 +24,12 @@ public interface DbContract {
         String CLOSED_CLAIMS = "closed_claims";
 
         String _UPDATED_AT = "_updated_at";
+    }
+
+    interface PlaceCategories extends BaseColumns {
+        String TABLE_NAME = "place_categories";
+
+        String NAME = "name";
     }
 
     interface Currencies extends BaseColumns {

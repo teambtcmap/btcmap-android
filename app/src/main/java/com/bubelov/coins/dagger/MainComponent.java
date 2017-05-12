@@ -6,6 +6,10 @@ import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
 import com.bubelov.coins.data.repository.currency.CurrenciesRepository;
 import com.bubelov.coins.data.repository.notification.PlaceNotificationsRepository;
 import com.bubelov.coins.data.repository.place.PlacesRepository;
+import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesDataSourceDb;
+import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesDataSourceMemory;
+import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesDataSourceNetwork;
+import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesRepository;
 import com.bubelov.coins.data.repository.rate.ExchangeRatesRepository;
 import com.bubelov.coins.ui.activity.EditPlaceActivity;
 import com.bubelov.coins.ui.activity.ExchangeRatesActivity;
@@ -47,6 +51,11 @@ public interface MainComponent {
     CurrenciesRepository currenciesRepository();
     ExchangeRatesRepository exchangeRatesRepository();
     PlaceNotificationsRepository placeNotificationsRepository();
+
+    PlaceCategoriesRepository placeCategoriesRepository();
+    PlaceCategoriesDataSourceNetwork placeCategoriesDataSourceNetwork();
+    PlaceCategoriesDataSourceDb placeCategoriesDataSourceDb();
+    PlaceCategoriesDataSourceMemory placeCategoriesDataSourceMemory();
 
     void inject(MapActivity target);
     void inject(EditPlaceActivity target);

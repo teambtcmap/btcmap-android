@@ -81,7 +81,7 @@ class PlacesDataSourceDisk implements PlacesDataSource {
                     .description(cursor.getString(cursor.getColumnIndex(DbContract.Places.DESCRIPTION)))
                     .latitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Places.LATITUDE)))
                     .longitude(cursor.getDouble(cursor.getColumnIndex(DbContract.Places.LONGITUDE)))
-                    .amenity(cursor.getString(cursor.getColumnIndex(DbContract.Places.AMENITY)))
+                    .categoryId(cursor.getLong(cursor.getColumnIndex(DbContract.Places.CATEGORY_ID)))
                     .phone(cursor.getString(cursor.getColumnIndex(DbContract.Places.PHONE)))
                     .website(cursor.getString(cursor.getColumnIndex(DbContract.Places.WEBSITE)))
                     .openingHours(cursor.getString(cursor.getColumnIndex(DbContract.Places.OPENING_HOURS)))
@@ -110,7 +110,7 @@ class PlacesDataSourceDisk implements PlacesDataSource {
                     DbContract.Places.DESCRIPTION,
                     DbContract.Places.PHONE,
                     DbContract.Places.WEBSITE,
-                    DbContract.Places.AMENITY,
+                    DbContract.Places.CATEGORY_ID,
                     DbContract.Places.OPENING_HOURS,
                     DbContract.Places.ADDRESS,
                     DbContract.Places.VISIBLE,
@@ -128,7 +128,7 @@ class PlacesDataSourceDisk implements PlacesDataSource {
                 insertStatement.bindString(6, place.description());
                 insertStatement.bindString(7, place.phone());
                 insertStatement.bindString(8, place.website());
-                insertStatement.bindString(9, place.amenity());
+                insertStatement.bindLong(9, place.categoryId());
                 insertStatement.bindString(10, place.openingHours());
                 insertStatement.bindString(11, place.address());
                 insertStatement.bindLong(12, place.visible() ? 1 : 0);

@@ -7,12 +7,18 @@ create table places (
     description text not null,
     phone text not null,
     website text not null,
-    amenity text not null,
+    category_id integer not null,
     opening_hours text not null,
     address text not null,
     visible boolean not null,
     opened_claims integer not null,
     closed_claims integer not null
+);
+
+create table place_categories (
+    _id integer primary key,
+    name text not null,
+    unique (name)
 );
 
 create table currencies (

@@ -5,7 +5,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.io.Serializable;
 
 /**
- * Author: Igor Bubelov
+ * @author Igor Bubelov
  */
 
 public class NotificationArea implements Serializable {

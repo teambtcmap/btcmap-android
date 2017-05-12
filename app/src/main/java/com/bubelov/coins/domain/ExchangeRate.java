@@ -1,7 +1,7 @@
 package com.bubelov.coins.domain;
 
 /**
- * Author: Igor Bubelov
+ * @author Igor Bubelov
  */
 
 public class ExchangeRate {

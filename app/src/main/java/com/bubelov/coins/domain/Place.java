@@ -22,7 +22,7 @@ public abstract class Place implements Parcelable, ClusterItem {
     public abstract String description();
     public abstract double latitude();
     public abstract double longitude();
-    public abstract String amenity();
+    public abstract long categoryId();
     public abstract String phone();
     public abstract String website();
     public abstract String openingHours();
@@ -44,7 +44,7 @@ public abstract class Place implements Parcelable, ClusterItem {
         public abstract Builder description(String description);
         public abstract Builder latitude(double latitude);
         public abstract Builder longitude(double longitude);
-        public abstract Builder amenity(String amenity);
+        public abstract Builder categoryId(long categoryId);
         public abstract Builder phone(String phone);
         public abstract Builder website(String website);
         public abstract Builder openingHours(String openingHours);

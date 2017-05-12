@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.domain.PlaceCategory;
 import com.bubelov.coins.domain.Place;
 import com.bubelov.coins.util.DistanceUnits;
 import com.bubelov.coins.util.DistanceUtils;
@@ -68,18 +67,7 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
             }
         }
 
-        boolean amenityFound = false;
-
-        for (PlaceCategory category : PlaceCategory.values()) {
-            if (place.amenity().equalsIgnoreCase(category.name())) {
-                amenityFound = true;
-                holder.icon.setImageResource(category.getIconId());
-            }
-        }
-
-        if (!amenityFound) {
-            holder.icon.setImageResource(R.drawable.ic_place_24dp);
-        }
+        holder.icon.setImageResource(R.drawable.ic_place_24dp);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.bubelov.coins.data.api.coins;
 
 import com.bubelov.coins.domain.Currency;
 import com.bubelov.coins.domain.Place;
+import com.bubelov.coins.domain.PlaceCategory;
 
 import java.util.Date;
 import java.util.List;
@@ -38,6 +39,9 @@ public interface CoinsApi {
 
     @PATCH("places/{id}")
     Call<Place> updatePlace(@Path("id") long id, @Header("session") String session, @Body Map<String, Object> args);
+
+    @GET("place_categories/{id}")
+    Call<PlaceCategory> getPlaceCategory(@Path("id") long id);
 
     @GET("currencies")
     Call<List<Currency>> getCurrencies();

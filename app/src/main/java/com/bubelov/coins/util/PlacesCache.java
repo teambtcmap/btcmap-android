@@ -41,7 +41,7 @@ public class PlacesCache {
 
         for (Place place : places) {
             if (bounds.contains(place.getPosition())
-                    && (category == null || category.name().equalsIgnoreCase(place.amenity()))) {
+                    && (category == null || place.categoryId() == category.id())) {
                 result.add(place);
             }
         }
