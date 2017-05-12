@@ -15,6 +15,7 @@ import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -35,28 +36,32 @@ public class ExchangeRatesRepository {
     private final WinkDexApi winkDexApi;
 
     @Inject
-    ExchangeRatesRepository(Gson gson) {
+    ExchangeRatesRepository(OkHttpClient httpClient, Gson gson) {
         Converter.Factory converterFactory = GsonConverterFactory.create(gson);
 
         bitcoinAverageApi = new Retrofit.Builder()
+                .client(httpClient)
                 .baseUrl("https://api.bitcoinaverage.com/")
                 .addConverterFactory(converterFactory)
                 .build()
                 .create(BitcoinAverageApi.class);
 
         bitstampApi = new Retrofit.Builder()
+                .client(httpClient)
                 .baseUrl("https://www.bitstamp.net/api/")
                 .addConverterFactory(converterFactory)
                 .build()
                 .create(BitstampApi.class);
 
         coinbaseApi = new Retrofit.Builder()
+                .client(httpClient)
                 .baseUrl("https://api.coinbase.com/v2/")
                 .addConverterFactory(converterFactory)
                 .build()
                 .create(CoinbaseApi.class);
 
         winkDexApi = new Retrofit.Builder()
+                .client(httpClient)
                 .baseUrl("https://winkdex.com/api/v0/")
                 .addConverterFactory(converterFactory)
                 .build()

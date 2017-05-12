@@ -14,6 +14,7 @@ import com.bubelov.coins.util.AutoValueAdapterFactory;
 import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.util.StringAdapter;
 import com.bubelov.coins.util.UtcDateTypeAdapter;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -87,7 +88,18 @@ public class MainModule {
 
     @Provides
     @Singleton
-    CoinsApi api(Gson gson) {
+    CoinsApi coinsApi(OkHttpClient httpClient, Gson gson) {
+        return new Retrofit.Builder()
+                .baseUrl(BuildConfig.API_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .client(httpClient)
+                .build()
+                .create(CoinsApi.class);
+    }
+
+    @Provides
+    @Singleton
+    OkHttpClient httpClient() {
         OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
@@ -97,13 +109,9 @@ public class MainModule {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
             httpClientBuilder.addInterceptor(loggingInterceptor);
+            httpClientBuilder.addNetworkInterceptor(new StethoInterceptor());
         }
 
-        return new Retrofit.Builder()
-                .baseUrl(BuildConfig.API_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .client(httpClientBuilder.build())
-                .build()
-                .create(CoinsApi.class);
+        return httpClientBuilder.build();
     }
 }
