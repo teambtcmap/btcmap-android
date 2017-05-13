@@ -84,5 +84,6 @@
     <string name="menu_item_settings">Settings</string>
     <string name="guest">Гость</string>
     <string name="more_features_coming_soon">More features coming soon</string>
+    <string name="could_not_add_place">Couldn\'t add place</string>
 
 </resources>

@@ -25,7 +25,6 @@ import com.bubelov.coins.ui.adapter.PlacesSearchResultsAdapter;
 import com.bubelov.coins.util.DistanceComparator;
 import com.bubelov.coins.util.DistanceUnits;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -105,7 +104,7 @@ public class FindPlaceActivity extends AbstractActivity implements PlacesSearchR
         resultsAdapter.getPlaces().clear();
 
         if (query.length() >= MIN_QUERY_LENGTH) {
-            List<Place> places = new ArrayList<>(placesRepository.getAll());
+            List<Place> places = placesRepository.getPlaces(query.toString());
 
             if (userLocation != null) {
                 Collections.sort(places, new DistanceComparator(userLocation));

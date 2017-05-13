@@ -1,6 +1,10 @@
 import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.dagger.Injector;
+import com.bubelov.coins.data.repository.place.PlacesDataSourceDb;
+import com.bubelov.coins.data.repository.place.PlacesDataSourceMemory;
+import com.bubelov.coins.data.repository.place.PlacesDataSourceNetwork;
 import com.bubelov.coins.data.repository.place.PlacesRepository;
+import com.bubelov.coins.domain.Place;
 
 import junit.framework.Assert;
 
@@ -11,6 +15,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.util.List;
+
 /**
  * @author Igor Bubelov
  */
@@ -19,6 +25,12 @@ import org.robolectric.annotation.Config;
 @Config(constants = BuildConfig.class, sdk = 23)
 public class PlacesRepositoryTest {
     private PlacesRepository placesRepository;
+
+    private PlacesDataSourceNetwork networkSource;
+
+    private PlacesDataSourceDb dbSource;
+
+    private PlacesDataSourceMemory memorySource;
 
     @Before
     public void setUp() {
@@ -33,7 +45,8 @@ public class PlacesRepositoryTest {
 
     @Test
     public void placesRepository_SavesNewPlaces() {
-        placesRepository.fetchNewPlaces();
-        Assert.assertFalse(placesRepository.getAll().isEmpty());
+        List<Place> newPlaces = placesRepository.fetchNewPlaces();
+        Assert.assertFalse(newPlaces.isEmpty());
+        Assert.assertNotNull(placesRepository.getPlace(newPlaces.get(0).id()));
     }
 }

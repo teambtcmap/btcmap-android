@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Switch;
@@ -23,9 +22,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -123,7 +119,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
             return false;
         });
 
-        place = placesRepository.get(getIntent().getLongExtra(ID_EXTRA, -1));
+        place = placesRepository.getPlace(getIntent().getLongExtra(ID_EXTRA, -1));
 
         if (place == null) {
             toolbar.setTitle(R.string.action_add_place);
@@ -164,50 +160,20 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
         }
     }
 
-    private Map<String, Object> getRequestArgs() {
-        Map<String, Object> args = new HashMap<>();
-
-        if (pickedLocation == null && place != null) {
-            pickedLocation = new LatLng(place.latitude(), place.longitude());
-        }
-
-        if ((place == null && name.length() > 0) || (place != null && !TextUtils.equals(name.getText(), place.name()))) {
-            args.put("name", name.getText().toString());
-        }
-
-        if (place == null || place.latitude() != pickedLocation.latitude) {
-            args.put("latitude", pickedLocation.latitude);
-        }
-
-        if (place == null || place.longitude() != pickedLocation.longitude) {
-            args.put("longitude", pickedLocation.longitude);
-        }
-
-        if ((place == null && phone.length() > 0) || (place != null && !TextUtils.equals(phone.getText(), place.phone()))) {
-            args.put("phone", phone.getText().toString());
-        }
-
-        if ((place == null && website.length() > 0) || (place != null && !TextUtils.equals(website.getText(), place.website()))) {
-            args.put("website", website.getText().toString());
-        }
-
-        if ((place == null && description.length() > 0) || (place != null && !TextUtils.equals(description.getText(), place.description()))) {
-            args.put("description", description.getText().toString());
-        }
-
-        if ((place == null && openingHours.length() > 0) || (place != null && !TextUtils.equals(openingHours.getText(), place.openingHours()))) {
-            args.put("opening_hours", openingHours.getText().toString());
-        }
-
-        if (closedSwitch.isChecked()) {
-            args.put("visible", false);
-        } else {
-            args.put("visible", true);
-        }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("place", args);
-        return result;
+    private Place getEditedPlace() {
+        return Place.builder()
+                .id(place == null ? 0 : place.id())
+                .name(name.getText().toString())
+                .description(description.getText().toString())
+                .latitude(pickedLocation.latitude)
+                .longitude(pickedLocation.longitude)
+                .categoryId(place == null ? 0 : place.categoryId())
+                .phone(phone.getText().toString())
+                .website(website.getText().toString())
+                .openingHours(openingHours.getText().toString())
+                .address(place == null ? "" : place.address())
+                .visible(!closedSwitch.isChecked())
+                .build();
     }
 
     @OnCheckedChanged(R.id.closed_switch)
@@ -234,7 +200,7 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
 
         @Override
         protected Boolean doInBackground(Void... args) {
-            return placesRepository.add(place);
+            return placesRepository.add(getEditedPlace());
         }
 
         @Override
@@ -245,23 +211,20 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
                 setResult(RESULT_OK);
                 supportFinishAfterTransition();
             } else {
-                Toast.makeText(EditPlaceActivity.this, "Couldn't add place", Toast.LENGTH_LONG).show();
+                Toast.makeText(EditPlaceActivity.this, R.string.could_not_add_place, Toast.LENGTH_LONG).show();
             }
         }
     }
 
     private class UpdatePlaceTask extends AsyncTask<Void, Void, Boolean> {
-        private Map<String, Object> requestArgs;
-
         @Override
         protected void onPreExecute() {
-            requestArgs = getRequestArgs();
             showProgress();
         }
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            return placesRepository.update(place);
+            return placesRepository.update(getEditedPlace());
         }
 
         @Override

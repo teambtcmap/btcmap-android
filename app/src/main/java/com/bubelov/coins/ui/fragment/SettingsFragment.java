@@ -42,7 +42,7 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     private void showRandomPlaceNotification() {
-        Place randomPlace = placesRepository.getAll().iterator().next(); // TODO
+        Place randomPlace = placesRepository.getRandomPlace();
 
         if (randomPlace != null) {
             Injector.INSTANCE.mainComponent().notificationManager().notifyUser(randomPlace);

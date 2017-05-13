@@ -26,39 +26,15 @@ import javax.inject.Singleton;
  */
 
 @Singleton
-class PlacesDataSourceDisk implements PlacesDataSource {
+public class PlacesDataSourceDb {
     private final SQLiteDatabase db;
 
     @Inject
-    PlacesDataSourceDisk(SQLiteDatabase db) {
+    PlacesDataSourceDb(SQLiteDatabase db) {
         this.db = db;
     }
 
-    @Override
-    public Place get(long id) {
-        try (Cursor cursor = db.query(DbContract.Places.TABLE_NAME,
-                null,
-                "_id = ?",
-                new String[]{String.valueOf(id)},
-                null,
-                null,
-                null,
-                null)) {
-            return cursor.getCount() == 1 ? getPlaces(cursor).iterator().next() : null;
-        }
-    }
-
-    @Override
-    public void add(Place place) {
-        batchInsert(Collections.singleton(place));
-    }
-
-    @Override
-    public void update(Place place) {
-        batchInsert(Collections.singleton(place));
-    }
-
-    Collection<Place> getAll() {
+    public List<Place> getPlaces() {
         try (Cursor cursor = db.query(DbContract.Places.TABLE_NAME,
                 null,
                 null,
@@ -71,7 +47,24 @@ class PlacesDataSourceDisk implements PlacesDataSource {
         }
     }
 
-    private Collection<Place> getPlaces(@NonNull Cursor cursor) {
+    public Place getPlace(long id) {
+        try (Cursor cursor = db.query(DbContract.Places.TABLE_NAME,
+                null,
+                "_id = ?",
+                new String[]{String.valueOf(id)},
+                null,
+                null,
+                null,
+                null)) {
+            return cursor.getCount() == 1 ? getPlaces(cursor).iterator().next() : null;
+        }
+    }
+
+    public void insertOrUpdatePlace(Place place) {
+        batchInsert(Collections.singleton(place));
+    }
+
+    private List<Place> getPlaces(@NonNull Cursor cursor) {
         List<Place> places = new ArrayList<>();
 
         while (cursor.moveToNext()) {

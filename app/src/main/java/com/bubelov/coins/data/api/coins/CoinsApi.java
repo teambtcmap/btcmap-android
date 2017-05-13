@@ -1,12 +1,12 @@
 package com.bubelov.coins.data.api.coins;
 
+import com.bubelov.coins.data.repository.place.PlaceParams;
 import com.bubelov.coins.domain.Currency;
 import com.bubelov.coins.domain.Place;
 import com.bubelov.coins.domain.PlaceCategory;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -34,11 +34,14 @@ public interface CoinsApi {
     @GET("places")
     Call<List<Place>> getPlaces(@Query("since") Date since, @Query("limit") int limit);
 
+    @GET("places/{id}")
+    Call<Place> getPlace(@Path("id") long id);
+
     @POST("places")
-    Call<Place> addPlace(@Header("session") String session, @Body Map<String, Object> args);
+    Call<Place> addPlace(@Header("session") String session, @Body PlaceParams place);
 
     @PATCH("places/{id}")
-    Call<Place> updatePlace(@Path("id") long id, @Header("session") String session, @Body Map<String, Object> args);
+    Call<Place> updatePlace(@Path("id") long id, @Header("session") String session, @Body PlaceParams place);
 
     @GET("place_categories")
     Call<List<PlaceCategory>> getPlaceCategories();

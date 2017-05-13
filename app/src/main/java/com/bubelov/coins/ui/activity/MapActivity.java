@@ -530,7 +530,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        Collection<Place> places = placesRepository.getAll();
+        Collection<Place> places = placesRepository.getPlaces(bounds);
 
         placesManager.clearItems();
         placesManager.addItems(places);
@@ -538,7 +538,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     private void selectPlace(long placeId) {
-        selectedPlace = placesRepository.get(placeId);
+        selectedPlace = placesRepository.getPlace(placeId);
 
         if (selectedPlace == null) {
             return;
