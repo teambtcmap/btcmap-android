@@ -7,9 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.BuildConfig;
-import com.bubelov.coins.data.api.coins.CoinsApi;
-import com.bubelov.coins.data.database.AssetDbHelper;
-import com.bubelov.coins.data.database.DbHelper;
+import com.bubelov.coins.api.coins.CoinsApi;
+import com.bubelov.coins.database.AssetDbHelper;
+import com.bubelov.coins.database.DbHelper;
 import com.bubelov.coins.util.AutoValueAdapterFactory;
 import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.util.StringAdapter;

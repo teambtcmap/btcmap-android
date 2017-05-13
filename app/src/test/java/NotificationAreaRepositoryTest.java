@@ -1,7 +1,7 @@
 import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
-import com.bubelov.coins.domain.NotificationArea;
+import com.bubelov.coins.repository.area.NotificationAreaRepository;
+import com.bubelov.coins.model.NotificationArea;
 
 import junit.framework.Assert;
 

@@ -9,8 +9,8 @@ import android.support.v7.widget.Toolbar;
 import android.widget.ViewSwitcher;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.repository.rate.ExchangeRatesRepository;
-import com.bubelov.coins.domain.ExchangeRate;
+import com.bubelov.coins.repository.rate.ExchangeRatesRepository;
+import com.bubelov.coins.model.ExchangeRate;
 import com.bubelov.coins.ui.adapter.ExchangeRatesAdapter;
 
 import java.util.Collection;

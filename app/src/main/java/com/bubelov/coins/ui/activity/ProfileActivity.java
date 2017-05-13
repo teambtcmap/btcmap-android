@@ -11,8 +11,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.domain.User;
-import com.bubelov.coins.data.repository.user.UserRepository;
+import com.bubelov.coins.model.User;
+import com.bubelov.coins.repository.user.UserRepository;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.squareup.picasso.Picasso;

@@ -1,6 +1,6 @@
 import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.data.repository.currency.CurrenciesRepository;
+import com.bubelov.coins.repository.currency.CurrenciesRepository;
 
 import junit.framework.Assert;
 

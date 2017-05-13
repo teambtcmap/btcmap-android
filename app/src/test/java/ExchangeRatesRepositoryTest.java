@@ -1,6 +1,6 @@
 import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.data.repository.rate.ExchangeRatesRepository;
+import com.bubelov.coins.repository.rate.ExchangeRatesRepository;
 
 import org.junit.Assert;
 import org.junit.Before;

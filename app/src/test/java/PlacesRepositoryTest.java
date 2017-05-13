@@ -1,10 +1,10 @@
 import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.data.repository.place.PlacesDataSourceDb;
-import com.bubelov.coins.data.repository.place.PlacesDataSourceMemory;
-import com.bubelov.coins.data.repository.place.PlacesDataSourceNetwork;
-import com.bubelov.coins.data.repository.place.PlacesRepository;
-import com.bubelov.coins.domain.Place;
+import com.bubelov.coins.repository.place.PlacesDataSourceDb;
+import com.bubelov.coins.repository.place.PlacesDataSourceMemory;
+import com.bubelov.coins.repository.place.PlacesDataSourceNetwork;
+import com.bubelov.coins.repository.place.PlacesRepository;
+import com.bubelov.coins.model.Place;
 
 import junit.framework.Assert;
 

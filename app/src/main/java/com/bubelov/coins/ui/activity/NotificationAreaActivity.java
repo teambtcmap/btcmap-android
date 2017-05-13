@@ -14,8 +14,8 @@ import android.widget.SeekBar;
 
 import com.bubelov.coins.Constants;
 import com.bubelov.coins.R;
-import com.bubelov.coins.domain.NotificationArea;
-import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
+import com.bubelov.coins.model.NotificationArea;
+import com.bubelov.coins.repository.area.NotificationAreaRepository;
 import com.bubelov.coins.util.OnSeekBarChangeAdapter;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;

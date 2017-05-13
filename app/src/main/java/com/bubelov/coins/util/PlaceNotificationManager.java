@@ -8,11 +8,11 @@ import android.content.IntentFilter;
 import android.support.v4.app.NotificationCompat;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
-import com.bubelov.coins.data.repository.notification.PlaceNotificationsRepository;
-import com.bubelov.coins.domain.Place;
-import com.bubelov.coins.domain.PlaceNotification;
-import com.bubelov.coins.domain.NotificationArea;
+import com.bubelov.coins.repository.area.NotificationAreaRepository;
+import com.bubelov.coins.repository.notification.PlaceNotificationsRepository;
+import com.bubelov.coins.model.Place;
+import com.bubelov.coins.model.PlaceNotification;
+import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.ui.activity.MapActivity;
 
 import java.util.Collection;

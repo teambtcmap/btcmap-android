@@ -14,8 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.repository.place.PlacesRepository;
-import com.bubelov.coins.domain.Place;
+import com.bubelov.coins.repository.place.PlacesRepository;
+import com.bubelov.coins.model.Place;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;

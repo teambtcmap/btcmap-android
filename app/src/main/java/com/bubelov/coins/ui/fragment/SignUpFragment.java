@@ -17,7 +17,7 @@ import android.widget.ViewSwitcher;
 
 import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.data.repository.user.UserRepository;
+import com.bubelov.coins.repository.user.UserRepository;
 import com.bubelov.coins.ui.activity.MapActivity;
 
 import javax.inject.Inject;

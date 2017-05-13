@@ -2,15 +2,15 @@ package com.bubelov.coins.dagger;
 
 import android.content.Context;
 
-import com.bubelov.coins.data.repository.area.NotificationAreaRepository;
-import com.bubelov.coins.data.repository.currency.CurrenciesRepository;
-import com.bubelov.coins.data.repository.notification.PlaceNotificationsRepository;
-import com.bubelov.coins.data.repository.place.PlacesRepository;
-import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesDataSourceDb;
-import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesDataSourceMemory;
-import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesDataSourceNetwork;
-import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesRepository;
-import com.bubelov.coins.data.repository.rate.ExchangeRatesRepository;
+import com.bubelov.coins.repository.area.NotificationAreaRepository;
+import com.bubelov.coins.repository.currency.CurrenciesRepository;
+import com.bubelov.coins.repository.notification.PlaceNotificationsRepository;
+import com.bubelov.coins.repository.place.PlacesRepository;
+import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceDb;
+import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceMemory;
+import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceNetwork;
+import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository;
+import com.bubelov.coins.repository.rate.ExchangeRatesRepository;
 import com.bubelov.coins.ui.activity.EditPlaceActivity;
 import com.bubelov.coins.ui.activity.ExchangeRatesActivity;
 import com.bubelov.coins.ui.activity.FindPlaceActivity;
@@ -22,7 +22,6 @@ import com.bubelov.coins.ui.fragment.SignInFragment;
 import com.bubelov.coins.ui.fragment.SignUpFragment;
 import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.util.PlaceNotificationManager;
-import com.bubelov.coins.data.repository.placecategory.marker.PlaceCategoriesMarkersRepository;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import javax.inject.Singleton;

@@ -3,12 +3,12 @@ package com.bubelov.coins.service;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.bubelov.coins.data.repository.currency.CurrenciesRepository;
-import com.bubelov.coins.data.repository.place.PlacesRepository;
+import com.bubelov.coins.repository.currency.CurrenciesRepository;
+import com.bubelov.coins.repository.place.PlacesRepository;
 import com.bubelov.coins.PreferenceKeys;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesRepository;
-import com.bubelov.coins.domain.Place;
+import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository;
+import com.bubelov.coins.model.Place;
 import com.bubelov.coins.util.PlaceNotificationManager;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;

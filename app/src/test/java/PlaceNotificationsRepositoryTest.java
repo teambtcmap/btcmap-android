@@ -1,7 +1,7 @@
 import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.data.repository.notification.PlaceNotificationsRepository;
-import com.bubelov.coins.domain.PlaceNotification;
+import com.bubelov.coins.repository.notification.PlaceNotificationsRepository;
+import com.bubelov.coins.model.PlaceNotification;
 
 import org.junit.Assert;
 import org.junit.Before;

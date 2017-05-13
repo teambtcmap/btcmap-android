@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.domain.Place;
+import com.bubelov.coins.model.Place;
 import com.bubelov.coins.util.DistanceUnits;
 import com.bubelov.coins.util.DistanceUtils;
 

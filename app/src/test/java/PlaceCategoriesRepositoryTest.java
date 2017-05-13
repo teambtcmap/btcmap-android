@@ -1,11 +1,11 @@
 import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.dagger.MainComponent;
-import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesDataSourceDb;
-import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesDataSourceMemory;
-import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesDataSourceNetwork;
-import com.bubelov.coins.data.repository.placecategory.PlaceCategoriesRepository;
-import com.bubelov.coins.domain.PlaceCategory;
+import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceDb;
+import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceMemory;
+import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceNetwork;
+import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository;
+import com.bubelov.coins.model.PlaceCategory;
 
 import org.junit.Assert;
 import org.junit.Before;

@@ -19,8 +19,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.bubelov.coins.R;
-import com.bubelov.coins.data.repository.place.PlacesRepository;
-import com.bubelov.coins.domain.Place;
+import com.bubelov.coins.repository.place.PlacesRepository;
+import com.bubelov.coins.model.Place;
 import com.bubelov.coins.ui.adapter.PlacesSearchResultsAdapter;
 import com.bubelov.coins.util.DistanceComparator;
 import com.bubelov.coins.util.DistanceUnits;
