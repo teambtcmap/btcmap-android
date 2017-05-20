@@ -91,31 +91,32 @@ public class PlaceDetailsView extends FrameLayout {
     public void setPlace(final Place place) {
         this.place = place;
 
-        if (place.openedClaims() > 0 && place.closedClaims() == 0) {
-            checkMark.setVisibility(VISIBLE);
-        } else {
-            checkMark.setVisibility(GONE);
-        }
-
-        if (place.closedClaims() > 0) {
-            warning.setVisibility(VISIBLE);
-        } else {
-            warning.setVisibility(GONE);
-        }
-
-        if (place.openedClaims() > 0) {
-            openedClaims.setVisibility(VISIBLE);
-            openedClaims.setText(getResources().getQuantityString(R.plurals.confirmed_by_d_users, place.openedClaims(), place.openedClaims()));
-        } else {
-            openedClaims.setVisibility(GONE);
-        }
-
-        if (place.closedClaims() > 0) {
-            closedClaims.setVisibility(VISIBLE);
-            closedClaims.setText(getResources().getQuantityString(R.plurals.marked_as_closed_by_d_users, place.closedClaims(), place.closedClaims()));
-        } else {
-            closedClaims.setVisibility(GONE);
-        }
+// TODO
+//        if (place.openedClaims() > 0 && place.closedClaims() == 0) {
+//            checkMark.setVisibility(VISIBLE);
+//        } else {
+//            checkMark.setVisibility(GONE);
+//        }
+//
+//        if (place.closedClaims() > 0) {
+//            warning.setVisibility(VISIBLE);
+//        } else {
+//            warning.setVisibility(GONE);
+//        }
+//
+//        if (place.openedClaims() > 0) {
+//            openedClaims.setVisibility(VISIBLE);
+//            openedClaims.setText(getResources().getQuantityString(R.plurals.confirmed_by_d_users, place.openedClaims(), place.openedClaims()));
+//        } else {
+//            openedClaims.setVisibility(GONE);
+//        }
+//
+//        if (place.closedClaims() > 0) {
+//            closedClaims.setVisibility(VISIBLE);
+//            closedClaims.setText(getResources().getQuantityString(R.plurals.marked_as_closed_by_d_users, place.closedClaims(), place.closedClaims()));
+//        } else {
+//            closedClaims.setVisibility(GONE);
+//        }
 
         if (TextUtils.isEmpty(place.name())) {
             name.setText(R.string.name_unknown);

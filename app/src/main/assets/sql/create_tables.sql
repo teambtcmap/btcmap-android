@@ -9,9 +9,7 @@ create table places (
     website text not null,
     category_id integer not null,
     opening_hours text not null,
-    visible boolean not null,
-    opened_claims integer not null,
-    closed_claims integer not null
+    visible boolean not null
 );
 
 create table place_categories (

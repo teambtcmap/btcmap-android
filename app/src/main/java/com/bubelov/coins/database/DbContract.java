@@ -19,8 +19,6 @@ public interface DbContract {
         String CATEGORY_ID = "category_id";
         String OPENING_HOURS = "opening_hours";
         String VISIBLE = "visible";
-        String OPENED_CLAIMS = "opened_claims";
-        String CLOSED_CLAIMS = "closed_claims";
 
         String _UPDATED_AT = "_updated_at";
     }

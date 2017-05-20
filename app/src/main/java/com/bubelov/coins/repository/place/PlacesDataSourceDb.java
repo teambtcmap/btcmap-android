@@ -75,8 +75,6 @@ public class PlacesDataSourceDb {
                     .website(cursor.getString(cursor.getColumnIndex(DbContract.Places.WEBSITE)))
                     .openingHours(cursor.getString(cursor.getColumnIndex(DbContract.Places.OPENING_HOURS)))
                     .visible(cursor.getLong(cursor.getColumnIndex(DbContract.Places.VISIBLE)) == 1)
-                    .openedClaims(cursor.getInt(cursor.getColumnIndex(DbContract.Places.OPENED_CLAIMS)))
-                    .closedClaims(cursor.getInt(cursor.getColumnIndex(DbContract.Places.CLOSED_CLAIMS)))
                     .updatedAt(new Date(cursor.getLong(cursor.getColumnIndex(DbContract.Places._UPDATED_AT))))
                     .build());
         }
@@ -88,7 +86,7 @@ public class PlacesDataSourceDb {
         db.beginTransaction();
 
         try {
-            String insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            String insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     DbContract.Places.TABLE_NAME,
                     DbContract.Places._ID,
                     DbContract.Places._UPDATED_AT,
@@ -100,9 +98,7 @@ public class PlacesDataSourceDb {
                     DbContract.Places.WEBSITE,
                     DbContract.Places.CATEGORY_ID,
                     DbContract.Places.OPENING_HOURS,
-                    DbContract.Places.VISIBLE,
-                    DbContract.Places.OPENED_CLAIMS,
-                    DbContract.Places.CLOSED_CLAIMS);
+                    DbContract.Places.VISIBLE);
 
             SQLiteStatement insertStatement = db.compileStatement(insertQuery);
 
@@ -118,8 +114,6 @@ public class PlacesDataSourceDb {
                 insertStatement.bindLong(9, place.categoryId());
                 insertStatement.bindString(10, place.openingHours());
                 insertStatement.bindLong(11, place.visible() ? 1 : 0);
-                insertStatement.bindLong(12, place.openedClaims());
-                insertStatement.bindLong(13, place.closedClaims());
                 insertStatement.execute();
             }
 
