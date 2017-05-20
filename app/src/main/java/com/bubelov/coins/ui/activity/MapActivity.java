@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
@@ -37,6 +38,8 @@ import com.bubelov.coins.model.Place;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.model.PlaceCategory;
 import com.bubelov.coins.model.User;
+import com.bubelov.coins.sync.DatabaseSync;
+import com.bubelov.coins.sync.DatabaseSyncService;
 import com.bubelov.coins.ui.widget.PlaceDetailsView;
 import com.bubelov.coins.util.Analytics;
 import com.bubelov.coins.repository.placecategory.marker.PlaceCategoriesMarkersRepository;
@@ -70,7 +73,7 @@ import butterknife.OnClick;
  * @author Igor Bubelov
  */
 
-public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener {
+public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener, DatabaseSync.Callback {
     private static final String PLACE_ID_EXTRA = "place_id";
     private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
     private static final String CLEAR_PLACE_NOTIFICATIONS_EXTRA = "clear_place_notifications";
@@ -137,6 +140,11 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     private boolean firstLaunch;
 
     private BottomSheetBehavior bottomSheetBehavior;
+
+    @Inject
+    DatabaseSync databaseSync;
+
+    private Snackbar initialSyncSnackbar;
 
     public static Intent newShowPlaceIntent(Context context, long placeId) {
         Intent intent = new Intent(context, MapActivity.class);
@@ -255,6 +263,30 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        initialSyncSnackbar = Snackbar.make(findViewById(R.id.coordinator_layout), "Loading places", Snackbar.LENGTH_INDEFINITE);
+
+        databaseSync.addCallback(this);
+
+        if (databaseSync.getLastSyncDate() == 0) {
+            initialSyncSnackbar.show();
+
+            if (!databaseSync.isSyncing()) {
+                DatabaseSyncService.start(this);
+            }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        databaseSync.removeCallback(this);
+        initialSyncSnackbar.dismiss();
+        super.onStop();
+    }
+
+    @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
@@ -273,11 +305,11 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         if (requestCode == REQUEST_ADD_PLACE && resultCode == RESULT_OK) {
-            reloadPlaces();
+            refreshMap();
         }
 
         if (requestCode == REQUEST_EDIT_PLACE && resultCode == RESULT_OK) {
-            reloadPlaces();
+            refreshMap();
 
             if (selectedPlace != null) {
                 selectPlace(selectedPlace.id());
@@ -392,6 +424,19 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         handleIntent(getIntent());
+    }
+
+    @Override
+    public void onDatabaseSyncFinished() {
+        runOnUiThread(() -> {
+            initialSyncSnackbar.dismiss();
+            refreshMap();
+        });
+    }
+
+    @Override
+    public void onDatabaseSyncError() {
+        runOnUiThread(() -> initialSyncSnackbar.dismiss());
     }
 
     private void updateDrawerHeader() {
@@ -524,7 +569,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         });
     }
 
-    private void reloadPlaces() {
+    private void refreshMap() {
         if (map == null) {
             return;
         }
@@ -587,7 +632,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     private class CameraChangeListener implements GoogleMap.OnCameraChangeListener {
         @Override
         public void onCameraChange(CameraPosition cameraPosition) {
-            reloadPlaces();
+            refreshMap();
         }
     }
 

@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 
 import com.bubelov.coins.BuildConfig;
-import com.bubelov.coins.service.DatabaseSyncService;
+import com.bubelov.coins.sync.DatabaseSyncService;
 import com.google.firebase.crash.FirebaseCrash;
 
 import java.io.BufferedReader;

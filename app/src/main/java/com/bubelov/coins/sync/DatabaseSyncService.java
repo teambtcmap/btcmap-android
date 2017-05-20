@@ -1,4 +1,4 @@
-package com.bubelov.coins.service;
+package com.bubelov.coins.sync;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -25,6 +25,10 @@ public class DatabaseSyncService extends IntentService {
             return;
         }
 
-        Injector.INSTANCE.mainComponent().databaseSync().run();
+        DatabaseSync databaseSync = Injector.INSTANCE.mainComponent().databaseSync();
+
+        if (!databaseSync.isSyncing()) {
+            databaseSync.sync();
+        }
     }
 }

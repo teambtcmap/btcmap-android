@@ -1,4 +1,4 @@
-package com.bubelov.coins.service;
+package com.bubelov.coins.sync;
 
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;

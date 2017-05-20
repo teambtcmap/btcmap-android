@@ -57,10 +57,10 @@
 
         <activity android:name=".ui.activity.PickLocationActivity" />
 
-        <service android:name=".service.DatabaseSyncService" />
+        <service android:name=".sync.DatabaseSyncService" />
 
         <service
-            android:name=".service.DatabaseGcmSyncService"
+            android:name=".sync.DatabaseGcmSyncService"
             android:exported="true"
             android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
             <intent-filter>

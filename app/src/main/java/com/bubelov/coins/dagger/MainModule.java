@@ -9,7 +9,6 @@ import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.api.coins.CoinsApi;
 import com.bubelov.coins.database.DbHelper;
 import com.bubelov.coins.util.AutoValueAdapterFactory;
-import com.bubelov.coins.service.DatabaseSync;
 import com.bubelov.coins.util.StringAdapter;
 import com.bubelov.coins.util.UtcDateTypeAdapter;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
@@ -46,12 +45,6 @@ public class MainModule {
     @Singleton
     Context context() {
         return context;
-    }
-
-    @Provides
-    @Singleton
-    DatabaseSync databaseSync() {
-        return new DatabaseSync();
     }
 
     @Provides

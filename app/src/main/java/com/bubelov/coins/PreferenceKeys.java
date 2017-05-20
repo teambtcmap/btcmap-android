@@ -5,7 +5,7 @@ package com.bubelov.coins;
  */
 
 public interface PreferenceKeys {
-    String DATABASE_SYNC_DATE = "database_sync_date";
+    String LAST_SYNC_DATE = "last_sync_date";
 
     String USER = "user";
 

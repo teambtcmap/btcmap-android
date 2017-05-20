@@ -4,7 +4,7 @@ import android.app.Application;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.dagger.Injector;
-import com.bubelov.coins.service.DatabaseSyncService;
+import com.bubelov.coins.sync.DatabaseSyncService;
 import com.facebook.stetho.Stetho;
 
 import timber.log.Timber;
@@ -25,6 +25,7 @@ public class App extends Application {
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
         Injector.INSTANCE.initMainComponent(this);
+
         DatabaseSyncService.start(this);
     }
 }
