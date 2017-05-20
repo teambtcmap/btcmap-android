@@ -2,7 +2,6 @@ package com.bubelov.coins.repository.placecategory;
 
 import com.bubelov.coins.api.coins.CoinsApi;
 import com.bubelov.coins.model.PlaceCategory;
-import com.google.firebase.crash.FirebaseCrash;
 
 import java.util.List;
 
@@ -29,7 +28,6 @@ public class PlaceCategoriesDataSourceNetwork implements PlaceCategoriesDataSour
         try {
             return api.getPlaceCategory(id).execute().body();
         } catch (Exception e) {
-            FirebaseCrash.report(e);
             Timber.e(e, "Couldn't load place category");
             return null;
         }
@@ -39,7 +37,6 @@ public class PlaceCategoriesDataSourceNetwork implements PlaceCategoriesDataSour
         try {
             return api.getPlaceCategories().execute().body();
         } catch (Exception e) {
-            FirebaseCrash.report(e);
             Timber.e(e, "Couldn't load place categories");
             return null;
         }

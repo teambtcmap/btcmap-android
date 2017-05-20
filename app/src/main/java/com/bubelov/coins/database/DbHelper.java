@@ -3,82 +3,93 @@ package com.bubelov.coins.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.text.TextUtils;
 
-import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.database.sync.DatabaseSyncService;
-import com.google.firebase.crash.FirebaseCrash;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collection;
-
-import timber.log.Timber;
 
 /**
  * @author Igor Bubelov
  */
 
 public class DbHelper extends SQLiteOpenHelper {
+    private static final String DATABASE_NAME = "database.db";
+
+    private static final int DATABASE_VERSION = 1;
+
+    private static final String CREATE_PLACES__SQL =
+            "create table places (\n" +
+            "    _id integer primary key,\n" +
+            "    _updated_at integer not null,\n" +
+            "    latitude real not null,\n" +
+            "    longitude real not null,\n" +
+            "    name text not null,\n" +
+            "    description text not null,\n" +
+            "    phone text not null,\n" +
+            "    website text not null,\n" +
+            "    category_id integer not null,\n" +
+            "    opening_hours text not null,\n" +
+            "    visible boolean not null\n" +
+            ");";
+
+    private static final String DROP_PLACES_SQL = "drop table if exists places;";
+
+    private static final String CREATE_PLACE_CATEGORIES_SQL =
+            "create table place_categories (\n" +
+            "    _id integer primary key,\n" +
+            "    name text not null,\n" +
+            "    unique (name)\n" +
+            ");";
+
+    private static final String DROP_PLACE_CATEGORIES_SQL = "drop table if exists place_categories;";
+
+    private static final String CREATE_CURRENCIES_SQL =
+            "create table currencies (\n" +
+            "    _id integer primary key,\n" +
+            "    name text not null,\n" +
+            "    code text not null,\n" +
+            "    crypto boolean not null,\n" +
+            "    unique (name),\n" +
+            "    unique (code)\n" +
+            ");";
+
+    private static final String DROP_CURRENCIES_SQL = "drop table if exists currencies;";
+
+    private static final String CREATE_CURRENCIES_PLACES_SQL =
+            "create table currencies_places (\n" +
+            "    _id integer primary key,\n" +
+            "    currency_id integer not null,\n" +
+            "    place_id integer not null,\n" +
+            "    unique (currency_id, place_id)\n" +
+            ");";
+
+    private static final String DROP_CURRENCIES_PLACES_SQL = "drop table if exists currencies_places;";
+
     private Context context;
 
     public DbHelper(Context context) {
         super(context,
-                BuildConfig.DATABASE_NAME,
+                DATABASE_NAME,
                 null,
-                BuildConfig.DATABASE_VERSION);
+                DATABASE_VERSION);
         this.context = context;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        for (String statement : getSqlStatements("sql/create_tables.sql")) {
-            db.execSQL(statement);
-        }
+        db.execSQL(CREATE_PLACES__SQL);
+        db.execSQL(CREATE_PLACE_CATEGORIES_SQL);
+        db.execSQL(CREATE_CURRENCIES_SQL);
+        db.execSQL(CREATE_CURRENCIES_PLACES_SQL);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        for (String statement : getSqlStatements("sql/drop_tables.sql")) {
-            db.execSQL(statement);
-        }
+        db.execSQL(DROP_PLACES_SQL);
+        db.execSQL(DROP_PLACE_CATEGORIES_SQL);
+        db.execSQL(DROP_CURRENCIES_SQL);
+        db.execSQL(DROP_CURRENCIES_PLACES_SQL);
 
         onCreate(db);
 
         DatabaseSyncService.Companion.start(context);
-    }
-
-    private Collection<String> getSqlStatements(String assetFileName) {
-        Collection<String> statements = new ArrayList<>();
-
-        for (String statement : TextUtils.split(getAssetFileContents(assetFileName), ";")) {
-            if (!TextUtils.isEmpty(statement)) {
-                statements.add(statement);
-            }
-        }
-
-        return statements;
-    }
-
-    private String getAssetFileContents(String fileName) {
-        try {
-            StringBuilder builder = new StringBuilder();
-            InputStream input = context.getAssets().open(fileName);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
-            String buffer;
-
-            while ((buffer = reader.readLine()) != null) {
-                builder.append(buffer);
-            }
-
-            reader.close();
-            return builder.toString();
-        } catch (Exception e) {
-            Timber.e(e, "Couldn't read asset file");
-            FirebaseCrash.report(e);
-            return "";
-        }
     }
 }

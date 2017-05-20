@@ -1,4 +1,3 @@
-import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.repository.area.NotificationAreaRepository;
 import com.bubelov.coins.model.NotificationArea;
@@ -17,7 +16,7 @@ import org.robolectric.annotation.Config;
  */
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
+@Config(manifest=Config.NONE, shadows = NetworkSecurityPolicyShadow.class)
 public class NotificationAreaRepositoryTest {
     private NotificationAreaRepository repository;
 

@@ -1,4 +1,3 @@
-import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.dagger.MainComponent;
 import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceDb;
@@ -22,7 +21,7 @@ import java.util.Random;
  */
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
+@Config(manifest=Config.NONE, shadows = NetworkSecurityPolicyShadow.class)
 public class PlaceCategoriesRepositoryTest {
     private static final long TEST_CATEGORY_ID = 1;
 

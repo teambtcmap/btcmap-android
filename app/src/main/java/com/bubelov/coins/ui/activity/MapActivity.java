@@ -57,7 +57,6 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.crash.FirebaseCrash;
 import com.google.maps.android.clustering.ClusterManager;
 import com.squareup.picasso.Picasso;
 
@@ -503,7 +502,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     private void openNotificationAreaScreen() {
         if (map == null) {
-            FirebaseCrash.report(new IllegalStateException("Map is not initialized"));
             return;
         }
 

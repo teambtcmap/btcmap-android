@@ -3,7 +3,6 @@ package com.bubelov.coins.repository.place;
 import com.bubelov.coins.repository.user.UserRepository;
 import com.bubelov.coins.model.Place;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.firebase.crash.FirebaseCrash;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -129,7 +128,6 @@ public class PlacesRepository {
 
             return places;
         } catch (IOException e) {
-            FirebaseCrash.report(e);
             Timber.e(e, "Couldn't fetch new places");
             return Collections.EMPTY_LIST;
         }

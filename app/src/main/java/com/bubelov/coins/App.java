@@ -5,6 +5,7 @@ import android.preference.PreferenceManager;
 
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.database.sync.DatabaseSyncService;
+import com.bubelov.coins.util.ReleaseTree;
 import com.facebook.stetho.Stetho;
 
 import timber.log.Timber;
@@ -21,6 +22,8 @@ public class App extends Application {
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
             Stetho.initializeWithDefaults(this);
+        } else {
+            Timber.plant(new ReleaseTree());
         }
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);

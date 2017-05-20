@@ -10,7 +10,6 @@ import com.bubelov.coins.api.coins.AuthResponse;
 import com.bubelov.coins.api.coins.NewUserParams;
 import com.bubelov.coins.model.User;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.crash.FirebaseCrash;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -71,7 +70,6 @@ public class UserRepository {
             response = api.authWithGoogle(googleToken).execute();
         } catch (IOException e) {
             Timber.e(e, "Couldn't authorize with Google token");
-            FirebaseCrash.report(e);
         }
 
         if (response == null) {
@@ -96,7 +94,6 @@ public class UserRepository {
             response = api.authWithEmail(email, password).execute();
         } catch (IOException e) {
             Timber.e(e, "Couldn't authorize with email");
-            FirebaseCrash.report(e);
         }
 
         if (response == null) {
@@ -121,7 +118,6 @@ public class UserRepository {
             response = api.createUser(new NewUserParams(email, password, firstName, lastName)).execute();
         } catch (IOException e) {
             Timber.e(e, "Couldn't sign up");
-            FirebaseCrash.report(e);
         }
 
         if (response == null) {

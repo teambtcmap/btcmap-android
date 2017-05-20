@@ -3,7 +3,6 @@ package com.bubelov.coins.repository.place;
 import com.bubelov.coins.api.coins.CoinsApi;
 import com.bubelov.coins.api.coins.PlaceParams;
 import com.bubelov.coins.model.Place;
-import com.google.firebase.crash.FirebaseCrash;
 
 import java.io.IOException;
 import java.util.Date;
@@ -32,7 +31,6 @@ public class PlacesDataSourceNetwork {
         try {
             return api.getPlace(id).execute().body();
         } catch (Exception e) {
-            FirebaseCrash.report(e);
             Timber.e(e, "Couldn't load place");
             return null;
         }
@@ -42,7 +40,6 @@ public class PlacesDataSourceNetwork {
         try {
             return api.addPlace(authToken, new PlaceParams(place)).execute().body();
         } catch (Exception e) {
-            FirebaseCrash.report(e);
             Timber.e(e, "Couldn't add place");
             return null;
         }
@@ -52,7 +49,6 @@ public class PlacesDataSourceNetwork {
         try {
             return api.updatePlace(place.id(), authToken, new PlaceParams(place)).execute().body();
         } catch (Exception e) {
-            FirebaseCrash.report(e);
             Timber.e(e, "Couldn't update place");
             return null;
         }

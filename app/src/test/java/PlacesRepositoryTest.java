@@ -1,4 +1,3 @@
-import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.repository.place.PlacesDataSourceDb;
 import com.bubelov.coins.repository.place.PlacesDataSourceMemory;
@@ -22,7 +21,7 @@ import java.util.List;
  */
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
+@Config(manifest=Config.NONE, shadows = NetworkSecurityPolicyShadow.class)
 public class PlacesRepositoryTest {
     private PlacesRepository placesRepository;
 

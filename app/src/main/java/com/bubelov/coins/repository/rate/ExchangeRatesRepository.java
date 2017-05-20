@@ -5,7 +5,6 @@ import com.bubelov.coins.api.rates.BitstampApi;
 import com.bubelov.coins.api.rates.CoinbaseApi;
 import com.bubelov.coins.api.rates.WinkDexApi;
 import com.bubelov.coins.model.ExchangeRate;
-import com.google.firebase.crash.FirebaseCrash;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -74,28 +73,24 @@ public class ExchangeRatesRepository {
         try {
             rates.add(getBitcoinAverageRate());
         } catch (IOException e) {
-            FirebaseCrash.report(e);
             Timber.e(e, "Couldn't fetch exchange rate");
         }
 
         try {
             rates.add(getBitstampRate());
         } catch (IOException e) {
-            FirebaseCrash.report(e);
             Timber.e(e, "Couldn't fetch exchange rate");
         }
 
         try {
             rates.add(getCoinbaseRate());
         } catch (IOException e) {
-            FirebaseCrash.report(e);
             Timber.e(e, "Couldn't fetch exchange rate");
         }
 
         try {
             rates.add(getWinkDexRate());
         } catch (IOException e) {
-            FirebaseCrash.report(e);
             Timber.e(e, "Couldn't fetch exchange rate");
         }
 
