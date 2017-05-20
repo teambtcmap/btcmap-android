@@ -14,7 +14,7 @@ android {
         buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v2/\""
         buildConfigField "boolean", "USE_DB_SNAPSHOT", "true"
         buildConfigField "String", "DATABASE_NAME", "\"coins.db\""
-        buildConfigField "int", "DATABASE_VERSION", "23"
+        buildConfigField "int", "DATABASE_VERSION", "24"
         buildConfigField "String", "GOOGLE_CLIENT_ID", project.property('GOOGLE_CLIENT_ID')
 
         resValue "string", "maps_api_key", project.property('MAPS_API_KEY')

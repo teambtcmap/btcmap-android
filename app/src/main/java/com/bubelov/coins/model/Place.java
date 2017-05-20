@@ -26,7 +26,6 @@ public abstract class Place implements Parcelable, ClusterItem {
     public abstract String phone();
     public abstract String website();
     public abstract String openingHours();
-    public abstract String address();
     public abstract boolean visible();
     public abstract int openedClaims();
     public abstract int closedClaims();
@@ -48,7 +47,6 @@ public abstract class Place implements Parcelable, ClusterItem {
         public abstract Builder phone(String phone);
         public abstract Builder website(String website);
         public abstract Builder openingHours(String openingHours);
-        public abstract Builder address(String address);
         public abstract Builder visible(boolean visible);
         public abstract Builder openedClaims(int openedClaims);
         public abstract Builder closedClaims(int closedClaims);

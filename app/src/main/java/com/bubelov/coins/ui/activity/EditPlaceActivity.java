@@ -171,7 +171,6 @@ public class EditPlaceActivity extends AbstractActivity implements OnMapReadyCal
                 .phone(phone.getText().toString())
                 .website(website.getText().toString())
                 .openingHours(openingHours.getText().toString())
-                .address(place == null ? "" : place.address())
                 .visible(!closedSwitch.isChecked())
                 .build();
     }
