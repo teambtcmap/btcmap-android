@@ -9,7 +9,7 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.dagger.Injector;
 import com.bubelov.coins.repository.place.PlacesRepository;
 import com.bubelov.coins.model.Place;
-import com.bubelov.coins.sync.DatabaseSyncService;
+import com.bubelov.coins.database.sync.DatabaseSyncService;
 
 import javax.inject.Inject;
 
@@ -35,7 +35,7 @@ public class SettingsFragment extends PreferenceFragment {
         }
 
         if (preference.getKey().equals("pref_update_places")) {
-            DatabaseSyncService.start(getActivity());
+            DatabaseSyncService.Companion.start(getActivity());
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);

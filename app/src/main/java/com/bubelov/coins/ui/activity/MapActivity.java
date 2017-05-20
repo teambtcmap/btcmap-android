@@ -38,8 +38,8 @@ import com.bubelov.coins.model.Place;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.model.PlaceCategory;
 import com.bubelov.coins.model.User;
-import com.bubelov.coins.sync.DatabaseSync;
-import com.bubelov.coins.sync.DatabaseSyncService;
+import com.bubelov.coins.database.sync.DatabaseSync;
+import com.bubelov.coins.database.sync.DatabaseSyncService;
 import com.bubelov.coins.ui.widget.PlaceDetailsView;
 import com.bubelov.coins.util.Analytics;
 import com.bubelov.coins.repository.placecategory.marker.PlaceCategoriesMarkersRepository;
@@ -274,7 +274,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             initialSyncSnackbar.show();
 
             if (!databaseSync.isSyncing()) {
-                DatabaseSyncService.start(this);
+                DatabaseSyncService.Companion.start(this);
             }
         }
     }
