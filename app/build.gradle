@@ -15,9 +15,9 @@ android {
         buildConfigField "boolean", "USE_DB_SNAPSHOT", "true"
         buildConfigField "String", "DATABASE_NAME", "\"coins.db\""
         buildConfigField "int", "DATABASE_VERSION", "23"
-        buildConfigField "String", "GOOGLE_CLIENT_ID", "\"557789430086-hnt5bk65a636mgi7phhn5t9b1porppik.apps.googleusercontent.com\""
+        buildConfigField "String", "GOOGLE_CLIENT_ID", project.property('GOOGLE_CLIENT_ID')
 
-        resValue "string", "maps_api_key", "AIzaSyCFlG9gZj-6ja-CQC6cAgvQXq6fs0foYVQ"
+        resValue "string", "maps_api_key", project.property('MAPS_API_KEY')
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -43,13 +43,6 @@ android {
         }
     }
 
-    applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            def projectName = 'coins'
-            output.outputFile = file("$project.buildDir/apk/$projectName-$variant.versionName" + '.apk')
-        }
-    }
-
     // TODO remove after fix on Google side
     applicationVariants.all { variant ->
         def productFlavor = variant.productFlavors[0] != null ? "${variant.productFlavors[0].name.capitalize()}" : ""
@@ -60,17 +53,17 @@ android {
 
 dependencies {
     // Android support libraries
-    compile "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
-    compile "com.android.support:design:${rootProject.ext.supportLibVersion}"
-    compile "com.android.support:customtabs:${rootProject.ext.supportLibVersion}"
-    compile "com.android.support:cardview-v7:${rootProject.ext.supportLibVersion}"
+    compile "com.android.support:appcompat-v7:$supportLibVersion"
+    compile "com.android.support:design:$supportLibVersion"
+    compile "com.android.support:customtabs:$supportLibVersion"
+    compile "com.android.support:cardview-v7:$supportLibVersion"
 
     // Google Play services split client libs
-    compile "com.google.android.gms:play-services-gcm:${rootProject.ext.googlePlayServicesVersion}"
-    compile "com.google.android.gms:play-services-location:${rootProject.ext.googlePlayServicesVersion}"
-    compile "com.google.android.gms:play-services-maps:${rootProject.ext.googlePlayServicesVersion}"
-    compile "com.google.android.gms:play-services-auth:${rootProject.ext.googlePlayServicesVersion}"
-    compile "com.google.firebase:firebase-crash:${rootProject.ext.googlePlayServicesVersion}"
+    compile "com.google.android.gms:play-services-gcm:$playServicesVersion"
+    compile "com.google.android.gms:play-services-location:$playServicesVersion"
+    compile "com.google.android.gms:play-services-maps:$playServicesVersion"
+    compile "com.google.android.gms:play-services-auth:$playServicesVersion"
+    compile "com.google.firebase:firebase-crash:$playServicesVersion"
 
     compile 'com.google.maps.android:android-maps-utils:0.4'
 
@@ -123,5 +116,3 @@ dependencies {
 
     androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
 }
-
-apply plugin: 'com.google.gms.google-services'
