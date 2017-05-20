@@ -3,12 +3,10 @@ package com.bubelov.coins.dagger;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
 import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.api.coins.CoinsApi;
-import com.bubelov.coins.database.AssetDbHelper;
 import com.bubelov.coins.database.DbHelper;
 import com.bubelov.coins.util.AutoValueAdapterFactory;
 import com.bubelov.coins.service.DatabaseSync;
@@ -65,8 +63,7 @@ public class MainModule {
     @Provides
     @Singleton
     SQLiteDatabase sqlDatabase(Context context) {
-        SQLiteOpenHelper helper = BuildConfig.USE_DB_SNAPSHOT ? new AssetDbHelper(context) : new DbHelper(context);
-        return helper.getWritableDatabase();
+        return new DbHelper(context).getWritableDatabase();
     }
 
     @Provides

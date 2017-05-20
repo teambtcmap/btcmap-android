@@ -12,7 +12,6 @@ android {
         resConfigs "en", "ru", "th"
 
         buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v3/\""
-        buildConfigField "boolean", "USE_DB_SNAPSHOT", "true"
         buildConfigField "String", "DATABASE_NAME", "\"coins.db\""
         buildConfigField "int", "DATABASE_VERSION", "25"
         buildConfigField "String", "GOOGLE_CLIENT_ID", project.property('GOOGLE_CLIENT_ID')
@@ -33,7 +32,6 @@ android {
             minifyEnabled true
             useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "boolean", "USE_DB_SNAPSHOT", "false"
         }
         release {
             minifyEnabled true
