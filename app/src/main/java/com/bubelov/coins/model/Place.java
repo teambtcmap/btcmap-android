@@ -7,7 +7,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.auto.value.AutoValue;
 import com.google.maps.android.clustering.ClusterItem;
 
-import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -30,8 +29,6 @@ public abstract class Place implements Parcelable, ClusterItem {
     public abstract int openedClaims();
     public abstract int closedClaims();
     public abstract Date updatedAt();
-
-    public Collection<Currency> currencies;
 
     public static Builder builder() {
         return new AutoValue_Place.Builder();

@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 
-import com.bubelov.coins.model.Currency;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.database.DbContract;
 
@@ -13,10 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -127,36 +123,9 @@ public class PlacesDataSourceDb {
                 insertStatement.execute();
             }
 
-            Map<Long, Collection<Place>> currencyIdsToPlaces = new HashMap<>();
-
-            for (Place place : places) {
-                for (Currency currency : place.currencies) {
-                    if (!currencyIdsToPlaces.containsKey(currency.id())) {
-                        currencyIdsToPlaces.put(currency.id(), new HashSet<>());
-                    }
-
-                    currencyIdsToPlaces.get(currency.id()).add(place);
-                }
-            }
-
-            for (Long currencyId : currencyIdsToPlaces.keySet()) {
-                insertCurrencyForPlaces(currencyIdsToPlaces.get(currencyId), currencyId);
-            }
-
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
-        }
-    }
-
-    private void insertCurrencyForPlaces(@NonNull Collection<Place> places, long currencyId) {
-        String insertQuery = String.format("insert or replace into %s (%s, %s) values (?, ?)", DbContract.CurrenciesPlaces.TABLE_NAME, DbContract.CurrenciesPlaces.CURRENCY_ID, DbContract.CurrenciesPlaces.PLACE_ID);
-        SQLiteStatement insertStatement = db.compileStatement(insertQuery);
-
-        for (Place place : places) {
-            insertStatement.bindLong(1, currencyId);
-            insertStatement.bindLong(2, place.id());
-            insertStatement.execute();
         }
     }
 }
