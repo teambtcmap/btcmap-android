@@ -14,9 +14,9 @@ android {
         resConfigs "en", "ru", "th"
 
         buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v3/\""
-        buildConfigField "String", "GOOGLE_CLIENT_ID", project.property('GOOGLE_CLIENT_ID')
+        buildConfigField "String", "GOOGLE_CLIENT_ID", GOOGLE_CLIENT_ID
 
-        resValue "string", "maps_api_key", project.property('MAPS_API_KEY')
+        resValue "string", "maps_api_key", MAPS_API_KEY
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -24,6 +24,15 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(KEYSTORE_PATH)
+            storePassword KEYSTORE_PASSWORD
+            keyAlias KEYSTORE_KEY_ALIAS
+            keyPassword KEYSTORE_KEY_PASSWORD
+        }
     }
 
     buildTypes {
@@ -36,8 +45,9 @@ android {
         release {
             minifyEnabled true
             useProguard true
-            shrinkResources true
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 
@@ -105,7 +115,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    androidTestCompile ('com.android.support.test.espresso:espresso-contrib:2.2') {
+    androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.2') {
         exclude group: 'com.android.support', module: 'support-annotations'
         exclude group: 'com.android.support', module: 'appcompat-v7'
         exclude group: 'com.android.support', module: 'support-v4'

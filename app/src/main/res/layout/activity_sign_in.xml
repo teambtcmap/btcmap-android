@@ -30,14 +30,14 @@
                 android:textColor="@color/text_primary"
                 android:textSize="18sp" />
 
-            <com.bubelov.coins.ui.widget.TypefaceTextView
+            <TextView
                 android:id="@+id/sign_in_with_google"
                 style="@style/Button.SignIn"
                 android:layout_marginTop="32dp"
                 android:background="@drawable/btn_google_sign_in"
                 android:text="@string/sign_in_with_google" />
 
-            <com.bubelov.coins.ui.widget.TypefaceTextView
+            <TextView
                 android:id="@+id/sign_in_with_email"
                 style="@style/Button.SignIn"
                 android:layout_marginTop="8dp"

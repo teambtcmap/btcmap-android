@@ -40,7 +40,7 @@
                     android:layout_gravity="center"
                     tools:background="#ff0000" />
 
-                <com.bubelov.coins.ui.widget.TypefaceTextView
+                <TextView
                     android:id="@+id/user_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -48,7 +48,6 @@
                     android:gravity="center"
                     android:textColor="#ffffff"
                     android:textSize="18sp"
-                    app:typeface="regular"
                     tools:text="Guest" />
 
             </LinearLayout>
@@ -60,13 +59,12 @@
             android:layout_height="0dp"
             android:layout_weight="1">
 
-            <com.bubelov.coins.ui.widget.TypefaceTextView
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/more_features_coming_soon"
-                android:textColor="@color/text_primary"
-                app:typeface="regular" />
+                android:textColor="@color/text_primary" />
 
         </FrameLayout>
 
