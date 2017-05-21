@@ -14,6 +14,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.io.IOException;
 import java.util.Random;
 
 /**
@@ -60,14 +61,14 @@ public class PlaceCategoriesRepositoryTest {
     }
 
     @Test
-    public void networkSource_loadsCategories() {
-        Assert.assertTrue(repository.reloadFromNetwork());
+    public void networkSource_loadsCategories() throws IOException {
+        repository.reloadFromApi();
         Assert.assertNotNull(repository.getPlaceCategory(TEST_CATEGORY_ID));
     }
 
     @Test
-    public void repository_cachesCategory() {
-        Assert.assertTrue(repository.reloadFromNetwork());
+    public void repository_cachesCategory() throws IOException {
+        repository.reloadFromApi();
         Assert.assertNotNull(repository.getPlaceCategory(TEST_CATEGORY_ID));
         Assert.assertNotNull(dbSource.getPlaceCategory(TEST_CATEGORY_ID));
         Assert.assertNotNull(memorySource.getPlaceCategory(TEST_CATEGORY_ID));

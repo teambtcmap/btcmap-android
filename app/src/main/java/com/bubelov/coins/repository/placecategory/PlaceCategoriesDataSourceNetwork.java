@@ -3,6 +3,7 @@ package com.bubelov.coins.repository.placecategory;
 import com.bubelov.coins.api.coins.CoinsApi;
 import com.bubelov.coins.model.PlaceCategory;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -33,12 +34,7 @@ public class PlaceCategoriesDataSourceNetwork implements PlaceCategoriesDataSour
         }
     }
 
-    public List<PlaceCategory> getPlaceCategories() {
-        try {
-            return api.getPlaceCategories().execute().body();
-        } catch (Exception e) {
-            Timber.e(e, "Couldn't load place categories");
-            return null;
-        }
+    public List<PlaceCategory> getPlaceCategories() throws IOException {
+        return api.getPlaceCategories().execute().body();
     }
 }

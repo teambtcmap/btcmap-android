@@ -269,12 +269,9 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         databaseSync.addCallback(this);
 
-        if (databaseSync.getLastSyncDate() == 0) {
+        if (placesRepository.getCachedPlacesCount() == 0) {
+            DatabaseSyncService.Companion.start(this);
             initialSyncSnackbar.show();
-
-            if (!databaseSync.isSyncing()) {
-                DatabaseSyncService.Companion.start(this);
-            }
         }
     }
 

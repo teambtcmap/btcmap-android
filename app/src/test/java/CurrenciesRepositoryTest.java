@@ -10,6 +10,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.io.IOException;
+
 /**
  * @author Igor Bubelov
  */
@@ -26,13 +28,13 @@ public class CurrenciesRepositoryTest {
     }
 
     @Test
-    public void currenciesRepository_SyncReturnsTrue() {
-        Assert.assertTrue(currenciesRepository.reloadFromNetwork());
+    public void currenciesRepository_SyncReturnsTrue() throws IOException {
+        currenciesRepository.reloadFromApi();
     }
 
     @Test
-    public void currenciesRepository_FetchesBitcoin() {
-        currenciesRepository.reloadFromNetwork();
+    public void currenciesRepository_FetchesBitcoin() throws IOException {
+        currenciesRepository.reloadFromApi();
         Assert.assertTrue(currenciesRepository.getCurrency("BTC") != null);
     }
 }

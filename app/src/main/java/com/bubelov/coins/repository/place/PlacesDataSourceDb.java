@@ -1,6 +1,7 @@
 package com.bubelov.coins.repository.place;
 
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
@@ -58,6 +59,10 @@ public class PlacesDataSourceDb {
 
     public void insertOrUpdatePlace(Place place) {
         batchInsert(Collections.singleton(place));
+    }
+
+    public long getCachedPlacesCount() {
+        return DatabaseUtils.queryNumEntries(db, DbContract.Places.TABLE_NAME);
     }
 
     private List<Place> getPlaces(@NonNull Cursor cursor) {

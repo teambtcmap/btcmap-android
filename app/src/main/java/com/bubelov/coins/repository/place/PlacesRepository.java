@@ -105,6 +105,10 @@ public class PlacesRepository {
         return true;
     }
 
+    public long getCachedPlacesCount() {
+        return dbDataSource.getCachedPlacesCount();
+    }
+
     public List<Place> fetchNewPlaces() {
         if (memoryDataSource.getPlaces().isEmpty()) {
             memoryDataSource.setPlaces(dbDataSource.getPlaces());

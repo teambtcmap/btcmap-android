@@ -2,6 +2,7 @@ package com.bubelov.coins.repository.placecategory;
 
 import com.bubelov.coins.model.PlaceCategory;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -43,18 +44,12 @@ public class PlaceCategoriesRepository implements PlaceCategoriesDataSource {
         return category;
     }
 
-    public boolean reloadFromNetwork() {
+    public void reloadFromApi() throws IOException {
         List<PlaceCategory> categories = networkSource.getPlaceCategories();
 
-        if (categories != null) {
-            for (PlaceCategory category : categories) {
-                dbSource.addPlaceCategory(category);
-                memorySource.addPlaceCategory(category);
-            }
-
-            return true;
-        } else {
-            return false;
+        for (PlaceCategory category : categories) {
+            dbSource.addPlaceCategory(category);
+            memorySource.addPlaceCategory(category);
         }
     }
 }

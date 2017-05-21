@@ -1,10 +1,7 @@
 package com.bubelov.coins.database.sync
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.support.annotation.WorkerThread
 
-import com.bubelov.coins.PreferenceKeys
 import com.bubelov.coins.repository.currency.CurrenciesRepository
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository
@@ -27,32 +24,27 @@ import timber.log.Timber
 
 @Singleton
 class DatabaseSync @Inject
-internal constructor(private val context: Context, private val placesRepository: PlacesRepository, private val placeCategoriesRepository: PlaceCategoriesRepository, private val currenciesRepository: CurrenciesRepository, private val placeNotificationManager: PlaceNotificationManager, private val preferences: SharedPreferences) {
+internal constructor(private val context: Context, private val placesRepository: PlacesRepository, private val placeCategoriesRepository: PlaceCategoriesRepository, private val currenciesRepository: CurrenciesRepository, private val placeNotificationManager: PlaceNotificationManager) {
     @Volatile var isSyncing: Boolean = false
         private set
 
     private val callbacks = ArrayList<Callback>()
 
-    @WorkerThread
     internal fun sync() {
         isSyncing = true
 
         try {
+            val cachedPlacesBeforeSync = placesRepository.cachedPlacesCount
             val newPlaces = placesRepository.fetchNewPlaces()
 
-            for (place in newPlaces) {
-                placeNotificationManager.notifyUserIfNecessary(place)
+            if (cachedPlacesBeforeSync == 0L) {
+                for (place in newPlaces) {
+                    placeNotificationManager.notifyUserIfNecessary(place)
+                }
             }
 
-            if (!placeCategoriesRepository.reloadFromNetwork()) {
-                throw IllegalStateException("Couldn't sync place categories")
-            }
-
-            if (!currenciesRepository.reloadFromNetwork()) {
-                throw IllegalStateException("Couldn't sync place categories")
-            }
-
-            preferences.edit().putLong(PreferenceKeys.LAST_SYNC_DATE, System.currentTimeMillis()).apply()
+            placeCategoriesRepository.reloadFromApi()
+            currenciesRepository.reloadFromApi()
 
             for (callback in callbacks) {
                 callback.onDatabaseSyncFinished()
@@ -68,15 +60,6 @@ internal constructor(private val context: Context, private val placesRepository:
             scheduleNextSync()
         }
     }
-
-    val lastSyncDate: Long
-        get() {
-            if (preferences.contains(PreferenceKeys.LAST_SYNC_DATE)) {
-                return preferences.getLong(PreferenceKeys.LAST_SYNC_DATE, 0)
-            } else {
-                return 0
-            }
-        }
 
     fun addCallback(callback: Callback) {
         callbacks.add(callback)

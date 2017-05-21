@@ -5,8 +5,6 @@ package com.bubelov.coins;
  */
 
 public interface PreferenceKeys {
-    String LAST_SYNC_DATE = "last_sync_date";
-
     String USER = "user";
 
     String API_AUTH_TOKEN = "api_auth_token";
