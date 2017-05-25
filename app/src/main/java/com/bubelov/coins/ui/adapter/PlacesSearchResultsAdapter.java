@@ -27,13 +27,13 @@ import butterknife.ButterKnife;
 public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearchResultsAdapter.ResultViewHolder> {
     private List<Place> places = new ArrayList<>();
 
-    private OnPlaceSelectedListener listener;
+    private Callback listener;
 
     private Location userLocation;
 
     private DistanceUnits distanceUnits;
 
-    public PlacesSearchResultsAdapter(OnPlaceSelectedListener listener, Location userLocation, DistanceUnits distanceUnits) {
+    public PlacesSearchResultsAdapter(Callback listener, Location userLocation, DistanceUnits distanceUnits) {
         this.listener = listener;
         this.userLocation = userLocation;
         this.distanceUnits = distanceUnits;
@@ -49,7 +49,7 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
     public void onBindViewHolder(ResultViewHolder holder, int position) {
         final Place place = places.get(position);
         holder.name.setText(place.name());
-        holder.ripple.setOnClickListener(v -> listener.onPlaceSelected(place));
+        holder.ripple.setOnClickListener(v -> listener.onPlaceClick(place));
 
         if (userLocation == null) {
             holder.distance.setVisibility(View.GONE);
@@ -79,6 +79,10 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
         return places;
     }
 
+    public void setPlaces(List<Place> places) {
+        this.places = places;
+    }
+
     public static class ResultViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.ripple)
         View ripple;
@@ -98,7 +102,7 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
         }
     }
 
-    public interface OnPlaceSelectedListener {
-        void onPlaceSelected(Place place);
+    public interface Callback {
+        void onPlaceClick(Place place);
     }
 }

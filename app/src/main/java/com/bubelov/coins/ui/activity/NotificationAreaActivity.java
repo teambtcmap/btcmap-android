@@ -73,8 +73,6 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
         setContentView(R.layout.activity_select_area);
         ButterKnife.bind(this);
 
-        setSupportActionBar(toolbar);
-
         defaultCameraPosition = getIntent().getParcelableExtra(DEFAULT_CAMERA_POSITION_EXTRA);
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);

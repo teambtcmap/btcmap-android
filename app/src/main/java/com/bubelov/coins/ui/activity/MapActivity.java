@@ -343,7 +343,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                     lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
                 }
 
-                FindPlaceActivity.startForResult(this, lastLocation, REQUEST_FIND_PLACE);
+                FindPlaceActivity.Companion.startForResult(this, lastLocation, REQUEST_FIND_PLACE);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
