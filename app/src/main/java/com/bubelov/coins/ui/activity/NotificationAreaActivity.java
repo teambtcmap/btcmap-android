@@ -108,11 +108,11 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
         NotificationArea notificationArea = notificationAreaRepository.getNotificationArea();
 
         if (notificationArea == null) {
-            notificationArea = NotificationArea.builder()
-                    .latitude(defaultCameraPosition.target.latitude)
-                    .longitude(defaultCameraPosition.target.longitude)
-                    .radius(Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS)
-                    .build();
+            notificationArea = new NotificationArea(
+                    defaultCameraPosition.target.latitude,
+                    defaultCameraPosition.target.longitude,
+                    Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS
+            );
         }
 
         setArea(notificationArea);
@@ -122,14 +122,14 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
         BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker_location);
 
         Marker marker = map.addMarker(new MarkerOptions()
-                .position(new LatLng(area.latitude(), area.longitude()))
+                .position(new LatLng(area.getLatitude(), area.getLongitude()))
                 .icon(markerDescriptor)
                 .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V)
                 .draggable(true));
 
         CircleOptions circleOptions = new CircleOptions()
                 .center(marker.getPosition())
-                .radius(area.radius())
+                .radius(area.getRadius())
                 .fillColor(getResources().getColor(R.color.notification_area))
                 .strokeColor(getResources().getColor(R.color.notification_area_border))
                 .strokeWidth(4);
@@ -140,16 +140,16 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
         radiusSeekBar.setProgress((int) areaCircle.getRadius());
         radiusSeekBar.setOnSeekBarChangeListener(new SeekBarChangeListener());
 
-        LatLng areaCenter = new LatLng(area.latitude(), area.longitude());
+        LatLng areaCenter = new LatLng(area.getLatitude(), area.getLongitude());
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(areaCenter, getZoomLevel(areaCircle) - 1));
     }
 
     private void saveArea() {
-        NotificationArea area = NotificationArea.builder()
-                .latitude(areaCircle.getCenter().latitude)
-                .longitude(areaCircle.getCenter().longitude)
-                .radius(areaCircle.getRadius())
-                .build();
+        NotificationArea area = new NotificationArea(
+                areaCircle.getCenter().latitude,
+                areaCircle.getCenter().longitude,
+                areaCircle.getRadius()
+        );
 
         notificationAreaRepository.setNotificationArea(area);
     }

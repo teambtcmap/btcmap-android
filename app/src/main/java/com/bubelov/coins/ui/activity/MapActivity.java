@@ -36,7 +36,6 @@ import com.bubelov.coins.repository.user.UserRepository;
 import com.bubelov.coins.R;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.model.NotificationArea;
-import com.bubelov.coins.model.PlaceCategory;
 import com.bubelov.coins.model.User;
 import com.bubelov.coins.database.sync.DatabaseSync;
 import com.bubelov.coins.database.sync.DatabaseSyncService;
@@ -74,7 +73,6 @@ import butterknife.OnClick;
 
 public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener, DatabaseSync.Callback {
     private static final String PLACE_ID_EXTRA = "place_id";
-    private static final String NOTIFICATION_AREA_EXTRA = "notification_area";
     private static final String CLEAR_PLACE_NOTIFICATIONS_EXTRA = "clear_place_notifications";
 
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 10;
@@ -145,19 +143,15 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     private Snackbar initialSyncSnackbar;
 
-    public static Intent newShowPlaceIntent(Context context, long placeId) {
+    public static Intent newIntent(Context context, long placeId) {
         Intent intent = new Intent(context, MapActivity.class);
-        intent.putExtra(PLACE_ID_EXTRA, placeId);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, true);
-        return intent;
-    }
 
-    public static Intent newShowNotificationAreaIntent(Context context, NotificationArea notificationArea) {
-        Intent intent = new Intent(context, MapActivity.class);
-        intent.putExtra(NOTIFICATION_AREA_EXTRA, notificationArea);
-        intent.putExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, true);
+        if (placeId != 0) {
+            intent.putExtra(PLACE_ID_EXTRA, placeId);
+        }
+
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, true);
         return intent;
     }
 
@@ -478,12 +472,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedPlace.getPosition(), MAP_DEFAULT_ZOOM));
             }
         }
-
-        if (intent.hasExtra(NOTIFICATION_AREA_EXTRA)) {
-            NotificationArea area = intent.getParcelableExtra(NOTIFICATION_AREA_EXTRA);
-            LatLng areaCenter = new LatLng(area.latitude(), area.longitude());
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(areaCenter, MAP_DEFAULT_ZOOM));
-        }
     }
 
     private void signIn() {
@@ -540,11 +528,11 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_DEFAULT_ZOOM));
 
         if (notificationAreaRepository.getNotificationArea() == null) {
-            NotificationArea area = NotificationArea.builder()
-                    .latitude(location.getLatitude())
-                    .longitude(location.getLongitude())
-                    .radius(Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS)
-                    .build();
+            NotificationArea area = new NotificationArea(
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS
+            );
 
             notificationAreaRepository.setNotificationArea(area);
         }
@@ -644,7 +632,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     private class LocationApiConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks {
         @Override
         public void onConnected(Bundle bundle) {
-            if (firstLaunch && !getIntent().hasExtra(NOTIFICATION_AREA_EXTRA)) {
+            if (firstLaunch) {
                 firstLaunch = false;
                 moveToLastLocation();
             }

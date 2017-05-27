@@ -36,7 +36,7 @@ public class PlaceNotificationManager {
     private final PlaceNotificationsRepository notificationsRepository;
 
     @Inject
-    public PlaceNotificationManager(Context context, NotificationAreaRepository notificationAreaRepository, PlaceNotificationsRepository placeNotificationsRepository) {
+    PlaceNotificationManager(Context context, NotificationAreaRepository notificationAreaRepository, PlaceNotificationsRepository placeNotificationsRepository) {
         this.context = context;
         this.notificationAreaRepository = notificationAreaRepository;
         this.notificationsRepository = placeNotificationsRepository;
@@ -57,7 +57,7 @@ public class PlaceNotificationManager {
                 .setAutoCancel(true)
                 .setGroup(NEW_PLACE_NOTIFICATION_GROUP);
 
-        Intent intent = MapActivity.newShowPlaceIntent(context, newPlace.id());
+        Intent intent = MapActivity.newIntent(context, newPlace.id());
         PendingIntent pendingIntent = PendingIntent.getActivity(context, UUID.randomUUID().hashCode(), intent, 0);
         builder.setContentIntent(pendingIntent);
 
@@ -90,17 +90,15 @@ public class PlaceNotificationManager {
         }
 
         return DistanceUtils.getDistance(
-                notificationArea.latitude(),
-                notificationArea.longitude(),
+                notificationArea.getLatitude(),
+                notificationArea.getLongitude(),
                 newPlace.latitude(),
                 newPlace.longitude()
-        ) <= notificationArea.radius();
+        ) <= notificationArea.getRadius();
     }
 
     private void issueGroupNotification(Collection<PlaceNotification> pendingPlaces) {
-        NotificationArea notificationArea = notificationAreaRepository.getNotificationArea();
-
-        Intent intent = MapActivity.newShowNotificationAreaIntent(context, notificationArea);
+        Intent intent = MapActivity.newIntent(context, 0);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, NEW_PLACE_NOTIFICATION_GROUP.hashCode(), intent, 0);
 
         NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();
