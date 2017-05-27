@@ -67,7 +67,7 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
             }
         }
 
-        holder.icon.setImageResource(R.drawable.ic_place_24dp);
+        holder.icon.setImageResource(R.drawable.ic_place);
     }
 
     @Override

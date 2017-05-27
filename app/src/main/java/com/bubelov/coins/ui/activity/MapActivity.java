@@ -618,9 +618,11 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         @Override
         protected void onBeforeClusterItemRendered(Place place, MarkerOptions markerOptions) {
-            super.onBeforeClusterItemRendered(place, markerOptions); // TODO
-            PlaceCategory category = placeCategoriesRepository.getPlaceCategory(place.categoryId());
-            markerOptions.icon(placeCategoriesMarkersRepository.getMarker(category)).anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
+            super.onBeforeClusterItemRendered(place, markerOptions);
+
+            markerOptions
+                    .icon(placeCategoriesMarkersRepository.getPlaceCategoryMarker(place.categoryId()))
+                    .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
         }
     }
 

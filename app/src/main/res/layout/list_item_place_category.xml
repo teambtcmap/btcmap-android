@@ -27,7 +27,7 @@
             android:layout_height="24dp"
             android:layout_gravity="center"
             android:tint="@color/white"
-            tools:background="@drawable/ic_restaurant_24dp" />
+            tools:background="@drawable/ic_restaurant" />
 
     </FrameLayout>
 

@@ -119,7 +119,7 @@ public class NotificationAreaActivity extends AbstractActivity implements OnMapR
     }
 
     private void setArea(NotificationArea area) {
-        BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_location_marker);
+        BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker_location);
 
         Marker marker = map.addMarker(new MarkerOptions()
                 .position(new LatLng(area.latitude(), area.longitude()))

@@ -121,7 +121,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="24dp"
                     android:layout_marginRight="24dp"
-                    android:src="@drawable/ic_phone_24dp"
+                    android:src="@drawable/ic_phone"
                     android:tint="@color/text_secondary" />
 
                 <LinearLayout
@@ -161,7 +161,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="24dp"
                     android:layout_marginRight="24dp"
-                    android:src="@drawable/ic_globe_24dp"
+                    android:src="@drawable/ic_globe"
                     android:tint="@color/text_secondary" />
 
                 <LinearLayout

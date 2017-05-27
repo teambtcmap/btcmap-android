@@ -33,7 +33,7 @@
                 android:layout_height="24dp"
                 android:layout_gravity="center"
                 android:tint="@color/white"
-                tools:src="@drawable/ic_place_24dp" />
+                tools:src="@drawable/ic_place" />
 
         </FrameLayout>
 
