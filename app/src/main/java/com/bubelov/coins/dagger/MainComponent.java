@@ -12,7 +12,6 @@ import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceNetwo
 import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository;
 import com.bubelov.coins.repository.rate.ExchangeRatesRepository;
 import com.bubelov.coins.ui.activity.EditPlaceActivity;
-import com.bubelov.coins.ui.activity.ExchangeRatesActivity;
 import com.bubelov.coins.ui.activity.MapActivity;
 import com.bubelov.coins.ui.activity.NotificationAreaActivity;
 import com.bubelov.coins.ui.activity.ProfileActivity;
@@ -57,7 +56,6 @@ public interface MainComponent {
     void inject(EditPlaceActivity target);
     void inject(NotificationAreaActivity target);
     void inject(ProfileActivity target);
-    void inject(ExchangeRatesActivity target);
 
     void inject(SignInFragment target);
     void inject(SignUpFragment target);

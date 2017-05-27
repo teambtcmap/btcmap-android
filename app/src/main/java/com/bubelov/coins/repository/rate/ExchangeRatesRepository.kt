@@ -65,7 +65,7 @@ internal constructor(httpClient: OkHttpClient, gson: Gson) {
                 .create(WinkDexApi::class.java)
     }
 
-    val exchangeRates: Collection<ExchangeRate>
+    val exchangeRates: List<ExchangeRate>
         get() {
             val rates = ArrayList<ExchangeRate>()
 

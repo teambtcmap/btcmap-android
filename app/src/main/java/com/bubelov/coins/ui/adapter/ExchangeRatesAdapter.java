@@ -21,7 +21,7 @@ import butterknife.ButterKnife;
  */
 
 public class ExchangeRatesAdapter extends RecyclerView.Adapter<ExchangeRatesAdapter.ExchangeRateViewHolder> {
-    private final List<ExchangeRate> items = new ArrayList<>();
+    public List<ExchangeRate> items = new ArrayList<>();
 
     @Override
     public ExchangeRateViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -40,10 +40,6 @@ public class ExchangeRatesAdapter extends RecyclerView.Adapter<ExchangeRatesAdap
     @Override
     public int getItemCount() {
         return items.size();
-    }
-
-    public List<ExchangeRate> getItems() {
-        return items;
     }
 
     static class ExchangeRateViewHolder extends RecyclerView.ViewHolder {
