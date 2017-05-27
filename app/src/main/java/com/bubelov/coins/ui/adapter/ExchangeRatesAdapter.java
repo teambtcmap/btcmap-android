@@ -32,9 +32,9 @@ public class ExchangeRatesAdapter extends RecyclerView.Adapter<ExchangeRatesAdap
     @Override
     public void onBindViewHolder(final ExchangeRateViewHolder holder, int position) {
         ExchangeRate rate = items.get(position);
-        holder.firstLetter.setText(rate.source().substring(0, 1));
-        holder.exchangeName.setText(rate.source());
-        holder.price.setText(String.format(Locale.US, "$%.2f", rate.rate()));
+        holder.firstLetter.setText(rate.getSource().substring(0, 1));
+        holder.exchangeName.setText(rate.getSource());
+        holder.price.setText(String.format(Locale.US, "$%.2f", rate.getRate()));
     }
 
     @Override
