@@ -490,7 +490,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             return;
         }
 
-        Intent intent = NotificationAreaActivity.newIntent(this, map.getCameraPosition());
+        Intent intent = NotificationAreaActivity.Companion.newIntent(this, map.getCameraPosition());
         startActivity(intent);
         Analytics.logSelectContentEvent("notification_area", null, "screen");
     }
