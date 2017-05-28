@@ -64,11 +64,7 @@ public class PlaceNotificationManager {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(UUID.randomUUID().hashCode(), builder.build());
 
-        PlaceNotification placeNotification = PlaceNotification.builder()
-                .placeId(newPlace.id())
-                .placeName(newPlace.name())
-                .build();
-
+        PlaceNotification placeNotification = new PlaceNotification(newPlace.id(), newPlace.name());
         notificationsRepository.addNotification(placeNotification);
 
         Collection<PlaceNotification> notifications = notificationsRepository.getNotifications();
@@ -105,7 +101,7 @@ public class PlaceNotificationManager {
         style.setBigContentTitle(context.getString(R.string.notification_new_places_content_title, String.valueOf(pendingPlaces.size())));
 
         for (PlaceNotification notification : pendingPlaces) {
-            style.addLine(notification.placeName());
+            style.addLine(notification.getPlaceName());
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
