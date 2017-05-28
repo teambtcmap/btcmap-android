@@ -32,10 +32,10 @@ class PlaceNotificationsRepositoryTest : BaseRobolectricTest() {
     }
 
     private fun addNotification(): PlaceNotification {
-        val notification = PlaceNotification.builder()
-                .placeId(1)
-                .placeName("Test")
-                .build()
+        val notification = PlaceNotification(
+                placeId = 1,
+                placeName = "Test"
+        )
 
         repository.value.addNotification(notification)
         return notification

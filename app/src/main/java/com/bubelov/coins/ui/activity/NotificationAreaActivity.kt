@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.widget.SeekBar
 
 import com.bubelov.coins.Constants
@@ -52,8 +53,8 @@ class NotificationAreaActivity : AbstractActivity(), OnMapReadyCallback {
         val mapFragment = fragmentManager.findFragmentById(R.id.map_fragment) as MapFragment
         mapFragment.getMapAsync(this)
 
-        seek_bar_radius.progressDrawable.setColorFilter(resources.getColor(R.color.accent), PorterDuff.Mode.SRC_IN)
-        seek_bar_radius.thumb.setColorFilter(resources.getColor(R.color.accent), PorterDuff.Mode.SRC_IN)
+        seek_bar_radius.progressDrawable.setColorFilter(ContextCompat.getColor(this, R.color.accent), PorterDuff.Mode.SRC_IN)
+        seek_bar_radius.thumb.setColorFilter(ContextCompat.getColor(this, R.color.accent), PorterDuff.Mode.SRC_IN)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -88,8 +89,8 @@ class NotificationAreaActivity : AbstractActivity(), OnMapReadyCallback {
         val circleOptions = CircleOptions()
                 .center(marker.position)
                 .radius(area.radius)
-                .fillColor(resources.getColor(R.color.notification_area))
-                .strokeColor(resources.getColor(R.color.notification_area_border))
+                .fillColor(ContextCompat.getColor(this, R.color.notification_area))
+                .strokeColor(ContextCompat.getColor(this, R.color.notification_area_border))
                 .strokeWidth(4f)
 
         areaCircle = map!!.addCircle(circleOptions)
@@ -114,7 +115,7 @@ class NotificationAreaActivity : AbstractActivity(), OnMapReadyCallback {
 
     private inner class OnMarkerDragListener : GoogleMap.OnMarkerDragListener {
         override fun onMarkerDragStart(marker: Marker) {
-            areaCircle!!.fillColor = resources.getColor(android.R.color.transparent)
+            areaCircle!!.fillColor = ContextCompat.getColor(this@NotificationAreaActivity, android.R.color.transparent)
         }
 
         override fun onMarkerDrag(marker: Marker) {
@@ -123,7 +124,7 @@ class NotificationAreaActivity : AbstractActivity(), OnMapReadyCallback {
         }
 
         override fun onMarkerDragEnd(marker: Marker) {
-            areaCircle!!.fillColor = resources.getColor(R.color.notification_area)
+            areaCircle!!.fillColor = ContextCompat.getColor(this@NotificationAreaActivity, R.color.notification_area)
             saveArea()
         }
     }

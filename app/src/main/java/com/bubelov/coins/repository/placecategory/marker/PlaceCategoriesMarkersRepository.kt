@@ -72,7 +72,7 @@ internal constructor(private val context: Context, private val categoriesReposit
             val dst = RectF(bitmap.width.toFloat() * 0.3f, bitmap.width.toFloat() * 0.23f, bitmap.width.toFloat() * 0.7f, bitmap.height.toFloat() * 0.63f)
             val dstInt = Rect(dst.left.toInt(), dst.top.toInt(), dst.right.toInt(), dst.bottom.toInt())
             val iconBitmap = toBitmap(iconResourceId, dstInt.right - dstInt.left, dstInt.bottom - dstInt.top)
-            paint.colorFilter = PorterDuffColorFilter(context.resources.getColor(R.color.primary_dark), PorterDuff.Mode.SRC_IN)
+            paint.colorFilter = PorterDuffColorFilter(ContextCompat.getColor(context, R.color.primary_dark), PorterDuff.Mode.SRC_IN)
             canvas.drawBitmap(iconBitmap, null, dstInt, paint)
         }
 
