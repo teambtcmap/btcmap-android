@@ -49,7 +49,7 @@ internal constructor(private val context: Context, private val categoriesReposit
 
         val iconResourceId: Int?
 
-        when (placeCategory.name().toLowerCase()) {
+        when (placeCategory.name.toLowerCase()) {
             "atm" -> iconResourceId = R.drawable.ic_atm
             "restaurant" -> iconResourceId = R.drawable.ic_restaurant
             "café" -> iconResourceId = R.drawable.ic_cafe

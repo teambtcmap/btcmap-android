@@ -19,17 +19,17 @@ class PlaceCategoriesRepositoryTest : BaseRobolectricTest() {
     @Test
     fun memorySource_addsCategory() {
         val category = generateRandomCategory()
-        Assert.assertNull(memorySource.value.getPlaceCategory(category.id()))
+        Assert.assertNull(memorySource.value.getPlaceCategory(category.id))
         memorySource.value.addPlaceCategory(category)
-        Assert.assertEquals(memorySource.value.getPlaceCategory(category.id()), category)
+        Assert.assertEquals(memorySource.value.getPlaceCategory(category.id), category)
     }
 
     @Test
     fun dbSource_addsCategory() {
         val category = generateRandomCategory()
-        Assert.assertNull(dbSource.value.getPlaceCategory(category.id()))
+        Assert.assertNull(dbSource.value.getPlaceCategory(category.id))
         dbSource.value.addPlaceCategory(category)
-        Assert.assertEquals(dbSource.value.getPlaceCategory(category.id()), category)
+        Assert.assertEquals(dbSource.value.getPlaceCategory(category.id), category)
     }
 
     @Test
@@ -51,10 +51,10 @@ class PlaceCategoriesRepositoryTest : BaseRobolectricTest() {
     private fun generateRandomCategory(): PlaceCategory {
         val random = Random(System.currentTimeMillis())
 
-        return PlaceCategory.builder()
-                .id(random.nextLong())
-                .name(random.nextLong().toString())
-                .build()
+        return PlaceCategory(
+                id = random.nextLong(),
+                name = random.nextLong().toString()
+        )
     }
 
     companion object {
