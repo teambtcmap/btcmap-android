@@ -8,7 +8,6 @@ import android.preference.PreferenceManager;
 import com.bubelov.coins.BuildConfig;
 import com.bubelov.coins.api.coins.CoinsApi;
 import com.bubelov.coins.database.DbHelper;
-import com.bubelov.coins.util.AutoValueAdapterFactory;
 import com.bubelov.coins.util.StringAdapter;
 import com.bubelov.coins.util.UtcDateTypeAdapter;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
@@ -70,7 +69,6 @@ public class MainModule {
     Gson gson() {
         return new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .registerTypeAdapterFactory(new AutoValueAdapterFactory())
                 .registerTypeAdapter(Date.class, new UtcDateTypeAdapter())
                 .registerTypeAdapter(String.class, new StringAdapter())
                 .create();

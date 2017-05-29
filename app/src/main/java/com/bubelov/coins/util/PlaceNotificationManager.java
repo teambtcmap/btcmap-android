@@ -52,19 +52,19 @@ public class PlaceNotificationManager {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(context.getString(R.string.notification_new_place))
-                .setContentText(newPlace.name())
+                .setContentText(newPlace.getName())
                 .setDeleteIntent(prepareClearPlacesIntent())
                 .setAutoCancel(true)
                 .setGroup(NEW_PLACE_NOTIFICATION_GROUP);
 
-        Intent intent = MapActivity.newIntent(context, newPlace.id());
+        Intent intent = MapActivity.newIntent(context, newPlace.getId());
         PendingIntent pendingIntent = PendingIntent.getActivity(context, UUID.randomUUID().hashCode(), intent, 0);
         builder.setContentIntent(pendingIntent);
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(UUID.randomUUID().hashCode(), builder.build());
 
-        PlaceNotification placeNotification = new PlaceNotification(newPlace.id(), newPlace.name());
+        PlaceNotification placeNotification = new PlaceNotification(newPlace.getId(), newPlace.getName());
         notificationsRepository.addNotification(placeNotification);
 
         Collection<PlaceNotification> notifications = notificationsRepository.getNotifications();
@@ -75,7 +75,7 @@ public class PlaceNotificationManager {
     }
 
     private boolean shouldNotifyUser(Place newPlace) {
-        if (!newPlace.visible()) {
+        if (!newPlace.getVisible()) {
             return false;
         }
 
@@ -88,8 +88,8 @@ public class PlaceNotificationManager {
         return DistanceUtils.getDistance(
                 notificationArea.getLatitude(),
                 notificationArea.getLongitude(),
-                newPlace.latitude(),
-                newPlace.longitude()
+                newPlace.getLatitude(),
+                newPlace.getLongitude()
         ) <= notificationArea.getRadius();
     }
 

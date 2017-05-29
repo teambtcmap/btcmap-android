@@ -118,43 +118,43 @@ public class PlaceDetailsView extends FrameLayout {
 //            closedClaims.setVisibility(GONE);
 //        }
 
-        if (TextUtils.isEmpty(place.name())) {
+        if (TextUtils.isEmpty(place.getName())) {
             name.setText(R.string.name_unknown);
             toolbar.setTitle(R.string.name_unknown);
         } else {
-            name.setText(place.name());
-            toolbar.setTitle(place.name());
+            name.setText(place.getName());
+            toolbar.setTitle(place.getName());
         }
 
-        if (TextUtils.isEmpty(place.phone())) {
+        if (TextUtils.isEmpty(place.getPhone())) {
             phone.setText(R.string.not_provided);
         } else {
-            phone.setText(place.phone());
+            phone.setText(place.getPhone());
         }
 
-        if (TextUtils.isEmpty(place.website())) {
+        if (TextUtils.isEmpty(place.getWebsite())) {
             website.setText(R.string.not_provided);
             website.setTextColor(getResources().getColor(R.color.black));
             website.setPaintFlags(website.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
 
             website.setOnClickListener(null);
         } else {
-            website.setText(place.website());
+            website.setText(place.getWebsite());
             website.setTextColor(getResources().getColor(R.color.primary_dark));
             website.setPaintFlags(website.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-            website.setOnClickListener(view -> Utils.openUrl(PlaceDetailsView.this.getContext(), place.website()));
+            website.setOnClickListener(view -> Utils.openUrl(PlaceDetailsView.this.getContext(), place.getWebsite()));
         }
 
-        if (TextUtils.isEmpty(place.description())) {
+        if (TextUtils.isEmpty(place.getDescription())) {
             description.setText(R.string.not_provided);
         } else {
-            description.setText(place.description());
+            description.setText(place.getDescription());
         }
 
-        if (TextUtils.isEmpty(place.openingHours())) {
+        if (TextUtils.isEmpty(place.getOpeningHours())) {
             openingHours.setText(R.string.not_provided);
         } else {
-            openingHours.setText(place.openingHours());
+            openingHours.setText(place.getOpeningHours());
         }
     }
 
@@ -176,8 +176,8 @@ public class PlaceDetailsView extends FrameLayout {
 
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_share) {
-                Utils.share(getContext(), getResources().getString(R.string.share_place_message_title), getResources().getString(R.string.share_place_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", place.latitude(), place.longitude())));
-                Analytics.logShareContentEvent(String.valueOf(place.id()), place.name(), "place");
+                Utils.share(getContext(), getResources().getString(R.string.share_place_message_title), getResources().getString(R.string.share_place_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", place.getLatitude(), place.getLongitude())));
+                Analytics.logShareContentEvent(String.valueOf(place.getId()), place.getName(), "place");
                 return true;
             }
 

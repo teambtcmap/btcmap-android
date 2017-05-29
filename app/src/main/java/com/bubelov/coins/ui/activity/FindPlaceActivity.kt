@@ -70,7 +70,7 @@ class FindPlaceActivity : AbstractActivity(), PlacesSearchResultsAdapter.Callbac
 
     override fun onPlaceClick(place: Place) {
         val data = Intent()
-        data.putExtra(PLACE_ID_EXTRA, place.id())
+        data.putExtra(PLACE_ID_EXTRA, place.id)
         setResult(Activity.RESULT_OK, data)
         supportFinishAfterTransition()
     }

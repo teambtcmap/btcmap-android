@@ -3,6 +3,7 @@ package com.bubelov.coins.util;
 import android.location.Location;
 
 import com.bubelov.coins.model.Place;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Comparator;
 
@@ -19,8 +20,8 @@ public class DistanceComparator implements Comparator<Place> {
 
     @Override
     public int compare(Place place1, Place place2) {
-        Float distance1 = DistanceUtils.getDistance(place1.getPosition(), target);
-        Float distance2 = DistanceUtils.getDistance(place2.getPosition(), target);
+        Float distance1 = DistanceUtils.getDistance(new LatLng(place1.getLatitude(), place1.getLongitude()), target);
+        Float distance2 = DistanceUtils.getDistance(new LatLng(place2.getLatitude(), place2.getLongitude()), target);
         return distance1.compareTo(distance2);
     }
 }

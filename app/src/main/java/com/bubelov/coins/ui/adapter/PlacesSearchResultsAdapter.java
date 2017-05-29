@@ -13,6 +13,7 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.util.DistanceUnits;
 import com.bubelov.coins.util.DistanceUtils;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,7 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
     @Override
     public void onBindViewHolder(ResultViewHolder holder, int position) {
         final Place place = places.get(position);
-        holder.name.setText(place.name());
+        holder.name.setText(place.getName());
         holder.ripple.setOnClickListener(v -> listener.onPlaceClick(place));
 
         if (userLocation == null) {
@@ -57,7 +58,7 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
             holder.distance.setVisibility(View.VISIBLE);
 
             Context context = holder.name.getContext();
-            float distanceInKilometers = DistanceUtils.getDistance(place.getPosition(), userLocation) / 1000.0f;
+            float distanceInKilometers = DistanceUtils.getDistance(new LatLng(place.getLatitude(), place.getLongitude()), userLocation) / 1000.0f;
 
             if (distanceUnits.equals(DistanceUnits.KILOMETERS)) {
                 holder.distance.setText(context.getString(R.string.n_kilometers, distanceInKilometers));
@@ -83,7 +84,7 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
         this.places = places;
     }
 
-    public static class ResultViewHolder extends RecyclerView.ViewHolder {
+    static class ResultViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.ripple)
         View ripple;
 
@@ -96,7 +97,7 @@ public class PlacesSearchResultsAdapter extends RecyclerView.Adapter<PlacesSearc
         @BindView(R.id.distance)
         TextView distance;
 
-        public ResultViewHolder(View itemView) {
+        ResultViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }

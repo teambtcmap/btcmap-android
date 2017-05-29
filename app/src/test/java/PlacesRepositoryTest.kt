@@ -17,6 +17,6 @@ class PlacesRepositoryTest : BaseRobolectricTest() {
     fun placesRepository_SavesNewPlaces() {
         val newPlaces = repository.value.fetchNewPlaces()
         Assert.assertFalse(newPlaces.isEmpty())
-        Assert.assertNotNull(repository.value.getPlace(newPlaces[0].id()))
+        Assert.assertNotNull(repository.value.getPlace(newPlaces[0].id))
     }
 }

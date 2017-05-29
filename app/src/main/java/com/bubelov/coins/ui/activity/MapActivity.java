@@ -56,9 +56,11 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -128,7 +130,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     private GoogleMap map;
 
-    private ClusterManager<Place> placesManager;
+    private ClusterManager<PlaceMarker> placesManager;
 
     private Place selectedPlace;
 
@@ -201,7 +203,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             @Override
             public void onEditPlaceClick(Place place) {
                 if (!TextUtils.isEmpty(userRepository.getUserAuthToken())) {
-                    EditPlaceActivity.startForResult(MapActivity.this, place.id(), null, REQUEST_EDIT_PLACE);
+                    EditPlaceActivity.Companion.startForResult(MapActivity.this, place.getId(), null, REQUEST_EDIT_PLACE);
                 } else {
                     signIn();
                 }
@@ -291,7 +293,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         if (requestCode == REQUEST_FIND_PLACE && resultCode == RESULT_OK) {
             selectPlace(data.getLongExtra(FindPlaceActivity.PLACE_ID_EXTRA, -1));
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedPlace.getPosition(), MAP_DEFAULT_ZOOM));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(selectedPlace.getLatitude(), selectedPlace.getLongitude()), MAP_DEFAULT_ZOOM));
         }
 
         if (requestCode == REQUEST_ADD_PLACE && resultCode == RESULT_OK) {
@@ -302,7 +304,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             refreshMap();
 
             if (selectedPlace != null) {
-                selectPlace(selectedPlace.id());
+                selectPlace(selectedPlace.getId());
             }
         }
 
@@ -324,7 +326,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         switch (id) {
             case R.id.action_add:
                 if (!TextUtils.isEmpty(userRepository.getUserAuthToken())) {
-                    EditPlaceActivity.startForResult(this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
+                    EditPlaceActivity.Companion.startForResult(this, 0, map.getCameraPosition(), REQUEST_ADD_PLACE);
                 } else {
                     signIn();
                 }
@@ -469,7 +471,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             selectPlace(intent.getLongExtra(PLACE_ID_EXTRA, -1));
 
             if (selectedPlace != null && map != null) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedPlace.getPosition(), MAP_DEFAULT_ZOOM));
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(selectedPlace.getLatitude(), selectedPlace.getLongitude()), MAP_DEFAULT_ZOOM));
             }
         }
     }
@@ -561,8 +563,18 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         Collection<Place> places = placesRepository.getPlaces(bounds);
 
         placesManager.clearItems();
-        placesManager.addItems(places);
+        placesManager.addItems(toPlaceMarkers(places));
         placesManager.cluster();
+    }
+
+    private Collection<PlaceMarker> toPlaceMarkers(Collection<Place> places) {
+        Collection<PlaceMarker> placeMarkers = new ArrayList<>();
+
+        for (Place place : places) {
+            placeMarkers.add(new PlaceMarker(place.getId(), place.getLatitude(), place.getLongitude()));
+        }
+
+        return placeMarkers;
     }
 
     private void selectPlace(long placeId) {
@@ -575,7 +587,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         placeDetails.setPlace(selectedPlace);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
-        Analytics.logSelectContentEvent(String.valueOf(selectedPlace.id()), selectedPlace.name(), "place");
+        Analytics.logSelectContentEvent(String.valueOf(selectedPlace.getId()), selectedPlace.getName(), "place");
     }
 
     @OnClick(R.id.fab)
@@ -593,23 +605,25 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     public void onPlaceDetailsClick() {
         if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-            Analytics.logViewContentEvent(String.valueOf(selectedPlace.id()), selectedPlace.name(), "place");
+            Analytics.logViewContentEvent(String.valueOf(selectedPlace.getId()), selectedPlace.getName(), "place");
         } else {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
     }
 
-    private class PlacesRenderer extends StaticClusterRenderer<Place> {
-        PlacesRenderer(Context context, GoogleMap map, ClusterManager<Place> clusterManager) {
+    private class PlacesRenderer extends StaticClusterRenderer<PlaceMarker> {
+        PlacesRenderer(Context context, GoogleMap map, ClusterManager<PlaceMarker> clusterManager) {
             super(context, map, clusterManager);
         }
 
         @Override
-        protected void onBeforeClusterItemRendered(Place place, MarkerOptions markerOptions) {
-            super.onBeforeClusterItemRendered(place, markerOptions);
+        protected void onBeforeClusterItemRendered(PlaceMarker placeMarker, MarkerOptions markerOptions) {
+            super.onBeforeClusterItemRendered(placeMarker, markerOptions);
+
+            Place place = placesRepository.getPlace(placeMarker.placeId);
 
             markerOptions
-                    .icon(placeCategoriesMarkersRepository.getPlaceCategoryMarker(place.categoryId()))
+                    .icon(placeCategoriesMarkersRepository.getPlaceCategoryMarker(place.getCategoryId()))
                     .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
         }
     }
@@ -621,10 +635,10 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
     }
 
-    private class ClusterItemClickListener implements ClusterManager.OnClusterItemClickListener<Place> {
+    private class ClusterItemClickListener implements ClusterManager.OnClusterItemClickListener<PlaceMarker> {
         @Override
-        public boolean onClusterItemClick(Place place) {
-            selectPlace(place.id());
+        public boolean onClusterItemClick(PlaceMarker placeMarker) {
+            selectPlace(placeMarker.placeId);
             return false;
         }
     }
@@ -641,6 +655,25 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         @Override
         public void onConnectionSuspended(int cause) {
             // Nothing to do here
+        }
+    }
+
+    public class PlaceMarker implements ClusterItem {
+        private final long placeId;
+
+        private final double latitude;
+
+        private final double longitude;
+
+        public PlaceMarker(long placeId, double latitude, double longitude) {
+            this.placeId = placeId;
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+
+        @Override
+        public LatLng getPosition() {
+            return new LatLng(latitude, longitude);
         }
     }
 }
