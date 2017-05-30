@@ -44,7 +44,7 @@ import com.bubelov.coins.util.Analytics;
 import com.bubelov.coins.repository.placecategory.marker.PlaceCategoriesMarkersRepository;
 import com.bubelov.coins.util.OnCameraChangeMultiplexer;
 import com.bubelov.coins.util.StaticClusterRenderer;
-import com.bubelov.coins.util.Utils;
+import com.bubelov.coins.util.IntentUtils;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -199,9 +199,9 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> bottomSheetBehavior.setPeekHeight(placeDetails.getHeaderHeight()), 1000);
 
-        placeDetails.setListener(new PlaceDetailsView.Listener() {
+        placeDetails.setCallback(new PlaceDetailsView.Callback() {
             @Override
-            public void onEditPlaceClick(Place place) {
+            public void onEditPlaceClick(@NonNull Place place) {
                 if (!TextUtils.isEmpty(userRepository.getUserAuthToken())) {
                     EditPlaceActivity.Companion.startForResult(MapActivity.this, place.getId(), null, REQUEST_EDIT_PLACE);
                 } else {
@@ -498,7 +498,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     }
 
     private void openChat() {
-        Utils.openUrl(this, "https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw");
+        IntentUtils.INSTANCE.openUrl(this, "https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw");
         Analytics.logSelectContentEvent("chat", null, "screen");
     }
 
@@ -665,7 +665,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         private final double longitude;
 
-        public PlaceMarker(long placeId, double latitude, double longitude) {
+        PlaceMarker(long placeId, double latitude, double longitude) {
             this.placeId = placeId;
             this.latitude = latitude;
             this.longitude = longitude;
