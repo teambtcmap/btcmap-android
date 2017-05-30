@@ -3,8 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
 
     defaultConfig {
         minSdkVersion 19
@@ -61,7 +61,7 @@ android {
 
 dependencies {
     // Kotlin support
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 
     // Android architecture components
     compile "android.arch.lifecycle:runtime:1.0.0-alpha1"
@@ -69,17 +69,17 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha1"
 
     // Android support libraries
-    compile "com.android.support:appcompat-v7:$supportLibVersion"
-    compile "com.android.support:design:$supportLibVersion"
-    compile "com.android.support:customtabs:$supportLibVersion"
-    compile "com.android.support:cardview-v7:$supportLibVersion"
+    compile "com.android.support:appcompat-v7:$support_version"
+    compile "com.android.support:design:$support_version"
+    compile "com.android.support:customtabs:$support_version"
+    compile "com.android.support:cardview-v7:$support_version"
 
     // Google Play services split client libs
-    compile "com.google.android.gms:play-services-gcm:$playServicesVersion"
-    compile "com.google.android.gms:play-services-location:$playServicesVersion"
-    compile "com.google.android.gms:play-services-maps:$playServicesVersion"
-    compile "com.google.android.gms:play-services-auth:$playServicesVersion"
-    compile "com.google.firebase:firebase-crash:$playServicesVersion"
+    compile "com.google.android.gms:play-services-gcm:$play_services_version"
+    compile "com.google.android.gms:play-services-location:$play_services_version"
+    compile "com.google.android.gms:play-services-maps:$play_services_version"
+    compile "com.google.android.gms:play-services-auth:$play_services_version"
+    compile "com.google.firebase:firebase-crash:$play_services_version"
 
     compile 'com.google.maps.android:android-maps-utils:0.4'
 

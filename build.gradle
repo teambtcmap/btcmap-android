@@ -1,9 +1,7 @@
 buildscript {
-    ext.compileSdkVersion = 25
-    ext.buildToolsVersion = '25.0.0'
-    ext.supportLibVersion = '25.3.1'
-    ext.playServicesVersion = '10.2.6'
-    ext.kotlinVersion = '1.1.2-4'
+    ext.support_version = '25.3.1'
+    ext.play_services_version = '10.2.6'
+    ext.kotlin_version = '1.1.2-4'
 
     repositories {
         jcenter()
@@ -12,7 +10,7 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.0-alpha2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
