@@ -85,7 +85,7 @@ public class PlaceNotificationManager {
             return false;
         }
 
-        return DistanceUtils.getDistance(
+        return DistanceUtils.INSTANCE.getDistance(
                 notificationArea.getLatitude(),
                 notificationArea.getLongitude(),
                 newPlace.getLatitude(),

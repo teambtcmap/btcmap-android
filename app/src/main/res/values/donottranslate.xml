@@ -6,6 +6,8 @@
 
     <string name="pref_distance_units_automatic" translatable="false">AUTOMATIC</string>
 
+    <string name="distance_format">%1$.2f %2$s</string>
+
     <string-array name="distance_units_values">
         <item>@string/pref_distance_units_automatic</item>
         <item>KILOMETERS</item>

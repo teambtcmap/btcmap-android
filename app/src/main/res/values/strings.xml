@@ -38,8 +38,8 @@
     <string name="share_place_message_text">This place accepts cryptocurrency: %1$s</string>
     <string name="saa_distance">Distance:</string>
     <string name="search">Search</string>
-    <string name="n_kilometers">%1$.2f km</string>
-    <string name="n_miles">%1$.2f mi</string>
+    <string name="kilometers_short">km</string>
+    <string name="miles_short">mi</string>
     <string name="name">Name</string>
     <string name="phone">Phone</string>
     <string name="website">Website</string>
@@ -80,6 +80,7 @@
     <string name="guest">Guest</string>
     <string name="more_features_coming_soon">More features coming soon</string>
     <string name="could_not_add_place">Couldn\'t add place</string>
+    <string name="clear_search">Clear search</string>
 
     <string-array name="distance_units">
         <item>Automatic</item>

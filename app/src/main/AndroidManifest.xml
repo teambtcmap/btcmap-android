@@ -50,7 +50,7 @@
         <activity android:name=".ui.activity.SettingsActivity" />
 
         <activity
-            android:name=".ui.activity.FindPlaceActivity"
+            android:name=".ui.activity.PlacesSearchActivity"
             android:theme="@style/AppTheme.GrayStatusBar" />
 
         <activity android:name=".ui.activity.EditPlaceActivity" />

@@ -292,7 +292,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         if (requestCode == REQUEST_FIND_PLACE && resultCode == RESULT_OK) {
-            selectPlace(data.getLongExtra(FindPlaceActivity.PLACE_ID_EXTRA, -1));
+            selectPlace(data.getLongExtra(PlacesSearchActivity.PLACE_ID_EXTRA, -1));
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(selectedPlace.getLatitude(), selectedPlace.getLongitude()), MAP_DEFAULT_ZOOM));
         }
 
@@ -339,7 +339,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
                     lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
                 }
 
-                FindPlaceActivity.Companion.startForResult(this, lastLocation, REQUEST_FIND_PLACE);
+                PlacesSearchActivity.Companion.startForResult(this, lastLocation, REQUEST_FIND_PLACE);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

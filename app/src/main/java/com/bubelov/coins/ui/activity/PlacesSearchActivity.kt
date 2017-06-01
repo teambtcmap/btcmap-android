@@ -15,35 +15,40 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 
 import com.bubelov.coins.R
-import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.adapter.PlacesSearchResultsAdapter
-import com.bubelov.coins.ui.viewmodel.FindPlaceViewModel
+import com.bubelov.coins.ui.model.PlacesSearchResult
+import com.bubelov.coins.ui.viewmodel.PlacesSearchViewModel
 import com.bubelov.coins.util.TextWatcherAdapter
 
-import kotlinx.android.synthetic.main.activity_find_place.*
+import kotlinx.android.synthetic.main.activity_places_search.*
 
 /**
  * @author Igor Bubelov
  */
 
-class FindPlaceActivity : AbstractActivity(), PlacesSearchResultsAdapter.Callback {
-    private val viewModel = lazy { ViewModelProviders.of(this).get(FindPlaceViewModel::class.java) }
+class PlacesSearchActivity : AbstractActivity() {
+    private val viewModel = lazy { ViewModelProviders.of(this).get(PlacesSearchViewModel::class.java) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_find_place)
-        viewModel.value.init(intent.getParcelableExtra<Location>(USER_LOCATION_EXTRA))
+        setContentView(R.layout.activity_places_search)
+        viewModel.value.userLocation = intent.getParcelableExtra<Location>(USER_LOCATION_EXTRA)
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 
+        val resultsAdapter = PlacesSearchResultsAdapter(emptyList(), object : PlacesSearchResultsAdapter.Callback {
+            override fun onClick(item: PlacesSearchResult) {
+                setResult(Activity.RESULT_OK, Intent().apply { putExtra(PLACE_ID_EXTRA, item.placeId) })
+                supportFinishAfterTransition()
+            }
+        })
+
+        results.adapter = resultsAdapter
         results.layoutManager = LinearLayoutManager(this)
         results.setHasFixedSize(true)
 
-        val resultsAdapter = PlacesSearchResultsAdapter(this, viewModel.value.userLocation, viewModel.value.distanceUnits)
-        results.adapter = resultsAdapter
-
         viewModel.value.searchResults.observe(this, Observer { places ->
-            resultsAdapter.places = places
+            resultsAdapter.items = places!!
             resultsAdapter.notifyDataSetChanged()
         })
 
@@ -68,21 +73,13 @@ class FindPlaceActivity : AbstractActivity(), PlacesSearchResultsAdapter.Callbac
         clear.setOnClickListener { query.setText("") }
     }
 
-    override fun onPlaceClick(place: Place) {
-        val data = Intent()
-        data.putExtra(PLACE_ID_EXTRA, place.id)
-        setResult(Activity.RESULT_OK, data)
-        supportFinishAfterTransition()
-    }
-
     companion object {
         const val USER_LOCATION_EXTRA = "user_location"
 
         const val PLACE_ID_EXTRA = "place_id"
 
         fun startForResult(activity: Activity, userLocation: Location, requestCode: Int) {
-            val intent = Intent(activity, FindPlaceActivity::class.java)
-            intent.putExtra(USER_LOCATION_EXTRA, userLocation)
+            val intent = Intent(activity, PlacesSearchActivity::class.java).apply { putExtra(USER_LOCATION_EXTRA, userLocation) }
             activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
         }
     }

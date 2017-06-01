@@ -2,25 +2,28 @@
 
 <resources>
 
-    <color name="primary">#FEBD0C</color>
-    <color name="primary_dark">#F99F00</color>
-    <color name="accent">#536DFE</color>
+    <color name="primary">@color/amber_500</color>
+    <color name="primary_dark">@color/amber_700</color>
+    <color name="accent">@color/indigo_a_200</color>
 
     <color name="text_primary">#202020</color>
-    <color name="text_secondary">#757575</color>
+    <color name="text_secondary">@color/grey_600</color>
 
-    <color name="black">#000000</color>
-    <color name="white">#FFFFFF</color>
+    <color name="black">@android:color/black</color>
+    <color name="white">@android:color/white</color>
 
     <color name="notification_area">#44F99F00</color>
     <color name="notification_area_border">@color/primary_dark</color>
-
-    <color name="search_activity_background">#EEEEEE</color>
 
     <color name="tab_indicator">#FFFBD0</color>
 
     <color name="red_500">#F44336</color>
     <color name="green_700">#388E3C</color>
+    <color name="grey_200">#EEEEEE</color>
     <color name="grey_500">#9E9E9E</color>
+    <color name="grey_600">#757575</color>
+    <color name="amber_500">#FFC107</color>
+    <color name="amber_700">#FFA000</color>
+    <color name="indigo_a_200">#536DFE</color>
 
 </resources>
