@@ -2,15 +2,15 @@ package com.bubelov.coins.repository.place
 
 import com.bubelov.coins.repository.user.UserRepository
 import com.bubelov.coins.model.Place
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 
 import java.io.IOException
-import java.util.Date
 
 import javax.inject.Inject
 import javax.inject.Singleton
 
-import timber.log.Timber
+import java.util.*
 
 /**
  * @author Igor Bubelov
@@ -18,86 +18,54 @@ import timber.log.Timber
 
 @Singleton
 class PlacesRepository @Inject
-constructor(private val networkDataSource: PlacesDataSourceApi, private val dbDataSource: PlacesDataSourceDb, private val memoryDataSource: PlacesDataSourceRam, private val userRepository: UserRepository) {
-    fun getPlaces(bounds: LatLngBounds): List<Place> {
-        if (memoryDataSource.places.isEmpty()) {
-            memoryDataSource.places = dbDataSource.places
-        }
-
-        return memoryDataSource.getPlaces(bounds)
-    }
-
-    fun getPlaces(searchQuery: String): List<Place> {
-        if (memoryDataSource.places.isEmpty()) {
-            memoryDataSource.places = dbDataSource.places
-        }
-
-        return memoryDataSource.places.filter { it.name.toLowerCase().contains(searchQuery.toLowerCase()) }
-    }
-
-    val randomPlace: Place?
+constructor(private val networkDataSource: PlacesDataSourceApi, private val dbDataSource: PlacesDataSourceDb, private val userRepository: UserRepository) {
+    private val cache: MutableList<Place> = mutableListOf()
         get() {
-            if (memoryDataSource.places.isEmpty()) {
-                memoryDataSource.places = dbDataSource.places
-            }
-
-            if (!memoryDataSource.places.isEmpty()) {
-                return memoryDataSource.places[(Math.random() * memoryDataSource.places.size).toInt()]
-            }
-
-            return null
+            if (field.isEmpty()) field.addAll(dbDataSource.getPlaces())
+            return field
         }
 
-    fun getPlace(id: Long): Place? {
-        if (memoryDataSource.places.isEmpty()) {
-            memoryDataSource.places = dbDataSource.places
-        }
+    fun getPlaces(bounds: LatLngBounds) = cache.filter { bounds.contains(LatLng(it.latitude, it.longitude)) }
 
-        return memoryDataSource.getPlace(id)
-    }
+    fun getPlaces(searchQuery: String) = cache.filter { it.name.contains(searchQuery, ignoreCase = true) }
 
-    fun add(place: Place): Boolean {
-        val result = networkDataSource.addPlace(place, userRepository.userAuthToken) ?: return false
-        dbDataSource.insertOrUpdatePlace(result)
-        memoryDataSource.places = dbDataSource.places
+    fun getPlace(id: Long) = cache.firstOrNull { it.id == id }
+
+    fun getRandomPlace() = if (cache.isEmpty()) null else cache[(Math.random() * cache.size).toInt()]
+
+    fun addPlace(place: Place): Boolean {
+        val createdPlace = networkDataSource.addPlace(place, userRepository.userAuthToken) ?: return false
+        dbDataSource.insertOrReplace(createdPlace)
+        cache.add(createdPlace)
         return true
     }
 
-    fun update(place: Place): Boolean {
-        val result = networkDataSource.updatePlace(place, userRepository.userAuthToken) ?: return false
-        dbDataSource.insertOrUpdatePlace(result)
-        memoryDataSource.places = dbDataSource.places
+    fun updatePlace(place: Place): Boolean {
+        val updatedPlace = networkDataSource.updatePlace(place, userRepository.userAuthToken) ?: return false
+        dbDataSource.insertOrReplace(updatedPlace)
+        cache.remove(updatedPlace)
+        cache.add(updatedPlace)
         return true
     }
 
-    val cachedPlacesCount: Long
-        get() = dbDataSource.cachedPlacesCount
-
+    @Throws(IOException::class)
     fun fetchNewPlaces(): List<Place> {
-        if (memoryDataSource.places.isEmpty()) {
-            memoryDataSource.places = dbDataSource.places
+        val places = networkDataSource.getPlaces(getLastUpdateDate())
+
+        if (!places.isEmpty()) {
+            dbDataSource.insertOrReplace(places)
+            cache.clear()
         }
 
-        var latestUpdatedAt = Date(0)
+        return places
+    }
 
-        for ((_, _, _, _, _, _, _, _, _, _, updatedAt) in memoryDataSource.places) {
-            if (updatedAt.after(latestUpdatedAt)) {
-                latestUpdatedAt = updatedAt
-            }
-        }
+    private fun getLastUpdateDate(): Date {
+        val latestPlace = cache.maxBy { it.updatedAt }
 
-        try {
-            val places = networkDataSource.getPlaces(latestUpdatedAt)
-
-            if (!places.isEmpty()) {
-                dbDataSource.batchInsert(places)
-                memoryDataSource.places = dbDataSource.places
-            }
-
-            return places
-        } catch (e: IOException) {
-            Timber.e(e, "Couldn't fetch new places")
-            return emptyList()
+        when (latestPlace) {
+            null -> return Date(0)
+            else -> return latestPlace.updatedAt
         }
     }
 }

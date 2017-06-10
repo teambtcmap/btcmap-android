@@ -1,7 +1,6 @@
 package com.bubelov.coins.repository.place
 
 import android.database.Cursor
-import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 
 import com.bubelov.coins.model.Place
@@ -18,46 +17,14 @@ import javax.inject.Singleton
 @Singleton
 class PlacesDataSourceDb @Inject
 internal constructor(private val db: SQLiteDatabase) {
-    val places: MutableList<Place>
-        get() = db.query(DbContract.Places.TABLE_NAME,
-                null, null, null, null, null, null, null).use { cursor -> return getPlaces(cursor) }
+    fun getPlaces(): List<Place> = db.query(DbContract.Places.TABLE_NAME,
+            null, null, null, null, null, null, null).use { cursor -> return cursor.toPlaces() }
 
-    val cachedPlacesCount: Long
-        get() = DatabaseUtils.queryNumEntries(db, DbContract.Places.TABLE_NAME)
-
-    fun getPlace(id: Long): Place? {
-        db.query(DbContract.Places.TABLE_NAME, null,
-                "_id = ?",
-                arrayOf(id.toString()), null, null, null, null).use { cursor -> return if (cursor.count == 1) getPlaces(cursor).iterator().next() else null }
+    fun insertOrReplace(place: Place) {
+        insertOrReplace(setOf(place))
     }
 
-    fun insertOrUpdatePlace(place: Place) {
-        batchInsert(setOf(place))
-    }
-
-    private fun getPlaces(cursor: Cursor): MutableList<Place> {
-        val places = ArrayList<Place>()
-
-        while (cursor.moveToNext()) {
-            places.add(Place(
-                    id = cursor.getLong(cursor.getColumnIndex(DbContract.Currencies._ID)),
-                    name = cursor.getString(cursor.getColumnIndex(DbContract.Places.NAME)),
-                    description = cursor.getString(cursor.getColumnIndex(DbContract.Places.DESCRIPTION)),
-                    latitude = cursor.getDouble(cursor.getColumnIndex(DbContract.Places.LATITUDE)),
-                    longitude = cursor.getDouble(cursor.getColumnIndex(DbContract.Places.LONGITUDE)),
-                    categoryId = cursor.getLong(cursor.getColumnIndex(DbContract.Places.CATEGORY_ID)),
-                    phone = cursor.getString(cursor.getColumnIndex(DbContract.Places.PHONE)),
-                    website = cursor.getString(cursor.getColumnIndex(DbContract.Places.WEBSITE)),
-                    openingHours = cursor.getString(cursor.getColumnIndex(DbContract.Places.OPENING_HOURS)),
-                    visible = cursor.getLong(cursor.getColumnIndex(DbContract.Places.VISIBLE)) == 1L,
-                    updatedAt = Date(cursor.getLong(cursor.getColumnIndex(DbContract.Places._UPDATED_AT)))
-            ))
-        }
-
-        return places
-    }
-
-    internal fun batchInsert(places: Collection<Place>) {
+    fun insertOrReplace(places: Collection<Place>) {
         db.beginTransaction()
 
         try {
@@ -97,4 +64,26 @@ internal constructor(private val db: SQLiteDatabase) {
             db.endTransaction()
         }
     }
+
+    private fun Cursor.toPlaces() = mutableListOf<Place>().apply {
+        moveToFirst()
+
+        while (moveToNext()) {
+            add(toPlace())
+        }
+    }
+
+    private fun Cursor.toPlace() = Place(
+            id = getLong(getColumnIndex(DbContract.Currencies._ID)),
+            name = getString(getColumnIndex(DbContract.Places.NAME)),
+            description = getString(getColumnIndex(DbContract.Places.DESCRIPTION)),
+            latitude = getDouble(getColumnIndex(DbContract.Places.LATITUDE)),
+            longitude = getDouble(getColumnIndex(DbContract.Places.LONGITUDE)),
+            categoryId = getLong(getColumnIndex(DbContract.Places.CATEGORY_ID)),
+            phone = getString(getColumnIndex(DbContract.Places.PHONE)),
+            website = getString(getColumnIndex(DbContract.Places.WEBSITE)),
+            openingHours = getString(getColumnIndex(DbContract.Places.OPENING_HOURS)),
+            visible = getLong(getColumnIndex(DbContract.Places.VISIBLE)) == 1L,
+            updatedAt = Date(getLong(getColumnIndex(DbContract.Places._UPDATED_AT)))
+    )
 }

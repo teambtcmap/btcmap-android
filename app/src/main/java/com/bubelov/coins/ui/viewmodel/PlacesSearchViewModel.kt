@@ -4,7 +4,6 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.location.Location
-import android.os.AsyncTask
 import android.preference.PreferenceManager
 
 import com.bubelov.coins.App
@@ -14,7 +13,10 @@ import com.bubelov.coins.ui.model.PlacesSearchResult
 import com.bubelov.coins.util.DistanceComparator
 import com.bubelov.coins.util.DistanceUnits
 import com.bubelov.coins.util.DistanceUtils
+import org.jetbrains.anko.doAsyncResult
+import org.jetbrains.anko.uiThread
 import java.util.*
+import java.util.concurrent.Future
 import kotlin.properties.Delegates
 
 /**
@@ -24,19 +26,35 @@ import kotlin.properties.Delegates
 class PlacesSearchViewModel(application: Application) : AndroidViewModel(application) {
     var userLocation: Location? = null
 
-    var searchQuery: String by Delegates.observable("", { _, _, _ -> search() })
+    var searchQuery: String by Delegates.observable("", { _, _, _ -> onSearchQueryChanged() })
 
     val searchResults = MutableLiveData<List<PlacesSearchResult>>()
 
-    private var findPlacesTask: FindPlacesTask? = null
+    private var futureResults: Future<Any>? = null
 
-    private fun search() {
-        findPlacesTask?.cancel(true)
-        findPlacesTask = null
+    private fun onSearchQueryChanged() {
+        futureResults?.cancel(true)
 
         if (searchQuery.length >= MIN_QUERY_LENGTH) {
-            findPlacesTask = FindPlacesTask()
-            findPlacesTask!!.execute(searchQuery)
+            futureResults = doAsyncResult {
+                val places = Injector.INSTANCE.mainComponent().placesRepository().getPlaces(searchQuery)
+
+                if (userLocation != null) {
+                    Collections.sort(places, DistanceComparator(userLocation!!))
+                }
+
+                val results = places.map { (id, name, _, latitude, longitude) ->
+                    PlacesSearchResult(
+                            placeId = id,
+                            placeName = name,
+                            distance = userLocation?.distanceTo(latitude, longitude, getDistanceUnits()),
+                            distanceUnits = getDistanceUnits().getShortName(),
+                            iconResId = R.drawable.ic_place
+                    )
+                }
+
+                uiThread { searchResults.value = results }
+            }
         } else {
             searchResults.value = emptyList()
         }
@@ -69,31 +87,7 @@ class PlacesSearchViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    private inner class FindPlacesTask : AsyncTask<String, Void, List<PlacesSearchResult>>() {
-        override fun doInBackground(vararg query: String): List<PlacesSearchResult> {
-            val places = Injector.INSTANCE.mainComponent().placesRepository().getPlaces(query[0])
-
-            if (userLocation != null) {
-                Collections.sort(places, DistanceComparator(userLocation!!))
-            }
-
-            return places.map { (id, name, _, latitude, longitude) ->
-                PlacesSearchResult(
-                        placeId = id,
-                        placeName = name,
-                        distance = userLocation?.distanceTo(latitude, longitude, getDistanceUnits()),
-                        distanceUnits = getDistanceUnits().getShortName(),
-                        iconResId = R.drawable.ic_place
-                )
-            }
-        }
-
-        override fun onPostExecute(places: List<PlacesSearchResult>) {
-            searchResults.value = places
-        }
-    }
-
     companion object {
-        private val MIN_QUERY_LENGTH = 2
+        private const val MIN_QUERY_LENGTH = 2
     }
 }

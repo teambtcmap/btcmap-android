@@ -151,7 +151,7 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
         }
 
         override fun doInBackground(vararg args: Void): Boolean? {
-            return placesRepository!!.add(editedPlace)
+            return placesRepository!!.addPlace(editedPlace)
         }
 
         override fun onPostExecute(success: Boolean?) {
@@ -172,7 +172,7 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
         }
 
         override fun doInBackground(vararg voids: Void): Boolean? {
-            return placesRepository!!.update(editedPlace)
+            return placesRepository!!.updatePlace(editedPlace)
         }
 
         override fun onPostExecute(success: Boolean?) {

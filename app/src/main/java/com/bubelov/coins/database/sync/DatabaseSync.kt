@@ -9,14 +9,15 @@ import com.bubelov.coins.util.PlaceNotificationManager
 import com.google.android.gms.gcm.GcmNetworkManager
 import com.google.android.gms.gcm.PeriodicTask
 import com.google.android.gms.gcm.Task
+import org.jetbrains.anko.doAsyncResult
 
-import java.util.ArrayList
 import java.util.concurrent.TimeUnit
 
 import javax.inject.Inject
 import javax.inject.Singleton
 
 import timber.log.Timber
+import java.util.concurrent.Future
 
 /**
  * @author Igor Bubelov
@@ -25,63 +26,34 @@ import timber.log.Timber
 @Singleton
 class DatabaseSync @Inject
 internal constructor(private val context: Context, private val placesRepository: PlacesRepository, private val placeCategoriesRepository: PlaceCategoriesRepository, private val currenciesRepository: CurrenciesRepository, private val placeNotificationManager: PlaceNotificationManager) {
-    @Volatile var isSyncing: Boolean = false
-        private set
+    private var futureResult: Future<Any>? = null
 
-    private val callbacks = ArrayList<Callback>()
+    fun sync() {
+        futureResult?.cancel(true)
 
-    internal fun sync() {
-        isSyncing = true
-
-        try {
-            val cachedPlacesBeforeSync = placesRepository.cachedPlacesCount
-            val newPlaces = placesRepository.fetchNewPlaces()
-
-            if (cachedPlacesBeforeSync == 0L) {
-                for (place in newPlaces) {
-                    placeNotificationManager.notifyUserIfNecessary(place)
-                }
+        futureResult = doAsyncResult({ Timber.e(it, "Couldn't sync database") }, {
+            placesRepository.fetchNewPlaces().forEach {
+                placeNotificationManager.notifyUserIfNecessary(it)
             }
 
             placeCategoriesRepository.reloadFromApi()
             currenciesRepository.reloadFromApi()
+        })
 
-            for (callback in callbacks) {
-                callback.onDatabaseSyncFinished()
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "Couldn't sync database")
-
-            for (callback in callbacks) {
-                callback.onDatabaseSyncError()
-            }
-        } finally {
-            isSyncing = false
-            scheduleNextSync()
-        }
-    }
-
-    fun addCallback(callback: Callback) {
-        callbacks.add(callback)
-    }
-
-    fun removeCallback(callback: Callback) {
-        callbacks.remove(callback)
+        scheduleNextSync()
     }
 
     private fun scheduleNextSync() {
-        GcmNetworkManager.getInstance(context).schedule(PeriodicTask.Builder()
-                .setService(DatabaseGcmSyncService::class.java)
-                .setTag(DatabaseGcmSyncService.TAG)
-                .setPeriod(TimeUnit.DAYS.toSeconds(1))
-                .setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)
-                .setPersisted(true)
-                .build())
+        PeriodicTask.Builder().apply {
+            setService(DatabaseGcmSyncService::class.java)
+            setTag(DatabaseGcmSyncService.TAG)
+            setPeriod(TimeUnit.DAYS.toSeconds(1))
+            setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)
+            setPersisted(true)
+        }.build().schedule()
     }
 
-    interface Callback {
-        fun onDatabaseSyncFinished()
-
-        fun onDatabaseSyncError()
+    private fun PeriodicTask.schedule() {
+        GcmNetworkManager.getInstance(context).schedule(this)
     }
 }

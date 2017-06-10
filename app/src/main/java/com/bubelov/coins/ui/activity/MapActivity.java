@@ -13,7 +13,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
@@ -37,8 +36,6 @@ import com.bubelov.coins.R;
 import com.bubelov.coins.model.Place;
 import com.bubelov.coins.model.NotificationArea;
 import com.bubelov.coins.model.User;
-import com.bubelov.coins.database.sync.DatabaseSync;
-import com.bubelov.coins.database.sync.DatabaseSyncService;
 import com.bubelov.coins.ui.widget.PlaceDetailsView;
 import com.bubelov.coins.util.Analytics;
 import com.bubelov.coins.repository.placecategory.marker.PlaceCategoriesMarkersRepository;
@@ -73,7 +70,7 @@ import butterknife.OnClick;
  * @author Igor Bubelov
  */
 
-public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener, DatabaseSync.Callback {
+public class MapActivity extends AbstractActivity implements OnMapReadyCallback, Toolbar.OnMenuItemClickListener {
     private static final String PLACE_ID_EXTRA = "place_id";
     private static final String CLEAR_PLACE_NOTIFICATIONS_EXTRA = "clear_place_notifications";
 
@@ -139,11 +136,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     private boolean firstLaunch;
 
     private BottomSheetBehavior bottomSheetBehavior;
-
-    @Inject
-    DatabaseSync databaseSync;
-
-    private Snackbar initialSyncSnackbar;
 
     public static Intent newIntent(Context context, long placeId) {
         Intent intent = new Intent(context, MapActivity.class);
@@ -255,27 +247,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         drawerToggle.syncState();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        initialSyncSnackbar = Snackbar.make(findViewById(R.id.coordinator_layout), "Loading places", Snackbar.LENGTH_INDEFINITE);
-
-        databaseSync.addCallback(this);
-
-        if (placesRepository.getCachedPlacesCount() == 0) {
-            DatabaseSyncService.Companion.start(this);
-            initialSyncSnackbar.show();
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        databaseSync.removeCallback(this);
-        initialSyncSnackbar.dismiss();
-        super.onStop();
     }
 
     @Override
@@ -416,19 +387,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
 
         handleIntent(getIntent());
-    }
-
-    @Override
-    public void onDatabaseSyncFinished() {
-        runOnUiThread(() -> {
-            initialSyncSnackbar.dismiss();
-            refreshMap();
-        });
-    }
-
-    @Override
-    public void onDatabaseSyncError() {
-        runOnUiThread(() -> initialSyncSnackbar.dismiss());
     }
 
     private void updateDrawerHeader() {

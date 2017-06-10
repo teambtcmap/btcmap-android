@@ -16,7 +16,6 @@ import android.view.inputmethod.InputMethodManager
 
 import com.bubelov.coins.R
 import com.bubelov.coins.ui.adapter.PlacesSearchResultsAdapter
-import com.bubelov.coins.ui.model.PlacesSearchResult
 import com.bubelov.coins.ui.viewmodel.PlacesSearchViewModel
 import com.bubelov.coins.util.TextWatcherAdapter
 
@@ -36,12 +35,10 @@ class PlacesSearchActivity : AbstractActivity() {
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 
-        val resultsAdapter = PlacesSearchResultsAdapter(emptyList(), object : PlacesSearchResultsAdapter.Callback {
-            override fun onClick(item: PlacesSearchResult) {
-                setResult(Activity.RESULT_OK, Intent().apply { putExtra(PLACE_ID_EXTRA, item.placeId) })
-                supportFinishAfterTransition()
-            }
-        })
+        val resultsAdapter = PlacesSearchResultsAdapter {
+            setResult(Activity.RESULT_OK, Intent().apply { putExtra(PLACE_ID_EXTRA, it.placeId) })
+            supportFinishAfterTransition()
+        }
 
         results.adapter = resultsAdapter
         results.layoutManager = LinearLayoutManager(this)
