@@ -39,8 +39,6 @@ import com.bubelov.coins.model.User;
 import com.bubelov.coins.ui.widget.PlaceDetailsView;
 import com.bubelov.coins.util.Analytics;
 import com.bubelov.coins.repository.placecategory.marker.PlaceCategoriesMarkersRepository;
-import com.bubelov.coins.util.OnCameraChangeMultiplexer;
-import com.bubelov.coins.util.StaticClusterRenderer;
 import com.bubelov.coins.util.IntentUtils;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -49,12 +47,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -369,8 +367,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
         initClustering();
 
-        map.setOnCameraChangeListener(new OnCameraChangeMultiplexer(placesManager, new CameraChangeListener()));
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             map.setMyLocationEnabled(true);
             moveToLastLocation();
@@ -500,12 +496,19 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
 
     private void initClustering() {
         placesManager = new ClusterManager<>(this, map);
+        placesManager.setAnimation(false);
         PlacesRenderer renderer = new PlacesRenderer(this, map, placesManager);
+        renderer.setAnimation(false);
         placesManager.setRenderer(renderer);
         renderer.setOnClusterItemClickListener(new ClusterItemClickListener());
 
-        map.setOnCameraChangeListener(placesManager);
+        map.setOnCameraIdleListener(() -> {
+            placesManager.onCameraIdle();
+            refreshMap();
+        });
+
         map.setOnMarkerClickListener(placesManager);
+
         map.setOnMapClickListener(latLng -> {
             selectedPlace = null;
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
@@ -569,7 +572,7 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         }
     }
 
-    private class PlacesRenderer extends StaticClusterRenderer<PlaceMarker> {
+    private class PlacesRenderer extends DefaultClusterRenderer<PlaceMarker> {
         PlacesRenderer(Context context, GoogleMap map, ClusterManager<PlaceMarker> clusterManager) {
             super(context, map, clusterManager);
         }
@@ -583,13 +586,6 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
             markerOptions
                     .icon(placeCategoriesMarkersRepository.getPlaceCategoryMarker(place.getCategoryId()))
                     .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V);
-        }
-    }
-
-    private class CameraChangeListener implements GoogleMap.OnCameraChangeListener {
-        @Override
-        public void onCameraChange(CameraPosition cameraPosition) {
-            refreshMap();
         }
     }
 
@@ -632,6 +628,16 @@ public class MapActivity extends AbstractActivity implements OnMapReadyCallback,
         @Override
         public LatLng getPosition() {
             return new LatLng(latitude, longitude);
+        }
+
+        @Override
+        public String getTitle() {
+            return "Title";
+        }
+
+        @Override
+        public String getSnippet() {
+            return "Snippet";
         }
     }
 }

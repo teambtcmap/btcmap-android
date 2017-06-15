@@ -82,7 +82,7 @@ dependencies {
     compile "com.google.android.gms:play-services-auth:$play_services_version"
     compile "com.google.firebase:firebase-crash:$play_services_version"
 
-    compile 'com.google.maps.android:android-maps-utils:0.4'
+    compile 'com.google.maps.android:android-maps-utils:0.5'
 
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
