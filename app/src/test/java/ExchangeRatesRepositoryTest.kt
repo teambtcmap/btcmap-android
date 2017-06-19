@@ -6,10 +6,10 @@ import org.junit.Test
  */
 
 class ExchangeRatesRepositoryTest : BaseRobolectricTest() {
-    private val repository = lazy { dependencies.value.exchangeRatesRepository() }
+    private val repository = dependencies!!.exchangeRatesRepository()
 
     @Test
     fun exchangeRatesRepository_LoadsAnyRates() {
-        Assert.assertFalse(repository.value.exchangeRates.isEmpty())
+        Assert.assertFalse(repository.exchangeRates.isEmpty())
     }
 }

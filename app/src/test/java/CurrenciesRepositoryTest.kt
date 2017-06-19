@@ -8,18 +8,18 @@ import java.io.IOException
  */
 
 class CurrenciesRepositoryTest : BaseRobolectricTest() {
-    private val repository = lazy { dependencies.value.currenciesRepository() }
+    private val repository = dependencies!!.currenciesRepository()
 
     @Test
     @Throws(IOException::class)
     fun currenciesRepository_ReloadsWithoutException() {
-        repository.value.reloadFromApi()
+        repository.reloadFromApi()
     }
 
     @Test
     @Throws(IOException::class)
     fun currenciesRepository_HasBitcoin() {
-        repository.value.reloadFromApi()
-        Assert.assertTrue(repository.value.getCurrency("BTC") != null)
+        repository.reloadFromApi()
+        Assert.assertTrue(repository.getCurrency("BTC") != null)
     }
 }

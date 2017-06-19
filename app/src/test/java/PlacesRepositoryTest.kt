@@ -6,17 +6,17 @@ import org.junit.Test
  */
 
 class PlacesRepositoryTest : BaseRobolectricTest() {
-    private val repository = lazy { dependencies.value.placesRepository() }
+    private val repository = dependencies!!.placesRepository()
 
     @Test
     fun placesRepository_FetchNewPlaces_NotEmpty() {
-        Assert.assertFalse(repository.value.fetchNewPlaces().isEmpty())
+        Assert.assertFalse(repository.fetchNewPlaces().isEmpty())
     }
 
     @Test
     fun placesRepository_SavesNewPlaces() {
-        val newPlaces = repository.value.fetchNewPlaces()
+        val newPlaces = repository.fetchNewPlaces()
         Assert.assertFalse(newPlaces.isEmpty())
-        Assert.assertNotNull(repository.value.getPlace(newPlaces[0].id))
+        Assert.assertNotNull(repository.getPlace(newPlaces[0].id))
     }
 }

@@ -8,11 +8,11 @@ import org.junit.Test
  */
 
 class NotificationAreaRepositoryTest : BaseRobolectricTest() {
-    private val repository = lazy { dependencies.value.notificationAreaRepository() }
+    private val repository = dependencies!!.notificationAreaRepository()
 
     @Test
     fun notificationAreaRepository_NullByDefault() {
-        Assert.assertTrue(repository.value.notificationArea == null)
+        Assert.assertTrue(repository.notificationArea == null)
     }
 
     @Test
@@ -23,8 +23,8 @@ class NotificationAreaRepositoryTest : BaseRobolectricTest() {
                 radius = 100.0
         )
 
-        repository.value.notificationArea = area
-        Assert.assertEquals(repository.value.notificationArea, area)
+        repository.notificationArea = area
+        Assert.assertEquals(repository.notificationArea, area)
     }
 
     @Test
@@ -35,8 +35,8 @@ class NotificationAreaRepositoryTest : BaseRobolectricTest() {
                 radius = 100.0
         )
 
-        repository.value.notificationArea = area
-        repository.value.notificationArea = null
-        Assert.assertTrue(repository.value.notificationArea == null)
+        repository.notificationArea = area
+        repository.notificationArea = null
+        Assert.assertTrue(repository.notificationArea == null)
     }
 }
