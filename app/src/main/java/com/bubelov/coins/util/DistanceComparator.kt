@@ -14,8 +14,4 @@ class DistanceComparator(private val target: Location) : Comparator<Place> {
     override fun compare(place1: Place, place2: Place): Int {
         return place1.distanceTo(target).compareTo(place2.distanceTo(target))
     }
-
-    fun Place.distanceTo(target: Location): Double {
-        return DistanceUtils.getDistance(this.latitude, this.longitude, target.latitude, target.longitude)
-    }
 }

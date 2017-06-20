@@ -57,7 +57,7 @@ public class PlaceNotificationManager {
                 .setAutoCancel(true)
                 .setGroup(NEW_PLACE_NOTIFICATION_GROUP);
 
-        Intent intent = MapActivity.newIntent(context, newPlace.getId());
+        Intent intent = MapActivity.Companion.newIntent(context, newPlace.getId());
         PendingIntent pendingIntent = PendingIntent.getActivity(context, UUID.randomUUID().hashCode(), intent, 0);
         builder.setContentIntent(pendingIntent);
 
@@ -94,7 +94,7 @@ public class PlaceNotificationManager {
     }
 
     private void issueGroupNotification(Collection<PlaceNotification> pendingPlaces) {
-        Intent intent = MapActivity.newIntent(context, 0);
+        Intent intent = MapActivity.Companion.newIntent(context, 0);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, NEW_PLACE_NOTIFICATION_GROUP.hashCode(), intent, 0);
 
         NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();

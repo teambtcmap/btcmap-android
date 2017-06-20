@@ -30,6 +30,7 @@ class PlacesSearchResultsAdapter(val itemClick: (PlacesSearchResult) -> Unit) : 
         fun bind(item: PlacesSearchResult) {
             with(item) {
                 itemView.icon.setImageResource(iconResId)
+                itemView.name.text = placeName
 
                 if (distance != null) {
                     itemView.distance.visibility = View.VISIBLE

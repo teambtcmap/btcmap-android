@@ -12,13 +12,13 @@ import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceNetwo
 import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository;
 import com.bubelov.coins.repository.rate.ExchangeRatesRepository;
 import com.bubelov.coins.ui.activity.EditPlaceActivity;
-import com.bubelov.coins.ui.activity.MapActivity;
 import com.bubelov.coins.ui.activity.NotificationAreaActivity;
 import com.bubelov.coins.ui.activity.ProfileActivity;
 import com.bubelov.coins.ui.fragment.SettingsFragment;
 import com.bubelov.coins.ui.fragment.SignInFragment;
 import com.bubelov.coins.ui.fragment.SignUpFragment;
 import com.bubelov.coins.database.sync.DatabaseSync;
+import com.bubelov.coins.ui.viewmodel.MainViewModel;
 import com.bubelov.coins.util.PlaceNotificationManager;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -52,7 +52,6 @@ public interface MainComponent {
     PlaceCategoriesDataSourceDb placeCategoriesDataSourceDb();
     PlaceCategoriesDataSourceMemory placeCategoriesDataSourceMemory();
 
-    void inject(MapActivity target);
     void inject(EditPlaceActivity target);
     void inject(NotificationAreaActivity target);
     void inject(ProfileActivity target);
@@ -60,6 +59,8 @@ public interface MainComponent {
     void inject(SignInFragment target);
     void inject(SignUpFragment target);
     void inject(SettingsFragment target);
+
+    void inject(MainViewModel target);
 
     void inject(DatabaseSync sync);
 }

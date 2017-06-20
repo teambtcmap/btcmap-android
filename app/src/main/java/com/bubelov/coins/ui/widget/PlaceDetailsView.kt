@@ -11,7 +11,7 @@ import android.widget.FrameLayout
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.util.Analytics
-import com.bubelov.coins.util.IntentUtils
+import com.bubelov.coins.util.openUrl
 
 import kotlinx.android.synthetic.main.widget_place_details.view.*
 import org.jetbrains.anko.share
@@ -84,7 +84,7 @@ class PlaceDetailsView(context: Context, attrs: AttributeSet) : FrameLayout(cont
             website.text = place.website
             website.setTextColor(ContextCompat.getColor(context, R.color.primary_dark))
             website.paintFlags = website.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-            website.setOnClickListener { IntentUtils.openUrl(this@PlaceDetailsView.context, place.website) }
+            website.setOnClickListener { context.openUrl(place.website) }
         }
 
         if (TextUtils.isEmpty(place.description)) {

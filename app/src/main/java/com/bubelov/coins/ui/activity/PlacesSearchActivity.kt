@@ -75,7 +75,7 @@ class PlacesSearchActivity : AbstractActivity() {
 
         const val PLACE_ID_EXTRA = "place_id"
 
-        fun startForResult(activity: Activity, userLocation: Location, requestCode: Int) {
+        fun startForResult(activity: Activity, userLocation: Location?, requestCode: Int) {
             val intent = Intent(activity, PlacesSearchActivity::class.java).apply { putExtra(USER_LOCATION_EXTRA, userLocation) }
             activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
         }
