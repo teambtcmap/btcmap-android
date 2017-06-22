@@ -6,8 +6,6 @@ import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.content.pm.PackageManager
 import android.location.Location
-import android.os.Bundle
-import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import com.bubelov.coins.App
 import com.bubelov.coins.Constants
@@ -24,12 +22,10 @@ import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.util.Analytics
 import com.bubelov.coins.util.openUrl
 import com.bubelov.coins.util.toLatLng
-import com.google.android.gms.auth.api.Auth
-import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import timber.log.Timber
 import java.util.ArrayList
 import javax.inject.Inject
 import kotlin.properties.Delegates
@@ -63,21 +59,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     var selectedPlace: Place? = null
 
-    val googleApiClient = GoogleApiClient.Builder(getApplication())
-            .addApi(LocationServices.API)
-            .addApi(Auth.GOOGLE_SIGN_IN_API)
-            .addConnectionCallbacks(object: GoogleApiClient.ConnectionCallbacks {
-                override fun onConnected(p0: Bundle?) {
-                    locateUser()
-                }
+    val locationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplication<App>())
 
-                override fun onConnectionSuspended(p0: Int) {
-                    Timber.e("Connection suspended")
-                }
-            })
-            .build()
-
-    lateinit var callback: Callback
+    var callback: Callback? = null
 
     init {
         Injector.INSTANCE.mainComponent().inject(this)
@@ -85,29 +69,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onAddPlaceClick() {
         if (userRepository.signedIn()) {
-            callback.addPlace()
+            callback?.addPlace()
         } else {
-            callback.signIn()
+            callback?.signIn()
         }
     }
 
     fun onEditPlaceClick(place: Place) {
         if (userRepository.signedIn()) {
-            callback.editPlace(place)
+            callback?.editPlace(place)
         } else {
-            callback.signIn()
+            callback?.signIn()
         }
     }
 
     fun onSearchClick() {
-        callback.startSearch(getLastLocation())
+        if (ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            callback?.startSearch(null)
+            return
+        }
+
+        locationClient.lastLocation.addOnCompleteListener { task ->
+            callback?.startSearch(task.result)
+        }
     }
 
     fun onDrawerHeaderClick() {
         if (userRepository.signedIn()) {
-            callback.showUserProfile()
+            callback?.showUserProfile()
         } else {
-            callback.signIn()
+            callback?.signIn()
         }
     }
 
@@ -130,41 +121,35 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun locateUser() {
         if (ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            val lastLocation = getLastLocation()
-
-            if (lastLocation != null) {
-                callback.moveToLocation(lastLocation.toLatLng())
-            } else {
-                callback.moveToLocation(LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE))
+            locationClient.lastLocation.addOnCompleteListener { task ->
+                if (task.result != null) {
+                    callback?.moveToLocation(task.result.toLatLng())
+                } else {
+                    callback?.moveToLocation(LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE))
+                }
             }
         } else {
-            callback.requestLocationPermissions()
+            callback?.requestLocationPermissions()
         }
     }
 
-    fun getLastLocation(): Location? {
-        if (googleApiClient.isConnected && ActivityCompat.checkSelfPermission(getApplication(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            val location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient)
-
-            if (location != null) {
-                onNewLocation(location)
-            }
-
-            return location
-        } else {
-            return null
+    fun onLocationPermissionGranted() {
+        if (ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return
         }
-    }
 
-    fun onNewLocation(location: Location) {
-        if (notificationAreaRepository.notificationArea == null) {
-            val area = NotificationArea(
-                    location.latitude,
-                    location.longitude,
-                    Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS
-            )
+        locationClient.lastLocation.addOnCompleteListener { task ->
+            val location = task.result
 
-            notificationAreaRepository.notificationArea = area
+            if (notificationAreaRepository.notificationArea == null) {
+                val area = NotificationArea(
+                        location.latitude,
+                        location.longitude,
+                        Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS
+                )
+
+                notificationAreaRepository.notificationArea = area
+            }
         }
     }
 

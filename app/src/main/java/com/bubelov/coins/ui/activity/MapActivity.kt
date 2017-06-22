@@ -41,7 +41,6 @@ import com.squareup.picasso.Picasso
 import butterknife.ButterKnife
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MainViewModel
-import com.bubelov.coins.util.openUrl
 import kotlinx.android.synthetic.main.activity_map.*
 
 /**
@@ -199,6 +198,7 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == Activity.RESULT_OK) {
+            viewModel.onLocationPermissionGranted()
             viewModel.locateUser()
         }
 
@@ -239,11 +239,8 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            REQUEST_ACCESS_LOCATION -> if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    return
-                }
-
+            REQUEST_ACCESS_LOCATION -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                viewModel.onLocationPermissionGranted()
                 viewModel.locateUser()
             }
         }
