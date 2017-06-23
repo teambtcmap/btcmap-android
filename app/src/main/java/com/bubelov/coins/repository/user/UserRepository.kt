@@ -53,8 +53,8 @@ internal constructor(private val api: CoinsApi, private val preferences: SharedP
         }
 
         if (response.isSuccessful) {
-            user = response.body().user
-            userAuthToken = response.body().token
+            user = response.body().user!!
+            userAuthToken = response.body().token!!
             userAuthMethod = "google"
             onAuthorized()
             return true
@@ -77,8 +77,8 @@ internal constructor(private val api: CoinsApi, private val preferences: SharedP
         }
 
         if (response.isSuccessful) {
-            user = response.body().user
-            userAuthToken = response.body().token
+            user = response.body().user!!
+            userAuthToken = response.body().token!!
             userAuthMethod = "email"
             onAuthorized()
             return true
@@ -101,8 +101,8 @@ internal constructor(private val api: CoinsApi, private val preferences: SharedP
         }
 
         if (response.isSuccessful) {
-            user = response.body().user
-            userAuthToken = response.body().token
+            user = response.body().user!!
+            userAuthToken = response.body().token!!
             userAuthMethod = "email"
             onAuthorized()
             return true
