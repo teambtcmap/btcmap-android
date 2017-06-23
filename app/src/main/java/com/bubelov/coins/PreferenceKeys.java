@@ -12,4 +12,6 @@ public interface PreferenceKeys {
     String API_AUTH_METHOD = "api_auth_method";
 
     String NOTIFICATION_AREA = "notification_area";
+
+    String PLACE_NOTIFICATIONS = "place_notifications";
 }

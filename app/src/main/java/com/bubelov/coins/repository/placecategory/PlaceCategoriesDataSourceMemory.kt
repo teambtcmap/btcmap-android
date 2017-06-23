@@ -15,11 +15,11 @@ import javax.inject.Singleton
 
 @Singleton
 class PlaceCategoriesDataSourceMemory @Inject
-internal constructor() : PlaceCategoriesDataSource {
+internal constructor() {
     @SuppressLint("UseSparseArrays")
     private val categories = HashMap<Long, PlaceCategory>()
 
-    override fun getPlaceCategory(id: Long): PlaceCategory? {
+    fun getPlaceCategory(id: Long): PlaceCategory? {
         return categories[id]
     }
 
