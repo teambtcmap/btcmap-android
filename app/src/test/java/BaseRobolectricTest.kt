@@ -16,8 +16,8 @@ abstract class BaseRobolectricTest {
     val dependencies: MainComponent? = null
     get() {
         if (field == null) {
-            Injector.INSTANCE.initMainComponent(RuntimeEnvironment.application)
-            field = Injector.INSTANCE.mainComponent()
+            Injector.init(RuntimeEnvironment.application)
+            field = Injector.mainComponent
         }
 
         return field

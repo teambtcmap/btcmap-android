@@ -114,7 +114,7 @@ internal constructor(private val api: CoinsApi, private val preferences: SharedP
     fun signedIn() = !userAuthToken.isBlank()
 
     private fun onAuthorized() {
-        val analytics = Injector.INSTANCE.mainComponent().analytics()
+        val analytics = Injector.mainComponent.analytics()
         val bundle = Bundle()
         bundle.putString(FirebaseAnalytics.Param.SIGN_UP_METHOD, userAuthMethod)
         analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)

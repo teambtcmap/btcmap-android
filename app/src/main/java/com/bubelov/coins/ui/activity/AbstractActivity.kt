@@ -45,6 +45,6 @@ abstract class AbstractActivity : LifecycleActivity() {
     }
 
     protected fun dependencies(): MainComponent {
-        return Injector.INSTANCE.mainComponent()
+        return Injector.mainComponent
     }
 }

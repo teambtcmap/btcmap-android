@@ -51,7 +51,7 @@ public class SignInFragment extends Fragment implements TextView.OnEditorActionL
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Injector.INSTANCE.mainComponent().inject(this);
+        Injector.INSTANCE.getMainComponent().inject(this);
     }
 
     @Nullable

@@ -64,7 +64,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     var callback: Callback? = null
 
     init {
-        Injector.INSTANCE.mainComponent().inject(this)
+        Injector.mainComponent.inject(this)
     }
 
     fun onAddPlaceClick() {

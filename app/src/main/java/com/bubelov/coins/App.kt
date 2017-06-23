@@ -25,7 +25,7 @@ class App : Application() {
             Timber.plant(ReleaseTree())
         }
 
-        Injector.INSTANCE.initMainComponent(this)
+        Injector.init(this)
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
         DatabaseSyncService.start(this)
     }

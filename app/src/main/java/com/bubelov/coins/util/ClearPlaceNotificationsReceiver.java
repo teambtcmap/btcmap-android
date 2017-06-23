@@ -15,7 +15,7 @@ public class ClearPlaceNotificationsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Injector.INSTANCE.mainComponent().placeNotificationsRepository().clear();
+        Injector.INSTANCE.getMainComponent().placeNotificationsRepository().clear();
         context.unregisterReceiver(this);
     }
 }

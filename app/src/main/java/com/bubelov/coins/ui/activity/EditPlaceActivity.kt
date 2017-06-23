@@ -40,7 +40,7 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        placesRepository = Injector.INSTANCE.mainComponent().placesRepository()
+        placesRepository = Injector.mainComponent.placesRepository()
         setContentView(R.layout.activity_edit_place)
         ButterKnife.bind(this)
 

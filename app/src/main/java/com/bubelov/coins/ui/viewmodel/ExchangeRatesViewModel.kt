@@ -20,7 +20,7 @@ class ExchangeRatesViewModel(application: Application) : AndroidViewModel(applic
 
     private inner class GetRatesTask : AsyncTask<Void, Void, List<ExchangeRate>>() {
         override fun doInBackground(vararg ignore: Void): List<ExchangeRate> {
-            return Injector.INSTANCE.mainComponent().exchangeRatesRepository().exchangeRates
+            return Injector.mainComponent.exchangeRatesRepository().exchangeRates
         }
 
         override fun onPostExecute(places: List<ExchangeRate>) {

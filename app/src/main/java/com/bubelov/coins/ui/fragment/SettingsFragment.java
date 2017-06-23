@@ -24,7 +24,7 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Injector.INSTANCE.mainComponent().inject(this);
+        Injector.INSTANCE.getMainComponent().inject(this);
         addPreferencesFromResource(R.xml.preferences);
     }
 
@@ -45,7 +45,7 @@ public class SettingsFragment extends PreferenceFragment {
         Place randomPlace = placesRepository.getRandomPlace();
 
         if (randomPlace != null) {
-            Injector.INSTANCE.mainComponent().notificationManager().notifyUser(randomPlace);
+            Injector.INSTANCE.getMainComponent().notificationManager().notifyUser(randomPlace);
         }
     }
 }

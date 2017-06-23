@@ -34,6 +34,6 @@ public class Analytics {
         }
 
         bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, contentType);
-        Injector.INSTANCE.mainComponent().analytics().logEvent(eventType, bundle);
+        Injector.INSTANCE.getMainComponent().analytics().logEvent(eventType, bundle);
     }
 }

@@ -12,7 +12,7 @@ import com.bubelov.coins.dagger.Injector
 
 class DatabaseSyncService : IntentService(DatabaseSyncService::class.java.simpleName) {
     override fun onHandleIntent(intent: Intent?) {
-        Injector.INSTANCE.mainComponent().databaseSync().sync()
+        Injector.mainComponent.databaseSync().sync()
     }
 
     companion object {
