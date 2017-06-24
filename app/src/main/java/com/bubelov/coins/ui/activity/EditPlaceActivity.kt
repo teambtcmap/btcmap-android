@@ -142,7 +142,8 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
 
     @OnClick(R.id.change_location)
     fun onChangeLocationClick() {
-        PickLocationActivity.startForResult(this, if (place == null) null else LatLng(place!!.latitude, place!!.longitude), intent.getParcelableExtra(MAP_CAMERA_POSITION_EXTRA), REQUEST_PICK_LOCATION)
+        val intent = PickLocationActivity.newIntent(this, if (place == null) null else LatLng(place!!.latitude, place!!.longitude), intent.getParcelableExtra(MAP_CAMERA_POSITION_EXTRA))
+        startActivityForResult(intent, REQUEST_PICK_LOCATION, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle())
     }
 
     private inner class AddPlaceTask : AsyncTask<Void, Void, Boolean>() {
