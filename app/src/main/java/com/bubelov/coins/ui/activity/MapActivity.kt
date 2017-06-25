@@ -278,9 +278,9 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
 
     private fun updateDrawerHeader() {
         if (viewModel.userRepository.signedIn()) {
-            val user = viewModel.userRepository.user
+            val user = viewModel.userRepository.user!!
 
-            if (!TextUtils.isEmpty(user.avatarUrl)) {
+            if (!TextUtils.isEmpty(user .avatarUrl)) {
                 Picasso.with(this).load(user.avatarUrl).into(avatar)
             } else {
                 avatar.setImageResource(R.drawable.ic_no_avatar)
@@ -325,7 +325,8 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
     }
 
     private fun openSettingsScreen() {
-        SettingsActivity.start(this)
+        val intent = SettingsActivity.newIntent(this)
+        startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle())
     }
 
     private fun initClustering() {

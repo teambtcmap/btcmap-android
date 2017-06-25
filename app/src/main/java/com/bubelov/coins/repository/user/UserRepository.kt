@@ -27,7 +27,7 @@ import timber.log.Timber
 @Singleton
 class UserRepository @Inject
 internal constructor(private val api: CoinsApi, private val preferences: SharedPreferences, private val gson: Gson) {
-    var user: User
+    var user: User?
         get() = gson.fromJson(preferences.getString(PreferenceKeys.USER, null), User::class.java)
         set(user) = preferences.edit().putString(PreferenceKeys.USER, gson.toJson(user)).apply()
 
@@ -112,6 +112,12 @@ internal constructor(private val api: CoinsApi, private val preferences: SharedP
     }
 
     fun signedIn() = !userAuthToken.isBlank()
+
+    fun clear() {
+        user = null
+        userAuthToken = ""
+        userAuthMethod = ""
+    }
 
     private fun onAuthorized() {
         val analytics = Injector.mainComponent.analytics()

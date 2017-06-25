@@ -18,6 +18,7 @@ import com.bubelov.coins.ui.fragment.SettingsFragment
 import com.bubelov.coins.ui.fragment.SignInFragment
 import com.bubelov.coins.ui.fragment.SignUpFragment
 import com.bubelov.coins.database.sync.DatabaseSync
+import com.bubelov.coins.ui.activity.SignInActivity
 import com.bubelov.coins.ui.viewmodel.MainViewModel
 import com.bubelov.coins.util.PlaceNotificationManager
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -55,6 +56,7 @@ interface MainComponent {
     fun inject(target: EditPlaceActivity)
     fun inject(target: NotificationAreaActivity)
     fun inject(target: ProfileActivity)
+    fun inject(target: SignInActivity)
 
     fun inject(target: SignInFragment)
     fun inject(target: SignUpFragment)
