@@ -65,7 +65,7 @@ class PlacesSearchViewModel(application: Application) : AndroidViewModel(applica
         val distanceUnitsString = sharedPreferences.getString(getApplication<App>().getString(R.string.pref_distance_units_key), getApplication<App>().getString(R.string.pref_distance_units_automatic))
 
         if (distanceUnitsString == getApplication<App>().getString(R.string.pref_distance_units_automatic)) {
-            return DistanceUnits.getDefault()
+            return DistanceUnits.default
         } else {
             return DistanceUnits.valueOf(distanceUnitsString)
         }

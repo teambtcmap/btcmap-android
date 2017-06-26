@@ -31,7 +31,7 @@ class PlaceDetailsView(context: Context, attrs: AttributeSet) : FrameLayout(cont
             when (item.itemId) {
                 R.id.action_share -> {
                     context.share(resources.getString(R.string.share_place_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", place!!.latitude, place!!.longitude)), resources.getString(R.string.share_place_message_title))
-                    Analytics.logShareContentEvent(place!!.id.toString(), place!!.name, "place")
+                    Analytics.logShareContent(place!!.id.toString(), place!!.name, "place")
                     true
                 } else -> false
             }

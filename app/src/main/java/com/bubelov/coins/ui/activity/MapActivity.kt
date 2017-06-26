@@ -315,13 +315,13 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
     private fun openExchangeRatesScreen() {
         val intent = Intent(this@MapActivity, ExchangeRatesActivity::class.java)
         startActivity(intent)
-        Analytics.logSelectContentEvent("exchange_rates", null, "screen")
+        Analytics.logSelectContent("exchange_rates", null, "screen")
     }
 
     private fun openNotificationAreaScreen() {
         val intent = NotificationAreaActivity.newIntent(this, map!!.cameraPosition)
         startActivity(intent)
-        Analytics.logSelectContentEvent("notification_area", null, "screen")
+        Analytics.logSelectContent("notification_area", null, "screen")
     }
 
     private fun openSettingsScreen() {

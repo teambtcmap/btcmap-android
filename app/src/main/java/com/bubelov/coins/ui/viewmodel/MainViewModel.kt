@@ -111,7 +111,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         if (selectedPlace != null) {
             this.selectedPlace = selectedPlace
-            Analytics.logSelectContentEvent(selectedPlace.id.toString(), selectedPlace.name, "place")
+            Analytics.logSelectContent(selectedPlace.id.toString(), selectedPlace.name, "place")
         }
     }
 
@@ -158,12 +158,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun onSelectedPlaceDetailsClick() {
-        Analytics.logViewContentEvent(selectedPlace!!.id.toString(), selectedPlace!!.name, "place")
+        Analytics.logViewContent(selectedPlace!!.id.toString(), selectedPlace!!.name, "place")
     }
 
     fun onSupportChatClick() {
         getApplication<App>().openUrl("https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw")
-        Analytics.logSelectContentEvent("chat", null, "screen")
+        Analytics.logSelectContent("chat", null, "screen")
     }
 
     private fun toPlaceMarkers(places: Collection<Place>): Collection<PlaceMarker> {
