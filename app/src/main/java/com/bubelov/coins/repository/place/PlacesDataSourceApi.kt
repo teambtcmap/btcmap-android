@@ -5,7 +5,6 @@ import com.bubelov.coins.api.coins.PlaceParams
 import com.bubelov.coins.model.Place
 
 import java.io.IOException
-import java.util.Date
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,8 +17,8 @@ import javax.inject.Singleton
 class PlacesDataSourceApi @Inject
 internal constructor(private val api: CoinsApi) {
     @Throws(IOException::class)
-    fun getPlaces(updatedAfter: Date): List<Place> {
-        return api.getPlaces(updatedAfter, Integer.MAX_VALUE).execute().body()
+    fun getPlaces(updatedAfter: String): List<Place> {
+        return api.getPlaces(updatedAfter, Integer.MAX_VALUE).execute().body()!!
     }
 
     @Throws(IOException::class)

@@ -99,7 +99,7 @@ internal constructor(httpClient: OkHttpClient, gson: Gson) {
     private val bitcoinAverageRate: ExchangeRate
         @Throws(IOException::class)
         get() {
-            val rate = bitcoinAverageApi.getUsdTicker().execute().body().last.toDouble()
+            val rate = bitcoinAverageApi.getUsdTicker().execute().body()!!.last.toDouble()
 
             return ExchangeRate(
                     id = 0,
@@ -114,7 +114,7 @@ internal constructor(httpClient: OkHttpClient, gson: Gson) {
     private val bitstampRate: ExchangeRate
         @Throws(IOException::class)
         get() {
-            val rate = bitstampApi.getTicker().execute().body().last.toDouble()
+            val rate = bitstampApi.getTicker().execute().body()!!.last.toDouble()
 
             return ExchangeRate(
                     id = 0,
@@ -129,7 +129,7 @@ internal constructor(httpClient: OkHttpClient, gson: Gson) {
     private val coinbaseRate: ExchangeRate
         @Throws(IOException::class)
         get() {
-            val rate = coinbaseApi.getExchangeRates().execute().body().data!!.rates!!["USD"]
+            val rate = coinbaseApi.getExchangeRates().execute().body()!!.data!!.rates!!["USD"]
 
             return ExchangeRate(
                     id = 0,
@@ -144,7 +144,7 @@ internal constructor(httpClient: OkHttpClient, gson: Gson) {
     private val winkDexRate: ExchangeRate
         @Throws(IOException::class)
         get() {
-            val rate = winkDexApi.getPrice().execute().body().price.toDouble() / 100.0f
+            val rate = winkDexApi.getPrice().execute().body()!!.price.toDouble() / 100.0f
 
             return ExchangeRate(
                     id = 0,

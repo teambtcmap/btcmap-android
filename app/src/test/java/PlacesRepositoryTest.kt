@@ -1,4 +1,5 @@
-import org.junit.Assert
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -9,14 +10,18 @@ class PlacesRepositoryTest : BaseRobolectricTest() {
     private val repository = dependencies!!.placesRepository()
 
     @Test
-    fun placesRepository_FetchNewPlaces_NotEmpty() {
-        Assert.assertFalse(repository.fetchNewPlaces().isEmpty())
+    fun isNotEmptyByDefault() {
+        assertTrue(repository.getPlaces("").isNotEmpty())
     }
 
     @Test
-    fun placesRepository_SavesNewPlaces() {
+    fun returnsRandomPlace() {
+        assertNotNull(repository.getRandomPlace())
+    }
+
+    @Test
+    fun fetchesNewPlaces() {
         val newPlaces = repository.fetchNewPlaces()
-        Assert.assertFalse(newPlaces.isEmpty())
-        Assert.assertNotNull(repository.getPlace(newPlaces[0].id))
+        assertTrue(newPlaces.isNotEmpty())
     }
 }

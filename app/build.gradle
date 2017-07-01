@@ -16,14 +16,7 @@ android {
         buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v3/\""
         buildConfigField "String", "GOOGLE_CLIENT_ID", GOOGLE_CLIENT_ID
 
-        resValue "string", "maps_api_key", MAPS_API_KEY
-
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     signingConfigs {
@@ -38,24 +31,12 @@ android {
     buildTypes {
         debug {
             versionNameSuffix "-dev"
-            minifyEnabled false
-            useProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
-            minifyEnabled true
             useProguard true
-            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
-    }
-
-    // TODO remove after fix on Google side
-    applicationVariants.all { variant ->
-        def productFlavor = variant.productFlavors[0] != null ? "${variant.productFlavors[0].name.capitalize()}" : ""
-        def buildType = "${variant.buildType.name.capitalize()}"
-        tasks["compile${productFlavor}${buildType}UnitTestSources"].dependsOn(tasks["merge${productFlavor}${buildType}Assets"])
     }
 }
 
@@ -69,9 +50,9 @@ dependencies {
     compile "org.jetbrains.anko:anko-commons:$anko_version"
 
     // Android architecture components
-    compile "android.arch.lifecycle:runtime:1.0.0-alpha1"
-    compile "android.arch.lifecycle:extensions:1.0.0-alpha1"
-    annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha1"
+    compile "android.arch.lifecycle:runtime:1.0.0-alpha3"
+    compile "android.arch.lifecycle:extensions:1.0.0-alpha3"
+    annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha3"
 
     // Android support libraries
     compile "com.android.support:appcompat-v7:$support_version"
@@ -88,9 +69,8 @@ dependencies {
 
     compile 'com.google.maps.android:android-maps-utils:0.5'
 
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'com.squareup.okhttp3:logging-interceptor:3.5.0'
+    compile 'com.squareup.retrofit2:retrofit:2.3.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
 
     compile 'com.jakewharton:butterknife:8.4.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
@@ -104,9 +84,6 @@ dependencies {
 
     compile 'com.google.dagger:dagger:2.11'
     kapt 'com.google.dagger:dagger-compiler:2.11'
-
-    compile 'com.facebook.stetho:stetho:1.5.0'
-    compile 'com.facebook.stetho:stetho-okhttp3:1.5.0'
 
     testCompile 'junit:junit:4.12'
 
@@ -132,16 +109,4 @@ dependencies {
     }
 
     androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
-}
-
-// TODO remove after fix on Google side
-task copyTestClasses(type: Copy) {
-    from "build/tmp/kotlin-classes/debugUnitTest"
-    into "build/intermediates/classes/debug"
-}
-
-// TODO remove after fix on Google side
-task copySdkClasses(type: Copy) {
-    from "build/tmp/kotlin-classes/debug"
-    into "build/intermediates/classes/debug"
 }

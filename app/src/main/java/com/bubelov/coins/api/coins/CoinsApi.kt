@@ -4,8 +4,6 @@ import com.bubelov.coins.model.Currency
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.model.PlaceCategory
 
-import java.util.Date
-
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -30,10 +28,7 @@ interface CoinsApi {
     fun authWithGoogle(@Header("token") token: String): Call<AuthResponse>
 
     @GET("places")
-    fun getPlaces(@Query("since") since: Date, @Query("limit") limit: Int): Call<List<Place>>
-
-    @GET("places/{id}")
-    fun getPlace(@Path("id") id: Long): Call<Place>
+    fun getPlaces(@Query("since") since: String, @Query("limit") limit: Int): Call<List<Place>>
 
     @POST("places")
     fun addPlace(@Header("session") session: String, @Body place: PlaceParams): Call<Place>

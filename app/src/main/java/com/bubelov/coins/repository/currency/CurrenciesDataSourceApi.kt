@@ -16,5 +16,5 @@ import javax.inject.Singleton
 class CurrenciesDataSourceApi @Inject
 internal constructor(private val api: CoinsApi) {
     @Throws(IOException::class)
-    fun getCurrencies(): List<Currency> = api.getCurrencies().execute().body()
+    fun getCurrencies(): List<Currency> = api.getCurrencies().execute().body()!!
 }

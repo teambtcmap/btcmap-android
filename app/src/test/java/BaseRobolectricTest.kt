@@ -11,7 +11,7 @@ import org.robolectric.annotation.Config
  */
 
 @RunWith(RobolectricTestRunner::class)
-@Config(manifest = Config.NONE, shadows = arrayOf(NetworkSecurityPolicyShadow::class))
+@Config(manifest = "app/src/main/AndroidManifest.xml", sdk = intArrayOf(23))
 abstract class BaseRobolectricTest {
     val dependencies: MainComponent? = null
     get() {

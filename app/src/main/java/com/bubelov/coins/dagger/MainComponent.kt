@@ -1,6 +1,7 @@
 package com.bubelov.coins.dagger
 
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 
 import com.bubelov.coins.repository.area.NotificationAreaRepository
 import com.bubelov.coins.repository.currency.CurrenciesRepository
@@ -35,6 +36,8 @@ import dagger.Component
 @Component(modules = arrayOf(MainModule::class))
 interface MainComponent {
     fun context(): Context
+
+    fun database(): SQLiteDatabase
 
     fun databaseSync(): DatabaseSync
 

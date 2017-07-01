@@ -10,7 +10,6 @@ import com.bubelov.coins.api.coins.CoinsApi
 import com.bubelov.coins.database.DbHelper
 import com.bubelov.coins.util.StringAdapter
 import com.bubelov.coins.util.UtcDateTypeAdapter
-import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
@@ -24,7 +23,6 @@ import javax.inject.Singleton
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -48,8 +46,8 @@ class MainModule(private val context: Context) {
 
     @Provides
     @Singleton
-    internal fun sqlDatabase(context: Context): SQLiteDatabase {
-        return DbHelper(context).writableDatabase
+    internal fun database(context: Context, gson: Gson): SQLiteDatabase {
+        return DbHelper(context, gson).writableDatabase
     }
 
     @Provides
@@ -86,13 +84,6 @@ class MainModule(private val context: Context) {
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
-
-        if (BuildConfig.DEBUG) {
-            val loggingInterceptor = HttpLoggingInterceptor()
-            loggingInterceptor.level = HttpLoggingInterceptor.Level.HEADERS
-            httpClientBuilder.addInterceptor(loggingInterceptor)
-            httpClientBuilder.addNetworkInterceptor(StethoInterceptor())
-        }
 
         return httpClientBuilder.build()
     }

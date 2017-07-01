@@ -3,19 +3,31 @@ package com.bubelov.coins.database
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.bubelov.coins.dagger.Injector
 
 import com.bubelov.coins.database.sync.DatabaseSyncService
+import com.bubelov.coins.model.Place
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import org.jetbrains.anko.doAsync
+import java.io.InputStreamReader
 
 /**
  * @author Igor Bubelov
  */
 
-class DbHelper(private val context: Context) : SQLiteOpenHelper(context, DbHelper.DATABASE_NAME, null, DbHelper.DATABASE_VERSION) {
+class DbHelper(private val context: Context, private val gson: Gson) : SQLiteOpenHelper(context, DbHelper.DATABASE_NAME, null, DbHelper.DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(CREATE_PLACES__SQL)
         db.execSQL(CREATE_PLACE_CATEGORIES_SQL)
         db.execSQL(CREATE_CURRENCIES_SQL)
         db.execSQL(CREATE_CURRENCIES_PLACES_SQL)
+
+        val placesFromAssets = getPlacesFromAssets()
+
+        doAsync {
+            Injector.mainComponent.placesRepository().setCache(placesFromAssets)
+        }
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -27,6 +39,12 @@ class DbHelper(private val context: Context) : SQLiteOpenHelper(context, DbHelpe
         onCreate(db)
 
         DatabaseSyncService.start(context)
+    }
+
+    private fun getPlacesFromAssets(): Collection<Place> {
+        val input = context.assets.open("places.json")
+        val typeToken = object: TypeToken<List<Place>>(){}
+        return gson.fromJson(InputStreamReader(input), typeToken.type)
     }
 
     companion object {
