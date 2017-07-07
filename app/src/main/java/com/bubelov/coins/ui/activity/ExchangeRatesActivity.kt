@@ -34,13 +34,14 @@ class ExchangeRatesActivity : AbstractActivity() {
         rates_view.setHasFixedSize(true)
 
         val ratesAdapter = ExchangeRatesAdapter()
+
         rates_view.adapter = ratesAdapter
 
         loading = true
 
         viewModel.value.rates.observe(this, Observer { rates ->
             loading = false
-            ratesAdapter.items = rates
+            ratesAdapter.items = rates!!
             ratesAdapter.notifyDataSetChanged()
         })
     }

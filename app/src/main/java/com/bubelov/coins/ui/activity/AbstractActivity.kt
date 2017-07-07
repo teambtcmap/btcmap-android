@@ -7,7 +7,6 @@ import android.support.v7.app.AlertDialog
 
 import com.bubelov.coins.dagger.Injector
 import com.bubelov.coins.dagger.MainComponent
-import com.bubelov.coins.ui.dialog.ProgressDialog
 import com.bubelov.coins.util.ThemeUtils
 
 /**
@@ -15,8 +14,6 @@ import com.bubelov.coins.util.ThemeUtils
  */
 
 abstract class AbstractActivity : LifecycleActivity() {
-    var progressDialog: ProgressDialog? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeUtils.ensureRuntimeTheme(this)
         super.onCreate(savedInstanceState)
@@ -34,14 +31,11 @@ abstract class AbstractActivity : LifecycleActivity() {
     }
 
     protected fun showProgress() {
-        hideProgress()
-        progressDialog = ProgressDialog.show(this, "", "", true, false)
+        TODO()
     }
 
     protected fun hideProgress() {
-        if (progressDialog != null) {
-            progressDialog!!.hide()
-        }
+        TODO()
     }
 
     protected fun dependencies(): MainComponent {

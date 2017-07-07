@@ -38,10 +38,10 @@ import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.squareup.picasso.Picasso
 
-import butterknife.ButterKnife
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_map.*
+import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
 
 /**
  * @author Igor Bubelov
@@ -72,8 +72,8 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
         viewModel.callback = this
 
         drawerHeader = navigation_view.getHeaderView(0)
-        avatar = ButterKnife.findById<ImageView>(drawerHeader, R.id.avatar)
-        userName = ButterKnife.findById<TextView>(drawerHeader, R.id.user_name)
+        avatar = drawerHeader.avatar
+        userName = drawerHeader.user_name
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)

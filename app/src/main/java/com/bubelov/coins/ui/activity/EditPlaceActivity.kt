@@ -18,9 +18,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 
-import butterknife.ButterKnife
-import butterknife.OnCheckedChanged
-import butterknife.OnClick
 import com.bubelov.coins.dagger.Injector
 import kotlinx.android.synthetic.main.activity_edit_place.*
 import java.util.*
@@ -30,7 +27,7 @@ import java.util.*
  */
 
 class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
-    private var placesRepository: PlacesRepository? = null
+    lateinit var placesRepository: PlacesRepository
 
     private var place: Place? = null
 
@@ -42,7 +39,6 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         placesRepository = Injector.mainComponent.placesRepository()
         setContentView(R.layout.activity_edit_place)
-        ButterKnife.bind(this)
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
         toolbar.inflateMenu(R.menu.edit_place)
@@ -55,7 +51,7 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
             true
         }
 
-        place = placesRepository!!.getPlace(intent.getLongExtra(ID_EXTRA, -1))
+        place = placesRepository.getPlace(intent.getLongExtra(ID_EXTRA, -1))
 
         if (place == null) {
             toolbar.setTitle(R.string.action_add_place)
@@ -72,6 +68,19 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        closed_switch.setOnCheckedChangeListener { _, checked ->
+            name.isEnabled = !checked
+            phone.isEnabled = !checked
+            website.isEnabled = !checked
+            description.isEnabled = !checked
+            opening_hours.isEnabled = !checked
+        }
+
+        change_location.setOnClickListener {
+            val intent = PickLocationActivity.newIntent(this, if (place == null) null else LatLng(place!!.latitude, place!!.longitude), intent.getParcelableExtra(MAP_CAMERA_POSITION_EXTRA))
+            startActivityForResult(intent, REQUEST_PICK_LOCATION, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle())
+        }
     }
 
     fun submit() {
@@ -128,23 +137,6 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
                 visible = !closed_switch.isChecked,
                 updatedAt = Date(0)
         )
-
-    @OnCheckedChanged(R.id.closed_switch)
-    fun onClosedSwitchChanged() {
-        val closed = closed_switch.isChecked
-
-        name!!.isEnabled = !closed
-        phone!!.isEnabled = !closed
-        website!!.isEnabled = !closed
-        description!!.isEnabled = !closed
-        opening_hours.isEnabled = !closed
-    }
-
-    @OnClick(R.id.change_location)
-    fun onChangeLocationClick() {
-        val intent = PickLocationActivity.newIntent(this, if (place == null) null else LatLng(place!!.latitude, place!!.longitude), intent.getParcelableExtra(MAP_CAMERA_POSITION_EXTRA))
-        startActivityForResult(intent, REQUEST_PICK_LOCATION, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle())
-    }
 
     private inner class AddPlaceTask : AsyncTask<Void, Void, Boolean>() {
         override fun onPreExecute() {

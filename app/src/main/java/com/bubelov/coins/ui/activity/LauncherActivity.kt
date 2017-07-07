@@ -33,7 +33,7 @@ class LauncherActivity : AbstractActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == PLAY_SERVICES_RESOLUTION_REQUEST) {
             if (resultCode == Activity.RESULT_OK) {
                 onPlayServicesAvailable()
