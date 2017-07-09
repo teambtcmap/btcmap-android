@@ -20,6 +20,7 @@ import com.bubelov.coins.ui.fragment.SignInFragment
 import com.bubelov.coins.ui.fragment.SignUpFragment
 import com.bubelov.coins.database.sync.DatabaseSync
 import com.bubelov.coins.ui.activity.SignInActivity
+import com.bubelov.coins.ui.viewmodel.ExchangeRatesViewModel
 import com.bubelov.coins.ui.viewmodel.MainViewModel
 import com.bubelov.coins.util.PlaceNotificationManager
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -66,6 +67,7 @@ interface MainComponent {
     fun inject(target: SettingsFragment)
 
     fun inject(target: MainViewModel)
+    fun inject(target: ExchangeRatesViewModel)
 
     fun inject(sync: DatabaseSync)
 }

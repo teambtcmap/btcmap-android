@@ -9,7 +9,7 @@ class ExchangeRatesRepositoryTest : BaseRobolectricTest() {
     private val repository = dependencies!!.exchangeRatesRepository()
 
     @Test
-    fun exchangeRatesRepository_LoadsAnyRates() {
-        Assert.assertFalse(repository.exchangeRates.isEmpty())
+    fun hasUsdBtcSources() {
+        Assert.assertFalse(repository.getExchangeRatesSources("USD", "BTC").isEmpty())
     }
 }

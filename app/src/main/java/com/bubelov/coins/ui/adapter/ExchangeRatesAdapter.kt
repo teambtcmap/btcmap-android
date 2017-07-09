@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.bubelov.coins.R
-import com.bubelov.coins.model.ExchangeRate
+import com.bubelov.coins.ui.model.ExchangeRateQuery
 
 import java.util.Locale
 
@@ -17,7 +17,7 @@ import kotlinx.android.synthetic.main.list_item_exchange_rate.view.*
  */
 
 class ExchangeRatesAdapter : RecyclerView.Adapter<ExchangeRatesAdapter.ViewHolder>() {
-    var items: List<ExchangeRate> = emptyList()
+    var items: List<ExchangeRateQuery> = emptyList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_item_exchange_rate, parent, false))
@@ -32,11 +32,23 @@ class ExchangeRatesAdapter : RecyclerView.Adapter<ExchangeRatesAdapter.ViewHolde
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        fun bind(item: ExchangeRate) {
-            with(item) {
-                itemView.first_letter.text = source.substring(0, 1)
-                itemView.exchange_name.text = source
-                itemView.price.text = String.format(Locale.US, "$%.2f", rate)
+        fun bind(item: ExchangeRateQuery) {
+            when(item) {
+                is ExchangeRateQuery.Loading -> {
+                    itemView.first_letter.text = item.source.substring(0, 1)
+                    itemView.exchange_name.text = item.source
+                    itemView.price.text = "fetching..."
+                }
+                is ExchangeRateQuery.ExchangeRate -> {
+                    itemView.first_letter.text = item.source.substring(0, 1)
+                    itemView.exchange_name.text = item.source
+                    itemView.price.text = String.format(Locale.US, "$%.2f", item.rate)
+                }
+                is ExchangeRateQuery.Error -> {
+                    itemView.first_letter.text = item.source.substring(0, 1)
+                    itemView.exchange_name.text = item.source
+                    itemView.price.text = "error"
+                }
             }
         }
     }

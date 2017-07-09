@@ -16,33 +16,27 @@ import kotlinx.android.synthetic.main.activity_exchange_rates.*
  */
 
 class ExchangeRatesActivity : AbstractActivity() {
-    val viewModel = lazy { ViewModelProviders.of(this).get(ExchangeRatesViewModel::class.java) }
-
-    var loading: Boolean = false
-    set(value) {
-        field = value
-        state_switcher.displayedChild = if (value) 1 else 0
-    }
+    private lateinit var viewModel: ExchangeRatesViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_exchange_rates)
+        viewModel = ViewModelProviders.of(this).get(ExchangeRatesViewModel::class.java)
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 
-        rates_view.layoutManager = LinearLayoutManager(this)
-        rates_view.setHasFixedSize(true)
+        ratesView.layoutManager = LinearLayoutManager(this)
+        ratesView.setHasFixedSize(true)
 
         val ratesAdapter = ExchangeRatesAdapter()
 
-        rates_view.adapter = ratesAdapter
+        ratesView.adapter = ratesAdapter
 
-        loading = true
-
-        viewModel.value.rates.observe(this, Observer { rates ->
-            loading = false
+        viewModel.rates.observe(this, Observer { rates ->
             ratesAdapter.items = rates!!
             ratesAdapter.notifyDataSetChanged()
         })
+
+        viewModel.setCurrencyPair("USD", "BTC")
     }
 }
