@@ -20,8 +20,6 @@ import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.view.MenuItem
 import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
 
 import com.bubelov.coins.Constants
 import com.bubelov.coins.R
@@ -40,40 +38,34 @@ import com.squareup.picasso.Picasso
 
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MainViewModel
-import kotlinx.android.synthetic.main.activity_map.*
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
 
 /**
  * @author Igor Bubelov
  */
 
-class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener, MainViewModel.Callback {
-    lateinit var viewModel: MainViewModel
-
+class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener, MainViewModel.Callback {
     lateinit var drawerHeader: View
-
-    lateinit var avatar: ImageView
-
-    lateinit var userName: TextView
 
     lateinit var drawerToggle: ActionBarDrawerToggle
 
-    lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
+    lateinit var viewModel: MainViewModel
 
     var map: GoogleMap? = null
 
     lateinit var placesManager: ClusterManager<PlaceMarker>
 
+    lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map)
+        setContentView(R.layout.activity_main)
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         viewModel.callback = this
 
         drawerHeader = navigation_view.getHeaderView(0)
-        avatar = drawerHeader.avatar
-        userName = drawerHeader.user_name
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -141,14 +133,19 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
             }
         }
+
+        viewModel.selectedPlace.observe(this, Observer { place ->
+            if (place != null) {
+                place_details.setPlace(place)
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+        })
     }
 
     //
 
     override fun signIn() {
-        val intent = SignInActivity.newIntent(this)
-        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle()
-        startActivityForResult(intent, REQUEST_SIGN_IN, options)
+        startActivityForResult(SignInActivity.newIntent(this), REQUEST_SIGN_IN)
     }
 
     override fun addPlace() {
@@ -164,7 +161,7 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
     }
 
     override fun showUserProfile() {
-        startActivityForResult(ProfileActivity.newIntent(this), REQUEST_PROFILE, ActivityOptionsCompat.makeBasic().toBundle())
+        startActivityForResult(ProfileActivity.newIntent(this), REQUEST_PROFILE)
     }
 
     override fun selectPlace(place: Place) {
@@ -176,7 +173,7 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
     override fun requestLocationPermissions() {
         ActivityCompat.requestPermissions(this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                MapActivity.REQUEST_ACCESS_LOCATION)
+                MainActivity.REQUEST_ACCESS_LOCATION)
     }
 
     override fun moveToLocation(location: LatLng) {
@@ -280,20 +277,20 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
         if (viewModel.userRepository.signedIn()) {
             val user = viewModel.userRepository.user!!
 
-            if (!TextUtils.isEmpty(user .avatarUrl)) {
-                Picasso.with(this).load(user.avatarUrl).into(avatar)
+            if (!TextUtils.isEmpty(user.avatarUrl)) {
+                Picasso.with(this).load(user.avatarUrl).into(drawerHeader.avatar)
             } else {
-                avatar.setImageResource(R.drawable.ic_no_avatar)
+                drawerHeader.avatar.setImageResource(R.drawable.ic_no_avatar)
             }
 
             if (!TextUtils.isEmpty(user.firstName)) {
-                userName.text = String.format("%s %s", user.firstName, user.lastName)
+                drawerHeader.user_name.text = String.format("%s %s", user.firstName, user.lastName)
             } else {
-                userName.text = user.email
+                drawerHeader.user_name.text = user.email
             }
         } else {
-            avatar.setImageResource(R.drawable.ic_no_avatar)
-            userName.setText(R.string.guest)
+            drawerHeader.avatar.setImageResource(R.drawable.ic_no_avatar)
+            drawerHeader.user_name.setText(R.string.guest)
         }
 
         drawerHeader.setOnClickListener {
@@ -313,7 +310,7 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
     }
 
     private fun openExchangeRatesScreen() {
-        val intent = Intent(this@MapActivity, ExchangeRatesActivity::class.java)
+        val intent = Intent(this@MainActivity, ExchangeRatesActivity::class.java)
         startActivity(intent)
         Analytics.logSelectContent("exchange_rates", null, "screen")
     }
@@ -382,7 +379,7 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
         private val MAP_DEFAULT_ZOOM = 13f
 
         fun newIntent(context: Context, placeId: Long): Intent {
-            val intent = Intent(context, MapActivity::class.java)
+            val intent = Intent(context, MainActivity::class.java)
 
             if (placeId != 0L) {
                 intent.putExtra(PLACE_ID_EXTRA, placeId)

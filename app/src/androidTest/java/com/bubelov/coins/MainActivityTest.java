@@ -9,7 +9,7 @@ import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
 
-import com.bubelov.coins.ui.activity.MapActivity;
+import com.bubelov.coins.ui.activity.MainActivity;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,7 +32,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 @LargeTest
 public class MainActivityTest {
     @Rule
-    public ActivityTestRule<MapActivity> activityTestRule = new ActivityTestRule<>(MapActivity.class);
+    public ActivityTestRule<MainActivity> activityTestRule = new ActivityTestRule<>(MainActivity.class);
 
     @Test
     public void testDrawerOpens() {

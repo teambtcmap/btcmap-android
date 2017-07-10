@@ -57,7 +57,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val placeMarkers = MutableLiveData<Collection<PlaceMarker>>()
 
-    var selectedPlace: Place? = null
+    val selectedPlace: MutableLiveData<Place> = MutableLiveData()
 
     val locationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplication<App>())
 
@@ -107,12 +107,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun selectPlace(id: Long) {
-        val selectedPlace = placesRepository.getPlace(id)
-
-        if (selectedPlace != null) {
-            this.selectedPlace = selectedPlace
-            Analytics.logSelectContent(selectedPlace.id.toString(), selectedPlace.name, "place")
-        }
+        selectedPlace.value = placesRepository.getPlace(id)
+        Analytics.logSelectContent(id.toString(), selectedPlace.value!!.name, "place")
     }
 
     fun onMapBoundsChanged() {
@@ -141,7 +137,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         locationClient.lastLocation.addOnCompleteListener { task ->
             val location = task.result
 
-            if (notificationAreaRepository.notificationArea == null) {
+            if (location != null && notificationAreaRepository.notificationArea == null) {
                 val area = NotificationArea(
                         location.latitude,
                         location.longitude,
@@ -154,11 +150,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun clearSelection() {
-        selectedPlace = null
+        selectedPlace.value = null
     }
 
     fun onSelectedPlaceDetailsClick() {
-        Analytics.logViewContent(selectedPlace!!.id.toString(), selectedPlace!!.name, "place")
+        Analytics.logViewContent(selectedPlace.value!!.id.toString(), selectedPlace.value!!.name, "place")
     }
 
     fun onSupportChatClick() {

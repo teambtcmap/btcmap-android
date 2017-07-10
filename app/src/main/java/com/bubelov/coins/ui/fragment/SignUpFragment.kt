@@ -13,7 +13,7 @@ import android.widget.TextView
 import com.bubelov.coins.R
 import com.bubelov.coins.dagger.Injector
 import com.bubelov.coins.repository.user.UserRepository
-import com.bubelov.coins.ui.activity.MapActivity
+import com.bubelov.coins.ui.activity.MainActivity
 
 import javax.inject.Inject
 
@@ -58,7 +58,7 @@ class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
             val success = userRepository.signUp(email, password, firstName, lastName)
 
             if (success) {
-                val intent = Intent(context, MapActivity::class.java)
+                val intent = Intent(context, MainActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 startActivity(intent)
             } else {

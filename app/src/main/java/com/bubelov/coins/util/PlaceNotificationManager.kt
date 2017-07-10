@@ -12,7 +12,7 @@ import com.bubelov.coins.repository.area.NotificationAreaRepository
 import com.bubelov.coins.repository.notification.PlaceNotificationsRepository
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.model.PlaceNotification
-import com.bubelov.coins.ui.activity.MapActivity
+import com.bubelov.coins.ui.activity.MainActivity
 import java.util.UUID
 
 import javax.inject.Inject
@@ -40,7 +40,7 @@ internal constructor(private val context: Context, private val notificationAreaR
                 .setAutoCancel(true)
                 .setGroup(NEW_PLACE_NOTIFICATION_GROUP)
 
-        val intent = MapActivity.newIntent(context, newPlace.id)
+        val intent = MainActivity.newIntent(context, newPlace.id)
         val pendingIntent = PendingIntent.getActivity(context, UUID.randomUUID().hashCode(), intent, 0)
         builder.setContentIntent(pendingIntent)
 
@@ -73,7 +73,7 @@ internal constructor(private val context: Context, private val notificationAreaR
     }
 
     private fun issueGroupNotification(pendingPlaces: Collection<PlaceNotification>) {
-        val intent = MapActivity.newIntent(context, 0)
+        val intent = MainActivity.newIntent(context, 0)
         val pendingIntent = PendingIntent.getActivity(context, NEW_PLACE_NOTIFICATION_GROUP.hashCode(), intent, 0)
 
         val style = NotificationCompat.InboxStyle()

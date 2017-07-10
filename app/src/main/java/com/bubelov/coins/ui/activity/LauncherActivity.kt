@@ -46,7 +46,7 @@ class LauncherActivity : AbstractActivity() {
     }
 
     private fun onPlayServicesAvailable() {
-        startActivity(Intent(this, MapActivity::class.java))
+        startActivity(Intent(this, MainActivity::class.java))
     }
 
     companion object {
