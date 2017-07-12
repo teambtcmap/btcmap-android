@@ -3,8 +3,10 @@ package com.bubelov.coins.repository.place
 import com.bubelov.coins.api.coins.CoinsApi
 import com.bubelov.coins.api.coins.PlaceParams
 import com.bubelov.coins.model.Place
+import com.google.gson.Gson
 
 import java.io.IOException
+import java.util.*
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,10 +17,10 @@ import javax.inject.Singleton
 
 @Singleton
 class PlacesDataSourceApi @Inject
-internal constructor(private val api: CoinsApi) {
+internal constructor(private val api: CoinsApi, val gson: Gson) {
     @Throws(IOException::class)
-    fun getPlaces(updatedAfter: String): List<Place> {
-        return api.getPlaces(updatedAfter, Integer.MAX_VALUE).execute().body()!!
+    fun getPlaces(updatedAfter: Date): List<Place> {
+        return api.getPlaces(gson.toJson(updatedAfter), Integer.MAX_VALUE).execute().body()!!
     }
 
     @Throws(IOException::class)

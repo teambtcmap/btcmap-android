@@ -46,8 +46,8 @@ class MainModule(private val context: Context) {
 
     @Provides
     @Singleton
-    internal fun database(context: Context, gson: Gson): SQLiteDatabase {
-        return DbHelper(context, gson).writableDatabase
+    internal fun database(context: Context): SQLiteDatabase {
+        return DbHelper(context).writableDatabase
     }
 
     @Provides

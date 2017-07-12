@@ -1,11 +1,9 @@
 package com.bubelov.coins.repository.place
 
-import android.content.Context
 import com.bubelov.coins.repository.user.UserRepository
 import com.bubelov.coins.model.Place
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.gson.Gson
 
 import java.io.IOException
 
@@ -20,10 +18,21 @@ import java.util.*
 
 @Singleton
 class PlacesRepository @Inject
-constructor(val networkDataSource: PlacesDataSourceApi, val dbDataSource: PlacesDataSourceDb, val userRepository: UserRepository, val context: Context, val gson: Gson) {
+constructor(val networkDataSource: PlacesDataSourceApi, val dbDataSource: PlacesDataSourceDb, val assetsDataSource: PlacesDataSourceAssets, val userRepository: UserRepository) {
     private val cache: MutableList<Place> = mutableListOf()
         get() {
-            if (field.isEmpty()) field.addAll(dbDataSource.getPlaces())
+            if (field.isEmpty()) {
+                val placesFromDb = dbDataSource.getPlaces()
+
+                if (placesFromDb.isEmpty()) {
+                    val placesFromAssets = assetsDataSource.getPlaces()
+                    dbDataSource.insertOrReplace(placesFromAssets)
+                    field.addAll(placesFromAssets)
+                } else {
+                    field.addAll(placesFromDb)
+                }
+            }
+
             return field
         }
 
@@ -52,7 +61,7 @@ constructor(val networkDataSource: PlacesDataSourceApi, val dbDataSource: Places
 
     @Throws(IOException::class)
     fun fetchNewPlaces(): List<Place> {
-        val places = networkDataSource.getPlaces(gson.toJson(getLastUpdateDate()))
+        val places = networkDataSource.getPlaces(getLastUpdateDate())
 
         if (!places.isEmpty()) {
             dbDataSource.insertOrReplace(places)
@@ -60,10 +69,6 @@ constructor(val networkDataSource: PlacesDataSourceApi, val dbDataSource: Places
         }
 
         return places
-    }
-
-    fun setCache(places: Collection<Place>) {
-        dbDataSource.insertOrReplace(places)
     }
 
     private fun getLastUpdateDate(): Date {
