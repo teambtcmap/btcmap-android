@@ -300,10 +300,6 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     }
 
     private fun handleIntent(intent: Intent) {
-        if (intent.getBooleanExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, false)) {
-            viewModel.clearPlaceNotifications()
-        }
-
         if (intent.hasExtra(PLACE_ID_EXTRA)) {
             viewModel.selectPlace(intent.getLongExtra(PLACE_ID_EXTRA, -1))
         }
@@ -366,7 +362,6 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
     companion object {
         private val PLACE_ID_EXTRA = "place_id"
-        private val CLEAR_PLACE_NOTIFICATIONS_EXTRA = "clear_place_notifications"
 
         private val REQUEST_CHECK_LOCATION_SETTINGS = 10
         private val REQUEST_ACCESS_LOCATION = 20
@@ -386,7 +381,6 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
             }
 
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            intent.putExtra(CLEAR_PLACE_NOTIFICATIONS_EXTRA, true)
             return intent
         }
     }

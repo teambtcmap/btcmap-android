@@ -82,6 +82,8 @@
     <string name="could_not_add_place">Couldn\'t add place</string>
     <string name="clear_search">Clear search</string>
 
+    <string name="new_place_notifications">New places in your area</string>
+
     <string-array name="distance_units">
         <item>Automatic</item>
         <item>Kilometers</item>

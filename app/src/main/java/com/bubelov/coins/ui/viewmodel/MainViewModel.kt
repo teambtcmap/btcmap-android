@@ -13,7 +13,6 @@ import com.bubelov.coins.dagger.Injector
 import com.bubelov.coins.model.NotificationArea
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.area.NotificationAreaRepository
-import com.bubelov.coins.repository.notification.PlaceNotificationsRepository
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository
 import com.bubelov.coins.repository.placecategory.marker.PlaceCategoriesMarkersRepository
@@ -43,9 +42,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     @Inject
     internal lateinit var placesRepository: PlacesRepository
-
-    @Inject
-    internal lateinit var placeNotificationsRepository: PlaceNotificationsRepository
 
     @Inject
     internal lateinit var placeCategoriesRepository: PlaceCategoriesRepository
@@ -100,10 +96,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             callback?.signIn()
         }
-    }
-
-    fun clearPlaceNotifications() {
-        placeNotificationsRepository.clear()
     }
 
     fun selectPlace(id: Long) {

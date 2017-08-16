@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase
 
 import com.bubelov.coins.repository.area.NotificationAreaRepository
 import com.bubelov.coins.repository.currency.CurrenciesRepository
-import com.bubelov.coins.repository.notification.PlaceNotificationsRepository
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceApi
 import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceDb
@@ -50,7 +49,6 @@ interface MainComponent {
     fun placesRepository(): PlacesRepository
     fun currenciesRepository(): CurrenciesRepository
     fun exchangeRatesRepository(): ExchangeRatesRepository
-    fun placeNotificationsRepository(): PlaceNotificationsRepository
 
     fun placeCategoriesRepository(): PlaceCategoriesRepository
     fun placeCategoriesDataSourceNetwork(): PlaceCategoriesDataSourceApi
