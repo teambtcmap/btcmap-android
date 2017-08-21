@@ -3,25 +3,31 @@ package com.bubelov.coins.ui.viewmodel
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import com.bubelov.coins.Constants
-import com.bubelov.coins.dagger.Injector
 import com.bubelov.coins.model.NotificationArea
+import com.bubelov.coins.repository.area.NotificationAreaRepository
+import com.bubelov.coins.util.appComponent
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.Circle
+import javax.inject.Inject
 
 /**
  * @author Igor Bubelov
  */
 
 class NotificationAreaViewModel(application: Application) : AndroidViewModel(application) {
-    val areaRepository = lazy { Injector.appComponent.notificationAreaRepository() }
+    @Inject internal lateinit var areaRepository: NotificationAreaRepository
 
     var notificationArea: NotificationArea?
         get() {
-            return areaRepository.value.notificationArea
+            return areaRepository.notificationArea
         }
         set(value) {
-            areaRepository.value.notificationArea = value
+            areaRepository.notificationArea = value
         }
+
+    init {
+        appComponent().inject(this)
+    }
 
     fun getDefaultNotificationArea(defaultCameraPosition: CameraPosition): NotificationArea {
         return NotificationArea(

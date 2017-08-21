@@ -74,9 +74,9 @@ constructor(val networkDataSource: PlacesDataSourceApi, val dbDataSource: Places
     private fun getLastUpdateDate(): Date {
         val latestPlace = cache.maxBy { it.updatedAt }
 
-        when (latestPlace) {
-            null -> return Date(0)
-            else -> return latestPlace.updatedAt
+        return when (latestPlace) {
+            null -> Date(0)
+            else -> latestPlace.updatedAt
         }
     }
 }

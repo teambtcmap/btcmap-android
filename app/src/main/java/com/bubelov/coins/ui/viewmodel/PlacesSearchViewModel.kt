@@ -8,15 +8,17 @@ import android.preference.PreferenceManager
 
 import com.bubelov.coins.App
 import com.bubelov.coins.R
-import com.bubelov.coins.dagger.Injector
+import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.ui.model.PlacesSearchResult
 import com.bubelov.coins.util.DistanceComparator
 import com.bubelov.coins.util.DistanceUnits
 import com.bubelov.coins.util.DistanceUtils
+import com.bubelov.coins.util.appComponent
 import org.jetbrains.anko.doAsyncResult
 import org.jetbrains.anko.uiThread
 import java.util.*
 import java.util.concurrent.Future
+import javax.inject.Inject
 import kotlin.properties.Delegates
 
 /**
@@ -24,6 +26,8 @@ import kotlin.properties.Delegates
  */
 
 class PlacesSearchViewModel(application: Application) : AndroidViewModel(application) {
+    @Inject internal lateinit var placesRepository: PlacesRepository
+
     var userLocation: Location? = null
 
     var searchQuery: String by Delegates.observable("", { _, _, _ -> onSearchQueryChanged() })
@@ -32,12 +36,16 @@ class PlacesSearchViewModel(application: Application) : AndroidViewModel(applica
 
     private var futureResults: Future<Any>? = null
 
+    init {
+        appComponent().inject(this)
+    }
+
     private fun onSearchQueryChanged() {
         futureResults?.cancel(true)
 
         if (searchQuery.length >= MIN_QUERY_LENGTH) {
             futureResults = doAsyncResult {
-                val places = Injector.appComponent.placesRepository().getPlaces(searchQuery)
+                val places = placesRepository.getPlaces(searchQuery)
 
                 if (userLocation != null) {
                     Collections.sort(places, DistanceComparator(userLocation!!))
@@ -71,19 +79,19 @@ class PlacesSearchViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun Location.distanceTo(latitude: Double, longitude: Double, units: DistanceUnits): Double {
+    private fun Location.distanceTo(latitude: Double, longitude: Double, units: DistanceUnits): Double {
         val distanceInKilometers = DistanceUtils.getDistance(this.latitude, this.longitude, latitude, longitude) / 1000.0
 
-        when (units) {
-            DistanceUnits.KILOMETERS -> return distanceInKilometers
-            DistanceUnits.MILES -> return DistanceUtils.toMiles(distanceInKilometers)
+        return when (units) {
+            DistanceUnits.KILOMETERS -> distanceInKilometers
+            DistanceUnits.MILES -> DistanceUtils.toMiles(distanceInKilometers)
         }
     }
 
-    fun DistanceUnits.getShortName(): String {
-        when (this) {
-            DistanceUnits.KILOMETERS -> return getApplication<App>().getString(R.string.kilometers_short)
-            DistanceUnits.MILES -> return getApplication<App>().getString(R.string.miles_short)
+    private fun DistanceUnits.getShortName(): String {
+        return when (this) {
+            DistanceUnits.KILOMETERS -> getApplication<App>().getString(R.string.kilometers_short)
+            DistanceUnits.MILES -> getApplication<App>().getString(R.string.miles_short)
         }
     }
 

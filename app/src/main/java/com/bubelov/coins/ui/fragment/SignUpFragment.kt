@@ -1,8 +1,9 @@
 package com.bubelov.coins.ui.fragment
 
+import android.app.Fragment
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -11,9 +12,9 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 
 import com.bubelov.coins.R
-import com.bubelov.coins.dagger.Injector
 import com.bubelov.coins.repository.user.UserRepository
 import com.bubelov.coins.ui.activity.MainActivity
+import dagger.android.AndroidInjection
 
 import javax.inject.Inject
 
@@ -25,12 +26,11 @@ import org.jetbrains.anko.doAsync
  */
 
 class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
-    @Inject
-    lateinit var userRepository: UserRepository
+    @Inject internal lateinit var userRepository: UserRepository
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        Injector.appComponent.inject(this)
+    override fun onAttach(context: Context) {
+        AndroidInjection.inject(this)
+        super.onAttach(context)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -58,7 +58,7 @@ class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
             val success = userRepository.signUp(email, password, firstName, lastName)
 
             if (success) {
-                val intent = Intent(context, MainActivity::class.java)
+                val intent = Intent(activity, MainActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 startActivity(intent)
             } else {

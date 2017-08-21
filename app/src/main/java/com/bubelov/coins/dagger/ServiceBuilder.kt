@@ -12,5 +12,5 @@ import dagger.android.ContributesAndroidInjector
 @Module
 abstract class ServiceBuilder {
     @ContributesAndroidInjector(modules = arrayOf(DatabaseSyncServiceModule::class))
-    abstract fun bindDatabaseSyncService(): DatabaseSyncService
+    abstract fun contributeDatabaseSyncServiceInjector(): DatabaseSyncService
 }

@@ -11,12 +11,10 @@ import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceDb
 import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceMemory
 import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository
 import com.bubelov.coins.repository.rate.ExchangeRatesRepository
-import com.bubelov.coins.ui.fragment.SettingsFragment
-import com.bubelov.coins.ui.fragment.SignInFragment
-import com.bubelov.coins.ui.fragment.SignUpFragment
 import com.bubelov.coins.ui.viewmodel.ExchangeRatesViewModel
 import com.bubelov.coins.ui.viewmodel.MainViewModel
-import com.bubelov.coins.util.PlaceNotificationManager
+import com.bubelov.coins.ui.viewmodel.NotificationAreaViewModel
+import com.bubelov.coins.ui.viewmodel.PlacesSearchViewModel
 
 import javax.inject.Singleton
 
@@ -29,10 +27,8 @@ import dagger.android.AndroidInjectionModule
  */
 
 @Singleton
-@Component(modules = arrayOf(AppModule::class, AndroidInjectionModule::class, ActivityBuilder::class, ServiceBuilder::class))
+@Component(modules = arrayOf(AppModule::class, AndroidInjectionModule::class, ActivityBuilder::class, FragmentBuilder::class, ServiceBuilder::class))
 interface AppComponent {
-    fun notificationManager(): PlaceNotificationManager
-
     fun notificationAreaRepository(): NotificationAreaRepository
     fun placesRepository(): PlacesRepository
     fun currenciesRepository(): CurrenciesRepository
@@ -44,12 +40,10 @@ interface AppComponent {
 
     fun inject(app: App)
 
-    fun inject(target: SignInFragment)
-    fun inject(target: SignUpFragment)
-    fun inject(target: SettingsFragment)
-
     fun inject(target: MainViewModel)
     fun inject(target: ExchangeRatesViewModel)
+    fun inject(target: NotificationAreaViewModel)
+    fun inject(target: PlacesSearchViewModel)
 
     @Component.Builder
     interface Builder {

@@ -55,6 +55,7 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha3"
 
     // Android support libraries
+    compile "com.android.support:support-v13:$support_version"
     compile "com.android.support:appcompat-v7:$support_version"
     compile "com.android.support:design:$support_version"
     compile "com.android.support:customtabs:$support_version"

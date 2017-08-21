@@ -12,14 +12,20 @@ import dagger.android.ContributesAndroidInjector
 @Module
 abstract class ActivityBuilder {
     @ContributesAndroidInjector(modules = arrayOf(MainActivityModule::class))
-    abstract fun bindMainActivity(): MainActivity
+    abstract fun contributeMainActivityInjector(): MainActivity
 
     @ContributesAndroidInjector(modules = arrayOf(ProfileActivityModule::class))
-    abstract fun bindProfileActivity(): ProfileActivity
+    abstract fun contributeProfileActivityInjector(): ProfileActivity
 
     @ContributesAndroidInjector(modules = arrayOf(SignInActivityModule::class))
-    abstract fun bindSignInActivity(): SignInActivity
+    abstract fun conributeSignInActivityInjector(): SignInActivity
 
     @ContributesAndroidInjector(modules = arrayOf(EditPlaceActivityModule::class))
-    abstract fun bindEditPlaceActivity(): EditPlaceActivity
+    abstract fun contributeEditPlaceActivityInjector(): EditPlaceActivity
+
+    @ContributesAndroidInjector(modules = arrayOf(SettingsActivityModule::class))
+    abstract fun contributeSettingsActivityInjector(): SettingsActivity
+
+    @ContributesAndroidInjector(modules = arrayOf(EmailSignInActivityModule::class))
+    abstract fun contributeEmailSignInActivityInjector(): EmailSignInActivity
 }
