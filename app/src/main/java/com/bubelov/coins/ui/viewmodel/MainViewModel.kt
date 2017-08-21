@@ -34,20 +34,17 @@ import kotlin.properties.Delegates
  */
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-    @Inject
-    internal lateinit var userRepository: UserRepository
+    @Inject internal lateinit var userRepository: UserRepository
 
-    @Inject
-    internal lateinit var notificationAreaRepository: NotificationAreaRepository
+    @Inject internal lateinit var notificationAreaRepository: NotificationAreaRepository
 
-    @Inject
-    internal lateinit var placesRepository: PlacesRepository
+    @Inject internal lateinit var placesRepository: PlacesRepository
 
-    @Inject
-    internal lateinit var placeCategoriesRepository: PlaceCategoriesRepository
+    @Inject internal lateinit var placeCategoriesRepository: PlaceCategoriesRepository
 
-    @Inject
-    internal lateinit var placeCategoriesMarkersRepository: PlaceCategoriesMarkersRepository
+    @Inject internal lateinit var placeCategoriesMarkersRepository: PlaceCategoriesMarkersRepository
+
+    @Inject internal lateinit var analytics: Analytics
 
     var mapBounds: LatLngBounds by Delegates.observable(LatLngBounds(LatLng(0.0, 0.0), LatLng(0.0, 0.0)), { _, _, _ -> onMapBoundsChanged() })
 
@@ -55,12 +52,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val selectedPlace: MutableLiveData<Place> = MutableLiveData()
 
-    val locationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplication<App>())
-
     var callback: Callback? = null
 
+    private val locationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplication<App>())
+
     init {
-        Injector.mainComponent.inject(this)
+        Injector.appComponent.inject(this)
     }
 
     fun onAddPlaceClick() {
@@ -100,7 +97,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun selectPlace(id: Long) {
         selectedPlace.value = placesRepository.getPlace(id)
-        Analytics.logSelectContent(id.toString(), selectedPlace.value!!.name, "place")
+        analytics.logSelectContent(id.toString(), selectedPlace.value!!.name, "place")
     }
 
     fun onMapBoundsChanged() {
@@ -146,12 +143,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun onSelectedPlaceDetailsClick() {
-        Analytics.logViewContent(selectedPlace.value!!.id.toString(), selectedPlace.value!!.name, "place")
+        analytics.logViewContent(selectedPlace.value!!.id.toString(), selectedPlace.value!!.name, "place")
     }
 
     fun onSupportChatClick() {
         getApplication<App>().openUrl("https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw")
-        Analytics.logSelectContent("chat", null, "screen")
+        analytics.logSelectContent("chat", null, "screen")
     }
 
     private fun toPlaceMarkers(places: Collection<Place>): Collection<PlaceMarker> {

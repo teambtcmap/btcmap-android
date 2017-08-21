@@ -10,7 +10,6 @@ import android.widget.FrameLayout
 
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Place
-import com.bubelov.coins.util.Analytics
 import com.bubelov.coins.util.openUrl
 
 import kotlinx.android.synthetic.main.widget_place_details.view.*
@@ -21,6 +20,8 @@ import org.jetbrains.anko.share
  */
 
 class PlaceDetailsView(context: Context, attrs: AttributeSet) : FrameLayout(context, attrs) {
+    internal lateinit var place: Place
+
     init {
         View.inflate(context, R.layout.widget_place_details, this)
 
@@ -30,17 +31,15 @@ class PlaceDetailsView(context: Context, attrs: AttributeSet) : FrameLayout(cont
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_share -> {
-                    context.share(resources.getString(R.string.share_place_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", place!!.latitude, place!!.longitude)), resources.getString(R.string.share_place_message_title))
-                    Analytics.logShareContent(place!!.id.toString(), place!!.name, "place")
+                    context.share(resources.getString(R.string.share_place_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", place.latitude, place.longitude)), resources.getString(R.string.share_place_message_title))
+                    callback?.onShared(place)
                     true
                 } else -> false
             }
         }
 
-        edit.setOnClickListener { callback?.onEditPlaceClick(place!!) }
+        edit.setOnClickListener { callback?.onEditPlaceClick(place) }
     }
-
-    internal var place: Place? = null
 
     var fullScreen: Boolean = false
         set(value) {
@@ -103,5 +102,6 @@ class PlaceDetailsView(context: Context, attrs: AttributeSet) : FrameLayout(cont
     interface Callback {
         fun onEditPlaceClick(place: Place)
         fun onDismissed()
+        fun onShared(place: Place)
     }
 }

@@ -14,13 +14,12 @@ import javax.inject.Inject
  */
 
 class ExchangeRatesViewModel(application: Application) : AndroidViewModel(application) {
-    @Inject
-    internal lateinit var repository: ExchangeRatesRepository
+    @Inject internal lateinit var repository: ExchangeRatesRepository
 
     val rates = MutableLiveData<List<ExchangeRateQuery>>()
 
     init {
-        Injector.mainComponent.inject(this)
+        Injector.appComponent.inject(this)
     }
 
     fun setCurrencyPair(baseCurrency: String, targetCurrency: String) {

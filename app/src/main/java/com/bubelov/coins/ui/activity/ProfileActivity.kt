@@ -13,6 +13,7 @@ import com.bubelov.coins.repository.user.UserRepository
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.common.api.GoogleApiClient
 import com.squareup.picasso.Picasso
+import dagger.android.AndroidInjection
 
 import javax.inject.Inject
 
@@ -23,13 +24,12 @@ import kotlinx.android.synthetic.main.activity_profile.*
  */
 
 class ProfileActivity : AbstractActivity(), Toolbar.OnMenuItemClickListener {
-    @Inject
-    lateinit var userRepository: UserRepository
+    @Inject lateinit var userRepository: UserRepository
 
     lateinit var googleApiClient: GoogleApiClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        dependencies().inject(this)
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 

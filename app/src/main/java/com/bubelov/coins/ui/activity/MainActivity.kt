@@ -38,8 +38,10 @@ import com.squareup.picasso.Picasso
 
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MainViewModel
+import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
+import javax.inject.Inject
 
 /**
  * @author Igor Bubelov
@@ -58,7 +60,10 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
     lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
 
+    @Inject internal lateinit var analytics: Analytics
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -92,6 +97,10 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
             override fun onDismissed() {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+
+            override fun onShared(place: Place) {
+                analytics.logShareContent(place.id.toString(), place.name, "place")
             }
         }
 
@@ -308,13 +317,13 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     private fun openExchangeRatesScreen() {
         val intent = Intent(this@MainActivity, ExchangeRatesActivity::class.java)
         startActivity(intent)
-        Analytics.logSelectContent("exchange_rates", null, "screen")
+        analytics.logSelectContent("exchange_rates", null, "screen")
     }
 
     private fun openNotificationAreaScreen() {
         val intent = NotificationAreaActivity.newIntent(this, map!!.cameraPosition)
         startActivity(intent)
-        Analytics.logSelectContent("notification_area", null, "screen")
+        analytics.logSelectContent("notification_area", null, "screen")
     }
 
     private fun openSettingsScreen() {

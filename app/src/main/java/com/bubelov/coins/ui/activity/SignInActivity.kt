@@ -17,6 +17,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.firebase.analytics.FirebaseAnalytics
+import dagger.android.AndroidInjection
 
 import javax.inject.Inject
 
@@ -36,7 +37,7 @@ class SignInActivity : AbstractActivity(), GoogleApiClient.OnConnectionFailedLis
     lateinit var googleApiClient: GoogleApiClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        dependencies().inject(this)
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_in)
 

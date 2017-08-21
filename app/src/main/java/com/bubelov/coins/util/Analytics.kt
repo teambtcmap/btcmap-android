@@ -3,14 +3,16 @@ package com.bubelov.coins.util
 import android.os.Bundle
 import android.text.TextUtils
 
-import com.bubelov.coins.dagger.Injector
 import com.google.firebase.analytics.FirebaseAnalytics
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * @author Igor Bubelov
  */
 
-object Analytics {
+@Singleton
+class Analytics @Inject constructor(internal val firebaseAnalytics: FirebaseAnalytics) {
     fun logSelectContent(itemId: String, itemName: String?, contentType: String) {
         logContentEvent(FirebaseAnalytics.Event.SELECT_CONTENT, itemId, itemName, contentType)
     }
@@ -32,6 +34,6 @@ object Analytics {
         }
 
         bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, contentType)
-        Injector.mainComponent.analytics().logEvent(eventType, bundle)
+        firebaseAnalytics.logEvent(eventType, bundle)
     }
 }

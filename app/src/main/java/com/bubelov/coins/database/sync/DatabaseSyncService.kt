@@ -4,15 +4,23 @@ import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 
-import com.bubelov.coins.dagger.Injector
+import dagger.android.AndroidInjection
+import javax.inject.Inject
 
 /**
  * @author Igor Bubelov
  */
 
 class DatabaseSyncService : IntentService(DatabaseSyncService::class.java.simpleName) {
+    @Inject internal lateinit var databaseSync: DatabaseSync
+
+    override fun onCreate() {
+        AndroidInjection.inject(this)
+        super.onCreate()
+    }
+
     override fun onHandleIntent(intent: Intent?) {
-        Injector.mainComponent.databaseSync().sync()
+        databaseSync.sync()
     }
 
     companion object {

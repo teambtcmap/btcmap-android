@@ -1,19 +1,31 @@
 package com.bubelov.coins
 
+import android.app.Activity
 import android.app.Application
+import android.app.Service
 import android.preference.PreferenceManager
 
 import com.bubelov.coins.dagger.Injector
 import com.bubelov.coins.database.sync.DatabaseSyncService
 import com.bubelov.coins.util.ReleaseTree
 
+import javax.inject.Inject
+
+import dagger.android.AndroidInjector
+import dagger.android.DispatchingAndroidInjector
+import dagger.android.HasActivityInjector
+import dagger.android.HasServiceInjector
 import timber.log.Timber
 
 /**
  * @author Igor Bubelov
  */
 
-class App : Application() {
+class App : Application(), HasActivityInjector, HasServiceInjector {
+    @Inject internal lateinit var activityInjector: DispatchingAndroidInjector<Activity>
+
+    @Inject internal lateinit var serviceInjector: DispatchingAndroidInjector<Service>
+
     override fun onCreate() {
         super.onCreate()
 
@@ -24,7 +36,16 @@ class App : Application() {
         }
 
         Injector.init(this)
+        Injector.appComponent.inject(this)
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
         DatabaseSyncService.start(this)
+    }
+
+    override fun activityInjector(): AndroidInjector<Activity> {
+        return activityInjector
+    }
+
+    override fun serviceInjector(): AndroidInjector<Service> {
+        return serviceInjector
     }
 }

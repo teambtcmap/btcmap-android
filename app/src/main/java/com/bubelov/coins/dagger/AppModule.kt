@@ -31,16 +31,10 @@ import retrofit2.converter.gson.GsonConverterFactory
  */
 
 @Module
-class MainModule(private val context: Context) {
+class AppModule {
     @Provides
     @Singleton
-    internal fun context(): Context {
-        return context
-    }
-
-    @Provides
-    @Singleton
-    internal fun analytics(context: Context): FirebaseAnalytics {
+    internal fun provideFirebaseAnalytics(context: Context): FirebaseAnalytics {
         return FirebaseAnalytics.getInstance(context)
     }
 

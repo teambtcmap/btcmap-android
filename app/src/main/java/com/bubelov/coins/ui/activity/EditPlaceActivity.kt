@@ -18,16 +18,17 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 
-import com.bubelov.coins.dagger.Injector
+import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_edit_place.*
 import java.util.*
+import javax.inject.Inject
 
 /**
  * @author Igor Bubelov
  */
 
 class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
-    lateinit var placesRepository: PlacesRepository
+    @Inject lateinit var placesRepository: PlacesRepository
 
     private var place: Place? = null
 
@@ -36,8 +37,8 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
     private var pickedLocation: LatLng? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
-        placesRepository = Injector.mainComponent.placesRepository()
         setContentView(R.layout.activity_edit_place)
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }

@@ -13,7 +13,7 @@ import com.google.android.gms.maps.model.Circle
  */
 
 class NotificationAreaViewModel(application: Application) : AndroidViewModel(application) {
-    val areaRepository = lazy { Injector.mainComponent.notificationAreaRepository() }
+    val areaRepository = lazy { Injector.appComponent.notificationAreaRepository() }
 
     var notificationArea: NotificationArea?
         get() {

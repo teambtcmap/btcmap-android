@@ -37,7 +37,7 @@ class PlacesSearchViewModel(application: Application) : AndroidViewModel(applica
 
         if (searchQuery.length >= MIN_QUERY_LENGTH) {
             futureResults = doAsyncResult {
-                val places = Injector.mainComponent.placesRepository().getPlaces(searchQuery)
+                val places = Injector.appComponent.placesRepository().getPlaces(searchQuery)
 
                 if (userLocation != null) {
                     Collections.sort(places, DistanceComparator(userLocation!!))

@@ -1,7 +1,7 @@
 package com.bubelov.coins.dagger
 
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
+import com.bubelov.coins.App
 
 import com.bubelov.coins.repository.area.NotificationAreaRepository
 import com.bubelov.coins.repository.currency.CurrenciesRepository
@@ -11,54 +11,38 @@ import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceDb
 import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceMemory
 import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository
 import com.bubelov.coins.repository.rate.ExchangeRatesRepository
-import com.bubelov.coins.ui.activity.EditPlaceActivity
-import com.bubelov.coins.ui.activity.NotificationAreaActivity
-import com.bubelov.coins.ui.activity.ProfileActivity
 import com.bubelov.coins.ui.fragment.SettingsFragment
 import com.bubelov.coins.ui.fragment.SignInFragment
 import com.bubelov.coins.ui.fragment.SignUpFragment
-import com.bubelov.coins.database.sync.DatabaseSync
-import com.bubelov.coins.ui.activity.SignInActivity
 import com.bubelov.coins.ui.viewmodel.ExchangeRatesViewModel
 import com.bubelov.coins.ui.viewmodel.MainViewModel
 import com.bubelov.coins.util.PlaceNotificationManager
-import com.google.firebase.analytics.FirebaseAnalytics
 
 import javax.inject.Singleton
 
 import dagger.Component
+import dagger.BindsInstance
+import dagger.android.AndroidInjectionModule
 
 /**
  * @author Igor Bubelov
  */
 
 @Singleton
-@Component(modules = arrayOf(MainModule::class))
-interface MainComponent {
-    fun context(): Context
-
-    fun database(): SQLiteDatabase
-
-    fun databaseSync(): DatabaseSync
-
-    fun analytics(): FirebaseAnalytics
-
+@Component(modules = arrayOf(AppModule::class, AndroidInjectionModule::class, ActivityBuilder::class, ServiceBuilder::class))
+interface AppComponent {
     fun notificationManager(): PlaceNotificationManager
 
     fun notificationAreaRepository(): NotificationAreaRepository
     fun placesRepository(): PlacesRepository
     fun currenciesRepository(): CurrenciesRepository
     fun exchangeRatesRepository(): ExchangeRatesRepository
-
     fun placeCategoriesRepository(): PlaceCategoriesRepository
     fun placeCategoriesDataSourceNetwork(): PlaceCategoriesDataSourceApi
     fun placeCategoriesDataSourceDb(): PlaceCategoriesDataSourceDb
     fun placeCategoriesDataSourceMemory(): PlaceCategoriesDataSourceMemory
 
-    fun inject(target: EditPlaceActivity)
-    fun inject(target: NotificationAreaActivity)
-    fun inject(target: ProfileActivity)
-    fun inject(target: SignInActivity)
+    fun inject(app: App)
 
     fun inject(target: SignInFragment)
     fun inject(target: SignUpFragment)
@@ -67,5 +51,10 @@ interface MainComponent {
     fun inject(target: MainViewModel)
     fun inject(target: ExchangeRatesViewModel)
 
-    fun inject(sync: DatabaseSync)
+    @Component.Builder
+    interface Builder {
+        @BindsInstance
+        fun context(context: Context): Builder
+        fun build(): AppComponent
+    }
 }

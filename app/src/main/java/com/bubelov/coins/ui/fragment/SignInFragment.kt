@@ -32,7 +32,7 @@ class SignInFragment : Fragment(), TextView.OnEditorActionListener {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        Injector.mainComponent.inject(this)
+        Injector.appComponent.inject(this)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

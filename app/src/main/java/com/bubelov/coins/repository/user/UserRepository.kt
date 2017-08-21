@@ -4,7 +4,6 @@ import android.content.SharedPreferences
 import android.os.Bundle
 
 import com.bubelov.coins.PreferenceKeys
-import com.bubelov.coins.dagger.Injector
 import com.bubelov.coins.api.coins.CoinsApi
 import com.bubelov.coins.api.coins.AuthResponse
 import com.bubelov.coins.api.coins.NewUserParams
@@ -26,7 +25,12 @@ import timber.log.Timber
 
 @Singleton
 class UserRepository @Inject
-internal constructor(private val api: CoinsApi, private val preferences: SharedPreferences, private val gson: Gson) {
+internal constructor(
+        private val api: CoinsApi,
+        private val preferences: SharedPreferences,
+        private val gson: Gson,
+        private val analytics: FirebaseAnalytics
+) {
     var user: User?
         get() = gson.fromJson(preferences.getString(PreferenceKeys.USER, null), User::class.java)
         set(user) = preferences.edit().putString(PreferenceKeys.USER, gson.toJson(user)).apply()
@@ -120,7 +124,6 @@ internal constructor(private val api: CoinsApi, private val preferences: SharedP
     }
 
     private fun onAuthorized() {
-        val analytics = Injector.mainComponent.analytics()
         val bundle = Bundle()
         bundle.putString(FirebaseAnalytics.Param.SIGN_UP_METHOD, userAuthMethod)
         analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)

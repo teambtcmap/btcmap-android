@@ -22,7 +22,7 @@ class SettingsFragment : PreferenceFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Injector.mainComponent.inject(this)
+        Injector.appComponent.inject(this)
         addPreferencesFromResource(R.xml.preferences)
     }
 
@@ -42,7 +42,7 @@ class SettingsFragment : PreferenceFragment() {
         val randomPlace = placesRepository.getRandomPlace()
 
         if (randomPlace != null) {
-            Injector.mainComponent.notificationManager().notifyUser(randomPlace)
+            Injector.appComponent.notificationManager().notifyUser(randomPlace)
         }
     }
 }

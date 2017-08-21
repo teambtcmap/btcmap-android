@@ -7,10 +7,10 @@ import android.content.Context
  */
 
 object Injector {
-    lateinit var mainComponent: MainComponent
+    lateinit var appComponent: AppComponent
     private set
 
     fun init(context: Context) {
-        mainComponent = DaggerMainComponent.builder().mainModule(MainModule(context)).build()
+        appComponent = DaggerAppComponent.builder().context(context).build()
     }
 }

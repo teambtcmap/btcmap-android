@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.support.annotation.StringRes
 import android.support.v7.app.AlertDialog
 
-import com.bubelov.coins.dagger.Injector
-import com.bubelov.coins.dagger.MainComponent
 import com.bubelov.coins.util.ThemeUtils
 
 /**
@@ -36,9 +34,5 @@ abstract class AbstractActivity : LifecycleActivity() {
 
     protected fun hideProgress() {
         TODO()
-    }
-
-    protected fun dependencies(): MainComponent {
-        return Injector.mainComponent
     }
 }
