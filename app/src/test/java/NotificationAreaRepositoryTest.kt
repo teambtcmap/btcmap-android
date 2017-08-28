@@ -1,22 +1,30 @@
 import com.bubelov.coins.model.NotificationArea
+import com.bubelov.coins.repository.area.NotificationAreaRepository
 import org.junit.Assert
+import org.junit.Before
 
 import org.junit.Test
+import javax.inject.Inject
 
 /**
  * @author Igor Bubelov
  */
 
 class NotificationAreaRepositoryTest : BaseRobolectricTest() {
-    private val repository = dependencies!!.notificationAreaRepository()
+    @Inject lateinit var repository: NotificationAreaRepository
+
+    @Before
+    fun init() {
+        TestInjector.testComponent.inject(this)
+    }
 
     @Test
-    fun notificationAreaRepository_NullByDefault() {
+    fun isNullByDefault() {
         Assert.assertTrue(repository.notificationArea == null)
     }
 
     @Test
-    fun notificationAreaRepository_AreaSaved() {
+    fun savesArea() {
         val area = NotificationArea(
                 latitude = 50.0,
                 longitude = 0.0,
@@ -28,7 +36,7 @@ class NotificationAreaRepositoryTest : BaseRobolectricTest() {
     }
 
     @Test
-    fun notificationAreaRepository_areaCleared() {
+    fun clearsArea() {
         val area = NotificationArea(
                 latitude = 50.0,
                 longitude = 0.0,

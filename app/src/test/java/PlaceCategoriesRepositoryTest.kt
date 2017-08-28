@@ -1,20 +1,29 @@
 import com.bubelov.coins.model.PlaceCategory
+import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceDb
+import com.bubelov.coins.repository.placecategory.PlaceCategoriesDataSourceMemory
+import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository
 
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 
 import java.io.IOException
 import java.util.Random
+import javax.inject.Inject
 
 /**
  * @author Igor Bubelov
  */
 
 class PlaceCategoriesRepositoryTest : BaseRobolectricTest() {
-    private val repository = dependencies!!.placeCategoriesRepository()
-    private val networkSource = dependencies!!.placeCategoriesDataSourceNetwork()
-    private val dbSource = dependencies!!.placeCategoriesDataSourceDb()
-    private val memorySource = dependencies!!.placeCategoriesDataSourceMemory()
+    @Inject lateinit var repository: PlaceCategoriesRepository
+    @Inject lateinit var dbSource: PlaceCategoriesDataSourceDb
+    @Inject lateinit var memorySource: PlaceCategoriesDataSourceMemory
+
+    @Before
+    fun init() {
+        TestInjector.testComponent.inject(this)
+    }
 
     @Test
     fun memorySource_addsCategory() {
@@ -41,7 +50,7 @@ class PlaceCategoriesRepositoryTest : BaseRobolectricTest() {
 
     @Test
     @Throws(IOException::class)
-    fun repository_cachesCategory() {
+    fun cachesCategory() {
         repository.reloadFromApi()
         Assert.assertNotNull(repository.getPlaceCategory(TEST_CATEGORY_ID))
         Assert.assertNotNull(dbSource.getPlaceCategory(TEST_CATEGORY_ID))

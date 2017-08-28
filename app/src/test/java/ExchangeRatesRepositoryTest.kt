@@ -1,12 +1,20 @@
+import com.bubelov.coins.repository.rate.ExchangeRatesRepository
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
+import javax.inject.Inject
 
 /**
  * @author Igor Bubelov
  */
 
 class ExchangeRatesRepositoryTest : BaseRobolectricTest() {
-    private val repository = dependencies!!.exchangeRatesRepository()
+    @Inject lateinit var repository: ExchangeRatesRepository
+
+    @Before
+    fun init() {
+        TestInjector.testComponent.inject(this)
+    }
 
     @Test
     fun hasUsdBtcSources() {
