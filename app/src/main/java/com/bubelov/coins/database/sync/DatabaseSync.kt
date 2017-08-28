@@ -1,10 +1,12 @@
 package com.bubelov.coins.database.sync
 
 import android.content.Context
+import com.bubelov.coins.model.SyncLogEntry
 
 import com.bubelov.coins.repository.currency.CurrenciesRepository
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository
+import com.bubelov.coins.repository.synclogs.SyncLogsRepository
 import com.bubelov.coins.util.PlaceNotificationManager
 import com.google.android.gms.gcm.GcmNetworkManager
 import com.google.android.gms.gcm.PeriodicTask
@@ -25,19 +27,30 @@ import java.util.concurrent.Future
 
 @Singleton
 class DatabaseSync @Inject
-internal constructor(private val context: Context, private val placesRepository: PlacesRepository, private val placeCategoriesRepository: PlaceCategoriesRepository, private val currenciesRepository: CurrenciesRepository, private val placeNotificationManager: PlaceNotificationManager) {
+internal constructor(
+        private val context: Context,
+        private val placesRepository: PlacesRepository,
+        private val placeCategoriesRepository: PlaceCategoriesRepository,
+        private val currenciesRepository: CurrenciesRepository,
+        private val placeNotificationManager: PlaceNotificationManager,
+        private val syncLogsRepository: SyncLogsRepository
+) {
     private var futureResult: Future<Any>? = null
 
     fun sync() {
         futureResult?.cancel(true)
 
         futureResult = doAsyncResult({ Timber.e(it, "Couldn't sync database") }, {
-            placesRepository.fetchNewPlaces().forEach {
+            val newPlaces = placesRepository.fetchNewPlaces()
+
+            newPlaces.forEach {
                 placeNotificationManager.notifyUserIfNecessary(it)
             }
 
             placeCategoriesRepository.reloadFromApi()
             currenciesRepository.reloadFromApi()
+
+            syncLogsRepository.addEntry(SyncLogEntry(System.currentTimeMillis(), newPlaces.size))
         })
 
         scheduleNextSync()

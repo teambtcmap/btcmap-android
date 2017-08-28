@@ -16,6 +16,7 @@ interface TestComponent {
     fun inject(target: NotificationAreaRepositoryTest)
     fun inject(target: PlaceCategoriesRepositoryTest)
     fun inject(target: PlacesRepositoryTest)
+    fun inject(target: SyncLogsRepositoryTest)
 
     @Component.Builder
     interface Builder {

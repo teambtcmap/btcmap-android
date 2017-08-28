@@ -9,4 +9,20 @@
         android:key="@string/pref_distance_units_key"
         android:title="@string/pref_distance_units" />
 
+    <PreferenceCategory android:title="Developer tools">
+
+        <Preference
+            android:key="@string/pref_sync_database_key"
+            android:title="Sync database" />
+
+        <Preference
+            android:key="@string/pref_show_sync_log_key"
+            android:title="Show sync log" />
+
+        <Preference
+            android:key="@string/pref_test_notification_key"
+            android:title="Test notification" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

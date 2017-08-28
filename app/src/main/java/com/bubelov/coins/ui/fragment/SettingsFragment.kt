@@ -9,8 +9,11 @@ import android.preference.PreferenceScreen
 import com.bubelov.coins.R
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.database.sync.DatabaseSyncService
+import com.bubelov.coins.repository.synclogs.SyncLogsRepository
 import com.bubelov.coins.util.PlaceNotificationManager
 import dagger.android.AndroidInjection
+import org.jetbrains.anko.alert
+import java.util.*
 
 import javax.inject.Inject
 
@@ -20,6 +23,8 @@ import javax.inject.Inject
 
 class SettingsFragment : PreferenceFragment() {
     @Inject internal lateinit var placesRepository: PlacesRepository
+
+    @Inject internal lateinit var syncLogsRepository: SyncLogsRepository
 
     @Inject internal lateinit var placeNotificationsManager: PlaceNotificationManager
 
@@ -35,10 +40,21 @@ class SettingsFragment : PreferenceFragment() {
 
     override fun onPreferenceTreeClick(preferenceScreen: PreferenceScreen, preference: Preference): Boolean {
         when (preference.key) {
-            "pref_test_notification" -> placeNotificationsManager.notifyUser(placesRepository.getRandomPlace()!!)
-            "pref_update_places" -> DatabaseSyncService.start(activity)
+            getString(R.string.pref_sync_database_key) -> DatabaseSyncService.start(activity)
+            getString(R.string.pref_show_sync_log_key) -> showSyncLog()
+            getString(R.string.pref_test_notification_key) -> placeNotificationsManager.notifyUser(placesRepository.getRandomPlace()!!)
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference)
+    }
+
+    private fun showSyncLog() {
+        val logs = syncLogsRepository.syncLogs.reversed().map { "Date: ${Date(it.time)}, Affected places: ${it.affectedPlaces}" }
+
+        if (logs.isEmpty()) {
+            alert(message = "Logs are empty").show()
+        } else {
+            alert { items(logs, onItemSelected = { _, _, _ -> }) }.show()
+        }
     }
 }

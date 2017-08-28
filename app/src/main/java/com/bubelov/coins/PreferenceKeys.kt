@@ -9,5 +9,5 @@ object PreferenceKeys {
     val API_AUTH_TOKEN = "api_auth_token"
     val API_AUTH_METHOD = "api_auth_method"
     val NOTIFICATION_AREA = "notification_area"
-    val SYNC_LOG = "sync_log"
+    val SYNC_LOGS = "sync_logs"
 }
