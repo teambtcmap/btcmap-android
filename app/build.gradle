@@ -31,9 +31,13 @@ android {
     buildTypes {
         debug {
             versionNameSuffix "-dev"
+            useProguard false
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
             useProguard true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
@@ -50,9 +54,9 @@ dependencies {
     compile "org.jetbrains.anko:anko-commons:$anko_version"
 
     // Android architecture components
-    compile "android.arch.lifecycle:runtime:1.0.0-alpha3"
-    compile "android.arch.lifecycle:extensions:1.0.0-alpha3"
-    annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha3"
+    compile "android.arch.lifecycle:runtime:1.0.0-alpha9"
+    compile "android.arch.lifecycle:extensions:1.0.0-alpha9"
+    annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha9"
 
     // Android support libraries
     compile "com.android.support:support-v13:$support_version"
@@ -68,22 +72,28 @@ dependencies {
     compile "com.google.android.gms:play-services-auth:$play_services_version"
     compile "com.google.firebase:firebase-crash:$play_services_version"
 
-    compile 'com.google.maps.android:android-maps-utils:0.5'
-
-    compile 'com.squareup.retrofit2:retrofit:2.3.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
-
-    compile 'com.jakewharton.timber:timber:4.5.1'
-
-    compile 'com.google.code.gson:gson:2.8.0'
-
-    compile 'de.hdodenhof:circleimageview:2.1.0'
-    compile 'com.squareup.picasso:picasso:2.5.2'
-
+    // Dependency injection
     compile 'com.google.dagger:dagger:2.11'
     kapt 'com.google.dagger:dagger-compiler:2.11'
     kapt 'com.google.dagger:dagger-android-processor:2.11'
     compile 'com.google.dagger:dagger-android-support:2.11'
+
+    // Api mapping
+    compile 'com.squareup.retrofit2:retrofit:2.3.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
+
+    // Map utils
+    compile 'com.google.maps.android:android-maps-utils:0.5'
+
+    // Image utils
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'de.hdodenhof:circleimageview:2.1.0'
+
+    // JSON utils
+    compile 'com.google.code.gson:gson:2.8.0'
+
+    // Logging
+    compile 'com.jakewharton.timber:timber:4.5.1'
 
     testCompile 'junit:junit:4.12'
 
@@ -108,5 +118,5 @@ dependencies {
         exclude module: 'recyclerview-v7'
     }
 
-    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
+    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.3'
 }
