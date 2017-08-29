@@ -38,6 +38,7 @@ import com.squareup.picasso.Picasso
 
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MainViewModel
+import com.bubelov.coins.util.openUrl
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
@@ -114,7 +115,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
             when (item.itemId) {
                 R.id.action_exchange_rates -> openExchangeRatesScreen()
                 R.id.action_notification_area -> openNotificationAreaScreen()
-                R.id.action_chat -> viewModel.onSupportChatClick()
+                R.id.action_chat -> openSupportChat()
                 R.id.action_settings -> openSettingsScreen()
             }
 
@@ -326,6 +327,11 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         val intent = NotificationAreaActivity.newIntent(this, map!!.cameraPosition)
         startActivity(intent)
         analytics.logSelectContent("notification_area", null, "screen")
+    }
+
+    private fun openSupportChat() {
+        openUrl("https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw")
+        analytics.logSelectContent("chat", null, "screen")
     }
 
     private fun openSettingsScreen() {

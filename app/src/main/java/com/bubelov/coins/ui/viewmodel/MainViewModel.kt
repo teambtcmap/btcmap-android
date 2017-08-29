@@ -19,7 +19,6 @@ import com.bubelov.coins.repository.placecategory.marker.PlaceCategoriesMarkersR
 import com.bubelov.coins.repository.user.UserRepository
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.util.Analytics
-import com.bubelov.coins.util.openUrl
 import com.bubelov.coins.util.toLatLng
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -144,11 +143,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onSelectedPlaceDetailsClick() {
         analytics.logViewContent(selectedPlace.value!!.id.toString(), selectedPlace.value!!.name, "place")
-    }
-
-    fun onSupportChatClick() {
-        getApplication<App>().openUrl("https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw")
-        analytics.logSelectContent("chat", null, "screen")
     }
 
     private fun toPlaceMarkers(places: Collection<Place>): Collection<PlaceMarker> {
