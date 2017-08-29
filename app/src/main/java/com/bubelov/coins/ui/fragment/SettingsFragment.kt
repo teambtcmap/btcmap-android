@@ -1,7 +1,9 @@
 package com.bubelov.coins.ui.fragment
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.preference.ListPreference
 import android.preference.Preference
 import android.preference.PreferenceFragment
 import android.preference.PreferenceScreen
@@ -21,7 +23,7 @@ import javax.inject.Inject
  * @author Igor Bubelov
  */
 
-class SettingsFragment : PreferenceFragment() {
+class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPreferenceChangeListener {
     @Inject internal lateinit var placesRepository: PlacesRepository
 
     @Inject internal lateinit var syncLogsRepository: SyncLogsRepository
@@ -36,6 +38,17 @@ class SettingsFragment : PreferenceFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addPreferencesFromResource(R.xml.preferences)
+        updateDistanceUnitsSummary()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onPause() {
+        preferenceScreen.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
+        super.onPause()
     }
 
     override fun onPreferenceTreeClick(preferenceScreen: PreferenceScreen, preference: Preference): Boolean {
@@ -48,6 +61,10 @@ class SettingsFragment : PreferenceFragment() {
         return super.onPreferenceTreeClick(preferenceScreen, preference)
     }
 
+    override fun onSharedPreferenceChanged(preferences: SharedPreferences, key: String) {
+        updateDistanceUnitsSummary()
+    }
+
     private fun showSyncLog() {
         val logs = syncLogsRepository.syncLogs.reversed().map { "Date: ${Date(it.time)}, Affected places: ${it.affectedPlaces}" }
 
@@ -56,5 +73,10 @@ class SettingsFragment : PreferenceFragment() {
         } else {
             alert { items(logs, onItemSelected = { _, _, _ -> }) }.show()
         }
+    }
+
+    private fun updateDistanceUnitsSummary() {
+        val distanceUnits = findPreference(getString(R.string.pref_distance_units_key)) as ListPreference
+        distanceUnits.summary = distanceUnits.entry
     }
 }
