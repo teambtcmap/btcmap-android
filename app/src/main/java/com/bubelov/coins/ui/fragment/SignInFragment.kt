@@ -20,8 +20,7 @@ import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 import kotlinx.android.synthetic.main.fragment_sign_in.*
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
+import org.jetbrains.anko.runOnUiThread
 
 /**
  * @author Igor Bubelov
@@ -54,19 +53,29 @@ class SignInFragment : Fragment(), TextView.OnEditorActionListener {
     }
 
     private fun signIn(email: String, password: String) {
-        doAsync {
-            val success = userRepository.signIn(email, password)
-
-            uiThread {
-                if (success) {
+        userRepository.signIn(email, password, object : UserRepository.SignInCallback {
+            override fun onSuccess() {
+                runOnUiThread {
                     val intent = Intent(activity, MainActivity::class.java)
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     startActivity(intent)
-                } else {
-                    val abstractActivity = activity as AbstractActivity
-                    abstractActivity.showAlert(R.string.could_not_connect_to_server)
                 }
             }
-        }
+
+            override fun onFailure(errors: List<String>) {
+                runOnUiThread {
+                    val abstractActivity = activity as AbstractActivity
+                    abstractActivity.showAlert(StringBuilder().apply {
+                        errors.forEach {
+                            append(it)
+
+                            if (it != errors.last()) {
+                                append("\n")
+                            }
+                        }
+                    }.toString())
+                }
+            }
+        })
     }
 }

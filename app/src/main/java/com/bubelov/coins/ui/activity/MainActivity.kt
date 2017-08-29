@@ -48,17 +48,17 @@ import javax.inject.Inject
  */
 
 class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener, MainViewModel.Callback {
-    lateinit var drawerHeader: View
+    private lateinit var drawerHeader: View
 
-    lateinit var drawerToggle: ActionBarDrawerToggle
+    private lateinit var drawerToggle: ActionBarDrawerToggle
 
-    lateinit var viewModel: MainViewModel
+    private lateinit var viewModel: MainViewModel
 
-    var map: GoogleMap? = null
+    private var map: GoogleMap? = null
 
-    lateinit var placesManager: ClusterManager<PlaceMarker>
+    private lateinit var placesManager: ClusterManager<PlaceMarker>
 
-    lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
 
     @Inject internal lateinit var analytics: Analytics
 
@@ -312,6 +312,8 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         if (intent.hasExtra(PLACE_ID_EXTRA)) {
             viewModel.selectPlace(intent.getLongExtra(PLACE_ID_EXTRA, -1))
         }
+
+        updateDrawerHeader()
     }
 
     private fun openExchangeRatesScreen() {

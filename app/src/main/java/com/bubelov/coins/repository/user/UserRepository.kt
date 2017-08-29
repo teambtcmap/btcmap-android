@@ -8,8 +8,11 @@ import com.bubelov.coins.api.coins.CoinsApi
 import com.bubelov.coins.api.coins.AuthResponse
 import com.bubelov.coins.api.coins.NewUserParams
 import com.bubelov.coins.model.User
+import com.bubelov.coins.util.toStrings
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
+import retrofit2.Call
+import retrofit2.Callback
 
 import java.io.IOException
 
@@ -67,28 +70,24 @@ internal constructor(
         }
     }
 
-    fun signIn(email: String, password: String): Boolean {
-        var response: Response<AuthResponse>? = null
+    fun signIn(email: String, password: String, callback: SignInCallback) {
+        api.authWithEmail(email, password).enqueue(object : Callback<AuthResponse> {
+            override fun onResponse(call: Call<AuthResponse>, response: Response<AuthResponse>) {
+                if (response.isSuccessful) {
+                    user = response.body()!!.user!!
+                    userAuthToken = response.body()!!.token!!
+                    userAuthMethod = "email"
+                    onAuthorized()
+                    callback.onSuccess()
+                } else {
+                    callback.onFailure(response.errorBody()!!.toStrings())
+                }
+            }
 
-        try {
-            response = api.authWithEmail(email, password).execute()
-        } catch (e: IOException) {
-            Timber.e(e, "Couldn't authorize with email")
-        }
-
-        if (response == null) {
-            return false
-        }
-
-        if (response.isSuccessful) {
-            user = response.body()!!.user!!
-            userAuthToken = response.body()!!.token!!
-            userAuthMethod = "email"
-            onAuthorized()
-            return true
-        } else {
-            return false
-        }
+            override fun onFailure(call: Call<AuthResponse>, e: Throwable) {
+                callback.onFailure(listOf(e.localizedMessage))
+            }
+        })
     }
 
     fun signUp(email: String, password: String, firstName: String, lastName: String): Boolean {
@@ -127,5 +126,10 @@ internal constructor(
         val bundle = Bundle()
         bundle.putString(FirebaseAnalytics.Param.SIGN_UP_METHOD, userAuthMethod)
         analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
+    }
+
+    interface SignInCallback {
+        fun onSuccess()
+        fun onFailure(errors: List<String>)
     }
 }
