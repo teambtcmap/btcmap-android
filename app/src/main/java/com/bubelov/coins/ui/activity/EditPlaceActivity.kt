@@ -1,16 +1,16 @@
 package com.bubelov.coins.ui.activity
 
 import android.app.Activity
+import android.app.ProgressDialog
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
 import android.view.View
-import android.widget.Toast
 
 import com.bubelov.coins.R
-import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.model.Place
+import com.bubelov.coins.ui.viewmodel.EditPlaceViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -20,26 +20,28 @@ import com.google.android.gms.maps.model.LatLng
 
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_edit_place.*
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.indeterminateProgressDialog
 import java.util.*
-import javax.inject.Inject
 
 /**
  * @author Igor Bubelov
  */
 
-class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
-    @Inject lateinit var placesRepository: PlacesRepository
-
-    private var place: Place? = null
+class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback, EditPlaceViewModel.Callback {
+    private lateinit var viewModel: EditPlaceViewModel
 
     private var map: GoogleMap? = null
 
-    private var pickedLocation: LatLng? = null
+    private var progressDialog: ProgressDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_place)
+
+        viewModel = ViewModelProviders.of(this).get(EditPlaceViewModel::class.java)
+        viewModel.init(intent.getLongExtra(ID_EXTRA, -1), this)
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
         toolbar.inflateMenu(R.menu.edit_place)
@@ -52,19 +54,19 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
             true
         }
 
-        place = placesRepository.getPlace(intent.getLongExtra(ID_EXTRA, -1))
+        val place = viewModel.place
 
         if (place == null) {
             toolbar.setTitle(R.string.action_add_place)
             closed_switch.visibility = View.GONE
             change_location.setText(R.string.set_location)
         } else {
-            name.setText(place!!.name)
+            name.setText(place.name)
             change_location.setText(R.string.change_location)
-            phone.setText(place!!.phone)
-            website.setText(place!!.website)
-            description.setText(place!!.description)
-            opening_hours.setText(place!!.openingHours)
+            phone.setText(place.phone)
+            website.setText(place.website)
+            description.setText(place.description)
+            opening_hours.setText(place.openingHours)
         }
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -79,35 +81,15 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
         }
 
         change_location.setOnClickListener {
-            val intent = PickLocationActivity.newIntent(this, if (place == null) null else LatLng(place!!.latitude, place!!.longitude), intent.getParcelableExtra(MAP_CAMERA_POSITION_EXTRA))
-            startActivityForResult(intent, REQUEST_PICK_LOCATION, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle())
-        }
-    }
-
-    fun submit() {
-        if (place == null) {
-            if (name!!.length() == 0) {
-                showAlert(R.string.name_is_not_specified)
-                return
-            }
-
-            if (pickedLocation == null) {
-                showAlert(R.string.location_is_not_specified)
-                return
-            }
-        }
-
-        if (place == null) {
-            AddPlaceTask().execute()
-        } else {
-            UpdatePlaceTask().execute()
+            val intent = PickLocationActivity.newIntent(this, if (place == null) null else LatLng(place.latitude, place.longitude), intent.getParcelableExtra(MAP_CAMERA_POSITION_EXTRA))
+            startActivityForResult(intent, REQUEST_PICK_LOCATION)
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         if (requestCode == REQUEST_PICK_LOCATION && resultCode == Activity.RESULT_OK) {
-            pickedLocation = data.getParcelableExtra<LatLng>(PickLocationActivity.LOCATION_EXTRA)
-            map!!.moveCamera(CameraUpdateFactory.newLatLngZoom(pickedLocation, DEFAULT_ZOOM))
+            viewModel.pickedLocation = data.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA)
+            map?.moveCamera(CameraUpdateFactory.newLatLngZoom(viewModel.pickedLocation, DEFAULT_ZOOM))
             change_location.setText(R.string.change_location)
         }
 
@@ -117,68 +99,64 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
-        map!!.uiSettings.setAllGesturesEnabled(false)
+        googleMap.uiSettings.setAllGesturesEnabled(false)
+
+        val place = viewModel.place
 
         if (place != null) {
-            map!!.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(place!!.latitude, place!!.longitude), DEFAULT_ZOOM))
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(place.latitude, place.longitude), DEFAULT_ZOOM))
         }
     }
 
-    private val editedPlace: Place
-        get() = Place(
-                id = if (place == null) 0 else place!!.id,
+    override fun onTaskStarted() {
+        progressDialog?.dismiss()
+        progressDialog = indeterminateProgressDialog("Uploading changes")
+    }
+
+    override fun onTaskStopped() {
+        progressDialog?.dismiss()
+    }
+
+    override fun onTaskSuccess() {
+        setResult(Activity.RESULT_OK)
+        supportFinishAfterTransition()
+    }
+
+    override fun onTaskFailure() {
+        alert(messageResource =  R.string.could_not_add_place).show()
+    }
+
+    private fun submit() {
+        if (name!!.length() == 0) {
+            alert(messageResource =  R.string.name_is_not_specified).show()
+            return
+        }
+
+        if (viewModel.place == null) {
+            if (viewModel.pickedLocation == null) {
+                alert(messageResource =  R.string.location_is_not_specified).show()
+                return
+            }
+
+            viewModel.addPlace(getChangedPlace())
+        } else {
+            viewModel.updatePlace(getChangedPlace())
+        }
+    }
+
+    private fun getChangedPlace(): Place {
+        return Place(
+                id = if (viewModel.place == null) 0 else viewModel.place!!.id,
                 name = name!!.text.toString(),
                 description = description!!.text.toString(),
-                latitude = pickedLocation!!.latitude,
-                longitude = pickedLocation!!.longitude,
-                categoryId = if (place == null) 0 else place!!.categoryId,
+                latitude = viewModel.pickedLocation!!.latitude,
+                longitude = viewModel.pickedLocation!!.longitude,
+                categoryId = if (viewModel.place == null) 0 else viewModel.place!!.categoryId,
                 phone = phone!!.text.toString(),
                 website = website!!.text.toString(),
                 openingHours = opening_hours.text.toString(),
                 visible = !closed_switch.isChecked,
-                updatedAt = Date(0)
-        )
-
-    private inner class AddPlaceTask : AsyncTask<Void, Void, Boolean>() {
-        override fun onPreExecute() {
-            showProgress()
-        }
-
-        override fun doInBackground(vararg args: Void): Boolean? {
-            return placesRepository.addPlace(editedPlace)
-        }
-
-        override fun onPostExecute(success: Boolean?) {
-            hideProgress()
-
-            if (success!!) {
-                setResult(Activity.RESULT_OK)
-                supportFinishAfterTransition()
-            } else {
-                Toast.makeText(this@EditPlaceActivity, R.string.could_not_add_place, Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
-    private inner class UpdatePlaceTask : AsyncTask<Void, Void, Boolean>() {
-        override fun onPreExecute() {
-            showProgress()
-        }
-
-        override fun doInBackground(vararg voids: Void): Boolean? {
-            return placesRepository.updatePlace(editedPlace)
-        }
-
-        override fun onPostExecute(success: Boolean?) {
-            hideProgress()
-
-            if (success!!) {
-                setResult(Activity.RESULT_OK)
-                supportFinishAfterTransition()
-            } else {
-                Toast.makeText(this@EditPlaceActivity, R.string.could_not_update_place, Toast.LENGTH_LONG).show()
-            }
-        }
+                updatedAt = Date(0))
     }
 
     companion object {

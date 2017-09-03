@@ -2,11 +2,7 @@ package com.bubelov.coins.dagger
 
 import android.content.Context
 import com.bubelov.coins.App
-
-import com.bubelov.coins.ui.viewmodel.ExchangeRatesViewModel
-import com.bubelov.coins.ui.viewmodel.MainViewModel
-import com.bubelov.coins.ui.viewmodel.NotificationAreaViewModel
-import com.bubelov.coins.ui.viewmodel.PlacesSearchViewModel
+import com.bubelov.coins.ui.viewmodel.*
 
 import javax.inject.Singleton
 
@@ -27,6 +23,7 @@ interface AppComponent {
     fun inject(target: ExchangeRatesViewModel)
     fun inject(target: NotificationAreaViewModel)
     fun inject(target: PlacesSearchViewModel)
+    fun inject(target: EditPlaceViewModel)
 
     @Component.Builder
     interface Builder {

@@ -13,13 +13,13 @@ import android.widget.TextView
 
 import com.bubelov.coins.R
 import com.bubelov.coins.repository.user.UserRepository
-import com.bubelov.coins.ui.activity.AbstractActivity
 import com.bubelov.coins.ui.activity.MainActivity
 import dagger.android.AndroidInjection
 
 import javax.inject.Inject
 
 import kotlinx.android.synthetic.main.fragment_sign_in.*
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.runOnUiThread
 
 /**
@@ -64,8 +64,7 @@ class SignInFragment : Fragment(), TextView.OnEditorActionListener {
 
             override fun onFailure(errors: List<String>) {
                 runOnUiThread {
-                    val abstractActivity = activity as AbstractActivity
-                    abstractActivity.showAlert(StringBuilder().apply {
+                    alert((StringBuilder().apply {
                         errors.forEach {
                             append(it)
 
@@ -73,7 +72,7 @@ class SignInFragment : Fragment(), TextView.OnEditorActionListener {
                                 append("\n")
                             }
                         }
-                    }.toString())
+                    }.toString())).show()
                 }
             }
         })

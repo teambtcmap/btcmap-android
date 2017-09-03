@@ -80,7 +80,11 @@ internal constructor(
                     onAuthorized()
                     callback.onSuccess()
                 } else {
-                    callback.onFailure(response.errorBody()!!.toStrings())
+                    if (response.errorBody() != null && response.errorBody()!!.contentLength() > 0) {
+                        callback.onFailure(response.errorBody()!!.toStrings())
+                    } else {
+                        callback.onFailure(listOf(response.message() ?: "Couldn't sign in"))
+                    }
                 }
             }
 

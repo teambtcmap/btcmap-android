@@ -45,7 +45,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     @Inject internal lateinit var analytics: Analytics
 
-    var mapBounds: LatLngBounds by Delegates.observable(LatLngBounds(LatLng(0.0, 0.0), LatLng(0.0, 0.0)), { _, _, _ -> onMapBoundsChanged() })
+    var mapBounds: LatLngBounds by Delegates.observable(LatLngBounds(LatLng(0.0, 0.0), LatLng(0.0, 0.0)), { _, _, _ ->
+        placeMarkers.value = toPlaceMarkers(placesRepository.getPlaces(mapBounds))
+    })
 
     val placeMarkers = MutableLiveData<Collection<PlaceMarker>>()
 
@@ -97,10 +99,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun selectPlace(id: Long) {
         selectedPlace.value = placesRepository.getPlace(id)
         analytics.logSelectContent(id.toString(), selectedPlace.value!!.name, "place")
-    }
-
-    fun onMapBoundsChanged() {
-        placeMarkers.value = toPlaceMarkers(placesRepository.getPlaces(mapBounds))
     }
 
     fun locateUser() {

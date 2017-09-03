@@ -42,6 +42,7 @@ import com.bubelov.coins.util.openUrl
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
+import org.jetbrains.anko.longToast
 import javax.inject.Inject
 
 /**
@@ -146,8 +147,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         viewModel.selectedPlace.observe(this, Observer { place ->
             if (place != null) {
-                place_details.setPlace(place)
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                selectPlace(place)
             }
         })
     }
@@ -210,15 +210,15 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         }
 
         if (requestCode == REQUEST_FIND_PLACE && resultCode == Activity.RESULT_OK) {
-            viewModel.selectPlace(data!!.getLongExtra(PlacesSearchActivity.PLACE_ID_EXTRA, -1))
+            viewModel.selectPlace(data?.getLongExtra(PlacesSearchActivity.PLACE_ID_EXTRA, 0) ?: 0)
         }
 
         if (requestCode == REQUEST_ADD_PLACE && resultCode == Activity.RESULT_OK) {
-            TODO()
+            longToast(R.string.place_has_been_added)
         }
 
         if (requestCode == REQUEST_EDIT_PLACE && resultCode == Activity.RESULT_OK) {
-            TODO()
+            longToast(R.string.your_edits_have_been_submitted)
         }
 
         if (requestCode == REQUEST_SIGN_IN && resultCode == Activity.RESULT_OK) {

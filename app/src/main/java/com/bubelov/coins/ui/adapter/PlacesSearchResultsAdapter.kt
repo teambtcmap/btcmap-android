@@ -14,33 +14,31 @@ import kotlinx.android.synthetic.main.list_item_places_search_result.view.*
  * @author Igor Bubelov
  */
 
-class PlacesSearchResultsAdapter(val itemClick: (PlacesSearchResult) -> Unit) : RecyclerView.Adapter<PlacesSearchResultsAdapter.ViewHolder>() {
+class PlacesSearchResultsAdapter(private val itemClick: (PlacesSearchResult) -> Unit) : RecyclerView.Adapter<PlacesSearchResultsAdapter.ViewHolder>() {
     var items = listOf<PlacesSearchResult>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
-            = ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_item_places_search_result, parent, false), itemClick)
+            = ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_item_places_search_result, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(items[position])
+        val item = items[position]
+
+        with(holder.itemView) {
+            icon.setImageResource(item.iconResId)
+            name.text = item.placeName
+
+            if (item.distance != null) {
+                distance.visibility = android.view.View.VISIBLE
+                distance.text = resources.getString(R.string.distance_format, item.distance, item.distanceUnits)
+            } else {
+                distance.visibility = android.view.View.GONE
+            }
+
+            setOnClickListener { itemClick(item) }
+        }
     }
 
     override fun getItemCount() = items.size
 
-    class ViewHolder(view: View, val itemClick: (PlacesSearchResult) -> Unit) : RecyclerView.ViewHolder(view) {
-        fun bind(item: PlacesSearchResult) {
-            with(item) {
-                itemView.icon.setImageResource(iconResId)
-                itemView.name.text = placeName
-
-                if (distance != null) {
-                    itemView.distance.visibility = View.VISIBLE
-                    itemView.distance.text = itemView.resources.getString(R.string.distance_format, distance, distanceUnits)
-                } else {
-                    itemView.distance.visibility = View.GONE
-                }
-
-                itemView.setOnClickListener { itemClick(this) }
-            }
-        }
-    }
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
 }

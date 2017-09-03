@@ -18,6 +18,7 @@ import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 import kotlinx.android.synthetic.main.activity_profile.*
+import org.jetbrains.anko.alert
 
 /**
  * @author Igor Bubelov
@@ -26,7 +27,7 @@ import kotlinx.android.synthetic.main.activity_profile.*
 class ProfileActivity : AbstractActivity(), Toolbar.OnMenuItemClickListener {
     @Inject lateinit var userRepository: UserRepository
 
-    lateinit var googleApiClient: GoogleApiClient
+    private lateinit var googleApiClient: GoogleApiClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -76,7 +77,7 @@ class ProfileActivity : AbstractActivity(), Toolbar.OnMenuItemClickListener {
 
     private fun googleSignOut() {
         if (!googleApiClient.isConnected) {
-            showAlert("Couldn't connect to Google services.")
+            alert("Couldn't connect to Google services.").show()
             return
         }
 
