@@ -17,17 +17,17 @@ class SyncLogsRepository @Inject constructor(
         private val gson: Gson
 ) {
     var syncLogs: List<SyncLogEntry>
-    get() {
-        val json = preferences.getString(PreferenceKeys.SYNC_LOGS, "")
+        get() {
+            val json = preferences.getString(PreferenceKeys.SYNC_LOGS, "")
 
-        return when(json) {
-            "" -> emptyList()
-            else -> gson.fromJson(json, SyncLog::class.java).entries
+            return when (json) {
+                "" -> emptyList()
+                else -> gson.fromJson(json, SyncLog::class.java).entries
+            }
         }
-    }
-    private set(value) {
-        preferences.edit().putString(PreferenceKeys.SYNC_LOGS, gson.toJson(SyncLog(value))).apply()
-    }
+        private set(value) {
+            preferences.edit().putString(PreferenceKeys.SYNC_LOGS, gson.toJson(SyncLog(value))).apply()
+        }
 
     fun addEntry(entry: SyncLogEntry) {
         val entries = mutableListOf<SyncLogEntry>().apply {

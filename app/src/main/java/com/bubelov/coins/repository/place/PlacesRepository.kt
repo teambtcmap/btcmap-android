@@ -5,8 +5,6 @@ import com.bubelov.coins.model.Place
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 
-import java.io.IOException
-
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,7 +16,12 @@ import java.util.*
 
 @Singleton
 class PlacesRepository @Inject
-constructor(val networkDataSource: PlacesDataSourceApi, val dbDataSource: PlacesDataSourceDb, val assetsDataSource: PlacesDataSourceAssets, val userRepository: UserRepository) {
+constructor(
+        private val networkDataSource: PlacesDataSourceApi,
+        private val dbDataSource: PlacesDataSourceDb,
+        private val assetsDataSource: PlacesDataSourceAssets,
+        private val userRepository: UserRepository
+) {
     private val cache: MutableList<Place> = mutableListOf()
         get() {
             if (field.isEmpty()) {
@@ -44,6 +47,18 @@ constructor(val networkDataSource: PlacesDataSourceApi, val dbDataSource: Places
 
     fun getRandomPlace() = if (cache.isEmpty()) null else cache[(Math.random() * cache.size).toInt()]
 
+    fun fetchNewPlaces(): List<Place> {
+        val lastSyncDate = cache.maxBy { it.updatedAt }?.updatedAt ?: Date(0)
+        val places = networkDataSource.getPlaces(Date(lastSyncDate.time + 1))
+
+        if (!places.isEmpty()) {
+            dbDataSource.insertOrReplace(places)
+            cache.clear()
+        }
+
+        return places
+    }
+
     fun addPlace(place: Place): Boolean {
         val createdPlace = networkDataSource.addPlace(place, userRepository.userAuthToken) ?: return false
         dbDataSource.insertOrReplace(createdPlace)
@@ -57,26 +72,5 @@ constructor(val networkDataSource: PlacesDataSourceApi, val dbDataSource: Places
         cache.remove(updatedPlace)
         cache.add(updatedPlace)
         return true
-    }
-
-    @Throws(IOException::class)
-    fun fetchNewPlaces(): List<Place> {
-        val places = networkDataSource.getPlaces(getLastUpdateDate())
-
-        if (!places.isEmpty()) {
-            dbDataSource.insertOrReplace(places)
-            cache.clear()
-        }
-
-        return places
-    }
-
-    private fun getLastUpdateDate(): Date {
-        val latestPlace = cache.maxBy { it.updatedAt }
-
-        return when (latestPlace) {
-            null -> Date(0)
-            else -> latestPlace.updatedAt
-        }
     }
 }
