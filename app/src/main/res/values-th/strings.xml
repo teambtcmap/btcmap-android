@@ -88,5 +88,7 @@
     <string name="clear_search">Clear search</string>
 
     <string name="new_place_notifications">New places in your area</string>
+    <string name="place_has_been_added">Place has been added</string>
+    <string name="your_edits_have_been_submitted">Your edits have been submitted</string>
 
 </resources>

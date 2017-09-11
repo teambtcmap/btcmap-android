@@ -2,6 +2,7 @@ package com.bubelov.coins.database.sync
 
 import android.content.Context
 import com.bubelov.coins.model.SyncLogEntry
+import com.bubelov.coins.repository.ApiResult
 
 import com.bubelov.coins.repository.currency.CurrenciesRepository
 import com.bubelov.coins.repository.place.PlacesRepository
@@ -35,28 +36,45 @@ internal constructor(
         private val placeNotificationManager: PlaceNotificationManager,
         private val syncLogsRepository: SyncLogsRepository
 ) {
-    private var futureResult: Future<Any>? = null
+    private var futureSyncResult: Future<Any>? = null
 
     fun sync() {
-        futureResult?.cancel(true)
+        Timber.d("Starting sync")
+        futureSyncResult?.cancel(true)
 
-        futureResult = doAsyncResult({ Timber.e(it, "Couldn't sync database") }, {
-            val newPlaces = placesRepository.fetchNewPlaces()
+        futureSyncResult = doAsyncResult({
+            Timber.e(it, "Couldn't sync database")
+            scheduleNextSync()
+        }, {
+            Timber.d("Fetching new places")
+            val placesResult = placesRepository.fetchNewPlaces()
 
-            newPlaces.forEach {
-                placeNotificationManager.notifyUserIfNecessary(it)
+            when (placesResult) {
+                is ApiResult.Success -> {
+                    Timber.d("Fetched ${placesResult.places.size} new places")
+                    syncLogsRepository.addEntry(SyncLogEntry(System.currentTimeMillis(), placesResult.places.size))
+
+                    placesResult.places.forEach {
+                        placeNotificationManager.notifyUserIfNecessary(it)
+                    }
+                }
+                is ApiResult.Error -> Timber.e(placesResult.e)
             }
 
+            Timber.d("Reloading place categories")
             placeCategoriesRepository.reloadFromApi()
+
+            Timber.d("Reloading currencies")
             currenciesRepository.reloadFromApi()
 
-            syncLogsRepository.addEntry(SyncLogEntry(System.currentTimeMillis(), newPlaces.size))
+            Timber.d("Sync completed")
+            scheduleNextSync()
         })
-
-        scheduleNextSync()
     }
 
     private fun scheduleNextSync() {
+        Timber.d("Scheduling next sync")
+
         PeriodicTask.Builder().apply {
             setService(DatabaseGcmSyncService::class.java)
             setTag(DatabaseGcmSyncService.TAG)

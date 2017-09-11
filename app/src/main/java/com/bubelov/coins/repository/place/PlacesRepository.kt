@@ -1,9 +1,10 @@
 package com.bubelov.coins.repository.place
 
-import com.bubelov.coins.repository.user.UserRepository
 import com.bubelov.coins.model.Place
+import com.bubelov.coins.repository.ApiResult
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import timber.log.Timber
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,8 +20,7 @@ class PlacesRepository @Inject
 constructor(
         private val networkDataSource: PlacesDataSourceApi,
         private val dbDataSource: PlacesDataSourceDb,
-        private val assetsDataSource: PlacesDataSourceAssets,
-        private val userRepository: UserRepository
+        private val assetsDataSource: PlacesDataSourceAssets
 ) {
     private val cache: MutableList<Place> = mutableListOf()
         get() {
@@ -47,30 +47,62 @@ constructor(
 
     fun getRandomPlace() = if (cache.isEmpty()) null else cache[(Math.random() * cache.size).toInt()]
 
-    fun fetchNewPlaces(): List<Place> {
-        val lastSyncDate = cache.maxBy { it.updatedAt }?.updatedAt ?: Date(0)
-        val places = networkDataSource.getPlaces(Date(lastSyncDate.time + 1))
+    fun fetchNewPlaces(): ApiResult<List<Place>> {
+        try {
+            val lastSyncDate = cache.maxBy { it.updatedAt }?.updatedAt ?: Date(0)
+            val response = networkDataSource.getPlaces(Date(lastSyncDate.time + 1)).execute()
 
-        if (!places.isEmpty()) {
-            dbDataSource.insertOrReplace(places)
-            cache.clear()
+            return if (response.isSuccessful) {
+                val places = response.body()!!
+
+                if (!places.isEmpty()) {
+                    dbDataSource.insertOrReplace(places)
+                    cache.clear()
+                }
+
+                ApiResult.Success(places)
+            } else {
+                throw Exception("HTTP code: ${response.code()}, message: ${response.message()}")
+            }
+        } catch (e: Exception) {
+            return ApiResult.Error(e)
         }
-
-        return places
     }
 
     fun addPlace(place: Place): Boolean {
-        val createdPlace = networkDataSource.addPlace(place, userRepository.userAuthToken) ?: return false
-        dbDataSource.insertOrReplace(createdPlace)
-        cache.add(createdPlace)
-        return true
+        return try {
+            val response = networkDataSource.addPlace(place).execute()
+
+            if (response.isSuccessful) {
+                val createdPlace = response.body()!!
+                dbDataSource.insertOrReplace(createdPlace)
+                cache.add(createdPlace)
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            Timber.e(e)
+            false
+        }
     }
 
     fun updatePlace(place: Place): Boolean {
-        val updatedPlace = networkDataSource.updatePlace(place, userRepository.userAuthToken) ?: return false
-        dbDataSource.insertOrReplace(updatedPlace)
-        cache.remove(updatedPlace)
-        cache.add(updatedPlace)
-        return true
+        return try {
+            val response = networkDataSource.updatePlace(place).execute()
+
+            if (response.isSuccessful) {
+                val updatedPlace = response.body()!!
+                dbDataSource.insertOrReplace(updatedPlace)
+                cache.remove(updatedPlace)
+                cache.add(updatedPlace)
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            Timber.e(e)
+            false
+        }
     }
 }
