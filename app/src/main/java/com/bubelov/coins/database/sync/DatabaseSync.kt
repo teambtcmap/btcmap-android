@@ -51,10 +51,10 @@ internal constructor(
 
             when (placesResult) {
                 is ApiResult.Success -> {
-                    Timber.d("Fetched ${placesResult.places.size} new places")
-                    syncLogsRepository.addEntry(SyncLogEntry(System.currentTimeMillis(), placesResult.places.size))
+                    Timber.d("Fetched ${placesResult.data.size} new places")
+                    syncLogsRepository.addEntry(SyncLogEntry(System.currentTimeMillis(), placesResult.data.size))
 
-                    placesResult.places.forEach {
+                    placesResult.data.forEach {
                         placeNotificationManager.notifyUserIfNecessary(it)
                     }
                 }

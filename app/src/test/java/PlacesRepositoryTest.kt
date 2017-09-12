@@ -30,7 +30,7 @@ class PlacesRepositoryTest : BaseRobolectricTest() {
 
     @Test
     fun fetchesNewPlaces() {
-        val newPlaces = repository.fetchNewPlaces()
-        assertTrue(newPlaces is ApiResult.Success && !newPlaces.places.isEmpty())
+        val result = repository.fetchNewPlaces()
+        assertTrue(result is ApiResult.Success && !result.data.isEmpty())
     }
 }

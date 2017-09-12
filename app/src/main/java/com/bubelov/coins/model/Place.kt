@@ -1,5 +1,6 @@
 package com.bubelov.coins.model
 
+import java.io.Serializable
 import java.util.*
 
 /**
@@ -18,4 +19,4 @@ data class Place(
         val openingHours: String,
         val visible: Boolean,
         val updatedAt: Date
-)
+) : Serializable

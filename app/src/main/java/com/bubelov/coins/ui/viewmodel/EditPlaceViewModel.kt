@@ -4,6 +4,7 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import com.bubelov.coins.dagger.Injector
 import com.bubelov.coins.model.Place
+import com.bubelov.coins.repository.ApiResult
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.google.android.gms.maps.model.LatLng
 import org.jetbrains.anko.doAsync
@@ -23,12 +24,12 @@ class EditPlaceViewModel(application: Application) : AndroidViewModel(applicatio
 
     private lateinit var callback: Callback
 
-    fun init(placeId: Long, callback: Callback) {
+    fun init(place: Place?, callback: Callback) {
         Injector.appComponent.inject(this)
-        place = placesRepository.getPlace(placeId)
+        this.place = place
 
         if (place != null) {
-            pickedLocation = LatLng(place!!.latitude, place!!.longitude)
+            pickedLocation = LatLng(place.latitude, place.longitude)
         }
 
         this.callback = callback
@@ -38,15 +39,14 @@ class EditPlaceViewModel(application: Application) : AndroidViewModel(applicatio
         callback.onTaskStarted()
 
         doAsync {
-            val success = placesRepository.addPlace(place)
+            val result = placesRepository.addPlace(place)
 
             uiThread {
                 callback.onTaskStopped()
 
-                if (success) {
-                    callback.onTaskSuccess()
-                } else {
-                    callback.onTaskFailure()
+                when (result) {
+                    is ApiResult.Success -> callback.onTaskSuccess(result.data)
+                    is ApiResult.Error -> callback.onTaskFailure()
                 }
             }
         }
@@ -56,15 +56,14 @@ class EditPlaceViewModel(application: Application) : AndroidViewModel(applicatio
         callback.onTaskStarted()
 
         doAsync {
-            val success = placesRepository.updatePlace(place)
+            val result = placesRepository.updatePlace(place)
 
             uiThread {
                 callback.onTaskStopped()
 
-                if (success) {
-                    callback.onTaskSuccess()
-                } else {
-                    callback.onTaskFailure()
+                when (result) {
+                    is ApiResult.Success -> callback.onTaskSuccess(result.data)
+                    is ApiResult.Error -> callback.onTaskFailure()
                 }
             }
         }
@@ -73,7 +72,7 @@ class EditPlaceViewModel(application: Application) : AndroidViewModel(applicatio
     interface Callback {
         fun onTaskStarted()
         fun onTaskStopped()
-        fun onTaskSuccess()
+        fun onTaskSuccess(place: Place)
         fun onTaskFailure()
     }
 }

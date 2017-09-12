@@ -4,7 +4,6 @@ import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.ApiResult
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import timber.log.Timber
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -69,7 +68,7 @@ constructor(
         }
     }
 
-    fun addPlace(place: Place): Boolean {
+    fun addPlace(place: Place): ApiResult<Place> {
         return try {
             val response = networkDataSource.addPlace(place).execute()
 
@@ -77,17 +76,16 @@ constructor(
                 val createdPlace = response.body()!!
                 dbDataSource.insertOrReplace(createdPlace)
                 cache.add(createdPlace)
-                true
+                ApiResult.Success(createdPlace)
             } else {
-                false
+                throw Exception("HTTP code: ${response.code()}, message: ${response.message()}")
             }
         } catch (e: Exception) {
-            Timber.e(e)
-            false
+            ApiResult.Error(e)
         }
     }
 
-    fun updatePlace(place: Place): Boolean {
+    fun updatePlace(place: Place): ApiResult<Place> {
         return try {
             val response = networkDataSource.updatePlace(place).execute()
 
@@ -96,13 +94,12 @@ constructor(
                 dbDataSource.insertOrReplace(updatedPlace)
                 cache.remove(updatedPlace)
                 cache.add(updatedPlace)
-                true
+                ApiResult.Success(updatedPlace)
             } else {
-                false
+                throw Exception("HTTP code: ${response.code()}, message: ${response.message()}")
             }
         } catch (e: Exception) {
-            Timber.e(e)
-            false
+            ApiResult.Error(e)
         }
     }
 }

@@ -159,11 +159,11 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     }
 
     override fun addPlace() {
-        EditPlaceActivity.startForResult(this, 0, map!!.cameraPosition, REQUEST_ADD_PLACE)
+        EditPlaceActivity.startForResult(this, null, map!!.cameraPosition, REQUEST_ADD_PLACE)
     }
 
     override fun editPlace(place: Place) {
-        EditPlaceActivity.startForResult(this, place.id, map!!.cameraPosition, REQUEST_EDIT_PLACE)
+        EditPlaceActivity.startForResult(this, place, map!!.cameraPosition, REQUEST_EDIT_PLACE)
     }
 
     override fun startSearch(location: Location?) {
@@ -215,10 +215,14 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         if (requestCode == REQUEST_ADD_PLACE && resultCode == Activity.RESULT_OK) {
             longToast(R.string.place_has_been_added)
+            viewModel.reloadMarkers()
         }
 
         if (requestCode == REQUEST_EDIT_PLACE && resultCode == Activity.RESULT_OK) {
             longToast(R.string.your_edits_have_been_submitted)
+            viewModel.reloadMarkers()
+            val place = data!!.getSerializableExtra(EditPlaceActivity.PLACE_EXTRA) as Place
+            viewModel.selectedPlace.value = place
         }
 
         if (requestCode == REQUEST_SIGN_IN && resultCode == Activity.RESULT_OK) {

@@ -41,7 +41,7 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback, EditPlaceViewM
         setContentView(R.layout.activity_edit_place)
 
         viewModel = ViewModelProviders.of(this).get(EditPlaceViewModel::class.java)
-        viewModel.init(intent.getLongExtra(ID_EXTRA, -1), this)
+        viewModel.init(intent.getSerializableExtra(PLACE_EXTRA) as Place?, this)
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
         toolbar.inflateMenu(R.menu.edit_place)
@@ -86,9 +86,9 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback, EditPlaceViewM
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_PICK_LOCATION && resultCode == Activity.RESULT_OK) {
-            viewModel.pickedLocation = data.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA)
+            viewModel.pickedLocation = data!!.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA)
             map?.moveCamera(CameraUpdateFactory.newLatLngZoom(viewModel.pickedLocation, DEFAULT_ZOOM))
             change_location.setText(R.string.change_location)
         }
@@ -110,15 +110,17 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback, EditPlaceViewM
 
     override fun onTaskStarted() {
         progressDialog?.dismiss()
-        progressDialog = indeterminateProgressDialog("Uploading changes")
+        progressDialog = indeterminateProgressDialog(getString(R.string.uploading_changes)).apply {
+            setCancelable(false)
+        }
     }
 
     override fun onTaskStopped() {
         progressDialog?.dismiss()
     }
 
-    override fun onTaskSuccess() {
-        setResult(Activity.RESULT_OK)
+    override fun onTaskSuccess(place: Place) {
+        setResult(Activity.RESULT_OK, Intent().apply { putExtra(PLACE_EXTRA, place) })
         supportFinishAfterTransition()
     }
 
@@ -160,7 +162,7 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback, EditPlaceViewM
     }
 
     companion object {
-        private val ID_EXTRA = "id"
+        const val PLACE_EXTRA = "place"
 
         private val MAP_CAMERA_POSITION_EXTRA = "map_camera_position"
 
@@ -168,9 +170,9 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback, EditPlaceViewM
 
         private val DEFAULT_ZOOM = 13f
 
-        fun startForResult(activity: Activity, placeId: Long, mapCameraPosition: CameraPosition, requestCode: Int) {
+        fun startForResult(activity: Activity, place: Place?, mapCameraPosition: CameraPosition, requestCode: Int) {
             val intent = Intent(activity, EditPlaceActivity::class.java)
-            intent.putExtra(ID_EXTRA, placeId)
+            intent.putExtra(PLACE_EXTRA, place)
             intent.putExtra(MAP_CAMERA_POSITION_EXTRA, mapCameraPosition)
             activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
         }
