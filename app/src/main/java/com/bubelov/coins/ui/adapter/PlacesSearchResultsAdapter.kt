@@ -9,6 +9,7 @@ import com.bubelov.coins.R
 import com.bubelov.coins.ui.model.PlacesSearchResult
 
 import kotlinx.android.synthetic.main.list_item_places_search_result.view.*
+import java.text.NumberFormat
 
 /**
  * @author Igor Bubelov
@@ -16,6 +17,8 @@ import kotlinx.android.synthetic.main.list_item_places_search_result.view.*
 
 class PlacesSearchResultsAdapter(private val itemClick: (PlacesSearchResult) -> Unit) : RecyclerView.Adapter<PlacesSearchResultsAdapter.ViewHolder>() {
     var items = listOf<PlacesSearchResult>()
+
+    private val distanceFormat = NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
             = ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_item_places_search_result, parent, false))
@@ -29,7 +32,7 @@ class PlacesSearchResultsAdapter(private val itemClick: (PlacesSearchResult) -> 
 
             if (item.distance != null) {
                 distance.visibility = android.view.View.VISIBLE
-                distance.text = resources.getString(R.string.distance_format, item.distance, item.distanceUnits)
+                distance.text = resources.getString(R.string.distance_format, distanceFormat.format(item.distance), item.distanceUnits)
             } else {
                 distance.visibility = android.view.View.GONE
             }
