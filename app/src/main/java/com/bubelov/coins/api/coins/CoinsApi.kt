@@ -1,8 +1,6 @@
 package com.bubelov.coins.api.coins
 
-import com.bubelov.coins.model.Currency
 import com.bubelov.coins.model.Place
-import com.bubelov.coins.model.PlaceCategory
 
 import retrofit2.Call
 import retrofit2.http.Body
@@ -35,13 +33,4 @@ interface CoinsApi {
 
     @PATCH("places/{id}")
     fun updatePlace(@Path("id") id: Long, @Header("session") session: String, @Body place: PlaceParams): Call<Place>
-
-    @GET("place_categories")
-    fun getPlaceCategories(): Call<List<PlaceCategory>>
-
-    @GET("place_categories/{id}")
-    fun getPlaceCategory(@Path("id") id: Long): Call<PlaceCategory>
-
-    @GET("currencies")
-    fun getCurrencies(): Call<List<Currency>>
 }

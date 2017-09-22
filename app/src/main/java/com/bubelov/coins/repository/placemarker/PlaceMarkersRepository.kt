@@ -1,10 +1,8 @@
-package com.bubelov.coins.repository.placecategory.marker
+package com.bubelov.coins.repository.placemarker
 
 import android.content.Context
 import android.graphics.*
 import com.bubelov.coins.R
-import com.bubelov.coins.model.PlaceCategory
-import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 
@@ -21,47 +19,40 @@ import android.support.v4.content.ContextCompat
  */
 
 @Singleton
-class PlaceCategoriesMarkersRepository @Inject
-internal constructor(private val context: Context, private val categoriesRepository: PlaceCategoriesRepository) {
-    private val cache = mutableMapOf<PlaceCategory?, BitmapDescriptor>()
+class PlaceMarkersRepository @Inject
+internal constructor(private val context: Context) {
+    private val cache = mutableMapOf<String, BitmapDescriptor>()
 
-    fun getPlaceCategoryMarker(categoryId: Long): BitmapDescriptor {
-        val placeCategory = categoriesRepository.getPlaceCategory(categoryId)
-        var marker = cache[placeCategory]
+    fun getPlaceCategoryMarker(category: String): BitmapDescriptor {
+        var marker = cache[category]
 
         if (marker == null) {
-            marker = createBitmapDescriptor(placeCategory)
-            cache[placeCategory] = marker
+            marker = createBitmapDescriptor(category)
+            cache[category] = marker
         }
 
         return marker
     }
 
-    private fun createBitmapDescriptor(placeCategory: PlaceCategory?): BitmapDescriptor {
+    private fun createBitmapDescriptor(placeCategory: String): BitmapDescriptor {
         val pinBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ic_map_marker_empty)
         val bitmap = Bitmap.createBitmap(pinBitmap.width, pinBitmap.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawBitmap(pinBitmap, 0f, 0f, Paint())
 
-        if (placeCategory == null) {
-            return BitmapDescriptorFactory.fromBitmap(bitmap)
-        }
-
-        val iconResourceId: Int?
-
-        when (placeCategory.name.toLowerCase()) {
-            "atm" -> iconResourceId = R.drawable.ic_atm
-            "restaurant" -> iconResourceId = R.drawable.ic_restaurant
-            "café" -> iconResourceId = R.drawable.ic_cafe
-            "bar" -> iconResourceId = R.drawable.ic_bar
-            "hotel" -> iconResourceId = R.drawable.ic_hotel
-            "pizza" -> iconResourceId = R.drawable.ic_pizza
-            "fast food" -> iconResourceId = R.drawable.ic_fast_food
-            "hospital" -> iconResourceId = R.drawable.ic_hospital
-            "pharmacy" -> iconResourceId = R.drawable.ic_pharmacy
-            "taxi" -> iconResourceId = R.drawable.ic_taxi
-            "gas station" -> iconResourceId = R.drawable.ic_gas_station
-            else -> iconResourceId = null
+        val iconResourceId = when (placeCategory.toLowerCase()) {
+            "atm" -> R.drawable.ic_atm
+            "restaurant" -> R.drawable.ic_restaurant
+            "café" -> R.drawable.ic_cafe
+            "bar" -> R.drawable.ic_bar
+            "hotel" -> R.drawable.ic_hotel
+            "pizza" -> R.drawable.ic_pizza
+            "fast food" -> R.drawable.ic_fast_food
+            "hospital" -> R.drawable.ic_hospital
+            "pharmacy" -> R.drawable.ic_pharmacy
+            "taxi" -> R.drawable.ic_taxi
+            "gas station" -> R.drawable.ic_gas_station
+            else -> null
         }
 
         if (iconResourceId != null) {
@@ -82,15 +73,15 @@ internal constructor(private val context: Context, private val categoriesReposit
     private fun toBitmap(@DrawableRes drawableId: Int, preferredWidth: Int, preferredHeight: Int): Bitmap {
         val drawable = ContextCompat.getDrawable(context, drawableId)
 
-        if (drawable is BitmapDrawable) {
-            return drawable.bitmap
+        return if (drawable is BitmapDrawable) {
+            drawable.bitmap
         } else if (drawable is VectorDrawable || drawable is VectorDrawableCompat) {
             val bitmap = Bitmap.createBitmap(preferredWidth, preferredHeight, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
             drawable.setBounds(0, 0, canvas.width, canvas.height)
             drawable.draw(canvas)
 
-            return bitmap
+            bitmap
         } else {
             throw IllegalArgumentException("Unsupported drawable")
         }

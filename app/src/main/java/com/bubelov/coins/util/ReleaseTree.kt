@@ -9,7 +9,7 @@ import timber.log.Timber
  */
 
 class ReleaseTree : Timber.Tree() {
-    override fun log(priority: Int, tag: String, message: String, t: Throwable?) {
+    override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
         if (t != null) {
             FirebaseCrash.log("Tag: " + tag)
             FirebaseCrash.log("Message: " + message)

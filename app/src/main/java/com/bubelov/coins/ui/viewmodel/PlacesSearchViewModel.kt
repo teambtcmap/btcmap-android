@@ -51,11 +51,11 @@ class PlacesSearchViewModel(application: Application) : AndroidViewModel(applica
                     Collections.sort(places, DistanceComparator(userLocation!!))
                 }
 
-                val results = places.map { (id, name, _, latitude, longitude) ->
+                val results = places.map { place ->
                     PlacesSearchResult(
-                            placeId = id,
-                            placeName = name,
-                            distance = userLocation?.distanceTo(latitude, longitude, getDistanceUnits()),
+                            placeId = place.id,
+                            placeName = place.name,
+                            distance = userLocation?.distanceTo(place.latitude, place.longitude, getDistanceUnits()),
                             distanceUnits = getDistanceUnits().getShortName(),
                             iconResId = R.drawable.ic_place
                     )

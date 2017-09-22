@@ -2,6 +2,7 @@ package com.bubelov.coins.model
 
 import java.io.Serializable
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * @author Igor Bubelov
@@ -10,10 +11,13 @@ import java.util.*
 data class Place(
         val id: Long,
         val name: String,
-        val description: String,
         val latitude: Double,
         val longitude: Double,
-        val categoryId: Long,
+        val category: String,
+        val description: String,
+        val currencies: ArrayList<String>,
+        val openedClaims: Int,
+        val closedClaims: Int,
         val phone: String,
         val website: String,
         val openingHours: String,

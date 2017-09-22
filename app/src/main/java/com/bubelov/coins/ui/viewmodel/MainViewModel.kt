@@ -14,8 +14,7 @@ import com.bubelov.coins.model.NotificationArea
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.area.NotificationAreaRepository
 import com.bubelov.coins.repository.place.PlacesRepository
-import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository
-import com.bubelov.coins.repository.placecategory.marker.PlaceCategoriesMarkersRepository
+import com.bubelov.coins.repository.placemarker.PlaceMarkersRepository
 import com.bubelov.coins.repository.user.UserRepository
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.util.Analytics
@@ -39,9 +38,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     @Inject internal lateinit var placesRepository: PlacesRepository
 
-    @Inject internal lateinit var placeCategoriesRepository: PlaceCategoriesRepository
-
-    @Inject internal lateinit var placeCategoriesMarkersRepository: PlaceCategoriesMarkersRepository
+    @Inject internal lateinit var placeMarkersRepository: PlaceMarkersRepository
 
     @Inject internal lateinit var analytics: Analytics
 
@@ -148,13 +145,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun toPlaceMarkers(places: Collection<Place>): Collection<PlaceMarker> {
-        val placeMarkers = ArrayList<PlaceMarker>()
-
-        for ((id, _, _, latitude, longitude, categoryId) in places) {
-            placeMarkers.add(PlaceMarker(id, placeCategoriesMarkersRepository.getPlaceCategoryMarker(categoryId), latitude, longitude))
+        return places.mapTo(ArrayList()) {
+            PlaceMarker(
+                placeId = it.id,
+                icon = placeMarkersRepository.getPlaceCategoryMarker(it.category),
+                latitude = it.latitude,
+                longitude = it.longitude
+            )
         }
-
-        return placeMarkers
     }
 
     interface Callback {

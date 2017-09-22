@@ -5,10 +5,12 @@ import android.database.sqlite.SQLiteDatabase
 
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.database.DbContract
+import com.google.gson.Gson
 import java.util.*
 
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.collections.ArrayList
 
 /**
  * @author Igor Bubelov
@@ -16,7 +18,7 @@ import javax.inject.Singleton
 
 @Singleton
 class PlacesDataSourceDb @Inject
-internal constructor(private val db: SQLiteDatabase) {
+internal constructor(private val db: SQLiteDatabase, private val gson: Gson) {
     fun getPlaces(): List<Place> = db.query(DbContract.Places.TABLE_NAME,
             null, null, null, null, null, null, null).use { cursor -> return cursor.toPlaces() }
 
@@ -28,35 +30,44 @@ internal constructor(private val db: SQLiteDatabase) {
         db.beginTransaction()
 
         try {
-            val insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            val insertQuery = String.format("insert or replace into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     DbContract.Places.TABLE_NAME,
                     DbContract.Places._ID,
-                    DbContract.Places._UPDATED_AT,
+                    DbContract.Places.NAME,
                     DbContract.Places.LATITUDE,
                     DbContract.Places.LONGITUDE,
-                    DbContract.Places.NAME,
+                    DbContract.Places.CATEGORY,
                     DbContract.Places.DESCRIPTION,
+                    DbContract.Places.CURRENCIES,
+                    DbContract.Places.OPENED_CLAIMS,
+                    DbContract.Places.CLOSED_CLAIMS,
                     DbContract.Places.PHONE,
                     DbContract.Places.WEBSITE,
-                    DbContract.Places.CATEGORY_ID,
                     DbContract.Places.OPENING_HOURS,
-                    DbContract.Places.VISIBLE)
+                    DbContract.Places.VISIBLE,
+                    DbContract.Places._UPDATED_AT
+            )
 
             val insertStatement = db.compileStatement(insertQuery)
 
-            for ((id, name, description, latitude, longitude, categoryId, phone, website, openingHours, visible, updatedAt) in places) {
-                insertStatement.bindLong(1, id)
-                insertStatement.bindLong(2, updatedAt.time)
-                insertStatement.bindDouble(3, latitude)
-                insertStatement.bindDouble(4, longitude)
-                insertStatement.bindString(5, name)
-                insertStatement.bindString(6, description)
-                insertStatement.bindString(7, phone)
-                insertStatement.bindString(8, website)
-                insertStatement.bindLong(9, categoryId)
-                insertStatement.bindString(10, openingHours)
-                insertStatement.bindLong(11, (if (visible) 1 else 0).toLong())
-                insertStatement.execute()
+            for (place in places) {
+                insertStatement.apply {
+                    bindLong(1, place.id)
+                    bindString(2, place.name)
+                    bindDouble(3, place.latitude)
+                    bindDouble(4, place.longitude)
+                    bindString(5, place.category)
+                    bindString(6, place.description)
+                    bindString(7, gson.toJson(place.currencies))
+                    bindLong(8, place.openedClaims.toLong())
+                    bindLong(9, place.closedClaims.toLong())
+                    bindString(10, place.phone)
+                    bindString(11, place.website)
+                    bindString(12, place.openingHours)
+                    bindLong(13, (if (place.visible) 1 else 0).toLong())
+                    bindLong(14, place.updatedAt.time)
+                    execute()
+                }
             }
 
             db.setTransactionSuccessful()
@@ -74,12 +85,15 @@ internal constructor(private val db: SQLiteDatabase) {
     }
 
     private fun Cursor.toPlace() = Place(
-            id = getLong(getColumnIndex(DbContract.Currencies._ID)),
+            id = getLong(getColumnIndex(DbContract.Places._ID)),
             name = getString(getColumnIndex(DbContract.Places.NAME)),
-            description = getString(getColumnIndex(DbContract.Places.DESCRIPTION)),
             latitude = getDouble(getColumnIndex(DbContract.Places.LATITUDE)),
             longitude = getDouble(getColumnIndex(DbContract.Places.LONGITUDE)),
-            categoryId = getLong(getColumnIndex(DbContract.Places.CATEGORY_ID)),
+            category = getString(getColumnIndex(DbContract.Places.CATEGORY)),
+            description = getString(getColumnIndex(DbContract.Places.DESCRIPTION)),
+            currencies = gson.fromJson(getString(getColumnIndex(DbContract.Places.CURRENCIES)), ArrayList<String>().javaClass),
+            openedClaims = getLong(getColumnIndex(DbContract.Places.OPENED_CLAIMS)).toInt(),
+            closedClaims = getLong(getColumnIndex(DbContract.Places.CLOSED_CLAIMS)).toInt(),
             phone = getString(getColumnIndex(DbContract.Places.PHONE)),
             website = getString(getColumnIndex(DbContract.Places.WEBSITE)),
             openingHours = getString(getColumnIndex(DbContract.Places.OPENING_HOURS)),

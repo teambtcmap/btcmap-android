@@ -4,9 +4,7 @@ import android.content.Context
 import com.bubelov.coins.model.SyncLogEntry
 import com.bubelov.coins.repository.ApiResult
 
-import com.bubelov.coins.repository.currency.CurrenciesRepository
 import com.bubelov.coins.repository.place.PlacesRepository
-import com.bubelov.coins.repository.placecategory.PlaceCategoriesRepository
 import com.bubelov.coins.repository.synclogs.SyncLogsRepository
 import com.bubelov.coins.util.PlaceNotificationManager
 import com.google.android.gms.gcm.GcmNetworkManager
@@ -31,8 +29,6 @@ class DatabaseSync @Inject
 internal constructor(
         private val context: Context,
         private val placesRepository: PlacesRepository,
-        private val placeCategoriesRepository: PlaceCategoriesRepository,
-        private val currenciesRepository: CurrenciesRepository,
         private val placeNotificationManager: PlaceNotificationManager,
         private val syncLogsRepository: SyncLogsRepository
 ) {
@@ -60,12 +56,6 @@ internal constructor(
                 }
                 is ApiResult.Error -> Timber.e(placesResult.e)
             }
-
-            Timber.d("Reloading place categories")
-            placeCategoriesRepository.reloadFromApi()
-
-            Timber.d("Reloading currencies")
-            currenciesRepository.reloadFromApi()
 
             Timber.d("Sync completed")
             scheduleNextSync()

@@ -11,10 +11,8 @@ import javax.inject.Singleton
 @Singleton
 @Component(modules = arrayOf(AppModule::class))
 interface TestComponent {
-    fun inject(target: CurrenciesRepositoryTest)
     fun inject(target: ExchangeRatesRepositoryTest)
     fun inject(target: NotificationAreaRepositoryTest)
-    fun inject(target: PlaceCategoriesRepositoryTest)
     fun inject(target: PlacesRepositoryTest)
     fun inject(target: SyncLogsRepositoryTest)
 

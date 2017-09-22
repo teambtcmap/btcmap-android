@@ -9,6 +9,7 @@ import com.bubelov.coins.repository.place.PlacesRepository
 import com.google.android.gms.maps.model.LatLng
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
+import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -46,7 +47,10 @@ class EditPlaceViewModel(application: Application) : AndroidViewModel(applicatio
 
                 when (result) {
                     is ApiResult.Success -> callback.onTaskSuccess(result.data)
-                    is ApiResult.Error -> callback.onTaskFailure()
+                    is ApiResult.Error -> {
+                        Timber.e(result.e)
+                        callback.onTaskFailure()
+                    }
                 }
             }
         }

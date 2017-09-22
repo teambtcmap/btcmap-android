@@ -125,18 +125,18 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback, EditPlaceViewM
     }
 
     override fun onTaskFailure() {
-        alert(messageResource =  R.string.could_not_add_place).show()
+        alert(messageResource = R.string.could_not_add_place).show()
     }
 
     private fun submit() {
         if (name!!.length() == 0) {
-            alert(messageResource =  R.string.name_is_not_specified).show()
+            alert(messageResource = R.string.name_is_not_specified).show()
             return
         }
 
         if (viewModel.place == null) {
             if (viewModel.pickedLocation == null) {
-                alert(messageResource =  R.string.location_is_not_specified).show()
+                alert(messageResource = R.string.location_is_not_specified).show()
                 return
             }
 
@@ -153,11 +153,14 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback, EditPlaceViewM
                 description = description!!.text.toString(),
                 latitude = viewModel.pickedLocation!!.latitude,
                 longitude = viewModel.pickedLocation!!.longitude,
-                categoryId = if (viewModel.place == null) 0 else viewModel.place!!.categoryId,
+                category = if (viewModel.place == null) "" else viewModel.place!!.category,
                 phone = phone!!.text.toString(),
                 website = website!!.text.toString(),
                 openingHours = opening_hours.text.toString(),
                 visible = !closed_switch.isChecked,
+                currencies = viewModel.place?.currencies ?: arrayListOf("BTC"),
+                openedClaims = viewModel.place?.openedClaims ?: 1,
+                closedClaims = viewModel.place?.closedClaims ?: 0,
                 updatedAt = Date(0))
     }
 
