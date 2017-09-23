@@ -1,13 +1,9 @@
 package com.bubelov.coins.ui.viewmodel
 
-import android.Manifest
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
-import android.content.pm.PackageManager
 import android.location.Location
-import android.support.v4.content.ContextCompat
-import com.bubelov.coins.App
 import com.bubelov.coins.Constants
 import com.bubelov.coins.dagger.Injector
 import com.bubelov.coins.model.NotificationArea
@@ -18,9 +14,7 @@ import com.bubelov.coins.repository.placemarker.PlaceMarkersRepository
 import com.bubelov.coins.repository.user.UserRepository
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.util.Analytics
-import com.bubelov.coins.util.toLatLng
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.bubelov.coins.util.LocationLiveData
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import java.util.ArrayList
@@ -50,9 +44,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val selectedPlace: MutableLiveData<Place> = MutableLiveData()
 
-    var callback: Callback? = null
+    val location = LocationLiveData(application)
 
-    private val locationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplication<App>())
+    var moveToNextLocation = true
+
+    var callback: Callback? = null
 
     init {
         Injector.appComponent.inject(this)
@@ -78,17 +74,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun onSearchClick() {
-        if (ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            callback?.startSearch(null)
-            return
-        }
-
-        locationClient.lastLocation.addOnCompleteListener { task ->
-            callback?.startSearch(task.result)
-        }
-    }
-
     fun onDrawerHeaderClick() {
         if (userRepository.signedIn()) {
             callback?.showUserProfile()
@@ -102,37 +87,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         analytics.logSelectContent(id.toString(), selectedPlace.value!!.name, "place")
     }
 
-    fun locateUser() {
-        if (ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationClient.lastLocation.addOnCompleteListener { task ->
-                if (task.result != null) {
-                    callback?.moveToLocation(task.result.toLatLng())
-                } else {
-                    callback?.moveToLocation(LatLng(Constants.SAN_FRANCISCO_LATITUDE, Constants.SAN_FRANCISCO_LONGITUDE))
-                }
-            }
-        } else {
-            callback?.requestLocationPermissions()
-        }
-    }
+    fun onNewLocation(location: Location) {
+        if (notificationAreaRepository.notificationArea == null) {
+            val area = NotificationArea(
+                    location.latitude,
+                    location.longitude,
+                    Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS
+            )
 
-    fun onLocationPermissionGranted() {
-        if (ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return
-        }
-
-        locationClient.lastLocation.addOnCompleteListener { task ->
-            val location = task.result
-
-            if (location != null && notificationAreaRepository.notificationArea == null) {
-                val area = NotificationArea(
-                        location.latitude,
-                        location.longitude,
-                        Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS
-                )
-
-                notificationAreaRepository.notificationArea = area
-            }
+            notificationAreaRepository.notificationArea = area
         }
     }
 
@@ -162,14 +125,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         fun editPlace(place: Place)
 
-        fun startSearch(location: Location?)
-
         fun showUserProfile()
 
         fun selectPlace(place: Place)
-
-        fun requestLocationPermissions()
-
-        fun moveToLocation(location: LatLng)
     }
 }

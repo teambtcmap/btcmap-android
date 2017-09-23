@@ -8,13 +8,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.ActivityOptionsCompat
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
 import android.text.TextUtils
@@ -39,6 +39,7 @@ import com.squareup.picasso.Picasso
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MainViewModel
 import com.bubelov.coins.util.openUrl
+import com.bubelov.coins.util.toLatLng
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
@@ -61,6 +62,9 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     private lateinit var placesManager: ClusterManager<PlaceMarker>
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
+
+    private val locationPermissionGranted: Boolean
+        get() = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
     @Inject internal lateinit var analytics: Analytics
 
@@ -134,7 +138,13 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
             placesManager.cluster()
         })
 
-        fab.setOnClickListener { viewModel.locateUser() }
+        fab.setOnClickListener {
+            if (locationPermissionGranted) {
+                viewModel.moveToNextLocation = true
+            } else {
+                requestLocationPermissions()
+            }
+        }
 
         place_details.setOnClickListener {
             if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
@@ -145,52 +155,12 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
             }
         }
 
-        viewModel.selectedPlace.observe(this, Observer { place ->
-            if (place != null) {
-                selectPlace(place)
+        viewModel.selectedPlace.observe(this, Observer {
+            if (it != null) {
+                selectPlace(it)
             }
         })
     }
-
-    //
-
-    override fun signIn() {
-        startActivityForResult(SignInActivity.newIntent(this), REQUEST_SIGN_IN)
-    }
-
-    override fun addPlace() {
-        EditPlaceActivity.startForResult(this, null, map!!.cameraPosition, REQUEST_ADD_PLACE)
-    }
-
-    override fun editPlace(place: Place) {
-        EditPlaceActivity.startForResult(this, place, map!!.cameraPosition, REQUEST_EDIT_PLACE)
-    }
-
-    override fun startSearch(location: Location?) {
-        PlacesSearchActivity.startForResult(this, location, REQUEST_FIND_PLACE)
-    }
-
-    override fun showUserProfile() {
-        startActivityForResult(ProfileActivity.newIntent(this), REQUEST_PROFILE)
-    }
-
-    override fun selectPlace(place: Place) {
-        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(place.latitude, place.longitude), MAP_DEFAULT_ZOOM))
-        place_details.setPlace(place)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-    }
-
-    override fun requestLocationPermissions() {
-        ActivityCompat.requestPermissions(this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                MainActivity.REQUEST_ACCESS_LOCATION)
-    }
-
-    override fun moveToLocation(location: LatLng) {
-        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(location, MAP_DEFAULT_ZOOM))
-    }
-
-    //
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
@@ -205,8 +175,11 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == Activity.RESULT_OK) {
-            viewModel.onLocationPermissionGranted()
-            viewModel.locateUser()
+            if (locationPermissionGranted) {
+                observeLocationUpdates()
+            } else {
+                requestLocationPermissions()
+            }
         }
 
         if (requestCode == REQUEST_FIND_PLACE && resultCode == Activity.RESULT_OK) {
@@ -236,25 +209,24 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            REQUEST_ACCESS_LOCATION -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                observeLocationUpdates()
+            }
+        }
+    }
+
     override fun onMenuItemClick(item: MenuItem): Boolean {
         val id = item.itemId
 
         when (id) {
             R.id.action_add -> viewModel.onAddPlaceClick()
-            R.id.action_search -> viewModel.onSearchClick()
+            R.id.action_search -> PlacesSearchActivity.startForResult(this, viewModel.location.value, REQUEST_FIND_PLACE)
             else -> return super.onOptionsItemSelected(item)
         }
 
         return true
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        when (requestCode) {
-            REQUEST_ACCESS_LOCATION -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                viewModel.onLocationPermissionGranted()
-                viewModel.locateUser()
-            }
-        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -275,6 +247,46 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         }
     }
 
+    override fun signIn() {
+        startActivityForResult(SignInActivity.newIntent(this), REQUEST_SIGN_IN)
+    }
+
+    override fun addPlace() {
+        EditPlaceActivity.startForResult(this, null, map!!.cameraPosition, REQUEST_ADD_PLACE)
+    }
+
+    override fun editPlace(place: Place) {
+        EditPlaceActivity.startForResult(this, place, map!!.cameraPosition, REQUEST_EDIT_PLACE)
+    }
+
+    override fun showUserProfile() {
+        startActivityForResult(ProfileActivity.newIntent(this), REQUEST_PROFILE)
+    }
+
+    override fun selectPlace(place: Place) {
+        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(place.latitude, place.longitude), MAP_DEFAULT_ZOOM))
+        place_details.setPlace(place)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+    }
+
+    private fun requestLocationPermissions() {
+        ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                MainActivity.REQUEST_ACCESS_LOCATION)
+    }
+
+    private fun observeLocationUpdates() {
+        viewModel.location.observe(this, Observer {
+            val map = this.map
+
+            if (it != null && map != null && viewModel.moveToNextLocation) {
+                viewModel.moveToNextLocation = false
+                viewModel.onNewLocation(it)
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(it.toLatLng(), MAP_DEFAULT_ZOOM))
+            }
+        })
+    }
+
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         map!!.uiSettings.isMyLocationButtonEnabled = false
@@ -283,8 +295,13 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         map!!.uiSettings.isMapToolbarEnabled = false
 
         initClustering()
-        viewModel.locateUser()
         handleIntent(intent)
+
+        if (locationPermissionGranted) {
+            observeLocationUpdates()
+        } else {
+            requestLocationPermissions()
+        }
     }
 
     private fun updateDrawerHeader() {
