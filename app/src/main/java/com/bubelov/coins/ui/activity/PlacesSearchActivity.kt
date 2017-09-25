@@ -51,7 +51,7 @@ class PlacesSearchActivity : AbstractActivity() {
 
         query.addTextChangedListener(object : TextWatcherAdapter() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                viewModel.value.searchQuery = s.toString()
+                viewModel.value.searchQuery.value = s.toString()
                 clear.visibility = if (TextUtils.isEmpty(s)) View.GONE else View.VISIBLE
             }
         })

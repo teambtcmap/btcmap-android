@@ -165,7 +165,7 @@ class EditPlaceActivity : AbstractActivity(), OnMapReadyCallback, EditPlaceViewM
     }
 
     companion object {
-        const val PLACE_EXTRA = "place"
+        private val PLACE_EXTRA = "place"
 
         private val MAP_CAMERA_POSITION_EXTRA = "map_camera_position"
 

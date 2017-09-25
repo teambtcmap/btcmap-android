@@ -2,12 +2,11 @@ package com.bubelov.coins.dagger
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.database.sqlite.SQLiteDatabase
 import android.preference.PreferenceManager
 
 import com.bubelov.coins.BuildConfig
 import com.bubelov.coins.api.coins.CoinsApi
-import com.bubelov.coins.database.DbHelper
+import com.bubelov.coins.database.Database
 import com.bubelov.coins.util.StringAdapter
 import com.bubelov.coins.util.UtcDateTypeAdapter
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -25,6 +24,8 @@ import dagger.Provides
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import android.arch.persistence.room.Room
+import com.bubelov.coins.database.dao.PlaceDao
 
 /**
  * @author Igor Bubelov
@@ -40,8 +41,14 @@ class AppModule {
 
     @Provides
     @Singleton
-    internal fun database(context: Context): SQLiteDatabase {
-        return DbHelper(context).writableDatabase
+    internal fun database(context: Context): Database {
+        return Room.databaseBuilder(context, Database::class.java, "data").build()
+    }
+
+    @Provides
+    @Singleton
+    internal fun placeDao(database: Database): PlaceDao {
+        return database.placeDao()
     }
 
     @Provides

@@ -2,6 +2,7 @@ package com.bubelov.coins.ui.viewmodel
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
+import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.location.Location
 import com.bubelov.coins.Constants
@@ -15,11 +16,10 @@ import com.bubelov.coins.repository.user.UserRepository
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.util.Analytics
 import com.bubelov.coins.util.LocationLiveData
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import java.util.ArrayList
 import javax.inject.Inject
-import kotlin.properties.Delegates
+import android.arch.lifecycle.Transformations
 
 /**
  * @author Igor Bubelov
@@ -36,13 +36,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     @Inject internal lateinit var analytics: Analytics
 
-    var mapBounds: LatLngBounds by Delegates.observable(LatLngBounds(LatLng(0.0, 0.0), LatLng(0.0, 0.0)), { _, _, _ ->
-        reloadMarkers()
-    })
+    val selectedPlaceId = MutableLiveData<Long>()
 
-    val placeMarkers = MutableLiveData<Collection<PlaceMarker>>()
-
-    val selectedPlace: MutableLiveData<Place> = MutableLiveData()
+    val selectedPlace: LiveData<Place?>
+            = Transformations.switchMap(selectedPlaceId) { placesRepository.getPlace(it) }
 
     val location = LocationLiveData(application)
 
@@ -50,12 +47,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     var callback: Callback? = null
 
-    init {
-        Injector.appComponent.inject(this)
+    var mapBounds = MutableLiveData<LatLngBounds>()
+
+    private val places: LiveData<List<Place>>
+            = Transformations.switchMap(mapBounds) { placesRepository.getPlaces(it) }
+
+    val placeMarkers: LiveData<List<PlaceMarker>> = Transformations.switchMap(places) {
+        MutableLiveData<List<PlaceMarker>>().apply {
+            value = it.mapTo(ArrayList()) {
+                PlaceMarker(
+                        placeId = it.id,
+                        icon = placeMarkersRepository.getPlaceCategoryMarker(it.category),
+                        latitude = it.latitude,
+                        longitude = it.longitude
+                )
+            }
+        }
     }
 
-    fun reloadMarkers() {
-        placeMarkers.value = toPlaceMarkers(placesRepository.getPlaces(mapBounds))
+    init {
+        Injector.appComponent.inject(this)
     }
 
     fun onAddPlaceClick() {
@@ -82,11 +93,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun selectPlace(id: Long) {
-        selectedPlace.value = placesRepository.getPlace(id)
-        analytics.logSelectContent(id.toString(), selectedPlace.value!!.name, "place")
-    }
-
     fun onNewLocation(location: Location) {
         if (notificationAreaRepository.notificationArea == null) {
             val area = NotificationArea(
@@ -99,23 +105,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun clearSelection() {
-        selectedPlace.value = null
-    }
-
     fun onSelectedPlaceDetailsClick() {
         analytics.logViewContent(selectedPlace.value!!.id.toString(), selectedPlace.value!!.name, "place")
-    }
-
-    private fun toPlaceMarkers(places: Collection<Place>): Collection<PlaceMarker> {
-        return places.mapTo(ArrayList()) {
-            PlaceMarker(
-                placeId = it.id,
-                icon = placeMarkersRepository.getPlaceCategoryMarker(it.category),
-                latitude = it.latitude,
-                longitude = it.longitude
-            )
-        }
     }
 
     interface Callback {

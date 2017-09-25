@@ -1,14 +1,18 @@
 package com.bubelov.coins.repository.place
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Transformations
+import com.bubelov.coins.database.dao.PlaceDao
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.ApiResult
-import com.google.android.gms.maps.model.LatLng
+import com.bubelov.coins.util.toLatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import org.jetbrains.anko.doAsync
+import java.util.*
 
 import javax.inject.Inject
 import javax.inject.Singleton
-
-import java.util.*
 
 /**
  * @author Igor Bubelov
@@ -18,45 +22,40 @@ import java.util.*
 class PlacesRepository @Inject
 constructor(
         private val networkDataSource: PlacesDataSourceApi,
-        private val dbDataSource: PlacesDataSourceDb,
-        private val assetsDataSource: PlacesDataSourceAssets
+        private val dao: PlaceDao,
+        assetsDataSource: PlacesDataSourceAssets
 ) {
-    private val cache: MutableList<Place> = mutableListOf()
-        get() {
-            if (field.isEmpty()) {
-                val placesFromDb = dbDataSource.getPlaces()
+    private val places = dao.all()
 
-                if (placesFromDb.isEmpty()) {
-                    val placesFromAssets = assetsDataSource.getPlaces()
-                    dbDataSource.insertOrReplace(placesFromAssets)
-                    field.addAll(placesFromAssets)
-                } else {
-                    field.addAll(placesFromDb)
-                }
+    init {
+        doAsync {
+            if (dao.count() == 0) {
+                dao.insertAll(assetsDataSource.getPlaces())
             }
-
-            return field
         }
+    }
 
-    fun getPlaces(bounds: LatLngBounds) = cache.filter { bounds.contains(LatLng(it.latitude, it.longitude)) }
+    fun getPlaces(bounds: LatLngBounds): LiveData<List<Place>>
+            = Transformations.switchMap(places) { MutableLiveData<List<Place>>().apply { value = it.filter { bounds.contains(it.toLatLng()) } } }
 
-    fun getPlaces(searchQuery: String) = cache.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    fun getPlaces(searchQuery: String): LiveData<List<Place>>
+            = Transformations.switchMap(places) { MutableLiveData<List<Place>>().apply { value = it.filter { it.name.contains(searchQuery, ignoreCase = true) } } }
 
-    fun getPlace(id: Long) = cache.firstOrNull { it.id == id }
+    fun getPlace(id: Long): LiveData<Place?>
+            = Transformations.map(places) { it.firstOrNull { it.id == id } }
 
-    fun getRandomPlace() = if (cache.isEmpty()) null else cache[(Math.random() * cache.size).toInt()]
+    fun getRandomPlace() = if (places.value!!.isEmpty()) null else places.value!![(Math.random() * places.value!!.size).toInt()]
 
     fun fetchNewPlaces(): ApiResult<List<Place>> {
         try {
-            val lastSyncDate = cache.maxBy { it.updatedAt }?.updatedAt ?: Date(0)
-            val response = networkDataSource.getPlaces(Date(lastSyncDate.time + 1)).execute()
+            val latestPlaceUpdatedAt = dao.maxUpdatedAt() ?: Date(0)
+            val response = networkDataSource.getPlaces(Date(latestPlaceUpdatedAt.time + 1)).execute()
 
             return if (response.isSuccessful) {
                 val places = response.body()!!
 
                 if (!places.isEmpty()) {
-                    dbDataSource.insertOrReplace(places)
-                    cache.clear()
+                    dao.insertAll(places)
                 }
 
                 ApiResult.Success(places)
@@ -74,8 +73,7 @@ constructor(
 
             if (response.isSuccessful) {
                 val createdPlace = response.body()!!
-                dbDataSource.insertOrReplace(createdPlace)
-                cache.add(createdPlace)
+                dao.insertAll(listOf(createdPlace))
                 ApiResult.Success(createdPlace)
             } else {
                 throw Exception("HTTP code: ${response.code()}, message: ${response.message()}")
@@ -91,9 +89,7 @@ constructor(
 
             if (response.isSuccessful) {
                 val updatedPlace = response.body()!!
-                dbDataSource.insertOrReplace(updatedPlace)
-                cache.remove(updatedPlace)
-                cache.add(updatedPlace)
+                dao.insertAll(listOf(updatedPlace))
                 ApiResult.Success(updatedPlace)
             } else {
                 throw Exception("HTTP code: ${response.code()}, message: ${response.message()}")

@@ -183,19 +183,15 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         }
 
         if (requestCode == REQUEST_FIND_PLACE && resultCode == Activity.RESULT_OK) {
-            viewModel.selectPlace(data?.getLongExtra(PlacesSearchActivity.PLACE_ID_EXTRA, 0) ?: 0)
+            viewModel.selectedPlaceId.value = data?.getLongExtra(PlacesSearchActivity.PLACE_ID_EXTRA, 0) ?: 0
         }
 
         if (requestCode == REQUEST_ADD_PLACE && resultCode == Activity.RESULT_OK) {
             longToast(R.string.place_has_been_added)
-            viewModel.reloadMarkers()
         }
 
         if (requestCode == REQUEST_EDIT_PLACE && resultCode == Activity.RESULT_OK) {
             longToast(R.string.your_edits_have_been_submitted)
-            viewModel.reloadMarkers()
-            val place = data!!.getSerializableExtra(EditPlaceActivity.PLACE_EXTRA) as Place
-            viewModel.selectedPlace.value = place
         }
 
         if (requestCode == REQUEST_SIGN_IN && resultCode == Activity.RESULT_OK) {
@@ -267,6 +263,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(place.latitude, place.longitude), MAP_DEFAULT_ZOOM))
         place_details.setPlace(place)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        analytics.logSelectContent(place.id.toString(), place.name, "place")
     }
 
     private fun requestLocationPermissions() {
@@ -332,7 +329,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
     private fun handleIntent(intent: Intent) {
         if (intent.hasExtra(PLACE_ID_EXTRA)) {
-            viewModel.selectPlace(intent.getLongExtra(PLACE_ID_EXTRA, -1))
+            viewModel.selectedPlaceId.value = intent.getLongExtra(PLACE_ID_EXTRA, 0)
         }
 
         updateDrawerHeader()
@@ -370,13 +367,13 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         map!!.setOnCameraIdleListener {
             placesManager.onCameraIdle()
-            viewModel.mapBounds = map!!.projection.visibleRegion.latLngBounds
+            viewModel.mapBounds.value = map!!.projection.visibleRegion.latLngBounds
         }
 
         map!!.setOnMarkerClickListener(placesManager)
 
         map!!.setOnMapClickListener {
-            viewModel.clearSelection()
+            viewModel.selectedPlaceId.value = 0
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN)
         }
     }
@@ -393,7 +390,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
     private inner class ClusterItemClickListener : ClusterManager.OnClusterItemClickListener<PlaceMarker> {
         override fun onClusterItemClick(placeMarker: PlaceMarker): Boolean {
-            viewModel.selectPlace(placeMarker.placeId)
+            viewModel.selectedPlaceId.value = placeMarker.placeId
             return false
         }
     }
