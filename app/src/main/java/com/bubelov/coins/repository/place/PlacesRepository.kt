@@ -25,7 +25,7 @@ constructor(
         private val dao: PlaceDao,
         assetsDataSource: PlacesDataSourceAssets
 ) {
-    private val places = dao.all()
+    val allPlaces = dao.all()
 
     init {
         doAsync {
@@ -36,15 +36,15 @@ constructor(
     }
 
     fun getPlaces(bounds: LatLngBounds): LiveData<List<Place>>
-            = Transformations.switchMap(places) { MutableLiveData<List<Place>>().apply { value = it.filter { bounds.contains(it.toLatLng()) } } }
+            = Transformations.switchMap(allPlaces) { MutableLiveData<List<Place>>().apply { value = it.filter { bounds.contains(it.toLatLng()) } } }
 
     fun getPlaces(searchQuery: String): LiveData<List<Place>>
-            = Transformations.switchMap(places) { MutableLiveData<List<Place>>().apply { value = it.filter { it.name.contains(searchQuery, ignoreCase = true) } } }
+            = Transformations.switchMap(allPlaces) { MutableLiveData<List<Place>>().apply { value = it.filter { it.name.contains(searchQuery, ignoreCase = true) } } }
 
     fun getPlace(id: Long): LiveData<Place?>
-            = Transformations.map(places) { it.firstOrNull { it.id == id } }
+            = Transformations.map(allPlaces) { it.firstOrNull { it.id == id } }
 
-    fun getRandomPlace() = if (places.value!!.isEmpty()) null else places.value!![(Math.random() * places.value!!.size).toInt()]
+    fun getRandomPlace() = dao.random()
 
     fun fetchNewPlaces(): ApiResult<List<Place>> {
         try {

@@ -1,7 +1,6 @@
 package com.bubelov.coins.dagger
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.preference.PreferenceManager
 
 import com.bubelov.coins.BuildConfig
@@ -24,8 +23,6 @@ import dagger.Provides
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import android.arch.persistence.room.Room
-import com.bubelov.coins.database.dao.PlaceDao
 
 /**
  * @author Igor Bubelov
@@ -35,57 +32,38 @@ import com.bubelov.coins.database.dao.PlaceDao
 class AppModule {
     @Provides
     @Singleton
-    internal fun provideFirebaseAnalytics(context: Context): FirebaseAnalytics {
-        return FirebaseAnalytics.getInstance(context)
-    }
+    fun providePlaceDao(database: Database) = database.placeDao()
 
     @Provides
     @Singleton
-    internal fun database(context: Context): Database {
-        return Room.databaseBuilder(context, Database::class.java, "data").build()
-    }
+    fun provideFirebaseAnalytics(context: Context) = FirebaseAnalytics.getInstance(context)
 
     @Provides
     @Singleton
-    internal fun placeDao(database: Database): PlaceDao {
-        return database.placeDao()
-    }
+    fun providePreferences(context: Context) = PreferenceManager.getDefaultSharedPreferences(context)
 
     @Provides
     @Singleton
-    internal fun preferences(context: Context): SharedPreferences {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-    }
+    fun provideGson() = GsonBuilder()
+            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .registerTypeAdapter(Date::class.java, UtcDateTypeAdapter())
+            .registerTypeAdapter(String::class.java, StringAdapter())
+            .create()
 
     @Provides
     @Singleton
-    internal fun gson(): Gson {
-        return GsonBuilder()
-                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .registerTypeAdapter(Date::class.java, UtcDateTypeAdapter())
-                .registerTypeAdapter(String::class.java, StringAdapter())
-                .create()
-    }
+    fun provideCoinsApi(httpClient: OkHttpClient, gson: Gson) = Retrofit.Builder()
+            .baseUrl(BuildConfig.API_URL)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .client(httpClient)
+            .build()
+            .create(CoinsApi::class.java)
 
     @Provides
     @Singleton
-    internal fun coinsApi(httpClient: OkHttpClient, gson: Gson): CoinsApi {
-        return Retrofit.Builder()
-                .baseUrl(BuildConfig.API_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .client(httpClient)
-                .build()
-                .create(CoinsApi::class.java)
-    }
-
-    @Provides
-    @Singleton
-    internal fun httpClient(): OkHttpClient {
-        val httpClientBuilder = OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
-
-        return httpClientBuilder.build()
-    }
+    fun provideHttpClient() = OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
 }

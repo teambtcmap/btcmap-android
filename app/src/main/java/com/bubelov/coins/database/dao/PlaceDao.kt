@@ -24,6 +24,9 @@ interface PlaceDao {
     @Query("SELECT * FROM place")
     fun all(): LiveData<List<Place>>
 
+    @Query("SELECT * FROM place ORDER BY RANDOM() LIMIT 1")
+    fun random(): LiveData<Place?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(places: List<Place>)
 }

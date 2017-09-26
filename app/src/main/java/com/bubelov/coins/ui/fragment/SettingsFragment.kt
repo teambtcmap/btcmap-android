@@ -7,16 +7,15 @@ import android.preference.ListPreference
 import android.preference.Preference
 import android.preference.PreferenceFragment
 import android.preference.PreferenceScreen
-
+import android.support.v7.app.AppCompatActivity
 import com.bubelov.coins.R
-import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.database.sync.DatabaseSyncService
+import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.synclogs.SyncLogsRepository
 import com.bubelov.coins.util.PlaceNotificationManager
 import dagger.android.AndroidInjection
 import org.jetbrains.anko.alert
 import java.util.*
-
 import javax.inject.Inject
 
 /**
@@ -55,7 +54,7 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
         when (preference.key) {
             getString(R.string.pref_sync_database_key) -> DatabaseSyncService.start(activity)
             getString(R.string.pref_show_sync_log_key) -> showSyncLog()
-            getString(R.string.pref_test_notification_key) -> placeNotificationsManager.notifyUser(placesRepository.getRandomPlace()!!)
+            getString(R.string.pref_test_notification_key) -> testNotification()
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference)
@@ -78,5 +77,13 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
     private fun updateDistanceUnitsSummary() {
         val distanceUnits = findPreference(getString(R.string.pref_distance_units_key)) as ListPreference
         distanceUnits.summary = distanceUnits.entry
+    }
+
+    private fun testNotification() {
+        placesRepository.getRandomPlace().observe(activity as AppCompatActivity, android.arch.lifecycle.Observer {
+            if (it != null) {
+                placeNotificationsManager.notifyUser(it)
+            }
+        })
     }
 }

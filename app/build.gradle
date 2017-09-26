@@ -53,6 +53,7 @@ dependencies {
     // Android architecture components
     implementation "android.arch.lifecycle:extensions:1.0.0-beta1"
     annotationProcessor "android.arch.lifecycle:compiler:1.0.0-beta1"
+    testImplementation "android.arch.core:core-testing:1.0.0-alpha9-1"
     implementation "android.arch.persistence.room:runtime:1.0.0-beta1"
     kapt "android.arch.persistence.room:compiler:1.0.0-beta1"
 
