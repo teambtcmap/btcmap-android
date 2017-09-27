@@ -38,11 +38,9 @@ constructor(
     fun getPlaces(bounds: LatLngBounds): LiveData<List<Place>>
             = Transformations.switchMap(allPlaces) { MutableLiveData<List<Place>>().apply { value = it.filter { bounds.contains(it.toLatLng()) } } }
 
-    fun getPlaces(searchQuery: String): LiveData<List<Place>>
-            = Transformations.switchMap(allPlaces) { MutableLiveData<List<Place>>().apply { value = it.filter { it.name.contains(searchQuery, ignoreCase = true) } } }
+    fun getPlaces(searchQuery: String) = dao.findBySearchQuery("%$searchQuery%")
 
-    fun getPlace(id: Long): LiveData<Place?>
-            = Transformations.map(allPlaces) { it.firstOrNull { it.id == id } }
+    fun getPlace(id: Long) = dao.findById(id)
 
     fun getRandomPlace() = dao.random()
 
@@ -73,7 +71,7 @@ constructor(
 
             if (response.isSuccessful) {
                 val createdPlace = response.body()!!
-                dao.insertAll(listOf(createdPlace))
+                dao.insert(createdPlace)
                 ApiResult.Success(createdPlace)
             } else {
                 throw Exception("HTTP code: ${response.code()}, message: ${response.message()}")
@@ -89,7 +87,7 @@ constructor(
 
             if (response.isSuccessful) {
                 val updatedPlace = response.body()!!
-                dao.insertAll(listOf(updatedPlace))
+                dao.update(updatedPlace)
                 ApiResult.Success(updatedPlace)
             } else {
                 throw Exception("HTTP code: ${response.code()}, message: ${response.message()}")

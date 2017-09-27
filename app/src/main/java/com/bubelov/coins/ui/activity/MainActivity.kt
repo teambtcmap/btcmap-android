@@ -149,7 +149,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         place_details.setOnClickListener {
             if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                viewModel.onSelectedPlaceDetailsClick()
+                analytics.logViewContent(place_details.place.id.toString(), place_details.place.name, "place")
             } else {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
             }

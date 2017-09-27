@@ -38,8 +38,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val selectedPlaceId = MutableLiveData<Long>()
 
-    val selectedPlace: LiveData<Place?>
-            = Transformations.switchMap(selectedPlaceId) { placesRepository.getPlace(it) }
+    val selectedPlace: LiveData<Place> = Transformations.switchMap(selectedPlaceId) { placesRepository.getPlace(it) }
 
     val location = LocationLiveData(application)
 
@@ -103,10 +102,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             notificationAreaRepository.notificationArea = area
         }
-    }
-
-    fun onSelectedPlaceDetailsClick() {
-        analytics.logViewContent(selectedPlace.value!!.id.toString(), selectedPlace.value!!.name, "place")
     }
 
     interface Callback {
