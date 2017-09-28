@@ -3,6 +3,7 @@ package com.bubelov.coins.repository.place
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
+import android.os.SystemClock
 import com.bubelov.coins.database.dao.PlaceDao
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.ApiResult
@@ -27,11 +28,15 @@ constructor(
 ) {
     val allPlaces = dao.all()
 
+    private var assetsInitialized = false
+
     init {
         doAsync {
             if (dao.count() == 0) {
                 dao.insertAll(assetsDataSource.getPlaces())
             }
+
+            assetsInitialized = true
         }
     }
 
@@ -46,6 +51,10 @@ constructor(
 
     fun fetchNewPlaces(): ApiResult<List<Place>> {
         try {
+            while (!assetsInitialized) {
+                SystemClock.sleep(100)
+            }
+
             val latestPlaceUpdatedAt = dao.maxUpdatedAt() ?: Date(0)
             val response = networkDataSource.getPlaces(Date(latestPlaceUpdatedAt.time + 1)).execute()
 
