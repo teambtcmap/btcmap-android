@@ -141,6 +141,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         fab.setOnClickListener {
             if (locationPermissionGranted) {
                 viewModel.moveToNextLocation = true
+                viewModel.location.requestLastLocation()
             } else {
                 requestLocationPermissions()
             }

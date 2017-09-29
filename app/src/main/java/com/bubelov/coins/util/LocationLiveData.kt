@@ -4,28 +4,42 @@ import android.annotation.SuppressLint
 import android.arch.lifecycle.LiveData
 import android.content.Context
 import android.location.Location
-import android.location.LocationManager
-
+import android.os.Looper
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 
 /**
  * @author Igor Bubelov
  */
 
 class LocationLiveData(context: Context) : LiveData<Location>() {
-    private val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    private val locationProvider = LocationServices.getFusedLocationProviderClient(context)
 
-    private val locationListener = object : SimpleLocationListener() {
-        override fun onLocationChanged(location: Location) {
-            value = location
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+            if (locationResult.lastLocation != null) {
+                value = locationResult.lastLocation
+            }
         }
     }
 
     @SuppressLint("MissingPermission")
     override fun onActive() {
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0.toLong(), 0.toFloat(), locationListener)
+        locationProvider.requestLocationUpdates(LocationRequest.create(), locationCallback, Looper.getMainLooper())
     }
 
     override fun onInactive() {
-        locationManager.removeUpdates(locationListener)
+        locationProvider.removeLocationUpdates(locationCallback)
+    }
+
+    @SuppressLint("MissingPermission")
+    fun requestLastLocation() {
+        locationProvider.lastLocation.addOnCompleteListener {
+            if (it.result != null) {
+                value = it.result
+            }
+        }
     }
 }
