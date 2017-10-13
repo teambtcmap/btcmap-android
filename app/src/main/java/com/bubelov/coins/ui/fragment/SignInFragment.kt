@@ -12,6 +12,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 
 import com.bubelov.coins.R
+import com.bubelov.coins.repository.user.SignInResult
 import com.bubelov.coins.repository.user.UserRepository
 import com.bubelov.coins.ui.activity.MainActivity
 import dagger.android.AndroidInjection
@@ -19,8 +20,10 @@ import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 import kotlinx.android.synthetic.main.fragment_sign_in.*
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.alert
-import org.jetbrains.anko.runOnUiThread
 
 /**
  * @author Igor Bubelov
@@ -40,41 +43,30 @@ class SignInFragment : Fragment(), TextView.OnEditorActionListener {
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         password.setOnEditorActionListener(this)
-        sign_in.setOnClickListener { signIn(email.text.toString(), password.text.toString()) }
+        sign_in.setOnClickListener { signInNew(email.text.toString(), password.text.toString()) }
     }
 
     override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean {
         if (actionId == EditorInfo.IME_ACTION_GO) {
-            signIn(email.text.toString(), password.text.toString())
+            signInNew(email.text.toString(), password.text.toString())
             return true
         }
 
         return false
     }
 
-    private fun signIn(email: String, password: String) {
-        userRepository.signIn(email, password, object : UserRepository.SignInCallback {
-            override fun onSuccess() {
-                runOnUiThread {
-                    val intent = Intent(activity, MainActivity::class.java)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    startActivity(intent)
-                }
-            }
+    private fun signInNew(email: String, password: String) = launch(UI) {
+        sign_in_panel.visibility = View.GONE
+        progress.visibility = View.VISIBLE
 
-            override fun onFailure(errors: List<String>) {
-                runOnUiThread {
-                    alert((StringBuilder().apply {
-                        errors.forEach {
-                            append(it)
+        val signInResult = async { userRepository.signIn(email, password) }.await()
 
-                            if (it != errors.last()) {
-                                append("\n")
-                            }
-                        }
-                    }.toString())).show()
-                }
-            }
-        })
+        when (signInResult) {
+            is SignInResult.Success -> startActivity(Intent(activity, MainActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) })
+            is SignInResult.Error -> alert { message = signInResult.e.message ?: getString(R.string.something_went_wrong) }.show()
+        }
+
+        sign_in_panel.visibility = View.VISIBLE
+        progress.visibility = View.GONE
     }
 }

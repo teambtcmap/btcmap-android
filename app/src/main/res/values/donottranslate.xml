@@ -3,11 +3,11 @@
 <resources>
     <string name="pref_distance_units_key" translatable="false">pref_distance_units</string>
     <string name="pref_distance_units_automatic" translatable="false">AUTOMATIC</string>
-    <string name="pref_sync_database_key">pref_sync_database</string>
-    <string name="pref_show_sync_log_key">pref_show_sync_log</string>
-    <string name="pref_test_notification_key">pref_test_notification</string>
+    <string name="pref_sync_database_key" translatable="false">pref_sync_database</string>
+    <string name="pref_show_sync_log_key" translatable="false">pref_show_sync_log</string>
+    <string name="pref_test_notification_key" translatable="false">pref_test_notification</string>
 
-    <string name="distance_format">%1$s %2$s</string>
+    <string name="distance_format" translatable="false">%1$s %2$s</string>
 
     <string-array name="distance_units_values">
         <item>@string/pref_distance_units_automatic</item>

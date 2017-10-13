@@ -90,6 +90,8 @@
     <string name="uploading_changes">Uploading changes</string>
     <string name="map">Map</string>
 
+    <string name="something_went_wrong">Whoops, something went wrong…</string>
+
     <string-array name="distance_units">
         <item>Automatic</item>
         <item>Kilometers</item>

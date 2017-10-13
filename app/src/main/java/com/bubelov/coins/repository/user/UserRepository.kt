@@ -8,11 +8,9 @@ import com.bubelov.coins.api.coins.CoinsApi
 import com.bubelov.coins.api.coins.AuthResponse
 import com.bubelov.coins.api.coins.NewUserParams
 import com.bubelov.coins.model.User
-import com.bubelov.coins.util.toStrings
+import com.bubelov.coins.util.toCoinsApiException
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
-import retrofit2.Call
-import retrofit2.Callback
 
 import java.io.IOException
 
@@ -70,28 +68,21 @@ internal constructor(
         }
     }
 
-    fun signIn(email: String, password: String, callback: SignInCallback) {
-        api.authWithEmail(email, password).enqueue(object : Callback<AuthResponse> {
-            override fun onResponse(call: Call<AuthResponse>, response: Response<AuthResponse>) {
-                if (response.isSuccessful) {
-                    user = response.body()!!.user!!
-                    userAuthToken = response.body()!!.token!!
-                    userAuthMethod = "email"
-                    onAuthorized()
-                    callback.onSuccess()
-                } else {
-                    if (response.errorBody() != null && response.errorBody()!!.contentLength() > 0) {
-                        callback.onFailure(response.errorBody()!!.toStrings())
-                    } else {
-                        callback.onFailure(listOf(response.message() ?: "Couldn't sign in"))
-                    }
-                }
-            }
+    fun signIn(email: String, password: String) = try {
+        val response = api.authWithEmail(email, password).execute()
 
-            override fun onFailure(call: Call<AuthResponse>, e: Throwable) {
-                callback.onFailure(listOf(e.localizedMessage))
-            }
-        })
+        if (response.isSuccessful) {
+            user = response.body()!!.user!!
+            userAuthToken = response.body()!!.token!!
+            userAuthMethod = "email"
+            onAuthorized()
+        } else {
+            throw response.toCoinsApiException()
+        }
+
+        SignInResult.Success()
+    } catch (e: Exception) {
+        SignInResult.Error(e)
     }
 
     fun signUp(email: String, password: String, firstName: String, lastName: String): Boolean {
@@ -130,10 +121,5 @@ internal constructor(
         val bundle = Bundle()
         bundle.putString(FirebaseAnalytics.Param.SIGN_UP_METHOD, userAuthMethod)
         analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
-    }
-
-    interface SignInCallback {
-        fun onSuccess()
-        fun onFailure(errors: List<String>)
     }
 }

@@ -92,5 +92,7 @@
     <string name="your_edits_have_been_submitted">Your edits have been submitted</string>
     <string name="uploading_changes">Uploading changes</string>
     <string name="map">Map</string>
+    <string name="something_went_wrong">Whoops, something went wrong…</string>
+    <string name="action_filter_places">Filter places</string>
 
 </resources>
