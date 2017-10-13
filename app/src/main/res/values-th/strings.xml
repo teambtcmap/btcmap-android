@@ -62,7 +62,6 @@
     <string name="sign_out">Sign Out</string>
     <string name="exchange_rates">Exchange Rates</string>
     <string name="fast_food">Fast food</string>
-    <string name="could_not_connect_to_server">Could not connect to server</string>
     <string name="could_not_update_place">Couldn\'t update place</string>
     <string name="email">Email</string>
     <string name="password">Password</string>

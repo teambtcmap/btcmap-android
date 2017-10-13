@@ -12,6 +12,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 
 import com.bubelov.coins.R
+import com.bubelov.coins.repository.user.SignInResult
 import com.bubelov.coins.repository.user.UserRepository
 import com.bubelov.coins.ui.activity.MainActivity
 import dagger.android.AndroidInjection
@@ -19,7 +20,10 @@ import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 import kotlinx.android.synthetic.main.fragment_sign_up.*
-import org.jetbrains.anko.doAsync
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
+import org.jetbrains.anko.alert
 
 /**
  * @author Igor Bubelov
@@ -51,28 +55,22 @@ class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
         return false
     }
 
-    private fun signUp(email: String, password: String, firstName: String, lastName: String) {
-        setState(STATE_PROGRESS)
+    private fun signUp(email: String, password: String, firstName: String, lastName: String) = launch(UI) {
+        setLoading(true)
 
-        doAsync {
-            val success = userRepository.signUp(email, password, firstName, lastName)
+        val result = async { userRepository.signUp(email, password, firstName, lastName) }.await()
 
-            if (success) {
-                val intent = Intent(activity, MainActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                startActivity(intent)
-            } else {
-                setState(STATE_FILL_FORM) // TODO
+        when (result) {
+            is SignInResult.Success -> startActivity(Intent(activity, MainActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) })
+
+            is SignInResult.Error -> {
+                setLoading(false)
+                alert { message = result.e.message ?: getString(R.string.something_went_wrong) }.show()
             }
         }
     }
 
-    private fun setState(state: Int) {
-        state_switcher.displayedChild = state
-    }
-
-    companion object {
-        private val STATE_FILL_FORM = 0
-        private val STATE_PROGRESS = 1
+    private fun setLoading(loading: Boolean) {
+        state_switcher.displayedChild = if (loading) 1 else 0
     }
 }

@@ -66,7 +66,6 @@
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="sign_up">Sign Up</string>
-    <string name="could_not_connect_to_server">Could not connect to server</string>
     <string name="could_not_update_place">Could not update place</string>
     <string name="first_name">First name</string>
     <string name="last_name">Last name</string>

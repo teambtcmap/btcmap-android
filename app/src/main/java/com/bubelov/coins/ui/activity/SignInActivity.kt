@@ -3,13 +3,13 @@ package com.bubelov.coins.ui.activity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
 import android.widget.Toast
 
 import com.bubelov.coins.BuildConfig
 import com.bubelov.coins.R
+import com.bubelov.coins.repository.user.SignInResult
 import com.bubelov.coins.repository.user.UserRepository
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -22,6 +22,10 @@ import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 import kotlinx.android.synthetic.main.activity_sign_in.*
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
+import org.jetbrains.anko.alert
 
 /**
  * @author Igor Bubelov
@@ -102,38 +106,32 @@ class SignInActivity : AbstractActivity(), GoogleApiClient.OnConnectionFailedLis
 
     private fun handleSignInResult(result: GoogleSignInResult) {
         if (result.isSuccess) {
-            val account = result.signInAccount
-            AuthWithGoogleTask(account!!.idToken!!).execute()
+            signIn(result.signInAccount!!.idToken!!)
+        }
+    }
+
+    private fun signIn(idToken: String) = launch(UI) {
+        setLoading(true)
+
+        val signInResult = async { userRepository.signIn(idToken) }.await()
+
+        when (signInResult) {
+            is SignInResult.Success -> {
+                val bundle = Bundle().apply { putString(FirebaseAnalytics.Param.SIGN_UP_METHOD, "google") }
+                analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
+                setResult(Activity.RESULT_OK)
+                supportFinishAfterTransition()
+            }
+
+            is SignInResult.Error -> {
+                setLoading(false)
+                alert { message = signInResult.e.message ?: getString(R.string.something_went_wrong) }.show()
+            }
         }
     }
 
     private fun setLoading(loading: Boolean) {
         view_switcher.displayedChild = if (loading) 1 else 0
-    }
-
-    private inner class AuthWithGoogleTask(private val token: String) : AsyncTask<Void, Void, Boolean>() {
-        override fun onPreExecute() {
-            setLoading(true)
-        }
-
-        override fun doInBackground(vararg params: Void): Boolean? {
-            return userRepository.signIn(token)
-        }
-
-        override fun onPostExecute(result: Boolean?) {
-            if (result == null) {
-                setLoading(false)
-                Toast.makeText(this@SignInActivity, R.string.could_not_connect_to_server, Toast.LENGTH_SHORT).show()
-                return
-            }
-
-            val bundle = Bundle()
-            bundle.putString(FirebaseAnalytics.Param.SIGN_UP_METHOD, "google")
-            analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
-
-            setResult(Activity.RESULT_OK)
-            supportFinishAfterTransition()
-        }
     }
 
     companion object {
