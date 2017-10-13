@@ -14,7 +14,6 @@ import android.os.Looper
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.ActivityOptionsCompat
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
 import android.text.TextUtils
@@ -38,11 +37,13 @@ import com.squareup.picasso.Picasso
 
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MainViewModel
+import com.bubelov.coins.util.hasLocationPermission
 import com.bubelov.coins.util.openUrl
 import com.bubelov.coins.util.toLatLng
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.longToast
 import javax.inject.Inject
 
@@ -51,20 +52,17 @@ import javax.inject.Inject
  */
 
 class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener, MainViewModel.Callback {
+    private lateinit var model: MainViewModel
+
     private lateinit var drawerHeader: View
 
     private lateinit var drawerToggle: ActionBarDrawerToggle
-
-    private lateinit var viewModel: MainViewModel
 
     private var map: GoogleMap? = null
 
     private lateinit var placesManager: ClusterManager<PlaceMarker>
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
-
-    private val locationPermissionGranted: Boolean
-        get() = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
     @Inject internal lateinit var analytics: Analytics
 
@@ -73,8 +71,8 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        viewModel.callback = this
+        model = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        model.callback = this
 
         drawerHeader = navigation_view.getHeaderView(0)
 
@@ -98,7 +96,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         place_details.callback = object : PlaceDetailsView.Callback {
             override fun onEditPlaceClick(place: Place) {
-                viewModel.onEditPlaceClick(place)
+                model.onEditPlaceClick(place)
             }
 
             override fun onDismissed() {
@@ -132,16 +130,19 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         updateDrawerHeader()
 
-        viewModel.placeMarkers.observe(this, Observer { markers ->
+        model.placeMarkers.observe(this, Observer { markers ->
             placesManager.clearItems()
             placesManager.addItems(markers)
             placesManager.cluster()
         })
 
         fab.setOnClickListener {
-            if (locationPermissionGranted) {
-                viewModel.moveToNextLocation = true
-                viewModel.location.requestLastLocation()
+            if (hasLocationPermission()) {
+                val location = model.userLocation.value
+
+                if (location != null) {
+                    map?.moveCamera(CameraUpdateFactory.newLatLng(location.toLatLng()))
+                }
             } else {
                 requestLocationPermissions()
             }
@@ -156,7 +157,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
             }
         }
 
-        viewModel.selectedPlace.observe(this, Observer {
+        model.selectedPlace.observe(this, Observer {
             if (it != null) {
                 selectPlace(it)
             }
@@ -176,7 +177,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == Activity.RESULT_OK) {
-            if (locationPermissionGranted) {
+            if (hasLocationPermission()) {
                 observeLocationUpdates()
             } else {
                 requestLocationPermissions()
@@ -184,7 +185,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         }
 
         if (requestCode == REQUEST_FIND_PLACE && resultCode == Activity.RESULT_OK) {
-            viewModel.selectedPlaceId.value = data?.getLongExtra(PlacesSearchActivity.PLACE_ID_EXTRA, 0) ?: 0
+            model.selectedPlaceId.value = data?.getLongExtra(PlacesSearchActivity.PLACE_ID_EXTRA, 0) ?: 0
         }
 
         if (requestCode == REQUEST_ADD_PLACE && resultCode == Activity.RESULT_OK) {
@@ -218,12 +219,23 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         val id = item.itemId
 
         when (id) {
-            R.id.action_add -> viewModel.onAddPlaceClick()
-            R.id.action_search -> PlacesSearchActivity.startForResult(this, viewModel.location.value, REQUEST_FIND_PLACE)
+            R.id.action_currency -> showCurrencyPicker()
+            R.id.action_add -> model.onAddPlaceClick()
+            R.id.action_search -> PlacesSearchActivity.startForResult(this, model.userLocation.value, REQUEST_FIND_PLACE)
             else -> return super.onOptionsItemSelected(item)
         }
 
         return true
+    }
+
+    private fun showCurrencyPicker() {
+        model.getCurrenciesToPlacesMap().observe(this, Observer { map ->
+            if (map != null) {
+                val currencies = map.keys.sortedBy { -map[it]!!.size }
+                val titles = currencies.map { "$it (${map[it]!!.size} places)" }
+                alert { items(titles, onItemSelected = { _, _, _ -> }) }.show()
+            }
+        })
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -274,28 +286,30 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     }
 
     private fun observeLocationUpdates() {
-        viewModel.location.observe(this, Observer {
+        model.userLocation.observe(this, Observer {
+            it!!
+
+            model.onNewLocation(it)
             val map = this.map
 
-            if (it != null && map != null && viewModel.moveToNextLocation) {
-                viewModel.moveToNextLocation = false
-                viewModel.onNewLocation(it)
+            if (map != null && model.moveToNextLocation) {
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(it.toLatLng(), MAP_DEFAULT_ZOOM))
+                model.moveToNextLocation = false
             }
         })
     }
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        map = googleMap
-        map!!.uiSettings.isMyLocationButtonEnabled = false
-        map!!.uiSettings.isZoomControlsEnabled = false
-        map!!.uiSettings.isCompassEnabled = false
-        map!!.uiSettings.isMapToolbarEnabled = false
+    override fun onMapReady(map: GoogleMap) {
+        this.map = map
+        map.uiSettings.isMyLocationButtonEnabled = false
+        map.uiSettings.isZoomControlsEnabled = false
+        map.uiSettings.isCompassEnabled = false
+        map.uiSettings.isMapToolbarEnabled = false
 
         initClustering()
         handleIntent(intent)
 
-        if (locationPermissionGranted) {
+        if (hasLocationPermission()) {
             observeLocationUpdates()
         } else {
             requestLocationPermissions()
@@ -303,8 +317,8 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     }
 
     private fun updateDrawerHeader() {
-        if (viewModel.userRepository.signedIn()) {
-            val user = viewModel.userRepository.user!!
+        if (model.userRepository.signedIn()) {
+            val user = model.userRepository.user!!
 
             if (!TextUtils.isEmpty(user.avatarUrl)) {
                 Picasso.with(this).load(user.avatarUrl).into(drawerHeader.avatar)
@@ -323,14 +337,14 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         }
 
         drawerHeader.setOnClickListener {
-            viewModel.onDrawerHeaderClick()
+            model.onDrawerHeaderClick()
             drawer_layout.closeDrawers()
         }
     }
 
     private fun handleIntent(intent: Intent) {
         if (intent.hasExtra(PLACE_ID_EXTRA)) {
-            viewModel.selectedPlaceId.value = intent.getLongExtra(PLACE_ID_EXTRA, 0)
+            model.selectedPlaceId.value = intent.getLongExtra(PLACE_ID_EXTRA, 0)
         }
 
         updateDrawerHeader()
@@ -368,13 +382,13 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         map!!.setOnCameraIdleListener {
             placesManager.onCameraIdle()
-            viewModel.mapBounds.value = map!!.projection.visibleRegion.latLngBounds
+            model.mapBounds.value = map!!.projection.visibleRegion.latLngBounds
         }
 
         map!!.setOnMarkerClickListener(placesManager)
 
         map!!.setOnMapClickListener {
-            viewModel.selectedPlaceId.value = 0
+            model.selectedPlaceId.value = 0
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN)
         }
     }
@@ -391,7 +405,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
     private inner class ClusterItemClickListener : ClusterManager.OnClusterItemClickListener<PlaceMarker> {
         override fun onClusterItemClick(placeMarker: PlaceMarker): Boolean {
-            viewModel.selectedPlaceId.value = placeMarker.placeId
+            model.selectedPlaceId.value = placeMarker.placeId
             return false
         }
     }

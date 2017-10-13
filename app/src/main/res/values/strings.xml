@@ -5,6 +5,7 @@
     <string name="app_name">Bitcoin Map</string>
 
     <string name="action_add_place">Add place</string>
+    <string name="action_filter_places">Filter places</string>
     <string name="action_search">Search</string>
     <string name="action_share">Share</string>
     <string name="action_send">Send</string>
@@ -87,6 +88,7 @@
     <string name="place_has_been_added">Place has been added</string>
     <string name="your_edits_have_been_submitted">Your edits have been submitted</string>
     <string name="uploading_changes">Uploading changes</string>
+    <string name="map">Map</string>
 
     <string-array name="distance_units">
         <item>Automatic</item>

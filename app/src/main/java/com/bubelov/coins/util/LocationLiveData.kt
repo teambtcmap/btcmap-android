@@ -9,37 +9,51 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import timber.log.Timber
 
 /**
  * @author Igor Bubelov
  */
 
-class LocationLiveData(context: Context) : LiveData<Location>() {
+@SuppressLint("MissingPermission")
+class LocationLiveData(context: Context, updateIntervalMillis: Long) : LiveData<Location>() {
     private val locationProvider = LocationServices.getFusedLocationProviderClient(context)
 
+    private val locationRequest = LocationRequest.create().apply {
+        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        interval = updateIntervalMillis
+    }
+
     private val locationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult) {
-            if (locationResult.lastLocation != null) {
-                value = locationResult.lastLocation
+        override fun onLocationResult(result: LocationResult?) {
+            Timber.d("New location: $result")
+            val location = result?.lastLocation
+
+            if (location != null) {
+                value = location
             }
         }
     }
 
-    @SuppressLint("MissingPermission")
-    override fun onActive() {
-        locationProvider.requestLocationUpdates(LocationRequest.create(), locationCallback, Looper.getMainLooper())
-    }
-
-    override fun onInactive() {
-        locationProvider.removeLocationUpdates(locationCallback)
-    }
-
-    @SuppressLint("MissingPermission")
-    fun requestLastLocation() {
+    init {
+        Timber.d("Requesting last location")
         locationProvider.lastLocation.addOnCompleteListener {
-            if (it.result != null) {
+            Timber.d("Last location is ${it.result}")
+            Timber.d("LiveData value is $value")
+
+            if (value == null && it.result != null) {
                 value = it.result
             }
         }
+    }
+
+    override fun onActive() {
+        Timber.d("Active")
+        locationProvider.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+    }
+
+    override fun onInactive() {
+        Timber.d("Inactive")
+        locationProvider.removeLocationUpdates(locationCallback)
     }
 }

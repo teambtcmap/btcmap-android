@@ -91,5 +91,6 @@
     <string name="place_has_been_added">Place has been added</string>
     <string name="your_edits_have_been_submitted">Your edits have been submitted</string>
     <string name="uploading_changes">Uploading changes</string>
+    <string name="map">Map</string>
 
 </resources>

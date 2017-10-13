@@ -2,6 +2,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_currency"
+        android:title="BTC"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_add"
         android:icon="@drawable/ic_add_location"
         android:title="@string/action_add_place"

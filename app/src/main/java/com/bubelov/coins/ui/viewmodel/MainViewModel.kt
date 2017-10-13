@@ -25,7 +25,7 @@ import android.arch.lifecycle.Transformations
  * @author Igor Bubelov
  */
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+class MainViewModel(app: Application) : AndroidViewModel(app) {
     @Inject internal lateinit var userRepository: UserRepository
 
     @Inject internal lateinit var notificationAreaRepository: NotificationAreaRepository
@@ -40,7 +40,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val selectedPlace: LiveData<Place> = Transformations.switchMap(selectedPlaceId) { placesRepository.getPlace(it) }
 
-    val location = LocationLiveData(application)
+    val userLocation = LocationLiveData(app, 1000)
 
     var moveToNextLocation = true
 
@@ -67,6 +67,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         Injector.appComponent.inject(this)
     }
+
+    fun getCurrenciesToPlacesMap() = placesRepository.getCurrenciesToPlacesMap()
 
     fun onAddPlaceClick() {
         if (userRepository.signedIn()) {

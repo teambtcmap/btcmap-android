@@ -26,7 +26,7 @@ constructor(
         private val dao: PlaceDao,
         assetsDataSource: PlacesDataSourceAssets
 ) {
-    val allPlaces = dao.all()
+    private val allPlaces = dao.all()
 
     private var assetsInitialized = false
 
@@ -44,6 +44,23 @@ constructor(
             = Transformations.switchMap(allPlaces) { MutableLiveData<List<Place>>().apply { value = it.filter { bounds.contains(it.toLatLng()) } } }
 
     fun getPlaces(searchQuery: String) = dao.findBySearchQuery("%$searchQuery%")
+
+    fun getCurrenciesToPlacesMap(): LiveData<Map<String, List<Place>>> = Transformations.switchMap(allPlaces) {
+        val data = MutableLiveData<Map<String, List<Place>>>()
+        val map = mutableMapOf<String, MutableList<Place>>()
+
+        it?.forEach { place ->
+            place.currencies.forEach { currency ->
+                if (!map.containsKey(currency)) {
+                    map.put(currency, mutableListOf())
+                }
+
+                map[currency]!!.add(place)
+            }
+        }
+
+        data.apply { value = map }
+    }
 
     fun getPlace(id: Long) = dao.findById(id)
 

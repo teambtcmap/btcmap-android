@@ -1,12 +1,17 @@
 package com.bubelov.coins.util
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.support.customtabs.CustomTabsIntent
+import android.support.v4.content.ContextCompat
 
 /**
  * @author Igor Bubelov
  */
+
+fun Context.hasLocationPermission() = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
 fun Context.openUrl(url: String) {
     val urlBuilder = StringBuilder()
