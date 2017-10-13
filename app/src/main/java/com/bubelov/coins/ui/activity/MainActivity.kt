@@ -37,7 +37,6 @@ import com.squareup.picasso.Picasso
 
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MainViewModel
-import com.bubelov.coins.util.hasLocationPermission
 import com.bubelov.coins.util.openUrl
 import com.bubelov.coins.util.toLatLng
 import dagger.android.AndroidInjection
@@ -137,7 +136,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         })
 
         fab.setOnClickListener {
-            if (hasLocationPermission()) {
+            if (model.userLocation.hasLocationPermission) {
                 val location = model.userLocation.value
 
                 if (location != null) {
@@ -162,6 +161,18 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
                 selectPlace(it)
             }
         })
+
+        model.userLocation.observe(this, Observer {
+            it!!
+
+            model.onNewLocation(it)
+            val map = this.map
+
+            if (map != null && model.moveToNextLocation) {
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(it.toLatLng(), MAP_DEFAULT_ZOOM))
+                model.moveToNextLocation = false
+            }
+        })
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -177,9 +188,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == Activity.RESULT_OK) {
-            if (hasLocationPermission()) {
-                observeLocationUpdates()
-            } else {
+            if (!model.userLocation.hasLocationPermission) {
                 requestLocationPermissions()
             }
         }
@@ -210,7 +219,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             REQUEST_ACCESS_LOCATION -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                observeLocationUpdates()
+                model.userLocation.onLocationPermissionGranted()
             }
         }
     }
@@ -285,20 +294,6 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
                 MainActivity.REQUEST_ACCESS_LOCATION)
     }
 
-    private fun observeLocationUpdates() {
-        model.userLocation.observe(this, Observer {
-            it!!
-
-            model.onNewLocation(it)
-            val map = this.map
-
-            if (map != null && model.moveToNextLocation) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(it.toLatLng(), MAP_DEFAULT_ZOOM))
-                model.moveToNextLocation = false
-            }
-        })
-    }
-
     override fun onMapReady(map: GoogleMap) {
         this.map = map
         map.uiSettings.isMyLocationButtonEnabled = false
@@ -309,9 +304,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         initClustering()
         handleIntent(intent)
 
-        if (hasLocationPermission()) {
-            observeLocationUpdates()
-        } else {
+        if (!model.userLocation.hasLocationPermission) {
             requestLocationPermissions()
         }
     }

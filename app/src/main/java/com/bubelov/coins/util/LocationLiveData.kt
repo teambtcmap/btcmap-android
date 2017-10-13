@@ -1,10 +1,13 @@
 package com.bubelov.coins.util
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.arch.lifecycle.LiveData
 import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
+import android.support.v4.content.ContextCompat
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -35,7 +38,28 @@ class LocationLiveData(context: Context, updateIntervalMillis: Long) : LiveData<
         }
     }
 
+    val hasLocationPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
     init {
+        if (hasLocationPermission) {
+            onLocationPermissionGranted()
+        }
+    }
+
+    override fun onActive() {
+        Timber.d("Active")
+
+        if (hasLocationPermission) {
+            locationProvider.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        }
+    }
+
+    override fun onInactive() {
+        Timber.d("Inactive")
+        locationProvider.removeLocationUpdates(locationCallback)
+    }
+
+    fun onLocationPermissionGranted() {
         Timber.d("Requesting last location")
         locationProvider.lastLocation.addOnCompleteListener {
             Timber.d("Last location is ${it.result}")
@@ -45,15 +69,9 @@ class LocationLiveData(context: Context, updateIntervalMillis: Long) : LiveData<
                 value = it.result
             }
         }
-    }
 
-    override fun onActive() {
-        Timber.d("Active")
-        locationProvider.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
-    }
-
-    override fun onInactive() {
-        Timber.d("Inactive")
-        locationProvider.removeLocationUpdates(locationCallback)
+        if (hasActiveObservers()) {
+            locationProvider.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        }
     }
 }
