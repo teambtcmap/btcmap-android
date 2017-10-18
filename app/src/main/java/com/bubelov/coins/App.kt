@@ -6,7 +6,7 @@ import android.app.Service
 import android.preference.PreferenceManager
 
 import com.bubelov.coins.dagger.Injector
-import com.bubelov.coins.database.sync.DatabaseSyncService
+import com.bubelov.coins.database.sync.DatabaseSync
 import com.bubelov.coins.util.ReleaseTree
 
 import javax.inject.Inject
@@ -26,6 +26,8 @@ class App : Application(), HasActivityInjector, HasServiceInjector {
 
     @Inject internal lateinit var serviceInjector: DispatchingAndroidInjector<Service>
 
+    @Inject lateinit var databaseSync: DatabaseSync
+
     override fun onCreate() {
         super.onCreate()
 
@@ -38,7 +40,7 @@ class App : Application(), HasActivityInjector, HasServiceInjector {
         Injector.init(this)
         Injector.appComponent.inject(this)
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
-        DatabaseSyncService.start(this)
+        databaseSync.start()
     }
 
     override fun activityInjector(): AndroidInjector<Activity> {

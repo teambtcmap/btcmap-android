@@ -2,7 +2,7 @@ package com.bubelov.coins.database.sync
 
 import android.content.Context
 import com.bubelov.coins.model.SyncLogEntry
-import com.bubelov.coins.repository.ApiResult
+import com.bubelov.coins.repository.Result
 
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.synclogs.SyncLogsRepository
@@ -10,7 +10,7 @@ import com.bubelov.coins.util.PlaceNotificationManager
 import com.google.android.gms.gcm.GcmNetworkManager
 import com.google.android.gms.gcm.PeriodicTask
 import com.google.android.gms.gcm.Task
-import org.jetbrains.anko.doAsyncResult
+import kotlinx.coroutines.experimental.launch
 
 import java.util.concurrent.TimeUnit
 
@@ -18,7 +18,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 import timber.log.Timber
-import java.util.concurrent.Future
 
 /**
  * @author Igor Bubelov
@@ -32,34 +31,29 @@ internal constructor(
         private val placeNotificationManager: PlaceNotificationManager,
         private val syncLogsRepository: SyncLogsRepository
 ) {
-    private var futureSyncResult: Future<Any>? = null
+    fun start() = launch {
+        try {
+            Timber.d("Starting sync")
+            val result = placesRepository.fetchNewPlaces()
 
-    fun sync() {
-        Timber.d("Starting sync")
-        futureSyncResult?.cancel(true)
+            when (result) {
+                is Result.Success -> {
+                    Timber.d("Fetched ${result.data.size} new places")
+                    syncLogsRepository.addEntry(SyncLogEntry(System.currentTimeMillis(), result.data.size))
 
-        futureSyncResult = doAsyncResult({
-            Timber.e(it, "Couldn't sync database")
-            scheduleNextSync()
-        }, {
-            Timber.d("Fetching new places")
-            val placesResult = placesRepository.fetchNewPlaces()
-
-            when (placesResult) {
-                is ApiResult.Success -> {
-                    Timber.d("Fetched ${placesResult.data.size} new places")
-                    syncLogsRepository.addEntry(SyncLogEntry(System.currentTimeMillis(), placesResult.data.size))
-
-                    placesResult.data.forEach {
+                    result.data.forEach {
                         placeNotificationManager.notifyUserIfNecessary(it)
                     }
-                }
-                is ApiResult.Error -> Timber.e(placesResult.e)
-            }
 
-            Timber.d("Sync completed")
-            scheduleNextSync()
-        })
+                    Timber.d("Sync completed")
+                }
+                is Result.Error -> throw result.e
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Couldn't sync database")
+        }
+
+        scheduleNextSync()
     }
 
     private fun scheduleNextSync() {

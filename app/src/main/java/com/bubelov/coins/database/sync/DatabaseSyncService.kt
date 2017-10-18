@@ -20,7 +20,7 @@ class DatabaseSyncService : IntentService(DatabaseSyncService::class.java.simple
     }
 
     override fun onHandleIntent(intent: Intent?) {
-        databaseSync.sync()
+        databaseSync.start()
     }
 
     companion object {

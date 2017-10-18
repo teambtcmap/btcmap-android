@@ -6,7 +6,7 @@ import android.arch.lifecycle.Transformations
 import android.os.SystemClock
 import com.bubelov.coins.database.dao.PlaceDao
 import com.bubelov.coins.model.Place
-import com.bubelov.coins.repository.ApiResult
+import com.bubelov.coins.repository.Result
 import com.bubelov.coins.util.toLatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import org.jetbrains.anko.doAsync
@@ -66,7 +66,7 @@ constructor(
 
     fun getRandomPlace() = dao.random()
 
-    fun fetchNewPlaces(): ApiResult<List<Place>> {
+    fun fetchNewPlaces(): Result<List<Place>> {
         try {
             while (!assetsInitialized) {
                 SystemClock.sleep(100)
@@ -82,44 +82,44 @@ constructor(
                     dao.insertAll(places)
                 }
 
-                ApiResult.Success(places)
+                Result.Success(places)
             } else {
                 throw Exception("HTTP code: ${response.code()}, message: ${response.message()}")
             }
         } catch (e: Exception) {
-            return ApiResult.Error(e)
+            return Result.Error(e)
         }
     }
 
-    fun addPlace(place: Place): ApiResult<Place> {
+    fun addPlace(place: Place): Result<Place> {
         return try {
             val response = networkDataSource.addPlace(place).execute()
 
             if (response.isSuccessful) {
                 val createdPlace = response.body()!!
                 dao.insert(createdPlace)
-                ApiResult.Success(createdPlace)
+                Result.Success(createdPlace)
             } else {
                 throw Exception("HTTP code: ${response.code()}, message: ${response.message()}")
             }
         } catch (e: Exception) {
-            ApiResult.Error(e)
+            Result.Error(e)
         }
     }
 
-    fun updatePlace(place: Place): ApiResult<Place> {
+    fun updatePlace(place: Place): Result<Place> {
         return try {
             val response = networkDataSource.updatePlace(place).execute()
 
             if (response.isSuccessful) {
                 val updatedPlace = response.body()!!
                 dao.update(updatedPlace)
-                ApiResult.Success(updatedPlace)
+                Result.Success(updatedPlace)
             } else {
                 throw Exception("HTTP code: ${response.code()}, message: ${response.message()}")
             }
         } catch (e: Exception) {
-            ApiResult.Error(e)
+            Result.Error(e)
         }
     }
 }

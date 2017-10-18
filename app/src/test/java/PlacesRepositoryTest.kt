@@ -1,4 +1,4 @@
-import com.bubelov.coins.repository.ApiResult
+import com.bubelov.coins.repository.Result
 import com.bubelov.coins.repository.place.PlacesRepository
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -31,7 +31,7 @@ class PlacesRepositoryTest : BaseRobolectricTest() {
     @Test
     fun fetchesNewPlaces() {
         val result = repository.fetchNewPlaces()
-        assertTrue(result is ApiResult.Success && !result.data.isEmpty())
+        assertTrue(result is Result.Success && !result.data.isEmpty())
     }
 
     @Test

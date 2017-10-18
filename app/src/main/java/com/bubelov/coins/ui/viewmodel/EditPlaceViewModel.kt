@@ -4,7 +4,7 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import com.bubelov.coins.dagger.Injector
 import com.bubelov.coins.model.Place
-import com.bubelov.coins.repository.ApiResult
+import com.bubelov.coins.repository.Result
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.google.android.gms.maps.model.LatLng
 import org.jetbrains.anko.doAsync
@@ -46,8 +46,8 @@ class EditPlaceViewModel(application: Application) : AndroidViewModel(applicatio
                 callback.onTaskStopped()
 
                 when (result) {
-                    is ApiResult.Success -> callback.onTaskSuccess(result.data)
-                    is ApiResult.Error -> {
+                    is Result.Success -> callback.onTaskSuccess(result.data)
+                    is Result.Error -> {
                         Timber.e(result.e)
                         callback.onTaskFailure()
                     }
@@ -66,8 +66,8 @@ class EditPlaceViewModel(application: Application) : AndroidViewModel(applicatio
                 callback.onTaskStopped()
 
                 when (result) {
-                    is ApiResult.Success -> callback.onTaskSuccess(result.data)
-                    is ApiResult.Error -> callback.onTaskFailure()
+                    is Result.Success -> callback.onTaskSuccess(result.data)
+                    is Result.Error -> callback.onTaskFailure()
                 }
             }
         }
