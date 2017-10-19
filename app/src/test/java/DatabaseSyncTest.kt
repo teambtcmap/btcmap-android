@@ -1,4 +1,4 @@
-import com.bubelov.coins.database.dao.PlaceDao
+import com.bubelov.coins.repository.place.PlacesDb
 import com.bubelov.coins.database.sync.DatabaseSync
 import com.bubelov.coins.repository.place.PlacesRepository
 import kotlinx.coroutines.experimental.runBlocking
@@ -16,7 +16,7 @@ class DatabaseSyncTest : BaseRobolectricTest() {
 
     @Inject lateinit var databaseSync: DatabaseSync
 
-    @Inject lateinit var placeDao: PlaceDao
+    @Inject lateinit var placesDb: PlacesDb
 
     @Before
     fun init() {
@@ -27,10 +27,10 @@ class DatabaseSyncTest : BaseRobolectricTest() {
     fun syncing() {
         runBlocking {
             placesRepository.getPlaces("").blockingObserve()
-            val placesBeforeSync = placeDao.count()
+            val placesBeforeSync = placesDb.count()
             Assert.assertTrue(placesBeforeSync > 0)
             databaseSync.start().join()
-            Assert.assertNotEquals(placesBeforeSync, placeDao.count())
+            Assert.assertNotEquals(placesBeforeSync, placesDb.count())
         }
     }
 }

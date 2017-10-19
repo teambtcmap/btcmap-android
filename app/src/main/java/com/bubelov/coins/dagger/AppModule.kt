@@ -32,7 +32,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class AppModule {
     @Provides
     @Singleton
-    fun providePlaceDao(database: Database) = database.placeDao()
+    fun providePlacesDb(database: Database) = database.placesDb()
 
     @Provides
     @Singleton

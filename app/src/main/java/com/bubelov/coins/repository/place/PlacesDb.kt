@@ -1,4 +1,4 @@
-package com.bubelov.coins.database.dao
+package com.bubelov.coins.repository.place
 
 import android.arch.lifecycle.LiveData
 import android.arch.persistence.room.*
@@ -11,7 +11,7 @@ import java.util.*
  */
 
 @Dao
-interface PlaceDao {
+interface PlacesDb {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(place: Place)
 

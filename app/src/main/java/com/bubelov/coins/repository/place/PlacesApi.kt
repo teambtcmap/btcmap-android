@@ -17,7 +17,7 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class PlacesDataSourceApi @Inject
+class PlacesApi @Inject
 internal constructor(
         private val api: CoinsApi,
         private val gson: Gson,

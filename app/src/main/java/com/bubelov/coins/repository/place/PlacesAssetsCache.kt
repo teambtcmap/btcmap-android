@@ -13,7 +13,7 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class PlacesDataSourceAssets @Inject
+class PlacesAssetsCache @Inject
 internal constructor(private val context: Context, val gson: Gson) {
     fun getPlaces(): List<Place> {
         val input = context.assets.open("places.json")

@@ -4,7 +4,7 @@ import android.arch.persistence.room.Database
 import android.arch.persistence.room.RoomDatabase
 import android.arch.persistence.room.TypeConverters
 
-import com.bubelov.coins.database.dao.PlaceDao
+import com.bubelov.coins.repository.place.PlacesDb
 import com.bubelov.coins.model.Place
 
 /**
@@ -14,5 +14,5 @@ import com.bubelov.coins.model.Place
 @Database(entities = arrayOf(Place::class), version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class Database : RoomDatabase() {
-    abstract fun placeDao(): PlaceDao
+    abstract fun placesDb(): PlacesDb
 }

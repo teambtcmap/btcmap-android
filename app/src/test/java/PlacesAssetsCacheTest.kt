@@ -1,4 +1,4 @@
-import com.bubelov.coins.repository.place.PlacesDataSourceAssets
+import com.bubelov.coins.repository.place.PlacesAssetsCache
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -8,8 +8,8 @@ import javax.inject.Inject
  * @author Igor Bubelov
  */
 
-class PlacesDataSourceAssetsTest : BaseRobolectricTest() {
-    @Inject lateinit var dataSource: PlacesDataSourceAssets
+class PlacesAssetsCacheTest : BaseRobolectricTest() {
+    @Inject lateinit var cache: PlacesAssetsCache
 
     @Before
     fun init() {
@@ -18,6 +18,6 @@ class PlacesDataSourceAssetsTest : BaseRobolectricTest() {
 
     @Test
     fun isNotEmpty() {
-        Assert.assertTrue(dataSource.getPlaces().isNotEmpty())
+        Assert.assertTrue(cache.getPlaces().isNotEmpty())
     }
 }

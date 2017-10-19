@@ -13,7 +13,7 @@ import javax.inject.Singleton
 interface TestComponent {
     fun inject(target: ExchangeRatesRepositoryTest)
     fun inject(target: NotificationAreaRepositoryTest)
-    fun inject(target: PlacesDataSourceAssetsTest)
+    fun inject(target: PlacesAssetsCacheTest)
     fun inject(target: PlacesRepositoryTest)
     fun inject(target: SyncLogsRepositoryTest)
     fun inject(target: DatabaseSyncTest)
