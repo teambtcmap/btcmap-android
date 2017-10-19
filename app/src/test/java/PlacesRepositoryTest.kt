@@ -20,12 +20,12 @@ class PlacesRepositoryTest : BaseRobolectricTest() {
 
     @Test
     fun isNotEmptyByDefault() {
-        assertNotNull(repository.getRandomPlace().blockingObserve(2))
+        assertNotNull(repository.getRandomPlace().blockingObserve())
     }
 
     @Test
     fun returnsRandomPlace() {
-        assertNotNull(repository.getRandomPlace().blockingObserve(2))
+        assertNotNull(repository.getRandomPlace().blockingObserve())
     }
 
     @Test
@@ -36,7 +36,7 @@ class PlacesRepositoryTest : BaseRobolectricTest() {
 
     @Test
     fun returnsCurrenciesToPlaces() {
-        val currenciesToPlaces = repository.getCurrenciesToPlacesMap().blockingObserve(2)
+        val currenciesToPlaces = repository.getCurrenciesToPlacesMap().blockingObserve()
         assertNotNull(currenciesToPlaces)
         assertTrue(currenciesToPlaces.size > 1)
     }

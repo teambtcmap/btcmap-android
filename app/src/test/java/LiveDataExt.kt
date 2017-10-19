@@ -6,9 +6,9 @@ import java.util.concurrent.TimeUnit
  * @author Igor Bubelov
  */
 
-fun <T> LiveData<T>.blockingObserve(observationsCount: Int = 1): T {
+fun <T> LiveData<T>.blockingObserve(): T {
     var value: T? = null
-    val latch = CountDownLatch(observationsCount)
+    val latch = CountDownLatch(1)
 
     observeForever({
         value = it

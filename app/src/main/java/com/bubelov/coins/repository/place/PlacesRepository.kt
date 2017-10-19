@@ -4,12 +4,14 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import android.os.SystemClock
+import com.bubelov.coins.database.DatabaseConfig
 import com.bubelov.coins.database.dao.PlaceDao
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.Result
 import com.bubelov.coins.util.toLatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import org.jetbrains.anko.doAsync
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.runBlocking
 import java.util.*
 
 import javax.inject.Inject
@@ -24,19 +26,20 @@ class PlacesRepository @Inject
 constructor(
         private val networkDataSource: PlacesDataSourceApi,
         private val dao: PlaceDao,
-        assetsDataSource: PlacesDataSourceAssets
+        private val assetsDataSource: PlacesDataSourceAssets,
+        databaseConfig: DatabaseConfig
 ) {
     private val allPlaces = dao.all()
 
-    private var assetsInitialized = false
+    private val initAssets = launch {
+        if (dao.count() == 0) {
+            dao.insertAll(assetsDataSource.getPlaces())
+        }
+    }
 
     init {
-        doAsync {
-            if (dao.count() == 0) {
-                dao.insertAll(assetsDataSource.getPlaces())
-            }
-
-            assetsInitialized = true
+        if (databaseConfig.canUseMainThread) {
+            runBlocking { initAssets.join() }
         }
     }
 
@@ -68,7 +71,9 @@ constructor(
 
     fun fetchNewPlaces(): Result<List<Place>> {
         try {
-            while (!assetsInitialized) {
+            runBlocking { initAssets.join() }
+
+            while (dao.count() == 0) {
                 SystemClock.sleep(100)
             }
 
