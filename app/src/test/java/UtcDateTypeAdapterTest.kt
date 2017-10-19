@@ -8,7 +8,7 @@ import java.util.*
  */
 
 class UtcDateTypeAdapterTest : BaseRobolectricTest() {
-    val adapter = UtcDateTypeAdapter()
+    private val adapter = UtcDateTypeAdapter()
 
     @Test
     fun convertsDateToString() {

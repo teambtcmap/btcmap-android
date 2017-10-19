@@ -21,16 +21,16 @@ interface PlaceDao {
     @Query("SELECT * FROM places")
     fun all(): LiveData<List<Place>>
 
-    @Query("SELECT * from places WHERE _id = :arg0 LIMIT 1")
+    @Query("SELECT * from places WHERE _id = :id LIMIT 1")
     fun findById(id: Long): LiveData<Place>
 
     @Query("SELECT * FROM places WHERE " +
-            "UPPER(name) LIKE UPPER(:arg0) " +
-            "OR UPPER(category) LIKE UPPER(:arg0) " +
-            "OR UPPER(description) LIKE UPPER(:arg0) " +
-            "OR UPPER(currencies) LIKE UPPER(:arg0) " +
-            "OR UPPER(phone) LIKE UPPER(:arg0) " +
-            "OR UPPER(website) LIKE UPPER(:arg0)")
+            "UPPER(name) LIKE UPPER(:query) " +
+            "OR UPPER(category) LIKE UPPER(:query) " +
+            "OR UPPER(description) LIKE UPPER(:query) " +
+            "OR UPPER(currencies) LIKE UPPER(:query) " +
+            "OR UPPER(phone) LIKE UPPER(:query) " +
+            "OR UPPER(website) LIKE UPPER(:query)")
     fun findBySearchQuery(query: String): LiveData<List<Place>>
 
     @Query("SELECT * FROM places ORDER BY RANDOM() LIMIT 1")

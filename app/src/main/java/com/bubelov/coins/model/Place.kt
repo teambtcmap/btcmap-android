@@ -15,44 +15,44 @@ import kotlin.collections.ArrayList
 data class Place(
         @PrimaryKey
         @ColumnInfo(name = "_id")
-        var id: Long = 0,
+        val id: Long,
 
         @ColumnInfo(name = "name")
-        var name: String = "",
+        val name: String,
 
         @ColumnInfo(name = "latitude")
-        var latitude: Double = 0.0,
+        val latitude: Double,
 
         @ColumnInfo(name = "longitude")
-        var longitude: Double = 0.0,
+        val longitude: Double,
 
         @ColumnInfo(name = "category")
-        var category: String = "",
+        val category: String,
 
         @ColumnInfo(name = "description")
-        var description: String = "",
+        val description: String,
 
         @ColumnInfo(name = "currencies")
-        var currencies: ArrayList<String> = arrayListOf(),
+        val currencies: ArrayList<String>,
 
         @ColumnInfo(name = "opened_claims")
-        var openedClaims: Int = 0,
+        val openedClaims: Int,
 
         @ColumnInfo(name = "closed_claims")
-        var closedClaims: Int = 0,
+        val closedClaims: Int,
 
         @ColumnInfo(name = "phone")
-        var phone: String = "",
+        val phone: String,
 
         @ColumnInfo(name = "website")
-        var website: String = "",
+        val website: String,
 
         @ColumnInfo(name = "opening_hours")
-        var openingHours: String = "",
+        val openingHours: String,
 
         @ColumnInfo(name = "visible")
-        var visible: Boolean = false,
+        val visible: Boolean,
 
         @ColumnInfo(name = "updated_at")
-        var updatedAt: Date = Date(0)
+        val updatedAt: Date
 ) : Serializable
