@@ -17,6 +17,7 @@ interface TestComponent {
     fun inject(target: PlacesRepositoryTest)
     fun inject(target: SyncLogsRepositoryTest)
     fun inject(target: DatabaseSyncTest)
+    fun inject(target: PlacesDbTests)
 
     @Component.Builder
     interface Builder {
