@@ -1,7 +1,6 @@
 import com.bubelov.coins.repository.Result
 import com.bubelov.coins.repository.place.PlacesRepository
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import javax.inject.Inject
@@ -39,5 +38,10 @@ class PlacesRepositoryTest : BaseRobolectricTest() {
         val currenciesToPlaces = repository.getCurrenciesToPlacesMap().blockingObserve()
         assertNotNull(currenciesToPlaces)
         assertTrue(currenciesToPlaces.size > 1)
+    }
+
+    @Test
+    fun searchIsWorking() {
+        assertNotEquals(0, repository.getPlaces("cafe").blockingObserve().size)
     }
 }

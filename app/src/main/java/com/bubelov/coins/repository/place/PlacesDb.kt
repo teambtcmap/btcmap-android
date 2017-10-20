@@ -25,12 +25,12 @@ interface PlacesDb {
     fun findById(id: Long): LiveData<Place>
 
     @Query("SELECT * FROM places WHERE " +
-            "UPPER(name) LIKE UPPER(:query) " +
-            "OR UPPER(category) LIKE UPPER(:query) " +
-            "OR UPPER(description) LIKE UPPER(:query) " +
-            "OR UPPER(currencies) LIKE UPPER(:query) " +
-            "OR UPPER(phone) LIKE UPPER(:query) " +
-            "OR UPPER(website) LIKE UPPER(:query)")
+            "UPPER(name) LIKE '%' || UPPER(:query) || '%' " +
+            "OR UPPER(category) LIKE '%' || UPPER(:query) || '%' " +
+            "OR UPPER(description) LIKE '%' || UPPER(:query) || '%' " +
+            "OR UPPER(currencies) LIKE '%' || UPPER(:query) || '%' " +
+            "OR UPPER(phone) LIKE '%' || UPPER(:query) || '%' " +
+            "OR UPPER(website) LIKE '%' || UPPER(:query) || '%'")
     fun findBySearchQuery(query: String): LiveData<List<Place>>
 
     @Query("SELECT * FROM places ORDER BY RANDOM() LIMIT 1")

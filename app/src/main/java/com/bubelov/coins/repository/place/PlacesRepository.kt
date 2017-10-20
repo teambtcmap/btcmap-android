@@ -45,7 +45,7 @@ constructor(
     fun getPlaces(bounds: LatLngBounds): LiveData<List<Place>>
             = Transformations.switchMap(allPlaces) { MutableLiveData<List<Place>>().apply { value = it.filter { bounds.contains(it.toLatLng()) } } }
 
-    fun getPlaces(searchQuery: String) = db.findBySearchQuery("%$searchQuery%")
+    fun getPlaces(searchQuery: String) = db.findBySearchQuery(searchQuery)
 
     fun getCurrenciesToPlacesMap(): LiveData<Map<String, List<Place>>> = Transformations.switchMap(allPlaces) {
         val data = MutableLiveData<Map<String, List<Place>>>()
