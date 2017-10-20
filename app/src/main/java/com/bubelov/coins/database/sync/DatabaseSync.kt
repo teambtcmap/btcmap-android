@@ -60,8 +60,8 @@ internal constructor(
         Timber.d("Scheduling next sync")
 
         PeriodicTask.Builder().apply {
-            setService(DatabaseGcmSyncService::class.java)
-            setTag(DatabaseGcmSyncService.TAG)
+            setService(DatabaseSyncService::class.java)
+            setTag(DatabaseSyncService.TAG)
             setPeriod(TimeUnit.DAYS.toSeconds(1))
             setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)
             setPersisted(true)

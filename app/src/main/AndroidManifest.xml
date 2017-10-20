@@ -57,10 +57,8 @@
 
         <activity android:name=".ui.activity.PickLocationActivity" />
 
-        <service android:name="com.bubelov.coins.database.sync.DatabaseSyncService" />
-
         <service
-            android:name="com.bubelov.coins.database.sync.DatabaseGcmSyncService"
+            android:name="com.bubelov.coins.database.sync.DatabaseSyncService"
             android:exported="true"
             android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
             <intent-filter>

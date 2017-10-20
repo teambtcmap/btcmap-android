@@ -1,31 +1,34 @@
 package com.bubelov.coins.database.sync
 
-import android.app.IntentService
-import android.content.Context
-import android.content.Intent
-
+import com.google.android.gms.gcm.GcmNetworkManager
+import com.google.android.gms.gcm.GcmTaskService
+import com.google.android.gms.gcm.TaskParams
 import dagger.android.AndroidInjection
+import kotlinx.coroutines.experimental.runBlocking
 import javax.inject.Inject
 
 /**
  * @author Igor Bubelov
  */
 
-class DatabaseSyncService : IntentService(DatabaseSyncService::class.java.simpleName) {
-    @Inject internal lateinit var databaseSync: DatabaseSync
+class DatabaseSyncService : GcmTaskService() {
+    @Inject lateinit var databaseSync: DatabaseSync
 
     override fun onCreate() {
         AndroidInjection.inject(this)
         super.onCreate()
     }
 
-    override fun onHandleIntent(intent: Intent?) {
-        databaseSync.start()
+    override fun onInitializeTasks() {
+        onRunTask(null)
+    }
+
+    override fun onRunTask(taskParams: TaskParams?): Int {
+        runBlocking { databaseSync.start() }
+        return GcmNetworkManager.RESULT_SUCCESS
     }
 
     companion object {
-        fun start(context: Context) {
-            context.startService(Intent(context, DatabaseSyncService::class.java))
-        }
+        const val TAG = "DATABASE_GCM_SYNC_SERVICE"
     }
 }
