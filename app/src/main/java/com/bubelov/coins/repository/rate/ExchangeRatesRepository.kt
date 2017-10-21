@@ -8,8 +8,12 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class ExchangeRatesRepository @Inject
-internal constructor(bitcoinAverage: BitcoinAverage, bitstamp: Bitstamp, coinbase: Coinbase, winkdex: Winkdex) {
+class ExchangeRatesRepository @Inject constructor(
+        bitcoinAverage: BitcoinAverage,
+        bitstamp: Bitstamp,
+        coinbase: Coinbase,
+        winkdex: Winkdex
+) {
     private val sources = listOf(bitcoinAverage, bitstamp, coinbase, winkdex)
 
     fun getExchangeRatesSources(baseCurrency: String, targetCurrency: String)

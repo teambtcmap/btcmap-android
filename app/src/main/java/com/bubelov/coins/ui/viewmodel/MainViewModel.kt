@@ -11,7 +11,7 @@ import com.bubelov.coins.model.NotificationArea
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.area.NotificationAreaRepository
 import com.bubelov.coins.repository.place.PlacesRepository
-import com.bubelov.coins.repository.placemarker.PlaceMarkersRepository
+import com.bubelov.coins.repository.placeicon.PlaceIconsRepository
 import com.bubelov.coins.repository.user.UserRepository
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.util.Analytics
@@ -32,7 +32,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     @Inject internal lateinit var placesRepository: PlacesRepository
 
-    @Inject internal lateinit var placeMarkersRepository: PlaceMarkersRepository
+    @Inject internal lateinit var placeIconsRepository: PlaceIconsRepository
 
     @Inject internal lateinit var analytics: Analytics
 
@@ -56,7 +56,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             value = it.mapTo(ArrayList()) {
                 PlaceMarker(
                         placeId = it.id,
-                        icon = placeMarkersRepository.getPlaceCategoryMarker(it.category),
+                        icon = placeIconsRepository.getMarker(it.category),
                         latitude = it.latitude,
                         longitude = it.longitude
                 )

@@ -17,8 +17,7 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class UserRepository @Inject
-internal constructor(
+class UserRepository @Inject constructor(
         private val api: CoinsApi,
         private val preferences: SharedPreferences,
         private val gson: Gson

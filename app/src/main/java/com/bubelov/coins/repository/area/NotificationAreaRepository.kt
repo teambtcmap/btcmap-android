@@ -14,8 +14,10 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class NotificationAreaRepository @Inject
-internal constructor(private val preferences: SharedPreferences, private val gson: Gson) {
+class NotificationAreaRepository @Inject constructor(
+        private val preferences: SharedPreferences,
+        private val gson: Gson
+) {
     var notificationArea: NotificationArea?
         get() = gson.fromJson(preferences.getString(PreferenceKeys.NOTIFICATION_AREA, ""), NotificationArea::class.java)
         set(area) = preferences.edit().putString(PreferenceKeys.NOTIFICATION_AREA, gson.toJson(area)).apply()

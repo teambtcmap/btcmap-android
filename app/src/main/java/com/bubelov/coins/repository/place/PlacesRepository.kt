@@ -21,8 +21,7 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class PlacesRepository @Inject
-constructor(
+class PlacesRepository @Inject constructor(
         private val api: PlacesApi,
         private val db: PlacesDb,
         private val assetsCache: PlacesAssetsCache,

@@ -1,4 +1,4 @@
-package com.bubelov.coins.repository.placemarker
+package com.bubelov.coins.repository.placeicon
 
 import android.content.Context
 import android.graphics.*
@@ -19,28 +19,24 @@ import android.support.v4.content.ContextCompat
  */
 
 @Singleton
-class PlaceMarkersRepository @Inject
-internal constructor(private val context: Context) {
+class PlaceIconsRepository @Inject constructor(
+        private val context: Context
+) {
     private val cache = mutableMapOf<String, BitmapDescriptor>()
 
-    fun getPlaceCategoryMarker(category: String): BitmapDescriptor {
-        var marker = cache[category]
+    fun getMarker(placeCategory: String): BitmapDescriptor {
+        var marker = cache[placeCategory]
 
         if (marker == null) {
-            marker = createBitmapDescriptor(category)
-            cache[category] = marker
+            marker = createBitmapDescriptor(placeCategory)
+            cache[placeCategory] = marker
         }
 
         return marker
     }
 
-    private fun createBitmapDescriptor(placeCategory: String): BitmapDescriptor {
-        val pinBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ic_map_marker_empty)
-        val bitmap = Bitmap.createBitmap(pinBitmap.width, pinBitmap.height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        canvas.drawBitmap(pinBitmap, 0f, 0f, Paint())
-
-        val iconResourceId = when (placeCategory.toLowerCase()) {
+    fun getPlaceCategoryIconResId(category: String): Int? {
+        return when (category.toLowerCase()) {
             "atm" -> R.drawable.ic_atm
             "restaurant" -> R.drawable.ic_restaurant
             "café" -> R.drawable.ic_cafe
@@ -54,15 +50,24 @@ internal constructor(private val context: Context) {
             "gas station" -> R.drawable.ic_gas_station
             else -> null
         }
+    }
 
-        if (iconResourceId != null) {
+    private fun createBitmapDescriptor(placeCategory: String): BitmapDescriptor {
+        val pinBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ic_map_marker_empty)
+        val bitmap = Bitmap.createBitmap(pinBitmap.width, pinBitmap.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        canvas.drawBitmap(pinBitmap, 0f, 0f, Paint())
+
+        val iconResId = getPlaceCategoryIconResId(placeCategory)
+
+        if (iconResId != null) {
             val paint = Paint()
             paint.isAntiAlias = true
             paint.color = Color.WHITE
             canvas.drawCircle(bitmap.width.toFloat() / 2, bitmap.height.toFloat() * 0.43f, bitmap.width.toFloat() * 0.27f, paint)
             val dst = RectF(bitmap.width.toFloat() * 0.3f, bitmap.width.toFloat() * 0.23f, bitmap.width.toFloat() * 0.7f, bitmap.height.toFloat() * 0.63f)
             val dstInt = Rect(dst.left.toInt(), dst.top.toInt(), dst.right.toInt(), dst.bottom.toInt())
-            val iconBitmap = toBitmap(iconResourceId, dstInt.right - dstInt.left, dstInt.bottom - dstInt.top)
+            val iconBitmap = toBitmap(iconResId, dstInt.right - dstInt.left, dstInt.bottom - dstInt.top)
             paint.colorFilter = PorterDuffColorFilter(ContextCompat.getColor(context, R.color.primary_dark), PorterDuff.Mode.SRC_IN)
             canvas.drawBitmap(iconBitmap, null, dstInt, paint)
         }
