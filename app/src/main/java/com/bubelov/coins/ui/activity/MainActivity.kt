@@ -124,6 +124,10 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
             true
         }
 
+        model.selectedCurrency.observe(this, Observer {
+            toolbar.menu.findItem(R.id.action_currency).title = it
+        })
+
         drawerToggle = ActionBarDrawerToggle(this, drawer_layout, toolbar, R.string.open, R.string.close)
         drawer_layout.addDrawerListener(drawerToggle)
 
@@ -241,8 +245,12 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         model.getCurrenciesToPlacesMap().observe(this, Observer { map ->
             if (map != null) {
                 val currencies = map.keys.sortedBy { -map[it]!!.size }
-                val titles = currencies.map { "$it (${map[it]!!.size} places)" }
-                alert { items(titles, onItemSelected = { _, _, _ -> }) }.show()
+                val titles = currencies.map { "$it (${map[it]!!.size} ${resources.getQuantityString(R.plurals.places, map[it]!!.size).toLowerCase()})" }
+
+                alert { items(titles, onItemSelected = { _, _, index -> model.selectedCurrency.value = currencies[index] }) }.apply {
+                    titleResource = R.string.currency
+                    show()
+                }
             }
         })
     }

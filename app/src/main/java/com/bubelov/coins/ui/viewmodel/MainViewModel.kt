@@ -48,20 +48,24 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     var mapBounds = MutableLiveData<LatLngBounds>()
 
+    var selectedCurrency = MutableLiveData<String>().apply { value = "BTC" }
+
     private val places: LiveData<List<Place>>
             = Transformations.switchMap(mapBounds) { placesRepository.getPlaces(it) }
 
-    val placeMarkers: LiveData<List<PlaceMarker>> = Transformations.switchMap(places) {
-        MutableLiveData<List<PlaceMarker>>().apply {
-            value = it.mapTo(ArrayList()) {
-                PlaceMarker(
-                        placeId = it.id,
-                        icon = placeIconsRepository.getMarker(it.category),
-                        latitude = it.latitude,
-                        longitude = it.longitude
-                )
+    val placeMarkers: LiveData<List<PlaceMarker>> = Transformations.switchMap(places) { places ->
+        Transformations.switchMap(selectedCurrency, { currency ->
+            MutableLiveData<List<PlaceMarker>>().apply {
+                value = places.filter { it.currencies.contains(currency) }.mapTo(ArrayList()) {
+                    PlaceMarker(
+                            placeId = it.id,
+                            icon = placeIconsRepository.getMarker(it.category),
+                            latitude = it.latitude,
+                            longitude = it.longitude
+                    )
+                }
             }
-        }
+        })
     }
 
     init {

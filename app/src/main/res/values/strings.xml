@@ -91,6 +91,8 @@
 
     <string name="something_went_wrong">Whoops, something went wrong…</string>
 
+    <string name="currency">Currency</string>
+
     <string-array name="distance_units">
         <item>Automatic</item>
         <item>Kilometers</item>
@@ -105,6 +107,11 @@
     <plurals name="marked_as_closed_by_d_users">
         <item quantity="one">Marked as closed by %d user</item>
         <item quantity="other">Marked as closed by %d users</item>
+    </plurals>
+
+    <plurals name="places">
+        <item quantity="one">Place</item>
+        <item quantity="other">Places</item>
     </plurals>
 
 </resources>

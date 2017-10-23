@@ -93,5 +93,6 @@
     <string name="map">Map</string>
     <string name="something_went_wrong">Whoops, something went wrong…</string>
     <string name="action_filter_places">Filter places</string>
+    <string name="currency">Currency</string>
 
 </resources>
