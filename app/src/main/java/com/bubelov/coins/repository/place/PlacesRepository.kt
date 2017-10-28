@@ -4,7 +4,7 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import android.os.SystemClock
-import com.bubelov.coins.database.DatabaseConfig
+import com.bubelov.coins.db.DatabaseConfig
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.Result
 import com.bubelov.coins.util.toLatLng

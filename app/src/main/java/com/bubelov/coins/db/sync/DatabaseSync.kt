@@ -1,4 +1,4 @@
-package com.bubelov.coins.database.sync
+package com.bubelov.coins.db.sync
 
 import android.content.Context
 import com.bubelov.coins.model.SyncLogEntry

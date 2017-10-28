@@ -1,4 +1,4 @@
-package com.bubelov.coins.database
+package com.bubelov.coins.db
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase

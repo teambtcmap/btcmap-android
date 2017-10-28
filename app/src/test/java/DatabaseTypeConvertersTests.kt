@@ -1,4 +1,4 @@
-import com.bubelov.coins.database.Converters
+import com.bubelov.coins.db.Converters
 import junit.framework.Assert
 import org.junit.Test
 import java.util.*

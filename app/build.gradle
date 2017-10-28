@@ -20,6 +20,12 @@ android {
         project.ext.set("archivesBaseName", "Coins-" + defaultConfig.versionName)
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
 
     signingConfigs {

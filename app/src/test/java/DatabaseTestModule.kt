@@ -1,7 +1,7 @@
 import android.arch.persistence.room.Room
 import android.content.Context
-import com.bubelov.coins.database.Database
-import com.bubelov.coins.database.DatabaseConfig
+import com.bubelov.coins.db.Database
+import com.bubelov.coins.db.DatabaseConfig
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

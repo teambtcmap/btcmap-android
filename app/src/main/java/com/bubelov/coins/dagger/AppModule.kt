@@ -5,7 +5,7 @@ import android.preference.PreferenceManager
 
 import com.bubelov.coins.BuildConfig
 import com.bubelov.coins.api.coins.CoinsApi
-import com.bubelov.coins.database.Database
+import com.bubelov.coins.db.Database
 import com.bubelov.coins.util.StringAdapter
 import com.bubelov.coins.util.UtcDateTypeAdapter
 import com.google.firebase.analytics.FirebaseAnalytics

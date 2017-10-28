@@ -9,7 +9,7 @@ import android.preference.PreferenceFragment
 import android.preference.PreferenceScreen
 import android.support.v7.app.AppCompatActivity
 import com.bubelov.coins.R
-import com.bubelov.coins.database.sync.DatabaseSync
+import com.bubelov.coins.db.sync.DatabaseSync
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.synclogs.SyncLogsRepository
 import com.bubelov.coins.util.PlaceNotificationManager

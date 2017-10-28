@@ -1,5 +1,5 @@
 import com.bubelov.coins.repository.place.PlacesDb
-import com.bubelov.coins.database.sync.DatabaseSync
+import com.bubelov.coins.db.sync.DatabaseSync
 import com.bubelov.coins.repository.place.PlacesRepository
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Assert

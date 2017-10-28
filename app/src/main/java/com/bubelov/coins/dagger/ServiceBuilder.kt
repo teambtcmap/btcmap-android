@@ -1,7 +1,7 @@
 package com.bubelov.coins.dagger
 
-import com.bubelov.coins.database.sync.DatabaseSyncService
-import com.bubelov.coins.database.sync.DatabaseSyncServiceModule
+import com.bubelov.coins.db.sync.DatabaseSyncService
+import com.bubelov.coins.db.sync.DatabaseSyncServiceModule
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 

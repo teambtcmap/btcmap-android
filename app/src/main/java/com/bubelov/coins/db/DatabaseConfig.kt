@@ -1,4 +1,4 @@
-package com.bubelov.coins.database
+package com.bubelov.coins.db
 
 /**
  * @author Igor Bubelov

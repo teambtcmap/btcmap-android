@@ -1,4 +1,4 @@
-package com.bubelov.coins.database
+package com.bubelov.coins.db
 
 import android.arch.persistence.room.TypeConverter
 import com.google.gson.Gson
