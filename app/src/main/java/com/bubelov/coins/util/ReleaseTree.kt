@@ -1,7 +1,6 @@
 package com.bubelov.coins.util
 
-import com.google.firebase.crash.FirebaseCrash
-
+import com.crashlytics.android.Crashlytics
 import timber.log.Timber
 
 /**
@@ -11,9 +10,9 @@ import timber.log.Timber
 class ReleaseTree : Timber.Tree() {
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
         if (t != null) {
-            FirebaseCrash.log("Tag: " + tag)
-            FirebaseCrash.log("Message: " + message)
-            FirebaseCrash.report(t)
+            Crashlytics.log("Tag: $tag")
+            Crashlytics.log("Message: $message")
+            Crashlytics.logException(t)
         }
     }
 }
