@@ -16,7 +16,7 @@ import javax.inject.Singleton
 class DatabaseModule {
     @Provides
     @Singleton
-    fun provideDatabase(context: Context, databaseConfig: DatabaseConfig) = Room.databaseBuilder(context, Database::class.java, "data").apply {
+    fun provideDatabase(context: Context, databaseConfig: DatabaseConfig) = Room.databaseBuilder(context, Database::class.java, "coins.db").apply {
         if (databaseConfig.canUseMainThread) {
             allowMainThreadQueries()
         }
