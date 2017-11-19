@@ -2,6 +2,11 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <Preference
+        android:defaultValue="@string/pref_currency_btc"
+        android:key="@string/pref_currency_key"
+        android:title="@string/pref_currency" />
+
     <ListPreference
         android:defaultValue="@string/pref_distance_units_automatic"
         android:entries="@array/distance_units"

@@ -39,7 +39,7 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addPreferencesFromResource(R.xml.preferences)
-        updateDistanceUnitsSummary()
+        updateSummaries()
     }
 
     override fun onResume() {
@@ -54,6 +54,7 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
 
     override fun onPreferenceTreeClick(preferenceScreen: PreferenceScreen, preference: Preference): Boolean {
         when (preference.key) {
+            getString(R.string.pref_currency_key) -> showCurrencySelector()
             getString(R.string.pref_sync_database_key) -> databaseSync.start()
             getString(R.string.pref_show_sync_log_key) -> showSyncLog()
             getString(R.string.pref_test_notification_key) -> testNotification()
@@ -63,7 +64,7 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
     }
 
     override fun onSharedPreferenceChanged(preferences: SharedPreferences, key: String) {
-        updateDistanceUnitsSummary()
+        updateSummaries()
     }
 
     private fun showSyncLog() {
@@ -76,9 +77,42 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
         }
     }
 
+    private fun updateSummaries() {
+        updateCurrencySummary()
+        updateDistanceUnitsSummary()
+    }
+
+    private fun updateCurrencySummary() {
+        val currency = findPreference(getString(R.string.pref_currency_key)) as Preference
+        currency.summary = preferenceManager.sharedPreferences.getString(getString(R.string.pref_currency_key), "BTC")
+    }
+
     private fun updateDistanceUnitsSummary() {
         val distanceUnits = findPreference(getString(R.string.pref_distance_units_key)) as ListPreference
         distanceUnits.summary = distanceUnits.entry
+    }
+
+    private fun showCurrencySelector() {
+        placesRepository.getCurrenciesToPlacesMap().observeForever { map ->
+            if (map == null) {
+                return@observeForever
+            }
+
+            val currencies = map.keys.sortedBy { -map[it]!!.size }
+            val titles = currencies.map { "$it (${map[it]!!.size} ${resources.getQuantityString(R.plurals.places, map[it]!!.size).toLowerCase()})" }
+
+            alert {
+                items(titles, onItemSelected = { _, _, index ->
+                    preferenceManager.sharedPreferences
+                            .edit()
+                            .putString(getString(R.string.pref_currency_key), currencies[index])
+                            .apply()
+                })
+            }.apply {
+                titleResource = R.string.currency
+                show()
+            }
+        }
     }
 
     private fun testNotification() {

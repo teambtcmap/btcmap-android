@@ -37,12 +37,12 @@ import com.squareup.picasso.Picasso
 
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MainViewModel
+import com.bubelov.coins.util.currencyCodeToName
 import com.bubelov.coins.util.openUrl
 import com.bubelov.coins.util.toLatLng
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
-import org.jetbrains.anko.alert
 import org.jetbrains.anko.longToast
 import javax.inject.Inject
 
@@ -125,7 +125,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         }
 
         model.selectedCurrency.observe(this, Observer {
-            toolbar.menu.findItem(R.id.action_currency).title = it
+            toolbar.title = getString(R.string.s_map, it!!.currencyCodeToName())
         })
 
         drawerToggle = ActionBarDrawerToggle(this, drawer_layout, toolbar, R.string.open, R.string.close)
@@ -232,27 +232,12 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         val id = item.itemId
 
         when (id) {
-            R.id.action_currency -> showCurrencyPicker()
             R.id.action_add -> model.onAddPlaceClick()
             R.id.action_search -> PlacesSearchActivity.startForResult(this, model.userLocation.value, REQUEST_FIND_PLACE)
             else -> return super.onOptionsItemSelected(item)
         }
 
         return true
-    }
-
-    private fun showCurrencyPicker() {
-        model.getCurrenciesToPlacesMap().observe(this, Observer { map ->
-            if (map != null) {
-                val currencies = map.keys.sortedBy { -map[it]!!.size }
-                val titles = currencies.map { "$it (${map[it]!!.size} ${resources.getQuantityString(R.plurals.places, map[it]!!.size).toLowerCase()})" }
-
-                alert { items(titles, onItemSelected = { _, _, index -> model.selectedCurrency.value = currencies[index] }) }.apply {
-                    titleResource = R.string.currency
-                    show()
-                }
-            }
-        })
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

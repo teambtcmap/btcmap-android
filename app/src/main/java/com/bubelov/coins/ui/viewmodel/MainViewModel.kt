@@ -20,12 +20,16 @@ import com.google.android.gms.maps.model.LatLngBounds
 import java.util.ArrayList
 import javax.inject.Inject
 import android.arch.lifecycle.Transformations
+import android.content.SharedPreferences
+import com.bubelov.coins.App
+import com.bubelov.coins.R
+import org.jetbrains.anko.defaultSharedPreferences
 
 /**
  * @author Igor Bubelov
  */
 
-class MainViewModel(app: Application) : AndroidViewModel(app) {
+class MainViewModel(val app: Application) : AndroidViewModel(app), SharedPreferences.OnSharedPreferenceChangeListener {
     @Inject internal lateinit var userRepository: UserRepository
 
     @Inject internal lateinit var notificationAreaRepository: NotificationAreaRepository
@@ -48,7 +52,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     var mapBounds = MutableLiveData<LatLngBounds>()
 
-    var selectedCurrency = MutableLiveData<String>().apply { value = "BTC" }
+    var selectedCurrency = MutableLiveData<String>()
 
     private val places: LiveData<List<Place>>
             = Transformations.switchMap(mapBounds) { placesRepository.getPlaces(it) }
@@ -70,9 +74,21 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         Injector.appComponent.inject(this)
+        updateSelectedCurrency()
+        app.defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }
 
-    fun getCurrenciesToPlacesMap() = placesRepository.getCurrenciesToPlacesMap()
+    override fun onCleared() {
+        getApplication<App>().defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        updateSelectedCurrency()
+    }
+
+    private fun updateSelectedCurrency() {
+        selectedCurrency.value = app.defaultSharedPreferences.getString(app.getString(R.string.pref_currency_key), "BTC")
+    }
 
     fun onAddPlaceClick() {
         if (userRepository.signedIn()) {
@@ -112,13 +128,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     interface Callback {
         fun signIn()
-
         fun addPlace()
-
         fun editPlace(place: Place)
-
         fun showUserProfile()
-
         fun selectPlace(place: Place)
     }
 }
