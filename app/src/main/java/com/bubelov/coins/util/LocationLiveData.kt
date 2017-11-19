@@ -12,7 +12,6 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import timber.log.Timber
 
 /**
  * @author Igor Bubelov
@@ -29,7 +28,6 @@ class LocationLiveData(context: Context, updateIntervalMillis: Long) : LiveData<
 
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult?) {
-            Timber.d("New location: $result")
             val location = result?.lastLocation
 
             if (location != null) {
@@ -47,24 +45,17 @@ class LocationLiveData(context: Context, updateIntervalMillis: Long) : LiveData<
     }
 
     override fun onActive() {
-        Timber.d("Active")
-
         if (hasLocationPermission) {
             locationProvider.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
         }
     }
 
     override fun onInactive() {
-        Timber.d("Inactive")
         locationProvider.removeLocationUpdates(locationCallback)
     }
 
     fun onLocationPermissionGranted() {
-        Timber.d("Requesting last location")
         locationProvider.lastLocation.addOnCompleteListener {
-            Timber.d("Last location is ${it.result}")
-            Timber.d("LiveData value is $value")
-
             if (value == null && it.result != null) {
                 value = it.result
             }

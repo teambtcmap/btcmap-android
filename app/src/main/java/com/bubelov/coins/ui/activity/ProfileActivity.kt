@@ -6,19 +6,17 @@ import android.os.Bundle
 import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.view.MenuItem
-import android.widget.Toast
 
 import com.bubelov.coins.R
 import com.bubelov.coins.repository.user.UserRepository
-import com.google.android.gms.auth.api.Auth
-import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection
 
 import javax.inject.Inject
 
 import kotlinx.android.synthetic.main.activity_profile.*
-import org.jetbrains.anko.alert
 
 /**
  * @author Igor Bubelov
@@ -26,8 +24,6 @@ import org.jetbrains.anko.alert
 
 class ProfileActivity : AbstractActivity(), Toolbar.OnMenuItemClickListener {
     @Inject lateinit var userRepository: UserRepository
-
-    private lateinit var googleApiClient: GoogleApiClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -38,17 +34,12 @@ class ProfileActivity : AbstractActivity(), Toolbar.OnMenuItemClickListener {
         toolbar.inflateMenu(R.menu.profile)
         toolbar.setOnMenuItemClickListener(this)
 
-        googleApiClient = GoogleApiClient.Builder(this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API)
-                .enableAutoManage(this) { connectionResult -> Toast.makeText(this@ProfileActivity, connectionResult.errorMessage, Toast.LENGTH_SHORT).show() }
-                .build()
-
         val user = userRepository.user!!
 
         if (!TextUtils.isEmpty(user.avatarUrl)) {
             Picasso.with(this).load(user.avatarUrl).into(avatar)
         } else {
-            avatar!!.setImageResource(R.drawable.ic_no_avatar)
+            avatar.setImageResource(R.drawable.ic_no_avatar)
         }
 
         if (!TextUtils.isEmpty(user.firstName)) {
@@ -76,12 +67,11 @@ class ProfileActivity : AbstractActivity(), Toolbar.OnMenuItemClickListener {
     }
 
     private fun googleSignOut() {
-        if (!googleApiClient.isConnected) {
-            alert("Couldn't connect to Google services.").show()
-            return
-        }
+        val googleSignInClient = GoogleSignIn.getClient(this, GoogleSignInOptions.DEFAULT_SIGN_IN)
 
-        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback { onSignOut() }
+        googleSignInClient.signOut().addOnCompleteListener {
+            onSignOut()
+        }
     }
 
     private fun onSignOut() {
@@ -93,8 +83,6 @@ class ProfileActivity : AbstractActivity(), Toolbar.OnMenuItemClickListener {
     companion object {
         val RESULT_SIGN_OUT = 10
 
-        fun newIntent(context: Context): Intent {
-            return Intent(context, ProfileActivity::class.java)
-        }
+        fun newIntent(context: Context): Intent = Intent(context, ProfileActivity::class.java)
     }
 }
