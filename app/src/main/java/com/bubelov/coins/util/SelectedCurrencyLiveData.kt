@@ -25,6 +25,10 @@ class SelectedCurrencyLiveData(val context: Context) : LiveData<String>(), Share
     }
 
     private fun updateSelectedCurrency() {
-        value = context.defaultSharedPreferences.getString(context.getString(R.string.pref_currency_key), "BTC")
+        value = context.defaultSharedPreferences.getString(context.getString(R.string.pref_currency_key), DEFAULT_CURRENCY)
+    }
+
+    companion object {
+        const val DEFAULT_CURRENCY = "BTC"
     }
 }

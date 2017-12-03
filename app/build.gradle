@@ -68,6 +68,7 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:$arch_components_version"
     kapt "android.arch.persistence.room:compiler:$arch_components_version"
     testImplementation "android.arch.persistence.room:testing:$arch_components_version"
+    implementation "android.arch.persistence.room:rxjava2:$arch_components_version"
     implementation "android.arch.paging:runtime:$arch_components_version-alpha3"
 
     // Google Play services split client libs

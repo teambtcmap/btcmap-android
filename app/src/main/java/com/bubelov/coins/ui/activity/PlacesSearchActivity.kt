@@ -32,7 +32,7 @@ class PlacesSearchActivity : AbstractActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_places_search)
         model = ViewModelProviders.of(this).get(PlacesSearchViewModel::class.java)
-        model.setUp(intent.getParcelableExtra(USER_LOCATION_EXTRA))
+        model.setUp(intent.getParcelableExtra(USER_LOCATION_EXTRA), intent.getStringExtra(CURRENCY_EXTRA))
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 
@@ -72,12 +72,18 @@ class PlacesSearchActivity : AbstractActivity() {
     }
 
     companion object {
-        const val USER_LOCATION_EXTRA = "user_location"
+        private const val USER_LOCATION_EXTRA = "user_location"
+
+        private const val CURRENCY_EXTRA = "currency"
 
         const val PLACE_ID_EXTRA = "place_id"
 
-        fun startForResult(activity: Activity, userLocation: Location?, requestCode: Int) {
-            val intent = Intent(activity, PlacesSearchActivity::class.java).apply { putExtra(USER_LOCATION_EXTRA, userLocation) }
+        fun startForResult(activity: Activity, userLocation: Location?, currency: String, requestCode: Int) {
+            val intent = Intent(activity, PlacesSearchActivity::class.java).apply {
+                putExtra(USER_LOCATION_EXTRA, userLocation)
+                putExtra(CURRENCY_EXTRA, currency)
+            }
+
             activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
         }
     }

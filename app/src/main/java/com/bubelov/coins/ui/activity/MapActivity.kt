@@ -24,7 +24,6 @@ import com.bubelov.coins.Constants
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.widget.PlaceDetailsView
-import com.bubelov.coins.util.Analytics
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -37,9 +36,7 @@ import com.squareup.picasso.Picasso
 
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MapViewModel
-import com.bubelov.coins.util.currencyCodeToName
-import com.bubelov.coins.util.openUrl
-import com.bubelov.coins.util.toLatLng
+import com.bubelov.coins.util.*
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
@@ -235,7 +232,7 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
 
         when (id) {
             R.id.action_add -> model.onAddPlaceClick()
-            R.id.action_search -> PlacesSearchActivity.startForResult(this, model.userLocation.value, REQUEST_FIND_PLACE)
+            R.id.action_search -> PlacesSearchActivity.startForResult(this, model.userLocation.value, model.selectedCurrency.value ?: SelectedCurrencyLiveData.DEFAULT_CURRENCY, REQUEST_FIND_PLACE)
             else -> return super.onOptionsItemSelected(item)
         }
 

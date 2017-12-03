@@ -24,24 +24,24 @@ class PlacesSearchViewModel(app: Application) : AndroidViewModel(app) {
 
     private var userLocation: Location? = null
 
+    private lateinit var currency: String
+
     val searchQuery = MutableLiveData<String>()
 
     val searchResults: LiveData<List<PlacesSearchResult>> = Transformations.switchMap(searchQuery) { query ->
-        Transformations.switchMap(placesRepository.getPlaces(query)) {
-            MutableLiveData<List<PlacesSearchResult>>().apply {
-                value = if (query.length <= MIN_QUERY_LENGTH) {
-                    emptyList()
-                } else {
-                    it.map { place ->
-                        PlacesSearchResult(
-                                placeId = place.id,
-                                placeName = place.name,
-                                distance = userLocation?.distanceTo(place.latitude, place.longitude, getDistanceUnits()),
-                                distanceUnits = getDistanceUnits().getShortName(),
-                                iconResId = placeIconsRepository.getPlaceCategoryIconResId(place.category) ?: R.drawable.ic_place
-                        )
-                    }.sortedBy { it.distance }
-                }
+        if (query.length < MIN_QUERY_LENGTH) {
+            MutableLiveData<List<PlacesSearchResult>>().apply { value = emptyList() }
+        } else {
+            Transformations.map(placesRepository.getPlaces(query)) {
+                it.filter { it.currencies.contains(currency) }.map { place ->
+                    PlacesSearchResult(
+                            placeId = place.id,
+                            placeName = place.name,
+                            distance = userLocation?.distanceTo(place.latitude, place.longitude, getDistanceUnits()),
+                            distanceUnits = getDistanceUnits().getShortName(),
+                            iconResId = placeIconsRepository.getPlaceCategoryIconResId(place.category) ?: R.drawable.ic_place
+                    )
+                }.sortedBy { it.distance }
             }
         }
     }
@@ -50,8 +50,9 @@ class PlacesSearchViewModel(app: Application) : AndroidViewModel(app) {
         appComponent().inject(this)
     }
 
-    fun setUp(userLocation: Location?) {
+    fun setUp(userLocation: Location?, currency: String) {
         this.userLocation = userLocation
+        this.currency = currency
     }
 
     private fun getDistanceUnits(): DistanceUnits {
