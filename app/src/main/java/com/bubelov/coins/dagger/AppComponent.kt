@@ -19,7 +19,7 @@ import dagger.android.AndroidInjectionModule
 interface AppComponent {
     fun inject(app: App)
 
-    fun inject(target: MainViewModel)
+    fun inject(target: MapViewModel)
     fun inject(target: ExchangeRatesViewModel)
     fun inject(target: NotificationAreaViewModel)
     fun inject(target: PlacesSearchViewModel)

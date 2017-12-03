@@ -20,16 +20,13 @@ import com.google.android.gms.maps.model.LatLngBounds
 import java.util.ArrayList
 import javax.inject.Inject
 import android.arch.lifecycle.Transformations
-import android.content.SharedPreferences
-import com.bubelov.coins.App
-import com.bubelov.coins.R
-import org.jetbrains.anko.defaultSharedPreferences
+import com.bubelov.coins.util.SelectedCurrencyLiveData
 
 /**
  * @author Igor Bubelov
  */
 
-class MainViewModel(val app: Application) : AndroidViewModel(app), SharedPreferences.OnSharedPreferenceChangeListener {
+class MapViewModel(app: Application) : AndroidViewModel(app) {
     @Inject internal lateinit var userRepository: UserRepository
 
     @Inject internal lateinit var notificationAreaRepository: NotificationAreaRepository
@@ -52,7 +49,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), SharedPrefere
 
     var mapBounds = MutableLiveData<LatLngBounds>()
 
-    var selectedCurrency = MutableLiveData<String>()
+    var selectedCurrency = SelectedCurrencyLiveData(app)
 
     private val places: LiveData<List<Place>>
             = Transformations.switchMap(mapBounds) { placesRepository.getPlaces(it) }
@@ -74,20 +71,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), SharedPrefere
 
     init {
         Injector.appComponent.inject(this)
-        updateSelectedCurrency()
-        app.defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this)
-    }
-
-    override fun onCleared() {
-        getApplication<App>().defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        updateSelectedCurrency()
-    }
-
-    private fun updateSelectedCurrency() {
-        selectedCurrency.value = app.defaultSharedPreferences.getString(app.getString(R.string.pref_currency_key), "BTC")
     }
 
     fun onAddPlaceClick() {

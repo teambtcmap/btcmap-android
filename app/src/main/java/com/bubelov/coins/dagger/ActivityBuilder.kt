@@ -12,7 +12,7 @@ import dagger.android.ContributesAndroidInjector
 @Module
 abstract class ActivityBuilder {
     @ContributesAndroidInjector(modules = arrayOf(MainActivityModule::class))
-    abstract fun contributeMainActivityInjector(): MainActivity
+    abstract fun contributeMapActivityInjector(): MapActivity
 
     @ContributesAndroidInjector(modules = arrayOf(ProfileActivityModule::class))
     abstract fun contributeProfileActivityInjector(): ProfileActivity

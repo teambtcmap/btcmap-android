@@ -29,7 +29,7 @@
         </activity>
 
         <activity
-            android:name=".ui.activity.MainActivity"
+            android:name=".ui.activity.MapActivity"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.TransparentStatusBar" />
 

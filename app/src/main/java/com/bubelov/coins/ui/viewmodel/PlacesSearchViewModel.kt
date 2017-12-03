@@ -1,10 +1,7 @@
 package com.bubelov.coins.ui.viewmodel
 
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations
+import android.arch.lifecycle.*
 import android.location.Location
 import android.preference.PreferenceManager
 
@@ -20,12 +17,12 @@ import javax.inject.Inject
  * @author Igor Bubelov
  */
 
-class PlacesSearchViewModel(application: Application) : AndroidViewModel(application) {
+class PlacesSearchViewModel(app: Application) : AndroidViewModel(app) {
     @Inject lateinit var placesRepository: PlacesRepository
 
     @Inject lateinit var placeIconsRepository: PlaceIconsRepository
 
-    var userLocation: Location? = null
+    private var userLocation: Location? = null
 
     val searchQuery = MutableLiveData<String>()
 
@@ -51,6 +48,10 @@ class PlacesSearchViewModel(application: Application) : AndroidViewModel(applica
 
     init {
         appComponent().inject(this)
+    }
+
+    fun setUp(userLocation: Location?) {
+        this.userLocation = userLocation
     }
 
     private fun getDistanceUnits(): DistanceUnits {

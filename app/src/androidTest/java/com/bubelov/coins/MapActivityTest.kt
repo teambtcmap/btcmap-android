@@ -4,7 +4,7 @@ import android.support.test.filters.LargeTest
 import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
 
-import com.bubelov.coins.ui.activity.MainActivity
+import com.bubelov.coins.ui.activity.MapActivity
 
 import org.junit.Rule
 import org.junit.Test
@@ -24,10 +24,10 @@ import android.support.test.rule.GrantPermissionRule
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class MainActivityTest {
+class MapActivityTest {
     @Rule
     @JvmField
-    val activityTestRule = ActivityTestRule(MainActivity::class.java)
+    val activityTestRule = ActivityTestRule(MapActivity::class.java)
 
     @Rule
     @JvmField

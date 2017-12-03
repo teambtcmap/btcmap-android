@@ -14,7 +14,7 @@ import android.widget.TextView
 import com.bubelov.coins.R
 import com.bubelov.coins.repository.user.SignInResult
 import com.bubelov.coins.repository.user.UserRepository
-import com.bubelov.coins.ui.activity.MainActivity
+import com.bubelov.coins.ui.activity.MapActivity
 import dagger.android.AndroidInjection
 
 import javax.inject.Inject
@@ -62,7 +62,7 @@ class SignInFragment : Fragment(), TextView.OnEditorActionListener {
         val signInResult = async { userRepository.signIn(email, password) }.await()
 
         when (signInResult) {
-            is SignInResult.Success -> startActivity(Intent(activity, MainActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) })
+            is SignInResult.Success -> startActivity(Intent(activity, MapActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) })
             is SignInResult.Error -> alert { message = signInResult.e.message ?: getString(R.string.something_went_wrong) }.show()
         }
 

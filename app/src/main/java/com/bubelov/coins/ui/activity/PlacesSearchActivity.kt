@@ -26,12 +26,13 @@ import kotlinx.android.synthetic.main.activity_places_search.*
  */
 
 class PlacesSearchActivity : AbstractActivity() {
-    private val viewModel = lazy { ViewModelProviders.of(this).get(PlacesSearchViewModel::class.java) }
+    private lateinit var model: PlacesSearchViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_places_search)
-        viewModel.value.userLocation = intent.getParcelableExtra<Location>(USER_LOCATION_EXTRA)
+        model = ViewModelProviders.of(this).get(PlacesSearchViewModel::class.java)
+        model.setUp(intent.getParcelableExtra(USER_LOCATION_EXTRA))
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 
@@ -44,14 +45,14 @@ class PlacesSearchActivity : AbstractActivity() {
         results.layoutManager = LinearLayoutManager(this)
         results.setHasFixedSize(true)
 
-        viewModel.value.searchResults.observe(this, Observer { places ->
+        model.searchResults.observe(this, Observer { places ->
             resultsAdapter.items = places!!
             resultsAdapter.notifyDataSetChanged()
         })
 
         query.addTextChangedListener(object : TextWatcherAdapter() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                viewModel.value.searchQuery.value = s.toString()
+                model.searchQuery.value = s.toString()
                 clear.visibility = if (TextUtils.isEmpty(s)) View.GONE else View.VISIBLE
             }
         })

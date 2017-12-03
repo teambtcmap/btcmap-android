@@ -36,12 +36,12 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.squareup.picasso.Picasso
 
 import com.bubelov.coins.ui.model.PlaceMarker
-import com.bubelov.coins.ui.viewmodel.MainViewModel
+import com.bubelov.coins.ui.viewmodel.MapViewModel
 import com.bubelov.coins.util.currencyCodeToName
 import com.bubelov.coins.util.openUrl
 import com.bubelov.coins.util.toLatLng
 import dagger.android.AndroidInjection
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
 import org.jetbrains.anko.longToast
 import javax.inject.Inject
@@ -50,8 +50,8 @@ import javax.inject.Inject
  * @author Igor Bubelov
  */
 
-class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener, MainViewModel.Callback {
-    private lateinit var model: MainViewModel
+class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener, MapViewModel.Callback {
+    private lateinit var model: MapViewModel
 
     private lateinit var drawerHeader: View
 
@@ -68,9 +68,9 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_map)
 
-        model = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        model = ViewModelProviders.of(this).get(MapViewModel::class.java)
         model.callback = this
 
         drawerHeader = navigation_view.getHeaderView(0)
@@ -126,6 +126,8 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         model.selectedCurrency.observe(this, Observer {
             toolbar.title = getString(R.string.s_map, it!!.currencyCodeToName())
+            toolbar.menu.findItem(R.id.action_add).isVisible = it == "BTC"
+            navigation_view.menu.findItem(R.id.action_exchange_rates).isVisible = it == "BTC"
         })
 
         drawerToggle = ActionBarDrawerToggle(this, drawer_layout, toolbar, R.string.open, R.string.close)
@@ -284,7 +286,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     private fun requestLocationPermissions() {
         ActivityCompat.requestPermissions(this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                MainActivity.REQUEST_ACCESS_LOCATION)
+                MapActivity.REQUEST_ACCESS_LOCATION)
     }
 
     override fun onMapReady(map: GoogleMap) {
@@ -337,7 +339,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     }
 
     private fun openExchangeRatesScreen() {
-        val intent = Intent(this@MainActivity, ExchangeRatesActivity::class.java)
+        val intent = Intent(this@MapActivity, ExchangeRatesActivity::class.java)
         startActivity(intent)
         analytics.logSelectContent("exchange_rates", null, "screen")
     }
@@ -410,7 +412,7 @@ class MainActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         private val MAP_DEFAULT_ZOOM = 13f
 
         fun newIntent(context: Context, placeId: Long): Intent {
-            val intent = Intent(context, MainActivity::class.java)
+            val intent = Intent(context, MapActivity::class.java)
 
             if (placeId != 0L) {
                 intent.putExtra(PLACE_ID_EXTRA, placeId)

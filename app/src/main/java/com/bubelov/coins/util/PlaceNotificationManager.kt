@@ -8,7 +8,7 @@ import android.support.v4.app.NotificationCompat
 import com.bubelov.coins.R
 import com.bubelov.coins.repository.area.NotificationAreaRepository
 import com.bubelov.coins.model.Place
-import com.bubelov.coins.ui.activity.MainActivity
+import com.bubelov.coins.ui.activity.MapActivity
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -52,7 +52,7 @@ internal constructor(
                 .setContentText(place.name)
                 .setAutoCancel(true)
 
-        val intent = MainActivity.newIntent(context, place.id)
+        val intent = MapActivity.newIntent(context, place.id)
         val pendingIntent = PendingIntent.getActivity(context, place.id.toInt(), intent, 0)
         builder.setContentIntent(pendingIntent)
 
