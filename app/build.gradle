@@ -15,7 +15,7 @@ android {
         versionName "2.0"
         resConfigs "en", "ru", "th"
 
-        buildConfigField "String", "API_URL", "\"http://192.168.1.5:3000/api/v3/\""
+        buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v3/\""
         buildConfigField "String", "GOOGLE_CLIENT_ID", GOOGLE_CLIENT_ID
 
         project.ext.set("archivesBaseName", "Coins-" + defaultConfig.versionName)
@@ -68,7 +68,6 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:$arch_components_version"
     kapt "android.arch.persistence.room:compiler:$arch_components_version"
     testImplementation "android.arch.persistence.room:testing:$arch_components_version"
-    implementation "android.arch.persistence.room:rxjava2:$arch_components_version"
     implementation "android.arch.paging:runtime:$arch_components_version-alpha3"
 
     // Google Play services split client libs

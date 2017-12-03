@@ -60,6 +60,32 @@ class PlaceDetailsView(context: Context, attrs: AttributeSet) : FrameLayout(cont
     fun setPlace(place: Place) {
         this.place = place
 
+        if (place.openedClaims > 0 && place.closedClaims == 0) {
+            check_mark.visibility = VISIBLE
+        } else {
+            check_mark.visibility = GONE
+        }
+
+        if (place.closedClaims > 0) {
+            warning.visibility = VISIBLE
+        } else {
+            warning.visibility = GONE
+        }
+
+        if (place.openedClaims > 0) {
+            opened_claims.visibility = VISIBLE
+            opened_claims.text = resources.getQuantityString(R.plurals.confirmed_by_d_users, place.openedClaims, place.openedClaims)
+        } else {
+            opened_claims.visibility = GONE
+        }
+
+        if (place.closedClaims > 0) {
+            closed_claims.visibility = VISIBLE
+            closed_claims.text = resources.getQuantityString(R.plurals.marked_as_closed_by_d_users, place.closedClaims, place.closedClaims)
+        } else {
+            closed_claims.visibility = GONE
+        }
+
         if (TextUtils.isEmpty(place.name)) {
             name.setText(R.string.name_unknown)
             toolbar.setTitle(R.string.name_unknown)
