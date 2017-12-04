@@ -12,6 +12,7 @@ import com.bubelov.coins.R
 import com.bubelov.coins.db.sync.DatabaseSync
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.synclogs.SyncLogsRepository
+import com.bubelov.coins.ui.activity.AbstractActivity
 import com.bubelov.coins.util.PlaceNotificationManager
 import dagger.android.AndroidInjection
 import org.jetbrains.anko.alert
@@ -93,9 +94,9 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
     }
 
     private fun showCurrencySelector() {
-        placesRepository.getCurrenciesToPlacesMap().observeForever { map ->
+        placesRepository.getCurrenciesToPlacesMap().observe(activity as AbstractActivity, android.arch.lifecycle.Observer { map ->
             if (map == null) {
-                return@observeForever
+                return@Observer
             }
 
             val currencies = map.keys.sortedBy { -map[it]!!.size }
@@ -112,7 +113,7 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
                 titleResource = R.string.currency
                 show()
             }
-        }
+        })
     }
 
     private fun testNotification() {
