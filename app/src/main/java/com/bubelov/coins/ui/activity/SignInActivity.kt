@@ -58,11 +58,11 @@ class SignInActivity : AbstractActivity(), GoogleApiClient.OnConnectionFailedLis
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-        if (requestCode == REQUEST_GOOGLE_SIGN_IN) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_GOOGLE_SIGN_IN && resultCode == Activity.RESULT_OK) {
             signIn(GoogleSignIn.getSignedInAccountFromIntent(data).result.idToken!!)
-        } else {
-            super.onActivityResult(requestCode, resultCode, data)
         }
     }
 
