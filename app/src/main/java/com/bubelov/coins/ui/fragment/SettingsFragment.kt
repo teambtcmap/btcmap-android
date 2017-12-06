@@ -1,5 +1,6 @@
 package com.bubelov.coins.ui.fragment
 
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -9,28 +10,18 @@ import android.preference.PreferenceFragment
 import android.preference.PreferenceScreen
 import android.support.v7.app.AppCompatActivity
 import com.bubelov.coins.R
-import com.bubelov.coins.db.sync.DatabaseSync
-import com.bubelov.coins.repository.place.PlacesRepository
-import com.bubelov.coins.repository.synclogs.SyncLogsRepository
-import com.bubelov.coins.ui.activity.AbstractActivity
-import com.bubelov.coins.util.PlaceNotificationManager
+import com.bubelov.coins.ui.activity.SettingsActivity
+import com.bubelov.coins.ui.viewmodel.SettingsViewModel
 import dagger.android.AndroidInjection
 import org.jetbrains.anko.alert
 import java.util.*
-import javax.inject.Inject
 
 /**
  * @author Igor Bubelov
  */
 
 class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPreferenceChangeListener {
-    @Inject internal lateinit var placesRepository: PlacesRepository
-
-    @Inject internal lateinit var syncLogsRepository: SyncLogsRepository
-
-    @Inject internal lateinit var placeNotificationsManager: PlaceNotificationManager
-
-    @Inject lateinit var databaseSync: DatabaseSync
+    private lateinit var model: SettingsViewModel
 
     override fun onAttach(context: Context) {
         AndroidInjection.inject(this)
@@ -39,6 +30,7 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        model = ViewModelProviders.of(getSettingsActivity())[SettingsViewModel::class.java]
         addPreferencesFromResource(R.xml.preferences)
         updateSummaries()
     }
@@ -56,7 +48,7 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
     override fun onPreferenceTreeClick(preferenceScreen: PreferenceScreen, preference: Preference): Boolean {
         when (preference.key) {
             getString(R.string.pref_currency_key) -> showCurrencySelector()
-            getString(R.string.pref_sync_database_key) -> databaseSync.start()
+            getString(R.string.pref_sync_database_key) -> model.databaseSync.start()
             getString(R.string.pref_show_sync_log_key) -> showSyncLog()
             getString(R.string.pref_test_notification_key) -> testNotification()
         }
@@ -69,7 +61,7 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
     }
 
     private fun showSyncLog() {
-        val logs = syncLogsRepository.syncLogs.reversed().map { "Date: ${Date(it.time)}, Affected places: ${it.affectedPlaces}" }
+        val logs = model.syncLogsRepository.syncLogs.reversed().map { "Date: ${Date(it.time)}, Affected places: ${it.affectedPlaces}" }
 
         if (logs.isEmpty()) {
             alert(message = "Logs are empty").show()
@@ -94,7 +86,7 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
     }
 
     private fun showCurrencySelector() {
-        placesRepository.getCurrenciesToPlacesMap().observe(activity as AbstractActivity, android.arch.lifecycle.Observer { map ->
+        model.placesRepository.getCurrenciesToPlacesMap().observe(getSettingsActivity(), android.arch.lifecycle.Observer { map ->
             if (map == null) {
                 return@Observer
             }
@@ -117,10 +109,12 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
     }
 
     private fun testNotification() {
-        placesRepository.getRandomPlace().observe(activity as AppCompatActivity, android.arch.lifecycle.Observer {
+        model.placesRepository.getRandomPlace().observe(activity as AppCompatActivity, android.arch.lifecycle.Observer {
             if (it != null) {
-                placeNotificationsManager.notifyUser(it)
+                model.placeNotificationsManager.notifyUser(it)
             }
         })
     }
+
+    private fun getSettingsActivity() = activity as SettingsActivity
 }
