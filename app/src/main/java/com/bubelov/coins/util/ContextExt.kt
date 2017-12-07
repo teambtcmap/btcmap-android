@@ -3,12 +3,13 @@ package com.bubelov.coins.util
 import android.content.Context
 import android.net.Uri
 import android.support.customtabs.CustomTabsIntent
+import timber.log.Timber
 
 /**
  * @author Igor Bubelov
  */
 
-fun Context.openUrl(url: String) {
+fun Context.openUrl(url: String): Boolean {
     val urlBuilder = StringBuilder()
 
     if (url.startsWith("www.") || !url.contains("http")) {
@@ -20,5 +21,12 @@ fun Context.openUrl(url: String) {
     intentBuilder.setStartAnimations(this, android.R.anim.fade_in, android.R.anim.fade_out)
     intentBuilder.setExitAnimations(this, android.R.anim.fade_in, android.R.anim.fade_out)
     val customTabsIntent = intentBuilder.build()
-    customTabsIntent.launchUrl(this, Uri.parse(url))
+
+    return try {
+        customTabsIntent.launchUrl(this, Uri.parse(urlBuilder.toString()))
+        true
+    } catch (e : Exception) {
+        Timber.e(e)
+        false
+    }
 }

@@ -14,6 +14,7 @@ import com.bubelov.coins.util.openUrl
 
 import kotlinx.android.synthetic.main.widget_place_details.view.*
 import org.jetbrains.anko.share
+import org.jetbrains.anko.toast
 
 /**
  * @author Igor Bubelov
@@ -109,7 +110,11 @@ class PlaceDetailsView(context: Context, attrs: AttributeSet) : FrameLayout(cont
             website.text = place.website
             website.setTextColor(ContextCompat.getColor(context, R.color.primary_dark))
             website.paintFlags = website.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-            website.setOnClickListener { context.openUrl(place.website) }
+            website.setOnClickListener {
+                if (!context.openUrl(place.website)) {
+                    context.toast("Can't open url: ${place.website}")
+                }
+            }
         }
 
         if (TextUtils.isEmpty(place.description)) {
