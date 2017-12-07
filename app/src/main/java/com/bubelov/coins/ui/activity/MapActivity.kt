@@ -2,6 +2,7 @@ package com.bubelov.coins.ui.activity
 
 import android.Manifest
 import android.app.Activity
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
@@ -56,7 +57,7 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
 
     private var map: GoogleMap? = null
 
-    private lateinit var placesManager: ClusterManager<PlaceMarker>
+    private val placesManager = MutableLiveData<ClusterManager<PlaceMarker>>()
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
 
@@ -132,10 +133,14 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
 
         updateDrawerHeader()
 
-        model.placeMarkers.observe(this, Observer { markers ->
-            placesManager.clearItems()
-            placesManager.addItems(markers)
-            placesManager.cluster()
+        placesManager.observe(this, Observer { placesManager ->
+            if (placesManager != null) {
+                model.placeMarkers.observe(this, Observer { markers ->
+                    placesManager.clearItems()
+                    placesManager.addItems(markers)
+                    placesManager.cluster()
+                })
+            }
         })
 
         fab.setOnClickListener {
@@ -358,7 +363,7 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
     }
 
     private fun initClustering() {
-        placesManager = ClusterManager<PlaceMarker>(this, map)
+        val placesManager = ClusterManager<PlaceMarker>(this, map)
         placesManager.setAnimation(false)
         val renderer = PlacesRenderer(this, map!!, placesManager)
         renderer.setAnimation(false)
@@ -376,6 +381,8 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
             model.selectedPlaceId.value = 0
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN)
         }
+
+        this.placesManager.value = placesManager
     }
 
     private inner class PlacesRenderer internal constructor(context: Context, map: GoogleMap, clusterManager: ClusterManager<PlaceMarker>) : DefaultClusterRenderer<PlaceMarker>(context, map, clusterManager) {

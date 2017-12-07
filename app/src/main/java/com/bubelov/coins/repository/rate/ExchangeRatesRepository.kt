@@ -14,7 +14,7 @@ class ExchangeRatesRepository @Inject constructor(
         coinbase: Coinbase,
         winkdex: Winkdex
 ) {
-    private val sources = listOf(bitcoinAverage, bitstamp, coinbase, winkdex)
+    private val sources = listOf(bitstamp, coinbase, winkdex)
 
     fun getExchangeRatesSources(baseCurrency: String, targetCurrency: String)
             = sources.filter { it.getSupportedCurrencyPairs().contains(Pair(baseCurrency, targetCurrency)) }
