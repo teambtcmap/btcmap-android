@@ -46,7 +46,7 @@ class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
         sign_up.setOnClickListener { signUp(email.text.toString(), password.text.toString(), first_name.text.toString(), last_name.text.toString()) }
     }
 
-    override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean {
+    override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
         if (actionId == EditorInfo.IME_ACTION_GO) {
             signUp(email.text.toString(), password.text.toString(), first_name.text.toString(), last_name.text.toString())
             return true

@@ -46,7 +46,7 @@ class SignInFragment : Fragment(), TextView.OnEditorActionListener {
         sign_in.setOnClickListener { signInNew(email.text.toString(), password.text.toString()) }
     }
 
-    override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean {
+    override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
         if (actionId == EditorInfo.IME_ACTION_GO) {
             signInNew(email.text.toString(), password.text.toString())
             return true
