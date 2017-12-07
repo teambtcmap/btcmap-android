@@ -11,8 +11,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 36
-        versionName "2.0.1"
+        versionCode 37
+        versionName "2.0.2"
         resConfigs "en", "ru", "th"
 
         buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v3/\""
