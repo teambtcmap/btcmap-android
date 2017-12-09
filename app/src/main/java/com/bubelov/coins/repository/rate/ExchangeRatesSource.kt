@@ -1,6 +1,7 @@
 package com.bubelov.coins.repository.rate
 
-import com.bubelov.coins.model.ExchangeRate
+import com.bubelov.coins.model.CurrencyPair
+import com.bubelov.coins.repository.Result
 
 /**
  * @author Igor Bubelov
@@ -9,7 +10,7 @@ import com.bubelov.coins.model.ExchangeRate
 interface ExchangeRatesSource {
     val name: String
 
-    fun getSupportedCurrencyPairs(): Collection<Pair<String, String>>
+    fun getCurrencyPairs(): Collection<CurrencyPair>
 
-    fun getExchangeRate(baseCurrency: String, targetCurrency: String): ExchangeRate
+    fun getExchangeRate(pair: CurrencyPair): Result<Double>
 }

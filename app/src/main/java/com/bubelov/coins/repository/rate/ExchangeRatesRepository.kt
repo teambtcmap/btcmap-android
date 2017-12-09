@@ -1,5 +1,6 @@
 package com.bubelov.coins.repository.rate
 
+import com.bubelov.coins.model.CurrencyPair
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,8 +15,8 @@ class ExchangeRatesRepository @Inject constructor(
         coinbase: Coinbase,
         winkdex: Winkdex
 ) {
-    private val sources = listOf(bitstamp, coinbase, winkdex)
+    private val sources = listOf(bitcoinAverage, bitstamp, coinbase, winkdex)
 
-    fun getExchangeRatesSources(baseCurrency: String, targetCurrency: String)
-            = sources.filter { it.getSupportedCurrencyPairs().contains(Pair(baseCurrency, targetCurrency)) }
+    fun getExchangeRatesSources(currencyPair: CurrencyPair)
+            = sources.filter { it.getCurrencyPairs().contains(currencyPair) }
 }

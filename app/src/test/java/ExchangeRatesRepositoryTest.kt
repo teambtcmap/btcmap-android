@@ -1,3 +1,6 @@
+import com.bubelov.coins.model.CurrencyPair
+import com.bubelov.coins.repository.Result
+import com.bubelov.coins.repository.rate.Coinbase
 import com.bubelov.coins.repository.rate.ExchangeRatesRepository
 import org.junit.Assert
 import org.junit.Before
@@ -11,6 +14,8 @@ import javax.inject.Inject
 class ExchangeRatesRepositoryTest : BaseRobolectricTest() {
     @Inject lateinit var repository: ExchangeRatesRepository
 
+    @Inject lateinit var coinbase: Coinbase
+
     @Before
     fun init() {
         TestInjector.testComponent.inject(this)
@@ -18,6 +23,13 @@ class ExchangeRatesRepositoryTest : BaseRobolectricTest() {
 
     @Test
     fun hasUsdBtcSources() {
-        Assert.assertFalse(repository.getExchangeRatesSources("USD", "BTC").isEmpty())
+        Assert.assertFalse(repository.getExchangeRatesSources(CurrencyPair.BTC_USD).isEmpty())
+    }
+
+    @Test
+    fun coinbaseIsWorking() {
+        val result = coinbase.getExchangeRate(CurrencyPair.BTC_USD)
+        System.out.println(result)
+        Assert.assertTrue(result is Result.Success)
     }
 }

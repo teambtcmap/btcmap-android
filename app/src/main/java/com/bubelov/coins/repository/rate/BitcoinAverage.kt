@@ -1,7 +1,8 @@
 package com.bubelov.coins.repository.rate
 
 import com.bubelov.coins.api.rates.BitcoinAverageApi
-import com.bubelov.coins.model.ExchangeRate
+import com.bubelov.coins.model.CurrencyPair
+import com.bubelov.coins.repository.Result
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -19,27 +20,22 @@ class BitcoinAverage @Inject constructor(httpClient: OkHttpClient, gson: Gson) :
 
     val api: BitcoinAverageApi = Retrofit.Builder()
             .client(httpClient)
-            .baseUrl("https://api.bitcoinaverage.com/")
+            .baseUrl("https://apiv2.bitcoinaverage.com/")
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(BitcoinAverageApi::class.java)
 
-    override fun getSupportedCurrencyPairs(): Collection<Pair<String, String>> {
-        return setOf(Pair("USD", "BTC"))
+    override fun getCurrencyPairs(): Collection<CurrencyPair> {
+        return listOf(CurrencyPair.BTC_USD)
     }
 
-    override fun getExchangeRate(baseCurrency: String, targetCurrency: String): ExchangeRate {
-        if (baseCurrency == "USD" && targetCurrency == "BTC") {
-            val rate = api.getUsdTicker().execute().body()!!.last.toDouble()
-
-            return ExchangeRate(
-                    id = 0,
-                    source = name,
-                    baseCurrencyCode = baseCurrency,
-                    targetCurrencyCode = targetCurrency,
-                    rate = rate,
-                    date = System.currentTimeMillis()
-            )
+    override fun getExchangeRate(pair: CurrencyPair): Result<Double> {
+        if (pair == CurrencyPair.BTC_USD) {
+            return try {
+                Result.Success(api.getUsdTicker().execute().body()!!.getAsJsonObject("BTCUSD").get("last").asDouble)
+            } catch (e: Exception) {
+                Result.Error(e)
+            }
         } else {
             throw IllegalArgumentException()
         }

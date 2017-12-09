@@ -1,5 +1,6 @@
 package com.bubelov.coins.api.rates
 
+import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.http.GET
 
@@ -8,6 +9,6 @@ import retrofit2.http.GET
  */
 
 interface BitcoinAverageApi {
-    @GET("ticker/global/USD")
-    fun getUsdTicker(): Call<BitcoinAverageTickerResponse>
+    @GET("indices/global/ticker/short?crypto=BTC&fiat=USD")
+    fun getUsdTicker(): Call<JsonObject>
 }
