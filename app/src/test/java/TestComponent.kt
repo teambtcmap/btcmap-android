@@ -9,7 +9,7 @@ import javax.inject.Singleton
  */
 
 @Singleton
-@Component(modules = arrayOf(AppModule::class, DatabaseTestModule::class))
+@Component(modules = [AppModule::class, DatabaseTestModule::class])
 interface TestComponent {
     fun inject(target: ExchangeRatesRepositoryTest)
     fun inject(target: NotificationAreaRepositoryTest)

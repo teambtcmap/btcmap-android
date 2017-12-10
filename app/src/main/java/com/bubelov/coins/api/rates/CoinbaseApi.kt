@@ -9,5 +9,9 @@ import retrofit2.http.GET
 
 interface CoinbaseApi {
     @GET("exchange-rates?currency=BTC")
-    fun getExchangeRates(): Call<CoinbaseResponse>
+    fun getExchangeRates(): Call<Response>
 }
+
+data class Response (val data: Data)
+
+data class Data (val currency: String, val rates: Map<String, Double>)

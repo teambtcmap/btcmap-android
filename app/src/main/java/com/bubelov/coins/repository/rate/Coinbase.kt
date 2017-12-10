@@ -26,13 +26,13 @@ class Coinbase @Inject constructor(httpClient: OkHttpClient, gson: Gson) : Excha
             .create(CoinbaseApi::class.java)
 
     override fun getCurrencyPairs(): Collection<CurrencyPair> {
-        return listOf(CurrencyPair.BTC_USD)
+        return listOf(CurrencyPair.BTC_USD, CurrencyPair.BTC_EUR, CurrencyPair.BTC_GBP)
     }
 
     override fun getExchangeRate(pair: CurrencyPair): Result<Double> {
-        if (pair == CurrencyPair.BTC_USD) {
+        if (pair == CurrencyPair.BTC_USD || pair == CurrencyPair.BTC_EUR || pair == CurrencyPair.BTC_GBP) {
             return try {
-                Result.Success(api.getExchangeRates().execute().body()!!.data!!.rates!!["USD"]!!)
+                Result.Success(api.getExchangeRates().execute().body()!!.data.rates[pair.displayCurrency]!!)
             } catch (e: Exception) {
                 Result.Error(e)
             }

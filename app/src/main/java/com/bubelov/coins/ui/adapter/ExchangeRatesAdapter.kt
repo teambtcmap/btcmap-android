@@ -8,8 +8,6 @@ import android.view.ViewGroup
 import com.bubelov.coins.R
 import com.bubelov.coins.ui.model.ExchangeRateQuery
 
-import java.util.Locale
-
 import kotlinx.android.synthetic.main.list_item_exchange_rate.view.*
 
 /**
@@ -39,10 +37,10 @@ class ExchangeRatesAdapter : RecyclerView.Adapter<ExchangeRatesAdapter.ViewHolde
                     itemView.exchange_name.text = item.source
                     itemView.price.text = "fetching..."
                 }
-                is ExchangeRateQuery.ExchangeRate -> {
+                is ExchangeRateQuery.Success -> {
                     itemView.first_letter.text = item.source.substring(0, 1)
                     itemView.exchange_name.text = item.source
-                    itemView.price.text = String.format(Locale.US, "$%.2f", item.rate)
+                    itemView.price.text = item.rate
                 }
                 is ExchangeRateQuery.Error -> {
                     itemView.first_letter.text = item.source.substring(0, 1)

@@ -1,10 +1,6 @@
 package com.bubelov.coins.ui.viewmodel
 
-import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations
+import android.arch.lifecycle.*
 import com.bubelov.coins.dagger.Injector
 import com.bubelov.coins.model.CurrencyPair
 import com.bubelov.coins.repository.Result
@@ -12,14 +8,14 @@ import com.bubelov.coins.repository.rate.ExchangeRatesRepository
 import com.bubelov.coins.ui.model.ExchangeRateQuery
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import timber.log.Timber
+import java.text.NumberFormat
 import javax.inject.Inject
 
 /**
  * @author Igor Bubelov
  */
 
-class ExchangeRatesViewModel(application: Application) : AndroidViewModel(application) {
+class ExchangeRatesViewModel : ViewModel() {
     @Inject internal lateinit var repository: ExchangeRatesRepository
 
     val pair = MutableLiveData<CurrencyPair>()
@@ -36,10 +32,8 @@ class ExchangeRatesViewModel(application: Application) : AndroidViewModel(applic
                     invokeOnCompletion {
                         result.postValue(rates.mapIndexed { resultIndex, result ->
                             when (result) {
-                                is Result.Success -> ExchangeRateQuery.ExchangeRate(sources[resultIndex].name, pair.displayCurrency, result.data)
-                                is Result.Error -> {
-                                    Timber.w(result.e)
-                                    ExchangeRateQuery.Error(sources[resultIndex].name)}
+                                is Result.Success -> ExchangeRateQuery.Success(sources[resultIndex].name, rateFormat.format(result.data))
+                                is Result.Error -> ExchangeRateQuery.Error(sources[resultIndex].name)
                                 null -> ExchangeRateQuery.Loading(sources[resultIndex].name)
                             }
                         })
@@ -51,6 +45,11 @@ class ExchangeRatesViewModel(application: Application) : AndroidViewModel(applic
         }
 
         result
+    }
+
+    private val rateFormat = NumberFormat.getNumberInstance().apply {
+        minimumFractionDigits = 2
+        maximumFractionDigits = 2
     }
 
     init {
