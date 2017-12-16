@@ -114,6 +114,5 @@ class MapViewModel(app: Application) : AndroidViewModel(app) {
         fun addPlace()
         fun editPlace(place: Place)
         fun showUserProfile()
-        fun selectPlace(place: Place)
     }
 }

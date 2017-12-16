@@ -158,7 +158,12 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
         place_details.setOnClickListener {
             if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                analytics.logViewContent(place_details.place.id.toString(), place_details.place.name, "place")
+
+                val selectedPlace = model.selectedPlace.value
+
+                if (selectedPlace != null) {
+                    analytics.logViewContent(selectedPlace.id.toString(), selectedPlace.name, "place")
+                }
             } else {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
             }
@@ -166,7 +171,10 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
 
         model.selectedPlace.observe(this, Observer {
             if (it != null) {
-                selectPlace(it)
+                map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), MAP_DEFAULT_ZOOM))
+                place_details.setPlace(it)
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                analytics.logSelectContent(it.id.toString(), it.name, "place")
             }
         })
 
@@ -276,13 +284,6 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
 
     override fun showUserProfile() {
         startActivityForResult(ProfileActivity.newIntent(this), REQUEST_PROFILE)
-    }
-
-    override fun selectPlace(place: Place) {
-        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(place.latitude, place.longitude), MAP_DEFAULT_ZOOM))
-        place_details.setPlace(place)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        analytics.logSelectContent(place.id.toString(), place.name, "place")
     }
 
     private fun requestLocationPermissions() {
