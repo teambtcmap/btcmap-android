@@ -33,8 +33,8 @@
     <string name="share_place_message_text">Это место принимает криптовалюту: %1$s</string>
     <string name="saa_distance">Расстояние:</string>
     <string name="search">Поиск</string>
-    <string name="kilometers_short">%1$.2f км</string>
-    <string name="miles_short">%1$.2f мил.</string>
+    <string name="kilometers_short">км</string>
+    <string name="miles_short">мил.</string>
     <string name="description">Описание</string>
     <string name="opening_hours">Время работы</string>
     <string name="accepted_currencies">Валюты</string>

@@ -266,6 +266,7 @@
                     android:layout_height="wrap_content"
                     android:background="?selectableItemBackground"
                     android:clickable="true"
+                    android:focusable="true"
                     android:padding="8dp"
                     android:text="@string/suggest_an_edit"
                     android:textAllCaps="true"

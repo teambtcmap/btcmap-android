@@ -33,8 +33,8 @@
     <string name="share_place_message_text">This place accept cryptocurrency: %1$s</string>
     <string name="saa_distance">Distance:</string>
     <string name="search">ค้นหา</string>
-    <string name="kilometers_short">%1$.2f km</string>
-    <string name="miles_short">%1$.2f mi</string>
+    <string name="kilometers_short">km</string>
+    <string name="miles_short">mi</string>
     <string name="description">Description:</string>
     <string name="opening_hours">Opening hours:</string>
     <string name="accepted_currencies">Accepted currencies:</string>

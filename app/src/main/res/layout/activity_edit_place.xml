@@ -39,7 +39,7 @@
                     android:id="@+id/name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:capitalize="sentences"
+                    android:inputType="textCapSentences"
                     android:hint="@string/name"
                     android:imeOptions="actionNext"
                     android:singleLine="true" />
@@ -127,7 +127,6 @@
                     android:id="@+id/opening_hours"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:capitalize="sentences"
                     android:hint="@string/opening_hours"
                     android:singleLine="true" />
 

@@ -13,7 +13,6 @@ android {
         targetSdkVersion 26
         versionCode 37
         versionName "2.0.2"
-        resConfigs "en", "ru", "th"
 
         buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v3/\""
         buildConfigField "String", "GOOGLE_CLIENT_ID", GOOGLE_CLIENT_ID
@@ -74,7 +73,7 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:$arch_components_version"
     kapt "android.arch.persistence.room:compiler:$arch_components_version"
     testImplementation "android.arch.persistence.room:testing:$arch_components_version"
-    implementation "android.arch.paging:runtime:$arch_components_version-alpha3"
+    implementation "android.arch.paging:runtime:$arch_components_version-alpha4-1"
 
     // Google Play services split client libs
     implementation "com.google.android.gms:play-services-gcm:$play_services_version"
@@ -105,10 +104,10 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.0'
 
     // Logging
-    implementation 'com.jakewharton.timber:timber:4.5.1'
+    implementation 'com.jakewharton.timber:timber:4.6.0'
 
     // Crash reporting
-    compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
         transitive = true
     }
 
@@ -128,7 +127,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    androidTestImplementation('com.android.support.test.espresso:espresso-contrib:3.0.0') {
+    androidTestImplementation('com.android.support.test.espresso:espresso-contrib:3.0.1') {
         exclude group: 'com.android.support', module: 'support-annotations'
         exclude group: 'com.android.support', module: 'appcompat-v7'
         exclude group: 'com.android.support', module: 'support-v4'
