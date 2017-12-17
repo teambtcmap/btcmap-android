@@ -10,8 +10,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.ActivityOptionsCompat
@@ -29,7 +27,6 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
@@ -55,7 +52,7 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
 
     private lateinit var drawerToggle: ActionBarDrawerToggle
 
-    private var map: GoogleMap? = null
+    private var map = MutableLiveData<GoogleMap>()
 
     private val placesManager = MutableLiveData<ClusterManager<PlaceMarker>>()
 
@@ -89,7 +86,7 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
             }
         })
 
-        Handler(Looper.getMainLooper()).postDelayed({ bottomSheetBehavior.setPeekHeight(place_details.headerHeight) }, 1000)
+        bottomSheetBehavior.peekHeight = resources.getDimensionPixelSize(R.dimen.map_header_height)
 
         place_details.callback = object : PlaceDetailsView.Callback {
             override fun onEditPlaceClick(place: Place) {
@@ -145,10 +142,11 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
 
         fab.setOnClickListener {
             if (model.userLocation.hasLocationPermission) {
+                val map = map.value
                 val location = model.userLocation.value
 
-                if (location != null) {
-                    map?.moveCamera(CameraUpdateFactory.newLatLng(location.toLatLng()))
+                if (map != null && location != null) {
+                    map.animateCamera(CameraUpdateFactory.newLatLng(location.toLatLng()))
                 }
             } else {
                 requestLocationPermissions()
@@ -171,24 +169,27 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
 
         model.selectedPlace.observe(this, Observer {
             if (it != null) {
-                map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), MAP_DEFAULT_ZOOM))
                 place_details.setPlace(it)
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                 analytics.logSelectContent(it.id.toString(), it.name, "place")
             }
         })
 
-        model.userLocation.observe(this, Observer {
-            it!!
+        model.userLocation.observe(this, Observer { location ->
+            if (location == null) {
+                return@Observer
+            }
 
-            model.onNewLocation(it)
-            val map = this.map
+            model.onNewLocation(location)
+            val map = this.map.value
 
             if (map != null && model.moveToNextLocation) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(it.toLatLng(), MAP_DEFAULT_ZOOM))
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(location.toLatLng(), MAP_DEFAULT_ZOOM))
                 model.moveToNextLocation = false
             }
         })
+
+        handleIntent(intent)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -275,11 +276,11 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
     }
 
     override fun addPlace() {
-        EditPlaceActivity.startForResult(this, null, map!!.cameraPosition, REQUEST_ADD_PLACE)
+        EditPlaceActivity.startForResult(this, null, map.value!!.cameraPosition, REQUEST_ADD_PLACE)
     }
 
     override fun editPlace(place: Place) {
-        EditPlaceActivity.startForResult(this, place, map!!.cameraPosition, REQUEST_EDIT_PLACE)
+        EditPlaceActivity.startForResult(this, place, map.value!!.cameraPosition, REQUEST_EDIT_PLACE)
     }
 
     override fun showUserProfile() {
@@ -293,14 +294,14 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
     }
 
     override fun onMapReady(map: GoogleMap) {
-        this.map = map
+        this.map.value = map
+
         map.uiSettings.isMyLocationButtonEnabled = false
         map.uiSettings.isZoomControlsEnabled = false
         map.uiSettings.isCompassEnabled = false
         map.uiSettings.isMapToolbarEnabled = false
 
-        initClustering()
-        handleIntent(intent)
+        initClustering(map)
 
         if (!model.userLocation.hasLocationPermission) {
             requestLocationPermissions()
@@ -336,6 +337,19 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
     private fun handleIntent(intent: Intent) {
         if (intent.hasExtra(PLACE_ID_EXTRA)) {
             model.selectedPlaceId.value = intent.getLongExtra(PLACE_ID_EXTRA, 0)
+
+            model.selectedPlace.observe(this, object: Observer<Place?> {
+                override fun onChanged(place: Place?) {
+                    if (place != null) {
+                        map.observe(this@MapActivity, Observer { map ->
+                            model.moveToNextLocation = false
+                            map?.moveCamera(CameraUpdateFactory.newLatLngZoom(place.toLatLng(), MAP_DEFAULT_ZOOM))
+                        })
+                    }
+
+                    model.selectedPlace.removeObserver(this)
+                }
+            })
         }
 
         updateDrawerHeader()
@@ -348,7 +362,7 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
     }
 
     private fun openNotificationAreaScreen() {
-        val intent = NotificationAreaActivity.newIntent(this, map!!.cameraPosition)
+        val intent = NotificationAreaActivity.newIntent(this, map.value!!.cameraPosition)
         startActivity(intent)
         analytics.logSelectContent("notification_area", null, "screen")
     }
@@ -363,22 +377,22 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
         startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle())
     }
 
-    private fun initClustering() {
+    private fun initClustering(map: GoogleMap) {
         val placesManager = ClusterManager<PlaceMarker>(this, map)
         placesManager.setAnimation(false)
-        val renderer = PlacesRenderer(this, map!!, placesManager)
+        val renderer = PlacesRenderer(this, map, placesManager)
         renderer.setAnimation(false)
         placesManager.renderer = renderer
         renderer.setOnClusterItemClickListener(ClusterItemClickListener())
 
-        map!!.setOnCameraIdleListener {
+        map.setOnCameraIdleListener {
             placesManager.onCameraIdle()
-            model.mapBounds.value = map!!.projection.visibleRegion.latLngBounds
+            model.mapBounds.value = map.projection.visibleRegion.latLngBounds
         }
 
-        map!!.setOnMarkerClickListener(placesManager)
+        map.setOnMarkerClickListener(placesManager)
 
-        map!!.setOnMapClickListener {
+        map.setOnMapClickListener {
             model.selectedPlaceId.value = 0
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN)
         }
@@ -399,7 +413,7 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
     private inner class ClusterItemClickListener : ClusterManager.OnClusterItemClickListener<PlaceMarker> {
         override fun onClusterItemClick(placeMarker: PlaceMarker): Boolean {
             model.selectedPlaceId.value = placeMarker.placeId
-            return false
+            return true
         }
     }
 

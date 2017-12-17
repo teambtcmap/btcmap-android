@@ -2,4 +2,5 @@
 
 <resources>
     <dimen name="drawer_header_top_padding">0dp</dimen>
+    <dimen name="map_header_height">80dp</dimen>
 </resources>

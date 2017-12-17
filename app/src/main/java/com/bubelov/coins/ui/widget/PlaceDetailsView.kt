@@ -26,10 +26,10 @@ class PlaceDetailsView(context: Context, attrs: AttributeSet) : FrameLayout(cont
     init {
         View.inflate(context, R.layout.widget_place_details, this)
 
-        toolbar.setNavigationOnClickListener { callback?.onDismissed() }
-        toolbar.inflateMenu(R.menu.place_details)
+        place_summary_toolbar.setNavigationOnClickListener { callback?.onDismissed() }
+        place_summary_toolbar.inflateMenu(R.menu.place_details)
 
-        toolbar.setOnMenuItemClickListener { item ->
+        place_summary_toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_share -> {
                     context.share(resources.getString(R.string.share_place_message_text, String.format("https://www.google.com/maps/@%s,%s,19z?hl=en", place.latitude, place.longitude)), resources.getString(R.string.share_place_message_title))
@@ -47,14 +47,15 @@ class PlaceDetailsView(context: Context, attrs: AttributeSet) : FrameLayout(cont
             field = value
 
             if (value) {
-                header_switcher.displayedChild = 1
+                map_header_shadow.visibility = View.GONE
+                map_header.visibility = View.GONE
+                place_summary_toolbar.visibility = View.VISIBLE
             } else {
-                header_switcher.displayedChild = 0
+                map_header_shadow.visibility = View.VISIBLE
+                map_header.visibility = View.VISIBLE
+                place_summary_toolbar.visibility = View.GONE
             }
         }
-
-    val headerHeight: Int
-        get() = header_switcher.height
 
     var callback: Callback? = null
 
@@ -89,10 +90,10 @@ class PlaceDetailsView(context: Context, attrs: AttributeSet) : FrameLayout(cont
 
         if (TextUtils.isEmpty(place.name)) {
             name.setText(R.string.name_unknown)
-            toolbar.setTitle(R.string.name_unknown)
+            place_summary_toolbar.setTitle(R.string.name_unknown)
         } else {
             name.text = place.name
-            toolbar.title = place.name
+            place_summary_toolbar.title = place.name
         }
 
         if (TextUtils.isEmpty(place.phone)) {
