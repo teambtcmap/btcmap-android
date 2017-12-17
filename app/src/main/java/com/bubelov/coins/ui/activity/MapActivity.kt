@@ -362,18 +362,16 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
     private fun openExchangeRatesScreen() {
         val intent = Intent(this@MapActivity, ExchangeRatesActivity::class.java)
         startActivity(intent)
-        analytics.logSelectContent("exchange_rates", null, "screen")
     }
 
     private fun openNotificationAreaScreen() {
         val intent = NotificationAreaActivity.newIntent(this, map.value!!.cameraPosition)
         startActivity(intent)
-        analytics.logSelectContent("notification_area", null, "screen")
     }
 
     private fun openSupportChat() {
         openUrl("https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw")
-        analytics.logSelectContent("chat", null, "screen")
+        analytics.logViewContent("chat", null, "screen")
     }
 
     private fun openSettingsScreen() {

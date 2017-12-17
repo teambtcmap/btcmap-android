@@ -12,7 +12,7 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class Analytics @Inject constructor(internal val firebaseAnalytics: FirebaseAnalytics) {
+class Analytics @Inject constructor(private val firebaseAnalytics: FirebaseAnalytics) {
     fun logSelectContent(itemId: String, itemName: String?, contentType: String) {
         logContentEvent(FirebaseAnalytics.Event.SELECT_CONTENT, itemId, itemName, contentType)
     }

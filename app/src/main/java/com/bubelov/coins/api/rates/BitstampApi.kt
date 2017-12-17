@@ -8,6 +8,9 @@ import retrofit2.http.GET
  */
 
 interface BitstampApi {
-    @GET("ticker/")
-    fun getTicker(): Call<BitstampTicker>
+    @GET("ticker/btcusd")
+    fun getBtcUsdTicker(): Call<BitstampTicker>
+
+    @GET("ticker/btceur")
+    fun getBtcEurTicker(): Call<BitstampTicker>
 }
