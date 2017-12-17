@@ -211,7 +211,7 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
         }
 
         if (requestCode == REQUEST_FIND_PLACE && resultCode == Activity.RESULT_OK) {
-            model.selectedPlaceId.value = data?.getLongExtra(PlacesSearchActivity.PLACE_ID_EXTRA, 0) ?: 0
+            moveToPlace(data?.getLongExtra(PlacesSearchActivity.PLACE_ID_EXTRA, 0) ?: 0)
         }
 
         if (requestCode == REQUEST_ADD_PLACE && resultCode == Activity.RESULT_OK) {
@@ -336,23 +336,27 @@ class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemCl
 
     private fun handleIntent(intent: Intent) {
         if (intent.hasExtra(PLACE_ID_EXTRA)) {
-            model.selectedPlaceId.value = intent.getLongExtra(PLACE_ID_EXTRA, 0)
-
-            model.selectedPlace.observe(this, object: Observer<Place?> {
-                override fun onChanged(place: Place?) {
-                    if (place != null) {
-                        map.observe(this@MapActivity, Observer { map ->
-                            model.moveToNextLocation = false
-                            map?.moveCamera(CameraUpdateFactory.newLatLngZoom(place.toLatLng(), MAP_DEFAULT_ZOOM))
-                        })
-                    }
-
-                    model.selectedPlace.removeObserver(this)
-                }
-            })
+            moveToPlace(intent.getLongExtra(PLACE_ID_EXTRA, 0))
         }
 
         updateDrawerHeader()
+    }
+
+    private fun moveToPlace(id: Long) {
+        model.selectedPlaceId.value = id
+
+        model.selectedPlace.observe(this, object: Observer<Place?> {
+            override fun onChanged(place: Place?) {
+                if (place != null) {
+                    map.observe(this@MapActivity, Observer { map ->
+                        model.moveToNextLocation = false
+                        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(place.toLatLng(), MAP_DEFAULT_ZOOM))
+                    })
+                }
+
+                model.selectedPlace.removeObserver(this)
+            }
+        })
     }
 
     private fun openExchangeRatesScreen() {
