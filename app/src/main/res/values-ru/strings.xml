@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <string name="app_name">Биткойн Карта</string>
 
@@ -72,5 +72,23 @@
     <string name="pref_currency">Валюта</string>
     <string name="new_place_notifications">Новые места в зоне уведомлений</string>
     <string name="menu_item_chat">Чат (ENG)</string>
+
+    <plurals name="places">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Место</item>
+        <item quantity="few">Места</item>
+        <item quantity="many">Мест</item>
+    </plurals>
+
+    <plurals name="confirmed_by_d_users">
+        <item quantity="one">Подтверждено %d пользователем</item>
+        <item quantity="few">Подтверждено %d пользователями</item>
+        <item quantity="many">Подтверждено %d пользователей</item>
+    </plurals>
+
+    <plurals name="marked_as_closed_by_d_users">
+        <item quantity="one">Пожаловался %d пользователь</item>
+        <item quantity="few">Пожаловалось %d пользователей</item>
+        <item quantity="many">Пожаловалось %d пользователей</item>
+    </plurals>
 
 </resources>
