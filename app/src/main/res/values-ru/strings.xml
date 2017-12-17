@@ -2,29 +2,13 @@
 
 <resources>
 
-    <string name="app_name">Coins</string>
+    <string name="app_name">Биткойн Карта</string>
 
     <string name="action_search">Поиск</string>
 
-    <string name="notification_new_place">Новое место принимает криптовалюту</string>
-    <string name="notification_new_place_no_name">Нажмите чтобы посмотреть</string>
-
-    <string name="notification_new_places_content_title">%1$s новых мест</string>
-    <string name="notification_new_places_content_text">Нажмите чтобы посмотреть</string>
+    <string name="notification_new_place">Новое место в зоне интереса</string>
 
     <string name="pref_distance_units">Километры/мили</string>
-
-    <string name="all_places">Все места</string>
-    <string name="atms">Банкоматы</string>
-    <string name="cafes">Кафе</string>
-    <string name="restaurants">Рестораны</string>
-    <string name="bars">Бары</string>
-    <string name="hotels">Отели</string>
-    <string name="gas_stations">Заправки</string>
-    <string name="hospitals">Госпитали</string>
-    <string name="pharmacies">Аптеки</string>
-    <string name="pizza">Пиццерии</string>
-    <string name="taxi">Такси</string>
 
     <string name="settings">Настройки</string>
     <string name="name_unknown">Без названия</string>
@@ -37,32 +21,27 @@
     <string name="miles_short">мил.</string>
     <string name="description">Описание</string>
     <string name="opening_hours">Время работы</string>
-    <string name="accepted_currencies">Валюты</string>
     <string name="notification_area_activity_title">Зона уведомлений</string>
     <string name="action_share">Поделиться</string>
     <string name="phone">Телефон</string>
-    <string name="website">Вебсайт</string>
+    <string name="website">Сайт</string>
     <string name="action_send">Отправить</string>
     <string name="name">Название</string>
     <string name="suggest_an_edit">Предложить правку</string>
     <string name="place_is_closed">Этого меса не существует или оно не принимает криптовалюту</string>
     <string name="action_add_place">Добавить место</string>
-    <string name="change_location">Изменить месторасположение</string>
-    <string name="place_location">Месторасположение</string>
+    <string name="change_location">Изменить локацию</string>
+    <string name="place_location">Локация</string>
     <string name="action_done">Готово</string>
-    <string name="location_is_not_specified">Месторасположение не задано</string>
+    <string name="location_is_not_specified">Локация не задана</string>
     <string name="name_is_not_specified">Не указано название</string>
-    <string name="set_location">Задать месторасположение</string>
-    <string name="authorization_hint">Авторизованные пользователи могут добавлять новые места и делать правки уже существующих</string>
-    <string name="cant_connect_to_google_services">Can\'t connect to Google services</string>
+    <string name="set_location">Указать локацию</string>
+    <string name="authorization_hint">Авторизованные пользователи могут добавлять и редактировать места</string>
     <string name="sign_in">Вход</string>
-    <string name="failed_to_sign_in">Ошибка авторизации</string>
     <string name="sign_in_with_email">Войти используя email</string>
     <string name="sign_in_with_google">Войти используя Google аккаунт</string>
     <string name="sign_out">Выйти из аккаунта</string>
-    <string name="exchange_rates">Обменный Курс</string>
-    <string name="fast_food">Фаст фуд</string>
-    <string name="could_not_update_place">Не получилось обновить данные</string>
+    <string name="exchange_rates">Обменный курс</string>
     <string name="email">Email</string>
     <string name="password">Пароль</string>
     <string name="sign_up">Регистрация</string>
@@ -74,26 +53,24 @@
     </string-array>
     <string name="first_name">Имя</string>
     <string name="last_name">Фамилия</string>
-    <string name="chat">Chat</string>
     <string name="close">Close</string>
     <string name="open">Open</string>
-    <string name="menu_item_exchange_rates">Exchange rates</string>
-    <string name="menu_item_notification_area">Notification area</string>
-    <string name="menu_item_chat">Chat</string>
-    <string name="menu_item_settings">Settings</string>
+    <string name="menu_item_exchange_rates">Обменный курс</string>
+    <string name="menu_item_notification_area">Зона уведомлений</string>
+    <string name="menu_item_settings">Настройки</string>
     <string name="guest">Гость</string>
-    <string name="more_features_coming_soon">More features coming soon</string>
-    <string name="could_not_add_place">Couldn\'t add place</string>
-    <string name="clear_search">Clear search</string>
+    <string name="more_features_coming_soon">Пока пусто =)</string>
+    <string name="could_not_add_place">Не получилось добавить место</string>
+    <string name="clear_search">Очистить поиск</string>
 
-    <string name="new_place_notifications">New places in your area</string>
-    <string name="place_has_been_added">Place has been added</string>
-    <string name="your_edits_have_been_submitted">Your edits have been submitted</string>
-    <string name="uploading_changes">Uploading changes</string>
-    <string name="s_map">%1$s Map</string>
-    <string name="something_went_wrong">Whoops, something went wrong…</string>
-    <string name="action_filter_places">Filter places</string>
-    <string name="currency">Currency</string>
-    <string name="pref_currency">Currency</string>
+    <string name="place_has_been_added">Место добавлено</string>
+    <string name="your_edits_have_been_submitted">Правки приняты</string>
+    <string name="uploading_changes">Загрузка правок</string>
+    <string name="s_map">%1$s карта</string>
+    <string name="something_went_wrong">Упс, что то пошло не так…</string>
+    <string name="currency">Валюта</string>
+    <string name="pref_currency">Валюта</string>
+    <string name="new_place_notifications">Новые места в зоне уведомлений</string>
+    <string name="menu_item_chat">Чат (ENG)</string>
 
 </resources>

@@ -5,15 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
-import android.widget.Toast
 import com.bubelov.coins.BuildConfig
 
 import com.bubelov.coins.R
 import com.bubelov.coins.repository.user.SignInResult
 import com.bubelov.coins.repository.user.UserRepository
 import com.google.android.gms.auth.api.signin.*
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.api.GoogleApiClient
 import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.android.AndroidInjection
 
@@ -30,7 +27,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
  * @author Igor Bubelov
  */
 
-class SignInActivity : AbstractActivity(), GoogleApiClient.OnConnectionFailedListener {
+class SignInActivity : AbstractActivity() {
     @Inject lateinit var userRepository: UserRepository
 
     @Inject lateinit var analytics: FirebaseAnalytics
@@ -64,10 +61,6 @@ class SignInActivity : AbstractActivity(), GoogleApiClient.OnConnectionFailedLis
         if (requestCode == REQUEST_GOOGLE_SIGN_IN && resultCode == Activity.RESULT_OK) {
             signIn(GoogleSignIn.getSignedInAccountFromIntent(data).result.idToken!!)
         }
-    }
-
-    override fun onConnectionFailed(connectionResult: ConnectionResult) {
-        Toast.makeText(this, R.string.cant_connect_to_google_services, Toast.LENGTH_LONG).show()
     }
 
     private fun signIn(idToken: String) = launch(UI) {
