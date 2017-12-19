@@ -25,6 +25,14 @@ class Analytics @Inject constructor(private val firebaseAnalytics: FirebaseAnaly
         logContentEvent(FirebaseAnalytics.Event.SHARE, itemId, itemName, contentType)
     }
 
+    fun logEvent(name: String, value: String) {
+        logEvent(name, Bundle().apply { putString(FirebaseAnalytics.Param.VALUE, value) })
+    }
+
+    fun logEvent(name: String, bundle: Bundle? = null) {
+        firebaseAnalytics.logEvent(name, bundle)
+    }
+
     private fun logContentEvent(eventType: String, itemId: String, itemName: String?, contentType: String) {
         val bundle = Bundle()
         bundle.putString(FirebaseAnalytics.Param.ITEM_ID, itemId)

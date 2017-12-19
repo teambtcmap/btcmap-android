@@ -32,7 +32,9 @@ class ExchangeRatesActivity : AbstractActivity() {
             setOnMenuItemClickListener {
                 if (it.itemId == R.id.currency) {
                     selector(title = getString(R.string.currency), items = CurrencyPair.values().map { it.displayCurrency }, onClick = { _, index ->
-                        model.pair.value = CurrencyPair.values()[index]
+                        val pair = CurrencyPair.values()[index]
+                        model.pair.value = pair
+                        model.analytics.logEvent("change_exchange_rates_currency_pair", pair.toString())
                     })
                 }
 

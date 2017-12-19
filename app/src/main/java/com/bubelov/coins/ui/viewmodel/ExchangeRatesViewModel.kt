@@ -6,6 +6,7 @@ import com.bubelov.coins.model.CurrencyPair
 import com.bubelov.coins.repository.Result
 import com.bubelov.coins.repository.rate.ExchangeRatesRepository
 import com.bubelov.coins.ui.model.ExchangeRateQuery
+import com.bubelov.coins.util.Analytics
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import java.text.NumberFormat
@@ -17,6 +18,8 @@ import javax.inject.Inject
 
 class ExchangeRatesViewModel : ViewModel() {
     @Inject internal lateinit var repository: ExchangeRatesRepository
+
+    @Inject lateinit var analytics: Analytics
 
     val pair = MutableLiveData<CurrencyPair>()
 
