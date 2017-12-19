@@ -11,8 +11,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 37
-        versionName "2.0.2"
+        versionCode 38
+        versionName "2.0.3"
 
         buildConfigField "String", "API_URL", "\"http://91.121.144.57:3000/api/v3/\""
         buildConfigField "String", "GOOGLE_CLIENT_ID", GOOGLE_CLIENT_ID
