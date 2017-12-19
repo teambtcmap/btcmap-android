@@ -20,6 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/map_header_height"
         android:background="@color/white"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
@@ -28,10 +29,8 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:paddingBottom="24dp"
-            android:paddingLeft="24dp"
-            android:paddingRight="8dp"
-            android:paddingTop="24dp"
+            android:paddingEnd="8dp"
+            android:paddingStart="24dp"
             android:textColor="@color/text_primary"
             android:textSize="20sp"
             tools:text="Place name" />
@@ -40,7 +39,6 @@
             android:id="@+id/check_mark"
             android:layout_width="16dp"
             android:layout_height="16dp"
-            android:layout_gravity="center_vertical"
             android:layout_marginTop="2dp"
             android:src="@drawable/ic_check_circle"
             android:tint="@color/green_700" />
@@ -49,7 +47,6 @@
             android:id="@+id/warning"
             android:layout_width="16dp"
             android:layout_height="16dp"
-            android:layout_gravity="center_vertical"
             android:layout_marginTop="2dp"
             android:src="@drawable/ic_warning"
             android:tint="@color/red_500" />
