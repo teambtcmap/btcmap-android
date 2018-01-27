@@ -72,5 +72,6 @@
     <string name="something_went_wrong">Whoops, something went wrong…</string>
     <string name="currency">Currency</string>
     <string name="pref_currency">Currency</string>
+    <string name="could_not_edit_place">Couldn\'t edit place</string>
 
 </resources>

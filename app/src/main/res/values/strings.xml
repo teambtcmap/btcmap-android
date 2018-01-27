@@ -59,6 +59,7 @@
     <string name="guest">Guest</string>
     <string name="more_features_coming_soon">More features coming soon</string>
     <string name="could_not_add_place">Couldn\'t add place</string>
+    <string name="could_not_edit_place">Couldn\'t edit place</string>
     <string name="clear_search">Clear search</string>
 
     <string name="new_place_notifications">New places in your area</string>

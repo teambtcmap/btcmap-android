@@ -28,11 +28,10 @@
 package com.bubelov.coins.ui.activity
 
 import android.app.Activity
-import android.app.ProgressDialog
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.ActivityOptionsCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 
@@ -49,23 +48,20 @@ import com.google.android.gms.maps.model.LatLng
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_edit_place.*
 import org.jetbrains.anko.alert
-import org.jetbrains.anko.indeterminateProgressDialog
 import java.util.*
 
-class EditPlaceActivity : AppCompatActivity(), OnMapReadyCallback, EditPlaceViewModel.Callback {
-    private lateinit var viewModel: EditPlaceViewModel
+class EditPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
+    private lateinit var model: EditPlaceViewModel
 
     private var map: GoogleMap? = null
-
-    private var progressDialog: ProgressDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_place)
 
-        viewModel = ViewModelProviders.of(this).get(EditPlaceViewModel::class.java)
-        viewModel.init(intent.getSerializableExtra(PLACE_EXTRA) as Place?, this)
+        model = ViewModelProviders.of(this).get(EditPlaceViewModel::class.java)
+        model.setup(intent.getSerializableExtra(PLACE_EXTRA) as Place?)
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
         toolbar.inflateMenu(R.menu.edit_place)
@@ -78,7 +74,7 @@ class EditPlaceActivity : AppCompatActivity(), OnMapReadyCallback, EditPlaceView
             true
         }
 
-        val place = viewModel.place
+        val place = model.place
 
         if (place == null) {
             toolbar.setTitle(R.string.action_add_place)
@@ -105,15 +101,21 @@ class EditPlaceActivity : AppCompatActivity(), OnMapReadyCallback, EditPlaceView
         }
 
         change_location.setOnClickListener {
-            val intent = PickLocationActivity.newIntent(this, if (place == null) null else LatLng(place.latitude, place.longitude), intent.getParcelableExtra(MAP_CAMERA_POSITION_EXTRA))
+            val intent = PickLocationActivity.newIntent(this, if (place == null) null else LatLng(place.latitude, place.longitude), intent.getParcelableExtra(
+                CAMERA_POSITION_EXTRA
+            ))
             startActivityForResult(intent, REQUEST_PICK_LOCATION)
         }
+
+        model.showProgress.observe(this, Observer {
+            state_switcher.displayedChild = if (it == true) { 1 } else { 0 }
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_PICK_LOCATION && resultCode == Activity.RESULT_OK) {
-            viewModel.pickedLocation = data!!.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA)
-            map?.moveCamera(CameraUpdateFactory.newLatLngZoom(viewModel.pickedLocation, DEFAULT_ZOOM))
+            model.pickedLocation = data!!.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA)
+            map?.moveCamera(CameraUpdateFactory.newLatLngZoom(model.pickedLocation, DEFAULT_ZOOM))
             change_location.setText(R.string.change_location)
         }
 
@@ -125,31 +127,11 @@ class EditPlaceActivity : AppCompatActivity(), OnMapReadyCallback, EditPlaceView
 
         googleMap.uiSettings.setAllGesturesEnabled(false)
 
-        val place = viewModel.place
+        val place = model.place
 
         if (place != null) {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(place.latitude, place.longitude), DEFAULT_ZOOM))
         }
-    }
-
-    override fun onTaskStarted() {
-        progressDialog?.dismiss()
-        progressDialog = indeterminateProgressDialog(getString(R.string.uploading_changes)).apply {
-            setCancelable(false)
-        }
-    }
-
-    override fun onTaskStopped() {
-        progressDialog?.dismiss()
-    }
-
-    override fun onTaskSuccess(place: Place) {
-        setResult(Activity.RESULT_OK, Intent().apply { putExtra(PLACE_EXTRA, place) })
-        supportFinishAfterTransition()
-    }
-
-    override fun onTaskFailure() {
-        alert(messageResource = R.string.could_not_add_place).show()
     }
 
     private fun submit() {
@@ -158,50 +140,65 @@ class EditPlaceActivity : AppCompatActivity(), OnMapReadyCallback, EditPlaceView
             return
         }
 
-        if (viewModel.place == null) {
-            if (viewModel.pickedLocation == null) {
+        if (model.place == null) {
+            if (model.pickedLocation == null) {
                 alert(messageResource = R.string.location_is_not_specified).show()
                 return
             }
 
-            viewModel.addPlace(getChangedPlace())
+            model.addPlace(getChangedPlace()).observe(this, Observer { success ->
+                if (success == true) {
+                    setResult(Activity.RESULT_OK)
+                    finish()
+                } else {
+                    alert(messageResource = R.string.could_not_add_place).show()
+                }
+            })
         } else {
-            viewModel.updatePlace(getChangedPlace())
+            model.updatePlace(getChangedPlace()).observe(this, Observer { success ->
+                if (success == true) {
+                    setResult(Activity.RESULT_OK)
+                    finish()
+                } else {
+                    alert(messageResource = R.string.could_not_edit_place).show()
+                }
+            })
         }
     }
 
     private fun getChangedPlace(): Place {
         return Place(
-                id = if (viewModel.place == null) 0 else viewModel.place!!.id,
+                id = if (model.place == null) 0 else model.place!!.id,
                 name = name!!.text.toString(),
                 description = description!!.text.toString(),
-                latitude = viewModel.pickedLocation!!.latitude,
-                longitude = viewModel.pickedLocation!!.longitude,
-                category = if (viewModel.place == null) "" else viewModel.place!!.category,
+                latitude = model.pickedLocation!!.latitude,
+                longitude = model.pickedLocation!!.longitude,
+                category = if (model.place == null) "" else model.place!!.category,
                 phone = phone!!.text.toString(),
                 website = website!!.text.toString(),
                 openingHours = opening_hours.text.toString(),
                 visible = !closed_switch.isChecked,
-                currencies = viewModel.place?.currencies ?: arrayListOf("BTC"),
-                openedClaims = viewModel.place?.openedClaims ?: 1,
-                closedClaims = viewModel.place?.closedClaims ?: 0,
-                updatedAt = Date(0))
+                currencies = model.place?.currencies ?: arrayListOf("BTC"),
+                openedClaims = model.place?.openedClaims ?: 1,
+                closedClaims = model.place?.closedClaims ?: 0,
+                updatedAt = Date(0)
+        )
     }
 
     companion object {
-        private val PLACE_EXTRA = "place"
+        private const val PLACE_EXTRA = "place"
 
-        private val MAP_CAMERA_POSITION_EXTRA = "map_camera_position"
+        private const val CAMERA_POSITION_EXTRA = "camera_position"
 
-        private val REQUEST_PICK_LOCATION = 10
+        private const val REQUEST_PICK_LOCATION = 10
 
-        private val DEFAULT_ZOOM = 13f
+        private const val DEFAULT_ZOOM = 13f
 
-        fun startForResult(activity: Activity, place: Place?, mapCameraPosition: CameraPosition, requestCode: Int) {
+        fun startForResult(activity: Activity, place: Place?, cameraPosition: CameraPosition, requestCode: Int) {
             val intent = Intent(activity, EditPlaceActivity::class.java)
             intent.putExtra(PLACE_EXTRA, place)
-            intent.putExtra(MAP_CAMERA_POSITION_EXTRA, mapCameraPosition)
-            activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+            intent.putExtra(CAMERA_POSITION_EXTRA, cameraPosition)
+            activity.startActivityForResult(intent, requestCode)
         }
     }
 }

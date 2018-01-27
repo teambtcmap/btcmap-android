@@ -90,5 +90,6 @@
         <item quantity="few">Пожаловалось %d пользователей</item>
         <item quantity="many">Пожаловалось %d пользователей</item>
     </plurals>
+    <string name="could_not_edit_place">Не получилось внести правки</string>
 
 </resources>

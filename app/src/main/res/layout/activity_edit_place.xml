@@ -11,129 +11,141 @@
         app:navigationIcon="@drawable/ic_close"
         app:title="@string/suggest_an_edit" />
 
-    <ScrollView
+    <ViewSwitcher
+        android:id="@+id/state_switcher"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?actionBarSize"
         android:background="@color/white">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
-            <Switch
-                android:id="@+id/closed_switch"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#11000000"
-                android:padding="16dp"
-                android:text="@string/place_is_closed" />
+                android:orientation="vertical">
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp">
-
-                <EditText
-                    android:id="@+id/name"
+                <Switch
+                    android:id="@+id/closed_switch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapSentences"
-                    android:hint="@string/name"
-                    android:imeOptions="actionNext"
-                    android:singleLine="true" />
-
-            </android.support.design.widget.TextInputLayout>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp">
-
-                <fragment
-                    android:id="@+id/map"
-                    android:name="com.google.android.gms.maps.SupportMapFragment"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:alpha="0.4"
-                    android:background="@color/black" />
-
-                <Button
-                    android:id="@+id/change_location"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="?selectableItemBackground"
+                    android:background="#11000000"
                     android:padding="16dp"
-                    android:text="@string/change_location"
-                    android:textColor="@color/white" />
+                    android:text="@string/place_is_closed" />
 
-            </FrameLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp">
-
-                <EditText
-                    android:id="@+id/phone"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/phone"
-                    android:inputType="phone" />
+                    android:padding="16dp">
 
-            </android.support.design.widget.TextInputLayout>
+                    <EditText
+                        android:id="@+id/name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/name"
+                        android:imeOptions="actionNext"
+                        android:inputType="textCapSentences"
+                        android:singleLine="true" />
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp">
+                </android.support.design.widget.TextInputLayout>
 
-                <EditText
-                    android:id="@+id/website"
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp">
+
+                    <fragment
+                        android:id="@+id/map"
+                        android:name="com.google.android.gms.maps.SupportMapFragment"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:alpha="0.4"
+                        android:background="@color/black" />
+
+                    <Button
+                        android:id="@+id/change_location"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="?selectableItemBackground"
+                        android:padding="16dp"
+                        android:text="@string/change_location"
+                        android:textColor="@color/white" />
+
+                </FrameLayout>
+
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/website"
-                    android:inputType="textUri" />
+                    android:padding="16dp">
 
-            </android.support.design.widget.TextInputLayout>
+                    <EditText
+                        android:id="@+id/phone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/phone"
+                        android:inputType="phone" />
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp">
+                </android.support.design.widget.TextInputLayout>
 
-                <EditText
-                    android:id="@+id/description"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/description"
-                    android:inputType="textMultiLine|textCapSentences" />
+                    android:padding="16dp">
 
-            </android.support.design.widget.TextInputLayout>
+                    <EditText
+                        android:id="@+id/website"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/website"
+                        android:inputType="textUri" />
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp">
+                </android.support.design.widget.TextInputLayout>
 
-                <EditText
-                    android:id="@+id/opening_hours"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/opening_hours"
-                    android:singleLine="true" />
+                    android:padding="16dp">
 
-            </android.support.design.widget.TextInputLayout>
+                    <EditText
+                        android:id="@+id/description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/description"
+                        android:inputType="textMultiLine|textCapSentences" />
 
-        </LinearLayout>
+                </android.support.design.widget.TextInputLayout>
 
-    </ScrollView>
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+
+                    <EditText
+                        android:id="@+id/opening_hours"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/opening_hours"
+                        android:singleLine="true" />
+
+                </android.support.design.widget.TextInputLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+    </ViewSwitcher>
 
 </FrameLayout>
