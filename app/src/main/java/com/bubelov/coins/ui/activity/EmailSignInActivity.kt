@@ -41,11 +41,11 @@ class EmailSignInActivity : AbstractActivity(), HasFragmentInjector {
         )
 
         override fun getItem(position: Int): Fragment {
-            return pages[position].first
+            return pages[position].first!!
         }
 
         override fun getPageTitle(position: Int): CharSequence {
-            return pages[position].second
+            return pages[position].second!!
         }
 
         override fun getCount(): Int {

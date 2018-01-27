@@ -5,12 +5,12 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'io.fabric'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 38
         versionName "2.0.3"
 
@@ -73,7 +73,7 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:$arch_components_version"
     kapt "android.arch.persistence.room:compiler:$arch_components_version"
     testImplementation "android.arch.persistence.room:testing:$arch_components_version"
-    implementation "android.arch.paging:runtime:$arch_components_version-alpha4-1"
+    implementation "android.arch.paging:runtime:$arch_components_version-alpha5"
 
     // Google Play services split client libs
     implementation "com.google.android.gms:play-services-gcm:$play_services_version"
@@ -83,11 +83,11 @@ dependencies {
     implementation "com.google.firebase:firebase-core:$play_services_version"
 
     // Dependency injection
-    implementation 'com.google.dagger:dagger:2.11'
-    kapt 'com.google.dagger:dagger-compiler:2.11'
-    kaptTest 'com.google.dagger:dagger-compiler:2.11'
-    kapt 'com.google.dagger:dagger-android-processor:2.11'
-    implementation 'com.google.dagger:dagger-android-support:2.11'
+    implementation "com.google.dagger:dagger:$dagger_version"
+    kapt "com.google.dagger:dagger-compiler:$dagger_version"
+    kaptTest "com.google.dagger:dagger-compiler:$dagger_version"
+    kapt "com.google.dagger:dagger-android-processor:$dagger_version"
+    implementation "com.google.dagger:dagger-android-support:$dagger_version"
 
     // Api mapping
     implementation 'com.squareup.retrofit2:retrofit:2.3.0'
