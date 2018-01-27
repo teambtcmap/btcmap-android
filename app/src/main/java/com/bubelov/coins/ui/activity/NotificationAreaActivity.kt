@@ -9,6 +9,7 @@ import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AppCompatActivity
 import android.widget.SeekBar
 
 import com.bubelov.coins.Constants
@@ -34,7 +35,7 @@ import kotlinx.android.synthetic.main.activity_notification_area.*
  * @author Igor Bubelov
  */
 
-class NotificationAreaActivity : AbstractActivity(), OnMapReadyCallback {
+class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
     private var viewModel = lazy { ViewModelProviders.of(this).get(NotificationAreaViewModel::class.java) }
 
     private var map: GoogleMap? = null

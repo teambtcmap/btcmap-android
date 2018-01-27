@@ -3,6 +3,7 @@ package com.bubelov.coins.ui.activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.view.MenuItem
@@ -22,7 +23,7 @@ import kotlinx.android.synthetic.main.activity_profile.*
  * @author Igor Bubelov
  */
 
-class ProfileActivity : AbstractActivity(), Toolbar.OnMenuItemClickListener {
+class ProfileActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
     @Inject lateinit var userRepository: UserRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {

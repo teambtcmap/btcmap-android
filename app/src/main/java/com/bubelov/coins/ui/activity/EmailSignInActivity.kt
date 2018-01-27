@@ -5,6 +5,7 @@ import android.app.FragmentManager
 import android.os.Bundle
 import android.support.v13.app.FragmentPagerAdapter
 import android.support.v4.util.Pair
+import android.support.v7.app.AppCompatActivity
 
 import com.bubelov.coins.R
 import com.bubelov.coins.ui.fragment.SignInFragment
@@ -20,7 +21,7 @@ import javax.inject.Inject
  * @author Igor Bubelov
  */
 
-class EmailSignInActivity : AbstractActivity(), HasFragmentInjector {
+class EmailSignInActivity : AppCompatActivity(), HasFragmentInjector {
     @Inject internal lateinit var fragmentInjector: DispatchingAndroidInjector<Fragment>
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -3,6 +3,7 @@ package com.bubelov.coins.ui.activity
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 
 import com.bubelov.coins.R
@@ -17,7 +18,7 @@ import org.jetbrains.anko.selector
  * @author Igor Bubelov
  */
 
-class ExchangeRatesActivity : AbstractActivity() {
+class ExchangeRatesActivity : AppCompatActivity() {
     private lateinit var model: ExchangeRatesViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -14,6 +14,7 @@ import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.ActivityOptionsCompat
 import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.view.MenuItem
@@ -45,7 +46,7 @@ import javax.inject.Inject
  * @author Igor Bubelov
  */
 
-class MapActivity : AbstractActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener, MapViewModel.Callback {
+class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener, MapViewModel.Callback {
     private lateinit var model: MapViewModel
 
     private lateinit var drawerHeader: View

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
+import android.support.v7.app.AppCompatActivity
 import com.bubelov.coins.BuildConfig
 
 import com.bubelov.coins.R
@@ -27,7 +28,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
  * @author Igor Bubelov
  */
 
-class SignInActivity : AbstractActivity() {
+class SignInActivity : AppCompatActivity() {
     @Inject lateinit var userRepository: UserRepository
 
     @Inject lateinit var analytics: FirebaseAnalytics

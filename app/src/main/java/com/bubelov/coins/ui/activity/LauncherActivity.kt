@@ -3,6 +3,7 @@ package com.bubelov.coins.ui.activity
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -12,7 +13,7 @@ import timber.log.Timber
  * @author Igor Bubelov
  */
 
-class LauncherActivity : AbstractActivity() {
+class LauncherActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

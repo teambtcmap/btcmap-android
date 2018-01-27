@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 
 import com.bubelov.coins.R
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -19,7 +20,7 @@ import kotlinx.android.synthetic.main.activity_pick_location.*
  * @author Igor Bubelov
  */
 
-class PickLocationActivity : AbstractActivity(), OnMapReadyCallback {
+class PickLocationActivity : AppCompatActivity(), OnMapReadyCallback {
     lateinit var map: GoogleMap
 
     override fun onCreate(savedInstanceState: Bundle?) {

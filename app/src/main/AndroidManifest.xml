@@ -4,7 +4,6 @@
     package="com.bubelov.coins">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
@@ -13,7 +12,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Launcher">
+        android:theme="@style/AppTheme">
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
