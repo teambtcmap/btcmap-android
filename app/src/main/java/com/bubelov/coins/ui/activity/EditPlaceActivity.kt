@@ -28,6 +28,7 @@
 package com.bubelov.coins.ui.activity
 
 import android.app.Activity
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
@@ -40,7 +41,6 @@ import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.viewmodel.EditPlaceViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -50,10 +50,10 @@ import kotlinx.android.synthetic.main.activity_edit_place.*
 import org.jetbrains.anko.alert
 import java.util.*
 
-class EditPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
+class EditPlaceActivity : AppCompatActivity() {
     private lateinit var model: EditPlaceViewModel
 
-    private var map: GoogleMap? = null
+    private val map = MutableLiveData<GoogleMap>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -89,8 +89,9 @@ class EditPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
             opening_hours.setText(place.openingHours)
         }
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        (supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment).getMapAsync({
+            map.value = it
+        })
 
         closed_switch.setOnCheckedChangeListener { _, checked ->
             name.isEnabled = !checked
@@ -101,41 +102,54 @@ class EditPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         change_location.setOnClickListener {
-            val intent = PickLocationActivity.newIntent(this, if (place == null) null else LatLng(place.latitude, place.longitude), intent.getParcelableExtra(
-                CAMERA_POSITION_EXTRA
-            ))
+            val intent = PickLocationActivity.newIntent(
+                this,
+                if (place == null) null else LatLng(place.latitude, place.longitude),
+                intent.getParcelableExtra(CAMERA_POSITION_EXTRA)
+            )
+
             startActivityForResult(intent, REQUEST_PICK_LOCATION)
         }
 
         model.showProgress.observe(this, Observer {
-            state_switcher.displayedChild = if (it == true) { 1 } else { 0 }
+            state_switcher.displayedChild = if (it == true) 1 else 0
+        })
+
+        map.observe(this, Observer { map ->
+            if (map == null) return@Observer
+
+            map.uiSettings.setAllGesturesEnabled(false)
+
+            if (place != null) {
+                map.moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(place.latitude, place.longitude),
+                        DEFAULT_ZOOM
+                    )
+                )
+            }
         })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == REQUEST_PICK_LOCATION && resultCode == Activity.RESULT_OK) {
-            model.pickedLocation = data!!.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA)
-            map?.moveCamera(CameraUpdateFactory.newLatLngZoom(model.pickedLocation, DEFAULT_ZOOM))
+        if (requestCode == REQUEST_PICK_LOCATION && resultCode == Activity.RESULT_OK && data != null) {
+            model.pickedLocation = data.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA)
+
+            map.value?.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    model.pickedLocation,
+                    DEFAULT_ZOOM
+                )
+            )
+
             change_location.setText(R.string.change_location)
         }
 
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        map = googleMap
-
-        googleMap.uiSettings.setAllGesturesEnabled(false)
-
-        val place = model.place
-
-        if (place != null) {
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(place.latitude, place.longitude), DEFAULT_ZOOM))
-        }
-    }
-
     private fun submit() {
-        if (name!!.length() == 0) {
+        if (name.length() == 0) {
             alert(messageResource = R.string.name_is_not_specified).show()
             return
         }
@@ -168,33 +182,37 @@ class EditPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun getChangedPlace(): Place {
         return Place(
-                id = if (model.place == null) 0 else model.place!!.id,
-                name = name!!.text.toString(),
-                description = description!!.text.toString(),
-                latitude = model.pickedLocation!!.latitude,
-                longitude = model.pickedLocation!!.longitude,
-                category = if (model.place == null) "" else model.place!!.category,
-                phone = phone!!.text.toString(),
-                website = website!!.text.toString(),
-                openingHours = opening_hours.text.toString(),
-                visible = !closed_switch.isChecked,
-                currencies = model.place?.currencies ?: arrayListOf("BTC"),
-                openedClaims = model.place?.openedClaims ?: 1,
-                closedClaims = model.place?.closedClaims ?: 0,
-                updatedAt = Date(0)
+            id = model.place?.id ?: 0,
+            name = name.text.toString(),
+            description = description.text.toString(),
+            latitude = model.pickedLocation?.latitude ?: 0.0,
+            longitude = model.pickedLocation?.longitude ?: 0.0,
+            category = model.place?.category ?: "",
+            phone = phone.text.toString(),
+            website = website.text.toString(),
+            openingHours = opening_hours.text.toString(),
+            visible = !closed_switch.isChecked,
+            currencies = model.place?.currencies ?: arrayListOf("BTC"),
+            openedClaims = model.place?.openedClaims ?: 1,
+            closedClaims = model.place?.closedClaims ?: 0,
+            updatedAt = model.place?.updatedAt ?: Date(0)
         )
     }
 
     companion object {
         private const val PLACE_EXTRA = "place"
-
         private const val CAMERA_POSITION_EXTRA = "camera_position"
 
         private const val REQUEST_PICK_LOCATION = 10
 
         private const val DEFAULT_ZOOM = 13f
 
-        fun startForResult(activity: Activity, place: Place?, cameraPosition: CameraPosition, requestCode: Int) {
+        fun startForResult(
+            activity: Activity,
+            place: Place?,
+            cameraPosition: CameraPosition,
+            requestCode: Int
+        ) {
             val intent = Intent(activity, EditPlaceActivity::class.java)
             intent.putExtra(PLACE_EXTRA, place)
             intent.putExtra(CAMERA_POSITION_EXTRA, cameraPosition)
