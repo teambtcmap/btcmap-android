@@ -28,7 +28,8 @@
             android:layout_height="24dp"
             android:layout_gravity="center"
             android:tint="@color/white"
-            tools:src="@drawable/ic_place" />
+            tools:src="@drawable/ic_place"
+            android:contentDescription="@string/icon" />
 
     </FrameLayout>
 
@@ -36,7 +37,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
         android:orientation="vertical">
 
         <TextView

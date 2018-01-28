@@ -73,5 +73,6 @@
     <string name="currency">Currency</string>
     <string name="pref_currency">Currency</string>
     <string name="could_not_edit_place">Couldn\'t edit place</string>
+    <string name="icon">Icon</string>
 
 </resources>

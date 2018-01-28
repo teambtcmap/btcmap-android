@@ -12,7 +12,7 @@
         android:background="@drawable/shape_oval_grey">
 
         <TextView
-            android:id="@+id/first_letter"
+            android:id="@+id/icon_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -24,7 +24,7 @@
     </FrameLayout>
 
     <TextView
-        android:id="@+id/exchange_name"
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -34,7 +34,7 @@
         tools:text="Name" />
 
     <TextView
-        android:id="@+id/price"
+        android:id="@+id/value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|center_vertical"

@@ -72,6 +72,7 @@
     <string name="something_went_wrong">Whoops, something went wrong…</string>
 
     <string name="currency">Currency</string>
+    <string name="icon">Icon</string>
 
     <string-array name="distance_units">
         <item>Automatic</item>

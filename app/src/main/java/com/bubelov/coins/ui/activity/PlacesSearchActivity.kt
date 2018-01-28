@@ -55,23 +55,26 @@ class PlacesSearchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_places_search)
-        model = ViewModelProviders.of(this).get(PlacesSearchViewModel::class.java)
-        model.setUp(intent.getParcelableExtra(USER_LOCATION_EXTRA), intent.getStringExtra(CURRENCY_EXTRA))
+
+        model = ViewModelProviders.of(this).get(PlacesSearchViewModel::class.java).apply {
+            setup(
+                intent.getParcelableExtra(USER_LOCATION_EXTRA),
+                intent.getStringExtra(CURRENCY_EXTRA)
+            )
+        }
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 
-        val resultsAdapter = PlacesSearchResultsAdapter {
-            setResult(Activity.RESULT_OK, Intent().apply { putExtra(PLACE_ID_EXTRA, it.placeId) })
-            supportFinishAfterTransition()
-        }
-
-        results.adapter = resultsAdapter
         results.layoutManager = LinearLayoutManager(this)
         results.setHasFixedSize(true)
 
         model.searchResults.observe(this, Observer { places ->
-            resultsAdapter.items = places!!
-            resultsAdapter.notifyDataSetChanged()
+            results.adapter = PlacesSearchResultsAdapter(places ?: emptyList()) {
+                setResult(
+                    Activity.RESULT_OK,
+                    Intent().apply { putExtra(PLACE_ID_EXTRA, it.placeId) })
+                supportFinishAfterTransition()
+            }
         })
 
         query.addTextChangedListener(object : TextWatcherAdapter() {
@@ -84,7 +87,8 @@ class PlacesSearchActivity : AppCompatActivity() {
         query.setOnEditorActionListener { _, actionId, _ ->
             when (actionId) {
                 EditorInfo.IME_ACTION_SEARCH -> {
-                    val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    val inputMethodManager =
+                        getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                     inputMethodManager.hideSoftInputFromWindow(query.windowToken, 0)
                     true
                 }
@@ -97,18 +101,25 @@ class PlacesSearchActivity : AppCompatActivity() {
 
     companion object {
         private const val USER_LOCATION_EXTRA = "user_location"
-
         private const val CURRENCY_EXTRA = "currency"
-
         const val PLACE_ID_EXTRA = "place_id"
 
-        fun startForResult(activity: Activity, userLocation: Location?, currency: String, requestCode: Int) {
+        fun startForResult(
+            activity: Activity,
+            userLocation: Location?,
+            currency: String,
+            requestCode: Int
+        ) {
             val intent = Intent(activity, PlacesSearchActivity::class.java).apply {
                 putExtra(USER_LOCATION_EXTRA, userLocation)
                 putExtra(CURRENCY_EXTRA, currency)
             }
 
-            activity.startActivityForResult(intent, requestCode, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+            activity.startActivityForResult(
+                intent,
+                requestCode,
+                ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
+            )
         }
     }
 }

@@ -55,11 +55,17 @@ class ExchangeRatesActivity : AppCompatActivity() {
 
             setOnMenuItemClickListener {
                 if (it.itemId == R.id.currency) {
-                    selector(title = getString(R.string.currency), items = CurrencyPair.values().map { it.displayCurrency }, onClick = { _, index ->
-                        val pair = CurrencyPair.values()[index]
-                        model.pair.value = pair
-                        model.analytics.logEvent("change_exchange_rates_currency_pair", pair.toString())
-                    })
+                    selector(
+                        title = getString(R.string.currency),
+                        items = CurrencyPair.values().map { it.displayCurrency },
+                        onClick = { _, index ->
+                            val pair = CurrencyPair.values()[index]
+                            model.pair.value = pair
+                            model.analytics.logEvent(
+                                "change_exchange_rates_currency_pair",
+                                pair.toString()
+                            )
+                        })
                 }
 
                 true
@@ -68,8 +74,6 @@ class ExchangeRatesActivity : AppCompatActivity() {
 
         ratesView.layoutManager = LinearLayoutManager(this)
         ratesView.setHasFixedSize(true)
-        val ratesAdapter = ExchangeRatesAdapter()
-        ratesView.adapter = ratesAdapter
 
         model.pair.observe(this, Observer {
             if (it != null) {
@@ -78,10 +82,7 @@ class ExchangeRatesActivity : AppCompatActivity() {
         })
 
         model.rates.observe(this, Observer { rates ->
-            if (rates != null) {
-                ratesAdapter.items = rates
-                ratesAdapter.notifyDataSetChanged()
-            }
+            ratesView.adapter = ExchangeRatesAdapter(rates ?: emptyList())
         })
 
         model.pair.value = CurrencyPair.BTC_USD
