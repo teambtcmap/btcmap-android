@@ -27,11 +27,11 @@
 
 package com.bubelov.coins.ui.model
 
-import com.google.android.gms.maps.model.BitmapDescriptor
+import android.graphics.Bitmap
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.ClusterItem
 
-data class PlaceMarker internal constructor(val placeId: Long, val icon: BitmapDescriptor, val latitude: Double, val longitude: Double) : ClusterItem {
+data class PlaceMarker internal constructor(val placeId: Long, val icon: Bitmap, val latitude: Double, val longitude: Double) : ClusterItem {
     override fun getPosition(): LatLng {
         return LatLng(latitude, longitude)
     }

@@ -64,6 +64,7 @@ import com.squareup.picasso.Picasso
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MapViewModel
 import com.bubelov.coins.util.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
@@ -433,7 +434,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
             super.onBeforeClusterItemRendered(placeMarker, markerOptions)
 
             markerOptions
-                    .icon(placeMarker.icon)
+                    .icon(BitmapDescriptorFactory.fromBitmap(placeMarker.icon))
                     .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V)
         }
     }
