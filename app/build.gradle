@@ -113,8 +113,8 @@ dependencies {
     }
 
     testImplementation 'junit:junit:4.12'
-
     testImplementation 'org.robolectric:robolectric:3.5.1'
+    testImplementation 'org.mockito:mockito-core:2.7.6'
 
     androidTestImplementation('com.android.support.test:runner:1.0.0', {
         exclude group: 'com.android.support', module: 'support-annotations'

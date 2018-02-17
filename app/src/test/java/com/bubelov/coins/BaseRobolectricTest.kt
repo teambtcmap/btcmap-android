@@ -25,33 +25,23 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-import com.bubelov.coins.BaseRobolectricTest
-import com.bubelov.coins.model.SyncLogEntry
-import com.bubelov.coins.repository.synclogs.SyncLogsRepository
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
-import javax.inject.Inject
+package com.bubelov.coins
 
-class SyncLogsRepositoryTest : BaseRobolectricTest() {
-    @Inject lateinit var repository: SyncLogsRepository
+import android.app.Application
+import android.arch.core.executor.testing.InstantTaskExecutorRule
+import org.junit.Rule
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
-    @Before
-    fun init() {
-        TestInjector.testComponent.inject(this)
-    }
+@RunWith(RobolectricTestRunner::class)
+@Config(application = Application::class)
+abstract class BaseRobolectricTest {
+    @JvmField @Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    @Test
-    fun isEmptyByDefault() {
-        Assert.assertNotNull(repository.syncLogs)
-        Assert.assertEquals(0, repository.syncLogs.size)
-    }
-
-    @Test
-    fun savesNewEntry() {
-        val entry = SyncLogEntry(time = System.currentTimeMillis(), affectedPlaces = 5)
-        repository.addEntry(entry)
-        Assert.assertEquals(1, repository.syncLogs.size)
-        Assert.assertEquals(entry, repository.syncLogs.first())
+    init {
+        TestInjector.init(RuntimeEnvironment.application)
     }
 }
