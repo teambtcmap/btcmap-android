@@ -28,9 +28,8 @@
 package com.bubelov.coins.ui.activity
 
 import android.app.Activity
-import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.*
 import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -49,8 +48,10 @@ import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_edit_place.*
 import org.jetbrains.anko.alert
 import java.util.*
+import javax.inject.Inject
 
 class EditPlaceActivity : AppCompatActivity() {
+    @Inject lateinit var modelFactory: ViewModelProvider.Factory
     private lateinit var model: EditPlaceViewModel
 
     private val map = MutableLiveData<GoogleMap>()
@@ -60,7 +61,7 @@ class EditPlaceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_place)
 
-        model = ViewModelProviders.of(this).get(EditPlaceViewModel::class.java)
+        model = ViewModelProviders.of(this, modelFactory).get(EditPlaceViewModel::class.java)
         model.setup(intent.getSerializableExtra(PLACE_EXTRA) as Place?)
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }

@@ -27,11 +27,9 @@
 
 package com.bubelov.coins.ui.viewmodel
 
-import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import com.bubelov.coins.dagger.Injector
+import android.arch.lifecycle.ViewModel
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.Result
 import com.bubelov.coins.repository.place.PlacesRepository
@@ -42,8 +40,7 @@ import kotlinx.coroutines.experimental.launch
 import timber.log.Timber
 import javax.inject.Inject
 
-class EditPlaceViewModel(application: Application) : AndroidViewModel(application) {
-    @Inject lateinit var placesRepository: PlacesRepository
+class EditPlaceViewModel @Inject constructor(var placesRepository: PlacesRepository) : ViewModel() {
 
     var place: Place? = null
 
@@ -52,7 +49,6 @@ class EditPlaceViewModel(application: Application) : AndroidViewModel(applicatio
     val showProgress = MutableLiveData<Boolean>().apply { value = false }
 
     fun setup(place: Place?) {
-        Injector.appComponent.inject(this)
         this.place = place
 
         if (place != null) {
@@ -85,8 +81,7 @@ class EditPlaceViewModel(application: Application) : AndroidViewModel(applicatio
 
         launch(UI) {
             showProgress.value = true
-            val result = async {
-                placesRepository.updatePlace(place) }.await()
+            val result = async { placesRepository.updatePlace(place) }.await()
 
             when (result) {
                 is Result.Success -> success.value = true

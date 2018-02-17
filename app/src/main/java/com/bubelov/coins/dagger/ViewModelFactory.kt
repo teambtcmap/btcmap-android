@@ -27,42 +27,39 @@
 
 package com.bubelov.coins.dagger
 
-import android.content.Context
-import com.bubelov.coins.App
-import com.bubelov.coins.ui.viewmodel.*
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProvider
 
+import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
-import dagger.Component
-import dagger.BindsInstance
-import dagger.android.AndroidInjectionModule
-
 @Singleton
-@Component(
-    modules = [
-        AppModule::class,
-        DatabaseModule::class,
-        AndroidInjectionModule::class,
-        ActivityBuilder::class,
-        FragmentBuilder::class,
-        ServiceBuilder::class,
-        ViewModelModule::class
-    ]
-)
-interface AppComponent {
-    fun inject(app: App)
+class ViewModelFactory @Inject constructor(
+    private val creators: Map<Class<out ViewModel>, @JvmSuppressWildcards Provider<ViewModel>>
+) : ViewModelProvider.Factory {
 
-    fun inject(target: MapViewModel)
-    fun inject(target: ExchangeRatesViewModel)
-    fun inject(target: NotificationAreaViewModel)
-    fun inject(target: PlacesSearchViewModel)
-    fun inject(target: SettingsViewModel)
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        var creator: Provider<out ViewModel>? = creators[modelClass]
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
+        if (creator == null) {
+            for ((key, value) in creators) {
+                if (modelClass.isAssignableFrom(key)) {
+                    creator = value
+                    break
+                }
+            }
+        }
 
-        fun build(): AppComponent
+        if (creator == null) {
+            throw IllegalArgumentException("unknown model class " + modelClass)
+        }
+
+        try {
+            return creator.get() as T
+        } catch (e: Exception) {
+            throw RuntimeException(e)
+        }
     }
 }

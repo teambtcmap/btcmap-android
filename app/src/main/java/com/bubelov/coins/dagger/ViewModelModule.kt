@@ -27,42 +27,20 @@
 
 package com.bubelov.coins.dagger
 
-import android.content.Context
-import com.bubelov.coins.App
-import com.bubelov.coins.ui.viewmodel.*
+import dagger.Module
+import android.arch.lifecycle.ViewModel
+import dagger.multibindings.IntoMap
+import dagger.Binds
+import android.arch.lifecycle.ViewModelProvider
+import com.bubelov.coins.ui.viewmodel.EditPlaceViewModel
 
-import javax.inject.Singleton
+@Module
+abstract class ViewModelModule {
+    @Binds
+    @IntoMap
+    @ViewModelKey(EditPlaceViewModel::class) // PROVIDE YOUR OWN MODELS HERE
+    internal abstract fun bindEditPlaceViewModel(dashboardViewModel: EditPlaceViewModel): ViewModel
 
-import dagger.Component
-import dagger.BindsInstance
-import dagger.android.AndroidInjectionModule
-
-@Singleton
-@Component(
-    modules = [
-        AppModule::class,
-        DatabaseModule::class,
-        AndroidInjectionModule::class,
-        ActivityBuilder::class,
-        FragmentBuilder::class,
-        ServiceBuilder::class,
-        ViewModelModule::class
-    ]
-)
-interface AppComponent {
-    fun inject(app: App)
-
-    fun inject(target: MapViewModel)
-    fun inject(target: ExchangeRatesViewModel)
-    fun inject(target: NotificationAreaViewModel)
-    fun inject(target: PlacesSearchViewModel)
-    fun inject(target: SettingsViewModel)
-
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        fun build(): AppComponent
-    }
+    @Binds
+    internal abstract fun bindViewModelFactory(factory: ViewModelFactory): ViewModelProvider.Factory
 }
