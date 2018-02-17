@@ -40,7 +40,9 @@ import kotlinx.coroutines.experimental.launch
 import timber.log.Timber
 import javax.inject.Inject
 
-class EditPlaceViewModel @Inject constructor(var placesRepository: PlacesRepository) : ViewModel() {
+class EditPlaceViewModel @Inject constructor(
+    val placesRepository: PlacesRepository
+) : ViewModel() {
 
     var place: Place? = null
 
@@ -48,7 +50,7 @@ class EditPlaceViewModel @Inject constructor(var placesRepository: PlacesReposit
 
     val showProgress = MutableLiveData<Boolean>().apply { value = false }
 
-    fun setup(place: Place?) {
+    fun init(place: Place?) {
         this.place = place
 
         if (place != null) {

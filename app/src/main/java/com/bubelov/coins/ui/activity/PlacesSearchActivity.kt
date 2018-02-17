@@ -29,6 +29,7 @@ package com.bubelov.coins.ui.activity
 
 import android.app.Activity
 import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
@@ -46,18 +47,22 @@ import com.bubelov.coins.R
 import com.bubelov.coins.ui.adapter.PlacesSearchResultsAdapter
 import com.bubelov.coins.ui.viewmodel.PlacesSearchViewModel
 import com.bubelov.coins.util.TextWatcherAdapter
+import dagger.android.AndroidInjection
 
 import kotlinx.android.synthetic.main.activity_places_search.*
+import javax.inject.Inject
 
 class PlacesSearchActivity : AppCompatActivity() {
+    @Inject lateinit var modelFactory: ViewModelProvider.Factory
     private lateinit var model: PlacesSearchViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_places_search)
 
-        model = ViewModelProviders.of(this).get(PlacesSearchViewModel::class.java).apply {
-            setup(
+        model = ViewModelProviders.of(this, modelFactory).get(PlacesSearchViewModel::class.java).apply {
+            init(
                 intent.getParcelableExtra(USER_LOCATION_EXTRA),
                 intent.getStringExtra(CURRENCY_EXTRA)
             )

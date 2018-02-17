@@ -62,7 +62,7 @@ class EditPlaceActivity : AppCompatActivity() {
         setContentView(R.layout.activity_edit_place)
 
         model = ViewModelProviders.of(this, modelFactory).get(EditPlaceViewModel::class.java)
-        model.setup(intent.getSerializableExtra(PLACE_EXTRA) as Place?)
+        model.init(intent.getSerializableExtra(PLACE_EXTRA) as Place?)
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
         toolbar.inflateMenu(R.menu.edit_place)

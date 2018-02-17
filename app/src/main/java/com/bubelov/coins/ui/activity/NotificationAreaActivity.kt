@@ -28,6 +28,7 @@
 package com.bubelov.coins.ui.activity
 
 import android.Manifest
+import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
@@ -55,19 +56,25 @@ import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import dagger.android.AndroidInjection
 
 import kotlinx.android.synthetic.main.activity_notification_area.*
+import javax.inject.Inject
 
 class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
-    private var viewModel = lazy { ViewModelProviders.of(this).get(NotificationAreaViewModel::class.java) }
+    @Inject lateinit var modelFactory: ViewModelProvider.Factory
+    private lateinit var model: NotificationAreaViewModel
 
     private var map: GoogleMap? = null
 
     private var areaCircle: Circle? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notification_area)
+
+        model = ViewModelProviders.of(this, modelFactory)[NotificationAreaViewModel::class.java]
 
         toolbar.setNavigationOnClickListener {
             saveArea()
@@ -98,7 +105,7 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         val defaultCameraPosition = intent.getParcelableExtra<CameraPosition>(DEFAULT_CAMERA_POSITION_EXTRA)
-        showArea(viewModel.value.notificationArea ?: viewModel.value.getDefaultNotificationArea(defaultCameraPosition))
+        showArea(model.notificationArea ?: model.getDefaultNotificationArea(defaultCameraPosition))
     }
 
     private fun showArea(area: NotificationArea) {
@@ -124,7 +131,7 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
         seek_bar_radius.setOnSeekBarChangeListener(SeekBarChangeListener())
 
         val areaCenter = LatLng(area.latitude, area.longitude)
-        map!!.moveCamera(CameraUpdateFactory.newLatLngZoom(areaCenter, (viewModel.value.getZoomLevel(areaCircle!!) - 1).toFloat()))
+        map!!.moveCamera(CameraUpdateFactory.newLatLngZoom(areaCenter, (model.getZoomLevel(areaCircle!!) - 1).toFloat()))
     }
 
     private fun saveArea() {
@@ -134,7 +141,7 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
                 areaCircle!!.radius
         )
 
-        viewModel.value.notificationArea = area
+        model.notificationArea = area
     }
 
     private inner class OnMarkerDragListener : GoogleMap.OnMarkerDragListener {

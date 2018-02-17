@@ -28,7 +28,6 @@
 package com.bubelov.coins.ui.viewmodel
 
 import android.arch.lifecycle.*
-import com.bubelov.coins.dagger.Injector
 import com.bubelov.coins.model.CurrencyPair
 import com.bubelov.coins.repository.Result
 import com.bubelov.coins.repository.rate.ExchangeRatesRepository
@@ -40,11 +39,10 @@ import kotlinx.coroutines.experimental.launch
 import java.text.NumberFormat
 import javax.inject.Inject
 
-class ExchangeRatesViewModel : ViewModel() {
-    @Inject internal lateinit var repository: ExchangeRatesRepository
-
-    @Inject lateinit var analytics: Analytics
-
+class ExchangeRatesViewModel @Inject constructor(
+    val repository: ExchangeRatesRepository,
+    val analytics: Analytics
+) : ViewModel() {
     val pair = MutableLiveData<CurrencyPair>()
 
     val rates: LiveData<List<ExchangeRateRow>> = Transformations.switchMap(pair) { pair ->
@@ -73,10 +71,6 @@ class ExchangeRatesViewModel : ViewModel() {
         }
 
         result
-    }
-
-    init {
-        Injector.appComponent.inject(this)
     }
 
     private fun ExchangeRatesSource.toRow(value: String) : ExchangeRateRow {

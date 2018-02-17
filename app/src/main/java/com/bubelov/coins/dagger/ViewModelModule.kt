@@ -32,14 +32,39 @@ import android.arch.lifecycle.ViewModel
 import dagger.multibindings.IntoMap
 import dagger.Binds
 import android.arch.lifecycle.ViewModelProvider
-import com.bubelov.coins.ui.viewmodel.EditPlaceViewModel
+import com.bubelov.coins.ui.viewmodel.*
 
 @Module
 abstract class ViewModelModule {
     @Binds
     @IntoMap
-    @ViewModelKey(EditPlaceViewModel::class) // PROVIDE YOUR OWN MODELS HERE
+    @ViewModelKey(EditPlaceViewModel::class)
     internal abstract fun bindEditPlaceViewModel(dashboardViewModel: EditPlaceViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ExchangeRatesViewModel::class)
+    internal abstract fun bindExchangeRatesViewModel(exchangeRatesViewModel: ExchangeRatesViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(MapViewModel::class)
+    internal abstract fun bindMapViewModel(mapViewModel: MapViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(NotificationAreaViewModel::class)
+    internal abstract fun bindNotificationAreaViewModel(notificationAreaViewModel: NotificationAreaViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(PlacesSearchViewModel::class)
+    internal abstract fun bindPlacesSearchViewModel(placesSearchViewModel: PlacesSearchViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(SettingsViewModel::class)
+    internal abstract fun bindSettingsViewModel(settingsViewModel: SettingsViewModel): ViewModel
 
     @Binds
     internal abstract fun bindViewModelFactory(factory: ViewModelFactory): ViewModelProvider.Factory

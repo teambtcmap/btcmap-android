@@ -27,12 +27,11 @@
 
 package com.bubelov.coins.ui.viewmodel
 
-import android.app.Application
 import android.arch.lifecycle.*
+import android.content.Context
 import android.location.Location
 import android.preference.PreferenceManager
 
-import com.bubelov.coins.App
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.place.PlacesRepository
@@ -42,9 +41,11 @@ import com.bubelov.coins.util.*
 import java.text.NumberFormat
 import javax.inject.Inject
 
-class PlacesSearchViewModel(app: Application) : AndroidViewModel(app) {
-    @Inject lateinit var placesRepository: PlacesRepository
-    @Inject lateinit var placeIconsRepository: PlaceIconsRepository
+class PlacesSearchViewModel @Inject constructor(
+    private val context: Context,
+    private val placesRepository: PlacesRepository,
+    private val placeIconsRepository: PlaceIconsRepository
+) : ViewModel() {
 
     private var userLocation: Location? = null
 
@@ -66,11 +67,7 @@ class PlacesSearchViewModel(app: Application) : AndroidViewModel(app) {
             }
         }
 
-    init {
-        appComponent().inject(this)
-    }
-
-    fun setup(userLocation: Location?, currency: String) {
+    fun init(userLocation: Location?, currency: String) {
         this.userLocation = userLocation
         this.currency = currency
     }
@@ -95,14 +92,14 @@ class PlacesSearchViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun getDistanceUnits(): DistanceUnits {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplication<App>())
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
         val distanceUnitsString = sharedPreferences.getString(
-            getApplication<App>().getString(R.string.pref_distance_units_key),
-            getApplication<App>().getString(R.string.pref_distance_units_automatic)
+            context.getString(R.string.pref_distance_units_key),
+            context.getString(R.string.pref_distance_units_automatic)
         )
 
-        return if (distanceUnitsString == getApplication<App>().getString(R.string.pref_distance_units_automatic)) {
+        return if (distanceUnitsString == context.getString(R.string.pref_distance_units_automatic)) {
             DistanceUnits.default
         } else {
             DistanceUnits.valueOf(distanceUnitsString)
@@ -111,8 +108,8 @@ class PlacesSearchViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun DistanceUnits.getShortName(): String {
         return when (this) {
-            DistanceUnits.KILOMETERS -> getApplication<App>().getString(R.string.kilometers_short)
-            DistanceUnits.MILES -> getApplication<App>().getString(R.string.miles_short)
+            DistanceUnits.KILOMETERS -> context.getString(R.string.kilometers_short)
+            DistanceUnits.MILES -> context.getString(R.string.miles_short)
         }
     }
 

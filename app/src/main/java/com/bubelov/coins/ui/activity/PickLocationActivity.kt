@@ -40,6 +40,7 @@ import com.google.android.gms.maps.MapFragment
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import dagger.android.AndroidInjection
 
 import kotlinx.android.synthetic.main.activity_pick_location.*
 
@@ -47,6 +48,7 @@ class PickLocationActivity : AppCompatActivity(), OnMapReadyCallback {
     lateinit var map: GoogleMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pick_location)
 

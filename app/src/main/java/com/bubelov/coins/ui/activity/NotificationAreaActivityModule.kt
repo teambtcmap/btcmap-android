@@ -30,4 +30,4 @@ package com.bubelov.coins.ui.activity
 import dagger.Module
 
 @Module
-class MainActivityModule
+class NotificationAreaActivityModule

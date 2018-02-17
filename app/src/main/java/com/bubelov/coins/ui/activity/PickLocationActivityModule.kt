@@ -25,37 +25,9 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.dagger
+package com.bubelov.coins.ui.activity
 
-import android.content.Context
-import com.bubelov.coins.App
+import dagger.Module
 
-import javax.inject.Singleton
-
-import dagger.Component
-import dagger.BindsInstance
-import dagger.android.AndroidInjectionModule
-
-@Singleton
-@Component(
-    modules = [
-        AppModule::class,
-        DatabaseModule::class,
-        AndroidInjectionModule::class,
-        ActivityBuilder::class,
-        FragmentBuilder::class,
-        ServiceBuilder::class,
-        ViewModelModule::class
-    ]
-)
-interface AppComponent {
-    fun inject(app: App)
-
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        fun build(): AppComponent
-    }
-}
+@Module
+class PickLocationActivityModule

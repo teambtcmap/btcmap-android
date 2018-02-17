@@ -31,6 +31,7 @@ import android.Manifest
 import android.app.Activity
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
@@ -70,6 +71,7 @@ import org.jetbrains.anko.longToast
 import javax.inject.Inject
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener, MapViewModel.Callback {
+    @Inject lateinit var modelFactory: ViewModelProvider.Factory
     private lateinit var model: MapViewModel
 
     private lateinit var drawerHeader: View
@@ -89,7 +91,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
-        model = ViewModelProviders.of(this).get(MapViewModel::class.java)
+        model = ViewModelProviders.of(this, modelFactory)[MapViewModel::class.java]
         model.callback = this
 
         drawerHeader = navigation_view.getHeaderView(0)
