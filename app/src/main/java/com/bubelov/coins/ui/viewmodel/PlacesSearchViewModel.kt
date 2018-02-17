@@ -34,15 +34,16 @@ import android.preference.PreferenceManager
 
 import com.bubelov.coins.App
 import com.bubelov.coins.R
+import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.placeicon.PlaceIconsRepository
-import com.bubelov.coins.ui.model.PlacesSearchResult
+import com.bubelov.coins.ui.model.PlacesSearchRow
 import com.bubelov.coins.util.*
+import java.text.NumberFormat
 import javax.inject.Inject
 
 class PlacesSearchViewModel(app: Application) : AndroidViewModel(app) {
     @Inject lateinit var placesRepository: PlacesRepository
-
     @Inject lateinit var placeIconsRepository: PlaceIconsRepository
 
     private var userLocation: Location? = null
@@ -51,23 +52,19 @@ class PlacesSearchViewModel(app: Application) : AndroidViewModel(app) {
 
     val searchQuery = MutableLiveData<String>()
 
-    val searchResults: LiveData<List<PlacesSearchResult>> = Transformations.switchMap(searchQuery) { query ->
-        if (query.length < MIN_QUERY_LENGTH) {
-            MutableLiveData<List<PlacesSearchResult>>().apply { value = emptyList() }
-        } else {
-            Transformations.map(placesRepository.getPlaces(query)) {
-                it.filter { it.currencies.contains(currency) }.map { place ->
-                    PlacesSearchResult(
-                            placeId = place.id,
-                            placeName = place.name,
-                            distance = userLocation?.distanceTo(place.latitude, place.longitude, getDistanceUnits()),
-                            distanceUnits = getDistanceUnits().getShortName(),
-                            iconResId = placeIconsRepository.getPlaceCategoryIconResId(place.category) ?: R.drawable.ic_place
-                    )
-                }.sortedBy { it.distance }
+    val searchResults: LiveData<List<PlacesSearchRow>> =
+        Transformations.switchMap(searchQuery) { query ->
+            if (query.length < MIN_QUERY_LENGTH) {
+                MutableLiveData<List<PlacesSearchRow>>().apply { value = emptyList() }
+            } else {
+                Transformations.map(placesRepository.getPlaces(query)) { places ->
+                    places
+                        .filter { it.currencies.contains(currency) }
+                        .map { it.toRow() }
+                        .sortedBy { it.distance }
+                }
             }
         }
-    }
 
     init {
         appComponent().inject(this)
@@ -78,9 +75,32 @@ class PlacesSearchViewModel(app: Application) : AndroidViewModel(app) {
         this.currency = currency
     }
 
+    private fun Place.toRow(): PlacesSearchRow {
+        val userLocation = userLocation
+
+        val distanceString = if (userLocation != null) DISTANCE_FORMAT.format(
+            userLocation.distanceTo(
+                latitude,
+                longitude,
+                getDistanceUnits()
+            )
+        ) + " ${getDistanceUnits().getShortName()}" else ""
+
+        return PlacesSearchRow(
+            placeId = id,
+            name = name,
+            distance = distanceString,
+            icon = placeIconsRepository.getPlaceIcon(category)
+        )
+    }
+
     private fun getDistanceUnits(): DistanceUnits {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplication<App>())
-        val distanceUnitsString = sharedPreferences.getString(getApplication<App>().getString(R.string.pref_distance_units_key), getApplication<App>().getString(R.string.pref_distance_units_automatic))
+
+        val distanceUnitsString = sharedPreferences.getString(
+            getApplication<App>().getString(R.string.pref_distance_units_key),
+            getApplication<App>().getString(R.string.pref_distance_units_automatic)
+        )
 
         return if (distanceUnitsString == getApplication<App>().getString(R.string.pref_distance_units_automatic)) {
             DistanceUnits.default
@@ -98,5 +118,8 @@ class PlacesSearchViewModel(app: Application) : AndroidViewModel(app) {
 
     companion object {
         private const val MIN_QUERY_LENGTH = 2
+
+        private val DISTANCE_FORMAT =
+            NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }
     }
 }

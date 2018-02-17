@@ -58,6 +58,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
     implementation "org.jetbrains.anko:anko-commons:$anko_version"
+    implementation 'androidx.core:core-ktx:0.1'
 
     // Android support libraries
     implementation "com.android.support:support-v13:$support_version"

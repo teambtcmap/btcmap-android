@@ -33,14 +33,13 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.bubelov.coins.R
-import com.bubelov.coins.ui.model.PlacesSearchResult
+import com.bubelov.coins.ui.model.PlacesSearchRow
 
 import kotlinx.android.synthetic.main.row_places_search_result.view.*
-import java.text.NumberFormat
 
 class PlacesSearchResultsAdapter(
-    private val items: List<PlacesSearchResult>,
-    private val itemClick: (PlacesSearchResult) -> Unit
+    private val items: List<PlacesSearchRow>,
+    private val itemClick: (PlacesSearchRow) -> Unit
 ) : RecyclerView.Adapter<PlacesSearchResultsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -54,34 +53,20 @@ class PlacesSearchResultsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
-
-        holder.itemView.apply {
-            icon.setImageResource(item.iconResId)
-            name.text = item.placeName
-
-            if (item.distance != null) {
-                distance.visibility = android.view.View.VISIBLE
-
-                distance.text = resources.getString(
-                    R.string.distance_format,
-                    DISTANCE_FORMAT.format(item.distance),
-                    item.distanceUnits
-                )
-            } else {
-                distance.visibility = android.view.View.GONE
-            }
-
-            setOnClickListener { itemClick(item) }
-        }
+        holder.bind(items[position], itemClick)
     }
 
     override fun getItemCount() = items.size
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
-
-    companion object {
-        private val DISTANCE_FORMAT =
-            NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        fun bind(item: PlacesSearchRow, itemClick: (PlacesSearchRow) -> Unit) {
+            itemView.apply {
+                icon.setImageBitmap(item.icon)
+                name.text = item.name
+                distance.visibility = if (item.distance.isNotEmpty()) View.VISIBLE else View.GONE
+                distance.text = item.distance
+                setOnClickListener { itemClick(item) }
+            }
+        }
     }
 }
