@@ -25,33 +25,26 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-import com.bubelov.coins.BaseRobolectricTest
-import com.bubelov.coins.model.CurrencyPair
-import com.bubelov.coins.repository.Result
-import com.bubelov.coins.repository.rate.ExchangeRatesRepository
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
-import javax.inject.Inject
+package com.bubelov.coins
 
-class ExchangeRatesRepositoryTest : BaseRobolectricTest() {
-    @Inject lateinit var repository: ExchangeRatesRepository
+import android.arch.lifecycle.LiveData
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
-    @Before
-    fun init() {
-        TestInjector.testComponent.inject(this)
-    }
+/**
+ * @author Igor Bubelov
+ */
 
-    @Test
-    fun returnsRates() {
-        CurrencyPair.values().forEach { pair ->
-            repository.getExchangeRatesSources(pair).forEach { source ->
-                System.out.println("Pair: $pair")
-                System.out.println("Source: ${source.name}")
-                val result = source.getExchangeRate(pair)
-                System.out.println("Result: $result")
-                Assert.assertTrue(result is Result.Success)
-            }
-        }
-    }
+fun <T> LiveData<T>.blockingObserve(): T {
+    var value: T? = null
+    val latch = CountDownLatch(1)
+
+    observeForever({
+        value = it
+        latch.countDown()
+    })
+
+    latch.await(10, TimeUnit.SECONDS)
+    @Suppress("UNCHECKED_CAST")
+    return value as T
 }

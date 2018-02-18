@@ -25,50 +25,19 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-import com.bubelov.coins.BaseRobolectricTest
-import com.bubelov.coins.model.NotificationArea
-import com.bubelov.coins.repository.area.NotificationAreaRepository
-import org.junit.Assert
-import org.junit.Before
+package com.bubelov.coins
 
-import org.junit.Test
-import javax.inject.Inject
+import android.content.Context
 
-class NotificationAreaRepositoryTest : BaseRobolectricTest() {
-    @Inject lateinit var repository: NotificationAreaRepository
+/**
+ * @author Igor Bubelov
+ */
 
-    @Before
-    fun init() {
-        TestInjector.testComponent.inject(this)
-    }
+object TestInjector {
+    lateinit var testComponent: TestComponent
+        private set
 
-    @Test
-    fun isNullByDefault() {
-        Assert.assertTrue(repository.notificationArea == null)
-    }
-
-    @Test
-    fun savesArea() {
-        val area = NotificationArea(
-                latitude = 50.0,
-                longitude = 0.0,
-                radius = 100.0
-        )
-
-        repository.notificationArea = area
-        Assert.assertEquals(repository.notificationArea, area)
-    }
-
-    @Test
-    fun clearsArea() {
-        val area = NotificationArea(
-                latitude = 50.0,
-                longitude = 0.0,
-                radius = 100.0
-        )
-
-        repository.notificationArea = area
-        repository.notificationArea = null
-        Assert.assertTrue(repository.notificationArea == null)
+    fun init(context: Context) {
+        testComponent = DaggerTestComponent.builder().context(context).build()
     }
 }

@@ -1,4 +1,4 @@
-/*
+package com.bubelov.coins/*
  * This is free and unencumbered software released into the public domain.
  *
  * Anyone is free to copy, modify, publish, use, compile, sell, or
@@ -26,15 +26,17 @@
  */
 
 import com.bubelov.coins.BaseRobolectricTest
-import com.bubelov.coins.model.SyncLogEntry
-import com.bubelov.coins.repository.synclogs.SyncLogsRepository
+import com.bubelov.coins.model.NotificationArea
+import com.bubelov.coins.repository.area.NotificationAreaRepository
+import com.bubelov.coins.TestInjector
 import org.junit.Assert
 import org.junit.Before
+
 import org.junit.Test
 import javax.inject.Inject
 
-class SyncLogsRepositoryTest : BaseRobolectricTest() {
-    @Inject lateinit var repository: SyncLogsRepository
+class NotificationAreaRepositoryTest : BaseRobolectricTest() {
+    @Inject lateinit var repository: NotificationAreaRepository
 
     @Before
     fun init() {
@@ -42,16 +44,32 @@ class SyncLogsRepositoryTest : BaseRobolectricTest() {
     }
 
     @Test
-    fun isEmptyByDefault() {
-        Assert.assertNotNull(repository.syncLogs)
-        Assert.assertEquals(0, repository.syncLogs.size)
+    fun isNullByDefault() {
+        Assert.assertTrue(repository.notificationArea == null)
     }
 
     @Test
-    fun savesNewEntry() {
-        val entry = SyncLogEntry(time = System.currentTimeMillis(), affectedPlaces = 5)
-        repository.addEntry(entry)
-        Assert.assertEquals(1, repository.syncLogs.size)
-        Assert.assertEquals(entry, repository.syncLogs.first())
+    fun savesArea() {
+        val area = NotificationArea(
+                latitude = 50.0,
+                longitude = 0.0,
+                radius = 100.0
+        )
+
+        repository.notificationArea = area
+        Assert.assertEquals(repository.notificationArea, area)
+    }
+
+    @Test
+    fun clearsArea() {
+        val area = NotificationArea(
+                latitude = 50.0,
+                longitude = 0.0,
+                radius = 100.0
+        )
+
+        repository.notificationArea = area
+        repository.notificationArea = null
+        Assert.assertTrue(repository.notificationArea == null)
     }
 }

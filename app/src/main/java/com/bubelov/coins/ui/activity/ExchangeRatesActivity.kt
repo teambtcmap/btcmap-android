@@ -63,7 +63,7 @@ class ExchangeRatesActivity : AppCompatActivity() {
                 if (it.itemId == R.id.currency) {
                     selector(
                         title = getString(R.string.currency),
-                        items = CurrencyPair.values().map { it.displayCurrency },
+                        items = CurrencyPair.values().map { it.toString() },
                         onClick = { _, index ->
                             val pair = CurrencyPair.values()[index]
                             model.pair.value = pair
@@ -79,11 +79,10 @@ class ExchangeRatesActivity : AppCompatActivity() {
         }
 
         ratesView.layoutManager = LinearLayoutManager(this)
-        ratesView.setHasFixedSize(true)
 
         model.pair.observe(this, Observer {
             if (it != null) {
-                toolbar.menu.findItem(R.id.currency).title = it.displayCurrency
+                toolbar.menu.findItem(R.id.currency).title = it.toString()
             }
         })
 
