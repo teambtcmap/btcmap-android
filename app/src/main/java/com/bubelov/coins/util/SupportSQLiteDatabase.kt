@@ -25,34 +25,29 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins
+package com.bubelov.coins.util
 
-import com.bubelov.coins.model.SyncLogEntry
-import com.bubelov.coins.repository.synclogs.SyncLogsRepository
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
-import javax.inject.Inject
+import android.arch.persistence.db.SupportSQLiteDatabase
 
-class SyncLogsRepositoryTest : BaseRobolectricTest() {
-    @Inject lateinit var repository: SyncLogsRepository
-
-    @Before
-    fun init() {
-        TestInjector.testComponent.inject(this)
+/**
+ * Run [body] in a transaction marking it as successful if it completes without exception.
+ *
+ * @param exclusive Run in `EXCLUSIVE` mode when true, `IMMEDIATE` mode otherwise.
+ */
+inline fun <T> SupportSQLiteDatabase.transaction(
+    exclusive: Boolean = true,
+    body: SupportSQLiteDatabase.() -> T
+): T {
+    if (exclusive) {
+        beginTransaction()
+    } else {
+        beginTransactionNonExclusive()
     }
-
-    @Test
-    fun isEmptyByDefault() {
-        Assert.assertNotNull(repository.syncLogs)
-        Assert.assertEquals(0, repository.syncLogs.size)
-    }
-
-    @Test
-    fun savesNewEntry() {
-        val entry = SyncLogEntry(time = System.currentTimeMillis(), affectedPlaces = 5)
-        repository.addEntry(entry)
-        Assert.assertEquals(1, repository.syncLogs.size)
-        Assert.assertEquals(entry, repository.syncLogs.first())
+    try {
+        val result = body()
+        setTransactionSuccessful()
+        return result
+    } finally {
+        endTransaction()
     }
 }

@@ -58,7 +58,7 @@ class PlacesSearchViewModel @Inject constructor(
             if (query.length < MIN_QUERY_LENGTH) {
                 MutableLiveData<List<PlacesSearchRow>>().apply { value = emptyList() }
             } else {
-                Transformations.map(placesRepository.getPlaces(query)) { places ->
+                Transformations.map(placesRepository.findBySearchQuery(query)) { places ->
                     places
                         .filter { it.currencies.contains(currency) }
                         .map { it.toRow() }

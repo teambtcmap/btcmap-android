@@ -71,7 +71,10 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
         super.onPause()
     }
 
-    override fun onPreferenceTreeClick(preferenceScreen: PreferenceScreen, preference: Preference): Boolean {
+    override fun onPreferenceTreeClick(
+        preferenceScreen: PreferenceScreen,
+        preference: Preference
+    ): Boolean {
         when (preference.key) {
             getString(R.string.pref_currency_key) -> showCurrencySelector()
             getString(R.string.pref_sync_database_key) -> model.databaseSync.start()
@@ -87,7 +90,9 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
     }
 
     private fun showSyncLog() {
-        val logs = model.syncLogsRepository.syncLogs.reversed().map { "Date: ${Date(it.time)}, Affected places: ${it.affectedPlaces}" }
+        val logs = model.syncLogsRepository.syncLogs
+            .reversed()
+            .map { "Date: ${Date(it.time)}, Affected places: ${it.affectedPlaces}" }
 
         if (logs.isEmpty()) {
             alert(message = "Logs are empty").show()
@@ -103,7 +108,11 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
 
     private fun updateCurrencySummary() {
         val currency = findPreference(getString(R.string.pref_currency_key)) as Preference
-        currency.summary = preferenceManager.sharedPreferences.getString(getString(R.string.pref_currency_key), "BTC")
+
+        currency.summary = preferenceManager.sharedPreferences.getString(
+            getString(R.string.pref_currency_key),
+            "BTC"
+        )
     }
 
     private fun updateDistanceUnitsSummary() {
@@ -112,34 +121,42 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
     }
 
     private fun showCurrencySelector() {
-        model.placesRepository.getCurrenciesToPlacesMap().observe(getSettingsActivity(), android.arch.lifecycle.Observer { map ->
-            if (map == null) {
-                return@Observer
-            }
+        model.placesRepository.getCurrenciesToPlacesMap()
+            .observe(getSettingsActivity(), android.arch.lifecycle.Observer { map ->
+                if (map == null) {
+                    return@Observer
+                }
 
-            val currencies = map.keys.sortedBy { -map[it]!!.size }
-            val titles = currencies.map { "$it (${map[it]!!.size} ${resources.getQuantityString(R.plurals.places, map[it]!!.size).toLowerCase()})" }
+                val currencies = map.keys.sortedBy { -map[it]!!.size }
 
-            alert {
-                items(titles, onItemSelected = { _, _, index ->
-                    preferenceManager.sharedPreferences
+                val titles = currencies.map {
+                    "$it (${map[it]!!.size} ${resources.getQuantityString(
+                        R.plurals.places,
+                        map[it]!!.size
+                    ).toLowerCase()})"
+                }
+
+                alert {
+                    items(titles, onItemSelected = { _, _, index ->
+                        preferenceManager.sharedPreferences
                             .edit()
                             .putString(getString(R.string.pref_currency_key), currencies[index])
                             .apply()
-                })
-            }.apply {
-                titleResource = R.string.currency
-                show()
-            }
-        })
+                    })
+                }.apply {
+                    titleResource = R.string.currency
+                    show()
+                }
+            })
     }
 
     private fun testNotification() {
-        model.placesRepository.getRandomPlace().observe(activity as AppCompatActivity, android.arch.lifecycle.Observer {
-            if (it != null) {
-                model.placeNotificationsManager.notifyUser(it)
-            }
-        })
+        model.placesRepository.findRandom()
+            .observe(activity as AppCompatActivity, android.arch.lifecycle.Observer {
+                if (it != null) {
+                    model.placeNotificationsManager.notifyUser(it)
+                }
+            })
     }
 
     private fun getSettingsActivity() = activity as SettingsActivity

@@ -1,4 +1,4 @@
-package com.bubelov.coins/*
+/*
  * This is free and unencumbered software released into the public domain.
  *
  * Anyone is free to copy, modify, publish, use, compile, sell, or
@@ -25,10 +25,10 @@ package com.bubelov.coins/*
  * For more information, please refer to <https://unlicense.org>
  */
 
-import com.bubelov.coins.BaseRobolectricTest
+package com.bubelov.coins
+
 import com.bubelov.coins.model.NotificationArea
 import com.bubelov.coins.repository.area.NotificationAreaRepository
-import com.bubelov.coins.TestInjector
 import org.junit.Assert
 import org.junit.Before
 

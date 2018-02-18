@@ -35,10 +35,6 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
-/**
- * @author Igor Bubelov
- */
-
 @Module
 class DatabaseTestModule {
     @Provides

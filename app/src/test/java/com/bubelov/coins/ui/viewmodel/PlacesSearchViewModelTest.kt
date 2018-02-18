@@ -61,7 +61,7 @@ class PlacesSearchViewModelTest {
         placeIconsRepository = mock(PlaceIconsRepository::class.java)
         model = PlacesSearchViewModel(context, placesRepository, placeIconsRepository)
 
-        `when`(placesRepository.getPlaces(ArgumentMatchers.anyString()))
+        `when`(placesRepository.findBySearchQuery(ArgumentMatchers.anyString()))
             .thenReturn(MutableLiveData<List<Place>>().apply { value = listOf(
                 generatePlace("Bar 1", "BTC"),
                 generatePlace("Bar 2", "BTC"),

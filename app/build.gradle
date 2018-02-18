@@ -23,7 +23,7 @@ android {
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+                arguments = ["room.schemaLocation": "$projectDir/src/main/assets/schemas".toString()]
             }
         }
     }
@@ -73,7 +73,7 @@ dependencies {
     testImplementation "android.arch.core:core-testing:$arch_components_version"
     implementation "android.arch.persistence.room:runtime:$arch_components_version"
     kapt "android.arch.persistence.room:compiler:$arch_components_version"
-    testImplementation "android.arch.persistence.room:testing:$arch_components_version"
+    androidTestImplementation "android.arch.persistence.room:testing:$arch_components_version"
     implementation "android.arch.paging:runtime:$arch_components_version-alpha5"
 
     // Google Play services split client libs

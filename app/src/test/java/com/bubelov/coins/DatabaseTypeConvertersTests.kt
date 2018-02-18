@@ -25,7 +25,6 @@ package com.bubelov.coins/*
  * For more information, please refer to <https://unlicense.org>
  */
 
-import com.bubelov.coins.BaseRobolectricTest
 import com.bubelov.coins.db.Converters
 import junit.framework.Assert
 import org.junit.Test

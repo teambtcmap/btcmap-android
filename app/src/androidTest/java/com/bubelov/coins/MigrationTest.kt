@@ -27,32 +27,36 @@
 
 package com.bubelov.coins
 
-import com.bubelov.coins.model.SyncLogEntry
-import com.bubelov.coins.repository.synclogs.SyncLogsRepository
-import org.junit.Assert
-import org.junit.Before
+import android.support.test.runner.AndroidJUnit4
+import org.junit.runner.RunWith
+import android.arch.persistence.room.testing.MigrationTestHelper
+import org.junit.Rule
+import android.arch.persistence.db.framework.FrameworkSQLiteOpenHelperFactory
+import android.support.test.InstrumentationRegistry
+import com.bubelov.coins.db.Database
 import org.junit.Test
-import javax.inject.Inject
 
-class SyncLogsRepositoryTest : BaseRobolectricTest() {
-    @Inject lateinit var repository: SyncLogsRepository
-
-    @Before
-    fun init() {
-        TestInjector.testComponent.inject(this)
-    }
-
-    @Test
-    fun isEmptyByDefault() {
-        Assert.assertNotNull(repository.syncLogs)
-        Assert.assertEquals(0, repository.syncLogs.size)
-    }
+@RunWith(AndroidJUnit4::class)
+class MigrationTest {
+    @JvmField @Rule val migrationTestHelper = MigrationTestHelper(
+        InstrumentationRegistry.getInstrumentation(),
+        "schemas/${Database::class.java.canonicalName}",
+        FrameworkSQLiteOpenHelperFactory()
+    )
 
     @Test
-    fun savesNewEntry() {
-        val entry = SyncLogEntry(time = System.currentTimeMillis(), affectedPlaces = 5)
-        repository.addEntry(entry)
-        Assert.assertEquals(1, repository.syncLogs.size)
-        Assert.assertEquals(entry, repository.syncLogs.first())
+    fun migrate1To2() {
+        migrationTestHelper.apply {
+            createDatabase(TEST_DB, 1).apply {
+                execSQL("INSERT INTO places VALUES (1, 'Italian Bakery', 0, 0, 'Cafe', '', '', 0, 0, '', '', '', 1, 0)")
+                close()
+            }
+
+            runMigrationsAndValidate(TEST_DB, 2, true, Database.MIGRATION_1_2)
+        }
+    }
+
+    companion object {
+        const val TEST_DB = "migration-test"
     }
 }

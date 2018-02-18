@@ -1,58 +1,53 @@
+/*
+ * This is free and unencumbered software released into the public domain.
+ *
+ * Anyone is free to copy, modify, publish, use, compile, sell, or
+ * distribute this software, either in source code form or as a compiled
+ * binary, for any purpose, commercial or non-commercial, and by any
+ * means.
+ *
+ * In jurisdictions that recognize copyright laws, the author or authors
+ * of this software dedicate any and all copyright interest in the
+ * software to the public domain. We make this dedication for the benefit
+ * of the public at large and to the detriment of our heirs and
+ * successors. We intend this dedication to be an overt act of
+ * relinquishment in perpetuity of all present and future rights to this
+ * software under copyright law.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information, please refer to <https://unlicense.org>
+ */
+
 package com.bubelov.coins.model
 
-import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 import java.io.Serializable
 import java.util.*
 import kotlin.collections.ArrayList
 
-/**
- * @author Igor Bubelov
- */
-
-@Entity(tableName = "places")
+@Entity
 data class Place(
-        @PrimaryKey
-        @ColumnInfo(name = "_id")
-        val id: Long,
-
-        @ColumnInfo(name = "name")
-        val name: String,
-
-        @ColumnInfo(name = "latitude")
-        val latitude: Double,
-
-        @ColumnInfo(name = "longitude")
-        val longitude: Double,
-
-        @ColumnInfo(name = "category")
-        val category: String,
-
-        @ColumnInfo(name = "description")
-        val description: String,
-
-        @ColumnInfo(name = "currencies")
-        val currencies: ArrayList<String>,
-
-        @ColumnInfo(name = "opened_claims")
-        val openedClaims: Int,
-
-        @ColumnInfo(name = "closed_claims")
-        val closedClaims: Int,
-
-        @ColumnInfo(name = "phone")
-        val phone: String,
-
-        @ColumnInfo(name = "website")
-        val website: String,
-
-        @ColumnInfo(name = "opening_hours")
-        val openingHours: String,
-
-        @ColumnInfo(name = "visible")
-        val visible: Boolean,
-
-        @ColumnInfo(name = "updated_at")
-        val updatedAt: Date
+    @PrimaryKey
+    val id: Long,
+    val name: String,
+    val latitude: Double,
+    val longitude: Double,
+    val category: String,
+    val description: String,
+    val currencies: ArrayList<String>,
+    val openedClaims: Int,
+    val closedClaims: Int,
+    val phone: String,
+    val website: String,
+    val openingHours: String,
+    val visible: Boolean,
+    val updatedAt: Date
 ) : Serializable

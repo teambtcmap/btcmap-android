@@ -29,10 +29,6 @@ package com.bubelov.coins
 
 import android.content.Context
 
-/**
- * @author Igor Bubelov
- */
-
 object TestInjector {
     lateinit var testComponent: TestComponent
         private set
