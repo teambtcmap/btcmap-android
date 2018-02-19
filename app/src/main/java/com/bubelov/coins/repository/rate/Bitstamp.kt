@@ -39,11 +39,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class Bitstamp @Inject constructor(httpClient: OkHttpClient, gson: Gson) : ExchangeRatesSource {
+class Bitstamp @Inject constructor(gson: Gson) : ExchangeRatesSource {
     override val name = "Bitstamp"
 
     val api: BitstampApi = Retrofit.Builder()
-            .client(httpClient)
             .baseUrl("https://www.bitstamp.net/api/v2/")
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()

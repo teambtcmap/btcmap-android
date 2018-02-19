@@ -13,7 +13,9 @@ import com.bubelov.coins.ui.activity.MapActivity
 import javax.inject.Inject
 import javax.inject.Singleton
 import android.app.NotificationChannel
+import android.arch.lifecycle.Observer
 import android.os.Build
+import com.bubelov.coins.model.NotificationArea
 
 /**
  * @author Igor Bubelov
@@ -22,35 +24,50 @@ import android.os.Build
 @Singleton
 class PlaceNotificationManager @Inject
 internal constructor(
-        private val context: Context,
-        private val notificationAreaRepository: NotificationAreaRepository
+    private val context: Context,
+    private val notificationAreaRepository: NotificationAreaRepository
 ) {
     init {
         if (Build.VERSION.SDK_INT >= 26) {
-            val channel = NotificationChannel(NEW_PLACE_NOTIFICATIONS_CHANNEL,
-                    context.getString(R.string.new_place_notifications),
-                    NotificationManager.IMPORTANCE_LOW).apply {
+            val channel = NotificationChannel(
+                NEW_PLACE_NOTIFICATIONS_CHANNEL,
+                context.getString(R.string.new_place_notifications),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
                 lightColor = context.getColor(R.color.primary)
                 enableVibration(false)
             }
 
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }
 
     fun notifyUserIfNecessary(newPlace: Place) {
-        if (shouldNotifyUser(newPlace)) {
-            notifyUser(newPlace)
+        if (!newPlace.visible) {
+            return
         }
+
+        notificationAreaRepository.notificationArea.observeForever(object : Observer<NotificationArea> {
+            override fun onChanged(area: NotificationArea?) {
+                if (area != null) {
+                    if (isInsideArea(newPlace, area)) {
+                        notifyUser(newPlace)
+                    }
+                }
+
+                notificationAreaRepository.notificationArea.removeObserver(this)
+            }
+        })
     }
 
     fun notifyUser(place: Place) {
         val builder = NotificationCompat.Builder(context, NEW_PLACE_NOTIFICATIONS_CHANNEL)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle(context.getString(R.string.notification_new_place))
-                .setContentText(place.name)
-                .setAutoCancel(true)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(context.getString(R.string.notification_new_place))
+            .setContentText(place.name)
+            .setAutoCancel(true)
 
         val intent = MapActivity.newIntent(context, place.id)
         val pendingIntent = PendingIntent.getActivity(context, place.id.toInt(), intent, 0)
@@ -60,22 +77,16 @@ internal constructor(
         notificationManager.notify(place.id.toInt(), builder.build())
     }
 
-    private fun shouldNotifyUser(newPlace: Place): Boolean {
-        if (!newPlace.visible) {
-            return false
-        }
-
-        val notificationArea = notificationAreaRepository.notificationArea ?: return false
-
+    private fun isInsideArea(newPlace: Place, area: NotificationArea): Boolean {
         return DistanceUtils.getDistance(
-                notificationArea.latitude,
-                notificationArea.longitude,
-                newPlace.latitude,
-                newPlace.longitude
-        ) <= notificationArea.radius
+            area.latitude,
+            area.longitude,
+            newPlace.latitude,
+            newPlace.longitude
+        ) <= area.radius
     }
 
     companion object {
-        private val NEW_PLACE_NOTIFICATIONS_CHANNEL = "new_place_notifications"
+        private const val NEW_PLACE_NOTIFICATIONS_CHANNEL = "new_place_notifications"
     }
 }

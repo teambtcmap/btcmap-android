@@ -25,38 +25,14 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins
+package com.bubelov.coins.repository.preference
 
-import com.bubelov.coins.model.NotificationArea
-import com.bubelov.coins.repository.area.NotificationAreaRepository
-import org.junit.Assert
-import org.junit.Before
-
-import org.junit.Test
+import com.bubelov.coins.model.Preference
 import javax.inject.Inject
+import javax.inject.Singleton
 
-class NotificationAreaRepositoryTest : BaseRobolectricTest() {
-    @Inject lateinit var repository: NotificationAreaRepository
-
-    @Before
-    fun init() {
-        TestInjector.testComponent.inject(this)
-    }
-
-    @Test
-    fun isNullByDefault() {
-        Assert.assertTrue(repository.notificationArea.blockingObserve() == null)
-    }
-
-    @Test
-    fun savesArea() {
-        val area = NotificationArea(
-                latitude = 50.0,
-                longitude = 0.0,
-                radius = 100.0
-        )
-
-        repository.save(area)
-        Assert.assertEquals(repository.notificationArea.blockingObserve(), area)
-    }
+@Singleton
+class PreferencesRepository @Inject constructor(private val db: PreferencesDb) {
+    fun insert(preference: Preference) = db.insert(preference)
+    fun find(key: String) = db.find(key)
 }

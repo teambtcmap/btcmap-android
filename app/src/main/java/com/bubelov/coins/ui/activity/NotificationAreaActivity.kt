@@ -28,6 +28,7 @@
 package com.bubelov.coins.ui.activity
 
 import android.Manifest
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
@@ -67,6 +68,7 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var map: GoogleMap? = null
 
+    private var marker: Marker? = null
     private var areaCircle: Circle? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,20 +107,30 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         val defaultCameraPosition = intent.getParcelableExtra<CameraPosition>(DEFAULT_CAMERA_POSITION_EXTRA)
-        showArea(model.notificationArea ?: model.getDefaultNotificationArea(defaultCameraPosition))
+
+        model.notificationArea.observe(this, Observer { area ->
+            if (area == null) {
+                model.save(model.getDefaultNotificationArea(defaultCameraPosition))
+            } else {
+                showArea(area)
+            }
+        })
     }
 
     private fun showArea(area: NotificationArea) {
+        marker?.remove()
+        areaCircle?.remove()
+
         val markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker_location)
 
-        val marker = map!!.addMarker(MarkerOptions()
+        marker = map!!.addMarker(MarkerOptions()
                 .position(LatLng(area.latitude, area.longitude))
                 .icon(markerDescriptor)
                 .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V)
                 .draggable(true))
 
         val circleOptions = CircleOptions()
-                .center(marker.position)
+                .center(marker?.position)
                 .radius(area.radius)
                 .fillColor(ContextCompat.getColor(this, R.color.notification_area))
                 .strokeColor(ContextCompat.getColor(this, R.color.notification_area_border))
@@ -141,7 +153,7 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
                 areaCircle!!.radius
         )
 
-        model.notificationArea = area
+        model.save(area)
     }
 
     private inner class OnMarkerDragListener : GoogleMap.OnMarkerDragListener {
@@ -167,12 +179,12 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     companion object {
-        val DEFAULT_CAMERA_POSITION_EXTRA = "default_camera_position"
+        const val DEFAULT_CAMERA_POSITION_EXTRA = "default_camera_position"
 
         fun newIntent(context: Context, defaultCameraPosition: CameraPosition): Intent {
-            val intent = Intent(context, NotificationAreaActivity::class.java)
-            intent.putExtra(DEFAULT_CAMERA_POSITION_EXTRA, defaultCameraPosition)
-            return intent
+            return Intent(context, NotificationAreaActivity::class.java).apply {
+                putExtra(DEFAULT_CAMERA_POSITION_EXTRA, defaultCameraPosition)
+            }
         }
     }
 }

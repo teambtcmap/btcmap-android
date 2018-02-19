@@ -25,38 +25,14 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins
+package com.bubelov.coins.model
 
-import com.bubelov.coins.model.NotificationArea
-import com.bubelov.coins.repository.area.NotificationAreaRepository
-import org.junit.Assert
-import org.junit.Before
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 
-import org.junit.Test
-import javax.inject.Inject
-
-class NotificationAreaRepositoryTest : BaseRobolectricTest() {
-    @Inject lateinit var repository: NotificationAreaRepository
-
-    @Before
-    fun init() {
-        TestInjector.testComponent.inject(this)
-    }
-
-    @Test
-    fun isNullByDefault() {
-        Assert.assertTrue(repository.notificationArea.blockingObserve() == null)
-    }
-
-    @Test
-    fun savesArea() {
-        val area = NotificationArea(
-                latitude = 50.0,
-                longitude = 0.0,
-                radius = 100.0
-        )
-
-        repository.save(area)
-        Assert.assertEquals(repository.notificationArea.blockingObserve(), area)
-    }
-}
+@Entity
+data class Preference(
+    @PrimaryKey
+    val key: String,
+    val value: String
+)

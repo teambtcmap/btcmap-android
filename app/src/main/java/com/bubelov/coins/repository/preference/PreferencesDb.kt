@@ -25,38 +25,18 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins
+package com.bubelov.coins.repository.preference
 
-import com.bubelov.coins.model.NotificationArea
-import com.bubelov.coins.repository.area.NotificationAreaRepository
-import org.junit.Assert
-import org.junit.Before
+import android.arch.lifecycle.LiveData
+import android.arch.persistence.room.*
 
-import org.junit.Test
-import javax.inject.Inject
+import com.bubelov.coins.model.Preference
 
-class NotificationAreaRepositoryTest : BaseRobolectricTest() {
-    @Inject lateinit var repository: NotificationAreaRepository
+@Dao
+interface PreferencesDb {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(preference: Preference)
 
-    @Before
-    fun init() {
-        TestInjector.testComponent.inject(this)
-    }
-
-    @Test
-    fun isNullByDefault() {
-        Assert.assertTrue(repository.notificationArea.blockingObserve() == null)
-    }
-
-    @Test
-    fun savesArea() {
-        val area = NotificationArea(
-                latitude = 50.0,
-                longitude = 0.0,
-                radius = 100.0
-        )
-
-        repository.save(area)
-        Assert.assertEquals(repository.notificationArea.blockingObserve(), area)
-    }
+    @Query("SELECT * from Preference WHERE key = :key")
+    fun find(key: String): LiveData<Preference>
 }

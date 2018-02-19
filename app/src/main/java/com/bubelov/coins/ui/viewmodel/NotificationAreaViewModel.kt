@@ -38,13 +38,7 @@ import javax.inject.Inject
 class NotificationAreaViewModel @Inject constructor(
     private var areaRepository: NotificationAreaRepository
 ) : ViewModel() {
-    var notificationArea: NotificationArea?
-        get() {
-            return areaRepository.notificationArea
-        }
-        set(value) {
-            areaRepository.notificationArea = value
-        }
+    val notificationArea = areaRepository.notificationArea
 
     fun getDefaultNotificationArea(defaultCameraPosition: CameraPosition): NotificationArea {
         return NotificationArea(
@@ -58,4 +52,6 @@ class NotificationAreaViewModel @Inject constructor(
         val scale = circle.radius / 500
         return (16 - Math.log(scale) / Math.log(2.0)).toInt()
     }
+
+    fun save(notificationArea: NotificationArea) = areaRepository.save(notificationArea)
 }

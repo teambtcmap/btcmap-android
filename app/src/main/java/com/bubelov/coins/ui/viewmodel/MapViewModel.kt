@@ -112,15 +112,19 @@ class MapViewModel @Inject constructor(
     }
 
     fun onNewLocation(location: Location) {
-        if (notificationAreaRepository.notificationArea == null) {
-            val area = NotificationArea(
-                location.latitude,
-                location.longitude,
-                Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS
-            )
+        notificationAreaRepository.notificationArea.observeForever(object: Observer<NotificationArea> {
+            override fun onChanged(area: NotificationArea?) {
+                if (area == null) {
+                    notificationAreaRepository.save(NotificationArea(
+                        location.latitude,
+                        location.longitude,
+                        Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS
+                    ))
+                }
 
-            notificationAreaRepository.notificationArea = area
-        }
+                notificationAreaRepository.notificationArea.removeObserver(this)
+            }
+        })
     }
 
     interface Callback {

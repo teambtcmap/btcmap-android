@@ -31,18 +31,16 @@ import com.bubelov.coins.api.rates.BitcoinAverageApi
 import com.bubelov.coins.model.CurrencyPair
 import com.bubelov.coins.repository.Result
 import com.google.gson.Gson
-import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class BitcoinAverage @Inject constructor(httpClient: OkHttpClient, gson: Gson) : ExchangeRatesSource {
+class BitcoinAverage @Inject constructor(gson: Gson) : ExchangeRatesSource {
     override val name = "BitcoinAverage"
 
     val api: BitcoinAverageApi = Retrofit.Builder()
-            .client(httpClient)
             .baseUrl("https://apiv2.bitcoinaverage.com/")
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()

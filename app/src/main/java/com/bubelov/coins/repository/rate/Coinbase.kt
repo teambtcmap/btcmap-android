@@ -31,18 +31,16 @@ import com.bubelov.coins.api.rates.CoinbaseApi
 import com.bubelov.coins.model.CurrencyPair
 import com.bubelov.coins.repository.Result
 import com.google.gson.Gson
-import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class Coinbase @Inject constructor(httpClient: OkHttpClient, gson: Gson) : ExchangeRatesSource {
+class Coinbase @Inject constructor(gson: Gson) : ExchangeRatesSource {
     override val name = "Coinbase"
 
     val api: CoinbaseApi = Retrofit.Builder()
-            .client(httpClient)
             .baseUrl("https://api.coinbase.com/v2/")
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
