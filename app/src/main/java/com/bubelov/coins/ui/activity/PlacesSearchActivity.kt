@@ -61,12 +61,12 @@ class PlacesSearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_places_search)
 
-        model = ViewModelProviders.of(this, modelFactory).get(PlacesSearchViewModel::class.java).apply {
-            init(
-                intent.getParcelableExtra(USER_LOCATION_EXTRA),
-                intent.getStringExtra(CURRENCY_EXTRA)
-            )
-        }
+        model = ViewModelProviders.of(this, modelFactory)[PlacesSearchViewModel::class.java]
+
+        model.init(
+            intent.getParcelableExtra(USER_LOCATION_EXTRA),
+            intent.getStringExtra(CURRENCY_EXTRA)
+        )
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 

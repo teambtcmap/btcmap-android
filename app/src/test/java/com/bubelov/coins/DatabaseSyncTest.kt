@@ -51,7 +51,7 @@ class DatabaseSyncTest : BaseRobolectricTest() {
     @Test
     fun syncing() {
         runBlocking {
-            placesRepository.findBySearchQuery("").blockingObserve()
+            placesRepository.findBySearchQuery("")
             val placesBeforeSync = placesDb.count()
             Assert.assertTrue(placesBeforeSync > 0)
             databaseSync.start().join()

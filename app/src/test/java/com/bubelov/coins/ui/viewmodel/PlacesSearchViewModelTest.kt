@@ -36,7 +36,6 @@ import org.junit.runner.RunWith
 import org.junit.Before
 import org.junit.Test
 import android.arch.core.executor.testing.InstantTaskExecutorRule
-import android.arch.lifecycle.MutableLiveData
 import android.graphics.Bitmap
 import com.bubelov.coins.model.Place
 import org.junit.Rule
@@ -62,11 +61,11 @@ class PlacesSearchViewModelTest {
         model = PlacesSearchViewModel(context, placesRepository, placeIconsRepository)
 
         `when`(placesRepository.findBySearchQuery(ArgumentMatchers.anyString()))
-            .thenReturn(MutableLiveData<List<Place>>().apply { value = listOf(
+            .thenReturn(listOf(
                 generatePlace("Bar 1", "BTC"),
                 generatePlace("Bar 2", "BTC"),
                 generatePlace("Bar 3", "LTC")
-            ) })
+            ))
 
         `when`(placeIconsRepository.getPlaceIcon(ArgumentMatchers.anyString()))
             .thenReturn(mock(Bitmap::class.java))

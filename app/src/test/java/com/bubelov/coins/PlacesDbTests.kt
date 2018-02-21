@@ -81,6 +81,6 @@ class PlacesDbTests: BaseRobolectricTest() {
         }
 
         assertEquals(100, placesDb.count())
-        assertEquals(1, placesDb.findBySearchQuery("55").blockingObserve().size)
+        assertEquals(1, placesDb.findBySearchQuery("55").size)
     }
 }

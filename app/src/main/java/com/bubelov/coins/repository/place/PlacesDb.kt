@@ -50,7 +50,7 @@ interface PlacesDb {
             "OR UPPER(description) LIKE '%' || UPPER(:query) || '%' " +
             "OR UPPER(phone) LIKE '%' || UPPER(:query) || '%' " +
             "OR UPPER(website) LIKE '%' || UPPER(:query) || '%'")
-    fun findBySearchQuery(query: String): LiveData<List<Place>>
+    fun findBySearchQuery(query: String): List<Place>
 
     @Query("SELECT * FROM Place ORDER BY RANDOM() LIMIT 1")
     fun findRandom(): LiveData<Place?>

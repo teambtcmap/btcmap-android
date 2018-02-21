@@ -38,6 +38,9 @@ import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.placeicon.PlaceIconsRepository
 import com.bubelov.coins.ui.model.PlacesSearchRow
 import com.bubelov.coins.util.*
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
 import java.text.NumberFormat
 import javax.inject.Inject
 
@@ -47,34 +50,49 @@ class PlacesSearchViewModel @Inject constructor(
     private val placeIconsRepository: PlaceIconsRepository
 ) : ViewModel() {
 
-    private var userLocation: Location? = null
-
-    private lateinit var currency: String
-
+    private val userLocation = MutableLiveData<Location>()
+    private val currency = MutableLiveData<String>()
     val searchQuery = MutableLiveData<String>()
 
     val searchResults: LiveData<List<PlacesSearchRow>> =
-        Transformations.switchMap(searchQuery) { query ->
-            if (query.length < MIN_QUERY_LENGTH) {
-                MutableLiveData<List<PlacesSearchRow>>().apply { value = emptyList() }
-            } else {
-                Transformations.map(placesRepository.findBySearchQuery(query)) { places ->
-                    places
-                        .filter { it.currencies.contains(currency) }
-                        .map { it.toRow() }
-                        .sortedBy { it.distance }
-                }
-            }
+        MediatorLiveData<List<PlacesSearchRow>>().apply {
+            addSource(userLocation, { search(this) })
+            addSource(currency, { search(this) })
+            addSource(searchQuery, { search(this) })
         }
 
+    private var searchJob: Job? = null
+
     fun init(userLocation: Location?, currency: String) {
-        this.userLocation = userLocation
-        this.currency = currency
+        this.userLocation.value = userLocation
+        this.currency.value = currency
     }
 
-    private fun Place.toRow(): PlacesSearchRow {
-        val userLocation = userLocation
+    private fun search(result: MutableLiveData<List<PlacesSearchRow>>) {
+        searchJob?.cancel()
 
+        val userLocation = userLocation.value
+        val currency = currency.value
+        val searchQuery = searchQuery.value
+
+        if (currency.isNullOrEmpty() || searchQuery == null || searchQuery.length < MIN_QUERY_LENGTH) {
+            result.value = emptyList()
+            return
+        }
+
+        searchJob = launch {
+            val places = async {
+                placesRepository.findBySearchQuery(searchQuery)
+                    .filter { it.currencies.contains(currency) }
+                    .map { it.toRow(userLocation) }
+                    .sortedBy { it.distance }
+            }.await()
+
+            result.postValue(places)
+        }
+    }
+
+    private fun Place.toRow(userLocation: Location?): PlacesSearchRow {
         val distanceString = if (userLocation != null) DISTANCE_FORMAT.format(
             userLocation.distanceTo(
                 latitude,

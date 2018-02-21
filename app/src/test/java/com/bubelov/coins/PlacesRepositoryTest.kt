@@ -67,6 +67,6 @@ class PlacesRepositoryTest : BaseRobolectricTest() {
 
     @Test
     fun searchIsWorking() {
-        assertNotEquals(0, repository.findBySearchQuery("cafe").blockingObserve().size)
+        assertNotEquals(0, repository.findBySearchQuery("cafe").size)
     }
 }
