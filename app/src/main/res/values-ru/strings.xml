@@ -60,7 +60,6 @@
     <string name="menu_item_settings">Настройки</string>
     <string name="guest">Гость</string>
     <string name="more_features_coming_soon">Пока пусто =)</string>
-    <string name="could_not_add_place">Не получилось добавить место</string>
     <string name="clear_search">Очистить поиск</string>
 
     <string name="place_has_been_added">Место добавлено</string>
@@ -90,7 +89,7 @@
         <item quantity="few">Пожаловалось %d пользователей</item>
         <item quantity="many">Пожаловалось %d пользователей</item>
     </plurals>
-    <string name="could_not_edit_place">Не получилось внести правки</string>
+    <string name="could_not_submit_changes">Не получилось внести правки</string>
     <string name="icon">Иконка</string>
 
 </resources>

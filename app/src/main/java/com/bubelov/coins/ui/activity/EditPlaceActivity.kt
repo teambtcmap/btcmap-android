@@ -31,6 +31,7 @@ import android.app.Activity
 import android.arch.lifecycle.*
 import android.arch.lifecycle.Observer
 import android.content.Intent
+import android.location.Location
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
@@ -38,16 +39,17 @@ import android.view.View
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.viewmodel.EditPlaceViewModel
+import com.bubelov.coins.util.toLatLng
+import com.bubelov.coins.util.toLocation
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.MapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_edit_place.*
 import org.jetbrains.anko.alert
-import java.util.*
 import javax.inject.Inject
 
 class EditPlaceActivity : AppCompatActivity() {
@@ -61,8 +63,8 @@ class EditPlaceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_place)
 
-        model = ViewModelProviders.of(this, modelFactory).get(EditPlaceViewModel::class.java)
-        model.init(intent.getSerializableExtra(PLACE_EXTRA) as Place?)
+        model = ViewModelProviders.of(this, modelFactory)[EditPlaceViewModel::class.java]
+        model.init(intent.getSerializableExtra(PLACE_EXTRA) as Place)
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
         toolbar.inflateMenu(R.menu.edit_place)
@@ -77,7 +79,7 @@ class EditPlaceActivity : AppCompatActivity() {
 
         val place = model.place
 
-        if (place == null) {
+        if (place.id == 0L) {
             toolbar.setTitle(R.string.action_add_place)
             closed_switch.visibility = View.GONE
             change_location.setText(R.string.set_location)
@@ -90,7 +92,7 @@ class EditPlaceActivity : AppCompatActivity() {
             opening_hours.setText(place.openingHours)
         }
 
-        (supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment).getMapAsync({
+        (supportFragmentManager.findFragmentById(R.id.map) as MapFragment).getMapAsync({
             map.value = it
         })
 
@@ -105,8 +107,8 @@ class EditPlaceActivity : AppCompatActivity() {
         change_location.setOnClickListener {
             val intent = PickLocationActivity.newIntent(
                 this,
-                if (place == null) null else LatLng(place.latitude, place.longitude),
-                intent.getParcelableExtra(CAMERA_POSITION_EXTRA)
+                LatLng(place.latitude, place.longitude).toLocation(),
+                map.value?.cameraPosition?.zoom ?: DEFAULT_ZOOM
             )
 
             startActivityForResult(intent, REQUEST_PICK_LOCATION)
@@ -121,24 +123,22 @@ class EditPlaceActivity : AppCompatActivity() {
 
             map.uiSettings.setAllGesturesEnabled(false)
 
-            if (place != null) {
-                map.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        LatLng(place.latitude, place.longitude),
-                        DEFAULT_ZOOM
-                    )
+            map.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(place.latitude, place.longitude),
+                    DEFAULT_ZOOM
                 )
-            }
+            )
         })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_PICK_LOCATION && resultCode == Activity.RESULT_OK && data != null) {
-            model.pickedLocation = data.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA)
+            val location = data.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA) as Location
 
             map.value?.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
-                    model.pickedLocation,
+                    location.toLatLng(),
                     DEFAULT_ZOOM
                 )
             )
@@ -150,53 +150,38 @@ class EditPlaceActivity : AppCompatActivity() {
     }
 
     private fun submit() {
+        syncUIWithModel()
+
         if (name.length() == 0) {
             alert(messageResource = R.string.name_is_not_specified).show()
             return
         }
 
-        if (model.place == null) {
-            if (model.pickedLocation == null) {
-                alert(messageResource = R.string.location_is_not_specified).show()
-                return
-            }
-
-            model.addPlace(getChangedPlace()).observe(this, Observer { success ->
-                if (success == true) {
-                    setResult(Activity.RESULT_OK)
-                    finish()
-                } else {
-                    alert(messageResource = R.string.could_not_add_place).show()
-                }
-            })
-        } else {
-            model.updatePlace(getChangedPlace()).observe(this, Observer { success ->
-                if (success == true) {
-                    setResult(Activity.RESULT_OK)
-                    finish()
-                } else {
-                    alert(messageResource = R.string.could_not_edit_place).show()
-                }
-            })
+        if (model.place.latitude == 0.0 && model.place.longitude == 0.0) {
+            alert(messageResource = R.string.location_is_not_specified).show()
+            return
         }
+
+        model.submitChanges().observe(this, Observer { success ->
+            if (success == true) {
+                setResult(Activity.RESULT_OK)
+                finish()
+            } else {
+                alert(messageResource = R.string.could_not_submit_changes).show()
+            }
+        })
     }
 
-    private fun getChangedPlace(): Place {
-        return Place(
-            id = model.place?.id ?: 0,
+    private fun syncUIWithModel() {
+        model.place = model.place.copy(
+            visible = !closed_switch.isChecked,
             name = name.text.toString(),
             description = description.text.toString(),
-            latitude = model.pickedLocation?.latitude ?: 0.0,
-            longitude = model.pickedLocation?.longitude ?: 0.0,
-            category = model.place?.category ?: "",
+            latitude = map.value?.cameraPosition?.target?.latitude ?: 0.0,
+            longitude = map.value?.cameraPosition?.target?.longitude ?: 0.0,
             phone = phone.text.toString(),
             website = website.text.toString(),
-            openingHours = opening_hours.text.toString(),
-            visible = !closed_switch.isChecked,
-            currencies = model.place?.currencies ?: arrayListOf("BTC"),
-            openedClaims = model.place?.openedClaims ?: 1,
-            closedClaims = model.place?.closedClaims ?: 0,
-            updatedAt = model.place?.updatedAt ?: Date(0)
+            openingHours = opening_hours.text.toString()
         )
     }
 
@@ -210,7 +195,7 @@ class EditPlaceActivity : AppCompatActivity() {
 
         fun startForResult(
             activity: Activity,
-            place: Place?,
+            place: Place,
             cameraPosition: CameraPosition,
             requestCode: Int
         ) {

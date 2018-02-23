@@ -39,7 +39,6 @@ import com.bubelov.coins.repository.placeicon.PlaceIconsRepository
 import com.bubelov.coins.ui.model.PlacesSearchRow
 import com.bubelov.coins.util.*
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import java.text.NumberFormat
 import javax.inject.Inject
@@ -81,14 +80,14 @@ class PlacesSearchViewModel @Inject constructor(
         }
 
         searchJob = launch {
-            val places = async {
-                placesRepository.findBySearchQuery(searchQuery)
+            val places = placesRepository.findBySearchQuery(searchQuery)
                     .filter { it.currencies.contains(currency) }
                     .map { it.toRow(userLocation) }
                     .sortedBy { it.distance }
-            }.await()
 
-            result.postValue(places)
+            if (isActive) {
+                result.postValue(places)
+            }
         }
     }
 

@@ -33,7 +33,6 @@ import android.arch.lifecycle.ViewModel
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.Result
 import com.bubelov.coins.repository.place.PlacesRepository
-import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -41,28 +40,31 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class EditPlaceViewModel @Inject constructor(
-    val placesRepository: PlacesRepository
+    private val placesRepository: PlacesRepository
 ) : ViewModel() {
 
-    var place: Place? = null
+    lateinit var place: Place
 
-    var pickedLocation: LatLng? = null
+    private val loading = MutableLiveData<Boolean>().apply { value = false }
+    val showProgress: LiveData<Boolean> = loading
 
-    val showProgress = MutableLiveData<Boolean>().apply { value = false }
-
-    fun init(place: Place?) {
+    fun init(place: Place) {
         this.place = place
+    }
 
-        if (place != null) {
-            pickedLocation = LatLng(place.latitude, place.longitude)
+    fun submitChanges(): LiveData<Boolean> {
+        return if (place.id == 0L) {
+            addPlace(place)
+        } else {
+            updatePlace(place)
         }
     }
 
-    fun addPlace(place: Place): LiveData<Boolean> {
+    private fun addPlace(place: Place): LiveData<Boolean> {
         val success = MutableLiveData<Boolean>()
+        loading.value = true
 
-        launch(UI) {
-            showProgress.value = true
+        launch {
             val result = async { placesRepository.addPlace(place) }.await()
 
             when (result) {
@@ -70,7 +72,7 @@ class EditPlaceViewModel @Inject constructor(
                 is Result.Error -> {
                     Timber.e(result.e)
                     success.value = false
-                    showProgress.value = false
+                    loading.postValue(false)
                 }
             }
         }
@@ -78,11 +80,11 @@ class EditPlaceViewModel @Inject constructor(
         return success
     }
 
-    fun updatePlace(place: Place): LiveData<Boolean> {
+    private fun updatePlace(place: Place): LiveData<Boolean> {
         val success = MutableLiveData<Boolean>()
+        loading.value = true
 
         launch(UI) {
-            showProgress.value = true
             val result = async { placesRepository.updatePlace(place) }.await()
 
             when (result) {
@@ -90,11 +92,13 @@ class EditPlaceViewModel @Inject constructor(
                 is Result.Error -> {
                     Timber.e(result.e)
                     success.value = false
-                    showProgress.value = false
+                    loading.value = false
                 }
             }
         }
 
         return success
     }
+
+    fun showProgress() = loading
 }

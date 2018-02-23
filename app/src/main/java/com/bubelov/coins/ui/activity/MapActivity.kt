@@ -52,10 +52,6 @@ import com.bubelov.coins.Constants
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.widget.PlaceDetailsView
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
@@ -64,11 +60,13 @@ import com.squareup.picasso.Picasso
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MapViewModel
 import com.bubelov.coins.util.*
+import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
 import org.jetbrains.anko.longToast
+import java.util.*
 import javax.inject.Inject
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener, MapViewModel.Callback {
@@ -97,7 +95,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         drawerHeader = navigation_view.getHeaderView(0)
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as MapFragment
         mapFragment.getMapAsync(this)
 
         bottomSheetBehavior = BottomSheetBehavior.from(place_details)
@@ -211,7 +209,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
             val map = this.map.value
 
             if (map != null && model.moveToNextLocation) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(location.toLatLng(), MAP_DEFAULT_ZOOM))
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    location.toLatLng(),
+                    DEFAULT_MAP_ZOOM
+                ))
+
                 model.moveToNextLocation = false
             }
         })
@@ -303,7 +305,24 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     }
 
     override fun addPlace() {
-        EditPlaceActivity.startForResult(this, null, map.value!!.cameraPosition, REQUEST_ADD_PLACE)
+        val place = Place(
+            id = 0,
+            name = "",
+            latitude = 0.0,
+            longitude = 0.0,
+            category = "",
+            description = "",
+            currencies = arrayListOf("BTC"),
+            openedClaims = 0,
+            closedClaims = 0,
+            phone = "",
+            website = "",
+            openingHours = "",
+            visible = true,
+            updatedAt = Date(0)
+        )
+
+        EditPlaceActivity.startForResult(this, place, map.value!!.cameraPosition, REQUEST_ADD_PLACE)
     }
 
     override fun editPlace(place: Place) {
@@ -377,7 +396,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
                 if (place != null) {
                     map.observe(this@MapActivity, Observer { map ->
                         model.moveToNextLocation = false
-                        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(place.toLatLng(), MAP_DEFAULT_ZOOM))
+
+                        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                            place.toLatLng(),
+                            DEFAULT_MAP_ZOOM
+                        ))
                     })
                 }
 
@@ -447,17 +470,17 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     }
 
     companion object {
-        private val PLACE_ID_EXTRA = "place_id"
+        private const val PLACE_ID_EXTRA = "place_id"
 
-        private val REQUEST_CHECK_LOCATION_SETTINGS = 10
-        private val REQUEST_ACCESS_LOCATION = 20
-        private val REQUEST_FIND_PLACE = 30
-        private val REQUEST_ADD_PLACE = 40
-        private val REQUEST_EDIT_PLACE = 50
-        private val REQUEST_SIGN_IN = 60
-        private val REQUEST_PROFILE = 70
+        private const val REQUEST_CHECK_LOCATION_SETTINGS = 10
+        private const val REQUEST_ACCESS_LOCATION = 20
+        private const val REQUEST_FIND_PLACE = 30
+        private const val REQUEST_ADD_PLACE = 40
+        private const val REQUEST_EDIT_PLACE = 50
+        private const val REQUEST_SIGN_IN = 60
+        private const val REQUEST_PROFILE = 70
 
-        private val MAP_DEFAULT_ZOOM = 13f
+        private const val DEFAULT_MAP_ZOOM = 13f
 
         fun newIntent(context: Context, placeId: Long): Intent {
             val intent = Intent(context, MapActivity::class.java)
