@@ -92,7 +92,7 @@ class EditPlaceActivity : AppCompatActivity() {
             opening_hours.setText(place.openingHours)
         }
 
-        (supportFragmentManager.findFragmentById(R.id.map) as MapFragment).getMapAsync({
+        (fragmentManager.findFragmentById(R.id.map) as MapFragment).getMapAsync({
             map.value = it
         })
 

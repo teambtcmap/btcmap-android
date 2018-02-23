@@ -1,11 +1,38 @@
+// Define versions in a single place
+ext {
+    // Sdk and tools
+    minSdkVersion = 19
+    targetSdkVersion = 27
+    compileSdkVersion = 27
+    buildToolsVersion = '27.0.3'
+
+    // App dependencies
+    supportLibraryVersion = '27.0.2'
+    archComponentsVersion = '1.0.0'
+    playServicesVersion = '11.8.0'
+    coroutineVersion = '0.22.1'
+    ankoVersion = '0.10.4'
+    ktxVersion = '0.1'
+    daggerVersion = '2.14.1'
+    retrofitVersion = '2.3.0'
+    mapsUtilsVersion = '0.5'
+    picassoVersion = '2.5.2'
+    circleImageViewVersion = '2.1.0'
+    gsonVersion = '2.8.0'
+    timberVersion = '4.6.0'
+    crashlyticsVersion = '2.8.0'
+    runnerVersion = '1.0.0'
+    junitVersion = '4.12'
+    mockitoVersion = '2.7.6'
+    robolectricVersion = '3.5.1'
+    espressoVersion = '3.0.1'
+}
+
 buildscript {
-    ext.kotlin_version = '1.2.21'
-    ext.coroutines_version = '0.22'
-    ext.anko_version = '0.10.4'
-    ext.support_version = '27.0.2'
-    ext.arch_components_version = '1.0.0'
-    ext.play_services_version = '11.8.0'
-    ext.dagger_version = '2.14.1'
+    ext.gradlePluginVersion = '3.0.1'
+    ext.kotlinVersion = '1.2.21'
+    ext.googleServicesPluginVersion = '3.1.1'
+    ext.fabricPluginVersion = '1.24.4'
 
     repositories {
         google()
@@ -14,10 +41,10 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.google.gms:google-services:3.1.1'
-        classpath 'io.fabric.tools:gradle:1.24.4'
+        classpath "com.android.tools.build:gradle:$gradlePluginVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "com.google.gms:google-services:$googleServicesPluginVersion"
+        classpath "io.fabric.tools:gradle:$fabricPluginVersion"
     }
 }
 

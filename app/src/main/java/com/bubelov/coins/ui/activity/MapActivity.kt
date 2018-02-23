@@ -95,7 +95,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         drawerHeader = navigation_view.getHeaderView(0)
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as MapFragment
+        val mapFragment = fragmentManager.findFragmentById(R.id.map) as MapFragment
         mapFragment.getMapAsync(this)
 
         bottomSheetBehavior = BottomSheetBehavior.from(place_details)

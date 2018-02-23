@@ -99,6 +99,4 @@ class EditPlaceViewModel @Inject constructor(
 
         return success
     }
-
-    fun showProgress() = loading
 }
