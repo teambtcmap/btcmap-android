@@ -45,7 +45,7 @@ class NotificationAreaRepositoryTest : BaseRobolectricTest() {
 
     @Test
     fun isNullByDefault() {
-        Assert.assertTrue(repository.notificationArea.blockingObserve() == null)
+        Assert.assertTrue(repository.notificationArea == null)
     }
 
     @Test
@@ -56,7 +56,7 @@ class NotificationAreaRepositoryTest : BaseRobolectricTest() {
                 radius = 100.0
         )
 
-        repository.save(area)
-        Assert.assertEquals(repository.notificationArea.blockingObserve(), area)
+        repository.notificationArea = area
+        Assert.assertEquals(repository.notificationArea, area)
     }
 }

@@ -1,3 +1,30 @@
+/*
+ * This is free and unencumbered software released into the public domain.
+ *
+ * Anyone is free to copy, modify, publish, use, compile, sell, or
+ * distribute this software, either in source code form or as a compiled
+ * binary, for any purpose, commercial or non-commercial, and by any
+ * means.
+ *
+ * In jurisdictions that recognize copyright laws, the author or authors
+ * of this software dedicate any and all copyright interest in the
+ * software to the public domain. We make this dedication for the benefit
+ * of the public at large and to the detriment of our heirs and
+ * successors. We intend this dedication to be an overt act of
+ * relinquishment in perpetuity of all present and future rights to this
+ * software under copyright law.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information, please refer to <https://unlicense.org>
+ */
+
 package com.bubelov.coins.util
 
 import android.app.NotificationManager
@@ -13,13 +40,8 @@ import com.bubelov.coins.ui.activity.MapActivity
 import javax.inject.Inject
 import javax.inject.Singleton
 import android.app.NotificationChannel
-import android.arch.lifecycle.Observer
 import android.os.Build
 import com.bubelov.coins.model.NotificationArea
-
-/**
- * @author Igor Bubelov
- */
 
 @Singleton
 class PlaceNotificationManager @Inject
@@ -44,25 +66,21 @@ internal constructor(
         }
     }
 
-    fun notifyUserIfNecessary(newPlace: Place) {
-        if (!newPlace.visible) {
-            return
-        }
-
-        notificationAreaRepository.notificationArea.observeForever(object : Observer<NotificationArea> {
-            override fun onChanged(area: NotificationArea?) {
-                if (area != null) {
-                    if (isInsideArea(newPlace, area)) {
-                        notifyUser(newPlace)
-                    }
-                }
-
-                notificationAreaRepository.notificationArea.removeObserver(this)
+    fun issueNotificationsIfNecessary(newPlaces: Collection<Place>) {
+        newPlaces.forEach { place ->
+            if (!place.visible) {
+                return
             }
-        })
+
+            val notificationArea = notificationAreaRepository.notificationArea
+
+            if (notificationArea != null && place.inside(notificationArea)) {
+                issueNotification(place)
+            }
+        }
     }
 
-    fun notifyUser(place: Place) {
+    fun issueNotification(place: Place) {
         val builder = NotificationCompat.Builder(context, NEW_PLACE_NOTIFICATIONS_CHANNEL)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(context.getString(R.string.notification_new_place))
@@ -77,12 +95,12 @@ internal constructor(
         notificationManager.notify(place.id.toInt(), builder.build())
     }
 
-    private fun isInsideArea(newPlace: Place, area: NotificationArea): Boolean {
+    private fun Place.inside(area: NotificationArea): Boolean {
         return DistanceUtils.getDistance(
             area.latitude,
             area.longitude,
-            newPlace.latitude,
-            newPlace.longitude
+            latitude,
+            longitude
         ) <= area.radius
     }
 

@@ -44,12 +44,12 @@ class PlacesRepositoryTest : BaseRobolectricTest() {
 
     @Test
     fun isNotEmptyByDefault() {
-        assertNotNull(repository.findRandom().blockingObserve())
+        assertNotNull(repository.findRandom())
     }
 
     @Test
     fun returnsRandomPlace() {
-        assertNotNull(repository.findRandom().blockingObserve())
+        assertNotNull(repository.findRandom())
     }
 
     @Test

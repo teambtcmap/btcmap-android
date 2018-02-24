@@ -53,7 +53,7 @@ interface PlacesDb {
     fun findBySearchQuery(query: String): List<Place>
 
     @Query("SELECT * FROM Place ORDER BY RANDOM() LIMIT 1")
-    fun findRandom(): LiveData<Place?>
+    fun findRandom(): Place?
 
     @Query("SELECT COUNT(*) FROM Place")
     fun count(): Int

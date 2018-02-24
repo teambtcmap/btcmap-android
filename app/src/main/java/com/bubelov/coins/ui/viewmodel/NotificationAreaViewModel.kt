@@ -53,5 +53,7 @@ class NotificationAreaViewModel @Inject constructor(
         return (16 - Math.log(scale) / Math.log(2.0)).toInt()
     }
 
-    fun save(notificationArea: NotificationArea) = areaRepository.save(notificationArea)
+    fun save(notificationArea: NotificationArea) {
+        areaRepository.notificationArea = notificationArea
+    }
 }

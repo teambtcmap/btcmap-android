@@ -36,11 +36,13 @@ import android.preference.ListPreference
 import android.preference.Preference
 import android.preference.PreferenceFragment
 import android.preference.PreferenceScreen
-import android.support.v7.app.AppCompatActivity
 import com.bubelov.coins.R
 import com.bubelov.coins.ui.activity.SettingsActivity
 import com.bubelov.coins.ui.viewmodel.SettingsViewModel
 import dagger.android.AndroidInjection
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.alert
 import java.util.*
 import javax.inject.Inject
@@ -150,13 +152,12 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
             })
     }
 
-    private fun testNotification() {
-        model.placesRepository.findRandom()
-            .observe(activity as AppCompatActivity, android.arch.lifecycle.Observer {
-                if (it != null) {
-                    model.placeNotificationsManager.notifyUser(it)
-                }
-            })
+    private fun testNotification() = launch(UI) {
+        val randomPlace = async { model.placesRepository.findRandom() }.await()
+
+        if (randomPlace != null) {
+            model.placeNotificationsManager.issueNotification(randomPlace)
+        }
     }
 
     private fun getSettingsActivity() = activity as SettingsActivity

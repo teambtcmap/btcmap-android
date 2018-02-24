@@ -28,7 +28,6 @@
 package com.bubelov.coins.ui.activity
 
 import android.Manifest
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
@@ -107,14 +106,7 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         val defaultCameraPosition = intent.getParcelableExtra<CameraPosition>(DEFAULT_CAMERA_POSITION_EXTRA)
-
-        model.notificationArea.observe(this, Observer { area ->
-            if (area == null) {
-                model.save(model.getDefaultNotificationArea(defaultCameraPosition))
-            } else {
-                showArea(area)
-            }
-        })
+        showArea(model.notificationArea ?: model.getDefaultNotificationArea(defaultCameraPosition))
     }
 
     private fun showArea(area: NotificationArea) {
