@@ -36,6 +36,7 @@ import com.bubelov.coins.api.coins.CoinsApi
 import com.bubelov.coins.db.Database
 import com.bubelov.coins.util.StringAdapter
 import com.bubelov.coins.util.UtcDateTypeAdapter
+import com.google.android.gms.gcm.GcmNetworkManager
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
@@ -56,8 +57,15 @@ class AppModule {
     fun providePlacesDb(database: Database) = database.placesDb()
 
     @Provides @Singleton
-    fun provideFirebaseAnalytics(context: Context): FirebaseAnalytics =
-        FirebaseAnalytics.getInstance(context)
+    fun provideFirebaseAnalytics(context: Context): FirebaseAnalytics {
+        return FirebaseAnalytics.getInstance(context)
+    }
+
+
+    @Provides @Singleton
+    fun provideGcmNetworkManager(context: Context): GcmNetworkManager {
+        return GcmNetworkManager.getInstance(context)
+    }
 
     @Provides @Singleton
     fun providePreferences(context: Context): SharedPreferences {

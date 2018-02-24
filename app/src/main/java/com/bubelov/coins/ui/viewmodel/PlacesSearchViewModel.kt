@@ -55,9 +55,24 @@ class PlacesSearchViewModel @Inject constructor(
 
     val searchResults: LiveData<List<PlacesSearchRow>> =
         MediatorLiveData<List<PlacesSearchRow>>().apply {
-            addSource(userLocation, { search(this) })
-            addSource(currency, { search(this) })
-            addSource(searchQuery, { search(this) })
+            var params: SearchParams? = null
+
+            fun onSourceChanged() {
+                val newParams = SearchParams(
+                    userLocation.value,
+                    currency.value ?: "",
+                    searchQuery.value ?: ""
+                )
+
+                if (newParams.valid() && newParams != params) {
+                    params = newParams
+                    search(newParams, this)
+                }
+            }
+
+            addSource(userLocation, { onSourceChanged() })
+            addSource(currency, { onSourceChanged() })
+            addSource(searchQuery, { onSourceChanged() })
         }
 
     private var searchJob: Job? = null
@@ -67,23 +82,19 @@ class PlacesSearchViewModel @Inject constructor(
         this.currency.value = currency
     }
 
-    private fun search(result: MutableLiveData<List<PlacesSearchRow>>) {
+    private fun search(params: SearchParams, result: MutableLiveData<List<PlacesSearchRow>>) {
         searchJob?.cancel()
 
-        val userLocation = userLocation.value
-        val currency = currency.value
-        val searchQuery = searchQuery.value
-
-        if (currency.isNullOrEmpty() || searchQuery == null || searchQuery.length < MIN_QUERY_LENGTH) {
+        if (params.query.length < MIN_QUERY_LENGTH) {
             result.value = emptyList()
             return
         }
 
         searchJob = launch {
-            val places = placesRepository.findBySearchQuery(searchQuery)
-                    .filter { it.currencies.contains(currency) }
-                    .map { it.toRow(userLocation) }
-                    .sortedBy { it.distance }
+            val places = placesRepository.findBySearchQuery(params.query)
+                .filter { it.currencies.contains(params.currency) }
+                .map { it.toRow(params.location) }
+                .sortedBy { it.distance }
 
             if (isActive) {
                 result.postValue(places)
@@ -128,6 +139,16 @@ class PlacesSearchViewModel @Inject constructor(
             DistanceUnits.KILOMETERS -> context.getString(R.string.kilometers_short)
             DistanceUnits.MILES -> context.getString(R.string.miles_short)
         }
+    }
+
+    private data class SearchParams(
+        val location: Location?,
+        val currency: String,
+        val query: String
+    )
+
+    private fun SearchParams.valid(): Boolean {
+        return currency.isNotEmpty()
     }
 
     companion object {

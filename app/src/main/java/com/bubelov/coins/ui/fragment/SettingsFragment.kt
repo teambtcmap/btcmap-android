@@ -79,7 +79,7 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
     ): Boolean {
         when (preference.key) {
             getString(R.string.pref_currency_key) -> showCurrencySelector()
-            getString(R.string.pref_sync_database_key) -> model.databaseSync.start()
+            getString(R.string.pref_sync_database_key) -> launch { model.databaseSync.sync() }
             getString(R.string.pref_show_sync_log_key) -> showSyncLog()
             getString(R.string.pref_test_notification_key) -> testNotification()
         }

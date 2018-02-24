@@ -25,33 +25,26 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.db.sync
+package com.bubelov.coins.util
 
-import com.google.android.gms.gcm.GcmNetworkManager
-import com.google.android.gms.gcm.GcmTaskService
-import com.google.android.gms.gcm.TaskParams
-import dagger.android.AndroidInjection
-import kotlinx.coroutines.experimental.runBlocking
-import javax.inject.Inject
+import com.bubelov.coins.model.Place
+import java.util.*
 
-class DatabaseSyncService : GcmTaskService() {
-    @Inject lateinit var databaseSync: DatabaseSync
-
-    override fun onCreate() {
-        AndroidInjection.inject(this)
-        super.onCreate()
-    }
-
-    override fun onInitializeTasks() {
-        onRunTask(null)
-    }
-
-    override fun onRunTask(taskParams: TaskParams?): Int {
-        runBlocking { databaseSync.sync() }
-        return GcmNetworkManager.RESULT_SUCCESS
-    }
-
-    companion object {
-        const val TAG = "DATABASE_GCM_SYNC_SERVICE"
-    }
+fun emptyPlace(): Place {
+    return Place(
+        id = 0,
+        name = "",
+        latitude = 0.0,
+        longitude = 0.0,
+        category = "",
+        description = "",
+        currencies = arrayListOf("BTC"),
+        openedClaims = 0,
+        closedClaims = 0,
+        phone = "",
+        website = "",
+        openingHours = "",
+        visible = true,
+        updatedAt = Date(0)
+    )
 }

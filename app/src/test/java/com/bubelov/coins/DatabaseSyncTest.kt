@@ -27,35 +27,58 @@
 
 package com.bubelov.coins
 
-import com.bubelov.coins.repository.place.PlacesDb
 import com.bubelov.coins.db.sync.DatabaseSync
+import com.bubelov.coins.db.sync.SyncScheduler
+import com.bubelov.coins.repository.Result
 import com.bubelov.coins.repository.place.PlacesRepository
+import com.bubelov.coins.repository.synclogs.SyncLogsRepository
+import com.bubelov.coins.util.PlaceNotificationManager
+import com.bubelov.coins.util.emptyPlace
+import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.verify
 import kotlinx.coroutines.experimental.runBlocking
-import org.junit.Assert
-import org.junit.Before
 import org.junit.Test
-import javax.inject.Inject
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
+import org.mockito.MockitoAnnotations
 
-class DatabaseSyncTest : BaseRobolectricTest() {
-    @Inject lateinit var placesRepository: PlacesRepository
+class DatabaseSyncTest {
+    @Mock private lateinit var placesRepository: PlacesRepository
+    @Mock private lateinit var placeNotificationManager: PlaceNotificationManager
+    @Mock private lateinit var syncLogsRepository: SyncLogsRepository
+    @Mock private lateinit var databaseSyncScheduler: SyncScheduler
 
-    @Inject lateinit var databaseSync: DatabaseSync
+    private val databaseSync: DatabaseSync
 
-    @Inject lateinit var placesDb: PlacesDb
+    init {
+        MockitoAnnotations.initMocks(this)
 
-    @Before
-    fun init() {
-        TestInjector.testComponent.inject(this)
+        databaseSync = DatabaseSync(
+            placesRepository,
+            placeNotificationManager,
+            syncLogsRepository,
+            databaseSyncScheduler
+        )
     }
 
     @Test
-    fun syncing() {
-        runBlocking {
-            placesRepository.findBySearchQuery("")
-            val placesBeforeSync = placesDb.count()
-            Assert.assertTrue(placesBeforeSync > 0)
-            databaseSync.start().join()
-            Assert.assertNotEquals(placesBeforeSync, placesDb.count())
-        }
+    fun handleSuccessfulSync() {
+        val fetchedPlaces = listOf(
+            emptyPlace().copy(id = 1),
+            emptyPlace().copy(id = 2),
+            emptyPlace().copy(id = 3)
+        )
+
+        `when`(
+            placesRepository
+                .fetchNewPlaces()
+        )
+            .thenReturn(Result.Success(fetchedPlaces))
+
+        runBlocking { databaseSync.sync() }
+
+        verify(placeNotificationManager).issueNotificationsIfNecessary(fetchedPlaces)
+        verify(syncLogsRepository).addEntry(any())
+        verify(databaseSyncScheduler).scheduleNextSync()
     }
 }

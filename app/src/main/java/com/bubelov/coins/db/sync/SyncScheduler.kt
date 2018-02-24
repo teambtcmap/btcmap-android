@@ -28,30 +28,27 @@
 package com.bubelov.coins.db.sync
 
 import com.google.android.gms.gcm.GcmNetworkManager
-import com.google.android.gms.gcm.GcmTaskService
-import com.google.android.gms.gcm.TaskParams
-import dagger.android.AndroidInjection
-import kotlinx.coroutines.experimental.runBlocking
+import com.google.android.gms.gcm.PeriodicTask
+import com.google.android.gms.gcm.Task
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import javax.inject.Singleton
 
-class DatabaseSyncService : GcmTaskService() {
-    @Inject lateinit var databaseSync: DatabaseSync
-
-    override fun onCreate() {
-        AndroidInjection.inject(this)
-        super.onCreate()
+@Singleton
+class SyncScheduler @Inject constructor(
+    private val gcmNetworkManager: GcmNetworkManager
+) {
+    fun scheduleNextSync() {
+        PeriodicTask.Builder().apply {
+            setService(DatabaseSyncService::class.java)
+            setTag(DatabaseSyncService.TAG)
+            setPeriod(TimeUnit.DAYS.toSeconds(1))
+            setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)
+            setPersisted(true)
+        }.build().schedule()
     }
 
-    override fun onInitializeTasks() {
-        onRunTask(null)
-    }
-
-    override fun onRunTask(taskParams: TaskParams?): Int {
-        runBlocking { databaseSync.sync() }
-        return GcmNetworkManager.RESULT_SUCCESS
-    }
-
-    companion object {
-        const val TAG = "DATABASE_GCM_SYNC_SERVICE"
+    private fun PeriodicTask.schedule() {
+        gcmNetworkManager.schedule(this)
     }
 }

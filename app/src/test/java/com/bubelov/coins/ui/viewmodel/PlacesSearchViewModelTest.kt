@@ -32,8 +32,6 @@ import com.bubelov.coins.blockingObserve
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.placeicon.PlaceIconsRepository
 import org.junit.Assert
-import org.junit.runner.RunWith
-import org.junit.Before
 import org.junit.Test
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import android.graphics.Bitmap
@@ -41,24 +39,18 @@ import com.bubelov.coins.model.Place
 import org.junit.Rule
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.*
-import org.mockito.junit.MockitoJUnitRunner
 import java.util.*
 
-@RunWith(MockitoJUnitRunner::class)
 class PlacesSearchViewModelTest {
     @JvmField @Rule val instantExecutor = InstantTaskExecutorRule()
 
-    private lateinit var context: Context
-    private lateinit var placesRepository: PlacesRepository
-    private lateinit var placeIconsRepository: PlaceIconsRepository
-    private lateinit var model: PlacesSearchViewModel
+    private val placesRepository = mock(PlacesRepository::class.java)
+    private val placeIconsRepository = mock(PlaceIconsRepository::class.java)
 
-    @Before
-    fun init() {
-        context = mock(Context::class.java)
-        placesRepository = mock(PlacesRepository::class.java)
-        placeIconsRepository = mock(PlaceIconsRepository::class.java)
-        model = PlacesSearchViewModel(context, placesRepository, placeIconsRepository)
+    private val model: PlacesSearchViewModel
+
+    init {
+        model = PlacesSearchViewModel(mock(Context::class.java), placesRepository, placeIconsRepository)
 
         `when`(placesRepository.findBySearchQuery(ArgumentMatchers.anyString()))
             .thenReturn(listOf(
@@ -76,6 +68,7 @@ class PlacesSearchViewModelTest {
         model.init(null, "BTC")
         model.searchQuery.value = "bar"
         val results = model.searchResults.blockingObserve()
+        verify(placesRepository).findBySearchQuery("bar")
         Assert.assertEquals(2, results.size)
         Assert.assertTrue(results.all { it.name.contains("bar", ignoreCase = true) })
     }
@@ -85,6 +78,7 @@ class PlacesSearchViewModelTest {
         model.init(null, "BTC")
         model.searchQuery.value = "b"
         val results = model.searchResults.blockingObserve()
+        verifyZeroInteractions(placesRepository)
         Assert.assertTrue(results.isEmpty())
     }
 
