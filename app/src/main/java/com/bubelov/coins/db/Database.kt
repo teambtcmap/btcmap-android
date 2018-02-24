@@ -35,15 +35,12 @@ import android.arch.persistence.room.migration.Migration
 
 import com.bubelov.coins.repository.place.PlacesDb
 import com.bubelov.coins.model.Place
-import com.bubelov.coins.model.Preference
-import com.bubelov.coins.repository.preference.PreferencesDb
 import com.bubelov.coins.util.transaction
 
-@Database(entities = [Place::class, Preference::class], version = 2, exportSchema = true)
+@Database(entities = [Place::class], version = 2, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class Database : RoomDatabase() {
     abstract fun placesDb(): PlacesDb
-    abstract fun preferencesDb(): PreferencesDb
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -68,14 +65,6 @@ abstract class Database : RoomDatabase() {
                                 "`visible` INTEGER NOT NULL, " +
                                 "`updatedAt` INTEGER NOT NULL, " +
                                 "PRIMARY KEY(`id`)" +
-                                ")"
-                    )
-
-                    database.execSQL(
-                        "CREATE TABLE `Preference` (" +
-                                "`key` TEXT NOT NULL, " +
-                                "`value` TEXT NOT NULL, " +
-                                "PRIMARY KEY(`key`)" +
                                 ")"
                     )
                 }
