@@ -28,6 +28,7 @@
 package com.bubelov.coins.ui.activity
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
@@ -37,6 +38,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.ActivityCompat
@@ -149,7 +151,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
             navigation_view.menu.findItem(R.id.action_exchange_rates).isVisible = it == "BTC"
         })
 
-        drawerToggle = ActionBarDrawerToggle(this, drawer_layout, toolbar, R.string.open, R.string.close)
+        drawerToggle = ActionBarDrawerToggle(
+            this,
+            drawer_layout,
+            toolbar,
+            R.string.open,
+            R.string.close
+        )
+
         drawer_layout.addDrawerListener(drawerToggle)
 
         updateDrawerHeader()
@@ -165,14 +174,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         })
 
         fab.setOnClickListener {
-            if (model.userLocation.hasLocationPermission) {
-                val map = map.value
-                val location = model.userLocation.value
-
-                if (map != null && location != null) {
-                    map.animateCamera(CameraUpdateFactory.newLatLng(location.toLatLng()))
-                }
-            } else {
+            if (!model.userLocation.hasLocationPermission()) {
                 requestLocationPermissions()
             }
         }
@@ -184,7 +186,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
                 val selectedPlace = model.selectedPlace.value
 
                 if (selectedPlace != null) {
-                    analytics.logViewContent(selectedPlace.id.toString(), selectedPlace.name, "place")
+                    analytics.logViewContent(
+                        selectedPlace.id.toString(),
+                        selectedPlace.name,
+                        "place"
+                    )
                 }
             } else {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
@@ -200,20 +206,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         })
 
         model.userLocation.observe(this, Observer { location ->
-            if (location == null) {
-                return@Observer
-            }
-
-            model.onNewLocation(location)
-            val map = this.map.value
-
-            if (map != null && model.moveToNextLocation) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    location.toLatLng(),
-                    DEFAULT_MAP_ZOOM
-                ))
-
-                model.moveToNextLocation = false
+            if (location != null) {
+                fab.setOnClickListener {
+                    model.onNewLocation(location)
+                    map.value?.animateCamera(CameraUpdateFactory.newLatLngZoom(location.toLatLng(), DEFAULT_MAP_ZOOM))
+                }
             }
         })
 
@@ -233,13 +230,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == Activity.RESULT_OK) {
-            if (!model.userLocation.hasLocationPermission) {
+            if (!model.userLocation.hasLocationPermission()) {
                 requestLocationPermissions()
             }
         }
 
         if (requestCode == REQUEST_FIND_PLACE && resultCode == Activity.RESULT_OK) {
-            moveToPlace(data?.getLongExtra(PlacesSearchActivity.PLACE_ID_EXTRA, 0) ?: 0)
+            model.navigateToNextSelectedPlace = true
+            model.selectedPlaceId.value = data?.getLongExtra(PlacesSearchActivity.PLACE_ID_EXTRA, 0) ?: 0
         }
 
         if (requestCode == REQUEST_ADD_PLACE && resultCode == Activity.RESULT_OK) {
@@ -261,12 +259,30 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    @SuppressLint("MissingPermission")
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             REQUEST_ACCESS_LOCATION -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 model.userLocation.onLocationPermissionGranted()
+                map.value?.isMyLocationEnabled = true
+                moveToUserLocation()
             }
         }
+    }
+
+    private fun moveToUserLocation() {
+        model.userLocation.observe(this, object: Observer<Location> {
+            override fun onChanged(location: Location?) {
+                if (location != null) {
+                    map.value?.animateCamera(CameraUpdateFactory.newLatLngZoom(location.toLatLng(), DEFAULT_MAP_ZOOM))
+                    model.userLocation.removeObserver(this)
+                }
+            }
+        })
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
@@ -274,7 +290,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         when (id) {
             R.id.action_add -> model.onAddPlaceClick()
-            R.id.action_search -> PlacesSearchActivity.startForResult(this, model.userLocation.value, model.selectedCurrency.value ?: SelectedCurrencyLiveData.DEFAULT_CURRENCY, REQUEST_FIND_PLACE)
+
+            R.id.action_search -> PlacesSearchActivity.startForResult(
+                this,
+                model.userLocation.value,
+                model.selectedCurrency.value ?: SelectedCurrencyLiveData.DEFAULT_CURRENCY,
+                REQUEST_FIND_PLACE
+            )
+
             else -> return super.onOptionsItemSelected(item)
         }
 
@@ -321,11 +344,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     }
 
     private fun requestLocationPermissions() {
-        ActivityCompat.requestPermissions(this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                MapActivity.REQUEST_ACCESS_LOCATION)
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            MapActivity.REQUEST_ACCESS_LOCATION
+        )
     }
 
+    @SuppressLint("MissingPermission")
     override fun onMapReady(map: GoogleMap) {
         this.map.value = map
 
@@ -336,9 +362,25 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         initClustering(map)
 
-        if (!model.userLocation.hasLocationPermission) {
+        if (model.userLocation.hasLocationPermission()) {
+            map.isMyLocationEnabled = true
+            moveToUserLocation()
+        } else {
             requestLocationPermissions()
         }
+
+        model.selectedPlace.observe(this, Observer { place ->
+            if (place != null && model.navigateToNextSelectedPlace) {
+                map.moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        place.toLatLng(),
+                        DEFAULT_MAP_ZOOM
+                    )
+                )
+
+                model.navigateToNextSelectedPlace = false
+            }
+        })
     }
 
     private fun updateDrawerHeader() {
@@ -369,31 +411,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
     private fun handleIntent(intent: Intent) {
         if (intent.hasExtra(PLACE_ID_EXTRA)) {
-            moveToPlace(intent.getLongExtra(PLACE_ID_EXTRA, 0))
+            model.selectedPlaceId.value = intent.getLongExtra(PLACE_ID_EXTRA, 0)
         }
 
         updateDrawerHeader()
-    }
-
-    private fun moveToPlace(id: Long) {
-        model.selectedPlaceId.value = id
-
-        model.selectedPlace.observe(this, object: Observer<Place?> {
-            override fun onChanged(place: Place?) {
-                if (place != null) {
-                    map.observe(this@MapActivity, Observer { map ->
-                        model.moveToNextLocation = false
-
-                        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            place.toLatLng(),
-                            DEFAULT_MAP_ZOOM
-                        ))
-                    })
-                }
-
-                model.selectedPlace.removeObserver(this)
-            }
-        })
     }
 
     private fun openExchangeRatesScreen() {
@@ -439,13 +460,20 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         this.placesManager.value = placesManager
     }
 
-    private inner class PlacesRenderer internal constructor(context: Context, map: GoogleMap, clusterManager: ClusterManager<PlaceMarker>) : DefaultClusterRenderer<PlaceMarker>(context, map, clusterManager) {
-        override fun onBeforeClusterItemRendered(placeMarker: PlaceMarker, markerOptions: MarkerOptions) {
+    private inner class PlacesRenderer internal constructor(
+        context: Context,
+        map: GoogleMap,
+        clusterManager: ClusterManager<PlaceMarker>
+    ) : DefaultClusterRenderer<PlaceMarker>(context, map, clusterManager) {
+        override fun onBeforeClusterItemRendered(
+            placeMarker: PlaceMarker,
+            markerOptions: MarkerOptions
+        ) {
             super.onBeforeClusterItemRendered(placeMarker, markerOptions)
 
             markerOptions
-                    .icon(BitmapDescriptorFactory.fromBitmap(placeMarker.icon))
-                    .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V)
+                .icon(BitmapDescriptorFactory.fromBitmap(placeMarker.icon))
+                .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V)
         }
     }
 
@@ -467,7 +495,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         private const val REQUEST_SIGN_IN = 60
         private const val REQUEST_PROFILE = 70
 
-        private const val DEFAULT_MAP_ZOOM = 13f
+        private const val DEFAULT_MAP_ZOOM = 15f
 
         fun newIntent(context: Context, placeId: Long): Intent {
             val intent = Intent(context, MapActivity::class.java)

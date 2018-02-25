@@ -51,17 +51,13 @@ class MapViewModel @Inject constructor(
     private val notificationAreaRepository: NotificationAreaRepository,
     private val placesRepository: PlacesRepository,
     private val placeIconsRepository: PlaceIconsRepository,
+    val userLocation: LocationLiveData,
     val analytics: Analytics
 ) : ViewModel() {
 
     val selectedPlaceId = MutableLiveData<Long>()
-
-    val selectedPlace: LiveData<Place> =
-        Transformations.switchMap(selectedPlaceId) { placesRepository.find(it) }
-
-    val userLocation = LocationLiveData(context, 1000)
-
-    var moveToNextLocation = true
+    val selectedPlace: LiveData<Place> = Transformations.switchMap(selectedPlaceId) { placesRepository.find(it) }
+    var navigateToNextSelectedPlace = false
 
     var callback: Callback? = null
 
