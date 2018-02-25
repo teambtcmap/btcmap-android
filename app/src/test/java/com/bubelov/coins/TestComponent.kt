@@ -36,12 +36,10 @@ import javax.inject.Singleton
 @Singleton
 @Component(modules = [AppModule::class, DatabaseTestModule::class])
 interface TestComponent {
-    fun inject(target: ExchangeRatesRepositoryTest)
     fun inject(target: NotificationAreaRepositoryTest)
     fun inject(target: PlacesAssetsCacheTest)
     fun inject(target: PlacesRepositoryTest)
     fun inject(target: SyncLogsRepositoryTest)
-    fun inject(target: DatabaseSyncTest)
     fun inject(target: PlacesDbTests)
 
     @Component.Builder
