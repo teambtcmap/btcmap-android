@@ -29,11 +29,11 @@ package com.bubelov.coins.ui.viewmodel
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.Result
 import com.bubelov.coins.repository.place.PlacesRepository
-import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import timber.log.Timber
@@ -45,58 +45,39 @@ class EditPlaceViewModel @Inject constructor(
 
     lateinit var place: Place
 
-    private val loading = MutableLiveData<Boolean>().apply { value = false }
-    val showProgress: LiveData<Boolean> = loading
+    private val submittingChanges = MutableLiveData<Boolean>()
+    val showProgress: LiveData<Boolean> = submittingChanges
+
+    private val submitChangesResult = MutableLiveData<Result<Place>>()
+
+    val submittedSuccessfully: LiveData<Boolean> = Transformations.map(submitChangesResult, {
+        when (it) {
+            is Result.Success -> true
+            is Result.Error -> false
+            else -> null
+        }
+    })
 
     fun init(place: Place) {
         this.place = place
     }
 
-    fun submitChanges(): LiveData<Boolean> {
-        return if (place.id == 0L) {
-            addPlace(place)
-        } else {
-            updatePlace(place)
-        }
-    }
+    fun submitChanges() = launch {
+        submittingChanges.postValue(true)
 
-    private fun addPlace(place: Place): LiveData<Boolean> {
-        val success = MutableLiveData<Boolean>()
-        loading.value = true
-
-        launch {
-            val result = async { placesRepository.addPlace(place) }.await()
-
-            when (result) {
-                is Result.Success -> success.value = true
-                is Result.Error -> {
-                    Timber.e(result.e)
-                    success.value = false
-                    loading.postValue(false)
-                }
+        val result = async {
+            if (place.id == 0L) {
+                placesRepository.addPlace(place)
+            } else {
+                placesRepository.updatePlace(place)
             }
+        }.await()
+
+        submitChangesResult.postValue(result)
+        submittingChanges.postValue(false)
+
+        if (result is Result.Error) {
+            Timber.e(result.e)
         }
-
-        return success
-    }
-
-    private fun updatePlace(place: Place): LiveData<Boolean> {
-        val success = MutableLiveData<Boolean>()
-        loading.value = true
-
-        launch(UI) {
-            val result = async { placesRepository.updatePlace(place) }.await()
-
-            when (result) {
-                is Result.Success -> success.value = true
-                is Result.Error -> {
-                    Timber.e(result.e)
-                    success.value = false
-                    loading.value = false
-                }
-            }
-        }
-
-        return success
     }
 }

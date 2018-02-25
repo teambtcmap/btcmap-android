@@ -66,7 +66,6 @@ import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
 import org.jetbrains.anko.longToast
-import java.util.*
 import javax.inject.Inject
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener, MapViewModel.Callback {
@@ -305,28 +304,16 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     }
 
     override fun addPlace() {
-        val place = Place(
-            id = 0,
-            name = "",
-            latitude = 0.0,
-            longitude = 0.0,
-            category = "",
-            description = "",
-            currencies = arrayListOf("BTC"),
-            openedClaims = 0,
-            closedClaims = 0,
-            phone = "",
-            website = "",
-            openingHours = "",
-            visible = true,
-            updatedAt = Date(0)
+        val place = emptyPlace().copy(
+            latitude = map.value?.cameraPosition?.target?.latitude ?: 0.0,
+            longitude = map.value?.cameraPosition?.target?.longitude ?: 0.0
         )
 
-        EditPlaceActivity.startForResult(this, place, map.value!!.cameraPosition, REQUEST_ADD_PLACE)
+        EditPlaceActivity.startForResult(this, place, REQUEST_ADD_PLACE)
     }
 
     override fun editPlace(place: Place) {
-        EditPlaceActivity.startForResult(this, place, map.value!!.cameraPosition, REQUEST_EDIT_PLACE)
+        EditPlaceActivity.startForResult(this, place, REQUEST_EDIT_PLACE)
     }
 
     override fun showUserProfile() {

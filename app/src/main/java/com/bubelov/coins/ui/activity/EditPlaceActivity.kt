@@ -35,6 +35,7 @@ import android.location.Location
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import com.bubelov.coins.Constants
 
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Place
@@ -44,8 +45,10 @@ import com.bubelov.coins.util.toLocation
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapFragment
-import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_edit_place.*
@@ -57,6 +60,7 @@ class EditPlaceActivity : AppCompatActivity() {
     private lateinit var model: EditPlaceViewModel
 
     private val map = MutableLiveData<GoogleMap>()
+    private var placeLocationMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -82,10 +86,8 @@ class EditPlaceActivity : AppCompatActivity() {
         if (place.id == 0L) {
             toolbar.setTitle(R.string.action_add_place)
             closed_switch.visibility = View.GONE
-            change_location.setText(R.string.set_location)
         } else {
             name.setText(place.name)
-            change_location.setText(R.string.change_location)
             phone.setText(place.phone)
             website.setText(place.website)
             description.setText(place.description)
@@ -98,6 +100,7 @@ class EditPlaceActivity : AppCompatActivity() {
 
         closed_switch.setOnCheckedChangeListener { _, checked ->
             name.isEnabled = !checked
+            change_location.visibility = if (checked) View.GONE else View.VISIBLE
             phone.isEnabled = !checked
             website.isEnabled = !checked
             description.isEnabled = !checked
@@ -115,6 +118,10 @@ class EditPlaceActivity : AppCompatActivity() {
         }
 
         model.showProgress.observe(this, Observer {
+            if (isFinishing) {
+                return@Observer
+            }
+
             state_switcher.displayedChild = if (it == true) 1 else 0
         })
 
@@ -123,6 +130,8 @@ class EditPlaceActivity : AppCompatActivity() {
 
             map.uiSettings.setAllGesturesEnabled(false)
 
+            setMarker(map, LatLng(place.latitude, place.longitude).toLocation())
+
             map.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(place.latitude, place.longitude),
@@ -130,46 +139,67 @@ class EditPlaceActivity : AppCompatActivity() {
                 )
             )
         })
+
+        model.submittedSuccessfully.observe(this, Observer {
+            when (it) {
+                true -> {
+                    setResult(Activity.RESULT_OK)
+                    finish()
+                }
+
+                false -> alert(messageResource = R.string.could_not_submit_changes, init = {
+                    positiveButton(android.R.string.ok, {
+
+                    })
+                }).show()
+            }
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_PICK_LOCATION && resultCode == Activity.RESULT_OK && data != null) {
+            val map = map.value
             val location = data.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA) as Location
 
-            map.value?.moveCamera(
-                CameraUpdateFactory.newLatLngZoom(
-                    location.toLatLng(),
-                    DEFAULT_ZOOM
-                )
-            )
+            if (map != null) {
+                setMarker(map, location)
 
-            change_location.setText(R.string.change_location)
+                map.moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        location.toLatLng(),
+                        DEFAULT_ZOOM
+                    )
+                )
+            }
         }
 
         super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    private fun setMarker(map: GoogleMap, location: Location) {
+        placeLocationMarker?.remove()
+
+        placeLocationMarker = map.addMarker(
+            MarkerOptions()
+                .position(location.toLatLng())
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker_empty))
+                .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V)
+        )
     }
 
     private fun submit() {
         syncUIWithModel()
 
         if (name.length() == 0) {
-            alert(messageResource = R.string.name_is_not_specified).show()
+            alert(messageResource = R.string.name_is_not_specified, init = {
+                positiveButton(android.R.string.ok, {
+
+                })
+            }).show()
             return
         }
 
-        if (model.place.latitude == 0.0 && model.place.longitude == 0.0) {
-            alert(messageResource = R.string.location_is_not_specified).show()
-            return
-        }
-
-        model.submitChanges().observe(this, Observer { success ->
-            if (success == true) {
-                setResult(Activity.RESULT_OK)
-                finish()
-            } else {
-                alert(messageResource = R.string.could_not_submit_changes).show()
-            }
-        })
+        model.submitChanges()
     }
 
     private fun syncUIWithModel() {
@@ -187,7 +217,6 @@ class EditPlaceActivity : AppCompatActivity() {
 
     companion object {
         private const val PLACE_EXTRA = "place"
-        private const val CAMERA_POSITION_EXTRA = "camera_position"
 
         private const val REQUEST_PICK_LOCATION = 10
 
@@ -196,12 +225,10 @@ class EditPlaceActivity : AppCompatActivity() {
         fun startForResult(
             activity: Activity,
             place: Place,
-            cameraPosition: CameraPosition,
             requestCode: Int
         ) {
             val intent = Intent(activity, EditPlaceActivity::class.java)
             intent.putExtra(PLACE_EXTRA, place)
-            intent.putExtra(CAMERA_POSITION_EXTRA, cameraPosition)
             activity.startActivityForResult(intent, requestCode)
         }
     }
