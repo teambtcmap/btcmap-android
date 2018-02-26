@@ -62,14 +62,14 @@ class PlacesDbTests: BaseRobolectricTest() {
 
     @Test
     fun isEmptyByDefault() {
-        assertEquals(0, placesDb.count())
+        assertEquals(0, placesDb.count().blockingObserve())
     }
 
     @Test
     fun insertsPlace() {
-        assertEquals(0, placesDb.count())
+        assertEquals(0, placesDb.count().blockingObserve())
         placesDb.insert(listOf(cafe))
-        assertEquals(1, placesDb.count())
+        assertEquals(1, placesDb.count().blockingObserve())
         assertEquals(cafe, placesDb.find(cafe.id).blockingObserve())
         assertEquals(cafe, placesDb.all().blockingObserve()[0])
     }
@@ -80,7 +80,7 @@ class PlacesDbTests: BaseRobolectricTest() {
             placesDb.insert(listOf(cafe.copy(id = it, description = cafe.description + it)))
         }
 
-        assertEquals(100, placesDb.count())
+        assertEquals(100, placesDb.count().blockingObserve())
         assertEquals(1, placesDb.findBySearchQuery("55").size)
     }
 }

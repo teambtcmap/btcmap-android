@@ -61,7 +61,6 @@ class AppModule {
         return FirebaseAnalytics.getInstance(context)
     }
 
-
     @Provides @Singleton
     fun provideGcmNetworkManager(context: Context): GcmNetworkManager {
         return GcmNetworkManager.getInstance(context)

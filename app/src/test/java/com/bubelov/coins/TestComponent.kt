@@ -37,13 +37,13 @@ import javax.inject.Singleton
 @Component(modules = [AppModule::class, DatabaseTestModule::class])
 interface TestComponent {
     fun inject(target: PlacesAssetsCacheTest)
-    fun inject(target: PlacesRepositoryTest)
     fun inject(target: PlacesDbTests)
 
     @Component.Builder
     interface Builder {
         @BindsInstance
         fun context(context: Context): Builder
+
         fun build(): TestComponent
     }
 }

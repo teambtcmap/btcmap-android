@@ -25,48 +25,43 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins
+package com.bubelov.coins.repository
 
-import com.bubelov.coins.repository.Result
+import android.arch.core.executor.testing.InstantTaskExecutorRule
+import android.arch.lifecycle.MutableLiveData
+import com.bubelov.coins.repository.place.PlacesApi
+import com.bubelov.coins.repository.place.PlacesAssetsCache
+import com.bubelov.coins.repository.place.PlacesDb
 import com.bubelov.coins.repository.place.PlacesRepository
-import org.junit.Assert.*
-import org.junit.Before
+import com.bubelov.coins.util.Analytics
+import com.bubelov.coins.util.emptyPlace
+import org.junit.Rule
 import org.junit.Test
-import javax.inject.Inject
+import org.mockito.Mock
+import org.mockito.Mockito.*
+import org.mockito.MockitoAnnotations
 
-class PlacesRepositoryTest : BaseRobolectricTest() {
-    @Inject lateinit var repository: PlacesRepository
+class PlacesRepositoryTest {
+    @JvmField @Rule val instantExecutor = InstantTaskExecutorRule()
 
-    @Before
-    fun init() {
-        TestInjector.testComponent.inject(this)
+    @Mock private lateinit var placesApi: PlacesApi
+    @Mock private lateinit var placesDb: PlacesDb
+    @Mock private lateinit var placesAssetsCache: PlacesAssetsCache
+    @Mock private lateinit var analytics: Analytics
+
+    init {
+        MockitoAnnotations.initMocks(this)
     }
 
     @Test
-    fun isNotEmptyByDefault() {
-        assertNotNull(repository.findRandom())
-    }
+    fun usesAssetsCacheWhenEmpty() {
+        `when`(placesDb.count()).thenReturn(MutableLiveData<Int>().apply { value = 0 })
+        val places = listOf(emptyPlace().copy(id = 1, name = "Cafe"))
+        `when`(placesAssetsCache.getPlaces()).thenReturn(places)
 
-    @Test
-    fun returnsRandomPlace() {
-        assertNotNull(repository.findRandom())
-    }
+        PlacesRepository(placesApi, placesDb, placesAssetsCache, analytics)
 
-    @Test
-    fun fetchesNewPlaces() {
-        val result = repository.fetchNewPlaces()
-        assertTrue(result is Result.Success && !result.data.isEmpty())
-    }
-
-    @Test
-    fun returnsCurrenciesToPlaces() {
-        val currenciesToPlaces = repository.getCurrenciesToPlacesMap().blockingObserve()
-        assertNotNull(currenciesToPlaces)
-        assertTrue(currenciesToPlaces.size > 1)
-    }
-
-    @Test
-    fun searchIsWorking() {
-        assertNotEquals(0, repository.findBySearchQuery("cafe").size)
+        verify(placesAssetsCache).getPlaces()
+        verify(placesDb).insert(places)
     }
 }

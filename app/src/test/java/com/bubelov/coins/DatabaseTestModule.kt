@@ -30,7 +30,6 @@ package com.bubelov.coins
 import android.arch.persistence.room.Room
 import android.content.Context
 import com.bubelov.coins.db.Database
-import com.bubelov.coins.db.DatabaseConfig
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -39,13 +38,7 @@ import javax.inject.Singleton
 class DatabaseTestModule {
     @Provides
     @Singleton
-    fun provideDatabase(context: Context, databaseConfig: DatabaseConfig) = Room.inMemoryDatabaseBuilder(context, Database::class.java).apply {
-        if (databaseConfig.canUseMainThread) {
+    fun provideDatabase(context: Context) = Room.inMemoryDatabaseBuilder(context, Database::class.java).apply {
             allowMainThreadQueries()
-        }
-    }.build()
-
-    @Provides
-    @Singleton
-    fun provideDatabaseConfig() = DatabaseConfig(canUseMainThread = true)
+        }.build()
 }

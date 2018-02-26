@@ -30,15 +30,11 @@ package com.bubelov.coins.repository.place
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
-import android.os.SystemClock
-import com.bubelov.coins.db.DatabaseConfig
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.Result
 import com.bubelov.coins.util.Analytics
 import com.bubelov.coins.util.toLatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
 import java.util.*
 
 import javax.inject.Inject
@@ -49,20 +45,15 @@ class PlacesRepository @Inject constructor(
     private val api: PlacesApi,
     private val db: PlacesDb,
     private val assetsCache: PlacesAssetsCache,
-    private val analytics: Analytics,
-    databaseConfig: DatabaseConfig
+    private val analytics: Analytics
 ) {
     private val allPlaces = db.all()
 
-    private val initAssets = launch {
-        if (db.count() == 0) {
-            db.insert(assetsCache.getPlaces())
-        }
-    }
-
     init {
-        if (databaseConfig.canUseMainThread) {
-            runBlocking { initAssets.join() }
+        db.count().observeForever { count ->
+            if (count == 0) {
+                db.insert(assetsCache.getPlaces())
+            }
         }
     }
 
@@ -99,12 +90,6 @@ class PlacesRepository @Inject constructor(
 
     fun fetchNewPlaces(): Result<List<Place>> {
         try {
-            runBlocking { initAssets.join() }
-
-            while (db.count() == 0) {
-                SystemClock.sleep(100)
-            }
-
             val latestPlaceUpdatedAt = db.maxUpdatedAt() ?: Date(0)
             val response = api.getPlaces(Date(latestPlaceUpdatedAt.time + 1)).execute()
 
