@@ -365,7 +365,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         if (model.userLocation.hasLocationPermission()) {
             map.isMyLocationEnabled = true
 
-            if (model.selectedPlaceId.value == 0L) {
+            if (model.selectedPlaceId.value == null || model.selectedPlaceId.value == 0L) {
                 moveToUserLocation()
             }
         } else {
