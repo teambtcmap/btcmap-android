@@ -91,13 +91,24 @@ class PlacesSearchViewModel @Inject constructor(
         }
 
         searchJob = launch {
-            val places = placesRepository.findBySearchQuery(params.query)
+            var places = placesRepository.findBySearchQuery(params.query)
                 .filter { it.currencies.contains(params.currency) }
-                .map { it.toRow(params.location) }
-                .sortedBy { it.distance }
+
+            if (params.location != null) {
+                places = places.sortedBy {
+                    DistanceUtils.getDistance(
+                        params.location.latitude,
+                        params.location.longitude,
+                        it.latitude,
+                        it.longitude
+                    )
+                }
+            }
+
+            val rows = places.map { it.toRow(params.location) }
 
             if (isActive) {
-                result.postValue(places)
+                result.postValue(rows)
             }
         }
     }
