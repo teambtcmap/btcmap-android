@@ -364,7 +364,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         if (model.userLocation.hasLocationPermission()) {
             map.isMyLocationEnabled = true
-            moveToUserLocation()
+
+            if (model.selectedPlaceId.value == 0L) {
+                moveToUserLocation()
+            }
         } else {
             requestLocationPermissions()
         }
@@ -411,6 +414,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
     private fun handleIntent(intent: Intent) {
         if (intent.hasExtra(PLACE_ID_EXTRA)) {
+            model.navigateToNextSelectedPlace = true
             model.selectedPlaceId.value = intent.getLongExtra(PLACE_ID_EXTRA, 0)
         }
 
