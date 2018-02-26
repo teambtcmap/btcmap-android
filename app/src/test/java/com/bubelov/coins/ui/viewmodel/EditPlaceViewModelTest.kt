@@ -28,18 +28,16 @@
 package com.bubelov.coins.ui.viewmodel
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
+import com.bubelov.coins.any
 import com.bubelov.coins.blockingObserve
 import com.bubelov.coins.repository.Result
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.util.emptyPlace
-import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.never
-import com.nhaarman.mockito_kotlin.verify
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 
 class EditPlaceViewModelTest {

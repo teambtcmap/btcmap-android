@@ -27,36 +27,35 @@
 
 package com.bubelov.coins
 
-import com.bubelov.coins.model.NotificationArea
-import com.bubelov.coins.repository.area.NotificationAreaRepository
-import org.junit.Assert
-import org.junit.Before
+/**
+ * Helper functions that are workarounds to kotlin Runtime Exceptions when using kotlin.
+ */
 
-import org.junit.Test
-import javax.inject.Inject
+import org.mockito.ArgumentCaptor
+import org.mockito.Mockito
 
-class NotificationAreaRepositoryTest : BaseRobolectricTest() {
-    @Inject lateinit var repository: NotificationAreaRepository
+/**
+ * Returns Mockito.eq() as nullable type to avoid java.lang.IllegalStateException when
+ * null is returned.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+fun <T> eq(obj: T): T = Mockito.eq<T>(obj)
 
-    @Before
-    fun init() {
-        TestInjector.testComponent.inject(this)
-    }
+/**
+ * Returns Mockito.any() as nullable type to avoid java.lang.IllegalStateException when
+ * null is returned.
+ */
+fun <T> any(): T = Mockito.any<T>()
 
-    @Test
-    fun isNullByDefault() {
-        Assert.assertTrue(repository.notificationArea == null)
-    }
+/**
+ * Returns ArgumentCaptor.capture() as nullable type to avoid java.lang.IllegalStateException
+ * when null is returned.
+ */
+fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
 
-    @Test
-    fun savesArea() {
-        val area = NotificationArea(
-                latitude = 50.0,
-                longitude = 0.0,
-                radius = 100.0
-        )
-
-        repository.notificationArea = area
-        Assert.assertEquals(repository.notificationArea, area)
-    }
-}
+/**
+ * Helper function for creating an argumentCaptor in kotlin.
+ */
+inline fun <reified T : Any> argumentCaptor(): ArgumentCaptor<T> =
+    ArgumentCaptor.forClass(T::class.java)

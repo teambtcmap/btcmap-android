@@ -32,11 +32,11 @@ import com.bubelov.coins.repository.rate.BitcoinAverage
 import com.bubelov.coins.repository.rate.Bitstamp
 import com.bubelov.coins.repository.rate.Coinbase
 import com.bubelov.coins.repository.rate.ExchangeRatesRepository
-import com.nhaarman.mockito_kotlin.verify
 import org.junit.Assert
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 class ExchangeRatesRepositoryTest {

@@ -34,12 +34,11 @@ import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.synclogs.SyncLogsRepository
 import com.bubelov.coins.util.PlaceNotificationManager
 import com.bubelov.coins.util.emptyPlace
-import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.verify
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 class DatabaseSyncTest {
@@ -69,16 +68,13 @@ class DatabaseSyncTest {
             emptyPlace().copy(id = 3)
         )
 
-        `when`(
-            placesRepository
-                .fetchNewPlaces()
-        )
+        `when`(placesRepository.fetchNewPlaces())
             .thenReturn(Result.Success(fetchedPlaces))
 
         runBlocking { databaseSync.sync() }
 
         verify(placeNotificationManager).issueNotificationsIfNecessary(fetchedPlaces)
-        verify(syncLogsRepository).addEntry(any())
+        verify(syncLogsRepository).insert(any())
         verify(databaseSyncScheduler).scheduleNextSync()
     }
 }

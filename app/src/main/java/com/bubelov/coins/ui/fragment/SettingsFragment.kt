@@ -92,7 +92,7 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
     }
 
     private fun showSyncLog() {
-        val logs = model.syncLogsRepository.syncLogs
+        val logs = model.syncLogsRepository.all()
             .reversed()
             .map { "Date: ${Date(it.time)}, Affected places: ${it.affectedPlaces}" }
 

@@ -64,7 +64,7 @@ internal constructor(
     }
 
     private fun onFetchNewPlaces(places: Collection<Place>) {
-        syncLogsRepository.addEntry(
+        syncLogsRepository.insert(
             SyncLogEntry(
                 System.currentTimeMillis(),
                 places.size

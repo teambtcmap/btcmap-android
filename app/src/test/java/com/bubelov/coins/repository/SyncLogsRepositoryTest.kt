@@ -25,34 +25,52 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins
+package com.bubelov.coins.repository
 
+import android.content.SharedPreferences
 import com.bubelov.coins.model.SyncLogEntry
 import com.bubelov.coins.repository.synclogs.SyncLogsRepository
+import com.google.gson.Gson
 import org.junit.Assert
-import org.junit.Before
 import org.junit.Test
-import javax.inject.Inject
+import org.mockito.ArgumentMatchers
+import org.mockito.Mock
+import org.mockito.Mockito.*
+import org.mockito.MockitoAnnotations
 
-class SyncLogsRepositoryTest : BaseRobolectricTest() {
-    @Inject lateinit var repository: SyncLogsRepository
+class SyncLogsRepositoryTest {
+    @Mock private lateinit var sharedPreferences: SharedPreferences
 
-    @Before
-    fun init() {
-        TestInjector.testComponent.inject(this)
+    init {
+        MockitoAnnotations.initMocks(this)
     }
 
     @Test
-    fun isEmptyByDefault() {
-        Assert.assertNotNull(repository.syncLogs)
-        Assert.assertEquals(0, repository.syncLogs.size)
+    fun returnsEmptyListWithEmptyPreferences() {
+        `when`(sharedPreferences.getString(ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
+            .thenReturn("")
+
+        val repository = SyncLogsRepository(sharedPreferences, Gson())
+        Assert.assertTrue(repository.all().isEmpty())
+        verify(sharedPreferences).getString(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())
+        verifyNoMoreInteractions(sharedPreferences)
     }
 
     @Test
     fun savesNewEntry() {
+        `when`(sharedPreferences.getString(ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
+            .thenReturn("")
+
+        val editor = mock(SharedPreferences.Editor::class.java)
+        `when`(editor.putString(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(editor)
+        `when`(sharedPreferences.edit()).thenReturn(editor)
+
+        val repository = SyncLogsRepository(sharedPreferences, Gson())
         val entry = SyncLogEntry(time = System.currentTimeMillis(), affectedPlaces = 5)
-        repository.addEntry(entry)
-        Assert.assertEquals(1, repository.syncLogs.size)
-        Assert.assertEquals(entry, repository.syncLogs.first())
+        repository.insert(entry)
+
+        verify(sharedPreferences).edit()
+        verify(editor).putString(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())
+        verify(editor).apply()
     }
 }

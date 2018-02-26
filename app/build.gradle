@@ -116,7 +116,6 @@ dependencies {
     // Dependencies for local unit tests
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation "com.nhaarman:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "org.robolectric:robolectric:$robolectricVersion" // TODO Remove
 
     // Android Testing Support Library's runner and rules
