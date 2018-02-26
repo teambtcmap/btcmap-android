@@ -12,7 +12,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
 
-        versionCode 39
+        versionCode 40
         versionName "2.0.4"
 
         buildConfigField "String", "API_URL", API_URL
