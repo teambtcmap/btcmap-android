@@ -27,10 +27,9 @@
 
 package com.bubelov.coins.ui.fragment
 
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.preference.ListPreference
 import android.preference.Preference
@@ -41,36 +40,35 @@ import com.bubelov.coins.ui.activity.SettingsActivity
 import com.bubelov.coins.ui.viewmodel.SettingsViewModel
 import dagger.android.AndroidInjection
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.alert
-import java.util.*
 import javax.inject.Inject
 
-class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPreferenceChangeListener {
+class SettingsFragment : PreferenceFragment() {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
     private lateinit var model: SettingsViewModel
 
-    override fun onAttach(context: Context) {
-        AndroidInjection.inject(this)
-        super.onAttach(context)
-    }
+    private val settingsActivity: SettingsActivity
+        get() = activity as SettingsActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
-        model = ViewModelProviders.of(getSettingsActivity(), modelFactory)[SettingsViewModel::class.java]
+        model = ViewModelProviders.of(settingsActivity, modelFactory)[SettingsViewModel::class.java]
         addPreferencesFromResource(R.xml.preferences)
-        updateSummaries()
-    }
 
-    override fun onResume() {
-        super.onResume()
-        preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
-    }
+        val currencyPreference = findPreference(getString(R.string.pref_currency_key)) as Preference
 
-    override fun onPause() {
-        preferenceScreen.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-        super.onPause()
+        model.selectedCurrencyLiveData.observe(settingsActivity, Observer {
+            currencyPreference.summary = it
+        })
+
+        val distanceUnitsPreference =
+            findPreference(getString(R.string.pref_distance_units_key)) as ListPreference
+
+        model.distanceUnitsLiveData.observe(settingsActivity, Observer {
+            distanceUnitsPreference.summary = distanceUnitsPreference.entry
+        })
     }
 
     override fun onPreferenceTreeClick(
@@ -79,86 +77,60 @@ class SettingsFragment : PreferenceFragment(), SharedPreferences.OnSharedPrefere
     ): Boolean {
         when (preference.key) {
             getString(R.string.pref_currency_key) -> showCurrencySelector()
-            getString(R.string.pref_sync_database_key) -> launch { model.databaseSync.sync() }
+            getString(R.string.pref_sync_database_key) -> model.syncDatabase()
             getString(R.string.pref_show_sync_log_key) -> showSyncLog()
-            getString(R.string.pref_test_notification_key) -> testNotification()
+            getString(R.string.pref_test_notification_key) -> launch(UI) { model.testNotification() }
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference)
     }
 
-    override fun onSharedPreferenceChanged(preferences: SharedPreferences, key: String) {
-        updateSummaries()
-    }
-
-    private fun showSyncLog() {
-        val logs = model.syncLogsRepository.all()
-            .reversed()
-            .map { "Date: ${Date(it.time)}, Affected places: ${it.affectedPlaces}" }
-
-        if (logs.isEmpty()) {
-            alert(message = "Logs are empty").show()
-        } else {
-            alert { items(logs, onItemSelected = { _, _, _ -> }) }.show()
-        }
-    }
-
-    private fun updateSummaries() {
-        updateCurrencySummary()
-        updateDistanceUnitsSummary()
-    }
-
-    private fun updateCurrencySummary() {
-        val currency = findPreference(getString(R.string.pref_currency_key)) as Preference
-
-        currency.summary = preferenceManager.sharedPreferences.getString(
-            getString(R.string.pref_currency_key),
-            "BTC"
-        )
-    }
-
-    private fun updateDistanceUnitsSummary() {
-        val distanceUnits = findPreference(getString(R.string.pref_distance_units_key)) as ListPreference
-        distanceUnits.summary = distanceUnits.entry
-    }
-
     private fun showCurrencySelector() {
-        model.placesRepository.getCurrenciesToPlacesMap()
-            .observe(getSettingsActivity(), android.arch.lifecycle.Observer { map ->
-                if (map == null) {
-                    return@Observer
-                }
+        val rowsLiveData = model.getCurrencySelectorRows()
 
-                val currencies = map.keys.sortedBy { -map[it]!!.size }
+        rowsLiveData.observe(
+            settingsActivity,
+            object : Observer<List<SettingsViewModel.CurrencySelectorRow>> {
+                override fun onChanged(rows: List<SettingsViewModel.CurrencySelectorRow>?) {
+                    if (rows != null && !rows.isEmpty()) {
+                        showCurrencySelector(rows)
+                    }
 
-                val titles = currencies.map {
-                    "$it (${map[it]!!.size} ${resources.getQuantityString(
-                        R.plurals.places,
-                        map[it]!!.size
-                    ).toLowerCase()})"
-                }
-
-                alert {
-                    items(titles, onItemSelected = { _, _, index ->
-                        preferenceManager.sharedPreferences
-                            .edit()
-                            .putString(getString(R.string.pref_currency_key), currencies[index])
-                            .apply()
-                    })
-                }.apply {
-                    titleResource = R.string.currency
-                    show()
+                    rowsLiveData.removeObserver(this)
                 }
             })
     }
 
-    private fun testNotification() = launch(UI) {
-        val randomPlace = async { model.placesRepository.findRandom() }.await()
-
-        if (randomPlace != null) {
-            model.placeNotificationsManager.issueNotification(randomPlace)
+    private fun showCurrencySelector(rows: List<SettingsViewModel.CurrencySelectorRow>) {
+        alert {
+            items(rows.map {
+                "${it.currency} (${it.places} ${resources.getQuantityString(
+                    R.plurals.places,
+                    it.places
+                )})"
+            }, onItemSelected = { _, _, index ->
+                preferenceManager.sharedPreferences
+                    .edit()
+                    .putString(getString(R.string.pref_currency_key), rows[index].currency)
+                    .apply()
+            })
+        }.apply {
+            titleResource = R.string.currency
+            show()
         }
     }
 
-    private fun getSettingsActivity() = activity as SettingsActivity
+    private fun showSyncLog() {
+        model.getSyncLogs().observe(settingsActivity, object : Observer<List<String>> {
+            override fun onChanged(logs: List<String>?) {
+                if (logs != null && !logs.isEmpty()) {
+                    alert { items(logs, onItemSelected = { _, _, _ -> }) }.show()
+                } else {
+                    alert(message = "Logs are empty").show()
+                }
+
+                model.getSyncLogs().removeObserver(this)
+            }
+        })
+    }
 }

@@ -27,17 +27,79 @@
 
 package com.bubelov.coins.ui.viewmodel
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
 import com.bubelov.coins.db.sync.DatabaseSync
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.synclogs.SyncLogsRepository
+import com.bubelov.coins.util.DistanceUnitsLiveData
 import com.bubelov.coins.util.PlaceNotificationManager
+import com.bubelov.coins.util.SelectedCurrencyLiveData
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
+import java.util.*
 import javax.inject.Inject
 
 class SettingsViewModel @Inject constructor(
-    val placesRepository: PlacesRepository,
-    val syncLogsRepository: SyncLogsRepository,
-    val placeNotificationsManager: PlaceNotificationManager,
-    val databaseSync: DatabaseSync
+    val selectedCurrencyLiveData: SelectedCurrencyLiveData,
+    private val placesRepository: PlacesRepository,
+    val distanceUnitsLiveData: DistanceUnitsLiveData,
+    private val databaseSync: DatabaseSync,
+    private val syncLogsRepository: SyncLogsRepository,
+    private val placeNotificationsManager: PlaceNotificationManager
 ) : ViewModel() {
+    fun getCurrencySelectorRows(): LiveData<List<CurrencySelectorRow>> =
+        Transformations.switchMap(placesRepository.all(), { places ->
+            val result = MutableLiveData<List<CurrencySelectorRow>>()
+
+            if (places == null) {
+                return@switchMap result
+            }
+
+            val currencies = mutableSetOf<String>()
+
+            places.forEach {
+                it.currencies.forEach {
+                    currencies.add(it)
+                }
+            }
+
+            result.value = currencies.map { currency ->
+                CurrencySelectorRow(
+                    currency,
+                    places.filter { it.currencies.contains(currency) }.size
+                )
+            }.sortedByDescending { it.places }
+
+            result
+        })
+
+    fun syncDatabase() = launch {
+        databaseSync.sync()
+    }
+
+    fun getSyncLogs(): LiveData<List<String>> {
+        val result = MutableLiveData<List<String>>()
+
+        launch {
+            result.postValue(syncLogsRepository.all()
+                .reversed()
+                .map { "Date: ${Date(it.time)}, Affected places: ${it.affectedPlaces}" }
+            )
+        }
+
+        return result
+    }
+
+    suspend fun testNotification() {
+        val randomPlace = async { placesRepository.findRandom() }.await()
+
+        if (randomPlace != null) {
+            placeNotificationsManager.issueNotification(randomPlace)
+        }
+    }
+
+    data class CurrencySelectorRow(val currency: String, val places: Int)
 }

@@ -294,7 +294,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
             R.id.action_search -> PlacesSearchActivity.startForResult(
                 this,
                 model.userLocation.value,
-                model.selectedCurrency.value ?: SelectedCurrencyLiveData.DEFAULT_CURRENCY,
+                model.selectedCurrency.value ?: "",
                 REQUEST_FIND_PLACE
             )
 
@@ -387,9 +387,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     }
 
     private fun updateDrawerHeader() {
-        if (model.userRepository.signedIn()) {
-            val user = model.userRepository.user!!
+        val user = model.userRepository.user
 
+        if (user != null) {
             if (!TextUtils.isEmpty(user.avatarUrl)) {
                 Picasso.with(this).load(user.avatarUrl).into(drawerHeader.avatar)
             } else {

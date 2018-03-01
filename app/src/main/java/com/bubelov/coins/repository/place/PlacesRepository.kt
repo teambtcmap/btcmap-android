@@ -57,6 +57,8 @@ class PlacesRepository @Inject constructor(
         }
     }
 
+    fun all() = allPlaces
+
     fun find(id: Long) = db.find(id)
 
     fun findBySearchQuery(searchQuery: String) = db.findBySearchQuery(searchQuery)
@@ -68,24 +70,6 @@ class PlacesRepository @Inject constructor(
             MutableLiveData<List<Place>>().apply {
                 value = it.filter { bounds.contains(it.toLatLng()) }
             }
-        }
-
-    fun getCurrenciesToPlacesMap(): LiveData<Map<String, List<Place>>> =
-        Transformations.switchMap(allPlaces) {
-            val data = MutableLiveData<Map<String, List<Place>>>()
-            val map = mutableMapOf<String, MutableList<Place>>()
-
-            it?.forEach { place ->
-                place.currencies.forEach { currency ->
-                    if (!map.containsKey(currency)) {
-                        map.put(currency, mutableListOf())
-                    }
-
-                    map[currency]!!.add(place)
-                }
-            }
-
-            data.apply { value = map }
         }
 
     fun fetchNewPlaces(): Result<List<Place>> {

@@ -28,7 +28,6 @@
 package com.bubelov.coins.ui.viewmodel
 
 import android.arch.lifecycle.*
-import android.content.Context
 import android.location.Location
 import com.bubelov.coins.Constants
 import com.bubelov.coins.model.NotificationArea
@@ -46,13 +45,13 @@ import javax.inject.Inject
 import com.bubelov.coins.util.SelectedCurrencyLiveData
 
 class MapViewModel @Inject constructor(
-    context: Context,
     val userRepository: UserRepository,
     private val notificationAreaRepository: NotificationAreaRepository,
     private val placesRepository: PlacesRepository,
     private val placeIconsRepository: PlaceIconsRepository,
     val userLocation: LocationLiveData,
-    val analytics: Analytics
+    val analytics: Analytics,
+    val selectedCurrency: SelectedCurrencyLiveData
 ) : ViewModel() {
 
     val selectedPlaceId = MutableLiveData<Long>()
@@ -62,8 +61,6 @@ class MapViewModel @Inject constructor(
     var callback: Callback? = null
 
     var mapBounds = MutableLiveData<LatLngBounds>()
-
-    var selectedCurrency = SelectedCurrencyLiveData(context)
 
     private val places: LiveData<List<Place>> =
         Transformations.switchMap(mapBounds) { placesRepository.getPlaces(it) }

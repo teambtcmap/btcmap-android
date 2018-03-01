@@ -29,6 +29,7 @@ package com.bubelov.coins.dagger
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.Resources
 import android.preference.PreferenceManager
 
 import com.bubelov.coins.BuildConfig
@@ -70,6 +71,9 @@ class AppModule {
     fun providePreferences(context: Context): SharedPreferences {
         return PreferenceManager.getDefaultSharedPreferences(context)
     }
+
+    @Provides @Singleton
+    fun provideResources(context: Context): Resources = context.resources
 
     @Provides @Singleton
     fun provideGson(): Gson {

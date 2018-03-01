@@ -27,15 +27,29 @@
 
 package com.bubelov.coins.util
 
-import android.content.Context
-import com.bubelov.coins.R
-import org.jetbrains.anko.defaultSharedPreferences
-import javax.inject.Inject
-import javax.inject.Singleton
+import android.arch.lifecycle.LiveData
+import android.content.SharedPreferences
 
-@Singleton
-class SelectedCurrencyLiveData @Inject constructor(context: Context) : StringPreferenceLiveData(
-    context.defaultSharedPreferences,
-    context.getString(R.string.pref_currency_key),
-    context.getString(R.string.pref_currency_btc)
-)
+open class StringPreferenceLiveData(
+    private val preferences: SharedPreferences,
+    private val key: String,
+    private val defaultValue: String = ""
+) :
+    LiveData<String>(), SharedPreferences.OnSharedPreferenceChangeListener {
+
+    init {
+        updateValue()
+    }
+
+    override fun onActive() = preferences.registerOnSharedPreferenceChangeListener(this)
+
+    override fun onInactive() = preferences.unregisterOnSharedPreferenceChangeListener(this)
+
+    override fun onSharedPreferenceChanged(preferences: SharedPreferences, key: String) {
+        updateValue()
+    }
+
+    private fun updateValue() {
+        value = preferences.getString(key, defaultValue)
+    }
+}

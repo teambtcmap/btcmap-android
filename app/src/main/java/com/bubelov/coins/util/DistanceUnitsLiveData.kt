@@ -27,15 +27,18 @@
 
 package com.bubelov.coins.util
 
-import android.content.Context
+import android.content.SharedPreferences
+import android.content.res.Resources
 import com.bubelov.coins.R
-import org.jetbrains.anko.defaultSharedPreferences
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SelectedCurrencyLiveData @Inject constructor(context: Context) : StringPreferenceLiveData(
-    context.defaultSharedPreferences,
-    context.getString(R.string.pref_currency_key),
-    context.getString(R.string.pref_currency_btc)
+class DistanceUnitsLiveData @Inject constructor(
+    preferences: SharedPreferences,
+    resources: Resources
+) : StringPreferenceLiveData(
+    preferences,
+    resources.getString(R.string.pref_distance_units_key),
+    resources.getString(R.string.pref_distance_units_automatic)
 )
