@@ -25,7 +25,7 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins
+package com.bubelov.coins.util
 
 import android.arch.lifecycle.LiveData
 import java.util.concurrent.CountDownLatch

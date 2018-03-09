@@ -1,4 +1,4 @@
-package com.bubelov.coins/*
+/*
  * This is free and unencumbered software released into the public domain.
  *
  * Anyone is free to copy, modify, publish, use, compile, sell, or
@@ -25,12 +25,14 @@ package com.bubelov.coins/*
  * For more information, please refer to <https://unlicense.org>
  */
 
+package com.bubelov.coins
+
 import com.bubelov.coins.util.UtcDateTypeAdapter
 import org.junit.Assert
 import org.junit.Test
 import java.util.*
 
-class UtcDateTypeAdapterTest : BaseRobolectricTest() {
+class UtcDateTypeAdapterTest {
     private val adapter = UtcDateTypeAdapter()
 
     @Test

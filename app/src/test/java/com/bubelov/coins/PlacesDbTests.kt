@@ -29,6 +29,7 @@ package com.bubelov.coins
 
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.place.PlacesDb
+import com.bubelov.coins.util.blockingObserve
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

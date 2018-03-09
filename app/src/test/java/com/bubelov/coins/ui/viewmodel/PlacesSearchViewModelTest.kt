@@ -28,7 +28,7 @@
 package com.bubelov.coins.ui.viewmodel
 
 import android.content.Context
-import com.bubelov.coins.blockingObserve
+import com.bubelov.coins.util.blockingObserve
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.placeicon.PlaceIconsRepository
 import org.junit.Assert
