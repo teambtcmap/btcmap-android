@@ -33,6 +33,7 @@ import com.bubelov.coins.repository.rate.Bitstamp
 import com.bubelov.coins.repository.rate.Coinbase
 import com.bubelov.coins.repository.rate.ExchangeRatesRepository
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -43,10 +44,10 @@ class ExchangeRatesRepositoryTest {
     @Mock private lateinit var bitcoinAverage: BitcoinAverage
     @Mock private lateinit var bitstamp: Bitstamp
     @Mock private lateinit var coinbase: Coinbase
+    private lateinit var repository: ExchangeRatesRepository
 
-    private val repository: ExchangeRatesRepository
-
-    init {
+    @Before
+    fun setup() {
         MockitoAnnotations.initMocks(this)
 
         repository = ExchangeRatesRepository(

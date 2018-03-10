@@ -32,6 +32,7 @@ import com.bubelov.coins.model.SyncLogEntry
 import com.bubelov.coins.repository.synclogs.SyncLogsRepository
 import com.google.gson.Gson
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
@@ -40,9 +41,12 @@ import org.mockito.MockitoAnnotations
 
 class SyncLogsRepositoryTest {
     @Mock private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var repository: SyncLogsRepository
 
-    init {
+    @Before
+    fun setup() {
         MockitoAnnotations.initMocks(this)
+        repository = SyncLogsRepository(sharedPreferences, Gson())
     }
 
     @Test
@@ -50,7 +54,6 @@ class SyncLogsRepositoryTest {
         `when`(sharedPreferences.getString(ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
             .thenReturn("")
 
-        val repository = SyncLogsRepository(sharedPreferences, Gson())
         Assert.assertTrue(repository.all().isEmpty())
         verify(sharedPreferences).getString(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())
         verifyNoMoreInteractions(sharedPreferences)
@@ -65,7 +68,6 @@ class SyncLogsRepositoryTest {
         `when`(editor.putString(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(editor)
         `when`(sharedPreferences.edit()).thenReturn(editor)
 
-        val repository = SyncLogsRepository(sharedPreferences, Gson())
         val entry = SyncLogEntry(time = System.currentTimeMillis(), affectedPlaces = 5)
         repository.insert(entry)
 

@@ -35,6 +35,7 @@ import com.bubelov.coins.repository.place.PlacesDb
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.util.Analytics
 import com.bubelov.coins.util.emptyPlace
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mock
@@ -50,6 +51,11 @@ class PlacesRepositoryTest {
     @Mock private lateinit var analytics: Analytics
 
     init {
+        MockitoAnnotations.initMocks(this)
+    }
+
+    @Before
+    fun setup() {
         MockitoAnnotations.initMocks(this)
     }
 

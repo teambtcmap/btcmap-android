@@ -34,6 +34,7 @@ import com.bubelov.coins.repository.Result
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.util.emptyPlace
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mock
@@ -44,15 +45,16 @@ class EditPlaceViewModelTest {
     @Rule @JvmField val instantExecutorRule = InstantTaskExecutorRule()
 
     @Mock private lateinit var placesRepository: PlacesRepository
+    private lateinit var model: EditPlaceViewModel
 
-    init {
+    @Before
+    fun setup() {
         MockitoAnnotations.initMocks(this)
+        model = EditPlaceViewModel(placesRepository)
     }
 
     @Test
     fun submitNewPlace() {
-        val model = EditPlaceViewModel(placesRepository)
-
         val place = emptyPlace().copy(
             id = 0,
             name = "Crypto Library"
@@ -70,8 +72,6 @@ class EditPlaceViewModelTest {
 
     @Test
     fun updateExistingPlace() {
-        val model = EditPlaceViewModel(placesRepository)
-
         val place = emptyPlace().copy(
             id = 50,
             name = "Crypto Library"
@@ -89,8 +89,6 @@ class EditPlaceViewModelTest {
 
     @Test
     fun handleFailure() {
-        val model = EditPlaceViewModel(placesRepository)
-
         `when`(placesRepository.addPlace(any())).thenReturn(Result.Error(IllegalStateException("Test")))
 
         model.init(emptyPlace())

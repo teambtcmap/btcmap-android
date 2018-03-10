@@ -35,6 +35,7 @@ import com.bubelov.coins.repository.synclogs.SyncLogsRepository
 import com.bubelov.coins.util.PlaceNotificationManager
 import com.bubelov.coins.util.emptyPlace
 import kotlinx.coroutines.experimental.runBlocking
+import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -46,10 +47,10 @@ class DatabaseSyncTest {
     @Mock private lateinit var placeNotificationManager: PlaceNotificationManager
     @Mock private lateinit var syncLogsRepository: SyncLogsRepository
     @Mock private lateinit var databaseSyncScheduler: SyncScheduler
+    private lateinit var databaseSync: DatabaseSync
 
-    private val databaseSync: DatabaseSync
-
-    init {
+    @Before
+    fun setup() {
         MockitoAnnotations.initMocks(this)
 
         databaseSync = DatabaseSync(

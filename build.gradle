@@ -16,12 +16,11 @@ ext {
     picassoVersion = '2.5.2'
     circleImageViewVersion = '2.1.0'
     gsonVersion = '2.8.0'
-    timberVersion = '4.6.0'
+    timberVersion = '4.6.1'
     crashlyticsVersion = '2.8.0'
     runnerVersion = '1.0.0'
     junitVersion = '4.12'
     mockitoVersion = '2.15.0'
-    robolectricVersion = '3.5.1'
     espressoVersion = '3.0.1'
 }
 

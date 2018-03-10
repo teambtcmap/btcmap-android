@@ -36,28 +36,39 @@ import org.junit.Test
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import android.graphics.Bitmap
 import com.bubelov.coins.model.Place
+import org.junit.Before
 import org.junit.Rule
 import org.mockito.ArgumentMatchers
+import org.mockito.Mock
 import org.mockito.Mockito.*
+import org.mockito.MockitoAnnotations
 import java.util.*
 
 class PlacesSearchViewModelTest {
     @JvmField @Rule val instantExecutor = InstantTaskExecutorRule()
 
-    private val placesRepository = mock(PlacesRepository::class.java)
-    private val placeIconsRepository = mock(PlaceIconsRepository::class.java)
+    @Mock private val placesRepository = mock(PlacesRepository::class.java)
+    @Mock private val placeIconsRepository = mock(PlaceIconsRepository::class.java)
+    private lateinit var model: PlacesSearchViewModel
 
-    private val model: PlacesSearchViewModel
+    @Before
+    fun setup() {
+        MockitoAnnotations.initMocks(this)
 
-    init {
-        model = PlacesSearchViewModel(mock(Context::class.java), placesRepository, placeIconsRepository)
+        model = PlacesSearchViewModel(
+            mock(Context::class.java),
+            placesRepository,
+            placeIconsRepository
+        )
 
         `when`(placesRepository.findBySearchQuery(ArgumentMatchers.anyString()))
-            .thenReturn(listOf(
-                generatePlace("Bar 1", "BTC"),
-                generatePlace("Bar 2", "BTC"),
-                generatePlace("Bar 3", "LTC")
-            ))
+            .thenReturn(
+                listOf(
+                    generatePlace("Bar 1", "BTC"),
+                    generatePlace("Bar 2", "BTC"),
+                    generatePlace("Bar 3", "LTC")
+                )
+            )
 
         `when`(placeIconsRepository.getPlaceIcon(ArgumentMatchers.anyString()))
             .thenReturn(mock(Bitmap::class.java))

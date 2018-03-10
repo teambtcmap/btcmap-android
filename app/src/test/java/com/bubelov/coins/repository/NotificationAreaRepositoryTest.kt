@@ -32,6 +32,7 @@ import com.bubelov.coins.model.NotificationArea
 import com.bubelov.coins.repository.area.NotificationAreaRepository
 import com.google.gson.Gson
 import org.junit.Assert
+import org.junit.Before
 
 import org.junit.Test
 import org.mockito.ArgumentMatchers
@@ -41,15 +42,16 @@ import org.mockito.MockitoAnnotations
 
 class NotificationAreaRepositoryTest {
     @Mock private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var repository: NotificationAreaRepository
 
-    init {
+    @Before
+    fun setup() {
         MockitoAnnotations.initMocks(this)
+        repository = NotificationAreaRepository(sharedPreferences, Gson())
     }
 
     @Test
     fun returnsNullIfNotSet() {
-        val repository = NotificationAreaRepository(sharedPreferences, Gson())
-
         `when`(sharedPreferences.getString(ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
             .thenReturn("")
 
@@ -59,8 +61,6 @@ class NotificationAreaRepositoryTest {
 
     @Test
     fun savesArea() {
-        val repository = NotificationAreaRepository(sharedPreferences, Gson())
-
         val editor = mock(SharedPreferences.Editor::class.java)
         `when`(editor.putString(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(editor)
         `when`(sharedPreferences.edit()).thenReturn(editor)
