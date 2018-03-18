@@ -38,7 +38,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.ActivityCompat
@@ -52,6 +51,7 @@ import android.view.View
 
 import com.bubelov.coins.Constants
 import com.bubelov.coins.R
+import com.bubelov.coins.model.Location
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.widget.PlaceDetailsView
 import com.google.android.gms.maps.model.MarkerOptions
@@ -174,7 +174,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         })
 
         fab.setOnClickListener {
-            if (!model.userLocation.hasLocationPermission()) {
+            if (!model.userLocation.isLocationPermissionGranted()) {
                 requestLocationPermissions()
             }
         }
@@ -230,7 +230,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == Activity.RESULT_OK) {
-            if (!model.userLocation.hasLocationPermission()) {
+            if (!model.userLocation.isLocationPermissionGranted()) {
                 requestLocationPermissions()
             }
         }
@@ -362,7 +362,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         initClustering(map)
 
-        if (model.userLocation.hasLocationPermission()) {
+        if (model.userLocation.isLocationPermissionGranted()) {
             map.isMyLocationEnabled = true
 
             if (model.selectedPlaceId.value == null || model.selectedPlaceId.value == 0L) {

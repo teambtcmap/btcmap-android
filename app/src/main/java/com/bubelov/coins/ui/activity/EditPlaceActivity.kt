@@ -31,13 +31,13 @@ import android.app.Activity
 import android.arch.lifecycle.*
 import android.arch.lifecycle.Observer
 import android.content.Intent
-import android.location.Location
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.bubelov.coins.Constants
 
 import com.bubelov.coins.R
+import com.bubelov.coins.model.Location
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.viewmodel.EditPlaceViewModel
 import com.bubelov.coins.util.toLatLng
@@ -159,7 +159,7 @@ class EditPlaceActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_PICK_LOCATION && resultCode == Activity.RESULT_OK && data != null) {
             val map = map.value
-            val location = data.getParcelableExtra(PickLocationActivity.LOCATION_EXTRA) as Location
+            val location = data.getSerializableExtra(PickLocationActivity.LOCATION_EXTRA) as Location
 
             if (map != null) {
                 setMarker(map, location)

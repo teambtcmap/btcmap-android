@@ -54,6 +54,10 @@ android {
     }
 }
 
+kapt {
+    generateStubs = true
+}
+
 dependencies {
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
@@ -79,7 +83,6 @@ dependencies {
 
     // Google Play Services split client libs
     implementation "com.google.android.gms:play-services-gcm:$playServicesVersion"
-    implementation "com.google.android.gms:play-services-location:$playServicesVersion"
     implementation "com.google.android.gms:play-services-maps:$playServicesVersion"
     implementation "com.google.android.gms:play-services-auth:$playServicesVersion"
     implementation "com.google.firebase:firebase-core:$playServicesVersion"

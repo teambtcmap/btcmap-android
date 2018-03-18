@@ -27,7 +27,6 @@
 
 package com.bubelov.coins
 
-import android.support.test.filters.LargeTest
 import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
 
@@ -46,7 +45,6 @@ import android.support.test.espresso.matcher.ViewMatchers.withId
 import android.support.test.rule.GrantPermissionRule
 
 @RunWith(AndroidJUnit4::class)
-@LargeTest
 class MapActivityTest {
     @Rule
     @JvmField

@@ -28,8 +28,8 @@
 package com.bubelov.coins.ui.viewmodel
 
 import android.arch.lifecycle.*
-import android.location.Location
 import com.bubelov.coins.Constants
+import com.bubelov.coins.model.Location
 import com.bubelov.coins.model.NotificationArea
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.area.NotificationAreaRepository

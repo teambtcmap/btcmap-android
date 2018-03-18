@@ -29,10 +29,10 @@ package com.bubelov.coins.ui.viewmodel
 
 import android.arch.lifecycle.*
 import android.content.Context
-import android.location.Location
 import android.preference.PreferenceManager
 
 import com.bubelov.coins.R
+import com.bubelov.coins.model.Location
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.placeicon.PlaceIconsRepository
@@ -116,8 +116,7 @@ class PlacesSearchViewModel @Inject constructor(
     private fun Place.toRow(userLocation: Location?): PlacesSearchRow {
         val distanceString = if (userLocation != null) DISTANCE_FORMAT.format(
             userLocation.distanceTo(
-                latitude,
-                longitude,
+                Location(latitude, longitude),
                 getDistanceUnits()
             )
         ) + " ${getDistanceUnits().getShortName()}" else ""

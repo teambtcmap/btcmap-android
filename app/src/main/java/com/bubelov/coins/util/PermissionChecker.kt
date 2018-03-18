@@ -27,25 +27,23 @@
 
 package com.bubelov.coins.util
 
-import com.bubelov.coins.model.Location
-import com.google.android.gms.maps.model.LatLng
+import android.content.Context
+import android.content.pm.PackageManager
+import android.support.v4.content.ContextCompat
+import javax.inject.Inject
+import javax.inject.Singleton
 
-fun Location.distanceTo(anotherLocation: Location, units: DistanceUnits): Double {
-    val distanceInKilometers = DistanceUtils.getDistance(
-        latitude,
-        longitude,
-        anotherLocation.latitude,
-        anotherLocation.longitude
-    ) / 1000.0
-
-    return when (units) {
-        DistanceUnits.KILOMETERS -> distanceInKilometers
-        DistanceUnits.MILES -> DistanceUtils.toMiles(distanceInKilometers)
+@Singleton
+class PermissionChecker @Inject constructor(
+    private val context: Context
+) {
+    fun check(permission: String): CheckResult {
+        return if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+            CheckResult.GRANTED
+        } else {
+            CheckResult.DENIED
+        }
     }
+
+    enum class CheckResult { GRANTED, DENIED }
 }
-
-fun android.location.Location.toLocation() = Location(latitude, longitude)
-
-fun Location.toLatLng(): LatLng = LatLng(latitude, longitude)
-
-fun LatLng.toLocation() = Location(latitude, longitude)

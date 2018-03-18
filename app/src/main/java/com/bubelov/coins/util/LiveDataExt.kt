@@ -30,6 +30,7 @@ package com.bubelov.coins.util
 import android.arch.lifecycle.LiveData
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 fun <T> LiveData<T>.blockingObserve(): T {
     var value: T? = null
@@ -41,6 +42,11 @@ fun <T> LiveData<T>.blockingObserve(): T {
     })
 
     latch.await(10, TimeUnit.SECONDS)
+
+    if (latch.count != 0L) {
+        throw TimeoutException()
+    }
+
     @Suppress("UNCHECKED_CAST")
     return value as T
 }

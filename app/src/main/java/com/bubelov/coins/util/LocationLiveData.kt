@@ -4,81 +4,86 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.arch.lifecycle.LiveData
 import android.content.Context
-import android.content.pm.PackageManager
-import android.location.Location
-import android.os.Looper
-import android.support.v4.content.ContextCompat
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import java.util.concurrent.TimeUnit
+import android.content.Context.LOCATION_SERVICE
+import android.location.LocationListener
+import android.location.LocationManager
+import android.location.LocationProvider
+import android.os.Bundle
+import com.bubelov.coins.model.Location
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@SuppressLint("MissingPermission")
 @Singleton
-class LocationLiveData @Inject constructor(private val context: Context) :
-    LiveData<Location>() {
-    private val locationProvider = LocationServices.getFusedLocationProviderClient(context)
+class LocationLiveData @Inject constructor(
+    private val context: Context,
+    private val permissionChecker: PermissionChecker
+) : LiveData<Location>() {
+    private val locationManager by lazy { context.getSystemService(LOCATION_SERVICE) as LocationManager }
 
-    private val locationRequest = LocationRequest.create().apply {
-        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        interval = TimeUnit.SECONDS.toMillis(1)
-    }
+    private val locationListener = object : LocationListener {
+        override fun onLocationChanged(location: android.location.Location) {
+            Timber.d("onLocationChanged(location: $location)")
+            value = location.toLocation()
+        }
 
-    private val locationCallback = object : LocationCallback() {
-        override fun onLocationResult(result: LocationResult?) {
-            val location = result?.lastLocation
-
-            if (location != null) {
-                value = location
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle?) {
+            val statusString = when (status) {
+                LocationProvider.OUT_OF_SERVICE -> "OUT_OF_SERVICE"
+                LocationProvider.TEMPORARILY_UNAVAILABLE -> "TEMPORARILY_UNAVAILABLE"
+                LocationProvider.AVAILABLE -> "AVAILABLE"
+                else -> "UNKNOWN"
             }
+
+            Timber.d("onStatusChanged(provider: $provider, status: $statusString, extras: $extras)")
+        }
+
+        override fun onProviderEnabled(provider: String) {
+            Timber.d("onProviderEnabled(provider: $provider)")
+        }
+
+        override fun onProviderDisabled(provider: String) {
+            Timber.d("onProviderDisabled(provider: $provider")
         }
     }
 
     init {
-        if (hasLocationPermission()) {
+        if (isLocationPermissionGranted()) {
             onLocationPermissionGranted()
+        } else {
+            value = null
         }
     }
 
+    @SuppressLint("MissingPermission")
     override fun onActive() {
-        if (hasLocationPermission()) {
-            locationProvider.requestLocationUpdates(
-                locationRequest,
-                locationCallback,
-                Looper.getMainLooper()
+        if (isLocationPermissionGranted()) {
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                MIN_UPDATE_TIME_MILLIS,
+                MIN_UPDATE_DISTANCE_METERS,
+                locationListener
             )
         }
     }
 
     override fun onInactive() {
-        locationProvider.removeLocationUpdates(locationCallback)
+        locationManager.removeUpdates(locationListener)
     }
 
-    fun hasLocationPermission(): Boolean {
-        val permission = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        )
-
-        return permission == PackageManager.PERMISSION_GRANTED
+    fun isLocationPermissionGranted(): Boolean {
+        val checkResult = permissionChecker.check(Manifest.permission.ACCESS_FINE_LOCATION)
+        return checkResult == PermissionChecker.CheckResult.GRANTED
     }
 
     fun onLocationPermissionGranted() {
-        locationProvider.lastLocation.addOnCompleteListener {
-            if (value == null && it.result != null) {
-                value = it.result
-            }
-        }
-
         if (hasActiveObservers()) {
-            locationProvider.requestLocationUpdates(
-                locationRequest,
-                locationCallback,
-                Looper.getMainLooper()
-            )
+            onActive()
         }
+    }
+
+    companion object {
+        private const val MIN_UPDATE_TIME_MILLIS = 3000L
+        private const val MIN_UPDATE_DISTANCE_METERS = 1f
     }
 }

@@ -32,11 +32,11 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
-import android.location.Location
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 
 import com.bubelov.coins.R
+import com.bubelov.coins.model.Location
 import com.bubelov.coins.util.toLatLng
 import com.bubelov.coins.util.toLocation
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -50,7 +50,7 @@ class PickLocationActivity : AppCompatActivity() {
     private val map = MutableLiveData<GoogleMap>()
 
     private val initialLocation: Location
-        get() = intent.getParcelableExtra(LOCATION_EXTRA)
+        get() = intent.getSerializableExtra(LOCATION_EXTRA) as Location
 
     private val initialZoom: Float
         get() = intent.getFloatExtra(ZOOM_EXTRA, 0f)

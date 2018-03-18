@@ -33,7 +33,6 @@ import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
-import android.location.Location
 import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
 import android.support.v7.app.AppCompatActivity
@@ -44,6 +43,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 
 import com.bubelov.coins.R
+import com.bubelov.coins.model.Location
 import com.bubelov.coins.ui.adapter.PlacesSearchResultsAdapter
 import com.bubelov.coins.ui.viewmodel.PlacesSearchViewModel
 import com.bubelov.coins.util.TextWatcherAdapter
@@ -64,14 +64,13 @@ class PlacesSearchActivity : AppCompatActivity() {
         model = ViewModelProviders.of(this, modelFactory)[PlacesSearchViewModel::class.java]
 
         model.init(
-            intent.getParcelableExtra(USER_LOCATION_EXTRA),
+            intent.getSerializableExtra(USER_LOCATION_EXTRA) as Location?,
             intent.getStringExtra(CURRENCY_EXTRA)
         )
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 
         results.layoutManager = LinearLayoutManager(this)
-        results.setHasFixedSize(true)
 
         model.searchResults.observe(this, Observer { places ->
             results.adapter = PlacesSearchResultsAdapter(places ?: emptyList()) {
