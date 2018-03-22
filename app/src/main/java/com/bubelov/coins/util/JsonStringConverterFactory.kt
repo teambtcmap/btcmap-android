@@ -25,25 +25,47 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.api.coins
+package com.bubelov.coins.util
 
-import com.bubelov.coins.model.Place
+import retrofit2.Converter
+import retrofit2.Retrofit
+import java.lang.reflect.Type
+import okhttp3.RequestBody
+import okio.Buffer
+import java.io.IOException
 
-import java.util.HashMap
+class JsonStringConverterFactory(private val delegateFactory: Converter.Factory) : Converter.Factory() {
+    override fun stringConverter(
+        type: Type,
+        annotations: Array<out Annotation>,
+        retrofit: Retrofit
+    ): Converter<*, String>? {
+        for (annotation in annotations) {
+            if (annotation is Json) {
+                val delegate = delegateFactory.requestBodyConverter(
+                    type,
+                    annotations,
+                    arrayOfNulls(0),
+                    retrofit
+                ) as Converter<Any, RequestBody>
 
-class PlaceParams(val realPlace: Place) {
-    private val place: MutableMap<String, Any>
+                if (delegate != null) {
+                    return DelegateToStringConverter<Any>(delegate)
+                }
+            }
+        }
 
-    init {
-        this.place = HashMap<String, Any>().apply {
-            put("name", realPlace.name)
-            put("description", realPlace.description)
-            put("latitude", realPlace.latitude)
-            put("longitude", realPlace.longitude)
-            put("phone", realPlace.phone)
-            put("website", realPlace.website)
-            put("opening_hours", realPlace.openingHours)
-            put("visible", realPlace.visible)
+        return null
+    }
+
+    internal class DelegateToStringConverter<T>(private val delegate: Converter<Any, RequestBody>) :
+        Converter<T, String> {
+
+        @Throws(IOException::class)
+        override fun convert(value: T): String {
+            val buffer = Buffer()
+            delegate.convert(value).writeTo(buffer)
+            return buffer.readUtf8()
         }
     }
 }

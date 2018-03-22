@@ -13,6 +13,7 @@ ext {
     ktxVersion = '0.2'
     daggerVersion = '2.14.1'
     retrofitVersion = '2.3.0'
+    loggingInterceptorVersion = '3.10.0'
     mapsUtilsVersion = '0.5'
     picassoVersion = '2.5.2'
     circleImageViewVersion = '2.1.0'

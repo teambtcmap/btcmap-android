@@ -35,6 +35,7 @@ import android.preference.PreferenceManager
 import com.bubelov.coins.BuildConfig
 import com.bubelov.coins.api.coins.CoinsApi
 import com.bubelov.coins.db.Database
+import com.bubelov.coins.util.JsonStringConverterFactory
 import com.bubelov.coins.util.StringAdapter
 import com.bubelov.coins.util.UtcDateTypeAdapter
 import com.google.android.gms.gcm.GcmNetworkManager
@@ -49,6 +50,8 @@ import javax.inject.Singleton
 
 import dagger.Module
 import dagger.Provides
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -86,10 +89,36 @@ class AppModule {
 
     @Provides @Singleton
     fun provideCoinsApi(gson: Gson): CoinsApi {
+        val logging = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.NONE }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .build()
+
         return Retrofit.Builder()
             .baseUrl(BuildConfig.API_URL)
             .addConverterFactory(GsonConverterFactory.create(gson))
+            .addConverterFactory(JsonStringConverterFactory(GsonConverterFactory.create()))
+            .client(client)
             .build()
             .create(CoinsApi::class.java)
     }
+
+//    @Provides @Singleton
+//    fun provideCoinsApi(placesAssetsCache: PlacesAssetsCache): CoinsApi {
+//        val retrofit = Retrofit.Builder()
+//            .baseUrl(BuildConfig.API_URL)
+//            .addConverterFactory(JsonStringConverterFactory(GsonConverterFactory.create()))
+//            .build()
+//
+//        val behavior = NetworkBehavior.create()
+//
+//        val mockRetrofit = MockRetrofit.Builder(retrofit)
+//            .networkBehavior(behavior)
+//            .build()
+//
+//        val delegate = mockRetrofit.create(CoinsApi::class.java)
+//
+//        return MockCoinsApi(delegate, placesAssetsCache)
+//    }
 }

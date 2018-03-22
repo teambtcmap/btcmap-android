@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 
 import com.bubelov.coins.PreferenceKeys
 import com.bubelov.coins.api.coins.CoinsApi
-import com.bubelov.coins.api.coins.NewUserParams
+import com.bubelov.coins.api.coins.CreateUserParams
 import com.bubelov.coins.model.User
 import com.bubelov.coins.util.toCoinsApiException
 import com.google.gson.Gson
@@ -67,7 +67,7 @@ class UserRepository @Inject constructor(
     }
 
     fun signUp(email: String, password: String, firstName: String, lastName: String) = try {
-        api.createUser(NewUserParams(email, password, firstName, lastName)).execute().apply {
+        api.createUser(CreateUserParams(CreateUserParams.User(email, password, firstName, lastName))).execute().apply {
             if (isSuccessful) {
                 user = body()!!.user!!
                 userAuthToken = body()!!.token!!
