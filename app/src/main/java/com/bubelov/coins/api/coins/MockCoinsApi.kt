@@ -32,7 +32,6 @@ import com.bubelov.coins.model.User
 import com.bubelov.coins.repository.place.PlacesAssetsCache
 import retrofit2.Call
 import retrofit2.mock.BehaviorDelegate
-import timber.log.Timber
 import java.util.*
 
 class MockCoinsApi(
@@ -45,16 +44,14 @@ class MockCoinsApi(
         places.addAll(assetsCache.getPlaces())
     }
 
-    override fun createUser(userParams: CreateUserParams): Call<AuthResponse> {
-        Timber.d("New user params: $userParams")
-
+    override fun createUser(args: CreateUserArgs): Call<AuthResponse> {
         val response = AuthResponse(
-            user = User(1L, userParams.user.email, userParams.user.firstName, userParams.user.lastName, ""),
+            user = User(1L, args.user.email, args.user.firstName, args.user.lastName, ""),
             token = UUID.randomUUID().toString(),
             errors = emptyList()
         )
 
-        return delegate.returningResponse(response).createUser(userParams)
+        return delegate.returningResponse(response).createUser(args)
     }
 
     override fun authWithEmail(email: String, password: String): Call<AuthResponse> {
@@ -81,31 +78,15 @@ class MockCoinsApi(
         return delegate.returningResponse(emptyList<Place>()).getPlaces(since, limit)
     }
 
-    override fun addPlace(session: String, place: PlaceParams): Call<Place> {
-        val mockedPlace = Place(
-            id = UUID.randomUUID().toString().hashCode().toLong(),
-            name = place.realPlace.name,
-            latitude = place.realPlace.latitude,
-            longitude = place.realPlace.longitude,
-            category = place.realPlace.category,
-            description = place.realPlace.description,
-            currencies = place.realPlace.currencies,
-            openedClaims = place.realPlace.openedClaims,
-            closedClaims = place.realPlace.closedClaims,
-            phone = place.realPlace.phone,
-            website = place.realPlace.website,
-            openingHours = place.realPlace.openingHours,
-            visible = place.realPlace.visible,
-            updatedAt = place.realPlace.updatedAt
-        )
-
-        places += mockedPlace
-
-        return delegate.returningResponse(mockedPlace).addPlace(session, place)
+    override fun addPlace(session: String, args: AddPlaceArgs): Call<Place> {
+        places += args.place
+        return delegate.returningResponse(args.place).addPlace(session, args)
     }
 
-    override fun updatePlace(id: Long, session: String, place: PlaceParams): Call<Place> {
-        val mockedPlace = places.find { it.id == id } ?: throw IllegalStateException()
-        return delegate.returningResponse(mockedPlace).updatePlace(id, session, place)
+    override fun updatePlace(id: Long, session: String, args: UpdatePlaceArgs): Call<Place> {
+        val existingPlace = places.find { it.id == id }
+        places.remove(existingPlace)
+        places += args.place
+        return delegate.returningResponse(args.place).updatePlace(id, session, args)
     }
 }

@@ -29,21 +29,4 @@ package com.bubelov.coins.api.coins
 
 import com.bubelov.coins.model.Place
 
-import java.util.HashMap
-
-class PlaceParams(val realPlace: Place) {
-    private val place: MutableMap<String, Any>
-
-    init {
-        this.place = HashMap<String, Any>().apply {
-            put("name", realPlace.name)
-            put("description", realPlace.description)
-            put("latitude", realPlace.latitude)
-            put("longitude", realPlace.longitude)
-            put("phone", realPlace.phone)
-            put("website", realPlace.website)
-            put("opening_hours", realPlace.openingHours)
-            put("visible", realPlace.visible)
-        }
-    }
-}
+data class UpdatePlaceArgs(val place: Place)

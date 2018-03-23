@@ -27,11 +27,6 @@
 
 package com.bubelov.coins.api.coins
 
-class CreateUserParams(val user: User) {
-    data class User(
-        val email: String,
-        val password: String,
-        val firstName: String,
-        val lastName: String
-    )
-}
+import com.bubelov.coins.model.Place
+
+data class AddPlaceArgs(val place: Place)
