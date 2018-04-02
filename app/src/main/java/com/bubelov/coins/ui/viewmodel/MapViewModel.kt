@@ -45,11 +45,11 @@ import javax.inject.Inject
 import com.bubelov.coins.util.SelectedCurrencyLiveData
 
 class MapViewModel @Inject constructor(
-    val userRepository: UserRepository,
     private val notificationAreaRepository: NotificationAreaRepository,
     private val placesRepository: PlacesRepository,
     private val placeIconsRepository: PlaceIconsRepository,
-    val userLocation: LocationLiveData,
+    private val location: LocationLiveData,
+    val userRepository: UserRepository,
     val analytics: Analytics,
     val selectedCurrency: SelectedCurrencyLiveData
 ) : ViewModel() {
@@ -80,6 +80,18 @@ class MapViewModel @Inject constructor(
         })
     }
 
+    val userLocation: LiveData<Location> = Transformations.map(location, { location ->
+        if (location != null && notificationAreaRepository.notificationArea == null) {
+            notificationAreaRepository.notificationArea = NotificationArea(
+                location.latitude,
+                location.longitude,
+                Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS
+            )
+        }
+
+        location
+    })
+
     fun onAddPlaceClick() {
         if (userRepository.signedIn()) {
             callback?.addPlace()
@@ -104,17 +116,9 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    fun onNewLocation(location: Location) {
-        if (notificationAreaRepository.notificationArea == null) {
-            val area = NotificationArea(
-                location.latitude,
-                location.longitude,
-                Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS
-            )
+    fun isLocationPermissionGranted() = location.isLocationPermissionGranted()
 
-            notificationAreaRepository.notificationArea = area
-        }
-    }
+    fun onLocationPermissionGranted() = location.onLocationPermissionGranted()
 
     interface Callback {
         fun signIn()

@@ -198,9 +198,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
             }
         })
 
-        model.userLocation.observe(this, Observer { location ->
+        model.userLocation.observe(this, Observer {
             fab.setOnClickListener {
-                if (!model.userLocation.isLocationPermissionGranted()) {
+                if (!model.isLocationPermissionGranted()) {
                     requestLocationPermissions()
                     return@setOnClickListener
                 }
@@ -225,7 +225,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CHECK_LOCATION_SETTINGS && resultCode == Activity.RESULT_OK) {
-            if (!model.userLocation.isLocationPermissionGranted()) {
+            if (!model.isLocationPermissionGranted()) {
                 requestLocationPermissions()
             }
         }
@@ -262,7 +262,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     ) {
         when (requestCode) {
             REQUEST_ACCESS_LOCATION -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                model.userLocation.onLocationPermissionGranted()
+                model.onLocationPermissionGranted()
                 map.value?.isMyLocationEnabled = true
                 moveToUserLocation()
             }
@@ -273,7 +273,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         val location = model.userLocation.value
 
         if (location != null) {
-            model.onNewLocation(location)
             map.value?.animateCamera(CameraUpdateFactory.newLatLngZoom(location.toLatLng(), DEFAULT_MAP_ZOOM))
         }
     }
@@ -355,7 +354,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         initClustering(map)
 
-        if (model.userLocation.isLocationPermissionGranted()) {
+        if (model.isLocationPermissionGranted()) {
             map.isMyLocationEnabled = true
 
             if (model.selectedPlaceId.value == null || model.selectedPlaceId.value == 0L) {
