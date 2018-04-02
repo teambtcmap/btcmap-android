@@ -79,8 +79,9 @@ class MockCoinsApi(
     }
 
     override fun addPlace(session: String, args: AddPlaceArgs): Call<Place> {
-        places += args.place
-        return delegate.returningResponse(args.place).addPlace(session, args)
+        val place = args.place.copy(id = UUID.randomUUID().toString().hashCode().toLong())
+        places += place
+        return delegate.returningResponse(place).addPlace(session, args)
     }
 
     override fun updatePlace(id: Long, session: String, args: UpdatePlaceArgs): Call<Place> {
