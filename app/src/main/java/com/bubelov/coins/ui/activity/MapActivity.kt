@@ -51,7 +51,6 @@ import android.view.View
 
 import com.bubelov.coins.Constants
 import com.bubelov.coins.R
-import com.bubelov.coins.model.Location
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.widget.PlaceDetailsView
 import com.google.android.gms.maps.model.MarkerOptions
@@ -173,12 +172,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
             }
         })
 
-        fab.setOnClickListener {
-            if (!model.userLocation.isLocationPermissionGranted()) {
-                requestLocationPermissions()
-            }
-        }
-
         place_details.setOnClickListener {
             if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -206,11 +199,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         })
 
         model.userLocation.observe(this, Observer { location ->
-            if (location != null) {
-                fab.setOnClickListener {
-                    model.onNewLocation(location)
-                    map.value?.animateCamera(CameraUpdateFactory.newLatLngZoom(location.toLatLng(), DEFAULT_MAP_ZOOM))
+            fab.setOnClickListener {
+                if (!model.userLocation.isLocationPermissionGranted()) {
+                    requestLocationPermissions()
+                    return@setOnClickListener
                 }
+
+                moveToUserLocation()
             }
         })
 
@@ -275,14 +270,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     }
 
     private fun moveToUserLocation() {
-        model.userLocation.observe(this, object: Observer<Location> {
-            override fun onChanged(location: Location?) {
-                if (location != null) {
-                    map.value?.animateCamera(CameraUpdateFactory.newLatLngZoom(location.toLatLng(), DEFAULT_MAP_ZOOM))
-                    model.userLocation.removeObserver(this)
-                }
-            }
-        })
+        val location = model.userLocation.value
+
+        if (location != null) {
+            model.onNewLocation(location)
+            map.value?.animateCamera(CameraUpdateFactory.newLatLngZoom(location.toLatLng(), DEFAULT_MAP_ZOOM))
+        }
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {

@@ -1,3 +1,30 @@
+/*
+ * This is free and unencumbered software released into the public domain.
+ *
+ * Anyone is free to copy, modify, publish, use, compile, sell, or
+ * distribute this software, either in source code form or as a compiled
+ * binary, for any purpose, commercial or non-commercial, and by any
+ * means.
+ *
+ * In jurisdictions that recognize copyright laws, the author or authors
+ * of this software dedicate any and all copyright interest in the
+ * software to the public domain. We make this dedication for the benefit
+ * of the public at large and to the detriment of our heirs and
+ * successors. We intend this dedication to be an overt act of
+ * relinquishment in perpetuity of all present and future rights to this
+ * software under copyright law.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information, please refer to <https://unlicense.org>
+ */
+
 package com.bubelov.coins.util
 
 import android.Manifest
@@ -7,14 +34,13 @@ import android.content.Context
 import android.content.Context.LOCATION_SERVICE
 import android.location.LocationListener
 import android.location.LocationManager
-import android.location.LocationProvider
 import android.os.Bundle
 import com.bubelov.coins.model.Location
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+@SuppressLint("MissingPermission")
 class LocationLiveData @Inject constructor(
     private val context: Context,
     private val permissionChecker: PermissionChecker
@@ -23,27 +49,19 @@ class LocationLiveData @Inject constructor(
 
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: android.location.Location) {
-            Timber.d("onLocationChanged(location: $location)")
             value = location.toLocation()
         }
 
         override fun onStatusChanged(provider: String, status: Int, extras: Bundle?) {
-            val statusString = when (status) {
-                LocationProvider.OUT_OF_SERVICE -> "OUT_OF_SERVICE"
-                LocationProvider.TEMPORARILY_UNAVAILABLE -> "TEMPORARILY_UNAVAILABLE"
-                LocationProvider.AVAILABLE -> "AVAILABLE"
-                else -> "UNKNOWN"
-            }
 
-            Timber.d("onStatusChanged(provider: $provider, status: $statusString, extras: $extras)")
         }
 
         override fun onProviderEnabled(provider: String) {
-            Timber.d("onProviderEnabled(provider: $provider)")
+
         }
 
         override fun onProviderDisabled(provider: String) {
-            Timber.d("onProviderDisabled(provider: $provider")
+
         }
     }
 
@@ -55,13 +73,19 @@ class LocationLiveData @Inject constructor(
         }
     }
 
-    @SuppressLint("MissingPermission")
     override fun onActive() {
         if (isLocationPermissionGranted()) {
             locationManager.requestLocationUpdates(
+                LocationManager.NETWORK_PROVIDER,
+                0L,
+                0.0f,
+                locationListener
+            )
+
+            locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
-                MIN_UPDATE_TIME_MILLIS,
-                MIN_UPDATE_DISTANCE_METERS,
+                0L,
+                0.0f,
                 locationListener
             )
         }
@@ -77,13 +101,20 @@ class LocationLiveData @Inject constructor(
     }
 
     fun onLocationPermissionGranted() {
+        val lastKnownLocation = getLastKnownLocation()
+
+        if (lastKnownLocation != null) {
+            value = lastKnownLocation
+        }
+
         if (hasActiveObservers()) {
             onActive()
         }
     }
 
-    companion object {
-        private const val MIN_UPDATE_TIME_MILLIS = 3000L
-        private const val MIN_UPDATE_DISTANCE_METERS = 1f
+    private fun getLastKnownLocation(): Location? {
+        val lastNetworkLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        val lastGpsLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        return lastGpsLocation?.toLocation() ?: lastNetworkLocation?.toLocation()
     }
 }
