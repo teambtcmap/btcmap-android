@@ -37,12 +37,13 @@ import android.graphics.drawable.BitmapDrawable
 import android.support.annotation.DrawableRes
 import android.support.graphics.drawable.VectorDrawableCompat
 import android.graphics.drawable.VectorDrawable
+import android.os.Build
 import android.support.v4.content.ContextCompat
-import androidx.graphics.applyCanvas
-import androidx.graphics.createBitmap
-import androidx.graphics.drawable.toBitmap
-import androidx.graphics.toColorFilter
-import androidx.graphics.toRect
+import androidx.core.graphics.applyCanvas
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.toColorFilter
+import androidx.core.graphics.toRect
 
 @Singleton
 class PlaceIconsRepository @Inject constructor(
@@ -146,7 +147,7 @@ class PlaceIconsRepository @Inject constructor(
 
         return if (drawable is BitmapDrawable) {
             drawable.bitmap
-        } else if (drawable is VectorDrawable || drawable is VectorDrawableCompat) {
+        } else if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && drawable is VectorDrawable) || drawable is VectorDrawableCompat) {
             val bitmap = createBitmap(preferredWidth, preferredHeight)
             val canvas = Canvas(bitmap)
             drawable.setBounds(0, 0, canvas.width, canvas.height)
