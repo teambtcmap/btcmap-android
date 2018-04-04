@@ -49,9 +49,7 @@ class JsonStringConverterFactory(private val delegateFactory: Converter.Factory)
                     retrofit
                 ) as Converter<Any, RequestBody>
 
-                if (delegate != null) {
-                    return DelegateToStringConverter<Any>(delegate)
-                }
+                return DelegateToStringConverter<Any>(delegate)
             }
         }
 

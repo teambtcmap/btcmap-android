@@ -94,7 +94,7 @@ class SignInActivity : AppCompatActivity() {
 
         when (signInResult) {
             is SignInResult.Success -> {
-                val bundle = Bundle().apply { putString(FirebaseAnalytics.Param.SIGN_UP_METHOD, "google") }
+                val bundle = Bundle().apply { putString(FirebaseAnalytics.Param.METHOD, "google") }
                 analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
                 setResult(Activity.RESULT_OK)
                 supportFinishAfterTransition()

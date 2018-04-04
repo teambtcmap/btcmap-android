@@ -28,8 +28,8 @@
 package com.bubelov.coins.ui.viewmodel
 
 import android.arch.lifecycle.*
-import android.content.Context
-import android.preference.PreferenceManager
+import android.content.SharedPreferences
+import android.content.res.Resources
 
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Location
@@ -44,36 +44,16 @@ import java.text.NumberFormat
 import javax.inject.Inject
 
 class PlacesSearchViewModel @Inject constructor(
-    private val context: Context,
     private val placesRepository: PlacesRepository,
-    private val placeIconsRepository: PlaceIconsRepository
+    private val placeIconsRepository: PlaceIconsRepository,
+    private val preferences: SharedPreferences,
+    private val resources: Resources
 ) : ViewModel() {
 
     private val userLocation = MutableLiveData<Location>()
     private val currency = MutableLiveData<String>()
-    val searchQuery = MutableLiveData<String>()
 
-    val searchResults: LiveData<List<PlacesSearchRow>> =
-        MediatorLiveData<List<PlacesSearchRow>>().apply {
-            var params: SearchParams? = null
-
-            fun onSourceChanged() {
-                val newParams = SearchParams(
-                    userLocation.value,
-                    currency.value ?: "",
-                    searchQuery.value ?: ""
-                )
-
-                if (newParams.valid() && newParams != params) {
-                    params = newParams
-                    search(newParams, this)
-                }
-            }
-
-            addSource(userLocation, { onSourceChanged() })
-            addSource(currency, { onSourceChanged() })
-            addSource(searchQuery, { onSourceChanged() })
-        }
+    val results = MutableLiveData<List<PlacesSearchRow>>()
 
     private var searchJob: Job? = null
 
@@ -82,33 +62,35 @@ class PlacesSearchViewModel @Inject constructor(
         this.currency.value = currency
     }
 
-    private fun search(params: SearchParams, result: MutableLiveData<List<PlacesSearchRow>>) {
+    fun search(query: String) {
         searchJob?.cancel()
 
-        if (params.query.length < MIN_QUERY_LENGTH) {
-            result.value = emptyList()
+        if (query.length < MIN_QUERY_LENGTH) {
+            results.value = emptyList()
             return
         }
 
         searchJob = launch {
-            var places = placesRepository.findBySearchQuery(params.query)
-                .filter { it.currencies.contains(params.currency) }
+            var places = placesRepository.findBySearchQuery(query)
+                .filter { it.currencies.contains(currency.value) }
 
-            if (params.location != null) {
+            val location = userLocation.value
+
+            if (location != null) {
                 places = places.sortedBy {
                     DistanceUtils.getDistance(
-                        params.location.latitude,
-                        params.location.longitude,
+                        location.latitude,
+                        location.longitude,
                         it.latitude,
                         it.longitude
                     )
                 }
             }
 
-            val rows = places.map { it.toRow(params.location) }
+            val rows = places.map { it.toRow(location) }
 
             if (isActive) {
-                result.postValue(rows)
+                results.postValue(rows)
             }
         }
     }
@@ -130,14 +112,12 @@ class PlacesSearchViewModel @Inject constructor(
     }
 
     private fun getDistanceUnits(): DistanceUnits {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-
-        val distanceUnitsString = sharedPreferences.getString(
-            context.getString(R.string.pref_distance_units_key),
-            context.getString(R.string.pref_distance_units_automatic)
+        val distanceUnitsString = preferences.getString(
+            resources.getString(R.string.pref_distance_units_key),
+            resources.getString(R.string.pref_distance_units_automatic)
         )
 
-        return if (distanceUnitsString == context.getString(R.string.pref_distance_units_automatic)) {
+        return if (distanceUnitsString == resources.getString(R.string.pref_distance_units_automatic)) {
             DistanceUnits.default
         } else {
             DistanceUnits.valueOf(distanceUnitsString)
@@ -146,19 +126,9 @@ class PlacesSearchViewModel @Inject constructor(
 
     private fun DistanceUnits.getShortName(): String {
         return when (this) {
-            DistanceUnits.KILOMETERS -> context.getString(R.string.kilometers_short)
-            DistanceUnits.MILES -> context.getString(R.string.miles_short)
+            DistanceUnits.KILOMETERS -> resources.getString(R.string.kilometers_short)
+            DistanceUnits.MILES -> resources.getString(R.string.miles_short)
         }
-    }
-
-    private data class SearchParams(
-        val location: Location?,
-        val currency: String,
-        val query: String
-    )
-
-    private fun SearchParams.valid(): Boolean {
-        return currency.isNotEmpty()
     }
 
     companion object {

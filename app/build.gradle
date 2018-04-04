@@ -55,10 +55,6 @@ android {
     }
 }
 
-kapt {
-    generateStubs = true
-}
-
 dependencies {
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
@@ -115,7 +111,7 @@ dependencies {
     implementation "com.jakewharton.timber:timber:$timberVersion"
 
     // Crash reporting
-    compile("com.crashlytics.sdk.android:crashlytics:$crashlyticsVersion@aar") {
+    implementation("com.crashlytics.sdk.android:crashlytics:$crashlyticsVersion@aar") {
         transitive = true
     }
 

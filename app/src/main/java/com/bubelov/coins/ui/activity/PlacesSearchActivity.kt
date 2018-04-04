@@ -72,7 +72,7 @@ class PlacesSearchActivity : AppCompatActivity() {
 
         results.layoutManager = LinearLayoutManager(this)
 
-        model.searchResults.observe(this, Observer { places ->
+        model.results.observe(this, Observer { places ->
             results.adapter = PlacesSearchResultsAdapter(places ?: emptyList()) {
                 setResult(
                     Activity.RESULT_OK,
@@ -83,7 +83,7 @@ class PlacesSearchActivity : AppCompatActivity() {
 
         query.addTextChangedListener(object : TextWatcherAdapter() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                model.searchQuery.value = s.toString()
+                model.search(s.toString())
                 clear.visibility = if (TextUtils.isEmpty(s)) View.GONE else View.VISIBLE
             }
         })
