@@ -28,7 +28,6 @@
 package com.bubelov.coins.ui.viewmodel
 
 import android.arch.lifecycle.*
-import com.bubelov.coins.Constants
 import com.bubelov.coins.model.Location
 import com.bubelov.coins.model.NotificationArea
 import com.bubelov.coins.model.Place
@@ -85,7 +84,7 @@ class MapViewModel @Inject constructor(
             notificationAreaRepository.notificationArea = NotificationArea(
                 location.latitude,
                 location.longitude,
-                Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS
+                NotificationAreaRepository.DEFAULT_RADIUS_METERS
             )
         }
 

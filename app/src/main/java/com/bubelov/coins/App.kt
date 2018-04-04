@@ -47,7 +47,6 @@ import timber.log.Timber
 
 class App : Application(), HasActivityInjector, HasServiceInjector {
     @Inject internal lateinit var activityInjector: DispatchingAndroidInjector<Activity>
-
     @Inject internal lateinit var serviceInjector: DispatchingAndroidInjector<Service>
 
     @Inject lateinit var databaseSync: DatabaseSync

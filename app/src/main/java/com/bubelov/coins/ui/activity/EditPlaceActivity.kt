@@ -34,10 +34,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import com.bubelov.coins.Constants
 
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Location
+import com.bubelov.coins.model.MapMarkerAnchor
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.viewmodel.EditPlaceViewModel
 import com.bubelov.coins.util.toLatLng
@@ -183,7 +183,7 @@ class EditPlaceActivity : AppCompatActivity() {
             MarkerOptions()
                 .position(location.toLatLng())
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker_empty))
-                .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V)
+                .anchor(MapMarkerAnchor.u, MapMarkerAnchor.v)
         )
     }
 

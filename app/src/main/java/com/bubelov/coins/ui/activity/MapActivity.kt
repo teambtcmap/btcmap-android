@@ -49,8 +49,8 @@ import android.text.TextUtils
 import android.view.MenuItem
 import android.view.View
 
-import com.bubelov.coins.Constants
 import com.bubelov.coins.R
+import com.bubelov.coins.model.MapMarkerAnchor
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.widget.PlaceDetailsView
 import com.google.android.gms.maps.model.MarkerOptions
@@ -469,7 +469,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
             markerOptions
                 .icon(BitmapDescriptorFactory.fromBitmap(placeMarker.icon))
-                .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V)
+                .anchor(MapMarkerAnchor.u, MapMarkerAnchor.v)
         }
     }
 

@@ -25,37 +25,9 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.repository.area
+package com.bubelov.coins.model
 
-import android.content.SharedPreferences
-
-import com.bubelov.coins.PreferenceKeys
-import com.bubelov.coins.model.NotificationArea
-import com.google.gson.Gson
-
-import javax.inject.Inject
-import javax.inject.Singleton
-
-@Singleton
-class NotificationAreaRepository @Inject constructor(
-    private val preferences: SharedPreferences,
-    private val gson: Gson
-) {
-    var notificationArea: NotificationArea?
-        get() {
-            return gson.fromJson(
-                preferences.getString(PreferenceKeys.NOTIFICATION_AREA, ""),
-                NotificationArea::class.java
-            )
-        }
-        set(area) {
-            preferences.edit().putString(
-                PreferenceKeys.NOTIFICATION_AREA,
-                gson.toJson(area)
-            ).apply()
-        }
-
-    companion object {
-        const val DEFAULT_RADIUS_METERS = 50000.0
-    }
+object MapMarkerAnchor {
+    const val u = 0.5f
+    const val v = 0.91145f
 }

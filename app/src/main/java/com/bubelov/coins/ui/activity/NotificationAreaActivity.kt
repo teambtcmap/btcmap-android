@@ -40,8 +40,8 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.widget.SeekBar
 
-import com.bubelov.coins.Constants
 import com.bubelov.coins.R
+import com.bubelov.coins.model.MapMarkerAnchor
 import com.bubelov.coins.model.NotificationArea
 import com.bubelov.coins.ui.viewmodel.NotificationAreaViewModel
 import com.bubelov.coins.util.OnSeekBarChangeAdapter
@@ -106,7 +106,7 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         val defaultCameraPosition = intent.getParcelableExtra<CameraPosition>(DEFAULT_CAMERA_POSITION_EXTRA)
-        showArea(model.notificationArea ?: model.getDefaultNotificationArea(defaultCameraPosition))
+        showArea(model.getNotificationArea(defaultCameraPosition))
     }
 
     private fun showArea(area: NotificationArea) {
@@ -118,7 +118,7 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
         marker = map!!.addMarker(MarkerOptions()
                 .position(LatLng(area.latitude, area.longitude))
                 .icon(markerDescriptor)
-                .anchor(Constants.MAP_MARKER_ANCHOR_U, Constants.MAP_MARKER_ANCHOR_V)
+                .anchor(MapMarkerAnchor.u, MapMarkerAnchor.v)
                 .draggable(true))
 
         val circleOptions = CircleOptions()

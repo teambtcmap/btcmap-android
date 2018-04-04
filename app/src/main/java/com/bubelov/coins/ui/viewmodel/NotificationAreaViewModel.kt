@@ -28,7 +28,6 @@
 package com.bubelov.coins.ui.viewmodel
 
 import android.arch.lifecycle.ViewModel
-import com.bubelov.coins.Constants
 import com.bubelov.coins.model.NotificationArea
 import com.bubelov.coins.repository.area.NotificationAreaRepository
 import com.google.android.gms.maps.model.CameraPosition
@@ -38,13 +37,12 @@ import javax.inject.Inject
 class NotificationAreaViewModel @Inject constructor(
     private var areaRepository: NotificationAreaRepository
 ) : ViewModel() {
-    val notificationArea = areaRepository.notificationArea
 
-    fun getDefaultNotificationArea(defaultCameraPosition: CameraPosition): NotificationArea {
-        return NotificationArea(
+    fun getNotificationArea(defaultCameraPosition: CameraPosition): NotificationArea {
+        return areaRepository.notificationArea ?: NotificationArea(
             defaultCameraPosition.target.latitude,
             defaultCameraPosition.target.longitude,
-            Constants.DEFAULT_NOTIFICATION_AREA_RADIUS_METERS
+            NotificationAreaRepository.DEFAULT_RADIUS_METERS
         )
     }
 
