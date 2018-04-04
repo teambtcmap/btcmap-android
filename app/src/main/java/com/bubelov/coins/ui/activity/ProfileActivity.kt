@@ -67,18 +67,18 @@ class ProfileActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         }
 
         if (!TextUtils.isEmpty(user.firstName)) {
-            user_name.text = String.format("%s %s", user.firstName, user.lastName)
+            userName.text = String.format("%s %s", user.firstName, user.lastName)
         } else {
-            user_name.text = user.email
+            userName.text = user.email
         }
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_sign_out) {
+        return if (item.itemId == R.id.action_sign_out) {
             signOut()
-            return true
+            true
         } else {
-            return false
+            false
         }
     }
 
@@ -105,7 +105,7 @@ class ProfileActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
     }
 
     companion object {
-        val RESULT_SIGN_OUT = 10
+        const val RESULT_SIGN_OUT = 10
 
         fun newIntent(context: Context): Intent = Intent(context, ProfileActivity::class.java)
     }

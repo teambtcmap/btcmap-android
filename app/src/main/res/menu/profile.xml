@@ -1,5 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.bubelov.coins.ui.activity.ProfileActivity">
 
     <item
         android:id="@+id/action_sign_out"

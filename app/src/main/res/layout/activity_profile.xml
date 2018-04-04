@@ -5,69 +5,68 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="@color/primary_dark"
     android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    tools:context="com.bubelov.coins.ui.activity.ProfileActivity">
 
-    <LinearLayout
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <FrameLayout
+        <View
+            android:id="@+id/topPanel"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="@color/primary_dark"
-            android:fitsSystemWindows="true">
+            android:layout_height="200dp" />
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                style="@style/Toolbar"
-                android:background="@android:color/transparent"
-                app:navigationIcon="?homeAsUpIndicator" />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            style="@style/Toolbar"
+            android:background="@android:color/transparent"
+            app:navigationIcon="@drawable/ic_arrow_back" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="vertical">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/avatar"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            app:layout_constraintBottom_toBottomOf="@+id/topPanel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/topPanel"
+            app:layout_constraintVertical_bias="0.27"
+            tools:background="#ff0000" />
 
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/avatar"
-                    android:layout_width="96dp"
-                    android:layout_height="96dp"
-                    android:layout_gravity="center"
-                    tools:background="#ff0000" />
+        <TextView
+            android:id="@+id/userName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/avatar"
+            tools:text="Guest" />
 
-                <TextView
-                    android:id="@+id/user_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:gravity="center"
-                    android:textColor="#ffffff"
-                    android:textSize="18sp"
-                    tools:text="Guest" />
-
-            </LinearLayout>
-
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="match_parent"
+        <View
+            android:id="@+id/bottomPanel"
+            android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:background="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/topPanel" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/more_features_coming_soon"
-                android:textColor="@color/text_primary" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/more_features_coming_soon"
+            android:textColor="@color/text_primary"
+            app:layout_constraintBottom_toBottomOf="@+id/bottomPanel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/bottomPanel" />
 
-        </FrameLayout>
-
-    </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.design.widget.CoordinatorLayout>
