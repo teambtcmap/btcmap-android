@@ -50,16 +50,16 @@ class PlacesSearchViewModel @Inject constructor(
     private val resources: Resources
 ) : ViewModel() {
 
-    private val userLocation = MutableLiveData<Location>()
-    private val currency = MutableLiveData<String>()
+    private var userLocation: Location? = null
+    private lateinit var currency: String
 
     val results = MutableLiveData<List<PlacesSearchRow>>()
 
     private var searchJob: Job? = null
 
     fun init(userLocation: Location?, currency: String) {
-        this.userLocation.value = userLocation
-        this.currency.value = currency
+        this.userLocation = userLocation
+        this.currency = currency
     }
 
     fun search(query: String) {
@@ -72,9 +72,9 @@ class PlacesSearchViewModel @Inject constructor(
 
         searchJob = launch {
             var places = placesRepository.findBySearchQuery(query)
-                .filter { it.currencies.contains(currency.value) }
+                .filter { it.currencies.contains(currency) }
 
-            val location = userLocation.value
+            val location = userLocation
 
             if (location != null) {
                 places = places.sortedBy {
@@ -96,17 +96,20 @@ class PlacesSearchViewModel @Inject constructor(
     }
 
     private fun Place.toRow(userLocation: Location?): PlacesSearchRow {
-        val distanceString = if (userLocation != null) DISTANCE_FORMAT.format(
-            userLocation.distanceTo(
-                Location(latitude, longitude),
-                getDistanceUnits()
-            )
-        ) + " ${getDistanceUnits().getShortName()}" else ""
+        val distanceStringBuilder = StringBuilder()
+
+        if (userLocation != null) {
+            val placeLocation = Location(latitude, longitude)
+            val distance = userLocation.distanceTo(placeLocation, getDistanceUnits())
+            distanceStringBuilder.append(DISTANCE_FORMAT.format(distance))
+            distanceStringBuilder.append(" ")
+            distanceStringBuilder.append(getDistanceUnits().getShortName())
+        }
 
         return PlacesSearchRow(
             placeId = id,
             name = name,
-            distance = distanceString,
+            distance = distanceStringBuilder.toString(),
             icon = placeIconsRepository.getPlaceIcon(category)
         )
     }
@@ -134,7 +137,8 @@ class PlacesSearchViewModel @Inject constructor(
     companion object {
         private const val MIN_QUERY_LENGTH = 2
 
-        private val DISTANCE_FORMAT =
-            NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }
+        private val DISTANCE_FORMAT = NumberFormat.getNumberInstance().apply {
+            maximumFractionDigits = 1
+        }
     }
 }

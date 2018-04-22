@@ -28,7 +28,7 @@ ext {
 }
 
 buildscript {
-    ext.gradlePluginVersion = '3.0.1'
+    ext.gradlePluginVersion = '3.1.0'
     ext.kotlinVersion = '1.2.31'
     ext.googleServicesPluginVersion = '3.1.1'
     ext.fabricPluginVersion = '1.24.4'
@@ -40,7 +40,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.0'
+        classpath "com.android.tools.build:gradle:$gradlePluginVersion"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "com.google.gms:google-services:$googleServicesPluginVersion"
         classpath "io.fabric.tools:gradle:$fabricPluginVersion"

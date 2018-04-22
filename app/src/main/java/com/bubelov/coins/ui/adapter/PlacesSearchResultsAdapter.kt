@@ -38,9 +38,10 @@ import com.bubelov.coins.ui.model.PlacesSearchRow
 import kotlinx.android.synthetic.main.row_places_search_result.view.*
 
 class PlacesSearchResultsAdapter(
-    private val items: List<PlacesSearchRow>,
     private val itemClick: (PlacesSearchRow) -> Unit
 ) : RecyclerView.Adapter<PlacesSearchResultsAdapter.ViewHolder>() {
+
+    private val items = mutableListOf<PlacesSearchRow>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
@@ -53,20 +54,24 @@ class PlacesSearchResultsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(items[position], itemClick)
+        val item = items[position]
+
+        holder.itemView.apply {
+            icon.setImageBitmap(item.icon)
+            name.text = item.name
+            distance.visibility = if (item.distance.isNotEmpty()) View.VISIBLE else View.GONE
+            distance.text = item.distance
+            setOnClickListener { itemClick(item) }
+        }
     }
 
     override fun getItemCount() = items.size
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        fun bind(item: PlacesSearchRow, itemClick: (PlacesSearchRow) -> Unit) {
-            itemView.apply {
-                icon.setImageBitmap(item.icon)
-                name.text = item.name
-                distance.visibility = if (item.distance.isNotEmpty()) View.VISIBLE else View.GONE
-                distance.text = item.distance
-                setOnClickListener { itemClick(item) }
-            }
-        }
+    fun swapItems(newItems: Collection<PlacesSearchRow>) {
+        items.clear()
+        items.addAll(newItems)
+        notifyDataSetChanged()
     }
+
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
 }

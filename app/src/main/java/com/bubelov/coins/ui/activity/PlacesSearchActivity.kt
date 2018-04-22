@@ -28,10 +28,8 @@
 package com.bubelov.coins.ui.activity
 
 import android.app.Activity
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
@@ -41,12 +39,16 @@ import android.text.TextUtils
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import androidx.core.content.systemService
 
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Location
 import com.bubelov.coins.ui.adapter.PlacesSearchResultsAdapter
+import com.bubelov.coins.ui.model.PlacesSearchRow
 import com.bubelov.coins.ui.viewmodel.PlacesSearchViewModel
 import com.bubelov.coins.util.TextWatcherAdapter
+import com.bubelov.coins.util.nonNull
+import com.bubelov.coins.util.observe
 import dagger.android.AndroidInjection
 
 import kotlinx.android.synthetic.main.activity_places_search.*
@@ -56,30 +58,23 @@ class PlacesSearchActivity : AppCompatActivity() {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
     private lateinit var model: PlacesSearchViewModel
 
+    val location by lazy { intent.getSerializableExtra(USER_LOCATION_EXTRA) as Location? }
+    val currency by lazy { intent.getStringExtra(CURRENCY_EXTRA) ?: "" }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_places_search)
 
         model = ViewModelProviders.of(this, modelFactory)[PlacesSearchViewModel::class.java]
-
-        model.init(
-            intent.getSerializableExtra(USER_LOCATION_EXTRA) as Location?,
-            intent.getStringExtra(CURRENCY_EXTRA)
-        )
+        model.init(location, currency)
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 
-        results.layoutManager = LinearLayoutManager(this)
-
-        model.results.observe(this, Observer { places ->
-            results.adapter = PlacesSearchResultsAdapter(places ?: emptyList()) {
-                setResult(
-                    Activity.RESULT_OK,
-                    Intent().apply { putExtra(PLACE_ID_EXTRA, it.placeId) })
-                supportFinishAfterTransition()
-            }
-        })
+        list.layoutManager = LinearLayoutManager(this)
+        val adapter = PlacesSearchResultsAdapter { onPlaceRowClick(it) }
+        list.adapter = adapter
+        model.results.nonNull().observe(this, { adapter.swapItems(it) })
 
         query.addTextChangedListener(object : TextWatcherAdapter() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
@@ -91,9 +86,8 @@ class PlacesSearchActivity : AppCompatActivity() {
         query.setOnEditorActionListener { _, actionId, _ ->
             when (actionId) {
                 EditorInfo.IME_ACTION_SEARCH -> {
-                    val inputMethodManager =
-                        getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    inputMethodManager.hideSoftInputFromWindow(query.windowToken, 0)
+                    val inputManager = systemService<InputMethodManager>()
+                    inputManager.hideSoftInputFromWindow(query.windowToken, 0)
                     true
                 }
                 else -> false
@@ -101,6 +95,12 @@ class PlacesSearchActivity : AppCompatActivity() {
         }
 
         clear.setOnClickListener { query.setText("") }
+    }
+
+    private fun onPlaceRowClick(row: PlacesSearchRow) {
+        val data = Intent().apply { putExtra(PLACE_ID_EXTRA, row.placeId) }
+        setResult(Activity.RESULT_OK, data)
+        finish()
     }
 
     companion object {
