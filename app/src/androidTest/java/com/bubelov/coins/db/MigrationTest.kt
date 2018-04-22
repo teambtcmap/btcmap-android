@@ -25,7 +25,7 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins
+package com.bubelov.coins.db
 
 import android.support.test.runner.AndroidJUnit4
 import org.junit.runner.RunWith
@@ -33,7 +33,6 @@ import android.arch.persistence.room.testing.MigrationTestHelper
 import org.junit.Rule
 import android.arch.persistence.db.framework.FrameworkSQLiteOpenHelperFactory
 import android.support.test.InstrumentationRegistry
-import com.bubelov.coins.db.Database
 import org.junit.Test
 
 @RunWith(AndroidJUnit4::class)

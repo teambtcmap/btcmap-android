@@ -25,12 +25,13 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins
+package com.bubelov.coins.ui.activity
 
 import android.support.test.rule.ActivityTestRule
+import android.support.test.rule.GrantPermissionRule
 import android.support.test.runner.AndroidJUnit4
 
-import com.bubelov.coins.ui.activity.MapActivity
+import com.bubelov.coins.R
 
 import org.junit.Rule
 import org.junit.Test
@@ -41,23 +42,52 @@ import android.support.test.espresso.assertion.ViewAssertions.matches
 import android.support.test.espresso.contrib.DrawerActions.openDrawer
 import android.support.test.espresso.contrib.DrawerMatchers.isClosed
 import android.support.test.espresso.contrib.DrawerMatchers.isOpen
+import android.support.test.espresso.matcher.ViewMatchers.hasDescendant
+import android.support.test.espresso.matcher.ViewMatchers.isDisplayed
+import android.support.test.espresso.matcher.ViewMatchers.isEnabled
 import android.support.test.espresso.matcher.ViewMatchers.withId
-import android.support.test.rule.GrantPermissionRule
+import android.support.test.espresso.matcher.ViewMatchers.withText
 
 @RunWith(AndroidJUnit4::class)
 class MapActivityTest {
     @Rule
     @JvmField
-    val activityTestRule = ActivityTestRule(MapActivity::class.java)
+    var activityTestRule = ActivityTestRule(MapActivity::class.java)
 
     @Rule
     @JvmField
-    val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION)
+    var grantLocationRule = GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
     @Test
-    fun testDrawerOpens() {
-        onView(withId(R.id.drawer_layout)).check(matches(isClosed()))
+    fun testToolbar() {
+        onView(withId(R.id.toolbar))
+            .check(matches(hasDescendant(withText("Bitcoin map"))))
+
+        onView(withId(R.id.action_add))
+            .check(matches(isDisplayed()))
+            .check(matches(isEnabled()))
+
+        onView(withId(R.id.action_search))
+            .check(matches(isDisplayed()))
+            .check(matches(isEnabled()))
+    }
+
+    @Test
+    fun testFab() {
+        onView(withId(R.id.fab))
+            .check(matches(isDisplayed()))
+            .check(matches(isEnabled()))
+    }
+
+    @Test
+    fun testNavigationDrawer() {
+        onView(withId(R.id.drawer_layout))
+            .check(matches(isDisplayed()))
+            .check(matches(isClosed()))
+
         openDrawer(R.id.drawer_layout)
-        onView(withId(R.id.drawer_layout)).check(matches(isOpen()))
+
+        onView(withId(R.id.drawer_layout))
+            .check(matches(isOpen()))
     }
 }
