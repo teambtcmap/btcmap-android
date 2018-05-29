@@ -25,9 +25,10 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.fragment
+package com.bubelov.coins.util
 
-import dagger.Module
-
-@Module
-class SettingsFragmentModule
+sealed class AsyncResult<out T: Any> {
+    object Loading: AsyncResult<Nothing>()
+    data class Success<out T : Any>(val data: T) : AsyncResult<T>()
+    data class Error(val t: Throwable) : AsyncResult<Nothing>()
+}

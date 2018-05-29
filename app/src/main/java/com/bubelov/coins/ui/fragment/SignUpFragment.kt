@@ -27,7 +27,9 @@
 
 package com.bubelov.coins.ui.fragment
 
-import android.content.Context
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -39,25 +41,43 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 
 import com.bubelov.coins.R
-import com.bubelov.coins.repository.user.SignInResult
-import com.bubelov.coins.repository.user.UserRepository
 import com.bubelov.coins.ui.activity.MapActivity
+import com.bubelov.coins.ui.viewmodel.AuthViewModel
+import com.bubelov.coins.util.AsyncResult
 import dagger.android.support.AndroidSupportInjection
 
 import javax.inject.Inject
 
 import kotlinx.android.synthetic.main.fragment_sign_up.*
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.alert
 
 class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
-    @Inject internal lateinit var userRepository: UserRepository
+    @Inject internal lateinit var modelFactory: ViewModelProvider.Factory
 
-    override fun onAttach(context: Context) {
+    private val model by lazy {
+        ViewModelProviders.of(this)[AuthViewModel::class.java]
+    }
+
+    private val authObserver = Observer<AsyncResult<Any>> {
+        when (it) {
+            is AsyncResult.Loading -> {
+                setLoading(true)
+            }
+
+            is AsyncResult.Success -> {
+                startActivity(Intent(activity, MapActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) })
+            }
+
+            is AsyncResult.Error -> {
+                setLoading(false)
+                activity?.alert { message = it.t.message ?: getString(R.string.something_went_wrong) }?.show()
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         AndroidSupportInjection.inject(this)
-        super.onAttach(context)
+        super.onCreate(savedInstanceState)
     }
 
     override fun onCreateView(
@@ -79,6 +99,8 @@ class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
                 last_name.text.toString()
             )
         }
+
+        model.authState.observe(this, authObserver)
     }
 
     override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
@@ -96,21 +118,9 @@ class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
         return false
     }
 
-    private fun signUp(email: String, password: String, firstName: String, lastName: String) =
-        launch(UI) {
-            setLoading(true)
-
-            val result = async { userRepository.signUp(email, password, firstName, lastName) }.await()
-
-            when (result) {
-                is SignInResult.Success -> startActivity(Intent(activity, MapActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) })
-
-                is SignInResult.Error -> {
-                    setLoading(false)
-                    activity?.alert { message = result.e.message ?: getString(R.string.something_went_wrong) }?.show()
-                }
-            }
-        }
+    private fun signUp(email: String, password: String, firstName: String, lastName: String) {
+        model.signUp(email, password, firstName, lastName).observe(this, authObserver)
+    }
 
     private fun setLoading(loading: Boolean) {
         state_switcher.displayedChild = if (loading) 1 else 0

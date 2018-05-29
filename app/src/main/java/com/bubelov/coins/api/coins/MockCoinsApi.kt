@@ -47,8 +47,7 @@ class MockCoinsApi(
     override fun createUser(args: CreateUserArgs): Call<AuthResponse> {
         val response = AuthResponse(
             user = User(1L, args.user.email, args.user.firstName, args.user.lastName, ""),
-            token = UUID.randomUUID().toString(),
-            errors = emptyList()
+            token = UUID.randomUUID().toString()
         )
 
         return delegate.returningResponse(response).createUser(args)
@@ -57,8 +56,7 @@ class MockCoinsApi(
     override fun authWithEmail(email: String, password: String): Call<AuthResponse> {
         val response = AuthResponse(
             user = User(1L, email, "Foo", "Bar", ""),
-            token = UUID.randomUUID().toString(),
-            errors = emptyList()
+            token = UUID.randomUUID().toString()
         )
 
         return delegate.returningResponse(response).authWithEmail(email, password)
@@ -67,8 +65,7 @@ class MockCoinsApi(
     override fun authWithGoogle(token: String): Call<AuthResponse> {
         val response = AuthResponse(
             user = User(1L, "foo@bar.com", "Foo", "Bar", ""),
-            token = UUID.randomUUID().toString(),
-            errors = emptyList()
+            token = UUID.randomUUID().toString()
         )
 
         return delegate.returningResponse(response).authWithGoogle(token)

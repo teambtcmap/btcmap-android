@@ -27,7 +27,9 @@
 
 package com.bubelov.coins.ui.fragment
 
-import android.content.Context
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -39,25 +41,48 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 
 import com.bubelov.coins.R
-import com.bubelov.coins.repository.user.SignInResult
-import com.bubelov.coins.repository.user.UserRepository
 import com.bubelov.coins.ui.activity.MapActivity
+import com.bubelov.coins.ui.viewmodel.AuthViewModel
+import com.bubelov.coins.util.AsyncResult
 import dagger.android.support.AndroidSupportInjection
 
 import javax.inject.Inject
 
 import kotlinx.android.synthetic.main.fragment_sign_in.*
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.alert
 
 class SignInFragment : Fragment(), TextView.OnEditorActionListener {
-    @Inject internal lateinit var userRepository: UserRepository
+    @Inject internal lateinit var modelFactory: ViewModelProvider.Factory
 
-    override fun onAttach(context: Context) {
+    private val model by lazy {
+        ViewModelProviders.of(this, modelFactory)[AuthViewModel::class.java]
+    }
+
+    private val authObserver = Observer<AsyncResult<Any>> {
+        when (it) {
+            is AsyncResult.Loading -> {
+                sign_in_panel.visibility = View.GONE
+                progress.visibility = View.VISIBLE
+            }
+
+            is AsyncResult.Success -> {
+                startActivity(
+                    Intent(activity, MapActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    })
+            }
+
+            is AsyncResult.Error -> {
+                sign_in_panel.visibility = View.VISIBLE
+                progress.visibility = View.GONE
+                activity?.alert { message = it.t.message ?: getString(R.string.something_went_wrong) }?.show()
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         AndroidSupportInjection.inject(this)
-        super.onAttach(context)
+        super.onCreate(savedInstanceState)
     }
 
     override fun onCreateView(
@@ -70,30 +95,21 @@ class SignInFragment : Fragment(), TextView.OnEditorActionListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         password.setOnEditorActionListener(this)
-        sign_in.setOnClickListener { signInNew(email.text.toString(), password.text.toString()) }
+
+        sign_in.setOnClickListener {
+            model.signIn(email.text.toString(), password.text.toString())
+                .observe(this, authObserver)
+        }
+
+        model.authState.observe(this, authObserver)
     }
 
     override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
         if (actionId == EditorInfo.IME_ACTION_GO) {
-            signInNew(email.text.toString(), password.text.toString())
+            model.signIn(email.text.toString(), password.text.toString()).observe(this, authObserver)
             return true
         }
 
         return false
-    }
-
-    private fun signInNew(email: String, password: String) = launch(UI) {
-        sign_in_panel.visibility = View.GONE
-        progress.visibility = View.VISIBLE
-
-        val signInResult = async { userRepository.signIn(email, password) }.await()
-
-        when (signInResult) {
-            is SignInResult.Success -> startActivity(Intent(activity, MapActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) })
-            is SignInResult.Error -> activity?.alert { message = signInResult.e.message ?: getString(R.string.something_went_wrong) }?.show()
-        }
-
-        sign_in_panel.visibility = View.VISIBLE
-        progress.visibility = View.GONE
     }
 }

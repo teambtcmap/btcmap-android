@@ -27,23 +27,27 @@
 
 package com.bubelov.coins.repository.user
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.content.SharedPreferences
 
 import com.bubelov.coins.PreferenceKeys
 import com.bubelov.coins.api.coins.CoinsApi
 import com.bubelov.coins.api.coins.CreateUserArgs
 import com.bubelov.coins.model.User
-import com.bubelov.coins.util.toCoinsApiException
+import com.bubelov.coins.util.AsyncResult
+import com.bubelov.coins.util.getException
 import com.google.gson.Gson
+import kotlinx.coroutines.experimental.launch
 
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class UserRepository @Inject constructor(
-        private val api: CoinsApi,
-        private val preferences: SharedPreferences,
-        private val gson: Gson
+    private val api: CoinsApi,
+    private val preferences: SharedPreferences,
+    private val gson: Gson
 ) {
     var user: User?
         get() = gson.fromJson(preferences.getString(PreferenceKeys.USER, null), User::class.java)
@@ -57,52 +61,94 @@ class UserRepository @Inject constructor(
         get() = preferences.getString(PreferenceKeys.API_AUTH_METHOD, "")
         set(method) = preferences.edit().putString(PreferenceKeys.API_AUTH_METHOD, method).apply()
 
-    fun signIn(googleToken: String) = try {
-        api.authWithGoogle(googleToken).execute().apply {
-            if (isSuccessful) {
-                user = body()!!.user!!
-                userAuthToken = body()!!.token!!
-                userAuthMethod = "google"
-            } else {
-                throw toCoinsApiException()
+    fun signIn(googleToken: String): LiveData<AsyncResult<Any>> {
+        val result = MutableLiveData<AsyncResult<Any>>()
+        result.postValue(AsyncResult.Loading)
+
+        launch {
+            try {
+                api.authWithGoogle(googleToken).execute().apply {
+                    if (isSuccessful) {
+                        val body = body() ?: throw getException()
+                        user = body.user
+                        userAuthToken = body.token
+                        userAuthMethod = "google"
+                        result.postValue(AsyncResult.Success(Any()))
+                    } else {
+                        throw getException()
+                    }
+                }
+            } catch (t: Throwable) {
+                result.postValue(AsyncResult.Error(t))
             }
         }
 
-        SignInResult.Success()
-    } catch (e: Exception) {
-        SignInResult.Error(e)
+        return result
     }
 
-    fun signIn(email: String, password: String) = try {
-        api.authWithEmail(email, password).execute().apply {
-            if (isSuccessful) {
-                user = body()!!.user!!
-                userAuthToken = body()!!.token!!
-                userAuthMethod = "email"
-            } else {
-                throw toCoinsApiException()
+    fun signIn(email: String, password: String): LiveData<AsyncResult<Any>> {
+        val result = MutableLiveData<AsyncResult<Any>>()
+        result.postValue(AsyncResult.Loading)
+
+        launch {
+            try {
+                api.authWithEmail(email, password).execute().apply {
+                    if (isSuccessful) {
+                        val body = body() ?: throw getException()
+                        user = body.user
+                        userAuthToken = body.token
+                        userAuthMethod = "email"
+                    } else {
+                        throw getException()
+                    }
+                }
+
+                result.postValue(AsyncResult.Success(Any()))
+            } catch (t: Throwable) {
+                result.postValue(AsyncResult.Error(t))
             }
         }
 
-        SignInResult.Success()
-    } catch (e: Exception) {
-        SignInResult.Error(e)
+        return result
     }
 
-    fun signUp(email: String, password: String, firstName: String, lastName: String) = try {
-        api.createUser(CreateUserArgs(CreateUserArgs.User(email, password, firstName, lastName))).execute().apply {
-            if (isSuccessful) {
-                user = body()!!.user!!
-                userAuthToken = body()!!.token!!
-                userAuthMethod = "email"
-            } else {
-                throw toCoinsApiException()
+    fun signUp(
+        email: String,
+        password: String,
+        firstName: String,
+        lastName: String
+    ): LiveData<AsyncResult<Any>> {
+        val result = MutableLiveData<AsyncResult<Any>>()
+        result.postValue(AsyncResult.Loading)
+
+        launch {
+            try {
+                val args = CreateUserArgs(
+                    CreateUserArgs.User(
+                        email = email,
+                        password = password,
+                        firstName = firstName,
+                        lastName = lastName
+                    )
+                )
+
+                api.createUser(args)
+                    .execute().apply {
+                        if (isSuccessful) {
+                            val body = body() ?: throw getException()
+                            user = body.user
+                            userAuthToken = body.token
+                            userAuthMethod = "email"
+                        } else {
+                            throw getException()
+                        }
+                    }
+            } catch (t: Throwable) {
+                result.postValue(AsyncResult.Error(t))
             }
         }
 
-        SignInResult.Success()
-    } catch (e: Exception) {
-        SignInResult.Error(e)
+        return result
     }
 
     fun signedIn() = !userAuthToken.isBlank()

@@ -46,15 +46,16 @@ import javax.inject.Inject
 
 class SettingsFragment : PreferenceFragment() {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
-    private lateinit var model: SettingsViewModel
 
-    private val settingsActivity: SettingsActivity
-        get() = activity as SettingsActivity
+    private val model by lazy {
+        ViewModelProviders.of(settingsActivity, modelFactory)[SettingsViewModel::class.java]
+    }
+
+    private val settingsActivity by lazy { activity as SettingsActivity }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
-        model = ViewModelProviders.of(settingsActivity, modelFactory)[SettingsViewModel::class.java]
         addPreferencesFromResource(R.xml.preferences)
 
         val currencyPreference = findPreference(getString(R.string.pref_currency_key)) as Preference
@@ -125,8 +126,6 @@ class SettingsFragment : PreferenceFragment() {
             override fun onChanged(logs: List<String>?) {
                 if (logs != null && !logs.isEmpty()) {
                     alert { items(logs, onItemSelected = { _, _, _ -> }) }.show()
-                } else {
-                    alert(message = "Logs are empty").show()
                 }
 
                 model.getSyncLogs().removeObserver(this)

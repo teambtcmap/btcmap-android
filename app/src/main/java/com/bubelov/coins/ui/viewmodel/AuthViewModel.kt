@@ -25,9 +25,32 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.fragment
+package com.bubelov.coins.ui.viewmodel
 
-import dagger.Module
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.ViewModel
+import com.bubelov.coins.repository.user.UserRepository
+import com.bubelov.coins.util.AsyncResult
+import javax.inject.Inject
 
-@Module
-class SettingsFragmentModule
+class AuthViewModel @Inject constructor(
+    private val userRepository: UserRepository
+) : ViewModel() {
+    var authState: LiveData<AsyncResult<Any>> = MutableLiveData<AsyncResult<Any>>()
+
+    fun signIn(googleToken: String): LiveData<AsyncResult<Any>> {
+        authState = userRepository.signIn(googleToken)
+        return authState
+    }
+
+    fun signIn(email: String, password: String): LiveData<AsyncResult<Any>> {
+        authState = userRepository.signIn(email, password)
+        return authState
+    }
+
+    fun signUp(email: String, password: String, firstName: String, lastName: String): LiveData<AsyncResult<Any>> {
+        authState = userRepository.signUp(email, password, firstName, lastName)
+        return authState
+    }
+}

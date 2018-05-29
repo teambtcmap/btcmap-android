@@ -28,33 +28,51 @@
 package com.bubelov.coins.ui.activity
 
 import android.app.Activity
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.ActivityOptionsCompat
 import android.support.v7.app.AppCompatActivity
 import com.bubelov.coins.BuildConfig
 
 import com.bubelov.coins.R
-import com.bubelov.coins.repository.user.SignInResult
-import com.bubelov.coins.repository.user.UserRepository
+import com.bubelov.coins.ui.viewmodel.AuthViewModel
+import com.bubelov.coins.util.AsyncResult
 import com.google.android.gms.auth.api.signin.*
-import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.android.AndroidInjection
 
 import javax.inject.Inject
 
 import kotlinx.android.synthetic.main.activity_sign_in.*
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.alert
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 class SignInActivity : AppCompatActivity() {
-    @Inject lateinit var userRepository: UserRepository
+    @Inject internal lateinit var modelFactory: ViewModelProvider.Factory
 
-    @Inject lateinit var analytics: FirebaseAnalytics
+    val model by lazy {
+        ViewModelProviders.of(this, modelFactory)[AuthViewModel::class.java]
+    }
+
+    private val authObserver = Observer<AsyncResult<Any>> {
+        when (it) {
+            is AsyncResult.Loading -> {
+                setLoading(true)
+            }
+
+            is AsyncResult.Success -> {
+                setResult(Activity.RESULT_OK)
+                finish()
+            }
+
+            is AsyncResult.Error -> {
+                setLoading(false)
+                alert { message = it.t.message ?: getString(R.string.something_went_wrong) }.show()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -64,46 +82,31 @@ class SignInActivity : AppCompatActivity() {
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 
         sign_in_with_google.setOnClickListener {
-            val googleSingInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            val googleSingInOptions =
+                GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
                     .requestEmail()
                     .build()
 
             val googleSignInClient = GoogleSignIn.getClient(this, googleSingInOptions)
-            startActivityForResult(googleSignInClient.signInIntent, REQUEST_GOOGLE_SIGN_IN)
+            startActivityForResult(googleSignInClient.signInIntent, GOOGLE_SIGN_IN_REQUEST)
         }
 
         sign_in_with_email.setOnClickListener {
-            val intent = Intent(this, EmailSignInActivity::class.java)
-            startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle())
+            startActivity(EmailSignInActivity.newIntent(this))
         }
+
+        model.authState.observe(this, authObserver)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == REQUEST_GOOGLE_SIGN_IN && resultCode == Activity.RESULT_OK) {
-            signIn(GoogleSignIn.getSignedInAccountFromIntent(data).result.idToken!!)
-        }
-    }
-
-    private fun signIn(idToken: String) = launch(UI) {
-        setLoading(true)
-
-        val signInResult = async { userRepository.signIn(idToken) }.await()
-
-        when (signInResult) {
-            is SignInResult.Success -> {
-                val bundle = Bundle().apply { putString(FirebaseAnalytics.Param.METHOD, "google") }
-                analytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
-                setResult(Activity.RESULT_OK)
-                supportFinishAfterTransition()
-            }
-
-            is SignInResult.Error -> {
-                setLoading(false)
-                alert { message = signInResult.e.message ?: getString(R.string.something_went_wrong) }.show()
-            }
+        if (requestCode == GOOGLE_SIGN_IN_REQUEST && resultCode == Activity.RESULT_OK) {
+            model.signIn(GoogleSignIn.getSignedInAccountFromIntent(data).result.idToken!!).observe(
+                this,
+                authObserver
+            )
         }
     }
 
@@ -112,8 +115,8 @@ class SignInActivity : AppCompatActivity() {
     }
 
     companion object {
-        private val REQUEST_GOOGLE_SIGN_IN = 10
+        private const val GOOGLE_SIGN_IN_REQUEST = 10
 
-        fun newIntent(context: Context): Intent = Intent(context, SignInActivity::class.java)
+        fun newIntent(context: Context) = Intent(context, SignInActivity::class.java)
     }
 }

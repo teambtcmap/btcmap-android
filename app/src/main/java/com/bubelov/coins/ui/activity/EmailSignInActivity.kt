@@ -27,6 +27,8 @@
 
 package com.bubelov.coins.ui.activity
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
@@ -75,5 +77,9 @@ class EmailSignInActivity : AppCompatActivity(), HasSupportFragmentInjector {
         override fun getCount(): Int {
             return pages.size
         }
+    }
+
+    companion object {
+        fun newIntent(context: Context) = Intent(context, EmailSignInActivity::class.java)
     }
 }
