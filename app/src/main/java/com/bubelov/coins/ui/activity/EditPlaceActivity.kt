@@ -32,6 +32,7 @@ import android.arch.lifecycle.*
 import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 
@@ -52,7 +53,6 @@ import com.google.android.gms.maps.model.MarkerOptions
 
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_edit_place.*
-import org.jetbrains.anko.alert
 import javax.inject.Inject
 
 class EditPlaceActivity : AppCompatActivity() {
@@ -147,11 +147,12 @@ class EditPlaceActivity : AppCompatActivity() {
                     finish()
                 }
 
-                false -> alert(messageResource = R.string.could_not_submit_changes, init = {
-                    positiveButton(android.R.string.ok, {
-
-                    })
-                }).show()
+                false -> {
+                    AlertDialog.Builder(this)
+                        .setMessage(R.string.could_not_submit_changes)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                }
             }
         })
     }
@@ -159,7 +160,8 @@ class EditPlaceActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_PICK_LOCATION && resultCode == Activity.RESULT_OK && data != null) {
             val map = map.value
-            val location = data.getSerializableExtra(PickLocationActivity.LOCATION_EXTRA) as Location
+            val location =
+                data.getSerializableExtra(PickLocationActivity.LOCATION_EXTRA) as Location
 
             if (map != null) {
                 setMarker(map, location)
@@ -191,11 +193,10 @@ class EditPlaceActivity : AppCompatActivity() {
         syncUIWithModel()
 
         if (name.length() == 0) {
-            alert(messageResource = R.string.name_is_not_specified, init = {
-                positiveButton(android.R.string.ok, {
-
-                })
-            }).show()
+            AlertDialog.Builder(this)
+                .setMessage(R.string.name_is_not_specified)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
             return
         }
 

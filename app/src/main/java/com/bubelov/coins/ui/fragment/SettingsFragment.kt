@@ -30,18 +30,19 @@ package com.bubelov.coins.ui.fragment
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.os.Bundle
 import android.preference.ListPreference
 import android.preference.Preference
 import android.preference.PreferenceFragment
 import android.preference.PreferenceScreen
+import android.support.v7.app.AlertDialog
 import com.bubelov.coins.R
 import com.bubelov.coins.ui.activity.SettingsActivity
 import com.bubelov.coins.ui.viewmodel.SettingsViewModel
 import dagger.android.AndroidInjection
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
-import org.jetbrains.anko.alert
 import javax.inject.Inject
 
 class SettingsFragment : PreferenceFragment() {
@@ -53,8 +54,12 @@ class SettingsFragment : PreferenceFragment() {
 
     private val settingsActivity by lazy { activity as SettingsActivity }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onAttach(context: Context?) {
         AndroidInjection.inject(this)
+        super.onAttach(context)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addPreferencesFromResource(R.xml.preferences)
 
@@ -103,29 +108,31 @@ class SettingsFragment : PreferenceFragment() {
     }
 
     private fun showCurrencySelector(rows: List<SettingsViewModel.CurrencySelectorRow>) {
-        alert {
-            items(rows.map {
-                "${it.currency} (${it.places} ${resources.getQuantityString(
-                    R.plurals.places,
-                    it.places
-                )})"
-            }, onItemSelected = { _, _, index ->
+        val items = rows.map {
+            "${it.currency} (${it.places} ${resources.getQuantityString(
+                R.plurals.places,
+                it.places
+            )})"
+        }.toTypedArray()
+
+        AlertDialog.Builder(settingsActivity)
+            .setTitle(R.string.currency)
+            .setItems(items) { _, index ->
                 preferenceManager.sharedPreferences
                     .edit()
                     .putString(getString(R.string.pref_currency_key), rows[index].currency)
                     .apply()
-            })
-        }.apply {
-            titleResource = R.string.currency
-            show()
-        }
+            }
+            .show()
     }
 
     private fun showSyncLog() {
         model.getSyncLogs().observe(settingsActivity, object : Observer<List<String>> {
             override fun onChanged(logs: List<String>?) {
                 if (logs != null && !logs.isEmpty()) {
-                    alert { items(logs, onItemSelected = { _, _, _ -> }) }.show()
+                    AlertDialog.Builder(settingsActivity)
+                        .setItems(logs.toTypedArray(), null)
+                        .show()
                 }
 
                 model.getSyncLogs().removeObserver(this)

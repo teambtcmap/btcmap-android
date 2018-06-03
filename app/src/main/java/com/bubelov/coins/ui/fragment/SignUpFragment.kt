@@ -30,9 +30,11 @@ package com.bubelov.coins.ui.fragment
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.app.AlertDialog
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -49,7 +51,6 @@ import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
 import kotlinx.android.synthetic.main.fragment_sign_up.*
-import org.jetbrains.anko.alert
 
 class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
     @Inject internal lateinit var modelFactory: ViewModelProvider.Factory
@@ -65,19 +66,26 @@ class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
             }
 
             is AsyncResult.Success -> {
-                startActivity(Intent(activity, MapActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) })
+                startActivity(
+                    Intent(
+                        activity,
+                        MapActivity::class.java
+                    ).apply { addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) })
             }
 
             is AsyncResult.Error -> {
                 setLoading(false)
-                activity?.alert { message = it.t.message ?: getString(R.string.something_went_wrong) }?.show()
+
+                AlertDialog.Builder(requireContext())
+                    .setMessage(it.t.message ?: getString(R.string.something_went_wrong))
+                    .show()
             }
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this)
-        super.onCreate(savedInstanceState)
+        super.onAttach(context)
     }
 
     override fun onCreateView(

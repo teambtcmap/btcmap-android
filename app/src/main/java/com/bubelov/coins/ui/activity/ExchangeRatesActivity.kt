@@ -31,6 +31,7 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 
@@ -41,7 +42,6 @@ import com.bubelov.coins.ui.adapter.ExchangeRatesAdapter
 import com.bubelov.coins.ui.viewmodel.ExchangeRatesViewModel
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_exchange_rates.*
-import org.jetbrains.anko.selector
 import javax.inject.Inject
 
 class ExchangeRatesActivity : AppCompatActivity() {
@@ -61,17 +61,17 @@ class ExchangeRatesActivity : AppCompatActivity() {
 
             setOnMenuItemClickListener {
                 if (it.itemId == R.id.currency) {
-                    selector(
-                        title = getString(R.string.currency),
-                        items = CurrencyPair.values().map { it.toString() },
-                        onClick = { _, index ->
-                            val pair = CurrencyPair.values()[index]
-                            model.pair.value = pair
-                            model.analytics.logEvent(
-                                "change_exchange_rates_currency_pair",
-                                pair.toString()
-                            )
-                        })
+                    AlertDialog.Builder(this@ExchangeRatesActivity)
+                        .setTitle(R.string.currency)
+                        .setItems(CurrencyPair.values().map { it.toString() }.toTypedArray(),
+                            { _, index ->
+                                val pair = CurrencyPair.values()[index]
+                                model.pair.value = pair
+                                model.analytics.logEvent(
+                                    "change_exchange_rates_currency_pair",
+                                    pair.toString()
+                                )
+                            })
                 }
 
                 true

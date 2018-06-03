@@ -48,6 +48,7 @@ import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 
 import com.bubelov.coins.R
 import com.bubelov.coins.model.MapMarkerAnchor
@@ -66,10 +67,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
-import org.jetbrains.anko.longToast
 import javax.inject.Inject
 
-class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener, MapViewModel.Callback {
+class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener,
+    MapViewModel.Callback {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
     private lateinit var model: MapViewModel
 
@@ -101,7 +102,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         bottomSheetBehavior = BottomSheetBehavior.from(place_details)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
-        bottomSheetBehavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        bottomSheetBehavior.setBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 place_details.fullScreen = newState == BottomSheetBehavior.STATE_EXPANDED
             }
@@ -232,15 +234,18 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
 
         if (requestCode == REQUEST_FIND_PLACE && resultCode == Activity.RESULT_OK) {
             model.navigateToNextSelectedPlace = true
-            model.selectedPlaceId.value = data?.getLongExtra(PlacesSearchActivity.PLACE_ID_EXTRA, 0) ?: 0
+            model.selectedPlaceId.value = data?.getLongExtra(
+                PlacesSearchActivity.PLACE_ID_EXTRA,
+                0
+            ) ?: 0
         }
 
         if (requestCode == REQUEST_ADD_PLACE && resultCode == Activity.RESULT_OK) {
-            longToast(R.string.place_has_been_added)
+            Toast.makeText(this, R.string.place_has_been_added, Toast.LENGTH_LONG).show()
         }
 
         if (requestCode == REQUEST_EDIT_PLACE && resultCode == Activity.RESULT_OK) {
-            longToast(R.string.your_edits_have_been_submitted)
+            Toast.makeText(this, R.string.your_edits_have_been_submitted, Toast.LENGTH_LONG).show()
         }
 
         if (requestCode == REQUEST_SIGN_IN && resultCode == Activity.RESULT_OK) {
@@ -273,7 +278,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         val location = model.userLocation.value
 
         if (location != null) {
-            map.value?.animateCamera(CameraUpdateFactory.newLatLngZoom(location.toLatLng(), DEFAULT_MAP_ZOOM))
+            map.value?.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    location.toLatLng(),
+                    DEFAULT_MAP_ZOOM
+                )
+            )
         }
     }
 
@@ -308,7 +318,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         }
 
         when (bottomSheetBehavior.state) {
-            BottomSheetBehavior.STATE_EXPANDED, BottomSheetBehavior.STATE_SETTLING -> bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
+            BottomSheetBehavior.STATE_EXPANDED, BottomSheetBehavior.STATE_SETTLING -> bottomSheetBehavior.setState(
+                BottomSheetBehavior.STATE_COLLAPSED
+            )
             BottomSheetBehavior.STATE_COLLAPSED -> bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN)
             BottomSheetBehavior.STATE_HIDDEN -> super.onBackPressed()
         }
@@ -473,7 +485,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
         }
     }
 
-    private inner class ClusterItemClickListener : ClusterManager.OnClusterItemClickListener<PlaceMarker> {
+    private inner class ClusterItemClickListener :
+        ClusterManager.OnClusterItemClickListener<PlaceMarker> {
         override fun onClusterItemClick(placeMarker: PlaceMarker): Boolean {
             model.selectedPlaceId.value = placeMarker.placeId
             return true

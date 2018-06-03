@@ -77,7 +77,6 @@ dependencies {
     implementation "com.google.firebase:firebase-core:$firebaseVersion"
     implementation "com.google.maps.android:android-maps-utils:$mapsUtilsVersion"
     implementation "com.jakewharton.timber:timber:$timberVersion"
-    implementation "org.jetbrains.anko:anko-commons:$ankoVersion" // TODO Remove
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion"
@@ -86,7 +85,7 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:retrofit-mock:$retrofitVersion"
-    implementation "de.hdodenhof:circleimageview:$circleImageViewVersion"
+    implementation "de.hdodenhof:circleimageview:$circleImageViewVersion" // TODO Remove
 
     androidTestImplementation "android.arch.persistence.room:testing:$roomVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$espressoVersion"

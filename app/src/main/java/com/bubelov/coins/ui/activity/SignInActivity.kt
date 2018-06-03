@@ -34,6 +34,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import com.bubelov.coins.BuildConfig
 
@@ -46,7 +47,6 @@ import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 import kotlinx.android.synthetic.main.activity_sign_in.*
-import org.jetbrains.anko.alert
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 class SignInActivity : AppCompatActivity() {
@@ -69,7 +69,11 @@ class SignInActivity : AppCompatActivity() {
 
             is AsyncResult.Error -> {
                 setLoading(false)
-                alert { message = it.t.message ?: getString(R.string.something_went_wrong) }.show()
+
+                AlertDialog.Builder(this)
+                    .setMessage(it.t.message ?: getString(R.string.something_went_wrong))
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
             }
         }
     }
