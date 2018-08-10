@@ -67,5 +67,10 @@ abstract class ViewModelModule {
     internal abstract fun bindSettingsViewModel(settingsViewModel: SettingsViewModel): ViewModel
 
     @Binds
+    @IntoMap
+    @ViewModelKey(AuthViewModel::class)
+    internal abstract fun bindAuthViewModel(authViewModel: AuthViewModel): ViewModel
+
+    @Binds
     internal abstract fun bindViewModelFactory(factory: ViewModelFactory): ViewModelProvider.Factory
 }
