@@ -42,6 +42,13 @@ android {
             keyAlias KEYSTORE_KEY_ALIAS
             keyPassword KEYSTORE_KEY_PASSWORD
         }
+
+        debug {
+            storeFile file("../debug.keystore")
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+            storePassword "android"
+        }
     }
 
     buildTypes {
