@@ -32,7 +32,7 @@ import android.app.Application
 import android.app.Service
 import android.preference.PreferenceManager
 
-import com.bubelov.coins.dagger.Injector
+import com.bubelov.coins.di.Injector
 import com.bubelov.coins.db.sync.DatabaseSync
 import com.bubelov.coins.util.ReleaseTree
 

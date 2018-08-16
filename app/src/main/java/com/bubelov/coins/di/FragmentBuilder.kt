@@ -1,4 +1,4 @@
-package com.bubelov.coins.dagger
+package com.bubelov.coins.di
 
 import com.bubelov.coins.ui.fragment.*
 import dagger.Module

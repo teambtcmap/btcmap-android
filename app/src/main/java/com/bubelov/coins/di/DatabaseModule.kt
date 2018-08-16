@@ -25,7 +25,7 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.dagger
+package com.bubelov.coins.di
 
 import android.arch.persistence.room.Room
 import android.content.Context

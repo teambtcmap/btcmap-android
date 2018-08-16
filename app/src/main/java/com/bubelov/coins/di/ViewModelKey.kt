@@ -25,37 +25,22 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.dagger
+package com.bubelov.coins.di
 
-import android.content.Context
-import com.bubelov.coins.App
+import android.arch.lifecycle.ViewModel
 
-import javax.inject.Singleton
+import java.lang.annotation.Documented
+import java.lang.annotation.ElementType
+import java.lang.annotation.Retention
+import java.lang.annotation.RetentionPolicy
+import java.lang.annotation.Target
 
-import dagger.Component
-import dagger.BindsInstance
-import dagger.android.AndroidInjectionModule
+import dagger.MapKey
+import kotlin.reflect.KClass
 
-@Singleton
-@Component(
-    modules = [
-        AppModule::class,
-        DatabaseModule::class,
-        AndroidInjectionModule::class,
-        ActivityBuilder::class,
-        FragmentBuilder::class,
-        ServiceBuilder::class,
-        ViewModelModule::class
-    ]
-)
-interface AppComponent {
-    fun inject(app: App)
-
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        fun build(): AppComponent
-    }
-}
+@Suppress("DEPRECATED_JAVA_ANNOTATION")
+@Documented
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@MapKey
+internal annotation class ViewModelKey(val value: KClass<out ViewModel>)
