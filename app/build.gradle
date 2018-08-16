@@ -13,8 +13,8 @@ android {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
 
-        versionCode 41
-        versionName "2.0.5-RC1"
+        versionCode rootProject.versionCode
+        versionName rootProject.versionName
 
         compileOptions {
             targetCompatibility 1.8
@@ -33,6 +33,8 @@ android {
         buildConfigField "String", "GOOGLE_CLIENT_ID", GOOGLE_CLIENT_ID
 
         project.ext.set("archivesBaseName", "Coins-" + defaultConfig.versionName)
+
+        manifestPlaceholders = [crashlyticsEnabled: true]
     }
 
     signingConfigs {
@@ -53,10 +55,11 @@ android {
 
     buildTypes {
         debug {
-            versionNameSuffix "-dev"
+            manifestPlaceholders = [crashlyticsEnabled: false]
         }
         release {
             signingConfig signingConfigs.release
+            manifestPlaceholders = [crashlyticsEnabled: true]
         }
     }
 }
