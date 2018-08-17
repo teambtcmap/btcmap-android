@@ -56,7 +56,7 @@ class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
     @Inject internal lateinit var modelFactory: ViewModelProvider.Factory
 
     private val model by lazy {
-        ViewModelProviders.of(this)[AuthViewModel::class.java]
+        ViewModelProviders.of(this, modelFactory)[AuthViewModel::class.java]
     }
 
     private val authObserver = Observer<AsyncResult<Any>> {
