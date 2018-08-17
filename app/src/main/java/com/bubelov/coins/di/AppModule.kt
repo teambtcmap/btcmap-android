@@ -38,6 +38,7 @@ import com.bubelov.coins.api.coins.CoinsApi
 import com.bubelov.coins.api.coins.MockCoinsApi
 import com.bubelov.coins.db.Database
 import com.bubelov.coins.repository.place.PlacesAssetsCache
+import com.bubelov.coins.util.JsonStringConverterFactory
 import com.bubelov.coins.util.StringAdapter
 import com.bubelov.coins.util.UtcDateTypeAdapter
 import com.google.android.gms.gcm.GcmNetworkManager
@@ -52,7 +53,10 @@ import javax.inject.Singleton
 
 import dagger.Module
 import dagger.Provides
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.mock.MockRetrofit
 import retrofit2.mock.NetworkBehavior
 
@@ -94,26 +98,29 @@ class AppModule {
             .create()
     }
 
-//    @Provides @Singleton
-//    fun provideCoinsApi(gson: Gson): CoinsApi {
-//        val logging = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.NONE }
-//
-//        val client = OkHttpClient.Builder()
-//            .addInterceptor(logging)
-//            .build()
-//
-//        return Retrofit.Builder()
-//            .baseUrl(BuildConfig.API_URL)
-//            .addConverterFactory(GsonConverterFactory.create(gson))
-//            .addConverterFactory(JsonStringConverterFactory(GsonConverterFactory.create()))
-//            .client(client)
-//            .build()
-//            .create(CoinsApi::class.java)
-//    }
-
     @Provides
     @Singleton
-    fun provideCoinsApi(placesAssetsCache: PlacesAssetsCache): CoinsApi {
+    fun provideApi(gson: Gson, placesAssetsCache: PlacesAssetsCache): CoinsApi {
+        return if (!BuildConfig.MOCK_API) createApi(gson) else createMockApi(placesAssetsCache)
+    }
+
+    private fun createApi(gson: Gson): CoinsApi {
+        val logging = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.NONE }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(BuildConfig.API_URL)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .addConverterFactory(JsonStringConverterFactory(GsonConverterFactory.create()))
+            .client(client)
+            .build()
+            .create(CoinsApi::class.java)
+    }
+
+    private fun createMockApi(placesAssetsCache: PlacesAssetsCache): CoinsApi {
         val retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.API_URL)
             .build()
