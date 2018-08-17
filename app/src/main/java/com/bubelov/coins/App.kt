@@ -27,28 +27,19 @@
 
 package com.bubelov.coins
 
-import android.app.Activity
-import android.app.Application
-import android.app.Service
 import android.preference.PreferenceManager
 
-import com.bubelov.coins.di.Injector
 import com.bubelov.coins.db.sync.DatabaseSync
+import com.bubelov.coins.di.DaggerAppComponent
 import com.bubelov.coins.util.ReleaseTree
+import dagger.android.*
 
 import javax.inject.Inject
 
-import dagger.android.AndroidInjector
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasActivityInjector
-import dagger.android.HasServiceInjector
 import kotlinx.coroutines.experimental.launch
 import timber.log.Timber
 
-class App : Application(), HasActivityInjector, HasServiceInjector {
-    @Inject internal lateinit var activityInjector: DispatchingAndroidInjector<Activity>
-    @Inject internal lateinit var serviceInjector: DispatchingAndroidInjector<Service>
-
+class App : DaggerApplication(), HasActivityInjector, HasServiceInjector {
     @Inject lateinit var databaseSync: DatabaseSync
 
     override fun onCreate() {
@@ -60,18 +51,12 @@ class App : Application(), HasActivityInjector, HasServiceInjector {
             Timber.plant(ReleaseTree())
         }
 
-        Injector.init(this)
-        Injector.appComponent.inject(this)
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
 
         launch { databaseSync.sync() }
     }
 
-    override fun activityInjector(): AndroidInjector<Activity> {
-        return activityInjector
-    }
-
-    override fun serviceInjector(): AndroidInjector<Service> {
-        return serviceInjector
+    override fun applicationInjector(): AndroidInjector<out DaggerApplication> {
+        return DaggerAppComponent.builder().create(this)
     }
 }

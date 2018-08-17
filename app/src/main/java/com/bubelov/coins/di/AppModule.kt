@@ -31,6 +31,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Resources
 import android.preference.PreferenceManager
+import com.bubelov.coins.App
 
 import com.bubelov.coins.BuildConfig
 import com.bubelov.coins.api.coins.CoinsApi
@@ -57,28 +58,34 @@ import retrofit2.mock.NetworkBehavior
 
 @Module
 class AppModule {
-    @Provides @Singleton
+    @Provides
+    fun provideContext(application: App): Context {
+        return application.applicationContext
+    }
+
+    @Provides
     fun providePlacesDb(database: Database) = database.placesDb()
 
-    @Provides @Singleton
+    @Provides
     fun provideFirebaseAnalytics(context: Context): FirebaseAnalytics {
         return FirebaseAnalytics.getInstance(context)
     }
 
-    @Provides @Singleton
+    @Provides
     fun provideGcmNetworkManager(context: Context): GcmNetworkManager {
         return GcmNetworkManager.getInstance(context)
     }
 
-    @Provides @Singleton
+    @Provides
     fun providePreferences(context: Context): SharedPreferences {
         return PreferenceManager.getDefaultSharedPreferences(context)
     }
 
-    @Provides @Singleton
+    @Provides
     fun provideResources(context: Context): Resources = context.resources
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideGson(): Gson {
         return GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
@@ -104,7 +111,8 @@ class AppModule {
 //            .create(CoinsApi::class.java)
 //    }
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideCoinsApi(placesAssetsCache: PlacesAssetsCache): CoinsApi {
         val retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.API_URL)

@@ -27,14 +27,13 @@
 
 package com.bubelov.coins.di
 
-import android.content.Context
 import com.bubelov.coins.App
 
 import javax.inject.Singleton
 
 import dagger.Component
-import dagger.BindsInstance
 import dagger.android.AndroidInjectionModule
+import dagger.android.AndroidInjector
 
 @Singleton
 @Component(
@@ -48,14 +47,7 @@ import dagger.android.AndroidInjectionModule
         ViewModelModule::class
     ]
 )
-interface AppComponent {
-    fun inject(app: App)
-
+interface AppComponent : AndroidInjector<App> {
     @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        fun build(): AppComponent
-    }
+    abstract class Builder : AndroidInjector.Builder<App>()
 }
