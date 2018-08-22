@@ -29,11 +29,9 @@ package com.bubelov.coins.ui.activity
 
 import android.app.Activity
 import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.text.TextUtils
 import android.view.View
@@ -49,24 +47,23 @@ import com.bubelov.coins.ui.viewmodel.PlacesSearchViewModel
 import com.bubelov.coins.util.TextWatcherAdapter
 import com.bubelov.coins.util.nonNull
 import com.bubelov.coins.util.observe
-import dagger.android.AndroidInjection
+import com.bubelov.coins.util.viewModelProvider
+import dagger.android.support.DaggerAppCompatActivity
 
 import kotlinx.android.synthetic.main.activity_places_search.*
 import javax.inject.Inject
 
-class PlacesSearchActivity : AppCompatActivity() {
+class PlacesSearchActivity : DaggerAppCompatActivity() {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
-    private lateinit var model: PlacesSearchViewModel
+    private val model by lazy { viewModelProvider(modelFactory) as PlacesSearchViewModel }
 
     val location by lazy { intent.getSerializableExtra(USER_LOCATION_EXTRA) as Location? }
     val currency by lazy { intent.getStringExtra(CURRENCY_EXTRA) ?: "" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_places_search)
 
-        model = ViewModelProviders.of(this, modelFactory)[PlacesSearchViewModel::class.java]
         model.init(location, currency)
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
@@ -74,7 +71,7 @@ class PlacesSearchActivity : AppCompatActivity() {
         list.layoutManager = LinearLayoutManager(this)
         val adapter = PlacesSearchResultsAdapter { onPlaceRowClick(it) }
         list.adapter = adapter
-        model.results.nonNull().observe(this, { adapter.swapItems(it) })
+        model.results.nonNull().observe(this) { adapter.swapItems(it) }
 
         query.addTextChangedListener(object : TextWatcherAdapter() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {

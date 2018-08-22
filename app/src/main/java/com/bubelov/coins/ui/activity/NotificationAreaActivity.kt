@@ -29,7 +29,6 @@ package com.bubelov.coins.ui.activity
 
 import android.Manifest
 import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -37,7 +36,6 @@ import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
 import android.widget.SeekBar
 
 import com.bubelov.coins.R
@@ -45,6 +43,7 @@ import com.bubelov.coins.model.MapMarkerAnchor
 import com.bubelov.coins.model.NotificationArea
 import com.bubelov.coins.ui.viewmodel.NotificationAreaViewModel
 import com.bubelov.coins.util.OnSeekBarChangeAdapter
+import com.bubelov.coins.util.viewModelProvider
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapFragment
@@ -56,14 +55,14 @@ import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import dagger.android.AndroidInjection
+import dagger.android.support.DaggerAppCompatActivity
 
 import kotlinx.android.synthetic.main.activity_notification_area.*
 import javax.inject.Inject
 
-class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
+class NotificationAreaActivity : DaggerAppCompatActivity(), OnMapReadyCallback {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
-    private lateinit var model: NotificationAreaViewModel
+    private val model by lazy { viewModelProvider(modelFactory) as NotificationAreaViewModel }
 
     private var map: GoogleMap? = null
 
@@ -71,11 +70,8 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
     private var areaCircle: Circle? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notification_area)
-
-        model = ViewModelProviders.of(this, modelFactory)[NotificationAreaViewModel::class.java]
 
         toolbar.setNavigationOnClickListener {
             saveArea()
@@ -85,7 +81,11 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = fragmentManager.findFragmentById(R.id.map_fragment) as MapFragment
         mapFragment.getMapAsync(this)
 
-        seek_bar_radius.progressDrawable.setColorFilter(ContextCompat.getColor(this, R.color.accent), PorterDuff.Mode.SRC_IN)
+        seek_bar_radius.progressDrawable.setColorFilter(
+            ContextCompat.getColor(this, R.color.accent),
+            PorterDuff.Mode.SRC_IN
+        )
+
         seek_bar_radius.thumb.setColorFilter(ContextCompat.getColor(this, R.color.accent), PorterDuff.Mode.SRC_IN)
     }
 
@@ -101,7 +101,11 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
         map!!.uiSettings.isCompassEnabled = false
         map!!.setOnMarkerDragListener(OnMarkerDragListener())
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             map!!.isMyLocationEnabled = true
         }
 
@@ -115,18 +119,20 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker_location)
 
-        marker = map!!.addMarker(MarkerOptions()
+        marker = map!!.addMarker(
+            MarkerOptions()
                 .position(LatLng(area.latitude, area.longitude))
                 .icon(markerDescriptor)
                 .anchor(MapMarkerAnchor.u, MapMarkerAnchor.v)
-                .draggable(true))
+                .draggable(true)
+        )
 
         val circleOptions = CircleOptions()
-                .center(marker?.position)
-                .radius(area.radius)
-                .fillColor(ContextCompat.getColor(this, R.color.notification_area))
-                .strokeColor(ContextCompat.getColor(this, R.color.notification_area_border))
-                .strokeWidth(4f)
+            .center(marker?.position)
+            .radius(area.radius)
+            .fillColor(ContextCompat.getColor(this, R.color.notification_area))
+            .strokeColor(ContextCompat.getColor(this, R.color.notification_area_border))
+            .strokeWidth(4f)
 
         areaCircle = map!!.addCircle(circleOptions)
 
@@ -135,14 +141,19 @@ class NotificationAreaActivity : AppCompatActivity(), OnMapReadyCallback {
         seek_bar_radius.setOnSeekBarChangeListener(SeekBarChangeListener())
 
         val areaCenter = LatLng(area.latitude, area.longitude)
-        map!!.moveCamera(CameraUpdateFactory.newLatLngZoom(areaCenter, (model.getZoomLevel(areaCircle!!) - 1).toFloat()))
+        map!!.moveCamera(
+            CameraUpdateFactory.newLatLngZoom(
+                areaCenter,
+                (model.getZoomLevel(areaCircle!!) - 1).toFloat()
+            )
+        )
     }
 
     private fun saveArea() {
         val area = NotificationArea(
-                areaCircle!!.center.latitude,
-                areaCircle!!.center.longitude,
-                areaCircle!!.radius
+            areaCircle!!.center.latitude,
+            areaCircle!!.center.longitude,
+            areaCircle!!.radius
         )
 
         model.save(area)

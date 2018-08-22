@@ -33,7 +33,6 @@ import android.app.Activity
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -43,7 +42,6 @@ import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.ActivityOptionsCompat
 import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.view.MenuItem
@@ -64,15 +62,15 @@ import com.bubelov.coins.ui.viewmodel.MapViewModel
 import com.bubelov.coins.util.*
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import dagger.android.AndroidInjection
+import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
 import javax.inject.Inject
 
-class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener,
+class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener,
     MapViewModel.Callback {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
-    private lateinit var model: MapViewModel
+    private val model by lazy { viewModelProvider(modelFactory) as MapViewModel }
 
     private lateinit var drawerHeader: View
 
@@ -87,11 +85,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemC
     @Inject internal lateinit var analytics: Analytics
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
-        model = ViewModelProviders.of(this, modelFactory)[MapViewModel::class.java]
         model.callback = this
 
         drawerHeader = navigation_view.getHeaderView(0)

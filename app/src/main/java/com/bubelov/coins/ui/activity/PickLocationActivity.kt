@@ -33,7 +33,6 @@ import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Location
@@ -42,11 +41,11 @@ import com.bubelov.coins.util.toLocation
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapFragment
-import dagger.android.AndroidInjection
+import dagger.android.support.DaggerAppCompatActivity
 
 import kotlinx.android.synthetic.main.activity_pick_location.*
 
-class PickLocationActivity : AppCompatActivity() {
+class PickLocationActivity : DaggerAppCompatActivity() {
     private val map = MutableLiveData<GoogleMap>()
 
     private val initialLocation: Location
@@ -56,7 +55,6 @@ class PickLocationActivity : AppCompatActivity() {
         get() = intent.getFloatExtra(ZOOM_EXTRA, 0f)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pick_location)
 

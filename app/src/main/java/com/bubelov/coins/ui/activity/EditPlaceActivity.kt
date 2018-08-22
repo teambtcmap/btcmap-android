@@ -33,7 +33,6 @@ import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 
 import com.bubelov.coins.R
@@ -43,6 +42,7 @@ import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.viewmodel.EditPlaceViewModel
 import com.bubelov.coins.util.toLatLng
 import com.bubelov.coins.util.toLocation
+import com.bubelov.coins.util.viewModelProvider
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapFragment
@@ -51,23 +51,21 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 
-import dagger.android.AndroidInjection
+import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_edit_place.*
 import javax.inject.Inject
 
-class EditPlaceActivity : AppCompatActivity() {
+class EditPlaceActivity : DaggerAppCompatActivity() {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
-    private lateinit var model: EditPlaceViewModel
+    private val model by lazy { viewModelProvider(modelFactory) as EditPlaceViewModel }
 
     private val map = MutableLiveData<GoogleMap>()
     private var placeLocationMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_place)
 
-        model = ViewModelProviders.of(this, modelFactory)[EditPlaceViewModel::class.java]
         model.init(intent.getSerializableExtra(PLACE_EXTRA) as Place)
 
         toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }

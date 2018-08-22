@@ -25,25 +25,30 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.activity
+package com.bubelov.coins.util
 
-import android.content.Context
-import android.content.Intent
-import android.os.Bundle
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentActivity
 
-import com.bubelov.coins.R
+inline fun <reified VM : ViewModel> FragmentActivity.viewModelProvider(
+    provider: ViewModelProvider.Factory
+) =
+    ViewModelProviders.of(this, provider).get(VM::class.java)
 
-import kotlinx.android.synthetic.main.activity_settings.*
-import dagger.android.support.DaggerAppCompatActivity
+inline fun <reified VM : ViewModel> Fragment.viewModelProvider(
+    provider: ViewModelProvider.Factory
+) =
+    ViewModelProviders.of(this, provider).get(VM::class.java)
 
-class SettingsActivity : DaggerAppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
-        toolbar.setNavigationOnClickListener { finish() }
-    }
+inline fun <reified VM : ViewModel> Fragment.activityViewModelProvider(
+    provider: ViewModelProvider.Factory
+) =
+    ViewModelProviders.of(requireActivity(), provider).get(VM::class.java)
 
-    companion object {
-        fun newIntent(context: Context) = Intent(context, SettingsActivity::class.java)
-    }
-}
+inline fun <reified VM : ViewModel> Fragment.parentViewModelProvider(
+    provider: ViewModelProvider.Factory
+) =
+    ViewModelProviders.of(parentFragment!!, provider).get(VM::class.java)

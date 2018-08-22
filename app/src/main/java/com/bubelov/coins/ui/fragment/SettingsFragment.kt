@@ -29,7 +29,6 @@ package com.bubelov.coins.ui.fragment
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.os.Bundle
 import android.preference.ListPreference
@@ -40,6 +39,7 @@ import android.support.v7.app.AlertDialog
 import com.bubelov.coins.R
 import com.bubelov.coins.ui.activity.SettingsActivity
 import com.bubelov.coins.ui.viewmodel.SettingsViewModel
+import com.bubelov.coins.util.viewModelProvider
 import dagger.android.AndroidInjection
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
@@ -47,10 +47,7 @@ import javax.inject.Inject
 
 class SettingsFragment : PreferenceFragment() {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
-
-    private val model by lazy {
-        ViewModelProviders.of(settingsActivity, modelFactory)[SettingsViewModel::class.java]
-    }
+    private val model by lazy { settingsActivity.viewModelProvider(modelFactory) as SettingsViewModel }
 
     private val settingsActivity by lazy { activity as SettingsActivity }
 

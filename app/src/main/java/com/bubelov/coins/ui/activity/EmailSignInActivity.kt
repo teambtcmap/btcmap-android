@@ -34,36 +34,27 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.util.Pair
-import android.support.v7.app.AppCompatActivity
 
 import com.bubelov.coins.R
 import com.bubelov.coins.ui.fragment.SignInFragment
 import com.bubelov.coins.ui.fragment.SignUpFragment
-import dagger.android.AndroidInjection
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.support.HasSupportFragmentInjector
+import dagger.android.support.DaggerAppCompatActivity
 
 import kotlinx.android.synthetic.main.activity_email_sign_in.*
-import javax.inject.Inject
 
-class EmailSignInActivity : AppCompatActivity(), HasSupportFragmentInjector {
-    @Inject internal lateinit var fragmentInjector: DispatchingAndroidInjector<Fragment>
-
+class EmailSignInActivity : DaggerAppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_email_sign_in)
         pager.adapter = TabsAdapter(supportFragmentManager)
         tab_layout.setupWithViewPager(pager)
-        toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
+        toolbar.setNavigationOnClickListener { finish() }
     }
-
-    override fun supportFragmentInjector() = fragmentInjector
 
     private inner class TabsAdapter internal constructor(fm: FragmentManager) : FragmentPagerAdapter(fm) {
         private val pages = listOf<Pair<Fragment, String>>(
-                Pair(SignInFragment(), getString(R.string.sign_in)),
-                Pair(SignUpFragment(), getString(R.string.sign_up))
+            Pair(SignInFragment(), getString(R.string.sign_in)),
+            Pair(SignUpFragment(), getString(R.string.sign_up))
         )
 
         override fun getItem(position: Int): Fragment {

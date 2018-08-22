@@ -30,17 +30,16 @@ package com.bubelov.coins.ui.activity
 import android.app.Activity
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
 import com.bubelov.coins.BuildConfig
 
 import com.bubelov.coins.R
 import com.bubelov.coins.ui.viewmodel.AuthViewModel
 import com.bubelov.coins.util.AsyncResult
+import com.bubelov.coins.util.viewModelProvider
 import com.google.android.gms.auth.api.signin.*
 import dagger.android.AndroidInjection
 
@@ -48,13 +47,11 @@ import javax.inject.Inject
 
 import kotlinx.android.synthetic.main.activity_sign_in.*
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import dagger.android.support.DaggerAppCompatActivity
 
-class SignInActivity : AppCompatActivity() {
+class SignInActivity : DaggerAppCompatActivity() {
     @Inject internal lateinit var modelFactory: ViewModelProvider.Factory
-
-    val model by lazy {
-        ViewModelProviders.of(this, modelFactory)[AuthViewModel::class.java]
-    }
+    val model by lazy { viewModelProvider(modelFactory) as AuthViewModel }
 
     private val authObserver = Observer<AsyncResult<Any>> {
         when (it) {

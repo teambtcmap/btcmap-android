@@ -27,23 +27,7 @@
 
 package com.bubelov.coins.ui.activity
 
-import android.content.Context
-import android.content.Intent
-import android.os.Bundle
+import dagger.Module
 
-import com.bubelov.coins.R
-
-import kotlinx.android.synthetic.main.activity_settings.*
-import dagger.android.support.DaggerAppCompatActivity
-
-class SettingsActivity : DaggerAppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
-        toolbar.setNavigationOnClickListener { finish() }
-    }
-
-    companion object {
-        fun newIntent(context: Context) = Intent(context, SettingsActivity::class.java)
-    }
-}
+@Module
+class LauncherActivityModule

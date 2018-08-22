@@ -34,6 +34,9 @@ import dagger.android.ContributesAndroidInjector
 
 @Module
 abstract class ActivityBuilder {
+    @ContributesAndroidInjector(modules = [LauncherActivityModule::class])
+    abstract fun contributeLauncherActivityInjector(): LauncherActivity
+
     @ContributesAndroidInjector(modules = [EditPlaceActivityModule::class])
     abstract fun contributeEditPlaceActivityInjector(): EditPlaceActivity
 

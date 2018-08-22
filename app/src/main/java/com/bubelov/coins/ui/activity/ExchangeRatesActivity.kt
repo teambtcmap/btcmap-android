@@ -29,10 +29,8 @@ package com.bubelov.coins.ui.activity
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 
 import com.bubelov.coins.R
@@ -40,20 +38,18 @@ import com.bubelov.coins.model.CurrencyPair
 import com.bubelov.coins.ui.adapter.ExchangeRatesAdapter
 
 import com.bubelov.coins.ui.viewmodel.ExchangeRatesViewModel
-import dagger.android.AndroidInjection
+import com.bubelov.coins.util.viewModelProvider
+import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_exchange_rates.*
 import javax.inject.Inject
 
-class ExchangeRatesActivity : AppCompatActivity() {
+class ExchangeRatesActivity : DaggerAppCompatActivity() {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
-    private lateinit var model: ExchangeRatesViewModel
+    private val model by lazy { viewModelProvider(modelFactory) as ExchangeRatesViewModel }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_exchange_rates)
-
-        model = ViewModelProviders.of(this, modelFactory)[ExchangeRatesViewModel::class.java]
 
         toolbar.apply {
             setNavigationOnClickListener { supportFinishAfterTransition() }
@@ -63,15 +59,16 @@ class ExchangeRatesActivity : AppCompatActivity() {
                 if (it.itemId == R.id.currency) {
                     AlertDialog.Builder(this@ExchangeRatesActivity)
                         .setTitle(R.string.currency)
-                        .setItems(CurrencyPair.values().map { it.toString() }.toTypedArray(),
-                            { _, index ->
-                                val pair = CurrencyPair.values()[index]
-                                model.pair.value = pair
-                                model.analytics.logEvent(
-                                    "change_exchange_rates_currency_pair",
-                                    pair.toString()
-                                )
-                            })
+                        .setItems(
+                            CurrencyPair.values().map { it.toString() }.toTypedArray()
+                        ) { _, index ->
+                            val pair = CurrencyPair.values()[index]
+                            model.pair.value = pair
+                            model.analytics.logEvent(
+                                "change_exchange_rates_currency_pair",
+                                pair.toString()
+                            )
+                        }
                 }
 
                 true

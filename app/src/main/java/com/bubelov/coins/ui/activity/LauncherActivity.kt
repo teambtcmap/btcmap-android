@@ -30,13 +30,13 @@ package com.bubelov.coins.ui.activity
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import dagger.android.support.DaggerAppCompatActivity
 import timber.log.Timber
 
-class LauncherActivity : AppCompatActivity() {
+class LauncherActivity : DaggerAppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -47,7 +47,11 @@ class LauncherActivity : AppCompatActivity() {
             onPlayServicesAvailable()
         } else {
             if (googleApiAvailability.isUserResolvableError(playServicesAvailabilityResult)) {
-                val dialog = googleApiAvailability.getErrorDialog(this, playServicesAvailabilityResult, PLAY_SERVICES_RESOLUTION_REQUEST)
+                val dialog = googleApiAvailability.getErrorDialog(
+                    this,
+                    playServicesAvailabilityResult,
+                    PLAY_SERVICES_RESOLUTION_REQUEST
+                )
                 dialog.setCancelable(false)
                 dialog.show()
             } else {
@@ -74,6 +78,6 @@ class LauncherActivity : AppCompatActivity() {
     }
 
     companion object {
-        private val PLAY_SERVICES_RESOLUTION_REQUEST = 10
+        private const val PLAY_SERVICES_RESOLUTION_REQUEST = 10
     }
 }
