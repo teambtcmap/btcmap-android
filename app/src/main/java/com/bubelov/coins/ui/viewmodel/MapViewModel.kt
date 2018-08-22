@@ -65,7 +65,7 @@ class MapViewModel @Inject constructor(
         Transformations.switchMap(mapBounds) { placesRepository.getPlaces(it) }
 
     val placeMarkers: LiveData<List<PlaceMarker>> = Transformations.switchMap(places) { places ->
-        Transformations.switchMap(selectedCurrency, { currency ->
+        Transformations.switchMap(selectedCurrency) { currency ->
             MutableLiveData<List<PlaceMarker>>().apply {
                 value = places.filter { it.currencies.contains(currency) }.mapTo(ArrayList()) {
                     PlaceMarker(
@@ -76,10 +76,10 @@ class MapViewModel @Inject constructor(
                     )
                 }
             }
-        })
+        }
     }
 
-    val userLocation: LiveData<Location> = Transformations.map(location, { location ->
+    val userLocation: LiveData<Location> = Transformations.map(location) { location ->
         if (location != null && notificationAreaRepository.notificationArea == null) {
             notificationAreaRepository.notificationArea = NotificationArea(
                 location.latitude,
@@ -89,7 +89,7 @@ class MapViewModel @Inject constructor(
         }
 
         location
-    })
+    }
 
     fun onAddPlaceClick() {
         if (userRepository.signedIn()) {

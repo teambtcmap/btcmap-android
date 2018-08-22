@@ -50,13 +50,13 @@ class EditPlaceViewModel @Inject constructor(
 
     private val submitChangesResult = MutableLiveData<Result<Place>>()
 
-    val submittedSuccessfully: LiveData<Boolean> = Transformations.map(submitChangesResult, {
+    val submittedSuccessfully: LiveData<Boolean> = Transformations.map(submitChangesResult) {
         when (it) {
             is Result.Success -> true
             is Result.Error -> false
             else -> null
         }
-    })
+    }
 
     fun init(place: Place) {
         this.place = place

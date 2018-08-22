@@ -51,7 +51,7 @@ class SettingsViewModel @Inject constructor(
     private val placeNotificationsManager: PlaceNotificationManager
 ) : ViewModel() {
     fun getCurrencySelectorRows(): LiveData<List<CurrencySelectorRow>> =
-        Transformations.switchMap(placesRepository.all(), { places ->
+        Transformations.switchMap(placesRepository.all()) { places ->
             val result = MutableLiveData<List<CurrencySelectorRow>>()
 
             if (places == null) {
@@ -74,7 +74,7 @@ class SettingsViewModel @Inject constructor(
             }.sortedByDescending { it.places }
 
             result
-        })
+        }
 
     fun syncDatabase() = launch {
         databaseSync.sync()
