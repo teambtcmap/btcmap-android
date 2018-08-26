@@ -30,6 +30,7 @@ package com.bubelov.coins.repository.place
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
+import com.bubelov.coins.model.Currency
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.repository.Result
 import com.bubelov.coins.util.Analytics
@@ -47,7 +48,7 @@ class PlacesRepository @Inject constructor(
     private val assetsCache: PlacesAssetsCache,
     private val analytics: Analytics
 ) {
-    private val allPlaces = db.all()
+    private val allPlaces = db.allAsync()
 
     init {
         db.count().observeForever { count ->
@@ -57,11 +58,11 @@ class PlacesRepository @Inject constructor(
         }
     }
 
-    fun all() = allPlaces
-
     fun find(id: Long) = db.find(id)
 
     fun findBySearchQuery(searchQuery: String) = db.findBySearchQuery(searchQuery)
+
+    fun countByCurrency(currency: Currency) = db.countByCurrencyCode(currency.code)
 
     fun findRandom() = db.findRandom()
 

@@ -28,11 +28,11 @@
 package com.bubelov.coins.ui.viewmodel
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
-import android.arch.lifecycle.MutableLiveData
 import com.bubelov.coins.util.blockingObserve
 import com.bubelov.coins.db.sync.DatabaseSync
-import com.bubelov.coins.model.Place
+import com.bubelov.coins.model.Currency
 import com.bubelov.coins.model.SyncLogEntry
+import com.bubelov.coins.repository.currency.CurrenciesRepository
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.synclogs.SyncLogsRepository
 import com.bubelov.coins.util.DistanceUnitsLiveData
@@ -57,6 +57,7 @@ class SettingsViewModelTest {
     @Mock private lateinit var databaseSync: DatabaseSync
     @Mock private lateinit var syncLogsRepository: SyncLogsRepository
     @Mock private lateinit var placesRepository: PlacesRepository
+    @Mock private lateinit var currenciesRepository: CurrenciesRepository
     @Mock private lateinit var notificationManager: PlaceNotificationManager
     private lateinit var model: SettingsViewModel
 
@@ -67,6 +68,7 @@ class SettingsViewModelTest {
         model = SettingsViewModel(
             selectedCurrencyLiveData,
             placesRepository,
+            currenciesRepository,
             distanceUnitsLiveData,
             databaseSync,
             syncLogsRepository,
@@ -76,19 +78,37 @@ class SettingsViewModelTest {
 
     @Test
     fun returnsCurrencies() {
-        `when`(placesRepository.all()).thenReturn(MutableLiveData<List<Place>>().apply {
-            value = listOf(
-                emptyPlace().copy(id = 1, name = "Cafe", currencies = arrayListOf("BTC")),
-                emptyPlace().copy(id = 2, name = "Bar", currencies = arrayListOf("BTC", "LTC")),
-                emptyPlace().copy(id = 3, name = "Black Market", currencies = arrayListOf("ZEC"))
-            )
-        })
+        val currencies = listOf(
+            Currency("ABC"),
+            Currency("BTC"),
+            Currency("LTC")
+        )
 
-        val rows = model.getCurrencySelectorRows().blockingObserve()
-        Assert.assertEquals(rows.size, 3)
-        Assert.assertTrue(rows.any { it.places == 2 })
-        verify(placesRepository).all()
-        verifyNoMoreInteractions(placesRepository)
+        `when`(currenciesRepository.getAllCurrencies()).thenReturn(currencies)
+
+        `when`(placesRepository.countByCurrency(currencies[0])).thenReturn(1)
+        `when`(placesRepository.countByCurrency(currencies[1])).thenReturn(2)
+        `when`(placesRepository.countByCurrency(currencies[2])).thenReturn(3)
+
+        runBlocking {
+            model.showCurrencySelector().join()
+            delay(100)
+            val rows = model.currencySelectorRows.value!!
+
+            Assert.assertEquals(rows.size, 3)
+            Assert.assertTrue(rows[0].second == 3)
+            Assert.assertTrue(rows[1].second == 2)
+            Assert.assertTrue(rows[2].second == 1)
+
+            verify(currenciesRepository).getAllCurrencies()
+            verifyNoMoreInteractions(currenciesRepository)
+
+            currencies.forEach {
+                verify(placesRepository).countByCurrency(it)
+            }
+
+            verifyNoMoreInteractions(placesRepository)
+        }
     }
 
     @Test

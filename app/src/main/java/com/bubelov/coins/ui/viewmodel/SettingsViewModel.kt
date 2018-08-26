@@ -29,9 +29,10 @@ package com.bubelov.coins.ui.viewmodel
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
 import com.bubelov.coins.db.sync.DatabaseSync
+import com.bubelov.coins.model.Currency
+import com.bubelov.coins.repository.currency.CurrenciesRepository
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.synclogs.SyncLogsRepository
 import com.bubelov.coins.util.DistanceUnitsLiveData
@@ -45,36 +46,24 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     val selectedCurrencyLiveData: SelectedCurrencyLiveData,
     private val placesRepository: PlacesRepository,
+    private val currenciesRepository: CurrenciesRepository,
     val distanceUnitsLiveData: DistanceUnitsLiveData,
     private val databaseSync: DatabaseSync,
     private val syncLogsRepository: SyncLogsRepository,
     private val placeNotificationsManager: PlaceNotificationManager
 ) : ViewModel() {
-    fun getCurrencySelectorRows(): LiveData<List<CurrencySelectorRow>> =
-        Transformations.switchMap(placesRepository.all()) { places ->
-            val result = MutableLiveData<List<CurrencySelectorRow>>()
+    val currencySelectorRows = MutableLiveData<List<Pair<Currency, Int>>>()
 
-            if (places == null) {
-                return@switchMap result
-            }
+    fun showCurrencySelector() = launch {
+        val allCurrencies = currenciesRepository.getAllCurrencies()
+        val rows = mutableListOf<Pair<Currency, Int>>()
 
-            val currencies = mutableSetOf<String>()
-
-            places.forEach {
-                it.currencies.forEach {
-                    currencies.add(it)
-                }
-            }
-
-            result.value = currencies.map { currency ->
-                CurrencySelectorRow(
-                    currency,
-                    places.filter { it.currencies.contains(currency) }.size
-                )
-            }.sortedByDescending { it.places }
-
-            result
+        allCurrencies.forEach { currency ->
+            rows.add(Pair(currency, placesRepository.countByCurrency(currency)))
         }
+
+        currencySelectorRows.postValue(rows.sortedByDescending { it.second })
+    }
 
     fun syncDatabase() = launch {
         databaseSync.sync()
@@ -100,6 +89,4 @@ class SettingsViewModel @Inject constructor(
             placeNotificationsManager.issueNotification(randomPlace)
         }
     }
-
-    data class CurrencySelectorRow(val currency: String, val places: Int)
 }

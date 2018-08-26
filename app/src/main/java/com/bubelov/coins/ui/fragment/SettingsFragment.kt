@@ -72,6 +72,28 @@ class SettingsFragment : PreferenceFragment() {
         model.distanceUnitsLiveData.observe(settingsActivity, Observer {
             distanceUnitsPreference.summary = distanceUnitsPreference.entry
         })
+
+        model.currencySelectorRows.observe(settingsActivity, Observer { rows ->
+            if (rows != null) {
+                val items = rows.map {
+                    "${it.first.code} (${it.second} ${resources.getQuantityString(
+                        R.plurals.places,
+                        it.second
+                    )})"
+                }.toTypedArray()
+
+                AlertDialog.Builder(settingsActivity)
+                    .setTitle(R.string.currency)
+                    .setItems(items) { _, index ->
+                        preferenceManager.sharedPreferences
+                            .edit()
+                            .putString(getString(R.string.pref_currency_key), items[index])
+                            .apply()
+                    }
+                    .setOnDismissListener { model.currencySelectorRows.value = null }
+                    .show()
+            }
+        })
     }
 
     override fun onPreferenceTreeClick(
@@ -79,48 +101,13 @@ class SettingsFragment : PreferenceFragment() {
         preference: Preference
     ): Boolean {
         when (preference.key) {
-            getString(R.string.pref_currency_key) -> showCurrencySelector()
+            getString(R.string.pref_currency_key) -> model.showCurrencySelector()
             getString(R.string.pref_sync_database_key) -> model.syncDatabase()
             getString(R.string.pref_show_sync_log_key) -> showSyncLog()
             getString(R.string.pref_test_notification_key) -> launch(UI) { model.testNotification() }
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference)
-    }
-
-    private fun showCurrencySelector() {
-        val rowsLiveData = model.getCurrencySelectorRows()
-
-        rowsLiveData.observe(
-            settingsActivity,
-            object : Observer<List<SettingsViewModel.CurrencySelectorRow>> {
-                override fun onChanged(rows: List<SettingsViewModel.CurrencySelectorRow>?) {
-                    if (rows != null && !rows.isEmpty()) {
-                        showCurrencySelector(rows)
-                    }
-
-                    rowsLiveData.removeObserver(this)
-                }
-            })
-    }
-
-    private fun showCurrencySelector(rows: List<SettingsViewModel.CurrencySelectorRow>) {
-        val items = rows.map {
-            "${it.currency} (${it.places} ${resources.getQuantityString(
-                R.plurals.places,
-                it.places
-            )})"
-        }.toTypedArray()
-
-        AlertDialog.Builder(settingsActivity)
-            .setTitle(R.string.currency)
-            .setItems(items) { _, index ->
-                preferenceManager.sharedPreferences
-                    .edit()
-                    .putString(getString(R.string.pref_currency_key), rows[index].currency)
-                    .apply()
-            }
-            .show()
     }
 
     private fun showSyncLog() {
