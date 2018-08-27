@@ -28,7 +28,6 @@
 package com.bubelov.coins.ui.viewmodel
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
-import com.bubelov.coins.util.blockingObserve
 import com.bubelov.coins.db.sync.DatabaseSync
 import com.bubelov.coins.model.Currency
 import com.bubelov.coins.model.SyncLogEntry
@@ -39,7 +38,6 @@ import com.bubelov.coins.util.DistanceUnitsLiveData
 import com.bubelov.coins.util.PlaceNotificationManager
 import com.bubelov.coins.util.SelectedCurrencyLiveData
 import com.bubelov.coins.util.emptyPlace
-import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -92,7 +90,6 @@ class SettingsViewModelTest {
 
         runBlocking {
             model.showCurrencySelector().join()
-            delay(100)
             val rows = model.currencySelectorRows.value!!
 
             Assert.assertEquals(rows.size, 3)
@@ -112,33 +109,34 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun callsSync() {
-        runBlocking {
-            model.syncDatabase()
-            delay(100)
-        }
-
+    fun callsSync() = runBlocking {
+        model.syncDatabase().join()
         verify(databaseSync).sync()
     }
 
     @Test
-    fun returnsSyncLogs() {
+    fun returnsSyncLogs() = runBlocking {
         `when`(syncLogsRepository.all()).thenReturn(listOf(SyncLogEntry(0, 10)))
-        val logs = model.getSyncLogs().blockingObserve()
+
+        model.showSyncLogs().join()
+        val logs = model.syncLogs.value!!
+
         Assert.assertEquals(1, logs.size)
         verify(syncLogsRepository).all()
         verifyNoMoreInteractions(syncLogsRepository)
     }
 
     @Test
-    fun sendsRandomPlaceNotification() {
+    fun sendsRandomPlaceNotification() = runBlocking {
         `when`(placesRepository.findRandom()).thenReturn(
             emptyPlace().copy(
                 id = 1,
                 name = "Random Place"
             )
         )
-        runBlocking { model.testNotification() }
+
+        model.testNotification().join()
+
         verify(placesRepository).findRandom()
         verifyNoMoreInteractions(placesRepository)
     }

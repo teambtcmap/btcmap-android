@@ -27,7 +27,6 @@
 
 package com.bubelov.coins.ui.viewmodel
 
-import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import com.bubelov.coins.db.sync.DatabaseSync
@@ -38,21 +37,26 @@ import com.bubelov.coins.repository.synclogs.SyncLogsRepository
 import com.bubelov.coins.util.DistanceUnitsLiveData
 import com.bubelov.coins.util.PlaceNotificationManager
 import com.bubelov.coins.util.SelectedCurrencyLiveData
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import java.util.*
 import javax.inject.Inject
 
 class SettingsViewModel @Inject constructor(
-    val selectedCurrencyLiveData: SelectedCurrencyLiveData,
+    selectedCurrencyLiveData: SelectedCurrencyLiveData,
     private val placesRepository: PlacesRepository,
     private val currenciesRepository: CurrenciesRepository,
-    val distanceUnitsLiveData: DistanceUnitsLiveData,
+    distanceUnitsLiveData: DistanceUnitsLiveData,
     private val databaseSync: DatabaseSync,
     private val syncLogsRepository: SyncLogsRepository,
     private val placeNotificationsManager: PlaceNotificationManager
 ) : ViewModel() {
+    val selectedCurrency = selectedCurrencyLiveData
+
     val currencySelectorRows = MutableLiveData<List<Pair<Currency, Int>>>()
+
+    val distanceUnits = distanceUnitsLiveData
+
+    val syncLogs = MutableLiveData<List<String>>()
 
     fun showCurrencySelector() = launch {
         val allCurrencies = currenciesRepository.getAllCurrencies()
@@ -69,21 +73,16 @@ class SettingsViewModel @Inject constructor(
         databaseSync.sync()
     }
 
-    fun getSyncLogs(): LiveData<List<String>> {
-        val result = MutableLiveData<List<String>>()
+    fun showSyncLogs() = launch {
+        val logs = syncLogsRepository.all()
+            .reversed()
+            .map { "Date: ${Date(it.time)}, Affected places: ${it.affectedPlaces}" }
 
-        launch {
-            result.postValue(syncLogsRepository.all()
-                .reversed()
-                .map { "Date: ${Date(it.time)}, Affected places: ${it.affectedPlaces}" }
-            )
-        }
-
-        return result
+        syncLogs.postValue(logs)
     }
 
-    suspend fun testNotification() {
-        val randomPlace = async { placesRepository.findRandom() }.await()
+    fun testNotification() = launch {
+        val randomPlace = placesRepository.findRandom()
 
         if (randomPlace != null) {
             placeNotificationsManager.issueNotification(randomPlace)

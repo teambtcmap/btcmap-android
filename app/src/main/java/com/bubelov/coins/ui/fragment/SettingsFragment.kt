@@ -41,8 +41,6 @@ import com.bubelov.coins.ui.activity.SettingsActivity
 import com.bubelov.coins.ui.viewmodel.SettingsViewModel
 import com.bubelov.coins.util.viewModelProvider
 import dagger.android.AndroidInjection
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
 import javax.inject.Inject
 
 class SettingsFragment : PreferenceFragment() {
@@ -62,15 +60,8 @@ class SettingsFragment : PreferenceFragment() {
 
         val currencyPreference = findPreference(getString(R.string.pref_currency_key)) as Preference
 
-        model.selectedCurrencyLiveData.observe(settingsActivity, Observer {
+        model.selectedCurrency.observe(settingsActivity, Observer {
             currencyPreference.summary = it
-        })
-
-        val distanceUnitsPreference =
-            findPreference(getString(R.string.pref_distance_units_key)) as ListPreference
-
-        model.distanceUnitsLiveData.observe(settingsActivity, Observer {
-            distanceUnitsPreference.summary = distanceUnitsPreference.entry
         })
 
         model.currencySelectorRows.observe(settingsActivity, Observer { rows ->
@@ -94,6 +85,22 @@ class SettingsFragment : PreferenceFragment() {
                     .show()
             }
         })
+
+        val distanceUnitsPreference =
+            findPreference(getString(R.string.pref_distance_units_key)) as ListPreference
+
+        model.distanceUnits.observe(settingsActivity, Observer {
+            distanceUnitsPreference.summary = distanceUnitsPreference.entry
+        })
+
+        model.syncLogs.observe(settingsActivity, Observer { logs ->
+            if (logs != null && !logs.isEmpty()) {
+                AlertDialog.Builder(settingsActivity)
+                    .setItems(logs.toTypedArray(), null)
+                    .setOnDismissListener { model.syncLogs.value = null }
+                    .show()
+            }
+        })
     }
 
     override fun onPreferenceTreeClick(
@@ -103,24 +110,10 @@ class SettingsFragment : PreferenceFragment() {
         when (preference.key) {
             getString(R.string.pref_currency_key) -> model.showCurrencySelector()
             getString(R.string.pref_sync_database_key) -> model.syncDatabase()
-            getString(R.string.pref_show_sync_log_key) -> showSyncLog()
-            getString(R.string.pref_test_notification_key) -> launch(UI) { model.testNotification() }
+            getString(R.string.pref_show_sync_log_key) -> model.showSyncLogs()
+            getString(R.string.pref_test_notification_key) -> model.testNotification()
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference)
-    }
-
-    private fun showSyncLog() {
-        model.getSyncLogs().observe(settingsActivity, object : Observer<List<String>> {
-            override fun onChanged(logs: List<String>?) {
-                if (logs != null && !logs.isEmpty()) {
-                    AlertDialog.Builder(settingsActivity)
-                        .setItems(logs.toTypedArray(), null)
-                        .show()
-                }
-
-                model.getSyncLogs().removeObserver(this)
-            }
-        })
     }
 }
