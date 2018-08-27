@@ -28,6 +28,8 @@
 package com.bubelov.coins.ui.viewmodel
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
+import android.content.SharedPreferences
+import android.content.res.Resources
 import com.bubelov.coins.db.sync.DatabaseSync
 import com.bubelov.coins.model.Currency
 import com.bubelov.coins.model.SyncLogEntry
@@ -57,6 +59,8 @@ class SettingsViewModelTest {
     @Mock private lateinit var placesRepository: PlacesRepository
     @Mock private lateinit var currenciesRepository: CurrenciesRepository
     @Mock private lateinit var notificationManager: PlaceNotificationManager
+    @Mock private lateinit var resources: Resources
+    @Mock private lateinit var preferences: SharedPreferences
     private lateinit var model: SettingsViewModel
 
     @Before
@@ -70,7 +74,9 @@ class SettingsViewModelTest {
             distanceUnitsLiveData,
             databaseSync,
             syncLogsRepository,
-            notificationManager
+            notificationManager,
+            resources,
+            preferences
         )
     }
 
@@ -90,12 +96,12 @@ class SettingsViewModelTest {
 
         runBlocking {
             model.showCurrencySelector().join()
-            val rows = model.currencySelectorRows.value!!
+            val rows = model.currencySelectorItems.value!!
 
             Assert.assertEquals(rows.size, 3)
-            Assert.assertTrue(rows[0].second == 3)
-            Assert.assertTrue(rows[1].second == 2)
-            Assert.assertTrue(rows[2].second == 1)
+            Assert.assertTrue(rows[0].places == 3)
+            Assert.assertTrue(rows[1].places == 2)
+            Assert.assertTrue(rows[2].places == 1)
 
             verify(currenciesRepository).getAllCurrencies()
             verifyNoMoreInteractions(currenciesRepository)

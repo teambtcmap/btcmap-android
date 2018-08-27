@@ -29,6 +29,9 @@ package com.bubelov.coins.ui.viewmodel
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import android.content.SharedPreferences
+import android.content.res.Resources
+import com.bubelov.coins.R
 import com.bubelov.coins.db.sync.DatabaseSync
 import com.bubelov.coins.model.Currency
 import com.bubelov.coins.repository.currency.CurrenciesRepository
@@ -48,11 +51,13 @@ class SettingsViewModel @Inject constructor(
     distanceUnitsLiveData: DistanceUnitsLiveData,
     private val databaseSync: DatabaseSync,
     private val syncLogsRepository: SyncLogsRepository,
-    private val placeNotificationsManager: PlaceNotificationManager
+    private val placeNotificationsManager: PlaceNotificationManager,
+    private val resources: Resources,
+    private val preferences: SharedPreferences
 ) : ViewModel() {
     val selectedCurrency = selectedCurrencyLiveData
 
-    val currencySelectorRows = MutableLiveData<List<Pair<Currency, Int>>>()
+    val currencySelectorItems = MutableLiveData<List<CurrencySelectorItem>>()
 
     val distanceUnits = distanceUnitsLiveData
 
@@ -60,13 +65,31 @@ class SettingsViewModel @Inject constructor(
 
     fun showCurrencySelector() = launch {
         val allCurrencies = currenciesRepository.getAllCurrencies()
-        val rows = mutableListOf<Pair<Currency, Int>>()
+        val currenciesToPlaces = mutableListOf<Pair<Currency, Int>>()
 
         allCurrencies.forEach { currency ->
-            rows.add(Pair(currency, placesRepository.countByCurrency(currency)))
+            currenciesToPlaces.add(Pair(currency, placesRepository.countByCurrency(currency)))
         }
 
-        currencySelectorRows.postValue(rows.sortedByDescending { it.second })
+        val items = currenciesToPlaces.map {
+            CurrencySelectorItem(
+                currency = it.first,
+                places = it.second,
+                title = "${it.first.code} (${it.second} ${resources.getQuantityString(
+                    R.plurals.places,
+                    it.second
+                )})"
+            )
+        }
+
+        currencySelectorItems.postValue(items.sortedByDescending { it.places })
+    }
+
+    fun selectCurrency(currency: Currency) {
+        preferences
+            .edit()
+            .putString(resources.getString(R.string.pref_currency_key), currency.code)
+            .apply()
     }
 
     fun syncDatabase() = launch {
@@ -88,4 +111,10 @@ class SettingsViewModel @Inject constructor(
             placeNotificationsManager.issueNotification(randomPlace)
         }
     }
+
+    data class CurrencySelectorItem(
+        val currency: Currency,
+        val places: Int,
+        val title: String
+    )
 }

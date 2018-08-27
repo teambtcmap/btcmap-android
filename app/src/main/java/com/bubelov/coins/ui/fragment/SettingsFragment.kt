@@ -64,24 +64,16 @@ class SettingsFragment : PreferenceFragment() {
             currencyPreference.summary = it
         })
 
-        model.currencySelectorRows.observe(settingsActivity, Observer { rows ->
-            if (rows != null) {
-                val items = rows.map {
-                    "${it.first.code} (${it.second} ${resources.getQuantityString(
-                        R.plurals.places,
-                        it.second
-                    )})"
-                }.toTypedArray()
+        model.currencySelectorItems.observe(settingsActivity, Observer { items ->
+            if (items != null && items.isNotEmpty()) {
+                val titles = items.map { it.title }.toTypedArray()
 
                 AlertDialog.Builder(settingsActivity)
                     .setTitle(R.string.currency)
-                    .setItems(items) { _, index ->
-                        preferenceManager.sharedPreferences
-                            .edit()
-                            .putString(getString(R.string.pref_currency_key), items[index])
-                            .apply()
+                    .setItems(titles) { _, index ->
+                        model.selectCurrency(items[index].currency)
                     }
-                    .setOnDismissListener { model.currencySelectorRows.value = null }
+                    .setOnDismissListener { model.currencySelectorItems.value = null }
                     .show()
             }
         })
