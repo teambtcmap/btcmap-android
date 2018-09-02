@@ -41,7 +41,6 @@ import com.bubelov.coins.repository.place.PlacesAssetsCache
 import com.bubelov.coins.util.JsonStringConverterFactory
 import com.bubelov.coins.util.StringAdapter
 import com.bubelov.coins.util.UtcDateTypeAdapter
-import com.google.android.gms.gcm.GcmNetworkManager
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
@@ -73,11 +72,6 @@ class AppModule {
     @Provides
     fun provideFirebaseAnalytics(context: Context): FirebaseAnalytics {
         return FirebaseAnalytics.getInstance(context)
-    }
-
-    @Provides
-    fun provideGcmNetworkManager(context: Context): GcmNetworkManager {
-        return GcmNetworkManager.getInstance(context)
     }
 
     @Provides

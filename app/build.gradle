@@ -83,7 +83,6 @@ dependencies {
         transitive = true
     }
     implementation "com.google.android.gms:play-services-auth:$playServicesVersion"
-    implementation "com.google.android.gms:play-services-gcm:$playServicesVersion"
     implementation "com.google.android.gms:play-services-maps:$playServicesVersion"
     implementation "com.google.code.gson:gson:$gsonVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"

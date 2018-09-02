@@ -34,6 +34,7 @@ import com.bubelov.coins.repository.Result
 import com.bubelov.coins.repository.place.PlacesRepository
 import com.bubelov.coins.repository.synclogs.SyncLogsRepository
 import com.bubelov.coins.util.PlaceNotificationManager
+import kotlinx.coroutines.experimental.launch
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -48,7 +49,7 @@ internal constructor(
     private val syncLogsRepository: SyncLogsRepository,
     private val databaseSyncScheduler: SyncScheduler
 ) {
-    fun sync() {
+    fun sync() = launch {
         try {
             val result = placesRepository.fetchNewPlaces()
 

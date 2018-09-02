@@ -27,28 +27,30 @@
 
 package com.bubelov.coins.db.sync
 
-import com.google.android.gms.gcm.GcmNetworkManager
-import com.google.android.gms.gcm.PeriodicTask
-import com.google.android.gms.gcm.Task
+import android.app.job.JobScheduler
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import android.app.job.JobInfo
+import android.content.ComponentName
+import android.content.Context
 
 @Singleton
 class SyncScheduler @Inject constructor(
-    private val gcmNetworkManager: GcmNetworkManager
+    private val context: Context
 ) {
     fun scheduleNextSync() {
-        PeriodicTask.Builder().apply {
-            setService(DatabaseSyncService::class.java)
-            setTag(DatabaseSyncService.TAG)
-            setPeriod(TimeUnit.DAYS.toSeconds(1))
-            setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)
-            setPersisted(true)
-        }.build().schedule()
-    }
+        val scheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
 
-    private fun PeriodicTask.schedule() {
-        gcmNetworkManager.schedule(this)
+        val jobId = DatabaseSyncService.JOB_ID
+        val jobComponent = ComponentName(context, DatabaseSyncService::class.java)
+
+        scheduler.schedule(
+            JobInfo.Builder(jobId, jobComponent)
+                .setPeriodic(TimeUnit.DAYS.toMillis(1))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .setPersisted(true)
+                .build()
+        )
     }
 }

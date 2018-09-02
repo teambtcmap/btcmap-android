@@ -27,31 +27,37 @@
 
 package com.bubelov.coins.db.sync
 
-import com.google.android.gms.gcm.GcmNetworkManager
-import com.google.android.gms.gcm.GcmTaskService
-import com.google.android.gms.gcm.TaskParams
+import android.app.job.JobParameters
+import android.app.job.JobService
 import dagger.android.AndroidInjection
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.Job
 import javax.inject.Inject
 
-class DatabaseSyncService : GcmTaskService() {
+class DatabaseSyncService : JobService() {
     @Inject lateinit var databaseSync: DatabaseSync
+
+    var syncJob: Job? = null
 
     override fun onCreate() {
         AndroidInjection.inject(this)
         super.onCreate()
     }
 
-    override fun onInitializeTasks() {
-        onRunTask(null)
+    override fun onStartJob(params: JobParameters?): Boolean {
+        syncJob = databaseSync.sync().apply {
+            syncJob = null
+            jobFinished(params, false)
+        }
+
+        return true
     }
 
-    override fun onRunTask(taskParams: TaskParams?): Int {
-        runBlocking { databaseSync.sync() }
-        return GcmNetworkManager.RESULT_SUCCESS
+    override fun onStopJob(params: JobParameters?): Boolean {
+        syncJob?.cancel(Exception("Terminated by OS"))
+        return true
     }
 
     companion object {
-        const val TAG = "DATABASE_GCM_SYNC_SERVICE"
+        const val JOB_ID = 1
     }
 }
