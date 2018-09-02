@@ -27,4 +27,8 @@
 
 package com.bubelov.coins.ui.model
 
-data class ExchangeRateRow(val iconText: String, val title: String, val value: String)
+data class ExchangeRateRow(
+    val iconText: String,
+    val title: String,
+    val value: String
+)

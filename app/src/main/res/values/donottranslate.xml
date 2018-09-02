@@ -16,4 +16,9 @@
         <item>KILOMETERS</item>
         <item>MILES</item>
     </string-array>
+
+    <string name="developer_tools">Developer tools</string>
+    <string name="sync_database">Sync database</string>
+    <string name="show_sync_log">Show sync log</string>
+    <string name="test_notification">Test notification</string>
 </resources>

@@ -29,46 +29,39 @@ package com.bubelov.coins.ui.fragment
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
-import android.content.Context
 import android.os.Bundle
-import android.preference.ListPreference
-import android.preference.Preference
-import android.preference.PreferenceFragment
-import android.preference.PreferenceScreen
 import android.support.v7.app.AlertDialog
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import com.bubelov.coins.R
-import com.bubelov.coins.ui.activity.SettingsActivity
 import com.bubelov.coins.ui.viewmodel.SettingsViewModel
 import com.bubelov.coins.util.viewModelProvider
-import dagger.android.AndroidInjection
+import dagger.android.support.DaggerFragment
+import kotlinx.android.synthetic.main.fragment_settings.*
 import javax.inject.Inject
 
-class SettingsFragment : PreferenceFragment() {
+class SettingsFragment : DaggerFragment() {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
-    private val model by lazy { settingsActivity.viewModelProvider(modelFactory) as SettingsViewModel }
+    private val model by lazy { viewModelProvider(modelFactory) as SettingsViewModel }
 
-    private val settingsActivity by lazy { activity as SettingsActivity }
-
-    override fun onAttach(context: Context?) {
-        AndroidInjection.inject(this)
-        super.onAttach(context)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_settings, container, false)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        addPreferencesFromResource(R.xml.preferences)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        currencyButton.setOnClickListener { model.showCurrencySelector() }
+        model.selectedCurrency.observe(this, Observer { currency.text = it })
 
-        val currencyPreference = findPreference(getString(R.string.pref_currency_key)) as Preference
-
-        model.selectedCurrency.observe(settingsActivity, Observer {
-            currencyPreference.summary = it
-        })
-
-        model.currencySelectorItems.observe(settingsActivity, Observer { items ->
+        model.currencySelectorItems.observe(this, Observer { items ->
             if (items != null && items.isNotEmpty()) {
                 val titles = items.map { it.title }.toTypedArray()
 
-                AlertDialog.Builder(settingsActivity)
+                AlertDialog.Builder(requireContext())
                     .setTitle(R.string.currency)
                     .setItems(titles) { _, index ->
                         model.selectCurrency(items[index].currency)
@@ -78,34 +71,41 @@ class SettingsFragment : PreferenceFragment() {
             }
         })
 
-        val distanceUnitsPreference =
-            findPreference(getString(R.string.pref_distance_units_key)) as ListPreference
+        distanceUnitsButton.setOnClickListener { _ ->
+            val labels = resources.getStringArray(R.array.distance_units)
+            val values = resources.getStringArray(R.array.distance_units_values)
 
-        model.distanceUnits.observe(settingsActivity, Observer {
-            distanceUnitsPreference.summary = distanceUnitsPreference.entry
+            val selectedUnits = model.distanceUnits.value ?: return@setOnClickListener
+            val selectedValueIndex = values.indexOf(selectedUnits)
+
+            AlertDialog.Builder(requireContext())
+                .setTitle(R.string.pref_distance_units)
+                .setSingleChoiceItems(labels, selectedValueIndex) { dialog, index ->
+                    model.distanceUnits.setValue(values[index])
+                    dialog.dismiss()
+                }
+                .show()
+        }
+
+        model.distanceUnits.observe(this, Observer {
+            val labels = resources.getStringArray(R.array.distance_units)
+            val values = resources.getStringArray(R.array.distance_units_values)
+            distanceUnits.text = labels[values.indexOf(it)]
         })
 
-        model.syncLogs.observe(settingsActivity, Observer { logs ->
+        syncDatabase.setOnClickListener { model.syncDatabase() }
+
+        showSyncLog.setOnClickListener { model.showSyncLogs() }
+
+        model.syncLogs.observe(this, Observer { logs ->
             if (logs != null && !logs.isEmpty()) {
-                AlertDialog.Builder(settingsActivity)
+                AlertDialog.Builder(requireContext())
                     .setItems(logs.toTypedArray(), null)
                     .setOnDismissListener { model.syncLogs.value = null }
                     .show()
             }
         })
-    }
 
-    override fun onPreferenceTreeClick(
-        preferenceScreen: PreferenceScreen,
-        preference: Preference
-    ): Boolean {
-        when (preference.key) {
-            getString(R.string.pref_currency_key) -> model.showCurrencySelector()
-            getString(R.string.pref_sync_database_key) -> model.syncDatabase()
-            getString(R.string.pref_show_sync_log_key) -> model.showSyncLogs()
-            getString(R.string.pref_test_notification_key) -> model.testNotification()
-        }
-
-        return super.onPreferenceTreeClick(preferenceScreen, preference)
+        testNotification.setOnClickListener { model.testNotification() }
     }
 }

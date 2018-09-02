@@ -9,7 +9,7 @@ buildscript {
 
         circleImageViewVersion = '2.1.0' // TODO Remove
         constraintLayoutVersion = '1.1.0'
-        coroutineVersion = '0.25.0'
+        coroutineVersion = '0.22.1'
         crashlyticsVersion = '2.8.0'
         daggerVersion = '2.15'
         espressoVersion = '3.0.1'

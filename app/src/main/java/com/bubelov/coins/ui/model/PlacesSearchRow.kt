@@ -30,8 +30,8 @@ package com.bubelov.coins.ui.model
 import android.graphics.Bitmap
 
 data class PlacesSearchRow(
-        val placeId: Long,
-        val icon: Bitmap,
-        val name: String,
-        val distance: String
+    val placeId: Long,
+    val icon: Bitmap,
+    val name: String,
+    val distance: String
 )

@@ -27,8 +27,6 @@
 
 package com.bubelov.coins
 
-import android.preference.PreferenceManager
-
 import com.bubelov.coins.db.sync.DatabaseSync
 import com.bubelov.coins.di.DaggerAppComponent
 import com.bubelov.coins.util.ReleaseTree
@@ -50,8 +48,6 @@ class App : DaggerApplication(), HasActivityInjector, HasServiceInjector {
         } else {
             Timber.plant(ReleaseTree())
         }
-
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
 
         launch { databaseSync.sync() }
     }

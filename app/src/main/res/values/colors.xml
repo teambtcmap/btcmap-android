@@ -17,6 +17,8 @@
 
     <color name="tab_indicator">#FFFBD0</color>
 
+    <color name="divider">#1F000000</color>
+
     <color name="red_500">#F44336</color>
     <color name="green_700">#388E3C</color>
     <color name="grey_200">#EEEEEE</color>
