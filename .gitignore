@@ -35,6 +35,3 @@ local.properties
 
 # Android Studio captures folder
 captures/
-
-# Local Gradle files
-gradle.properties
