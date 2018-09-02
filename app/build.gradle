@@ -33,6 +33,9 @@ android {
         buildConfigField "String", "GOOGLE_CLIENT_ID", GOOGLE_CLIENT_ID
         buildConfigField "Boolean", "MOCK_API", "true"
 
+        buildConfigField "Float", "MAP_MARKER_ANCHOR_U", "$map_marker_anchor_u"
+        buildConfigField "Float", "MAP_MARKER_ANCHOR_V", "$map_marker_anchor_v"
+
         project.ext.set("archivesBaseName", "Coins-" + defaultConfig.versionName)
 
         manifestPlaceholders = [crashlyticsEnabled: true]

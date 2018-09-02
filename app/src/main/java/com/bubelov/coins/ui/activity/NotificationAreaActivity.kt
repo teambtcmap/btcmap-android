@@ -37,9 +37,9 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.widget.SeekBar
+import com.bubelov.coins.BuildConfig
 
 import com.bubelov.coins.R
-import com.bubelov.coins.model.MapMarkerAnchor
 import com.bubelov.coins.model.NotificationArea
 import com.bubelov.coins.ui.viewmodel.NotificationAreaViewModel
 import com.bubelov.coins.util.OnSeekBarChangeAdapter
@@ -123,7 +123,7 @@ class NotificationAreaActivity : DaggerAppCompatActivity(), OnMapReadyCallback {
             MarkerOptions()
                 .position(LatLng(area.latitude, area.longitude))
                 .icon(markerDescriptor)
-                .anchor(MapMarkerAnchor.u, MapMarkerAnchor.v)
+                .anchor(BuildConfig.MAP_MARKER_ANCHOR_U, BuildConfig.MAP_MARKER_ANCHOR_V)
                 .draggable(true)
         )
 

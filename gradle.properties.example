@@ -7,6 +7,10 @@ GOOGLE_CLIENT_ID=
 
 org.gradle.jvmargs=-Xmx4g
 
+# Map marker anchors
+map_marker_anchor_u=0.5f
+map_marker_anchor_v=0.91145f
+
 # AndroidX
 android.useAndroidX=true
 android.enableJetifier=true

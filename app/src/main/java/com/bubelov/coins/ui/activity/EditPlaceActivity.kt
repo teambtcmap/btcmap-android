@@ -34,10 +34,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.view.View
+import com.bubelov.coins.BuildConfig
 
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Location
-import com.bubelov.coins.model.MapMarkerAnchor
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.viewmodel.EditPlaceViewModel
 import com.bubelov.coins.util.toLatLng
@@ -183,7 +183,7 @@ class EditPlaceActivity : DaggerAppCompatActivity() {
             MarkerOptions()
                 .position(location.toLatLng())
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker_empty))
-                .anchor(MapMarkerAnchor.u, MapMarkerAnchor.v)
+                .anchor(BuildConfig.MAP_MARKER_ANCHOR_U, BuildConfig.MAP_MARKER_ANCHOR_V)
         )
     }
 
