@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bubelov/coins-android.svg?branch=develop)](https://travis-ci.org/bubelov/coins-android)
+
 Thousands of places already accept Bitcoin. This app will help you find them.
 
 Key features:
