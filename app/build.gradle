@@ -29,13 +29,11 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-        def apiUrl = project.hasProperty('API_URL') ? API_URL : System.getenv('API_URL')
-        buildConfigField "String", "API_URL", apiUrl != null ? apiUrl : ""
+        buildConfigField "String", "API_URL", API_URL
+        buildConfigField "Boolean", "MOCK_API", "true"
 
         def googleClientId = project.hasProperty('GOOGLE_CLIENT_ID') ? GOOGLE_CLIENT_ID : System.getenv('GOOGLE_CLIENT_ID')
         buildConfigField "String", "GOOGLE_CLIENT_ID", googleClientId != null ? googleClientId : ""
-
-        buildConfigField "Boolean", "MOCK_API", "true"
 
         buildConfigField "Float", "MAP_MARKER_ANCHOR_U", "$map_marker_anchor_u"
         buildConfigField "Float", "MAP_MARKER_ANCHOR_V", "$map_marker_anchor_v"
@@ -47,10 +45,10 @@ android {
 
     signingConfigs {
         release {
-            storeFile file(KEYSTORE_PATH)
-            storePassword KEYSTORE_PASSWORD
-            keyAlias KEYSTORE_KEY_ALIAS
-            keyPassword KEYSTORE_KEY_PASSWORD
+            storeFile file(project.hasProperty('KEYSTORE_PATH') ? KEYSTORE_PATH : System.getenv('KEYSTORE_PATH'))
+            storePassword project.hasProperty('KEYSTORE_PASSWORD') ? KEYSTORE_PASSWORD : System.getenv('KEYSTORE_PASSWORD')
+            keyAlias project.hasProperty('KEYSTORE_KEY_ALIAS') ? KEYSTORE_KEY_ALIAS : System.getenv('KEYSTORE_KEY_ALIAS')
+            keyPassword project.hasProperty('KEYSTORE_KEY_PASSWORD') ? KEYSTORE_KEY_PASSWORD : System.getenv('KEYSTORE_KEY_PASSWORD')
         }
 
         debug {
