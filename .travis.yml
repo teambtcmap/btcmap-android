@@ -1,0 +1,19 @@
+language: android
+android:
+  components:
+    - tools
+    - platform-tools
+    - build-tools-27.0.3
+    - android-27
+    - addon-google_apis-google-27
+    - extra-google-m2repository
+    - extra-android-m2repository
+script:
+  - ./gradlew test
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+    - $HOME/.m2
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
