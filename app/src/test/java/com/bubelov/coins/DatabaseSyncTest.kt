@@ -72,7 +72,7 @@ class DatabaseSyncTest {
         `when`(placesRepository.fetchNewPlaces())
             .thenReturn(Result.Success(fetchedPlaces))
 
-        runBlocking { databaseSync.sync() }
+        runBlocking { databaseSync.sync().join() }
 
         verify(placeNotificationManager).issueNotificationsIfNecessary(fetchedPlaces)
         verify(syncLogsRepository).insert(any())

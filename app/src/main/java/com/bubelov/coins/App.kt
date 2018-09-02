@@ -29,12 +29,11 @@ package com.bubelov.coins
 
 import com.bubelov.coins.db.sync.DatabaseSync
 import com.bubelov.coins.di.DaggerAppComponent
-import com.bubelov.coins.util.ReleaseTree
+import com.bubelov.coins.util.CrashlyticsTree
 import dagger.android.*
 
 import javax.inject.Inject
 
-import kotlinx.coroutines.experimental.launch
 import timber.log.Timber
 
 class App : DaggerApplication(), HasActivityInjector, HasServiceInjector {
@@ -46,10 +45,10 @@ class App : DaggerApplication(), HasActivityInjector, HasServiceInjector {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         } else {
-            Timber.plant(ReleaseTree())
+            Timber.plant(CrashlyticsTree())
         }
 
-        launch { databaseSync.sync() }
+        databaseSync.sync()
     }
 
     override fun applicationInjector(): AndroidInjector<out DaggerApplication> {

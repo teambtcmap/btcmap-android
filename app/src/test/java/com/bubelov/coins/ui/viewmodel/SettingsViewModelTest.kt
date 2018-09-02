@@ -115,9 +115,11 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun callsSync() = runBlocking {
-        model.syncDatabase().join()
-        verify(databaseSync).sync()
+    fun callsSync() {
+        runBlocking {
+            model.syncDatabase().join()
+            verify(databaseSync).sync()
+        }
     }
 
     @Test
