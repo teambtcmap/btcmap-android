@@ -54,6 +54,8 @@
 
         <activity android:name=".ui.activity.PickLocationActivity" />
 
+        <activity android:name=".ui.activity.SupportProjectActivity" />
+
         <service
             android:name="com.bubelov.coins.db.sync.DatabaseSyncService"
             android:exported="true"

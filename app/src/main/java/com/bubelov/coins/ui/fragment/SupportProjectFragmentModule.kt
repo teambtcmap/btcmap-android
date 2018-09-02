@@ -25,23 +25,9 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.di
+package com.bubelov.coins.ui.fragment
 
-import com.bubelov.coins.ui.fragment.*
 import dagger.Module
-import dagger.android.ContributesAndroidInjector
 
 @Module
-abstract class FragmentBuilder {
-    @ContributesAndroidInjector(modules = [SignInFragmentModule::class])
-    abstract fun contributeSignInFragmentInjector(): SignInFragment
-
-    @ContributesAndroidInjector(modules = [SignUpFragmentModule::class])
-    abstract fun contributeSignUpFragmentInjector(): SignUpFragment
-
-    @ContributesAndroidInjector(modules = [SettingsFragmentModule::class])
-    abstract fun contributeSettingsFragmentInjector(): SettingsFragment
-
-    @ContributesAndroidInjector(modules = [SupportProjectFragmentModule::class])
-    abstract fun contributeSupportProjectFragmentInjector(): SupportProjectFragment
-}
+class SupportProjectFragmentModule

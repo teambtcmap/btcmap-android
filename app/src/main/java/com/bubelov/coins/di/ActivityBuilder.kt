@@ -66,4 +66,7 @@ abstract class ActivityBuilder {
 
     @ContributesAndroidInjector(modules = [SignInActivityModule::class])
     abstract fun conributeSignInActivityInjector(): SignInActivity
+
+    @ContributesAndroidInjector(modules = [SupportProjectActivityModule::class])
+    abstract fun conributeSupportProjectActivityInjector(): SupportProjectActivity
 }

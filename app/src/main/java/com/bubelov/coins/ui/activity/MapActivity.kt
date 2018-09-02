@@ -136,6 +136,7 @@ class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMen
                 R.id.action_exchange_rates -> openExchangeRatesScreen()
                 R.id.action_notification_area -> openNotificationAreaScreen()
                 R.id.action_chat -> openSupportChat()
+                R.id.action_support_project -> openSupportProjectScreen()
                 R.id.action_settings -> openSettingsScreen()
             }
 
@@ -434,6 +435,11 @@ class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMen
     private fun openSupportChat() {
         openUrl("https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw")
         analytics.logViewContent("chat", null, "screen")
+    }
+
+    private fun openSupportProjectScreen() {
+        val intent = SupportProjectActivity.newIntent(this)
+        startActivity(intent)
     }
 
     private fun openSettingsScreen() {

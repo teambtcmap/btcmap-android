@@ -21,4 +21,7 @@
     <string name="sync_database">Sync database</string>
     <string name="show_sync_log">Show sync log</string>
     <string name="test_notification">Test notification</string>
+
+    <string name="repository_url">https://github.com/bubelov/coins-android</string>
+    <string name="donation_wallet">3LdUESXcxfyEkYc78F4icCnhwG1G4dDziQ</string>
 </resources>

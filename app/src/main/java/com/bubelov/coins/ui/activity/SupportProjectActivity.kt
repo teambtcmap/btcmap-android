@@ -25,23 +25,25 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.di
+package com.bubelov.coins.ui.activity
 
-import com.bubelov.coins.ui.fragment.*
-import dagger.Module
-import dagger.android.ContributesAndroidInjector
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
 
-@Module
-abstract class FragmentBuilder {
-    @ContributesAndroidInjector(modules = [SignInFragmentModule::class])
-    abstract fun contributeSignInFragmentInjector(): SignInFragment
+import com.bubelov.coins.R
 
-    @ContributesAndroidInjector(modules = [SignUpFragmentModule::class])
-    abstract fun contributeSignUpFragmentInjector(): SignUpFragment
+import kotlinx.android.synthetic.main.activity_settings.*
+import dagger.android.support.DaggerAppCompatActivity
 
-    @ContributesAndroidInjector(modules = [SettingsFragmentModule::class])
-    abstract fun contributeSettingsFragmentInjector(): SettingsFragment
+class SupportProjectActivity : DaggerAppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_support_project)
+        toolbar.setNavigationOnClickListener { finish() }
+    }
 
-    @ContributesAndroidInjector(modules = [SupportProjectFragmentModule::class])
-    abstract fun contributeSupportProjectFragmentInjector(): SupportProjectFragment
+    companion object {
+        fun newIntent(context: Context) = Intent(context, SupportProjectActivity::class.java)
+    }
 }
