@@ -29,8 +29,12 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-        buildConfigField "String", "API_URL", API_URL
-        buildConfigField "String", "GOOGLE_CLIENT_ID", GOOGLE_CLIENT_ID
+        def apiUrl = project.hasProperty('API_URL') ? API_URL : System.getenv('API_URL')
+        buildConfigField "String", "API_URL", apiUrl != null ? apiUrl : ""
+
+        def googleClientId = project.hasProperty('GOOGLE_CLIENT_ID') ? GOOGLE_CLIENT_ID : System.getenv('GOOGLE_CLIENT_ID')
+        buildConfigField "String", "GOOGLE_CLIENT_ID", googleClientId != null ? googleClientId : ""
+
         buildConfigField "Boolean", "MOCK_API", "true"
 
         buildConfigField "Float", "MAP_MARKER_ANCHOR_U", "$map_marker_anchor_u"
