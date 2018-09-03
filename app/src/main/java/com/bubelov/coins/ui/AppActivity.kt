@@ -25,56 +25,80 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.activity
+package com.bubelov.coins.ui
 
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-
+import androidx.navigation.NavHost
+import androidx.navigation.findNavController
+import com.bubelov.coins.R
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import dagger.android.support.DaggerAppCompatActivity
-import timber.log.Timber
 
-class LauncherActivity : DaggerAppCompatActivity() {
+class AppActivity : DaggerAppCompatActivity(), NavHost {
+    private val navigationController by lazy { findNavController(R.id.nav_host_fragment) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_app)
 
         val googleApiAvailability = GoogleApiAvailability.getInstance()
-        val playServicesAvailabilityResult = googleApiAvailability.isGooglePlayServicesAvailable(this)
 
-        if (playServicesAvailabilityResult == ConnectionResult.SUCCESS) {
+        val playServicesAvailability =
+            googleApiAvailability.isGooglePlayServicesAvailable(this)
+
+        if (playServicesAvailability == ConnectionResult.SUCCESS) {
             onPlayServicesAvailable()
         } else {
-            if (googleApiAvailability.isUserResolvableError(playServicesAvailabilityResult)) {
+            if (googleApiAvailability.isUserResolvableError(playServicesAvailability)) {
                 val dialog = googleApiAvailability.getErrorDialog(
                     this,
-                    playServicesAvailabilityResult,
+                    playServicesAvailability,
                     PLAY_SERVICES_RESOLUTION_REQUEST
                 )
+
                 dialog.setCancelable(false)
                 dialog.show()
-            } else {
-                Timber.e(IllegalStateException("Unresolvable Play Services error"))
-                supportFinishAfterTransition()
+
+                dialog.setOnDismissListener {
+                    if (playServicesAvailability == ConnectionResult.SERVICE_INVALID) {
+                        finish()
+                    }
+                }
             }
         }
     }
+
+    override fun getNavController() = navigationController
+
+    override fun onSupportNavigateUp() = navigationController.navigateUp()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == PLAY_SERVICES_RESOLUTION_REQUEST) {
             if (resultCode == Activity.RESULT_OK) {
                 onPlayServicesAvailable()
             } else {
-                supportFinishAfterTransition()
+                finish()
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        supportFragmentManager.fragments.forEach {
+            it.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
+    }
+
     private fun onPlayServicesAvailable() {
-        startActivity(Intent(this, MapActivity::class.java))
+        navigationController.navigate(R.id.action_emptyFragment_to_mapFragment)
     }
 
     companion object {

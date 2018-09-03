@@ -102,15 +102,20 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit-mock:$retrofitVersion"
     implementation "de.hdodenhof:circleimageview:$circleImageViewVersion" // TODO Remove
 
+    implementation "android.arch.navigation:navigation-fragment-ktx:$navigationVersion"
+    implementation "android.arch.navigation:navigation-ui-ktx:$navigationVersion"
+
+    testImplementation "android.arch.core:core-testing:$lifecycleVersion"
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+
     androidTestImplementation "android.arch.persistence.room:testing:$roomVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$espressoVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-intents:$espressoVersion"
     androidTestImplementation "com.android.support.test:runner:$runnerVersion"
     androidTestImplementation "com.android.support.test:rules:$runnerVersion"
-    testImplementation "android.arch.core:core-testing:$lifecycleVersion"
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    androidTestImplementation "android.arch.navigation:navigation-testing-ktx:$navigationVersion"
 }
 
 kotlin {

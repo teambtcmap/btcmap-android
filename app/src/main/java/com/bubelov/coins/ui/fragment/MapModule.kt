@@ -25,9 +25,9 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.activity
+package com.bubelov.coins.ui.fragment
 
 import dagger.Module
 
 @Module
-class MapActivityModule
+class MapModule

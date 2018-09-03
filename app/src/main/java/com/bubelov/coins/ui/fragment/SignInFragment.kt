@@ -29,7 +29,6 @@ package com.bubelov.coins.ui.fragment
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
-import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.view.KeyEvent
@@ -40,7 +39,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 
 import com.bubelov.coins.R
-import com.bubelov.coins.ui.activity.MapActivity
 import com.bubelov.coins.ui.viewmodel.AuthViewModel
 import com.bubelov.coins.util.AsyncResult
 import com.bubelov.coins.util.viewModelProvider
@@ -63,10 +61,11 @@ class SignInFragment : DaggerFragment(), TextView.OnEditorActionListener {
             }
 
             is AsyncResult.Success -> {
-                startActivity(
-                    Intent(activity, MapActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    })
+// TODO
+//                startActivity(
+//                    Intent(activity, MapActivity::class.java).apply {
+//                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+//                    })
             }
 
             is AsyncResult.Error -> {

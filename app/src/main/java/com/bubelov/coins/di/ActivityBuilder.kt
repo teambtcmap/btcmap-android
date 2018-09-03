@@ -27,6 +27,7 @@
 
 package com.bubelov.coins.di
 
+import com.bubelov.coins.ui.AppActivity
 import com.bubelov.coins.ui.activity.*
 
 import dagger.Module
@@ -34,8 +35,8 @@ import dagger.android.ContributesAndroidInjector
 
 @Module
 abstract class ActivityBuilder {
-    @ContributesAndroidInjector(modules = [LauncherActivityModule::class])
-    abstract fun contributeLauncherActivityInjector(): LauncherActivity
+    @ContributesAndroidInjector(modules = [AppModule::class])
+    abstract fun contributeLauncherActivityInjector(): AppActivity
 
     @ContributesAndroidInjector(modules = [EditPlaceActivityModule::class])
     abstract fun contributeEditPlaceActivityInjector(): EditPlaceActivity
@@ -45,9 +46,6 @@ abstract class ActivityBuilder {
 
     @ContributesAndroidInjector(modules = [ExchangeRatesActivityModule::class])
     abstract fun contributeExchangeRatesActivityInjector(): ExchangeRatesActivity
-
-    @ContributesAndroidInjector(modules = [MapActivityModule::class])
-    abstract fun contributeMapActivityInjector(): MapActivity
 
     @ContributesAndroidInjector(modules = [NotificationAreaActivityModule::class])
     abstract fun contributeNotificationAreaActivityInjector(): NotificationAreaActivity

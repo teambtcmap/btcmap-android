@@ -33,6 +33,9 @@ import dagger.android.ContributesAndroidInjector
 
 @Module
 abstract class FragmentBuilder {
+    @ContributesAndroidInjector(modules = [MapModule::class])
+    abstract fun contributeMapFragmentInjector(): MapFragment
+
     @ContributesAndroidInjector(modules = [SignInFragmentModule::class])
     abstract fun contributeSignInFragmentInjector(): SignInFragment
 

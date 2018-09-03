@@ -25,7 +25,7 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.activity
+package com.bubelov.coins.ui.fragment
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -38,38 +38,59 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
+import android.os.Handler
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.ActivityOptionsCompat
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+
+import com.bubelov.coins.R
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.view.MenuItem
-import android.view.View
 import android.widget.Toast
 import com.bubelov.coins.BuildConfig
-
-import com.bubelov.coins.R
 import com.bubelov.coins.model.Place
+import com.bubelov.coins.ui.activity.EditPlaceActivity
+import com.bubelov.coins.ui.activity.ExchangeRatesActivity
+import com.bubelov.coins.ui.activity.NotificationAreaActivity
+import com.bubelov.coins.ui.activity.PlacesSearchActivity
+import com.bubelov.coins.ui.activity.ProfileActivity
+import com.bubelov.coins.ui.activity.SettingsActivity
+import com.bubelov.coins.ui.activity.SignInActivity
+import com.bubelov.coins.ui.activity.SupportProjectActivity
+import com.bubelov.coins.ui.model.PlaceMarker
+import com.bubelov.coins.ui.viewmodel.MapViewModel
 import com.bubelov.coins.ui.widget.PlaceDetailsView
+import com.bubelov.coins.util.Analytics
+import com.bubelov.coins.util.currencyCodeToName
+import com.bubelov.coins.util.emptyPlace
+import com.bubelov.coins.util.openUrl
+import com.bubelov.coins.util.toLatLng
+import com.bubelov.coins.util.viewModelProvider
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.squareup.picasso.Picasso
-
-import com.bubelov.coins.ui.model.PlaceMarker
-import com.bubelov.coins.ui.viewmodel.MapViewModel
-import com.bubelov.coins.util.*
-import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import dagger.android.support.DaggerAppCompatActivity
-import kotlinx.android.synthetic.main.activity_map.*
+import dagger.android.support.DaggerFragment
+import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.android.synthetic.main.navigation_drawer_header.view.*
 import javax.inject.Inject
 
-class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMenuItemClickListener,
+class MapFragment :
+    DaggerFragment(),
+    OnMapReadyCallback,
+    Toolbar.OnMenuItemClickListener,
     MapViewModel.Callback {
-    @Inject lateinit var modelFactory: ViewModelProvider.Factory
+    @Inject internal lateinit var modelFactory: ViewModelProvider.Factory
     private val model by lazy { viewModelProvider(modelFactory) as MapViewModel }
 
     private lateinit var drawerHeader: View
@@ -84,15 +105,20 @@ class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMen
 
     @Inject internal lateinit var analytics: Analytics
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_map, container, false)
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         model.callback = this
 
         drawerHeader = navigation_view.getHeaderView(0)
 
-        val mapFragment = fragmentManager.findFragmentById(R.id.map) as MapFragment
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
         bottomSheetBehavior = BottomSheetBehavior.from(place_details)
@@ -150,7 +176,7 @@ class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMen
         })
 
         drawerToggle = ActionBarDrawerToggle(
-            this,
+            requireActivity(),
             drawer_layout,
             toolbar,
             R.string.open,
@@ -208,18 +234,9 @@ class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMen
             }
         })
 
-        handleIntent(intent)
-    }
-
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-        drawerToggle.syncState()
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        setIntent(intent)
-        handleIntent(intent)
+        Handler().post {
+            drawerToggle.syncState()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -238,11 +255,16 @@ class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMen
         }
 
         if (requestCode == REQUEST_ADD_PLACE && resultCode == Activity.RESULT_OK) {
-            Toast.makeText(this, R.string.place_has_been_added, Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), R.string.place_has_been_added, Toast.LENGTH_LONG)
+                .show()
         }
 
         if (requestCode == REQUEST_EDIT_PLACE && resultCode == Activity.RESULT_OK) {
-            Toast.makeText(this, R.string.your_edits_have_been_submitted, Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                requireContext(),
+                R.string.your_edits_have_been_submitted,
+                Toast.LENGTH_LONG
+            ).show()
         }
 
         if (requestCode == REQUEST_SIGN_IN && resultCode == Activity.RESULT_OK) {
@@ -291,7 +313,7 @@ class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMen
             R.id.action_add -> model.onAddPlaceClick()
 
             R.id.action_search -> PlacesSearchActivity.startForResult(
-                this,
+                requireActivity(),
                 model.userLocation.value,
                 model.selectedCurrency.value ?: "",
                 REQUEST_FIND_PLACE
@@ -308,23 +330,8 @@ class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMen
         drawerToggle.onConfigurationChanged(newConfig)
     }
 
-    override fun onBackPressed() {
-        if (drawer_layout.isDrawerOpen(navigation_view)) {
-            drawer_layout.closeDrawer(navigation_view)
-            return
-        }
-
-        when (bottomSheetBehavior.state) {
-            BottomSheetBehavior.STATE_EXPANDED, BottomSheetBehavior.STATE_SETTLING -> bottomSheetBehavior.setState(
-                BottomSheetBehavior.STATE_COLLAPSED
-            )
-            BottomSheetBehavior.STATE_COLLAPSED -> bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN)
-            BottomSheetBehavior.STATE_HIDDEN -> super.onBackPressed()
-        }
-    }
-
     override fun signIn() {
-        startActivityForResult(SignInActivity.newIntent(this), REQUEST_SIGN_IN)
+        startActivityForResult(SignInActivity.newIntent(requireContext()), REQUEST_SIGN_IN)
     }
 
     override fun addPlace() {
@@ -333,22 +340,22 @@ class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMen
             longitude = map.value?.cameraPosition?.target?.longitude ?: 0.0
         )
 
-        EditPlaceActivity.startForResult(this, place, REQUEST_ADD_PLACE)
+        EditPlaceActivity.startForResult(requireActivity(), place, REQUEST_ADD_PLACE)
     }
 
     override fun editPlace(place: Place) {
-        EditPlaceActivity.startForResult(this, place, REQUEST_EDIT_PLACE)
+        EditPlaceActivity.startForResult(requireActivity(), place, REQUEST_EDIT_PLACE)
     }
 
     override fun showUserProfile() {
-        startActivityForResult(ProfileActivity.newIntent(this), REQUEST_PROFILE)
+        startActivityForResult(ProfileActivity.newIntent(requireContext()), REQUEST_PROFILE)
     }
 
     private fun requestLocationPermissions() {
         ActivityCompat.requestPermissions(
-            this,
+            requireActivity(),
             arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-            MapActivity.REQUEST_ACCESS_LOCATION
+            REQUEST_ACCESS_LOCATION
         )
     }
 
@@ -392,7 +399,7 @@ class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMen
 
         if (user != null) {
             if (!TextUtils.isEmpty(user.avatarUrl)) {
-                Picasso.with(this).load(user.avatarUrl).into(drawerHeader.avatar)
+                Picasso.with(requireContext()).load(user.avatarUrl).into(drawerHeader.avatar)
             } else {
                 drawerHeader.avatar.setImageResource(R.drawable.ic_no_avatar)
             }
@@ -413,44 +420,39 @@ class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMen
         }
     }
 
-    private fun handleIntent(intent: Intent) {
-        if (intent.hasExtra(PLACE_ID_EXTRA)) {
-            model.navigateToNextSelectedPlace = true
-            model.selectedPlaceId.value = intent.getLongExtra(PLACE_ID_EXTRA, 0)
-        }
-
-        updateDrawerHeader()
-    }
-
     private fun openExchangeRatesScreen() {
-        val intent = Intent(this@MapActivity, ExchangeRatesActivity::class.java)
+        val intent = Intent(requireContext(), ExchangeRatesActivity::class.java)
         startActivity(intent)
     }
 
     private fun openNotificationAreaScreen() {
-        val intent = NotificationAreaActivity.newIntent(this, map.value!!.cameraPosition)
+        val intent =
+            NotificationAreaActivity.newIntent(requireContext(), map.value!!.cameraPosition)
         startActivity(intent)
     }
 
     private fun openSupportChat() {
-        openUrl("https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw")
+        requireContext().openUrl("https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw")
         analytics.logViewContent("chat", null, "screen")
     }
 
     private fun openSupportProjectScreen() {
-        val intent = SupportProjectActivity.newIntent(this)
+        val intent = SupportProjectActivity.newIntent(requireContext())
         startActivity(intent)
     }
 
     private fun openSettingsScreen() {
-        val intent = SettingsActivity.newIntent(this)
-        startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle())
+        val intent = SettingsActivity.newIntent(requireContext())
+        startActivity(
+            intent,
+            ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity()).toBundle()
+        )
     }
 
     private fun initClustering(map: GoogleMap) {
-        val placesManager = ClusterManager<PlaceMarker>(this, map)
+        val placesManager = ClusterManager<PlaceMarker>(requireContext(), map)
         placesManager.setAnimation(false)
-        val renderer = PlacesRenderer(this, map, placesManager)
+        val renderer = PlacesRenderer(requireContext(), map, placesManager)
         renderer.setAnimation(false)
         placesManager.renderer = renderer
         renderer.setOnClusterItemClickListener(ClusterItemClickListener())
@@ -496,8 +498,6 @@ class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMen
     }
 
     companion object {
-        private const val PLACE_ID_EXTRA = "place_id"
-
         private const val REQUEST_CHECK_LOCATION_SETTINGS = 10
         private const val REQUEST_ACCESS_LOCATION = 20
         private const val REQUEST_FIND_PLACE = 30
@@ -507,16 +507,5 @@ class MapActivity : DaggerAppCompatActivity(), OnMapReadyCallback, Toolbar.OnMen
         private const val REQUEST_PROFILE = 70
 
         private const val DEFAULT_MAP_ZOOM = 15f
-
-        fun newIntent(context: Context, placeId: Long): Intent {
-            val intent = Intent(context, MapActivity::class.java)
-
-            if (placeId != 0L) {
-                intent.putExtra(PLACE_ID_EXTRA, placeId)
-            }
-
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            return intent
-        }
     }
 }
