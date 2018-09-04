@@ -47,10 +47,17 @@
         <action
             android:id="@+id/action_mapFragment_to_supportProjectFragment"
             app:destination="@id/supportProjectFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/supportProjectFragment"
         android:name="com.bubelov.coins.ui.fragment.SupportProjectFragment"
         android:label="SupportProjectFragment" />
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.bubelov.coins.ui.fragment.SettingsFragment"
+        android:label="SettingsFragment" />
 
 </navigation>

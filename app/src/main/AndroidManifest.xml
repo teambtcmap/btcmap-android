@@ -35,8 +35,6 @@
 
         <activity android:name=".ui.activity.NotificationAreaActivity" />
 
-        <activity android:name=".ui.activity.SettingsActivity" />
-
         <activity
             android:name=".ui.activity.PlacesSearchActivity"
             android:theme="@style/AppTheme.GrayStatusBar" />

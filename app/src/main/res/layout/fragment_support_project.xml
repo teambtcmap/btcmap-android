@@ -35,7 +35,8 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         style="@style/Toolbar"
-        app:navigationIcon="?homeAsUpIndicator" />
+        app:navigationIcon="?homeAsUpIndicator"
+        app:title="@string/support_this_project" />
 
     <TextView
         android:id="@+id/codeContributionTitle"

@@ -30,4 +30,4 @@ package com.bubelov.coins.ui.fragment
 import dagger.Module
 
 @Module
-class SettingsFragmentModule
+class SettingsModule

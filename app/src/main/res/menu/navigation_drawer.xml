@@ -26,7 +26,7 @@
         android:id="@+id/secondary_actions"
         android:checkableBehavior="none">
         <item
-            android:id="@+id/action_settings"
+            android:id="@+id/settingsFragment"
             android:icon="@drawable/ic_settings"
             android:title="@string/menu_item_settings" />
     </group>

@@ -34,6 +34,7 @@ import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import com.bubelov.coins.R
 import com.bubelov.coins.ui.viewmodel.SettingsViewModel
 import com.bubelov.coins.util.viewModelProvider
@@ -54,6 +55,7 @@ class SettingsFragment : DaggerFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
         currencyButton.setOnClickListener { model.showCurrencySelector() }
         model.selectedCurrency.observe(this, Observer { currency.text = it })
 

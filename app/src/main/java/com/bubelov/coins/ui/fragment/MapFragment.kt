@@ -41,7 +41,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.ActivityCompat
-import android.support.v4.app.ActivityOptionsCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -61,7 +60,6 @@ import com.bubelov.coins.ui.activity.ExchangeRatesActivity
 import com.bubelov.coins.ui.activity.NotificationAreaActivity
 import com.bubelov.coins.ui.activity.PlacesSearchActivity
 import com.bubelov.coins.ui.activity.ProfileActivity
-import com.bubelov.coins.ui.activity.SettingsActivity
 import com.bubelov.coins.ui.activity.SignInActivity
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MapViewModel
@@ -163,7 +161,6 @@ class MapFragment :
                 R.id.action_exchange_rates -> openExchangeRatesScreen()
                 R.id.action_notification_area -> openNotificationAreaScreen()
                 R.id.action_chat -> openSupportChat()
-                R.id.action_settings -> openSettingsScreen()
             }
 
             true
@@ -436,14 +433,6 @@ class MapFragment :
     private fun openSupportChat() {
         requireContext().openUrl("https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw")
         analytics.logViewContent("chat", null, "screen")
-    }
-
-    private fun openSettingsScreen() {
-        val intent = SettingsActivity.newIntent(requireContext())
-        startActivity(
-            intent,
-            ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity()).toBundle()
-        )
     }
 
     private fun initClustering(map: GoogleMap) {
