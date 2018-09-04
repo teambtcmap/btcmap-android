@@ -45,6 +45,6 @@ abstract class FragmentBuilder {
     @ContributesAndroidInjector(modules = [SettingsFragmentModule::class])
     abstract fun contributeSettingsFragmentInjector(): SettingsFragment
 
-    @ContributesAndroidInjector(modules = [SupportProjectFragmentModule::class])
+    @ContributesAndroidInjector(modules = [SupportProjectModule::class])
     abstract fun contributeSupportProjectFragmentInjector(): SupportProjectFragment
 }

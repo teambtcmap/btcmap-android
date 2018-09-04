@@ -39,6 +39,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
+import androidx.navigation.fragment.findNavController
 import com.bubelov.coins.util.openUrl
 
 class SupportProjectFragment : DaggerFragment() {
@@ -51,6 +52,7 @@ class SupportProjectFragment : DaggerFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
         openGitHub.setOnClickListener { requireContext().openUrl(getString(R.string.repository_url)) }
         address.setOnClickListener { copyDonationAddressToClipboard() }
         copy.setOnClickListener { copyDonationAddressToClipboard() }

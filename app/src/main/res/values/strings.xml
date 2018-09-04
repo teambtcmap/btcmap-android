@@ -75,7 +75,7 @@
     <string name="donation_title">You can make a financial contribution by sending money to this address</string>
     <string name="copy">Copy</string>
     <string name="support_this_project">Support this project</string>
-    <string name="code_contribution_title">If you\'d to make a code contribution you can check out our GitHub repository</string>
+    <string name="code_contribution_title">If you\'d like to make a code contribution you can check out our GitHub repository</string>
     <string name="open_github_repository">Open GitHub repository</string>
     <string name="bitcoin_map_donation_address">Bitcoin map donation address</string>
     <string name="address_have_been_copied">Address have been copied</string>

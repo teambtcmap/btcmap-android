@@ -30,19 +30,24 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        style="@style/Toolbar"
+        app:navigationIcon="?homeAsUpIndicator" />
 
     <TextView
         android:id="@+id/codeContributionTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:padding="16dp"
         android:paddingBottom="8dp"
         android:text="@string/code_contribution_title"
         android:textColor="@color/text_secondary"
         android:textSize="18sp"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <Button
         android:id="@+id/openGitHub"
@@ -58,6 +63,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:padding="16dp"
         android:text="@string/donation_title"
         android:textColor="@color/text_secondary"
         android:textSize="18sp"
@@ -74,8 +80,9 @@
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
-        android:paddingBottom="8dp"
+        android:padding="16dp"
         android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:text="@string/donation_wallet"
         android:textColor="@color/text_primary"
         android:textSize="20sp"

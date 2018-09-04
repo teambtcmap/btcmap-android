@@ -17,7 +17,7 @@
             android:icon="@drawable/ic_chat"
             android:title="@string/menu_item_chat" />
         <item
-            android:id="@+id/action_support_project"
+            android:id="@+id/supportProjectFragment"
             android:icon="@drawable/ic_build"
             android:title="@string/support_this_project" />
     </group>

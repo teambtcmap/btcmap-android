@@ -52,6 +52,8 @@ import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.setupWithNavController
 import com.bubelov.coins.BuildConfig
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.activity.EditPlaceActivity
@@ -61,7 +63,6 @@ import com.bubelov.coins.ui.activity.PlacesSearchActivity
 import com.bubelov.coins.ui.activity.ProfileActivity
 import com.bubelov.coins.ui.activity.SettingsActivity
 import com.bubelov.coins.ui.activity.SignInActivity
-import com.bubelov.coins.ui.activity.SupportProjectActivity
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MapViewModel
 import com.bubelov.coins.ui.widget.PlaceDetailsView
@@ -162,7 +163,6 @@ class MapFragment :
                 R.id.action_exchange_rates -> openExchangeRatesScreen()
                 R.id.action_notification_area -> openNotificationAreaScreen()
                 R.id.action_chat -> openSupportChat()
-                R.id.action_support_project -> openSupportProjectScreen()
                 R.id.action_settings -> openSettingsScreen()
             }
 
@@ -233,6 +233,8 @@ class MapFragment :
                 moveToUserLocation()
             }
         })
+
+        navigation_view.setupWithNavController(findNavController())
 
         Handler().post {
             drawerToggle.syncState()
@@ -434,11 +436,6 @@ class MapFragment :
     private fun openSupportChat() {
         requireContext().openUrl("https://t.me/joinchat/AAAAAAwVT4aVBdFzcKKbsw")
         analytics.logViewContent("chat", null, "screen")
-    }
-
-    private fun openSupportProjectScreen() {
-        val intent = SupportProjectActivity.newIntent(requireContext())
-        startActivity(intent)
     }
 
     private fun openSettingsScreen() {
