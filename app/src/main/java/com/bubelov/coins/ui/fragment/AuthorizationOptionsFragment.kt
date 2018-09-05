@@ -25,31 +25,31 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.activity
+package com.bubelov.coins.ui.fragment
 
 import android.app.Activity
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
-import com.bubelov.coins.BuildConfig
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 
 import com.bubelov.coins.R
+import dagger.android.support.DaggerFragment
+import android.content.Intent
+import android.support.v7.app.AlertDialog
+import androidx.navigation.fragment.findNavController
+import com.bubelov.coins.BuildConfig
 import com.bubelov.coins.ui.viewmodel.AuthViewModel
 import com.bubelov.coins.util.AsyncResult
 import com.bubelov.coins.util.viewModelProvider
-import com.google.android.gms.auth.api.signin.*
-import dagger.android.AndroidInjection
-
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import kotlinx.android.synthetic.main.fragment_authorization_options.*
 import javax.inject.Inject
 
-import kotlinx.android.synthetic.main.activity_sign_in.*
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import dagger.android.support.DaggerAppCompatActivity
-
-class SignInActivity : DaggerAppCompatActivity() {
+class AuthorizationOptionsFragment : DaggerFragment() {
     @Inject internal lateinit var modelFactory: ViewModelProvider.Factory
     val model by lazy { viewModelProvider(modelFactory) as AuthViewModel }
 
@@ -60,14 +60,14 @@ class SignInActivity : DaggerAppCompatActivity() {
             }
 
             is AsyncResult.Success -> {
-                setResult(Activity.RESULT_OK)
-                finish()
+                // TODO
+                findNavController().popBackStack()
             }
 
             is AsyncResult.Error -> {
                 setLoading(false)
 
-                AlertDialog.Builder(this)
+                AlertDialog.Builder(requireContext())
                     .setMessage(it.t.message ?: getString(R.string.something_went_wrong))
                     .setPositiveButton(android.R.string.ok, null)
                     .show()
@@ -75,12 +75,16 @@ class SignInActivity : DaggerAppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sign_in)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_authorization_options, container, false)
+    }
 
-        toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         sign_in_with_google.setOnClickListener {
             val googleSingInOptions =
@@ -89,12 +93,12 @@ class SignInActivity : DaggerAppCompatActivity() {
                     .requestEmail()
                     .build()
 
-            val googleSignInClient = GoogleSignIn.getClient(this, googleSingInOptions)
+            val googleSignInClient = GoogleSignIn.getClient(requireContext(), googleSingInOptions)
             startActivityForResult(googleSignInClient.signInIntent, GOOGLE_SIGN_IN_REQUEST)
         }
 
         sign_in_with_email.setOnClickListener {
-            startActivity(EmailSignInActivity.newIntent(this))
+            // TODO
         }
 
         model.authState.observe(this, authObserver)
@@ -117,7 +121,5 @@ class SignInActivity : DaggerAppCompatActivity() {
 
     companion object {
         private const val GOOGLE_SIGN_IN_REQUEST = 10
-
-        fun newIntent(context: Context) = Intent(context, SignInActivity::class.java)
     }
 }

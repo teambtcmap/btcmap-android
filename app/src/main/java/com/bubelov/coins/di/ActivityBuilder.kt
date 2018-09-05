@@ -58,7 +58,4 @@ abstract class ActivityBuilder {
 
     @ContributesAndroidInjector(modules = [ProfileActivityModule::class])
     abstract fun contributeProfileActivityInjector(): ProfileActivity
-
-    @ContributesAndroidInjector(modules = [SignInActivityModule::class])
-    abstract fun contributeSignInActivityInjector(): SignInActivity
 }

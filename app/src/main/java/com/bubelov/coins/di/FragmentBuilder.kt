@@ -36,6 +36,9 @@ abstract class FragmentBuilder {
     @ContributesAndroidInjector(modules = [MapModule::class])
     abstract fun contributeMapFragmentInjector(): MapFragment
 
+    @ContributesAndroidInjector(modules = [AuthorizationModule::class])
+    abstract fun contributeAuthorizationOptionsFragmentInjector(): AuthorizationOptionsFragment
+
     @ContributesAndroidInjector(modules = [SignInFragmentModule::class])
     abstract fun contributeSignInFragmentInjector(): SignInFragment
 

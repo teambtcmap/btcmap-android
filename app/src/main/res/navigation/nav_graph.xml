@@ -50,6 +50,9 @@
         <action
             android:id="@+id/action_mapFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_authorizationOptionsFragment"
+            app:destination="@id/authorizationOptionsFragment" />
     </fragment>
     <fragment
         android:id="@+id/supportProjectFragment"
@@ -59,5 +62,9 @@
         android:id="@+id/settingsFragment"
         android:name="com.bubelov.coins.ui.fragment.SettingsFragment"
         android:label="SettingsFragment" />
+    <fragment
+        android:id="@+id/authorizationOptionsFragment"
+        android:name="com.bubelov.coins.ui.fragment.AuthorizationOptionsFragment"
+        android:label="AuthorizationOptionsFragment" />
 
 </navigation>

@@ -60,7 +60,6 @@ import com.bubelov.coins.ui.activity.ExchangeRatesActivity
 import com.bubelov.coins.ui.activity.NotificationAreaActivity
 import com.bubelov.coins.ui.activity.PlacesSearchActivity
 import com.bubelov.coins.ui.activity.ProfileActivity
-import com.bubelov.coins.ui.activity.SignInActivity
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MapViewModel
 import com.bubelov.coins.ui.widget.PlaceDetailsView
@@ -330,7 +329,7 @@ class MapFragment :
     }
 
     override fun signIn() {
-        startActivityForResult(SignInActivity.newIntent(requireContext()), REQUEST_SIGN_IN)
+        findNavController().navigate(R.id.action_mapFragment_to_authorizationOptionsFragment)
     }
 
     override fun addPlace() {

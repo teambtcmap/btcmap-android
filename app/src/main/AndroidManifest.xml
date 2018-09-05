@@ -21,8 +21,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.activity.SignInActivity" />
-
         <activity
             android:name=".ui.activity.EmailSignInActivity"
             android:windowSoftInputMode="adjustResize" />
