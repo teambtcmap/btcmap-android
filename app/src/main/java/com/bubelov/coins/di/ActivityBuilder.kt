@@ -55,7 +55,4 @@ abstract class ActivityBuilder {
 
     @ContributesAndroidInjector(modules = [PlacesSearchActivityModule::class])
     abstract fun contributePlacesSearchActivityInjector(): PlacesSearchActivity
-
-    @ContributesAndroidInjector(modules = [ProfileActivityModule::class])
-    abstract fun contributeProfileActivityInjector(): ProfileActivity
 }

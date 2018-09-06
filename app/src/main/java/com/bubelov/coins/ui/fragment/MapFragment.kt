@@ -59,7 +59,6 @@ import com.bubelov.coins.ui.activity.EditPlaceActivity
 import com.bubelov.coins.ui.activity.ExchangeRatesActivity
 import com.bubelov.coins.ui.activity.NotificationAreaActivity
 import com.bubelov.coins.ui.activity.PlacesSearchActivity
-import com.bubelov.coins.ui.activity.ProfileActivity
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MapViewModel
 import com.bubelov.coins.ui.widget.PlaceDetailsView
@@ -269,10 +268,6 @@ class MapFragment :
             updateDrawerHeader()
         }
 
-        if (requestCode == REQUEST_PROFILE && resultCode == ProfileActivity.RESULT_SIGN_OUT) {
-            updateDrawerHeader()
-        }
-
         super.onActivityResult(requestCode, resultCode, data)
     }
 
@@ -346,7 +341,7 @@ class MapFragment :
     }
 
     override fun showUserProfile() {
-        startActivityForResult(ProfileActivity.newIntent(requireContext()), REQUEST_PROFILE)
+        findNavController().navigate(R.id.action_mapFragment_to_profileFragment)
     }
 
     private fun requestLocationPermissions() {

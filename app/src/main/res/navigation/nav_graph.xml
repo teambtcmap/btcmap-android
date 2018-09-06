@@ -53,6 +53,9 @@
         <action
             android:id="@+id/action_mapFragment_to_authorizationOptionsFragment"
             app:destination="@id/authorizationOptionsFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
     </fragment>
     <fragment
         android:id="@+id/supportProjectFragment"
@@ -66,5 +69,9 @@
         android:id="@+id/authorizationOptionsFragment"
         android:name="com.bubelov.coins.ui.fragment.AuthorizationOptionsFragment"
         android:label="AuthorizationOptionsFragment" />
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.bubelov.coins.ui.fragment.ProfileFragment"
+        android:label="ProfileFragment" />
 
 </navigation>

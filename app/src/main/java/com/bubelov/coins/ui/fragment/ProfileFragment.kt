@@ -25,41 +25,46 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.activity
+package com.bubelov.coins.ui.fragment
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.support.v7.widget.Toolbar
 import android.text.TextUtils
+import android.view.LayoutInflater
 import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 
 import com.bubelov.coins.R
+import dagger.android.support.DaggerFragment
+import kotlinx.android.synthetic.main.fragment_profile.*
+import androidx.navigation.fragment.findNavController
 import com.bubelov.coins.repository.user.UserRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.squareup.picasso.Picasso
-import dagger.android.support.DaggerAppCompatActivity
-
 import javax.inject.Inject
 
-import kotlinx.android.synthetic.main.activity_profile.*
-
-class ProfileActivity : DaggerAppCompatActivity(), Toolbar.OnMenuItemClickListener {
+class ProfileFragment : DaggerFragment(), Toolbar.OnMenuItemClickListener {
     @Inject lateinit var userRepository: UserRepository
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_profile)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_profile, container, false)
+    }
 
-        toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
         toolbar.inflateMenu(R.menu.profile)
         toolbar.setOnMenuItemClickListener(this)
 
         val user = userRepository.user!!
 
         if (!TextUtils.isEmpty(user.avatarUrl)) {
-            Picasso.with(this).load(user.avatarUrl).into(avatar)
+            Picasso.with(requireContext()).load(user.avatarUrl).into(avatar)
         } else {
             avatar.setImageResource(R.drawable.ic_no_avatar)
         }
@@ -89,7 +94,8 @@ class ProfileActivity : DaggerAppCompatActivity(), Toolbar.OnMenuItemClickListen
     }
 
     private fun googleSignOut() {
-        val googleSignInClient = GoogleSignIn.getClient(this, GoogleSignInOptions.DEFAULT_SIGN_IN)
+        val googleSignInClient =
+            GoogleSignIn.getClient(requireContext(), GoogleSignInOptions.DEFAULT_SIGN_IN)
 
         googleSignInClient.signOut().addOnCompleteListener {
             onSignOut()
@@ -98,13 +104,6 @@ class ProfileActivity : DaggerAppCompatActivity(), Toolbar.OnMenuItemClickListen
 
     private fun onSignOut() {
         userRepository.clear()
-        setResult(RESULT_SIGN_OUT)
-        supportFinishAfterTransition()
-    }
-
-    companion object {
-        const val RESULT_SIGN_OUT = 10
-
-        fun newIntent(context: Context): Intent = Intent(context, ProfileActivity::class.java)
+        findNavController().popBackStack()
     }
 }
