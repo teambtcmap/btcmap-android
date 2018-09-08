@@ -55,7 +55,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.bubelov.coins.BuildConfig
 import com.bubelov.coins.model.Place
-import com.bubelov.coins.ui.activity.ExchangeRatesActivity
 import com.bubelov.coins.ui.activity.NotificationAreaActivity
 import com.bubelov.coins.ui.activity.PlacesSearchActivity
 import com.bubelov.coins.ui.model.PlaceMarker
@@ -413,8 +412,9 @@ class MapFragment :
     }
 
     private fun openExchangeRatesScreen() {
-        val intent = Intent(requireContext(), ExchangeRatesActivity::class.java)
-        startActivity(intent)
+        // TODO
+        //val intent = Intent(requireContext(), ExchangeRatesActivity::class.java)
+        //startActivity(intent)
     }
 
     private fun openNotificationAreaScreen() {

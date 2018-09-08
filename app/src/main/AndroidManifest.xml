@@ -21,8 +21,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.activity.ExchangeRatesActivity" />
-
         <activity android:name=".ui.activity.NotificationAreaActivity" />
 
         <activity

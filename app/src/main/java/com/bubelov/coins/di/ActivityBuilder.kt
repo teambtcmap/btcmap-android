@@ -38,9 +38,6 @@ abstract class ActivityBuilder {
     @ContributesAndroidInjector(modules = [AppModule::class])
     abstract fun contributeLauncherActivityInjector(): AppActivity
 
-    @ContributesAndroidInjector(modules = [ExchangeRatesActivityModule::class])
-    abstract fun contributeExchangeRatesActivityInjector(): ExchangeRatesActivity
-
     @ContributesAndroidInjector(modules = [NotificationAreaActivityModule::class])
     abstract fun contributeNotificationAreaActivityInjector(): NotificationAreaActivity
 

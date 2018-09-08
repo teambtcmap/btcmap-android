@@ -25,39 +25,45 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.activity
+package com.bubelov.coins.feature.rates
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
-
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.navigation.findNavController
 import com.bubelov.coins.R
 import com.bubelov.coins.model.CurrencyPair
 import com.bubelov.coins.ui.adapter.ExchangeRatesAdapter
-
-import com.bubelov.coins.ui.viewmodel.ExchangeRatesViewModel
 import com.bubelov.coins.util.viewModelProvider
-import dagger.android.support.DaggerAppCompatActivity
-import kotlinx.android.synthetic.main.activity_exchange_rates.*
+import dagger.android.support.DaggerFragment
+import kotlinx.android.synthetic.main.fragment_exchange_rates.*
 import javax.inject.Inject
 
-class ExchangeRatesActivity : DaggerAppCompatActivity() {
+class ExchangeRatesFragment : DaggerFragment() {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
     private val model by lazy { viewModelProvider(modelFactory) as ExchangeRatesViewModel }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_exchange_rates)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_exchange_rates, container, false)
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         toolbar.apply {
-            setNavigationOnClickListener { supportFinishAfterTransition() }
+            setNavigationOnClickListener { findNavController().popBackStack() }
             inflateMenu(R.menu.exchange_rates)
 
             setOnMenuItemClickListener {
                 if (it.itemId == R.id.currency) {
-                    AlertDialog.Builder(this@ExchangeRatesActivity)
+                    AlertDialog.Builder(requireContext())
                         .setTitle(R.string.currency)
                         .setItems(
                             CurrencyPair.values().map { it.toString() }.toTypedArray()
@@ -75,7 +81,7 @@ class ExchangeRatesActivity : DaggerAppCompatActivity() {
             }
         }
 
-        ratesView.layoutManager = LinearLayoutManager(this)
+        ratesView.layoutManager = LinearLayoutManager(requireContext())
 
         model.pair.observe(this, Observer {
             if (it != null) {

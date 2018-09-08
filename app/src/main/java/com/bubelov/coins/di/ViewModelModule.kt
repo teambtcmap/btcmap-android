@@ -34,6 +34,7 @@ import dagger.Binds
 import android.arch.lifecycle.ViewModelProvider
 import com.bubelov.coins.feature.auth.AuthViewModel
 import com.bubelov.coins.feature.editplace.EditPlaceViewModel
+import com.bubelov.coins.feature.rates.ExchangeRatesViewModel
 import com.bubelov.coins.ui.viewmodel.*
 
 @Module

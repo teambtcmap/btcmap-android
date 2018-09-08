@@ -36,6 +36,8 @@ import com.bubelov.coins.feature.editplace.EditPlaceFragment
 import com.bubelov.coins.feature.editplace.EditPlaceModule
 import com.bubelov.coins.feature.picklocation.PickLocationFragment
 import com.bubelov.coins.feature.picklocation.PickLocationModule
+import com.bubelov.coins.feature.rates.ExchangeRatesFragment
+import com.bubelov.coins.feature.rates.ExchangeRatesModule
 import com.bubelov.coins.ui.fragment.*
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
@@ -71,4 +73,7 @@ abstract class FragmentBuilder {
 
     @ContributesAndroidInjector(modules = [PickLocationModule::class])
     abstract fun contributePickLocationFragmentInjector(): PickLocationFragment
+
+    @ContributesAndroidInjector(modules = [ExchangeRatesModule::class])
+    abstract fun contributeExchangeRatesFragmentInjector(): ExchangeRatesFragment
 }
