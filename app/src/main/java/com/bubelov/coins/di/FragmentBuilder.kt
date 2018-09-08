@@ -27,6 +27,10 @@
 
 package com.bubelov.coins.di
 
+import com.bubelov.coins.feature.editplace.EditPlaceFragment
+import com.bubelov.coins.feature.editplace.EditPlaceModule
+import com.bubelov.coins.feature.picklocation.PickLocationFragment
+import com.bubelov.coins.feature.picklocation.PickLocationModule
 import com.bubelov.coins.ui.fragment.*
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
@@ -53,4 +57,10 @@ abstract class FragmentBuilder {
 
     @ContributesAndroidInjector(modules = [SupportProjectModule::class])
     abstract fun contributeSupportProjectFragmentInjector(): SupportProjectFragment
+
+    @ContributesAndroidInjector(modules = [EditPlaceModule::class])
+    abstract fun contributeEditPlaceFragmentInjector(): EditPlaceFragment
+
+    @ContributesAndroidInjector(modules = [PickLocationModule::class])
+    abstract fun contributePickLocationFragmentInjector(): PickLocationFragment
 }

@@ -55,7 +55,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.bubelov.coins.BuildConfig
 import com.bubelov.coins.model.Place
-import com.bubelov.coins.ui.activity.EditPlaceActivity
 import com.bubelov.coins.ui.activity.ExchangeRatesActivity
 import com.bubelov.coins.ui.activity.NotificationAreaActivity
 import com.bubelov.coins.ui.activity.PlacesSearchActivity
@@ -333,11 +332,11 @@ class MapFragment :
             longitude = map.value?.cameraPosition?.target?.longitude ?: 0.0
         )
 
-        EditPlaceActivity.startForResult(requireActivity(), place, REQUEST_ADD_PLACE)
+        // TODO
     }
 
     override fun editPlace(place: Place) {
-        EditPlaceActivity.startForResult(requireActivity(), place, REQUEST_EDIT_PLACE)
+        // TODO
     }
 
     override fun showUserProfile() {

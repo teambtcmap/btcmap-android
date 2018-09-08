@@ -29,6 +29,7 @@ package com.bubelov.coins.ui.viewmodel
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import com.bubelov.coins.any
+import com.bubelov.coins.feature.editplace.EditPlaceViewModel
 import com.bubelov.coins.util.blockingObserve
 import com.bubelov.coins.repository.Result
 import com.bubelov.coins.repository.place.PlacesRepository

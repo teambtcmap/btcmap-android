@@ -56,6 +56,9 @@
         <action
             android:id="@+id/action_mapFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_editPlaceFragment"
+            app:destination="@id/editPlaceFragment" />
     </fragment>
     <fragment
         android:id="@+id/supportProjectFragment"
@@ -73,5 +76,17 @@
         android:id="@+id/profileFragment"
         android:name="com.bubelov.coins.ui.fragment.ProfileFragment"
         android:label="ProfileFragment" />
+    <fragment
+        android:id="@+id/editPlaceFragment"
+        android:name="com.bubelov.coins.feature.editplace.EditPlaceFragment"
+        android:label="EditPlaceFragment" >
+        <action
+            android:id="@+id/action_editPlaceFragment_to_pickLocationFragment"
+            app:destination="@id/pickLocationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/pickLocationFragment"
+        android:name="com.bubelov.coins.feature.picklocation.PickLocationFragment"
+        android:label="PickLocationFragment" />
 
 </navigation>

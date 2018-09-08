@@ -25,46 +25,47 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.activity
+package com.bubelov.coins.feature.picklocation
 
-import android.app.Activity
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.navigation.findNavController
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Location
 import com.bubelov.coins.util.toLatLng
-import com.bubelov.coins.util.toLocation
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapFragment
-import dagger.android.support.DaggerAppCompatActivity
+import dagger.android.support.DaggerFragment
+import kotlinx.android.synthetic.main.fragment_pick_location.*
 
-import kotlinx.android.synthetic.main.activity_pick_location.*
-
-class PickLocationActivity : DaggerAppCompatActivity() {
+class PickLocationFragment : DaggerFragment() {
     private val map = MutableLiveData<GoogleMap>()
 
-    private val initialLocation: Location
-        get() = intent.getSerializableExtra(LOCATION_EXTRA) as Location
+    private val initialLocation = Location(0.0, 0.0)
 
-    private val initialZoom: Float
-        get() = intent.getFloatExtra(ZOOM_EXTRA, 0f)
+    private val initialZoom = 15f
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_pick_location)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_pick_location, container, false)
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         toolbar.apply {
-            setNavigationOnClickListener { finish() }
+            setNavigationOnClickListener { findNavController().popBackStack() }
             inflateMenu(R.menu.pick_location)
 
             setOnMenuItemClickListener { item ->
                 if (item.itemId == R.id.action_done) {
-                    onDonePressed()
+                    // TODO
                     return@setOnMenuItemClickListener true
                 }
 
@@ -72,32 +73,10 @@ class PickLocationActivity : DaggerAppCompatActivity() {
             }
         }
 
-        (fragmentManager.findFragmentById(R.id.map) as MapFragment).getMapAsync({ map.value = it })
+        (childFragmentManager.findFragmentById(R.id.map) as MapFragment).getMapAsync { map.value = it }
 
         map.observe(this, Observer { map ->
             map?.moveCamera(CameraUpdateFactory.newLatLngZoom(initialLocation.toLatLng(), initialZoom))
         })
-    }
-
-    private fun onDonePressed() {
-        val data = Intent().apply { putExtra(LOCATION_EXTRA, map.value?.cameraPosition?.target?.toLocation()) }
-        setResult(Activity.RESULT_OK, data)
-        supportFinishAfterTransition()
-    }
-
-    companion object {
-        const val LOCATION_EXTRA = "location"
-        const val ZOOM_EXTRA = "zoom"
-
-        fun newIntent(
-            context: Context,
-            initialLocation: Location,
-            initialZoom: Float
-        ): Intent {
-            return Intent(context, PickLocationActivity::class.java).apply {
-                putExtra(LOCATION_EXTRA, initialLocation)
-                putExtra(ZOOM_EXTRA, initialZoom)
-            }
-        }
     }
 }

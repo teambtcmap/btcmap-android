@@ -38,9 +38,6 @@ abstract class ActivityBuilder {
     @ContributesAndroidInjector(modules = [AppModule::class])
     abstract fun contributeLauncherActivityInjector(): AppActivity
 
-    @ContributesAndroidInjector(modules = [EditPlaceActivityModule::class])
-    abstract fun contributeEditPlaceActivityInjector(): EditPlaceActivity
-
     @ContributesAndroidInjector(modules = [EmailSignInActivityModule::class])
     abstract fun contributeEmailSignInActivityInjector(): EmailSignInActivity
 
@@ -49,9 +46,6 @@ abstract class ActivityBuilder {
 
     @ContributesAndroidInjector(modules = [NotificationAreaActivityModule::class])
     abstract fun contributeNotificationAreaActivityInjector(): NotificationAreaActivity
-
-    @ContributesAndroidInjector(modules = [PickLocationActivityModule::class])
-    abstract fun contributePickLocationActivityInjector(): PickLocationActivity
 
     @ContributesAndroidInjector(modules = [PlacesSearchActivityModule::class])
     abstract fun contributePlacesSearchActivityInjector(): PlacesSearchActivity
