@@ -21,10 +21,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".ui.activity.EmailSignInActivity"
-            android:windowSoftInputMode="adjustResize" />
-
         <activity android:name=".ui.activity.ExchangeRatesActivity" />
 
         <activity android:name=".ui.activity.NotificationAreaActivity" />

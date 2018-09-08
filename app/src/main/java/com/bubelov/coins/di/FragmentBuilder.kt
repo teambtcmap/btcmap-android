@@ -27,6 +27,11 @@
 
 package com.bubelov.coins.di
 
+import com.bubelov.coins.feature.auth.AuthModule
+import com.bubelov.coins.feature.auth.AuthOptionsFragment
+import com.bubelov.coins.feature.auth.EmailSignInFragment
+import com.bubelov.coins.feature.auth.SignInFragment
+import com.bubelov.coins.feature.auth.SignUpFragment
 import com.bubelov.coins.feature.editplace.EditPlaceFragment
 import com.bubelov.coins.feature.editplace.EditPlaceModule
 import com.bubelov.coins.feature.picklocation.PickLocationFragment
@@ -40,13 +45,16 @@ abstract class FragmentBuilder {
     @ContributesAndroidInjector(modules = [MapModule::class])
     abstract fun contributeMapFragmentInjector(): MapFragment
 
-    @ContributesAndroidInjector(modules = [AuthorizationModule::class])
-    abstract fun contributeAuthorizationOptionsFragmentInjector(): AuthorizationOptionsFragment
+    @ContributesAndroidInjector(modules = [AuthModule::class])
+    abstract fun contributeAuthorizationOptionsFragmentInjector(): AuthOptionsFragment
 
-    @ContributesAndroidInjector(modules = [SignInFragmentModule::class])
+    @ContributesAndroidInjector(modules = [AuthModule::class])
+    abstract fun contributeEmailSignInFragmentInjector(): EmailSignInFragment
+
+    @ContributesAndroidInjector(modules = [AuthModule::class])
     abstract fun contributeSignInFragmentInjector(): SignInFragment
 
-    @ContributesAndroidInjector(modules = [SignUpFragmentModule::class])
+    @ContributesAndroidInjector(modules = [AuthModule::class])
     abstract fun contributeSignUpFragmentInjector(): SignUpFragment
 
     @ContributesAndroidInjector(modules = [ProfileModule::class])

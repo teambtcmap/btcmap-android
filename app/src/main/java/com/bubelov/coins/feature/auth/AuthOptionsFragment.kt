@@ -25,7 +25,7 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.fragment
+package com.bubelov.coins.feature.auth
 
 import android.app.Activity
 import android.arch.lifecycle.Observer
@@ -41,7 +41,6 @@ import android.content.Intent
 import android.support.v7.app.AlertDialog
 import androidx.navigation.fragment.findNavController
 import com.bubelov.coins.BuildConfig
-import com.bubelov.coins.ui.viewmodel.AuthViewModel
 import com.bubelov.coins.util.AsyncResult
 import com.bubelov.coins.util.viewModelProvider
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -49,7 +48,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import kotlinx.android.synthetic.main.fragment_authorization_options.*
 import javax.inject.Inject
 
-class AuthorizationOptionsFragment : DaggerFragment() {
+class AuthOptionsFragment : DaggerFragment() {
     @Inject internal lateinit var modelFactory: ViewModelProvider.Factory
     val model by lazy { viewModelProvider(modelFactory) as AuthViewModel }
 
@@ -94,7 +93,9 @@ class AuthorizationOptionsFragment : DaggerFragment() {
                     .build()
 
             val googleSignInClient = GoogleSignIn.getClient(requireContext(), googleSingInOptions)
-            startActivityForResult(googleSignInClient.signInIntent, GOOGLE_SIGN_IN_REQUEST)
+            startActivityForResult(googleSignInClient.signInIntent,
+                GOOGLE_SIGN_IN_REQUEST
+            )
         }
 
         sign_in_with_email.setOnClickListener {

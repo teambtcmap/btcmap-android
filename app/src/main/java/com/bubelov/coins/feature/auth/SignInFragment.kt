@@ -25,12 +25,11 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.fragment
+package com.bubelov.coins.feature.auth
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -40,38 +39,41 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 
 import com.bubelov.coins.R
-import com.bubelov.coins.ui.viewmodel.AuthViewModel
 import com.bubelov.coins.util.AsyncResult
 import com.bubelov.coins.util.viewModelProvider
+import dagger.android.support.DaggerFragment
 
 import javax.inject.Inject
 
-import kotlinx.android.synthetic.main.fragment_sign_up.*
+import kotlinx.android.synthetic.main.fragment_sign_in.*
 
-class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
+class SignInFragment : DaggerFragment(), TextView.OnEditorActionListener {
     @Inject internal lateinit var modelFactory: ViewModelProvider.Factory
+
     private val model by lazy { viewModelProvider(modelFactory) as AuthViewModel }
 
     private val authObserver = Observer<AsyncResult<Any>> {
         when (it) {
             is AsyncResult.Loading -> {
-                setLoading(true)
+                sign_in_panel.visibility = View.GONE
+                progress.visibility = View.VISIBLE
             }
 
             is AsyncResult.Success -> {
 // TODO
 //                startActivity(
-//                    Intent(
-//                        activity,
-//                        MapActivity::class.java
-//                    ).apply { addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) })
+//                    Intent(activity, MapActivity::class.java).apply {
+//                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+//                    })
             }
 
             is AsyncResult.Error -> {
-                setLoading(false)
+                sign_in_panel.visibility = View.VISIBLE
+                progress.visibility = View.GONE
 
                 AlertDialog.Builder(requireContext())
                     .setMessage(it.t.message ?: getString(R.string.something_went_wrong))
+                    .setPositiveButton(android.R.string.ok, null)
                     .show()
             }
         }
@@ -82,19 +84,15 @@ class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_sign_up, container, false)
+        return inflater.inflate(R.layout.fragment_sign_in, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        last_name.setOnEditorActionListener(this)
+        password.setOnEditorActionListener(this)
 
-        sign_up.setOnClickListener {
-            signUp(
-                email.text.toString(),
-                password.text.toString(),
-                first_name.text.toString(),
-                last_name.text.toString()
-            )
+        sign_in.setOnClickListener {
+            model.signIn(email.text.toString(), password.text.toString())
+                .observe(this, authObserver)
         }
 
         model.authState.observe(this, authObserver)
@@ -102,24 +100,11 @@ class SignUpFragment : Fragment(), TextView.OnEditorActionListener {
 
     override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
         if (actionId == EditorInfo.IME_ACTION_GO) {
-            signUp(
-                email.text.toString(),
-                password.text.toString(),
-                first_name.text.toString(),
-                last_name.text.toString()
-            )
-
+            model.signIn(email.text.toString(), password.text.toString())
+                .observe(this, authObserver)
             return true
         }
 
         return false
-    }
-
-    private fun signUp(email: String, password: String, firstName: String, lastName: String) {
-        model.signUp(email, password, firstName, lastName).observe(this, authObserver)
-    }
-
-    private fun setLoading(loading: Boolean) {
-        state_switcher.displayedChild = if (loading) 1 else 0
     }
 }

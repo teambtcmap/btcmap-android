@@ -38,9 +38,6 @@ abstract class ActivityBuilder {
     @ContributesAndroidInjector(modules = [AppModule::class])
     abstract fun contributeLauncherActivityInjector(): AppActivity
 
-    @ContributesAndroidInjector(modules = [EmailSignInActivityModule::class])
-    abstract fun contributeEmailSignInActivityInjector(): EmailSignInActivity
-
     @ContributesAndroidInjector(modules = [ExchangeRatesActivityModule::class])
     abstract fun contributeExchangeRatesActivityInjector(): ExchangeRatesActivity
 

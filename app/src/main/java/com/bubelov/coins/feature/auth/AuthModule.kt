@@ -25,9 +25,9 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.fragment
+package com.bubelov.coins.feature.auth
 
 import dagger.Module
 
 @Module
-class AuthorizationModule
+class AuthModule
