@@ -35,6 +35,7 @@ import android.arch.core.executor.testing.InstantTaskExecutorRule
 import android.content.SharedPreferences
 import android.content.res.Resources
 import android.graphics.Bitmap
+import com.bubelov.coins.feature.placessearch.PlacesSearchViewModel
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.util.blockingObserve
 import org.junit.Before

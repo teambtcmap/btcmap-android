@@ -56,7 +56,6 @@ import androidx.navigation.ui.setupWithNavController
 import com.bubelov.coins.BuildConfig
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.activity.NotificationAreaActivity
-import com.bubelov.coins.ui.activity.PlacesSearchActivity
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MapViewModel
 import com.bubelov.coins.ui.widget.PlaceDetailsView
@@ -241,14 +240,6 @@ class MapFragment :
             }
         }
 
-        if (requestCode == REQUEST_FIND_PLACE && resultCode == Activity.RESULT_OK) {
-            model.navigateToNextSelectedPlace = true
-            model.selectedPlaceId.value = data?.getLongExtra(
-                PlacesSearchActivity.PLACE_ID_EXTRA,
-                0
-            ) ?: 0
-        }
-
         if (requestCode == REQUEST_ADD_PLACE && resultCode == Activity.RESULT_OK) {
             Toast.makeText(requireContext(), R.string.place_has_been_added, Toast.LENGTH_LONG)
                 .show()
@@ -303,12 +294,9 @@ class MapFragment :
         when (id) {
             R.id.action_add -> model.onAddPlaceClick()
 
-            R.id.action_search -> PlacesSearchActivity.startForResult(
-                requireActivity(),
-                model.userLocation.value,
-                model.selectedCurrency.value ?: "",
-                REQUEST_FIND_PLACE
-            )
+            R.id.action_search -> {
+                // TODO
+            }
 
             else -> return super.onOptionsItemSelected(item)
         }
@@ -479,11 +467,9 @@ class MapFragment :
     companion object {
         private const val REQUEST_CHECK_LOCATION_SETTINGS = 10
         private const val REQUEST_ACCESS_LOCATION = 20
-        private const val REQUEST_FIND_PLACE = 30
         private const val REQUEST_ADD_PLACE = 40
         private const val REQUEST_EDIT_PLACE = 50
         private const val REQUEST_SIGN_IN = 60
-        private const val REQUEST_PROFILE = 70
 
         private const val DEFAULT_MAP_ZOOM = 15f
     }

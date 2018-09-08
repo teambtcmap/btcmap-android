@@ -40,7 +40,4 @@ abstract class ActivityBuilder {
 
     @ContributesAndroidInjector(modules = [NotificationAreaActivityModule::class])
     abstract fun contributeNotificationAreaActivityInjector(): NotificationAreaActivity
-
-    @ContributesAndroidInjector(modules = [PlacesSearchActivityModule::class])
-    abstract fun contributePlacesSearchActivityInjector(): PlacesSearchActivity
 }

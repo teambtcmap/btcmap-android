@@ -25,9 +25,9 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.activity
+package com.bubelov.coins.feature.placessearch
 
 import dagger.Module
 
 @Module
-class PlacesSearchActivityModule
+class PlacesSearchModule

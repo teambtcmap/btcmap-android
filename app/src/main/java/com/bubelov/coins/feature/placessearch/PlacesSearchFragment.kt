@@ -25,51 +25,52 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.activity
+package com.bubelov.coins.feature.placessearch
 
-import android.app.Activity
 import android.arch.lifecycle.ViewModelProvider
-import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.ActivityOptionsCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.text.TextUtils
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.systemService
-
+import androidx.navigation.fragment.findNavController
 import com.bubelov.coins.R
 import com.bubelov.coins.model.Location
 import com.bubelov.coins.ui.adapter.PlacesSearchResultsAdapter
-import com.bubelov.coins.ui.model.PlacesSearchRow
-import com.bubelov.coins.ui.viewmodel.PlacesSearchViewModel
 import com.bubelov.coins.util.TextWatcherAdapter
 import com.bubelov.coins.util.nonNull
 import com.bubelov.coins.util.observe
 import com.bubelov.coins.util.viewModelProvider
-import dagger.android.support.DaggerAppCompatActivity
-
-import kotlinx.android.synthetic.main.activity_places_search.*
+import dagger.android.support.DaggerFragment
+import kotlinx.android.synthetic.main.fragment_places_search.*
 import javax.inject.Inject
 
-class PlacesSearchActivity : DaggerAppCompatActivity() {
+class PlacesSearchFragment : DaggerFragment() {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
     private val model by lazy { viewModelProvider(modelFactory) as PlacesSearchViewModel }
 
-    val location by lazy { intent.getSerializableExtra(USER_LOCATION_EXTRA) as Location? }
-    val currency by lazy { intent.getStringExtra(CURRENCY_EXTRA) ?: "" }
+    val location by lazy { Location(0.0, 0.0) }
+    val currency by lazy { "" }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_places_search)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_places_search, container, false)
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         model.init(location, currency)
 
-        toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
+        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        list.layoutManager = LinearLayoutManager(this)
-        val adapter = PlacesSearchResultsAdapter { onPlaceRowClick(it) }
+        list.layoutManager = LinearLayoutManager(requireContext())
+        val adapter = PlacesSearchResultsAdapter { }
         list.adapter = adapter
         model.results.nonNull().observe(this) { adapter.swapItems(it) }
 
@@ -83,7 +84,7 @@ class PlacesSearchActivity : DaggerAppCompatActivity() {
         query.setOnEditorActionListener { _, actionId, _ ->
             when (actionId) {
                 EditorInfo.IME_ACTION_SEARCH -> {
-                    val inputManager = systemService<InputMethodManager>()
+                    val inputManager = requireContext().systemService<InputMethodManager>()
                     inputManager.hideSoftInputFromWindow(query.windowToken, 0)
                     true
                 }
@@ -92,35 +93,5 @@ class PlacesSearchActivity : DaggerAppCompatActivity() {
         }
 
         clear.setOnClickListener { query.setText("") }
-    }
-
-    private fun onPlaceRowClick(row: PlacesSearchRow) {
-        val data = Intent().apply { putExtra(PLACE_ID_EXTRA, row.placeId) }
-        setResult(Activity.RESULT_OK, data)
-        finish()
-    }
-
-    companion object {
-        private const val USER_LOCATION_EXTRA = "user_location"
-        private const val CURRENCY_EXTRA = "currency"
-        const val PLACE_ID_EXTRA = "place_id"
-
-        fun startForResult(
-            activity: Activity,
-            userLocation: Location?,
-            currency: String,
-            requestCode: Int
-        ) {
-            val intent = Intent(activity, PlacesSearchActivity::class.java).apply {
-                putExtra(USER_LOCATION_EXTRA, userLocation)
-                putExtra(CURRENCY_EXTRA, currency)
-            }
-
-            activity.startActivityForResult(
-                intent,
-                requestCode,
-                ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
-            )
-        }
     }
 }

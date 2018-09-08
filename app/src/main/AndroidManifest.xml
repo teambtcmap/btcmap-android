@@ -23,10 +23,6 @@
 
         <activity android:name=".ui.activity.NotificationAreaActivity" />
 
-        <activity
-            android:name=".ui.activity.PlacesSearchActivity"
-            android:theme="@style/AppTheme.GrayStatusBar" />
-
         <service
             android:name="com.bubelov.coins.db.sync.DatabaseSyncService"
             android:exported="true"

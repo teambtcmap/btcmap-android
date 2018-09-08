@@ -36,6 +36,8 @@ import com.bubelov.coins.feature.editplace.EditPlaceFragment
 import com.bubelov.coins.feature.editplace.EditPlaceModule
 import com.bubelov.coins.feature.picklocation.PickLocationFragment
 import com.bubelov.coins.feature.picklocation.PickLocationModule
+import com.bubelov.coins.feature.placessearch.PlacesSearchFragment
+import com.bubelov.coins.feature.placessearch.PlacesSearchModule
 import com.bubelov.coins.feature.rates.ExchangeRatesFragment
 import com.bubelov.coins.feature.rates.ExchangeRatesModule
 import com.bubelov.coins.ui.fragment.*
@@ -76,4 +78,7 @@ abstract class FragmentBuilder {
 
     @ContributesAndroidInjector(modules = [ExchangeRatesModule::class])
     abstract fun contributeExchangeRatesFragmentInjector(): ExchangeRatesFragment
+
+    @ContributesAndroidInjector(modules = [PlacesSearchModule::class])
+    abstract fun contributePlacesSearchFragmentInjector(): PlacesSearchFragment
 }
