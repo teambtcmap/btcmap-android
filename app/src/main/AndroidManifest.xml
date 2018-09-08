@@ -21,8 +21,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.activity.NotificationAreaActivity" />
-
         <service
             android:name="com.bubelov.coins.db.sync.DatabaseSyncService"
             android:exported="true"

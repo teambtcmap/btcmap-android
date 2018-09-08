@@ -25,23 +25,24 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-package com.bubelov.coins.ui.activity
+package com.bubelov.coins.feature.notificationarea
 
 import android.Manifest
 import android.arch.lifecycle.ViewModelProvider
-import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.SeekBar
+import androidx.navigation.fragment.findNavController
 import com.bubelov.coins.BuildConfig
-
 import com.bubelov.coins.R
 import com.bubelov.coins.model.NotificationArea
-import com.bubelov.coins.ui.viewmodel.NotificationAreaViewModel
 import com.bubelov.coins.util.OnSeekBarChangeAdapter
 import com.bubelov.coins.util.viewModelProvider
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -49,18 +50,16 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapFragment
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.Circle
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import dagger.android.support.DaggerAppCompatActivity
-
-import kotlinx.android.synthetic.main.activity_notification_area.*
+import dagger.android.support.DaggerFragment
+import kotlinx.android.synthetic.main.fragment_notification_area.*
 import javax.inject.Inject
 
-class NotificationAreaActivity : DaggerAppCompatActivity(), OnMapReadyCallback {
+class NotificationAreaFragment : DaggerFragment(), OnMapReadyCallback {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
     private val model by lazy { viewModelProvider(modelFactory) as NotificationAreaViewModel }
 
@@ -69,29 +68,33 @@ class NotificationAreaActivity : DaggerAppCompatActivity(), OnMapReadyCallback {
     private var marker: Marker? = null
     private var areaCircle: Circle? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_notification_area)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_notification_area, container, false)
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         toolbar.setNavigationOnClickListener {
             saveArea()
-            supportFinishAfterTransition()
+            findNavController().popBackStack()
         }
 
-        val mapFragment = fragmentManager.findFragmentById(R.id.map_fragment) as MapFragment
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map_fragment) as MapFragment
         mapFragment.getMapAsync(this)
 
         seek_bar_radius.progressDrawable.setColorFilter(
-            ContextCompat.getColor(this, R.color.accent),
+            ContextCompat.getColor(requireContext(), R.color.accent),
             PorterDuff.Mode.SRC_IN
         )
 
-        seek_bar_radius.thumb.setColorFilter(ContextCompat.getColor(this, R.color.accent), PorterDuff.Mode.SRC_IN)
-    }
+        seek_bar_radius.thumb.setColorFilter(ContextCompat.getColor(requireContext(), R.color.accent), PorterDuff.Mode.SRC_IN)
 
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-        bottom_panel.post { map!!.setPadding(0, 0, 0, bottom_panel.height) }
+        Handler().post {
+            bottom_panel.post { map!!.setPadding(0, 0, 0, bottom_panel.height) }
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -102,15 +105,15 @@ class NotificationAreaActivity : DaggerAppCompatActivity(), OnMapReadyCallback {
         map!!.setOnMarkerDragListener(OnMarkerDragListener())
 
         if (ActivityCompat.checkSelfPermission(
-                this,
+                requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             map!!.isMyLocationEnabled = true
         }
 
-        val defaultCameraPosition = intent.getParcelableExtra<CameraPosition>(DEFAULT_CAMERA_POSITION_EXTRA)
-        showArea(model.getNotificationArea(defaultCameraPosition))
+        // TODO
+        //showArea(model.getNotificationArea(defaultCameraPosition))
     }
 
     private fun showArea(area: NotificationArea) {
@@ -130,8 +133,8 @@ class NotificationAreaActivity : DaggerAppCompatActivity(), OnMapReadyCallback {
         val circleOptions = CircleOptions()
             .center(marker?.position)
             .radius(area.radius)
-            .fillColor(ContextCompat.getColor(this, R.color.notification_area))
-            .strokeColor(ContextCompat.getColor(this, R.color.notification_area_border))
+            .fillColor(ContextCompat.getColor(requireContext(), R.color.notification_area))
+            .strokeColor(ContextCompat.getColor(requireContext(), R.color.notification_area_border))
             .strokeWidth(4f)
 
         areaCircle = map!!.addCircle(circleOptions)
@@ -161,7 +164,7 @@ class NotificationAreaActivity : DaggerAppCompatActivity(), OnMapReadyCallback {
 
     private inner class OnMarkerDragListener : GoogleMap.OnMarkerDragListener {
         override fun onMarkerDragStart(marker: Marker) {
-            areaCircle!!.fillColor = ContextCompat.getColor(this@NotificationAreaActivity, android.R.color.transparent)
+            areaCircle!!.fillColor = ContextCompat.getColor(requireContext(), android.R.color.transparent)
         }
 
         override fun onMarkerDrag(marker: Marker) {
@@ -170,7 +173,7 @@ class NotificationAreaActivity : DaggerAppCompatActivity(), OnMapReadyCallback {
         }
 
         override fun onMarkerDragEnd(marker: Marker) {
-            areaCircle!!.fillColor = ContextCompat.getColor(this@NotificationAreaActivity, R.color.notification_area)
+            areaCircle!!.fillColor = ContextCompat.getColor(requireContext(), R.color.notification_area)
             saveArea()
         }
     }
@@ -178,16 +181,6 @@ class NotificationAreaActivity : DaggerAppCompatActivity(), OnMapReadyCallback {
     private inner class SeekBarChangeListener : OnSeekBarChangeAdapter() {
         override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
             areaCircle!!.radius = progress.toDouble()
-        }
-    }
-
-    companion object {
-        const val DEFAULT_CAMERA_POSITION_EXTRA = "default_camera_position"
-
-        fun newIntent(context: Context, defaultCameraPosition: CameraPosition): Intent {
-            return Intent(context, NotificationAreaActivity::class.java).apply {
-                putExtra(DEFAULT_CAMERA_POSITION_EXTRA, defaultCameraPosition)
-            }
         }
     }
 }

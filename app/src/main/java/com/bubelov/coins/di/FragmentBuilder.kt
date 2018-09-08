@@ -34,6 +34,8 @@ import com.bubelov.coins.feature.auth.SignInFragment
 import com.bubelov.coins.feature.auth.SignUpFragment
 import com.bubelov.coins.feature.editplace.EditPlaceFragment
 import com.bubelov.coins.feature.editplace.EditPlaceModule
+import com.bubelov.coins.feature.notificationarea.NotificationAreaFragment
+import com.bubelov.coins.feature.notificationarea.NotificationAreaModule
 import com.bubelov.coins.feature.picklocation.PickLocationFragment
 import com.bubelov.coins.feature.picklocation.PickLocationModule
 import com.bubelov.coins.feature.placessearch.PlacesSearchFragment
@@ -81,4 +83,7 @@ abstract class FragmentBuilder {
 
     @ContributesAndroidInjector(modules = [PlacesSearchModule::class])
     abstract fun contributePlacesSearchFragmentInjector(): PlacesSearchFragment
+
+    @ContributesAndroidInjector(modules = [NotificationAreaModule::class])
+    abstract fun contributeNotificationAreaFragmentInjector(): NotificationAreaFragment
 }

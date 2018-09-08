@@ -55,7 +55,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.bubelov.coins.BuildConfig
 import com.bubelov.coins.model.Place
-import com.bubelov.coins.ui.activity.NotificationAreaActivity
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MapViewModel
 import com.bubelov.coins.ui.widget.PlaceDetailsView
@@ -406,9 +405,10 @@ class MapFragment :
     }
 
     private fun openNotificationAreaScreen() {
-        val intent =
-            NotificationAreaActivity.newIntent(requireContext(), map.value!!.cameraPosition)
-        startActivity(intent)
+        // TODO
+//        val intent =
+//            NotificationAreaActivity.newIntent(requireContext(), map.value!!.cameraPosition)
+//        startActivity(intent)
     }
 
     private fun openSupportChat() {

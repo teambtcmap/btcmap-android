@@ -28,7 +28,6 @@
 package com.bubelov.coins.di
 
 import com.bubelov.coins.ui.AppActivity
-import com.bubelov.coins.ui.activity.*
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
@@ -37,7 +36,4 @@ import dagger.android.ContributesAndroidInjector
 abstract class ActivityBuilder {
     @ContributesAndroidInjector(modules = [AppModule::class])
     abstract fun contributeLauncherActivityInjector(): AppActivity
-
-    @ContributesAndroidInjector(modules = [NotificationAreaActivityModule::class])
-    abstract fun contributeNotificationAreaActivityInjector(): NotificationAreaActivity
 }
