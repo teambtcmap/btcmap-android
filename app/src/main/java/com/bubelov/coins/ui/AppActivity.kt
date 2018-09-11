@@ -27,14 +27,10 @@
 
 package com.bubelov.coins.ui
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import androidx.navigation.NavHost
 import androidx.navigation.findNavController
 import com.bubelov.coins.R
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import dagger.android.support.DaggerAppCompatActivity
 
 class AppActivity : DaggerAppCompatActivity(), NavHost {
@@ -43,55 +39,9 @@ class AppActivity : DaggerAppCompatActivity(), NavHost {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app)
-
-        val googleApiAvailability = GoogleApiAvailability.getInstance()
-
-        val playServicesAvailability =
-            googleApiAvailability.isGooglePlayServicesAvailable(this)
-
-        if (playServicesAvailability == ConnectionResult.SUCCESS) {
-            onPlayServicesAvailable()
-        } else {
-            if (googleApiAvailability.isUserResolvableError(playServicesAvailability)) {
-                val dialog = googleApiAvailability.getErrorDialog(
-                    this,
-                    playServicesAvailability,
-                    PLAY_SERVICES_RESOLUTION_REQUEST
-                )
-
-                dialog.setCancelable(false)
-                dialog.show()
-
-                dialog.setOnDismissListener {
-                    if (playServicesAvailability == ConnectionResult.SERVICE_INVALID) {
-                        finish()
-                    }
-                }
-            }
-        }
     }
 
     override fun getNavController() = navigationController
 
     override fun onSupportNavigateUp() = navigationController.navigateUp()
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == PLAY_SERVICES_RESOLUTION_REQUEST) {
-            if (resultCode == Activity.RESULT_OK) {
-                onPlayServicesAvailable()
-            } else {
-                finish()
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data)
-        }
-    }
-
-    private fun onPlayServicesAvailable() {
-        navigationController.navigate(R.id.action_emptyFragment_to_mapFragment)
-    }
-
-    companion object {
-        private const val PLAY_SERVICES_RESOLUTION_REQUEST = 10
-    }
 }

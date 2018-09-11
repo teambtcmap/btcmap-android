@@ -34,10 +34,10 @@
 
     <fragment
         android:id="@+id/emptyFragment"
-        android:name="com.bubelov.coins.ui.fragment.EmptyFragment"
-        android:label="EmptyFragment">
+        android:name="com.bubelov.coins.ui.fragment.CheckPlayServicesFragment"
+        android:label="CheckPlayServicesFragment">
         <action
-            android:id="@+id/action_emptyFragment_to_mapFragment"
+            android:id="@+id/action_checkPlayServicesFragment_to_mapFragment"
             app:destination="@id/mapFragment" />
     </fragment>
     <fragment
