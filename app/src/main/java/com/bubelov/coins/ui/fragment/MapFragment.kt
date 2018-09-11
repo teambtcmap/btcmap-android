@@ -40,7 +40,6 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.support.design.widget.BottomSheetBehavior
-import android.support.v4.app.ActivityCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -330,8 +329,7 @@ class MapFragment :
     }
 
     private fun requestLocationPermissions() {
-        ActivityCompat.requestPermissions(
-            requireActivity(),
+        requestPermissions(
             arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
             REQUEST_ACCESS_LOCATION
         )

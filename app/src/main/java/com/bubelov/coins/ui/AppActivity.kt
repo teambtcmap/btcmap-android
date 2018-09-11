@@ -87,16 +87,6 @@ class AppActivity : DaggerAppCompatActivity(), NavHost {
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        supportFragmentManager.fragments.forEach {
-            it.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        }
-    }
-
     private fun onPlayServicesAvailable() {
         navigationController.navigate(R.id.action_emptyFragment_to_mapFragment)
     }
