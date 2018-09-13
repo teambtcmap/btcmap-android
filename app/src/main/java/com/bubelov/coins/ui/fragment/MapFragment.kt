@@ -53,11 +53,13 @@ import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.bubelov.coins.BuildConfig
+import com.bubelov.coins.feature.placessearch.PlacesSearchResultsViewModel
 import com.bubelov.coins.model.Place
 import com.bubelov.coins.ui.model.PlaceMarker
 import com.bubelov.coins.ui.viewmodel.MapViewModel
 import com.bubelov.coins.ui.widget.PlaceDetailsView
 import com.bubelov.coins.util.Analytics
+import com.bubelov.coins.util.activityViewModelProvider
 import com.bubelov.coins.util.currencyCodeToName
 import com.bubelov.coins.util.emptyPlace
 import com.bubelov.coins.util.openUrl
@@ -83,7 +85,14 @@ class MapFragment :
     Toolbar.OnMenuItemClickListener,
     MapViewModel.Callback {
     @Inject internal lateinit var modelFactory: ViewModelProvider.Factory
-    private val model by lazy { viewModelProvider(modelFactory) as MapViewModel }
+
+    private val model by lazy {
+        viewModelProvider(modelFactory) as MapViewModel
+    }
+
+    private val placesSearchResultsModel by lazy {
+        activityViewModelProvider(modelFactory) as PlacesSearchResultsViewModel
+    }
 
     private lateinit var drawerHeader: View
 
@@ -226,6 +235,11 @@ class MapFragment :
 
         navigation_view.setupWithNavController(findNavController())
 
+        placesSearchResultsModel.pickedPlaceId.observe(this, Observer { id ->
+            model.navigateToNextSelectedPlace = true
+            model.selectedPlaceId.value = id
+        })
+
         Handler().post {
             drawerToggle.syncState()
         }
@@ -293,7 +307,7 @@ class MapFragment :
             R.id.action_add -> model.onAddPlaceClick()
 
             R.id.action_search -> {
-                // TODO
+                findNavController().navigate(R.id.action_mapFragment_to_placesSearchFragment)
             }
 
             else -> return super.onOptionsItemSelected(item)

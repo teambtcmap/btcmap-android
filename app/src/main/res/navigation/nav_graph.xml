@@ -59,6 +59,9 @@
         <action
             android:id="@+id/action_mapFragment_to_editPlaceFragment"
             app:destination="@id/editPlaceFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_placesSearchFragment"
+            app:destination="@id/placesSearchFragment" />
     </fragment>
     <fragment
         android:id="@+id/supportProjectFragment"
@@ -88,5 +91,9 @@
         android:id="@+id/pickLocationFragment"
         android:name="com.bubelov.coins.feature.picklocation.PickLocationFragment"
         android:label="PickLocationFragment" />
+    <fragment
+        android:id="@+id/placesSearchFragment"
+        android:name="com.bubelov.coins.feature.placessearch.PlacesSearchFragment"
+        android:label="PlacesSearchFragment" ></fragment>
 
 </navigation>

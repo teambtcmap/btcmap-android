@@ -44,23 +44,18 @@ import java.text.NumberFormat
 import javax.inject.Inject
 
 class PlacesSearchViewModel @Inject constructor(
+    locationLiveData: LocationLiveData,
+    currencyLiveData: SelectedCurrencyLiveData,
     private val placesRepository: PlacesRepository,
     private val placeIconsRepository: PlaceIconsRepository,
     private val preferences: SharedPreferences,
     private val resources: Resources
 ) : ViewModel() {
-
-    private var userLocation: Location? = null
-    private lateinit var currency: String
-
-    val results = MutableLiveData<List<PlacesSearchRow>>()
+    private val userLocation: Location? = locationLiveData.blockingObserve()
+    private val currency: String = currencyLiveData.blockingObserve()
 
     private var searchJob: Job? = null
-
-    fun init(userLocation: Location?, currency: String) {
-        this.userLocation = userLocation
-        this.currency = currency
-    }
+    val results = MutableLiveData<List<PlacesSearchRow>>()
 
     fun search(query: String) {
         searchJob?.cancel()
@@ -94,6 +89,8 @@ class PlacesSearchViewModel @Inject constructor(
             }
         }
     }
+
+    fun getPlace(id: Long) = placesRepository.find(id).blockingObserve()
 
     private fun Place.toRow(userLocation: Location?): PlacesSearchRow {
         val distanceStringBuilder = StringBuilder()

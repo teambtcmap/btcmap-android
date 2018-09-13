@@ -35,6 +35,7 @@ import android.arch.lifecycle.ViewModelProvider
 import com.bubelov.coins.feature.auth.AuthViewModel
 import com.bubelov.coins.feature.editplace.EditPlaceViewModel
 import com.bubelov.coins.feature.notificationarea.NotificationAreaViewModel
+import com.bubelov.coins.feature.placessearch.PlacesSearchResultsViewModel
 import com.bubelov.coins.feature.placessearch.PlacesSearchViewModel
 import com.bubelov.coins.feature.rates.ExchangeRatesViewModel
 import com.bubelov.coins.ui.viewmodel.*
@@ -65,6 +66,11 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(PlacesSearchViewModel::class)
     internal abstract fun bindPlacesSearchViewModel(placesSearchViewModel: PlacesSearchViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(PlacesSearchResultsViewModel::class)
+    internal abstract fun bindPlacesSearchSesultsViewModel(placesSearchResultsViewModel: PlacesSearchResultsViewModel): ViewModel
 
     @Binds
     @IntoMap

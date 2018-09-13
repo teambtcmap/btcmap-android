@@ -28,6 +28,7 @@
 package com.bubelov.coins.feature.placessearch
 
 import android.arch.lifecycle.ViewModelProvider
+import android.content.Context
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.text.TextUtils
@@ -36,12 +37,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import androidx.core.content.systemService
 import androidx.navigation.fragment.findNavController
 import com.bubelov.coins.R
-import com.bubelov.coins.model.Location
 import com.bubelov.coins.ui.adapter.PlacesSearchResultsAdapter
 import com.bubelov.coins.util.TextWatcherAdapter
+import com.bubelov.coins.util.activityViewModelProvider
 import com.bubelov.coins.util.nonNull
 import com.bubelov.coins.util.observe
 import com.bubelov.coins.util.viewModelProvider
@@ -51,10 +51,14 @@ import javax.inject.Inject
 
 class PlacesSearchFragment : DaggerFragment() {
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
-    private val model by lazy { viewModelProvider(modelFactory) as PlacesSearchViewModel }
 
-    val location by lazy { Location(0.0, 0.0) }
-    val currency by lazy { "" }
+    private val model by lazy {
+        viewModelProvider(modelFactory) as PlacesSearchViewModel
+    }
+
+    private val resultsModel by lazy {
+        activityViewModelProvider(modelFactory) as PlacesSearchResultsViewModel
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -65,12 +69,15 @@ class PlacesSearchFragment : DaggerFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        model.init(location, currency)
-
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         list.layoutManager = LinearLayoutManager(requireContext())
-        val adapter = PlacesSearchResultsAdapter { }
+
+        val adapter = PlacesSearchResultsAdapter {
+            resultsModel.pickedPlaceId.value = it.placeId
+            findNavController().popBackStack()
+        }
+
         list.adapter = adapter
         model.results.nonNull().observe(this) { adapter.swapItems(it) }
 
@@ -84,7 +91,8 @@ class PlacesSearchFragment : DaggerFragment() {
         query.setOnEditorActionListener { _, actionId, _ ->
             when (actionId) {
                 EditorInfo.IME_ACTION_SEARCH -> {
-                    val inputManager = requireContext().systemService<InputMethodManager>()
+                    val inputManager =
+                        requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                     inputManager.hideSoftInputFromWindow(query.windowToken, 0)
                     true
                 }
