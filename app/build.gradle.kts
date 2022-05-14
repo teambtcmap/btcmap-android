@@ -62,12 +62,6 @@ android {
     buildFeatures {
         viewBinding = true
     }
-
-    sourceSets {
-        getByName("debug") {
-            kotlin.srcDir("build/generated/ksp/debug/kotlin")
-        }
-    }
 }
 
 sqldelight {
@@ -101,8 +95,9 @@ dependencies {
 
     // Injection library
     implementation("io.insert-koin:koin-android:3.2.0")
-    implementation("io.insert-koin:koin-annotations:1.0.0-beta-2")
-    ksp("io.insert-koin:koin-ksp-compiler:1.0.0-beta-2")
+    val koinAnnotationsVer = "1.0.0-beta-2"
+    implementation("io.insert-koin:koin-annotations:$koinAnnotationsVer")
+    ksp("io.insert-koin:koin-ksp-compiler:$koinAnnotationsVer")
 
     // Open Street Map widget
     implementation("org.osmdroid:osmdroid-android:6.1.11")
