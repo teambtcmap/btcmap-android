@@ -78,25 +78,26 @@ dependencies {
 
     // Android extensions
     implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
     val navVer = "2.4.2"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVer")
     implementation("androidx.navigation:navigation-ui-ktx:$navVer")
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
-    implementation("androidx.browser:browser:1.4.0")
-    implementation("androidx.work:work-runtime-ktx:2.7.1")
+    implementation("com.google.android.material:material:1.6.0")
 
     // Modern HTTP client
-    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.9.3"))
-    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
 
     // SQLDelight generates typesafe kotlin APIs from SQL statements
     val sqlDelightVer = "1.5.3"
     implementation("com.squareup.sqldelight:coroutines-extensions:$sqlDelightVer")
     implementation("com.squareup.sqldelight:android-driver:$sqlDelightVer")
 
-    implementation("io.insert-koin:koin-android:3.2.0-beta-1")
-    implementation("com.google.android.material:material:1.7.0-alpha01")
+    // Injection library
+    implementation("io.insert-koin:koin-android:3.2.0")
+
+    // Open Street Map widget
     implementation("org.osmdroid:osmdroid-android:6.1.11")
+
+    // JSON converter
     implementation("com.google.code.gson:gson:2.9.0")
 }
