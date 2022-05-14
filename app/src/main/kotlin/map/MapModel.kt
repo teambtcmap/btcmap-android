@@ -3,6 +3,11 @@ package map
 import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOne
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import db.Database
 import db.Location
 import location.UserLocationRepository
 import db.Place
@@ -19,14 +24,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
 import org.osmdroid.util.BoundingBox
+import sync.Sync
 import kotlin.math.max
 import kotlin.math.min
 
 @KoinViewModel
 class MapModel(
-    private val placesRepo: PlacesRepository,
     private val placeIconsRepo: PlaceIconsRepository,
     private val locationRepo: UserLocationRepository,
+    private val sync: Sync,
+    private val db: Database,
 ) : ViewModel() {
 
     val toast = MutableStateFlow("")
@@ -53,7 +60,7 @@ class MapModel(
                     toast.update { "Syncing places..." }
                 }
 
-                placesRepo.sync()
+                sync.sync()
 
                 if (job.isCompleted) {
                     delay(1000)
@@ -71,21 +78,25 @@ class MapModel(
     }
 
     init {
-        combine(_viewport, placesRepo.selectCount()) { viewport, _ ->
+        combine(_viewport, db.placeQueries.selectCount().asFlow().mapToOne()) { viewport, _ ->
             withContext(Dispatchers.Default) {
                 if (viewport == null) {
                     return@withContext
                 }
 
                 _visiblePlaces.update {
-                    placesRepo.selectByBoundingBox(
+                    db.placeQueries.selectByBoundingBox(
                         minLat = min(viewport.latNorth, viewport.latSouth),
                         maxLat = max(viewport.latNorth, viewport.latSouth),
                         minLon = min(viewport.lonEast, viewport.lonWest),
                         maxLon = max(viewport.lonEast, viewport.lonWest),
-                    ).first().map {
-                        Pair(it, placeIconsRepo.getMarkerDrawable(it))
-                    }
+                    )
+                        .asFlow()
+                        .mapToList()
+                        .first()
+                        .map {
+                            Pair(it, placeIconsRepo.getMarkerIcon(it))
+                        }
                 }
             }
         }.launchIn(viewModelScope)
@@ -119,7 +130,7 @@ class MapModel(
 
     fun selectPlace(id: Long, moveToLocation: Boolean) {
         viewModelScope.launch {
-            val place = placesRepo.selectById(id).first()
+            val place = db.placeQueries.selectById(id).asFlow().mapToOneOrNull().first()
             _selectedPlace.update { place }
 
             if (place != null && moveToLocation) {

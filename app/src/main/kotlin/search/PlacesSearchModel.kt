@@ -3,9 +3,11 @@ package search
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
+import db.Database
 import org.btcmap.R
 import db.Location
-import map.PlacesRepository
 import map.PlaceIconsRepository
 import db.Place
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,9 +21,9 @@ import java.text.NumberFormat
 
 @KoinViewModel
 class PlacesSearchModel(
-    private val placesRepo: PlacesRepository,
     private val placeIconsRepo: PlaceIconsRepository,
     private val app: Application,
+    private val db: Database,
 ) : ViewModel() {
 
     private val location = MutableStateFlow<Location?>(null)
@@ -36,7 +38,7 @@ class PlacesSearchModel(
             if (searchString.length < MIN_QUERY_LENGTH) {
                 _searchResults.update { emptyList() }
             } else {
-                var places = placesRepo.selectBySearchString(searchString).first()
+                var places = db.placeQueries.selectBySearchString(searchString).asFlow().mapToList().first()
 
                 if (location != null) {
                     places = places.sortedBy {
@@ -84,7 +86,7 @@ class PlacesSearchModel(
 
         return PlacesSearchRow(
             place = this,
-            icon = placeIconsRepo.getPlaceIcon(this),
+            icon = placeIconsRepo.getIcon(this),
             name = name,
             distanceToUser = distanceStringBuilder.toString(),
         )

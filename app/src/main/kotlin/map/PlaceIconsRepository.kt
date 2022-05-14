@@ -29,12 +29,12 @@ class PlaceIconsRepository(
     private val context: Context,
 ) {
 
-    private val markersCache = mutableMapOf<Int?, Bitmap>()
-    private val markerDrawablesCache = mutableMapOf<Int?, BitmapDrawable>()
+    private val iconCache = mutableMapOf<Int, Bitmap>()
+    private val markerIconCache = mutableMapOf<Int?, BitmapDrawable>()
 
     private val emptyPinBitmap = BitmapFactory.decodeResource(
         context.resources,
-        R.drawable.ic_map_marker_empty
+        R.drawable.ic_map_marker_empty,
     )
 
     private val pinCirclePaint = Paint().apply {
@@ -43,293 +43,69 @@ class PlaceIconsRepository(
     }
 
     private val pinIconPaint = Paint().apply {
-        colorFilter = PorterDuff.Mode.SRC_IN.toColorFilter(
-            Color.parseColor("#ff9100")
-        )
-
+        colorFilter = PorterDuff.Mode.SRC_IN.toColorFilter(Color.parseColor("#ff9100"))
         isAntiAlias = true
     }
 
-    fun getMarker(place: Place): Bitmap {
-        val iconResId = getIconResId(place)
-        var marker = markersCache[iconResId]
+    fun getIcon(place: Place): Bitmap {
+        val iconResId = place.iconResId() ?: R.drawable.ic_place
 
-        if (marker == null) {
-            marker = createMarker(place)
-            markersCache[iconResId] = marker
+        var icon = iconCache[iconResId]
+
+        if (icon == null) {
+            icon = ContextCompat.getDrawable(context, iconResId)!!.toBitmap()
+            iconCache[iconResId] = icon
         }
 
-        return createMarker(place)
+        return icon
     }
 
-    fun getMarkerDrawable(place: Place): BitmapDrawable {
-        val iconResId = getIconResId(place)
-        var markerDrawable = markerDrawablesCache[iconResId]
+    fun getMarkerIcon(place: Place): BitmapDrawable {
+        val iconResId = place.iconResId()
+        var markerDrawable = markerIconCache[iconResId]
 
         if (markerDrawable == null) {
-            markerDrawable = createMarker(place).toDrawable(context.resources)
-            markerDrawablesCache[iconResId] = markerDrawable
+            markerDrawable = createMarkerIcon(iconResId).toDrawable(context.resources)
+            markerIconCache[iconResId] = markerDrawable
         }
 
-        return createMarker(place).toDrawable(context.resources)
+        return markerDrawable
     }
 
-    fun getPlaceIcon(place: Place): Bitmap {
-        val iconId = getIconResId(place) ?: R.drawable.ic_place
-        return ContextCompat.getDrawable(context, iconId)!!.toBitmap()
-    }
-
-    private fun getIconResId(place: Place): Int? {
-        if (place.tags.has("tourism") && place.tags["tourism"].asString == "hotel") {
-            return R.drawable.baseline_hotel_24
-        }
-
-        if (place.tags.has("tourism") && place.tags["tourism"].asString == "hostel") {
-            return R.drawable.baseline_hotel_24
-        }
-
-        if (place.tags.has("tourism") && place.tags["tourism"].asString == "apartment") {
-            return R.drawable.baseline_hotel_24
-        }
-
-        if (place.tags.has("tourism") && place.tags["tourism"].asString == "guest_house") {
-            return R.drawable.baseline_hotel_24
-        }
-
-        if (place.tags.has("tourism") && place.tags["tourism"].asString == "gallery") {
-            return R.drawable.baseline_palette_24
-        }
-
-        if (place.tags.has("company") && place.tags["company"].asString == "transport") {
-            return R.drawable.baseline_directions_car_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "scuba_diving") {
-            return R.drawable.baseline_scuba_diving_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "computer") {
-            return R.drawable.baseline_computer_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "electronics") {
-            return R.drawable.baseline_computer_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "hardware") {
-            return R.drawable.baseline_hardware_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "hairdresser") {
-            return R.drawable.ic_tmp_barbershop
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "massage") {
-            return R.drawable.baseline_spa_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "beauty") {
-            return R.drawable.baseline_spa_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "mobile_phone") {
-            return R.drawable.baseline_smartphone_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "supermarket") {
-            return R.drawable.baseline_local_grocery_store_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "wholesale") {
-            return R.drawable.baseline_local_grocery_store_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "interior_decoration") {
-            return R.drawable.baseline_design_services_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "video_games") {
-            return R.drawable.baseline_games_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "jewelry") {
-            return R.drawable.baseline_diamond_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "e-cigarette") {
-            return R.drawable.baseline_vaping_rooms_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "clothes") {
-            return R.drawable.baseline_storefront_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "yes") {
-            return R.drawable.baseline_storefront_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "car_parts") {
-            return R.drawable.baseline_directions_car_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "car_repair") {
-            return R.drawable.baseline_car_repair_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "deli") {
-            return R.drawable.baseline_tapas_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "watches") {
-            return R.drawable.baseline_watch_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "florist") {
-            return R.drawable.baseline_local_florist_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "storage_rental") {
-            return R.drawable.baseline_warehouse_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "garden_centre") {
-            return R.drawable.baseline_local_florist_24
-        }
-
-        if (place.tags.has("shop") && place.tags["shop"].asString == "toys") {
-            return R.drawable.baseline_toys_24
-        }
-
-        if (place.tags.has("cuisine") && place.tags["cuisine"].asString == "burger") {
-            return R.drawable.baseline_lunch_dining_24
-        }
-
-        if (place.tags.has("cuisine") && place.tags["cuisine"].asString == "pizza") {
-            return R.drawable.baseline_local_pizza_24
-        }
-
-        if (place.tags.has("amenity") && place.tags["amenity"].asString == "bar") {
-            return R.drawable.baseline_local_bar_24
-        }
-
-        if (place.tags.has("amenity") && place.tags["amenity"].asString == "restaurant") {
-            return R.drawable.baseline_restaurant_24
-        }
-
-        if (place.tags.has("amenity") && place.tags["amenity"].asString.lowercase() == "spa") {
-            return R.drawable.baseline_spa_24
-        }
-
-        if (place.tags.has("amenity") && place.tags["amenity"].asString == "training") {
-            return R.drawable.baseline_school_24
-        }
-
-        if (place.tags.has("amenity") && place.tags["amenity"].asString == "bureau_de_change") {
-            return R.drawable.baseline_currency_exchange_24
-        }
-
-        if (place.tags.has("amenity") && place.tags["amenity"].asString == "car_wash") {
-            return R.drawable.baseline_local_car_wash_24
-        }
-
-        if (place.tags.has("amenity") && place.tags["amenity"].asString == "atm") {
-            return R.drawable.baseline_local_atm_24
-        }
-
-        if (place.tags.has("office") && place.tags["office"].asString == "lawyer") {
-            return R.drawable.ic_tmp_scales
-        }
-
-        if (place.tags.has("office") && place.tags["office"].asString == "company") {
-            return R.drawable.baseline_business_24
-        }
-
-        if (place.tags.has("office") && place.tags["office"].asString == "it") {
-            return R.drawable.baseline_computer_24
-        }
-
-        if (place.tags.has("office") && place.tags["office"].asString == "educational_institution") {
-            return R.drawable.baseline_school_24
-        }
-
-        if (place.tags.has("office") && place.tags["office"].asString == "graphic_design") {
-            return R.drawable.baseline_design_services_24
-        }
-
-        if (place.tags.has("office") && place.tags["office"].asString == "marketing") {
-            return R.drawable.baseline_business_24
-        }
-
-        if (place.tags.has("office") && place.tags["office"].asString == "limousine_service") {
-            return R.drawable.baseline_local_taxi_24
-        }
-
-        if (place.tags.has("office") && place.tags["office"].asString == "coworking") {
-            return R.drawable.baseline_business_24
-        }
-
-        if (place.tags.has("leisure") && place.tags["leisure"].asString == "fitness_centre") {
-            return R.drawable.baseline_fitness_center_24
-        }
-
-        if (place.tags.has("healthcare") && place.tags["healthcare"].asString == "dentist") {
-            return R.drawable.baseline_medical_services_24
-        }
-
-        if (place.tags.has("healthcare") && place.tags["healthcare"].asString == "clinic") {
-            return R.drawable.baseline_medical_services_24
-        }
-
-        if (place.tags.has("healthcare") && place.tags["healthcare"].asString == "pharmacy") {
-            return R.drawable.baseline_local_pharmacy_24
-        }
-
-        return null
-    }
-
-    private fun createMarker(place: Place): Bitmap {
-        val iconResId = getIconResId(place) ?: return createBitmap(
-            emptyPinBitmap.width,
-            emptyPinBitmap.height
-        ).applyCanvas {
+    private fun createMarkerIcon(iconResId: Int?): Bitmap {
+        val markerIcon = createBitmap(emptyPinBitmap.width, emptyPinBitmap.height).applyCanvas {
             drawBitmap(emptyPinBitmap, 0f, 0f, Paint())
         }
 
-        return createMarker(iconResId)
-    }
+        if (iconResId != null) {
+            markerIcon.applyCanvas {
+                drawCircle(
+                    markerIcon.width.toFloat() / 2,
+                    markerIcon.height.toFloat() * 0.43f,
+                    markerIcon.width.toFloat() * 0.27f,
+                    pinCirclePaint
+                )
+            }
 
-    fun createMarker(drawableId: Int): Bitmap {
-        val pinBitmap = createBitmap(emptyPinBitmap.width, emptyPinBitmap.height).applyCanvas {
-            drawBitmap(emptyPinBitmap, 0f, 0f, Paint())
-        }
+            val iconFrame = RectF(
+                markerIcon.width.toFloat() * 0.3f,
+                markerIcon.width.toFloat() * 0.23f,
+                markerIcon.width.toFloat() * 0.7f,
+                markerIcon.height.toFloat() * 0.63f
+            ).toRect()
 
-        pinBitmap.applyCanvas {
-            drawCircle(
-                pinBitmap.width.toFloat() / 2,
-                pinBitmap.height.toFloat() * 0.43f,
-                pinBitmap.width.toFloat() * 0.27f,
-                pinCirclePaint
+            val iconBitmap = toBitmap(
+                iconResId,
+                iconFrame.right - iconFrame.left,
+                iconFrame.bottom - iconFrame.top,
             )
+
+            markerIcon.applyCanvas {
+                drawBitmap(iconBitmap, null, iconFrame, pinIconPaint)
+            }
         }
 
-        val iconFrame = RectF(
-            pinBitmap.width.toFloat() * 0.3f,
-            pinBitmap.width.toFloat() * 0.23f,
-            pinBitmap.width.toFloat() * 0.7f,
-            pinBitmap.height.toFloat() * 0.63f
-        ).toRect()
-
-        val iconBitmap = toBitmap(
-            drawableId,
-            iconFrame.right - iconFrame.left,
-            iconFrame.bottom - iconFrame.top
-        )
-
-        pinBitmap.applyCanvas {
-            drawBitmap(iconBitmap, null, iconFrame, pinIconPaint)
-        }
-
-        return pinBitmap
+        return markerIcon
     }
 
     private fun toBitmap(
@@ -350,5 +126,215 @@ class PlaceIconsRepository(
         } else {
             throw IllegalArgumentException("Unsupported drawable")
         }
+    }
+
+    private fun Place.iconResId(): Int? {
+        tags.apply {
+            if (has("tourism") && this["tourism"].asString == "hotel") {
+                return R.drawable.baseline_hotel_24
+            }
+
+            if (has("tourism") && this["tourism"].asString == "hostel") {
+                return R.drawable.baseline_hotel_24
+            }
+
+            if (has("tourism") && this["tourism"].asString == "apartment") {
+                return R.drawable.baseline_hotel_24
+            }
+
+            if (has("tourism") && this["tourism"].asString == "guest_house") {
+                return R.drawable.baseline_hotel_24
+            }
+
+            if (has("tourism") && this["tourism"].asString == "gallery") {
+                return R.drawable.baseline_palette_24
+            }
+
+            if (has("company") && this["company"].asString == "transport") {
+                return R.drawable.baseline_directions_car_24
+            }
+
+            if (has("shop") && this["shop"].asString == "scuba_diving") {
+                return R.drawable.baseline_scuba_diving_24
+            }
+
+            if (has("shop") && this["shop"].asString == "computer") {
+                return R.drawable.baseline_computer_24
+            }
+
+            if (has("shop") && this["shop"].asString == "electronics") {
+                return R.drawable.baseline_computer_24
+            }
+
+            if (has("shop") && this["shop"].asString == "hardware") {
+                return R.drawable.baseline_hardware_24
+            }
+
+            if (has("shop") && this["shop"].asString == "hairdresser") {
+                return R.drawable.ic_tmp_barbershop
+            }
+
+            if (has("shop") && this["shop"].asString == "massage") {
+                return R.drawable.baseline_spa_24
+            }
+
+            if (has("shop") && this["shop"].asString == "beauty") {
+                return R.drawable.baseline_spa_24
+            }
+
+            if (has("shop") && this["shop"].asString == "mobile_phone") {
+                return R.drawable.baseline_smartphone_24
+            }
+
+            if (has("shop") && this["shop"].asString == "supermarket") {
+                return R.drawable.baseline_local_grocery_store_24
+            }
+
+            if (has("shop") && this["shop"].asString == "wholesale") {
+                return R.drawable.baseline_local_grocery_store_24
+            }
+
+            if (has("shop") && this["shop"].asString == "interior_decoration") {
+                return R.drawable.baseline_design_services_24
+            }
+
+            if (has("shop") && this["shop"].asString == "video_games") {
+                return R.drawable.baseline_games_24
+            }
+
+            if (has("shop") && this["shop"].asString == "jewelry") {
+                return R.drawable.baseline_diamond_24
+            }
+
+            if (has("shop") && this["shop"].asString == "e-cigarette") {
+                return R.drawable.baseline_vaping_rooms_24
+            }
+
+            if (has("shop") && this["shop"].asString == "clothes") {
+                return R.drawable.baseline_storefront_24
+            }
+
+            if (has("shop") && this["shop"].asString == "yes") {
+                return R.drawable.baseline_storefront_24
+            }
+
+            if (has("shop") && this["shop"].asString == "car_parts") {
+                return R.drawable.baseline_directions_car_24
+            }
+
+            if (has("shop") && this["shop"].asString == "car_repair") {
+                return R.drawable.baseline_car_repair_24
+            }
+
+            if (has("shop") && this["shop"].asString == "deli") {
+                return R.drawable.baseline_tapas_24
+            }
+
+            if (has("shop") && this["shop"].asString == "watches") {
+                return R.drawable.baseline_watch_24
+            }
+
+            if (has("shop") && this["shop"].asString == "florist") {
+                return R.drawable.baseline_local_florist_24
+            }
+
+            if (has("shop") && this["shop"].asString == "storage_rental") {
+                return R.drawable.baseline_warehouse_24
+            }
+
+            if (has("shop") && this["shop"].asString == "garden_centre") {
+                return R.drawable.baseline_local_florist_24
+            }
+
+            if (has("shop") && this["shop"].asString == "toys") {
+                return R.drawable.baseline_toys_24
+            }
+
+            if (has("cuisine") && this["cuisine"].asString == "burger") {
+                return R.drawable.baseline_lunch_dining_24
+            }
+
+            if (has("cuisine") && this["cuisine"].asString == "pizza") {
+                return R.drawable.baseline_local_pizza_24
+            }
+
+            if (has("amenity") && this["amenity"].asString == "bar") {
+                return R.drawable.baseline_local_bar_24
+            }
+
+            if (has("amenity") && this["amenity"].asString == "restaurant") {
+                return R.drawable.baseline_restaurant_24
+            }
+
+            if (has("amenity") && this["amenity"].asString.lowercase() == "spa") {
+                return R.drawable.baseline_spa_24
+            }
+
+            if (has("amenity") && this["amenity"].asString == "training") {
+                return R.drawable.baseline_school_24
+            }
+
+            if (has("amenity") && this["amenity"].asString == "bureau_de_change") {
+                return R.drawable.baseline_currency_exchange_24
+            }
+
+            if (has("amenity") && this["amenity"].asString == "car_wash") {
+                return R.drawable.baseline_local_car_wash_24
+            }
+
+            if (has("amenity") && this["amenity"].asString == "atm") {
+                return R.drawable.baseline_local_atm_24
+            }
+
+            if (has("office") && this["office"].asString == "lawyer") {
+                return R.drawable.ic_tmp_scales
+            }
+
+            if (has("office") && this["office"].asString == "company") {
+                return R.drawable.baseline_business_24
+            }
+
+            if (has("office") && this["office"].asString == "it") {
+                return R.drawable.baseline_computer_24
+            }
+
+            if (has("office") && this["office"].asString == "educational_institution") {
+                return R.drawable.baseline_school_24
+            }
+
+            if (has("office") && this["office"].asString == "graphic_design") {
+                return R.drawable.baseline_design_services_24
+            }
+
+            if (has("office") && this["office"].asString == "marketing") {
+                return R.drawable.baseline_business_24
+            }
+
+            if (has("office") && this["office"].asString == "limousine_service") {
+                return R.drawable.baseline_local_taxi_24
+            }
+
+            if (has("office") && this["office"].asString == "coworking") {
+                return R.drawable.baseline_business_24
+            }
+
+            if (has("leisure") && this["leisure"].asString == "fitness_centre") {
+                return R.drawable.baseline_fitness_center_24
+            }
+
+            if (has("healthcare") && this["healthcare"].asString == "dentist") {
+                return R.drawable.baseline_medical_services_24
+            }
+
+            if (has("healthcare") && this["healthcare"].asString == "clinic") {
+                return R.drawable.baseline_medical_services_24
+            }
+
+            if (has("healthcare") && this["healthcare"].asString == "pharmacy") {
+                return R.drawable.baseline_local_pharmacy_24
+            }
+        }
+
+        return null
     }
 }
