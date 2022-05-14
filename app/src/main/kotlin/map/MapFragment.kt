@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
@@ -18,14 +17,17 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import org.btcmap.R
 import org.btcmap.databinding.FragmentMapBinding
-import search.PlacesSearchResultViewModel
+import search.PlacesSearchResultModel
 import db.Place
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -34,9 +36,9 @@ import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
+import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.ItemizedIconOverlay
 import org.osmdroid.views.overlay.ItemizedIconOverlay.OnItemGestureListener
 import org.osmdroid.views.overlay.MapEventsOverlay
@@ -45,7 +47,7 @@ import org.osmdroid.views.overlay.OverlayItem
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
-class MapFragment : Fragment(), Toolbar.OnMenuItemClickListener {
+class MapFragment : Fragment() {
 
     companion object {
         private const val REQUEST_ACCESS_LOCATION = 10
@@ -54,29 +56,21 @@ class MapFragment : Fragment(), Toolbar.OnMenuItemClickListener {
 
     private val model: MapModel by viewModel()
 
-    private val placesSearchResultModel: PlacesSearchResultViewModel by sharedViewModel()
-
-    private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
-
-    var locationOverlay: MyLocationNewOverlay? = null
-    var placesOverlay: Overlay? = null
-
-    private val backPressedCallback = object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() {
-            if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            } else {
-                requireActivity().finish()
-            }
-        }
-    }
+    private val placesSearchResultModel: PlacesSearchResultModel by sharedViewModel()
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        requireActivity().onBackPressedDispatcher.addCallback(backPressedCallback)
+    private val placeDetailsFragment by lazy {
+        childFragmentManager.findFragmentById(R.id.placeDetailsFragment) as PlaceDetailsFragment
+    }
+
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
+
+    private var backPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            onBackPressed()
+        }
     }
 
     override fun onCreateView(
@@ -94,93 +88,61 @@ class MapFragment : Fragment(), Toolbar.OnMenuItemClickListener {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.map.setTileSource(TileSourceFactory.MAPNIK)
-        binding.map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-        binding.map.setMultiTouchControls(true)
-
-        val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), binding.map)
-        locationOverlay.enableMyLocation()
-        binding.map.overlays += locationOverlay
-
-        binding.map.overlays += MapEventsOverlay(object : MapEventsReceiver {
-            override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
-                viewLifecycleOwner.lifecycleScope.launch { model.selectPlace(0, false) }
-                return true
-            }
-
-            override fun longPressHelper(p: GeoPoint?): Boolean {
-                return false
-            }
-        })
-
-        binding.map.addMapListener(object : MapListener {
-            override fun onScroll(event: ScrollEvent?): Boolean {
-                model.setMapViewport(binding.map.boundingBox)
-                return false
-            }
-
-            override fun onZoom(event: ZoomEvent?) = false
-        })
-
-        bottomSheetBehavior = BottomSheetBehavior.from(binding.placeDetails).apply {
-            state = BottomSheetBehavior.STATE_HIDDEN
-
-            addBottomSheetCallback(object :
-                BottomSheetBehavior.BottomSheetCallback() {
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
-
-                }
-
-                override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                    binding.locationFab.isVisible = slideOffset < 0.5f
-                    (childFragmentManager.findFragmentById(R.id.placeDetailsFragment) as PlaceDetailsFragment).setScrollProgress(slideOffset)
-                }
-            })
-
-            viewLifecycleOwner.lifecycleScope.launch {
-                while (true) {
-                    val tb = (childFragmentManager.findFragmentById(R.id.placeDetailsFragment) as PlaceDetailsFragment).view?.findViewById<Toolbar>(R.id.toolbar)
-
-                    if (tb != null && tb.height > 0) {
-                        peekHeight = tb.height
-
-                        tb.setOnClickListener {
-                            if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
-                                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                            } else {
-                                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
-                            }
-                        }
-
-                        break
-                    } else {
-                        delay(100)
-                    }
-                }
-            }
-        }
-
         binding.toolbar.apply {
             inflateMenu(R.menu.map)
-            setOnMenuItemClickListener(this@MapFragment)
+
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.action_search -> {
+                        lifecycleScope.launch {
+                            val action = MapFragmentDirections.actionMapFragmentToPlacesSearchFragment(
+                                model.userLocation.value.lat.toString(),
+                                model.userLocation.value.lon.toString(),
+                            )
+
+                            findNavController().navigate(action)
+                        }
+                    }
+
+                    R.id.action_add -> {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.data = Uri.parse("https://wiki.openstreetmap.org/wiki/How_to_contribute")
+                        startActivity(intent)
+                    }
+                }
+
+                true
+            }
         }
 
-        binding.placeDetails.setOnClickListener {
-            if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-            } else {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
+        binding.map.apply {
+            zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
+            setMultiTouchControls(true)
+            addLocationOverlay()
+            addCancelSelectionOverlay()
+            addViewportListener()
+        }
+
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.placeDetails)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehavior.addSlideCallback()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val placeDetailsToolbar = getPlaceDetailsToolbar()
+            bottomSheetBehavior.peekHeight = placeDetailsToolbar.height
+
+            placeDetailsToolbar.setOnClickListener {
+                if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                } else {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
+                }
             }
         }
 
         model.selectedPlace.onEach {
             if (it != null) {
-                val placeDetailsFragment = childFragmentManager.findFragmentById(R.id.placeDetailsFragment) as PlaceDetailsFragment
-
-                while (placeDetailsFragment.view == null) {
-                    delay(10)
-                }
-
+                getPlaceDetailsToolbar()
                 placeDetailsFragment.setPlace(it)
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             } else {
@@ -196,28 +158,25 @@ class MapFragment : Fragment(), Toolbar.OnMenuItemClickListener {
                 return@setOnClickListener
             }
 
-            val location = model.location.value
+            val location = model.userLocation.value
             val mapController = binding.map.controller
             mapController.setZoom(DEFAULT_MAP_ZOOM.toDouble())
-            val startPoint = GeoPoint(location.latitude, location.longitude)
+            val startPoint = GeoPoint(location.lat, location.lon)
             mapController.setCenter(startPoint)
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            placesSearchResultModel.place.collectLatest {
-                if (it == null) {
-                    return@collectLatest
-                }
-
+        placesSearchResultModel.place
+            .filterNotNull()
+            .onEach {
                 val mapController = binding.map.controller
                 mapController.setZoom(DEFAULT_MAP_ZOOM.toDouble())
                 val startPoint = GeoPoint(it.lat, it.lon)
                 mapController.setCenter(startPoint)
                 model.selectPlace(it.id, true)
+                placesSearchResultModel.place.update { null }
+            }.launchIn(viewLifecycleOwner.lifecycleScope)
 
-                placesSearchResultModel.consume()
-            }
-        }
+        var placesOverlay: Overlay? = null
 
         viewLifecycleOwner.lifecycleScope.launch {
             model.visiblePlaces.collectLatest { places ->
@@ -244,7 +203,7 @@ class MapFragment : Fragment(), Toolbar.OnMenuItemClickListener {
                 placesOverlay =
                     ItemizedIconOverlay(requireContext(), items, object : OnItemGestureListener<OverlayItem> {
                         override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
-                            viewLifecycleOwner.lifecycleScope.launch { model.selectPlace(itemsToPlaces[item]!!.id, false) }
+                            model.selectPlace(itemsToPlaces[item]!!.id, false)
                             return true
                         }
 
@@ -278,28 +237,47 @@ class MapFragment : Fragment(), Toolbar.OnMenuItemClickListener {
 
             val mapController = binding.map.controller
             mapController.setZoom(DEFAULT_MAP_ZOOM.toDouble())
-            val startPoint = GeoPoint(it.latitude, it.longitude)
+            val startPoint = GeoPoint(it.lat, it.lon)
             mapController.setCenter(startPoint)
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
-        backPressedCallback.isEnabled = true
+        model.syncPlaces()
+
+        lifecycleScope.launchWhenResumed {
+            val snack = Snackbar.make(
+                binding.root,
+                "",
+                Snackbar.LENGTH_INDEFINITE,
+            )
+
+            model.toast.collectLatest {
+                snack.setText(it)
+
+                if (it.isNotBlank()) {
+                    snack.show()
+                } else {
+                    snack.dismiss()
+                }
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
         binding.map.onResume()
+        backPressedCallback.isEnabled = true
     }
 
     override fun onPause() {
         super.onPause()
         binding.map.onPause()
+        backPressedCallback.isEnabled = false
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         prevZoom = binding.map.zoomLevel
         _binding = null
-        backPressedCallback.isEnabled = false
     }
 
     var prevZoom = 0
@@ -318,31 +296,6 @@ class MapFragment : Fragment(), Toolbar.OnMenuItemClickListener {
         }
     }
 
-    override fun onMenuItemClick(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_search -> {
-                lifecycleScope.launch {
-                    val action = MapFragmentDirections.actionMapFragmentToPlacesSearchFragment(
-                        model.location.value.latitude.toString(),
-                        model.location.value.longitude.toString(),
-                    )
-
-                    findNavController().navigate(action)
-                }
-            }
-
-            R.id.action_add -> {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = Uri.parse("https://wiki.openstreetmap.org/wiki/How_to_contribute")
-                startActivity(intent)
-            }
-
-            else -> return super.onOptionsItemSelected(item)
-        }
-
-        return true
-    }
-
     private fun requestLocationPermissions() {
         requestPermissions(
             arrayOf(
@@ -350,5 +303,68 @@ class MapFragment : Fragment(), Toolbar.OnMenuItemClickListener {
             ),
             REQUEST_ACCESS_LOCATION,
         )
+    }
+
+    private fun onBackPressed() {
+        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        } else {
+            requireActivity().finish()
+        }
+    }
+
+    private fun MapView.addLocationOverlay() {
+        val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(requireContext()), this)
+        locationOverlay.enableMyLocation()
+        binding.map.overlays += locationOverlay
+    }
+
+    private fun MapView.addCancelSelectionOverlay() {
+        overlays += MapEventsOverlay(object : MapEventsReceiver {
+            override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
+                model.selectPlace(0, false)
+                return true
+            }
+
+            override fun longPressHelper(p: GeoPoint?): Boolean {
+                return false
+            }
+        })
+    }
+
+    private fun MapView.addViewportListener() {
+        addMapListener(object : MapListener {
+            override fun onScroll(event: ScrollEvent?): Boolean {
+                model.setMapViewport(binding.map.boundingBox)
+                return false
+            }
+
+            override fun onZoom(event: ZoomEvent?) = false
+        })
+    }
+
+    private fun BottomSheetBehavior<*>.addSlideCallback() {
+        addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                binding.locationFab.isVisible = slideOffset < 0.5f
+                (childFragmentManager.findFragmentById(org.btcmap.R.id.placeDetailsFragment) as PlaceDetailsFragment).setScrollProgress(
+                    slideOffset
+                )
+            }
+        })
+    }
+
+    private suspend fun getPlaceDetailsToolbar(): Toolbar {
+        while (placeDetailsFragment.view == null
+            || placeDetailsFragment.view!!.findViewById<View>(R.id.toolbar)!!.height == 0
+        ) {
+            delay(10)
+        }
+
+        return placeDetailsFragment.view?.findViewById(R.id.toolbar)!!
     }
 }

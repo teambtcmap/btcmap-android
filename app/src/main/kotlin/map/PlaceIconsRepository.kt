@@ -22,7 +22,9 @@ import androidx.core.graphics.toColorFilter
 import androidx.core.graphics.toRect
 import org.btcmap.R
 import db.Place
+import org.koin.core.annotation.Single
 
+@Single
 class PlaceIconsRepository(
     private val context: Context,
 ) {

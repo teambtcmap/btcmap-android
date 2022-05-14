@@ -12,10 +12,11 @@ import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import db.Location
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import org.btcmap.databinding.FragmentPlacesSearchBinding
-import location.Location
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -23,7 +24,7 @@ class PlacesSearchFragment : Fragment() {
 
     private val model: PlacesSearchModel by viewModel()
 
-    private val resultModel: PlacesSearchResultViewModel by sharedViewModel()
+    private val resultModel: PlacesSearchResultModel by sharedViewModel()
 
     private var _binding: FragmentPlacesSearchBinding? = null
     private val binding get() = _binding!!
@@ -39,14 +40,20 @@ class PlacesSearchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val args = PlacesSearchFragmentArgs.fromBundle(requireArguments())
-        model.setLocation(Location(args.lat.toDouble(), args.lon.toDouble()))
+
+        model.setLocation(
+            Location(
+                lat = args.lat.toDouble(),
+                lon = args.lon.toDouble(),
+            )
+        )
 
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
 
-        val adapter = PlacesSearchResultsAdapter {
-            resultModel.setPlace(it.place)
+        val adapter = PlacesSearchResultsAdapter { row ->
+            resultModel.place.update { row.place }
             findNavController().popBackStack()
         }
 

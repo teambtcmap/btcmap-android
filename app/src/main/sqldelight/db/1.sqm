@@ -9,3 +9,8 @@ CREATE TABLE Place (
     updated_at TEXT NOT NULL,
     deleted_at TEXT NOT NULL
 );
+
+CREATE TABLE Location (
+    lat REAL NOT NULL,
+    lon REAL NOT NULL
+);

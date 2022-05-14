@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.btcmap.R
-import location.Location
+import db.Location
 import map.PlacesRepository
 import map.PlaceIconsRepository
 import db.Place
@@ -14,8 +14,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
+import org.koin.android.annotation.KoinViewModel
 import java.text.NumberFormat
 
+@KoinViewModel
 class PlacesSearchModel(
     private val placesRepo: PlacesRepository,
     private val placeIconsRepo: PlaceIconsRepository,
@@ -39,8 +41,8 @@ class PlacesSearchModel(
                 if (location != null) {
                     places = places.sortedBy {
                         getDistance(
-                            startLatitude = location.latitude,
-                            startLongitude = location.longitude,
+                            startLatitude = location.lat,
+                            startLongitude = location.lon,
                             endLatitude = it.lat,
                             endLongitude = it.lon,
                         )
@@ -90,10 +92,10 @@ class PlacesSearchModel(
 
     private fun Location.distanceInKmTo(location: Location): Double {
         return getDistance(
-            latitude,
-            longitude,
-            location.latitude,
-            location.longitude,
+            lat,
+            lon,
+            location.lat,
+            location.lon,
         ) / 1000.0
     }
 

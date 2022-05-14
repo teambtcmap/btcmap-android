@@ -8,16 +8,22 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import db.Location
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.koin.core.annotation.Single
 
-class LocationRepository(
+@Single
+class UserLocationRepository(
     private val context: Context,
 ) {
 
     companion object {
-        val DEFAULT_LOCATION: Location = Location(40.7141667, -74.0063889)
+        val DEFAULT_LOCATION: Location = Location(
+            lat = 40.7141667,
+            lon = -74.0063889,
+        )
     }
 
     private var requestedLocationUpdates = false
@@ -27,12 +33,12 @@ class LocationRepository(
 
     private val listener: LocationListener = object : LocationListener {
         override fun onLocationChanged(location: android.location.Location) {
-            Log.d("LocationRepository", "Location changed")
+            Log.d("UserLocationRepository", "Location changed")
 
             _location.update {
                 Location(
-                    latitude = location.latitude,
-                    longitude = location.longitude,
+                    lat = location.latitude,
+                    lon = location.longitude,
                 )
             }
         }
@@ -64,40 +70,40 @@ class LocationRepository(
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         val providers = locationManager.allProviders
-        Log.d("LocationRepository", "Enabled providers: $providers")
+        Log.d("UserLocationRepository", "Enabled providers: $providers")
 
         if (providers.contains(LocationManager.PASSIVE_PROVIDER)) {
-            Log.d("LocationRepository", "Passive provider found, requesting last known location")
+            Log.d("UserLocationRepository", "Passive provider found, requesting last known location")
 
             val lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
-            Log.d("LocationRepository", "Last known location: $lastKnownLocation")
+            Log.d("UserLocationRepository", "Last known location: $lastKnownLocation")
 
             if (lastKnownLocation != null) {
                 _location.update {
                     Location(
-                        latitude = lastKnownLocation.latitude,
-                        longitude = lastKnownLocation.longitude,
+                        lat = lastKnownLocation.latitude,
+                        lon = lastKnownLocation.longitude,
                     )
                 }
             }
         }
 
         if (providers.contains(LocationManager.GPS_PROVIDER)) {
-            Log.d("LocationRepository", "GPS provider found, requesting last known location")
+            Log.d("UserLocationRepository", "GPS provider found, requesting last known location")
 
             val lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-            Log.d("LocationRepository", "Last known location: $lastKnownLocation")
+            Log.d("UserLocationRepository", "Last known location: $lastKnownLocation")
 
             if (lastKnownLocation != null) {
                 _location.update {
                     Location(
-                        latitude = lastKnownLocation.latitude,
-                        longitude = lastKnownLocation.longitude,
+                        lat = lastKnownLocation.latitude,
+                        lon = lastKnownLocation.longitude,
                     )
                 }
             }
 
-            Log.d("LocationRepository", "Requesting GPS location updates")
+            Log.d("UserLocationRepository", "Requesting GPS location updates")
 
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,

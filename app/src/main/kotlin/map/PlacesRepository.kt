@@ -8,15 +8,16 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Database
 import db.Place
-import db.PlaceQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.koin.core.annotation.Single
 import java.time.ZonedDateTime
 
+@Single
 class PlacesRepository(
     private val db: Database,
 ) {
