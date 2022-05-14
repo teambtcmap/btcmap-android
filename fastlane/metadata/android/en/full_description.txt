@@ -1,0 +1,9 @@
+Main Features:
+
+* See where you can spend your bitcoins
+* Encourage local business to accept bitcoins by buying their goods and services
+* Easily add new places or edit existing ones via Open Street Map
+* Smooth and snappy user experience even on the older and cheaper devices
+* Enjoy modern and minimalistic Material Design
+* Both light and dark themes are supported
+* This is an open source app which respects your privacy
