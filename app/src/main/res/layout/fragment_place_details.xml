@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        app:title="Title"
+        android:maxLines="1"
+        tools:text="Place name" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:id="@+id/divider"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        android:background="?attr/colorOnSurface"
+        android:layout_gravity="bottom" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/phoneIcon"
+                    android:layout_width="72dp"
+                    app:tint="?attr/colorSecondary"
+                    android:layout_height="72dp"
+                    android:contentDescription="@null"
+                    android:padding="24dp"
+                    android:src="@drawable/ic_phone"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/phoneTitle"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/phoneTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/phone"
+                    android:textSize="18sp"
+                    app:layout_constraintBottom_toTopOf="@id/phone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/phoneIcon"
+                    app:layout_constraintTop_toTopOf="@id/phoneIcon"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+                <TextView
+                    android:id="@+id/phone"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="0dp"
+                    android:autoLink="phone"
+                    android:paddingEnd="16dp"
+                    android:singleLine="true"
+                    android:text="@string/not_provided"
+                    android:textSize="18sp"
+                    app:layout_constraintBottom_toBottomOf="@id/phoneIcon"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/phoneTitle"
+                    app:layout_constraintTop_toBottomOf="@id/phoneTitle"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/websiteIcon"
+                    android:layout_width="72dp"
+                    app:tint="?attr/colorSecondary"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_height="72dp"
+                    android:contentDescription="@null"
+                    android:padding="24dp"
+                    android:src="@drawable/ic_globe"
+                    app:layout_constraintEnd_toStartOf="@id/websiteTitle"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/websiteTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/website"
+                    android:textSize="18sp"
+                    app:layout_constraintBottom_toTopOf="@id/website"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/websiteIcon"
+                    app:layout_constraintTop_toTopOf="@id/websiteIcon"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+                <TextView
+                    android:id="@+id/website"
+                    android:layout_width="0dp"
+                    android:autoLink="web"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="16dp"
+                    android:singleLine="true"
+                    android:text="@string/not_provided"
+                    android:textSize="18sp"
+                    app:layout_constraintBottom_toBottomOf="@id/websiteIcon"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/websiteTitle"
+                    app:layout_constraintTop_toBottomOf="@id/websiteTitle"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/openingHoursIcon"
+                    android:layout_width="72dp"
+                    app:tint="?attr/colorSecondary"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_height="72dp"
+                    android:contentDescription="@null"
+                    android:padding="24dp"
+                    android:src="@drawable/ic_access_time"
+                    app:layout_constraintEnd_toStartOf="@id/openingHoursTitle"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/openingHoursTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/opening_hours"
+                    android:textSize="18sp"
+                    app:layout_constraintBottom_toTopOf="@id/openingHours"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/openingHoursIcon"
+                    app:layout_constraintTop_toTopOf="@id/openingHoursIcon"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+                <TextView
+                    android:id="@+id/openingHours"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="16dp"
+                    android:singleLine="true"
+                    android:text="@string/not_provided"
+                    android:textSize="18sp"
+                    app:layout_constraintBottom_toBottomOf="@id/openingHoursIcon"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/openingHoursTitle"
+                    app:layout_constraintTop_toBottomOf="@id/openingHoursTitle"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/tags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="24dp"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/openingHours"
+                tools:text="Place description." />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

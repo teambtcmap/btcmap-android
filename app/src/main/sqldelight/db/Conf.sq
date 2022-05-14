@@ -1,0 +1,12 @@
+insert:
+INSERT OR REPLACE
+INTO Conf (distanceUnits)
+VALUES ?;
+
+select:
+SELECT *
+FROM Conf;
+
+delete:
+DELETE
+FROM Conf;

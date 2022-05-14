@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:id="@+id/primary_actions"
+        android:checkableBehavior="none">
+        <item
+            android:id="@+id/action_exchange_rates"
+            android:icon="@drawable/ic_bitcoin"
+            android:title="@string/menu_item_exchange_rates" />
+        <item
+            android:id="@+id/action_notification_area"
+            android:icon="@drawable/ic_area"
+            android:title="@string/menu_item_notification_area" />
+        <item
+            android:id="@+id/action_chat"
+            android:icon="@drawable/ic_chat"
+            android:title="@string/menu_item_chat" />
+        <item
+            android:id="@+id/action_support_project"
+            android:icon="@drawable/ic_build"
+            android:title="@string/support_this_project" />
+    </group>
+
+    <group
+        android:id="@+id/secondary_actions"
+        android:checkableBehavior="none">
+        <item
+            android:id="@+id/action_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/menu_item_settings" />
+    </group>
+</menu>

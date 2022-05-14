@@ -1,0 +1,36 @@
+insertOrReplace:
+INSERT OR REPLACE
+INTO Place
+VALUES ?;
+
+selectAll:
+SELECT *
+FROM Place;
+
+selectById:
+SELECT *
+FROM Place
+WHERE id = ?;
+
+selectBySearchString:
+SELECT * FROM Place WHERE
+UPPER(tags) LIKE '%' || UPPER(:searchString) || '%';
+
+selectByBoundingBox:
+SELECT * FROM Place WHERE
+lat > :minLat
+AND lat < :maxLat
+AND lon > :minLon
+AND lon < :maxLon;
+
+selectCount:
+SELECT COUNT(*)
+FROM Place;
+
+selectMaxUpdatedAt:
+SELECT MAX(updated_at)
+FROM Place;
+
+deleteAll:
+DELETE
+FROM Place;
