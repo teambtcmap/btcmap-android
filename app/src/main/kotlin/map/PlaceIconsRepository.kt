@@ -1,7 +1,13 @@
 package map
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.RectF
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.VectorDrawable
 import android.os.Build
@@ -18,7 +24,7 @@ import org.btcmap.R
 import db.Place
 
 class PlaceIconsRepository(
-    private val context: Context
+    private val context: Context,
 ) {
 
     private val markersCache = mutableMapOf<Int?, Bitmap>()
@@ -73,19 +79,19 @@ class PlaceIconsRepository(
 
     private fun getIconResId(place: Place): Int? {
         if (place.tags.has("tourism") && place.tags["tourism"].asString == "hotel") {
-            return R.drawable.ic_hotel
+            return R.drawable.baseline_hotel_24
         }
 
         if (place.tags.has("tourism") && place.tags["tourism"].asString == "hostel") {
-            return R.drawable.ic_hotel
+            return R.drawable.baseline_hotel_24
         }
 
         if (place.tags.has("tourism") && place.tags["tourism"].asString == "apartment") {
-            return R.drawable.ic_hotel
+            return R.drawable.baseline_hotel_24
         }
 
         if (place.tags.has("tourism") && place.tags["tourism"].asString == "guest_house") {
-            return R.drawable.ic_hotel
+            return R.drawable.baseline_hotel_24
         }
 
         if (place.tags.has("tourism") && place.tags["tourism"].asString == "gallery") {
@@ -205,7 +211,7 @@ class PlaceIconsRepository(
         }
 
         if (place.tags.has("amenity") && place.tags["amenity"].asString == "restaurant") {
-            return R.drawable.ic_restaurant
+            return R.drawable.baseline_restaurant_24
         }
 
         if (place.tags.has("amenity") && place.tags["amenity"].asString.lowercase() == "spa") {
@@ -225,7 +231,7 @@ class PlaceIconsRepository(
         }
 
         if (place.tags.has("amenity") && place.tags["amenity"].asString == "atm") {
-            return R.drawable.ic_atm
+            return R.drawable.baseline_local_atm_24
         }
 
         if (place.tags.has("office") && place.tags["office"].asString == "lawyer") {
@@ -253,7 +259,7 @@ class PlaceIconsRepository(
         }
 
         if (place.tags.has("office") && place.tags["office"].asString == "limousine_service") {
-            return R.drawable.ic_taxi
+            return R.drawable.baseline_local_taxi_24
         }
 
         if (place.tags.has("office") && place.tags["office"].asString == "coworking") {

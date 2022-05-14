@@ -46,7 +46,7 @@
                     android:layout_height="72dp"
                     android:contentDescription="@null"
                     android:padding="24dp"
-                    android:src="@drawable/ic_phone"
+                    android:src="@drawable/baseline_call_24"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/phoneTitle"
@@ -95,7 +95,7 @@
                     android:layout_height="72dp"
                     android:contentDescription="@null"
                     android:padding="24dp"
-                    android:src="@drawable/ic_globe"
+                    android:src="@drawable/baseline_public_24"
                     app:layout_constraintEnd_toStartOf="@id/websiteTitle"
                     app:layout_constraintStart_toStartOf="parent" />
 
@@ -142,7 +142,7 @@
                     android:layout_height="72dp"
                     android:contentDescription="@null"
                     android:padding="24dp"
-                    android:src="@drawable/ic_access_time"
+                    android:src="@drawable/baseline_schedule_24"
                     app:layout_constraintEnd_toStartOf="@id/openingHoursTitle"
                     app:layout_constraintHorizontal_chainStyle="spread_inside"
                     app:layout_constraintStart_toStartOf="parent" />
