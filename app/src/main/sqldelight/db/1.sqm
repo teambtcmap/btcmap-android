@@ -9,10 +9,3 @@ CREATE TABLE Place (
     updated_at TEXT NOT NULL,
     deleted_at TEXT NOT NULL
 );
-
-CREATE TABLE Conf (
-    distanceUnits TEXT NOT NULL,
-    notificationAreaLat REAL,
-    notificationAreaLon REAL,
-    notificationAreaRadiusMeters REAL
-);

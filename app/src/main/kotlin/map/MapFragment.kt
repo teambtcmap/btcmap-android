@@ -337,10 +337,6 @@ class MapFragment : Fragment(), Toolbar.OnMenuItemClickListener {
                 startActivity(intent)
             }
 
-            R.id.action_settings -> {
-                findNavController().navigate(R.id.action_mapFragment_to_settingsFragment)
-            }
-
             else -> return super.onOptionsItemSelected(item)
         }
 

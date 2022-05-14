@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.update
 
 class LocationRepository(
     private val context: Context,
-    private val locationManager: LocationManager,
 ) {
 
     companion object {
@@ -61,6 +60,8 @@ class LocationRepository(
         ) {
             return false
         }
+
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         val providers = locationManager.allProviders
         Log.d("LocationRepository", "Enabled providers: $providers")

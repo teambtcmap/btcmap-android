@@ -10,17 +10,9 @@
         android:name="map.MapFragment"
         android:label="MapFragment">
         <action
-            android:id="@+id/action_mapFragment_to_settingsFragment"
-            app:destination="@id/settingsFragment" />
-        <action
             android:id="@+id/action_mapFragment_to_placesSearchFragment"
             app:destination="@id/placesSearchFragment" />
     </fragment>
-
-    <fragment
-        android:id="@+id/settingsFragment"
-        android:name="settings.SettingsFragment"
-        android:label="SettingsFragment" />
 
     <fragment
         android:id="@+id/placesSearchFragment"

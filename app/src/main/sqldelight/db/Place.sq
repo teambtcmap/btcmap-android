@@ -30,7 +30,3 @@ FROM Place;
 selectMaxUpdatedAt:
 SELECT MAX(updated_at)
 FROM Place;
-
-deleteAll:
-DELETE
-FROM Place;

@@ -6,6 +6,7 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import db.Database
 import db.Place
 import db.PlaceQueries
 import kotlinx.coroutines.Dispatchers
@@ -17,19 +18,19 @@ import okhttp3.Request
 import java.time.ZonedDateTime
 
 class PlacesRepository(
-    private val placeQueries: PlaceQueries,
+    private val db: Database,
 ) {
 
     fun selectAll(): Flow<List<Place>> {
-        return placeQueries.selectAll().asFlow().mapToList()
+        return db.placeQueries.selectAll().asFlow().mapToList()
     }
 
     fun selectById(id: Long): Flow<Place?> {
-        return placeQueries.selectById(id).asFlow().mapToOneOrNull()
+        return db.placeQueries.selectById(id).asFlow().mapToOneOrNull()
     }
 
     fun selectBySearchString(searchString: String): Flow<List<Place>> {
-        return placeQueries.selectBySearchString(searchString).asFlow().mapToList()
+        return db.placeQueries.selectBySearchString(searchString).asFlow().mapToList()
     }
 
     fun selectByBoundingBox(
@@ -38,7 +39,7 @@ class PlacesRepository(
         minLon: Double,
         maxLon: Double,
     ): Flow<List<Place>> {
-        return placeQueries.selectByBoundingBox(
+        return db.placeQueries.selectByBoundingBox(
             minLat = minLat,
             maxLat = maxLat,
             minLon = minLon,
@@ -47,12 +48,12 @@ class PlacesRepository(
     }
 
     fun selectCount(): Flow<Long> {
-        return placeQueries.selectCount().asFlow().mapToOne()
+        return db.placeQueries.selectCount().asFlow().mapToOne()
     }
 
     suspend fun sync() {
         withContext(Dispatchers.Default) {
-            val maxUpdatedAt = placeQueries.selectMaxUpdatedAt().executeAsOneOrNull()?.MAX ?: "2000-01-01T00:00:00Z"
+            val maxUpdatedAt = db.placeQueries.selectMaxUpdatedAt().executeAsOneOrNull()?.MAX ?: "2000-01-01T00:00:00Z"
             val afterMaxUpdatedAt = ZonedDateTime.parse(maxUpdatedAt).toString()
 
             val httpClient = OkHttpClient()
@@ -69,8 +70,8 @@ class PlacesRepository(
                 val places: List<Place> = Gson().fromJson(json, Array<Place>::class.java).toList()
                 Log.d(PlacesRepository::class.java.simpleName, "Got ${places.size} places")
 
-                placeQueries.transaction {
-                    places.forEach { placeQueries.insertOrReplace(it) }
+                db.transaction {
+                    places.forEach { db.placeQueries.insertOrReplace(it) }
                 }
             }
         }

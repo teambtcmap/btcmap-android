@@ -1,16 +1,12 @@
 package search
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
-import android.content.res.Resources
 import androidx.lifecycle.viewModelScope
 import org.btcmap.R
 import location.Location
-import settings.ConfRepository
 import map.PlacesRepository
 import map.PlaceIconsRepository
-import common.DistanceUnits
-import common.DistanceUtils
-import db.Conf
 import db.Place
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,8 +19,7 @@ import java.text.NumberFormat
 class PlacesSearchModel(
     private val placesRepo: PlacesRepository,
     private val placeIconsRepo: PlaceIconsRepository,
-    confRepo: ConfRepository,
-    private val resources: Resources,
+    private val app: Application,
 ) : ViewModel() {
 
     private val location = MutableStateFlow<Location?>(null)
@@ -35,7 +30,7 @@ class PlacesSearchModel(
     val searchResults = _searchResults.asStateFlow()
 
     init {
-        combine(location, searchString, confRepo.select()) { location, searchString, conf ->
+        combine(location, searchString) { location, searchString ->
             if (searchString.length < MIN_QUERY_LENGTH) {
                 _searchResults.update { emptyList() }
             } else {
@@ -43,7 +38,7 @@ class PlacesSearchModel(
 
                 if (location != null) {
                     places = places.sortedBy {
-                        DistanceUtils.getDistance(
+                        getDistance(
                             startLatitude = location.latitude,
                             startLongitude = location.longitude,
                             endLatitude = it.lat,
@@ -52,7 +47,7 @@ class PlacesSearchModel(
                     }
                 }
 
-                _searchResults.update { places.map { it.toRow(location, conf) } }
+                _searchResults.update { places.map { it.toRow(location) } }
             }
         }.launchIn(viewModelScope)
     }
@@ -65,17 +60,17 @@ class PlacesSearchModel(
         this.searchString.update { searchString }
     }
 
-    private fun Place.toRow(userLocation: Location?, conf: Conf): PlacesSearchRow {
+    private fun Place.toRow(userLocation: Location?): PlacesSearchRow {
         val distanceStringBuilder = StringBuilder()
 
         if (userLocation != null) {
             val placeLocation = Location(lat, lon)
-            val distance = userLocation.distanceTo(placeLocation, conf.getDistanceUnits())
+            val distanceKm = userLocation.distanceInKmTo(placeLocation)
 
             distanceStringBuilder.apply {
-                append(DISTANCE_FORMAT.format(distance))
+                append(DISTANCE_FORMAT.format(distanceKm))
                 append(" ")
-                append(conf.getDistanceUnits().getShortName())
+                append(app.resources.getString(R.string.kilometers_short))
             }
         }
 
@@ -93,33 +88,24 @@ class PlacesSearchModel(
         )
     }
 
-    private fun Conf.getDistanceUnits(): DistanceUnits {
-        return if (distanceUnits.isBlank()) {
-            DistanceUnits.default
-        } else {
-            DistanceUnits.valueOf(distanceUnits)
-        }
-    }
-
-    private fun DistanceUnits.getShortName(): String {
-        return when (this) {
-            DistanceUnits.KILOMETERS -> resources.getString(R.string.kilometers_short)
-            DistanceUnits.MILES -> resources.getString(R.string.miles_short)
-        }
-    }
-
-    private fun Location.distanceTo(anotherLocation: Location, units: DistanceUnits): Double {
-        val distanceInKilometers = DistanceUtils.getDistance(
+    private fun Location.distanceInKmTo(location: Location): Double {
+        return getDistance(
             latitude,
             longitude,
-            anotherLocation.latitude,
-            anotherLocation.longitude
+            location.latitude,
+            location.longitude,
         ) / 1000.0
+    }
 
-        return when (units) {
-            DistanceUnits.KILOMETERS -> distanceInKilometers
-            DistanceUnits.MILES -> DistanceUtils.toMiles(distanceInKilometers)
-        }
+    private fun getDistance(
+        startLatitude: Double,
+        startLongitude: Double,
+        endLatitude: Double,
+        endLongitude: Double
+    ): Double {
+        val distance = FloatArray(1)
+        android.location.Location.distanceBetween(startLatitude, startLongitude, endLatitude, endLongitude, distance)
+        return distance[0].toDouble()
     }
 
     companion object {
