@@ -1,13 +1,13 @@
 package sync
 
 import android.util.Log
-import com.google.gson.Gson
 import db.Database
 import db.Place
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.json.JSONArray
 import org.koin.core.annotation.Single
 import java.time.ZonedDateTime
 
@@ -32,12 +32,28 @@ class Sync(
 
             if (response.isSuccessful) {
                 val json = response.body!!.string()
-                val places: List<Place> = Gson().fromJson(json, Array<Place>::class.java).toList()
-                Log.d("Sync", "Got ${places.size} places")
+                val places = JSONArray(json)
+                Log.d("Sync", "Got ${places.length()} places")
 
                 db.transaction {
-                    places.forEach { db.placeQueries.insertOrReplace(it) }
+                    for (i in 0 until places.length()) {
+                        val place = places.getJSONObject(i)
+
+                        db.placeQueries.insertOrReplace(
+                            Place(
+                                id = place.getLong("id"),
+                                lat = place.getDouble("lat"),
+                                lon = place.getDouble("lon"),
+                                tags = place.getJSONObject("tags"),
+                                created_at = place.getString("created_at"),
+                                updated_at = place.getString("updated_at"),
+                                deleted_at = place.getString("deleted_at"),
+                            )
+                        )
+                    }
                 }
+
+                Log.d("Sync", "Finished sync")
             }
         }
     }

@@ -130,235 +130,235 @@ class PlaceIconsRepository(
 
     private fun Place.iconResId(): Int? {
         tags.apply {
-            if (has("tourism") && this["tourism"].asString == "hotel") {
+            if (has("tourism") && this["tourism"].toString() == "hotel") {
                 return R.drawable.baseline_hotel_24
             }
 
-            if (has("tourism") && this["tourism"].asString == "hostel") {
+            if (has("tourism") && this["tourism"].toString() == "hostel") {
                 return R.drawable.baseline_hotel_24
             }
 
-            if (has("tourism") && this["tourism"].asString == "apartment") {
+            if (has("tourism") && this["tourism"].toString() == "apartment") {
                 return R.drawable.baseline_hotel_24
             }
 
-            if (has("tourism") && this["tourism"].asString == "guest_house") {
+            if (has("tourism") && this["tourism"].toString() == "guest_house") {
                 return R.drawable.baseline_hotel_24
             }
 
-            if (has("tourism") && this["tourism"].asString == "gallery") {
+            if (has("tourism") && this["tourism"].toString() == "gallery") {
                 return R.drawable.baseline_palette_24
             }
 
-            if (has("tourism") && this["tourism"].asString == "chalet") {
+            if (has("tourism") && this["tourism"].toString() == "chalet") {
                 return R.drawable.baseline_chalet_24
             }
 
-            if (has("company") && this["company"].asString == "transport") {
+            if (has("company") && this["company"].toString() == "transport") {
                 return R.drawable.baseline_directions_car_24
             }
 
-            if (has("shop") && this["shop"].asString == "scuba_diving") {
+            if (has("shop") && this["shop"].toString() == "scuba_diving") {
                 return R.drawable.baseline_scuba_diving_24
             }
 
-            if (has("shop") && this["shop"].asString == "computer") {
+            if (has("shop") && this["shop"].toString() == "computer") {
                 return R.drawable.baseline_computer_24
             }
 
-            if (has("shop") && this["shop"].asString == "electronics") {
+            if (has("shop") && this["shop"].toString() == "electronics") {
                 return R.drawable.baseline_computer_24
             }
 
-            if (has("shop") && this["shop"].asString == "hardware") {
+            if (has("shop") && this["shop"].toString() == "hardware") {
                 return R.drawable.baseline_hardware_24
             }
 
-            if (has("shop") && this["shop"].asString == "hairdresser") {
+            if (has("shop") && this["shop"].toString() == "hairdresser") {
                 return R.drawable.ic_tmp_barbershop
             }
 
-            if (has("shop") && this["shop"].asString == "massage") {
+            if (has("shop") && this["shop"].toString() == "massage") {
                 return R.drawable.baseline_spa_24
             }
 
-            if (has("shop") && this["shop"].asString == "beauty") {
+            if (has("shop") && this["shop"].toString() == "beauty") {
                 return R.drawable.baseline_spa_24
             }
 
-            if (has("shop") && this["shop"].asString == "mobile_phone") {
+            if (has("shop") && this["shop"].toString() == "mobile_phone") {
                 return R.drawable.baseline_smartphone_24
             }
 
-            if (has("shop") && this["shop"].asString == "supermarket") {
+            if (has("shop") && this["shop"].toString() == "supermarket") {
                 return R.drawable.baseline_local_grocery_store_24
             }
 
-            if (has("shop") && this["shop"].asString == "wholesale") {
+            if (has("shop") && this["shop"].toString() == "wholesale") {
                 return R.drawable.baseline_local_grocery_store_24
             }
 
-            if (has("shop") && this["shop"].asString == "interior_decoration") {
+            if (has("shop") && this["shop"].toString() == "interior_decoration") {
                 return R.drawable.baseline_design_services_24
             }
 
-            if (has("shop") && this["shop"].asString == "video_games") {
+            if (has("shop") && this["shop"].toString() == "video_games") {
                 return R.drawable.baseline_games_24
             }
 
-            if (has("shop") && this["shop"].asString == "jewelry") {
+            if (has("shop") && this["shop"].toString() == "jewelry") {
                 return R.drawable.baseline_diamond_24
             }
 
-            if (has("shop") && this["shop"].asString == "e-cigarette") {
+            if (has("shop") && this["shop"].toString() == "e-cigarette") {
                 return R.drawable.baseline_vaping_rooms_24
             }
 
-            if (has("shop") && this["shop"].asString == "clothes") {
+            if (has("shop") && this["shop"].toString() == "clothes") {
                 return R.drawable.baseline_storefront_24
             }
 
-            if (has("shop") && this["shop"].asString == "yes") {
+            if (has("shop") && this["shop"].toString() == "yes") {
                 return R.drawable.baseline_storefront_24
             }
 
-            if (has("shop") && this["shop"].asString == "car_parts") {
+            if (has("shop") && this["shop"].toString() == "car_parts") {
                 return R.drawable.baseline_directions_car_24
             }
 
-            if (has("shop") && this["shop"].asString == "car_repair") {
+            if (has("shop") && this["shop"].toString() == "car_repair") {
                 return R.drawable.baseline_car_repair_24
             }
 
-            if (has("shop") && this["shop"].asString == "deli") {
+            if (has("shop") && this["shop"].toString() == "deli") {
                 return R.drawable.baseline_tapas_24
             }
 
-            if (has("shop") && this["shop"].asString == "watches") {
+            if (has("shop") && this["shop"].toString() == "watches") {
                 return R.drawable.baseline_watch_24
             }
 
-            if (has("shop") && this["shop"].asString == "florist") {
+            if (has("shop") && this["shop"].toString() == "florist") {
                 return R.drawable.baseline_local_florist_24
             }
 
-            if (has("shop") && this["shop"].asString == "storage_rental") {
+            if (has("shop") && this["shop"].toString() == "storage_rental") {
                 return R.drawable.baseline_warehouse_24
             }
 
-            if (has("shop") && this["shop"].asString == "garden_centre") {
+            if (has("shop") && this["shop"].toString() == "garden_centre") {
                 return R.drawable.baseline_local_florist_24
             }
 
-            if (has("shop") && this["shop"].asString == "toys") {
+            if (has("shop") && this["shop"].toString() == "toys") {
                 return R.drawable.baseline_toys_24
             }
 
-            if (has("shop") && this["shop"].asString == "sports") {
+            if (has("shop") && this["shop"].toString() == "sports") {
                 return R.drawable.baseline_sports_24
             }
 
-            if (has("shop") && this["shop"].asString == "convenience") {
+            if (has("shop") && this["shop"].toString() == "convenience") {
                 return R.drawable.baseline_local_grocery_store_24
             }
 
-            if (has("shop") && this["shop"].asString == "travel_agency") {
+            if (has("shop") && this["shop"].toString() == "travel_agency") {
                 return R.drawable.baseline_luggage_24
             }
 
-            if (has("cuisine") && this["cuisine"].asString == "burger") {
+            if (has("cuisine") && this["cuisine"].toString() == "burger") {
                 return R.drawable.baseline_lunch_dining_24
             }
 
-            if (has("cuisine") && this["cuisine"].asString == "pizza") {
+            if (has("cuisine") && this["cuisine"].toString() == "pizza") {
                 return R.drawable.baseline_local_pizza_24
             }
 
-            if (has("amenity") && this["amenity"].asString == "bar") {
+            if (has("amenity") && this["amenity"].toString() == "bar") {
                 return R.drawable.baseline_local_bar_24
             }
 
-            if (has("amenity") && this["amenity"].asString == "restaurant") {
+            if (has("amenity") && this["amenity"].toString() == "restaurant") {
                 return R.drawable.baseline_restaurant_24
             }
 
-            if (has("amenity") && this["amenity"].asString.lowercase() == "spa") {
+            if (has("amenity") && this["amenity"].toString().lowercase() == "spa") {
                 return R.drawable.baseline_spa_24
             }
 
-            if (has("amenity") && this["amenity"].asString == "training") {
+            if (has("amenity") && this["amenity"].toString() == "training") {
                 return R.drawable.baseline_school_24
             }
 
-            if (has("amenity") && this["amenity"].asString == "bureau_de_change") {
+            if (has("amenity") && this["amenity"].toString() == "bureau_de_change") {
                 return R.drawable.baseline_currency_exchange_24
             }
 
-            if (has("amenity") && this["amenity"].asString == "car_wash") {
+            if (has("amenity") && this["amenity"].toString() == "car_wash") {
                 return R.drawable.baseline_local_car_wash_24
             }
 
-            if (has("amenity") && this["amenity"].asString == "atm") {
+            if (has("amenity") && this["amenity"].toString() == "atm") {
                 return R.drawable.baseline_local_atm_24
             }
 
-            if (has("amenity") && this["amenity"].asString == "cafe") {
+            if (has("amenity") && this["amenity"].toString() == "cafe") {
                 return R.drawable.baseline_local_cafe_24
             }
 
-            if (has("amenity") && this["amenity"].asString == "pub") {
+            if (has("amenity") && this["amenity"].toString() == "pub") {
                 return R.drawable.baseline_sports_bar_24
             }
 
-            if (has("office") && this["office"].asString == "lawyer") {
+            if (has("office") && this["office"].toString() == "lawyer") {
                 return R.drawable.ic_tmp_scales
             }
 
-            if (has("office") && this["office"].asString == "company") {
+            if (has("office") && this["office"].toString() == "company") {
                 return R.drawable.baseline_business_24
             }
 
-            if (has("office") && this["office"].asString == "it") {
+            if (has("office") && this["office"].toString() == "it") {
                 return R.drawable.baseline_computer_24
             }
 
-            if (has("office") && this["office"].asString == "educational_institution") {
+            if (has("office") && this["office"].toString() == "educational_institution") {
                 return R.drawable.baseline_school_24
             }
 
-            if (has("office") && this["office"].asString == "graphic_design") {
+            if (has("office") && this["office"].toString() == "graphic_design") {
                 return R.drawable.baseline_design_services_24
             }
 
-            if (has("office") && this["office"].asString == "marketing") {
+            if (has("office") && this["office"].toString() == "marketing") {
                 return R.drawable.baseline_business_24
             }
 
-            if (has("office") && this["office"].asString == "limousine_service") {
+            if (has("office") && this["office"].toString() == "limousine_service") {
                 return R.drawable.baseline_local_taxi_24
             }
 
-            if (has("office") && this["office"].asString == "coworking") {
+            if (has("office") && this["office"].toString() == "coworking") {
                 return R.drawable.baseline_business_24
             }
 
-            if (has("leisure") && this["leisure"].asString == "fitness_centre") {
+            if (has("leisure") && this["leisure"].toString() == "fitness_centre") {
                 return R.drawable.baseline_fitness_center_24
             }
 
-            if (has("healthcare") && this["healthcare"].asString == "dentist") {
+            if (has("healthcare") && this["healthcare"].toString() == "dentist") {
                 return R.drawable.baseline_medical_services_24
             }
 
-            if (has("healthcare") && this["healthcare"].asString == "clinic") {
+            if (has("healthcare") && this["healthcare"].toString() == "clinic") {
                 return R.drawable.baseline_medical_services_24
             }
 
-            if (has("healthcare") && this["healthcare"].asString == "pharmacy") {
+            if (has("healthcare") && this["healthcare"].toString() == "pharmacy") {
                 return R.drawable.baseline_local_pharmacy_24
             }
 
-            if (has("building") && this["building"].asString == "commercial") {
+            if (has("building") && this["building"].toString() == "commercial") {
                 return R.drawable.baseline_business_24
             }
         }

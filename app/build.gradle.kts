@@ -45,6 +45,10 @@ android {
         }
     }
 
+    packagingOptions {
+        resources.excludes += "DebugProbesKt.bin"
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -56,6 +60,17 @@ android {
                 signingProperties.load(FileInputStream(signingPropertiesFile))
                 signingConfig = signingConfigs.getByName("release")
             }
+        }
+
+        getByName("release") {
+            // Enables code shrinking, obfuscation, and optimization
+            isMinifyEnabled = true
+
+            // Enables resource shrinking
+            isShrinkResources = true
+
+            // Includes the default ProGuard rules file
+            proguardFile(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
     }
 
@@ -101,7 +116,4 @@ dependencies {
 
     // Open Street Map widget
     implementation("org.osmdroid:osmdroid-android:6.1.11")
-
-    // JSON converter
-    implementation("com.google.code.gson:gson:2.9.0")
 }

@@ -79,7 +79,7 @@ class PlacesSearchModel(
         }
 
         val name = if (tags.has("name")) {
-            tags["name"].asString
+            tags["name"].toString()
         } else {
             "Unnamed"
         }

@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import org.btcmap.R
 import org.btcmap.databinding.FragmentPlaceDetailsBinding
-import com.google.gson.GsonBuilder
 import db.Place
 
 class PlaceDetailsFragment : Fragment() {
@@ -35,29 +34,29 @@ class PlaceDetailsFragment : Fragment() {
 
     fun setPlace(place: Place) {
         if (place.tags.has("name")) {
-            binding.toolbar.title = place.tags["name"].asString
+            binding.toolbar.title = place.tags["name"].toString()
         } else {
             binding.toolbar.title = place.id.toString()
         }
 
         if (place.tags.has("phone")) {
-            binding.phone.text = place.tags["phone"].asString
+            binding.phone.text = place.tags["phone"].toString()
         } else {
             binding.phone.setText(R.string.not_provided)
         }
 
         if (place.tags.has("website")) {
-            binding.website.text = place.tags["website"].asString
+            binding.website.text = place.tags["website"].toString()
         } else {
             binding.website.setText(R.string.not_provided)
         }
 
         if (place.tags.has("opening_hours")) {
-            binding.openingHours.text = place.tags["opening_hours"].asString
+            binding.openingHours.text = place.tags["opening_hours"].toString()
         } else {
             binding.openingHours.setText(R.string.not_provided)
         }
 
-        binding.tags.text = GsonBuilder().setPrettyPrinting().create().toJson(place.tags)
+        binding.tags.text = place.tags.toString(4)
     }
 }

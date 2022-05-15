@@ -1,10 +1,9 @@
 package db
 
 import android.content.Context
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import com.squareup.sqldelight.ColumnAdapter
 import com.squareup.sqldelight.android.AndroidSqliteDriver
+import org.json.JSONObject
 
 fun database(context: Context): Database {
     return Database(
@@ -19,15 +18,15 @@ fun database(context: Context): Database {
 
 private fun placeAdapter(): Place.Adapter {
     return Place.Adapter(
-        tagsAdapter = object : ColumnAdapter<JsonObject, String> {
+        tagsAdapter = object : ColumnAdapter<JSONObject, String> {
             override fun decode(databaseValue: String) =
                 if (databaseValue.isEmpty()) {
-                    JsonObject()
+                    JSONObject()
                 } else {
-                    Gson().fromJson(databaseValue, JsonObject::class.java)
+                    JSONObject(databaseValue)
                 }
 
-            override fun encode(value: JsonObject) = value.toString()
+            override fun encode(value: JSONObject) = value.toString()
         }
     )
 }
