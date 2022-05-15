@@ -150,6 +150,10 @@ class PlaceIconsRepository(
                 return R.drawable.baseline_palette_24
             }
 
+            if (has("tourism") && this["tourism"].asString == "chalet") {
+                return R.drawable.baseline_chalet_24
+            }
+
             if (has("company") && this["company"].asString == "transport") {
                 return R.drawable.baseline_directions_car_24
             }
@@ -250,6 +254,18 @@ class PlaceIconsRepository(
                 return R.drawable.baseline_toys_24
             }
 
+            if (has("shop") && this["shop"].asString == "sports") {
+                return R.drawable.baseline_sports_24
+            }
+
+            if (has("shop") && this["shop"].asString == "convenience") {
+                return R.drawable.baseline_local_grocery_store_24
+            }
+
+            if (has("shop") && this["shop"].asString == "travel_agency") {
+                return R.drawable.baseline_luggage_24
+            }
+
             if (has("cuisine") && this["cuisine"].asString == "burger") {
                 return R.drawable.baseline_lunch_dining_24
             }
@@ -284,6 +300,10 @@ class PlaceIconsRepository(
 
             if (has("amenity") && this["amenity"].asString == "atm") {
                 return R.drawable.baseline_local_atm_24
+            }
+
+            if (has("amenity") && this["amenity"].asString == "cafe") {
+                return R.drawable.baseline_local_cafe_24
             }
 
             if (has("office") && this["office"].asString == "lawyer") {
@@ -332,6 +352,10 @@ class PlaceIconsRepository(
 
             if (has("healthcare") && this["healthcare"].asString == "pharmacy") {
                 return R.drawable.baseline_local_pharmacy_24
+            }
+
+            if (has("building") && this["building"].asString == "commercial") {
+                return R.drawable.baseline_business_24
             }
         }
 
