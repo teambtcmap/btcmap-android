@@ -12,6 +12,9 @@
         <action
             android:id="@+id/action_mapFragment_to_placesSearchFragment"
             app:destination="@id/placesSearchFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_donationFragment"
+            app:destination="@id/donationFragment" />
     </fragment>
 
     <fragment
@@ -27,5 +30,10 @@
             app:argType="string"
             app:nullable="false" />
     </fragment>
+
+    <fragment
+        android:id="@+id/donationFragment"
+        android:name="donation.DonationFragment"
+        android:label="DonationFragment" />
 
 </navigation>

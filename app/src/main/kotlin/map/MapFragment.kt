@@ -93,6 +93,16 @@ class MapFragment : Fragment() {
 
             setOnMenuItemClickListener {
                 when (it.itemId) {
+                    R.id.action_add -> {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.data = Uri.parse("https://wiki.openstreetmap.org/wiki/How_to_contribute")
+                        startActivity(intent)
+                    }
+
+                    R.id.action_donate -> {
+                        findNavController().navigate(MapFragmentDirections.actionMapFragmentToDonationFragment())
+                    }
+
                     R.id.action_search -> {
                         lifecycleScope.launch {
                             val action = MapFragmentDirections.actionMapFragmentToPlacesSearchFragment(
@@ -102,12 +112,6 @@ class MapFragment : Fragment() {
 
                             findNavController().navigate(action)
                         }
-                    }
-
-                    R.id.action_add -> {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse("https://wiki.openstreetmap.org/wiki/How_to_contribute")
-                        startActivity(intent)
                     }
                 }
 
