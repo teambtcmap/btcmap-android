@@ -306,6 +306,10 @@ class PlaceIconsRepository(
                 return R.drawable.baseline_local_cafe_24
             }
 
+            if (has("amenity") && this["amenity"].asString == "pub") {
+                return R.drawable.baseline_sports_bar_24
+            }
+
             if (has("office") && this["office"].asString == "lawyer") {
                 return R.drawable.ic_tmp_scales
             }
