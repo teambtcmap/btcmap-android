@@ -1,4 +1,4 @@
-name: Android CI
+name: Create preview release
 
 on:
   push:
@@ -29,10 +29,11 @@ jobs:
       - name: Assemble APKs
         run: ./gradlew assemble
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - name: Create preview release
+      - uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "preview"
+          automatic_release_tag: 'preview'
           prerelease: true
-          title: "preview"
-          files: "app/build/outputs/apk/debug/btcmap-*.apk"
+          title: 'preview'
+          files: '*.apk'
