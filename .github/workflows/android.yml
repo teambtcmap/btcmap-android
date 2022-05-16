@@ -29,12 +29,6 @@ jobs:
       - name: Assemble APKs
         run: ./gradlew assemble
 
-      - name: Upload APKs
-        uses: actions/upload-artifact@v2.2.0
-        with:
-          name: btcmap-debug
-          path: app/build/outputs/apk/debug/btcmap-*.apk
-
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
