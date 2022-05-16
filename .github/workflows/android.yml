@@ -13,7 +13,7 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: set up JDK 11
+      - name: Install JDK 11
         uses: actions/setup-java@v2
         with:
           java-version: '11'
@@ -23,13 +23,13 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Run unit tests
-        run: ./gradlew testDebugUnitTest
+      - name: Run verification tasks
+        run: ./gradlew check
 
-      - name: Assemble APK
-        run: ./gradlew assembleDebug
+      - name: Assemble APKs
+        run: ./gradlew assemble
 
-      - name: Upload APK artifact
+      - name: Upload APKs
         uses: actions/upload-artifact@v2.2.0
         with:
           name: btcmap-debug
