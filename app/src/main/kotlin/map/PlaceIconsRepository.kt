@@ -154,6 +154,10 @@ class PlaceIconsRepository(
                 return R.drawable.baseline_chalet_24
             }
 
+            if (has("tourism") && this["tourism"].toString() == "motel") {
+                return R.drawable.baseline_hotel_24
+            }
+
             if (has("company") && this["company"].toString() == "transport") {
                 return R.drawable.baseline_directions_car_24
             }
