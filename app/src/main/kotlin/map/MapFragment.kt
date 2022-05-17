@@ -184,7 +184,7 @@ class MapFragment : Fragment() {
         var placesOverlay: Overlay? = null
 
         viewLifecycleOwner.lifecycleScope.launch {
-            model.visiblePlaces.collectLatest { places ->
+            model.visiblePlaces.collectLatest { placeWithMarkers ->
                 if (placesOverlay != null) {
                     binding.map.overlays.remove(placesOverlay)
                 }
@@ -192,22 +192,17 @@ class MapFragment : Fragment() {
                 val items = mutableListOf<OverlayItem>()
                 val itemsToPlaces = mutableMapOf<OverlayItem, Place>()
 
-                places.forEach { place ->
-                    val item = OverlayItem(
-                        "Title",
-                        "Description",
-                        GeoPoint(place.first.lat, place.first.lon)
-                    ).apply {
-                        setMarker(place.second)
-                    }
-
+                placeWithMarkers.forEach { placeWithMarker ->
+                    val (place, marker) = placeWithMarker
+                    val item = OverlayItem(null, null, GeoPoint(place.lat, place.lon))
+                    item.setMarker(marker)
                     items += item
-                    itemsToPlaces[item] = place.first
+                    itemsToPlaces[item] = place
                 }
 
                 placesOverlay =
                     ItemizedIconOverlay(requireContext(), items, object : OnItemGestureListener<OverlayItem> {
-                        override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
+                        override fun onItemSingleTapUp(index: Int, item: OverlayItem): Boolean {
                             model.selectPlace(itemsToPlaces[item]!!.id, false)
                             return true
                         }
@@ -224,7 +219,7 @@ class MapFragment : Fragment() {
 
         var ignoreNextLocation = false
 
-        model.viewport.value?.let {
+        model.mapBoundingBox.value?.let {
             ignoreNextLocation = true
 
             viewLifecycleOwner.lifecycleScope.launch {
@@ -232,7 +227,7 @@ class MapFragment : Fragment() {
                     delay(10)
                 }
 
-                binding.map.zoomToBoundingBox(model.viewport.value, false)
+                binding.map.zoomToBoundingBox(model.mapBoundingBox.value, false)
             }
         }
 
@@ -257,7 +252,7 @@ class MapFragment : Fragment() {
                 Snackbar.LENGTH_INDEFINITE,
             )
 
-            model.toast.collectLatest {
+            model.syncMessage.collectLatest {
                 snack.setText(it)
 
                 if (it.isNotBlank()) {

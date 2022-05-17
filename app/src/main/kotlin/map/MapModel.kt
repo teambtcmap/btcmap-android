@@ -1,6 +1,5 @@
 package map
 
-import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -14,6 +13,7 @@ import db.Place
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -36,28 +36,29 @@ class MapModel(
     private val db: Database,
 ) : ViewModel() {
 
-    val toast = MutableStateFlow("")
+    val userLocation: StateFlow<Location> = locationRepo.location
 
-    private val _viewport: MutableStateFlow<BoundingBox?> = MutableStateFlow(null)
-    val viewport = _viewport.asStateFlow()
+    private val _mapBoundingBox: MutableStateFlow<BoundingBox?> = MutableStateFlow(null)
+    val mapBoundingBox = _mapBoundingBox.asStateFlow()
 
     private val _selectedPlace: MutableStateFlow<Place?> = MutableStateFlow(null)
     val selectedPlace = _selectedPlace.asStateFlow()
 
-    val userLocation = locationRepo.location
+    private val _visiblePlaces = MutableStateFlow<List<PlaceWithMarker>>(emptyList())
+    val visiblePlaces = _visiblePlaces.asStateFlow()
 
     private val _moveToLocation: MutableStateFlow<Location> = MutableStateFlow(UserLocationRepository.DEFAULT_LOCATION)
     val moveToLocation = _moveToLocation.asStateFlow()
 
-    private val _visiblePlaces = MutableStateFlow<List<Pair<Place, BitmapDrawable>>>(emptyList())
-    val visiblePlaces = _visiblePlaces.asStateFlow()
+    private val _syncMessage: MutableStateFlow<String> = MutableStateFlow("")
+    val syncMessage = _syncMessage.asStateFlow()
 
     fun syncPlaces() {
         viewModelScope.launch {
             runCatching {
                 val job = launch {
                     delay(1000)
-                    toast.update { "Syncing places..." }
+                    _syncMessage.update { "Syncing places..." }
                 }
 
                 sync.sync()
@@ -68,17 +69,17 @@ class MapModel(
                     job.cancel()
                 }
 
-                toast.update { "" }
+                _syncMessage.update { "" }
             }.onFailure {
-                toast.update { "Failed to sync places" }
+                _syncMessage.update { "Failed to sync places" }
                 delay(5000)
-                toast.update { "" }
+                _syncMessage.update { "" }
             }
         }
     }
 
     init {
-        combine(_viewport, db.placeQueries.selectCount().asFlow().mapToOne()) { viewport, _ ->
+        combine(_mapBoundingBox, db.placeQueries.selectCount().asFlow().mapToOne()) { viewport, _ ->
             withContext(Dispatchers.Default) {
                 if (viewport == null) {
                     return@withContext
@@ -94,7 +95,7 @@ class MapModel(
                         .asFlow()
                         .mapToList()
                         .first()
-                        .map { Pair(it, mapMarkersRepo.getMarker(it)) }
+                        .map { PlaceWithMarker(it, mapMarkersRepo.getMarker(it)) }
                 }
             }
         }.launchIn(viewModelScope)
@@ -123,7 +124,7 @@ class MapModel(
     }
 
     fun setMapViewport(viewport: BoundingBox) {
-        _viewport.update { viewport }
+        _mapBoundingBox.update { viewport }
     }
 
     fun selectPlace(id: String, moveToLocation: Boolean) {

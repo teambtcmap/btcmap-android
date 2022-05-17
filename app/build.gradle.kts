@@ -115,5 +115,5 @@ dependencies {
     ksp("io.insert-koin:koin-ksp-compiler:$koinAnnotationsVer")
 
     // Open Street Map widget
-    implementation("org.osmdroid:osmdroid-android:6.1.11")
+    implementation("org.osmdroid:osmdroid-android:6.1.13")
 }
