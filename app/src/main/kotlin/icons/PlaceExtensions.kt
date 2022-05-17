@@ -27,7 +27,7 @@ fun Place.iconResId(): Int? {
         tags["shop"] == "computer" -> R.drawable.baseline_computer_24
         tags["shop"] == "electronics" -> R.drawable.baseline_computer_24
         tags["shop"] == "hardware" -> R.drawable.baseline_hardware_24
-        tags["shop"] == "hairdresser" -> R.drawable.ic_tmp_barbershop
+        tags["shop"] == "hairdresser" -> R.drawable.baseline_content_cut_24
         tags["shop"] == "massage" -> R.drawable.baseline_spa_24
         tags["shop"] == "beauty" -> R.drawable.baseline_spa_24
         tags["shop"] == "mobile_phone" -> R.drawable.baseline_smartphone_24
@@ -61,7 +61,7 @@ fun Place.iconResId(): Int? {
         tags["amenity"] == "atm" -> R.drawable.baseline_local_atm_24
         tags["amenity"] == "cafe" -> R.drawable.baseline_local_cafe_24
         tags["amenity"] == "pub" -> R.drawable.baseline_sports_bar_24
-        tags["office"] == "lawyer" -> R.drawable.ic_tmp_scales
+        tags["office"] == "lawyer" -> R.drawable.baseline_balance_24
         tags["office"] == "company" -> R.drawable.baseline_business_24
         tags["office"] == "it" -> R.drawable.baseline_computer_24
         tags["office"] == "educational_institution" -> R.drawable.baseline_school_24

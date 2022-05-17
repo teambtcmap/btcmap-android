@@ -2,12 +2,12 @@ package map
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.RectF
 import android.graphics.drawable.BitmapDrawable
+import android.util.TypedValue
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.applyCanvas
 import androidx.core.graphics.createBitmap
@@ -40,9 +40,12 @@ class MapMarkersRepository(
     }
 
     private fun createMarkerIcon(iconResId: Int?): Bitmap {
-        val emptyPinBitmap = BitmapFactory.decodeResource(
-            context.resources,
-            R.drawable.ic_map_marker_empty,
+        val pinSizePx =
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 128f, context.resources.displayMetrics).toInt()
+
+        val emptyPinBitmap = ContextCompat.getDrawable(context, R.drawable.ic_marker)!!.toBitmap(
+            width = pinSizePx,
+            height = pinSizePx,
         )
 
         val markerIcon = createBitmap(emptyPinBitmap.width, emptyPinBitmap.height).applyCanvas {
@@ -53,8 +56,8 @@ class MapMarkersRepository(
             markerIcon.applyCanvas {
                 drawCircle(
                     markerIcon.width.toFloat() / 2,
-                    markerIcon.height.toFloat() * 0.43f,
-                    markerIcon.width.toFloat() * 0.27f,
+                    markerIcon.height.toFloat() * 0.4f,
+                    markerIcon.width.toFloat() * 0.325f,
                     Paint().apply {
                         color = Color.WHITE
                         isAntiAlias = true
@@ -64,9 +67,9 @@ class MapMarkersRepository(
 
             val iconFrame = RectF(
                 markerIcon.width.toFloat() * 0.3f,
-                markerIcon.width.toFloat() * 0.23f,
+                markerIcon.width.toFloat() * 0.20f,
                 markerIcon.width.toFloat() * 0.7f,
-                markerIcon.height.toFloat() * 0.63f
+                markerIcon.height.toFloat() * 0.6f
             ).toRect()
 
             val iconBitmap = ContextCompat.getDrawable(context, iconResId)!!.toBitmap(
