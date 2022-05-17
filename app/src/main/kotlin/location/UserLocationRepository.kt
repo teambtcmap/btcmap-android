@@ -70,7 +70,7 @@ class UserLocationRepository(
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         val providers = locationManager.allProviders
-        Log.d("UserLocationRepository", "Enabled providers: $providers")
+        Log.d("UserLocationRepository", "Listed providers: $providers")
 
         if (providers.contains(LocationManager.PASSIVE_PROVIDER)) {
             Log.d("UserLocationRepository", "Passive provider found, requesting last known location")
@@ -102,15 +102,22 @@ class UserLocationRepository(
                     )
                 }
             }
+        }
 
-            Log.d("UserLocationRepository", "Requesting GPS location updates")
+        Log.d("UserLocationRepository", "Requesting GPS location updates")
 
-            locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
-                10_000,
-                0f,
-                listener,
-            )
+        providers.forEach {
+            val enabled = locationManager.isProviderEnabled(it)
+            Log.d("UserLocationRepository", "Provider ${it}.enabled=$enabled")
+
+            if (enabled) {
+                locationManager.requestLocationUpdates(
+                    it,
+                    0,
+                    0f,
+                    listener,
+                )
+            }
         }
 
         requestedLocationUpdates = true
