@@ -30,7 +30,7 @@ import kotlin.math.min
 
 @KoinViewModel
 class MapModel(
-    private val placeIconsRepo: PlaceIconsRepository,
+    private val mapMarkersRepo: MapMarkersRepository,
     private val locationRepo: UserLocationRepository,
     private val sync: Sync,
     private val db: Database,
@@ -94,9 +94,7 @@ class MapModel(
                         .asFlow()
                         .mapToList()
                         .first()
-                        .map {
-                            Pair(it, placeIconsRepo.getMarkerIcon(it))
-                        }
+                        .map { Pair(it, mapMarkersRepo.getMarker(it)) }
                 }
             }
         }.launchIn(viewModelScope)

@@ -8,7 +8,7 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.Database
 import org.btcmap.R
 import db.Location
-import map.PlaceIconsRepository
+import icons.PlaceIconsRepository
 import db.Place
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
