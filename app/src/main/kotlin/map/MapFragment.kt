@@ -224,14 +224,16 @@ class MapFragment : Fragment() {
 
         var ignoreNextLocation = false
 
-        if (model.viewport.value != null) {
+        model.viewport.value?.let {
             ignoreNextLocation = true
 
-            val viewport = model.viewport.value!!
-            val mapController = binding.map.controller
-            mapController.setZoom(prevZoom)
-            val viewportCenter = GeoPoint(viewport.centerLatitude, viewport.centerLongitude)
-            mapController.setCenter(viewportCenter)
+            viewLifecycleOwner.lifecycleScope.launch {
+                while (binding.map.getIntrinsicScreenRect(null).height() == 0) {
+                    delay(10)
+                }
+
+                binding.map.zoomToBoundingBox(model.viewport.value, false)
+            }
         }
 
         model.moveToLocation.onEach {
@@ -281,11 +283,8 @@ class MapFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        prevZoom = binding.map.zoomLevel
         _binding = null
     }
-
-    var prevZoom = 0
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
