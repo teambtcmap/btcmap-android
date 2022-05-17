@@ -121,6 +121,7 @@ class MapFragment : Fragment() {
 
         binding.map.apply {
             zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
+            minZoomLevel = 5.0
             setMultiTouchControls(true)
             addLocationOverlay()
             addCancelSelectionOverlay()
