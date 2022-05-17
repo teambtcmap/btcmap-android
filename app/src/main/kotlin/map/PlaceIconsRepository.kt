@@ -20,9 +20,9 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.toColorFilter
 import androidx.core.graphics.toRect
-import com.google.gson.JsonObject
 import org.btcmap.R
 import db.Place
+import org.json.JSONObject
 import org.koin.core.annotation.Single
 
 @Single
@@ -130,8 +130,8 @@ class PlaceIconsRepository(
     }
 
     @JvmInline
-    private value class JsonObjectWrapper(private val value: JsonObject) {
-        operator fun get(key: String): String? = if (value.has(key)) value[key].asString else null
+    private value class JsonObjectWrapper(private val value: JSONObject) {
+        operator fun get(key: String): String? = if (value.has(key)) value[key].toString() else null
     }
 
     @DrawableRes
@@ -177,7 +177,7 @@ class PlaceIconsRepository(
             tags["cuisine"] == "pizza" -> R.drawable.baseline_local_pizza_24
             tags["amenity"] == "bar" -> R.drawable.baseline_local_bar_24
             tags["amenity"] == "restaurant" -> R.drawable.baseline_restaurant_24
-            tags["amenity"]?.lowercase() == "spa" -> R.drawable.baseline_spa_24
+            tags["amenity"] == "spa" -> R.drawable.baseline_spa_24
             tags["amenity"] == "training" -> R.drawable.baseline_school_24
             tags["amenity"] == "bureau_de_change" -> R.drawable.baseline_currency_exchange_24
             tags["amenity"] == "car_wash" -> R.drawable.baseline_local_car_wash_24
