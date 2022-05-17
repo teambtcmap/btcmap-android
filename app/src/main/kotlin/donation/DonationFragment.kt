@@ -28,20 +28,22 @@ class DonationFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
-
-        binding.copy.setOnClickListener {
-            val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText(getString(R.string.btc_map_donation_address), getString(R.string.donation_address))
-            clipboard.setPrimaryClip(clip)
-            Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+        binding.apply {
+            toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+            copy.setOnClickListener { onCopyButtonClick() }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun onCopyButtonClick() {
+        val clipManager = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipLabel = getString(R.string.btc_map_donation_address)
+        val clipText = getString(R.string.donation_address)
+        clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
+        Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
     }
 }

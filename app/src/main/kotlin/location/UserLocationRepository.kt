@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationListener
 import android.location.LocationManager
-import android.os.Bundle
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import db.Location
@@ -20,6 +19,8 @@ class UserLocationRepository(
 ) {
 
     companion object {
+        const val TAG = "UserLocationRepository"
+
         val DEFAULT_LOCATION: Location = Location(
             lat = 40.7141667,
             lon = -74.0063889,
@@ -31,52 +32,33 @@ class UserLocationRepository(
     private val _location = MutableStateFlow(DEFAULT_LOCATION)
     val location = _location.asStateFlow()
 
-    private val listener: LocationListener = object : LocationListener {
-        override fun onLocationChanged(location: android.location.Location) {
-            Log.d("UserLocationRepository", "Location changed")
-
-            _location.update {
-                Location(
-                    lat = location.latitude,
-                    lon = location.longitude,
-                )
-            }
-        }
-
-        @Deprecated("Deprecated in Java")
-        override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-        }
-
-        override fun onProviderEnabled(provider: String) {
-
-        }
-
-        override fun onProviderDisabled(provider: String) {
-
-        }
-    }
+    private val listener: LocationListener = LocationListener { onNewLocation(it) }
 
     fun requestLocationUpdates(): Boolean {
         if (requestedLocationUpdates) {
             return false
         }
 
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
+            Log.d(TAG, "Location permission was not granted")
             return false
         }
 
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         val providers = locationManager.allProviders
-        Log.d("UserLocationRepository", "Listed providers: $providers")
+        Log.d(TAG, "Available providers: $providers")
+        Log.d(TAG, "Some providers might not be enabled")
 
         if (providers.contains(LocationManager.PASSIVE_PROVIDER)) {
-            Log.d("UserLocationRepository", "Passive provider found, requesting last known location")
+            Log.d(TAG, "Passive provider found, requesting last known location")
 
             val lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
-            Log.d("UserLocationRepository", "Last known location: $lastKnownLocation")
+            Log.d(TAG, "Last known location: $lastKnownLocation")
 
             if (lastKnownLocation != null) {
                 _location.update {
@@ -89,10 +71,10 @@ class UserLocationRepository(
         }
 
         if (providers.contains(LocationManager.GPS_PROVIDER)) {
-            Log.d("UserLocationRepository", "GPS provider found, requesting last known location")
+            Log.d(TAG, "GPS provider found, requesting last known location")
 
             val lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-            Log.d("UserLocationRepository", "Last known location: $lastKnownLocation")
+            Log.d(TAG, "Last known location: $lastKnownLocation")
 
             if (lastKnownLocation != null) {
                 _location.update {
@@ -104,11 +86,11 @@ class UserLocationRepository(
             }
         }
 
-        Log.d("UserLocationRepository", "Requesting GPS location updates")
+        Log.d(TAG, "Requesting location updates")
 
         providers.forEach {
             val enabled = locationManager.isProviderEnabled(it)
-            Log.d("UserLocationRepository", "Provider ${it}.enabled=$enabled")
+            Log.d(TAG, "Provider ${it}.enabled=$enabled")
 
             if (enabled) {
                 locationManager.requestLocationUpdates(
@@ -124,4 +106,11 @@ class UserLocationRepository(
 
         return true
     }
+
+    private fun onNewLocation(androidLocation: AndroidLocation) {
+        Log.d(TAG, "Got new location: ${androidLocation.latitude},${androidLocation.longitude}")
+        _location.update { androidLocation.toLocation() }
+    }
+
+    private fun AndroidLocation.toLocation() = Location(lat = latitude, lon = longitude)
 }
