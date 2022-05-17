@@ -1,7 +1,7 @@
 import org.json.JSONObject;
 
 CREATE TABLE Place (
-    id INTEGER PRIMARY KEY,
+    id TEXT NOT NULL PRIMARY KEY,
     lat REAL NOT NULL,
     lon REAL NOT NULL,
     tags TEXT AS JSONObject NOT NULL,

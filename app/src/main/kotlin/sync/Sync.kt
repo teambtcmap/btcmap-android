@@ -41,7 +41,7 @@ class Sync(
 
                         db.placeQueries.insertOrReplace(
                             Place(
-                                id = place.getLong("id"),
+                                id = place.getString("id"),
                                 lat = place.getDouble("lat"),
                                 lon = place.getDouble("lon"),
                                 tags = place.getJSONObject("tags"),

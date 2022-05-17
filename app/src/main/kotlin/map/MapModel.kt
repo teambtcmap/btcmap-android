@@ -128,7 +128,7 @@ class MapModel(
         _viewport.update { viewport }
     }
 
-    fun selectPlace(id: Long, moveToLocation: Boolean) {
+    fun selectPlace(id: String, moveToLocation: Boolean) {
         viewModelScope.launch {
             val place = db.placeQueries.selectById(id).asFlow().mapToOneOrNull().first()
             _selectedPlace.update { place }

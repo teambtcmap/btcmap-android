@@ -10,7 +10,7 @@ fun database(context: Context): Database {
         driver = AndroidSqliteDriver(
             schema = Database.Schema,
             context = context,
-            name = "btcmap.db",
+            name = "btcmap-v2.db",
         ),
         PlaceAdapter = placeAdapter(),
     )

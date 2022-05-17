@@ -326,7 +326,7 @@ class MapFragment : Fragment() {
     private fun MapView.addCancelSelectionOverlay() {
         overlays += MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
-                model.selectPlace(0, false)
+                model.selectPlace("", false)
                 return true
             }
 
