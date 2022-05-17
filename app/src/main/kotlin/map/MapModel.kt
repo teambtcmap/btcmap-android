@@ -137,4 +137,8 @@ class MapModel(
             }
         }
     }
+
+    fun invalidateMarkersCache() {
+        mapMarkersRepo.invalidateCache()
+    }
 }

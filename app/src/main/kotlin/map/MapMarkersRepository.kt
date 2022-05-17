@@ -2,7 +2,6 @@ package map
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.RectF
@@ -39,6 +38,10 @@ class MapMarkersRepository(
         return markerDrawable
     }
 
+    fun invalidateCache() {
+        cache.clear()
+    }
+
     private fun createMarkerIcon(iconResId: Int?): Bitmap {
         val pinSizePx =
             TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 128f, context.resources.displayMetrics).toInt()
@@ -59,7 +62,7 @@ class MapMarkersRepository(
                     markerIcon.height.toFloat() * 0.4f,
                     markerIcon.width.toFloat() * 0.325f,
                     Paint().apply {
-                        color = Color.WHITE
+                        color = ContextCompat.getColor(context, R.color.pin_icon_bg)
                         isAntiAlias = true
                     },
                 )
@@ -83,7 +86,8 @@ class MapMarkersRepository(
                     null,
                     iconFrame,
                     Paint().apply {
-                        colorFilter = PorterDuff.Mode.SRC_IN.toColorFilter(Color.parseColor("#ff9100"))
+                        colorFilter =
+                            PorterDuff.Mode.SRC_IN.toColorFilter(ContextCompat.getColor(context, R.color.pin_icon))
                         isAntiAlias = true
                     },
                 )

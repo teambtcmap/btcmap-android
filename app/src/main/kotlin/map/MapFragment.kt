@@ -3,6 +3,7 @@ package map
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -44,6 +45,7 @@ import org.osmdroid.views.overlay.ItemizedIconOverlay.OnItemGestureListener
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.OverlayItem
+import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
@@ -126,7 +128,20 @@ class MapFragment : Fragment() {
             addLocationOverlay()
             addCancelSelectionOverlay()
             addViewportListener()
+
+            val nightMode =
+                resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+
+            if (nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+                overlayManager.tilesOverlay.apply {
+                    setColorFilter(TilesOverlay.INVERT_COLORS)
+                    loadingBackgroundColor = android.R.color.black
+                    loadingLineColor = Color.argb(255, 0, 255, 0)
+                }
+            }
         }
+
+        model.invalidateMarkersCache()
 
         bottomSheetBehavior = BottomSheetBehavior.from(binding.placeDetails)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN

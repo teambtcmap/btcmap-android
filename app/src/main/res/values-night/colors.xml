@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <color name="pin_bg">#333333</color>
+    <color name="pin_border">#000000</color>
+    <color name="pin_icon_bg">#000000</color>
+    <color name="pin_icon">#cccccc</color>
+</resources>
