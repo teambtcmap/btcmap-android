@@ -45,7 +45,7 @@ class Sync(
                                 id = place.getString("id"),
                                 lat = place.getDouble("lat"),
                                 lon = place.getDouble("lon"),
-                                tags = Tags(place.getString("tags")),
+                                tags = Tags(place.getJSONObject("tags")),
                                 created_at = place.getString("created_at"),
                                 updated_at = place.getString("updated_at"),
                                 deleted_at = place.getString("deleted_at"),
