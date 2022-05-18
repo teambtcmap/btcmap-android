@@ -79,16 +79,10 @@ class PlacesSearchModel(
             }
         }
 
-        val name = if (tags.has("name")) {
-            tags["name"].toString()
-        } else {
-            "Unnamed"
-        }
-
         return PlacesSearchRow(
             place = this,
             icon = placeIconsRepo.getIcon(this),
-            name = name,
+            name = tags["name"] ?: "Unnamed",
             distanceToUser = distanceStringBuilder.toString(),
         )
     }

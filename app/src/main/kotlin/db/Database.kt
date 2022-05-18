@@ -18,9 +18,9 @@ fun database(context: Context): Database {
 
 private fun placeAdapter(): Place.Adapter {
     return Place.Adapter(
-        tagsAdapter = object : ColumnAdapter<JSONObject, String> {
-            override fun decode(databaseValue: String) = JSONObject(databaseValue)
-            override fun encode(value: JSONObject) = value.toString()
+        tagsAdapter = object : ColumnAdapter<Tags, String> {
+            override fun decode(databaseValue: String) = Tags(databaseValue)
+            override fun encode(value: Tags) = value.toString()
         }
     )
 }
