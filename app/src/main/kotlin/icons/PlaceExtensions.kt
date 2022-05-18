@@ -7,7 +7,7 @@ import org.json.JSONObject
 
 @JvmInline
 private value class Tags(private val tags: JSONObject) {
-    operator fun get(key: String): String = if (tags.has(key)) tags[key].toString() else ""
+    operator fun get(key: String): String = tags.optString(key)
 }
 
 @DrawableRes
