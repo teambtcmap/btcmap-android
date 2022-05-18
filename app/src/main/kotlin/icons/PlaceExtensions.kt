@@ -52,6 +52,7 @@ fun Place.iconResId(): Int? {
         tags["shop"] == "travel_agency" -> R.drawable.baseline_luggage_24
         tags["shop"] == "laundry" -> R.drawable.baseline_local_laundry_service_24
         tags["shop"] == "surf" -> R.drawable.baseline_surfing_24
+        tags["shop"] == "video" -> R.drawable.baseline_local_movies_24
         tags["cuisine"] == "burger" -> R.drawable.baseline_lunch_dining_24
         tags["cuisine"] == "pizza" -> R.drawable.baseline_local_pizza_24
         tags["amenity"] == "bar" -> R.drawable.baseline_local_bar_24
