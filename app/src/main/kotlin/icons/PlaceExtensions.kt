@@ -15,6 +15,7 @@ fun Place.iconResId(): Int? {
             opt("tourism") == "gallery" -> R.drawable.baseline_palette_24
             opt("tourism") == "chalet" -> R.drawable.baseline_chalet_24
             opt("tourism") == "motel" -> R.drawable.baseline_hotel_24
+            opt("tourism") == "attraction" -> R.drawable.baseline_tour_24
             opt("company") == "transport" -> R.drawable.baseline_directions_car_24
             opt("shop") == "scuba_diving" -> R.drawable.baseline_scuba_diving_24
             opt("shop") == "computer" -> R.drawable.baseline_computer_24
@@ -46,6 +47,10 @@ fun Place.iconResId(): Int? {
             opt("shop") == "laundry" -> R.drawable.baseline_local_laundry_service_24
             opt("shop") == "surf" -> R.drawable.baseline_surfing_24
             opt("shop") == "video" -> R.drawable.baseline_local_movies_24
+            opt("shop") == "optician" -> R.drawable.baseline_visibility_24
+            opt("shop") == "furniture" -> R.drawable.baseline_chair_24
+            opt("shop") == "kiosk" -> R.drawable.baseline_storefront_24
+            opt("shop") == "boat" -> R.drawable.baseline_sailing_24
             opt("cuisine") == "burger" -> R.drawable.baseline_lunch_dining_24
             opt("cuisine") == "pizza" -> R.drawable.baseline_local_pizza_24
             opt("amenity") == "bar" -> R.drawable.baseline_local_bar_24
@@ -66,10 +71,12 @@ fun Place.iconResId(): Int? {
             opt("office") == "limousine_service" -> R.drawable.baseline_local_taxi_24
             opt("office") == "coworking" -> R.drawable.baseline_business_24
             opt("leisure") == "fitness_centre" -> R.drawable.baseline_fitness_center_24
+            opt("leisure") == "beach_resort" -> R.drawable.baseline_beach_access_24
             opt("healthcare") == "dentist" -> R.drawable.baseline_medical_services_24
             opt("healthcare") == "clinic" -> R.drawable.baseline_medical_services_24
             opt("healthcare") == "pharmacy" -> R.drawable.baseline_local_pharmacy_24
             opt("building") == "commercial" -> R.drawable.baseline_business_24
+            opt("sport") == "scuba_diving" -> R.drawable.baseline_scuba_diving_24
             else -> null
         }
     }
