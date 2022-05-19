@@ -1,6 +1,6 @@
 insert:
 INSERT
-INTO Place (id, type, lat, lon, tags)
+INTO Place (id, type, lat, lon, timestamp, boundsMinLat, boundsMinLon, boundsMaxLat, boundsMaxLon, tags)
 VALUES ?;
 
 selectById:

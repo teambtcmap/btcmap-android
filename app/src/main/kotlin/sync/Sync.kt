@@ -37,13 +37,28 @@ class Sync(
                         val lat: Double
                         val lon: Double
 
+                        val boundsMinLat: Double?
+                        val boundsMinLon: Double?
+                        val boundsMaxLat: Double?
+                        val boundsMaxLon: Double?
+
                         if (place["type"].toString() == "node") {
                             lat = place.getDouble("lat")
                             lon = place.getDouble("lon")
+
+                            boundsMinLat = null
+                            boundsMinLon = null
+                            boundsMaxLat = null
+                            boundsMaxLon = null
                         } else {
-                            val center = place.getJSONObject("center")
-                            lat = center.getDouble("lat")
-                            lon = center.getDouble("lon")
+                            val bounds = place.getJSONObject("bounds")
+                            boundsMinLat = bounds.getDouble("minlat")
+                            boundsMinLon = bounds.getDouble("minlon")
+                            boundsMaxLat = bounds.getDouble("maxlat")
+                            boundsMaxLon = bounds.getDouble("maxlon")
+
+                            lat = (boundsMinLat + boundsMaxLat) / 2.0
+                            lon = (boundsMinLon + boundsMaxLon) / 2.0
                         }
 
                         db.placeQueries.insert(
@@ -52,6 +67,11 @@ class Sync(
                                 type = place.getString("type"),
                                 lat = lat,
                                 lon = lon,
+                                timestamp = place.getString("timestamp"),
+                                boundsMinLat = boundsMinLat,
+                                boundsMinLon = boundsMinLon,
+                                boundsMaxLat = boundsMaxLat,
+                                boundsMaxLon = boundsMaxLon,
                                 tags = place.getJSONObject("tags"),
                             )
                         )

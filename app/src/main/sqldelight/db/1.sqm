@@ -1,10 +1,15 @@
 import org.json.JSONObject;
 
 CREATE TABLE Place (
-    id TEXT NOT NULL,
     type TEXT NOT NULL,
+    id TEXT NOT NULL,
     lat REAL NOT NULL,
     lon REAL NOT NULL,
+    timestamp TEXT NOT NULL,
+    boundsMinLat REAL,
+    boundsMinLon REAL,
+    boundsMaxLat REAl,
+    boundsMaxLon REAL,
     tags TEXT AS JSONObject NOT NULL
 );
 
