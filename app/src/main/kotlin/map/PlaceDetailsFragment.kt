@@ -33,30 +33,10 @@ class PlaceDetailsFragment : Fragment() {
     }
 
     fun setPlace(place: Place) {
-        if (place.tags.has("name")) {
-            binding.toolbar.title = place.tags["name"].toString()
-        } else {
-            binding.toolbar.title = place.id.toString()
-        }
-
-        if (place.tags.has("phone")) {
-            binding.phone.text = place.tags["phone"].toString()
-        } else {
-            binding.phone.setText(R.string.not_provided)
-        }
-
-        if (place.tags.has("website")) {
-            binding.website.text = place.tags["website"].toString()
-        } else {
-            binding.website.setText(R.string.not_provided)
-        }
-
-        if (place.tags.has("opening_hours")) {
-            binding.openingHours.text = place.tags["opening_hours"].toString()
-        } else {
-            binding.openingHours.setText(R.string.not_provided)
-        }
-
-        binding.tags.text = place.tags.toString(4)
+        binding.toolbar.title = place.tags["name"] ?: place.id
+        binding.phone.text = place.tags["phone"] ?: getString(R.string.not_provided)
+        binding.website.text = place.tags["website"] ?: getString(R.string.not_provided)
+        binding.openingHours.text = place.tags["opening_hours"] ?: getString(R.string.not_provided)
+        binding.tags.text = place.tags.toFormattedJson()
     }
 }

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
+import location.AndroidLocation
 import org.koin.android.annotation.KoinViewModel
 import java.text.NumberFormat
 
@@ -78,16 +79,10 @@ class PlacesSearchModel(
             }
         }
 
-        val name = if (tags.has("name")) {
-            tags["name"].toString()
-        } else {
-            "Unnamed"
-        }
-
         return PlacesSearchRow(
             place = this,
             icon = placeIconsRepo.getIcon(this),
-            name = name,
+            name = tags["name"] ?: "Unnamed",
             distanceToUser = distanceStringBuilder.toString(),
         )
     }
@@ -108,7 +103,7 @@ class PlacesSearchModel(
         endLongitude: Double
     ): Double {
         val distance = FloatArray(1)
-        android.location.Location.distanceBetween(startLatitude, startLongitude, endLatitude, endLongitude, distance)
+        AndroidLocation.distanceBetween(startLatitude, startLongitude, endLatitude, endLongitude, distance)
         return distance[0].toDouble()
     }
 

@@ -1,10 +1,10 @@
-import org.json.JSONObject;
+import db.Tags;
 
 CREATE TABLE Place (
     id TEXT NOT NULL PRIMARY KEY,
     lat REAL NOT NULL,
     lon REAL NOT NULL,
-    tags TEXT AS JSONObject NOT NULL,
+    tags TEXT AS Tags NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     deleted_at TEXT NOT NULL

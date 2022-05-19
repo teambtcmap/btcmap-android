@@ -5,15 +5,8 @@ import db.Place
 import org.btcmap.R
 import org.json.JSONObject
 
-@JvmInline
-private value class Tags(private val tags: JSONObject) {
-    operator fun get(key: String): String = tags.optString(key)
-}
-
 @DrawableRes
 fun Place.iconResId(): Int? {
-    val tags = Tags(tags)
-
     return when {
         tags["tourism"] == "hotel" -> R.drawable.baseline_hotel_24
         tags["tourism"] == "hostel" -> R.drawable.baseline_hotel_24

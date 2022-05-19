@@ -3,6 +3,7 @@ package sync
 import android.util.Log
 import db.Database
 import db.Place
+import db.Tags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -44,7 +45,7 @@ class Sync(
                                 id = place.getString("id"),
                                 lat = place.getDouble("lat"),
                                 lon = place.getDouble("lon"),
-                                tags = place.getJSONObject("tags"),
+                                tags = Tags(place.getJSONObject("tags")),
                                 created_at = place.getString("created_at"),
                                 updated_at = place.getString("updated_at"),
                                 deleted_at = place.getString("deleted_at"),
