@@ -18,7 +18,8 @@ class Sync(
     suspend fun sync() {
         withContext(Dispatchers.Default) {
             val httpClient = OkHttpClient()
-            val request = Request.Builder().get().url("https://api.btcmap.org/data").build()
+            val url = "https://raw.githubusercontent.com/bubelov/btcmap-data/main/data.json"
+            val request = Request.Builder().get().url(url).build()
             val call = httpClient.newCall(request)
             val response = call.execute()
 
