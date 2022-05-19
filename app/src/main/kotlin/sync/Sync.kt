@@ -46,15 +46,13 @@ class Sync(
                             lon = center.getDouble("lon")
                         }
 
-                        db.placeQueries.insertOrReplace(
+                        db.placeQueries.insert(
                             Place(
                                 id = place.getString("id"),
+                                type = place.getString("type"),
                                 lat = lat,
                                 lon = lon,
                                 tags = Tags(place.getJSONObject("tags")),
-                                created_at = "",
-                                updated_at = "",
-                                deleted_at = "",
                             )
                         )
                     }

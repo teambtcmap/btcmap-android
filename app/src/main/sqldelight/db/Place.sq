@@ -1,11 +1,7 @@
-insertOrReplace:
-INSERT OR REPLACE
-INTO Place
+insert:
+INSERT
+INTO Place (id, type, lat, lon, tags)
 VALUES ?;
-
-selectAll:
-SELECT *
-FROM Place;
 
 selectById:
 SELECT *
@@ -25,10 +21,6 @@ AND lon < :maxLon;
 
 selectCount:
 SELECT COUNT(*)
-FROM Place;
-
-selectMaxUpdatedAt:
-SELECT MAX(updated_at)
 FROM Place;
 
 deleteAll:

@@ -1,13 +1,11 @@
 import db.Tags;
 
 CREATE TABLE Place (
-    id TEXT NOT NULL PRIMARY KEY,
+    id TEXT NOT NULL,
+    type TEXT NOT NULL,
     lat REAL NOT NULL,
     lon REAL NOT NULL,
-    tags TEXT AS Tags NOT NULL,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL,
-    deleted_at TEXT NOT NULL
+    tags TEXT AS Tags NOT NULL
 );
 
 CREATE TABLE Location (
