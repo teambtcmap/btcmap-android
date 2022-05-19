@@ -22,8 +22,8 @@ class UserLocationRepository(
         const val TAG = "UserLocationRepository"
 
         val DEFAULT_LOCATION: Location = Location(
-            lat = 40.7141667,
-            lon = -74.0063889,
+            lat = 13.7061879,
+            lon = -89.1996151,
         )
     }
 

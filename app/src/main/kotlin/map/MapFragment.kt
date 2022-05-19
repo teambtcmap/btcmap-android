@@ -53,7 +53,7 @@ class MapFragment : Fragment() {
 
     companion object {
         private const val REQUEST_ACCESS_LOCATION = 10
-        private const val DEFAULT_MAP_ZOOM = 15f
+        private const val DEFAULT_MAP_ZOOM = 12f
     }
 
     private val model: MapModel by viewModel()
