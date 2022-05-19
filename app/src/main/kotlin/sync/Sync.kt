@@ -8,9 +8,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.json.JSONArray
+import org.json.JSONObject
 import org.koin.core.annotation.Single
-import java.time.ZonedDateTime
 
 @Single
 class Sync(
@@ -19,36 +18,43 @@ class Sync(
 
     suspend fun sync() {
         withContext(Dispatchers.Default) {
-            val maxUpdatedAt = db.placeQueries.selectMaxUpdatedAt().executeAsOneOrNull()?.MAX ?: "2000-01-01T00:00:00Z"
-            val afterMaxUpdatedAt = ZonedDateTime.parse(maxUpdatedAt).toString()
-
             val httpClient = OkHttpClient()
-
-            val request = Request.Builder().get()
-                .url("https://api.btcmap.org/places?created_or_updated_since=$afterMaxUpdatedAt")
-                .build()
-
+            val request = Request.Builder().get().url("https://api.btcmap.org/data").build()
             val call = httpClient.newCall(request)
             val response = call.execute()
 
             if (response.isSuccessful) {
                 val json = response.body!!.string()
-                val places = JSONArray(json)
-                Log.d("Sync", "Got ${places.length()} places")
+                val elements = JSONObject(json).getJSONArray("elements")
+                Log.d("Sync", "Got ${elements.length()} elements")
 
                 db.transaction {
-                    for (i in 0 until places.length()) {
-                        val place = places.getJSONObject(i)
+                    db.placeQueries.deleteAll()
+
+                    for (i in 0 until elements.length()) {
+                        val place = elements.getJSONObject(i)
+
+                        val lat: Double
+                        val lon: Double
+
+                        if (place["type"].toString() == "node") {
+                            lat = place.getDouble("lat")
+                            lon = place.getDouble("lon")
+                        } else {
+                            val center = place.getJSONObject("center")
+                            lat = center.getDouble("lat")
+                            lon = center.getDouble("lon")
+                        }
 
                         db.placeQueries.insertOrReplace(
                             Place(
                                 id = place.getString("id"),
-                                lat = place.getDouble("lat"),
-                                lon = place.getDouble("lon"),
+                                lat = lat,
+                                lon = lon,
                                 tags = Tags(place.getJSONObject("tags")),
-                                created_at = place.getString("created_at"),
-                                updated_at = place.getString("updated_at"),
-                                deleted_at = place.getString("deleted_at"),
+                                created_at = "",
+                                updated_at = "",
+                                deleted_at = "",
                             )
                         )
                     }

@@ -1,5 +1,6 @@
 package map
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -71,6 +72,7 @@ class MapModel(
 
                 _syncMessage.update { "" }
             }.onFailure {
+                Log.e("sync", "Failed to sync places", it)
                 _syncMessage.update { "Failed to sync places" }
                 delay(5000)
                 _syncMessage.update { "" }
