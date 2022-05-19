@@ -3,7 +3,6 @@ package sync
 import android.util.Log
 import db.Database
 import db.Place
-import db.Tags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -52,7 +51,7 @@ class Sync(
                                 type = place.getString("type"),
                                 lat = lat,
                                 lon = lon,
-                                tags = Tags(place.getJSONObject("tags")),
+                                tags = place.getJSONObject("tags"),
                             )
                         )
                     }

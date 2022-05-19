@@ -82,7 +82,7 @@ class PlacesSearchModel(
         return PlacesSearchRow(
             place = this,
             icon = placeIconsRepo.getIcon(this),
-            name = tags["name"] ?: "Unnamed",
+            name = tags.opt("name")?.toString() ?: "Unnamed",
             distanceToUser = distanceStringBuilder.toString(),
         )
     }
