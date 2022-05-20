@@ -275,18 +275,8 @@ class MapFragment : Fragment() {
                 }
             }
         }
-    }
 
-    override fun onResume() {
-        super.onResume()
-        binding.map.onResume()
-        backPressedCallback.isEnabled = true
-    }
-
-    override fun onPause() {
-        super.onPause()
-        binding.map.onPause()
-        backPressedCallback.isEnabled = false
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, backPressedCallback)
     }
 
     override fun onDestroyView() {
