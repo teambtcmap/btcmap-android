@@ -92,6 +92,8 @@ sqldelight {
 
 tasks.register("refreshData") {
     doLast {
+        val assetsDir = File("app/src/main/assets")
+        if (!assetsDir.exists()) assetsDir.mkdir()
         val url = URL("https://raw.githubusercontent.com/bubelov/btcmap-data/main/data.json")
         url.openStream().use { Files.copy(it, Paths.get("app/src/main/assets/data.json")) }
     }

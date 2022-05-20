@@ -14,3 +14,6 @@ build/
 
 # Gradle cache
 .gradle
+
+# App data
+app/src/main/assets/data.json
