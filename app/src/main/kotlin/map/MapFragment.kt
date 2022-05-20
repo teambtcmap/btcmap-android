@@ -258,8 +258,6 @@ class MapFragment : Fragment() {
             mapController.setCenter(startPoint)
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
-        model.syncPlaces()
-
         lifecycleScope.launchWhenResumed {
             val snack = Snackbar.make(
                 binding.root,

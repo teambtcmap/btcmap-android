@@ -54,32 +54,6 @@ class MapModel(
     private val _syncMessage: MutableStateFlow<String> = MutableStateFlow("")
     val syncMessage = _syncMessage.asStateFlow()
 
-    fun syncPlaces() {
-        viewModelScope.launch {
-            runCatching {
-                val job = launch {
-                    delay(1000)
-                    _syncMessage.update { "Syncing places..." }
-                }
-
-                sync.sync()
-
-                if (job.isCompleted) {
-                    delay(1000)
-                } else {
-                    job.cancel()
-                }
-
-                _syncMessage.update { "" }
-            }.onFailure {
-                Log.e("sync", "Failed to sync places", it)
-                _syncMessage.update { "Failed to sync places" }
-                delay(5000)
-                _syncMessage.update { "" }
-            }
-        }
-    }
-
     init {
         combine(_mapBoundingBox, db.placeQueries.selectCount().asFlow().mapToOne()) { viewport, _ ->
             withContext(Dispatchers.Default) {
@@ -110,6 +84,8 @@ class MapModel(
 
             _moveToLocation.update { firstNonDefaultLocation }
         }
+
+        viewModelScope.launch { syncPlaces() }
     }
 
     fun onLocationPermissionGranted() {
@@ -142,5 +118,31 @@ class MapModel(
 
     fun invalidateMarkersCache() {
         mapMarkersRepo.invalidateCache()
+    }
+
+    private fun syncPlaces() {
+        viewModelScope.launch {
+            runCatching {
+                val job = launch {
+                    delay(1000)
+                    _syncMessage.update { "Syncing places..." }
+                }
+
+                sync.sync()
+
+                if (job.isCompleted) {
+                    delay(1000)
+                } else {
+                    job.cancel()
+                }
+
+                _syncMessage.update { "" }
+            }.onFailure {
+                Log.e("sync", "Failed to sync places", it)
+                _syncMessage.update { "Failed to sync places" }
+                delay(5000)
+                _syncMessage.update { "" }
+            }
+        }
     }
 }
