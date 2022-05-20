@@ -1,9 +1,7 @@
 package search
 
 import android.os.Bundle
-import android.text.Editable
 import androidx.recyclerview.widget.LinearLayoutManager
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
