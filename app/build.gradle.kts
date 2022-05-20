@@ -1,5 +1,8 @@
 import java.io.FileInputStream
+import java.net.URL
 import java.util.Properties
+import java.nio.file.Files
+import java.nio.file.Paths
 
 plugins {
     id("com.android.application")
@@ -84,6 +87,13 @@ sqldelight {
         sourceFolders = listOf("sqldelight")
         packageName = "db"
         deriveSchemaFromMigrations = true
+    }
+}
+
+tasks.register("refreshData") {
+    doLast {
+        val url = URL("https://raw.githubusercontent.com/bubelov/btcmap-data/main/data.json")
+        url.openStream().use { Files.copy(it, Paths.get("app/src/main/assets/data.json")) }
     }
 }
 
