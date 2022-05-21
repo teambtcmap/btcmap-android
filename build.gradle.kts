@@ -14,9 +14,9 @@ buildscript {
 
 allprojects {
     repositories {
-        maven { url = uri("https://repo.maven.apache.org/maven2/") }
-        maven { url = uri("https://jitpack.io") }
-        maven { url = uri("https://dl.google.com/dl/android/maven2/") }
+        maven("https://repo.maven.apache.org/maven2/")
+        maven("https://jitpack.io")
+        maven("https://dl.google.com/dl/android/maven2/")
     }
 }
 
