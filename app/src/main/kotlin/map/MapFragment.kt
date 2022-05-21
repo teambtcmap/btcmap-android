@@ -7,22 +7,21 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
-import org.btcmap.R
-import org.btcmap.databinding.FragmentMapBinding
-import search.PlacesSearchResultModel
-import db.Place
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
@@ -30,8 +29,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.btcmap.R
+import org.btcmap.databinding.FragmentMapBinding
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
@@ -40,14 +42,12 @@ import org.osmdroid.events.ZoomEvent
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.ItemizedIconOverlay
-import org.osmdroid.views.overlay.ItemizedIconOverlay.OnItemGestureListener
 import org.osmdroid.views.overlay.MapEventsOverlay
-import org.osmdroid.views.overlay.Overlay
-import org.osmdroid.views.overlay.OverlayItem
+import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import search.PlacesSearchResultModel
 
 class MapFragment : Fragment() {
 
@@ -196,7 +196,7 @@ class MapFragment : Fragment() {
                 placesSearchResultModel.place.update { null }
             }.launchIn(viewLifecycleOwner.lifecycleScope)
 
-        var placesOverlay: Overlay? = null
+        var placesOverlay: RadiusMarkerClusterer? = null
 
         viewLifecycleOwner.lifecycleScope.launch {
             model.visiblePlaces.collectLatest { placeWithMarkers ->
@@ -204,28 +204,26 @@ class MapFragment : Fragment() {
                     binding.map.overlays.remove(placesOverlay)
                 }
 
-                val items = mutableListOf<OverlayItem>()
-                val itemsToPlaces = mutableMapOf<OverlayItem, Place>()
+                placesOverlay = RadiusMarkerClusterer(context!!)
+                val clusterIcon = ContextCompat.getDrawable(context!!, R.drawable.ic_cluster)!!
+                val pinSizePx =
+                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 128f, resources.displayMetrics).toInt()
+                placesOverlay!!.setIcon(clusterIcon.toBitmap(pinSizePx, pinSizePx))
 
-                placeWithMarkers.forEach { placeWithMarker ->
-                    val (place, marker) = placeWithMarker
-                    val item = OverlayItem(null, null, GeoPoint(place.lat, place.lon))
-                    item.setMarker(marker)
-                    items += item
-                    itemsToPlaces[item] = place
+                placeWithMarkers.forEach {
+                    val marker = Marker(binding.map)
+                    marker.title = it.place.id
+                    marker.snippet = it.place.type
+                    marker.position = GeoPoint(it.place.lat, it.place.lon)
+                    marker.icon = it.marker
+
+                    marker.setOnMarkerClickListener { _, _ ->
+                        model.selectPlace(it.place.id, false)
+                        true
+                    }
+
+                    placesOverlay!!.add(marker)
                 }
-
-                placesOverlay =
-                    ItemizedIconOverlay(requireContext(), items, object : OnItemGestureListener<OverlayItem> {
-                        override fun onItemSingleTapUp(index: Int, item: OverlayItem): Boolean {
-                            model.selectPlace(itemsToPlaces[item]!!.id, false)
-                            return true
-                        }
-
-                        override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean {
-                            return false
-                        }
-                    })
 
                 binding.map.overlays.add(placesOverlay)
                 binding.map.invalidate()
