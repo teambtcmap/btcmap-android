@@ -90,12 +90,13 @@ sqldelight {
     }
 }
 
-tasks.register("refreshData") {
+tasks.register("bundleData") {
     doLast {
-        val assetsDir = File("app/src/main/assets")
-        if (!assetsDir.exists()) assetsDir.mkdir()
-        val url = URL("https://raw.githubusercontent.com/bubelov/btcmap-data/main/data.json")
-        url.openStream().use { Files.copy(it, Paths.get("app/src/main/assets/data.json")) }
+        val src = URL("https://raw.githubusercontent.com/bubelov/btcmap-data/main/data.json")
+        val destDir = File("app/src/main/assets")
+        destDir.mkdirs()
+        val destFile = File(destDir, "data.json")
+        destFile.writeText(src.readText())
     }
 }
 
