@@ -8,14 +8,28 @@ import org.btcmap.R
 fun Place.iconResId(): Int? {
     tags.apply {
         return when {
+            // 174 places (22-05-2022)
             opt("tourism") == "hotel" -> R.drawable.baseline_hotel_24
-            opt("tourism") == "hostel" -> R.drawable.baseline_hotel_24
-            opt("tourism") == "apartment" -> R.drawable.baseline_hotel_24
-            opt("tourism") == "guest_house" -> R.drawable.baseline_hotel_24
-            opt("tourism") == "gallery" -> R.drawable.baseline_palette_24
-            opt("tourism") == "chalet" -> R.drawable.baseline_chalet_24
-            opt("tourism") == "motel" -> R.drawable.baseline_hotel_24
+            // 130 places (22-05-2022)
             opt("tourism") == "attraction" -> R.drawable.baseline_tour_24
+            // 94 places (22-05-2022)
+            opt("tourism") == "guest_house" -> R.drawable.baseline_hotel_24
+            // 87 places (22-05-2022)
+            opt("tourism") == "apartment" -> R.drawable.baseline_hotel_24
+            // 40 places (22-05-2022)
+            opt("tourism") == "hostel" -> R.drawable.baseline_hotel_24
+            // 25 places (22-05-2022)
+            opt("tourism") == "chalet" -> R.drawable.baseline_chalet_24
+            // TODO tourism=camp_site 12 places (22-05-2022)
+            // 7 places (22-05-2022)
+            opt("tourism") == "gallery" -> R.drawable.baseline_palette_24
+            // 7 places (22-05-2022)
+            opt("tourism") == "artwork" -> R.drawable.baseline_palette_24
+            // TODO tourism=information 5 places (22-05-2022)
+            // TODO tourism=museum 5 places (22-05-2022)
+            // 3 places (22-05-2022)
+            opt("tourism") == "motel" -> R.drawable.baseline_hotel_24
+
             opt("company") == "transport" -> R.drawable.baseline_directions_car_24
             opt("shop") == "scuba_diving" -> R.drawable.baseline_scuba_diving_24
             opt("shop") == "computer" -> R.drawable.baseline_computer_24
@@ -62,6 +76,9 @@ fun Place.iconResId(): Int? {
             opt("amenity") == "atm" -> R.drawable.baseline_local_atm_24
             opt("amenity") == "cafe" -> R.drawable.baseline_local_cafe_24
             opt("amenity") == "pub" -> R.drawable.baseline_sports_bar_24
+            opt("amenity") == "doctors" -> R.drawable.baseline_medical_services_24
+            opt("amenity") == "flight_school" -> R.drawable.baseline_flight_takeoff_24
+            opt("amenity") == "taxi" -> R.drawable.baseline_local_taxi_24
             opt("office") == "lawyer" -> R.drawable.baseline_balance_24
             opt("office") == "company" -> R.drawable.baseline_business_24
             opt("office") == "it" -> R.drawable.baseline_computer_24
@@ -70,13 +87,19 @@ fun Place.iconResId(): Int? {
             opt("office") == "marketing" -> R.drawable.baseline_business_24
             opt("office") == "limousine_service" -> R.drawable.baseline_local_taxi_24
             opt("office") == "coworking" -> R.drawable.baseline_business_24
+            opt("office") == "association" -> R.drawable.baseline_groups_24
             opt("leisure") == "fitness_centre" -> R.drawable.baseline_fitness_center_24
+            opt("leisure") == "sports_centre" -> R.drawable.baseline_fitness_center_24
             opt("leisure") == "beach_resort" -> R.drawable.baseline_beach_access_24
+            opt("leisure") == "hackerspace" -> R.drawable.baseline_computer_24
             opt("healthcare") == "dentist" -> R.drawable.baseline_medical_services_24
             opt("healthcare") == "clinic" -> R.drawable.baseline_medical_services_24
             opt("healthcare") == "pharmacy" -> R.drawable.baseline_local_pharmacy_24
             opt("building") == "commercial" -> R.drawable.baseline_business_24
+            opt("building") == "office" -> R.drawable.baseline_business_24
+            opt("building") == "retail" -> R.drawable.baseline_storefront_24
             opt("sport") == "scuba_diving" -> R.drawable.baseline_scuba_diving_24
+            opt("craft") == "blacksmith" -> R.drawable.baseline_hardware_24
             else -> null
         }
     }
