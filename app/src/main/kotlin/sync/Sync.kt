@@ -25,7 +25,7 @@ class Sync(
     companion object {
         private const val TAG = "Sync"
 
-        private val BTCMAP_DATA_URL = "https://api.btcmap.org/data".toHttpUrl()
+        private val BTCMAP_DATA_URL = "https://btcmap.org/data.json".toHttpUrl()
         private val GITHUB_DATA_URL = "https://raw.githubusercontent.com/bubelov/btcmap-data/main/data.json".toHttpUrl()
     }
 

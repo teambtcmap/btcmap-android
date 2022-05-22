@@ -1,8 +1,6 @@
 import java.io.FileInputStream
 import java.net.URL
 import java.util.Properties
-import java.nio.file.Files
-import java.nio.file.Paths
 
 plugins {
     id("com.android.application")
