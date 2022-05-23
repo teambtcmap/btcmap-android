@@ -31,7 +31,7 @@ class PlacesSearchModel(
 
     private val searchString = MutableStateFlow("")
 
-    private val _searchResults = MutableStateFlow<List<PlacesSearchRow>>(emptyList())
+    private val _searchResults = MutableStateFlow<List<PlacesSearchAdapter.Item>>(emptyList())
     val searchResults = _searchResults.asStateFlow()
 
     init {
@@ -65,7 +65,7 @@ class PlacesSearchModel(
         this.searchString.update { searchString }
     }
 
-    private fun Place.toRow(userLocation: Location?): PlacesSearchRow {
+    private fun Place.toRow(userLocation: Location?): PlacesSearchAdapter.Item {
         val distanceStringBuilder = StringBuilder()
 
         if (userLocation != null) {
@@ -79,7 +79,7 @@ class PlacesSearchModel(
             }
         }
 
-        return PlacesSearchRow(
+        return PlacesSearchAdapter.Item(
             place = this,
             icon = placeIconsRepo.getIcon(this),
             name = tags.opt("name")?.toString() ?: "Unnamed",
@@ -97,10 +97,7 @@ class PlacesSearchModel(
     }
 
     private fun getDistance(
-        startLatitude: Double,
-        startLongitude: Double,
-        endLatitude: Double,
-        endLongitude: Double
+        startLatitude: Double, startLongitude: Double, endLatitude: Double, endLongitude: Double
     ): Double {
         val distance = FloatArray(1)
         AndroidLocation.distanceBetween(startLatitude, startLongitude, endLatitude, endLongitude, distance)

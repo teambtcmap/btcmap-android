@@ -185,7 +185,7 @@ class MapFragment : Fragment() {
             }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
-        binding.locationFab.setOnClickListener {
+        binding.fab.setOnClickListener {
             if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
             ) {
@@ -351,7 +351,7 @@ class MapFragment : Fragment() {
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                binding.locationFab.isVisible = slideOffset < 0.5f
+                binding.fab.isVisible = slideOffset < 0.5f
                 (childFragmentManager.findFragmentById(R.id.placeDetailsFragment) as PlaceDetailsFragment).setScrollProgress(
                     slideOffset
                 )

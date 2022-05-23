@@ -51,7 +51,7 @@ class PlacesSearchFragment : Fragment() {
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
 
-        val adapter = PlacesSearchResultsAdapter { row ->
+        val adapter = PlacesSearchAdapter { row ->
             resultModel.place.update { row.place }
             findNavController().popBackStack()
         }
@@ -59,7 +59,7 @@ class PlacesSearchFragment : Fragment() {
         binding.list.adapter = adapter
 
         model.searchResults
-            .onEach { adapter.swapItems(it) }
+            .onEach { adapter.submitList(it) }
             .launchIn(viewLifecycleOwner.lifecycleScope)
 
         binding.query.setOnFocusChangeListener { _, hasFocus ->

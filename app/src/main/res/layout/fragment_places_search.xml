@@ -21,6 +21,7 @@
 
             <EditText
                 android:id="@+id/query"
+                android:importantForAutofill="no"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="56dp"
