@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -72,6 +73,20 @@ class MapFragment : Fragment() {
     private var backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             onBackPressed()
+        }
+    }
+
+    private val locationPermissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { permissions ->
+        when {
+            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                model.onLocationPermissionGranted()
+            }
+            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                model.onLocationPermissionGranted()
+            }
+            else -> {}
         }
     }
 
@@ -282,26 +297,12 @@ class MapFragment : Fragment() {
         _binding = null
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray,
-    ) {
-        when (requestCode) {
-            REQUEST_ACCESS_LOCATION -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    model.onLocationPermissionGranted()
-                }
-            }
-        }
-    }
-
     private fun requestLocationPermissions() {
-        requestPermissions(
+        locationPermissionRequest.launch(
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
-            ),
-            REQUEST_ACCESS_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            )
         )
     }
 
