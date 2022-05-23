@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -20,6 +19,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.delay
@@ -351,7 +351,7 @@ class MapFragment : Fragment() {
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 binding.locationFab.isVisible = slideOffset < 0.5f
-                (childFragmentManager.findFragmentById(org.btcmap.R.id.placeDetailsFragment) as PlaceDetailsFragment).setScrollProgress(
+                (childFragmentManager.findFragmentById(R.id.placeDetailsFragment) as PlaceDetailsFragment).setScrollProgress(
                     slideOffset
                 )
             }
