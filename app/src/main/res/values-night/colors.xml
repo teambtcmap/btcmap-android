@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <color name="pin_bg">#333333</color>
-    <color name="pin_border">#000000</color>
-    <color name="pin_icon_bg">#000000</color>
-    <color name="pin_icon">#cccccc</color>
+    <!-- colorSurfaceVariant -->
+    <color name="pin_bg">#ff49454f</color>
+    <!-- colorSurface -->
+    <color name="pin_border">#ff1c1b1f</color>
+    <!-- colorSurface -->
+    <color name="pin_icon_bg">#ff1c1b1f</color>
+    <!-- colorOnSurface -->
+    <color name="pin_icon">#ffe6e1e5</color>
 </resources>

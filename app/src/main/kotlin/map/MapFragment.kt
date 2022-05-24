@@ -3,7 +3,6 @@ package map
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
@@ -24,11 +23,7 @@ import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.FragmentMapBinding
@@ -45,7 +40,6 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import search.PlacesSearchResultModel
@@ -53,7 +47,6 @@ import search.PlacesSearchResultModel
 class MapFragment : Fragment() {
 
     companion object {
-        private const val REQUEST_ACCESS_LOCATION = 10
         private const val DEFAULT_MAP_ZOOM = 12f
     }
 
@@ -143,17 +136,6 @@ class MapFragment : Fragment() {
             addLocationOverlay()
             addCancelSelectionOverlay()
             addViewportListener()
-
-            val nightMode =
-                resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
-
-            if (nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
-                overlayManager.tilesOverlay.apply {
-                    setColorFilter(TilesOverlay.INVERT_COLORS)
-                    loadingBackgroundColor = android.R.color.black
-                    loadingLineColor = Color.argb(255, 0, 255, 0)
-                }
-            }
         }
 
         model.invalidateMarkersCache()
