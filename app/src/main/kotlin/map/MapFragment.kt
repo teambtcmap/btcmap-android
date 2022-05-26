@@ -22,6 +22,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
+import element.ElementFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -42,7 +43,7 @@ import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import search.PlacesSearchResultModel
+import search.SearchResultModel
 
 class MapFragment : Fragment() {
 
@@ -52,13 +53,13 @@ class MapFragment : Fragment() {
 
     private val model: MapModel by viewModel()
 
-    private val placesSearchResultModel: PlacesSearchResultModel by sharedViewModel()
+    private val searchResultModel: SearchResultModel by sharedViewModel()
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
 
-    private val placeDetailsFragment by lazy {
-        childFragmentManager.findFragmentById(R.id.placeDetailsFragment) as PlaceDetailsFragment
+    private val elementFragment by lazy {
+        childFragmentManager.findFragmentById(R.id.elementFragment) as ElementFragment
     }
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
@@ -115,7 +116,7 @@ class MapFragment : Fragment() {
 
                     R.id.action_search -> {
                         lifecycleScope.launch {
-                            val action = MapFragmentDirections.actionMapFragmentToPlacesSearchFragment(
+                            val action = MapFragmentDirections.actionMapFragmentToSearchFragment(
                                 model.userLocation.value.lat.toString(),
                                 model.userLocation.value.lon.toString(),
                             )
@@ -140,15 +141,15 @@ class MapFragment : Fragment() {
 
         model.invalidateMarkersCache()
 
-        bottomSheetBehavior = BottomSheetBehavior.from(binding.placeDetails)
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.elementDetails)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         bottomSheetBehavior.addSlideCallback()
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val placeDetailsToolbar = getPlaceDetailsToolbar()
-            bottomSheetBehavior.peekHeight = placeDetailsToolbar.height
+            val elementDetailsToolbar = getElementDetailsToolbar()
+            bottomSheetBehavior.peekHeight = elementDetailsToolbar.height
 
-            placeDetailsToolbar.setOnClickListener {
+            elementDetailsToolbar.setOnClickListener {
                 if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
                     bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 } else {
@@ -157,10 +158,10 @@ class MapFragment : Fragment() {
             }
         }
 
-        model.selectedPlace.onEach {
+        model.selectedElement.onEach {
             if (it != null) {
-                getPlaceDetailsToolbar()
-                placeDetailsFragment.setPlace(it)
+                getElementDetailsToolbar()
+                elementFragment.setElement(it)
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             } else {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
@@ -182,47 +183,43 @@ class MapFragment : Fragment() {
             mapController.setCenter(startPoint)
         }
 
-        placesSearchResultModel.place
-            .filterNotNull()
-            .onEach {
-                val mapController = binding.map.controller
-                mapController.setZoom(DEFAULT_MAP_ZOOM.toDouble())
-                val startPoint = GeoPoint(it.lat, it.lon)
-                mapController.setCenter(startPoint)
-                model.selectPlace(it.id, true)
-                placesSearchResultModel.place.update { null }
-            }.launchIn(viewLifecycleOwner.lifecycleScope)
+        searchResultModel.element.filterNotNull().onEach {
+            val mapController = binding.map.controller
+            mapController.setZoom(DEFAULT_MAP_ZOOM.toDouble())
+            val startPoint = GeoPoint(it.lat, it.lon)
+            mapController.setCenter(startPoint)
+            model.selectElement(it.id, true)
+            searchResultModel.element.update { null }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
 
-        var placesOverlay: RadiusMarkerClusterer? = null
+        var elementsOverlay: RadiusMarkerClusterer? = null
 
         viewLifecycleOwner.lifecycleScope.launch {
-            model.visiblePlaces.collectLatest { placeWithMarkers ->
-                if (placesOverlay != null) {
-                    binding.map.overlays.remove(placesOverlay)
+            model.visibleElements.collectLatest { elementWithMarkers ->
+                if (elementsOverlay != null) {
+                    binding.map.overlays.remove(elementsOverlay)
                 }
 
-                placesOverlay = RadiusMarkerClusterer(context!!)
+                elementsOverlay = RadiusMarkerClusterer(context!!)
                 val clusterIcon = ContextCompat.getDrawable(context!!, R.drawable.ic_cluster)!!
                 val pinSizePx =
                     TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 128f, resources.displayMetrics).toInt()
-                placesOverlay!!.setIcon(clusterIcon.toBitmap(pinSizePx, pinSizePx))
+                elementsOverlay!!.setIcon(clusterIcon.toBitmap(pinSizePx, pinSizePx))
 
-                placeWithMarkers.forEach {
+                elementWithMarkers.forEach {
                     val marker = Marker(binding.map)
-                    marker.title = it.place.id
-                    marker.snippet = it.place.type
-                    marker.position = GeoPoint(it.place.lat, it.place.lon)
+                    marker.position = GeoPoint(it.element.lat, it.element.lon)
                     marker.icon = it.marker
 
                     marker.setOnMarkerClickListener { _, _ ->
-                        model.selectPlace(it.place.id, false)
+                        model.selectElement(it.element.id, false)
                         true
                     }
 
-                    placesOverlay!!.add(marker)
+                    elementsOverlay!!.add(marker)
                 }
 
-                binding.map.overlays.add(placesOverlay)
+                binding.map.overlays.add(elementsOverlay)
                 binding.map.invalidate()
             }
         }
@@ -305,7 +302,7 @@ class MapFragment : Fragment() {
     private fun MapView.addCancelSelectionOverlay() {
         overlays += MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
-                model.selectPlace("", false)
+                model.selectElement("", false)
                 return true
             }
 
@@ -334,20 +331,20 @@ class MapFragment : Fragment() {
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 binding.fab.isVisible = slideOffset < 0.5f
-                (childFragmentManager.findFragmentById(R.id.placeDetailsFragment) as PlaceDetailsFragment).setScrollProgress(
+                (childFragmentManager.findFragmentById(R.id.elementFragment) as ElementFragment).setScrollProgress(
                     slideOffset
                 )
             }
         })
     }
 
-    private suspend fun getPlaceDetailsToolbar(): Toolbar {
-        while (placeDetailsFragment.view == null
-            || placeDetailsFragment.view!!.findViewById<View>(R.id.toolbar)!!.height == 0
+    private suspend fun getElementDetailsToolbar(): Toolbar {
+        while (elementFragment.view == null
+            || elementFragment.view!!.findViewById<View>(R.id.toolbar)!!.height == 0
         ) {
             delay(10)
         }
 
-        return placeDetailsFragment.view?.findViewById(R.id.toolbar)!!
+        return elementFragment.view?.findViewById(R.id.toolbar)!!
     }
 }

@@ -1,6 +1,5 @@
 package map
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -8,9 +7,9 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Database
+import db.Element
 import db.Location
 import location.UserLocationRepository
-import db.Place
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,11 +41,11 @@ class MapModel(
     private val _mapBoundingBox: MutableStateFlow<BoundingBox?> = MutableStateFlow(null)
     val mapBoundingBox = _mapBoundingBox.asStateFlow()
 
-    private val _selectedPlace: MutableStateFlow<Place?> = MutableStateFlow(null)
-    val selectedPlace = _selectedPlace.asStateFlow()
+    private val _selectedElement: MutableStateFlow<Element?> = MutableStateFlow(null)
+    val selectedElement = _selectedElement.asStateFlow()
 
-    private val _visiblePlaces = MutableStateFlow<List<PlaceWithMarker>>(emptyList())
-    val visiblePlaces = _visiblePlaces.asStateFlow()
+    private val _visibleElements = MutableStateFlow<List<ElementWithMarker>>(emptyList())
+    val visibleElements = _visibleElements.asStateFlow()
 
     private val _moveToLocation: MutableStateFlow<Location> = MutableStateFlow(UserLocationRepository.DEFAULT_LOCATION)
     val moveToLocation = _moveToLocation.asStateFlow()
@@ -55,14 +54,14 @@ class MapModel(
     val syncMessage = _syncMessage.asStateFlow()
 
     init {
-        combine(_mapBoundingBox, db.placeQueries.selectCount().asFlow().mapToOne()) { viewport, _ ->
+        combine(_mapBoundingBox, db.elementQueries.selectCount().asFlow().mapToOne()) { viewport, _ ->
             withContext(Dispatchers.Default) {
                 if (viewport == null) {
                     return@withContext
                 }
 
-                _visiblePlaces.update {
-                    db.placeQueries.selectByBoundingBox(
+                _visibleElements.update {
+                    db.elementQueries.selectByBoundingBox(
                         minLat = min(viewport.latNorth, viewport.latSouth),
                         maxLat = max(viewport.latNorth, viewport.latSouth),
                         minLon = min(viewport.lonEast, viewport.lonWest),
@@ -71,7 +70,7 @@ class MapModel(
                         .asFlow()
                         .mapToList()
                         .first()
-                        .map { PlaceWithMarker(it, mapMarkersRepo.getMarker(it)) }
+                        .map { ElementWithMarker(it, mapMarkersRepo.getMarker(it)) }
                 }
             }
         }.launchIn(viewModelScope)
@@ -85,7 +84,7 @@ class MapModel(
             _moveToLocation.update { firstNonDefaultLocation }
         }
 
-        viewModelScope.launch { syncPlaces() }
+        viewModelScope.launch { syncElements() }
     }
 
     fun onLocationPermissionGranted() {
@@ -105,13 +104,13 @@ class MapModel(
         _mapBoundingBox.update { viewport }
     }
 
-    fun selectPlace(id: String, moveToLocation: Boolean) {
+    fun selectElement(id: String, moveToLocation: Boolean) {
         viewModelScope.launch {
-            val place = db.placeQueries.selectById(id).asFlow().mapToOneOrNull().first()
-            _selectedPlace.update { place }
+            val element = db.elementQueries.selectById(id).asFlow().mapToOneOrNull().first()
+            _selectedElement.update { element }
 
-            if (place != null && moveToLocation) {
-                _moveToLocation.update { Location(place.lat, place.lon) }
+            if (element != null && moveToLocation) {
+                _moveToLocation.update { Location(element.lat, element.lon) }
             }
         }
     }
@@ -120,12 +119,12 @@ class MapModel(
         mapMarkersRepo.invalidateCache()
     }
 
-    private fun syncPlaces() {
+    private fun syncElements() {
         viewModelScope.launch {
             runCatching {
                 val job = launch {
                     delay(1000)
-                    _syncMessage.update { "Syncing places..." }
+                    _syncMessage.update { "Syncing elements..." }
                 }
 
                 sync.sync()
@@ -138,8 +137,7 @@ class MapModel(
 
                 _syncMessage.update { "" }
             }.onFailure {
-                Log.e("sync", "Failed to sync places", it)
-                _syncMessage.update { "Failed to sync places" }
+                _syncMessage.update { "Failed to sync elements" }
                 delay(5000)
                 _syncMessage.update { "" }
             }

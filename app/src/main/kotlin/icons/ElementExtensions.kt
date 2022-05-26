@@ -1,38 +1,38 @@
 package icons
 
 import androidx.annotation.DrawableRes
-import db.Place
+import db.Element
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.R
 
 @DrawableRes
-fun Place.iconResId(): Int? {
+fun Element.iconResId(): Int? {
     val tag = fun(tag: String): String? {
         return tags[tag]?.jsonPrimitive?.contentOrNull
     }
 
     return when {
-        // 174 places (22-05-2022)
+        // 174 elements (22-05-2022)
         tag("tourism") == "hotel" -> R.drawable.baseline_hotel_24
-        // 130 places (22-05-2022)
+        // 130 elements (22-05-2022)
         tag("tourism") == "attraction" -> R.drawable.baseline_tour_24
-        // 94 places (22-05-2022)
+        // 94 elements (22-05-2022)
         tag("tourism") == "guest_house" -> R.drawable.baseline_hotel_24
-        // 87 places (22-05-2022)
+        // 87 elements (22-05-2022)
         tag("tourism") == "apartment" -> R.drawable.baseline_hotel_24
-        // 40 places (22-05-2022)
+        // 40 elements (22-05-2022)
         tag("tourism") == "hostel" -> R.drawable.baseline_hotel_24
-        // 25 places (22-05-2022)
+        // 25 elements (22-05-2022)
         tag("tourism") == "chalet" -> R.drawable.baseline_chalet_24
-        // TODO tourism=camp_site 12 places (22-05-2022)
-        // 7 places (22-05-2022)
+        // TODO tourism=camp_site 12 elements (22-05-2022)
+        // 7 elements (22-05-2022)
         tag("tourism") == "gallery" -> R.drawable.baseline_palette_24
-        // 7 places (22-05-2022)
+        // 7 elements (22-05-2022)
         tag("tourism") == "artwork" -> R.drawable.baseline_palette_24
-        // TODO tourism=information 5 places (22-05-2022)
-        // TODO tourism=museum 5 places (22-05-2022)
-        // 3 places (22-05-2022)
+        // TODO tourism=information 5 elements (22-05-2022)
+        // TODO tourism=museum 5 elements (22-05-2022)
+        // 3 elements (22-05-2022)
         tag("tourism") == "motel" -> R.drawable.baseline_hotel_24
 
         tag("shop") == "scuba_diving" -> R.drawable.baseline_scuba_diving_24

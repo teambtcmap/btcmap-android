@@ -33,7 +33,7 @@ class Sync(
 
     suspend fun sync() {
         withContext(Dispatchers.Default) {
-            if (db.placeQueries.selectCount().executeAsOne() == 0L) {
+            if (db.elementQueries.selectCount().executeAsOne() == 0L) {
                 Log.d(TAG, "Importing bundled data")
 
                 runCatching {

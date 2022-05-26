@@ -14,7 +14,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.toColorFilter
 import androidx.core.graphics.toRect
-import db.Place
+import db.Element
 import icons.iconResId
 import org.btcmap.R
 import org.koin.core.annotation.Single
@@ -26,8 +26,8 @@ class MapMarkersRepository(
 
     private val cache = mutableMapOf<Int?, BitmapDrawable>()
 
-    fun getMarker(place: Place): BitmapDrawable {
-        val iconResId = place.iconResId()
+    fun getMarker(element: Element): BitmapDrawable {
+        val iconResId = element.iconResId()
         var markerDrawable = cache[iconResId]
 
         if (markerDrawable == null) {

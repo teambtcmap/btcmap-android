@@ -7,18 +7,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import db.Place
-import org.btcmap.databinding.RowPlacesSearchResultBinding
+import db.Element
+import org.btcmap.databinding.ItemSearchResultBinding
 
-class PlacesSearchAdapter(
+class SearchAdapter(
     private val onItemClick: (Item) -> Unit,
-) : ListAdapter<PlacesSearchAdapter.Item, PlacesSearchAdapter.ItemViewHolder>(DiffCallback()) {
+) : ListAdapter<SearchAdapter.Item, SearchAdapter.ItemViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
     ): ItemViewHolder {
-        val binding = RowPlacesSearchResultBinding.inflate(
+        val binding = ItemSearchResultBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false,
@@ -32,14 +32,14 @@ class PlacesSearchAdapter(
     }
 
     data class Item(
-        val place: Place,
+        val element: Element,
         val icon: Bitmap,
         val name: String,
         val distanceToUser: String,
     )
 
     class ItemViewHolder(
-        private val binding: RowPlacesSearchResultBinding,
+        private val binding: ItemSearchResultBinding,
     ) : RecyclerView.ViewHolder(
         binding.root,
     ) {
@@ -61,7 +61,8 @@ class PlacesSearchAdapter(
             oldItem: Item,
             newItem: Item,
         ): Boolean {
-            return newItem.place.id == oldItem.place.id
+            return newItem.element.type == oldItem.element.type
+                    && newItem.element.id == oldItem.element.id
         }
 
         override fun areContentsTheSame(

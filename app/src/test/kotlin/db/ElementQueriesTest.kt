@@ -4,13 +4,13 @@ import kotlinx.serialization.json.JsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class PlaceQueriesTest {
+class ElementQueriesTest {
 
     @Test
     fun insert() {
         val db = testDb()
 
-        val place = Place(
+        val element = Element(
             type = "",
             id = "",
             lat = 0.0,
@@ -23,7 +23,7 @@ class PlaceQueriesTest {
             tags = JsonObject(emptyMap()),
         )
 
-        db.placeQueries.insert(place)
-        assertEquals(place, db.placeQueries.selectById(place.id).executeAsOne())
+        db.elementQueries.insert(element)
+        assertEquals(element, db.elementQueries.selectById(element.id).executeAsOne())
     }
 }

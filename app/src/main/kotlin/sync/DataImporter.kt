@@ -2,7 +2,7 @@ package sync
 
 import android.util.Log
 import db.Database
-import db.Place
+import db.Element
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
@@ -23,14 +23,13 @@ class DataImporter(
 
     suspend fun import(data: JsonObject) {
         withContext(Dispatchers.Default) {
-            val elements = data["elements"]!!.jsonArray
+            val elements = data["elements"]!!.jsonArray.map { it.jsonObject }
             Log.d(TAG, "Got ${elements.size} elements")
 
             db.transaction {
-                db.placeQueries.deleteAll()
+                db.elementQueries.deleteAll()
 
-                for (e in elements) {
-                    val element = e.jsonObject
+                for (element in elements) {
 
                     val lat: Double
                     val lon: Double
@@ -60,8 +59,8 @@ class DataImporter(
                         lon = (boundsMinLon + boundsMaxLon) / 2.0
                     }
 
-                    db.placeQueries.insert(
-                        Place(
+                    db.elementQueries.insert(
+                        Element(
                             id = element["id"]!!.jsonPrimitive.content,
                             type = element["type"]!!.jsonPrimitive.content,
                             lat = lat,

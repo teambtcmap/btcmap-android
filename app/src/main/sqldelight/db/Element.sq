@@ -1,19 +1,19 @@
 insert:
 INSERT
-INTO Place (id, type, lat, lon, timestamp, boundsMinLat, boundsMinLon, boundsMaxLat, boundsMaxLon, tags)
+INTO Element (id, type, lat, lon, timestamp, boundsMinLat, boundsMinLon, boundsMaxLat, boundsMaxLon, tags)
 VALUES ?;
 
 selectById:
 SELECT *
-FROM Place
+FROM Element
 WHERE id = ?;
 
 selectBySearchString:
-SELECT * FROM Place WHERE
+SELECT * FROM Element WHERE
 UPPER(tags) LIKE '%' || UPPER(:searchString) || '%';
 
 selectByBoundingBox:
-SELECT * FROM Place WHERE
+SELECT * FROM Element WHERE
 lat > :minLat
 AND lat < :maxLat
 AND lon > :minLon
@@ -21,8 +21,8 @@ AND lon < :maxLon;
 
 selectCount:
 SELECT COUNT(*)
-FROM Place;
+FROM Element;
 
 deleteAll:
 DELETE
-FROM Place;
+FROM Element;

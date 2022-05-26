@@ -15,17 +15,17 @@ import db.Location
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import org.btcmap.databinding.FragmentPlacesSearchBinding
+import org.btcmap.databinding.FragmentSearchBinding
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class PlacesSearchFragment : Fragment() {
+class SearchFragment : Fragment() {
 
-    private val model: PlacesSearchModel by viewModel()
+    private val model: SearchModel by viewModel()
 
-    private val resultModel: PlacesSearchResultModel by sharedViewModel()
+    private val resultModel: SearchResultModel by sharedViewModel()
 
-    private var _binding: FragmentPlacesSearchBinding? = null
+    private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -33,12 +33,12 @@ class PlacesSearchFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentPlacesSearchBinding.inflate(inflater, container, false)
+        _binding = FragmentSearchBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val args = PlacesSearchFragmentArgs.fromBundle(requireArguments())
+        val args = SearchFragmentArgs.fromBundle(requireArguments())
 
         model.setLocation(
             Location(
@@ -51,8 +51,8 @@ class PlacesSearchFragment : Fragment() {
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
 
-        val adapter = PlacesSearchAdapter { row ->
-            resultModel.place.update { row.place }
+        val adapter = SearchAdapter { row ->
+            resultModel.element.update { row.element }
             findNavController().popBackStack()
         }
 

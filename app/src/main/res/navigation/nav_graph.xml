@@ -10,8 +10,8 @@
         android:name="map.MapFragment"
         android:label="MapFragment">
         <action
-            android:id="@+id/action_mapFragment_to_placesSearchFragment"
-            app:destination="@id/placesSearchFragment"
+            android:id="@+id/action_mapFragment_to_searchFragment"
+            app:destination="@id/searchFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
@@ -26,9 +26,9 @@
     </fragment>
 
     <fragment
-        android:id="@+id/placesSearchFragment"
-        android:name="search.PlacesSearchFragment"
-        android:label="PlacesSearchFragment">
+        android:id="@+id/searchFragment"
+        android:name="search.SearchFragment"
+        android:label="SearchFragment">
         <argument
             android:name="lat"
             app:argType="string"

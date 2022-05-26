@@ -21,12 +21,12 @@ fun database(context: Context): Database {
 fun database(driver: SqlDriver): Database {
     return Database(
         driver = driver,
-        PlaceAdapter = placeAdapter(),
+        ElementAdapter = elementAdapter(),
     )
 }
 
-private fun placeAdapter(): Place.Adapter {
-    return Place.Adapter(
+private fun elementAdapter(): Element.Adapter {
+    return Element.Adapter(
         tagsAdapter = object : ColumnAdapter<JsonObject, String> {
             override fun decode(databaseValue: String) = Json.parseToJsonElement(databaseValue).jsonObject
             override fun encode(value: JsonObject) = value.toString()

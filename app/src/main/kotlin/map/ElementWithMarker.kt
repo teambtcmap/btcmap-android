@@ -1,9 +1,9 @@
 package map
 
 import android.graphics.drawable.Drawable
-import db.Place
+import db.Element
 
-data class PlaceWithMarker(
-    val place: Place,
+data class ElementWithMarker(
+    val element: Element,
     val marker: Drawable,
 )

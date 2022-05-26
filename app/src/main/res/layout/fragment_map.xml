@@ -24,7 +24,7 @@
     </LinearLayout>
 
     <FrameLayout
-        android:id="@+id/placeDetails"
+        android:id="@+id/elementDetails"
         android:background="?attr/colorSurface"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -33,8 +33,8 @@
         app:layout_insetEdge="bottom">
 
         <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/placeDetailsFragment"
-            android:name="map.PlaceDetailsFragment"
+            android:id="@+id/elementFragment"
+            android:name="element.ElementFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 

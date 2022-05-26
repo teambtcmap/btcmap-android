@@ -4,7 +4,7 @@ CREATE TABLE Conf (
     lastSyncDateTime TEXT
 );
 
-CREATE TABLE Place (
+CREATE TABLE Element (
     type TEXT NOT NULL,
     id TEXT NOT NULL,
     lat REAL NOT NULL,

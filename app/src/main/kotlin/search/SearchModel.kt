@@ -7,10 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.Database
+import db.Element
 import org.btcmap.R
 import db.Location
-import icons.PlaceIconsRepository
-import db.Place
+import icons.IconsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -25,8 +25,8 @@ import java.text.NumberFormat
 import kotlin.system.measureTimeMillis
 
 @KoinViewModel
-class PlacesSearchModel(
-    private val placeIconsRepo: PlaceIconsRepository,
+class SearchModel(
+    private val iconsRepo: IconsRepository,
     private val app: Application,
     private val db: Database,
 ) : ViewModel() {
@@ -45,7 +45,7 @@ class PlacesSearchModel(
 
     private val searchString = MutableStateFlow("")
 
-    private val _searchResults = MutableStateFlow<List<PlacesSearchAdapter.Item>>(emptyList())
+    private val _searchResults = MutableStateFlow<List<SearchAdapter.Item>>(emptyList())
     val searchResults = _searchResults.asStateFlow()
 
     init {
@@ -53,18 +53,18 @@ class PlacesSearchModel(
             if (searchString.length < MIN_QUERY_LENGTH) {
                 _searchResults.update { emptyList() }
             } else {
-                var places: List<Place>
+                var elements: List<Element>
 
                 val queryTimeMillis = measureTimeMillis {
-                    places = db.placeQueries.selectBySearchString(searchString).asFlow().mapToList().first()
+                    elements = db.elementQueries.selectBySearchString(searchString).asFlow().mapToList().first()
                 }
 
                 Log.d(TAG, "Search string: $searchString")
-                Log.d(TAG, "Queried ${places.size} places in $queryTimeMillis ms")
+                Log.d(TAG, "Queried ${elements.size} elements in $queryTimeMillis ms")
 
                 if (location != null) {
                     val sortTimeMillis = measureTimeMillis {
-                        places = places.sortedBy {
+                        elements = elements.sortedBy {
                             getDistance(
                                 startLatitude = location.lat,
                                 startLongitude = location.lon,
@@ -74,10 +74,10 @@ class PlacesSearchModel(
                         }
                     }
 
-                    Log.d(TAG, "Sorted ${places.size} places by distance in $sortTimeMillis ms")
+                    Log.d(TAG, "Sorted ${elements.size} elements by distance in $sortTimeMillis ms")
                 }
 
-                _searchResults.update { places.map { it.toRow(location) } }
+                _searchResults.update { elements.map { it.toAdapterItem(location) } }
             }
         }.launchIn(viewModelScope)
     }
@@ -90,12 +90,12 @@ class PlacesSearchModel(
         this.searchString.update { searchString }
     }
 
-    private fun Place.toRow(userLocation: Location?): PlacesSearchAdapter.Item {
+    private fun Element.toAdapterItem(userLocation: Location?): SearchAdapter.Item {
         val distanceStringBuilder = StringBuilder()
 
         if (userLocation != null) {
-            val placeLocation = Location(lat, lon)
-            val distanceKm = userLocation.distanceInKmTo(placeLocation)
+            val elementLocation = Location(lat, lon)
+            val distanceKm = userLocation.distanceInKmTo(elementLocation)
 
             distanceStringBuilder.apply {
                 append(DISTANCE_FORMAT.format(distanceKm))
@@ -104,9 +104,9 @@ class PlacesSearchModel(
             }
         }
 
-        return PlacesSearchAdapter.Item(
-            place = this,
-            icon = placeIconsRepo.getIcon(this),
+        return SearchAdapter.Item(
+            element = this,
+            icon = iconsRepo.getIcon(this),
             name = tags["name"]?.jsonPrimitive?.contentOrNull ?: "Unnamed",
             distanceToUser = distanceStringBuilder.toString(),
         )

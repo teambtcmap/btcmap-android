@@ -19,7 +19,7 @@ class UserLocationRepository(
 ) {
 
     companion object {
-        const val TAG = "UserLocationRepository"
+        const val TAG = "location"
 
         val DEFAULT_LOCATION: Location = Location(
             lat = 13.7061879,
