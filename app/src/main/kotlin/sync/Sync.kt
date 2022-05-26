@@ -6,11 +6,13 @@ import db.Conf
 import db.Database
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.json.JSONObject
 import org.koin.core.annotation.Single
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
@@ -36,7 +38,8 @@ class Sync(
 
                 runCatching {
                     val bundledData = context.assets.open("data.json")
-                    dataImporter.import(JSONObject(bundledData.bufferedReader().readText()))
+                    val bundledDataJson: JsonObject = Json.decodeFromString(bundledData.bufferedReader().readText())
+                    dataImporter.import(bundledDataJson)
                 }.onFailure {
                     Log.e(TAG, "Failed to import bundled data", it)
                 }
@@ -79,7 +82,12 @@ class Sync(
             val response = runCatching { call.execute() }.getOrNull() ?: return@withContext false
 
             if (response.isSuccessful) {
-                runCatching { dataImporter.import(JSONObject(response.body!!.string())) }.isSuccess
+                runCatching {
+                    val json: JsonObject = Json.decodeFromString(response.body!!.string())
+                    dataImporter.import(json)
+                }.onFailure {
+                    Log.e(TAG, "Failed to import new data", it)
+                }.isSuccess
             } else {
                 false
             }

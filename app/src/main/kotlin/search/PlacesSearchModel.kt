@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import location.AndroidLocation
 import org.koin.android.annotation.KoinViewModel
 import java.text.NumberFormat
@@ -105,7 +107,7 @@ class PlacesSearchModel(
         return PlacesSearchAdapter.Item(
             place = this,
             icon = placeIconsRepo.getIcon(this),
-            name = tags.opt("name")?.toString() ?: "Unnamed",
+            name = tags["name"]?.jsonPrimitive?.contentOrNull ?: "Unnamed",
             distanceToUser = distanceStringBuilder.toString(),
         )
     }

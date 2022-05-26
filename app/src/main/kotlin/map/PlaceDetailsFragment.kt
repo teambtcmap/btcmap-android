@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import org.btcmap.R
 import org.btcmap.databinding.FragmentPlaceDetailsBinding
 import db.Place
+import kotlinx.serialization.json.jsonPrimitive
 
 class PlaceDetailsFragment : Fragment() {
 
@@ -33,10 +34,10 @@ class PlaceDetailsFragment : Fragment() {
     }
 
     fun setPlace(place: Place) {
-        binding.toolbar.title = place.tags.opt("name")?.toString() ?: place.id
-        binding.phone.text = place.tags.opt("phone")?.toString() ?: getString(R.string.not_provided)
-        binding.website.text = place.tags.opt("website")?.toString() ?: getString(R.string.not_provided)
-        binding.openingHours.text = place.tags.opt("opening_hours")?.toString() ?: getString(R.string.not_provided)
-        binding.tags.text = place.tags.toString(4)
+        binding.toolbar.title = place.tags["name"]?.jsonPrimitive?.content ?: place.id
+        binding.phone.text = place.tags["phone"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
+        binding.website.text = place.tags["website"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
+        binding.openingHours.text = place.tags["opening_hours"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
+        binding.tags.text = place.tags.toString()
     }
 }

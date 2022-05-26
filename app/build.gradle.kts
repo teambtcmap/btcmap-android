@@ -5,6 +5,7 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     kotlin("android")
+    kotlin("plugin.serialization") version "1.6.21"
     id("androidx.navigation.safeargs.kotlin")
     id("com.squareup.sqldelight")
     id("com.google.devtools.ksp") version "1.6.21-1.0.5"
@@ -102,6 +103,8 @@ dependencies {
     // Kotlin extensions
     // Simplifies non-blocking programming
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1")
+    // Platform-agnostic JSON serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
 
     // Android extensions
     implementation("androidx.core:core-ktx:1.7.0")

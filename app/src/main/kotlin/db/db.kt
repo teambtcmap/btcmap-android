@@ -4,7 +4,9 @@ import android.content.Context
 import com.squareup.sqldelight.ColumnAdapter
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
-import org.json.JSONObject
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 
 fun database(context: Context): Database {
     val driver = AndroidSqliteDriver(
@@ -25,9 +27,9 @@ fun database(driver: SqlDriver): Database {
 
 private fun placeAdapter(): Place.Adapter {
     return Place.Adapter(
-        tagsAdapter = object : ColumnAdapter<JSONObject, String> {
-            override fun decode(databaseValue: String) = JSONObject(databaseValue)
-            override fun encode(value: JSONObject) = value.toString()
+        tagsAdapter = object : ColumnAdapter<JsonObject, String> {
+            override fun decode(databaseValue: String) = Json.parseToJsonElement(databaseValue).jsonObject
+            override fun encode(value: JsonObject) = value.toString()
         }
     )
 }

@@ -5,7 +5,11 @@ import db.Database
 import db.Place
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.annotation.Single
 
 @Single
@@ -17,16 +21,16 @@ class DataImporter(
         private const val TAG = "DataImporter"
     }
 
-    suspend fun import(data: JSONObject) {
+    suspend fun import(data: JsonObject) {
         withContext(Dispatchers.Default) {
-            val elements = data.getJSONArray("elements")
-            Log.d(TAG, "Got ${elements.length()} elements")
+            val elements = data["elements"]!!.jsonArray
+            Log.d(TAG, "Got ${elements.size} elements")
 
             db.transaction {
                 db.placeQueries.deleteAll()
 
-                for (i in 0 until elements.length()) {
-                    val place = elements.getJSONObject(i)
+                for (e in elements) {
+                    val element = e.jsonObject
 
                     val lat: Double
                     val lon: Double
@@ -36,20 +40,21 @@ class DataImporter(
                     val boundsMaxLat: Double?
                     val boundsMaxLon: Double?
 
-                    if (place["type"].toString() == "node") {
-                        lat = place.getDouble("lat")
-                        lon = place.getDouble("lon")
+                    if (element["type"]!!.jsonPrimitive.content == "node") {
+                        lat = element["lat"]!!.jsonPrimitive.double
+                        lon = element["lon"]!!.jsonPrimitive.double
 
                         boundsMinLat = null
                         boundsMinLon = null
                         boundsMaxLat = null
                         boundsMaxLon = null
                     } else {
-                        val bounds = place.getJSONObject("bounds")
-                        boundsMinLat = bounds.getDouble("minlat")
-                        boundsMinLon = bounds.getDouble("minlon")
-                        boundsMaxLat = bounds.getDouble("maxlat")
-                        boundsMaxLon = bounds.getDouble("maxlon")
+                        val bounds = element["bounds"]!!.jsonObject
+
+                        boundsMinLat = bounds["minlat"]!!.jsonPrimitive.double
+                        boundsMinLon = bounds["minlon"]!!.jsonPrimitive.double
+                        boundsMaxLat = bounds["maxlat"]!!.jsonPrimitive.double
+                        boundsMaxLon = bounds["maxlon"]!!.jsonPrimitive.double
 
                         lat = (boundsMinLat + boundsMaxLat) / 2.0
                         lon = (boundsMinLon + boundsMaxLon) / 2.0
@@ -57,16 +62,16 @@ class DataImporter(
 
                     db.placeQueries.insert(
                         Place(
-                            id = place.getString("id"),
-                            type = place.getString("type"),
+                            id = element["id"]!!.jsonPrimitive.content,
+                            type = element["type"]!!.jsonPrimitive.content,
                             lat = lat,
                             lon = lon,
-                            timestamp = place.getString("timestamp"),
+                            timestamp = element["timestamp"]!!.jsonPrimitive.content,
                             boundsMinLat = boundsMinLat,
                             boundsMinLon = boundsMinLon,
                             boundsMaxLat = boundsMaxLat,
                             boundsMaxLon = boundsMaxLon,
-                            tags = place.getJSONObject("tags"),
+                            tags = element["tags"]!!.jsonObject,
                         )
                     )
                 }
