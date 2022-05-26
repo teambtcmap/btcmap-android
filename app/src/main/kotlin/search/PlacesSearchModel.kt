@@ -1,6 +1,7 @@
 package search
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.update
 import location.AndroidLocation
 import org.koin.android.annotation.KoinViewModel
 import java.text.NumberFormat
+import kotlin.system.measureTimeMillis
 
 @KoinViewModel
 class PlacesSearchModel(
@@ -26,6 +28,16 @@ class PlacesSearchModel(
     private val app: Application,
     private val db: Database,
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "search"
+
+        private const val MIN_QUERY_LENGTH = 3
+
+        private val DISTANCE_FORMAT = NumberFormat.getNumberInstance().apply {
+            maximumFractionDigits = 1
+        }
+    }
 
     private val location = MutableStateFlow<Location?>(null)
 
@@ -39,17 +51,28 @@ class PlacesSearchModel(
             if (searchString.length < MIN_QUERY_LENGTH) {
                 _searchResults.update { emptyList() }
             } else {
-                var places = db.placeQueries.selectBySearchString(searchString).asFlow().mapToList().first()
+                var places: List<Place>
+
+                val queryTimeMillis = measureTimeMillis {
+                    places = db.placeQueries.selectBySearchString(searchString).asFlow().mapToList().first()
+                }
+
+                Log.d(TAG, "Search string: $searchString")
+                Log.d(TAG, "Queried ${places.size} places in $queryTimeMillis ms")
 
                 if (location != null) {
-                    places = places.sortedBy {
-                        getDistance(
-                            startLatitude = location.lat,
-                            startLongitude = location.lon,
-                            endLatitude = it.lat,
-                            endLongitude = it.lon,
-                        )
+                    val sortTimeMillis = measureTimeMillis {
+                        places = places.sortedBy {
+                            getDistance(
+                                startLatitude = location.lat,
+                                startLongitude = location.lon,
+                                endLatitude = it.lat,
+                                endLongitude = it.lon,
+                            )
+                        }
                     }
+
+                    Log.d(TAG, "Sorted ${places.size} places by distance in $sortTimeMillis ms")
                 }
 
                 _searchResults.update { places.map { it.toRow(location) } }
@@ -102,13 +125,5 @@ class PlacesSearchModel(
         val distance = FloatArray(1)
         AndroidLocation.distanceBetween(startLatitude, startLongitude, endLatitude, endLongitude, distance)
         return distance[0].toDouble()
-    }
-
-    companion object {
-        private const val MIN_QUERY_LENGTH = 2
-
-        private val DISTANCE_FORMAT = NumberFormat.getNumberInstance().apply {
-            maximumFractionDigits = 1
-        }
     }
 }
