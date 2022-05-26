@@ -14,4 +14,4 @@ If you wish to add a new place or edit an existing one, you can do it directly o
 
 bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d
 
-<img src="app/src/main/res/drawable/btc_address.png" width="25%">
+<img src="app/src/main/res/drawable-anydpi/btc_address.png" width="25%">
