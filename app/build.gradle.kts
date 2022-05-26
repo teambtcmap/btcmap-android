@@ -119,6 +119,7 @@ dependencies {
     val sqlDelightVer = "1.5.3"
     implementation("com.squareup.sqldelight:coroutines-extensions:$sqlDelightVer")
     implementation("com.squareup.sqldelight:android-driver:$sqlDelightVer")
+    testImplementation("com.squareup.sqldelight:sqlite-driver:$sqlDelightVer")
 
     // Injection library
     implementation("io.insert-koin:koin-android:3.2.0")
@@ -129,4 +130,7 @@ dependencies {
     // Open Street Map widget
     implementation("org.osmdroid:osmdroid-android:6.1.13")
     implementation("com.github.MKergall:osmbonuspack:6.7.0")
+
+    // Common test dependencies
+    testImplementation(kotlin("test"))
 }
