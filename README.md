@@ -1,14 +1,12 @@
 ## BTC Map
 
-Thousands of places already accept bitcoins. This app will help you find them.
+See where you can spend your bitcoins and become a contributor by adding new places and refining existing ones
 
 <p>
   <a href="https://f-droid.org/packages/org.btcmap/">
     <img src="graphics/get-it-on-fdroid.svg" alt="Get it on F-Droid" height="75">
   </a>
 </p>
-
-If you wish to add a new place or edit an existing one, you can do it directly on [Open Street Map](https://www.openstreetmap.org). User contributions are very important and always welcome.
 
 <p>
 <img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="19%">
