@@ -22,5 +22,7 @@
     <string name="show_my_location">Show my location</string>
     <string name="edit_place">Edit place</string>
     <string name="delete_place">Delete place</string>
+    <string name="show_tags">Show tags</string>
+    <string name="hide_tags">Hide tags</string>
 
 </resources>

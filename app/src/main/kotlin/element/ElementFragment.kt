@@ -6,8 +6,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import db.Element
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import org.btcmap.R
 import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.databinding.FragmentElementBinding
@@ -16,6 +19,8 @@ class ElementFragment : Fragment() {
 
     private var _binding: FragmentElementBinding? = null
     private val binding get() = _binding!!
+
+    private val tagsJsonFormatter by lazy { Json { prettyPrint = true } }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,6 +43,16 @@ class ElementFragment : Fragment() {
             }
 
             true
+        }
+
+        binding.tagsButton.setOnClickListener {
+            binding.tags.isVisible = !binding.tags.isVisible
+
+            if (binding.tags.isVisible) {
+                binding.tagsButton.setText(R.string.hide_tags)
+            } else {
+                binding.tagsButton.setText(R.string.show_tags)
+            }
         }
     }
 
@@ -62,6 +77,6 @@ class ElementFragment : Fragment() {
         binding.website.text = element.tags["website"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
         binding.openingHours.text =
             element.tags["opening_hours"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
-        binding.tags.text = element.tags.toString()
+        binding.tags.text = tagsJsonFormatter.encodeToString(JsonObject.serializer(), element.tags)
     }
 }
