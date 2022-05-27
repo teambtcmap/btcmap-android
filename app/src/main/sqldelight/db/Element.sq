@@ -3,10 +3,14 @@ INSERT
 INTO Element (id, type, lat, lon, timestamp, boundsMinLat, boundsMinLon, boundsMaxLat, boundsMaxLon, tags)
 VALUES ?;
 
-selectById:
+selectAll:
+SELECT *
+FROM Element;
+
+selectByTypeAndId:
 SELECT *
 FROM Element
-WHERE id = ?;
+WHERE type = ? AND id = ?;
 
 selectBySearchString:
 SELECT * FROM Element WHERE

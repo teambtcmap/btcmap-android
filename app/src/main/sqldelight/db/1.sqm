@@ -1,12 +1,12 @@
 import kotlinx.serialization.json.JsonObject;
 
 CREATE TABLE Conf (
-    lastSyncDateTime TEXT
+    lastSyncDate TEXT
 );
 
 CREATE TABLE Element (
     type TEXT NOT NULL,
-    id TEXT NOT NULL,
+    id INTEGER NOT NULL,
     lat REAL NOT NULL,
     lon REAL NOT NULL,
     timestamp TEXT NOT NULL,

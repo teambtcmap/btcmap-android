@@ -45,7 +45,7 @@ class Sync(
                 }
             }
 
-            val lastSyncDateTime = db.confQueries.selectAll().executeAsOneOrNull()?.lastSyncDateTime
+            val lastSyncDateTime = db.confQueries.selectAll().executeAsOneOrNull()?.lastSyncDate
             val hourAgo = ZonedDateTime.now(ZoneOffset.UTC).minusHours(1)
             Log.d(TAG, "Last sync date: $lastSyncDateTime")
             Log.d(TAG, "Hour ago: $hourAgo")
@@ -100,7 +100,7 @@ class Sync(
 
             db.transaction {
                 db.confQueries.deleteAll()
-                db.confQueries.insert(conf.copy(lastSyncDateTime = lastSyncDateTime.toString()))
+                db.confQueries.insert(conf.copy(lastSyncDate = lastSyncDateTime.toString()))
             }
         }
     }

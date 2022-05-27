@@ -10,6 +10,7 @@ import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
 import org.koin.core.annotation.Single
 
 @Single
@@ -61,7 +62,7 @@ class DataImporter(
 
                     db.elementQueries.insert(
                         Element(
-                            id = element["id"]!!.jsonPrimitive.content,
+                            id = element["id"]!!.jsonPrimitive.long,
                             type = element["type"]!!.jsonPrimitive.content,
                             lat = lat,
                             lon = lon,

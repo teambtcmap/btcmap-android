@@ -8,7 +8,7 @@ class ConfQueriesTest {
     @Test
     fun insert() {
         val db = testDb()
-        val conf = Conf(lastSyncDateTime = null)
+        val conf = Conf(lastSyncDate = null)
         db.confQueries.insert(conf)
         assertEquals(conf, db.confQueries.selectAll().executeAsOne())
     }
@@ -21,7 +21,7 @@ class ConfQueriesTest {
     @Test
     fun deleteAll() {
         val db = testDb()
-        val conf = Conf(lastSyncDateTime = null)
+        val conf = Conf(lastSyncDate = null)
         db.confQueries.insert(conf)
         db.confQueries.deleteAll()
     }

@@ -188,7 +188,7 @@ class MapFragment : Fragment() {
             mapController.setZoom(DEFAULT_MAP_ZOOM.toDouble())
             val startPoint = GeoPoint(it.lat, it.lon)
             mapController.setCenter(startPoint)
-            model.selectElement(it.id, true)
+            model.selectElement(it, true)
             searchResultModel.element.update { null }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
@@ -212,7 +212,7 @@ class MapFragment : Fragment() {
                     marker.icon = it.marker
 
                     marker.setOnMarkerClickListener { _, _ ->
-                        model.selectElement(it.element.id, false)
+                        model.selectElement(it.element, false)
                         true
                     }
 
@@ -302,7 +302,7 @@ class MapFragment : Fragment() {
     private fun MapView.addCancelSelectionOverlay() {
         overlays += MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
-                model.selectElement("", false)
+                model.selectElement(null, false)
                 return true
             }
 

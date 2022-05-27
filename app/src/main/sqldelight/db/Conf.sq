@@ -1,6 +1,6 @@
 insert:
 INSERT
-INTO Conf (lastSyncDateTime)
+INTO Conf (lastSyncDate)
 VALUES ?;
 
 selectAll:

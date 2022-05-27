@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Database
 import db.Element
 import db.Location
@@ -104,14 +103,11 @@ class MapModel(
         _mapBoundingBox.update { viewport }
     }
 
-    fun selectElement(id: String, moveToLocation: Boolean) {
-        viewModelScope.launch {
-            val element = db.elementQueries.selectById(id).asFlow().mapToOneOrNull().first()
-            _selectedElement.update { element }
+    fun selectElement(element: Element?, moveToLocation: Boolean) {
+        _selectedElement.update { element }
 
-            if (element != null && moveToLocation) {
-                _moveToLocation.update { Location(element.lat, element.lon) }
-            }
+        if (element != null && moveToLocation) {
+            _moveToLocation.update { Location(element.lat, element.lon) }
         }
     }
 
