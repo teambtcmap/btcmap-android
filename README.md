@@ -8,14 +8,14 @@ See where you can spend your bitcoins and become a contributor by adding new pla
   </a>
 </p>
 
-<p>
-<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="19%">
-<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="19%">
-<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="19%">
-</p>
+<div>
+<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="300">
+<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="300">
+<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="300">
+</div>
 
 ## Support BTC Map
 
 bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d
 
-<img src="app/src/main/res/drawable-nodpi/btc_address.png" width="25%">
+<img src="app/src/main/res/drawable-nodpi/btc_address.png" width="300">
