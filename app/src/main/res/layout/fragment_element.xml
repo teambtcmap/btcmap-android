@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         app:title="Title"
+        app:menu="@menu/element"
         android:maxLines="1"
         tools:text="Place name" />
 

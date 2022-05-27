@@ -20,5 +20,7 @@
     <string name="donation_address" translatable="false">bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d</string>
     <string name="help_us_improve_btc_map">Help us improve BTC Map</string>
     <string name="show_my_location">Show my location</string>
+    <string name="edit_place">Edit place</string>
+    <string name="delete_place">Delete place</string>
 
 </resources>
