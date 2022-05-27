@@ -18,4 +18,4 @@ See where you can spend your bitcoins and become a contributor by adding new pla
 
 bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d
 
-<img src="app/src/main/res/drawable-nodpi/btc_address.png" width="25%">
+<img src="app/src/main/res/drawable-nodpi/btc_address.png" width="273">
