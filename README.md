@@ -1,6 +1,6 @@
 ## BTC Map
 
-See where you can spend your bitcoins and become a contributor by adding new places and refining existing ones
+See where you can spend your bitcoins
 
 <p>
   <a href="https://f-droid.org/packages/org.btcmap/">
