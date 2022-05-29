@@ -45,6 +45,13 @@ android {
                 keyPassword = signingProperties["keystore_key_password"] as String
             }
         }
+
+        create("selfSignedRelease") {
+            storeFile = File(rootDir, "release.jks")
+            storePassword = "btcmap"
+            keyAlias = "btcmap"
+            keyPassword = "btcmap"
+        }
     }
 
     packagingOptions {
@@ -65,6 +72,19 @@ android {
         }
 
         getByName("release") {
+            // Enables code shrinking, obfuscation, and optimization
+            isMinifyEnabled = true
+
+            // Enables resource shrinking
+            isShrinkResources = true
+
+            // Includes the default ProGuard rules file
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+
+        create("selfSignedRelease") {
+            signingConfig = signingConfigs.getByName("selfSignedRelease")
+
             // Enables code shrinking, obfuscation, and optimization
             isMinifyEnabled = true
 
