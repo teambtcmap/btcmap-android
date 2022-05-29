@@ -25,13 +25,16 @@ fun Element.iconResId(): Int? {
         tag("tourism") == "hostel" -> R.drawable.baseline_hotel_24
         // 25 elements (22-05-2022)
         tag("tourism") == "chalet" -> R.drawable.baseline_chalet_24
-        // TODO tourism=camp_site 12 elements (22-05-2022)
+        // 12 elements (22-05-2022)
+        tag("tourism") == "camp_site" -> R.drawable.baseline_holiday_village_24
         // 7 elements (22-05-2022)
         tag("tourism") == "gallery" -> R.drawable.baseline_palette_24
         // 7 elements (22-05-2022)
         tag("tourism") == "artwork" -> R.drawable.baseline_palette_24
-        // TODO tourism=information 5 elements (22-05-2022)
-        // TODO tourism=museum 5 elements (22-05-2022)
+        // 5 elements (22-05-2022)
+        tag("tourism") == "information" -> R.drawable.baseline_info_outline_24
+        // 5 elements (22-05-2022)
+        tag("tourism") == "museum" -> R.drawable.baseline_museum_24
         // 3 elements (22-05-2022)
         tag("tourism") == "motel" -> R.drawable.baseline_hotel_24
 
