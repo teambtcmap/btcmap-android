@@ -134,12 +134,46 @@ fun Element.iconResId(): Int? {
         tag("shop") == "boutique" -> R.drawable.baseline_storefront_24
         // 8 elements (31-05-2022)
         tag("shop") == "stationery" -> R.drawable.baseline_edit_24
-
-        tag("shop") == "scuba_diving" -> R.drawable.baseline_scuba_diving_24
-        tag("shop") == "wholesale" -> R.drawable.baseline_local_grocery_store_24
-        tag("shop") == "interior_decoration" -> R.drawable.baseline_design_services_24
+        // 8 elements (31-05-2022)
+        tag("shop") == "pastry" -> R.drawable.baseline_bakery_dining_24
+        // 8 elements (31-05-2022)
+        tag("shop") == "mall" -> R.drawable.baseline_local_mall_24
+        // 8 elements (31-05-2022)
+        tag("shop") == "hifi" -> R.drawable.baseline_music_note_24
+        // 8 elements (31-05-2022)
+        tag("shop") == "estate_agent" -> R.drawable.baseline_home_24
+        // 8 elements (31-05-2022)
+        tag("shop") == "cosmetics" -> R.drawable.baseline_spa_24
+        // 8 elements (31-05-2022)
+        tag("shop") == "coffee" -> R.drawable.baseline_coffee_24
+        // 7 elements (31-05-2022)
+        tag("shop") == "erotic" -> R.drawable.baseline_adult_content_24
+        // 7 elements (31-05-2022)
+        tag("shop") == "confectionery" -> R.drawable.baseline_storefront_24
+        // 7 elements (31-05-2022)
+        tag("shop") == "beverages" -> R.drawable.baseline_liquor_24
+        // 6 elements (31-05-2022)
         tag("shop") == "video_games" -> R.drawable.baseline_games_24
+        // 6 elements (31-05-2022)
+        tag("shop") == "newsagent" -> R.drawable.baseline_newspaper_24
+        // 6 elements (31-05-2022)
+        tag("shop") == "interior_decoration" -> R.drawable.baseline_design_services_24
+        // 6 elements (31-05-2022)
+        tag("shop") == "electrical" -> R.drawable.baseline_electrical_services_24
+        // 6 elements (31-05-2022)
+        tag("shop") == "doityourself" -> R.drawable.baseline_hardware_24
+        // 6 elements (31-05-2022)
+        tag("shop") == "antiques" -> R.drawable.baseline_storefront_24
+        // 5 elements (31-05-2022)
         tag("shop") == "watches" -> R.drawable.baseline_watch_24
+        // 5 elements (31-05-2022)
+        tag("shop") == "trade" -> R.drawable.baseline_storefront_24
+        // 5 elements (31-05-2022)
+        tag("shop") == "tea" -> R.drawable.baseline_emoji_food_beverage_24
+        // 5 elements (31-05-2022)
+        tag("shop") == "scuba_diving" -> R.drawable.baseline_scuba_diving_24
+
+        tag("shop") == "wholesale" -> R.drawable.baseline_local_grocery_store_24
         tag("shop") == "storage_rental" -> R.drawable.baseline_warehouse_24
         tag("shop") == "garden_centre" -> R.drawable.baseline_local_florist_24
         tag("shop") == "surf" -> R.drawable.baseline_surfing_24
