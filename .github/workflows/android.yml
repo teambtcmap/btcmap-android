@@ -36,9 +36,5 @@ jobs:
           automatic_release_tag: 'preview'
           prerelease: true
           title: 'preview'
-          files: |
-            app/build/outputs/apk/debug/btcmap-*.apk
-            app/build/outputs/apk/release/btcmap-*.apk
-            app/build/outputs/apk/selfSignedRelease/btcmap-*.apk
-          
+          files: app/build/outputs/apk/selfSignedRelease/btcmap-*.apk          
           
