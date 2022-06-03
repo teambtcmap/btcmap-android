@@ -172,6 +172,36 @@ fun Element.iconResId(): Int? {
         tag("shop") == "tea" -> R.drawable.baseline_emoji_food_beverage_24
         // 5 elements (31-05-2022)
         tag("shop") == "scuba_diving" -> R.drawable.baseline_scuba_diving_24
+        // 5 elements (31-05-2022)
+        tag("shop") == "musical_instrument" -> R.drawable.baseline_music_note_24
+        // 5 elements (31-05-2022)
+        tag("shop") == "dairy" -> R.drawable.baseline_storefront_24
+        // 5 elements (31-05-2022)
+        tag("shop") == "chocolate" -> R.drawable.baseline_storefront_24
+        // 5 elements (31-05-2022)
+        tag("shop") == "anime" -> R.drawable.baseline_storefront_24
+        // 4 elements (31-05-2022)
+        tag("shop") == "tyres" -> R.drawable.baseline_trip_origin_24
+        // 4 elements (31-05-2022)
+        tag("shop") == "second_hand" -> R.drawable.baseline_storefront_24
+        // 4 elements (31-05-2022)
+        tag("shop") == "perfumery" -> R.drawable.baseline_storefront_24
+        // 4 elements (31-05-2022)
+        tag("shop") == "nutrition_supplements" -> R.drawable.baseline_storefront_24
+        // 4 elements (31-05-2022)
+        tag("shop") == "motorcycle" -> R.drawable.baseline_two_wheeler_24
+        // 4 elements (31-05-2022)
+        tag("shop") == "lottery" -> R.drawable.baseline_storefront_24
+        // 4 elements (31-05-2022)
+        tag("shop") == "locksmith" -> R.drawable.baseline_lock_24
+        // 4 elements (31-05-2022)
+        tag("shop") == "games" -> R.drawable.baseline_games_24
+        // 4 elements (31-05-2022)
+        tag("shop") == "funeral_directors" -> R.drawable.baseline_church_24
+        // 4 elements (31-05-2022)
+        tag("shop") == "department_store" -> R.drawable.baseline_local_mall_24
+        // 4 elements (31-05-2022)
+        tag("shop") == "chemist" -> R.drawable.baseline_science_24
 
         tag("shop") == "wholesale" -> R.drawable.baseline_local_grocery_store_24
         tag("shop") == "storage_rental" -> R.drawable.baseline_warehouse_24
