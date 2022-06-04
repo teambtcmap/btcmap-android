@@ -202,13 +202,38 @@ fun Element.iconResId(): Int? {
         tag("shop") == "department_store" -> R.drawable.baseline_local_mall_24
         // 4 elements (31-05-2022)
         tag("shop") == "chemist" -> R.drawable.baseline_science_24
-
-        tag("shop") == "wholesale" -> R.drawable.baseline_local_grocery_store_24
+        // 3 elements (31-05-2022)
+        tag("shop") == "water_sports" -> R.drawable.baseline_sports_24
+        // 3 elements (31-05-2022)
+        tag("shop") == "water" -> R.drawable.baseline_sports_24
+        // 3 elements (31-05-2022)
+        tag("shop") == "video" -> R.drawable.baseline_videocam_24
+        // 3 elements (31-05-2022)
+        tag("shop") == "tailor" -> R.drawable.baseline_checkroom_24
+        // 3 elements (31-05-2022)
         tag("shop") == "storage_rental" -> R.drawable.baseline_warehouse_24
-        tag("shop") == "garden_centre" -> R.drawable.baseline_local_florist_24
-        tag("shop") == "surf" -> R.drawable.baseline_surfing_24
-        tag("shop") == "video" -> R.drawable.baseline_local_movies_24
+        // 3 elements (31-05-2022)
+        tag("shop") == "storage" -> R.drawable.baseline_warehouse_24
+        // 3 elements (31-05-2022)
+        tag("shop") == "outdoor" -> R.drawable.baseline_outdoor_grill_24
+        // 3 elements (31-05-2022)
+        tag("shop") == "houseware" -> R.drawable.baseline_chair_24
+        // 3 elements (31-05-2022)
+        tag("shop") == "herbalist" -> R.drawable.baseline_local_florist_24
+        // 3 elements (31-05-2022)
+        tag("shop") == "health_food" -> R.drawable.baseline_local_florist_24
+        // 3 elements (31-05-2022)
+        tag("shop") == "grocery" -> R.drawable.baseline_local_grocery_store_24
+        // 3 elements (31-05-2022)
+        tag("shop") == "food" -> R.drawable.baseline_local_grocery_store_24
+        // 3 elements (31-05-2022)
+        tag("shop") == "curtain" -> R.drawable.baseline_storefront_24
+        // 3 elements (31-05-2022)
         tag("shop") == "boat" -> R.drawable.baseline_sailing_24
+        // 1 element (31-05-2022)
+        tag("shop") == "wholesale" -> R.drawable.baseline_local_grocery_store_24
+        // 0 elements (31-05-2022)
+        tag("shop") == "surf" -> R.drawable.baseline_surfing_24
 
         tag("cuisine") == "burger" -> R.drawable.baseline_lunch_dining_24
         tag("cuisine") == "pizza" -> R.drawable.baseline_local_pizza_24
