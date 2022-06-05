@@ -62,6 +62,12 @@ class ElementFragment : Fragment() {
     }
 
     fun setScrollProgress(progress: Float) {
+        if (progress == 1.0f) {
+            binding.toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24)
+        } else {
+            binding.toolbar.navigationIcon = null
+        }
+
         val edit = binding.toolbar.menu.findItem(R.id.action_edit)!!
         edit.isVisible = progress == 1.0f
 
@@ -73,6 +79,31 @@ class ElementFragment : Fragment() {
 
     fun setElement(element: Element) {
         binding.toolbar.title = element.tags["name"]?.jsonPrimitive?.content ?: "Unnamed"
+
+        val address = buildString {
+            if (element.tags.containsKey("addr:housenumber")) {
+                append(element.tags["addr:housenumber"]!!.jsonPrimitive.content)
+            }
+
+            if (element.tags.containsKey("addr:street")) {
+                append(" ")
+                append(element.tags["addr:street"]!!.jsonPrimitive.content)
+            }
+
+            if (element.tags.containsKey("addr:city")) {
+                append(", ")
+                append(element.tags["addr:city"]!!.jsonPrimitive.content)
+            }
+
+            if (element.tags.containsKey("addr:postcode")) {
+                append(", ")
+                append(element.tags["addr:postcode"]!!.jsonPrimitive.content)
+            }
+        }.trim(',', ' ')
+
+        binding.address.isVisible = address.isNotBlank()
+        binding.address.text = address
+
         binding.phone.text = element.tags["phone"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
         binding.website.text = element.tags["website"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
         binding.openingHours.text =

@@ -5,12 +5,12 @@
         android:id="@+id/action_edit"
         android:icon="@drawable/baseline_edit_24"
         android:title="@string/edit_place"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_delete"
         android:icon="@drawable/baseline_delete_24"
         android:title="@string/delete_place"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
 </menu>
