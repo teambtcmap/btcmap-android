@@ -1,7 +1,8 @@
+import java.time.ZonedDateTime;
 import kotlinx.serialization.json.JsonObject;
 
 CREATE TABLE Conf (
-    lastSyncDate TEXT
+    lastSyncDate TEXT AS ZonedDateTime
 );
 
 CREATE TABLE Element (

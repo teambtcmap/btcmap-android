@@ -2,9 +2,10 @@ package sync
 
 import android.content.Context
 import android.util.Log
-import db.Conf
+import conf.ConfRepo
 import db.Database
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -20,6 +21,7 @@ import java.time.ZonedDateTime
 @Single
 class Sync(
     private val dataImporter: DataImporter,
+    private val confRepo: ConfRepo,
     private val db: Database,
     private val context: Context,
 ) {
@@ -45,12 +47,12 @@ class Sync(
                 }
             }
 
-            val lastSyncDateTime = db.confQueries.selectAll().executeAsOneOrNull()?.lastSyncDate
+            val lastSyncDateTime = confRepo.load().first().lastSyncDate
             val hourAgo = ZonedDateTime.now(ZoneOffset.UTC).minusHours(1)
             Log.d(TAG, "Last sync date: $lastSyncDateTime")
             Log.d(TAG, "Hour ago: $hourAgo")
 
-            if (lastSyncDateTime != null && ZonedDateTime.parse(lastSyncDateTime).isAfter(hourAgo)) {
+            if (lastSyncDateTime != null && lastSyncDateTime.isAfter(hourAgo)) {
                 Log.d(TAG, "Data is up to date")
                 return@withContext
             }
@@ -58,14 +60,14 @@ class Sync(
             Log.d(TAG, "Syncing with $BTCMAP_DATA_URL")
 
             if (sync(BTCMAP_DATA_URL)) {
-                setLastSyncDateTime(ZonedDateTime.now(ZoneOffset.UTC))
+                confRepo.save { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
                 Log.d(TAG, "Finished sync")
             } else {
                 Log.w(TAG, "Failed to sync with $BTCMAP_DATA_URL")
                 Log.d(TAG, "Syncing with $GITHUB_DATA_URL")
 
                 if (sync(GITHUB_DATA_URL)) {
-                    setLastSyncDateTime(ZonedDateTime.now(ZoneOffset.UTC))
+                    confRepo.save { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
                     Log.d(TAG, "Finished sync")
                 } else {
                     Log.w(TAG, "Failed to sync with $GITHUB_DATA_URL")
@@ -90,17 +92,6 @@ class Sync(
                 }.isSuccess
             } else {
                 false
-            }
-        }
-    }
-
-    private suspend fun setLastSyncDateTime(lastSyncDateTime: ZonedDateTime) {
-        withContext(Dispatchers.Default) {
-            val conf = db.confQueries.selectAll().executeAsOneOrNull() ?: Conf("")
-
-            db.transaction {
-                db.confQueries.deleteAll()
-                db.confQueries.insert(conf.copy(lastSyncDate = lastSyncDateTime.toString()))
             }
         }
     }

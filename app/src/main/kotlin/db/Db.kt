@@ -7,6 +7,7 @@ import com.squareup.sqldelight.db.SqlDriver
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+import java.time.ZonedDateTime
 
 fun database(context: Context): Database {
     val driver = AndroidSqliteDriver(
@@ -21,7 +22,17 @@ fun database(context: Context): Database {
 fun database(driver: SqlDriver): Database {
     return Database(
         driver = driver,
+        ConfAdapter = confAdapter(),
         ElementAdapter = elementAdapter(),
+    )
+}
+
+private fun confAdapter(): Conf.Adapter {
+    return Conf.Adapter(
+        lastSyncDateAdapter = object : ColumnAdapter<ZonedDateTime, String> {
+            override fun decode(databaseValue: String) = ZonedDateTime.parse(databaseValue)
+            override fun encode(value: ZonedDateTime) = value.toString()
+        }
     )
 }
 
