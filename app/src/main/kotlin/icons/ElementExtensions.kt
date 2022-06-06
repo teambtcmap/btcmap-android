@@ -235,20 +235,116 @@ fun Element.iconResId(): Int? {
         // 0 elements (31-05-2022)
         tag("shop") == "surf" -> R.drawable.baseline_surfing_24
 
+        // 674 elements (06-06-2022)
+        tag("amenity") == "restaurant" -> R.drawable.baseline_restaurant_24
+        // 336 elements (06-06-2022)
+        tag("amenity") == "atm" -> R.drawable.baseline_local_atm_24
+        // 199 elements (06-06-2022)
+        tag("amenity") == "cafe" -> R.drawable.baseline_local_cafe_24
+        // 146 elements (06-06-2022)
+        tag("amenity") == "bar" -> R.drawable.baseline_local_bar_24
+        // 100 elements (06-06-2022)
+        tag("amenity") == "bureau_de_change" -> R.drawable.baseline_currency_exchange_24
+        // 87 elements (06-06-2022)
+        tag("amenity") == "place_of_worship" -> R.drawable.baseline_church_24
+        // 77 elements (06-06-2022)
+        tag("amenity") == "fast_food" -> R.drawable.baseline_lunch_dining_24
+        // 70 elements (06-06-2022)
+        tag("amenity") == "bank" -> R.drawable.baseline_account_balance_24
+        // 60 elements (06-06-2022)
+        tag("amenity") == "dentist" -> R.drawable.baseline_medical_services_24
+        // 54 elements (06-06-2022)
+        tag("amenity") == "pub" -> R.drawable.baseline_sports_bar_24
+        // 41 elements (06-06-2022)
+        tag("amenity") == "doctors" -> R.drawable.baseline_medical_services_24
+        // 26 elements (06-06-2022)
+        tag("amenity") == "pharmacy" -> R.drawable.baseline_local_pharmacy_24
+        // 26 elements (06-06-2022)
+        tag("amenity") == "clinic" -> R.drawable.baseline_medical_services_24
+        // 23 elements (06-06-2022)
+        tag("amenity") == "school" -> R.drawable.baseline_school_24
+        // 18 elements (06-06-2022)
+        tag("amenity") == "taxi" -> R.drawable.baseline_local_taxi_24
+        // 16 elements (06-06-2022)
+        tag("amenity") == "studio" -> R.drawable.baseline_mic_24
+        // 16 elements (06-06-2022)
+        tag("amenity") == "fuel" -> R.drawable.baseline_local_gas_station_24
+        // 15 elements (06-06-2022)
+        tag("amenity") == "car_rental" -> R.drawable.baseline_directions_car_24
+        // 11 elements (06-06-2022)
+        tag("amenity") == "arts_centre" -> R.drawable.baseline_palette_24
+        // 11 elements (06-06-2022)
+        tag("amenity") == "police" -> R.drawable.baseline_local_police_24
+        // 10 elements (06-06-2022)
+        tag("amenity") == "hospital" -> R.drawable.baseline_local_hospital_24
+        // 10 elements (06-06-2022)
+        tag("amenity") == "brothel" -> R.drawable.baseline_adult_content_24
+        // 9 elements (06-06-2022)
+        tag("amenity") == "veterinary" -> R.drawable.baseline_pets_24
+        // 8 elements (06-06-2022)
+        tag("amenity") == "university" -> R.drawable.baseline_school_24
+        // 8 elements (06-06-2022)
+        tag("amenity") == "college" -> R.drawable.baseline_school_24
+        // 8 elements (06-06-2022)
+        tag("amenity") == "car_wash" -> R.drawable.baseline_local_car_wash_24
+        // 7 elements (06-06-2022)
+        tag("amenity") == "nightclub" -> R.drawable.baseline_nightlife_24
+        // 7 elements (06-06-2022)
+        tag("amenity") == "driving_school" -> R.drawable.baseline_directions_car_24
+        // 7 elements (06-06-2022)
+        tag("amenity") == "boat_rental" -> R.drawable.baseline_directions_boat_24
+        // 6 elements (06-06-2022)
+        tag("amenity") == "vending_machine" -> R.drawable.baseline_storefront_24
+        // 6 elements (06-06-2022)
+        tag("amenity") == "money_transfer" -> R.drawable.baseline_currency_exchange_24
+        // 6 elements (06-06-2022)
+        tag("amenity") == "marketplace" -> R.drawable.baseline_storefront_24
+        // 6 elements (06-06-2022)
+        tag("amenity") == "ice_cream" -> R.drawable.baseline_icecream_24
+        // 6 elements (06-06-2022)
+        tag("amenity") == "coworking_space" -> R.drawable.baseline_business_24
+        // 6 elements (06-06-2022)
+        tag("amenity") == "community_centre" -> R.drawable.baseline_groups_24
+        // 5 elements (06-06-2022)
+        tag("amenity") == "kindergarten" -> R.drawable.baseline_child_care_24
+        // 5 elements (06-06-2022)
+        tag("amenity") == "internet_cafe" -> R.drawable.baseline_public_24
+        // 4 elements (06-06-2022)
+        tag("amenity") == "recycling" -> R.drawable.baseline_delete_24
+        // 4 elements (06-06-2022)
+        tag("amenity") == "payment_centre" -> R.drawable.baseline_currency_exchange_24
+        // 4 elements (06-06-2022)
+        tag("amenity") == "cinema" -> R.drawable.baseline_local_movies_24
+        // 4 elements (06-06-2022)
+        tag("amenity") == "childcare" -> R.drawable.baseline_child_care_24
+        // 4 elements (06-06-2022)
+        tag("amenity") == "bicycle_rental" -> R.drawable.baseline_pedal_bike_24
+        // 3 elements (06-06-2022)
+        tag("amenity") == "townhall" -> R.drawable.baseline_groups_24
+        // 3 elements (06-06-2022)
+        tag("amenity") == "theatre" -> R.drawable.baseline_account_balance_24
+        // 3 elements (06-06-2022)
+        tag("amenity") == "post_office" -> R.drawable.baseline_local_post_office_24
+        // 3 elements (06-06-2022)
+        tag("amenity") == "payment_terminal" -> R.drawable.baseline_currency_exchange_24
+        // 3 elements (06-06-2022)
+        tag("amenity") == "office" -> R.drawable.baseline_business_24
+        // 3 elements (06-06-2022)
+        tag("amenity") == "language_school" -> R.drawable.baseline_school_24
+        // 3 elements (06-06-2022)
+        tag("amenity") == "charging_station" -> R.drawable.baseline_electrical_services_24
+        // 2 elements (06-06-2022)
+        tag("amenity") == "stripclub" -> R.drawable.baseline_adult_content_24
+        // 2 elements (06-06-2022)
+        tag("amenity") == "spa" -> R.drawable.baseline_spa_24
+        // 1 element (06-06-2022)
+        tag("amenity") == "training" -> R.drawable.baseline_school_24
+        // 1 element (06-06-2022)
+        tag("amenity") == "flight_school" -> R.drawable.baseline_flight_takeoff_24
+
         tag("cuisine") == "burger" -> R.drawable.baseline_lunch_dining_24
         tag("cuisine") == "pizza" -> R.drawable.baseline_local_pizza_24
-        tag("amenity") == "bar" -> R.drawable.baseline_local_bar_24
-        tag("amenity") == "restaurant" -> R.drawable.baseline_restaurant_24
-        tag("amenity") == "spa" -> R.drawable.baseline_spa_24
-        tag("amenity") == "training" -> R.drawable.baseline_school_24
-        tag("amenity") == "bureau_de_change" -> R.drawable.baseline_currency_exchange_24
-        tag("amenity") == "car_wash" -> R.drawable.baseline_local_car_wash_24
-        tag("amenity") == "atm" -> R.drawable.baseline_local_atm_24
-        tag("amenity") == "cafe" -> R.drawable.baseline_local_cafe_24
-        tag("amenity") == "pub" -> R.drawable.baseline_sports_bar_24
-        tag("amenity") == "doctors" -> R.drawable.baseline_medical_services_24
-        tag("amenity") == "flight_school" -> R.drawable.baseline_flight_takeoff_24
-        tag("amenity") == "taxi" -> R.drawable.baseline_local_taxi_24
+
         tag("office") == "lawyer" -> R.drawable.baseline_balance_24
         tag("office") == "company" -> R.drawable.baseline_business_24
         tag("office") == "it" -> R.drawable.baseline_computer_24
@@ -258,19 +354,26 @@ fun Element.iconResId(): Int? {
         tag("office") == "limousine_service" -> R.drawable.baseline_local_taxi_24
         tag("office") == "coworking" -> R.drawable.baseline_business_24
         tag("office") == "association" -> R.drawable.baseline_groups_24
+
         tag("leisure") == "fitness_centre" -> R.drawable.baseline_fitness_center_24
         tag("leisure") == "sports_centre" -> R.drawable.baseline_fitness_center_24
         tag("leisure") == "beach_resort" -> R.drawable.baseline_beach_access_24
         tag("leisure") == "hackerspace" -> R.drawable.baseline_computer_24
+
         tag("healthcare") == "dentist" -> R.drawable.baseline_medical_services_24
         tag("healthcare") == "clinic" -> R.drawable.baseline_medical_services_24
         tag("healthcare") == "pharmacy" -> R.drawable.baseline_local_pharmacy_24
+
         tag("building") == "commercial" -> R.drawable.baseline_business_24
         tag("building") == "office" -> R.drawable.baseline_business_24
         tag("building") == "retail" -> R.drawable.baseline_storefront_24
+
         tag("sport") == "scuba_diving" -> R.drawable.baseline_scuba_diving_24
+
         tag("craft") == "blacksmith" -> R.drawable.baseline_hardware_24
+
         tag("company") == "transport" -> R.drawable.baseline_directions_car_24
+
         else -> null
     }
 }
