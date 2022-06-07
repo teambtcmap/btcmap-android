@@ -342,23 +342,77 @@ fun Element.iconResId(): Int? {
         // 1 element (06-06-2022)
         tag("amenity") == "flight_school" -> R.drawable.baseline_flight_takeoff_24
 
-        tag("cuisine") == "burger" -> R.drawable.baseline_lunch_dining_24
-        tag("cuisine") == "pizza" -> R.drawable.baseline_local_pizza_24
-
-        tag("office") == "lawyer" -> R.drawable.baseline_balance_24
+        // 490 elements (07-06-2022)
         tag("office") == "company" -> R.drawable.baseline_business_24
+        // 222 elements (07-06-2022)
         tag("office") == "it" -> R.drawable.baseline_computer_24
+        // 131 elements (07-06-2022)
+        tag("office") == "lawyer" -> R.drawable.baseline_balance_24
+        // 40 elements (07-06-2022)
+        tag("office") == "accountant" -> R.drawable.baseline_attach_money_24
+        // 30 elements (07-06-2022)
+        tag("office") == "architect" -> R.drawable.baseline_architecture_24
+        // 23 elements (07-06-2022)
         tag("office") == "educational_institution" -> R.drawable.baseline_school_24
-        tag("office") == "graphic_design" -> R.drawable.baseline_design_services_24
+        // 20 elements (07-06-2022)
+        tag("office") == "advertising_agency" -> R.drawable.baseline_business_24
+        // 17 elements (07-06-2022)
+        tag("office") == "estate_agent" -> R.drawable.baseline_home_24
+        // 13 elements (07-06-2022)
+        tag("office") == "therapist" -> R.drawable.baseline_medical_services_24
+        // 13 elements (07-06-2022)
+        tag("office") == "coworking" -> R.drawable.baseline_groups_24
+        // 12 elements (07-06-2022)
+        tag("office") == "physician" -> R.drawable.baseline_medical_services_24
+        // 11 elements (07-06-2022)
         tag("office") == "marketing" -> R.drawable.baseline_business_24
-        tag("office") == "limousine_service" -> R.drawable.baseline_local_taxi_24
-        tag("office") == "coworking" -> R.drawable.baseline_business_24
+        // 11 elements (07-06-2022)
+        tag("office") == "surveyor" -> R.drawable.baseline_business_24
+        // 10 elements (07-06-2022)
+        tag("office") == "financial" -> R.drawable.baseline_attach_money_24
+        // 10 elements (07-06-2022)
         tag("office") == "association" -> R.drawable.baseline_groups_24
+        // 9 elements (07-06-2022)
+        tag("office") == "engineer" -> R.drawable.baseline_engineering_24
+        // 8 elements (07-06-2022)
+        tag("office") == "telecommunication" -> R.drawable.baseline_cell_tower_24
+        // 8 elements (07-06-2022)
+        tag("office") == "coworking_space" -> R.drawable.baseline_groups_24
+        // 8 elements (07-06-2022)
+        tag("office") == "construction" -> R.drawable.baseline_engineering_24
+        // 7 elements (07-06-2022)
+        tag("office") == "tax_advisor" -> R.drawable.baseline_attach_money_24
+        // 7 elements (07-06-2022)
+        tag("office") == "construction_company" -> R.drawable.baseline_engineering_24
+        // 6 elements (07-06-2022)
+        tag("office") == "travel_agent" -> R.drawable.baseline_tour_24
+        // 6 elements (07-06-2022)
+        tag("office") == "insurance" -> R.drawable.baseline_business_24
+        // 5 elements (07-06-2022)
+        tag("office") == "ngo" -> R.drawable.baseline_business_24
+        // 5 elements (07-06-2022)
+        tag("office") == "newspaper" -> R.drawable.baseline_newspaper_24
+        // 4 elements (07-06-2022)
+        tag("office") == "trade" -> R.drawable.baseline_business_24
+        // 4 elements (07-06-2022)
+        tag("office") == "private" -> R.drawable.baseline_business_24
+        // 4 elements (07-06-2022)
+        tag("office") == "guide" -> R.drawable.baseline_tour_24
+        // 4 elements (07-06-2022)
+        tag("office") == "foundation" -> R.drawable.baseline_business_24
+        // 3 elements (07-06-2022)
+        tag("office") == "web_design" -> R.drawable.baseline_design_services_24
+        // 2 elements (07-06-2022)
+        tag("office") == "graphic_design" -> R.drawable.baseline_design_services_24
+        // 1 element (07-06-2022)
+        tag("office") == "limousine_service" -> R.drawable.baseline_local_taxi_24
+        tag("office") != null -> R.drawable.baseline_business_24
 
         tag("leisure") == "fitness_centre" -> R.drawable.baseline_fitness_center_24
         tag("leisure") == "sports_centre" -> R.drawable.baseline_fitness_center_24
         tag("leisure") == "beach_resort" -> R.drawable.baseline_beach_access_24
         tag("leisure") == "hackerspace" -> R.drawable.baseline_computer_24
+        tag("leisure") == "kayak_dock" -> R.drawable.baseline_kayaking_24
 
         tag("healthcare") == "dentist" -> R.drawable.baseline_medical_services_24
         tag("healthcare") == "clinic" -> R.drawable.baseline_medical_services_24
@@ -373,6 +427,9 @@ fun Element.iconResId(): Int? {
         tag("craft") == "blacksmith" -> R.drawable.baseline_hardware_24
 
         tag("company") == "transport" -> R.drawable.baseline_directions_car_24
+
+        tag("cuisine") == "burger" -> R.drawable.baseline_lunch_dining_24
+        tag("cuisine") == "pizza" -> R.drawable.baseline_local_pizza_24
 
         else -> null
     }
