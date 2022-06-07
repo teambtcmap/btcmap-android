@@ -23,6 +23,7 @@ android {
         versionCode = 2
         versionName = "0.2.0"
         setProperty("archivesBaseName", "btcmap-$versionName")
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -162,4 +163,10 @@ dependencies {
 
     // Common test dependencies
     testImplementation(kotlin("test"))
+
+    // Common instrumented test dependencies
+    androidTestImplementation(kotlin("test"))
+    androidTestImplementation("androidx.test:core-ktx:1.4.0")
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.3")
+    androidTestImplementation("androidx.test:runner:1.4.0")
 }
