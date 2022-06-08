@@ -408,10 +408,31 @@ fun Element.iconResId(): Int? {
         tag("office") == "limousine_service" -> R.drawable.baseline_local_taxi_24
         tag("office") != null -> R.drawable.baseline_business_24
 
-        tag("leisure") == "fitness_centre" -> R.drawable.baseline_fitness_center_24
+        // 46 elements (08-06-2022)
         tag("leisure") == "sports_centre" -> R.drawable.baseline_fitness_center_24
-        tag("leisure") == "beach_resort" -> R.drawable.baseline_beach_access_24
+        // 14 elements (08-06-2022)
         tag("leisure") == "hackerspace" -> R.drawable.baseline_computer_24
+        // 12 elements (08-06-2022)
+        tag("leisure") == "fitness_centre" -> R.drawable.baseline_fitness_center_24
+        // 9 elements (08-06-2022)
+        tag("leisure") == "pitch" -> R.drawable.baseline_sports_24
+        // 4 elements (08-06-2022)
+        tag("leisure") == "resort" -> R.drawable.baseline_beach_access_24
+        // 4 elements (08-06-2022)
+        tag("leisure") == "park" -> R.drawable.baseline_park_24
+        // 4 elements (08-06-2022)
+        tag("leisure") == "beach_resort" -> R.drawable.baseline_beach_access_24
+        // 2 elements (08-06-2022)
+        tag("leisure") == "marina" -> R.drawable.baseline_directions_boat_24
+        // 2 elements (08-06-2022)
+        tag("leisure") == "golf_course" -> R.drawable.baseline_directions_boat_24
+        // 2 elements (08-06-2022)
+        tag("leisure") == "garden" -> R.drawable.baseline_local_florist_24
+        // 2 elements (08-06-2022)
+        tag("leisure") == "escape_game" -> R.drawable.baseline_games_24
+        // 2 elements (08-06-2022)
+        tag("leisure") == "dance" -> R.drawable.baseline_nightlife_24
+        // 1 element (08-06-2022)
         tag("leisure") == "kayak_dock" -> R.drawable.baseline_kayaking_24
 
         tag("healthcare") == "dentist" -> R.drawable.baseline_medical_services_24
