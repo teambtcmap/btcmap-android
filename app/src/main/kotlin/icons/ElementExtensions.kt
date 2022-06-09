@@ -446,11 +446,15 @@ fun Element.iconResId(): Int? {
         tag("sport") == "scuba_diving" -> R.drawable.baseline_scuba_diving_24
 
         tag("craft") == "blacksmith" -> R.drawable.baseline_hardware_24
+        tag("craft") == "photographer" -> R.drawable.baseline_photo_camera_24
+        tag("craft") == "hvac" -> R.drawable.baseline_hvac_24
 
         tag("company") == "transport" -> R.drawable.baseline_directions_car_24
 
         tag("cuisine") == "burger" -> R.drawable.baseline_lunch_dining_24
         tag("cuisine") == "pizza" -> R.drawable.baseline_local_pizza_24
+
+        tag("telecom") == "data_center" -> R.drawable.baseline_dns_24
 
         else -> null
     }
