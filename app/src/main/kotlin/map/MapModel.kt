@@ -8,7 +8,6 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import db.Database
 import db.Element
 import db.Location
-import location.UserLocationRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +20,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import location.UserLocationRepository
 import org.koin.android.annotation.KoinViewModel
 import org.osmdroid.util.BoundingBox
 import sync.Sync

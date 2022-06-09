@@ -8,23 +8,23 @@
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
-        app:layout_constraintTop_toTopOf="parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"
-        app:title="Title"
-        app:menu="@menu/element"
         android:maxLines="1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:menu="@menu/element"
         app:navigationIcon="@drawable/baseline_arrow_back_24"
+        app:title="Title"
         tools:text="Place name" />
 
     <View
+        android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:id="@+id/divider"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        android:layout_gravity="bottom"
         android:background="?attr/colorOnSurface"
-        android:layout_gravity="bottom" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -39,61 +39,61 @@
 
             <TextView
                 android:id="@+id/address"
+                style="?attr/textAppearanceSubtitle1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:autoLink="phone"
-                android:paddingHorizontal="16dp"
-                app:drawableStartCompat="@drawable/ic_place"
                 android:drawablePadding="20dp"
+                android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:text="@string/not_provided"
-                style="?attr/textAppearanceSubtitle1" />
+                app:drawableStartCompat="@drawable/ic_place" />
 
             <TextView
                 android:id="@+id/phone"
+                style="?attr/textAppearanceSubtitle1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:autoLink="phone"
-                android:paddingHorizontal="16dp"
-                android:singleLine="true"
-                app:drawableStartCompat="@drawable/baseline_call_24"
                 android:drawablePadding="20dp"
+                android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
+                android:singleLine="true"
                 android:text="@string/not_provided"
-                style="?attr/textAppearanceSubtitle1" />
+                app:drawableStartCompat="@drawable/baseline_call_24" />
 
             <TextView
                 android:id="@+id/website"
+                style="?attr/textAppearanceSubtitle1"
                 android:layout_width="match_parent"
-                android:autoLink="web"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
+                android:autoLink="web"
                 android:drawablePadding="20dp"
-                app:drawableStartCompat="@drawable/baseline_public_24"
+                android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
                 android:text="@string/not_provided"
-                style="?attr/textAppearanceSubtitle1" />
+                app:drawableStartCompat="@drawable/baseline_public_24" />
 
             <TextView
                 android:id="@+id/openingHours"
+                style="?attr/textAppearanceSubtitle1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
                 android:drawablePadding="20dp"
-                app:drawableStartCompat="@drawable/baseline_schedule_24"
+                android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
                 android:text="@string/not_provided"
-                style="?attr/textAppearanceSubtitle1" />
+                app:drawableStartCompat="@drawable/baseline_schedule_24" />
 
             <TextView
                 android:id="@+id/tags"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="24dp"
-                android:visibility="gone"
                 android:textSize="16sp"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/openingHours"
@@ -101,11 +101,11 @@
 
             <Button
                 android:id="@+id/tagsButton"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:layout_gravity="center_horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
                 android:text="@string/show_tags" />
 
         </LinearLayout>

@@ -8,12 +8,12 @@
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
-        app:navigationIcon="@drawable/baseline_arrow_back_24"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/baseline_arrow_back_24">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -21,7 +21,6 @@
 
             <EditText
                 android:id="@+id/query"
-                android:importantForAutofill="no"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginStart="16dp"
@@ -29,6 +28,7 @@
                 android:background="@android:color/transparent"
                 android:hint="@string/search"
                 android:imeOptions="actionSearch"
+                android:importantForAutofill="no"
                 android:inputType="text"
                 android:maxLines="1" />
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.coordinatorlayout.widget.CoordinatorLayout android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,9 +11,9 @@
         android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/toolbar"
             app:title="@string/app_name" />
 
         <org.osmdroid.views.MapView
@@ -25,9 +25,9 @@
 
     <FrameLayout
         android:id="@+id/elementDetails"
-        android:background="?attr/colorSurface"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="?attr/colorSurface"
         app:behavior_hideable="true"
         app:layout_behavior="@string/bottom_sheet_behavior"
         app:layout_insetEdge="bottom">
@@ -46,8 +46,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
-        app:srcCompat="@drawable/baseline_my_location_24"
         android:contentDescription="@string/show_my_location"
-        app:layout_dodgeInsetEdges="bottom" />
+        app:layout_dodgeInsetEdges="bottom"
+        app:srcCompat="@drawable/baseline_my_location_24" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

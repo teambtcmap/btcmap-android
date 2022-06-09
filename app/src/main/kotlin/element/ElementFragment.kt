@@ -11,8 +11,8 @@ import androidx.fragment.app.Fragment
 import db.Element
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import org.btcmap.R
 import kotlinx.serialization.json.jsonPrimitive
+import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
 
 class ElementFragment : Fragment() {

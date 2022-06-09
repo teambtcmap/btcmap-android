@@ -8,7 +8,6 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.Database
 import db.Element
-import org.btcmap.R
 import db.Location
 import icons.IconsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +19,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import location.AndroidLocation
+import org.btcmap.R
 import org.koin.android.annotation.KoinViewModel
 import java.text.NumberFormat
 import kotlin.system.measureTimeMillis
