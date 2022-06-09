@@ -7,7 +7,8 @@
     android:layout_height="wrap_content"
     android:background="?selectableItemBackground"
     android:gravity="center_vertical"
-    tools:ignore="overdraw">
+    android:paddingEnd="16dp"
+    tools:ignore="RtlSymmetry,overdraw">
 
     <ImageView
         android:id="@+id/icon"
