@@ -425,7 +425,7 @@ fun Element.iconResId(): Int? {
         // 2 elements (08-06-2022)
         tag("leisure") == "marina" -> R.drawable.baseline_directions_boat_24
         // 2 elements (08-06-2022)
-        tag("leisure") == "golf_course" -> R.drawable.baseline_directions_boat_24
+        tag("leisure") == "golf_course" -> R.drawable.baseline_golf_course_24
         // 2 elements (08-06-2022)
         tag("leisure") == "garden" -> R.drawable.baseline_local_florist_24
         // 2 elements (08-06-2022)
