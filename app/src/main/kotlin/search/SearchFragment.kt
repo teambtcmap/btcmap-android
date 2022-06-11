@@ -11,13 +11,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import db.Location
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import org.btcmap.databinding.FragmentSearchBinding
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.osmdroid.util.GeoPoint
 
 class SearchFragment : Fragment() {
 
@@ -40,12 +40,7 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val args = SearchFragmentArgs.fromBundle(requireArguments())
 
-        model.setLocation(
-            Location(
-                lat = args.lat.toDouble(),
-                lon = args.lon.toDouble(),
-            )
-        )
+        model.setLocation(GeoPoint(args.lat.toDouble(), args.lon.toDouble()))
 
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 

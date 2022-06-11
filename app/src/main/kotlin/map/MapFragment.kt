@@ -121,8 +121,8 @@ class MapFragment : Fragment() {
                     R.id.action_search -> {
                         lifecycleScope.launch {
                             val action = MapFragmentDirections.actionMapFragmentToSearchFragment(
-                                model.userLocation.value.lat.toString(),
-                                model.userLocation.value.lon.toString(),
+                                model.userLocation.value.latitude.toString(),
+                                model.userLocation.value.longitude.toString(),
                             )
 
                             findNavController().navigate(action)
@@ -180,11 +180,9 @@ class MapFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            val location = model.userLocation.value
             val mapController = binding.map.controller
             mapController.setZoom(DEFAULT_MAP_ZOOM.toDouble())
-            val startPoint = GeoPoint(location.lat, location.lon)
-            mapController.setCenter(startPoint)
+            mapController.setCenter(model.userLocation.value)
         }
 
         searchResultModel.element.filterNotNull().onEach {
@@ -250,8 +248,7 @@ class MapFragment : Fragment() {
 
             val mapController = binding.map.controller
             mapController.setZoom(DEFAULT_MAP_ZOOM.toDouble())
-            val startPoint = GeoPoint(it.lat, it.lon)
-            mapController.setCenter(startPoint)
+            mapController.setCenter(it)
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         lifecycleScope.launchWhenResumed {

@@ -1,6 +1,7 @@
 package search
 
 import android.app.Application
+import android.location.Location
 import android.util.Log
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.ViewModel
@@ -9,7 +10,6 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.Database
 import db.Element
-import db.Location
 import icons.iconResId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,9 +19,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
-import location.AndroidLocation
 import org.btcmap.R
 import org.koin.android.annotation.KoinViewModel
+import org.osmdroid.util.GeoPoint
 import java.text.NumberFormat
 import kotlin.system.measureTimeMillis
 
@@ -41,7 +41,7 @@ class SearchModel(
         }
     }
 
-    private val location = MutableStateFlow<Location?>(null)
+    private val location = MutableStateFlow<GeoPoint?>(null)
 
     private val searchString = MutableStateFlow("")
 
@@ -65,9 +65,9 @@ class SearchModel(
                 if (location != null) {
                     val sortTimeMillis = measureTimeMillis {
                         elements = elements.sortedBy {
-                            getDistance(
-                                startLatitude = location.lat,
-                                startLongitude = location.lon,
+                            getDistanceInMeters(
+                                startLatitude = location.latitude,
+                                startLongitude = location.longitude,
                                 endLatitude = it.lat,
                                 endLongitude = it.lon,
                             )
@@ -82,7 +82,7 @@ class SearchModel(
         }.launchIn(viewModelScope)
     }
 
-    fun setLocation(location: Location?) {
+    fun setLocation(location: GeoPoint?) {
         this.location.update { location }
     }
 
@@ -90,12 +90,12 @@ class SearchModel(
         this.searchString.update { searchString }
     }
 
-    private fun Element.toAdapterItem(userLocation: Location?): SearchAdapter.Item {
+    private fun Element.toAdapterItem(userLocation: GeoPoint?): SearchAdapter.Item {
         val distanceStringBuilder = StringBuilder()
 
         if (userLocation != null) {
-            val elementLocation = Location(lat, lon)
-            val distanceKm = userLocation.distanceInKmTo(elementLocation)
+            val elementLocation = GeoPoint(lat, lon)
+            val distanceKm = userLocation.distanceToAsDouble(elementLocation) / 1000
 
             distanceStringBuilder.apply {
                 append(DISTANCE_FORMAT.format(distanceKm))
@@ -112,20 +112,14 @@ class SearchModel(
         )
     }
 
-    private fun Location.distanceInKmTo(location: Location): Double {
-        return getDistance(
-            lat,
-            lon,
-            location.lat,
-            location.lon,
-        ) / 1000.0
-    }
-
-    private fun getDistance(
-        startLatitude: Double, startLongitude: Double, endLatitude: Double, endLongitude: Double
+    private fun getDistanceInMeters(
+        startLatitude: Double,
+        startLongitude: Double,
+        endLatitude: Double,
+        endLongitude: Double,
     ): Double {
         val distance = FloatArray(1)
-        AndroidLocation.distanceBetween(startLatitude, startLongitude, endLatitude, endLongitude, distance)
+        Location.distanceBetween(startLatitude, startLongitude, endLatitude, endLongitude, distance)
         return distance[0].toDouble()
     }
 }

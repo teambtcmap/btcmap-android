@@ -7,7 +7,6 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import db.Database
 import db.Element
-import db.Location
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +22,7 @@ import kotlinx.coroutines.withContext
 import location.UserLocationRepository
 import org.koin.android.annotation.KoinViewModel
 import org.osmdroid.util.BoundingBox
+import org.osmdroid.util.GeoPoint
 import sync.Sync
 import kotlin.math.max
 import kotlin.math.min
@@ -35,7 +35,7 @@ class MapModel(
     private val db: Database,
 ) : ViewModel() {
 
-    val userLocation: StateFlow<Location> = locationRepo.location
+    val userLocation: StateFlow<GeoPoint> = locationRepo.location
 
     private val _mapBoundingBox: MutableStateFlow<BoundingBox?> = MutableStateFlow(null)
     val mapBoundingBox = _mapBoundingBox.asStateFlow()
@@ -46,7 +46,7 @@ class MapModel(
     private val _visibleElements = MutableStateFlow<List<ElementWithMarker>>(emptyList())
     val visibleElements = _visibleElements.asStateFlow()
 
-    private val _moveToLocation: MutableStateFlow<Location> = MutableStateFlow(UserLocationRepository.DEFAULT_LOCATION)
+    private val _moveToLocation: MutableStateFlow<GeoPoint> = MutableStateFlow(UserLocationRepository.DEFAULT_LOCATION)
     val moveToLocation = _moveToLocation.asStateFlow()
 
     private val _syncMessage: MutableStateFlow<String> = MutableStateFlow("")
@@ -107,7 +107,7 @@ class MapModel(
         _selectedElement.update { element }
 
         if (element != null && moveToLocation) {
-            _moveToLocation.update { Location(element.lat, element.lon) }
+            _moveToLocation.update { GeoPoint(element.lat, element.lon) }
         }
     }
 

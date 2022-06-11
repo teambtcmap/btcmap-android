@@ -3,15 +3,16 @@ package location
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
-import db.Location
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.Single
+import org.osmdroid.util.GeoPoint
 
 @Single
 class UserLocationRepository(
@@ -21,9 +22,9 @@ class UserLocationRepository(
     companion object {
         const val TAG = "location"
 
-        val DEFAULT_LOCATION: Location = Location(
-            lat = 43.741667,
-            lon = -79.373333,
+        val DEFAULT_LOCATION = GeoPoint(
+            43.741667,
+            -79.373333,
         )
     }
 
@@ -61,12 +62,7 @@ class UserLocationRepository(
             Log.d(TAG, "Last known location: $lastKnownLocation")
 
             if (lastKnownLocation != null) {
-                _location.update {
-                    Location(
-                        lat = lastKnownLocation.latitude,
-                        lon = lastKnownLocation.longitude,
-                    )
-                }
+                _location.update { GeoPoint(lastKnownLocation.latitude, lastKnownLocation.longitude) }
             }
         }
 
@@ -77,12 +73,7 @@ class UserLocationRepository(
             Log.d(TAG, "Last known location: $lastKnownLocation")
 
             if (lastKnownLocation != null) {
-                _location.update {
-                    Location(
-                        lat = lastKnownLocation.latitude,
-                        lon = lastKnownLocation.longitude,
-                    )
-                }
+                _location.update { GeoPoint(lastKnownLocation.latitude, lastKnownLocation.longitude) }
             }
         }
 
@@ -107,10 +98,8 @@ class UserLocationRepository(
         return true
     }
 
-    private fun onNewLocation(androidLocation: AndroidLocation) {
-        Log.d(TAG, "Got new location: ${androidLocation.latitude},${androidLocation.longitude}")
-        _location.update { androidLocation.toLocation() }
+    private fun onNewLocation(location: Location) {
+        Log.d(TAG, "Got new location: ${location.latitude},${location.longitude}")
+        _location.update { GeoPoint(location.latitude, location.longitude) }
     }
-
-    private fun AndroidLocation.toLocation() = Location(lat = latitude, lon = longitude)
 }

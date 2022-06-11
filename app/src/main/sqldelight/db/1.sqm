@@ -17,8 +17,3 @@ CREATE TABLE Element (
     boundsMaxLon REAL,
     tags TEXT AS JsonObject NOT NULL
 );
-
-CREATE TABLE Location (
-    lat REAL NOT NULL,
-    lon REAL NOT NULL
-);
