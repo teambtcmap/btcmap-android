@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-
     <string name="app_name">BTC Map</string>
     <string name="add_place">Add place</string>
     <string name="search">Search</string>
@@ -21,5 +20,7 @@
     <string name="delete_place">Delete place</string>
     <string name="show_tags">Show tags</string>
     <string name="hide_tags">Hide tags</string>
-
+    <string name="onchain">Onchain only</string>
+    <string name="onchain_and_lightning">Onchain and Lightning</string>
+    <string name="lightning_enabled">Lightning-enabled</string>
 </resources>

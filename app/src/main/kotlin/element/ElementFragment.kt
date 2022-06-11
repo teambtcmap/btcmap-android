@@ -108,6 +108,13 @@ class ElementFragment : Fragment() {
         binding.website.text = element.tags["website"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
         binding.openingHours.text =
             element.tags["opening_hours"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
+
+        if (element.tags["payment:lightning"]?.jsonPrimitive?.content == "yes") {
+            binding.paymentMethods.setText(R.string.onchain_and_lightning)
+        } else {
+            binding.paymentMethods.setText(R.string.onchain)
+        }
+
         binding.tags.text = tagsJsonFormatter.encodeToString(JsonObject.serializer(), element.tags)
     }
 }

@@ -21,8 +21,9 @@
         tools:src="@drawable/ic_place" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:orientation="vertical">
 
         <TextView
@@ -40,6 +41,15 @@
             tools:text="1.2 mi" />
 
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/lightning"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        android:contentDescription="@string/lightning_enabled"
+        android:src="@drawable/baseline_bolt_24"
+        app:tint="?attr/colorOnSurfaceVariant" />
 
 </LinearLayout>
 

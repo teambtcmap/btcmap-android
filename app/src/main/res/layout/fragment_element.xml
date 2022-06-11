@@ -38,6 +38,17 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/paymentMethods"
+                style="?attr/textAppearanceSubtitle1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="20dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp"
+                android:singleLine="true"
+                app:drawableStartCompat="@drawable/baseline_currency_bitcoin_24" />
+
+            <TextView
                 android:id="@+id/address"
                 style="?attr/textAppearanceSubtitle1"
                 android:layout_width="match_parent"

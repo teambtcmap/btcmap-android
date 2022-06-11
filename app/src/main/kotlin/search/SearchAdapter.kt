@@ -4,10 +4,12 @@ import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import db.Element
+import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.databinding.ItemSearchResultBinding
 
 class SearchAdapter(
@@ -50,6 +52,7 @@ class SearchAdapter(
                 name.text = item.name
                 distance.visibility = if (item.distanceToUser.isNotEmpty()) View.VISIBLE else View.GONE
                 distance.text = item.distanceToUser
+                lightning.isVisible = item.element.tags["payment:lightning"]?.jsonPrimitive?.content == "yes"
                 root.setOnClickListener { onItemClick(item) }
             }
         }
