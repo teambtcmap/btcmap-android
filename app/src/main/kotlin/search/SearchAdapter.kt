@@ -1,6 +1,6 @@
 package search
 
-import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,7 +35,7 @@ class SearchAdapter(
 
     data class Item(
         val element: Element,
-        val icon: Bitmap,
+        val icon: Drawable,
         val name: String,
         val distanceToUser: String,
     )
@@ -48,7 +48,7 @@ class SearchAdapter(
 
         fun bind(item: Item, onItemClick: (Item) -> Unit) {
             binding.apply {
-                icon.setImageBitmap(item.icon)
+                icon.setImageDrawable(item.icon)
                 name.text = item.name
                 distance.visibility = if (item.distanceToUser.isNotEmpty()) View.VISIBLE else View.GONE
                 distance.text = item.distanceToUser

@@ -2,6 +2,7 @@ package search
 
 import android.app.Application
 import android.util.Log
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -9,7 +10,7 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.Database
 import db.Element
 import db.Location
-import icons.IconsRepository
+import icons.iconResId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -26,7 +27,6 @@ import kotlin.system.measureTimeMillis
 
 @KoinViewModel
 class SearchModel(
-    private val iconsRepo: IconsRepository,
     private val app: Application,
     private val db: Database,
 ) : ViewModel() {
@@ -106,7 +106,7 @@ class SearchModel(
 
         return SearchAdapter.Item(
             element = this,
-            icon = iconsRepo.getIcon(this),
+            icon = AppCompatResources.getDrawable(app, iconResId() ?: R.drawable.ic_place)!!,
             name = tags["name"]?.jsonPrimitive?.contentOrNull ?: "Unnamed",
             distanceToUser = distanceStringBuilder.toString(),
         )
