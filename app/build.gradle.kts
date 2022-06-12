@@ -101,10 +101,8 @@ android {
         viewBinding = true
     }
 
-    sourceSets {
-        getByName("debug") {
-            kotlin.srcDir("build/generated/ksp/debug/kotlin")
-        }
+    sourceSets.all {
+        kotlin.srcDir("build/generated/ksp/$name/kotlin")
     }
 }
 
