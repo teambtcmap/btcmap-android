@@ -38,7 +38,7 @@ https://www.openstreetmap.org
 
 ### Can I add or edit places?
 
-Absolutely, you are very welcome to do that. This is a good place to start with: 
+Absolutely, you are very welcome to do that. This is a good place to start: 
 
 https://wiki.openstreetmap.org/wiki/How_to_contribute
 
