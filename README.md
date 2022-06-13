@@ -30,7 +30,7 @@ bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d
 
 ## FAQ
 
-### Where BTC Map takes its data from?
+### Where does BTC Map take its data from?
 
 The data is provided by Open Street Map:
 
