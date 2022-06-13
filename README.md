@@ -42,7 +42,7 @@ Absolutely, you are very welcome to do that. This is a good place to start:
 
 https://wiki.openstreetmap.org/wiki/How_to_contribute
 
-### BTC Map shows a place which doesn't exist, how can I report it?
+### BTC Map shows a place which doesn't exist, how can I delete it?
 
 You can delete such places from Open Street Map and BTC Map will pick up all your changes within 24 hours
 
