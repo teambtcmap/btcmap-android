@@ -202,6 +202,8 @@ fun Element.iconResId(): Int? {
         tag("shop") == "department_store" -> R.drawable.baseline_local_mall_24
         // 4 elements (31-05-2022)
         tag("shop") == "chemist" -> R.drawable.baseline_science_24
+        // 3 elements (14-06-2022)
+        tag("shop") == "carpet" -> R.drawable.baseline_storefront_24
         // 3 elements (31-05-2022)
         tag("shop") == "water_sports" -> R.drawable.baseline_sports_24
         // 3 elements (31-05-2022)
@@ -234,6 +236,7 @@ fun Element.iconResId(): Int? {
         tag("shop") == "wholesale" -> R.drawable.baseline_local_grocery_store_24
         // 0 elements (31-05-2022)
         tag("shop") == "surf" -> R.drawable.baseline_surfing_24
+        tag("shop") != null -> R.drawable.baseline_storefront_24
 
         // 674 elements (06-06-2022)
         tag("amenity") == "restaurant" -> R.drawable.baseline_restaurant_24
