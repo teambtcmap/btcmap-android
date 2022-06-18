@@ -438,13 +438,28 @@ fun Element.iconResId(): Int? {
         // 1 element (08-06-2022)
         tag("leisure") == "kayak_dock" -> R.drawable.baseline_kayaking_24
 
+        // 45 elements (18-06-2022)
         tag("healthcare") == "dentist" -> R.drawable.baseline_medical_services_24
+        // 27 elements (18-06-2022)
+        tag("healthcare") == "doctor" -> R.drawable.baseline_medical_services_24
+        // 18 elements (18-06-2022)
         tag("healthcare") == "clinic" -> R.drawable.baseline_medical_services_24
+        // 16 elements (18-06-2022)
         tag("healthcare") == "pharmacy" -> R.drawable.baseline_local_pharmacy_24
+        // 12 elements (18-06-2022)
+        tag("healthcare") == "pharmacy" -> R.drawable.baseline_local_pharmacy_24
+        // 1 element (18-06-2022)
+        tag("healthcare") == "optometrist" -> R.drawable.baseline_visibility_24
+        tag("healthcare") != null -> R.drawable.baseline_medical_services_24
 
+        // 112 elements (18-06-2022)
         tag("building") == "commercial" -> R.drawable.baseline_business_24
+        // 66 elements (18-06-2022)
         tag("building") == "office" -> R.drawable.baseline_business_24
+        // 44 elements (18-06-2022)
         tag("building") == "retail" -> R.drawable.baseline_storefront_24
+        // 30 elements (18-06-2022)
+        tag("building") == "church" -> R.drawable.baseline_church_24
 
         tag("sport") == "scuba_diving" -> R.drawable.baseline_scuba_diving_24
 
