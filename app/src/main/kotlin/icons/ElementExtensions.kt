@@ -13,6 +13,9 @@ fun Element.iconResId(): Int? {
     }
 
     return when {
+        // Tag combos are more specific so they have a higher prio
+        tag("amenity") == "fast_food" && tag("cuisine") == "ice_cream" -> R.drawable.baseline_icecream_24
+
         // 174 elements (22-05-2022)
         tag("tourism") == "hotel" -> R.drawable.baseline_hotel_24
         // 130 elements (22-05-2022)
@@ -473,6 +476,8 @@ fun Element.iconResId(): Int? {
         tag("cuisine") == "pizza" -> R.drawable.baseline_local_pizza_24
 
         tag("telecom") == "data_center" -> R.drawable.baseline_dns_24
+
+        tag("place") == "farm" -> R.drawable.baseline_agriculture_24
 
         else -> null
     }
