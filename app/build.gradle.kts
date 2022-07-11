@@ -33,6 +33,7 @@ android {
 
     kotlinOptions {
         jvmTarget = "11"
+        freeCompilerArgs += "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi"
     }
 
     signingConfigs {

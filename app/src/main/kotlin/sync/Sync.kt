@@ -2,6 +2,8 @@ package sync
 
 import android.content.Context
 import android.util.Log
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import conf.ConfRepo
 import db.Database
 import kotlinx.coroutines.Dispatchers
@@ -27,17 +29,17 @@ class Sync(
 ) {
 
     companion object {
-        private const val TAG = "Sync"
+        private const val TAG = "sync"
 
         private val BTCMAP_DATA_URL = "https://btcmap.org/data.json".toHttpUrl()
         private val GITHUB_DATA_URL = "https://raw.githubusercontent.com/bubelov/btcmap-data/main/data.json".toHttpUrl()
     }
 
     suspend fun sync() {
-        withContext(Dispatchers.Default) {
-            if (db.elementQueries.selectCount().executeAsOne() == 0L) {
-                Log.d(TAG, "Importing bundled data")
+        if (db.elementQueries.selectCount().asFlow().mapToOne().first() == 0L) {
+            Log.d(TAG, "Importing bundled data")
 
+            withContext(Dispatchers.Default) {
                 runCatching {
                     val bundledData = context.assets.open("data.json")
                     val bundledDataJson: JsonObject = Json.decodeFromString(bundledData.bufferedReader().readText())
@@ -46,32 +48,32 @@ class Sync(
                     Log.e(TAG, "Failed to import bundled data", it)
                 }
             }
+        }
 
-            val lastSyncDateTime = confRepo.load().first().lastSyncDate
-            val hourAgo = ZonedDateTime.now(ZoneOffset.UTC).minusHours(1)
-            Log.d(TAG, "Last sync date: $lastSyncDateTime")
-            Log.d(TAG, "Hour ago: $hourAgo")
+        val lastSyncDateTime = confRepo.conf.value.lastSyncDate
+        val hourAgo = ZonedDateTime.now(ZoneOffset.UTC).minusHours(1)
+        Log.d(TAG, "Last sync date: $lastSyncDateTime")
+        Log.d(TAG, "Hour ago: $hourAgo")
 
-            if (lastSyncDateTime != null && lastSyncDateTime.isAfter(hourAgo)) {
-                Log.d(TAG, "Data is up to date")
-                return@withContext
-            }
+        if (lastSyncDateTime != null && lastSyncDateTime.isAfter(hourAgo)) {
+            Log.d(TAG, "Data is up to date")
+            return
+        }
 
-            Log.d(TAG, "Syncing with $BTCMAP_DATA_URL")
+        Log.d(TAG, "Syncing with $BTCMAP_DATA_URL")
 
-            if (sync(BTCMAP_DATA_URL)) {
-                confRepo.save { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
+        if (sync(BTCMAP_DATA_URL)) {
+            confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
+            Log.d(TAG, "Finished sync")
+        } else {
+            Log.w(TAG, "Failed to sync with $BTCMAP_DATA_URL")
+            Log.d(TAG, "Syncing with $GITHUB_DATA_URL")
+
+            if (sync(GITHUB_DATA_URL)) {
+                confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
                 Log.d(TAG, "Finished sync")
             } else {
-                Log.w(TAG, "Failed to sync with $BTCMAP_DATA_URL")
-                Log.d(TAG, "Syncing with $GITHUB_DATA_URL")
-
-                if (sync(GITHUB_DATA_URL)) {
-                    confRepo.save { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
-                    Log.d(TAG, "Finished sync")
-                } else {
-                    Log.w(TAG, "Failed to sync with $GITHUB_DATA_URL")
-                }
+                Log.w(TAG, "Failed to sync with $GITHUB_DATA_URL")
             }
         }
     }

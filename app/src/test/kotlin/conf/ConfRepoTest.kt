@@ -2,8 +2,6 @@ package conf
 
 import db.Conf
 import db.testDb
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import java.time.ZonedDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -11,21 +9,21 @@ import kotlin.test.assertEquals
 class ConfRepoTest {
 
     @Test
-    fun load() = runBlocking {
+    fun getConf() {
         val db = testDb()
         val repo = ConfRepo(db)
-        assertEquals(ConfRepo.DEFAULT_CONF, repo.load().first())
+        assertEquals(ConfRepo.DEFAULT_CONF, repo.conf.value)
         val newConf = Conf(lastSyncDate = ZonedDateTime.now())
-        repo.save(newConf)
-        assertEquals(newConf, repo.load().first())
+        repo.update { newConf }
+        assertEquals(newConf, repo.conf.value)
     }
 
     @Test
-    fun save() = runBlocking {
+    fun update() {
         val db = testDb()
         val repo = ConfRepo(db)
         val lastSyncDate = ZonedDateTime.now()
-        repo.save { it.copy(lastSyncDate = lastSyncDate) }
-        assertEquals(lastSyncDate, repo.load().first().lastSyncDate)
+        repo.update { it.copy(lastSyncDate = lastSyncDate) }
+        assertEquals(lastSyncDate, repo.conf.value.lastSyncDate)
     }
 }
