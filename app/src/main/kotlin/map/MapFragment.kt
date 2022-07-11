@@ -205,7 +205,7 @@ class MapFragment : Fragment() {
                 elementsOverlay = RadiusMarkerClusterer(context!!)
                 val clusterIcon = ContextCompat.getDrawable(context!!, R.drawable.ic_cluster)!!
                 val pinSizePx =
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 128f, resources.displayMetrics).toInt()
+                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48f, resources.displayMetrics).toInt()
                 elementsOverlay!!.setIcon(clusterIcon.toBitmap(pinSizePx, pinSizePx))
 
                 elementWithMarkers.forEach {

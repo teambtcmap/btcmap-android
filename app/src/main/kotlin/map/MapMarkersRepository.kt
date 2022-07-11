@@ -44,7 +44,7 @@ class MapMarkersRepository(
 
     private fun createMarkerIcon(iconResId: Int?): Bitmap {
         val pinSizePx =
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 128f, context.resources.displayMetrics).toInt()
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48f, context.resources.displayMetrics).toInt()
 
         val emptyPinBitmap = ContextCompat.getDrawable(context, R.drawable.ic_marker)!!.toBitmap(
             width = pinSizePx,
