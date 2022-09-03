@@ -38,7 +38,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/paymentMethods"
+                android:id="@+id/lightningEnabled"
                 style="?attr/textAppearanceSubtitle1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -46,7 +46,8 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/baseline_currency_bitcoin_24" />
+                android:text="@string/lightning_enabled"
+                app:drawableStartCompat="@drawable/baseline_bolt_24" />
 
             <TextView
                 android:id="@+id/address"
