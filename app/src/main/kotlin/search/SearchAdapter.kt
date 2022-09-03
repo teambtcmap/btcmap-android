@@ -53,6 +53,7 @@ class SearchAdapter(
                 distance.visibility = if (item.distanceToUser.isNotEmpty()) View.VISIBLE else View.GONE
                 distance.text = item.distanceToUser
                 lightning.isVisible = item.element.tags["payment:lightning"]?.jsonPrimitive?.content == "yes"
+                        || item.element.tags["payment:bitcoin"]?.jsonPrimitive?.content?.contains("lightning") == true
                 root.setOnClickListener { onItemClick(item) }
             }
         }
