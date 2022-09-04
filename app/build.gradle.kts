@@ -20,8 +20,8 @@ android {
         applicationId = "org.btcmap"
         minSdk = 26
         targetSdk = 31
-        versionCode = 6
-        versionName = "0.3.3"
+        versionCode = 7
+        versionName = "0.3.4"
         setProperty("archivesBaseName", "btcmap-$versionName")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
