@@ -79,11 +79,8 @@ class MapModel(
         viewModelScope.launch {
             val firstNonDefaultLocation =
                 locationRepo.location.first { it != UserLocationRepository.DEFAULT_LOCATION }
-
             _moveToLocation.update { firstNonDefaultLocation }
         }
-
-        viewModelScope.launch { syncElements() }
     }
 
     fun onLocationPermissionGranted() {
@@ -115,7 +112,7 @@ class MapModel(
         mapMarkersRepo.invalidateCache()
     }
 
-    private fun syncElements() {
+    fun syncElements() {
         viewModelScope.launch {
             runCatching {
                 val job = launch {

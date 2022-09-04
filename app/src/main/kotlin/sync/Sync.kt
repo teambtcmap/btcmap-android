@@ -32,7 +32,8 @@ class Sync(
         private const val TAG = "sync"
 
         private val BTCMAP_DATA_URL = "https://btcmap.org/data.json".toHttpUrl()
-        private val GITHUB_DATA_URL = "https://raw.githubusercontent.com/bubelov/btcmap-data/main/data.json".toHttpUrl()
+        private val GITHUB_DATA_URL =
+            "https://raw.githubusercontent.com/teambtcmap/btcmap-data/main/data.json".toHttpUrl()
     }
 
     suspend fun sync() {
@@ -51,14 +52,7 @@ class Sync(
         }
 
         val lastSyncDateTime = confRepo.conf.value.lastSyncDate
-        val hourAgo = ZonedDateTime.now(ZoneOffset.UTC).minusHours(1)
         Log.d(TAG, "Last sync date: $lastSyncDateTime")
-        Log.d(TAG, "Hour ago: $hourAgo")
-
-        if (lastSyncDateTime != null && lastSyncDateTime.isAfter(hourAgo)) {
-            Log.d(TAG, "Data is up to date")
-            return
-        }
 
         Log.d(TAG, "Syncing with $BTCMAP_DATA_URL")
 

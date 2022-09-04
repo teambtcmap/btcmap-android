@@ -117,7 +117,7 @@ sqldelight {
 
 tasks.register("bundleData") {
     doLast {
-        val src = URL("https://raw.githubusercontent.com/bubelov/btcmap-data/main/data.json")
+        val src = URL("https://raw.githubusercontent.com/teambtcmap/btcmap-data/main/data.json")
         val destDir = File(projectDir, "src/main/assets")
         destDir.mkdirs()
         val destFile = File(destDir, "data.json")
