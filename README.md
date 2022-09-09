@@ -40,7 +40,7 @@ https://www.openstreetmap.org
 
 Absolutely, you are very welcome to do that. This is a good place to start: 
 
-https://wiki.openstreetmap.org/wiki/How_to_contribute
+[Tagging Instructions](https://github.com/teambtcmap/btcmap.org/wiki/Tagging-Instructions)
 
 ### BTC Map shows a place which doesn't exist, how can I delete it?
 
