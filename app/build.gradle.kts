@@ -5,7 +5,7 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("plugin.serialization") version "1.6.21"
+    kotlin("plugin.serialization") version "1.7.10"
     id("androidx.navigation.safeargs.kotlin")
     id("com.squareup.sqldelight")
     id("com.google.devtools.ksp") version "1.7.10-1.0.6"
@@ -14,12 +14,12 @@ plugins {
 val signingPropertiesFile = rootProject.file("signing.properties")
 
 android {
-    compileSdk = 31
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "org.btcmap"
         minSdk = 26
-        targetSdk = 31
+        targetSdk = 33
         versionCode = 7
         versionName = "0.3.4"
         setProperty("archivesBaseName", "btcmap-$versionName")
@@ -126,21 +126,31 @@ tasks.register("bundleData") {
 }
 
 dependencies {
-    // Kotlin extensions
     // Simplifies non-blocking programming
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.3")
-    // Platform-agnostic JSON serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 
-    // Android extensions
-    implementation("androidx.core:core-ktx:1.8.0")
-    val navVer = "2.5.0"
+    // Platform-agnostic JSON serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+
+    // Kotlin extensions for Android SDK
+    implementation("androidx.core:core-ktx:1.9.0")
+
+    // Simplifies in-app navigation
+    val navVer = "2.5.2"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVer")
     implementation("androidx.navigation:navigation-ui-ktx:$navVer")
+
+    // Helps with keeping our view hierarchies flat
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.preference:preference:1.2.0")
+
+    // Used by osmdroid
+    implementation("androidx.preference:preference-ktx:1.2.0")
+
+    // Material design components
     implementation("com.google.android.material:material:1.6.1")
-    val fragmentVer = "1.5.0"
+
+    // Helps to split the app into multiple independent screens
+    val fragmentVer = "1.5.1"
     implementation("androidx.fragment:fragment-ktx:$fragmentVer")
     debugImplementation("androidx.fragment:fragment-testing:$fragmentVer")
 
@@ -160,13 +170,13 @@ dependencies {
     ksp("io.insert-koin:koin-ksp-compiler:$koinAnnotationsVer")
 
     // Open Street Map widget
-    implementation("org.osmdroid:osmdroid-android:6.1.13")
+    implementation("org.osmdroid:osmdroid-android:6.1.14")
     implementation("com.github.MKergall:osmbonuspack:6.7.0")
 
-    // Common test dependencies
+    // Common test deps
     testImplementation(kotlin("test"))
 
-    // Common instrumented test dependencies
+    // Common instrumented test deps
     androidTestImplementation(kotlin("test"))
     androidTestImplementation("androidx.test:core-ktx:1.4.0")
     androidTestImplementation("androidx.test.ext:junit-ktx:1.1.3")
