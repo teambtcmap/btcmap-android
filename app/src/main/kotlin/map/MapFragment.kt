@@ -209,6 +209,7 @@ class MapFragment : Fragment() {
                 val pinSizePx =
                     TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48f, resources.displayMetrics).toInt()
                 elementsOverlay!!.setIcon(clusterIcon.toBitmap(pinSizePx, pinSizePx))
+                elementsOverlay!!.textPaint.color = ContextCompat.getColor(requireContext(), R.color.pin_icon)
 
                 elementWithMarkers.forEach {
                     val marker = Marker(binding.map)

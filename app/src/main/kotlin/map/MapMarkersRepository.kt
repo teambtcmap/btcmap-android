@@ -69,10 +69,10 @@ class MapMarkersRepository(
             }
 
             val iconFrame = RectF(
-                markerIcon.width.toFloat() * 0.3f,
-                markerIcon.width.toFloat() * 0.20f,
-                markerIcon.width.toFloat() * 0.7f,
-                markerIcon.height.toFloat() * 0.6f
+                markerIcon.width.toFloat() * 0.27f,
+                markerIcon.width.toFloat() * 0.17f,
+                markerIcon.width.toFloat() * 0.73f,
+                markerIcon.height.toFloat() * 0.63f
             ).toRect()
 
             val iconBitmap = ContextCompat.getDrawable(context, iconResId)!!.toBitmap(
