@@ -28,22 +28,15 @@ class Sync(
     private val context: Context,
 ) {
 
-    companion object {
-        private const val TAG = "sync"
-
-        private val BTCMAP_DATA_URL = "https://btcmap.org/data.json".toHttpUrl()
-        private val GITHUB_DATA_URL =
-            "https://raw.githubusercontent.com/teambtcmap/btcmap-data/main/data.json".toHttpUrl()
-    }
-
     suspend fun sync() {
         if (db.elementQueries.selectCount().asFlow().mapToOne().first() == 0L) {
             Log.d(TAG, "Importing bundled data")
 
             withContext(Dispatchers.Default) {
                 runCatching {
-                    val bundledData = context.assets.open("data.json")
-                    val bundledDataJson: JsonObject = Json.decodeFromString(bundledData.bufferedReader().readText())
+                    val bundledData = context.assets.open("elements.json")
+                    val bundledDataJson: JsonObject =
+                        Json.decodeFromString(bundledData.bufferedReader().readText())
                     dataImporter.import(bundledDataJson)
                 }.onFailure {
                     Log.e(TAG, "Failed to import bundled data", it)
@@ -54,21 +47,14 @@ class Sync(
         val lastSyncDateTime = confRepo.conf.value.lastSyncDate
         Log.d(TAG, "Last sync date: $lastSyncDateTime")
 
-        Log.d(TAG, "Syncing with $BTCMAP_DATA_URL")
+        val url = "https://data.btcmap.org/elements.json".toHttpUrl()
+        Log.d(TAG, "Syncing with $url")
 
-        if (sync(BTCMAP_DATA_URL)) {
+        if (sync(url)) {
             confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
             Log.d(TAG, "Finished sync")
         } else {
-            Log.w(TAG, "Failed to sync with $BTCMAP_DATA_URL")
-            Log.d(TAG, "Syncing with $GITHUB_DATA_URL")
-
-            if (sync(GITHUB_DATA_URL)) {
-                confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
-                Log.d(TAG, "Finished sync")
-            } else {
-                Log.w(TAG, "Failed to sync with $GITHUB_DATA_URL")
-            }
+            Log.w(TAG, "Failed to sync with $url")
         }
     }
 
@@ -90,5 +76,9 @@ class Sync(
                 false
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "sync"
     }
 }

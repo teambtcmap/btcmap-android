@@ -16,4 +16,4 @@ build/
 .gradle
 
 # App data
-app/src/main/assets/data.json
+app/src/main/assets/elements.json
