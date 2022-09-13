@@ -20,8 +20,6 @@ class ElementFragmentTest {
         launchFragmentInContainer<ElementFragment>(
             themeResId = R.style.Theme_Material3_DynamicColors_DayNight,
         ).use { scenario ->
-            onView(withId(R.id.paymentMethods)).check(matches(isDisplayed()))
-
             val tags = mutableMapOf<String, JsonPrimitive>()
 
             val element = Element(

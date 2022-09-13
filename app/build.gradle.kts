@@ -4,8 +4,8 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    kotlin("android")
-    kotlin("plugin.serialization") version "1.7.10"
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.10"
     id("androidx.navigation.safeargs.kotlin")
     id("com.squareup.sqldelight")
     id("com.google.devtools.ksp") version "1.7.10-1.0.6"
@@ -150,7 +150,7 @@ dependencies {
     implementation("com.google.android.material:material:1.6.1")
 
     // Helps to split the app into multiple independent screens
-    val fragmentVer = "1.5.1"
+    val fragmentVer = "1.5.2"
     implementation("androidx.fragment:fragment-ktx:$fragmentVer")
     debugImplementation("androidx.fragment:fragment-testing:$fragmentVer")
 
@@ -173,11 +173,11 @@ dependencies {
     implementation("org.osmdroid:osmdroid-android:6.1.14")
     implementation("com.github.MKergall:osmbonuspack:6.7.0")
 
-    // Common test deps
-    testImplementation(kotlin("test"))
+    // Common test dependencies
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.7.10")
 
-    // Common instrumented test deps
-    androidTestImplementation(kotlin("test"))
+    // Common instrumented test dependencies
+    androidTestImplementation("org.jetbrains.kotlin:kotlin-test:1.7.10")
     androidTestImplementation("androidx.test:core-ktx:1.4.0")
     androidTestImplementation("androidx.test.ext:junit-ktx:1.1.3")
     androidTestImplementation("androidx.test:runner:1.4.0")
