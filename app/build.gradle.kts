@@ -22,7 +22,6 @@ android {
         targetSdk = 33
         versionCode = 7
         versionName = "0.3.4"
-        setProperty("archivesBaseName", "btcmap-$versionName")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
