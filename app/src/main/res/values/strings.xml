@@ -10,7 +10,7 @@
     <string name="icon">Icon</string>
     <string name="donate">Donate</string>
     <string name="qr_code">QR code</string>
-    <string name="copy">Copy</string>
+    <string name="copy_to_clipboard">Copy</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="btc_map_donation_address">BTC Map donation address</string>
     <string name="donation_address" translatable="false">bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d</string>
@@ -20,5 +20,4 @@
     <string name="delete_place">Delete place</string>
     <string name="show_tags">Show tags</string>
     <string name="hide_tags">Hide tags</string>
-    <string name="lightning_enabled">Lightning-enabled</string>
 </resources>

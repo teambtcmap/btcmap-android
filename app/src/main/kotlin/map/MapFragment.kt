@@ -350,11 +350,11 @@ class MapFragment : Fragment() {
 
     private suspend fun getElementDetailsToolbar(): Toolbar {
         while (elementFragment.view == null
-            || elementFragment.view!!.findViewById<View>(R.id.toolbar)!!.height == 0
+                || elementFragment.requireView().findViewById<View>(R.id.toolbar)!!.height == 0
         ) {
             delay(10)
         }
 
-        return elementFragment.view?.findViewById(R.id.toolbar)!!
+        return elementFragment.requireView().findViewById(R.id.toolbar)!!
     }
 }

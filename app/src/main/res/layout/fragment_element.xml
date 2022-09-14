@@ -38,18 +38,6 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/lightningEnabled"
-                style="?attr/textAppearanceSubtitle1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawablePadding="20dp"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="16dp"
-                android:singleLine="true"
-                android:text="@string/lightning_enabled"
-                app:drawableStartCompat="@drawable/baseline_bolt_24" />
-
-            <TextView
                 android:id="@+id/address"
                 style="?attr/textAppearanceSubtitle1"
                 android:layout_width="match_parent"

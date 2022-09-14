@@ -109,9 +109,6 @@ class ElementFragment : Fragment() {
         binding.openingHours.text =
             element.tags["opening_hours"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
 
-        binding.lightningEnabled.isVisible = element.tags["payment:lightning"]?.jsonPrimitive?.content == "yes"
-                || element.tags["payment:bitcoin"]?.jsonPrimitive?.content?.contains("lightning") == true
-
         binding.tags.text = tagsJsonFormatter.encodeToString(JsonObject.serializer(), element.tags)
     }
 }
