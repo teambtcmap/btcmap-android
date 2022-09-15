@@ -112,7 +112,7 @@ class MapFragment : Fragment() {
                 when (it.itemId) {
                     R.id.action_add -> {
                         val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse("https://wiki.openstreetmap.org/wiki/How_to_contribute")
+                        intent.data = Uri.parse("https://github.com/teambtcmap/btcmap.org/wiki/Tagging-Instructions")
                         startActivity(intent)
                     }
 
