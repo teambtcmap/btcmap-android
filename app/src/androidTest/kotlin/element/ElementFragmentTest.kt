@@ -10,8 +10,8 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import org.btcmap.R
 import org.hamcrest.Matchers.not
+import org.junit.Test
 import java.time.ZonedDateTime
-import kotlin.test.Test
 
 class ElementFragmentTest {
 

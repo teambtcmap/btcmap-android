@@ -1,7 +1,7 @@
 package activity
 
 import androidx.test.core.app.launchActivity
-import kotlin.test.Test
+import org.junit.Test
 
 class ActivityTest {
 

@@ -2,6 +2,8 @@ package db
 
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import org.junit.Assert.assertEquals
+import org.junit.Test
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import java.time.ZoneOffset
@@ -9,8 +11,6 @@ import java.time.ZonedDateTime
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class ElementQueriesTest {
 

@@ -20,7 +20,7 @@ class ConfRepo(
 ) {
 
     private val _conf: MutableStateFlow<Conf> = MutableStateFlow(
-        runBlocking { db.confQueries.selectAll().executeAsOneOrNull() ?: DEFAULT_CONF }
+        runBlocking { db.confQueries.select().executeAsOneOrNull() ?: DEFAULT_CONF }
     )
 
     val conf: StateFlow<Conf> = _conf.asStateFlow()
@@ -29,7 +29,7 @@ class ConfRepo(
         conf.onEach {
             withContext(Dispatchers.Default) {
                 db.transaction {
-                    db.confQueries.deleteAll()
+                    db.confQueries.delete()
                     db.confQueries.insert(it)
                 }
             }

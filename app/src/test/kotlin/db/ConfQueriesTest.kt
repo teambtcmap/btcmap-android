@@ -1,10 +1,10 @@
 package db
 
 import conf.ConfRepo
+import org.junit.Assert.assertEquals
+import org.junit.Test
 import kotlin.random.Random
 import kotlin.random.nextInt
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class ConfQueriesTest {
 
@@ -13,7 +13,7 @@ class ConfQueriesTest {
         testDb().confQueries.apply {
             val conf = ConfRepo.DEFAULT_CONF
             insert(conf)
-            assertEquals(conf, selectAll().executeAsOne())
+            assertEquals(conf, select().executeAsOne())
         }
     }
 
@@ -22,7 +22,7 @@ class ConfQueriesTest {
         testDb().confQueries.apply {
             val rows = (0..Random.nextInt(6)).map { ConfRepo.DEFAULT_CONF }
             rows.forEach { insert(it) }
-            assertEquals(rows, selectAll().executeAsList())
+            assertEquals(rows, select().executeAsList())
         }
     }
 
@@ -30,9 +30,9 @@ class ConfQueriesTest {
     fun deleteAll() {
         testDb().confQueries.apply {
             repeat(Random.nextInt(1..5)) { insert(ConfRepo.DEFAULT_CONF) }
-            assert(selectAll().executeAsList().isNotEmpty())
-            deleteAll()
-            assert(selectAll().executeAsList().isEmpty())
+            assert(select().executeAsList().isNotEmpty())
+            delete()
+            assert(select().executeAsList().isEmpty())
         }
     }
 }

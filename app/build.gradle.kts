@@ -173,10 +173,10 @@ dependencies {
     implementation("com.github.MKergall:osmbonuspack:6.7.0")
 
     // Common test dependencies
-    testImplementation("org.jetbrains.kotlin:kotlin-test:1.7.10")
+    testImplementation("junit:junit:4.13.2")
 
     // Common instrumented test dependencies
-    androidTestImplementation("org.jetbrains.kotlin:kotlin-test:1.7.10")
+    androidTestImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:core-ktx:1.4.0")
     androidTestImplementation("androidx.test.ext:junit-ktx:1.1.3")
     androidTestImplementation("androidx.test:runner:1.4.0")

@@ -45,7 +45,14 @@ class Sync(
         }
 
         val lastSyncDateTime = confRepo.conf.value.lastSyncDate
+        val cacheExpiryDate = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(15)
         Log.d(TAG, "Last sync date: $lastSyncDateTime")
+        Log.d(TAG, "Cache expiry date: $cacheExpiryDate")
+
+        if (lastSyncDateTime != null && lastSyncDateTime.isAfter(cacheExpiryDate)) {
+            Log.d(TAG, "Cache is up to date")
+            return
+        }
 
         val url = "https://data.btcmap.org/elements.json".toHttpUrl()
         Log.d(TAG, "Syncing with $url")

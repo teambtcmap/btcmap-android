@@ -2,9 +2,9 @@ package conf
 
 import db.Conf
 import db.testDb
+import org.junit.Assert.assertEquals
+import org.junit.Test
 import java.time.ZonedDateTime
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class ConfRepoTest {
 
