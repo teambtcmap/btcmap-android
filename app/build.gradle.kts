@@ -14,6 +14,7 @@ plugins {
 val signingPropertiesFile = rootProject.file("signing.properties")
 
 android {
+    namespace = "org.btcmap"
     compileSdk = 33
 
     defaultConfig {
