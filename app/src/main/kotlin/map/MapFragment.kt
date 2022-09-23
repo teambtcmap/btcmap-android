@@ -78,15 +78,9 @@ class MapFragment : Fragment() {
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
-    ) { permissions ->
-        when {
-            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                model.onLocationPermissionGranted()
-            }
-            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                model.onLocationPermissionGranted()
-            }
-            else -> {}
+    ) {
+        if (it.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
+            model.onLocationPermissionGranted()
         }
     }
 
@@ -112,7 +106,7 @@ class MapFragment : Fragment() {
                 when (it.itemId) {
                     R.id.action_add -> {
                         val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse("https://github.com/teambtcmap/btcmap.org/wiki/Tagging-Instructions")
+                        intent.data = Uri.parse("https://www.btcmap.org/add-location")
                         startActivity(intent)
                     }
 
