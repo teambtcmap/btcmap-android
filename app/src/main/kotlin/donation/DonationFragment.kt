@@ -31,6 +31,7 @@ class DonationFragment : Fragment() {
         binding.apply {
             toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
             copy.setOnClickListener { onCopyButtonClick() }
+            lnCopy.setOnClickListener { onLnCopyButtonClick() }
         }
     }
 
@@ -42,7 +43,15 @@ class DonationFragment : Fragment() {
     private fun onCopyButtonClick() {
         val clipManager = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clipLabel = getString(R.string.btc_map_donation_address)
-        val clipText = getString(R.string.donation_address)
+        val clipText = getString(R.string.donation_address_onchain)
+        clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
+        Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun onLnCopyButtonClick() {
+        val clipManager = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipLabel = getString(R.string.btc_map_donation_address)
+        val clipText = getString(R.string.donation_address_ln)
         clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
         Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
     }

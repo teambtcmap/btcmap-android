@@ -25,15 +25,30 @@ class DonationFragmentTest {
             onView(withId(R.id.toolbar)).check(matches(isDisplayed()))
             onView(withId(R.id.message)).check(matches(isDisplayed()))
             onView(withId(R.id.message)).check(matches(withText(R.string.help_us_improve_btc_map)))
+
             onView(withId(R.id.qr)).check(matches(isDisplayed()))
             onView(withId(R.id.copy)).check(matches(isDisplayed()))
             onView(withId(R.id.copy)).check(matches(isClickable()))
 
-            onView(withId(R.id.copy)).perform(click())
-            val context = InstrumentationRegistry.getInstrumentation().targetContext
-            val clipManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clipboardText = clipManager.primaryClip!!.getItemAt(clipManager.primaryClip!!.itemCount - 1).text
-            assertEquals(context.getString(R.string.donation_address), clipboardText)
+            onView(withId(R.id.copy)).apply {
+                perform(click())
+                val context = InstrumentationRegistry.getInstrumentation().targetContext
+                val clipManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clipboardText = clipManager.primaryClip!!.getItemAt(clipManager.primaryClip!!.itemCount - 1).text
+                assertEquals(context.getString(R.string.donation_address_onchain), clipboardText)
+            }
+
+            onView(withId(R.id.lnQr)).check(matches(isDisplayed()))
+            onView(withId(R.id.lnCopy)).check(matches(isDisplayed()))
+            onView(withId(R.id.lnCopy)).check(matches(isClickable()))
+
+            onView(withId(R.id.lnCopy)).apply {
+                perform(click())
+                val context = InstrumentationRegistry.getInstrumentation().targetContext
+                val clipManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clipboardText = clipManager.primaryClip!!.getItemAt(clipManager.primaryClip!!.itemCount - 1).text
+                assertEquals(context.getString(R.string.donation_address_ln), clipboardText)
+            }
         }
     }
 }

@@ -10,14 +10,16 @@
     <string name="icon">Icon</string>
     <string name="donate">Donate</string>
     <string name="qr_code">QR code</string>
-    <string name="copy_to_clipboard">Copy</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="btc_map_donation_address">BTC Map donation address</string>
-    <string name="donation_address" translatable="false">bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d</string>
+    <string name="donation_address_onchain" translatable="false">bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d</string>
+    <string name="donation_address_ln" translatable="false">lnurl1dp68gurn8ghj7ctsdyh85etzv4jx2efwd9hj7a3s9aex2ut4v4ehgttnw3shg6tr943ksctjvajhxtekvvckyvpnv3sj6cmx8ymz6drrxa3j6ct9vdsj6vrpvejnwwf4v56r2vpefj93d5</string>
     <string name="help_us_improve_btc_map">Help us improve BTC Map</string>
     <string name="show_my_location">Show my location</string>
     <string name="edit_place">Edit place</string>
     <string name="delete_place">Delete place</string>
     <string name="show_tags">Show tags</string>
     <string name="hide_tags">Hide tags</string>
+    <string name="copy_bitcoin_address">Copy Bitcoin Address</string>
+    <string name="copy_lnurl">Copy LNURL</string>
 </resources>
