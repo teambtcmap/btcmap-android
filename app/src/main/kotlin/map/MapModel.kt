@@ -1,5 +1,6 @@
 package map
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -29,11 +30,12 @@ import kotlin.math.min
 
 @KoinViewModel
 class MapModel(
-    private val mapMarkersRepo: MapMarkersRepository,
     private val locationRepo: UserLocationRepository,
     private val sync: Sync,
     private val db: Database,
 ) : ViewModel() {
+
+    private val mapMarkersRepo: MutableStateFlow<MapMarkersRepository?> = MutableStateFlow(null)
 
     val userLocation: StateFlow<GeoPoint> = locationRepo.location
 
@@ -53,9 +55,9 @@ class MapModel(
     val syncMessage = _syncMessage.asStateFlow()
 
     init {
-        combine(_mapBoundingBox, db.elementQueries.selectCount().asFlow().mapToOne()) { viewport, _ ->
+        combine(_mapBoundingBox, db.elementQueries.selectCount().asFlow().mapToOne(), mapMarkersRepo) { viewport, _, mapMarkersRepo ->
             withContext(Dispatchers.Default) {
-                if (viewport == null) {
+                if (viewport == null || mapMarkersRepo == null) {
                     return@withContext
                 }
 
@@ -81,6 +83,10 @@ class MapModel(
                 locationRepo.location.first { it != UserLocationRepository.DEFAULT_LOCATION }
             _moveToLocation.update { firstNonDefaultLocation }
         }
+    }
+
+    fun setArgs(context: Context) {
+        mapMarkersRepo.update { MapMarkersRepository(context) }
     }
 
     fun onLocationPermissionGranted() {
@@ -109,7 +115,7 @@ class MapModel(
     }
 
     fun invalidateMarkersCache() {
-        mapMarkersRepo.invalidateCache()
+        mapMarkersRepo.value?.invalidateCache()
     }
 
     fun syncElements() {

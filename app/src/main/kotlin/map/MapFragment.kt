@@ -26,11 +26,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import element.ElementFragment
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.FragmentMapBinding
@@ -99,6 +95,8 @@ class MapFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        model.setArgs(requireContext())
+
         binding.toolbar.apply {
             inflateMenu(R.menu.map)
 
@@ -169,7 +167,10 @@ class MapFragment : Fragment() {
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         binding.fab.setOnClickListener {
-            if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+            if (ActivityCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
                 != PackageManager.PERMISSION_GRANTED
             ) {
                 requestLocationPermissions()
@@ -199,11 +200,22 @@ class MapFragment : Fragment() {
                 }
 
                 elementsOverlay = RadiusMarkerClusterer(requireContext())
-                val clusterIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_cluster)!!
+
+                val clusterIcon =
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_cluster)!!
+
                 val pinSizePx =
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48f, resources.displayMetrics).toInt()
+                    TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        48f,
+                        resources.displayMetrics,
+                    ).toInt()
                 elementsOverlay!!.setIcon(clusterIcon.toBitmap(pinSizePx, pinSizePx))
-                elementsOverlay!!.textPaint.color = ContextCompat.getColor(requireContext(), R.color.pin_icon)
+
+                val attrs =
+                    requireContext().theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnPrimaryContainer))
+
+                elementsOverlay!!.textPaint.color = attrs.getColor(0, 0)
 
                 elementWithMarkers.forEach {
                     val marker = Marker(binding.map)
@@ -272,7 +284,10 @@ class MapFragment : Fragment() {
             }
         }
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, backPressedCallback)
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            backPressedCallback
+        )
     }
 
     override fun onDestroyView() {
@@ -344,7 +359,7 @@ class MapFragment : Fragment() {
 
     private suspend fun getElementDetailsToolbar(): Toolbar {
         while (elementFragment.view == null
-                || elementFragment.requireView().findViewById<View>(R.id.toolbar)!!.height == 0
+            || elementFragment.requireView().findViewById<View>(R.id.toolbar)!!.height == 0
         ) {
             delay(10)
         }

@@ -4,8 +4,6 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
-        android:fillColor="@color/pin_bg"
-        android:pathData="M12,12m-11.5467,0a11.5467,11.5467 0,1 1,23.0933 0a11.5467,11.5467 0,1 1,-23.0933 0"
-        android:strokeWidth="0.5"
-        android:strokeColor="@color/pin_border" />
+        android:fillColor="?colorPrimaryContainer"
+        android:pathData="M12,12m-11.5467,0a11.5467,11.5467 0,1 1,23.0933 0a11.5467,11.5467 0,1 1,-23.0933 0" />
 </vector>
