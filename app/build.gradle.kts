@@ -96,6 +96,19 @@ android {
             // Includes the default ProGuard rules file
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+
+        create("googlePlayRelease") {
+            applicationIdSuffix = ".android"
+
+            // Enables code shrinking, obfuscation, and optimization
+            isMinifyEnabled = true
+
+            // Enables resource shrinking
+            isShrinkResources = true
+
+            // Includes the default ProGuard rules file
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
     }
 
     buildFeatures {
