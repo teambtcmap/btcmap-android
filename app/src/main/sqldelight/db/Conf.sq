@@ -1,3 +1,9 @@
+import java.time.ZonedDateTime;
+
+CREATE TABLE Conf (
+    lastSyncDate TEXT AS ZonedDateTime
+);
+
 insert:
 INSERT
 INTO Conf (lastSyncDate)

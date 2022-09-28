@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import db.Element
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
@@ -37,7 +38,8 @@ class ElementFragment : Fragment() {
                 R.id.action_edit,
                 R.id.action_delete -> {
                     val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse("https://github.com/teambtcmap/btcmap.org/wiki/Tagging-Instructions")
+                    intent.data =
+                        Uri.parse("https://github.com/teambtcmap/btcmap.org/wiki/Tagging-Instructions")
                     startActivity(intent)
                 }
             }
@@ -78,37 +80,40 @@ class ElementFragment : Fragment() {
     }
 
     fun setElement(element: Element) {
-        binding.toolbar.title = element.tags["name"]?.jsonPrimitive?.content ?: "Unnamed"
+        val tags = element.osm_data["tags"]!!.jsonObject
+        binding.toolbar.title = tags["name"]?.jsonPrimitive?.content ?: "Unnamed"
 
         val address = buildString {
-            if (element.tags.containsKey("addr:housenumber")) {
-                append(element.tags["addr:housenumber"]!!.jsonPrimitive.content)
+            if (tags.containsKey("addr:housenumber")) {
+                append(tags["addr:housenumber"]!!.jsonPrimitive.content)
             }
 
-            if (element.tags.containsKey("addr:street")) {
+            if (tags.containsKey("addr:street")) {
                 append(" ")
-                append(element.tags["addr:street"]!!.jsonPrimitive.content)
+                append(tags["addr:street"]!!.jsonPrimitive.content)
             }
 
-            if (element.tags.containsKey("addr:city")) {
+            if (tags.containsKey("addr:city")) {
                 append(", ")
-                append(element.tags["addr:city"]!!.jsonPrimitive.content)
+                append(tags["addr:city"]!!.jsonPrimitive.content)
             }
 
-            if (element.tags.containsKey("addr:postcode")) {
+            if (tags.containsKey("addr:postcode")) {
                 append(", ")
-                append(element.tags["addr:postcode"]!!.jsonPrimitive.content)
+                append(tags["addr:postcode"]!!.jsonPrimitive.content)
             }
         }.trim(',', ' ')
 
         binding.address.isVisible = address.isNotBlank()
         binding.address.text = address
 
-        binding.phone.text = element.tags["phone"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
-        binding.website.text = element.tags["website"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
+        binding.phone.text =
+            tags["phone"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
+        binding.website.text =
+            tags["website"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
         binding.openingHours.text =
-            element.tags["opening_hours"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
+            tags["opening_hours"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
 
-        binding.tags.text = tagsJsonFormatter.encodeToString(JsonObject.serializer(), element.tags)
+        binding.tags.text = tagsJsonFormatter.encodeToString(JsonObject.serializer(), tags)
     }
 }

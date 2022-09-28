@@ -5,12 +5,7 @@ import db.Database
 import db.Element
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.double
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.long
+import kotlinx.serialization.json.*
 import org.koin.core.annotation.Single
 
 @Single
@@ -22,39 +17,28 @@ class DataImporter(
         private const val TAG = "DataImporter"
     }
 
-    suspend fun import(data: JsonObject) {
+    suspend fun import(elements: JsonArray) {
         withContext(Dispatchers.Default) {
-            val elements = data["elements"]!!.jsonArray.map { it.jsonObject }
             Log.d(TAG, "Got ${elements.size} elements")
 
             db.transaction {
-                db.elementQueries.deleteAll()
-
                 for (element in elements) {
 
                     val lat: Double
                     val lon: Double
 
-                    val boundsMinLat: Double?
-                    val boundsMinLon: Double?
-                    val boundsMaxLat: Double?
-                    val boundsMaxLon: Double?
+                    val osmData = element.jsonObject["data"]!!.jsonObject
 
-                    if (element["type"]!!.jsonPrimitive.content == "node") {
-                        lat = element["lat"]!!.jsonPrimitive.double
-                        lon = element["lon"]!!.jsonPrimitive.double
-
-                        boundsMinLat = null
-                        boundsMinLon = null
-                        boundsMaxLat = null
-                        boundsMaxLon = null
+                    if (osmData["type"]!!.jsonPrimitive.content == "node") {
+                        lat = osmData["lat"]!!.jsonPrimitive.double
+                        lon = osmData["lon"]!!.jsonPrimitive.double
                     } else {
-                        val bounds = element["bounds"]!!.jsonObject
+                        val bounds = osmData["bounds"]!!.jsonObject
 
-                        boundsMinLat = bounds["minlat"]!!.jsonPrimitive.double
-                        boundsMinLon = bounds["minlon"]!!.jsonPrimitive.double
-                        boundsMaxLat = bounds["maxlat"]!!.jsonPrimitive.double
-                        boundsMaxLon = bounds["maxlon"]!!.jsonPrimitive.double
+                        val boundsMinLat = bounds["minlat"]!!.jsonPrimitive.double
+                        val boundsMinLon = bounds["minlon"]!!.jsonPrimitive.double
+                        val boundsMaxLat = bounds["maxlat"]!!.jsonPrimitive.double
+                        val boundsMaxLon = bounds["maxlon"]!!.jsonPrimitive.double
 
                         lat = (boundsMinLat + boundsMaxLat) / 2.0
                         lon = (boundsMinLon + boundsMaxLon) / 2.0
@@ -62,16 +46,13 @@ class DataImporter(
 
                     db.elementQueries.insert(
                         Element(
-                            id = element["id"]!!.jsonPrimitive.long,
-                            type = element["type"]!!.jsonPrimitive.content,
+                            id = element.jsonObject["id"]!!.jsonPrimitive.content,
                             lat = lat,
                             lon = lon,
-                            timestamp = element["timestamp"]!!.jsonPrimitive.content,
-                            boundsMinLat = boundsMinLat,
-                            boundsMinLon = boundsMinLon,
-                            boundsMaxLat = boundsMaxLat,
-                            boundsMaxLon = boundsMaxLon,
-                            tags = element["tags"]!!.jsonObject,
+                            osm_data = osmData,
+                            created_at = element.jsonObject["created_at"]!!.jsonPrimitive.content,
+                            updated_at = element.jsonObject["updated_at"]!!.jsonPrimitive.content,
+                            deleted_at = element.jsonObject["deleted_at"]!!.jsonPrimitive.contentOrNull,
                         )
                     )
                 }

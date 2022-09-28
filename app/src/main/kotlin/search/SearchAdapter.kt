@@ -61,8 +61,7 @@ class SearchAdapter(
             oldItem: Item,
             newItem: Item,
         ): Boolean {
-            return newItem.element.type == oldItem.element.type
-                    && newItem.element.id == oldItem.element.id
+            return newItem.element.id == oldItem.element.id
         }
 
         override fun areContentsTheSame(

@@ -13,7 +13,7 @@ fun database(context: Context): Database {
     val driver = AndroidSqliteDriver(
         schema = Database.Schema,
         context = context,
-        name = "btcmap-v2.db",
+        name = "btcmap-v3.db",
     )
 
     return database(driver)
@@ -32,15 +32,17 @@ private fun confAdapter(): Conf.Adapter {
         lastSyncDateAdapter = object : ColumnAdapter<ZonedDateTime, String> {
             override fun decode(databaseValue: String) = ZonedDateTime.parse(databaseValue)
             override fun encode(value: ZonedDateTime) = value.toString()
-        }
+        },
     )
 }
 
 private fun elementAdapter(): Element.Adapter {
     return Element.Adapter(
-        tagsAdapter = object : ColumnAdapter<JsonObject, String> {
-            override fun decode(databaseValue: String) = Json.parseToJsonElement(databaseValue).jsonObject
+        osm_dataAdapter = object : ColumnAdapter<JsonObject, String> {
+            override fun decode(databaseValue: String) =
+                Json.parseToJsonElement(databaseValue).jsonObject
+
             override fun encode(value: JsonObject) = value.toString()
-        }
+        },
     )
 }

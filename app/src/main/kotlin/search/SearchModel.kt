@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.R
 import org.koin.android.annotation.KoinViewModel
@@ -107,7 +108,7 @@ class SearchModel(
         return SearchAdapter.Item(
             element = this,
             icon = AppCompatResources.getDrawable(app, iconResId() ?: R.drawable.ic_place)!!,
-            name = tags["name"]?.jsonPrimitive?.contentOrNull ?: "Unnamed",
+            name = osm_data["tags"]!!.jsonObject["name"]?.jsonPrimitive?.contentOrNull ?: "Unnamed",
             distanceToUser = distanceStringBuilder.toString(),
         )
     }

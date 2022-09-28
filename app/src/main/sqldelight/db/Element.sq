@@ -1,20 +1,32 @@
+import kotlinx.serialization.json.JsonObject;
+
+CREATE TABLE Element (
+    id TEXT NOT NULL PRIMARY KEY,
+    lat REAL NOT NULL,
+    lon REAL NOT NULL,
+    osm_data TEXT AS JsonObject NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT
+);
+
 insert:
 INSERT
-INTO Element (id, type, lat, lon, timestamp, boundsMinLat, boundsMinLon, boundsMaxLat, boundsMaxLon, tags)
+INTO Element (id, lat, lon, osm_data, created_at, updated_at, deleted_at)
 VALUES ?;
 
 selectAll:
 SELECT *
 FROM Element;
 
-selectByTypeAndId:
+selectById:
 SELECT *
 FROM Element
-WHERE type = ? AND id = ?;
+WHERE id = ?;
 
 selectBySearchString:
 SELECT * FROM Element WHERE
-UPPER(tags) LIKE '%' || UPPER(:searchString) || '%';
+UPPER(osm_data) LIKE '%' || UPPER(:searchString) || '%';
 
 selectByBoundingBox:
 SELECT * FROM Element WHERE
@@ -25,6 +37,10 @@ AND lon < :maxLon;
 
 selectCount:
 SELECT COUNT(*)
+FROM Element;
+
+selectMaxUpdatedAt:
+SELECT MAX(updated_at)
 FROM Element;
 
 deleteAll:

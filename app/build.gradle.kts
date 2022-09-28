@@ -124,7 +124,6 @@ sqldelight {
     database("Database") {
         sourceFolders = listOf("sqldelight")
         packageName = "db"
-        deriveSchemaFromMigrations = true
     }
 }
 

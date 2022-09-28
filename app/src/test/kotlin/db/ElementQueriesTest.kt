@@ -33,20 +33,20 @@ class ElementQueriesTest {
     }
 
     @Test
-    fun selectByTypeAndId() {
+    fun selectById() {
         testDb().elementQueries.apply {
             val rows = (0..Random.nextInt(6)).map { testElement() }
             rows.forEach { insert(it) }
             val randomRow = rows.random()
-            assertEquals(randomRow, selectByTypeAndId(randomRow.type, randomRow.id).executeAsOne())
+            assertEquals(randomRow, selectById(randomRow.id).executeAsOne())
         }
     }
 
     @Test
     fun selectBySearchString() {
         testDb().elementQueries.apply {
-            val row1 = testElement().copy(tags = JsonObject(mapOf(Pair("amenity", JsonPrimitive("cafe")))))
-            val row2 = testElement().copy(tags = JsonObject(mapOf(Pair("amenity", JsonPrimitive("bar")))))
+            val row1 = testElement().copy(osm_data = JsonObject(mapOf(Pair("amenity", JsonPrimitive("cafe")))))
+            val row2 = testElement().copy(osm_data = JsonObject(mapOf(Pair("amenity", JsonPrimitive("bar")))))
             insert(row1)
             insert(row2)
 
@@ -79,16 +79,13 @@ class ElementQueriesTest {
 
     private fun testElement(): Element {
         return Element(
-            type = arrayOf("node", "way", "relation").random(),
-            id = Random.nextLong(),
+            id = "${arrayOf("node", "way", "relation").random()}:${Random.nextLong()}",
             lat = Random.nextDouble(-90.0, 90.0),
             lon = Random.nextDouble(-180.0, 180.0),
-            timestamp = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
-            boundsMinLat = null,
-            boundsMinLon = null,
-            boundsMaxLat = null,
-            boundsMaxLon = null,
-            tags = JsonObject(emptyMap()),
+            osm_data = JsonObject(emptyMap()),
+            created_at = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
+            updated_at = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
+            deleted_at = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
         )
     }
 }

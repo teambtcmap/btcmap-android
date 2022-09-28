@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonArray
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -35,7 +35,7 @@ class Sync(
             withContext(Dispatchers.Default) {
                 runCatching {
                     val bundledData = context.assets.open("elements.json")
-                    val bundledDataJson: JsonObject =
+                    val bundledDataJson: JsonArray =
                         Json.decodeFromString(bundledData.bufferedReader().readText())
                     dataImporter.import(bundledDataJson)
                 }.onFailure {
@@ -45,16 +45,25 @@ class Sync(
         }
 
         val lastSyncDateTime = confRepo.conf.value.lastSyncDate
-        val cacheExpiryDate = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(15)
+        val minSyncIntervalExpiryDate = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(15)
         Log.d(TAG, "Last sync date: $lastSyncDateTime")
-        Log.d(TAG, "Cache expiry date: $cacheExpiryDate")
+        Log.d(TAG, "Min sync interval expiry date: $minSyncIntervalExpiryDate")
 
-        if (lastSyncDateTime != null && lastSyncDateTime.isAfter(cacheExpiryDate)) {
+        if (lastSyncDateTime != null && lastSyncDateTime.isAfter(minSyncIntervalExpiryDate)) {
             Log.d(TAG, "Cache is up to date")
             return
         }
 
-        val url = "https://data.btcmap.org/elements.json".toHttpUrl()
+        val maxUpdatedAt = withContext(Dispatchers.Default) {
+            db.elementQueries.selectMaxUpdatedAt().executeAsOneOrNull()?.MAX
+        }
+
+        val url = if (maxUpdatedAt == null) {
+            "https://api.btcmap.org/elements"
+        } else {
+            "https://api.btcmap.org/elements?updated_since=$maxUpdatedAt"
+        }.toHttpUrl()
+
         Log.d(TAG, "Syncing with $url")
 
         if (sync(url)) {
@@ -74,7 +83,8 @@ class Sync(
 
             if (response.isSuccessful) {
                 runCatching {
-                    val json: JsonObject = Json.decodeFromString(response.body!!.string())
+                    val json: JsonArray = Json.decodeFromString(response.body!!.string())
+                    Log.d(TAG, "Got ${json.size} elements")
                     dataImporter.import(json)
                 }.onFailure {
                     Log.e(TAG, "Failed to import new data", it)
