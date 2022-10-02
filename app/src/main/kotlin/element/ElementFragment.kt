@@ -39,7 +39,7 @@ class ElementFragment : Fragment() {
                 R.id.action_delete -> {
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.data =
-                        Uri.parse("https://github.com/teambtcmap/btcmap.org/wiki/Tagging-Instructions")
+                        Uri.parse("https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions")
                     startActivity(intent)
                 }
             }

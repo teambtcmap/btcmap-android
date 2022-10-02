@@ -10,18 +10,44 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:title="@string/app_name" />
-
         <org.osmdroid.views.MapView
             android:id="@+id/map"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent" />
 
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:background="@drawable/search_bar_bg"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:text="@string/search_here"
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            android:textColor="?colorOnSurfaceVariant"
+            android:textSize="20sp" />
+
+        <ImageView
+            android:id="@+id/donate"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginHorizontal="32dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="@string/donate"
+            android:focusable="true"
+            android:src="@drawable/baseline_currency_bitcoin_24"
+            app:tint="?colorOnSurface" />
+
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/elementDetails"
@@ -45,8 +71,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
-        android:layout_margin="16dp"
+        android:layout_margin="24dp"
         android:contentDescription="@string/show_my_location"
+        app:elevation="0dp"
         app:layout_dodgeInsetEdges="bottom"
         app:srcCompat="@drawable/baseline_my_location_24" />
 

@@ -123,7 +123,7 @@ class MapModel(
             runCatching {
                 val job = launch {
                     delay(1000)
-                    _syncMessage.update { "Syncing elements..." }
+                    _syncMessage.update { "Syncing data" }
                 }
 
                 sync.sync()
@@ -136,7 +136,7 @@ class MapModel(
 
                 _syncMessage.update { "" }
             }.onFailure {
-                _syncMessage.update { "Failed to sync elements" }
+                _syncMessage.update { "Failed to sync data" }
                 delay(5000)
                 _syncMessage.update { "" }
             }

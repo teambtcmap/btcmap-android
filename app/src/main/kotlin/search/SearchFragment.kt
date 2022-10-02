@@ -1,11 +1,13 @@
 package search
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import androidx.core.view.isVisible
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.*
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -76,6 +78,24 @@ class SearchFragment : Fragment() {
         }
 
         binding.clear.setOnClickListener { binding.query.setText("") }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { toolbar, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+            toolbar.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                topMargin = insets.top
+            }
+            WindowInsetsCompat.CONSUMED
+        }
+
+        WindowCompat.getInsetsController(
+            requireActivity().window,
+            requireActivity().window.decorView,
+        ).isAppearanceLightStatusBars =
+            when (requireContext().resources.configuration.uiMode and
+                    Configuration.UI_MODE_NIGHT_MASK) {
+                Configuration.UI_MODE_NIGHT_NO -> true
+                else -> false
+            }
     }
 
     override fun onDestroyView() {

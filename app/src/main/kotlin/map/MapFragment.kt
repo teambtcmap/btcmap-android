@@ -1,21 +1,21 @@
 package map
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import androidx.core.view.isVisible
+import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -23,7 +23,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.snackbar.Snackbar
 import element.ElementFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -91,41 +90,43 @@ class MapFragment : Fragment() {
         )
 
         _binding = FragmentMapBinding.inflate(inflater, container, false)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.search) { view, windowInsets ->
+            val baseTopMargin =
+                TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    8f,
+                    resources.displayMetrics,
+                ).toInt()
+
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+
+            view.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                topMargin = insets.top + baseTopMargin
+            }
+
+            bottomSheetBehavior.expandedOffset = insets.top
+
+            WindowInsetsCompat.CONSUMED
+        }
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         model.setArgs(requireContext())
 
-        binding.toolbar.apply {
-            inflateMenu(R.menu.map)
+        binding.search.setOnClickListener {
+            val action = MapFragmentDirections.actionMapFragmentToSearchFragment(
+                model.userLocation.value.latitude.toString(),
+                model.userLocation.value.longitude.toString(),
+            )
 
-            setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.action_add -> {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse("https://www.btcmap.org/add-location")
-                        startActivity(intent)
-                    }
+            findNavController().navigate(action)
+        }
 
-                    R.id.action_donate -> {
-                        findNavController().navigate(MapFragmentDirections.actionMapFragmentToDonationFragment())
-                    }
-
-                    R.id.action_search -> {
-                        lifecycleScope.launch {
-                            val action = MapFragmentDirections.actionMapFragmentToSearchFragment(
-                                model.userLocation.value.latitude.toString(),
-                                model.userLocation.value.longitude.toString(),
-                            )
-
-                            findNavController().navigate(action)
-                        }
-                    }
-                }
-
-                true
-            }
+        binding.donate.setOnClickListener {
+            findNavController().navigate(MapFragmentDirections.actionMapFragmentToDonationFragment())
         }
 
         binding.map.apply {
@@ -145,10 +146,13 @@ class MapFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             val elementDetailsToolbar = getElementDetailsToolbar()
-            bottomSheetBehavior.peekHeight = elementDetailsToolbar.height
+            bottomSheetBehavior.peekHeight = elementDetailsToolbar.height * 3
+            bottomSheetBehavior.halfExpandedRatio = 0.33f
+            bottomSheetBehavior.isFitToContents = false
+            bottomSheetBehavior.skipCollapsed = true
 
             elementDetailsToolbar.setOnClickListener {
-                if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
+                if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_HALF_EXPANDED) {
                     bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 } else {
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
@@ -160,7 +164,7 @@ class MapFragment : Fragment() {
             if (it != null) {
                 getElementDetailsToolbar()
                 elementFragment.setElement(it)
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
             } else {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
             }
@@ -261,19 +265,19 @@ class MapFragment : Fragment() {
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         lifecycleScope.launchWhenResumed {
-            val snack = Snackbar.make(
-                binding.root,
+            val toast = Toast.makeText(
+                requireContext(),
                 "",
-                Snackbar.LENGTH_INDEFINITE,
+                Toast.LENGTH_LONG,
             )
 
             model.syncMessage.collectLatest {
-                snack.setText(it)
+                toast.setText(it)
 
                 if (it.isNotBlank()) {
-                    snack.show()
+                    toast.show()
                 } else {
-                    snack.dismiss()
+                    toast.cancel()
                 }
             }
         }
@@ -288,6 +292,11 @@ class MapFragment : Fragment() {
             viewLifecycleOwner,
             backPressedCallback
         )
+
+        WindowCompat.getInsetsController(
+            requireActivity().window,
+            requireActivity().window.decorView,
+        ).isAppearanceLightStatusBars = true
     }
 
     override fun onDestroyView() {
@@ -305,10 +314,16 @@ class MapFragment : Fragment() {
     }
 
     private fun onBackPressed() {
-        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        } else {
-            requireActivity().finish()
+        when (bottomSheetBehavior.state) {
+            BottomSheetBehavior.STATE_EXPANDED -> {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+            }
+            BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+            }
+            else -> {
+                requireActivity().finish()
+            }
         }
     }
 
@@ -345,7 +360,9 @@ class MapFragment : Fragment() {
     private fun BottomSheetBehavior<*>.addSlideCallback() {
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
-
+                if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                    model.selectElement(null, false)
+                }
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {

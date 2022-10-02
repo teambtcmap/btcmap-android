@@ -22,4 +22,5 @@
     <string name="hide_tags">Hide tags</string>
     <string name="copy_bitcoin_address">Copy Bitcoin Address</string>
     <string name="copy_lnurl">Copy LNURL</string>
+    <string name="search_here">Search here</string>
 </resources>
