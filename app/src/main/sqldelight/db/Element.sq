@@ -7,7 +7,7 @@ CREATE TABLE Element (
     osm_data TEXT AS JsonObject NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
-    deleted_at TEXT
+    deleted_at TEXT NOT NULL
 );
 
 insertOrReplace:
@@ -25,8 +25,10 @@ FROM Element
 WHERE id = ?;
 
 selectBySearchString:
-SELECT * FROM Element WHERE
-UPPER(osm_data) LIKE '%' || UPPER(:searchString) || '%';
+SELECT *
+FROM Element
+WHERE deleted_at = '' AND (UPPER(osm_data) LIKE '%' || UPPER(:searchString) || '%')
+LIMIT 100;
 
 selectByBoundingBox:
 SELECT * FROM Element WHERE

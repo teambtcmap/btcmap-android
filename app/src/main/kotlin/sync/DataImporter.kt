@@ -52,7 +52,7 @@ class DataImporter(
                             osm_data = osmData,
                             created_at = element.jsonObject["created_at"]!!.jsonPrimitive.content,
                             updated_at = element.jsonObject["updated_at"]!!.jsonPrimitive.content,
-                            deleted_at = element.jsonObject["deleted_at"]!!.jsonPrimitive.contentOrNull,
+                            deleted_at = element.jsonObject["deleted_at"]!!.jsonPrimitive.contentOrNull ?: "",
                         )
                     )
                 }
