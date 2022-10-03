@@ -10,8 +10,8 @@ CREATE TABLE Element (
     deleted_at TEXT
 );
 
-insert:
-INSERT
+insertOrReplace:
+INSERT OR REPLACE
 INTO Element (id, lat, lon, osm_data, created_at, updated_at, deleted_at)
 VALUES ?;
 
@@ -41,8 +41,4 @@ FROM Element;
 
 selectMaxUpdatedAt:
 SELECT MAX(updated_at)
-FROM Element;
-
-deleteAll:
-DELETE
 FROM Element;

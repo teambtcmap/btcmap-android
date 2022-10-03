@@ -15,10 +15,10 @@ import kotlin.random.Random
 class ElementQueriesTest {
 
     @Test
-    fun insert() {
+    fun insertOrReplace() {
         testDb().elementQueries.apply {
             val row = testElement()
-            insert(row)
+            insertOrReplace(row)
             assertEquals(row, selectAll().executeAsOne())
         }
     }
@@ -27,7 +27,7 @@ class ElementQueriesTest {
     fun selectAll() {
         testDb().elementQueries.apply {
             val rows = (0..Random.nextInt(6)).map { testElement() }
-            rows.forEach { insert(it) }
+            rows.forEach { insertOrReplace(it) }
             assertEquals(rows, selectAll().executeAsList())
         }
     }
@@ -36,7 +36,7 @@ class ElementQueriesTest {
     fun selectById() {
         testDb().elementQueries.apply {
             val rows = (0..Random.nextInt(6)).map { testElement() }
-            rows.forEach { insert(it) }
+            rows.forEach { insertOrReplace(it) }
             val randomRow = rows.random()
             assertEquals(randomRow, selectById(randomRow.id).executeAsOne())
         }
@@ -47,8 +47,8 @@ class ElementQueriesTest {
         testDb().elementQueries.apply {
             val row1 = testElement().copy(osm_data = JsonObject(mapOf(Pair("amenity", JsonPrimitive("cafe")))))
             val row2 = testElement().copy(osm_data = JsonObject(mapOf(Pair("amenity", JsonPrimitive("bar")))))
-            insert(row1)
-            insert(row2)
+            insertOrReplace(row1)
+            insertOrReplace(row2)
 
             val result = selectBySearchString("cafe").executeAsOne()
             assertEquals(row1, result)
@@ -59,7 +59,7 @@ class ElementQueriesTest {
     fun selectByBoundingBox() {
         testDb().elementQueries.apply {
             val rows = buildList { repeat(100) { add(testElement()) } }
-            rows.forEach { insert(it) }
+            rows.forEach { insertOrReplace(it) }
             val london = GeoPoint(51.509865, -0.118092)
             val phuket = GeoPoint(7.878978, 98.398392)
             val boundingBox = BoundingBox.fromGeoPoints(listOf(london, phuket))

@@ -44,7 +44,7 @@ class DataImporter(
                         lon = (boundsMinLon + boundsMaxLon) / 2.0
                     }
 
-                    db.elementQueries.insert(
+                    db.elementQueries.insertOrReplace(
                         Element(
                             id = element.jsonObject["id"]!!.jsonPrimitive.content,
                             lat = lat,
