@@ -3,7 +3,9 @@ package donation
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -36,7 +38,38 @@ class DonationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.apply {
             toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+            listOf(qr, pay).forEach {
+                it.setOnClickListener {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data =
+                        Uri.parse("bitcoin:${getString(R.string.donation_address_onchain)}")
+                    runCatching {
+                        startActivity(intent)
+                    }.onFailure {
+                        Toast.makeText(
+                            requireContext(),
+                            R.string.you_dont_have_a_compatible_wallet,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
             copy.setOnClickListener { onCopyButtonClick() }
+            listOf(lnQr, lnPay).forEach {
+                it.setOnClickListener {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse("lightning:${getString(R.string.donation_address_ln)}")
+                    runCatching {
+                        startActivity(intent)
+                    }.onFailure {
+                        Toast.makeText(
+                            requireContext(),
+                            R.string.you_dont_have_a_compatible_wallet,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
             lnCopy.setOnClickListener { onLnCopyButtonClick() }
         }
 
@@ -52,8 +85,7 @@ class DonationFragment : Fragment() {
             requireActivity().window,
             requireActivity().window.decorView,
         ).isAppearanceLightStatusBars =
-            when (requireContext().resources.configuration.uiMode and
-                    Configuration.UI_MODE_NIGHT_MASK) {
+            when (requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
                 Configuration.UI_MODE_NIGHT_NO -> true
                 else -> false
             }

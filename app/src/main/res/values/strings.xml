@@ -12,7 +12,7 @@
     <string name="qr_code">QR code</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="btc_map_donation_address">BTC Map donation address</string>
-    <string name="donation_address_onchain" translatable="false">bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d</string>
+    <string name="donation_address_onchain" translatable="false">bc1qyyr7g9tew6sfa57mv2r6rvgj2ucakcmqnqzqjj</string>
     <string name="donation_address_ln" translatable="false">LNURL1DP68GURN8GHJ7ERZXVUXVER9X4SNYTNY9EMX7MR5V9NK2CTSWQHXJME0D3H82UNVWQHKZURF9AMRZTMVDE6HYMP0XYA8GEF9</string>
     <string name="help_us_improve_btc_map">Help us improve BTC Map</string>
     <string name="show_my_location">Show my location</string>
@@ -20,7 +20,6 @@
     <string name="delete_place">Delete place</string>
     <string name="show_tags">Show tags</string>
     <string name="hide_tags">Hide tags</string>
-    <string name="copy_bitcoin_address">Copy Bitcoin Address</string>
     <string name="copy_lnurl">Copy LNURL</string>
     <string name="search_here">Search here</string>
     <string name="settings">Settings</string>
@@ -30,4 +29,7 @@
     <string name="trends">Trends</string>
     <string name="up_to_date_places">Up-to-date places</string>
     <string name="total_places">Total places</string>
+    <string name="pay">Pay</string>
+    <string name="copy_address">Copy Address</string>
+    <string name="you_dont_have_a_compatible_wallet">You don\'t have a compatible wallet</string>
 </resources>
