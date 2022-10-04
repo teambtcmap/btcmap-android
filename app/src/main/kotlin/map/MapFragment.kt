@@ -149,6 +149,9 @@ class MapFragment : Fragment() {
                                 Uri.parse("https://btcmap.org/add-location")
                             startActivity(intent)
                         }
+                        R.id.action_trends -> {
+                            findNavController().navigate(MapFragmentDirections.actionMapFragmentToTrendsFragment())
+                        }
                         R.id.action_settings -> {
                             findNavController().navigate(MapFragmentDirections.actionMapFragmentToSettingsFragment())
                         }

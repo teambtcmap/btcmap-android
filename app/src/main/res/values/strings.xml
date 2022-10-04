@@ -27,4 +27,7 @@
     <string name="actions">Actions</string>
     <string name="themed_pins">Themed pins</string>
     <string name="dark_map">Dark map</string>
+    <string name="trends">Trends</string>
+    <string name="up_to_date_places">Up-to-date places</string>
+    <string name="total_places">Total places</string>
 </resources>
