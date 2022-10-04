@@ -39,12 +39,25 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="end|center_vertical"
-            android:layout_marginHorizontal="32dp"
+            android:layout_marginHorizontal="64dp"
             android:background="?selectableItemBackgroundBorderless"
             android:clickable="true"
             android:contentDescription="@string/donate"
             android:focusable="true"
             android:src="@drawable/baseline_currency_bitcoin_24"
+            app:tint="?colorOnSurface" />
+
+        <ImageView
+            android:id="@+id/actions"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginHorizontal="32dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="@string/actions"
+            android:focusable="true"
+            android:src="@drawable/baseline_more_vert_24"
             app:tint="?colorOnSurface" />
 
     </FrameLayout>

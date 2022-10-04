@@ -1,7 +1,10 @@
 package map
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -10,10 +13,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
@@ -42,6 +47,7 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import search.SearchResultModel
@@ -129,6 +135,30 @@ class MapFragment : Fragment() {
             findNavController().navigate(MapFragmentDirections.actionMapFragmentToDonationFragment())
         }
 
+        binding.actions.setOnClickListener {
+            val popup = PopupMenu(requireContext(), binding.actions)
+
+            popup.apply {
+                menuInflater.inflate(R.menu.search, menu)
+
+                setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.action_add_element -> {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.data =
+                                Uri.parse("https://btcmap.org/add-location")
+                            startActivity(intent)
+                        }
+                        R.id.action_settings -> {
+                            findNavController().navigate(MapFragmentDirections.actionMapFragmentToSettingsFragment())
+                        }
+                    }
+
+                    true
+                }
+            }.show()
+        }
+
         binding.map.apply {
             zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
             minZoomLevel = 5.0
@@ -207,6 +237,10 @@ class MapFragment : Fragment() {
 
                 val clusterIcon =
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_cluster)!!
+                DrawableCompat.setTint(
+                    clusterIcon,
+                    requireContext().getPrimaryContainerColor(model.conf.conf.value)
+                )
 
                 val pinSizePx =
                     TypedValue.applyDimension(
@@ -215,11 +249,8 @@ class MapFragment : Fragment() {
                         resources.displayMetrics,
                     ).toInt()
                 elementsOverlay!!.setIcon(clusterIcon.toBitmap(pinSizePx, pinSizePx))
-
-                val attrs =
-                    requireContext().theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnPrimaryContainer))
-
-                elementsOverlay!!.textPaint.color = attrs.getColor(0, 0)
+                elementsOverlay!!.textPaint.color =
+                    requireContext().getOnPrimaryContainerColor(model.conf.conf.value)
 
                 elementWithMarkers.forEach {
                     val marker = Marker(binding.map)
@@ -293,10 +324,23 @@ class MapFragment : Fragment() {
             backPressedCallback
         )
 
+        val nightMode =
+            resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+        val darkMap = nightMode && model.conf.conf.value.darkMap
+
+        if (darkMap) {
+            binding.map.overlayManager.tilesOverlay.apply {
+                setColorFilter(TilesOverlay.INVERT_COLORS)
+                loadingBackgroundColor = android.R.color.black
+                loadingLineColor = Color.argb(255, 0, 255, 0)
+            }
+        }
+
         WindowCompat.getInsetsController(
             requireActivity().window,
             requireActivity().window.decorView,
-        ).isAppearanceLightStatusBars = true
+        ).isAppearanceLightStatusBars = !darkMap
     }
 
     override fun onDestroyView() {

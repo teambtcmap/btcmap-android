@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_add_element"
+        android:icon="@drawable/baseline_add_location_alt_24"
+        android:title="@string/add_place"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/baseline_settings_24"
+        android:title="@string/settings"
+        app:showAsAction="never" />
+
+</menu>

@@ -1,12 +1,15 @@
+import java.lang.Boolean;
 import java.time.ZonedDateTime;
 
 CREATE TABLE Conf (
-    lastSyncDate TEXT AS ZonedDateTime
+    lastSyncDate TEXT AS ZonedDateTime,
+    themedPins INTEGER AS Boolean NOT NULL,
+    darkMap INTEGER AS Boolean NOT NULL
 );
 
 insert:
 INSERT
-INTO Conf (lastSyncDate)
+INTO Conf (lastSyncDate, themedPins, darkMap)
 VALUES ?;
 
 select:

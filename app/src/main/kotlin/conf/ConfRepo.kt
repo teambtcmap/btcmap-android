@@ -41,6 +41,10 @@ class ConfRepo(
     }
 
     companion object {
-        val DEFAULT_CONF = Conf(lastSyncDate = null)
+        val DEFAULT_CONF = Conf(
+            lastSyncDate = null,
+            themedPins = true,
+            darkMap = false,
+        )
     }
 }

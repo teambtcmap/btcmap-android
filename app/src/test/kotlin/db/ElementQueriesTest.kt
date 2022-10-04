@@ -85,7 +85,7 @@ class ElementQueriesTest {
             osm_data = JsonObject(emptyMap()),
             created_at = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
             updated_at = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
-            deleted_at = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
+            deleted_at = "",
         )
     }
 }

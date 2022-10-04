@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
+import conf.ConfRepo
 import db.Database
 import db.Element
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +31,7 @@ import kotlin.math.min
 
 @KoinViewModel
 class MapModel(
+    val conf: ConfRepo,
     private val locationRepo: UserLocationRepository,
     private val sync: Sync,
     private val db: Database,
@@ -86,7 +88,7 @@ class MapModel(
     }
 
     fun setArgs(context: Context) {
-        mapMarkersRepo.update { MapMarkersRepository(context) }
+        mapMarkersRepo.update { MapMarkersRepository(context, conf) }
     }
 
     fun onLocationPermissionGranted() {

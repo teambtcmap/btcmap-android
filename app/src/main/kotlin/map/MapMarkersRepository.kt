@@ -11,11 +11,15 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.toRect
+import conf.ConfRepo
 import db.Element
 import icons.iconResId
 import org.btcmap.R
 
-class MapMarkersRepository(private val context: Context) {
+class MapMarkersRepository(
+    private val context: Context,
+    private val conf: ConfRepo,
+) {
 
     private val cache = mutableMapOf<Int?, BitmapDrawable>()
 
@@ -44,6 +48,7 @@ class MapMarkersRepository(private val context: Context) {
             ).toInt()
 
         val emptyPinDrawable = ContextCompat.getDrawable(context, R.drawable.ic_marker)!!
+        DrawableCompat.setTint(emptyPinDrawable, context.getPrimaryContainerColor(conf.conf.value))
         val emptyPinBitmap = emptyPinDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
 
         val markerIcon = createBitmap(emptyPinBitmap.width, emptyPinBitmap.height).applyCanvas {
@@ -59,9 +64,7 @@ class MapMarkersRepository(private val context: Context) {
             ).toRect()
 
             val iconDrawable = ContextCompat.getDrawable(context, iconResId)!!
-            val attrs = context.theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnPrimaryContainer))
-            DrawableCompat.setTintMode(iconDrawable, PorterDuff.Mode.MULTIPLY)
-            DrawableCompat.setTint(iconDrawable, attrs.getColor(0, 0))
+            DrawableCompat.setTint(iconDrawable, context.getOnPrimaryContainerColor(conf.conf.value))
 
             val iconBitmap = ContextCompat.getDrawable(context, iconResId)!!.toBitmap(
                 width = iconFrame.right - iconFrame.left,

@@ -1,6 +1,5 @@
 package conf
 
-import db.Conf
 import db.testDb
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -13,7 +12,7 @@ class ConfRepoTest {
         val db = testDb()
         val repo = ConfRepo(db)
         assertEquals(ConfRepo.DEFAULT_CONF, repo.conf.value)
-        val newConf = Conf(lastSyncDate = ZonedDateTime.now())
+        val newConf = repo.conf.value.copy(lastSyncDate = ZonedDateTime.now())
         repo.update { newConf }
         assertEquals(newConf, repo.conf.value)
     }

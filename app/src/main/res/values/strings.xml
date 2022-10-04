@@ -13,7 +13,7 @@
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="btc_map_donation_address">BTC Map donation address</string>
     <string name="donation_address_onchain" translatable="false">bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d</string>
-    <string name="donation_address_ln" translatable="false">lnurl1dp68gurn8ghj7ctsdyh85etzv4jx2efwd9hj7a3s9aex2ut4v4ehgttnw3shg6tr943ksctjvajhxtekvvckyvpnv3sj6cmx8ymz6drrxa3j6ct9vdsj6vrpvejnwwf4v56r2vpefj93d5</string>
+    <string name="donation_address_ln" translatable="false">LNURL1DP68GURN8GHJ7ERZXVUXVER9X4SNYTNY9EMX7MR5V9NK2CTSWQHXJME0D3H82UNVWQHKZURF9AMRZTMVDE6HYMP0XYA8GEF9</string>
     <string name="help_us_improve_btc_map">Help us improve BTC Map</string>
     <string name="show_my_location">Show my location</string>
     <string name="edit_place">Edit place</string>
@@ -23,4 +23,8 @@
     <string name="copy_bitcoin_address">Copy Bitcoin Address</string>
     <string name="copy_lnurl">Copy LNURL</string>
     <string name="search_here">Search here</string>
+    <string name="settings">Settings</string>
+    <string name="actions">Actions</string>
+    <string name="themed_pins">Themed pins</string>
+    <string name="dark_map">Dark map</string>
 </resources>
