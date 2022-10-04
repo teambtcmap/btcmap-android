@@ -64,12 +64,6 @@ class ElementFragment : Fragment() {
     }
 
     fun setScrollProgress(progress: Float) {
-        if (progress == 1.0f) {
-            binding.toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24)
-        } else {
-            binding.toolbar.navigationIcon = null
-        }
-
         val edit = binding.toolbar.menu.findItem(R.id.action_edit)!!
         edit.isVisible = progress == 1.0f
 
@@ -107,12 +101,17 @@ class ElementFragment : Fragment() {
         binding.address.isVisible = address.isNotBlank()
         binding.address.text = address
 
-        binding.phone.text =
-            tags["phone"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
-        binding.website.text =
-            tags["website"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
-        binding.openingHours.text =
-            tags["opening_hours"]?.jsonPrimitive?.content ?: getString(R.string.not_provided)
+        val phone  = tags["phone"]?.jsonPrimitive?.content
+        binding.phone.text = phone
+        binding.phone.isVisible = phone != null
+
+        val website  = tags["website"]?.jsonPrimitive?.content
+        binding.website.text = website
+        binding.website.isVisible = website != null
+
+        val openingHours  = tags["opening_hours"]?.jsonPrimitive?.content
+        binding.openingHours.text = openingHours
+        binding.openingHours.isVisible = openingHours != null
 
         binding.tags.text = tagsJsonFormatter.encodeToString(JsonObject.serializer(), tags)
     }
