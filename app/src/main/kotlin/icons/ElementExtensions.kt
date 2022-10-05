@@ -348,6 +348,7 @@ fun Element.iconResId(): Int? {
         tag("amenity") == "training" -> R.drawable.baseline_school_24
         // 1 element (06-06-2022)
         tag("amenity") == "flight_school" -> R.drawable.baseline_flight_takeoff_24
+        tag("amenity") == "motorcycle_rental" -> R.drawable.baseline_two_wheeler_24
 
         // 490 elements (07-06-2022)
         tag("office") == "company" -> R.drawable.baseline_business_24
@@ -441,6 +442,7 @@ fun Element.iconResId(): Int? {
         tag("leisure") == "dance" -> R.drawable.baseline_nightlife_24
         // 1 element (08-06-2022)
         tag("leisure") == "kayak_dock" -> R.drawable.baseline_kayaking_24
+        tag("leisure") == "water_park" -> R.drawable.baseline_pool_24
 
         // 45 elements (18-06-2022)
         tag("healthcare") == "dentist" -> R.drawable.baseline_medical_services_24
@@ -470,6 +472,7 @@ fun Element.iconResId(): Int? {
         tag("craft") == "blacksmith" -> R.drawable.baseline_hardware_24
         tag("craft") == "photographer" -> R.drawable.baseline_photo_camera_24
         tag("craft") == "hvac" -> R.drawable.baseline_hvac_24
+        tag("craft") == "signmaker" -> R.drawable.baseline_hardware_24
 
         tag("company") == "transport" -> R.drawable.baseline_directions_car_24
 
