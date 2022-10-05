@@ -55,7 +55,7 @@ import search.SearchResultModel
 class MapFragment : Fragment() {
 
     companion object {
-        private const val DEFAULT_MAP_ZOOM = 12f
+        private const val DEFAULT_MAP_ZOOM = 20f
     }
 
     private val model: MapModel by viewModel()
@@ -124,8 +124,8 @@ class MapFragment : Fragment() {
 
         binding.search.setOnClickListener {
             val action = MapFragmentDirections.actionMapFragmentToSearchFragment(
-                model.userLocation.value.latitude.toString(),
-                model.userLocation.value.longitude.toString(),
+                binding.map.boundingBox.centerLatitude.toString(),
+                binding.map.boundingBox.centerLongitude.toString(),
             )
 
             findNavController().navigate(action)
@@ -217,9 +217,11 @@ class MapFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            val mapController = binding.map.controller
-            mapController.setZoom(DEFAULT_MAP_ZOOM.toDouble())
-            mapController.setCenter(model.userLocation.value)
+            val userLocation = model.userLocation.value
+
+            if (userLocation != null) {
+                binding.map.controller.setCenter(model.userLocation.value)
+            }
         }
 
         searchResultModel.element.filterNotNull().onEach {
@@ -286,7 +288,7 @@ class MapFragment : Fragment() {
                     delay(10)
                 }
 
-                binding.map.zoomToBoundingBox(model.mapBoundingBox.value, false)
+                binding.map.zoomToBoundingBox(it, false)
             }
         }
 
@@ -296,9 +298,7 @@ class MapFragment : Fragment() {
                 return@onEach
             }
 
-            val mapController = binding.map.controller
-            mapController.setZoom(DEFAULT_MAP_ZOOM.toDouble())
-            mapController.setCenter(it)
+            binding.map.zoomToBoundingBox(it, false)
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         lifecycleScope.launchWhenResumed {

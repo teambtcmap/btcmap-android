@@ -39,9 +39,9 @@ class MapModel(
 
     private val mapMarkersRepo: MutableStateFlow<MapMarkersRepository?> = MutableStateFlow(null)
 
-    val userLocation: StateFlow<GeoPoint> = locationRepo.location
+    val userLocation: StateFlow<GeoPoint?> = locationRepo.location
 
-    private val _mapBoundingBox: MutableStateFlow<BoundingBox?> = MutableStateFlow(null)
+    private val _mapBoundingBox: MutableStateFlow<BoundingBox?> = MutableStateFlow(UserLocationRepository.DEFAULT_BOUNDING_BOX)
     val mapBoundingBox = _mapBoundingBox.asStateFlow()
 
     private val _selectedElement: MutableStateFlow<Element?> = MutableStateFlow(null)
@@ -50,7 +50,7 @@ class MapModel(
     private val _visibleElements = MutableStateFlow<List<ElementWithMarker>>(emptyList())
     val visibleElements = _visibleElements.asStateFlow()
 
-    private val _moveToLocation: MutableStateFlow<GeoPoint> = MutableStateFlow(UserLocationRepository.DEFAULT_LOCATION)
+    private val _moveToLocation: MutableStateFlow<BoundingBox> = MutableStateFlow(UserLocationRepository.DEFAULT_BOUNDING_BOX)
     val moveToLocation = _moveToLocation.asStateFlow()
 
     private val _syncMessage: MutableStateFlow<String> = MutableStateFlow("")
@@ -81,9 +81,9 @@ class MapModel(
         locationRepo.requestLocationUpdates()
 
         viewModelScope.launch {
-            val firstNonDefaultLocation =
-                locationRepo.location.first { it != UserLocationRepository.DEFAULT_LOCATION }
-            _moveToLocation.update { firstNonDefaultLocation }
+            val firstNotNullLocation =
+                locationRepo.location.first { it != null }
+            _mapBoundingBox.update { firstNotNullLocation!!.toBoundingBox(1000.0) }
         }
     }
 
@@ -97,9 +97,9 @@ class MapModel(
         var found = false
 
         locationRepo.location.onEach { location ->
-            if (!found && location != UserLocationRepository.DEFAULT_LOCATION) {
+            if (!found && location != null) {
                 found = true
-                _moveToLocation.update { location }
+                _moveToLocation.update { location.toBoundingBox(1000.0) }
             }
         }.launchIn(viewModelScope)
     }
@@ -112,7 +112,7 @@ class MapModel(
         _selectedElement.update { element }
 
         if (element != null && moveToLocation) {
-            _moveToLocation.update { GeoPoint(element.lat, element.lon) }
+            _mapBoundingBox.update { GeoPoint(element.lat, element.lon).toBoundingBox(100.0) }
         }
     }
 
@@ -143,5 +143,11 @@ class MapModel(
                 _syncMessage.update { "" }
             }
         }
+    }
+
+    private fun GeoPoint.toBoundingBox(distance: Double): BoundingBox {
+        val point1 = destinationPoint(distance, 45.0)
+        val point2 = destinationPoint(distance, -135.0)
+        return BoundingBox.fromGeoPoints(listOf(point1, point2))
     }
 }

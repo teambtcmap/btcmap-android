@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.Single
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 
 @Single
@@ -22,15 +23,17 @@ class UserLocationRepository(
     companion object {
         const val TAG = "location"
 
-        val DEFAULT_LOCATION = GeoPoint(
-            43.741667,
-            -79.373333,
+        val DEFAULT_BOUNDING_BOX: BoundingBox = BoundingBox.fromGeoPointsSafe(
+            listOf(
+                GeoPoint(11.9674565, 121.9249217).destinationPoint(4200.0, 45.0),
+                GeoPoint(11.9674565, 121.9249217).destinationPoint(3500.0, -135.0),
+            )
         )
     }
 
     private var requestedLocationUpdates = false
 
-    private val _location = MutableStateFlow(DEFAULT_LOCATION)
+    private val _location: MutableStateFlow<GeoPoint?> = MutableStateFlow(null)
     val location = _location.asStateFlow()
 
     private val listener: LocationListener = LocationListener { onNewLocation(it) }
@@ -58,22 +61,34 @@ class UserLocationRepository(
         if (providers.contains(LocationManager.PASSIVE_PROVIDER)) {
             Log.d(TAG, "Passive provider found, requesting last known location")
 
-            val lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
+            val lastKnownLocation =
+                locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
             Log.d(TAG, "Last known location: $lastKnownLocation")
 
             if (lastKnownLocation != null) {
-                _location.update { GeoPoint(lastKnownLocation.latitude, lastKnownLocation.longitude) }
+                _location.update {
+                    GeoPoint(
+                        lastKnownLocation.latitude,
+                        lastKnownLocation.longitude
+                    )
+                }
             }
         }
 
         if (providers.contains(LocationManager.GPS_PROVIDER)) {
             Log.d(TAG, "GPS provider found, requesting last known location")
 
-            val lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            val lastKnownLocation =
+                locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
             Log.d(TAG, "Last known location: $lastKnownLocation")
 
             if (lastKnownLocation != null) {
-                _location.update { GeoPoint(lastKnownLocation.latitude, lastKnownLocation.longitude) }
+                _location.update {
+                    GeoPoint(
+                        lastKnownLocation.latitude,
+                        lastKnownLocation.longitude
+                    )
+                }
             }
         }
 
