@@ -54,10 +54,6 @@ import search.SearchResultModel
 
 class MapFragment : Fragment() {
 
-    companion object {
-        private const val DEFAULT_MAP_ZOOM = 20f
-    }
-
     private val model: MapModel by viewModel()
 
     private val searchResultModel: SearchResultModel by sharedViewModel()
@@ -82,6 +78,12 @@ class MapFragment : Fragment() {
     ) {
         if (it.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
             model.onLocationPermissionGranted()
+
+            val userLocation = model.userLocation.value
+
+            if (userLocation != null) {
+                binding.map.controller.setCenter(model.userLocation.value)
+            }
         }
     }
 
@@ -171,7 +173,6 @@ class MapFragment : Fragment() {
             setMultiTouchControls(true)
             addLocationOverlay()
             addCancelSelectionOverlay()
-            addViewportListener()
         }
 
         model.invalidateMarkersCache()
@@ -226,7 +227,7 @@ class MapFragment : Fragment() {
 
         searchResultModel.element.filterNotNull().onEach {
             val mapController = binding.map.controller
-            mapController.setZoom(DEFAULT_MAP_ZOOM.toDouble())
+            mapController.setZoom(16.toDouble())
             val startPoint = GeoPoint(it.lat, it.lon)
             mapController.setCenter(startPoint)
             model.selectElement(it, true)
@@ -278,29 +279,6 @@ class MapFragment : Fragment() {
             }
         }
 
-        var ignoreNextLocation = false
-
-        model.mapBoundingBox.value?.let {
-            ignoreNextLocation = true
-
-            viewLifecycleOwner.lifecycleScope.launch {
-                while (binding.map.getIntrinsicScreenRect(null).height() == 0) {
-                    delay(10)
-                }
-
-                binding.map.zoomToBoundingBox(it, false)
-            }
-        }
-
-        model.moveToLocation.onEach {
-            if (ignoreNextLocation) {
-                ignoreNextLocation = false
-                return@onEach
-            }
-
-            binding.map.zoomToBoundingBox(it, false)
-        }.launchIn(viewLifecycleOwner.lifecycleScope)
-
         lifecycleScope.launchWhenResumed {
             val toast = Toast.makeText(
                 requireContext(),
@@ -347,6 +325,18 @@ class MapFragment : Fragment() {
             requireActivity().window,
             requireActivity().window.decorView,
         ).isAppearanceLightStatusBars = !darkMap
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                while (binding.map.getIntrinsicScreenRect(null).height() == 0) {
+                    delay(10)
+                }
+
+                val firstBoundingBox = model.mapBoundingBox.firstOrNull()
+                binding.map.zoomToBoundingBox(firstBoundingBox, false)
+                binding.map.addViewportListener()
+            }
+        }
 
 //        viewLifecycleOwner.lifecycleScope.launch {
 //            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {

@@ -45,6 +45,10 @@ class ConfRepo(
             lastSyncDate = null,
             themedPins = true,
             darkMap = false,
+            viewport_north_lat = 11.994133785187255,
+            viewport_east_lon = 121.95219572432649,
+            viewport_south_lat = 11.945223417353624,
+            viewport_west_lon = 121.90219745907318,
         )
     }
 }

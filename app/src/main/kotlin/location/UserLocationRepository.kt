@@ -12,25 +12,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.Single
-import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 
 @Single
 class UserLocationRepository(
     private val context: Context,
 ) {
-
-    companion object {
-        const val TAG = "location"
-
-        val DEFAULT_BOUNDING_BOX: BoundingBox = BoundingBox.fromGeoPointsSafe(
-            listOf(
-                GeoPoint(11.9674565, 121.9249217).destinationPoint(4200.0, 45.0),
-                GeoPoint(11.9674565, 121.9249217).destinationPoint(3500.0, -135.0),
-            )
-        )
-    }
-
     private var requestedLocationUpdates = false
 
     private val _location: MutableStateFlow<GeoPoint?> = MutableStateFlow(null)
@@ -116,5 +103,9 @@ class UserLocationRepository(
     private fun onNewLocation(location: Location) {
         Log.d(TAG, "Got new location: ${location.latitude},${location.longitude}")
         _location.update { GeoPoint(location.latitude, location.longitude) }
+    }
+
+    companion object {
+        const val TAG = "location"
     }
 }

@@ -4,12 +4,16 @@ import java.time.ZonedDateTime;
 CREATE TABLE Conf (
     lastSyncDate TEXT AS ZonedDateTime,
     themedPins INTEGER AS Boolean NOT NULL,
-    darkMap INTEGER AS Boolean NOT NULL
+    darkMap INTEGER AS Boolean NOT NULL,
+    viewport_north_lat REAL NOT NULL,
+    viewport_east_lon REAL NOT NULL,
+    viewport_south_lat REAL NOT NULL,
+    viewport_west_lon REAL NOT NULL
 );
 
 insert:
 INSERT
-INTO Conf (lastSyncDate, themedPins, darkMap)
+INTO Conf (lastSyncDate, themedPins, darkMap, viewport_north_lat, viewport_east_lon, viewport_south_lat, viewport_west_lon)
 VALUES ?;
 
 select:

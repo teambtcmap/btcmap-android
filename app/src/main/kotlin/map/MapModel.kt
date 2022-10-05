@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -41,7 +40,15 @@ class MapModel(
 
     val userLocation: StateFlow<GeoPoint?> = locationRepo.location
 
-    private val _mapBoundingBox: MutableStateFlow<BoundingBox?> = MutableStateFlow(UserLocationRepository.DEFAULT_BOUNDING_BOX)
+    private val _mapBoundingBox: MutableStateFlow<BoundingBox> = MutableStateFlow(
+        BoundingBox(
+            conf.conf.value.viewport_north_lat,
+            conf.conf.value.viewport_east_lon,
+            conf.conf.value.viewport_south_lat,
+            conf.conf.value.viewport_west_lon,
+        )
+    )
+
     val mapBoundingBox = _mapBoundingBox.asStateFlow()
 
     private val _selectedElement: MutableStateFlow<Element?> = MutableStateFlow(null)
@@ -50,16 +57,17 @@ class MapModel(
     private val _visibleElements = MutableStateFlow<List<ElementWithMarker>>(emptyList())
     val visibleElements = _visibleElements.asStateFlow()
 
-    private val _moveToLocation: MutableStateFlow<BoundingBox> = MutableStateFlow(UserLocationRepository.DEFAULT_BOUNDING_BOX)
-    val moveToLocation = _moveToLocation.asStateFlow()
-
     private val _syncMessage: MutableStateFlow<String> = MutableStateFlow("")
     val syncMessage = _syncMessage.asStateFlow()
 
     init {
-        combine(_mapBoundingBox, db.elementQueries.selectCount().asFlow().mapToOne(), mapMarkersRepo) { viewport, _, mapMarkersRepo ->
+        combine(
+            _mapBoundingBox,
+            db.elementQueries.selectCount().asFlow().mapToOne(),
+            mapMarkersRepo
+        ) { viewport, _, mapMarkersRepo ->
             withContext(Dispatchers.Default) {
-                if (viewport == null || mapMarkersRepo == null) {
+                if (mapMarkersRepo == null) {
                     return@withContext
                 }
 
@@ -79,12 +87,6 @@ class MapModel(
         }.launchIn(viewModelScope)
 
         locationRepo.requestLocationUpdates()
-
-        viewModelScope.launch {
-            val firstNotNullLocation =
-                locationRepo.location.first { it != null }
-            _mapBoundingBox.update { firstNotNullLocation!!.toBoundingBox(1000.0) }
-        }
     }
 
     fun setArgs(context: Context) {
@@ -93,19 +95,19 @@ class MapModel(
 
     fun onLocationPermissionGranted() {
         locationRepo.requestLocationUpdates()
-
-        var found = false
-
-        locationRepo.location.onEach { location ->
-            if (!found && location != null) {
-                found = true
-                _moveToLocation.update { location.toBoundingBox(1000.0) }
-            }
-        }.launchIn(viewModelScope)
     }
 
     fun setMapViewport(viewport: BoundingBox) {
         _mapBoundingBox.update { viewport }
+
+        conf.update {
+            it.copy(
+                viewport_north_lat = viewport.latNorth,
+                viewport_east_lon = viewport.lonEast,
+                viewport_south_lat = viewport.latSouth,
+                viewport_west_lon = viewport.lonWest,
+            )
+        }
     }
 
     fun selectElement(element: Element?, moveToLocation: Boolean) {
