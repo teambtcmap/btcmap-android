@@ -33,4 +33,5 @@
     <string name="you_dont_have_a_compatible_wallet">You don\'t have a compatible wallet</string>
     <string name="communities">Communities</string>
     <string name="latest_changes">Latest changes</string>
+    <string name="legacy_places">Legacy places</string>
 </resources>
