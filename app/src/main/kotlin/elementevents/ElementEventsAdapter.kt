@@ -69,7 +69,7 @@ class ElementEventsAdapter(
 
                     tip.setOnClickListener {
                         val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse("lightning:${item.lnurl}")
+                        intent.data = Uri.parse(item.lnurl)
                         runCatching {
                             root.context.startActivity(intent)
                         }.onFailure {

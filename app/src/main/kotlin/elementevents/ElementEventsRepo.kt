@@ -6,6 +6,7 @@ import kotlinx.serialization.json.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.koin.core.annotation.Single
+import java.util.regex.Pattern
 
 @Single
 class ElementEventsRepo {
@@ -26,8 +27,15 @@ class ElementEventsRepo {
                 ""
             }
 
-            val lnurl =
-                userDescription.split(" ").firstOrNull { it.lowercase().startsWith("lnurl") } ?: ""
+            var lnurl = ""
+
+            val pattern = Pattern.compile("\\(lightning:[^)]*\\)", Pattern.CASE_INSENSITIVE)
+            val matcher = pattern.matcher(userDescription)
+            val matchFound: Boolean = matcher.find()
+
+            if (matchFound) {
+                lnurl = matcher.group().trim('(', ')')
+            }
 
             ElementEvent(
                 date = event.jsonObject["date"]!!.jsonPrimitive.content,
