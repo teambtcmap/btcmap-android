@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">BTC Map</string>
     <string name="add_place">Add place</string>
     <string name="search">Search</string>
@@ -34,4 +34,5 @@
     <string name="communities">Communities</string>
     <string name="latest_changes">Latest changes</string>
     <string name="legacy_places">Legacy places</string>
+    <string name="tip" tools:ignore="ExtraTranslation">⚡ Tip</string>
 </resources>

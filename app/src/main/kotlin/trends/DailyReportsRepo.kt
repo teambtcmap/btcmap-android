@@ -17,9 +17,10 @@ class DailyReportsRepo {
         val url = "https://api.btcmap.org/daily_reports"
         val request = OkHttpClient().newCall(Request.Builder().url(url).build())
         val response = runCatching { request.await() }.getOrNull() ?: return emptyList()
+        val json = Json { ignoreUnknownKeys = true }
 
         val reports = runCatching {
-            Json
+            json
                 .decodeFromStream(
                     ListSerializer(DailyReport.serializer()),
                     response.body!!.byteStream(),

@@ -15,16 +15,29 @@ class ElementEventsRepo {
         val request = OkHttpClient().newCall(Request.Builder().url(url).build())
         val response = runCatching { request.await() }.getOrNull()
             ?: return emptyList()
-        val areas: JsonArray = Json.decodeFromString(response.body!!.string())
-        return areas.map {
+        val events: JsonArray = Json.decodeFromString(response.body!!.string())
+        return events.map { event ->
+            val user2 = event.jsonObject["user_v2"]!!
+
+            val userDescription = if (user2 is JsonObject) {
+                user2.jsonObject["data"]?.jsonObject?.get("description")?.jsonPrimitive?.content
+                    ?: ""
+            } else {
+                ""
+            }
+
+            val lnurl =
+                userDescription.split(" ").firstOrNull { it.lowercase().startsWith("lnurl") } ?: ""
+
             ElementEvent(
-                date = it.jsonObject["date"]!!.jsonPrimitive.content,
-                elementId = it.jsonObject["element_id"]!!.jsonPrimitive.content,
-                elementLat = it.jsonObject["element_lat"]!!.jsonPrimitive.double,
-                elementLon = it.jsonObject["element_lon"]!!.jsonPrimitive.double,
-                elementName = it.jsonObject["element_name"]!!.jsonPrimitive.content,
-                eventType = it.jsonObject["event_type"]!!.jsonPrimitive.content,
-                user = it.jsonObject["user"]!!.jsonPrimitive.content,
+                date = event.jsonObject["date"]!!.jsonPrimitive.content,
+                elementId = event.jsonObject["element_id"]!!.jsonPrimitive.content,
+                elementLat = event.jsonObject["element_lat"]!!.jsonPrimitive.double,
+                elementLon = event.jsonObject["element_lon"]!!.jsonPrimitive.double,
+                elementName = event.jsonObject["element_name"]!!.jsonPrimitive.content,
+                eventType = event.jsonObject["event_type"]!!.jsonPrimitive.content,
+                user = event.jsonObject["user"]!!.jsonPrimitive.content,
+                lnurl = lnurl
             )
         }
     }

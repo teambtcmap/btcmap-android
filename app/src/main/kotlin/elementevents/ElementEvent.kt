@@ -8,4 +8,5 @@ data class ElementEvent(
     val elementName: String,
     val eventType: String,
     val user: String,
+    val lnurl: String,
 )

@@ -1,9 +1,13 @@
 package elementevents
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -59,6 +63,27 @@ class ElementEventsAdapter(
                 }
 
                 subtitle.text = subtitleText
+
+                if (item.lnurl.isNotBlank()) {
+                    tip.isVisible = true
+
+                    tip.setOnClickListener {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.data = Uri.parse("lightning:${item.lnurl}")
+                        runCatching {
+                            root.context.startActivity(intent)
+                        }.onFailure {
+                            Toast.makeText(
+                                root.context,
+                                R.string.you_dont_have_a_compatible_wallet,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                } else {
+                    tip.isVisible = false
+                }
+
                 root.setOnClickListener { onItemClick(item) }
             }
         }
