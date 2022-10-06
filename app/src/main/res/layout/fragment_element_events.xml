@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="?attr/homeAsUpIndicator"
-        app:title="@string/latest_supertaggers" />
+        app:title="@string/latest_changes" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"

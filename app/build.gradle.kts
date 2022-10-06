@@ -98,7 +98,7 @@ android {
         }
 
         create("googlePlayRelease") {
-            applicationIdSuffix = ".android"
+            applicationIdSuffix = ".app"
 
             // Enables code shrinking, obfuscation, and optimization
             isMinifyEnabled = true

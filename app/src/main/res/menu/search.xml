@@ -19,7 +19,7 @@
 
     <item
         android:id="@+id/action_element_events"
-        android:title="@string/latest_supertaggers"
+        android:title="@string/latest_changes"
         app:showAsAction="never" />
 
     <item
