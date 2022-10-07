@@ -35,4 +35,5 @@
     <string name="latest_changes">Latest changes</string>
     <string name="legacy_places">Legacy places</string>
     <string name="tip" tools:ignore="ExtraTranslation">⚡ Tip</string>
+    <string name="osm_copyright">© OpenStreetMap contributors</string>
 </resources>
