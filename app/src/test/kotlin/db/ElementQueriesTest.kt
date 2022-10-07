@@ -45,8 +45,26 @@ class ElementQueriesTest {
     @Test
     fun selectBySearchString() {
         testDb().elementQueries.apply {
-            val row1 = testElement().copy(osm_data = JsonObject(mapOf(Pair("amenity", JsonPrimitive("cafe")))))
-            val row2 = testElement().copy(osm_data = JsonObject(mapOf(Pair("amenity", JsonPrimitive("bar")))))
+            val row1 = testElement().copy(
+                osm_json = JsonObject(
+                    mapOf(
+                        Pair(
+                            "amenity",
+                            JsonPrimitive("cafe")
+                        )
+                    )
+                ).toString()
+            )
+            val row2 = testElement().copy(
+                osm_json = JsonObject(
+                    mapOf(
+                        Pair(
+                            "amenity",
+                            JsonPrimitive("bar")
+                        )
+                    )
+                ).toString()
+            )
             insertOrReplace(row1)
             insertOrReplace(row2)
 
@@ -82,9 +100,11 @@ class ElementQueriesTest {
             id = "${arrayOf("node", "way", "relation").random()}:${Random.nextLong()}",
             lat = Random.nextDouble(-90.0, 90.0),
             lon = Random.nextDouble(-180.0, 180.0),
-            osm_data = JsonObject(emptyMap()),
-            created_at = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
-            updated_at = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
+            osm_json = "{}",
+            created_at = ZonedDateTime.now(ZoneOffset.UTC)
+                .minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
+            updated_at = ZonedDateTime.now(ZoneOffset.UTC)
+                .minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
             deleted_at = "",
         )
     }
