@@ -5,6 +5,7 @@ import android.util.Log
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import conf.ConfRepo
+import dailyreports.DailyReportsRepo
 import db.Database
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -26,6 +27,7 @@ class Sync(
     private val confRepo: ConfRepo,
     private val db: Database,
     private val context: Context,
+    private val dailyReportsRepo: DailyReportsRepo,
 ) {
 
     suspend fun sync() {
@@ -71,6 +73,10 @@ class Sync(
             Log.d(TAG, "Finished sync")
         } else {
             Log.w(TAG, "Failed to sync with $url")
+        }
+
+        runCatching {
+            dailyReportsRepo.sync()
         }
     }
 

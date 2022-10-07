@@ -14,10 +14,9 @@
         app:title="@string/trends" />
 
     <ScrollView
-        android:id="@+id/settings"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:paddingBottom="40dp"
+        android:scrollbars="none"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
 
@@ -128,6 +127,10 @@
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="40dp" />
 
         </LinearLayout>
 

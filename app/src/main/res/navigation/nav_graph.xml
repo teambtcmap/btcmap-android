@@ -7,8 +7,7 @@
 
     <fragment
         android:id="@+id/mapFragment"
-        android:name="map.MapFragment"
-        android:label="MapFragment">
+        android:name="map.MapFragment">
         <action
             android:id="@+id/action_mapFragment_to_searchFragment"
             app:destination="@id/searchFragment"
@@ -55,8 +54,7 @@
 
     <fragment
         android:id="@+id/searchFragment"
-        android:name="search.SearchFragment"
-        android:label="SearchFragment">
+        android:name="search.SearchFragment">
         <argument
             android:name="lat"
             app:argType="string"
@@ -69,27 +67,22 @@
 
     <fragment
         android:id="@+id/donationFragment"
-        android:name="donation.DonationFragment"
-        android:label="DonationFragment" />
+        android:name="donation.DonationFragment" />
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="settings.SettingsFragment"
-        android:label="SettingsFragment" />
+        android:name="settings.SettingsFragment" />
 
     <fragment
         android:id="@+id/trendsFragment"
-        android:name="trends.TrendsFragment"
-        android:label="TrendsFragment" />
+        android:name="dailyreports.DailyReportsFragment" />
 
     <fragment
         android:id="@+id/areasFragment"
-        android:name="areas.AreasFragment"
-        android:label="AreasFragment" />
+        android:name="areas.AreasFragment" />
 
     <fragment
         android:id="@+id/elementEventsFragment"
-        android:name="elementevents.ElementEventsFragment"
-        android:label="ElementEventsFragment" />
+        android:name="elementevents.ElementEventsFragment" />
 
 </navigation>

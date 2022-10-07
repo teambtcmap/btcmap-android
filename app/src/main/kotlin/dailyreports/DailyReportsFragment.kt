@@ -1,4 +1,4 @@
-package trends
+package dailyreports
 
 import android.content.res.Configuration
 import android.graphics.Color
@@ -23,14 +23,17 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import kotlinx.coroutines.launch
 import map.getOnSurfaceColor
-import org.btcmap.databinding.FragmentTrendsBinding
+import org.btcmap.databinding.FragmentDailyReportsBinding
+import org.koin.android.ext.android.inject
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
-class TrendsFragment : Fragment() {
+class DailyReportsFragment : Fragment() {
 
-    private var _binding: FragmentTrendsBinding? = null
+    private val repo: DailyReportsRepo by inject()
+
+    private var _binding: FragmentDailyReportsBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -38,7 +41,7 @@ class TrendsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentTrendsBinding.inflate(inflater, container, false)
+        _binding = FragmentDailyReportsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -71,7 +74,7 @@ class TrendsFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                val reports = DailyReportsRepo().getDailyReports()
+                val reports = repo.getDailyReports()
 
                 if (reports.isEmpty()) {
                     return@repeatOnLifecycle
