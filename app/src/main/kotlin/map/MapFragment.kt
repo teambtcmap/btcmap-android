@@ -115,6 +115,10 @@ class MapFragment : Fragment() {
 
             bottomSheetBehavior.expandedOffset = insets.top
 
+            val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            binding.osmAttribution.translationY = -navBarsInsets.bottom.toFloat()
+            binding.fab.translationY = -navBarsInsets.bottom.toFloat()
+
             WindowInsetsCompat.CONSUMED
         }
 
