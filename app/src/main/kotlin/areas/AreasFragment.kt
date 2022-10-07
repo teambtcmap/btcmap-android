@@ -36,6 +36,8 @@ class AreasFragment : Fragment() {
             toolbar.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 topMargin = insets.top
             }
+            val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            binding.list.setPadding(0, 0, 0, navBarsInsets.bottom)
             WindowInsetsCompat.CONSUMED
         }
 
@@ -58,7 +60,7 @@ class AreasFragment : Fragment() {
                 binding.list.layoutManager = LinearLayoutManager(requireContext())
                 val adapter = AreasAdapter {}
                 binding.list.adapter = adapter
-                adapter.submitList(AreasRepo().getAreas())
+                adapter.submitList(AreasRepo().getAreas().filter { it.area_type != "country" })
             }
         }
     }

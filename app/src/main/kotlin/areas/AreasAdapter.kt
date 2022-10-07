@@ -39,7 +39,7 @@ class AreasAdapter(
                 title.text = item.name
                 val formatter = NumberFormat.getPercentInstance()
                 val upToDatePercent =
-                    formatter.format(item.upToDateElements.toDouble() / item.elements.toDouble())
+                    formatter.format(item.up_to_date_elements.toDouble() / item.elements.toDouble())
                 subtitle.text = "${item.elements} places ($upToDatePercent up-to-date)"
                 root.setOnClickListener { onItemClick(item) }
             }

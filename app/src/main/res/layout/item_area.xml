@@ -14,7 +14,7 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_gravity="center"
-        android:layout_margin="20dp"
+        android:layout_margin="18dp"
         android:contentDescription="@string/icon"
         android:src="@drawable/ic_place"
         app:tint="?attr/colorOnSurfaceVariant" />
