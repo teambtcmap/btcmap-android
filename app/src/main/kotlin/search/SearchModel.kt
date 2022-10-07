@@ -10,6 +10,7 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.Database
 import db.Element
+import element.tags
 import icons.iconResId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,9 +18,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 import org.btcmap.R
 import org.koin.android.annotation.KoinViewModel
 import org.osmdroid.util.GeoPoint
@@ -57,7 +56,9 @@ class SearchModel(
                 var elements: List<Element>
 
                 val queryTimeMillis = measureTimeMillis {
-                    elements = db.elementQueries.selectBySearchString(searchString).asFlow().mapToList().first()
+                    elements =
+                        db.elementQueries.selectBySearchString(searchString).asFlow().mapToList()
+                            .first()
                 }
 
                 Log.d(TAG, "Search string: $searchString")
@@ -108,7 +109,7 @@ class SearchModel(
         return SearchAdapter.Item(
             element = this,
             icon = AppCompatResources.getDrawable(app, iconResId() ?: R.drawable.ic_place)!!,
-            name = osm_data["tags"]!!.jsonObject["name"]?.jsonPrimitive?.contentOrNull ?: "Unnamed",
+            name = tags()["name"]?.jsonPrimitive?.contentOrNull ?: "Unnamed",
             distanceToUser = distanceStringBuilder.toString(),
         )
     }

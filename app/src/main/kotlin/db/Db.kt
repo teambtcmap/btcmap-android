@@ -22,8 +22,7 @@ fun database(context: Context): Database {
 fun database(driver: SqlDriver): Database {
     return Database(
         driver = driver,
-        ConfAdapter = confAdapter(),
-        ElementAdapter = elementAdapter(),
+        confAdapter = confAdapter(),
     )
 }
 
@@ -32,17 +31,6 @@ private fun confAdapter(): Conf.Adapter {
         lastSyncDateAdapter = object : ColumnAdapter<ZonedDateTime, String> {
             override fun decode(databaseValue: String) = ZonedDateTime.parse(databaseValue)
             override fun encode(value: ZonedDateTime) = value.toString()
-        },
-    )
-}
-
-private fun elementAdapter(): Element.Adapter {
-    return Element.Adapter(
-        osm_dataAdapter = object : ColumnAdapter<JsonObject, String> {
-            override fun decode(databaseValue: String) =
-                Json.parseToJsonElement(databaseValue).jsonObject
-
-            override fun encode(value: JsonObject) = value.toString()
         },
     )
 }

@@ -45,22 +45,26 @@ class DailyReportsRepo(
                 .toMutableList()
         }.getOrNull() ?: return
 
-        reports.forEach {
-            db.daily_reportQueries.insertOrReplace(
-                Daily_report(
-                    date = it.date,
-                    total_elements = it.total_elements,
-                    total_elements_onchain = it.total_elements_onchain,
-                    total_elements_lightning = it.total_elements_lightning,
-                    total_elements_lightning_contactless = it.total_elements_lightning_contactless,
-                    up_to_date_elements = it.up_to_date_elements,
-                    outdated_elements = it.outdated_elements,
-                    legacy_elements = it.legacy_elements,
-                    elements_created = it.elements_created,
-                    elements_updated = it.elements_updated,
-                    elements_deleted = it.elements_deleted,
+        db.transaction {
+            db.daily_reportQueries.deleteAll()
+
+            reports.forEach {
+                db.daily_reportQueries.insertOrReplace(
+                    Daily_report(
+                        date = it.date,
+                        total_elements = it.total_elements,
+                        total_elements_onchain = it.total_elements_onchain,
+                        total_elements_lightning = it.total_elements_lightning,
+                        total_elements_lightning_contactless = it.total_elements_lightning_contactless,
+                        up_to_date_elements = it.up_to_date_elements,
+                        outdated_elements = it.outdated_elements,
+                        legacy_elements = it.legacy_elements,
+                        elements_created = it.elements_created,
+                        elements_updated = it.elements_updated,
+                        elements_deleted = it.elements_deleted,
+                    )
                 )
-            )
+            }
         }
     }
 

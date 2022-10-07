@@ -1,7 +1,7 @@
 import java.lang.Boolean;
 import java.time.ZonedDateTime;
 
-CREATE TABLE Conf (
+CREATE TABLE conf (
     lastSyncDate TEXT AS ZonedDateTime,
     themedPins INTEGER AS Boolean NOT NULL,
     darkMap INTEGER AS Boolean NOT NULL,
@@ -13,13 +13,13 @@ CREATE TABLE Conf (
 
 insert:
 INSERT
-INTO Conf (lastSyncDate, themedPins, darkMap, viewport_north_lat, viewport_east_lon, viewport_south_lat, viewport_west_lon)
+INTO conf (lastSyncDate, themedPins, darkMap, viewport_north_lat, viewport_east_lon, viewport_south_lat, viewport_west_lon)
 VALUES ?;
 
 select:
 SELECT *
-FROM Conf;
+FROM conf;
 
 delete:
 DELETE
-FROM Conf;
+FROM conf;

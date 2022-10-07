@@ -9,10 +9,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import db.Element
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
 
@@ -74,7 +71,7 @@ class ElementFragment : Fragment() {
     }
 
     fun setElement(element: Element) {
-        val tags = element.osm_data["tags"]!!.jsonObject
+        val tags = element.tags()
         binding.toolbar.title = tags["name"]?.jsonPrimitive?.content ?: "Unnamed"
 
         val address = buildString {
@@ -101,15 +98,15 @@ class ElementFragment : Fragment() {
         binding.address.isVisible = address.isNotBlank()
         binding.address.text = address
 
-        val phone  = tags["phone"]?.jsonPrimitive?.content
+        val phone = tags["phone"]?.jsonPrimitive?.content
         binding.phone.text = phone
         binding.phone.isVisible = phone != null
 
-        val website  = tags["website"]?.jsonPrimitive?.content
+        val website = tags["website"]?.jsonPrimitive?.content
         binding.website.text = website
         binding.website.isVisible = website != null
 
-        val openingHours  = tags["opening_hours"]?.jsonPrimitive?.content
+        val openingHours = tags["opening_hours"]?.jsonPrimitive?.content
         binding.openingHours.text = openingHours
         binding.openingHours.isVisible = openingHours != null
 

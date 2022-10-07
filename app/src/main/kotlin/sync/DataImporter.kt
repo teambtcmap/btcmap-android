@@ -27,13 +27,13 @@ class DataImporter(
                     val lat: Double
                     val lon: Double
 
-                    val osmData = element.jsonObject["data"]!!.jsonObject
+                    val osmJson = element.jsonObject["data"]!!.jsonObject
 
-                    if (osmData["type"]!!.jsonPrimitive.content == "node") {
-                        lat = osmData["lat"]!!.jsonPrimitive.double
-                        lon = osmData["lon"]!!.jsonPrimitive.double
+                    if (osmJson["type"]!!.jsonPrimitive.content == "node") {
+                        lat = osmJson["lat"]!!.jsonPrimitive.double
+                        lon = osmJson["lon"]!!.jsonPrimitive.double
                     } else {
-                        val bounds = osmData["bounds"]!!.jsonObject
+                        val bounds = osmJson["bounds"]!!.jsonObject
 
                         val boundsMinLat = bounds["minlat"]!!.jsonPrimitive.double
                         val boundsMinLon = bounds["minlon"]!!.jsonPrimitive.double
@@ -49,10 +49,11 @@ class DataImporter(
                             id = element.jsonObject["id"]!!.jsonPrimitive.content,
                             lat = lat,
                             lon = lon,
-                            osm_data = osmData,
+                            osm_json = osmJson.toString(),
                             created_at = element.jsonObject["created_at"]!!.jsonPrimitive.content,
                             updated_at = element.jsonObject["updated_at"]!!.jsonPrimitive.content,
-                            deleted_at = element.jsonObject["deleted_at"]!!.jsonPrimitive.contentOrNull ?: "",
+                            deleted_at = element.jsonObject["deleted_at"]!!.jsonPrimitive.contentOrNull
+                                ?: "",
                         )
                     )
                 }

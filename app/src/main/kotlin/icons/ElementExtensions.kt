@@ -2,15 +2,14 @@ package icons
 
 import androidx.annotation.DrawableRes
 import db.Element
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import element.tags
+import kotlinx.serialization.json.*
 import org.btcmap.R
 
 @DrawableRes
 fun Element.iconResId(): Int? {
     val tag = fun(tag: String): String? {
-        return osm_data["tags"]!!.jsonObject[tag]?.jsonPrimitive?.contentOrNull
+        return tags()[tag]?.jsonPrimitive?.contentOrNull
     }
 
     return when {

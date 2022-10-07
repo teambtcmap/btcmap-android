@@ -25,3 +25,7 @@ ORDER BY date;
 selectCount:
 SELECT count(*)
 FROM daily_report;
+
+deleteAll:
+DELETE
+FROM daily_report;
