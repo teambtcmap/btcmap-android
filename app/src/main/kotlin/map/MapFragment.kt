@@ -237,6 +237,9 @@ class MapFragment : Fragment() {
             mapController.setZoom(16.toDouble())
             val startPoint = GeoPoint(it.lat, it.lon)
             mapController.setCenter(startPoint)
+            binding.map.post {
+                mapController.zoomTo(19.0)
+            }
             model.selectElement(it, true)
             searchResultModel.element.update { null }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
@@ -442,11 +445,14 @@ class MapFragment : Fragment() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                     model.selectElement(null, false)
+                    binding.fab.show()
+                    binding.fab.isVisible = true
+                } else {
+                    binding.fab.isVisible = false
                 }
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                binding.fab.isVisible = slideOffset < 0.5f
                 (childFragmentManager.findFragmentById(R.id.elementFragment) as ElementFragment).setScrollProgress(
                     slideOffset
                 )

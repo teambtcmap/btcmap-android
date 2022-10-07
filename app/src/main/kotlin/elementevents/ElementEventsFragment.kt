@@ -13,10 +13,18 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import db.Database
 import kotlinx.coroutines.launch
 import org.btcmap.databinding.FragmentElementEventsBinding
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import search.SearchResultModel
 
 class ElementEventsFragment : Fragment() {
+
+    private val db: Database by inject()
+
+    private val resultModel: SearchResultModel by sharedViewModel()
 
     private var _binding: FragmentElementEventsBinding? = null
     private val binding get() = _binding!!
@@ -36,6 +44,8 @@ class ElementEventsFragment : Fragment() {
             toolbar.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 topMargin = insets.top
             }
+            val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            binding.list.setPadding(0, 0, 0, navBarsInsets.bottom)
             WindowInsetsCompat.CONSUMED
         }
 
@@ -56,7 +66,11 @@ class ElementEventsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.list.layoutManager = LinearLayoutManager(requireContext())
-                val adapter = ElementEventsAdapter {}
+                val adapter = ElementEventsAdapter {
+                    resultModel.element.value =
+                        db.elementQueries.selectById(it.elementId).executeAsOneOrNull()
+                    findNavController().popBackStack()
+                }
                 binding.list.adapter = adapter
                 adapter.submitList(ElementEventsRepo().getElementEvents())
             }

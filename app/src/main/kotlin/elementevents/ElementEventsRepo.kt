@@ -47,6 +47,6 @@ class ElementEventsRepo {
                 user = event.jsonObject["user"]!!.jsonPrimitive.content,
                 lnurl = lnurl
             )
-        }
+        }.filter { !it.date.contains(" ") }
     }
 }
