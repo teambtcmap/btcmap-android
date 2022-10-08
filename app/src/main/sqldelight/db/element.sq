@@ -30,7 +30,8 @@ LIMIT 100;
 
 selectByBoundingBox:
 SELECT * FROM element WHERE
-lat > :minLat
+deleted_at = ''
+AND lat > :minLat
 AND lat < :maxLat
 AND lon > :minLon
 AND lon < :maxLon;
