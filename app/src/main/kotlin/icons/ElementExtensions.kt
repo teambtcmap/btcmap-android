@@ -472,6 +472,7 @@ fun Element.iconResId(): Int? {
         tag("craft") == "photographer" -> R.drawable.baseline_photo_camera_24
         tag("craft") == "hvac" -> R.drawable.baseline_hvac_24
         tag("craft") == "signmaker" -> R.drawable.baseline_hardware_24
+        tag("craft") == "brewery" -> R.drawable.baseline_sports_bar_24
 
         tag("company") == "transport" -> R.drawable.baseline_directions_car_24
 
