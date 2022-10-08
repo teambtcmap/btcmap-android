@@ -1,6 +1,7 @@
 package areas
 
 import http.await
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.*
 import okhttp3.OkHttpClient
@@ -10,6 +11,7 @@ import org.koin.core.annotation.Single
 @Single
 class AreasRepo {
 
+    @OptIn(ExperimentalSerializationApi::class)
     suspend fun getAreas(): List<Area> {
         val url = "https://api.btcmap.org/areas"
         val request = OkHttpClient().newCall(Request.Builder().url(url).build())

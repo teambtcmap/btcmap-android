@@ -2,6 +2,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_view_on_osm"
+        android:icon="@drawable/ic_place"
+        android:title="@string/view_on_osm"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_edit"
         android:icon="@drawable/baseline_edit_24"
         android:title="@string/edit_place"

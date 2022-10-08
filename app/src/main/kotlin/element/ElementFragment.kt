@@ -15,10 +15,12 @@ import org.btcmap.databinding.FragmentElementBinding
 
 class ElementFragment : Fragment() {
 
+    private val tagsJsonFormatter by lazy { Json { prettyPrint = true } }
+
+    private var elementId = ""
+
     private var _binding: FragmentElementBinding? = null
     private val binding get() = _binding!!
-
-    private val tagsJsonFormatter by lazy { Json { prettyPrint = true } }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,6 +34,19 @@ class ElementFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
+                R.id.action_view_on_osm -> {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data =
+                        Uri.parse(
+                            "https://www.openstreetmap.org/${
+                                elementId.replace(
+                                    ":",
+                                    "/"
+                                )
+                            }"
+                        )
+                    startActivity(intent)
+                }
                 R.id.action_edit,
                 R.id.action_delete -> {
                     val intent = Intent(Intent.ACTION_VIEW)
@@ -61,6 +76,9 @@ class ElementFragment : Fragment() {
     }
 
     fun setScrollProgress(progress: Float) {
+        val viewOnOsm = binding.toolbar.menu.findItem(R.id.action_view_on_osm)!!
+        viewOnOsm.isVisible = progress == 1.0f
+
         val edit = binding.toolbar.menu.findItem(R.id.action_edit)!!
         edit.isVisible = progress == 1.0f
 
@@ -71,6 +89,8 @@ class ElementFragment : Fragment() {
     }
 
     fun setElement(element: Element) {
+        elementId = element.id
+
         val tags = element.tags()
         binding.toolbar.title = tags["name"]?.jsonPrimitive?.content ?: "Unnamed"
 
