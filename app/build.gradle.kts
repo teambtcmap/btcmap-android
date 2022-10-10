@@ -189,7 +189,7 @@ dependencies {
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     // Used to download, cache and display images
-    implementation("com.squareup.picasso:picasso:2.71828")
+    implementation("com.squareup.picasso:picasso:2.8")
 
     // Common test dependencies
     testImplementation("junit:junit:4.13.2")
