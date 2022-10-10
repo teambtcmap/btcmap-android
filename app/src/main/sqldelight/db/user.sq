@@ -1,0 +1,16 @@
+CREATE TABLE user (
+    id INTEGER NOT NULL PRIMARY KEY,
+    osm_json TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT NOT NULL
+);
+
+insertOrReplace:
+INSERT OR REPLACE
+INTO user (id, osm_json, created_at, updated_at, deleted_at)
+VALUES ?;
+
+selectAll:
+SELECT *
+FROM user;

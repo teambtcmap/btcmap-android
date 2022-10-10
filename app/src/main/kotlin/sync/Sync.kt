@@ -6,6 +6,7 @@ import conf.ConfRepo
 import reports.ReportsRepo
 import elements.ElementsRepo
 import org.koin.core.annotation.Single
+import users.UsersRepo
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
@@ -15,6 +16,7 @@ class Sync(
     private val confRepo: ConfRepo,
     private val elementsRepo: ElementsRepo,
     private val reportsRepo: ReportsRepo,
+    private val usersRepo: UsersRepo,
 ) {
 
     suspend fun sync() {
@@ -57,6 +59,15 @@ class Sync(
             Log.d(TAG, "Synced areas")
         }.onFailure {
             Log.d(TAG, "Failed to sync areas")
+        }
+
+        runCatching {
+            Log.d(TAG, "Syncing users")
+            usersRepo.sync()
+        }.onSuccess {
+            Log.d(TAG, "Synced users")
+        }.onFailure {
+            Log.d(TAG, "Failed to sync users")
         }
 
         confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
