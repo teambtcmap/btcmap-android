@@ -3,6 +3,7 @@ package areas
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -41,6 +42,7 @@ class AreasAdapter(
                 val upToDatePercent =
                     formatter.format(item.up_to_date_elements.toDouble() / item.elements.toDouble())
                 subtitle.text = "${item.elements} places ($upToDatePercent up-to-date)"
+                subtitle.isVisible = false
                 root.setOnClickListener { onItemClick(item) }
             }
         }

@@ -27,6 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
+import areas.AreaResultModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import element.ElementFragment
 import kotlinx.coroutines.delay
@@ -42,6 +43,7 @@ import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
@@ -57,6 +59,7 @@ class MapFragment : Fragment() {
     private val model: MapModel by viewModel()
 
     private val searchResultModel: SearchResultModel by sharedViewModel()
+    private val areaResultModel: AreaResultModel by sharedViewModel()
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
@@ -232,18 +235,6 @@ class MapFragment : Fragment() {
             }
         }
 
-        searchResultModel.element.filterNotNull().onEach {
-            val mapController = binding.map.controller
-            mapController.setZoom(16.toDouble())
-            val startPoint = GeoPoint(it.lat, it.lon)
-            mapController.setCenter(startPoint)
-            binding.map.post {
-                mapController.zoomTo(19.0)
-            }
-            model.selectElement(it, true)
-            searchResultModel.element.update { null }
-        }.launchIn(viewLifecycleOwner.lifecycleScope)
-
         var elementsOverlay: RadiusMarkerClusterer? = null
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -340,6 +331,38 @@ class MapFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 while (binding.map.getIntrinsicScreenRect(null).height() == 0) {
                     delay(10)
+                }
+
+                val pickedPlace = searchResultModel.element.value
+                searchResultModel.element.update { null }
+
+                val pickedArea = areaResultModel.area.value
+                areaResultModel.area.update { null }
+
+                if (pickedPlace != null) {
+                    binding.map.addViewportListener()
+                    val mapController = binding.map.controller
+                    mapController.setZoom(16.toDouble())
+                    val startPoint = GeoPoint(pickedPlace.lat, pickedPlace.lon)
+                    mapController.setCenter(startPoint)
+                    binding.map.post {
+                        mapController.zoomTo(19.0)
+                    }
+                    model.selectElement(pickedPlace, true)
+                    return@repeatOnLifecycle
+                }
+
+                if (pickedArea != null) {
+                    binding.map.addViewportListener()
+                    binding.map.zoomToBoundingBox(
+                        BoundingBox.fromGeoPoints(
+                            listOf(
+                                GeoPoint(pickedArea.min_lat, pickedArea.min_lon),
+                                GeoPoint(pickedArea.max_lat, pickedArea.max_lon),
+                            )
+                        ), false
+                    )
+                    return@repeatOnLifecycle
                 }
 
                 val firstBoundingBox = model.mapBoundingBox.firstOrNull()

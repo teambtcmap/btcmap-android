@@ -15,8 +15,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import org.btcmap.databinding.FragmentAreasBinding
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class AreasFragment : Fragment() {
+
+    private val areaResultModel: AreaResultModel by sharedViewModel()
 
     private var _binding: FragmentAreasBinding? = null
     private val binding get() = _binding!!
@@ -58,7 +61,10 @@ class AreasFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.list.layoutManager = LinearLayoutManager(requireContext())
-                val adapter = AreasAdapter {}
+                val adapter = AreasAdapter {
+                    areaResultModel.area.value = it
+                    findNavController().popBackStack()
+                }
                 binding.list.adapter = adapter
                 adapter.submitList(AreasRepo().getAreas().filter { it.area_type != "country" })
             }
