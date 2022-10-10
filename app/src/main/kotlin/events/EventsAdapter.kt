@@ -1,4 +1,4 @@
-package elementevents
+package events
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -13,11 +13,11 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import org.btcmap.R
 import org.btcmap.databinding.ItemElementEventBinding
-import java.time.OffsetDateTime
+import java.time.ZonedDateTime
 
-class ElementEventsAdapter(
-    private val onItemClick: (ElementEvent) -> Unit,
-) : ListAdapter<ElementEvent, ElementEventsAdapter.ItemViewHolder>(DiffCallback()) {
+class EventsAdapter(
+    private val onItemClick: (Item) -> Unit,
+) : ListAdapter<EventsAdapter.Item, EventsAdapter.ItemViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val binding = ItemElementEventBinding.inflate(
@@ -40,9 +40,9 @@ class ElementEventsAdapter(
     ) {
 
         @SuppressLint("SetTextI18n")
-        fun bind(item: ElementEvent, onItemClick: (ElementEvent) -> Unit) {
+        fun bind(item: Item, onItemClick: (Item) -> Unit) {
             binding.apply {
-                when (item.eventType) {
+                when (item.type) {
                     "create" -> icon.setImageResource(R.drawable.baseline_add_location_alt_24)
                     "update" -> icon.setImageResource(R.drawable.baseline_edit_24)
                     "delete" -> icon.setImageResource(R.drawable.baseline_delete_24)
@@ -52,24 +52,24 @@ class ElementEventsAdapter(
 
                 var subtitleText = DateUtils.getRelativeDateTimeString(
                     root.context,
-                    OffsetDateTime.parse(item.date).toEpochSecond() * 1000,
+                    item.date.toEpochSecond() * 1000,
                     DateUtils.SECOND_IN_MILLIS,
                     DateUtils.WEEK_IN_MILLIS,
                     0
                 ).split(",").first()
 
-                if (item.user.isNotBlank()) {
-                    subtitleText += " by ${item.user}"
+                if (item.username.isNotBlank()) {
+                    subtitleText += " by ${item.username}"
                 }
 
                 subtitle.text = subtitleText
 
-                if (item.lnurl.isNotBlank()) {
+                if (item.tipLnurl.isNotBlank()) {
                     tip.isVisible = true
 
                     tip.setOnClickListener {
                         val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse(item.lnurl)
+                        intent.data = Uri.parse(item.tipLnurl)
                         runCatching {
                             root.context.startActivity(intent)
                         }.onFailure {
@@ -89,20 +89,29 @@ class ElementEventsAdapter(
         }
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<ElementEvent>() {
+    class DiffCallback : DiffUtil.ItemCallback<Item>() {
 
         override fun areItemsTheSame(
-            oldItem: ElementEvent,
-            newItem: ElementEvent,
+            oldItem: Item,
+            newItem: Item,
         ): Boolean {
             return newItem == oldItem
         }
 
         override fun areContentsTheSame(
-            oldItem: ElementEvent,
-            newItem: ElementEvent,
+            oldItem: Item,
+            newItem: Item,
         ): Boolean {
             return newItem == oldItem
         }
     }
+
+    data class Item(
+        val date: ZonedDateTime,
+        val type: String,
+        val elementId: String,
+        val elementName: String,
+        val username: String,
+        val tipLnurl: String,
+    )
 }

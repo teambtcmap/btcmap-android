@@ -10,7 +10,7 @@ fun database(context: Context): Database {
     val driver = AndroidSqliteDriver(
         schema = Database.Schema,
         context = context,
-        name = "btcmap-v11.db",
+        name = "btcmap-v12.db",
     )
 
     return database(driver)

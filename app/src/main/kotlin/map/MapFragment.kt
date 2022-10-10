@@ -165,7 +165,7 @@ class MapFragment : Fragment() {
                             findNavController().navigate(MapFragmentDirections.actionMapFragmentToAreasFragment())
                         }
                         R.id.action_element_events -> {
-                            findNavController().navigate(MapFragmentDirections.actionMapFragmentToElementEventsFragment())
+                            findNavController().navigate(MapFragmentDirections.actionMapFragmentToEventsFragment())
                         }
                         R.id.action_users -> {
                             findNavController().navigate(MapFragmentDirections.actionMapFragmentToUsersFragment())

@@ -1,0 +1,25 @@
+CREATE TABLE event (
+    date TEXT NOT NULL,
+    type TEXT NOT NULL,
+    element_id TEXT NOT NULL,
+    user_id INTEGER NOT NULL
+);
+
+insert:
+INSERT
+INTO event(
+    date,
+    type,
+    element_id,
+    user_id
+)
+VALUES ?;
+
+selectAll:
+SELECT *
+FROM event
+ORDER BY date DESC;
+
+deleteAll:
+DELETE
+FROM event;

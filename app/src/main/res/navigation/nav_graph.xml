@@ -44,8 +44,8 @@
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_mapFragment_to_elementEventsFragment"
-            app:destination="@id/elementEventsFragment"
+            android:id="@+id/action_mapFragment_to_eventsFragment"
+            app:destination="@id/eventsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
@@ -89,8 +89,8 @@
         android:name="areas.AreasFragment" />
 
     <fragment
-        android:id="@+id/elementEventsFragment"
-        android:name="elementevents.ElementEventsFragment" />
+        android:id="@+id/eventsFragment"
+        android:name="events.EventsFragment" />
 
     <fragment
         android:id="@+id/usersFragment"

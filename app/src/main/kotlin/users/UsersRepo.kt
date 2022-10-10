@@ -2,6 +2,7 @@ package users
 
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Database
 import db.User
 import http.await
@@ -21,6 +22,10 @@ class UsersRepo(
 
     suspend fun selectAll(): List<User> {
         return db.userQueries.selectAll().asFlow().mapToList().first()
+    }
+
+    suspend fun selectById(id: Long): User? {
+        return db.userQueries.selectById(id).asFlow().mapToOneOrNull().first()
     }
 
     @OptIn(ExperimentalSerializationApi::class)

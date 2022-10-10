@@ -5,6 +5,7 @@ import areas.AreasRepo
 import conf.ConfRepo
 import reports.ReportsRepo
 import elements.ElementsRepo
+import events.EventsRepo
 import org.koin.core.annotation.Single
 import users.UsersRepo
 import java.time.ZoneOffset
@@ -17,13 +18,14 @@ class Sync(
     private val elementsRepo: ElementsRepo,
     private val reportsRepo: ReportsRepo,
     private val usersRepo: UsersRepo,
+    private val eventsRepo: EventsRepo,
 ) {
 
     suspend fun sync() {
         elementsRepo.fetchBundledElements()
 
         val lastSyncDateTime = confRepo.conf.value.lastSyncDate
-        val minSyncIntervalExpiryDate = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(15)
+        val minSyncIntervalExpiryDate = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(10)
         Log.d(TAG, "Last sync date: $lastSyncDateTime")
         Log.d(TAG, "Min sync interval expiry date: $minSyncIntervalExpiryDate")
 
@@ -68,6 +70,15 @@ class Sync(
             Log.d(TAG, "Synced users")
         }.onFailure {
             Log.d(TAG, "Failed to sync users")
+        }
+
+        runCatching {
+            Log.d(TAG, "Syncing events")
+            eventsRepo.sync()
+        }.onSuccess {
+            Log.d(TAG, "Synced events")
+        }.onFailure {
+            Log.d(TAG, "Failed to sync events")
         }
 
         confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }

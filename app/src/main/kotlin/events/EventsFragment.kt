@@ -1,4 +1,4 @@
-package elementevents
+package events
 
 import android.content.res.Configuration
 import android.os.Bundle
@@ -14,15 +14,31 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import db.Database
+import db.User
+import element.tags
+import elements.ElementsRepo
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.databinding.FragmentElementEventsBinding
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import search.SearchResultModel
+import users.UsersRepo
+import java.time.ZonedDateTime
+import java.util.regex.Pattern
 
-class ElementEventsFragment : Fragment() {
+class EventsFragment : Fragment() {
 
     private val db: Database by inject()
+
+    private val eventsRepo: EventsRepo by inject()
+
+    private val elementsRepo: ElementsRepo by inject()
+
+    private val usersRepo: UsersRepo by inject()
 
     private val resultModel: SearchResultModel by sharedViewModel()
 
@@ -66,13 +82,27 @@ class ElementEventsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.list.layoutManager = LinearLayoutManager(requireContext())
-                val adapter = ElementEventsAdapter {
+                val adapter = EventsAdapter {
                     resultModel.element.value =
                         db.elementQueries.selectById(it.elementId).executeAsOneOrNull()
                     findNavController().popBackStack()
                 }
                 binding.list.adapter = adapter
-                adapter.submitList(ElementEventsRepo().getElementEvents())
+                adapter.submitList(eventsRepo.selectAll().map {
+                    val element = elementsRepo.selectById(it.element_id) ?: return@map null
+                    val user = usersRepo.selectById(it.user_id) ?: return@map null
+                    val userOsmJson: JsonObject = Json.decodeFromString(user.osm_json)
+
+                    EventsAdapter.Item(
+                        date = ZonedDateTime.parse(it.date),
+                        type = it.type,
+                        elementId = it.element_id,
+                        elementName = element.tags()["name"]?.jsonPrimitive?.content
+                            ?: "Unnamed place",
+                        username = userOsmJson["display_name"]?.jsonPrimitive?.content ?: "",
+                        tipLnurl = user.lnurl(),
+                    )
+                }.filterNotNull())
             }
         }
     }
@@ -80,5 +110,19 @@ class ElementEventsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    fun User.lnurl(): String {
+        val osmJson: JsonObject = Json.decodeFromString(osm_json)
+        val description = osmJson["description"]?.jsonPrimitive?.content ?: ""
+        val pattern = Pattern.compile("\\(lightning:[^)]*\\)", Pattern.CASE_INSENSITIVE)
+        val matcher = pattern.matcher(description)
+        val matchFound: Boolean = matcher.find()
+
+        return if (matchFound) {
+            matcher.group().trim('(', ')')
+        } else {
+            ""
+        }
     }
 }
