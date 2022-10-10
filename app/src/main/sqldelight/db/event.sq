@@ -20,6 +20,12 @@ SELECT *
 FROM event
 ORDER BY date DESC;
 
+selectByUserId:
+SELECT *
+FROM event
+WHERE user_id = ?
+ORDER BY date DESC;
+
 deleteAll:
 DELETE
 FROM event;

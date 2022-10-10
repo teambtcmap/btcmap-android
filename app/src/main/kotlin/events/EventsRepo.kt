@@ -23,6 +23,10 @@ class EventsRepo(
         return db.eventQueries.selectAll().asFlow().mapToList().first()
     }
 
+    suspend fun selectByUserId(userId: Long): List<Event> {
+        return db.eventQueries.selectByUserId(userId).asFlow().mapToList().first()
+    }
+
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun sync() {
         val url = "https://api.btcmap.org/v2/events"

@@ -1,6 +1,5 @@
 package events
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.text.format.DateUtils
@@ -12,7 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import org.btcmap.R
-import org.btcmap.databinding.ItemElementEventBinding
+import org.btcmap.databinding.ItemEventBinding
 import java.time.ZonedDateTime
 
 class EventsAdapter(
@@ -20,7 +19,7 @@ class EventsAdapter(
 ) : ListAdapter<EventsAdapter.Item, EventsAdapter.ItemViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        val binding = ItemElementEventBinding.inflate(
+        val binding = ItemEventBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false,
@@ -34,12 +33,11 @@ class EventsAdapter(
     }
 
     class ItemViewHolder(
-        private val binding: ItemElementEventBinding,
+        private val binding: ItemEventBinding,
     ) : ViewHolder(
         binding.root,
     ) {
 
-        @SuppressLint("SetTextI18n")
         fun bind(item: Item, onItemClick: (Item) -> Unit) {
             binding.apply {
                 when (item.type) {
@@ -55,11 +53,25 @@ class EventsAdapter(
                     item.date.toEpochSecond() * 1000,
                     DateUtils.SECOND_IN_MILLIS,
                     DateUtils.WEEK_IN_MILLIS,
-                    0
+                    0,
                 ).split(",").first()
 
                 if (item.username.isNotBlank()) {
-                    subtitleText += " by ${item.username}"
+                    subtitleText += when (item.type) {
+                        "create" -> " " + root.context.resources.getString(
+                            R.string.created_by_s,
+                            item.username
+                        )
+                        "update" -> " " + root.context.resources.getString(
+                            R.string.updated_by_s,
+                            item.username
+                        )
+                        "delete" -> "" + root.context.resources.getString(
+                            R.string.deleted_by_s,
+                            item.username
+                        )
+                        else -> ""
+                    }
                 }
 
                 subtitle.text = subtitleText
