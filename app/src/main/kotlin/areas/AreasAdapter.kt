@@ -7,8 +7,8 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import db.Area
 import org.btcmap.databinding.ItemAreaBinding
-import java.text.NumberFormat
 
 class AreasAdapter(
     private val onItemClick: (Area) -> Unit,
@@ -38,10 +38,10 @@ class AreasAdapter(
         fun bind(item: Area, onItemClick: (Area) -> Unit) {
             binding.apply {
                 title.text = item.name
-                val formatter = NumberFormat.getPercentInstance()
-                val upToDatePercent =
-                    formatter.format(item.up_to_date_elements.toDouble() / item.elements.toDouble())
-                subtitle.text = "${item.elements} places ($upToDatePercent up-to-date)"
+//                val formatter = NumberFormat.getPercentInstance()
+//                val upToDatePercent =
+//                    formatter.format(item.up_to_date_elements.toDouble() / item.elements.toDouble())
+//                subtitle.text = "${item.elements} places ($upToDatePercent up-to-date)"
                 subtitle.isVisible = false
                 root.setOnClickListener { onItemClick(item) }
             }

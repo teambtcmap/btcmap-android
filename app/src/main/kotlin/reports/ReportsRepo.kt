@@ -20,6 +20,7 @@ import org.koin.core.annotation.Single
 class ReportsRepo(
     private val db: Database,
 ) {
+
     suspend fun getDailyReports(): List<Report> {
         if (db.reportQueries.selectCount().asFlow().mapToOne().first() == 0L) {
             sync()

@@ -1,6 +1,7 @@
 package sync
 
 import android.util.Log
+import areas.AreasRepo
 import conf.ConfRepo
 import reports.ReportsRepo
 import elements.ElementsRepo
@@ -10,9 +11,10 @@ import java.time.ZonedDateTime
 
 @Single
 class Sync(
+    private val areasRepo: AreasRepo,
     private val confRepo: ConfRepo,
-    private val dailyReportsRepo: ReportsRepo,
     private val elementsRepo: ElementsRepo,
+    private val reportsRepo: ReportsRepo,
 ) {
 
     suspend fun sync() {
@@ -38,14 +40,23 @@ class Sync(
         }.getOrThrow()
 
         Log.d(TAG, "Synced elements")
-        Log.d(TAG, "Syncing daily reports")
 
         runCatching {
-            dailyReportsRepo.sync()
+            Log.d(TAG, "Syncing reports")
+            reportsRepo.sync()
         }.onSuccess {
-            Log.d(TAG, "Synced daily reports")
+            Log.d(TAG, "Synced reports")
         }.onFailure {
-            Log.d(TAG, "Failed to sync daily reports")
+            Log.d(TAG, "Failed to sync reports")
+        }
+
+        runCatching {
+            Log.d(TAG, "Syncing areas")
+            areasRepo.sync()
+        }.onSuccess {
+            Log.d(TAG, "Synced areas")
+        }.onFailure {
+            Log.d(TAG, "Failed to sync areas")
         }
 
         confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
