@@ -2,7 +2,7 @@ package sync
 
 import android.util.Log
 import conf.ConfRepo
-import dailyreports.DailyReportsRepo
+import reports.ReportsRepo
 import elements.ElementsRepo
 import org.koin.core.annotation.Single
 import java.time.ZoneOffset
@@ -11,7 +11,7 @@ import java.time.ZonedDateTime
 @Single
 class Sync(
     private val confRepo: ConfRepo,
-    private val dailyReportsRepo: DailyReportsRepo,
+    private val dailyReportsRepo: ReportsRepo,
     private val elementsRepo: ElementsRepo,
 ) {
 

@@ -1,9 +1,9 @@
-package dailyreports
+package reports
 
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
-import db.Daily_report
+import db.Report
 import db.Database
 import http.await
 import kotlinx.coroutines.flow.first
@@ -17,20 +17,20 @@ import okhttp3.Request
 import org.koin.core.annotation.Single
 
 @Single
-class DailyReportsRepo(
+class ReportsRepo(
     private val db: Database,
 ) {
-    suspend fun getDailyReports(): List<Daily_report> {
-        if (db.daily_reportQueries.selectCount().asFlow().mapToOne().first() == 0L) {
+    suspend fun getDailyReports(): List<Report> {
+        if (db.reportQueries.selectCount().asFlow().mapToOne().first() == 0L) {
             sync()
         }
 
-        return db.daily_reportQueries.selectAll().asFlow().mapToList().first()
+        return db.reportQueries.selectAll().asFlow().mapToList().first()
     }
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun sync() {
-        val url = "https://api.btcmap.org/daily_reports"
+        val url = "https://api.btcmap.org/v2/reports"
         val request = OkHttpClient().newCall(Request.Builder().url(url).build())
         val response = runCatching { request.await() }.getOrNull() ?: return
         val json = Json { ignoreUnknownKeys = true }
@@ -38,7 +38,7 @@ class DailyReportsRepo(
         val reports = runCatching {
             json
                 .decodeFromStream(
-                    ListSerializer(DailyReportJson.serializer()),
+                    ListSerializer(ReportJson.serializer()),
                     response.body!!.byteStream(),
                 )
                 .sortedBy { it.date }
@@ -46,11 +46,12 @@ class DailyReportsRepo(
         }.getOrNull() ?: return
 
         db.transaction {
-            db.daily_reportQueries.deleteAll()
+            db.reportQueries.deleteAll()
 
             reports.forEach {
-                db.daily_reportQueries.insertOrReplace(
-                    Daily_report(
+                db.reportQueries.insertOrReplace(
+                    Report(
+                        area_id = "",
                         date = it.date,
                         total_elements = it.total_elements,
                         total_elements_onchain = it.total_elements_onchain,
@@ -62,6 +63,9 @@ class DailyReportsRepo(
                         elements_created = it.elements_created,
                         elements_updated = it.elements_updated,
                         elements_deleted = it.elements_deleted,
+                        created_at = it.created_at,
+                        updated_at = it.updated_at,
+                        deleted_at = it.deleted_at
                     )
                 )
             }
@@ -69,7 +73,8 @@ class DailyReportsRepo(
     }
 
     @Serializable
-    private data class DailyReportJson(
+    private data class ReportJson(
+        val area_id: String,
         val date: String,
         val total_elements: Long,
         val total_elements_onchain: Long,
@@ -81,5 +86,8 @@ class DailyReportsRepo(
         val elements_created: Long,
         val elements_updated: Long,
         val elements_deleted: Long,
+        val created_at: String,
+        val updated_at: String,
+        val deleted_at: String,
     )
 }

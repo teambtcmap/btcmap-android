@@ -1,4 +1,4 @@
-package dailyreports
+package reports
 
 import android.content.res.Configuration
 import android.graphics.Color
@@ -29,9 +29,9 @@ import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
-class DailyReportsFragment : Fragment() {
+class ReportsFragment : Fragment() {
 
-    private val repo: DailyReportsRepo by inject()
+    private val repo: ReportsRepo by inject()
 
     private var _binding: FragmentDailyReportsBinding? = null
     private val binding get() = _binding!!

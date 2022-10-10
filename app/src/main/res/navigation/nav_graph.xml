@@ -30,8 +30,8 @@
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_mapFragment_to_trendsFragment"
-            app:destination="@id/trendsFragment"
+            android:id="@+id/action_mapFragment_to_reportsFragment"
+            app:destination="@id/reportsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
@@ -74,8 +74,8 @@
         android:name="settings.SettingsFragment" />
 
     <fragment
-        android:id="@+id/trendsFragment"
-        android:name="dailyreports.DailyReportsFragment" />
+        android:id="@+id/reportsFragment"
+        android:name="reports.ReportsFragment" />
 
     <fragment
         android:id="@+id/areasFragment"
