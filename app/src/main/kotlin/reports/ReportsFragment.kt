@@ -3,6 +3,7 @@ package reports
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +24,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import kotlinx.coroutines.launch
 import map.getOnSurfaceColor
-import org.btcmap.databinding.FragmentDailyReportsBinding
+import org.btcmap.databinding.FragmentReportsBinding
 import org.koin.android.ext.android.inject
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -33,7 +34,7 @@ class ReportsFragment : Fragment() {
 
     private val repo: ReportsRepo by inject()
 
-    private var _binding: FragmentDailyReportsBinding? = null
+    private var _binding: FragmentReportsBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -41,7 +42,7 @@ class ReportsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentDailyReportsBinding.inflate(inflater, container, false)
+        _binding = FragmentReportsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -105,6 +106,16 @@ class ReportsFragment : Fragment() {
 
     private fun initChart(chart: LineChart) {
         chart.apply {
+            val bottomOffset =
+                TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    1f,
+                    resources.displayMetrics,
+                )
+
+            setExtraOffsets(0f, 0f, 0f, bottomOffset)
+            minOffset = 0f
+
             description.isEnabled = false
             setTouchEnabled(false)
             legend.isEnabled = false
@@ -121,8 +132,12 @@ class ReportsFragment : Fragment() {
 
             axisLeft.setDrawGridLines(false)
             axisLeft.isEnabled = false
-            axisRight.setDrawGridLines(false)
-            axisRight.isEnabled = false
+            val gridColor = Color.valueOf(requireContext().getOnSurfaceColor())
+            //axisRight.setDrawGridLines(false)
+            axisRight.gridColor =
+                Color.argb(0.12f, gridColor.red(), gridColor.green(), gridColor.blue())
+            axisRight.textColor = requireContext().getOnSurfaceColor()
+            axisRight.setDrawAxisLine(false)
         }
     }
 
@@ -149,6 +164,7 @@ class ReportsFragment : Fragment() {
         dataSet.setCircleColor(Color.parseColor("#f7931a"))
         dataSet.valueTextColor = requireContext().getOnSurfaceColor()
 
+        dataSet.setDrawValues(false)
         dataSet.lineWidth = 1f
         dataSet.circleRadius = 3f
 
