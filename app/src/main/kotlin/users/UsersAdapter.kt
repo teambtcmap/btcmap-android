@@ -10,9 +10,11 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import org.btcmap.R
 import org.btcmap.databinding.ItemUserBinding
+import java.lang.Exception
 
 class UsersAdapter(
     private val onItemClick: (Item) -> Unit,
@@ -71,10 +73,18 @@ class UsersAdapter(
                 Picasso.get().load(null as String?).into(avatar)
 
                 avatar.isVisible = item.imgHref.isNotBlank()
-                avatarPlaceholder.isVisible = item.imgHref.isBlank()
+                avatarPlaceholder.isVisible = true
 
                 if (item.imgHref.isNotBlank()) {
-                    Picasso.get().load(item.imgHref).placeholder(R.drawable.baseline_person_24).into(avatar)
+                    Picasso.get().load(item.imgHref).into(avatar, object : Callback {
+                        override fun onSuccess() {
+                            avatarPlaceholder.isVisible = false
+                        }
+
+                        override fun onError(e: Exception?) {
+                            avatarPlaceholder.isVisible = true
+                        }
+                    })
                 }
 
                 root.setOnClickListener { onItemClick(item) }
