@@ -14,7 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import db.Database
-import db.SelectAllAsListItems
+import db.SelectAllEventsAsListItems
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementEventsBinding
@@ -96,7 +96,7 @@ class EventsFragment : Fragment() {
         _binding = null
     }
 
-    fun SelectAllAsListItems.lnurl(): String {
+    fun SelectAllEventsAsListItems.lnurl(): String {
         val description = user_description ?: ""
         val pattern = Pattern.compile("\\(lightning:[^)]*\\)", Pattern.CASE_INSENSITIVE)
         val matcher = pattern.matcher(description)

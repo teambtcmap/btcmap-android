@@ -40,6 +40,7 @@
     <string name="top_mappers">Top mappers</string>
     <string name="by_s">by %1$s</string>
     <string name="unnamed_place">Unnamed place</string>
+    <string name="unnamed_user">Unnamed user</string>
     <plurals name="d_changes">
         <item quantity="zero">%d changes</item>
         <item quantity="one">%d change</item>

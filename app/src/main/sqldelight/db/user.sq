@@ -19,3 +19,15 @@ selectById:
 SELECT *
 FROM user
 WHERE id = ?;
+
+selectAllUsersAsListItems:
+SELECT
+    u.id AS user_id,
+    json_extract(u.osm_json, '$.img.href') AS user_img_href,
+    json_extract(u.osm_json, '$.display_name') AS user_name,
+    json_extract(u.osm_json, '$.description') AS user_description,
+    count(e.user_id) AS changes
+FROM user u
+LEFT JOIN event e ON e.user_id = u.id
+GROUP BY u.id
+ORDER BY changes DESC;

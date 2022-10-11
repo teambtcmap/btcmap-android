@@ -26,7 +26,7 @@ FROM event
 WHERE user_id = ?
 ORDER BY date DESC;
 
-selectAllAsListItems:
+selectAllEventsAsListItems:
 SELECT
     ev.type AS event_type,
     el.id AS element_id,

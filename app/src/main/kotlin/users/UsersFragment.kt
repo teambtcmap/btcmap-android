@@ -15,20 +15,16 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import events.EventsRepo
+import db.SelectAllUsersAsListItems
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import org.btcmap.R
 import org.btcmap.databinding.FragmentUsersBinding
 import org.koin.android.ext.android.inject
+import java.util.regex.Pattern
 
 class UsersFragment : Fragment() {
 
     private val usersRepo: UsersRepo by inject()
-
-    private val eventsRepo: EventsRepo by inject()
 
     private var _binding: FragmentUsersBinding? = null
     private val binding get() = _binding!!
@@ -75,15 +71,13 @@ class UsersFragment : Fragment() {
                     startActivity(intent)
                 }
                 binding.list.adapter = adapter
-                adapter.submitList(usersRepo.selectAll().map {
-                    val osmData: JsonObject = Json.decodeFromString(it.osm_json)
-
+                adapter.submitList(usersRepo.selectAllUsersAsListItems().map {
                     UsersAdapter.Item(
-                        id = it.id,
-                        name = osmData["display_name"]?.jsonPrimitive?.content ?: it.id.toString(),
-                        changes = eventsRepo.selectByUserId(it.id).size.toLong(),
+                        id = it.user_id,
+                        name = it.user_name ?: getString(R.string.unnamed_user),
+                        changes = it.changes,
                         tipLnurl = it.lnurl(),
-                        imgHref = it.imgHref(),
+                        imgHref = it.user_img_href ?: "",
                     )
                 }.sortedByDescending { it.changes })
             }
@@ -93,5 +87,18 @@ class UsersFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    fun SelectAllUsersAsListItems.lnurl(): String {
+        val description = user_description ?: ""
+        val pattern = Pattern.compile("\\(lightning:[^)]*\\)", Pattern.CASE_INSENSITIVE)
+        val matcher = pattern.matcher(description)
+        val matchFound: Boolean = matcher.find()
+
+        return if (matchFound) {
+            matcher.group().trim('(', ')')
+        } else {
+            ""
+        }
     }
 }

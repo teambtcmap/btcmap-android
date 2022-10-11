@@ -4,7 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import db.Database
 import db.Event
-import db.SelectAllAsListItems
+import db.SelectAllEventsAsListItems
 import http.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -21,12 +21,9 @@ class EventsRepo(
     private val db: Database,
 ) {
 
-    suspend fun selectByUserId(userId: Long): List<Event> {
-        return db.eventQueries.selectByUserId(userId).asFlow().mapToList(Dispatchers.IO).first()
-    }
-
-    suspend fun selectAllAsListItems(): List<SelectAllAsListItems> {
-        return db.eventQueries.selectAllAsListItems().asFlow().mapToList(Dispatchers.IO).first()
+    suspend fun selectAllAsListItems(): List<SelectAllEventsAsListItems> {
+        return db.eventQueries.selectAllEventsAsListItems().asFlow().mapToList(Dispatchers.IO)
+            .first()
     }
 
     @OptIn(ExperimentalSerializationApi::class)
