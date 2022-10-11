@@ -1,10 +1,12 @@
 package events
 
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
 import db.Database
 import db.Event
+import db.SelectAllAsListItems
 import http.await
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -19,12 +21,12 @@ class EventsRepo(
     private val db: Database,
 ) {
 
-    suspend fun selectAll(): List<Event> {
-        return db.eventQueries.selectAll().asFlow().mapToList().first()
+    suspend fun selectByUserId(userId: Long): List<Event> {
+        return db.eventQueries.selectByUserId(userId).asFlow().mapToList(Dispatchers.IO).first()
     }
 
-    suspend fun selectByUserId(userId: Long): List<Event> {
-        return db.eventQueries.selectByUserId(userId).asFlow().mapToList().first()
+    suspend fun selectAllAsListItems(): List<SelectAllAsListItems> {
+        return db.eventQueries.selectAllAsListItems().asFlow().mapToList(Dispatchers.IO).first()
     }
 
     @OptIn(ExperimentalSerializationApi::class)

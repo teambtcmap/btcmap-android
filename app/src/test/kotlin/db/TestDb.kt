@@ -1,6 +1,6 @@
 package db
 
-import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 
 fun testDb(): Database {
     val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)

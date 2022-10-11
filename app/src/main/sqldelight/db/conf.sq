@@ -1,4 +1,4 @@
-import java.lang.Boolean;
+import kotlin.Boolean;
 import java.time.ZonedDateTime;
 
 CREATE TABLE conf (

@@ -5,10 +5,10 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.10"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
     id("androidx.navigation.safeargs.kotlin")
-    id("com.squareup.sqldelight")
-    id("com.google.devtools.ksp") version "1.7.10-1.0.6"
+    id("app.cash.sqldelight")
+    id("com.google.devtools.ksp") version "1.7.20-1.0.6"
 }
 
 val signingPropertiesFile = rootProject.file("signing.properties")
@@ -120,10 +120,14 @@ android {
     }
 }
 
+val sqlDelightVer = "2.0.0-alpha04"
+
 sqldelight {
     database("Database") {
         sourceFolders = listOf("sqldelight")
         packageName = "db"
+        dialect("app.cash.sqldelight:sqlite-3-35-dialect:$sqlDelightVer")
+        module("app.cash.sqldelight:sqlite-json-module:$sqlDelightVer")
     }
 }
 
@@ -170,10 +174,9 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
 
     // SQLDelight generates typesafe kotlin APIs from SQL statements
-    val sqlDelightVer = "1.5.3"
-    implementation("com.squareup.sqldelight:coroutines-extensions:$sqlDelightVer")
-    implementation("com.squareup.sqldelight:android-driver:$sqlDelightVer")
-    testImplementation("com.squareup.sqldelight:sqlite-driver:$sqlDelightVer")
+    implementation("app.cash.sqldelight:coroutines-extensions:$sqlDelightVer")
+    implementation("app.cash.sqldelight:android-driver:$sqlDelightVer")
+    testImplementation("app.cash.sqldelight:sqlite-driver:$sqlDelightVer")
 
     // Injection library
     implementation("io.insert-koin:koin-android:3.2.0")
@@ -190,6 +193,9 @@ dependencies {
 
     // Used to download, cache and display images
     implementation("com.squareup.picasso:picasso:2.8")
+
+    // Bundle SQLite binaries
+    implementation("com.github.requery:sqlite-android:3.39.2")
 
     // Common test dependencies
     testImplementation("junit:junit:4.13.2")

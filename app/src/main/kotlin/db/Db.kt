@@ -1,9 +1,10 @@
 package db
 
 import android.content.Context
-import com.squareup.sqldelight.ColumnAdapter
-import com.squareup.sqldelight.android.AndroidSqliteDriver
-import com.squareup.sqldelight.db.SqlDriver
+import app.cash.sqldelight.ColumnAdapter
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import app.cash.sqldelight.db.SqlDriver
+import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 import java.time.ZonedDateTime
 
 fun database(context: Context): Database {
@@ -11,6 +12,7 @@ fun database(context: Context): Database {
         schema = Database.Schema,
         context = context,
         name = "btcmap-v12.db",
+        factory = RequerySQLiteOpenHelperFactory(),
     )
 
     return database(driver)

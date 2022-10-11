@@ -2,9 +2,8 @@ package elements
 
 import android.content.Context
 import android.util.Log
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToOne
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToOne
 import db.Database
 import db.Element
 import http.await
@@ -26,13 +25,9 @@ class ElementsRepo(
     private val db: Database,
 ) {
 
-    suspend fun selectById(id: String): Element? {
-        return db.elementQueries.selectById(id).asFlow().mapToOneOrNull().first()
-    }
-
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun fetchBundledElements() {
-        if (db.elementQueries.selectCount().asFlow().mapToOne().first() > 0) {
+        if (db.elementQueries.selectCount().asFlow().mapToOne(Dispatchers.IO).first() > 0) {
             return
         }
 

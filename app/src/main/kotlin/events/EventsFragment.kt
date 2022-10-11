@@ -14,31 +14,21 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import db.Database
-import element.tags
-import elements.ElementsRepo
+import db.SelectAllAsListItems
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementEventsBinding
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import search.SearchResultModel
-import users.UsersRepo
-import users.lnurl
 import java.time.ZonedDateTime
+import java.util.regex.Pattern
 
 class EventsFragment : Fragment() {
 
     private val db: Database by inject()
 
     private val eventsRepo: EventsRepo by inject()
-
-    private val elementsRepo: ElementsRepo by inject()
-
-    private val usersRepo: UsersRepo by inject()
 
     private val resultModel: SearchResultModel by sharedViewModel()
 
@@ -87,21 +77,16 @@ class EventsFragment : Fragment() {
                     findNavController().popBackStack()
                 }
                 binding.list.adapter = adapter
-                adapter.submitList(eventsRepo.selectAll().map {
-                    val element = elementsRepo.selectById(it.element_id) ?: return@map null
-                    val user = usersRepo.selectById(it.user_id) ?: return@map null
-                    val userOsmJson: JsonObject = Json.decodeFromString(user.osm_json)
-
+                adapter.submitList(eventsRepo.selectAllAsListItems().map {
                     EventsAdapter.Item(
-                        date = ZonedDateTime.parse(it.date),
-                        type = it.type,
+                        date = ZonedDateTime.parse(it.event_date),
+                        type = it.event_type,
                         elementId = it.element_id,
-                        elementName = element.tags()["name"]?.jsonPrimitive?.content
-                            ?: getString(R.string.unnamed_place),
-                        username = userOsmJson["display_name"]?.jsonPrimitive?.content ?: "",
-                        tipLnurl = user.lnurl(),
+                        elementName = it.element_name ?: getString(R.string.unnamed_place),
+                        username = it.user_name ?: "",
+                        tipLnurl = it.lnurl(),
                     )
-                }.filterNotNull())
+                })
             }
         }
     }
@@ -109,5 +94,18 @@ class EventsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    fun SelectAllAsListItems.lnurl(): String {
+        val description = user_description ?: ""
+        val pattern = Pattern.compile("\\(lightning:[^)]*\\)", Pattern.CASE_INSENSITIVE)
+        val matcher = pattern.matcher(description)
+        val matchFound: Boolean = matcher.find()
+
+        return if (matchFound) {
+            matcher.group().trim('(', ')')
+        } else {
+            ""
+        }
     }
 }

@@ -38,9 +38,7 @@
     <string name="osm_copyright">© OpenStreetMap contributors</string>
     <string name="view_on_osm">View on OpenStreetMap</string>
     <string name="top_mappers">Top mappers</string>
-    <string name="created_by_s">Created by %1$s </string>
-    <string name="updated_by_s">Updated by %1$s </string>
-    <string name="deleted_by_s">Deleted by %1$s </string>
+    <string name="by_s">by %1$s</string>
     <string name="unnamed_place">Unnamed place</string>
     <plurals name="d_changes">
         <item quantity="zero">%d changes</item>

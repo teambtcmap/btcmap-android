@@ -6,12 +6,13 @@ import android.util.Log
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
 import db.Database
 import db.Element
 import element.tags
 import icons.iconResId
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -57,7 +58,8 @@ class SearchModel(
 
                 val queryTimeMillis = measureTimeMillis {
                     elements =
-                        db.elementQueries.selectBySearchString(searchString).asFlow().mapToList()
+                        db.elementQueries.selectBySearchString(searchString).asFlow()
+                            .mapToList(Dispatchers.IO)
                             .first()
                 }
 

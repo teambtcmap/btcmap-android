@@ -1,10 +1,11 @@
 package areas
 
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
 import db.Area
 import db.Database
 import http.await
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -20,7 +21,7 @@ class AreasRepo(
 ) {
 
     suspend fun getAreas(): List<Area> {
-        return db.areaQueries.selectAll().asFlow().mapToList().first()
+        return db.areaQueries.selectAll().asFlow().mapToList(Dispatchers.IO).first()
     }
 
     @OptIn(ExperimentalSerializationApi::class)

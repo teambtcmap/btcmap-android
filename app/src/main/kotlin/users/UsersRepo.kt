@@ -1,11 +1,11 @@
 package users
 
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
 import db.Database
 import db.User
 import http.await
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -21,11 +21,7 @@ class UsersRepo(
 ) {
 
     suspend fun selectAll(): List<User> {
-        return db.userQueries.selectAll().asFlow().mapToList().first()
-    }
-
-    suspend fun selectById(id: Long): User? {
-        return db.userQueries.selectById(id).asFlow().mapToOneOrNull().first()
+        return db.userQueries.selectAll().asFlow().mapToList(Dispatchers.IO).first()
     }
 
     @OptIn(ExperimentalSerializationApi::class)

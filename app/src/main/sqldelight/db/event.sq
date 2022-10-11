@@ -26,6 +26,19 @@ FROM event
 WHERE user_id = ?
 ORDER BY date DESC;
 
+selectAllAsListItems:
+SELECT
+    ev.type AS event_type,
+    el.id AS element_id,
+    json_extract(el.osm_json, '$.tags.name') AS element_name,
+    ev.date AS event_date,
+    json_extract(u.osm_json, '$.display_name') AS user_name,
+    json_extract(u.osm_json, '$.description') AS user_description
+FROM event ev
+JOIN element el ON el.id = ev.element_id
+JOIN user u ON u.id = ev.user_id
+ORDER BY ev.date DESC;
+
 deleteAll:
 DELETE
 FROM event;

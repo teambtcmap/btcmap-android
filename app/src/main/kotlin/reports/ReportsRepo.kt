@@ -1,11 +1,12 @@
 package reports
 
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOne
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOne
 import db.Report
 import db.Database
 import http.await
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -22,11 +23,11 @@ class ReportsRepo(
 ) {
 
     suspend fun getDailyReports(): List<Report> {
-        if (db.reportQueries.selectCount().asFlow().mapToOne().first() == 0L) {
+        if (db.reportQueries.selectCount().asFlow().mapToOne(Dispatchers.IO).first() == 0L) {
             sync()
         }
 
-        return db.reportQueries.selectAll().asFlow().mapToList().first()
+        return db.reportQueries.selectAll().asFlow().mapToList(Dispatchers.IO).first()
     }
 
     @OptIn(ExperimentalSerializationApi::class)

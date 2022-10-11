@@ -3,9 +3,9 @@ package map
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOne
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOne
 import conf.ConfRepo
 import db.Database
 import db.Element
@@ -63,7 +63,7 @@ class MapModel(
     init {
         combine(
             _mapBoundingBox,
-            db.elementQueries.selectCount().asFlow().mapToOne(),
+            db.elementQueries.selectCount().asFlow().mapToOne(Dispatchers.IO),
             mapMarkersRepo
         ) { viewport, _, mapMarkersRepo ->
             withContext(Dispatchers.Default) {
@@ -79,7 +79,7 @@ class MapModel(
                         maxLon = max(viewport.lonEast, viewport.lonWest),
                     )
                         .asFlow()
-                        .mapToList()
+                        .mapToList(Dispatchers.IO)
                         .first()
                         .map { ElementWithMarker(it, mapMarkersRepo.getMarker(it)) }
                 }

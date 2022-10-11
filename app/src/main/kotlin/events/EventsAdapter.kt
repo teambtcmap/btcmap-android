@@ -48,7 +48,7 @@ class EventsAdapter(
 
                 title.text = item.elementName
 
-                var subtitleText = DateUtils.getRelativeDateTimeString(
+                val date = DateUtils.getRelativeDateTimeString(
                     root.context,
                     item.date.toEpochSecond() * 1000,
                     DateUtils.SECOND_IN_MILLIS,
@@ -56,25 +56,20 @@ class EventsAdapter(
                     0,
                 ).split(",").first()
 
-                if (item.username.isNotBlank()) {
-                    subtitleText += when (item.type) {
-                        "create" -> " " + root.context.resources.getString(
-                            R.string.created_by_s,
-                            item.username
-                        )
-                        "update" -> " " + root.context.resources.getString(
-                            R.string.updated_by_s,
-                            item.username
-                        )
-                        "delete" -> "" + root.context.resources.getString(
-                            R.string.deleted_by_s,
-                            item.username
-                        )
-                        else -> ""
-                    }
+                val author = if (item.username.isNotBlank()) {
+                    root.context.resources.getString(
+                        R.string.by_s,
+                        item.username,
+                    )
+                } else {
+                    ""
                 }
 
-                subtitle.text = subtitleText
+                subtitle.text = if (author.isBlank()) {
+                    date
+                } else {
+                    "$date $author"
+                }
 
                 if (item.tipLnurl.isNotBlank()) {
                     tip.isVisible = true
