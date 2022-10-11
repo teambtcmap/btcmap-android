@@ -1,6 +1,5 @@
-import java.io.FileInputStream
+
 import java.net.URL
-import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -10,8 +9,6 @@ plugins {
     id("app.cash.sqldelight")
     id("com.google.devtools.ksp") version "1.7.20-1.0.6"
 }
-
-val signingPropertiesFile = rootProject.file("signing.properties")
 
 android {
     namespace = "org.btcmap"
@@ -37,18 +34,7 @@ android {
     }
 
     signingConfigs {
-        if (signingPropertiesFile.exists()) {
-            create("release") {
-                val signingProperties = Properties()
-                signingProperties.load(FileInputStream(signingPropertiesFile))
-                storeFile = File(signingProperties["keystore_path"] as String)
-                storePassword = signingProperties["keystore_password"] as String
-                keyAlias = signingProperties["keystore_key_alias"] as String
-                keyPassword = signingProperties["keystore_key_password"] as String
-            }
-        }
-
-        create("selfSignedRelease") {
+        create("release") {
             storeFile = File(rootDir, "release.jks")
             storePassword = "btcmap"
             keyAlias = "btcmap"
@@ -60,45 +46,26 @@ android {
         resources.excludes += "DebugProbesKt.bin"
     }
 
+    flavorDimensions += "store"
+
+    productFlavors {
+        create("fdroid") {
+            dimension = "store"
+        }
+
+        create("play") {
+            dimension = "store"
+            applicationIdSuffix = ".app"
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
         }
 
-        if (signingPropertiesFile.exists()) {
-            release {
-                val signingProperties = Properties()
-                signingProperties.load(FileInputStream(signingPropertiesFile))
-                signingConfig = signingConfigs.getByName("release")
-            }
-        }
-
-        getByName("release") {
-            // Enables code shrinking, obfuscation, and optimization
-            isMinifyEnabled = true
-
-            // Enables resource shrinking
-            isShrinkResources = true
-
-            // Includes the default ProGuard rules file
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-
-        create("selfSignedRelease") {
-            signingConfig = signingConfigs.getByName("selfSignedRelease")
-
-            // Enables code shrinking, obfuscation, and optimization
-            isMinifyEnabled = true
-
-            // Enables resource shrinking
-            isShrinkResources = true
-
-            // Includes the default ProGuard rules file
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-
-        create("googlePlayRelease") {
-            applicationIdSuffix = ".app"
+        release {
+            signingConfig = signingConfigs.getByName("release")
 
             // Enables code shrinking, obfuscation, and optimization
             isMinifyEnabled = true
@@ -120,7 +87,7 @@ android {
     }
 }
 
-val sqlDelightVer = "2.0.0-alpha04"
+val sqlDelightVer = "2.0.0-SNAPSHOT"
 
 sqldelight {
     database("Database") {
