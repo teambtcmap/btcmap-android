@@ -106,6 +106,13 @@ class ReportsFragment : Fragment() {
 
     private fun initChart(chart: LineChart) {
         chart.apply {
+            val topOffset =
+                TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    2f,
+                    resources.displayMetrics,
+                )
+
             val bottomOffset =
                 TypedValue.applyDimension(
                     TypedValue.COMPLEX_UNIT_DIP,
@@ -113,7 +120,7 @@ class ReportsFragment : Fragment() {
                     resources.displayMetrics,
                 )
 
-            setExtraOffsets(0f, 0f, 0f, bottomOffset)
+            setExtraOffsets(0f, topOffset, 0f, bottomOffset)
             minOffset = 0f
 
             description.isEnabled = false

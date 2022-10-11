@@ -1,6 +1,5 @@
 package users
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.view.LayoutInflater
@@ -40,7 +39,6 @@ class UsersAdapter(
         binding.root,
     ) {
 
-        @SuppressLint("SetTextI18n")
         fun bind(item: Item, onItemClick: (Item) -> Unit) {
             binding.apply {
                 title.text = item.name
@@ -62,7 +60,7 @@ class UsersAdapter(
                             Toast.makeText(
                                 root.context,
                                 R.string.you_dont_have_a_compatible_wallet,
-                                Toast.LENGTH_LONG
+                                Toast.LENGTH_LONG,
                             ).show()
                         }
                     }

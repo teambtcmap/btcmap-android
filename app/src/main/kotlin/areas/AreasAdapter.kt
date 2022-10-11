@@ -1,6 +1,5 @@
 package areas
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -34,7 +33,6 @@ class AreasAdapter(
         binding.root,
     ) {
 
-        @SuppressLint("SetTextI18n")
         fun bind(item: Area, onItemClick: (Area) -> Unit) {
             binding.apply {
                 title.text = item.name
