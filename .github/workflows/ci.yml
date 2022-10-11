@@ -36,5 +36,4 @@ jobs:
           automatic_release_tag: 'preview'
           prerelease: true
           title: 'preview'
-          files: app/build/outputs/apk/selfSignedRelease/app-*.apk
-          
+          files: app/build/outputs/apk/fdroidSelfSignedRelease/app-*.apk

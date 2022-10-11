@@ -1,4 +1,3 @@
-
 import java.net.URL
 
 plugins {
@@ -34,7 +33,7 @@ android {
     }
 
     signingConfigs {
-        create("release") {
+        create("selfSigned") {
             storeFile = File(rootDir, "release.jks")
             storePassword = "btcmap"
             keyAlias = "btcmap"
@@ -47,6 +46,7 @@ android {
     }
 
     flavorDimensions += "store"
+    flavorDimensions += "signature"
 
     productFlavors {
         create("fdroid") {
@@ -57,21 +57,22 @@ android {
             dimension = "store"
             applicationIdSuffix = ".app"
         }
+
+        create("selfSigned") {
+            dimension = "signature"
+            signingConfig = signingConfigs.getByName("selfSigned")
+        }
     }
 
     buildTypes {
-        debug {
-            applicationIdSuffix = ".debug"
-        }
-
         release {
-            signingConfig = signingConfigs.getByName("release")
-
             // Enables code shrinking, obfuscation, and optimization
-            isMinifyEnabled = true
+            // TODO figure out why it doesn't work with SQLDelight
+            // isMinifyEnabled = true
 
             // Enables resource shrinking
-            isShrinkResources = true
+            // TODO figure out why it doesn't work with SQLDelight
+            // isShrinkResources = true
 
             // Includes the default ProGuard rules file
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
