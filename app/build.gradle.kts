@@ -88,7 +88,7 @@ android {
     }
 }
 
-val sqlDelightVer = "2.0.0-SNAPSHOT"
+val sqlDelightVer = "2.0.0-alpha04"
 
 sqldelight {
     database("Database") {
