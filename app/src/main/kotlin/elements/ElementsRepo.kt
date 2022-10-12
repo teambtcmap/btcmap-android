@@ -2,6 +2,7 @@ package elements
 
 import android.content.Context
 import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import db.Database
@@ -25,6 +26,20 @@ class ElementsRepo(
     private val context: Context,
     private val db: Database,
 ) {
+
+    suspend fun selectByBoundingBox(
+        minLat: Double,
+        maxLat: Double,
+        minLon: Double,
+        maxLon: Double,
+    ): List<Element> {
+        return db.elementQueries.selectByBoundingBox(
+            minLat = minLat,
+            maxLat = maxLat,
+            minLon = minLon,
+            maxLon = maxLon,
+        ).asFlow().mapToList(Dispatchers.IO).first()
+    }
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun fetchBundledElements(): Result<SyncReport> {

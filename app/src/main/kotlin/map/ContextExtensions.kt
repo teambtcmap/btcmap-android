@@ -27,3 +27,8 @@ fun Context.getOnPrimaryContainerColor(conf: Conf): Int {
         Color.WHITE
     }
 }
+
+fun Context.getErrorColor(): Int {
+    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorError))
+    return attrs.getColor(0, 0)
+}

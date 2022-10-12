@@ -26,6 +26,11 @@ SELECT *
 FROM area
 ORDER BY name;
 
+selectByid:
+SELECT *
+FROM area
+WHERE id = ?;
+
 deleteAll:
 DELETE
 FROM area;

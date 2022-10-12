@@ -16,13 +16,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import org.btcmap.databinding.FragmentAreasBinding
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class AreasFragment : Fragment() {
 
     private val areasRepo: AreasRepo by inject()
-
-    private val areaResultModel: AreaResultModel by sharedViewModel()
 
     private var _binding: FragmentAreasBinding? = null
     private val binding get() = _binding!!
@@ -65,11 +62,14 @@ class AreasFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.list.layoutManager = LinearLayoutManager(requireContext())
                 val adapter = AreasAdapter {
-                    areaResultModel.area.value = it
-                    findNavController().popBackStack()
+                    findNavController().navigate(
+                        AreasFragmentDirections.actionAreasFragmentToAreaFragment(
+                            it.id,
+                        ),
+                    )
                 }
                 binding.list.adapter = adapter
-                adapter.submitList(areasRepo.getAreas().filter { it.type != "country" })
+                adapter.submitList(areasRepo.selectAll().filter { it.type != "country" })
             }
         }
     }

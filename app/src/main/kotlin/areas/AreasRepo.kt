@@ -2,6 +2,7 @@ package areas
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOneOrNull
 import db.Area
 import db.Database
 import http.await
@@ -20,8 +21,12 @@ class AreasRepo(
     private val db: Database,
 ) {
 
-    suspend fun getAreas(): List<Area> {
+    suspend fun selectAll(): List<Area> {
         return db.areaQueries.selectAll().asFlow().mapToList(Dispatchers.IO).first()
+    }
+
+    suspend fun selectById(id: String): Area? {
+        return db.areaQueries.selectByid(id).asFlow().mapToOneOrNull(Dispatchers.IO).first()
     }
 
     @OptIn(ExperimentalSerializationApi::class)

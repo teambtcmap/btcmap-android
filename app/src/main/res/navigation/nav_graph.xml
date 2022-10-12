@@ -86,7 +86,15 @@
 
     <fragment
         android:id="@+id/areasFragment"
-        android:name="areas.AreasFragment" />
+        android:name="areas.AreasFragment">
+        <action
+            android:id="@+id/action_areasFragment_to_areaFragment"
+            app:destination="@id/areaFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
 
     <fragment
         android:id="@+id/eventsFragment"
@@ -110,6 +118,14 @@
         <argument
             android:name="user_id"
             app:argType="long" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/areaFragment"
+        android:name="area.AreaFragment">
+        <argument
+            android:name="area_id"
+            app:argType="string" />
     </fragment>
 
 </navigation>
