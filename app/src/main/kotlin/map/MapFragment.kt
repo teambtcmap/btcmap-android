@@ -10,7 +10,6 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.PopupMenu
@@ -103,12 +102,11 @@ class MapFragment : Fragment() {
         _binding = FragmentMapBinding.inflate(inflater, container, false)
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.search) { view, windowInsets ->
-            val baseTopMargin =
-                TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP,
-                    8f,
-                    resources.displayMetrics,
-                ).toInt()
+            val baseTopMargin = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                8f,
+                resources.displayMetrics,
+            ).toInt()
 
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
 
@@ -154,8 +152,7 @@ class MapFragment : Fragment() {
                     when (it.itemId) {
                         R.id.action_add_element -> {
                             val intent = Intent(Intent.ACTION_VIEW)
-                            intent.data =
-                                Uri.parse("https://btcmap.org/add-location")
+                            intent.data = Uri.parse("https://btcmap.org/add-location")
                             startActivity(intent)
                         }
                         R.id.action_trends -> {
@@ -222,10 +219,8 @@ class MapFragment : Fragment() {
 
         binding.fab.setOnClickListener {
             if (ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-                != PackageManager.PERMISSION_GRANTED
+                    requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 requestLocationPermissions()
                 return@setOnClickListener
@@ -251,16 +246,15 @@ class MapFragment : Fragment() {
                 val clusterIcon =
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_cluster)!!
                 DrawableCompat.setTint(
-                    clusterIcon,
-                    requireContext().getPrimaryContainerColor(model.conf.conf.value)
+                    clusterIcon, requireContext().getPrimaryContainerColor(model.conf.conf.value)
                 )
 
-                val pinSizePx =
-                    TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP,
-                        48f,
-                        resources.displayMetrics,
-                    ).toInt()
+                val pinSizePx = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    48f,
+                    resources.displayMetrics,
+                ).toInt()
+
                 elementsOverlay!!.setIcon(clusterIcon.toBitmap(pinSizePx, pinSizePx))
                 elementsOverlay!!.textPaint.color =
                     requireContext().getOnPrimaryContainerColor(model.conf.conf.value)
@@ -283,24 +277,6 @@ class MapFragment : Fragment() {
             }
         }
 
-        lifecycleScope.launchWhenResumed {
-            val toast = Toast.makeText(
-                requireContext(),
-                "",
-                Toast.LENGTH_LONG,
-            )
-
-            model.syncMessage.collectLatest {
-                toast.setText(it)
-
-                if (it.isNotBlank()) {
-                    toast.show()
-                } else {
-                    toast.cancel()
-                }
-            }
-        }
-
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 model.syncElements()
@@ -308,8 +284,7 @@ class MapFragment : Fragment() {
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner,
-            backPressedCallback
+            viewLifecycleOwner, backPressedCallback
         )
 
         val nightMode =
@@ -487,8 +462,8 @@ class MapFragment : Fragment() {
     }
 
     private suspend fun getElementDetailsToolbar(): Toolbar {
-        while (elementFragment.view == null
-            || elementFragment.requireView().findViewById<View>(R.id.toolbar)!!.height == 0
+        while (elementFragment.view == null || elementFragment.requireView()
+                .findViewById<View>(R.id.toolbar)!!.height == 0
         ) {
             delay(10)
         }

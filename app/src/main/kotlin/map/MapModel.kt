@@ -10,7 +10,6 @@ import conf.ConfRepo
 import db.Database
 import db.Element
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -57,9 +56,6 @@ class MapModel(
     private val _visibleElements = MutableStateFlow<List<ElementWithMarker>>(emptyList())
     val visibleElements = _visibleElements.asStateFlow()
 
-    private val _syncMessage: MutableStateFlow<String> = MutableStateFlow("")
-    val syncMessage = _syncMessage.asStateFlow()
-
     init {
         combine(
             _mapBoundingBox,
@@ -77,10 +73,7 @@ class MapModel(
                         maxLat = max(viewport.latNorth, viewport.latSouth),
                         minLon = min(viewport.lonEast, viewport.lonWest),
                         maxLon = max(viewport.lonEast, viewport.lonWest),
-                    )
-                        .asFlow()
-                        .mapToList(Dispatchers.IO)
-                        .first()
+                    ).asFlow().mapToList(Dispatchers.IO).first()
                         .map { ElementWithMarker(it, mapMarkersRepo.getMarker(it)) }
                 }
             }
@@ -124,26 +117,7 @@ class MapModel(
 
     fun syncElements() {
         viewModelScope.launch {
-            runCatching {
-                val job = launch {
-                    delay(1000)
-                    _syncMessage.update { "Syncing data" }
-                }
-
-                sync.sync()
-
-                if (job.isCompleted) {
-                    delay(1000)
-                } else {
-                    job.cancel()
-                }
-
-                _syncMessage.update { "" }
-            }.onFailure {
-                _syncMessage.update { "Failed to sync data" }
-                delay(5000)
-                _syncMessage.update { "" }
-            }
+            runCatching { sync.sync() }
         }
     }
 
