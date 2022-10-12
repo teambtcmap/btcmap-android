@@ -80,12 +80,6 @@ class MapFragment : Fragment() {
     ) {
         if (it.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
             model.onLocationPermissionGranted()
-
-            val userLocation = model.userLocation.value
-
-            if (userLocation != null) {
-                binding.map.controller.setCenter(model.userLocation.value)
-            }
         }
     }
 

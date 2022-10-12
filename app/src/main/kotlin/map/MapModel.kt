@@ -10,15 +10,10 @@ import conf.ConfRepo
 import db.Database
 import db.Element
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import location.UserLocationRepository
 import org.koin.android.annotation.KoinViewModel
 import org.osmdroid.util.BoundingBox
@@ -88,6 +83,11 @@ class MapModel(
 
     fun onLocationPermissionGranted() {
         locationRepo.requestLocationUpdates()
+
+        viewModelScope.launch {
+            val location = withTimeout(5_000) { userLocation.filterNotNull().first() }
+            setMapViewport(location.toBoundingBox(1_000.0))
+        }
     }
 
     fun setMapViewport(viewport: BoundingBox) {
