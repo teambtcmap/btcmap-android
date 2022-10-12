@@ -39,6 +39,6 @@ JOIN element el ON el.id = ev.element_id
 JOIN user u ON u.id = ev.user_id
 ORDER BY ev.date DESC;
 
-deleteAll:
-DELETE
+selectMaxDate:
+SELECT max(date)
 FROM event;

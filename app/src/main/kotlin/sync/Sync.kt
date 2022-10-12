@@ -83,13 +83,15 @@ class Sync(
             Log.d(TAG, "Failed to sync users")
         }
 
-        runCatching {
-            Log.d(TAG, "Syncing events")
-            eventsRepo.sync()
-        }.onSuccess {
-            Log.d(TAG, "Synced events")
+        Log.d(TAG, "Syncing events")
+
+        eventsRepo.sync().onSuccess {
+            Log.d(
+                TAG,
+                "Fetched ${it.createdOrUpdatedElements} new or updated events in ${it.timeMillis} ms"
+            )
         }.onFailure {
-            Log.d(TAG, "Failed to sync events")
+            Log.e(TAG, "Failed to fetch new or updated events", it)
         }
 
         confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }

@@ -90,9 +90,10 @@ class ElementsRepo(
 
         val request = OkHttpClient().newCall(Request.Builder().url(url).build())
         val response = runCatching { request.await() }.getOrElse { return Result.failure(it) }
+        val json = Json { ignoreUnknownKeys = true }
 
         val elements = runCatching {
-            Json.decodeFromStream(
+            json.decodeFromStream(
                 ListSerializer(ElementJson.serializer()),
                 response.body!!.byteStream(),
             )
