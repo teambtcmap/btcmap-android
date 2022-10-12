@@ -1,14 +1,15 @@
 package elements
 
 import android.content.Context
-import android.util.Log
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOne
+import app.cash.sqldelight.coroutines.mapToOneNotNull
 import db.Database
 import db.Element
 import http.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -26,14 +27,19 @@ class ElementsRepo(
 ) {
 
     @OptIn(ExperimentalSerializationApi::class)
-    suspend fun fetchBundledElements() {
+    suspend fun fetchBundledElements(): Result<SyncReport> {
+        val startMillis = System.currentTimeMillis()
+
         if (db.elementQueries.selectCount().asFlow().mapToOne(Dispatchers.IO).first() > 0) {
-            return
+            return Result.success(
+                SyncReport(
+                    timeMillis = System.currentTimeMillis() - startMillis,
+                    createdOrUpdatedElements = 0,
+                )
+            )
         }
 
-        Log.d(TAG, "Fetching bundled elements")
-
-        withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.IO) {
             runCatching {
                 val bundledElementsInputStream = context.assets.open("elements.json")
 
@@ -60,18 +66,21 @@ class ElementsRepo(
                     }
                 }
 
-                Log.d(TAG, "Fetched ${bundledElements.size} bundled elements")
-            }.onFailure {
-                Log.e(TAG, "Failed to fetch bundled elements", it)
+                SyncReport(
+                    timeMillis = System.currentTimeMillis() - startMillis,
+                    createdOrUpdatedElements = bundledElements.size.toLong(),
+                )
             }
         }
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    suspend fun sync() {
-        val maxUpdatedAt = withContext(Dispatchers.Default) {
-            db.elementQueries.selectMaxUpdatedAt().executeAsOneOrNull()?.MAX
-        }
+    suspend fun sync(): Result<SyncReport> {
+        val startMillis = System.currentTimeMillis()
+
+        val maxUpdatedAt =
+            db.elementQueries.selectMaxUpdatedAt().asFlow().mapToOneNotNull(Dispatchers.IO)
+                .firstOrNull()?.MAX
 
         val url = if (maxUpdatedAt == null) {
             "https://api.btcmap.org/v2/elements"
@@ -80,12 +89,14 @@ class ElementsRepo(
         }.toHttpUrl()
 
         val request = OkHttpClient().newCall(Request.Builder().url(url).build())
-        val response = request.await()
+        val response = runCatching { request.await() }.getOrElse { return Result.failure(it) }
 
-        val elements = Json.decodeFromStream(
-            ListSerializer(ElementJson.serializer()),
-            response.body!!.byteStream(),
-        )
+        val elements = runCatching {
+            Json.decodeFromStream(
+                ListSerializer(ElementJson.serializer()),
+                response.body!!.byteStream(),
+            )
+        }.getOrElse { return Result.failure(it) }
 
         db.transaction {
             elements.forEach {
@@ -104,6 +115,13 @@ class ElementsRepo(
                 )
             }
         }
+
+        return Result.success(
+            SyncReport(
+                timeMillis = System.currentTimeMillis() - startMillis,
+                createdOrUpdatedElements = elements.size.toLong(),
+            )
+        )
     }
 
     private fun ElementJson.getLatLon(): Pair<Double, Double> {
@@ -137,7 +155,8 @@ class ElementsRepo(
         val deleted_at: String?,
     )
 
-    companion object {
-        private const val TAG = "ElementsRepo"
-    }
+    data class SyncReport(
+        val timeMillis: Long,
+        val createdOrUpdatedElements: Long,
+    )
 }

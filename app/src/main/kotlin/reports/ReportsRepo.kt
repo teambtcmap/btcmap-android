@@ -2,7 +2,6 @@ package reports
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
-import app.cash.sqldelight.coroutines.mapToOne
 import db.Report
 import db.Database
 import http.await
@@ -23,10 +22,6 @@ class ReportsRepo(
 ) {
 
     suspend fun getDailyReports(): List<Report> {
-        if (db.reportQueries.selectCount().asFlow().mapToOne(Dispatchers.IO).first() == 0L) {
-            sync()
-        }
-
         return db.reportQueries.selectAll().asFlow().mapToList(Dispatchers.IO).first()
     }
 
@@ -38,13 +33,10 @@ class ReportsRepo(
         val json = Json { ignoreUnknownKeys = true }
 
         val reports = runCatching {
-            json
-                .decodeFromStream(
-                    ListSerializer(ReportJson.serializer()),
-                    response.body!!.byteStream(),
-                )
-                .sortedBy { it.date }
-                .toMutableList()
+            json.decodeFromStream(
+                ListSerializer(ReportJson.serializer()),
+                response.body!!.byteStream(),
+            ).sortedBy { it.date }.toMutableList()
         }.getOrNull() ?: return
 
         db.transaction {
@@ -53,7 +45,7 @@ class ReportsRepo(
             reports.forEach {
                 db.reportQueries.insertOrReplace(
                     Report(
-                        area_id = "",
+                        area_id = it.area_id,
                         date = it.date,
                         total_elements = it.total_elements,
                         total_elements_onchain = it.total_elements_onchain,

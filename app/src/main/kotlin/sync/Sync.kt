@@ -22,7 +22,7 @@ class Sync(
 ) {
 
     suspend fun sync() {
-        elementsRepo.fetchBundledElements()
+        Log.d(TAG, "Sync was requested")
 
         val lastSyncDateTime = confRepo.conf.value.lastSyncDate
         val minSyncIntervalExpiryDate = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(10)
@@ -30,20 +30,31 @@ class Sync(
         Log.d(TAG, "Min sync interval expiry date: $minSyncIntervalExpiryDate")
 
         if (lastSyncDateTime != null && lastSyncDateTime.isAfter(minSyncIntervalExpiryDate)) {
-            Log.d(TAG, "Cache is up to date")
+            Log.d(TAG, "Cache is up to date, skipping sync")
             return
+        }
+
+        Log.d(TAG, "Fetching bundled elements")
+
+        elementsRepo.fetchBundledElements().onSuccess {
+            Log.d(
+                TAG,
+                "Fetched ${it.createdOrUpdatedElements} bundled elements in ${it.timeMillis} ms"
+            )
+        }.onFailure {
+            Log.e(TAG, "Failed to fetch bundled elements", it)
         }
 
         Log.d(TAG, "Syncing elements")
 
-        runCatching {
-            elementsRepo.sync()
+        elementsRepo.sync().onSuccess {
+            Log.d(
+                TAG,
+                "Fetched ${it.createdOrUpdatedElements} new or updated elements in ${it.timeMillis} ms"
+            )
         }.onFailure {
-            Log.e(TAG, "Failed to sync elements", it)
-            return
-        }.getOrThrow()
-
-        Log.d(TAG, "Synced elements")
+            Log.e(TAG, "Failed to fetch new or updated elements", it)
+        }
 
         runCatching {
             Log.d(TAG, "Syncing reports")
