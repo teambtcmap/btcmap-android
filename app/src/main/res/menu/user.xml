@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_view_on_osm"
+        android:icon="@drawable/baseline_public_24"
+        android:title="@string/view_on_osm"
+        app:showAsAction="ifRoom" />
+
+</menu>

@@ -39,6 +39,18 @@ JOIN element el ON el.id = ev.element_id
 JOIN user u ON u.id = ev.user_id
 ORDER BY ev.date DESC;
 
+selectEventsByUserIdAsListItems:
+SELECT
+    ev.type AS event_type,
+    el.id AS element_id,
+    json_extract(el.osm_json, '$.tags.name') AS element_name,
+    ev.date AS event_date
+FROM event ev
+JOIN element el ON el.id = ev.element_id
+JOIN user u ON u.id = ev.user_id
+WHERE ev.user_id = ?
+ORDER BY ev.date DESC;
+
 selectMaxDate:
 SELECT max(date)
 FROM event;

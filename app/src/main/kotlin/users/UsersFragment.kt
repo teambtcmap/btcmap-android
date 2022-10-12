@@ -1,8 +1,6 @@
 package users
 
-import android.content.Intent
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -66,9 +64,7 @@ class UsersFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.list.layoutManager = LinearLayoutManager(requireContext())
                 val adapter = UsersAdapter {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse("https://www.openstreetmap.org/user/${it.name}")
-                    startActivity(intent)
+                    findNavController().navigate(UsersFragmentDirections.actionUsersFragmentToUserFragment(it.id))
                 }
                 binding.list.adapter = adapter
                 adapter.submitList(usersRepo.selectAllUsersAsListItems().map {

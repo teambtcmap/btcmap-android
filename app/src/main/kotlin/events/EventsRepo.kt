@@ -6,6 +6,7 @@ import app.cash.sqldelight.coroutines.mapToOneNotNull
 import db.Database
 import db.Event
 import db.SelectAllEventsAsListItems
+import db.SelectEventsByUserIdAsListItems
 import http.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -29,13 +30,17 @@ class EventsRepo(
             .first()
     }
 
+    suspend fun selectEventsByUserIdAsListItems(userId: Long): List<SelectEventsByUserIdAsListItems> {
+        return db.eventQueries.selectEventsByUserIdAsListItems(userId).asFlow()
+            .mapToList(Dispatchers.IO).first()
+    }
+
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun sync(): Result<SyncReport> {
         val startMillis = System.currentTimeMillis()
 
-        val maxDate =
-            db.eventQueries.selectMaxDate().asFlow().mapToOneNotNull(Dispatchers.IO)
-                .firstOrNull()?.max
+        val maxDate = db.eventQueries.selectMaxDate().asFlow().mapToOneNotNull(Dispatchers.IO)
+            .firstOrNull()?.max
 
         val url = if (maxDate == null) {
             "https://api.btcmap.org/v2/events"

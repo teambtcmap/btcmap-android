@@ -2,12 +2,14 @@ package users
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOneOrNull
 import db.Database
 import db.SelectAllUsersAsListItems
 import db.User
 import http.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -23,6 +25,10 @@ class UsersRepo(
 
     suspend fun selectAllUsersAsListItems(): List<SelectAllUsersAsListItems> {
         return db.userQueries.selectAllUsersAsListItems().asFlow().mapToList(Dispatchers.IO).first()
+    }
+
+    suspend fun selectById(id: Long): User? {
+        return db.userQueries.selectById(id).asFlow().mapToOneOrNull(Dispatchers.IO).firstOrNull()
     }
 
     @OptIn(ExperimentalSerializationApi::class)
