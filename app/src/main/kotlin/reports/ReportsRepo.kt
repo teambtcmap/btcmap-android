@@ -21,8 +21,8 @@ class ReportsRepo(
     private val db: Database,
 ) {
 
-    suspend fun getDailyReports(): List<Report> {
-        return db.reportQueries.selectAll().asFlow().mapToList(Dispatchers.IO).first()
+    suspend fun selectByAreaId(areaId: String): List<Report> {
+        return db.reportQueries.selectByAreaId(areaId).asFlow().mapToList(Dispatchers.IO).first()
     }
 
     @OptIn(ExperimentalSerializationApi::class)

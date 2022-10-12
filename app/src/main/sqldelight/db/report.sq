@@ -37,14 +37,11 @@ INTO report(
 )
 VALUES ?;
 
-selectAll:
+selectByAreaId:
 SELECT *
 FROM report
+WHERE area_id = ?
 ORDER BY date;
-
-selectCount:
-SELECT count(*)
-FROM report;
 
 deleteAll:
 DELETE

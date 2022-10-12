@@ -75,7 +75,7 @@ class ReportsFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                val reports = repo.getDailyReports()
+                val reports = repo.selectByAreaId("")
 
                 if (reports.isEmpty()) {
                     return@repeatOnLifecycle
