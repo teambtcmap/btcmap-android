@@ -155,9 +155,8 @@ class AreaFragment : Fragment() {
 
                 binding.map.overlays += MapEventsOverlay(object : MapEventsReceiver {
                     override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
-                        findNavController().popBackStack()
-                        findNavController().popBackStack()
                         areaResultModel.area.update { area }
+                        findNavController().navigate(R.id.action_areaFragment_to_mapFragment)
                         return true
                     }
 
