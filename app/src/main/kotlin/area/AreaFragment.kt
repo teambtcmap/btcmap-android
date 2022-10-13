@@ -30,11 +30,8 @@ import org.btcmap.R
 import org.btcmap.databinding.FragmentAreaBinding
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.CustomZoomButtonsController
-import org.osmdroid.views.overlay.MapEventsOverlay
 
 class AreaFragment : Fragment() {
 
@@ -151,19 +148,10 @@ class AreaFragment : Fragment() {
                     binding.map.zoomToBoundingBox(boundingBox, false, boundingBoxPaddingPx)
                 }
 
-                binding.map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-
-                binding.map.overlays += MapEventsOverlay(object : MapEventsReceiver {
-                    override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
-                        areaResultModel.area.update { area }
-                        findNavController().navigate(R.id.action_areaFragment_to_mapFragment)
-                        return true
-                    }
-
-                    override fun longPressHelper(p: GeoPoint?): Boolean {
-                        return false
-                    }
-                })
+                binding.mapContainer.setOnClickListener {
+                    areaResultModel.area.update { area }
+                    findNavController().navigate(R.id.action_areaFragment_to_mapFragment)
+                }
             }
         }
     }
