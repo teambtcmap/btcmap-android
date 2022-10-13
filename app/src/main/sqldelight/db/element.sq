@@ -41,5 +41,5 @@ SELECT COUNT(*)
 FROM element;
 
 selectMaxUpdatedAt:
-SELECT MAX(updated_at)
+SELECT max(updated_at)
 FROM element;

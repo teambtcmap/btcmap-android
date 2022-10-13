@@ -2,6 +2,7 @@ package users
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOneNotNull
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import db.Database
 import db.SelectAllUsersAsListItems
@@ -14,6 +15,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.*
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.koin.core.annotation.Single
@@ -32,20 +34,31 @@ class UsersRepo(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    suspend fun sync() {
-        val url = "https://api.btcmap.org/v2/users"
+    suspend fun sync(): Result<SyncReport> {
+        val startMillis = System.currentTimeMillis()
+
+        val maxUpdatedAt =
+            db.userQueries.selectMaxUpdatedAt().asFlow().mapToOneNotNull(Dispatchers.IO)
+                .firstOrNull()?.max
+
+        val url = if (maxUpdatedAt == null) {
+            "https://api.btcmap.org/v2/users"
+        } else {
+            "https://api.btcmap.org/v2/users?updated_since=$maxUpdatedAt"
+        }.toHttpUrl()
 
         val request = OkHttpClient().newCall(Request.Builder().url(url).build())
-        val response = request.await()
+        val response = runCatching { request.await() }.getOrElse { return Result.failure(it) }
+        val json = Json { ignoreUnknownKeys = true }
 
-        val users = Json.decodeFromStream(
-            ListSerializer(UserJson.serializer()),
-            response.body!!.byteStream(),
-        )
+        val users = runCatching {
+            json.decodeFromStream(
+                ListSerializer(UserJson.serializer()),
+                response.body!!.byteStream(),
+            )
+        }.getOrElse { return Result.failure(it) }
 
         db.transaction {
-            db.userQueries.deleteAll()
-
             users.forEach {
                 db.userQueries.insertOrReplace(
                     User(
@@ -58,6 +71,13 @@ class UsersRepo(
                 )
             }
         }
+
+        return Result.success(
+            SyncReport(
+                timeMillis = System.currentTimeMillis() - startMillis,
+                createdOrUpdatedUsers = users.size.toLong(),
+            )
+        )
     }
 
     @Serializable
@@ -67,5 +87,10 @@ class UsersRepo(
         val created_at: String,
         val updated_at: String,
         val deleted_at: String?,
+    )
+
+    data class SyncReport(
+        val timeMillis: Long,
+        val createdOrUpdatedUsers: Long,
     )
 }

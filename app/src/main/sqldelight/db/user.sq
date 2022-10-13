@@ -32,6 +32,6 @@ LEFT JOIN event e ON e.user_id = u.id
 GROUP BY u.id
 ORDER BY changes DESC;
 
-deleteAll:
-DELETE
+selectMaxUpdatedAt:
+SELECT max(updated_at)
 FROM user;

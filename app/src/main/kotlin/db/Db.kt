@@ -11,7 +11,7 @@ fun database(context: Context): Database {
     val driver = AndroidSqliteDriver(
         schema = Database.Schema,
         context = context,
-        name = "btcmap-v13.db",
+        name = "btcmap-v14.db",
         factory = RequerySQLiteOpenHelperFactory(),
     )
 

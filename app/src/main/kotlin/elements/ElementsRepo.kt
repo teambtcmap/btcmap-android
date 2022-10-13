@@ -95,7 +95,7 @@ class ElementsRepo(
 
         val maxUpdatedAt =
             db.elementQueries.selectMaxUpdatedAt().asFlow().mapToOneNotNull(Dispatchers.IO)
-                .firstOrNull()?.MAX
+                .firstOrNull()?.max
 
         val url = if (maxUpdatedAt == null) {
             "https://api.btcmap.org/v2/elements"
