@@ -44,6 +44,8 @@ class UsersRepo(
         )
 
         db.transaction {
+            db.userQueries.deleteAll()
+
             users.forEach {
                 db.userQueries.insertOrReplace(
                     User(
