@@ -41,9 +41,9 @@ class EventsAdapter(
         fun bind(item: Item, onItemClick: (Item) -> Unit) {
             binding.apply {
                 when (item.type) {
-                    "create" -> icon.setImageResource(R.drawable.baseline_add_location_alt_24)
+                    "create" -> icon.setImageResource(R.drawable.baseline_add_24)
                     "update" -> icon.setImageResource(R.drawable.baseline_edit_24)
-                    "delete" -> icon.setImageResource(R.drawable.baseline_delete_24)
+                    "delete" -> icon.setImageResource(R.drawable.baseline_remove_24)
                 }
 
                 title.text = item.elementName
