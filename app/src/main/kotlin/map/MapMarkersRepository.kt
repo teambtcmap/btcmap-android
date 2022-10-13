@@ -40,12 +40,9 @@ class MapMarkersRepository(
     }
 
     private fun createMarkerIcon(iconResId: Int?): Bitmap {
-        val pinSizePx =
-            TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                48f,
-                context.resources.displayMetrics
-            ).toInt()
+        val pinSizePx = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, 48f, context.resources.displayMetrics
+        ).toInt()
 
         val emptyPinDrawable = ContextCompat.getDrawable(context, R.drawable.ic_marker)!!
         DrawableCompat.setTint(emptyPinDrawable, context.getPrimaryContainerColor(conf.conf.value))
@@ -64,9 +61,12 @@ class MapMarkersRepository(
             ).toRect()
 
             val iconDrawable = ContextCompat.getDrawable(context, iconResId)!!
-            DrawableCompat.setTint(iconDrawable, context.getOnPrimaryContainerColor(conf.conf.value))
 
-            val iconBitmap = ContextCompat.getDrawable(context, iconResId)!!.toBitmap(
+            DrawableCompat.setTint(
+                iconDrawable, context.getOnPrimaryContainerColor(conf.conf.value)
+            )
+
+            val iconBitmap = iconDrawable.toBitmap(
                 width = iconFrame.right - iconFrame.left,
                 height = iconFrame.bottom - iconFrame.top,
             )
