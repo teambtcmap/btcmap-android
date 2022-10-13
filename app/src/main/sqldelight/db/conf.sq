@@ -1,5 +1,5 @@
-import kotlin.Boolean;
 import java.time.ZonedDateTime;
+import kotlin.Boolean;
 
 CREATE TABLE conf (
     lastSyncDate TEXT AS ZonedDateTime,
@@ -8,12 +8,22 @@ CREATE TABLE conf (
     viewport_north_lat REAL NOT NULL,
     viewport_east_lon REAL NOT NULL,
     viewport_south_lat REAL NOT NULL,
-    viewport_west_lon REAL NOT NULL
+    viewport_west_lon REAL NOT NULL,
+    showTags INTEGER AS Boolean NOT NULL
 );
 
 insert:
 INSERT
-INTO conf (lastSyncDate, themedPins, darkMap, viewport_north_lat, viewport_east_lon, viewport_south_lat, viewport_west_lon)
+INTO conf (
+    lastSyncDate,
+    themedPins,
+    darkMap,
+    viewport_north_lat,
+    viewport_east_lon,
+    viewport_south_lat,
+    viewport_west_lon,
+    showTags
+)
 VALUES ?;
 
 select:

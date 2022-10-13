@@ -447,11 +447,7 @@ class MapFragment : Fragment() {
                 }
             }
 
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                (childFragmentManager.findFragmentById(R.id.elementFragment) as ElementFragment).setScrollProgress(
-                    slideOffset
-                )
-            }
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
     }
 

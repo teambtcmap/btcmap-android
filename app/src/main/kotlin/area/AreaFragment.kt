@@ -90,7 +90,13 @@ class AreaFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.list.layoutManager = LinearLayoutManager(requireContext())
-                val adapter = AreaElementsAdapter {}
+                val adapter = AreaElementsAdapter {
+                    findNavController().navigate(
+                        AreaFragmentDirections.actionAreaFragmentToElementFragment(
+                            it.id,
+                        ),
+                    )
+                }
                 binding.list.adapter = adapter
                 val items = elementsRepo.selectByBoundingBox(
                     minLat = area.min_lat,

@@ -6,16 +6,35 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import conf.ConfRepo
 import db.Element
+import elements.ElementsRepo
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.osmdroid.util.GeoPoint
+import search.SearchResultModel
 
 class ElementFragment : Fragment() {
 
+    private val elementsRepo: ElementsRepo by inject()
+
+    private val confRepo: ConfRepo by inject()
+
     private val tagsJsonFormatter by lazy { Json { prettyPrint = true } }
+
+    private val resultModel: SearchResultModel by sharedViewModel()
 
     private var elementId = ""
 
@@ -23,32 +42,64 @@ class ElementFragment : Fragment() {
     private val binding get() = _binding!!
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentElementBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        if (arguments != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { appBar, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+                appBar.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    topMargin = insets.top
+                }
+                val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+                binding.scrollView.setPadding(0, 0, 0, navBarsInsets.bottom)
+                WindowInsetsCompat.CONSUMED
+            }
+
+            val elementId = ElementFragmentArgs.fromBundle(requireArguments()).elementId
+            val element = runBlocking { elementsRepo.selectById(elementId)!! }
+            setElement(element)
+
+            binding.toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24)
+
+            binding.toolbar.setNavigationOnClickListener {
+                findNavController().popBackStack()
+            }
+
+            binding.mapContainer.isVisible = true
+
+            binding.mapContainer.setOnClickListener {
+                resultModel.element.update { element }
+                findNavController().navigate(R.id.action_elementFragment_to_mapFragment)
+            }
+
+            binding.map.post {
+                val mapController = binding.map.controller
+                mapController.setZoom(16.toDouble())
+                val startPoint = GeoPoint(element.lat, element.lon)
+                mapController.setCenter(startPoint)
+                mapController.zoomTo(19.0)
+            }
+        }
+
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.action_view_on_osm -> {
                     val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data =
-                        Uri.parse(
-                            "https://www.openstreetmap.org/${
-                                elementId.replace(
-                                    ":",
-                                    "/"
-                                )
-                            }"
-                        )
+                    intent.data = Uri.parse(
+                        "https://www.openstreetmap.org/${
+                            elementId.replace(
+                                ":", "/"
+                            )
+                        }"
+                    )
                     startActivity(intent)
                 }
-                R.id.action_edit,
-                R.id.action_delete -> {
+                R.id.action_edit, R.id.action_delete -> {
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.data =
                         Uri.parse("https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions")
@@ -59,33 +110,12 @@ class ElementFragment : Fragment() {
             true
         }
 
-        binding.tagsButton.setOnClickListener {
-            binding.tags.isVisible = !binding.tags.isVisible
-
-            if (binding.tags.isVisible) {
-                binding.tagsButton.setText(R.string.hide_tags)
-            } else {
-                binding.tagsButton.setText(R.string.show_tags)
-            }
-        }
+        binding.tags.isVisible = confRepo.conf.value.showTags
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    fun setScrollProgress(progress: Float) {
-        val viewOnOsm = binding.toolbar.menu.findItem(R.id.action_view_on_osm)!!
-        viewOnOsm.isVisible = progress == 1.0f
-
-        val edit = binding.toolbar.menu.findItem(R.id.action_edit)!!
-        edit.isVisible = progress == 1.0f
-
-        val delete = binding.toolbar.menu.findItem(R.id.action_delete)!!
-        delete.isVisible = progress == 1.0f
-
-        binding.divider.alpha = 0.12f * progress
     }
 
     fun setElement(element: Element) {

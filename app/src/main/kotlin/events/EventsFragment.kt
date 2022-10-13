@@ -19,8 +19,6 @@ import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementEventsBinding
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import search.SearchResultModel
 import java.time.ZonedDateTime
 import java.util.regex.Pattern
 
@@ -29,8 +27,6 @@ class EventsFragment : Fragment() {
     private val db: Database by inject()
 
     private val eventsRepo: EventsRepo by inject()
-
-    private val resultModel: SearchResultModel by sharedViewModel()
 
     private var _binding: FragmentElementEventsBinding? = null
     private val binding get() = _binding!!
@@ -72,9 +68,13 @@ class EventsFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.list.layoutManager = LinearLayoutManager(requireContext())
                 val adapter = EventsAdapter {
-                    resultModel.element.value =
-                        db.elementQueries.selectById(it.elementId).executeAsOneOrNull()
-                    findNavController().popBackStack()
+                    val element = db.elementQueries.selectById(it.elementId).executeAsOneOrNull()
+                        ?: return@EventsAdapter
+                    findNavController().navigate(
+                        EventsFragmentDirections.actionEventsFragmentToElementFragment(
+                            element.id,
+                        ),
+                    )
                 }
                 binding.list.adapter = adapter
                 adapter.submitList(eventsRepo.selectAllAsListItems().map {

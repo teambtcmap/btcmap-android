@@ -1,10 +1,7 @@
 package elements
 
 import android.content.Context
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
-import app.cash.sqldelight.coroutines.mapToOne
-import app.cash.sqldelight.coroutines.mapToOneNotNull
+import app.cash.sqldelight.coroutines.*
 import db.Database
 import db.Element
 import http.await
@@ -26,6 +23,10 @@ class ElementsRepo(
     private val context: Context,
     private val db: Database,
 ) {
+
+    suspend fun selectById(id: String): Element? {
+        return db.elementQueries.selectById(id).asFlow().mapToOneOrNull(Dispatchers.IO).first()
+    }
 
     suspend fun selectByBoundingBox(
         minLat: Double,

@@ -64,6 +64,11 @@ class SettingsFragment : Fragment() {
         binding.darkMap.setOnCheckedChangeListener { _, isChecked ->
             conf.update { it.copy(darkMap = isChecked) }
         }
+
+        binding.showTags.isChecked = conf.conf.value.showTags
+        binding.showTags.setOnCheckedChangeListener { _, isChecked ->
+            conf.update { it.copy(showTags = isChecked) }
+        }
     }
 
     override fun onDestroyView() {

@@ -49,6 +49,7 @@ class ConfRepo(
             viewport_east_lon = 121.95219572432649,
             viewport_south_lat = 11.945223417353624,
             viewport_west_lon = 121.90219745907318,
+            showTags = false,
         )
     }
 }

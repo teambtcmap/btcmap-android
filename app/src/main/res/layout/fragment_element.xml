@@ -10,31 +10,35 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="1"
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/element"
-        app:title="Title"
-        tools:text="Place name" />
-
-    <View
-        android:id="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_gravity="bottom"
-        android:background="?attr/colorOnSurface"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+        tools:text="Satoshi's Bar" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider">
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/mapContainer"
+                android:layout_width="match_parent"
+                android:layout_height="192dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone">
+
+                <map.DisabledMapView
+                    android:id="@+id/map"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/address"
@@ -93,15 +97,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/openingHours"
                 tools:text="Place description." />
-
-            <Button
-                android:id="@+id/tagsButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:text="@string/show_tags" />
 
         </LinearLayout>
 

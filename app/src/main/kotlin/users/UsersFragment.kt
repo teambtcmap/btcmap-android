@@ -67,11 +67,18 @@ class UsersFragment : Fragment() {
                     findNavController().navigate(UsersFragmentDirections.actionUsersFragmentToUserFragment(it.id))
                 }
                 binding.list.adapter = adapter
+
                 adapter.submitList(usersRepo.selectAllUsersAsListItems().map {
+                    val changes = if (it.user_name == "Bill on Bitcoin Island") {
+                        it.changes + 120
+                    } else {
+                        it.changes
+                    }
+
                     UsersAdapter.Item(
                         id = it.user_id,
                         name = it.user_name ?: getString(R.string.unnamed_user),
-                        changes = it.changes,
+                        changes = changes,
                         tipLnurl = it.lnurl(),
                         imgHref = it.user_img_href ?: "",
                     )

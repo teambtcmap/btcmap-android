@@ -98,7 +98,15 @@
 
     <fragment
         android:id="@+id/eventsFragment"
-        android:name="events.EventsFragment" />
+        android:name="events.EventsFragment">
+        <action
+            android:id="@+id/action_eventsFragment_to_elementFragment"
+            app:destination="@id/elementFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
 
     <fragment
         android:id="@+id/usersFragment"
@@ -128,6 +136,29 @@
             app:argType="string" />
         <action
             android:id="@+id/action_areaFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:launchSingleTop="true"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_areaFragment_to_elementFragment"
+            app:destination="@id/elementFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/elementFragment"
+        android:name="element.ElementFragment">
+        <argument
+            android:name="element_id"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_elementFragment_to_mapFragment"
             app:destination="@id/mapFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
