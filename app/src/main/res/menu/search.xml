@@ -8,23 +8,23 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_trends"
-        android:title="@string/trends"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/action_areas"
         android:title="@string/communities"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_element_events"
-        android:title="@string/latest_changes"
+        android:id="@+id/action_trends"
+        android:title="@string/trends"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_users"
-        android:title="@string/top_mappers"
+        android:title="@string/top_supertaggers"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_element_events"
+        android:title="@string/latest_changes"
         app:showAsAction="never" />
 
     <item

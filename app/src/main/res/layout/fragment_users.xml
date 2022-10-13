@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="?attr/homeAsUpIndicator"
-        app:title="@string/top_mappers"
+        app:title="@string/top_supertaggers"
         app:titleMarginStart="16dp" />
 
     <androidx.recyclerview.widget.RecyclerView
