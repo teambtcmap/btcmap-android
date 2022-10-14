@@ -43,6 +43,7 @@
     <string name="unnamed_user">Unnamed user</string>
     <string name="outdated">Outdated</string>
     <string name="up_to_date">Up-to-date</string>
+    <string name="not_verified_by_supertaggers">Not verified by Supertaggers</string>
     <plurals name="d_changes">
         <item quantity="zero">%d changes</item>
         <item quantity="one">%d change</item>

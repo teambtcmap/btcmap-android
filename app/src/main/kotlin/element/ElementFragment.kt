@@ -3,6 +3,7 @@ package element
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,12 +20,15 @@ import elements.ElementsRepo
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
+import map.getErrorColor
+import map.getOnSurfaceColor
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.osmdroid.util.GeoPoint
 import search.SearchResultModel
+import java.time.ZonedDateTime
 
 class ElementFragment : Fragment() {
 
@@ -123,6 +127,29 @@ class ElementFragment : Fragment() {
 
         val tags = element.tags()
         binding.toolbar.title = tags["name"]?.jsonPrimitive?.content ?: "Unnamed"
+
+        val surveyDate = tags["survey:date"]?.jsonPrimitive?.content ?: ""
+
+        if (surveyDate.isNotBlank()) {
+            runCatching {
+                val date = DateUtils.getRelativeDateTimeString(
+                    requireContext(),
+                    ZonedDateTime.parse(surveyDate + "T00:00:00Z").toEpochSecond() * 1000,
+                    DateUtils.SECOND_IN_MILLIS,
+                    DateUtils.WEEK_IN_MILLIS,
+                    0,
+                ).split(",").first()
+
+                binding.lastVerified.text = date
+                binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
+            }.onFailure {
+                binding.lastVerified.text = surveyDate
+                binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
+            }
+        } else {
+            binding.lastVerified.text = getString(R.string.not_verified_by_supertaggers)
+            binding.lastVerified.setTextColor(requireContext().getErrorColor())
+        }
 
         val address = buildString {
             if (tags.containsKey("addr:housenumber")) {
