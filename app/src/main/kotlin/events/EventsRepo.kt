@@ -39,13 +39,14 @@ class EventsRepo(
     suspend fun sync(): Result<SyncReport> {
         val startMillis = System.currentTimeMillis()
 
-        val maxDate = db.eventQueries.selectMaxDate().asFlow().mapToOneNotNull(Dispatchers.IO)
-            .firstOrNull()?.max
+        val maxUpdatedAt =
+            db.eventQueries.selectMaxUpdatedAt().asFlow().mapToOneNotNull(Dispatchers.IO)
+                .firstOrNull()?.max
 
-        val url = if (maxDate == null) {
+        val url = if (maxUpdatedAt == null) {
             "https://api.btcmap.org/v2/events"
         } else {
-            "https://api.btcmap.org/v2/events?updated_since=$maxDate"
+            "https://api.btcmap.org/v2/events?updated_since=$maxUpdatedAt"
         }.toHttpUrl()
 
         val request = OkHttpClient().newCall(Request.Builder().url(url).build())
@@ -63,10 +64,13 @@ class EventsRepo(
             events.forEach {
                 db.eventQueries.insert(
                     Event(
-                        date = it.date,
+                        id = it.id,
                         type = it.type,
                         element_id = it.element_id,
                         user_id = it.user_id,
+                        created_at = it.created_at,
+                        updated_at = it.updated_at,
+                        deleted_at = it.deleted_at,
                     )
                 )
             }
@@ -82,10 +86,14 @@ class EventsRepo(
 
     @Serializable
     private data class EventJson(
+        val id: Long,
         val date: String,
         val type: String,
         val element_id: String,
         val user_id: Long,
+        val created_at: String,
+        val updated_at: String,
+        val deleted_at: String,
     )
 
     data class SyncReport(

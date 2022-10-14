@@ -1,56 +1,62 @@
 CREATE TABLE event (
-    date TEXT NOT NULL,
+    id INTEGER PRIMARY KEY,
     type TEXT NOT NULL,
     element_id TEXT NOT NULL,
-    user_id INTEGER NOT NULL
+    user_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT NOT NULL
 );
 
 insert:
 INSERT
 INTO event(
-    date,
+    id,
     type,
     element_id,
-    user_id
+    user_id,
+    created_at,
+    updated_at,
+    deleted_at
 )
 VALUES ?;
 
 selectAll:
 SELECT *
 FROM event
-ORDER BY date DESC;
+ORDER BY created_at DESC;
 
 selectByUserId:
 SELECT *
 FROM event
 WHERE user_id = ?
-ORDER BY date DESC;
+ORDER BY created_at DESC;
 
 selectAllEventsAsListItems:
 SELECT
     ev.type AS event_type,
     el.id AS element_id,
     json_extract(el.osm_json, '$.tags.name') AS element_name,
-    ev.date AS event_date,
+    ev.created_at AS event_date,
     json_extract(u.osm_json, '$.display_name') AS user_name,
     json_extract(u.osm_json, '$.description') AS user_description
 FROM event ev
 JOIN element el ON el.id = ev.element_id
 JOIN user u ON u.id = ev.user_id
-ORDER BY ev.date DESC;
+ORDER BY ev.created_at DESC;
 
 selectEventsByUserIdAsListItems:
 SELECT
     ev.type AS event_type,
     el.id AS element_id,
     json_extract(el.osm_json, '$.tags.name') AS element_name,
-    ev.date AS event_date
+    ev.created_at AS event_date
 FROM event ev
 JOIN element el ON el.id = ev.element_id
 JOIN user u ON u.id = ev.user_id
 WHERE ev.user_id = ?
-ORDER BY ev.date DESC;
+ORDER BY ev.created_at DESC;
 
-selectMaxDate:
-SELECT max(date)
+selectMaxUpdatedAt:
+SELECT max(updated_at)
 FROM event;
