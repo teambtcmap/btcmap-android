@@ -44,7 +44,8 @@ FROM event ev
 JOIN element el ON el.id = ev.element_id
 JOIN user u ON u.id = ev.user_id
 WHERE ev.deleted_at == ''
-ORDER BY ev.created_at DESC;
+ORDER BY ev.created_at DESC
+LIMIT :limit;
 
 selectEventsByUserIdAsListItems:
 SELECT

@@ -15,14 +15,14 @@ import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
-import org.btcmap.databinding.FragmentElementEventsBinding
+import org.btcmap.databinding.FragmentEventsBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class EventsFragment : Fragment() {
 
     private val model: EventsModel by viewModel()
 
-    private var _binding: FragmentElementEventsBinding? = null
+    private var _binding: FragmentEventsBinding? = null
     private val binding get() = _binding!!
 
     private val adapter = EventsAdapter {
@@ -44,7 +44,7 @@ class EventsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentElementEventsBinding.inflate(inflater, container, false)
+        _binding = FragmentEventsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -55,7 +55,7 @@ class EventsFragment : Fragment() {
                 topMargin = insets.top
             }
             val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            binding.list.setPadding(0, 0, 0, navBarsInsets.bottom)
+            binding.scrollView.setPadding(0, 0, 0, navBarsInsets.bottom)
             WindowInsetsCompat.CONSUMED
         }
 
@@ -88,6 +88,10 @@ class EventsFragment : Fragment() {
                 }
 
             }
+        }
+
+        binding.showMore.setOnClickListener {
+            model.onShowMoreItemsClick()
         }
     }
 

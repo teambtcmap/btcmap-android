@@ -22,8 +22,8 @@ class EventsRepo(
     private val db: Database,
 ) {
 
-    suspend fun selectAllNotDeletedAsListItems(): List<SelectAllNotDeletedEventsAsListItems> {
-        return db.eventQueries.selectAllNotDeletedEventsAsListItems().asFlow().mapToList(Dispatchers.IO)
+    suspend fun selectAllNotDeletedAsListItems(limit: Long): List<SelectAllNotDeletedEventsAsListItems> {
+        return db.eventQueries.selectAllNotDeletedEventsAsListItems(limit).asFlow().mapToList(Dispatchers.IO)
             .first()
     }
 

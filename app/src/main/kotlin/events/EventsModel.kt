@@ -24,9 +24,22 @@ class EventsModel(
     private val _state: MutableStateFlow<State> = MutableStateFlow(State.Loading)
     val state = _state.asStateFlow()
 
+    private var limit = LIMIT
+
     init {
+        loadItems()
+    }
+
+    suspend fun selectElementById(id: String) = elementsRepo.selectById(id)
+
+    fun onShowMoreItemsClick() {
+        limit += LIMIT
+        loadItems()
+    }
+
+    private fun loadItems() {
         viewModelScope.launch {
-            val allNotDeleted = eventsRepo.selectAllNotDeletedAsListItems()
+            val allNotDeleted = eventsRepo.selectAllNotDeletedAsListItems(limit)
 
             val items = allNotDeleted.map {
                 EventsAdapter.Item(
@@ -42,8 +55,6 @@ class EventsModel(
             _state.update { State.ShowingItems(items) }
         }
     }
-
-    suspend fun selectElementById(id: String) = elementsRepo.selectById(id)
 
     sealed class State {
 
@@ -63,5 +74,9 @@ class EventsModel(
         } else {
             ""
         }
+    }
+
+    companion object {
+        private const val LIMIT = 100L
     }
 }
