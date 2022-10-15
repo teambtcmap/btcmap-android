@@ -253,7 +253,7 @@ class MapFragment : Fragment() {
                 elementsOverlay!!.textPaint.color =
                     requireContext().getOnPrimaryContainerColor(model.conf.conf.value)
 
-                elementWithMarkers.forEach {
+                elementWithMarkers.sortedByDescending { it.element.lat }.forEach {
                     val marker = Marker(binding.map)
                     marker.position = GeoPoint(it.element.lat, it.element.lon)
                     marker.icon = it.marker
