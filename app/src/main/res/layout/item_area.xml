@@ -38,7 +38,7 @@
             style="?textAppearanceCaption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="837 places (13% up-to-date)" />
+            tools:text="1.2 mi" />
 
     </LinearLayout>
 

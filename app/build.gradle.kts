@@ -6,7 +6,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
     id("androidx.navigation.safeargs.kotlin")
     id("app.cash.sqldelight")
-    id("com.google.devtools.ksp") version "1.7.20-1.0.6"
+    id("com.google.devtools.ksp") version "1.7.20-1.0.7"
 }
 
 android {
@@ -147,7 +147,7 @@ dependencies {
     testImplementation("app.cash.sqldelight:sqlite-driver:$sqlDelightVer")
 
     // Injection library
-    implementation("io.insert-koin:koin-android:3.2.0")
+    implementation("io.insert-koin:koin-android:3.2.2")
     val koinAnnotationsVer = "1.0.1"
     implementation("io.insert-koin:koin-annotations:$koinAnnotationsVer")
     ksp("io.insert-koin:koin-ksp-compiler:$koinAnnotationsVer")

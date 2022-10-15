@@ -153,7 +153,12 @@ class MapFragment : Fragment() {
                             findNavController().navigate(MapFragmentDirections.actionMapFragmentToReportsFragment())
                         }
                         R.id.action_areas -> {
-                            findNavController().navigate(MapFragmentDirections.actionMapFragmentToAreasFragment())
+                            findNavController().navigate(
+                                MapFragmentDirections.actionMapFragmentToAreasFragment(
+                                    binding.map.boundingBox.centerLatitude.toString(),
+                                    binding.map.boundingBox.centerLongitude.toString(),
+                                )
+                            )
                         }
                         R.id.action_element_events -> {
                             findNavController().navigate(MapFragmentDirections.actionMapFragmentToEventsFragment())

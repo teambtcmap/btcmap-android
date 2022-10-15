@@ -15,14 +15,22 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import org.btcmap.databinding.FragmentAreasBinding
-import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AreasFragment : Fragment() {
 
-    private val areasRepo: AreasRepo by inject()
+    private val model: AreasModel by viewModel()
 
     private var _binding: FragmentAreasBinding? = null
     private val binding get() = _binding!!
+
+    private val adapter = AreasAdapter {
+        findNavController().navigate(
+            AreasFragmentDirections.actionAreasFragmentToAreaFragment(
+                it.id,
+            ),
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,6 +42,13 @@ class AreasFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val args = AreasFragmentArgs.fromBundle(requireArguments())
+
+        model.setArgs(
+            lat = args.lat.toDouble(),
+            lon = args.lon.toDouble(),
+        )
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { toolbar, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
             toolbar.updateLayoutParams<ConstraintLayout.LayoutParams> {
@@ -52,24 +67,25 @@ class AreasFragment : Fragment() {
             requireActivity().window,
             requireActivity().window.decorView,
         ).isAppearanceLightStatusBars =
-            when (requireContext().resources.configuration.uiMode and
-                    Configuration.UI_MODE_NIGHT_MASK) {
+            when (requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
                 Configuration.UI_MODE_NIGHT_NO -> true
                 else -> false
             }
 
+        binding.list.layoutManager = LinearLayoutManager(requireContext())
+        binding.list.adapter = adapter
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                binding.list.layoutManager = LinearLayoutManager(requireContext())
-                val adapter = AreasAdapter {
-                    findNavController().navigate(
-                        AreasFragmentDirections.actionAreasFragmentToAreaFragment(
-                            it.id,
-                        ),
-                    )
+                model.state.collect {
+                    when (it) {
+                        is AreasModel.State.ShowingItems -> {
+                            adapter.submitList(it.items)
+                        }
+
+                        else -> {}
+                    }
                 }
-                binding.list.adapter = adapter
-                adapter.submitList(areasRepo.selectAllNotDeleted().filter { it.type != "country" })
             }
         }
     }
