@@ -30,7 +30,7 @@ class MapModel(
     private val db: Database,
 ) : ViewModel() {
 
-    private val mapMarkersRepo: MutableStateFlow<MapMarkersRepository?> = MutableStateFlow(null)
+    private val mapMarkersRepo: MutableStateFlow<MapMarkersRepo?> = MutableStateFlow(null)
 
     val userLocation: StateFlow<GeoPoint?> = locationRepo.location
 
@@ -78,7 +78,7 @@ class MapModel(
     }
 
     fun setArgs(context: Context) {
-        mapMarkersRepo.update { MapMarkersRepository(context, conf) }
+        mapMarkersRepo.update { MapMarkersRepo(context, conf) }
     }
 
     fun onLocationPermissionGranted() {

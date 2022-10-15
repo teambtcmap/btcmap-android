@@ -107,7 +107,10 @@ class AreaFragment : Fragment() {
                     val status: String
                     val statusColor: Int
 
-                    if (it.tags()["survey:date"]?.jsonPrimitive?.content.isNullOrBlank()) {
+                    if (
+                        it.tags()["survey:date"]?.jsonPrimitive?.content.isNullOrBlank()
+                        && it.tags()["check_date"]?.jsonPrimitive?.content.isNullOrBlank()
+                    ) {
                         status = getString(R.string.outdated)
                         statusColor = requireContext().getErrorColor()
                     } else {

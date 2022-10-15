@@ -20,6 +20,7 @@ import elements.ElementsRepo
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
+import map.MapMarkersRepo
 import map.getErrorColor
 import map.getOnSurfaceColor
 import org.btcmap.R
@@ -27,6 +28,7 @@ import org.btcmap.databinding.FragmentElementBinding
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.Marker
 import search.SearchResultModel
 import java.time.ZonedDateTime
 
@@ -87,6 +89,12 @@ class ElementFragment : Fragment() {
                 val startPoint = GeoPoint(element.lat, element.lon)
                 mapController.setCenter(startPoint)
                 mapController.zoomTo(19.0)
+
+                val markersRepo = MapMarkersRepo(requireContext(), confRepo)
+                val marker = Marker(binding.map)
+                marker.position = GeoPoint(element.lat, element.lon)
+                marker.icon = markersRepo.getMarker(element)
+                binding.map.overlays.add(marker)
             }
         }
 
@@ -103,7 +111,20 @@ class ElementFragment : Fragment() {
                     )
                     startActivity(intent)
                 }
-                R.id.action_edit, R.id.action_delete -> {
+
+                R.id.action_edit_on_osm -> {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse(
+                        "https://www.openstreetmap.org/edit?${
+                            elementId.replace(
+                                ":", "="
+                            )
+                        }"
+                    )
+                    startActivity(intent)
+                }
+
+                R.id.action_supertagger_manual -> {
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.data =
                         Uri.parse("https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions")

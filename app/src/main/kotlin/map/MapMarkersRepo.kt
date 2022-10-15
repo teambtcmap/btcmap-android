@@ -16,7 +16,7 @@ import db.Element
 import icons.iconResId
 import org.btcmap.R
 
-class MapMarkersRepository(
+class MapMarkersRepo(
     private val context: Context,
     private val conf: ConfRepo,
 ) {

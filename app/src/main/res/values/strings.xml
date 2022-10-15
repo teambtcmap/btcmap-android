@@ -15,8 +15,6 @@
     <string name="donation_address_ln" translatable="false">LNURL1DP68GURN8GHJ7ERZXVUXVER9X4SNYTNY9EMX7MR5V9NK2CTSWQHXJME0D3H82UNVWQHKZURF9AMRZTMVDE6HYMP0XYA8GEF9</string>
     <string name="help_us_improve_btc_map">Help us improve BTC Map</string>
     <string name="show_my_location">Show my location</string>
-    <string name="edit_place">Edit place</string>
-    <string name="delete_place">Delete place</string>
     <string name="show_tags">Show tags</string>
     <string name="hide_tags">Hide tags</string>
     <string name="copy_lnurl">Copy LNURL</string>
@@ -36,7 +34,9 @@
     <string name="legacy_places">Legacy places</string>
     <string name="tip" tools:ignore="ExtraTranslation">⚡ Tip</string>
     <string name="osm_copyright">© OpenStreetMap contributors</string>
-    <string name="view_on_osm">View on OpenStreetMap</string>
+    <string name="view_on_osm">View on OSM</string>
+    <string name="edit_on_osm">Edit on OSM</string>
+    <string name="supertagger_manual">Supertagger manual</string>
     <string name="top_supertaggers">Top supertaggers</string>
     <string name="by_s">by %1$s</string>
     <string name="unnamed_place">Unnamed place</string>
