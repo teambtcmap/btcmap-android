@@ -65,13 +65,15 @@ class Sync(
             Log.d(TAG, "Failed to sync reports")
         }
 
-        runCatching {
-            Log.d(TAG, "Syncing areas")
-            areasRepo.sync()
-        }.onSuccess {
-            Log.d(TAG, "Synced areas")
+        Log.d(TAG, "Syncing areas")
+
+        areasRepo.sync().onSuccess {
+            Log.d(
+                TAG,
+                "Fetched ${it.createdOrUpdatedAreas} new or updated areas in ${it.timeMillis} ms"
+            )
         }.onFailure {
-            Log.d(TAG, "Failed to sync areas")
+            Log.e(TAG, "Failed to fetch new or updated areas", it)
         }
 
         Log.d(TAG, "Syncing users")

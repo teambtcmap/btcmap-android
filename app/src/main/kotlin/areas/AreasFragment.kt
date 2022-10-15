@@ -69,7 +69,7 @@ class AreasFragment : Fragment() {
                     )
                 }
                 binding.list.adapter = adapter
-                adapter.submitList(areasRepo.selectAll().filter { it.type != "country" })
+                adapter.submitList(areasRepo.selectAllNotDeleted().filter { it.type != "country" })
             }
         }
     }

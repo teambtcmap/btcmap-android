@@ -5,7 +5,10 @@ CREATE TABLE area (
     min_lon REAL NOT NULL,
     min_lat REAL NOT NULL,
     max_lon REAL NOT NULL,
-    max_lat REAL NOT NULL
+    max_lat REAL NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT NOT NULL
 );
 
 insertOrReplace:
@@ -17,20 +20,24 @@ INTO area(
     min_lon,
     min_lat,
     max_lon,
-    max_lat
+    max_lat,
+    created_at,
+    updated_at,
+    deleted_at
 )
 VALUES ?;
 
-selectAll:
+selectAllNotDeleted:
 SELECT *
 FROM area
+WHERE deleted_at == ''
 ORDER BY name;
 
-selectByid:
+selectById:
 SELECT *
 FROM area
 WHERE id = ?;
 
-deleteAll:
-DELETE
+selectMaxUpdatedAt:
+SELECT max(updated_at)
 FROM area;
