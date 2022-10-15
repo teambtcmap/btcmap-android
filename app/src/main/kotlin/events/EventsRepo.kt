@@ -3,10 +3,7 @@ package events
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneNotNull
-import db.Database
-import db.Event
-import db.SelectAllEventsAsListItems
-import db.SelectEventsByUserIdAsListItems
+import db.*
 import http.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -25,8 +22,8 @@ class EventsRepo(
     private val db: Database,
 ) {
 
-    suspend fun selectAllAsListItems(): List<SelectAllEventsAsListItems> {
-        return db.eventQueries.selectAllEventsAsListItems().asFlow().mapToList(Dispatchers.IO)
+    suspend fun selectAllNotDeletedAsListItems(): List<SelectAllNotDeletedEventsAsListItems> {
+        return db.eventQueries.selectAllNotDeletedEventsAsListItems().asFlow().mapToList(Dispatchers.IO)
             .first()
     }
 

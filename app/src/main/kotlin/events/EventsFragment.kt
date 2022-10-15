@@ -11,25 +11,33 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import db.Database
-import db.SelectAllEventsAsListItems
 import kotlinx.coroutines.launch
-import org.btcmap.R
 import org.btcmap.databinding.FragmentElementEventsBinding
-import org.koin.android.ext.android.inject
-import java.time.ZonedDateTime
-import java.util.regex.Pattern
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class EventsFragment : Fragment() {
 
-    private val db: Database by inject()
-
-    private val eventsRepo: EventsRepo by inject()
+    private val model: EventsModel by viewModel()
 
     private var _binding: FragmentElementEventsBinding? = null
     private val binding get() = _binding!!
+
+    private val adapter = EventsAdapter {
+        viewLifecycleOwner.lifecycleScope.launch {
+            whenResumed {
+                val element = model.selectElementById(it.elementId) ?: return@whenResumed
+
+                findNavController().navigate(
+                    EventsFragmentDirections.actionEventsFragmentToElementFragment(
+                        element.id,
+                    ),
+                )
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,29 +72,21 @@ class EventsFragment : Fragment() {
                 else -> false
             }
 
+        binding.list.layoutManager = LinearLayoutManager(requireContext())
+        binding.list.adapter = adapter
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                binding.list.layoutManager = LinearLayoutManager(requireContext())
-                val adapter = EventsAdapter {
-                    val element = db.elementQueries.selectById(it.elementId).executeAsOneOrNull()
-                        ?: return@EventsAdapter
-                    findNavController().navigate(
-                        EventsFragmentDirections.actionEventsFragmentToElementFragment(
-                            element.id,
-                        ),
-                    )
+                model.state.collect {
+                    when (it) {
+                        is EventsModel.State.ShowingItems -> {
+                            adapter.submitList(it.items)
+                        }
+
+                        else -> {}
+                    }
                 }
-                binding.list.adapter = adapter
-                adapter.submitList(eventsRepo.selectAllAsListItems().map {
-                    EventsAdapter.Item(
-                        date = ZonedDateTime.parse(it.event_date),
-                        type = it.event_type,
-                        elementId = it.element_id,
-                        elementName = it.element_name ?: getString(R.string.unnamed_place),
-                        username = it.user_name ?: "",
-                        tipLnurl = it.lnurl(),
-                    )
-                })
+
             }
         }
     }
@@ -94,18 +94,5 @@ class EventsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    fun SelectAllEventsAsListItems.lnurl(): String {
-        val description = user_description ?: ""
-        val pattern = Pattern.compile("\\(lightning:[^)]*\\)", Pattern.CASE_INSENSITIVE)
-        val matcher = pattern.matcher(description)
-        val matchFound: Boolean = matcher.find()
-
-        return if (matchFound) {
-            matcher.group().trim('(', ')')
-        } else {
-            ""
-        }
     }
 }
