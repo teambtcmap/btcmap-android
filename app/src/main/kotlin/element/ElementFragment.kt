@@ -204,6 +204,10 @@ class ElementFragment : Fragment() {
         binding.website.text = website
         binding.website.isVisible = website != null
 
+        val facebook = tags["contact:facebook"]?.jsonPrimitive?.content
+        binding.facebook.text = facebook
+        binding.facebook.isVisible = facebook != null
+
         val openingHours = tags["opening_hours"]?.jsonPrimitive?.content
         binding.openingHours.text = openingHours
         binding.openingHours.isVisible = openingHours != null

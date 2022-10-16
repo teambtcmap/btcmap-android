@@ -88,6 +88,19 @@
                 app:drawableStartCompat="@drawable/baseline_public_24" />
 
             <TextView
+                android:id="@+id/facebook"
+                style="?attr/textAppearanceSubtitle1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autoLink="web"
+                android:drawablePadding="20dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp"
+                android:singleLine="true"
+                app:drawableStartCompat="@drawable/baseline_public_24"
+                tools:text="https://www.facebook.com" />
+
+            <TextView
                 android:id="@+id/openingHours"
                 style="?attr/textAppearanceSubtitle1"
                 android:layout_width="match_parent"
