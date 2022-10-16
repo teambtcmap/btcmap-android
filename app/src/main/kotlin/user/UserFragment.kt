@@ -97,7 +97,10 @@ class UserFragment : Fragment() {
                 binding.toolbar.title = userName.ifBlank { getString(R.string.unnamed_user) }
 
                 binding.list.layoutManager = LinearLayoutManager(requireContext())
-                val adapter = EventsAdapter {}
+                val adapter = EventsAdapter(object : EventsAdapter.Listener {
+                    override fun onItemClick(item: EventsAdapter.Item) {}
+                    override fun onShowMoreClick() {}
+                })
                 binding.list.adapter = adapter
                 val items = eventsRepo.selectEventsByUserIdAsListItems(
                     UserFragmentArgs.fromBundle(

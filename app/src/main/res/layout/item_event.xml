@@ -5,54 +5,77 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?selectableItemBackground"
-    android:gravity="center_vertical"
-    android:paddingTop="8dp"
-    android:paddingEnd="8dp"
-    android:paddingBottom="8dp"
-    tools:ignore="RtlSymmetry,overdraw">
-
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_gravity="center"
-        android:layout_marginHorizontal="18dp"
-        android:contentDescription="@string/icon"
-        android:src="@drawable/ic_place"
-        app:tint="?attr/colorOnSurfaceVariant" />
+    android:orientation="vertical">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:background="?selectableItemBackground"
+        android:gravity="center_vertical"
+        android:paddingTop="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp"
+        tools:ignore="RtlSymmetry,overdraw">
 
-        <TextView
-            android:id="@+id/title"
-            style="?attr/textAppearanceSubtitle1"
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="18dp"
+            android:contentDescription="@string/icon"
+            android:src="@drawable/ic_place"
+            app:tint="?attr/colorOnSurfaceVariant" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/title"
+                style="?attr/textAppearanceSubtitle1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Bob's bar was added by Bob" />
+
+            <TextView
+                android:id="@+id/subtitle"
+                style="?textAppearanceCaption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="5 minutes ago" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/tip"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="Bob's bar was added by Bob" />
-
-        <TextView
-            android:id="@+id/subtitle"
-            style="?textAppearanceCaption"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="5 minutes ago" />
+            android:layout_gravity="center"
+            android:contentDescription="@string/icon"
+            android:src="@drawable/ic_place"
+            android:text="@string/tip" />
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/tip"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="wrap_content"
+    <FrameLayout
+        android:id="@+id/showMoreContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:contentDescription="@string/icon"
-        android:src="@drawable/ic_place"
-        android:text="@string/tip" />
+        android:gravity="center_vertical"
+        android:paddingBottom="8dp">
+
+        <Button
+            android:id="@+id/showMore"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/show_more" />
+
+    </FrameLayout>
 
 </LinearLayout>
-

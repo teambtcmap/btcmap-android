@@ -15,7 +15,7 @@ import org.btcmap.databinding.ItemEventBinding
 import java.time.ZonedDateTime
 
 class EventsAdapter(
-    private val onItemClick: (Item) -> Unit,
+    private val listener: Listener,
 ) : ListAdapter<EventsAdapter.Item, EventsAdapter.ItemViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
@@ -29,7 +29,7 @@ class EventsAdapter(
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-        holder.bind(getItem(position), onItemClick)
+        holder.bind(getItem(position), position == itemCount - 1, listener)
     }
 
     class ItemViewHolder(
@@ -38,7 +38,7 @@ class EventsAdapter(
         binding.root,
     ) {
 
-        fun bind(item: Item, onItemClick: (Item) -> Unit) {
+        fun bind(item: Item, isLast: Boolean, listener: Listener) {
             binding.apply {
                 when (item.type) {
                     "create" -> icon.setImageResource(R.drawable.baseline_add_24)
@@ -91,7 +91,10 @@ class EventsAdapter(
                     tip.isVisible = false
                 }
 
-                root.setOnClickListener { onItemClick(item) }
+                showMoreContainer.isVisible = isLast
+                showMore.setOnClickListener { listener.onShowMoreClick() }
+
+                root.setOnClickListener { listener.onItemClick(item) }
             }
         }
     }
@@ -121,4 +124,11 @@ class EventsAdapter(
         val username: String,
         val tipLnurl: String,
     )
+
+    interface Listener {
+
+        fun onItemClick(item: Item)
+
+        fun onShowMoreClick()
+    }
 }

@@ -25,19 +25,25 @@ class EventsFragment : Fragment() {
     private var _binding: FragmentEventsBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter = EventsAdapter {
-        viewLifecycleOwner.lifecycleScope.launch {
-            whenResumed {
-                val element = model.selectElementById(it.elementId) ?: return@whenResumed
+    val adapter = EventsAdapter(object : EventsAdapter.Listener {
+        override fun onItemClick(item: EventsAdapter.Item) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                whenResumed {
+                    val element = model.selectElementById(item.elementId) ?: return@whenResumed
 
-                findNavController().navigate(
-                    EventsFragmentDirections.actionEventsFragmentToElementFragment(
-                        element.id,
-                    ),
-                )
+                    findNavController().navigate(
+                        EventsFragmentDirections.actionEventsFragmentToElementFragment(
+                            element.id,
+                        ),
+                    )
+                }
             }
         }
-    }
+
+        override fun onShowMoreClick() {
+            model.onShowMoreItemsClick()
+        }
+    })
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,7 +61,7 @@ class EventsFragment : Fragment() {
                 topMargin = insets.top
             }
             val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            binding.scrollView.setPadding(0, 0, 0, navBarsInsets.bottom)
+            binding.list.setPadding(0, 0, 0, navBarsInsets.bottom)
             WindowInsetsCompat.CONSUMED
         }
 
@@ -74,13 +80,20 @@ class EventsFragment : Fragment() {
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         binding.list.adapter = adapter
+        binding.list.setHasFixedSize(true)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 model.state.collect {
                     when (it) {
                         is EventsModel.State.ShowingItems -> {
-                            adapter.submitList(it.items)
+                            val itemCount = adapter.itemCount
+
+                            adapter.submitList(it.items) {
+                                if (itemCount != 0) {
+                                    adapter.notifyItemChanged(itemCount - 1)
+                                }
+                            }
                         }
 
                         else -> {}
@@ -88,10 +101,6 @@ class EventsFragment : Fragment() {
                 }
 
             }
-        }
-
-        binding.showMore.setOnClickListener {
-            model.onShowMoreItemsClick()
         }
     }
 
