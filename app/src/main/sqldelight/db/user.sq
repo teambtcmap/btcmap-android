@@ -28,7 +28,7 @@ SELECT
     json_extract(u.osm_json, '$.description') AS user_description,
     count(e.user_id) AS changes
 FROM user u
-LEFT JOIN event e ON e.user_id = u.id
+LEFT JOIN event e ON e.user_id = u.id AND e.deleted_at = ''
 GROUP BY u.id
 ORDER BY changes DESC;
 
