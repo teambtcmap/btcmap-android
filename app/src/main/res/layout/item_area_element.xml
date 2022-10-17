@@ -5,43 +5,66 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?selectableItemBackground"
-    android:gravity="center_vertical"
-    android:padding="8dp">
+    android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_gravity="center"
-        android:layout_margin="8dp"
-        android:contentDescription="@string/icon"
-        app:tint="?attr/colorOnSurfaceVariant"
-        tools:src="@drawable/ic_place" />
+    <FrameLayout
+        android:id="@+id/mapContainer"
+        android:layout_width="match_parent"
+        android:layout_height="192dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <map.DisabledMapView
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </FrameLayout>
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp">
+        android:background="?selectableItemBackground"
+        android:gravity="center_vertical"
+        android:padding="8dp">
 
-        <TextView
-            android:id="@+id/title"
-            style="?attr/textAppearanceSubtitle1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="Satoshi's Bar" />
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:layout_margin="8dp"
+            android:contentDescription="@string/icon"
+            app:tint="?attr/colorOnSurfaceVariant"
+            tools:src="@drawable/ic_place" />
 
-        <TextView
-            android:id="@+id/subtitle"
-            style="?textAppearanceCaption"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            tools:text="Up-to-date" />
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp">
+
+            <TextView
+                android:id="@+id/title"
+                style="?attr/textAppearanceSubtitle1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Satoshi's Bar" />
+
+            <TextView
+                android:id="@+id/subtitle"
+                style="?textAppearanceCaption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Up-to-date" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
 </LinearLayout>
+
+
 

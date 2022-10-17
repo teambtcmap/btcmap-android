@@ -30,8 +30,6 @@ import org.btcmap.R
 import org.btcmap.databinding.FragmentAreaBinding
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.osmdroid.util.BoundingBox
-import org.osmdroid.util.GeoPoint
 
 class AreaFragment : Fragment() {
 
@@ -43,6 +41,31 @@ class AreaFragment : Fragment() {
 
     private var _binding: FragmentAreaBinding? = null
     private val binding get() = _binding!!
+
+    private val adapter: AreaElementsAdapter by lazy {
+        val area = runBlocking {
+            areasRepo.selectById(
+                AreaFragmentArgs.fromBundle(
+                    requireArguments()
+                ).areaId
+            )
+        }!!
+
+        val boundingBoxPaddingPx = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            16f,
+            resources.displayMetrics,
+        ).toInt()
+
+        AreaElementsAdapter(area, boundingBoxPaddingPx, object : AreaElementsAdapter.Listener {
+            override fun onMapClick() {
+                areaResultModel.area.update { area }
+                findNavController().navigate(R.id.action_areaFragment_to_mapFragment)
+            }
+
+            override fun onItemClick(item: AreaElementsAdapter.Item) {}
+        })
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -87,17 +110,11 @@ class AreaFragment : Fragment() {
 
         binding.toolbar.title = area.name
 
+        binding.list.layoutManager = LinearLayoutManager(requireContext())
+        binding.list.adapter = adapter
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                binding.list.layoutManager = LinearLayoutManager(requireContext())
-                val adapter = AreaElementsAdapter {
-                    findNavController().navigate(
-                        AreaFragmentDirections.actionAreaFragmentToElementFragment(
-                            it.id,
-                        ),
-                    )
-                }
-                binding.list.adapter = adapter
                 val items = elementsRepo.selectByBoundingBox(
                     minLat = area.min_lat,
                     maxLat = area.max_lat,
@@ -135,32 +152,6 @@ class AreaFragment : Fragment() {
                     items.size,
                     items.size,
                 )
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                val boundingBox = BoundingBox.fromGeoPoints(
-                    mutableListOf(
-                        GeoPoint(area.min_lat, area.min_lon),
-                        GeoPoint(area.max_lat, area.max_lon),
-                    )
-                )
-
-                val boundingBoxPaddingPx = TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP,
-                    16f,
-                    resources.displayMetrics,
-                ).toInt()
-
-                binding.map.post {
-                    binding.map.zoomToBoundingBox(boundingBox, false, boundingBoxPaddingPx)
-                }
-
-                binding.mapContainer.setOnClickListener {
-                    areaResultModel.area.update { area }
-                    findNavController().navigate(R.id.action_areaFragment_to_mapFragment)
-                }
             }
         }
     }
