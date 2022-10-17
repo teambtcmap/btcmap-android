@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="?attr/homeAsUpIndicator"
-        app:title="@string/communities" />
+        app:title="@string/communities"
+        app:titleMarginStart="16dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"

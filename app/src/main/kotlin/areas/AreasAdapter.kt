@@ -2,10 +2,14 @@ package areas
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.squareup.picasso.Callback
+import com.squareup.picasso.Picasso
 import org.btcmap.databinding.ItemAreaBinding
+import java.lang.Exception
 
 class AreasAdapter(
     private val onItemClick: (Item) -> Unit,
@@ -36,6 +40,20 @@ class AreasAdapter(
                 title.text = item.name
                 subtitle.text = item.distance
                 root.setOnClickListener { onItemClick(item) }
+
+                iconPlaceholder.isVisible = true
+                Picasso.get().load(null as String?).into(icon)
+
+                Picasso.get().load("https://data.btcmap.org/areas/icons/${item.id}.jpg")
+                    .into(icon, object : Callback {
+                        override fun onSuccess() {
+                            iconPlaceholder.isVisible = false
+                        }
+
+                        override fun onError(e: Exception?) {
+                            iconPlaceholder.isVisible = true
+                        }
+                    })
             }
         }
     }

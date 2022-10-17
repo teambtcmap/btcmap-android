@@ -6,19 +6,33 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?selectableItemBackground"
-    android:gravity="center_vertical"
-    android:paddingEnd="16dp"
-    tools:ignore="RtlSymmetry,overdraw">
+    android:baselineAligned="false"
+    android:gravity="center_vertical">
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+    <FrameLayout
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_gravity="center"
-        android:layout_margin="18dp"
-        android:contentDescription="@string/icon"
-        android:src="@drawable/ic_place"
-        app:tint="?attr/colorOnSurfaceVariant" />
+        android:layout_margin="16dp">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:shapeAppearanceOverlay="@style/RoundedImageView" />
+
+        <ImageView
+            android:id="@+id/iconPlaceholder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/user_avatar_placeholder_bg"
+            android:backgroundTint="?colorPrimary"
+            android:contentDescription="@string/icon"
+            android:padding="8dp"
+            android:src="@drawable/ic_place"
+            app:tint="?colorOnPrimary" />
+
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -38,7 +52,7 @@
             style="?textAppearanceCaption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="1.2 mi" />
+            tools:text="1.2 km" />
 
     </LinearLayout>
 
