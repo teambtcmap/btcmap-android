@@ -63,7 +63,13 @@ class AreaFragment : Fragment() {
                 findNavController().navigate(R.id.action_areaFragment_to_mapFragment)
             }
 
-            override fun onItemClick(item: AreaElementsAdapter.Item) {}
+            override fun onItemClick(item: AreaElementsAdapter.Item) {
+                findNavController().navigate(
+                    AreaFragmentDirections.actionAreaFragmentToElementFragment(
+                        item.id,
+                    ),
+                )
+            }
         })
     }
 
@@ -124,10 +130,7 @@ class AreaFragment : Fragment() {
                     val status: String
                     val statusColor: Int
 
-                    if (
-                        it.tags()["survey:date"]?.jsonPrimitive?.content.isNullOrBlank()
-                        && it.tags()["check_date"]?.jsonPrimitive?.content.isNullOrBlank()
-                    ) {
+                    if (it.tags()["survey:date"]?.jsonPrimitive?.content.isNullOrBlank() && it.tags()["check_date"]?.jsonPrimitive?.content.isNullOrBlank()) {
                         status = getString(R.string.outdated)
                         statusColor = requireContext().getErrorColor()
                     } else {
