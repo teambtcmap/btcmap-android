@@ -38,6 +38,18 @@ class UserFragment : Fragment() {
     private var _binding: FragmentUserBinding? = null
     private val binding get() = _binding!!
 
+    private val adapter = EventsAdapter(object : EventsAdapter.Listener {
+        override fun onItemClick(item: EventsAdapter.Item) {
+            findNavController().navigate(
+                UserFragmentDirections.actionUserFragmentToElementFragment(
+                    item.elementId,
+                ),
+            )
+        }
+
+        override fun onShowMoreClick() {}
+    })
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -92,16 +104,13 @@ class UserFragment : Fragment() {
                 else -> false
             }
 
+        binding.list.layoutManager = LinearLayoutManager(requireContext())
+        binding.list.adapter = adapter
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.toolbar.title = userName.ifBlank { getString(R.string.unnamed_user) }
 
-                binding.list.layoutManager = LinearLayoutManager(requireContext())
-                val adapter = EventsAdapter(object : EventsAdapter.Listener {
-                    override fun onItemClick(item: EventsAdapter.Item) {}
-                    override fun onShowMoreClick() {}
-                })
-                binding.list.adapter = adapter
                 val items = eventsRepo.selectEventsByUserIdAsListItems(
                     UserFragmentArgs.fromBundle(
                         requireArguments()
