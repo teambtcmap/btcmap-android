@@ -159,11 +159,12 @@ dependencies {
     // Charts
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
-    // Used to download, cache and display images
-    implementation("com.squareup.picasso:picasso:2.8")
-
     // Bundle SQLite binaries
     implementation("com.github.requery:sqlite-android:3.39.2")
+
+    // Used to download, cache and display images
+    implementation("io.coil-kt:coil:2.2.2")
+    implementation("io.coil-kt:coil-svg:2.2.2")
 
     // Common test dependencies
     testImplementation("junit:junit:4.13.2")

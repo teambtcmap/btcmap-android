@@ -32,6 +32,11 @@ import element.ElementFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.R
 import org.btcmap.databinding.FragmentMapBinding
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
@@ -331,12 +336,14 @@ class MapFragment : Fragment() {
 
                 if (pickedArea != null) {
                     binding.map.addViewportListener()
+                    val tags: JsonObject = Json.decodeFromString(pickedArea.tags)
+                    
                     binding.map.zoomToBoundingBox(
-                        BoundingBox.fromGeoPoints(
-                            listOf(
-                                GeoPoint(pickedArea.min_lat, pickedArea.min_lon),
-                                GeoPoint(pickedArea.max_lat, pickedArea.max_lon),
-                            )
+                        BoundingBox(
+                            tags["box:north"]!!.jsonPrimitive.double,
+                            tags["box:east"]!!.jsonPrimitive.double,
+                            tags["box:south"]!!.jsonPrimitive.double,
+                            tags["box:west"]!!.jsonPrimitive.double,
                         ), false
                     )
                     return@repeatOnLifecycle

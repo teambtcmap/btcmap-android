@@ -6,10 +6,12 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.squareup.picasso.Callback
-import com.squareup.picasso.Picasso
+import coil.ImageLoader
+import coil.decode.SvgDecoder
+import coil.load
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import org.btcmap.databinding.ItemAreaBinding
-import java.lang.Exception
 
 class AreasAdapter(
     private val onItemClick: (Item) -> Unit,
@@ -42,18 +44,38 @@ class AreasAdapter(
                 root.setOnClickListener { onItemClick(item) }
 
                 iconPlaceholder.isVisible = true
-                Picasso.get().load(null as String?).into(icon)
+                icon.load(null)
 
-                Picasso.get().load("https://data.btcmap.org/areas/icons/${item.id}.jpg")
-                    .into(icon, object : Callback {
-                        override fun onSuccess() {
-                            iconPlaceholder.isVisible = false
-                        }
+                if (item.iconUrl.isNotBlank()) {
+                    if (item.iconUrl.endsWith(".svg")) {
+                        val imageLoader = ImageLoader.Builder(root.context)
+                            .components { add(SvgDecoder.Factory()) }.build()
 
-                        override fun onError(e: Exception?) {
-                            iconPlaceholder.isVisible = true
+                        val imageRequest =
+                            ImageRequest.Builder(root.context).data(item.iconUrl).target(icon)
+                                .listener(object : ImageRequest.Listener {
+                                    override fun onSuccess(
+                                        request: ImageRequest,
+                                        result: SuccessResult,
+                                    ) {
+                                        iconPlaceholder.isVisible = false
+                                    }
+                                }).tag(item.id).build()
+
+                        imageLoader.enqueue(imageRequest)
+                    } else {
+                        icon.load(data = item.iconUrl) {
+                            listener(object : ImageRequest.Listener {
+                                override fun onSuccess(
+                                    request: ImageRequest,
+                                    result: SuccessResult,
+                                ) {
+                                    iconPlaceholder.isVisible = false
+                                }
+                            }).tag(item.id)
                         }
-                    })
+                    }
+                }
             }
         }
     }
@@ -77,6 +99,7 @@ class AreasAdapter(
 
     data class Item(
         val id: String,
+        val iconUrl: String,
         val name: String,
         val distance: String,
     )

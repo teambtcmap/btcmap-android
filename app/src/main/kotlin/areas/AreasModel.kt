@@ -7,6 +7,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.R
 import org.koin.android.annotation.KoinViewModel
 import org.osmdroid.util.GeoPoint
@@ -25,9 +30,18 @@ class AreasModel(
         val location = GeoPoint(lat, lon)
 
         viewModelScope.launch {
-            val communities = areasRepo.selectAllNotDeleted().filter { it.type != "country" }.map {
-                val areaCenter =
-                    GeoPoint((it.min_lat + it.max_lat) / 2.0, (it.min_lon + it.max_lon) / 2.0)
+            val communities = areasRepo.selectAllNotDeleted().filter {
+                val tags: JsonObject = Json.decodeFromString(it.tags)
+                tags["type"]?.jsonPrimitive?.content != "country"
+            }.map {
+                val tags: JsonObject = Json.decodeFromString(it.tags)
+
+                val minLat = tags["box:south"]!!.jsonPrimitive.double
+                val maxLat = tags["box:north"]!!.jsonPrimitive.double
+                val minLon = tags["box:west"]!!.jsonPrimitive.double
+                val maxLon = tags["box:east"]!!.jsonPrimitive.double
+
+                val areaCenter = GeoPoint((minLat + maxLat) / 2.0, (minLon + maxLon) / 2.0)
                 Pair(it, areaCenter.distanceToAsDouble(location) / 1000)
             }.sortedBy { it.second }
 
@@ -40,9 +54,13 @@ class AreasModel(
                     append(app.resources.getString(R.string.kilometers_short))
                 }
 
+                val tags: JsonObject = Json.decodeFromString(it.first.tags)
+
                 AreasAdapter.Item(
                     id = it.first.id,
-                    name = it.first.name,
+                    iconUrl = tags["icon:square"]?.jsonPrimitive?.content ?: "",
+                    name = tags["name"]?.jsonPrimitive?.content
+                        ?: app.getString(R.string.unnamed_area),
                     distance = distanceStringBuilder.toString(),
                 )
             }

@@ -23,6 +23,10 @@ import icons.iconResId
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonPrimitive
 import map.getErrorColor
 import map.getOnSurfaceColor
@@ -114,7 +118,9 @@ class AreaFragment : Fragment() {
                 else -> false
             }
 
-        binding.toolbar.title = area.name
+        val tags: JsonObject = Json.decodeFromString(area.tags)
+        binding.toolbar.title =
+            tags["name"]?.jsonPrimitive?.content ?: getString(R.string.unnamed_area)
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         binding.list.adapter = adapter
@@ -122,10 +128,10 @@ class AreaFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 val items = elementsRepo.selectByBoundingBox(
-                    minLat = area.min_lat,
-                    maxLat = area.max_lat,
-                    minLon = area.min_lon,
-                    maxLon = area.max_lon,
+                    minLat = tags["box:south"]!!.jsonPrimitive.double,
+                    maxLat = tags["box:north"]!!.jsonPrimitive.double,
+                    minLon = tags["box:west"]!!.jsonPrimitive.double,
+                    maxLon = tags["box:east"]!!.jsonPrimitive.double,
                 ).map {
                     val status: String
                     val statusColor: Int

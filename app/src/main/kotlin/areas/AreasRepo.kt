@@ -62,12 +62,7 @@ class AreasRepo(
                 db.areaQueries.insertOrReplace(
                     Area(
                         id = it.id,
-                        name = it.name,
-                        type = it.type,
-                        min_lon = it.min_lon,
-                        min_lat = it.min_lat,
-                        max_lon = it.max_lon,
-                        max_lat = it.max_lat,
+                        tags = it.tags.toString(),
                         created_at = it.created_at,
                         updated_at = it.updated_at,
                         deleted_at = it.deleted_at,
@@ -87,12 +82,7 @@ class AreasRepo(
     @Serializable
     private data class AreaJson(
         val id: String,
-        val name: String,
-        val type: String,
-        val min_lon: Double,
-        val min_lat: Double,
-        val max_lon: Double,
-        val max_lat: Double,
+        val tags: JsonObject,
         val created_at: String,
         val updated_at: String,
         val deleted_at: String,

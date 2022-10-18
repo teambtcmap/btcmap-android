@@ -9,11 +9,11 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.squareup.picasso.Callback
-import com.squareup.picasso.Picasso
+import coil.load
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import org.btcmap.R
 import org.btcmap.databinding.ItemUserBinding
-import java.lang.Exception
 
 class UsersAdapter(
     private val onItemClick: (Item) -> Unit,
@@ -43,9 +43,7 @@ class UsersAdapter(
             binding.apply {
                 title.text = item.name
                 subtitle.text = root.context.resources.getQuantityString(
-                    R.plurals.d_changes,
-                    item.changes.toInt(),
-                    item.changes
+                    R.plurals.d_changes, item.changes.toInt(), item.changes
                 )
 
                 if (item.tipLnurl.isNotBlank()) {
@@ -68,21 +66,20 @@ class UsersAdapter(
                     tip.isVisible = false
                 }
 
-                Picasso.get().load(null as String?).into(avatar)
-
-                avatar.isVisible = item.imgHref.isNotBlank()
                 avatarPlaceholder.isVisible = true
+                avatar.load(null)
 
                 if (item.imgHref.isNotBlank()) {
-                    Picasso.get().load(item.imgHref).into(avatar, object : Callback {
-                        override fun onSuccess() {
-                            avatarPlaceholder.isVisible = false
-                        }
-
-                        override fun onError(e: Exception?) {
-                            avatarPlaceholder.isVisible = true
-                        }
-                    })
+                    avatar.load(data = item.imgHref) {
+                        listener(object : ImageRequest.Listener {
+                            override fun onSuccess(
+                                request: ImageRequest,
+                                result: SuccessResult,
+                            ) {
+                                avatarPlaceholder.isVisible = false
+                            }
+                        }).tag(item.id)
+                    }
                 }
 
                 root.setOnClickListener { onItemClick(item) }

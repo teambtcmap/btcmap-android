@@ -8,9 +8,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import db.Area
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.databinding.ItemAreaElementBinding
 import org.osmdroid.util.BoundingBox
-import org.osmdroid.util.GeoPoint
 
 class AreaElementsAdapter(
     private val area: Area,
@@ -60,11 +64,13 @@ class AreaElementsAdapter(
                 mapContainer.isVisible = first
 
                 if (mapContainer.isVisible) {
-                    val boundingBox = BoundingBox.fromGeoPoints(
-                        mutableListOf(
-                            GeoPoint(area.min_lat, area.min_lon),
-                            GeoPoint(area.max_lat, area.max_lon),
-                        )
+                    val tags: JsonObject = Json.decodeFromString(area.tags)
+
+                    val boundingBox = BoundingBox(
+                        tags["box:north"]!!.jsonPrimitive.double,
+                        tags["box:east"]!!.jsonPrimitive.double,
+                        tags["box:south"]!!.jsonPrimitive.double,
+                        tags["box:west"]!!.jsonPrimitive.double,
                     )
 
                     map.post {
