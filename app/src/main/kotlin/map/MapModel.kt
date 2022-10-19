@@ -4,16 +4,15 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
+import app.cash.sqldelight.coroutines.mapToOneOrNull
 import conf.ConfRepo
 import db.Database
 import db.Element
-import kotlinx.coroutines.Dispatchers
+import elements.ElementsRepo
+import icons.toIconResId
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import location.UserLocationRepository
 import org.koin.android.annotation.KoinViewModel
 import org.osmdroid.util.BoundingBox
@@ -28,6 +27,7 @@ class MapModel(
     private val locationRepo: UserLocationRepository,
     private val sync: Sync,
     private val db: Database,
+    private val elementsRepo: ElementsRepo,
 ) : ViewModel() {
 
     private val mapMarkersRepo: MutableStateFlow<MapMarkersRepo?> = MutableStateFlow(null)
@@ -63,13 +63,17 @@ class MapModel(
                 }
 
                 _visibleElements.update {
-                    db.elementQueries.selectByBoundingBox(
+                    elementsRepo.selectByBoundingBox(
                         minLat = min(viewport.latNorth, viewport.latSouth),
                         maxLat = max(viewport.latNorth, viewport.latSouth),
                         minLon = min(viewport.lonEast, viewport.lonWest),
                         maxLon = max(viewport.lonEast, viewport.lonWest),
-                    ).asFlow().mapToList(Dispatchers.IO).first()
-                        .map { ElementWithMarker(it, mapMarkersRepo.getMarker(it)) }
+                    ).map {
+                        ElementWithMarker(
+                            it,
+                            mapMarkersRepo.getMarker(it.icon_id.toIconResId()),
+                        )
+                    }
                 }
             }
         }.launchIn(viewModelScope)
@@ -103,11 +107,16 @@ class MapModel(
         }
     }
 
-    fun selectElement(element: Element?, moveToLocation: Boolean) {
+    fun selectElement(elementId: String, moveToLocation: Boolean) {
+        val element = runBlocking {
+            db.elementQueries.selectById(elementId).asFlow().mapToOneOrNull(Dispatchers.IO).first()
+        }
         _selectedElement.update { element }
 
         if (element != null && moveToLocation) {
-            _mapBoundingBox.update { GeoPoint(element.lat, element.lon).toBoundingBox(100.0) }
+            _mapBoundingBox.update {
+                GeoPoint(element.lat, element.lon).toBoundingBox(100.0)
+            }
         }
     }
 

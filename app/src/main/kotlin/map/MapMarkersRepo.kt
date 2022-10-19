@@ -12,8 +12,6 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.toRect
 import conf.ConfRepo
-import db.Element
-import icons.iconResId
 import org.btcmap.R
 
 class MapMarkersRepo(
@@ -23,8 +21,7 @@ class MapMarkersRepo(
 
     private val cache = mutableMapOf<Int?, BitmapDrawable>()
 
-    fun getMarker(element: Element): BitmapDrawable {
-        val iconResId = element.iconResId()
+    fun getMarker(iconResId: Int?): BitmapDrawable {
         var markerDrawable = cache[iconResId]
 
         if (markerDrawable == null) {

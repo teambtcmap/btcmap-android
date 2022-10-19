@@ -26,7 +26,7 @@ class UsersRepo(
 ) {
 
     suspend fun selectAllUsersAsListItems(): List<SelectAllUsersAsListItems> {
-        return db.userQueries.selectAllUsersAsListItems().asFlow().mapToList(Dispatchers.IO).first()
+        return db.userQueries.selectAllUsersAsListItems().asFlow().mapToList(Dispatchers.IO).first().filter { it.changes > 0 }
     }
 
     suspend fun selectById(id: Long): User? {

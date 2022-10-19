@@ -45,7 +45,6 @@
     <string name="up_to_date">Up-to-date</string>
     <string name="not_verified_by_supertaggers">Not verified by Supertaggers</string>
     <string name="show_more">Show more</string>
-    <string name="unnamed_area">Unnamed area</string>
     <plurals name="d_changes">
         <item quantity="zero">%d changes</item>
         <item quantity="one">%d change</item>

@@ -1,21 +1,39 @@
+import kotlinx.serialization.json.JsonObject;
+
 CREATE TABLE element (
     id TEXT NOT NULL PRIMARY KEY,
     lat REAL NOT NULL,
     lon REAL NOT NULL,
-    osm_json TEXT NOT NULL,
+    icon_id TEXT NOT NULL,
+    osm_json TEXT AS JsonObject NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     deleted_at TEXT NOT NULL
 );
 
+CREATE INDEX idx_element_lat_lon ON element (lat, lon);
+
+CREATE VIEW view_element_map_pin AS
+SELECT
+    id,
+    lat,
+    lon,
+    icon_id
+FROM element
+WHERE deleted_at = '';
+
 insertOrReplace:
 INSERT OR REPLACE
-INTO element (id, lat, lon, osm_json, created_at, updated_at, deleted_at)
+INTO element (id, lat, lon, icon_id, osm_json, created_at, updated_at, deleted_at)
 VALUES ?;
 
 selectAll:
 SELECT *
 FROM element;
+
+selectAllElementsAsMapPins:
+SELECT *
+FROM view_element_map_pin;
 
 selectById:
 SELECT *
@@ -28,10 +46,10 @@ FROM element
 WHERE deleted_at = '' AND (UPPER(osm_json) LIKE '%' || UPPER(:searchString) || '%')
 LIMIT 100;
 
-selectByBoundingBox:
-SELECT * FROM element WHERE
-deleted_at = ''
-AND lat > :minLat
+selectElementsAsMapPinsByBoundingBox:
+SELECT *
+FROM view_element_map_pin
+WHERE lat > :minLat
 AND lat < :maxLat
 AND lon > :minLon
 AND lon < :maxLon;

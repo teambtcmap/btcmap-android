@@ -58,11 +58,11 @@ class AreasRepo(
         }.getOrElse { return Result.failure(it) }
 
         db.transaction {
-            areas.forEach {
+            areas.filter { it.valid() }.forEach {
                 db.areaQueries.insertOrReplace(
                     Area(
                         id = it.id,
-                        tags = it.tags.toString(),
+                        tags = it.tags,
                         created_at = it.created_at,
                         updated_at = it.updated_at,
                         deleted_at = it.deleted_at,
@@ -87,6 +87,14 @@ class AreasRepo(
         val updated_at: String,
         val deleted_at: String,
     )
+
+    private fun AreaJson.valid(): Boolean {
+        return (tags["name"]?.jsonPrimitive?.content ?: "").isNotBlank()
+                && tags.containsKey("box:north") && tags["box:north"]!!.jsonPrimitive.doubleOrNull != null
+                && tags.containsKey("box:east") && tags["box:east"]!!.jsonPrimitive.doubleOrNull != null
+                && tags.containsKey("box:south") && tags["box:south"]!!.jsonPrimitive.doubleOrNull != null
+                && tags.containsKey("box:west") && tags["box:west"]!!.jsonPrimitive.doubleOrNull != null
+    }
 
     data class SyncReport(
         val timeMillis: Long,

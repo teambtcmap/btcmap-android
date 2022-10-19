@@ -7,17 +7,12 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import db.Area
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.double
-import kotlinx.serialization.json.jsonPrimitive
+import map.DisabledMapView
 import org.btcmap.databinding.ItemAreaElementBinding
 import org.osmdroid.util.BoundingBox
 
 class AreaElementsAdapter(
-    private val area: Area,
+    private val boundingBox: BoundingBox,
     private val boundingBoxPaddingPx: Int,
     private val listener: Listener,
 ) : ListAdapter<AreaElementsAdapter.Item, AreaElementsAdapter.ItemViewHolder>(DiffCallback()) {
@@ -36,7 +31,13 @@ class AreaElementsAdapter(
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-        holder.bind(getItem(position), position == 0, area, boundingBoxPaddingPx, listener)
+        holder.bind(
+            item = getItem(position),
+            first = position == 0,
+            boundingBox = boundingBox,
+            boundingBoxPaddingPx = boundingBoxPaddingPx,
+            listener = listener,
+        )
     }
 
     data class Item(
@@ -56,7 +57,7 @@ class AreaElementsAdapter(
         fun bind(
             item: Item,
             first: Boolean,
-            area: Area,
+            boundingBox: BoundingBox,
             boundingBoxPaddingPx: Int,
             listener: Listener,
         ) {
@@ -64,20 +65,20 @@ class AreaElementsAdapter(
                 mapContainer.isVisible = first
 
                 if (mapContainer.isVisible) {
-                    val tags: JsonObject = Json.decodeFromString(area.tags)
-
-                    val boundingBox = BoundingBox(
-                        tags["box:north"]!!.jsonPrimitive.double,
-                        tags["box:east"]!!.jsonPrimitive.double,
-                        tags["box:south"]!!.jsonPrimitive.double,
-                        tags["box:west"]!!.jsonPrimitive.double,
-                    )
+                    val map = DisabledMapView(root.context, null)
+                    mapContainer.addView(map)
 
                     map.post {
-                        binding.map.zoomToBoundingBox(boundingBox, false, boundingBoxPaddingPx)
+                        map.zoomToBoundingBox(
+                            boundingBox,
+                            false,
+                            boundingBoxPaddingPx,
+                        )
                     }
 
                     mapContainer.setOnClickListener { listener.onMapClick() }
+                } else {
+                    mapContainer.removeAllViews()
                 }
 
                 icon.setImageDrawable(item.icon)

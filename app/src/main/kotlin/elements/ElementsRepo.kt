@@ -2,9 +2,9 @@ package elements
 
 import android.content.Context
 import app.cash.sqldelight.coroutines.*
-import db.Database
-import db.Element
+import db.*
 import http.await
+import icons.iconId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -33,8 +33,8 @@ class ElementsRepo(
         maxLat: Double,
         minLon: Double,
         maxLon: Double,
-    ): List<Element> {
-        return db.elementQueries.selectByBoundingBox(
+    ): List<View_element_map_pin> {
+        return db.elementQueries.selectElementsAsMapPinsByBoundingBox(
             minLat = minLat,
             maxLat = maxLat,
             minLon = minLon,
@@ -73,10 +73,11 @@ class ElementsRepo(
                                 id = it.id,
                                 lat = latLon.first,
                                 lon = latLon.second,
-                                osm_json = it.osm_json.toString(),
+                                icon_id = it.osm_json["tags"]?.jsonObject?.iconId() ?: "",
+                                osm_json = it.osm_json,
                                 created_at = it.created_at,
                                 updated_at = it.updated_at,
-                                deleted_at = it.deleted_at ?: "",
+                                deleted_at = it.deleted_at,
                             )
                         )
                     }
@@ -124,10 +125,11 @@ class ElementsRepo(
                         id = it.id,
                         lat = latLon.first,
                         lon = latLon.second,
-                        osm_json = it.osm_json.toString(),
+                        icon_id = it.osm_json["tags"]?.jsonObject?.iconId() ?: "",
+                        osm_json = it.osm_json,
                         created_at = it.created_at,
                         updated_at = it.updated_at,
-                        deleted_at = it.deleted_at ?: "",
+                        deleted_at = it.deleted_at,
                     )
                 )
             }
@@ -169,7 +171,7 @@ class ElementsRepo(
         val osm_json: JsonObject,
         val created_at: String,
         val updated_at: String,
-        val deleted_at: String?,
+        val deleted_at: String,
     )
 
     data class SyncReport(

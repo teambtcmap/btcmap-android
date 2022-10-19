@@ -17,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import conf.ConfRepo
 import db.Element
 import elements.ElementsRepo
+import icons.toIconResId
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
@@ -93,7 +94,7 @@ class ElementFragment : Fragment() {
                 val markersRepo = MapMarkersRepo(requireContext(), confRepo)
                 val marker = Marker(binding.map)
                 marker.position = GeoPoint(element.lat, element.lon)
-                marker.icon = markersRepo.getMarker(element)
+                marker.icon = markersRepo.getMarker(element.icon_id.toIconResId())
                 binding.map.overlays.add(marker)
             }
         }
@@ -146,7 +147,7 @@ class ElementFragment : Fragment() {
     fun setElement(element: Element) {
         elementId = element.id
 
-        val tags = element.tags()
+        val tags = element.osm_json["tags"]!!.jsonObject
         binding.toolbar.title = tags["name"]?.jsonPrimitive?.content ?: "Unnamed"
 
         val surveyDate = tags["survey:date"]?.jsonPrimitive?.content ?: ""

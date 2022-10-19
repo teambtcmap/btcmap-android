@@ -17,19 +17,16 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import areas.AreaResultModel
 import areas.AreasRepo
-import element.tags
 import elements.ElementsRepo
-import icons.iconResId
+import icons.toIconResId
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.double
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 import map.getErrorColor
 import map.getOnSurfaceColor
+import map.name
+import map.toBoundingBox
 import org.btcmap.R
 import org.btcmap.databinding.FragmentAreaBinding
 import org.koin.android.ext.android.inject
@@ -48,11 +45,7 @@ class AreaFragment : Fragment() {
 
     private val adapter: AreaElementsAdapter by lazy {
         val area = runBlocking {
-            areasRepo.selectById(
-                AreaFragmentArgs.fromBundle(
-                    requireArguments()
-                ).areaId
-            )
+            areasRepo.selectById(AreaFragmentArgs.fromBundle(requireArguments()).areaId)
         }!!
 
         val boundingBoxPaddingPx = TypedValue.applyDimension(
@@ -61,20 +54,24 @@ class AreaFragment : Fragment() {
             resources.displayMetrics,
         ).toInt()
 
-        AreaElementsAdapter(area, boundingBoxPaddingPx, object : AreaElementsAdapter.Listener {
-            override fun onMapClick() {
-                areaResultModel.area.update { area }
-                findNavController().navigate(R.id.action_areaFragment_to_mapFragment)
-            }
+        AreaElementsAdapter(
+            boundingBox = area.toBoundingBox(),
+            boundingBoxPaddingPx = boundingBoxPaddingPx,
+            listener = object : AreaElementsAdapter.Listener {
+                override fun onMapClick() {
+                    areaResultModel.area.update { area }
+                    findNavController().navigate(R.id.action_areaFragment_to_mapFragment)
+                }
 
-            override fun onItemClick(item: AreaElementsAdapter.Item) {
-                findNavController().navigate(
-                    AreaFragmentDirections.actionAreaFragmentToElementFragment(
-                        item.id,
-                    ),
-                )
-            }
-        })
+                override fun onItemClick(item: AreaElementsAdapter.Item) {
+                    findNavController().navigate(
+                        AreaFragmentDirections.actionAreaFragmentToElementFragment(
+                            item.id,
+                        ),
+                    )
+                }
+            },
+        )
     }
 
     override fun onCreateView(
@@ -102,11 +99,7 @@ class AreaFragment : Fragment() {
         }
 
         val area = runBlocking {
-            areasRepo.selectById(
-                AreaFragmentArgs.fromBundle(
-                    requireArguments()
-                ).areaId
-            )
+            areasRepo.selectById(AreaFragmentArgs.fromBundle(requireArguments()).areaId)
         } ?: return
 
         WindowCompat.getInsetsController(
@@ -118,25 +111,28 @@ class AreaFragment : Fragment() {
                 else -> false
             }
 
-        val tags: JsonObject = Json.decodeFromString(area.tags)
-        binding.toolbar.title =
-            tags["name"]?.jsonPrimitive?.content ?: getString(R.string.unnamed_area)
+        binding.toolbar.title = area.name()
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         binding.list.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                val box = area.toBoundingBox()
+
                 val items = elementsRepo.selectByBoundingBox(
-                    minLat = tags["box:south"]!!.jsonPrimitive.double,
-                    maxLat = tags["box:north"]!!.jsonPrimitive.double,
-                    minLon = tags["box:west"]!!.jsonPrimitive.double,
-                    maxLon = tags["box:east"]!!.jsonPrimitive.double,
+                    minLat = box.latSouth,
+                    maxLat = box.latNorth,
+                    minLon = box.lonWest,
+                    maxLon = box.lonEast,
                 ).map {
                     val status: String
                     val statusColor: Int
 
-                    if (it.tags()["survey:date"]?.jsonPrimitive?.content.isNullOrBlank() && it.tags()["check_date"]?.jsonPrimitive?.content.isNullOrBlank()) {
+                    val element = elementsRepo.selectById(it.id)!!
+                    val tags = element.osm_json["tags"]!!.jsonObject
+
+                    if (tags["survey:date"]?.jsonPrimitive?.content.isNullOrBlank() && tags["check_date"]?.jsonPrimitive?.content.isNullOrBlank()) {
                         status = getString(R.string.outdated)
                         statusColor = requireContext().getErrorColor()
                     } else {
@@ -147,9 +143,9 @@ class AreaFragment : Fragment() {
                     AreaElementsAdapter.Item(
                         id = it.id,
                         icon = AppCompatResources.getDrawable(
-                            requireContext(), it.iconResId() ?: R.drawable.ic_place,
+                            requireContext(), it.icon_id.toIconResId() ?: R.drawable.ic_place,
                         )!!,
-                        name = it.tags()["name"]?.jsonPrimitive?.content
+                        name = element.osm_json["tags"]!!.jsonObject["name"]?.jsonPrimitive?.content
                             ?: getString(R.string.unnamed_place),
                         status = status,
                         statusColor = statusColor,

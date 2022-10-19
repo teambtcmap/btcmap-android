@@ -32,9 +32,6 @@ import element.ElementFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.R
@@ -269,7 +266,7 @@ class MapFragment : Fragment() {
                     marker.icon = it.marker
 
                     marker.setOnMarkerClickListener { _, _ ->
-                        model.selectElement(it.element, false)
+                        model.selectElement(it.element.id, false)
                         true
                     }
 
@@ -325,25 +322,25 @@ class MapFragment : Fragment() {
                     binding.map.addViewportListener()
                     val mapController = binding.map.controller
                     mapController.setZoom(16.toDouble())
-                    val startPoint = GeoPoint(pickedPlace.lat, pickedPlace.lon)
+                    val startPoint =
+                        GeoPoint(pickedPlace.lat, pickedPlace.lon)
                     mapController.setCenter(startPoint)
                     binding.map.post {
                         mapController.zoomTo(19.0)
                     }
-                    model.selectElement(pickedPlace, true)
+                    model.selectElement(pickedPlace.id, true)
                     return@repeatOnLifecycle
                 }
 
                 if (pickedArea != null) {
                     binding.map.addViewportListener()
-                    val tags: JsonObject = Json.decodeFromString(pickedArea.tags)
-                    
+
                     binding.map.zoomToBoundingBox(
                         BoundingBox(
-                            tags["box:north"]!!.jsonPrimitive.double,
-                            tags["box:east"]!!.jsonPrimitive.double,
-                            tags["box:south"]!!.jsonPrimitive.double,
-                            tags["box:west"]!!.jsonPrimitive.double,
+                            pickedArea.tags["box:north"]!!.jsonPrimitive.double,
+                            pickedArea.tags["box:east"]!!.jsonPrimitive.double,
+                            pickedArea.tags["box:south"]!!.jsonPrimitive.double,
+                            pickedArea.tags["box:west"]!!.jsonPrimitive.double,
                         ), false
                     )
                     return@repeatOnLifecycle
@@ -426,7 +423,7 @@ class MapFragment : Fragment() {
     private fun MapView.addCancelSelectionOverlay() {
         overlays += MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
-                model.selectElement(null, false)
+                model.selectElement("", false)
                 return true
             }
 
@@ -451,7 +448,7 @@ class MapFragment : Fragment() {
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                    model.selectElement(null, false)
+                    model.selectElement("", false)
                     binding.fab.show()
                     binding.fab.isVisible = true
                 } else {
