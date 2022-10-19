@@ -214,5 +214,12 @@ class ElementFragment : Fragment() {
         binding.openingHours.isVisible = openingHours != null
 
         binding.tags.text = tagsJsonFormatter.encodeToString(JsonObject.serializer(), tags)
+
+        binding.verifyOrReport.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data =
+                Uri.parse("https://btcmap.org/report-outdated-info?&name=${element.osm_json["tags"]!!.jsonObject["name"]?.jsonPrimitive?.content ?: ""}&lat=${element.lat}&long=${element.lon}&${element.osm_json["type"]!!.jsonPrimitive.content}=${element.osm_json["id"]!!.jsonPrimitive.content}")
+            startActivity(intent)
+        }
     }
 }
