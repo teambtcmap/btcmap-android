@@ -42,6 +42,20 @@ class ElementsRepo(
         ).asFlow().mapToList(Dispatchers.IO).first()
     }
 
+    suspend fun selectElementIdIconAndTags(
+        minLat: Double,
+        maxLat: Double,
+        minLon: Double,
+        maxLon: Double,
+    ): List<SelectElementIdIconAndTags> {
+        return db.elementQueries.selectElementIdIconAndTags(
+            minLat = minLat,
+            maxLat = maxLat,
+            minLon = minLon,
+            maxLon = maxLon,
+        ).asFlow().mapToList(Dispatchers.IO).first()
+    }
+
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun fetchBundledElements(): Result<SyncReport> {
         val startMillis = System.currentTimeMillis()

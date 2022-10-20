@@ -22,6 +22,7 @@ import icons.toIconResId
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
 import map.getErrorColor
 import map.getOnSurfaceColor
@@ -43,36 +44,27 @@ class AreaFragment : Fragment() {
     private var _binding: FragmentAreaBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter: AreaElementsAdapter by lazy {
-        val area = runBlocking {
-            areasRepo.selectById(AreaFragmentArgs.fromBundle(requireArguments()).areaId)
-        }!!
-
-        val boundingBoxPaddingPx = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            16f,
-            resources.displayMetrics,
-        ).toInt()
-
-        AreaElementsAdapter(
-            boundingBox = area.toBoundingBox(),
-            boundingBoxPaddingPx = boundingBoxPaddingPx,
-            listener = object : AreaElementsAdapter.Listener {
-                override fun onMapClick() {
+    private val adapter = AreaAdapter(
+        listener = object : AreaAdapter.Listener {
+            override fun onMapClick() {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val area =
+                        areasRepo.selectById(AreaFragmentArgs.fromBundle(requireArguments()).areaId)
+                            ?: return@launch
                     areaResultModel.area.update { area }
                     findNavController().navigate(R.id.action_areaFragment_to_mapFragment)
                 }
+            }
 
-                override fun onItemClick(item: AreaElementsAdapter.Item) {
-                    findNavController().navigate(
-                        AreaFragmentDirections.actionAreaFragmentToElementFragment(
-                            item.id,
-                        ),
-                    )
-                }
-            },
-        )
-    }
+            override fun onElementClick(item: AreaAdapter.Item.Element) {
+                findNavController().navigate(
+                    AreaFragmentDirections.actionAreaFragmentToElementFragment(
+                        item.id,
+                    ),
+                )
+            }
+        },
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -120,7 +112,7 @@ class AreaFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 val box = area.toBoundingBox()
 
-                val items = elementsRepo.selectByBoundingBox(
+                val elements = elementsRepo.selectElementIdIconAndTags(
                     minLat = box.latSouth,
                     maxLat = box.latNorth,
                     minLon = box.lonWest,
@@ -129,8 +121,7 @@ class AreaFragment : Fragment() {
                     val status: String
                     val statusColor: Int
 
-                    val element = elementsRepo.selectById(it.id)!!
-                    val tags = element.osm_json["tags"]!!.jsonObject
+                    val tags: JsonObject = Json.decodeFromString(it.tags ?: "{}")
 
                     if (tags["survey:date"]?.jsonPrimitive?.content.isNullOrBlank() && tags["check_date"]?.jsonPrimitive?.content.isNullOrBlank()) {
                         status = getString(R.string.outdated)
@@ -140,22 +131,34 @@ class AreaFragment : Fragment() {
                         statusColor = requireContext().getOnSurfaceColor()
                     }
 
-                    AreaElementsAdapter.Item(
+                    AreaAdapter.Item.Element(
                         id = it.id,
                         icon = AppCompatResources.getDrawable(
                             requireContext(), it.icon_id.toIconResId() ?: R.drawable.ic_place,
                         )!!,
-                        name = element.osm_json["tags"]!!.jsonObject["name"]?.jsonPrimitive?.content
+                        name = tags["name"]?.jsonPrimitive?.content
                             ?: getString(R.string.unnamed_place),
                         status = status,
                         statusColor = statusColor,
                     )
-                }
-                adapter.submitList(items.sortedBy { it.name })
+                }.sortedBy { it.name }.toMutableList()
+
+                val boundingBoxPaddingPx = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    16f,
+                    resources.displayMetrics,
+                ).toInt()
+
+                val map = AreaAdapter.Item.Map(
+                    boundingBox = area.toBoundingBox(),
+                    boundingBoxPaddingPx = boundingBoxPaddingPx,
+                )
+
+                adapter.submitList(listOf(map) + elements)
                 binding.toolbar.subtitle = resources.getQuantityString(
                     R.plurals.d_places,
-                    items.size,
-                    items.size,
+                    elements.size,
+                    elements.size,
                 )
             }
         }

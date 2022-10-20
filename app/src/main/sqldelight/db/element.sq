@@ -54,6 +54,19 @@ AND lat < :maxLat
 AND lon > :minLon
 AND lon < :maxLon;
 
+selectElementIdIconAndTags:
+SELECT
+    id,
+    icon_id,
+    json_extract(osm_json, '$.tags') AS tags
+FROM element
+WHERE
+deleted_at = ''
+AND lat > :minLat
+AND lat < :maxLat
+AND lon > :minLon
+AND lon < :maxLon;
+
 selectCount:
 SELECT COUNT(*)
 FROM element;
