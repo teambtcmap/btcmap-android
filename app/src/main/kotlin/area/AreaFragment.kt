@@ -1,6 +1,8 @@
 package area
 
+import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -28,6 +30,8 @@ import map.getErrorColor
 import map.getOnSurfaceColor
 import map.name
 import map.toBoundingBox
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
 import org.btcmap.databinding.FragmentAreaBinding
 import org.koin.android.ext.android.inject
@@ -62,6 +66,12 @@ class AreaFragment : Fragment() {
                         item.id,
                     ),
                 )
+            }
+
+            override fun onUrlClick(url: HttpUrl) {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse(url.toString())
+                startActivity(intent)
             }
         },
     )
@@ -154,7 +164,15 @@ class AreaFragment : Fragment() {
                     boundingBoxPaddingPx = boundingBoxPaddingPx,
                 )
 
-                adapter.submitList(listOf(map) + elements)
+                val contact = AreaAdapter.Item.Contact(
+                    website = area.tags["contact:website"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
+                    twitter = area.tags["contact:twitter"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
+                    telegram = area.tags["contact:telegram"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
+                    discord = area.tags["contact:discord"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
+                    youtube = area.tags["contact:youtube"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
+                )
+
+                adapter.submitList(listOf(map, contact) + elements)
                 binding.toolbar.subtitle = resources.getQuantityString(
                     R.plurals.d_places,
                     elements.size,

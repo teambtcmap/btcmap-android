@@ -3,11 +3,14 @@ package area
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import okhttp3.HttpUrl
 import org.btcmap.databinding.ItemAreaElementBinding
+import org.btcmap.databinding.ItemContactBinding
 import org.btcmap.databinding.ItemMapBinding
 import org.osmdroid.util.BoundingBox
 
@@ -16,7 +19,11 @@ class AreaAdapter(
 ) : ListAdapter<AreaAdapter.Item, AreaAdapter.ItemViewHolder>(DiffCallback()) {
 
     override fun getItemViewType(position: Int): Int {
-        return if (position == 0) VIEW_TYPE_MAP else VIEW_TYPE_ELEMENT
+        return when (getItem(position)) {
+            is Item.Map -> VIEW_TYPE_MAP
+            is Item.Contact -> VIEW_TYPE_CONTACT
+            is Item.Element -> VIEW_TYPE_ELEMENT
+        }
     }
 
     override fun onCreateViewHolder(
@@ -26,6 +33,14 @@ class AreaAdapter(
         val binding = when (viewType) {
             VIEW_TYPE_MAP -> {
                 ItemMapBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false,
+                )
+            }
+
+            VIEW_TYPE_CONTACT -> {
+                ItemContactBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false,
@@ -58,6 +73,14 @@ class AreaAdapter(
         data class Map(
             val boundingBox: BoundingBox,
             val boundingBoxPaddingPx: Int,
+        ) : Item()
+
+        data class Contact(
+            val website: HttpUrl?,
+            val twitter: HttpUrl?,
+            val telegram: HttpUrl?,
+            val discord: HttpUrl?,
+            val youtube: HttpUrl?,
         ) : Item()
 
         data class Element(
@@ -102,6 +125,25 @@ class AreaAdapter(
                     root.setOnClickListener { listener.onElementClick(item) }
                 }
             }
+
+            if (item is Item.Contact && binding is ItemContactBinding) {
+                binding.apply {
+                    website.isVisible = item.website != null
+                    website.setOnClickListener { item.website?.let { listener.onUrlClick(it) } }
+
+                    twitter.isVisible = item.twitter != null
+                    twitter.setOnClickListener { item.twitter?.let { listener.onUrlClick(it) } }
+
+                    telegram.isVisible = item.telegram != null
+                    telegram.setOnClickListener { item.telegram?.let { listener.onUrlClick(it) } }
+
+                    discord.isVisible = item.discord != null
+                    discord.setOnClickListener { item.discord?.let { listener.onUrlClick(it) } }
+
+                    youtube.isVisible = item.youtube != null
+                    youtube.setOnClickListener { item.youtube?.let { listener.onUrlClick(it) } }
+                }
+            }
         }
     }
 
@@ -113,7 +155,8 @@ class AreaAdapter(
         ): Boolean {
             return if (oldItem is Item.Element && newItem is Item.Element) {
                 oldItem.id == newItem.id
-            } else oldItem is Item.Map && newItem is Item.Map
+            } else (oldItem is Item.Map && newItem is Item.Map)
+                    || (oldItem is Item.Contact && newItem is Item.Contact)
         }
 
         override fun areContentsTheSame(
@@ -121,6 +164,10 @@ class AreaAdapter(
             newItem: Item,
         ): Boolean {
             if (oldItem is Item.Map && newItem is Item.Map) {
+                return true
+            }
+
+            if (oldItem is Item.Contact && newItem is Item.Contact) {
                 return true
             }
 
@@ -133,10 +180,13 @@ class AreaAdapter(
         fun onMapClick()
 
         fun onElementClick(item: Item.Element)
+
+        fun onUrlClick(url: HttpUrl)
     }
 
     companion object {
         const val VIEW_TYPE_MAP = 0
-        const val VIEW_TYPE_ELEMENT = 1
+        const val VIEW_TYPE_CONTACT = 1
+        const val VIEW_TYPE_ELEMENT = 2
     }
 }
