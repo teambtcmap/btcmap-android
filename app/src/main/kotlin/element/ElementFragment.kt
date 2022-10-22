@@ -150,7 +150,8 @@ class ElementFragment : Fragment() {
         val tags = element.osm_json["tags"]!!.jsonObject
         binding.toolbar.title = tags["name"]?.jsonPrimitive?.content ?: "Unnamed"
 
-        val surveyDate = tags["survey:date"]?.jsonPrimitive?.content ?: ""
+        val surveyDate = tags["survey:date"]?.jsonPrimitive?.content
+            ?: tags["check_date"]?.jsonPrimitive?.content ?: ""
 
         if (surveyDate.isNotBlank()) {
             runCatching {

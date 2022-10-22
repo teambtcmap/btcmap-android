@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
+import android.text.format.DateUtils
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -36,6 +37,7 @@ import org.btcmap.R
 import org.btcmap.databinding.FragmentAreaBinding
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import java.time.ZonedDateTime
 
 class AreaFragment : Fragment() {
 
@@ -128,17 +130,34 @@ class AreaFragment : Fragment() {
                     minLon = box.lonWest,
                     maxLon = box.lonEast,
                 ).map {
-                    val status: String
-                    val statusColor: Int
+                    var status = ""
+                    var statusColor = 0
 
                     val tags: JsonObject = Json.decodeFromString(it.tags ?: "{}")
 
-                    if (tags["survey:date"]?.jsonPrimitive?.content.isNullOrBlank() && tags["check_date"]?.jsonPrimitive?.content.isNullOrBlank()) {
-                        status = getString(R.string.outdated)
-                        statusColor = requireContext().getErrorColor()
+                    val surveyDate = tags["survey:date"]?.jsonPrimitive?.content
+                        ?: tags["check_date"]?.jsonPrimitive?.content ?: ""
+
+                    if (surveyDate.isNotBlank()) {
+                        runCatching {
+                            val date = DateUtils.getRelativeDateTimeString(
+                                requireContext(),
+                                ZonedDateTime.parse(surveyDate + "T00:00:00Z")
+                                    .toEpochSecond() * 1000,
+                                DateUtils.SECOND_IN_MILLIS,
+                                DateUtils.WEEK_IN_MILLIS,
+                                0,
+                            ).split(",").first()
+
+                            status = getString(R.string.verified_s, date)
+                            statusColor = requireContext().getOnSurfaceColor()
+                        }.onFailure {
+                            status = getString(R.string.verified_s, surveyDate)
+                            statusColor = requireContext().getOnSurfaceColor()
+                        }
                     } else {
-                        status = getString(R.string.up_to_date)
-                        statusColor = requireContext().getOnSurfaceColor()
+                        status = getString(R.string.not_verified)
+                        statusColor = requireContext().getErrorColor()
                     }
 
                     AreaAdapter.Item.Element(
