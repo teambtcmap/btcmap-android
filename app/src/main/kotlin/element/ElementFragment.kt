@@ -3,10 +3,14 @@ package element
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
 import android.text.format.DateUtils
+import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -24,6 +28,7 @@ import kotlinx.serialization.json.*
 import map.MapMarkersRepo
 import map.getErrorColor
 import map.getOnSurfaceColor
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
 import org.koin.android.ext.android.inject
@@ -202,13 +207,65 @@ class ElementFragment : Fragment() {
         binding.phone.text = phone
         binding.phone.isVisible = phone != null
 
-        val website = tags["website"]?.jsonPrimitive?.content
+        val website = tags["website"]?.jsonPrimitive?.content ?: ""
         binding.website.text = website
-        binding.website.isVisible = website != null
+            .replace("https://www.", "")
+            .replace("http://www.", "")
+            .replace("https://", "")
+            .replace("http://", "")
+            .trim('/')
+        binding.website.isVisible = website.isNotBlank() && website.toHttpUrlOrNull() != null
 
-        val facebook = tags["contact:facebook"]?.jsonPrimitive?.content
-        binding.facebook.text = facebook
-        binding.facebook.isVisible = facebook != null
+        val twitter = tags["contact:twitter"]?.jsonPrimitive?.content
+        binding.twitter.text = twitter?.replace("https://twitter.com/", "")?.trim('@')
+        binding.twitter.styleAsLink()
+        binding.twitter.isVisible = twitter != null
+
+        binding.twitter.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse("https://twitter.com/${binding.twitter.text}")
+            startActivity(intent)
+        }
+
+        var facebookUrl = tags["contact:facebook"]?.jsonPrimitive?.content ?: ""
+        var facebookUsername = ""
+
+        if (facebookUrl.isNotBlank() && !facebookUrl.startsWith("https")) {
+            facebookUsername = facebookUrl
+            facebookUrl = "https://www.facebook.com/$facebookUrl"
+        }
+
+        if (facebookUsername.isNotBlank()) {
+            binding.facebook.text = facebookUsername
+        } else {
+            binding.facebook.text = facebookUrl
+                .replace("https://www.facebook.com/", "")
+                .replace("https://facebook.com/", "")
+        }
+
+        binding.facebook.styleAsLink()
+        binding.facebook.isVisible =
+            (facebookUrl.isNotBlank() && facebookUrl.toHttpUrlOrNull() != null) || facebookUsername.isNotBlank()
+
+        binding.facebook.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(facebookUrl)
+            startActivity(intent)
+        }
+
+        val instagram = tags["contact:instagram"]?.jsonPrimitive?.content ?: ""
+        binding.instagram.text = instagram
+            .replace("https://www.instagram.com/", "")
+            .replace("https://instagram.com/", "")
+            .trim('@', '/')
+        binding.instagram.styleAsLink()
+        binding.instagram.isVisible = instagram.isNotBlank()
+
+        binding.instagram.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse("https://www.instagram.com/${binding.instagram.text}")
+            startActivity(intent)
+        }
 
         val openingHours = tags["opening_hours"]?.jsonPrimitive?.content
         binding.openingHours.text = openingHours
@@ -222,5 +279,19 @@ class ElementFragment : Fragment() {
                 Uri.parse("https://btcmap.org/report-outdated-info?&name=${element.osm_json["tags"]!!.jsonObject["name"]?.jsonPrimitive?.content ?: ""}&lat=${element.lat}&long=${element.lon}&${element.osm_json["type"]!!.jsonPrimitive.content}=${element.osm_json["id"]!!.jsonPrimitive.content}")
             startActivity(intent)
         }
+    }
+
+    fun TextView.styleAsLink() {
+        setText(
+            SpannableString(text).apply {
+                setSpan(
+                    URLSpan(""),
+                    0,
+                    length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            },
+            TextView.BufferType.SPANNABLE,
+        )
     }
 }
