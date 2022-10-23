@@ -13,19 +13,20 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import db.SelectAllUsersAsListItems
 import kotlinx.coroutines.launch
-import org.btcmap.R
 import org.btcmap.databinding.FragmentUsersBinding
-import org.koin.android.ext.android.inject
-import java.util.regex.Pattern
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class UsersFragment : Fragment() {
 
-    private val usersRepo: UsersRepo by inject()
+    private val model: UsersModel by viewModel()
 
     private var _binding: FragmentUsersBinding? = null
     private val binding get() = _binding!!
+
+    val adapter = UsersAdapter {
+        findNavController().navigate(UsersFragmentDirections.actionUsersFragmentToUserFragment(it.id))
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,29 +61,12 @@ class UsersFragment : Fragment() {
                 else -> false
             }
 
+        binding.list.layoutManager = LinearLayoutManager(requireContext())
+        binding.list.adapter = adapter
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                binding.list.layoutManager = LinearLayoutManager(requireContext())
-                val adapter = UsersAdapter {
-                    findNavController().navigate(UsersFragmentDirections.actionUsersFragmentToUserFragment(it.id))
-                }
-                binding.list.adapter = adapter
-
-                adapter.submitList(usersRepo.selectAllUsersAsListItems().map {
-                    val changes = if (it.user_name == "Bill on Bitcoin Island") {
-                        it.changes + 120
-                    } else {
-                        it.changes
-                    }
-
-                    UsersAdapter.Item(
-                        id = it.user_id,
-                        name = it.user_name ?: getString(R.string.unnamed_user),
-                        changes = changes,
-                        tipLnurl = it.lnurl(),
-                        imgHref = it.user_img_href ?: "",
-                    )
-                }.sortedByDescending { it.changes })
+                model.items.collect { adapter.submitList(it) }
             }
         }
     }
@@ -90,18 +74,5 @@ class UsersFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    fun SelectAllUsersAsListItems.lnurl(): String {
-        val description = user_description ?: ""
-        val pattern = Pattern.compile("\\(lightning:[^)]*\\)", Pattern.CASE_INSENSITIVE)
-        val matcher = pattern.matcher(description)
-        val matchFound: Boolean = matcher.find()
-
-        return if (matchFound) {
-            matcher.group().trim('(', ')')
-        } else {
-            ""
-        }
     }
 }
