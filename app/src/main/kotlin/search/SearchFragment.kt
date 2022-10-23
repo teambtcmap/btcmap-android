@@ -15,17 +15,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
 import org.btcmap.databinding.FragmentSearchBinding
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.osmdroid.util.GeoPoint
 
 class SearchFragment : Fragment() {
 
     private val model: SearchModel by viewModel()
-
-    private val resultModel: SearchResultModel by sharedViewModel()
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
@@ -49,8 +45,11 @@ class SearchFragment : Fragment() {
         binding.list.layoutManager = LinearLayoutManager(requireContext())
 
         val adapter = SearchAdapter { row ->
-            resultModel.element.update { row.element }
-            findNavController().popBackStack()
+            findNavController().navigate(
+                SearchFragmentDirections.actionSearchFragmentToElementFragment(
+                    row.element.id,
+                ),
+            )
         }
 
         binding.list.adapter = adapter
