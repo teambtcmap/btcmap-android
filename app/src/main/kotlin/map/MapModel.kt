@@ -18,8 +18,6 @@ import org.koin.android.annotation.KoinViewModel
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import sync.Sync
-import kotlin.math.max
-import kotlin.math.min
 
 @KoinViewModel
 class MapModel(
@@ -55,7 +53,7 @@ class MapModel(
         combine(
             _mapBoundingBox,
             db.elementQueries.selectCount().asFlow().mapToOne(Dispatchers.IO),
-            mapMarkersRepo
+            mapMarkersRepo,
         ) { viewport, _, mapMarkersRepo ->
             withContext(Dispatchers.Default) {
                 if (mapMarkersRepo == null) {
@@ -63,17 +61,13 @@ class MapModel(
                 }
 
                 _visibleElements.update {
-                    elementsRepo.selectByBoundingBox(
-                        minLat = min(viewport.latNorth, viewport.latSouth),
-                        maxLat = max(viewport.latNorth, viewport.latSouth),
-                        minLon = min(viewport.lonEast, viewport.lonWest),
-                        maxLon = max(viewport.lonEast, viewport.lonWest),
-                    ).map {
-                        ElementWithMarker(
-                            it,
-                            mapMarkersRepo.getMarker(it.icon_id.toIconResId()),
-                        )
-                    }
+                    elementsRepo.selectByBoundingBox(viewport)
+                        .map {
+                            ElementWithMarker(
+                                it,
+                                mapMarkersRepo.getMarker(it.icon_id.toIconResId()),
+                            )
+                        }
                 }
             }
         }.launchIn(viewModelScope)

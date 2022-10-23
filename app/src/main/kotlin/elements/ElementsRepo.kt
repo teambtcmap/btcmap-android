@@ -17,6 +17,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.koin.core.annotation.Single
+import org.osmdroid.util.BoundingBox
 
 @Single
 class ElementsRepo(
@@ -29,17 +30,34 @@ class ElementsRepo(
     }
 
     suspend fun selectByBoundingBox(
-        minLat: Double,
-        maxLat: Double,
-        minLon: Double,
-        maxLon: Double,
+        box: BoundingBox,
     ): List<View_element_map_pin> {
-        return db.elementQueries.selectElementsAsMapPinsByBoundingBox(
-            minLat = minLat,
-            maxLat = maxLat,
-            minLon = minLon,
-            maxLon = maxLon,
-        ).asFlow().mapToList(Dispatchers.IO).first()
+        val pins = if (box.lonEast > box.lonWest) {
+            db.elementQueries.selectElementsAsMapPinsByBoundingBox(
+                minLat = box.latSouth,
+                maxLat = box.latNorth,
+                minLon = box.lonWest,
+                maxLon = box.lonEast,
+            ).asFlow().mapToList(Dispatchers.IO).first()
+        } else {
+            val part1 = db.elementQueries.selectElementsAsMapPinsByBoundingBox(
+                minLat = box.latSouth,
+                maxLat = box.latNorth,
+                minLon = box.lonWest,
+                maxLon = 180.0,
+            ).asFlow().mapToList(Dispatchers.IO).first()
+
+            val part2 = db.elementQueries.selectElementsAsMapPinsByBoundingBox(
+                minLat = box.latSouth,
+                maxLat = box.latNorth,
+                minLon = -180.0,
+                maxLon = box.lonEast,
+            ).asFlow().mapToList(Dispatchers.IO).first()
+
+            part1 + part2
+        }
+
+        return pins
     }
 
     suspend fun selectElementIdIconAndTags(
