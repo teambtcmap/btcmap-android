@@ -1,7 +1,8 @@
 package db
 
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.osmdroid.util.BoundingBox
@@ -46,24 +47,10 @@ class ElementQueriesTest {
     fun selectBySearchString() {
         testDb().elementQueries.apply {
             val row1 = testElement().copy(
-                osm_json = JsonObject(
-                    mapOf(
-                        Pair(
-                            "amenity",
-                            JsonPrimitive("cafe")
-                        )
-                    )
-                ).toString()
+                osm_json = Json.decodeFromString("""{ "tags": { "amenity": "cafe" } }"""),
             )
             val row2 = testElement().copy(
-                osm_json = JsonObject(
-                    mapOf(
-                        Pair(
-                            "amenity",
-                            JsonPrimitive("bar")
-                        )
-                    )
-                ).toString()
+                osm_json = Json.decodeFromString("""{ "tags": { "amenity": "bar" } }"""),
             )
             insertOrReplace(row1)
             insertOrReplace(row2)
@@ -82,15 +69,19 @@ class ElementQueriesTest {
             val phuket = GeoPoint(7.878978, 98.398392)
             val boundingBox = BoundingBox.fromGeoPoints(listOf(london, phuket))
 
-            val resultRows = selectByBoundingBox(
+            val resultRows = selectElementIdIconAndTags(
                 minLat = min(boundingBox.latNorth, boundingBox.latSouth),
                 maxLat = max(boundingBox.latNorth, boundingBox.latSouth),
                 minLon = min(boundingBox.lonEast, boundingBox.lonWest),
                 maxLon = max(boundingBox.lonEast, boundingBox.lonWest),
             ).executeAsList()
 
-            rows.forEach {
-                assert(!boundingBox.contains(it.lat, it.lon) || resultRows.contains(it))
+            rows.forEach { row ->
+                assert(
+                    !boundingBox.contains(
+                        row.lat,
+                        row.lon,
+                    ) || resultRows.any { it.id == row.id })
             }
         }
     }
@@ -100,7 +91,8 @@ class ElementQueriesTest {
             id = "${arrayOf("node", "way", "relation").random()}:${Random.nextLong()}",
             lat = Random.nextDouble(-90.0, 90.0),
             lon = Random.nextDouble(-180.0, 180.0),
-            osm_json = "{}",
+            icon_id = "",
+            osm_json = JsonObject(emptyMap()),
             created_at = ZonedDateTime.now(ZoneOffset.UTC)
                 .minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
             updated_at = ZonedDateTime.now(ZoneOffset.UTC)
