@@ -64,6 +64,8 @@
     <string name="failed_to_create_a_changeset">Failed to create a changeset</string>
     <string name="failed_to_update_tags">Failed to update tags</string>
     <string name="ways_and_relations_are_not_supported">Ways and relations aren\'t supported</string>
+    <string name="add_tag">Add tag</string>
+    <string name="delete_tag">Delete tag</string>
     <plurals name="d_changes">
         <item quantity="zero">%d changes</item>
         <item quantity="one">%d change</item>

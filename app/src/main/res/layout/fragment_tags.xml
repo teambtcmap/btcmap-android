@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
+        app:menu="@menu/tags"
         app:navigationIcon="?attr/homeAsUpIndicator"
         tools:title="Satoshi Bar" />
 
@@ -25,8 +26,7 @@
             android:id="@+id/tagsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="16dp" />
+            android:orientation="vertical" />
 
     </ScrollView>
 
@@ -35,6 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
+        android:paddingTop="8dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@id/upload">
 
@@ -52,6 +53,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/upload"
         app:layout_constraintBottom_toBottomOf="parent" />
 

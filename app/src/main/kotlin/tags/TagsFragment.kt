@@ -59,6 +59,16 @@ class TagsFragment : Fragment() {
 
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.action_add_tag) {
+                val tagView = TagView(requireContext())
+                tagView.onDeleteListener = TagView.OnDeleteListener { binding.tagsContainer -= it }
+                binding.tagsContainer += tagView
+            }
+
+            true
+        }
+
         val elementId = TagsFragmentArgs.fromBundle(requireArguments()).elementId
 
         if (elementId.split(":").first() != "node") {
@@ -80,6 +90,7 @@ class TagsFragment : Fragment() {
         for (entry in tags) {
             val tagView = TagView(requireContext())
             tagView.setValue(entry.key, entry.value.jsonPrimitive.content)
+            tagView.onDeleteListener = TagView.OnDeleteListener { binding.tagsContainer -= it }
             binding.tagsContainer += tagView
         }
 
@@ -142,8 +153,13 @@ class TagsFragment : Fragment() {
                         val nodeVer = element.osm_json["version"]!!.jsonPrimitive.long
 
                         val tagsString =
-                            binding.tagsContainer.children.filterIsInstance<TagView>().map {
+                            binding.tagsContainer.children.filterIsInstance<TagView>().mapNotNull {
                                 val value = it.getValue()
+
+                                if (value.first.isBlank() || value.second.isBlank()) {
+                                    return@mapNotNull null
+                                }
+
                                 """<tag k="${value.first}" v="${value.second}" />"""
                             }.toList().joinToString("\n")
 

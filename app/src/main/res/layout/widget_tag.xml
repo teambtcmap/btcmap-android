@@ -8,6 +8,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_weight="1">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -34,6 +35,20 @@
             android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <ImageView
+        android:id="@+id/delete"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:contentDescription="@string/delete_tag"
+        android:focusable="true"
+        android:padding="4dp"
+        android:src="@drawable/baseline_remove_24" />
 
 </LinearLayout>
 

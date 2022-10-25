@@ -20,9 +20,10 @@ class TagView : LinearLayout {
         WidgetTagBinding.inflate(LayoutInflater.from(context), this, true)
     }
 
+    var onDeleteListener: OnDeleteListener? = null
+
     init {
-        binding.name.text = null
-        binding.value.text = null
+        binding.delete.setOnClickListener { onDeleteListener?.onDelete(this) }
     }
 
     fun getValue(): Pair<String, String> {
@@ -32,5 +33,10 @@ class TagView : LinearLayout {
     fun setValue(name: String, value: String) {
         binding.name.setText(name)
         binding.value.setText(value)
+    }
+
+    fun interface OnDeleteListener {
+
+        fun onDelete(sender: TagView)
     }
 }
