@@ -6,13 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
+import androidx.core.view.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import conf.ConfRepo
+import kotlinx.coroutines.launch
+import org.btcmap.R
 import org.btcmap.databinding.FragmentSettingsBinding
 import org.koin.android.ext.android.inject
 
@@ -68,6 +69,31 @@ class SettingsFragment : Fragment() {
         binding.showTags.isChecked = conf.conf.value.showTags
         binding.showTags.setOnCheckedChangeListener { _, isChecked ->
             conf.update { it.copy(showTags = isChecked) }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            whenResumed {
+                conf.conf.collect {
+                    if (it.osmLogin.isNotBlank()) {
+                        binding.accountTitle.setText(R.string.log_out)
+                        binding.accountSubtitle.isVisible = true
+                        binding.accountSubtitle.text = it.osmLogin
+
+                        binding.account.setOnClickListener {
+                            conf.update { prev ->
+                                prev.copy(osmLogin = "", osmPassword = "")
+                            }
+                        }
+                    } else {
+                        binding.accountTitle.setText(R.string.connect_osm_account)
+                        binding.accountSubtitle.isVisible = false
+
+                        binding.account.setOnClickListener {
+                            findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToLoginFragment())
+                        }
+                    }
+                }
+            }
         }
     }
 

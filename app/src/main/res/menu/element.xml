@@ -16,4 +16,9 @@
         android:title="@string/edit_on_osm"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_edit_tags"
+        android:title="@string/edit_tags"
+        app:showAsAction="never" />
+
 </menu>

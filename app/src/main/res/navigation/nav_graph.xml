@@ -57,6 +57,13 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_mapFragment_to_tagsFragment"
+            app:destination="@id/tagsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -85,7 +92,15 @@
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="settings.SettingsFragment" />
+        android:name="settings.SettingsFragment">
+        <action
+            android:id="@+id/action_settingsFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
 
     <fragment
         android:id="@+id/reportsFragment"
@@ -187,6 +202,25 @@
             app:launchSingleTop="true"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_elementFragment_to_tagsFragment"
+            app:destination="@id/tagsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
+
+    <fragment
+        android:id="@+id/tagsFragment"
+        android:name="tags.TagsFragment">
+        <argument
+            android:name="element_id"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="login.LoginFragment" />
 
 </navigation>

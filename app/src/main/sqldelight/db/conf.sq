@@ -9,7 +9,9 @@ CREATE TABLE conf (
     viewport_east_lon REAL NOT NULL,
     viewport_south_lat REAL NOT NULL,
     viewport_west_lon REAL NOT NULL,
-    showTags INTEGER AS Boolean NOT NULL
+    showTags INTEGER AS Boolean NOT NULL,
+    osmLogin TEXT NOT NULL,
+    osmPassword TEXT NOT NULL
 );
 
 insert:
@@ -22,7 +24,9 @@ INTO conf (
     viewport_east_lon,
     viewport_south_lat,
     viewport_west_lon,
-    showTags
+    showTags,
+    osmLogin,
+    osmPassword
 )
 VALUES ?;
 

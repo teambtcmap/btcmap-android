@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -135,6 +136,26 @@ class ElementFragment : Fragment() {
                     intent.data =
                         Uri.parse("https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions")
                     startActivity(intent)
+                }
+
+                R.id.action_edit_tags -> {
+                    if (confRepo.conf.value.osmLogin.isBlank()) {
+                        findNavController().navigate(R.id.loginFragment)
+                        return@setOnMenuItemClickListener true
+                    }
+
+                    if (arguments == null) {
+                        findNavController().navigate(
+                            R.id.tagsFragment,
+                            bundleOf(Pair("element_id", elementId))
+                        )
+                    } else {
+                        findNavController().navigate(
+                            ElementFragmentDirections.actionElementFragmentToTagsFragment(
+                                elementId
+                            )
+                        )
+                    }
                 }
             }
 
