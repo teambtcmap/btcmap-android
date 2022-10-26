@@ -1,6 +1,5 @@
 package login
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -49,16 +48,6 @@ class LoginFragment : Fragment() {
         }
 
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
-
-        WindowCompat.getInsetsController(
-            requireActivity().window,
-            requireActivity().window.decorView,
-        ).isAppearanceLightStatusBars =
-            when (requireContext().resources.configuration.uiMode and
-                    Configuration.UI_MODE_NIGHT_MASK) {
-                Configuration.UI_MODE_NIGHT_NO -> true
-                else -> false
-            }
 
         binding.login.setOnClickListener { login() }
     }

@@ -1,6 +1,5 @@
 package tags
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -93,16 +92,6 @@ class TagsFragment : Fragment() {
             tagView.onDeleteListener = TagView.OnDeleteListener { binding.tagsContainer -= it }
             binding.tagsContainer += tagView
         }
-
-        WindowCompat.getInsetsController(
-            requireActivity().window,
-            requireActivity().window.decorView,
-        ).isAppearanceLightStatusBars =
-            when (requireContext().resources.configuration.uiMode and
-                    Configuration.UI_MODE_NIGHT_MASK) {
-                Configuration.UI_MODE_NIGHT_NO -> true
-                else -> false
-            }
 
         binding.upload.setOnClickListener {
             if (binding.comment.text.toString().isBlank()) {

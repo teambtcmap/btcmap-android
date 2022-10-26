@@ -1,7 +1,6 @@
 package area
 
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.text.format.DateUtils
@@ -105,15 +104,6 @@ class AreaFragment : Fragment() {
         val area = runBlocking {
             areasRepo.selectById(AreaFragmentArgs.fromBundle(requireArguments()).areaId)
         } ?: return
-
-        WindowCompat.getInsetsController(
-            requireActivity().window,
-            requireActivity().window.decorView,
-        ).isAppearanceLightStatusBars =
-            when (requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-                Configuration.UI_MODE_NIGHT_NO -> true
-                else -> false
-            }
 
         binding.toolbar.title = area.name()
 

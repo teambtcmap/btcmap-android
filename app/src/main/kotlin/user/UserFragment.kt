@@ -1,7 +1,6 @@
 package user
 
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -94,15 +93,6 @@ class UserFragment : Fragment() {
 
             true
         }
-
-        WindowCompat.getInsetsController(
-            requireActivity().window,
-            requireActivity().window.decorView,
-        ).isAppearanceLightStatusBars =
-            when (requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-                Configuration.UI_MODE_NIGHT_NO -> true
-                else -> false
-            }
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         binding.list.adapter = adapter

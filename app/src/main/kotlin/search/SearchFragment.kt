@@ -1,6 +1,5 @@
 package search
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -85,16 +84,6 @@ class SearchFragment : Fragment() {
             }
             WindowInsetsCompat.CONSUMED
         }
-
-        WindowCompat.getInsetsController(
-            requireActivity().window,
-            requireActivity().window.decorView,
-        ).isAppearanceLightStatusBars =
-            when (requireContext().resources.configuration.uiMode and
-                    Configuration.UI_MODE_NIGHT_MASK) {
-                Configuration.UI_MODE_NIGHT_NO -> true
-                else -> false
-            }
     }
 
     override fun onDestroyView() {

@@ -291,6 +291,12 @@ class ElementFragment : Fragment() {
             startActivity(intent)
         }
 
+        val email =
+            tags["email"]?.jsonPrimitive?.content ?: tags["contact:email"]?.jsonPrimitive?.content
+            ?: ""
+        binding.email.text = email
+        binding.email.isVisible = email.isNotBlank()
+
         val openingHours = tags["opening_hours"]?.jsonPrimitive?.content
         binding.openingHours.text = openingHours
         binding.openingHours.isVisible = openingHours != null

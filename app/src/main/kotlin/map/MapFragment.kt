@@ -301,11 +301,6 @@ class MapFragment : Fragment() {
             }
         }
 
-        WindowCompat.getInsetsController(
-            requireActivity().window,
-            requireActivity().window.decorView,
-        ).isAppearanceLightStatusBars = !darkMap
-
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 while (binding.map.getIntrinsicScreenRect(null).height() == 0) {
@@ -385,6 +380,33 @@ class MapFragment : Fragment() {
 //            }
 //        }
 //    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val nightMode =
+            resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+        val darkMap = nightMode && model.conf.conf.value.darkMap
+
+        WindowCompat.getInsetsController(
+            requireActivity().window,
+            requireActivity().window.decorView,
+        ).isAppearanceLightStatusBars = !darkMap
+    }
+
+    override fun onPause() {
+        WindowCompat.getInsetsController(
+            requireActivity().window,
+            requireActivity().window.decorView,
+        ).isAppearanceLightStatusBars =
+            when (requireContext().resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) {
+                android.content.res.Configuration.UI_MODE_NIGHT_NO -> true
+                else -> false
+            }
+
+        super.onPause()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

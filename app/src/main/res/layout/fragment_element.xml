@@ -156,7 +156,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/ic_contact_instagram"
+                app:drawableStartCompat="@drawable/ic_contact_email"
                 app:drawableTint="?colorSecondary"
                 tools:text="BTCMapDotOrg" />
 
