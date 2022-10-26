@@ -147,6 +147,20 @@
                 tools:text="BTCMapDotOrg" />
 
             <TextView
+                android:id="@+id/email"
+                style="?attr/textAppearanceSubtitle1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autoLink="email"
+                android:drawablePadding="20dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp"
+                android:singleLine="true"
+                app:drawableStartCompat="@drawable/ic_contact_instagram"
+                app:drawableTint="?colorSecondary"
+                tools:text="BTCMapDotOrg" />
+
+            <TextView
                 android:id="@+id/openingHours"
                 style="?attr/textAppearanceSubtitle1"
                 android:layout_width="match_parent"

@@ -224,11 +224,14 @@ class ElementFragment : Fragment() {
         binding.address.isVisible = address.isNotBlank()
         binding.address.text = address
 
-        val phone = tags["phone"]?.jsonPrimitive?.content
+        val phone =
+            tags["phone"]?.jsonPrimitive?.content ?: tags["contact:phone"]?.jsonPrimitive?.content
+            ?: ""
         binding.phone.text = phone
-        binding.phone.isVisible = phone != null
+        binding.phone.isVisible = phone.isNotBlank()
 
-        val website = tags["website"]?.jsonPrimitive?.content ?: ""
+        val website = tags["website"]?.jsonPrimitive?.content
+            ?: tags["contact:website"]?.jsonPrimitive?.content ?: ""
         binding.website.text = website
             .replace("https://www.", "")
             .replace("http://www.", "")
