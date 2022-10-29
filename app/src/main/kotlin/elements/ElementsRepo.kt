@@ -6,8 +6,10 @@ import db.*
 import http.await
 import icons.iconId
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -25,39 +27,130 @@ class ElementsRepo(
     private val db: Database,
 ) {
 
+    init {
+        GlobalScope.launch {
+            db.elementQueries.selectCount().asFlow().mapToOne(Dispatchers.IO).collect {
+                clustersCache.clear()
+            }
+        }
+    }
+
+    private val clustersCache = mutableMapOf<Double, List<View_element_map_cluster>>()
+
     suspend fun selectById(id: String): Element? {
         return db.elementQueries.selectById(id).asFlow().mapToOneOrNull(Dispatchers.IO).first()
     }
 
     suspend fun selectByBoundingBox(
+        zoom: Double?,
         box: BoundingBox,
-    ): List<View_element_map_pin> {
-        val pins = if (box.lonEast > box.lonWest) {
-            db.elementQueries.selectElementsAsMapPinsByBoundingBox(
-                minLat = box.latSouth,
-                maxLat = box.latNorth,
-                minLon = box.lonWest,
-                maxLon = box.lonEast,
-            ).asFlow().mapToList(Dispatchers.IO).first()
-        } else {
-            val part1 = db.elementQueries.selectElementsAsMapPinsByBoundingBox(
-                minLat = box.latSouth,
-                maxLat = box.latNorth,
-                minLon = box.lonWest,
-                maxLon = 180.0,
-            ).asFlow().mapToList(Dispatchers.IO).first()
-
-            val part2 = db.elementQueries.selectElementsAsMapPinsByBoundingBox(
-                minLat = box.latSouth,
-                maxLat = box.latNorth,
-                minLon = -180.0,
-                maxLon = box.lonEast,
-            ).asFlow().mapToList(Dispatchers.IO).first()
-
-            part1 + part2
+    ): List<View_element_map_cluster> {
+        if (zoom == null) {
+            return emptyList()
         }
 
-        return pins
+        var step = 1.0
+
+        if (zoom >= 1.0) {
+            step = 35.0
+        }
+
+        if (zoom >= 2.0) {
+            step = 25.0
+        }
+
+        if (zoom >= 3.0) {
+            step = 17.0
+        }
+
+        if (zoom >= 4.0) {
+            step = 13.0
+        }
+
+        if (zoom >= 5.0) {
+            step = 6.5
+        }
+
+        if (zoom > 6.0) {
+            step = 3.0
+        }
+
+        if (zoom > 7.0) {
+            step = 1.5
+        }
+
+        if (zoom > 8.0) {
+            step = 0.8
+        }
+
+        if (zoom > 9.0) {
+            step = 0.4
+        }
+
+        if (zoom > 10.0) {
+            step = 0.2
+        }
+
+        if (zoom > 11.0) {
+            step = 0.1
+        }
+
+        if (zoom > 12.0) {
+            step = 0.04
+        }
+
+        if (zoom > 13.0) {
+            step = 0.02
+        }
+
+        if (zoom > 14.0) {
+            step = 0.005
+        }
+
+        if (zoom > 15.0) {
+            step = 0.003
+        }
+
+        if (zoom > 16.0) {
+            step = 0.002
+        }
+
+        if (zoom > 17.0) {
+            step = 0.001
+        }
+
+        return if (zoom > 18) {
+            db.elementQueries.selectElementsAsPinsByBoundingBox(
+                minLat = box.latSouth,
+                maxLat = box.latNorth,
+                minLon = box.lonWest,
+                maxLon = box.lonEast,
+            ).asFlow().mapToList(Dispatchers.IO).first().map {
+                View_element_map_cluster(
+                    count = 1,
+                    id = it.id,
+                    lat = it.lat,
+                    lon = it.lon,
+                    icon_id = it.icon_id,
+                )
+            }
+        } else {
+            clustersCache.getOrPut(step) {
+                db.elementQueries.selectElementsAsPins(
+                    step = step,
+                ).asFlow().mapToList(Dispatchers.IO).first().map {
+                    View_element_map_cluster(
+                        count = it.count,
+                        id = it.id,
+                        lat = it.lat!!,
+                        lon = it.lon!!,
+                        icon_id = it.icon_id,
+                    )
+                }
+            }.filter {
+                box.contains(it.lat, it.lon)
+            }
+        }
     }
 
     suspend fun selectElementIdIconAndTags(

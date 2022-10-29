@@ -22,6 +22,8 @@ import com.github.mikephil.charting.formatter.IFillFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import map.getOnSurfaceColor
 import org.btcmap.databinding.FragmentReportsBinding
 import org.koin.android.ext.android.inject
@@ -72,17 +74,32 @@ class ReportsFragment : Fragment() {
 
                 show(
                     binding.chartUpToDateElements,
-                    reports.map { Pair(it.date, it.up_to_date_elements) },
+                    reports.map {
+                        Pair(
+                            it.date,
+                            it.tags["up_to_date_elements"]?.jsonPrimitive?.longOrNull ?: 0,
+                        )
+                    },
                 )
 
                 show(
                     binding.chartTotalElements,
-                    reports.map { Pair(it.date, it.total_elements) },
+                    reports.map {
+                        Pair(
+                            it.date,
+                            it.tags["total_elements"]?.jsonPrimitive?.longOrNull ?: 0,
+                        )
+                    },
                 )
 
                 show(
                     binding.chartLegacyElements,
-                    reports.map { Pair(it.date, it.legacy_elements) },
+                    reports.map {
+                        Pair(
+                            it.date,
+                            it.tags["legacy_elements"]?.jsonPrimitive?.longOrNull ?: 0,
+                        )
+                    },
                 )
             }
         }

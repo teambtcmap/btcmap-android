@@ -3,7 +3,9 @@ package map
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Paint
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
@@ -17,8 +19,11 @@ import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.applyCanvas
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -28,6 +33,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import areas.AreaResultModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import db.View_element_map_cluster
 import element.ElementFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -38,7 +44,6 @@ import org.btcmap.R
 import org.btcmap.databinding.FragmentMapBinding
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
@@ -46,6 +51,7 @@ import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.util.TileSystemWebMercator
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
@@ -180,7 +186,15 @@ class MapFragment : Fragment() {
 
         binding.map.apply {
             zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-            minZoomLevel = 5.0
+            minZoomLevel = 4.0
+            setScrollableAreaLimitDouble(
+                BoundingBox(
+                    TileSystemWebMercator.MaxLatitude,
+                    TileSystemWebMercator.MaxLongitude,
+                    TileSystemWebMercator.MinLatitude,
+                    TileSystemWebMercator.MinLongitude
+                )
+            )
             setMultiTouchControls(true)
             addLocationOverlay()
             addCancelSelectionOverlay()
@@ -234,46 +248,38 @@ class MapFragment : Fragment() {
             }
         }
 
-        var elementsOverlay: RadiusMarkerClusterer? = null
+        val visibleElements = mutableListOf<Marker>()
 
         viewLifecycleOwner.lifecycleScope.launch {
-            model.visibleElements.collectLatest { elementWithMarkers ->
-                if (elementsOverlay != null) {
-                    binding.map.overlays.remove(elementsOverlay)
+            model.visibleElements.collectLatest { newElements ->
+                visibleElements.forEach {
+                    binding.map.overlays -= it
                 }
 
-                elementsOverlay = RadiusMarkerClusterer(requireContext())
+                visibleElements.clear()
 
-                val clusterIcon =
-                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_cluster)!!
-                DrawableCompat.setTint(
-                    clusterIcon, requireContext().getPrimaryContainerColor(model.conf.conf.value)
-                )
-
-                val pinSizePx = TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP,
-                    48f,
-                    resources.displayMetrics,
-                ).toInt()
-
-                elementsOverlay!!.setIcon(clusterIcon.toBitmap(pinSizePx, pinSizePx))
-                elementsOverlay!!.textPaint.color =
-                    requireContext().getOnPrimaryContainerColor(model.conf.conf.value)
-
-                elementWithMarkers.sortedByDescending { it.element.lat }.forEach {
+                newElements.forEach {
                     val marker = Marker(binding.map)
                     marker.position = GeoPoint(it.element.lat, it.element.lon)
-                    marker.icon = it.marker
+
+                    if (it.element.count == 1L) {
+                        marker.icon = it.marker
+                    } else {
+                        marker.icon = createClusterIcon(it.element).toDrawable(resources)
+                    }
 
                     marker.setOnMarkerClickListener { _, _ ->
-                        model.selectElement(it.element.id, false)
+                        if (it.element.count == 1L) {
+                            model.selectElement(it.element.id, false)
+                        }
+
                         true
                     }
 
-                    elementsOverlay!!.add(marker)
+                    visibleElements += marker
+                    binding.map.overlays += marker
                 }
 
-                binding.map.overlays.add(elementsOverlay)
                 binding.map.invalidate()
             }
         }
@@ -341,8 +347,14 @@ class MapFragment : Fragment() {
                     return@repeatOnLifecycle
                 }
 
-                val firstBoundingBox = model.mapBoundingBox.firstOrNull()
+                val firstBoundingBox = model.mapViewport.firstOrNull()?.boundingBox
                 binding.map.zoomToBoundingBox(firstBoundingBox, false)
+                model.setMapViewport(
+                    MapModel.MapViewport(
+                        binding.map.zoomLevelDouble,
+                        binding.map.boundingBox,
+                    )
+                )
                 binding.map.addViewportListener()
             }
         }
@@ -458,7 +470,12 @@ class MapFragment : Fragment() {
     private fun MapView.addViewportListener() {
         addMapListener(object : MapListener {
             override fun onScroll(event: ScrollEvent?): Boolean {
-                model.setMapViewport(binding.map.boundingBox)
+                model.setMapViewport(
+                    MapModel.MapViewport(
+                        binding.map.zoomLevelDouble,
+                        binding.map.boundingBox,
+                    )
+                )
                 return false
             }
 
@@ -490,5 +507,47 @@ class MapFragment : Fragment() {
         }
 
         return elementFragment.requireView().findViewById(R.id.toolbar)!!
+    }
+
+    private var emptyPinBitmap: Bitmap? = null
+
+    private fun createClusterIcon(cluster: View_element_map_cluster): Bitmap {
+        val pinSizePx = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, 32f, requireContext().resources.displayMetrics
+        ).toInt()
+
+        if (emptyPinBitmap == null) {
+            val emptyClusterDrawable =
+                ContextCompat.getDrawable(requireContext(), R.drawable.ic_cluster)!!
+            DrawableCompat.setTint(
+                emptyClusterDrawable,
+                requireContext().getPrimaryContainerColor(model.conf.conf.value)
+            )
+            emptyPinBitmap = emptyClusterDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
+        }
+
+        val clusterIcon =
+            createBitmap(emptyPinBitmap!!.width, emptyPinBitmap!!.height).applyCanvas {
+                drawBitmap(emptyPinBitmap!!, 0f, 0f, Paint())
+            }
+
+        clusterIcon.applyCanvas {
+            val paint = Paint().apply {
+                textSize = pinSizePx.toFloat() / 3
+                color = requireContext().getOnPrimaryContainerColor(model.conf.conf.value)
+            }
+
+            val text = cluster.count.toString()
+            val textWidth = paint.measureText(text)
+
+            drawText(
+                text,
+                clusterIcon.width / 2f - textWidth / 2,
+                clusterIcon.height / 2f - (paint.fontMetrics.ascent + paint.fontMetrics.descent) / 2,
+                paint
+            )
+        }
+
+        return clusterIcon
     }
 }

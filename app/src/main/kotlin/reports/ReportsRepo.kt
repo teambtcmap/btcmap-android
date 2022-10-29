@@ -11,6 +11,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromStream
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -47,16 +48,7 @@ class ReportsRepo(
                     Report(
                         area_id = it.area_id,
                         date = it.date,
-                        total_elements = it.total_elements,
-                        total_elements_onchain = it.total_elements_onchain,
-                        total_elements_lightning = it.total_elements_lightning,
-                        total_elements_lightning_contactless = it.total_elements_lightning_contactless,
-                        up_to_date_elements = it.up_to_date_elements,
-                        outdated_elements = it.outdated_elements,
-                        legacy_elements = it.legacy_elements,
-                        elements_created = it.elements_created,
-                        elements_updated = it.elements_updated,
-                        elements_deleted = it.elements_deleted,
+                        tags = it.tags,
                         created_at = it.created_at,
                         updated_at = it.updated_at,
                         deleted_at = it.deleted_at
@@ -70,16 +62,7 @@ class ReportsRepo(
     private data class ReportJson(
         val area_id: String,
         val date: String,
-        val total_elements: Long,
-        val total_elements_onchain: Long,
-        val total_elements_lightning: Long,
-        val total_elements_lightning_contactless: Long,
-        val up_to_date_elements: Long,
-        val outdated_elements: Long,
-        val legacy_elements: Long,
-        val elements_created: Long,
-        val elements_updated: Long,
-        val elements_deleted: Long,
+        val tags: JsonObject,
         val created_at: String,
         val updated_at: String,
         val deleted_at: String,

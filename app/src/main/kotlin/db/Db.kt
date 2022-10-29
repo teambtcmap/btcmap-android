@@ -14,7 +14,7 @@ fun database(context: Context): Database {
     val driver = AndroidSqliteDriver(
         schema = Database.Schema,
         context = context,
-        name = "btcmap-v22.db",
+        name = "btcmap-v23.db",
         factory = RequerySQLiteOpenHelperFactory(),
     )
 
@@ -27,6 +27,7 @@ fun database(driver: SqlDriver): Database {
         confAdapter = confAdapter(),
         elementAdapter = elementAdapter(),
         areaAdapter = areaAdapter(),
+        reportAdapter = reportAdapter(),
     )
 }
 
@@ -52,6 +53,17 @@ private fun elementAdapter(): Element.Adapter {
 
 private fun areaAdapter(): Area.Adapter {
     return Area.Adapter(
+        tagsAdapter = object : ColumnAdapter<JsonObject, String> {
+            override fun decode(databaseValue: String): JsonObject =
+                Json.decodeFromString(databaseValue)
+
+            override fun encode(value: JsonObject) = value.toString()
+        },
+    )
+}
+
+private fun reportAdapter(): Report.Adapter {
+    return Report.Adapter(
         tagsAdapter = object : ColumnAdapter<JsonObject, String> {
             override fun decode(databaseValue: String): JsonObject =
                 Json.decodeFromString(databaseValue)

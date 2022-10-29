@@ -154,7 +154,6 @@ dependencies {
 
     // Open Street Map widget
     implementation("org.osmdroid:osmdroid-android:6.1.14")
-    implementation("com.github.MKergall:osmbonuspack:6.7.0")
 
     // Charts
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")

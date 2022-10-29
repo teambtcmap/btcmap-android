@@ -22,6 +22,16 @@ SELECT
 FROM element
 WHERE deleted_at = '';
 
+CREATE VIEW view_element_map_cluster AS
+SELECT
+    count(*),
+    id,
+    lat,
+    lon,
+    icon_id
+FROM element
+WHERE deleted_at = '';
+
 insertOrReplace:
 INSERT OR REPLACE
 INTO element (id, lat, lon, icon_id, osm_json, created_at, updated_at, deleted_at)
@@ -46,13 +56,25 @@ FROM element
 WHERE deleted_at = '' AND (UPPER(osm_json) LIKE '%' || UPPER(:searchString) || '%')
 LIMIT 100;
 
-selectElementsAsMapPinsByBoundingBox:
+selectElementsAsPins:
+SELECT
+    count(*),
+    e.id,
+    avg(e.lat) AS lat,
+    avg(e.lon) AS lon,
+    e.icon_id
+FROM element e
+GROUP BY round(lat / :step) * :step, round(lon / :step) * :step
+ORDER BY e.lat DESC;
+
+selectElementsAsPinsByBoundingBox:
 SELECT *
 FROM view_element_map_pin
 WHERE lat > :minLat
 AND lat < :maxLat
 AND lon > :minLon
-AND lon < :maxLon;
+AND lon < :maxLon
+ORDER BY lat DESC;
 
 selectElementIdIconAndTags:
 SELECT

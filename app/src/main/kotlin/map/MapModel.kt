@@ -32,16 +32,24 @@ class MapModel(
 
     val userLocation: StateFlow<GeoPoint?> = locationRepo.location
 
-    private val _mapBoundingBox: MutableStateFlow<BoundingBox> = MutableStateFlow(
-        BoundingBox(
-            conf.conf.value.viewport_north_lat,
-            conf.conf.value.viewport_east_lon,
-            conf.conf.value.viewport_south_lat,
-            conf.conf.value.viewport_west_lon,
+    data class MapViewport(
+        val zoom: Double?,
+        val boundingBox: BoundingBox,
+    )
+
+    private val _mapViewport: MutableStateFlow<MapViewport> = MutableStateFlow(
+        MapViewport(
+            zoom = null,
+            boundingBox = BoundingBox(
+                conf.conf.value.viewport_north_lat,
+                conf.conf.value.viewport_east_lon,
+                conf.conf.value.viewport_south_lat,
+                conf.conf.value.viewport_west_lon,
+            ),
         )
     )
 
-    val mapBoundingBox = _mapBoundingBox.asStateFlow()
+    val mapViewport = _mapViewport.asStateFlow()
 
     private val _selectedElement: MutableStateFlow<Element?> = MutableStateFlow(null)
     val selectedElement = _selectedElement.asStateFlow()
@@ -51,7 +59,7 @@ class MapModel(
 
     init {
         combine(
-            _mapBoundingBox,
+            mapViewport,
             db.elementQueries.selectCount().asFlow().mapToOne(Dispatchers.IO),
             mapMarkersRepo,
         ) { viewport, _, mapMarkersRepo ->
@@ -61,7 +69,10 @@ class MapModel(
                 }
 
                 _visibleElements.update {
-                    elementsRepo.selectByBoundingBox(viewport)
+                    elementsRepo.selectByBoundingBox(
+                        zoom = viewport.zoom,
+                        box = viewport.boundingBox,
+                    )
                         .map {
                             ElementWithMarker(
                                 it,
@@ -84,19 +95,19 @@ class MapModel(
 
         viewModelScope.launch {
             val location = withTimeout(5_000) { userLocation.filterNotNull().first() }
-            setMapViewport(location.toBoundingBox(1_000.0))
+            setMapViewport(MapViewport(null, location.toBoundingBox(1_000.0)))
         }
     }
 
-    fun setMapViewport(viewport: BoundingBox) {
-        _mapBoundingBox.update { viewport }
+    fun setMapViewport(viewport: MapViewport) {
+        _mapViewport.update { viewport }
 
         conf.update {
             it.copy(
-                viewport_north_lat = viewport.latNorth,
-                viewport_east_lon = viewport.lonEast,
-                viewport_south_lat = viewport.latSouth,
-                viewport_west_lon = viewport.lonWest,
+                viewport_north_lat = viewport.boundingBox.latNorth,
+                viewport_east_lon = viewport.boundingBox.lonEast,
+                viewport_south_lat = viewport.boundingBox.latSouth,
+                viewport_west_lon = viewport.boundingBox.lonWest,
             )
         }
     }
@@ -108,8 +119,11 @@ class MapModel(
         _selectedElement.update { element }
 
         if (element != null && moveToLocation) {
-            _mapBoundingBox.update {
-                GeoPoint(element.lat, element.lon).toBoundingBox(100.0)
+            _mapViewport.update {
+                MapViewport(
+                    null,
+                    GeoPoint(element.lat, element.lon).toBoundingBox(100.0),
+                )
             }
         }
     }
