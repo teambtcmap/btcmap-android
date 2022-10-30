@@ -33,8 +33,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import areas.AreaResultModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import db.View_element_map_cluster
+import db.SelectElementClusters
 import element.ElementFragment
+import icons.toIconResId
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -129,7 +130,7 @@ class MapFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        model.setArgs(requireContext())
+        val markersRepo = MapMarkersRepo(requireContext(), model.conf)
 
         binding.search.setOnClickListener {
             val action = MapFragmentDirections.actionMapFragmentToSearchFragment(
@@ -200,8 +201,6 @@ class MapFragment : Fragment() {
             addCancelSelectionOverlay()
         }
 
-        model.invalidateMarkersCache()
-
         bottomSheetBehavior = BottomSheetBehavior.from(binding.elementDetails)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         bottomSheetBehavior.addSlideCallback()
@@ -260,17 +259,17 @@ class MapFragment : Fragment() {
 
                 newElements.forEach {
                     val marker = Marker(binding.map)
-                    marker.position = GeoPoint(it.element.lat, it.element.lon)
+                    marker.position = GeoPoint(it.lat!!, it.lon!!)
 
-                    if (it.element.count == 1L) {
-                        marker.icon = it.marker
+                    if (it.count == 1L) {
+                        marker.icon = markersRepo.getMarker(it.icon_id.toIconResId())
                     } else {
-                        marker.icon = createClusterIcon(it.element).toDrawable(resources)
+                        marker.icon = createClusterIcon(it).toDrawable(resources)
                     }
 
                     marker.setOnMarkerClickListener { _, _ ->
-                        if (it.element.count == 1L) {
-                            model.selectElement(it.element.id, false)
+                        if (it.count == 1L) {
+                            model.selectElement(it.id, false)
                         }
 
                         true
@@ -511,7 +510,7 @@ class MapFragment : Fragment() {
 
     private var emptyPinBitmap: Bitmap? = null
 
-    private fun createClusterIcon(cluster: View_element_map_cluster): Bitmap {
+    private fun createClusterIcon(cluster: SelectElementClusters): Bitmap {
         val pinSizePx = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, 32f, requireContext().resources.displayMetrics
         ).toInt()

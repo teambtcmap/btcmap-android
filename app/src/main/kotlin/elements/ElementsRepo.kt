@@ -35,7 +35,7 @@ class ElementsRepo(
         }
     }
 
-    private val clustersCache = mutableMapOf<Double, List<View_element_map_cluster>>()
+    private val clustersCache = mutableMapOf<Double, List<SelectElementClusters>>()
 
     suspend fun selectById(id: String): Element? {
         return db.elementQueries.selectById(id).asFlow().mapToOneOrNull(Dispatchers.IO).first()
@@ -44,7 +44,7 @@ class ElementsRepo(
     suspend fun selectByBoundingBox(
         zoom: Double?,
         box: BoundingBox,
-    ): List<View_element_map_cluster> {
+    ): List<SelectElementClusters> {
         if (zoom == null) {
             return emptyList()
         }
@@ -126,7 +126,7 @@ class ElementsRepo(
                 minLon = box.lonWest,
                 maxLon = box.lonEast,
             ).asFlow().mapToList(Dispatchers.IO).first().map {
-                View_element_map_cluster(
+                SelectElementClusters(
                     count = 1,
                     id = it.id,
                     lat = it.lat,
@@ -136,19 +136,10 @@ class ElementsRepo(
             }
         } else {
             clustersCache.getOrPut(step) {
-                db.elementQueries.selectElementsAsPins(
-                    step = step,
-                ).asFlow().mapToList(Dispatchers.IO).first().map {
-                    View_element_map_cluster(
-                        count = it.count,
-                        id = it.id,
-                        lat = it.lat!!,
-                        lon = it.lon!!,
-                        icon_id = it.icon_id,
-                    )
-                }
+                db.elementQueries.selectElementClusters(step = step).asFlow()
+                    .mapToList(Dispatchers.IO).first()
             }.filter {
-                box.contains(it.lat, it.lon)
+                box.contains(it.lat!!, it.lon!!)
             }
         }
     }

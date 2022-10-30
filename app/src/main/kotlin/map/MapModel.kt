@@ -1,6 +1,5 @@
 package map
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.cash.sqldelight.coroutines.asFlow
@@ -9,8 +8,8 @@ import app.cash.sqldelight.coroutines.mapToOneOrNull
 import conf.ConfRepo
 import db.Database
 import db.Element
+import db.SelectElementClusters
 import elements.ElementsRepo
-import icons.toIconResId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import location.UserLocationRepository
@@ -27,8 +26,6 @@ class MapModel(
     private val db: Database,
     private val elementsRepo: ElementsRepo,
 ) : ViewModel() {
-
-    private val mapMarkersRepo: MutableStateFlow<MapMarkersRepo?> = MutableStateFlow(null)
 
     val userLocation: StateFlow<GeoPoint?> = locationRepo.location
 
@@ -54,40 +51,25 @@ class MapModel(
     private val _selectedElement: MutableStateFlow<Element?> = MutableStateFlow(null)
     val selectedElement = _selectedElement.asStateFlow()
 
-    private val _visibleElements = MutableStateFlow<List<ElementWithMarker>>(emptyList())
+    private val _visibleElements = MutableStateFlow<List<SelectElementClusters>>(emptyList())
     val visibleElements = _visibleElements.asStateFlow()
 
     init {
         combine(
             mapViewport,
             db.elementQueries.selectCount().asFlow().mapToOne(Dispatchers.IO),
-            mapMarkersRepo,
-        ) { viewport, _, mapMarkersRepo ->
+        ) { viewport, _ ->
             withContext(Dispatchers.Default) {
-                if (mapMarkersRepo == null) {
-                    return@withContext
-                }
-
                 _visibleElements.update {
                     elementsRepo.selectByBoundingBox(
                         zoom = viewport.zoom,
                         box = viewport.boundingBox,
                     )
-                        .map {
-                            ElementWithMarker(
-                                it,
-                                mapMarkersRepo.getMarker(it.icon_id.toIconResId()),
-                            )
-                        }
                 }
             }
         }.launchIn(viewModelScope)
 
         locationRepo.requestLocationUpdates()
-    }
-
-    fun setArgs(context: Context) {
-        mapMarkersRepo.update { MapMarkersRepo(context, conf) }
     }
 
     fun onLocationPermissionGranted() {
@@ -126,10 +108,6 @@ class MapModel(
                 )
             }
         }
-    }
-
-    fun invalidateMarkersCache() {
-        mapMarkersRepo.value?.invalidateCache()
     }
 
     fun syncElements() {

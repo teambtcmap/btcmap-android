@@ -13,25 +13,6 @@ CREATE TABLE element (
 
 CREATE INDEX idx_element_lat_lon ON element (lat, lon);
 
-CREATE VIEW view_element_map_pin AS
-SELECT
-    id,
-    lat,
-    lon,
-    icon_id
-FROM element
-WHERE deleted_at = '';
-
-CREATE VIEW view_element_map_cluster AS
-SELECT
-    count(*),
-    id,
-    lat,
-    lon,
-    icon_id
-FROM element
-WHERE deleted_at = '';
-
 insertOrReplace:
 INSERT OR REPLACE
 INTO element (id, lat, lon, icon_id, osm_json, created_at, updated_at, deleted_at)
@@ -40,10 +21,6 @@ VALUES ?;
 selectAll:
 SELECT *
 FROM element;
-
-selectAllElementsAsMapPins:
-SELECT *
-FROM view_element_map_pin;
 
 selectById:
 SELECT *
@@ -56,7 +33,7 @@ FROM element
 WHERE deleted_at = '' AND (UPPER(osm_json) LIKE '%' || UPPER(:searchString) || '%')
 LIMIT 100;
 
-selectElementsAsPins:
+selectElementClusters:
 SELECT
     count(*),
     e.id,
@@ -64,16 +41,23 @@ SELECT
     avg(e.lon) AS lon,
     e.icon_id
 FROM element e
+WHERE e.deleted_at = ''
 GROUP BY round(lat / :step) * :step, round(lon / :step) * :step
 ORDER BY e.lat DESC;
 
 selectElementsAsPinsByBoundingBox:
-SELECT *
-FROM view_element_map_pin
-WHERE lat > :minLat
-AND lat < :maxLat
-AND lon > :minLon
-AND lon < :maxLon
+SELECT
+    id,
+    lat,
+    lon,
+    icon_id
+FROM element
+WHERE
+    deleted_at = ''
+    AND lat > :minLat
+    AND lat < :maxLat
+    AND lon > :minLon
+    AND lon < :maxLon
 ORDER BY lat DESC;
 
 selectElementIdIconAndTags:

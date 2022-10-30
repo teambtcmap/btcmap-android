@@ -265,6 +265,7 @@ class ElementFragment : Fragment() {
             binding.facebook.text = facebookUrl
                 .replace("https://www.facebook.com/", "")
                 .replace("https://facebook.com/", "")
+                .trimEnd('/')
         }
 
         binding.facebook.styleAsLink()
@@ -306,12 +307,12 @@ class ElementFragment : Fragment() {
         binding.verifyOrReport.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data =
-                Uri.parse("https://btcmap.org/report-outdated-info?&name=${element.osm_json["tags"]!!.jsonObject["name"]?.jsonPrimitive?.content ?: ""}&lat=${element.lat}&long=${element.lon}&${element.osm_json["type"]!!.jsonPrimitive.content}=${element.osm_json["id"]!!.jsonPrimitive.content}")
+                Uri.parse("https://btcmap.org/verify-location?&name=${element.osm_json["tags"]!!.jsonObject["name"]?.jsonPrimitive?.content ?: ""}&lat=${element.lat}&long=${element.lon}&${element.osm_json["type"]!!.jsonPrimitive.content}=${element.osm_json["id"]!!.jsonPrimitive.content}")
             startActivity(intent)
         }
     }
 
-    fun TextView.styleAsLink() {
+    private fun TextView.styleAsLink() {
         setText(
             SpannableString(text).apply {
                 setSpan(
