@@ -150,7 +150,7 @@ class AreaFragment : Fragment() {
 
                     AreaAdapter.Item.Element(
                         id = it.id,
-                        iconId = it.icon_id,
+                        iconId = it.icon_id ?: "question_mark",
                         name = tags["name"]?.jsonPrimitive?.content
                             ?: getString(R.string.unnamed_place),
                         status = status,

@@ -4,8 +4,8 @@ CREATE TABLE element (
     id TEXT NOT NULL PRIMARY KEY,
     lat REAL NOT NULL,
     lon REAL NOT NULL,
-    icon_id TEXT NOT NULL,
     osm_json TEXT AS JsonObject NOT NULL,
+    tags TEXT AS JsonObject NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     deleted_at TEXT NOT NULL
@@ -15,7 +15,7 @@ CREATE INDEX idx_element_lat_lon ON element (lat, lon);
 
 insertOrReplace:
 INSERT OR REPLACE
-INTO element (id, lat, lon, icon_id, osm_json, created_at, updated_at, deleted_at)
+INTO element (id, lat, lon, tags, osm_json, created_at, updated_at, deleted_at)
 VALUES ?;
 
 selectAll:
@@ -39,7 +39,7 @@ SELECT
     e.id,
     avg(e.lat) AS lat,
     avg(e.lon) AS lon,
-    e.icon_id
+    json_extract(e.tags, '$.icon:android') AS icon_id
 FROM element e
 WHERE e.deleted_at = ''
 GROUP BY round(lat / :step) * :step, round(lon / :step) * :step
@@ -50,7 +50,7 @@ SELECT
     id,
     lat,
     lon,
-    icon_id
+    json_extract(tags, '$.icon:android') AS icon_id
 FROM element
 WHERE
     deleted_at = ''
@@ -63,7 +63,7 @@ ORDER BY lat DESC;
 selectElementIdIconAndTags:
 SELECT
     id,
-    icon_id,
+    json_extract(tags, '$.icon:android') AS icon_id,
     json_extract(osm_json, '$.tags') AS tags
 FROM element
 WHERE

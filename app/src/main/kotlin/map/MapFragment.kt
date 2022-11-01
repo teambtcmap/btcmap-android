@@ -265,7 +265,7 @@ class MapFragment : Fragment() {
                     marker.position = GeoPoint(it.lat!!, it.lon!!)
 
                     if (it.count == 1L) {
-                        marker.icon = markersRepo.getMarker(it.icon_id)
+                        marker.icon = markersRepo.getMarker(it.icon_id ?: "question_mark")
                     } else {
                         marker.icon = createClusterIcon(it).toDrawable(resources)
                     }

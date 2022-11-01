@@ -107,7 +107,7 @@ class SearchModel(
 
         return SearchAdapter.Item(
             element = this,
-            icon = icon_id,
+            icon = tags["icon:android"]?.jsonPrimitive?.content ?: "question_mark",
             name = osm_json["tags"]!!.jsonObject["name"]?.jsonPrimitive?.contentOrNull ?: "Unnamed",
             distanceToUser = distanceStringBuilder.toString(),
         )

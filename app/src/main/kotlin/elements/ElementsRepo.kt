@@ -4,7 +4,6 @@ import android.content.Context
 import app.cash.sqldelight.coroutines.*
 import db.*
 import http.await
-import icons.iconId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
@@ -190,8 +189,8 @@ class ElementsRepo(
                                 id = it.id,
                                 lat = latLon.first,
                                 lon = latLon.second,
-                                icon_id = it.osm_json["tags"]?.jsonObject?.iconId() ?: "",
                                 osm_json = it.osm_json,
+                                tags = it.tags,
                                 created_at = it.created_at,
                                 updated_at = it.updated_at,
                                 deleted_at = it.deleted_at,
@@ -242,8 +241,8 @@ class ElementsRepo(
                         id = it.id,
                         lat = latLon.first,
                         lon = latLon.second,
-                        icon_id = it.osm_json["tags"]?.jsonObject?.iconId() ?: "",
                         osm_json = it.osm_json,
+                        tags = it.tags,
                         created_at = it.created_at,
                         updated_at = it.updated_at,
                         deleted_at = it.deleted_at,
@@ -286,6 +285,7 @@ class ElementsRepo(
     private data class ElementJson(
         val id: String,
         val osm_json: JsonObject,
+        val tags: JsonObject,
         val created_at: String,
         val updated_at: String,
         val deleted_at: String,
