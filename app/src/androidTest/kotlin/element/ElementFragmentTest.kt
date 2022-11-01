@@ -11,7 +11,9 @@ import kotlinx.serialization.json.JsonPrimitive
 import org.btcmap.R
 import org.hamcrest.Matchers.not
 import org.junit.Test
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import kotlin.random.Random
 
 class ElementFragmentTest {
 
@@ -23,16 +25,16 @@ class ElementFragmentTest {
             val tags = mutableMapOf<String, JsonPrimitive>()
 
             val element = Element(
-                type = "node",
-                id = 1L,
-                lat = 0.0,
-                lon = 0.0,
-                timestamp = ZonedDateTime.now().toString(),
-                boundsMinLat = null,
-                boundsMinLon = null,
-                boundsMaxLat = null,
-                boundsMaxLon = null,
-                tags = JsonObject(tags),
+                id = "${arrayOf("node", "way", "relation").random()}:${Random.nextLong()}",
+                lat = Random.nextDouble(-90.0, 90.0),
+                lon = Random.nextDouble(-180.0, 180.0),
+                osm_json = JsonObject(mapOf("tags" to JsonObject(tags))),
+                tags = JsonObject(emptyMap()),
+                created_at = ZonedDateTime.now(ZoneOffset.UTC)
+                    .minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
+                updated_at = ZonedDateTime.now(ZoneOffset.UTC)
+                    .minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
+                deleted_at = "",
             )
 
             scenario.onFragment { it.setElement(element) }

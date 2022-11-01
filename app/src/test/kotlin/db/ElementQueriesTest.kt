@@ -91,8 +91,8 @@ class ElementQueriesTest {
             id = "${arrayOf("node", "way", "relation").random()}:${Random.nextLong()}",
             lat = Random.nextDouble(-90.0, 90.0),
             lon = Random.nextDouble(-180.0, 180.0),
-            icon_id = "",
-            osm_json = JsonObject(emptyMap()),
+            osm_json = JsonObject(mapOf("tags" to JsonObject(emptyMap()))),
+            tags = JsonObject(emptyMap()),
             created_at = ZonedDateTime.now(ZoneOffset.UTC)
                 .minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
             updated_at = ZonedDateTime.now(ZoneOffset.UTC)
