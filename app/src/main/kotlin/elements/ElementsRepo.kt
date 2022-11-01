@@ -174,8 +174,9 @@ class ElementsRepo(
         return withContext(Dispatchers.IO) {
             runCatching {
                 val bundledElementsInputStream = context.assets.open("elements.json")
+                val json = Json { ignoreUnknownKeys = true }
 
-                val bundledElements = Json.decodeFromStream(
+                val bundledElements = json.decodeFromStream(
                     ListSerializer(ElementJson.serializer()),
                     bundledElementsInputStream,
                 )

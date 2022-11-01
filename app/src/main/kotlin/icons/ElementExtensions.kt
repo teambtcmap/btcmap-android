@@ -1,114 +1,6 @@
 package icons
 
-import androidx.annotation.DrawableRes
 import kotlinx.serialization.json.*
-import org.btcmap.R
-
-@DrawableRes
-fun String.toIconResId(): Int? {
-    return when (this) {
-        "icecream" -> R.drawable.baseline_icecream_24
-        "hotel" -> R.drawable.baseline_hotel_24
-        "tour" -> R.drawable.baseline_tour_24
-        "chalet" -> R.drawable.baseline_chalet_24
-        "holiday_village" -> R.drawable.baseline_holiday_village_24
-        "palette" -> R.drawable.baseline_palette_24
-        "info_outline" -> R.drawable.baseline_info_outline_24
-        "museum" -> R.drawable.baseline_museum_24
-        "computer" -> R.drawable.baseline_computer_24
-        "storefront" -> R.drawable.baseline_storefront_24
-        "diamond" -> R.drawable.baseline_diamond_24
-        "content_cut" -> R.drawable.baseline_content_cut_24
-        "local_grocery_store" -> R.drawable.baseline_local_grocery_store_24
-        "car_repair" -> R.drawable.baseline_car_repair_24
-        "spa" -> R.drawable.baseline_spa_24
-        "menu_book" -> R.drawable.baseline_menu_book_24
-        "chair" -> R.drawable.baseline_chair_24
-        "card_giftcard" -> R.drawable.baseline_card_giftcard_24
-        "luggage" -> R.drawable.baseline_luggage_24
-        "smartphone" -> R.drawable.baseline_smartphone_24
-        "smoking_rooms" -> R.drawable.baseline_smoking_rooms_24
-        "directions_car" -> R.drawable.baseline_directions_car_24
-        "bakery_dining" -> R.drawable.baseline_bakery_dining_24
-        "local_florist" -> R.drawable.baseline_local_florist_24
-        "pedal_bike" -> R.drawable.baseline_pedal_bike_24
-        "vaping_rooms" -> R.drawable.baseline_vaping_rooms_24
-        "visibility" -> R.drawable.baseline_visibility_24
-        "photo_camera" -> R.drawable.baseline_photo_camera_24
-        "tapas" -> R.drawable.baseline_tapas_24
-        "sports" -> R.drawable.baseline_sports_24
-        "music_note" -> R.drawable.baseline_music_note_24
-        "hardware" -> R.drawable.baseline_hardware_24
-        "local_printshop" -> R.drawable.baseline_local_printshop_24
-        "wine_bar" -> R.drawable.baseline_wine_bar_24
-        "liquor" -> R.drawable.baseline_liquor_24
-        "toys" -> R.drawable.baseline_toys_24
-        "attach_money" -> R.drawable.baseline_attach_money_24
-        "checkroom" -> R.drawable.baseline_checkroom_24
-        "restaurant" -> R.drawable.baseline_restaurant_24
-        "pool" -> R.drawable.baseline_pool_24
-        "two_wheeler" -> R.drawable.baseline_two_wheeler_24
-        "scuba_diving" -> R.drawable.baseline_scuba_diving_24
-        "lunch_dining" -> R.drawable.baseline_lunch_dining_24
-        "local_cafe" -> R.drawable.baseline_local_cafe_24
-        "local_bar" -> R.drawable.baseline_local_bar_24
-        "currency_exchange" -> R.drawable.baseline_currency_exchange_24
-        "business" -> R.drawable.baseline_business_24
-        "nightlife" -> R.drawable.baseline_nightlife_24
-        "pets" -> R.drawable.baseline_pets_24
-        "agriculture" -> R.drawable.baseline_agriculture_24
-        "local_atm" -> R.drawable.baseline_local_atm_24
-        "balance" -> R.drawable.baseline_balance_24
-        "mic" -> R.drawable.baseline_mic_24
-        "sports_bar" -> R.drawable.baseline_sports_bar_24
-        "account_balance" -> R.drawable.baseline_account_balance_24
-        "groups" -> R.drawable.baseline_groups_24
-        "surfing" -> R.drawable.baseline_surfing_24
-        "local_laundry_service" -> R.drawable.baseline_local_laundry_service_24
-        "medical_services" -> R.drawable.baseline_medical_services_24
-        "fitness_center" -> R.drawable.baseline_fitness_center_24
-        "design_services" -> R.drawable.baseline_design_services_24
-        "school" -> R.drawable.baseline_school_24
-        "local_hospital" -> R.drawable.baseline_local_hospital_24
-        "church" -> R.drawable.baseline_church_24
-        "park" -> R.drawable.baseline_park_24
-        "directions_boat" -> R.drawable.baseline_directions_boat_24
-        "local_mall" -> R.drawable.baseline_local_mall_24
-        "beach_access" -> R.drawable.baseline_beach_access_24
-        "public" -> R.drawable.baseline_public_24
-        "games" -> R.drawable.baseline_games_24
-        "lock" -> R.drawable.baseline_lock_24
-        "grass" -> R.drawable.baseline_grass_24
-        "local_taxi" -> R.drawable.baseline_local_taxi_24
-        "local_pharmacy" -> R.drawable.baseline_local_pharmacy_24
-        "electrical_services" -> R.drawable.baseline_electrical_services_24
-        "adult_content" -> R.drawable.baseline_adult_content_24
-        "coffee" -> R.drawable.baseline_coffee_24
-        "sailing" -> R.drawable.baseline_sailing_24
-        "local_gas_station" -> R.drawable.baseline_local_gas_station_24
-        "warehouse" -> R.drawable.baseline_warehouse_24
-        "science" -> R.drawable.baseline_science_24
-        "hvac" -> R.drawable.baseline_delete_24
-        "delete" -> R.drawable.baseline_delete_24
-        "edit" -> R.drawable.baseline_edit_24
-        "local_car_wash" -> R.drawable.baseline_local_car_wash_24
-        "newspaper" -> R.drawable.baseline_newspaper_24
-        "home" -> R.drawable.baseline_home_24
-        "child_care" -> R.drawable.baseline_child_care_24
-        "architecture" -> R.drawable.baseline_architecture_24
-        "videocam" -> R.drawable.baseline_videocam_24
-        "outdoor_grill" -> R.drawable.baseline_outdoor_grill_24
-        "cell_tower" -> R.drawable.baseline_cell_tower_24
-        "emoji_food_beverage" -> R.drawable.baseline_emoji_food_beverage_24
-        "local_post_office" -> R.drawable.baseline_local_post_office_24
-        "flight_takeoff" -> R.drawable.baseline_flight_takeoff_24
-        "local_movies" -> R.drawable.baseline_local_movies_24
-        "engineering" -> R.drawable.baseline_engineering_24
-        "watch" -> R.drawable.baseline_watch_24
-        "trip_origin" -> R.drawable.baseline_trip_origin_24
-        else -> null
-    }
-}
 
 fun JsonObject.iconId(): String {
     val tag = fun(tag: String): String? {
@@ -143,6 +35,7 @@ fun JsonObject.iconId(): String {
         tag("tourism") == "museum" -> "museum"
         // 3 elements (22-05-2022)
         tag("tourism") == "motel" -> "hotel"
+        tag("tourism") == "spa" -> "spa"
 
         // 179 elements (31-05-2022)
         tag("shop") == "computer" -> "computer"
@@ -413,7 +306,7 @@ fun JsonObject.iconId(): String {
         // 6 elements (06-06-2022)
         tag("amenity") == "coworking_space" -> "business"
         // 6 elements (06-06-2022)
-        tag("amenity") == "community_centre" -> "groups"
+        tag("amenity") == "community_centre" -> "group"
         // 5 elements (06-06-2022)
         tag("amenity") == "kindergarten" -> "child_care"
         // 5 elements (06-06-2022)
@@ -429,7 +322,7 @@ fun JsonObject.iconId(): String {
         // 4 elements (06-06-2022)
         tag("amenity") == "bicycle_rental" -> "pedal_bike"
         // 3 elements (06-06-2022)
-        tag("amenity") == "townhall" -> "groups"
+        tag("amenity") == "townhall" -> "group"
         // 3 elements (06-06-2022)
         tag("amenity") == "theatre" -> "account_balance"
         // 3 elements (06-06-2022)
@@ -471,7 +364,7 @@ fun JsonObject.iconId(): String {
         // 13 elements (07-06-2022)
         tag("office") == "therapist" -> "medical_services"
         // 13 elements (07-06-2022)
-        tag("office") == "coworking" -> "groups"
+        tag("office") == "coworking" -> "group"
         // 12 elements (07-06-2022)
         tag("office") == "physician" -> "medical_services"
         // 11 elements (07-06-2022)
@@ -481,13 +374,13 @@ fun JsonObject.iconId(): String {
         // 10 elements (07-06-2022)
         tag("office") == "financial" -> "attach_money"
         // 10 elements (07-06-2022)
-        tag("office") == "association" -> "groups"
+        tag("office") == "association" -> "group"
         // 9 elements (07-06-2022)
         tag("office") == "engineer" -> "engineering"
         // 8 elements (07-06-2022)
         tag("office") == "telecommunication" -> "cell_tower"
         // 8 elements (07-06-2022)
-        tag("office") == "coworking_space" -> "groups"
+        tag("office") == "coworking_space" -> "group"
         // 8 elements (07-06-2022)
         tag("office") == "construction" -> "engineering"
         // 7 elements (07-06-2022)
@@ -586,6 +479,6 @@ fun JsonObject.iconId(): String {
 
         tag("place") == "farm" -> "agriculture"
 
-        else -> ""
+        else -> "question_mark"
     }
 }

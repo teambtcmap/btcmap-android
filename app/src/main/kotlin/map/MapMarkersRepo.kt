@@ -10,8 +10,8 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
-import androidx.core.graphics.toRect
 import conf.ConfRepo
+import icons.iconTypeface
 import org.btcmap.R
 
 class MapMarkersRepo(
@@ -19,14 +19,30 @@ class MapMarkersRepo(
     private val conf: ConfRepo,
 ) {
 
-    private val cache = mutableMapOf<Int?, BitmapDrawable>()
+    private val iconPaint by lazy {
+        Paint().apply {
+            val pinSizePx = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                PIN_SIZE_DP,
+                context.resources.displayMetrics,
+            )
 
-    fun getMarker(iconResId: Int?): BitmapDrawable {
-        var markerDrawable = cache[iconResId]
+            typeface = context.iconTypeface()
+            textSize = pinSizePx / 2.1f
+            color = context.getOnPrimaryContainerColor(conf.conf.value)
+            isAntiAlias = true
+        }
+    }
+
+    private val cache = mutableMapOf<String?, BitmapDrawable>()
+
+    fun getMarker(iconId: String): BitmapDrawable {
+        var markerDrawable = cache[iconId]
 
         if (markerDrawable == null) {
-            markerDrawable = createMarkerIcon(iconResId).toDrawable(context.resources)
-            cache[iconResId] = markerDrawable
+            markerDrawable =
+                createMarkerIcon(iconId).toDrawable(context.resources)
+            cache[iconId] = markerDrawable
         }
 
         return markerDrawable
@@ -36,7 +52,7 @@ class MapMarkersRepo(
         cache.clear()
     }
 
-    private fun createMarkerIcon(iconResId: Int?): Bitmap {
+    private fun createMarkerIcon(iconId: String): Bitmap {
         val pinSizePx = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, 48f, context.resources.displayMetrics
         ).toInt()
@@ -49,35 +65,30 @@ class MapMarkersRepo(
             drawBitmap(emptyPinBitmap, 0f, 0f, Paint())
         }
 
-        if (iconResId != null) {
-            val iconFrame = RectF(
-                markerIcon.width.toFloat() * 0.27f,
-                markerIcon.width.toFloat() * 0.17f,
-                markerIcon.width.toFloat() * 0.73f,
-                markerIcon.height.toFloat() * 0.63f
-            ).toRect()
-
-            val iconDrawable = ContextCompat.getDrawable(context, iconResId)!!
-
-            DrawableCompat.setTint(
-                iconDrawable, context.getOnPrimaryContainerColor(conf.conf.value)
-            )
-
-            val iconBitmap = iconDrawable.toBitmap(
-                width = iconFrame.right - iconFrame.left,
-                height = iconFrame.bottom - iconFrame.top,
-            )
-
+        if (iconId.isNotBlank()) {
             markerIcon.applyCanvas {
-                drawBitmap(
-                    iconBitmap,
-                    null,
-                    iconFrame,
-                    Paint().apply { isAntiAlias = true },
+                val textWidth = iconPaint.measureText(iconId)
+
+//                drawBitmap(
+//                    context.createFontIconBitmap(pinSizePx  / 2),
+//                    (markerIcon.width / 2 - pinSizePx / 2 / 2).toFloat(),
+//                    (markerIcon.height / 2 - pinSizePx / 2 / 2).toFloat() - markerIcon.height.toFloat() * 0.09f,
+//                    Paint()
+//                )
+
+                drawText(
+                    iconId,
+                    markerIcon.width / 2f - textWidth / 2f,
+                    markerIcon.height / 2f - (iconPaint.fontMetrics.ascent + iconPaint.fontMetrics.descent) / 2 - markerIcon.height.toFloat() * 0.09f,
+                    iconPaint
                 )
             }
         }
 
         return markerIcon
+    }
+
+    companion object {
+        private const val PIN_SIZE_DP = 48f
     }
 }

@@ -19,6 +19,11 @@ fun Context.getPrimaryContainerColor(conf: Conf): Int {
     }
 }
 
+fun Context.getOnPrimaryContainerColor(): Int {
+    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnPrimaryContainer))
+    return attrs.getColor(0, 0)
+}
+
 fun Context.getOnPrimaryContainerColor(conf: Conf): Int {
     return if (conf.themedPins) {
         val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnPrimaryContainer))

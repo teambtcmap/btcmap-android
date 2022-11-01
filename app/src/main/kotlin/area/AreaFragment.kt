@@ -8,7 +8,6 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
@@ -20,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import areas.AreaResultModel
 import areas.AreasRepo
 import elements.ElementsRepo
-import icons.toIconResId
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -152,9 +150,7 @@ class AreaFragment : Fragment() {
 
                     AreaAdapter.Item.Element(
                         id = it.id,
-                        icon = AppCompatResources.getDrawable(
-                            requireContext(), it.icon_id.toIconResId() ?: R.drawable.ic_place,
-                        )!!,
+                        iconId = it.icon_id,
                         name = tags["name"]?.jsonPrimitive?.content
                             ?: getString(R.string.unnamed_place),
                         status = status,

@@ -3,14 +3,12 @@ package search
 import android.app.Application
 import android.location.Location
 import android.util.Log
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import db.Database
 import db.Element
-import icons.toIconResId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -109,10 +107,7 @@ class SearchModel(
 
         return SearchAdapter.Item(
             element = this,
-            icon = AppCompatResources.getDrawable(
-                app,
-                icon_id.toIconResId() ?: R.drawable.ic_place,
-            )!!,
+            icon = icon_id,
             name = osm_json["tags"]!!.jsonObject["name"]?.jsonPrimitive?.contentOrNull ?: "Unnamed",
             distanceToUser = distanceStringBuilder.toString(),
         )

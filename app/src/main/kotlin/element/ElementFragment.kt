@@ -22,7 +22,6 @@ import androidx.navigation.fragment.findNavController
 import conf.ConfRepo
 import db.Element
 import elements.ElementsRepo
-import icons.toIconResId
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
@@ -100,7 +99,7 @@ class ElementFragment : Fragment() {
                 val markersRepo = MapMarkersRepo(requireContext(), confRepo)
                 val marker = Marker(binding.map)
                 marker.position = GeoPoint(element.lat, element.lon)
-                marker.icon = markersRepo.getMarker(element.icon_id.toIconResId())
+                marker.icon = markersRepo.getMarker(element.icon_id)
                 binding.map.overlays.add(marker)
             }
         }

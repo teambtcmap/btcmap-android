@@ -35,7 +35,6 @@ import areas.AreaResultModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import db.SelectElementClusters
 import element.ElementFragment
-import icons.toIconResId
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -92,6 +91,8 @@ class MapFragment : Fragment() {
         }
     }
 
+    private var emptyClusterBitmap: Bitmap? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -130,6 +131,8 @@ class MapFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        emptyClusterBitmap = null
+
         val markersRepo = MapMarkersRepo(requireContext(), model.conf)
 
         binding.search.setOnClickListener {
@@ -262,7 +265,7 @@ class MapFragment : Fragment() {
                     marker.position = GeoPoint(it.lat!!, it.lon!!)
 
                     if (it.count == 1L) {
-                        marker.icon = markersRepo.getMarker(it.icon_id.toIconResId())
+                        marker.icon = markersRepo.getMarker(it.icon_id)
                     } else {
                         marker.icon = createClusterIcon(it).toDrawable(resources)
                     }
@@ -508,26 +511,24 @@ class MapFragment : Fragment() {
         return elementFragment.requireView().findViewById(R.id.toolbar)!!
     }
 
-    private var emptyPinBitmap: Bitmap? = null
-
     private fun createClusterIcon(cluster: SelectElementClusters): Bitmap {
         val pinSizePx = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, 32f, requireContext().resources.displayMetrics
         ).toInt()
 
-        if (emptyPinBitmap == null) {
+        if (emptyClusterBitmap == null) {
             val emptyClusterDrawable =
                 ContextCompat.getDrawable(requireContext(), R.drawable.ic_cluster)!!
             DrawableCompat.setTint(
                 emptyClusterDrawable,
                 requireContext().getPrimaryContainerColor(model.conf.conf.value)
             )
-            emptyPinBitmap = emptyClusterDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
+            emptyClusterBitmap = emptyClusterDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
         }
 
         val clusterIcon =
-            createBitmap(emptyPinBitmap!!.width, emptyPinBitmap!!.height).applyCanvas {
-                drawBitmap(emptyPinBitmap!!, 0f, 0f, Paint())
+            createBitmap(emptyClusterBitmap!!.width, emptyClusterBitmap!!.height).applyCanvas {
+                drawBitmap(emptyClusterBitmap!!, 0f, 0f, Paint())
             }
 
         clusterIcon.applyCanvas {

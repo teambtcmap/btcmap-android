@@ -1,6 +1,5 @@
 package search
 
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import db.Element
+import icons.iconTypeface
 import org.btcmap.databinding.ItemSearchResultBinding
 
 class SearchAdapter(
@@ -24,6 +24,8 @@ class SearchAdapter(
             false,
         )
 
+        binding.icon.typeface = parent.context.iconTypeface()
+
         return ItemViewHolder(binding)
     }
 
@@ -33,7 +35,7 @@ class SearchAdapter(
 
     data class Item(
         val element: Element,
-        val icon: Drawable,
+        val icon: String,
         val name: String,
         val distanceToUser: String,
     )
@@ -46,9 +48,10 @@ class SearchAdapter(
 
         fun bind(item: Item, onItemClick: (Item) -> Unit) {
             binding.apply {
-                icon.setImageDrawable(item.icon)
+                icon.text = item.icon
                 name.text = item.name
-                distance.visibility = if (item.distanceToUser.isNotEmpty()) View.VISIBLE else View.GONE
+                distance.visibility =
+                    if (item.distanceToUser.isNotEmpty()) View.VISIBLE else View.GONE
                 distance.text = item.distanceToUser
                 root.setOnClickListener { onItemClick(item) }
             }

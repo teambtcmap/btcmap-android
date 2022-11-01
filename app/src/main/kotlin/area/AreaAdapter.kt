@@ -1,6 +1,5 @@
 package area
 
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -8,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import icons.iconTypeface
 import okhttp3.HttpUrl
 import org.btcmap.databinding.ItemAreaElementBinding
 import org.btcmap.databinding.ItemContactBinding
@@ -52,7 +52,9 @@ class AreaAdapter(
                     LayoutInflater.from(parent.context),
                     parent,
                     false,
-                )
+                ).apply {
+                    icon.typeface = parent.context.iconTypeface()
+                }
             }
 
             else -> throw Exception()
@@ -85,7 +87,7 @@ class AreaAdapter(
 
         data class Element(
             val id: String,
-            val icon: Drawable,
+            val iconId: String,
             val name: String,
             val status: String,
             val statusColor: Int,
@@ -118,7 +120,7 @@ class AreaAdapter(
 
             if (item is Item.Element && binding is ItemAreaElementBinding) {
                 binding.apply {
-                    icon.setImageDrawable(item.icon)
+                    icon.text = item.iconId
                     title.text = item.name
                     subtitle.text = item.status
                     subtitle.setTextColor(item.statusColor)
