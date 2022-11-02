@@ -11,6 +11,7 @@ import http.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -26,7 +27,8 @@ class UsersRepo(
 ) {
 
     suspend fun selectAllUsersAsListItems(): List<SelectAllUsersAsListItems> {
-        return db.userQueries.selectAllUsersAsListItems().asFlow().mapToList(Dispatchers.IO).first().filter { it.changes > 0 }
+        return db.userQueries.selectAllUsersAsListItems().asFlow().mapToList(Dispatchers.IO).first()
+            .filter { it.changes > 0 }
     }
 
     suspend fun selectById(id: Long): User? {
@@ -52,26 +54,30 @@ class UsersRepo(
         val json = Json { ignoreUnknownKeys = true }
 
         val users = runCatching {
-            json.decodeFromStream(
-                ListSerializer(UserJson.serializer()),
-                response.body!!.byteStream(),
-            )
-        }.getOrElse { return Result.failure(it) }
-
-        db.transaction {
-            users.forEach {
-                db.userQueries.insertOrReplace(
-                    User(
-                        id = it.id,
-                        osm_json = it.osm_json.toString(),
-                        created_at = it.created_at,
-                        updated_at = it.updated_at,
-                        deleted_at = it.deleted_at ?: "",
-                    )
+            withContext(Dispatchers.IO) {
+                json.decodeFromStream(
+                    ListSerializer(UserJson.serializer()),
+                    response.body!!.byteStream(),
                 )
             }
-        }
+        }.getOrElse { return Result.failure(it) }
 
+        withContext(Dispatchers.IO) {
+            db.transaction {
+                users.forEach {
+                    db.userQueries.insertOrReplace(
+                        User(
+                            id = it.id,
+                            osm_json = it.osm_json.toString(),
+                            created_at = it.created_at,
+                            updated_at = it.updated_at,
+                            deleted_at = it.deleted_at ?: "",
+                        )
+                    )
+                }
+            }
+        }
+        
         return Result.success(
             SyncReport(
                 timeMillis = System.currentTimeMillis() - startMillis,

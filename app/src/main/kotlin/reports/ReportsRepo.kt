@@ -7,6 +7,7 @@ import db.Database
 import http.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -34,26 +35,30 @@ class ReportsRepo(
         val json = Json { ignoreUnknownKeys = true }
 
         val reports = runCatching {
-            json.decodeFromStream(
-                ListSerializer(ReportJson.serializer()),
-                response.body!!.byteStream(),
-            ).sortedBy { it.date }.toMutableList()
+            withContext(Dispatchers.IO) {
+                json.decodeFromStream(
+                    ListSerializer(ReportJson.serializer()),
+                    response.body!!.byteStream(),
+                )
+            }
         }.getOrNull() ?: return
 
-        db.transaction {
-            db.reportQueries.deleteAll()
+        withContext(Dispatchers.IO) {
+            db.transaction {
+                db.reportQueries.deleteAll()
 
-            reports.forEach {
-                db.reportQueries.insertOrReplace(
-                    Report(
-                        area_id = it.area_id,
-                        date = it.date,
-                        tags = it.tags,
-                        created_at = it.created_at,
-                        updated_at = it.updated_at,
-                        deleted_at = it.deleted_at
+                reports.forEach {
+                    db.reportQueries.insertOrReplace(
+                        Report(
+                            area_id = it.area_id,
+                            date = it.date,
+                            tags = it.tags,
+                            created_at = it.created_at,
+                            updated_at = it.updated_at,
+                            deleted_at = it.deleted_at
+                        )
                     )
-                )
+                }
             }
         }
     }

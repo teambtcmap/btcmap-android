@@ -4,12 +4,9 @@ import android.content.Context
 import app.cash.sqldelight.coroutines.*
 import db.*
 import http.await
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -134,11 +131,14 @@ class ElementsRepo(
                 )
             }
         } else {
-            clustersCache.getOrPut(step) {
-                db.elementQueries.selectElementClusters(step = step).asFlow()
+            val clusters = clustersCache.getOrPut(step) {
+                db.elementQueries.selectElementClusters(step = step)
+                    .asFlow()
                     .mapToList(Dispatchers.IO).first()
-            }.filter {
-                box.contains(it.lat!!, it.lon!!)
+            }
+
+            return withContext(Dispatchers.IO) {
+                clusters.filter { box.contains(it.lat!!, it.lon!!) }
             }
         }
     }
@@ -180,23 +180,29 @@ class ElementsRepo(
                     bundledElementsInputStream,
                 )
 
-                db.transaction {
-                    bundledElements.forEach {
-                        val latLon = it.getLatLon()
+                bundledElements.chunked(500).forEach { element ->
+                    val withLatLon = element.map { Pair(it, it.getLatLon()) }
 
-                        db.elementQueries.insertOrReplace(
-                            Element(
-                                id = it.id,
-                                lat = latLon.first,
-                                lon = latLon.second,
-                                osm_json = it.osm_json,
-                                tags = it.tags,
-                                created_at = it.created_at,
-                                updated_at = it.updated_at,
-                                deleted_at = it.deleted_at,
+                    db.transaction {
+                        withLatLon.forEach {
+                            val latLon = it.second
+
+                            db.elementQueries.insertOrReplace(
+                                Element(
+                                    id = it.first.id,
+                                    lat = latLon.first,
+                                    lon = latLon.second,
+                                    osm_json = it.first.osm_json,
+                                    tags = it.first.tags,
+                                    created_at = it.first.created_at,
+                                    updated_at = it.first.updated_at,
+                                    deleted_at = it.first.deleted_at,
+                                )
                             )
-                        )
+                        }
                     }
+
+                    delay(100)
                 }
 
                 SyncReport(
@@ -226,29 +232,39 @@ class ElementsRepo(
         val json = Json { ignoreUnknownKeys = true }
 
         val elements = runCatching {
-            json.decodeFromStream(
-                ListSerializer(ElementJson.serializer()),
-                response.body!!.byteStream(),
-            )
-        }.getOrElse { return Result.failure(it) }
-
-        db.transaction {
-            elements.forEach {
-                val latLon = it.getLatLon()
-
-                db.elementQueries.insertOrReplace(
-                    Element(
-                        id = it.id,
-                        lat = latLon.first,
-                        lon = latLon.second,
-                        osm_json = it.osm_json,
-                        tags = it.tags,
-                        created_at = it.created_at,
-                        updated_at = it.updated_at,
-                        deleted_at = it.deleted_at,
-                    )
+            withContext(Dispatchers.IO) {
+                json.decodeFromStream(
+                    ListSerializer(ElementJson.serializer()),
+                    response.body!!.byteStream(),
                 )
             }
+        }.getOrElse { return Result.failure(it) }
+
+        elements.chunked(500).forEach { element ->
+            withContext(Dispatchers.IO) {
+                val withLatLon = element.map { Pair(it, it.getLatLon()) }
+
+                db.transaction {
+                    withLatLon.forEach {
+                        val latLon = it.second
+
+                        db.elementQueries.insertOrReplace(
+                            Element(
+                                id = it.first.id,
+                                lat = latLon.first,
+                                lon = latLon.second,
+                                osm_json = it.first.osm_json,
+                                tags = it.first.tags,
+                                created_at = it.first.created_at,
+                                updated_at = it.first.updated_at,
+                                deleted_at = it.first.deleted_at,
+                            )
+                        )
+                    }
+                }
+            }
+
+            delay(100)
         }
 
         return Result.success(

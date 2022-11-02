@@ -6,8 +6,10 @@ import app.cash.sqldelight.coroutines.mapToOneNotNull
 import db.*
 import http.await
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -23,7 +25,8 @@ class EventsRepo(
 ) {
 
     suspend fun selectAllNotDeletedAsListItems(limit: Long): List<SelectAllNotDeletedEventsAsListItems> {
-        return db.eventQueries.selectAllNotDeletedEventsAsListItems(limit).asFlow().mapToList(Dispatchers.IO)
+        return db.eventQueries.selectAllNotDeletedEventsAsListItems(limit).asFlow()
+            .mapToList(Dispatchers.IO)
             .first()
     }
 
@@ -51,26 +54,34 @@ class EventsRepo(
         val json = Json { ignoreUnknownKeys = true }
 
         val events = runCatching {
-            json.decodeFromStream(
-                ListSerializer(EventJson.serializer()),
-                response.body!!.byteStream(),
-            )
-        }.getOrElse { return Result.failure(it) }
-
-        db.transaction {
-            events.forEach {
-                db.eventQueries.insert(
-                    Event(
-                        id = it.id,
-                        type = it.type,
-                        element_id = it.element_id,
-                        user_id = it.user_id,
-                        created_at = it.created_at,
-                        updated_at = it.updated_at,
-                        deleted_at = it.deleted_at,
-                    )
+            withContext(Dispatchers.IO) {
+                json.decodeFromStream(
+                    ListSerializer(EventJson.serializer()),
+                    response.body!!.byteStream(),
                 )
             }
+        }.getOrElse { return Result.failure(it) }
+
+        events.chunked(1000).forEach {
+            withContext(Dispatchers.IO) {
+                db.transaction {
+                    it.forEach {
+                        db.eventQueries.insert(
+                            Event(
+                                id = it.id,
+                                type = it.type,
+                                element_id = it.element_id,
+                                user_id = it.user_id,
+                                created_at = it.created_at,
+                                updated_at = it.updated_at,
+                                deleted_at = it.deleted_at,
+                            )
+                        )
+                    }
+                }
+            }
+
+            delay(100)
         }
 
         return Result.success(
