@@ -43,6 +43,11 @@ android {
 
     packagingOptions {
         resources.excludes += "DebugProbesKt.bin"
+
+        jniLibs.excludes += "/lib/armeabi-v7a/libsqlite3x.so"
+        //jniLibs.excludes += "lib/arm64-v8a/libsqlite3x.so"
+        jniLibs.excludes += "/lib/x86/**"
+        jniLibs.excludes += "/lib/x86_64/**"
     }
 
     flavorDimensions += "store"
@@ -67,12 +72,10 @@ android {
     buildTypes {
         release {
             // Enables code shrinking, obfuscation, and optimization
-            // TODO figure out why it doesn't work with SQLDelight
-            // isMinifyEnabled = true
+            isMinifyEnabled = true
 
             // Enables resource shrinking
-            // TODO figure out why it doesn't work with SQLDelight
-            // isShrinkResources = true
+            isShrinkResources = true
 
             // Includes the default ProGuard rules file
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
