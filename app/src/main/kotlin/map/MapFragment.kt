@@ -209,7 +209,7 @@ class MapFragment : Fragment() {
         bottomSheetBehavior.addSlideCallback()
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val elementDetailsToolbar = getElementDetailsToolbar()
+            val elementDetailsToolbar = getElementDetailsToolbar() ?: return@launch
             bottomSheetBehavior.peekHeight = elementDetailsToolbar.height * 3
             bottomSheetBehavior.halfExpandedRatio = 0.33f
             bottomSheetBehavior.isFitToContents = false
@@ -313,8 +313,16 @@ class MapFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                var attempts = 0
+
                 while (binding.map.getIntrinsicScreenRect(null).height() == 0) {
-                    delay(10)
+                    if (attempts >= 100) {
+                        requireActivity().finish()
+                        return@repeatOnLifecycle
+                    } else {
+                        attempts++
+                        delay(10)
+                    }
                 }
 
                 val pickedPlace = searchResultModel.element.value
@@ -503,11 +511,19 @@ class MapFragment : Fragment() {
         })
     }
 
-    private suspend fun getElementDetailsToolbar(): Toolbar {
+    private suspend fun getElementDetailsToolbar(): Toolbar? {
+        var attempts = 0
+
         while (elementFragment.view == null || elementFragment.requireView()
                 .findViewById<View>(R.id.toolbar)!!.height == 0
         ) {
-            delay(10)
+            if (attempts >= 100) {
+                requireActivity().finish()
+                return null
+            } else {
+                attempts++
+                delay(10)
+            }
         }
 
         return elementFragment.requireView().findViewById(R.id.toolbar)!!
@@ -525,7 +541,8 @@ class MapFragment : Fragment() {
                 emptyClusterDrawable,
                 requireContext().getPrimaryContainerColor(model.conf.conf.value)
             )
-            emptyClusterBitmap = emptyClusterDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
+            emptyClusterBitmap =
+                emptyClusterDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
         }
 
         val clusterIcon =
