@@ -266,8 +266,10 @@ class MapFragment : Fragment() {
 
                     if (it.count == 1L) {
                         marker.icon = markersRepo.getMarker(it.icon_id ?: "question_mark")
+                        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     } else {
                         marker.icon = createClusterIcon(it).toDrawable(resources)
+                        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                     }
 
                     marker.setOnMarkerClickListener { _, _ ->

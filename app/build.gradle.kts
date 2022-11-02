@@ -47,7 +47,7 @@ android {
         jniLibs.excludes += "/lib/armeabi-v7a/libsqlite3x.so"
         //jniLibs.excludes += "lib/arm64-v8a/libsqlite3x.so"
         jniLibs.excludes += "/lib/x86/**"
-        jniLibs.excludes += "/lib/x86_64/**"
+        //jniLibs.excludes += "/lib/x86_64/**"
     }
 
     flavorDimensions += "store"
