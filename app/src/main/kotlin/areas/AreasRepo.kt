@@ -10,11 +10,11 @@ import http.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.*
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.koin.core.annotation.Single
@@ -22,44 +22,85 @@ import org.koin.core.annotation.Single
 @Single
 class AreasRepo(
     private val db: Database,
+    private val httpClient: OkHttpClient,
+    private val json: Json,
 ) {
 
     suspend fun selectAllNotDeleted(): List<Area> {
-        return db.areaQueries.selectAllNotDeleted().asFlow().mapToList(Dispatchers.IO).first()
+        return db.areaQueries
+            .selectAllNotDeleted()
+            .asFlow()
+            .mapToList(Dispatchers.IO)
+            .first()
     }
 
     suspend fun selectById(id: String): Area? {
-        return db.areaQueries.selectById(id).asFlow().mapToOneOrNull(Dispatchers.IO).first()
+        return db
+            .areaQueries
+            .selectById(id)
+            .asFlow()
+            .mapToOneOrNull(Dispatchers.IO)
+            .first()
     }
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun sync(): Result<SyncReport> {
-        val startMillis = System.currentTimeMillis()
+        return runCatching {
+            withContext(Dispatchers.IO) {
+                val startMillis = System.currentTimeMillis()
 
-        val maxUpdatedAt =
-            db.areaQueries.selectMaxUpdatedAt().asFlow().mapToOneNotNull(Dispatchers.IO)
-                .firstOrNull()?.max
+                val maxUpdatedAt =
+                    db.areaQueries
+                        .selectMaxUpdatedAt()
+                        .asFlow()
+                        .mapToOneNotNull(Dispatchers.IO)
+                        .firstOrNull()
+                        ?.max
 
-        val url = if (maxUpdatedAt == null) {
-            "https://api.btcmap.org/v2/areas"
-        } else {
-            "https://api.btcmap.org/v2/areas?updated_since=$maxUpdatedAt"
-        }.toHttpUrl()
+                val url = HttpUrl.Builder().apply {
+                    scheme("https")
+                    host("api.btcmap.org")
+                    addPathSegment("v2")
+                    addPathSegment("areas")
 
-        val request = OkHttpClient().newCall(Request.Builder().url(url).build())
-        val response = runCatching { request.await() }.getOrElse { return Result.failure(it) }
-        val json = Json { ignoreUnknownKeys = true }
+                    if (!maxUpdatedAt.isNullOrBlank()) {
+                        addQueryParameter("updated_since", maxUpdatedAt)
+                    }
+                }.build()
 
-        val areas = runCatching {
-            json.decodeFromStream(
-                ListSerializer(AreaJson.serializer()),
-                response.body!!.byteStream(),
-            )
-        }.getOrElse { return Result.failure(it) }
+                val request = httpClient.newCall(Request.Builder().url(url).build())
+                val response = request.await()
 
-        db.transaction {
-            areas.filter { it.valid() }.forEach {
-                db.areaQueries.insertOrReplace(
+                if (!response.isSuccessful) {
+                    throw Exception("Unexpected HTTP response code: ${response.code}")
+                }
+
+                response.body!!.byteStream().use { inputStream ->
+                    val areas = json.decodeToSequence(
+                        stream = inputStream,
+                        deserializer = AreaJson.serializer(),
+                    )
+
+                    val createdOrUpdatedAreas = areas
+                        .chunked(1_000)
+                        .map { db.insertOrReplace(it) }
+                        .sum()
+
+                    SyncReport(
+                        timeMillis = System.currentTimeMillis() - startMillis,
+                        createdOrUpdatedAreas = createdOrUpdatedAreas,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun Database.insertOrReplace(areas: List<AreaJson>): Long {
+        val validAreas = areas.filter { it.valid() }
+
+        transaction {
+            validAreas.forEach {
+                areaQueries.insertOrReplace(
                     Area(
                         id = it.id,
                         tags = it.tags,
@@ -71,12 +112,7 @@ class AreasRepo(
             }
         }
 
-        return Result.success(
-            SyncReport(
-                timeMillis = System.currentTimeMillis() - startMillis,
-                createdOrUpdatedAreas = areas.size.toLong(),
-            )
-        )
+        return validAreas.size.toLong()
     }
 
     @Serializable

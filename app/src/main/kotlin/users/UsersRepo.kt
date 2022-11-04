@@ -5,7 +5,7 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import db.Database
-import db.SelectAllUsersAsListItems
+import db.SelectUsersAsListItems
 import db.User
 import http.await
 import kotlinx.coroutines.Dispatchers
@@ -14,9 +14,8 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.*
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.koin.core.annotation.Single
@@ -24,75 +23,106 @@ import org.koin.core.annotation.Single
 @Single
 class UsersRepo(
     private val db: Database,
+    private val httpClient: OkHttpClient,
+    private val json: Json,
 ) {
 
-    suspend fun selectAllUsersAsListItems(): List<SelectAllUsersAsListItems> {
-        return db.userQueries.selectAllUsersAsListItems().asFlow().mapToList(Dispatchers.IO).first()
+    suspend fun selectUsersAsListItems(): List<SelectUsersAsListItems> {
+        return db.userQueries
+            .selectUsersAsListItems()
+            .asFlow()
+            .mapToList(Dispatchers.IO)
+            .first()
             .filter { it.changes > 0 }
     }
 
     suspend fun selectById(id: Long): User? {
-        return db.userQueries.selectById(id).asFlow().mapToOneOrNull(Dispatchers.IO).firstOrNull()
+        return db.userQueries
+            .selectById(id)
+            .asFlow()
+            .mapToOneOrNull(Dispatchers.IO)
+            .firstOrNull()
     }
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun sync(): Result<SyncReport> {
-        val startMillis = System.currentTimeMillis()
-
-        val maxUpdatedAt =
-            db.userQueries.selectMaxUpdatedAt().asFlow().mapToOneNotNull(Dispatchers.IO)
-                .firstOrNull()?.max
-
-        val url = if (maxUpdatedAt == null) {
-            "https://api.btcmap.org/v2/users"
-        } else {
-            "https://api.btcmap.org/v2/users?updated_since=$maxUpdatedAt"
-        }.toHttpUrl()
-
-        val request = OkHttpClient().newCall(Request.Builder().url(url).build())
-        val response = runCatching { request.await() }.getOrElse { return Result.failure(it) }
-        val json = Json { ignoreUnknownKeys = true }
-
-        val users = runCatching {
+        return runCatching {
             withContext(Dispatchers.IO) {
-                json.decodeFromStream(
-                    ListSerializer(UserJson.serializer()),
-                    response.body!!.byteStream(),
-                )
-            }
-        }.getOrElse { return Result.failure(it) }
+                val startMillis = System.currentTimeMillis()
 
-        withContext(Dispatchers.IO) {
-            db.transaction {
-                users.forEach {
-                    db.userQueries.insertOrReplace(
-                        User(
-                            id = it.id,
-                            osm_json = it.osm_json.toString(),
-                            created_at = it.created_at,
-                            updated_at = it.updated_at,
-                            deleted_at = it.deleted_at ?: "",
-                        )
+                val maxUpdatedAt = db.userQueries
+                    .selectMaxUpdatedAt()
+                    .asFlow()
+                    .mapToOneNotNull(Dispatchers.IO)
+                    .firstOrNull()
+                    ?.max
+
+                val url = HttpUrl.Builder().apply {
+                    scheme("https")
+                    host("api.btcmap.org")
+                    addPathSegment("v2")
+                    addPathSegment("users")
+
+                    if (!maxUpdatedAt.isNullOrBlank()) {
+                        addQueryParameter("updated_since", maxUpdatedAt)
+                    }
+                }.build()
+
+                val response = httpClient
+                    .newCall(Request.Builder().url(url).build())
+                    .await()
+
+                if (!response.isSuccessful) {
+                    throw Exception("Unexpected HTTP response code: ${response.code}")
+                }
+
+                response.body!!.byteStream().use { inputStream ->
+                    val users = json.decodeToSequence(
+                        stream = inputStream,
+                        deserializer = UserJson.serializer(),
+                    )
+
+                    val createdOrUpdatedUsers = users
+                        .chunked(1_000)
+                        .map { db.insertOrReplace(it) }
+                        .sum()
+
+                    SyncReport(
+                        timeMillis = System.currentTimeMillis() - startMillis,
+                        createdOrUpdatedUsers = createdOrUpdatedUsers,
                     )
                 }
             }
         }
-        
-        return Result.success(
-            SyncReport(
-                timeMillis = System.currentTimeMillis() - startMillis,
-                createdOrUpdatedUsers = users.size.toLong(),
-            )
-        )
+    }
+
+    private fun Database.insertOrReplace(users: List<UserJson>): Long {
+        transaction {
+            users.forEach {
+                userQueries.insertOrReplace(
+                    User(
+                        id = it.id,
+                        osm_json = it.osm_json.toString(),
+                        tags = it.tags.toString(),
+                        created_at = it.created_at,
+                        updated_at = it.updated_at,
+                        deleted_at = it.deleted_at,
+                    )
+                )
+            }
+        }
+
+        return users.size.toLong()
     }
 
     @Serializable
     private data class UserJson(
         val id: Long,
         val osm_json: JsonObject,
+        val tags: JsonObject,
         val created_at: String,
         val updated_at: String,
-        val deleted_at: String?,
+        val deleted_at: String,
     )
 
     data class SyncReport(

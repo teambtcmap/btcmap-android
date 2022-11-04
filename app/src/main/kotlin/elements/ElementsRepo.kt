@@ -9,9 +9,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.*
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.koin.core.annotation.Single
@@ -21,20 +20,28 @@ import org.osmdroid.util.BoundingBox
 class ElementsRepo(
     private val context: Context,
     private val db: Database,
+    private val json: Json,
+    private val httpClient: OkHttpClient,
 ) {
-
-    init {
-        GlobalScope.launch {
-            db.elementQueries.selectCount().asFlow().mapToOne(Dispatchers.IO).collect {
-                clustersCache.clear()
-            }
-        }
-    }
 
     private val clustersCache = mutableMapOf<Double, List<SelectElementClusters>>()
 
+    init {
+        GlobalScope.launch {
+            db.elementQueries
+                .selectCount()
+                .asFlow()
+                .mapToOne(Dispatchers.IO)
+                .collect { clustersCache.clear() }
+        }
+    }
+
     suspend fun selectById(id: String): Element? {
-        return db.elementQueries.selectById(id).asFlow().mapToOneOrNull(Dispatchers.IO).first()
+        return db.elementQueries
+            .selectById(id)
+            .asFlow()
+            .mapToOneOrNull(Dispatchers.IO)
+            .first()
     }
 
     suspend fun selectByBoundingBox(
@@ -116,25 +123,34 @@ class ElementsRepo(
         }
 
         return if (zoom > 18) {
-            db.elementQueries.selectElementsAsPinsByBoundingBox(
+            val pins = db.elementQueries.selectElementsAsPinsByBoundingBox(
                 minLat = box.latSouth,
                 maxLat = box.latNorth,
                 minLon = box.lonWest,
                 maxLon = box.lonEast,
-            ).asFlow().mapToList(Dispatchers.IO).first().map {
-                SelectElementClusters(
-                    count = 1,
-                    id = it.id,
-                    lat = it.lat,
-                    lon = it.lon,
-                    icon_id = it.icon_id,
-                )
+            )
+                .asFlow()
+                .mapToList(Dispatchers.IO)
+                .first()
+
+            withContext(Dispatchers.IO) {
+                pins.map {
+                    SelectElementClusters(
+                        count = 1,
+                        id = it.id,
+                        lat = it.lat,
+                        lon = it.lon,
+                        icon_id = it.icon_id,
+                    )
+                }
             }
         } else {
             val clusters = clustersCache.getOrPut(step) {
-                db.elementQueries.selectElementClusters(step = step)
+                db.elementQueries
+                    .selectElementClusters(step = step)
                     .asFlow()
-                    .mapToList(Dispatchers.IO).first()
+                    .mapToList(Dispatchers.IO)
+                    .first()
             }
 
             return withContext(Dispatchers.IO) {
@@ -154,125 +170,128 @@ class ElementsRepo(
             maxLat = maxLat,
             minLon = minLon,
             maxLon = maxLon,
-        ).asFlow().mapToList(Dispatchers.IO).first()
+        )
+            .asFlow()
+            .mapToList(Dispatchers.IO)
+            .first()
     }
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun fetchBundledElements(): Result<SyncReport> {
-        val startMillis = System.currentTimeMillis()
+        return runCatching {
+            withContext(Dispatchers.IO) {
+                val startMillis = System.currentTimeMillis()
 
-        if (db.elementQueries.selectCount().asFlow().mapToOne(Dispatchers.IO).first() > 0) {
-            return Result.success(
-                SyncReport(
-                    timeMillis = System.currentTimeMillis() - startMillis,
-                    createdOrUpdatedElements = 0,
-                )
-            )
-        }
+                val rows = db.elementQueries
+                    .selectCount()
+                    .asFlow()
+                    .mapToOne(Dispatchers.IO)
+                    .first()
 
-        return withContext(Dispatchers.IO) {
-            runCatching {
-                val bundledElementsInputStream = context.assets.open("elements.json")
-                val json = Json { ignoreUnknownKeys = true }
-
-                val bundledElements = json.decodeFromStream(
-                    ListSerializer(ElementJson.serializer()),
-                    bundledElementsInputStream,
-                )
-
-                bundledElements.chunked(500).forEach { element ->
-                    val withLatLon = element.map { Pair(it, it.getLatLon()) }
-
-                    db.transaction {
-                        withLatLon.forEach {
-                            val latLon = it.second
-
-                            db.elementQueries.insertOrReplace(
-                                Element(
-                                    id = it.first.id,
-                                    lat = latLon.first,
-                                    lon = latLon.second,
-                                    osm_json = it.first.osm_json,
-                                    tags = it.first.tags,
-                                    created_at = it.first.created_at,
-                                    updated_at = it.first.updated_at,
-                                    deleted_at = it.first.deleted_at,
-                                )
-                            )
-                        }
-                    }
-
-                    delay(100)
+                if (rows > 0) {
+                    return@withContext SyncReport(
+                        timeMillis = System.currentTimeMillis() - startMillis,
+                        createdOrUpdatedElements = 0,
+                    )
                 }
 
-                SyncReport(
-                    timeMillis = System.currentTimeMillis() - startMillis,
-                    createdOrUpdatedElements = bundledElements.size.toLong(),
-                )
+                context.assets.open("elements.json").use { inputStream ->
+                    val elements = json.decodeToSequence(
+                        stream = inputStream,
+                        deserializer = ElementJson.serializer(),
+                    )
+
+                    val createdOrUpdatedElements = elements
+                        .chunked(1_000)
+                        .map { db.insertOrReplace(it) }
+                        .sum()
+
+                    SyncReport(
+                        timeMillis = System.currentTimeMillis() - startMillis,
+                        createdOrUpdatedElements = createdOrUpdatedElements,
+                    )
+                }
             }
         }
     }
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun sync(): Result<SyncReport> {
-        val startMillis = System.currentTimeMillis()
+        return runCatching {
+            return withContext(Dispatchers.IO) {
+                val startMillis = System.currentTimeMillis()
 
-        val maxUpdatedAt =
-            db.elementQueries.selectMaxUpdatedAt().asFlow().mapToOneNotNull(Dispatchers.IO)
-                .firstOrNull()?.max
+                val maxUpdatedAt = db.elementQueries
+                    .selectMaxUpdatedAt()
+                    .asFlow()
+                    .mapToOneNotNull(Dispatchers.IO)
+                    .firstOrNull()
+                    ?.max
 
-        val url = if (maxUpdatedAt == null) {
-            "https://api.btcmap.org/v2/elements"
-        } else {
-            "https://api.btcmap.org/v2/elements?updated_since=$maxUpdatedAt"
-        }.toHttpUrl()
+                val url = HttpUrl.Builder().apply {
+                    scheme("https")
+                    host("api.btcmap.org")
+                    addPathSegment("v2")
+                    addPathSegment("elements")
 
-        val request = OkHttpClient().newCall(Request.Builder().url(url).build())
-        val response = runCatching { request.await() }.getOrElse { return Result.failure(it) }
-        val json = Json { ignoreUnknownKeys = true }
-
-        val elements = runCatching {
-            withContext(Dispatchers.IO) {
-                json.decodeFromStream(
-                    ListSerializer(ElementJson.serializer()),
-                    response.body!!.byteStream(),
-                )
-            }
-        }.getOrElse { return Result.failure(it) }
-
-        elements.chunked(500).forEach { element ->
-            withContext(Dispatchers.IO) {
-                val withLatLon = element.map { Pair(it, it.getLatLon()) }
-
-                db.transaction {
-                    withLatLon.forEach {
-                        val latLon = it.second
-
-                        db.elementQueries.insertOrReplace(
-                            Element(
-                                id = it.first.id,
-                                lat = latLon.first,
-                                lon = latLon.second,
-                                osm_json = it.first.osm_json,
-                                tags = it.first.tags,
-                                created_at = it.first.created_at,
-                                updated_at = it.first.updated_at,
-                                deleted_at = it.first.deleted_at,
-                            )
-                        )
+                    if (!maxUpdatedAt.isNullOrBlank()) {
+                        addQueryParameter("updated_since", maxUpdatedAt)
                     }
+                }.build()
+
+                val response = httpClient
+                    .newCall(Request.Builder().url(url).build())
+                    .await()
+
+                if (!response.isSuccessful) {
+                    throw Exception("Unexpected HTTP response code: ${response.code}")
+                }
+
+                response.body!!.byteStream().use { inputStream ->
+                    val elements = json.decodeToSequence(
+                        stream = inputStream,
+                        deserializer = ElementJson.serializer(),
+                    )
+
+                    val createdOrUpdatedElements = elements
+                        .chunked(1_000)
+                        .map { db.insertOrReplace(it) }
+                        .sum()
+
+                    Result.success(
+                        SyncReport(
+                            timeMillis = System.currentTimeMillis() - startMillis,
+                            createdOrUpdatedElements = createdOrUpdatedElements,
+                        )
+                    )
                 }
             }
+        }
+    }
 
-            delay(100)
+    private fun Database.insertOrReplace(elements: List<ElementJson>): Long {
+        val elementsWithLatLon = elements.map { Pair(it, it.getLatLon()) }
+
+        transaction {
+            elementsWithLatLon.forEach {
+                val latLon = it.second
+
+                elementQueries.insertOrReplace(
+                    Element(
+                        id = it.first.id,
+                        lat = latLon.first,
+                        lon = latLon.second,
+                        osm_json = it.first.osm_json,
+                        tags = it.first.tags,
+                        created_at = it.first.created_at,
+                        updated_at = it.first.updated_at,
+                        deleted_at = it.first.deleted_at,
+                    )
+                )
+            }
         }
 
-        return Result.success(
-            SyncReport(
-                timeMillis = System.currentTimeMillis() - startMillis,
-                createdOrUpdatedElements = elements.size.toLong(),
-            )
-        )
+        return elementsWithLatLon.size.toLong()
     }
 
     private fun ElementJson.getLatLon(): Pair<Double, Double> {

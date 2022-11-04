@@ -2,6 +2,8 @@ package app
 
 import android.app.Application
 import db.database
+import kotlinx.serialization.json.Json
+import okhttp3.OkHttpClient
 import org.btcmap.BuildConfig
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -19,7 +21,11 @@ class App : Application() {
             if (BuildConfig.DEBUG) androidLogger(Level.DEBUG)
             androidContext(applicationContext)
             defaultModule()
-            modules(module { single { database(applicationContext) } })
+            modules(module {
+                single { database(applicationContext) }
+                single { OkHttpClient() }
+                single { Json { ignoreUnknownKeys = true } }
+            })
         }
     }
 }

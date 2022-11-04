@@ -8,8 +8,8 @@ CREATE TABLE event (
     deleted_at TEXT NOT NULL
 );
 
-insert:
-INSERT
+insertOrReplace:
+INSERT OR REPLACE
 INTO event(
     id,
     type,

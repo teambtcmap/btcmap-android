@@ -1,6 +1,7 @@
 CREATE TABLE user (
     id INTEGER NOT NULL PRIMARY KEY,
     osm_json TEXT NOT NULL,
+    tags TEXT NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     deleted_at TEXT NOT NULL
@@ -8,19 +9,21 @@ CREATE TABLE user (
 
 insertOrReplace:
 INSERT OR REPLACE
-INTO user (id, osm_json, created_at, updated_at, deleted_at)
-VALUES ?;
-
-selectAll:
-SELECT *
-FROM user;
+INTO user (
+    id,
+    osm_json,
+    tags,
+    created_at,
+    updated_at,
+    deleted_at
+) VALUES ?;
 
 selectById:
 SELECT *
 FROM user
 WHERE id = ?;
 
-selectAllUsersAsListItems:
+selectUsersAsListItems:
 SELECT
     u.id AS user_id,
     json_extract(u.osm_json, '$.img.href') AS user_img_href,

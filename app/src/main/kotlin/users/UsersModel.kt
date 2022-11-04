@@ -3,7 +3,7 @@ package users
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import db.SelectAllUsersAsListItems
+import db.SelectUsersAsListItems
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -23,7 +23,7 @@ class UsersModel(
 
     init {
         viewModelScope.launch {
-            val items = usersRepo.selectAllUsersAsListItems().map {
+            val items = usersRepo.selectUsersAsListItems().map {
                 val changes = if (it.user_name == "Bill on Bitcoin Island") {
                     it.changes + 120
                 } else {
@@ -43,7 +43,7 @@ class UsersModel(
         }
     }
 
-    fun SelectAllUsersAsListItems.lnurl(): String {
+    fun SelectUsersAsListItems.lnurl(): String {
         val description = user_description ?: ""
         val pattern = Pattern.compile("\\(lightning:[^)]*\\)", Pattern.CASE_INSENSITIVE)
         val matcher = pattern.matcher(description)

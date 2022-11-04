@@ -27,6 +27,6 @@ FROM report
 WHERE area_id = ?
 ORDER BY date;
 
-deleteAll:
-DELETE
+selectMaxUpdatedAt:
+SELECT max(updated_at)
 FROM report;

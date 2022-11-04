@@ -56,13 +56,15 @@ class Sync(
             Log.e(TAG, "Failed to fetch new or updated elements", it)
         }
 
-        runCatching {
-            Log.d(TAG, "Syncing reports")
-            reportsRepo.sync()
-        }.onSuccess {
-            Log.d(TAG, "Synced reports")
+        Log.d(TAG, "Syncing reports")
+
+        reportsRepo.sync().onSuccess {
+            Log.d(
+                TAG,
+                "Fetched ${it.createdOrUpdatedReports} new or updated reports in ${it.timeMillis} ms"
+            )
         }.onFailure {
-            Log.d(TAG, "Failed to sync reports")
+            Log.e(TAG, "Failed to fetch new or updated reports", it)
         }
 
         Log.d(TAG, "Syncing areas")
