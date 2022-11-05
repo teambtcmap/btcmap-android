@@ -134,7 +134,7 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.2.0")
 
     // Material design components
-    implementation("com.google.android.material:material:1.6.1")
+    implementation("com.google.android.material:material:1.7.0")
 
     // Helps to split the app into multiple independent screens
     val fragmentVer = "1.5.2"
