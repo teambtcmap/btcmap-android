@@ -175,7 +175,10 @@ class ElementFragment : Fragment() {
         elementId = element.id
 
         val tags = element.osm_json["tags"]!!.jsonObject
-        binding.toolbar.title = tags["name"]?.jsonPrimitive?.content ?: "Unnamed"
+        binding.toolbar.title = tags["name"]?.jsonPrimitive?.content
+            ?: if (element.tags["icon:android"]?.jsonPrimitive?.content == "local_atm") getString(R.string.atm) else getString(
+                R.string.unnamed_place
+            )
 
         val surveyDate = tags["survey:date"]?.jsonPrimitive?.content
             ?: tags["check_date"]?.jsonPrimitive?.content ?: ""

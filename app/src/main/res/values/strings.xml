@@ -66,6 +66,7 @@
     <string name="ways_and_relations_are_not_supported">Ways and relations aren\'t supported</string>
     <string name="add_tag">Add tag</string>
     <string name="delete_tag">Delete tag</string>
+    <string name="atm">ATM</string>
     <plurals name="d_changes">
         <item quantity="zero">%d changes</item>
         <item quantity="one">%d change</item>

@@ -152,7 +152,9 @@ class AreaFragment : Fragment() {
                         id = it.id,
                         iconId = it.icon_id ?: "question_mark",
                         name = tags["name"]?.jsonPrimitive?.content
-                            ?: getString(R.string.unnamed_place),
+                            ?: if (it.icon_id == "local_atm") getString(R.string.atm) else getString(
+                                R.string.unnamed_place
+                            ),
                         status = status,
                         statusColor = statusColor,
                     )
