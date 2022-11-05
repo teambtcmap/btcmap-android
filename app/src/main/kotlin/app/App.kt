@@ -4,6 +4,7 @@ import android.app.Application
 import db.database
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
+import okhttp3.brotli.BrotliInterceptor
 import org.btcmap.BuildConfig
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -23,7 +24,7 @@ class App : Application() {
             defaultModule()
             modules(module {
                 single { database(applicationContext) }
-                single { OkHttpClient() }
+                single { OkHttpClient.Builder().addInterceptor(BrotliInterceptor).build() }
                 single { Json { ignoreUnknownKeys = true } }
             })
         }

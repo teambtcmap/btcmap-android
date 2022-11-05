@@ -142,7 +142,7 @@ dependencies {
     debugImplementation("androidx.fragment:fragment-testing:$fragmentVer")
 
     // Modern HTTP client
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.squareup.okhttp3:okhttp-brotli:4.10.0")
 
     // SQLDelight generates typesafe kotlin APIs from SQL statements
     implementation("app.cash.sqldelight:coroutines-extensions:$sqlDelightVer")
