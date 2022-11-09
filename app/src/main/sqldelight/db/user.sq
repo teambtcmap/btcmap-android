@@ -32,6 +32,9 @@ SELECT
     count(e.user_id) AS changes
 FROM user u
 LEFT JOIN event e ON e.user_id = u.id AND e.deleted_at = ''
+WHERE user_name != 'Igor Bubelov'
+AND user_name != 'secondl1ght'
+AND user_name != 'b-jazz-bot'
 GROUP BY u.id
 ORDER BY changes DESC;
 
