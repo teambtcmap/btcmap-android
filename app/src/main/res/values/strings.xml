@@ -67,6 +67,7 @@
     <string name="add_tag">Add tag</string>
     <string name="delete_tag">Delete tag</string>
     <string name="atm">ATM</string>
+    <string name="pay_with_pouch">Pay with Pouch</string>
     <plurals name="d_changes">
         <item quantity="zero">%d changes</item>
         <item quantity="one">%d change</item>

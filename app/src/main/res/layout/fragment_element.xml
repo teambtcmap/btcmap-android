@@ -59,7 +59,7 @@
                     tools:text="Last verified on Oct 14, 2022" />
 
                 <Button
-                    android:id="@+id/verifyOrReport"
+                    android:id="@+id/elementAction"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

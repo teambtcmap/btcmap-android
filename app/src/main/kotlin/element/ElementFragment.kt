@@ -308,11 +308,32 @@ class ElementFragment : Fragment() {
 
         binding.tags.text = tagsJsonFormatter.encodeToString(JsonObject.serializer(), tags)
 
-        binding.verifyOrReport.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data =
-                Uri.parse("https://btcmap.org/verify-location?&name=${element.osm_json["tags"]!!.jsonObject["name"]?.jsonPrimitive?.content ?: ""}&lat=${element.lat}&long=${element.lon}&${element.osm_json["type"]!!.jsonPrimitive.content}=${element.osm_json["id"]!!.jsonPrimitive.content}")
-            startActivity(intent)
+        if (tags.containsKey("payment:pouch")) {
+            binding.elementAction.setText(R.string.pay_with_pouch)
+            binding.elementAction.setOnClickListener {
+                val url = (tags["payment:pouch"]?.jsonPrimitive?.content ?: "").toHttpUrlOrNull()
+
+                if (url != null && url.host == "app.pouch.ph") {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse(url.newBuilder().scheme("https").build().toString())
+                    startActivity(intent)
+                }
+
+                if (url == null) {
+                    val username = tags["payment:pouch"]?.jsonPrimitive?.content ?: ""
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse("https://app.pouch.ph/$username")
+                    startActivity(intent)
+                }
+            }
+        } else {
+            binding.elementAction.setText(R.string.verify)
+            binding.elementAction.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data =
+                    Uri.parse("https://btcmap.org/verify-location?&name=${element.osm_json["tags"]!!.jsonObject["name"]?.jsonPrimitive?.content ?: ""}&lat=${element.lat}&long=${element.lon}&${element.osm_json["type"]!!.jsonPrimitive.content}=${element.osm_json["id"]!!.jsonPrimitive.content}")
+                startActivity(intent)
+            }
         }
     }
 
