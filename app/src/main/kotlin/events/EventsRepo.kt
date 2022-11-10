@@ -115,7 +115,6 @@ class EventsRepo(
     @Serializable
     private data class EventJson(
         val id: Long,
-        val date: String,
         val type: String,
         val element_id: String,
         val user_id: Long,
