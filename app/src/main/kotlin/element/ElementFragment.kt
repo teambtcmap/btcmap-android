@@ -308,23 +308,14 @@ class ElementFragment : Fragment() {
 
         binding.tags.text = tagsJsonFormatter.encodeToString(JsonObject.serializer(), tags)
 
-        if (tags.containsKey("payment:pouch")) {
-            binding.elementAction.setText(R.string.pay_with_pouch)
+        val pouchUsername = element.tags["payment:pouch"]?.jsonPrimitive?.content ?: ""
+
+        if (pouchUsername.isNotBlank()) {
+            binding.elementAction.setText(R.string.pay)
             binding.elementAction.setOnClickListener {
-                val url = (tags["payment:pouch"]?.jsonPrimitive?.content ?: "").toHttpUrlOrNull()
-
-                if (url != null && url.host == "app.pouch.ph") {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse(url.newBuilder().scheme("https").build().toString())
-                    startActivity(intent)
-                }
-
-                if (url == null) {
-                    val username = tags["payment:pouch"]?.jsonPrimitive?.content ?: ""
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse("https://app.pouch.ph/$username")
-                    startActivity(intent)
-                }
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse("https://app.pouch.ph/$pouchUsername")
+                startActivity(intent)
             }
         } else {
             binding.elementAction.setText(R.string.verify)
