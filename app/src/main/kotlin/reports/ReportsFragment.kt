@@ -26,14 +26,14 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
 import map.getOnSurfaceColor
 import org.btcmap.databinding.FragmentReportsBinding
-import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
 class ReportsFragment : Fragment() {
 
-    private val repo: ReportsRepo by inject()
+    private val model: ReportsModel by viewModel()
 
     private var _binding: FragmentReportsBinding? = null
     private val binding get() = _binding!!
@@ -66,41 +66,41 @@ class ReportsFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                val reports = repo.selectByAreaId("")
+                model.reports.collect { reports ->
+                    if (reports.isEmpty()) {
+                        return@collect
+                    }
 
-                if (reports.isEmpty()) {
-                    return@repeatOnLifecycle
+                    show(
+                        binding.chartUpToDateElements,
+                        reports.map {
+                            Pair(
+                                it.date,
+                                it.tags["up_to_date_elements"]?.jsonPrimitive?.longOrNull ?: 0,
+                            )
+                        },
+                    )
+
+                    show(
+                        binding.chartTotalElements,
+                        reports.map {
+                            Pair(
+                                it.date,
+                                it.tags["total_elements"]?.jsonPrimitive?.longOrNull ?: 0,
+                            )
+                        },
+                    )
+
+                    show(
+                        binding.chartLegacyElements,
+                        reports.map {
+                            Pair(
+                                it.date,
+                                it.tags["legacy_elements"]?.jsonPrimitive?.longOrNull ?: 0,
+                            )
+                        },
+                    )
                 }
-
-                show(
-                    binding.chartUpToDateElements,
-                    reports.map {
-                        Pair(
-                            it.date,
-                            it.tags["up_to_date_elements"]?.jsonPrimitive?.longOrNull ?: 0,
-                        )
-                    },
-                )
-
-                show(
-                    binding.chartTotalElements,
-                    reports.map {
-                        Pair(
-                            it.date,
-                            it.tags["total_elements"]?.jsonPrimitive?.longOrNull ?: 0,
-                        )
-                    },
-                )
-
-                show(
-                    binding.chartLegacyElements,
-                    reports.map {
-                        Pair(
-                            it.date,
-                            it.tags["legacy_elements"]?.jsonPrimitive?.longOrNull ?: 0,
-                        )
-                    },
-                )
             }
         }
     }
@@ -146,7 +146,6 @@ class ReportsFragment : Fragment() {
             axisLeft.setDrawGridLines(false)
             axisLeft.isEnabled = false
             val gridColor = Color.valueOf(requireContext().getOnSurfaceColor())
-            //axisRight.setDrawGridLines(false)
             axisRight.gridColor =
                 Color.argb(0.12f, gridColor.red(), gridColor.green(), gridColor.blue())
             axisRight.textColor = requireContext().getOnSurfaceColor()
@@ -174,17 +173,14 @@ class ReportsFragment : Fragment() {
         dataSet.setDrawIcons(false)
 
         dataSet.color = Color.parseColor("#f7931a")
-        dataSet.setCircleColor(Color.parseColor("#f7931a"))
         dataSet.valueTextColor = requireContext().getOnSurfaceColor()
 
         dataSet.setDrawValues(false)
         dataSet.lineWidth = 1f
-        dataSet.circleRadius = 3f
-
-        dataSet.setDrawCircleHole(false)
 
         dataSet.valueTextSize = 9f
 
+        dataSet.setDrawCircles(false)
         dataSet.setDrawFilled(true)
         dataSet.fillFormatter =
             IFillFormatter { _, _ ->
