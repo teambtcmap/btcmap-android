@@ -180,14 +180,25 @@ class ElementFragment : Fragment() {
                 R.string.unnamed_place
             )
 
-        val surveyDate = tags["survey:date"]?.jsonPrimitive?.content
-            ?: tags["check_date"]?.jsonPrimitive?.content ?: ""
+        val surveyDates = mutableListOf<String>()
 
-        if (surveyDate.isNotBlank()) {
+        tags["survey:date"]?.jsonPrimitive?.content?.let {
+            surveyDates += it
+        }
+
+        tags["check_date"]?.jsonPrimitive?.content?.let {
+            surveyDates += it
+        }
+
+        tags["check_date:currency:XBT"]?.jsonPrimitive?.content?.let {
+            surveyDates += it
+        }
+
+        if (surveyDates.isNotEmpty()) {
             runCatching {
                 val date = DateUtils.getRelativeDateTimeString(
                     requireContext(),
-                    ZonedDateTime.parse(surveyDate + "T00:00:00Z").toEpochSecond() * 1000,
+                    ZonedDateTime.parse(surveyDates.max() + "T00:00:00Z").toEpochSecond() * 1000,
                     DateUtils.SECOND_IN_MILLIS,
                     DateUtils.WEEK_IN_MILLIS,
                     0,
@@ -196,7 +207,7 @@ class ElementFragment : Fragment() {
                 binding.lastVerified.text = date
                 binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
             }.onFailure {
-                binding.lastVerified.text = surveyDate
+                binding.lastVerified.text = surveyDates.max()
                 binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
             }
         } else {
