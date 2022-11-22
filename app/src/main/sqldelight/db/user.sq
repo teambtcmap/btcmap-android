@@ -35,6 +35,9 @@ LEFT JOIN event e ON e.user_id = u.id AND e.deleted_at = ''
 WHERE user_name != 'Igor Bubelov'
 AND user_name != 'secondl1ght'
 AND user_name != 'b-jazz-bot'
+AND user_name != 'vindard'
+AND user_name != 'Mateusz Konieczny'
+AND user_name != 'ovruni'
 GROUP BY u.id
 ORDER BY changes DESC;
 
