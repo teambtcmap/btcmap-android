@@ -6,7 +6,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
     id("androidx.navigation.safeargs.kotlin")
     id("app.cash.sqldelight")
-    id("com.google.devtools.ksp") version "1.7.20-1.0.7"
+    // https://github.com/google/ksp/releases
+    id("com.google.devtools.ksp") version "1.7.20-1.0.8"
 }
 
 android {
@@ -113,68 +114,79 @@ tasks.register("bundleData") {
 }
 
 dependencies {
-    // Simplifies non-blocking programming
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-
     // Platform-agnostic JSON serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
-
-    // Kotlin extensions for Android SDK
-    implementation("androidx.core:core-ktx:1.9.0")
+    // https://github.com/Kotlin/kotlinx.serialization/releases
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
 
     // Simplifies in-app navigation
-    val navVer = "2.5.2"
+    // https://developer.android.com/jetpack/androidx/releases/navigation
+    val navVer = "2.5.3"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVer")
     implementation("androidx.navigation:navigation-ui-ktx:$navVer")
 
     // Helps with keeping our view hierarchies flat
+    // https://developer.android.com/jetpack/androidx/releases/constraintlayout
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
-    // Used by osmdroid
+    // Used by osmdroid (original prefs API is deprecated)
+    // https://developer.android.com/jetpack/androidx/releases/preference
     implementation("androidx.preference:preference-ktx:1.2.0")
 
     // Material design components
-    implementation("com.google.android.material:material:1.7.0")
+    // https://github.com/material-components/material-components-android/releases
+    implementation("com.google.android.material:material:1.8.0-alpha02")
 
     // Helps to split the app into multiple independent screens
-    val fragmentVer = "1.5.2"
-    implementation("androidx.fragment:fragment-ktx:$fragmentVer")
-    debugImplementation("androidx.fragment:fragment-testing:$fragmentVer")
+    // https://developer.android.com/jetpack/androidx/releases/fragment
+    debugImplementation("androidx.fragment:fragment-testing:1.5.4")
 
     // Modern HTTP client
+    // https://github.com/square/okhttp/blob/master/CHANGELOG.md
     implementation("com.squareup.okhttp3:okhttp-brotli:4.10.0")
 
     // SQLDelight generates typesafe kotlin APIs from SQL statements
+    // https://github.com/cashapp/sqldelight/releases
     implementation("app.cash.sqldelight:coroutines-extensions:$sqlDelightVer")
     implementation("app.cash.sqldelight:android-driver:$sqlDelightVer")
     testImplementation("app.cash.sqldelight:sqlite-driver:$sqlDelightVer")
 
     // Injection library
-    implementation("io.insert-koin:koin-android:3.2.2")
-    val koinAnnotationsVer = "1.0.1"
+    // https://github.com/InsertKoinIO/koin/blob/main/CHANGELOG.md
+    implementation("io.insert-koin:koin-android:3.2.3")
+    val koinAnnotationsVer = "1.0.3"
     implementation("io.insert-koin:koin-annotations:$koinAnnotationsVer")
     ksp("io.insert-koin:koin-ksp-compiler:$koinAnnotationsVer")
 
     // Open Street Map widget
+    // https://github.com/osmdroid/osmdroid/releases
     implementation("org.osmdroid:osmdroid-android:6.1.14")
 
     // Charts
+    // https://github.com/PhilJay/MPAndroidChart/releases
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     // Bundle SQLite binaries
+    // TODO remove when Android will enable JSON1
+    // https://github.com/requery/sqlite-android/releases
     implementation("com.github.requery:sqlite-android:3.39.2")
 
     // Used to download, cache and display images
-    implementation("io.coil-kt:coil:2.2.2")
-    implementation("io.coil-kt:coil-svg:2.2.2")
+    // https://github.com/coil-kt/coil/releases
+    val coilVer = "2.2.2"
+    implementation("io.coil-kt:coil:$coilVer")
+    implementation("io.coil-kt:coil-svg:$coilVer")
 
     // Common test dependencies
+    // https://junit.org/junit4/
     testImplementation("junit:junit:4.13.2")
 
     // Common instrumented test dependencies
+    // https://junit.org/junit4/
+    // https://developer.android.com/jetpack/androidx/releases/test
     androidTestImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test:core-ktx:1.4.0")
-    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.3")
+    androidTestImplementation("androidx.test:core-ktx:1.5.0")
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.4")
+    // TODO figure out why newer versions hang
     androidTestImplementation("androidx.test:runner:1.4.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
 }
