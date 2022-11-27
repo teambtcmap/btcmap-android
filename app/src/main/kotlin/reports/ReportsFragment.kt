@@ -18,9 +18,11 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.DefaultValueFormatter
 import com.github.mikephil.charting.formatter.IFillFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
@@ -63,6 +65,12 @@ class ReportsFragment : Fragment() {
         initChart(binding.chartUpToDateElements)
         initChart(binding.chartTotalElements)
         initChart(binding.chartLegacyElements)
+
+        model.args.update {
+            ReportsModel.Args(
+                ReportsFragmentArgs.fromBundle(requireArguments()).areaId
+            )
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -171,6 +179,7 @@ class ReportsFragment : Fragment() {
 
         dataSet = LineDataSet(values, null)
         dataSet.setDrawIcons(false)
+        dataSet.valueFormatter = DefaultValueFormatter(0)
 
         dataSet.color = Color.parseColor("#f7931a")
         dataSet.valueTextColor = requireContext().getOnSurfaceColor()

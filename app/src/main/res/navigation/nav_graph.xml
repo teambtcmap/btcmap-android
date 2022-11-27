@@ -104,7 +104,11 @@
 
     <fragment
         android:id="@+id/reportsFragment"
-        android:name="reports.ReportsFragment" />
+        android:name="reports.ReportsFragment">
+        <argument
+            android:name="area_id"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/areasFragment"
@@ -182,6 +186,13 @@
         <action
             android:id="@+id/action_areaFragment_to_elementFragment"
             app:destination="@id/elementFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_areaFragment_to_reportsFragment"
+            app:destination="@id/reportsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"

@@ -13,11 +13,21 @@ class ReportsModel(
     private val reportsRepo: ReportsRepo,
 ) : ViewModel() {
 
+    val args = MutableStateFlow<Args?>(null)
+
     val reports = MutableStateFlow<List<Report>>(emptyList())
 
     init {
         viewModelScope.launch {
-            reports.update { reportsRepo.selectByAreaId("") }
+            args.collect { args ->
+                if (args == null) {
+                    return@collect
+                } else {
+                    reports.update { reportsRepo.selectByAreaId(args.areaId) }
+                }
+            }
         }
     }
+
+    data class Args(val areaId: String)
 }

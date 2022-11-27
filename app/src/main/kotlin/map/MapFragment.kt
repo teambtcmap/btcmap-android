@@ -162,7 +162,7 @@ class MapFragment : Fragment() {
                             startActivity(intent)
                         }
                         R.id.action_trends -> {
-                            findNavController().navigate(MapFragmentDirections.actionMapFragmentToReportsFragment())
+                            findNavController().navigate(MapFragmentDirections.actionMapFragmentToReportsFragment(""))
                         }
                         R.id.action_areas -> {
                             findNavController().navigate(

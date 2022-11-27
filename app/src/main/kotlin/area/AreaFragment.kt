@@ -95,8 +95,22 @@ class AreaFragment : Fragment() {
             WindowInsetsCompat.CONSUMED
         }
 
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+        binding.toolbar.apply {
+            setNavigationOnClickListener {
+                findNavController().popBackStack()
+            }
+
+            setOnMenuItemClickListener {
+                if (it.itemId == R.id.action_reports) {
+                    findNavController().navigate(
+                        AreaFragmentDirections.actionAreaFragmentToReportsFragment(
+                            AreaFragmentArgs.fromBundle(requireArguments()).areaId
+                        )
+                    )
+                }
+
+                true
+            }
         }
 
         val area = runBlocking {
