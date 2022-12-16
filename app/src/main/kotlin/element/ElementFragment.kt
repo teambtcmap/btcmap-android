@@ -20,7 +20,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import conf.ConfRepo
-import db.Element
+import elements.Element
 import elements.ElementsRepo
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
@@ -174,7 +174,7 @@ class ElementFragment : Fragment() {
     fun setElement(element: Element) {
         elementId = element.id
 
-        val tags = element.osm_json["tags"]!!.jsonObject
+        val tags = element.osmJson["tags"]!!.jsonObject
         binding.toolbar.title = tags["name"]?.jsonPrimitive?.content
             ?: if (element.tags["icon:android"]?.jsonPrimitive?.content == "local_atm") getString(R.string.atm) else getString(
                 R.string.unnamed_place
@@ -333,7 +333,7 @@ class ElementFragment : Fragment() {
             binding.elementAction.setOnClickListener {
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data =
-                    Uri.parse("https://btcmap.org/verify-location?&name=${element.osm_json["tags"]!!.jsonObject["name"]?.jsonPrimitive?.content ?: ""}&lat=${element.lat}&long=${element.lon}&${element.osm_json["type"]!!.jsonPrimitive.content}=${element.osm_json["id"]!!.jsonPrimitive.content}")
+                    Uri.parse("https://btcmap.org/verify-location?&name=${element.osmJson["tags"]!!.jsonObject["name"]?.jsonPrimitive?.content ?: ""}&lat=${element.lat}&long=${element.lon}&${element.osmJson["type"]!!.jsonPrimitive.content}=${element.osmJson["id"]!!.jsonPrimitive.content}")
                 startActivity(intent)
             }
         }

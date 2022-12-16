@@ -1,13 +1,8 @@
 package events
 
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
-import app.cash.sqldelight.coroutines.mapToOneNotNull
 import db.*
 import http.await
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -16,100 +11,64 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.koin.core.annotation.Single
+import java.time.ZonedDateTime
 
 @Single
 class EventsRepo(
-    private val db: Database,
+    private val queries: EventQueries,
     private val httpClient: OkHttpClient,
     private val json: Json,
 ) {
 
-    suspend fun selectAllNotDeletedAsListItems(limit: Long): List<SelectAllNotDeletedEventsAsListItems> {
-        return db.eventQueries
-            .selectAllNotDeletedEventsAsListItems(limit)
-            .asFlow()
-            .mapToList(Dispatchers.IO)
-            .first()
-    }
+    suspend fun selectAll(limit: Long) = queries.selectAll(limit)
 
-    suspend fun selectEventsByUserIdAsListItems(userId: Long): List<SelectEventsByUserIdAsListItems> {
-        return db.eventQueries
-            .selectEventsByUserIdAsListItems(userId)
-            .asFlow()
-            .mapToList(Dispatchers.IO)
-            .first()
-    }
+    suspend fun selectByUserIdAsListItems(userId: Long) = queries.selectByUserId(userId)
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun sync(): Result<SyncReport> {
         return runCatching {
-            withContext(Dispatchers.IO) {
-                val startMillis = System.currentTimeMillis()
+            val startMillis = System.currentTimeMillis()
 
-                val maxUpdatedAt = db.eventQueries
-                    .selectMaxUpdatedAt()
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .firstOrNull()
-                    ?.max
+            val maxUpdatedAt = queries.selectMaxUpdatedAt()
 
-                val url = HttpUrl.Builder().apply {
-                    scheme("https")
-                    host("api.btcmap.org")
-                    addPathSegment("v2")
-                    addPathSegment("events")
+            val url = HttpUrl.Builder().apply {
+                scheme("https")
+                host("api.btcmap.org")
+                addPathSegment("v2")
+                addPathSegment("events")
 
-                    if (!maxUpdatedAt.isNullOrBlank()) {
-                        addQueryParameter("updated_since", maxUpdatedAt)
-                    }
-                }.build()
-
-                val response = httpClient
-                    .newCall(Request.Builder().url(url).build())
-                    .await()
-
-                if (!response.isSuccessful) {
-                    throw Exception("Unexpected HTTP response code: ${response.code}")
+                if (maxUpdatedAt != null) {
+                    addQueryParameter("updated_since", maxUpdatedAt.toString())
                 }
+            }.build()
 
-                response.body!!.byteStream().use { inputStream ->
-                    val events = json.decodeToSequence(
-                        stream = inputStream,
-                        deserializer = EventJson.serializer(),
-                    )
+            val response = httpClient
+                .newCall(Request.Builder().url(url).build())
+                .await()
 
-                    val createdOrUpdatedElements = events
-                        .chunked(1_000)
-                        .map { db.insertOrReplace(it) }
-                        .sum()
-
-                    SyncReport(
-                        timeMillis = System.currentTimeMillis() - startMillis,
-                        createdOrUpdatedElements = createdOrUpdatedElements,
-                    )
-                }
+            if (!response.isSuccessful) {
+                throw Exception("Unexpected HTTP response code: ${response.code}")
             }
-        }
-    }
 
-    private fun Database.insertOrReplace(events: List<EventJson>): Long {
-        transaction {
-            events.forEach {
-                eventQueries.insertOrReplace(
-                    Event(
-                        id = it.id,
-                        type = it.type,
-                        element_id = it.element_id,
-                        user_id = it.user_id,
-                        created_at = it.created_at,
-                        updated_at = it.updated_at,
-                        deleted_at = it.deleted_at,
-                    )
+            response.body!!.byteStream().use { responseBody ->
+                var count = 0L
+
+                withContext(Dispatchers.IO) {
+                    json.decodeToSequence(
+                        stream = responseBody,
+                        deserializer = EventJson.serializer(),
+                    ).chunked(1_000).forEach { chunk ->
+                        queries.insertOrReplace(chunk.map { it.toEvent() })
+                        count += chunk.size
+                    }
+                }
+
+                SyncReport(
+                    timeMillis = System.currentTimeMillis() - startMillis,
+                    createdOrUpdatedElements = count,
                 )
             }
         }
-
-        return events.size.toLong()
     }
 
     @Serializable
@@ -122,6 +81,18 @@ class EventsRepo(
         val updated_at: String,
         val deleted_at: String,
     )
+
+    private fun EventJson.toEvent(): Event {
+        return Event(
+            id = id,
+            type = type,
+            elementId = element_id,
+            userId = user_id,
+            createdAt = ZonedDateTime.parse(created_at),
+            updatedAt = ZonedDateTime.parse(updated_at),
+            deletedAt = if (deleted_at.isNotEmpty()) ZonedDateTime.parse(deleted_at) else null,
+        )
+    }
 
     data class SyncReport(
         val timeMillis: Long,

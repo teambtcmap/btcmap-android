@@ -1,16 +1,8 @@
 package users
 
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
-import app.cash.sqldelight.coroutines.mapToOneNotNull
-import app.cash.sqldelight.coroutines.mapToOneOrNull
-import db.Database
-import db.SelectUsersAsListItems
-import db.User
+import db.*
 import http.await
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -19,100 +11,64 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.koin.core.annotation.Single
+import java.time.ZonedDateTime
 
 @Single
 class UsersRepo(
-    private val db: Database,
+    private val userQueries: UserQueries,
     private val httpClient: OkHttpClient,
     private val json: Json,
 ) {
 
-    suspend fun selectUsersAsListItems(): List<SelectUsersAsListItems> {
-        return db.userQueries
-            .selectUsersAsListItems()
-            .asFlow()
-            .mapToList(Dispatchers.IO)
-            .first()
-            .filter { it.changes > 0 }
-    }
+    suspend fun selectAll() = userQueries.selectAll()
 
-    suspend fun selectById(id: Long): User? {
-        return db.userQueries
-            .selectById(id)
-            .asFlow()
-            .mapToOneOrNull(Dispatchers.IO)
-            .firstOrNull()
-    }
+    suspend fun selectById(id: Long) = userQueries.selectById(id)
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun sync(): Result<SyncReport> {
         return runCatching {
-            withContext(Dispatchers.IO) {
-                val startMillis = System.currentTimeMillis()
+            val startMillis = System.currentTimeMillis()
 
-                val maxUpdatedAt = db.userQueries
-                    .selectMaxUpdatedAt()
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .firstOrNull()
-                    ?.max
+            val maxUpdatedAt = userQueries.selectMaxUpdatedAt()
 
-                val url = HttpUrl.Builder().apply {
-                    scheme("https")
-                    host("api.btcmap.org")
-                    addPathSegment("v2")
-                    addPathSegment("users")
+            val url = HttpUrl.Builder().apply {
+                scheme("https")
+                host("api.btcmap.org")
+                addPathSegment("v2")
+                addPathSegment("users")
 
-                    if (!maxUpdatedAt.isNullOrBlank()) {
-                        addQueryParameter("updated_since", maxUpdatedAt)
-                    }
-                }.build()
-
-                val response = httpClient
-                    .newCall(Request.Builder().url(url).build())
-                    .await()
-
-                if (!response.isSuccessful) {
-                    throw Exception("Unexpected HTTP response code: ${response.code}")
+                if (maxUpdatedAt != null) {
+                    addQueryParameter("updated_since", maxUpdatedAt.toString())
                 }
+            }.build()
 
-                response.body!!.byteStream().use { inputStream ->
-                    val users = json.decodeToSequence(
+            val response = httpClient
+                .newCall(Request.Builder().url(url).build())
+                .await()
+
+            if (!response.isSuccessful) {
+                throw Exception("Unexpected HTTP response code: ${response.code}")
+            }
+
+            response.body!!.byteStream().use { inputStream ->
+                withContext(Dispatchers.IO) {
+                    var count = 0L
+
+                    json.decodeToSequence(
                         stream = inputStream,
                         deserializer = UserJson.serializer(),
-                    )
-
-                    val createdOrUpdatedUsers = users
-                        .chunked(1_000)
-                        .map { db.insertOrReplace(it) }
-                        .sum()
+                    ).chunked(1_000).forEach { chunk ->
+                        userQueries.insertOrReplace(chunk.map { it.toUser() })
+                        count += chunk.size
+                    }
 
                     SyncReport(
                         timeMillis = System.currentTimeMillis() - startMillis,
-                        createdOrUpdatedUsers = createdOrUpdatedUsers,
+                        createdOrUpdatedUsers = count,
                     )
                 }
             }
         }
-    }
-
-    private fun Database.insertOrReplace(users: List<UserJson>): Long {
-        transaction {
-            users.forEach {
-                userQueries.insertOrReplace(
-                    User(
-                        id = it.id,
-                        osm_json = it.osm_json.toString(),
-                        tags = it.tags.toString(),
-                        created_at = it.created_at,
-                        updated_at = it.updated_at,
-                        deleted_at = it.deleted_at,
-                    )
-                )
-            }
-        }
-
-        return users.size.toLong()
     }
 
     @Serializable
@@ -124,6 +80,17 @@ class UsersRepo(
         val updated_at: String,
         val deleted_at: String,
     )
+
+    private fun UserJson.toUser(): User {
+        return User(
+            id = id,
+            osmJson = osm_json,
+            tags = tags,
+            createdAt = ZonedDateTime.parse(created_at),
+            updatedAt = ZonedDateTime.parse(updated_at),
+            deletedAt = if (deleted_at.isNotBlank()) ZonedDateTime.parse(deleted_at) else null,
+        )
+    }
 
     data class SyncReport(
         val timeMillis: Long,

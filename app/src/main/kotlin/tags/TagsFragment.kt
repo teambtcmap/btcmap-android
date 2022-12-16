@@ -81,7 +81,7 @@ class TagsFragment : Fragment() {
 
         val element = runBlocking { elementsRepo.selectById(elementId)!! }
 
-        val tags = element.osm_json["tags"]?.jsonObject!!
+        val tags = element.osmJson["tags"]?.jsonObject!!
 
         binding.toolbar.title =
             tags["name"]?.jsonPrimitive?.content ?: getString(R.string.unnamed_place)
@@ -139,7 +139,7 @@ class TagsFragment : Fragment() {
                         val nodeId = elementId.split(":").last()
                         val nodeLat = element.lat
                         val nodeLon = element.lon
-                        val nodeVer = element.osm_json["version"]!!.jsonPrimitive.long
+                        val nodeVer = element.osmJson["version"]!!.jsonPrimitive.long
 
                         val tagsString =
                             binding.tagsContainer.children.filterIsInstance<TagView>().mapNotNull {

@@ -28,7 +28,7 @@ class AreasModel(
         val location = GeoPoint(lat, lon)
 
         viewModelScope.launch {
-            val communities = areasRepo.selectAllNotDeleted().filter {
+            val communities = areasRepo.selectAll().filter {
                 it.tags["type"]?.jsonPrimitive?.content != "country"
             }.map {
                 Pair(it, it.toBoundingBox().centerWithDateLine.distanceToAsDouble(location) / 1000)

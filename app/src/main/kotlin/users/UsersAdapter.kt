@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import coil.load
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import okhttp3.HttpUrl
 import org.btcmap.R
 import org.btcmap.databinding.ItemUserBinding
 
@@ -69,8 +70,8 @@ class UsersAdapter(
                 avatarPlaceholder.isVisible = true
                 avatar.load(null)
 
-                if (item.imgHref.isNotBlank()) {
-                    avatar.load(data = item.imgHref) {
+                if (item.image != null) {
+                    avatar.load(data = item.image.toString()) {
                         listener(object : ImageRequest.Listener {
                             override fun onSuccess(
                                 request: ImageRequest,
@@ -109,6 +110,6 @@ class UsersAdapter(
         val name: String,
         val changes: Long,
         val tipLnurl: String,
-        val imgHref: String,
+        val image: HttpUrl?,
     )
 }

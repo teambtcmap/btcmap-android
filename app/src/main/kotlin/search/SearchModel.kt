@@ -5,15 +5,11 @@ import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
-import db.Database
-import db.Element
-import kotlinx.coroutines.Dispatchers
+import elements.Element
+import elements.ElementsRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.*
@@ -26,7 +22,7 @@ import kotlin.system.measureTimeMillis
 @KoinViewModel
 class SearchModel(
     private val app: Application,
-    private val db: Database,
+    private val elementsRepo: ElementsRepo,
 ) : ViewModel() {
 
     companion object {
@@ -54,10 +50,7 @@ class SearchModel(
                 var elements: List<Element>
 
                 val queryTimeMillis = measureTimeMillis {
-                    elements =
-                        db.elementQueries.selectBySearchString(searchString).asFlow()
-                            .mapToList(Dispatchers.IO)
-                            .first()
+                    elements = elementsRepo.selectBySearchString(searchString)
                 }
 
                 Log.d(TAG, "Search string: $searchString")
@@ -108,7 +101,7 @@ class SearchModel(
         return SearchAdapter.Item(
             element = this,
             icon = tags["icon:android"]?.jsonPrimitive?.content ?: "question_mark",
-            name = osm_json["tags"]!!.jsonObject["name"]?.jsonPrimitive?.contentOrNull ?: "Unnamed",
+            name = osmJson["tags"]!!.jsonObject["name"]?.jsonPrimitive?.contentOrNull ?: "Unnamed",
             distanceToUser = distanceStringBuilder.toString(),
         )
     }

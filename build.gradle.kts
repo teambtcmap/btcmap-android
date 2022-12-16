@@ -10,7 +10,6 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20")
         // https://developer.android.com/jetpack/androidx/releases/navigation
         classpath("androidx.navigation:navigation-safe-args-gradle-plugin:2.5.3")
-        classpath("app.cash.sqldelight:gradle-plugin:2.0.0-alpha04")
     }
 }
 

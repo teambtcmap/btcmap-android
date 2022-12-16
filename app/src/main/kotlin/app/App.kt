@@ -1,7 +1,7 @@
 package app
 
 import android.app.Application
-import db.database
+import db.persistentDatabase
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.brotli.BrotliInterceptor
@@ -20,10 +20,11 @@ class App : Application() {
 
         startKoin {
             if (BuildConfig.DEBUG) androidLogger(Level.DEBUG)
-            androidContext(applicationContext)
+            androidContext(this@App)
             defaultModule()
+
             modules(module {
-                single { database(applicationContext) }
+                single { persistentDatabase(this@App) }
                 single { OkHttpClient.Builder().addInterceptor(BrotliInterceptor).build() }
                 single { Json { ignoreUnknownKeys = true } }
             })

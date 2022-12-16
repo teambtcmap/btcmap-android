@@ -18,15 +18,11 @@ import events.EventsAdapter
 import events.EventsRepo
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.R
 import org.btcmap.databinding.FragmentUserBinding
 import org.koin.android.ext.android.inject
 import users.UsersRepo
-import java.time.ZonedDateTime
 
 class UserFragment : Fragment() {
 
@@ -81,8 +77,7 @@ class UserFragment : Fragment() {
             )
         } ?: return
 
-        val userOsmJson: JsonObject = Json.decodeFromString(user.osm_json)
-        val userName = userOsmJson["display_name"]?.jsonPrimitive?.content ?: return
+        val userName = user.osmJson["display_name"]?.jsonPrimitive?.content ?: return
 
         binding.toolbar.setOnMenuItemClickListener {
             if (it.itemId == R.id.action_view_on_osm) {
@@ -101,16 +96,16 @@ class UserFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.toolbar.title = userName.ifBlank { getString(R.string.unnamed_user) }
 
-                val items = eventsRepo.selectEventsByUserIdAsListItems(
+                val items = eventsRepo.selectByUserIdAsListItems(
                     UserFragmentArgs.fromBundle(
                         requireArguments()
                     ).userId
                 ).map {
                     EventsAdapter.Item(
-                        date = ZonedDateTime.parse(it.event_date),
-                        type = it.event_type,
-                        elementId = it.element_id,
-                        elementName = it.element_name ?: getString(R.string.unnamed_place),
+                        date = it.eventDate,
+                        type = it.eventType,
+                        elementId = it.elementId,
+                        elementName = it.elementName.ifBlank { getString(R.string.unnamed_place) },
                         username = "",
                         tipLnurl = "",
                     )

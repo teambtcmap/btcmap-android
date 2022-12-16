@@ -1,6 +1,6 @@
 package map
 
-import db.Area
+import areas.Area
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonPrimitive
 import org.osmdroid.util.BoundingBox

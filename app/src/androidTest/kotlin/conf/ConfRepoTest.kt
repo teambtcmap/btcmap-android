@@ -1,6 +1,6 @@
 package conf
 
-import db.testDb
+import db.inMemoryDatabase
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.ZonedDateTime
@@ -9,8 +9,7 @@ class ConfRepoTest {
 
     @Test
     fun getConf() {
-        val db = testDb()
-        val repo = ConfRepo(db)
+        val repo = ConfRepo(ConfQueries(inMemoryDatabase()))
         assertEquals(ConfRepo.DEFAULT_CONF, repo.conf.value)
         val newConf = repo.conf.value.copy(lastSyncDate = ZonedDateTime.now())
         repo.update { newConf }
@@ -19,8 +18,7 @@ class ConfRepoTest {
 
     @Test
     fun update() {
-        val db = testDb()
-        val repo = ConfRepo(db)
+        val repo = ConfRepo(ConfQueries(inMemoryDatabase()))
         val lastSyncDate = ZonedDateTime.now()
         repo.update { it.copy(lastSyncDate = lastSyncDate) }
         assertEquals(lastSyncDate, repo.conf.value.lastSyncDate)

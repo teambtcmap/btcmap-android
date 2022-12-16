@@ -2,7 +2,7 @@ package map
 
 import android.content.Context
 import android.graphics.Color
-import db.Conf
+import conf.Conf
 import org.btcmap.R
 
 fun Context.getOnSurfaceColor(): Int {

@@ -5,7 +5,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
     id("androidx.navigation.safeargs.kotlin")
-    id("app.cash.sqldelight")
     // https://github.com/google/ksp/releases
     id("com.google.devtools.ksp") version "1.7.20-1.0.8"
 }
@@ -45,6 +44,9 @@ android {
     packagingOptions {
         resources.excludes += "DebugProbesKt.bin"
 
+        // TODO remove bundled SQLite when Android bumps its deps
+        // > The JSON functions and operators are built into SQLite by default, as of SQLite version 3.38.0 (2022-02-22).
+        // https://www.sqlite.org/json1.html
         //jniLibs.excludes += "/lib/armeabi-v7a/libsqlite3x.so"
         //jniLibs.excludes += "lib/arm64-v8a/libsqlite3x.so"
         jniLibs.excludes += "/lib/x86/**"
@@ -92,17 +94,6 @@ android {
     }
 }
 
-val sqlDelightVer = "2.0.0-alpha04"
-
-sqldelight {
-    database("Database") {
-        sourceFolders = listOf("sqldelight")
-        packageName = "db"
-        dialect("app.cash.sqldelight:sqlite-3-35-dialect:$sqlDelightVer")
-        module("app.cash.sqldelight:sqlite-json-module:$sqlDelightVer")
-    }
-}
-
 tasks.register("bundleData") {
     doLast {
         val src = URL("https://api.btcmap.org/v2/elements")
@@ -144,12 +135,6 @@ dependencies {
     // https://github.com/square/okhttp/blob/master/CHANGELOG.md
     implementation("com.squareup.okhttp3:okhttp-brotli:4.10.0")
 
-    // SQLDelight generates typesafe kotlin APIs from SQL statements
-    // https://github.com/cashapp/sqldelight/releases
-    implementation("app.cash.sqldelight:coroutines-extensions:$sqlDelightVer")
-    implementation("app.cash.sqldelight:android-driver:$sqlDelightVer")
-    testImplementation("app.cash.sqldelight:sqlite-driver:$sqlDelightVer")
-
     // Injection library
     // https://github.com/InsertKoinIO/koin/blob/main/CHANGELOG.md
     implementation("io.insert-koin:koin-android:3.2.3")
@@ -165,9 +150,14 @@ dependencies {
     // https://github.com/PhilJay/MPAndroidChart/releases
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
+    // Used to cache data and store user preferences
+    implementation("androidx.sqlite:sqlite-ktx:2.2.0")
+
     // Bundle SQLite binaries
-    // TODO remove when Android will enable JSON1
     // https://github.com/requery/sqlite-android/releases
+    // TODO remove bundled SQLite when Android bumps its deps
+    // > The JSON functions and operators are built into SQLite by default, as of SQLite version 3.38.0 (2022-02-22).
+    // https://www.sqlite.org/json1.html
     implementation("com.github.requery:sqlite-android:3.39.2")
 
     // Used to download, cache and display images

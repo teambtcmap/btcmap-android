@@ -83,7 +83,7 @@ class ReportsFragment : Fragment() {
                         binding.chartUpToDateElements,
                         reports.map {
                             Pair(
-                                it.date,
+                                it.date.toString(),
                                 it.tags["up_to_date_elements"]?.jsonPrimitive?.longOrNull ?: 0,
                             )
                         },
@@ -93,7 +93,7 @@ class ReportsFragment : Fragment() {
                         binding.chartTotalElements,
                         reports.map {
                             Pair(
-                                it.date,
+                                it.date.toString(),
                                 it.tags["total_elements"]?.jsonPrimitive?.longOrNull ?: 0,
                             )
                         },
@@ -103,7 +103,7 @@ class ReportsFragment : Fragment() {
                         binding.chartLegacyElements,
                         reports.map {
                             Pair(
-                                it.date,
+                                it.date.toString(),
                                 it.tags["legacy_elements"]?.jsonPrimitive?.longOrNull ?: 0,
                             )
                         },

@@ -1,7 +1,7 @@
 package search
 
 import androidx.lifecycle.ViewModel
-import db.Element
+import elements.Element
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.android.annotation.KoinViewModel
 

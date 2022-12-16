@@ -5,7 +5,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import db.Element
+import elements.Element
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import org.btcmap.R
@@ -28,13 +28,13 @@ class ElementFragmentTest {
                 id = "${arrayOf("node", "way", "relation").random()}:${Random.nextLong()}",
                 lat = Random.nextDouble(-90.0, 90.0),
                 lon = Random.nextDouble(-180.0, 180.0),
-                osm_json = JsonObject(mapOf("tags" to JsonObject(tags))),
+                osmJson = JsonObject(mapOf("tags" to JsonObject(tags))),
                 tags = JsonObject(emptyMap()),
-                created_at = ZonedDateTime.now(ZoneOffset.UTC)
-                    .minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
-                updated_at = ZonedDateTime.now(ZoneOffset.UTC)
-                    .minusMinutes(Random.nextLong(60 * 24 * 30)).toString(),
-                deleted_at = "",
+                createdAt = ZonedDateTime.now(ZoneOffset.UTC)
+                    .minusMinutes(Random.nextLong(60 * 24 * 30)),
+                updatedAt = ZonedDateTime.now(ZoneOffset.UTC)
+                    .minusMinutes(Random.nextLong(60 * 24 * 30)),
+                deletedAt = null,
             )
 
             scenario.onFragment { it.setElement(element) }

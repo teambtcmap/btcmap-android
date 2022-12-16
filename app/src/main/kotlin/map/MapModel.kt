@@ -2,13 +2,9 @@ package map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToOne
-import app.cash.sqldelight.coroutines.mapToOneOrNull
 import conf.ConfRepo
-import db.Database
-import db.Element
-import db.SelectElementClusters
+import elements.Element
+import elements.ElementsCluster
 import elements.ElementsRepo
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -23,7 +19,6 @@ class MapModel(
     val conf: ConfRepo,
     private val locationRepo: UserLocationRepository,
     private val sync: Sync,
-    private val db: Database,
     private val elementsRepo: ElementsRepo,
 ) : ViewModel() {
 
@@ -38,10 +33,10 @@ class MapModel(
         MapViewport(
             zoom = null,
             boundingBox = BoundingBox(
-                conf.conf.value.viewport_north_lat,
-                conf.conf.value.viewport_east_lon,
-                conf.conf.value.viewport_south_lat,
-                conf.conf.value.viewport_west_lon,
+                conf.conf.value.viewportNorthLat,
+                conf.conf.value.viewportEastLon,
+                conf.conf.value.viewportSouthLat,
+                conf.conf.value.viewportWestLon,
             ),
         )
     )
@@ -51,13 +46,13 @@ class MapModel(
     private val _selectedElement: MutableStateFlow<Element?> = MutableStateFlow(null)
     val selectedElement = _selectedElement.asStateFlow()
 
-    private val _visibleElements = MutableStateFlow<List<SelectElementClusters>>(emptyList())
+    private val _visibleElements = MutableStateFlow<List<ElementsCluster>>(emptyList())
     val visibleElements = _visibleElements.asStateFlow()
 
     init {
         combine(
             mapViewport,
-            db.elementQueries.selectCount().asFlow().mapToOne(Dispatchers.IO),
+            conf.conf.map { it.lastSyncDate }
         ) { viewport, _ ->
             withContext(Dispatchers.Default) {
                 _visibleElements.update {
@@ -86,18 +81,16 @@ class MapModel(
 
         conf.update {
             it.copy(
-                viewport_north_lat = viewport.boundingBox.latNorth,
-                viewport_east_lon = viewport.boundingBox.lonEast,
-                viewport_south_lat = viewport.boundingBox.latSouth,
-                viewport_west_lon = viewport.boundingBox.lonWest,
+                viewportNorthLat = viewport.boundingBox.latNorth,
+                viewportEastLon = viewport.boundingBox.lonEast,
+                viewportSouthLat = viewport.boundingBox.latSouth,
+                viewportWestLon = viewport.boundingBox.lonWest,
             )
         }
     }
 
     fun selectElement(elementId: String, moveToLocation: Boolean) {
-        val element = runBlocking {
-            db.elementQueries.selectById(elementId).asFlow().mapToOneOrNull(Dispatchers.IO).first()
-        }
+        val element = runBlocking { elementsRepo.selectById(elementId) }
         _selectedElement.update { element }
 
         if (element != null && moveToLocation) {

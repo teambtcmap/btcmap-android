@@ -22,7 +22,6 @@ import elements.ElementsRepo
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
 import map.getErrorColor
 import map.getOnSurfaceColor
@@ -126,7 +125,7 @@ class AreaFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 val box = area.toBoundingBox()
 
-                val elements = elementsRepo.selectElementIdIconAndTags(
+                val elements = elementsRepo.selectByBoundingBox(
                     minLat = box.latSouth,
                     maxLat = box.latNorth,
                     minLon = box.lonWest,
@@ -135,10 +134,8 @@ class AreaFragment : Fragment() {
                     var status = ""
                     var statusColor = 0
 
-                    val tags: JsonObject = Json.decodeFromString(it.tags ?: "{}")
-
-                    val surveyDate = tags["survey:date"]?.jsonPrimitive?.content
-                        ?: tags["check_date"]?.jsonPrimitive?.content ?: ""
+                    val surveyDate = it.osmTags["survey:date"]?.jsonPrimitive?.content
+                        ?: it.osmTags["check_date"]?.jsonPrimitive?.content ?: ""
 
                     if (surveyDate.isNotBlank()) {
                         runCatching {
@@ -164,9 +161,9 @@ class AreaFragment : Fragment() {
 
                     AreaAdapter.Item.Element(
                         id = it.id,
-                        iconId = it.icon_id ?: "question_mark",
-                        name = tags["name"]?.jsonPrimitive?.content
-                            ?: if (it.icon_id == "local_atm") getString(R.string.atm) else getString(
+                        iconId = it.icon.ifBlank { "question_mark" },
+                        name = it.osmTags["name"]?.jsonPrimitive?.content
+                            ?: if (it.icon == "local_atm") getString(R.string.atm) else getString(
                                 R.string.unnamed_place
                             ),
                         status = status,

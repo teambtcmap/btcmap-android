@@ -33,8 +33,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import areas.AreaResultModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import db.SelectElementClusters
 import element.ElementFragment
+import elements.ElementsCluster
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -262,10 +262,10 @@ class MapFragment : Fragment() {
 
                 newElements.forEach {
                     val marker = Marker(binding.map)
-                    marker.position = GeoPoint(it.lat!!, it.lon!!)
+                    marker.position = GeoPoint(it.lat, it.lon)
 
                     if (it.count == 1L) {
-                        marker.icon = markersRepo.getMarker(it.icon_id ?: "question_mark")
+                        marker.icon = markersRepo.getMarker(it.iconId.ifBlank { "question_mark" })
                         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     } else {
                         marker.icon = createClusterIcon(it).toDrawable(resources)
@@ -529,7 +529,7 @@ class MapFragment : Fragment() {
         return elementFragment.requireView().findViewById(R.id.toolbar)!!
     }
 
-    private fun createClusterIcon(cluster: SelectElementClusters): Bitmap {
+    private fun createClusterIcon(cluster: ElementsCluster): Bitmap {
         val pinSizePx = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, 32f, requireContext().resources.displayMetrics
         ).toInt()
