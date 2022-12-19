@@ -9,9 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.btcmap.R
-import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
 class EventsModel(
     private val eventsRepo: EventsRepo,
     private val elementsRepo: ElementsRepo,

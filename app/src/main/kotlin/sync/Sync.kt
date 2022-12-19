@@ -10,12 +10,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
-import org.koin.core.annotation.Single
 import users.UsersRepo
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
-@Single
 class Sync(
     private val areasRepo: AreasRepo,
     private val confRepo: ConfRepo,

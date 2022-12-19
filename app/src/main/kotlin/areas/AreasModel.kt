@@ -11,11 +11,9 @@ import kotlinx.serialization.json.jsonPrimitive
 import map.name
 import map.toBoundingBox
 import org.btcmap.R
-import org.koin.android.annotation.KoinViewModel
 import org.osmdroid.util.GeoPoint
 import java.text.NumberFormat
 
-@KoinViewModel
 class AreasModel(
     private val areasRepo: AreasRepo,
     private val app: Application,

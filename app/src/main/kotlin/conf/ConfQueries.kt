@@ -7,9 +7,7 @@ import db.toSqliteInt
 import io.requery.android.database.sqlite.SQLiteOpenHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.koin.core.annotation.Single
 
-@Single
 class ConfQueries(private val db: SQLiteOpenHelper) {
 
     suspend fun insertOrReplace(conf: Conf) {

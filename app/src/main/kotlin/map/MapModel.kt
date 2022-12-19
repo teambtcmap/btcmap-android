@@ -9,12 +9,10 @@ import elements.ElementsRepo
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import location.UserLocationRepository
-import org.koin.android.annotation.KoinViewModel
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import sync.Sync
 
-@KoinViewModel
 class MapModel(
     val conf: ConfRepo,
     private val locationRepo: UserLocationRepository,

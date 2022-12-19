@@ -11,11 +11,9 @@ import kotlinx.serialization.json.decodeToSequence
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.koin.core.annotation.Single
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
-@Single
 class ReportsRepo(
     private val queries: ReportQueries,
     private val httpClient: OkHttpClient,

@@ -11,10 +11,8 @@ import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.koin.core.annotation.Single
 import org.osmdroid.util.GeoPoint
 
-@Single
 class UserLocationRepository(
     private val context: Context,
 ) {

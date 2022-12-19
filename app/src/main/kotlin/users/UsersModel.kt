@@ -8,9 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.btcmap.R
-import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
 class UsersModel(
     private val app: Application,
     private val usersRepo: UsersRepo,

@@ -10,10 +10,8 @@ import kotlinx.serialization.json.*
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.koin.core.annotation.Single
 import java.time.ZonedDateTime
 
-@Single
 class EventsRepo(
     private val queries: EventQueries,
     private val httpClient: OkHttpClient,

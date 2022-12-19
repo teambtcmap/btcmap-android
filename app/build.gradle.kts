@@ -5,8 +5,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
     id("androidx.navigation.safeargs.kotlin")
-    // https://github.com/google/ksp/releases
-    id("com.google.devtools.ksp") version "1.7.20-1.0.8"
 }
 
 android {
@@ -88,10 +86,6 @@ android {
     buildFeatures {
         viewBinding = true
     }
-
-    sourceSets.all {
-        kotlin.srcDir("build/generated/ksp/$name/kotlin")
-    }
 }
 
 tasks.register("bundleData") {
@@ -138,9 +132,6 @@ dependencies {
     // Injection library
     // https://github.com/InsertKoinIO/koin/blob/main/CHANGELOG.md
     implementation("io.insert-koin:koin-android:3.2.3")
-    val koinAnnotationsVer = "1.0.3"
-    implementation("io.insert-koin:koin-annotations:$koinAnnotationsVer")
-    ksp("io.insert-koin:koin-ksp-compiler:$koinAnnotationsVer")
 
     // Open Street Map widget
     // https://github.com/osmdroid/osmdroid/releases

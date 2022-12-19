@@ -5,9 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
 class ReportsModel(
     private val reportsRepo: ReportsRepo,
 ) : ViewModel() {

@@ -10,11 +10,9 @@ import kotlinx.serialization.json.*
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.koin.core.annotation.Single
 import org.osmdroid.util.BoundingBox
 import java.time.ZonedDateTime
 
-@Single
 class ElementsRepo(
     private val context: Context,
     private val elementQueries: ElementQueries,

@@ -6,11 +6,9 @@ import db.getZonedDateTime
 import io.requery.android.database.sqlite.SQLiteOpenHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.koin.core.annotation.Single
 import java.time.ZonedDateTime
 import java.util.regex.Pattern
 
-@Single
 class EventQueries(private val db: SQLiteOpenHelper) {
 
     fun insertOrReplace(events: List<Event>) {

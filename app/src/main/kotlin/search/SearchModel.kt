@@ -14,12 +14,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.*
 import org.btcmap.R
-import org.koin.android.annotation.KoinViewModel
 import org.osmdroid.util.GeoPoint
 import java.text.NumberFormat
 import kotlin.system.measureTimeMillis
 
-@KoinViewModel
 class SearchModel(
     private val app: Application,
     private val elementsRepo: ElementsRepo,
