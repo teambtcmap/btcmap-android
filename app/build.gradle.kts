@@ -17,7 +17,7 @@ android {
         targetSdk = 33
         versionCode = 39
         versionName = "0.5.10"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "app.InstrumentationTestRunner"
     }
 
     compileOptions {
@@ -131,7 +131,7 @@ dependencies {
 
     // Injection library
     // https://github.com/InsertKoinIO/koin/blob/main/CHANGELOG.md
-    implementation("io.insert-koin:koin-android:3.2.3")
+    implementation("io.insert-koin:koin-android:3.3.1")
 
     // Open Street Map widget
     // https://github.com/osmdroid/osmdroid/releases

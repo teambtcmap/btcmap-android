@@ -42,7 +42,7 @@ import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.R
 import org.btcmap.databinding.FragmentMapBinding
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
@@ -65,8 +65,8 @@ class MapFragment : Fragment() {
 
     private val model: MapModel by viewModel()
 
-    private val searchResultModel: SearchResultModel by sharedViewModel()
-    private val areaResultModel: AreaResultModel by sharedViewModel()
+    private val searchResultModel: SearchResultModel by activityViewModel()
+    private val areaResultModel: AreaResultModel by activityViewModel()
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!

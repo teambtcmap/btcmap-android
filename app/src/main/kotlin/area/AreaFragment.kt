@@ -32,7 +32,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
 import org.btcmap.databinding.FragmentAreaBinding
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import java.time.ZonedDateTime
 
 class AreaFragment : Fragment() {
@@ -41,7 +41,7 @@ class AreaFragment : Fragment() {
 
     private val elementsRepo: ElementsRepo by inject()
 
-    private val areaResultModel: AreaResultModel by sharedViewModel()
+    private val areaResultModel: AreaResultModel by activityViewModel()
 
     private var _binding: FragmentAreaBinding? = null
     private val binding get() = _binding!!

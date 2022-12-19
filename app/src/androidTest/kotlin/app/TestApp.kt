@@ -1,27 +1,25 @@
 package app
 
 import android.app.Application
-import db.persistentDatabase
-import org.btcmap.BuildConfig
+import db.inMemoryDatabase
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import org.koin.dsl.module
 
-class App : Application() {
-
+class TestApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
         startKoin {
-            if (BuildConfig.DEBUG) androidLogger(Level.DEBUG)
+            androidLogger(Level.DEBUG)
 
-            androidContext(this@App)
+            androidContext(this@TestApp)
 
             modules(
                 appModule,
-                module { single { persistentDatabase(this@App) } }
+                module { single { inMemoryDatabase() } }
             )
         }
     }

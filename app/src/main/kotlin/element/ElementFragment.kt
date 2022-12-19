@@ -32,7 +32,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import search.SearchResultModel
@@ -46,7 +46,7 @@ class ElementFragment : Fragment() {
 
     private val tagsJsonFormatter by lazy { Json { prettyPrint = true } }
 
-    private val resultModel: SearchResultModel by sharedViewModel()
+    private val resultModel: SearchResultModel by activityViewModel()
 
     private var elementId = ""
 
