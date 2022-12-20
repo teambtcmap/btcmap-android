@@ -2,6 +2,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_donate"
+        android:icon="@drawable/baseline_currency_bitcoin_24"
+        android:title="@string/donate"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_add_element"
         android:icon="@drawable/baseline_add_location_alt_24"
         android:title="@string/add_place"
@@ -23,7 +29,7 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_element_events"
+        android:id="@+id/action_events"
         android:title="@string/latest_changes"
         app:showAsAction="never" />
 

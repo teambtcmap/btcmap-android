@@ -14,7 +14,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
@@ -106,7 +105,7 @@ class MapFragment : Fragment() {
 
         _binding = FragmentMapBinding.inflate(inflater, container, false)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.search) { view, windowInsets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.searchBar) { view, windowInsets ->
             val baseTopMargin = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 8f,
@@ -136,7 +135,7 @@ class MapFragment : Fragment() {
 
         val markersRepo = MapMarkersRepo(requireContext(), model.conf)
 
-        binding.search.setOnClickListener {
+        binding.searchBar.setOnClickListener {
             findNavController().navigate(
                 R.id.searchFragment,
                 bundleOf(
@@ -146,52 +145,32 @@ class MapFragment : Fragment() {
             )
         }
 
-        binding.donate.setOnClickListener {
-            findNavController().navigate(R.id.donationFragment)
-        }
+        binding.searchBar.setOnMenuItemClickListener {
+            val nav = findNavController()
 
-        binding.actions.setOnClickListener {
-            val popup = PopupMenu(requireContext(), binding.actions)
-
-            popup.apply {
-                menuInflater.inflate(R.menu.search, menu)
-
-                setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.action_add_element -> {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.data = Uri.parse("https://btcmap.org/add-location")
-                            startActivity(intent)
-                        }
-                        R.id.action_trends -> {
-                            findNavController().navigate(
-                                R.id.reportsFragment,
-                                bundleOf("area_id" to ""),
-                            )
-                        }
-                        R.id.action_areas -> {
-                            findNavController().navigate(
-                                R.id.areasFragment,
-                                bundleOf(
-                                    "lat" to binding.map.boundingBox.centerLatitude.toFloat(),
-                                    "lon" to binding.map.boundingBox.centerLongitude.toFloat(),
-                                ),
-                            )
-                        }
-                        R.id.action_element_events -> {
-                            findNavController().navigate(R.id.eventsFragment)
-                        }
-                        R.id.action_users -> {
-                            findNavController().navigate(R.id.usersFragment)
-                        }
-                        R.id.action_settings -> {
-                            findNavController().navigate(R.id.settingsFragment)
-                        }
-                    }
-
-                    true
+            when (it.itemId) {
+                R.id.action_donate -> nav.navigate(R.id.donationFragment)
+                R.id.action_add_element -> {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse("https://btcmap.org/add-location")
+                    startActivity(intent)
                 }
-            }.show()
+                R.id.action_areas -> {
+                    nav.navigate(
+                        R.id.areasFragment,
+                        bundleOf(
+                            "lat" to binding.map.boundingBox.centerLatitude.toFloat(),
+                            "lon" to binding.map.boundingBox.centerLongitude.toFloat(),
+                        ),
+                    )
+                }
+                R.id.action_trends -> nav.navigate(R.id.reportsFragment, bundleOf("area_id" to ""))
+                R.id.action_users -> nav.navigate(R.id.usersFragment)
+                R.id.action_events -> nav.navigate(R.id.eventsFragment)
+                R.id.action_settings -> nav.navigate(R.id.settingsFragment)
+            }
+
+            true
         }
 
         binding.map.apply {
