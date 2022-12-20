@@ -68,7 +68,7 @@ class TagsFragment : Fragment() {
             true
         }
 
-        val elementId = TagsFragmentArgs.fromBundle(requireArguments()).elementId
+        val elementId = requireArguments().getString("element_id")!!
 
         if (elementId.split(":").first() != "node") {
             MaterialAlertDialogBuilder(requireContext())

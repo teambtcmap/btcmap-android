@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.os.bundleOf
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -13,6 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
+import org.btcmap.R
 import org.btcmap.databinding.FragmentUsersBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -24,7 +26,7 @@ class UsersFragment : Fragment() {
     private val binding get() = _binding!!
 
     val adapter = UsersAdapter {
-        findNavController().navigate(UsersFragmentDirections.actionUsersFragmentToUserFragment(it.id))
+        findNavController().navigate(R.id.userFragment, bundleOf("user_id" to it.id))
     }
 
     override fun onCreateView(

@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.os.bundleOf
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -36,9 +37,8 @@ class UserFragment : Fragment() {
     private val adapter = EventsAdapter(object : EventsAdapter.Listener {
         override fun onItemClick(item: EventsAdapter.Item) {
             findNavController().navigate(
-                UserFragmentDirections.actionUserFragmentToElementFragment(
-                    item.elementId,
-                ),
+                R.id.elementFragment,
+                bundleOf("element_id" to item.elementId),
             )
         }
 
@@ -70,11 +70,7 @@ class UserFragment : Fragment() {
         }
 
         val user = runBlocking {
-            usersRepo.selectById(
-                UserFragmentArgs.fromBundle(
-                    requireArguments()
-                ).userId
-            )
+            usersRepo.selectById(requireArguments().getLong("user_id"))
         } ?: return
 
         val userName = user.osmJson["display_name"]?.jsonPrimitive?.content ?: return
@@ -97,9 +93,7 @@ class UserFragment : Fragment() {
                 binding.toolbar.title = userName.ifBlank { getString(R.string.unnamed_user) }
 
                 val items = eventsRepo.selectByUserIdAsListItems(
-                    UserFragmentArgs.fromBundle(
-                        requireArguments()
-                    ).userId
+                    requireArguments().getLong("user_id"),
                 ).map {
                     EventsAdapter.Item(
                         date = it.eventDate,

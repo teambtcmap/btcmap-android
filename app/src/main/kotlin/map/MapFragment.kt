@@ -24,6 +24,7 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.os.bundleOf
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -136,16 +137,17 @@ class MapFragment : Fragment() {
         val markersRepo = MapMarkersRepo(requireContext(), model.conf)
 
         binding.search.setOnClickListener {
-            val action = MapFragmentDirections.actionMapFragmentToSearchFragment(
-                binding.map.boundingBox.centerLatitude.toString(),
-                binding.map.boundingBox.centerLongitude.toString(),
+            findNavController().navigate(
+                R.id.searchFragment,
+                bundleOf(
+                    "lat" to binding.map.boundingBox.centerLatitude.toFloat(),
+                    "lon" to binding.map.boundingBox.centerLongitude.toFloat(),
+                ),
             )
-
-            findNavController().navigate(action)
         }
 
         binding.donate.setOnClickListener {
-            findNavController().navigate(MapFragmentDirections.actionMapFragmentToDonationFragment())
+            findNavController().navigate(R.id.donationFragment)
         }
 
         binding.actions.setOnClickListener {
@@ -162,24 +164,28 @@ class MapFragment : Fragment() {
                             startActivity(intent)
                         }
                         R.id.action_trends -> {
-                            findNavController().navigate(MapFragmentDirections.actionMapFragmentToReportsFragment(""))
+                            findNavController().navigate(
+                                R.id.reportsFragment,
+                                bundleOf("area_id" to ""),
+                            )
                         }
                         R.id.action_areas -> {
                             findNavController().navigate(
-                                MapFragmentDirections.actionMapFragmentToAreasFragment(
-                                    binding.map.boundingBox.centerLatitude.toString(),
-                                    binding.map.boundingBox.centerLongitude.toString(),
-                                )
+                                R.id.areasFragment,
+                                bundleOf(
+                                    "lat" to binding.map.boundingBox.centerLatitude.toFloat(),
+                                    "lon" to binding.map.boundingBox.centerLongitude.toFloat(),
+                                ),
                             )
                         }
                         R.id.action_element_events -> {
-                            findNavController().navigate(MapFragmentDirections.actionMapFragmentToEventsFragment())
+                            findNavController().navigate(R.id.eventsFragment)
                         }
                         R.id.action_users -> {
-                            findNavController().navigate(MapFragmentDirections.actionMapFragmentToUsersFragment())
+                            findNavController().navigate(R.id.usersFragment)
                         }
                         R.id.action_settings -> {
-                            findNavController().navigate(MapFragmentDirections.actionMapFragmentToSettingsFragment())
+                            findNavController().navigate(R.id.settingsFragment)
                         }
                     }
 

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.os.bundleOf
 import androidx.core.view.*
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -14,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.btcmap.R
 import org.btcmap.databinding.FragmentSearchBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.osmdroid.util.GeoPoint
@@ -35,9 +37,12 @@ class SearchFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val args = SearchFragmentArgs.fromBundle(requireArguments())
-
-        model.setLocation(GeoPoint(args.lat.toDouble(), args.lon.toDouble()))
+        model.setLocation(
+            GeoPoint(
+                requireArguments().getDouble("lat"),
+                requireArguments().getDouble("lon"),
+            )
+        )
 
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
@@ -45,9 +50,8 @@ class SearchFragment : Fragment() {
 
         val adapter = SearchAdapter { row ->
             findNavController().navigate(
-                SearchFragmentDirections.actionSearchFragmentToElementFragment(
-                    row.element.id,
-                ),
+                R.id.elementFragment,
+                bundleOf("element_id" to row.element.id),
             )
         }
 

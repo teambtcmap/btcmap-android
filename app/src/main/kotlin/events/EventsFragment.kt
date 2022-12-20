@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.os.bundleOf
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -14,6 +15,7 @@ import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
+import org.btcmap.R
 import org.btcmap.databinding.FragmentEventsBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -31,9 +33,8 @@ class EventsFragment : Fragment() {
                     val element = model.selectElementById(item.elementId) ?: return@whenResumed
 
                     findNavController().navigate(
-                        EventsFragmentDirections.actionEventsFragmentToElementFragment(
-                            element.id,
-                        ),
+                        R.id.elementFragment,
+                        bundleOf("element_id" to element.id),
                     )
                 }
             }

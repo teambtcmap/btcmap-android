@@ -67,9 +67,7 @@ class ReportsFragment : Fragment() {
         initChart(binding.chartLegacyElements)
 
         model.args.update {
-            ReportsModel.Args(
-                ReportsFragmentArgs.fromBundle(requireArguments()).areaId
-            )
+            ReportsModel.Args(requireArguments().getString("area_id")!!)
         }
 
         viewLifecycleOwner.lifecycleScope.launch {

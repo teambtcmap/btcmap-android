@@ -72,7 +72,7 @@ class ElementFragment : Fragment() {
                 WindowInsetsCompat.CONSUMED
             }
 
-            val elementId = ElementFragmentArgs.fromBundle(requireArguments()).elementId
+            val elementId = requireArguments().getString("element_id")!!
             val element = runBlocking { elementsRepo.selectById(elementId)!! }
             setElement(element)
 
@@ -145,18 +145,10 @@ class ElementFragment : Fragment() {
                         return@setOnMenuItemClickListener true
                     }
 
-                    if (arguments == null) {
-                        findNavController().navigate(
-                            R.id.tagsFragment,
-                            bundleOf(Pair("element_id", elementId))
-                        )
-                    } else {
-                        findNavController().navigate(
-                            ElementFragmentDirections.actionElementFragmentToTagsFragment(
-                                elementId
-                            )
-                        )
-                    }
+                    findNavController().navigate(
+                        R.id.tagsFragment,
+                        bundleOf("element_id" to elementId),
+                    )
                 }
             }
 

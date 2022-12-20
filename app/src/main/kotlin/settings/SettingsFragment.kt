@@ -78,7 +78,7 @@ class SettingsFragment : Fragment() {
                         binding.accountSubtitle.isVisible = false
 
                         binding.account.setOnClickListener {
-                            findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToLoginFragment())
+                            findNavController().navigate(R.id.loginFragment)
                         }
                     }
                 }

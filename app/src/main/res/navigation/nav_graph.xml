@@ -71,12 +71,10 @@
         android:name="search.SearchFragment">
         <argument
             android:name="lat"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="float" />
         <argument
             android:name="lon"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="float" />
         <action
             android:id="@+id/action_searchFragment_to_elementFragment"
             app:destination="@id/elementFragment"
@@ -115,12 +113,10 @@
         android:name="areas.AreasFragment">
         <argument
             android:name="lat"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="float" />
         <argument
             android:name="lon"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="float" />
         <action
             android:id="@+id/action_areasFragment_to_areaFragment"
             app:destination="@id/areaFragment"

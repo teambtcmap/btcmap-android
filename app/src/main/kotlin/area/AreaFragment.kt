@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.os.bundleOf
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -50,9 +51,8 @@ class AreaFragment : Fragment() {
         listener = object : AreaAdapter.Listener {
             override fun onMapClick() {
                 viewLifecycleOwner.lifecycleScope.launch {
-                    val area =
-                        areasRepo.selectById(AreaFragmentArgs.fromBundle(requireArguments()).areaId)
-                            ?: return@launch
+                    val area = areasRepo.selectById(requireArguments().getString("area_id")!!)
+                        ?: return@launch
                     areaResultModel.area.update { area }
                     findNavController().navigate(R.id.action_areaFragment_to_mapFragment)
                 }
@@ -60,9 +60,8 @@ class AreaFragment : Fragment() {
 
             override fun onElementClick(item: AreaAdapter.Item.Element) {
                 findNavController().navigate(
-                    AreaFragmentDirections.actionAreaFragmentToElementFragment(
-                        item.id,
-                    ),
+                    R.id.elementFragment,
+                    bundleOf("element_id" to item.id),
                 )
             }
 
@@ -102,9 +101,8 @@ class AreaFragment : Fragment() {
             setOnMenuItemClickListener {
                 if (it.itemId == R.id.action_reports) {
                     findNavController().navigate(
-                        AreaFragmentDirections.actionAreaFragmentToReportsFragment(
-                            AreaFragmentArgs.fromBundle(requireArguments()).areaId
-                        )
+                        R.id.reportsFragment,
+                        bundleOf("area_id" to requireArguments().getString("area_id")!!),
                     )
                 }
 
@@ -113,7 +111,7 @@ class AreaFragment : Fragment() {
         }
 
         val area = runBlocking {
-            areasRepo.selectById(AreaFragmentArgs.fromBundle(requireArguments()).areaId)
+            areasRepo.selectById(requireArguments().getString("area_id")!!)
         } ?: return
 
         binding.toolbar.title = area.name()

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.os.bundleOf
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -13,6 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
+import org.btcmap.R
 import org.btcmap.databinding.FragmentAreasBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -25,9 +27,8 @@ class AreasFragment : Fragment() {
 
     private val adapter = AreasAdapter {
         findNavController().navigate(
-            AreasFragmentDirections.actionAreasFragmentToAreaFragment(
-                it.id,
-            ),
+            resId = R.id.areaFragment,
+            args = bundleOf("area_id" to it.id),
         )
     }
 
@@ -41,11 +42,9 @@ class AreasFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val args = AreasFragmentArgs.fromBundle(requireArguments())
-
         model.setArgs(
-            lat = args.lat.toDouble(),
-            lon = args.lon.toDouble(),
+            lat = requireArguments().getDouble("lat"),
+            lon = requireArguments().getDouble("lon"),
         )
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { toolbar, windowInsets ->
