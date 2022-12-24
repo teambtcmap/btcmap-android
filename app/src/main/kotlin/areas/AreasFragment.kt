@@ -43,8 +43,8 @@ class AreasFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         model.setArgs(
-            lat = requireArguments().getDouble("lat"),
-            lon = requireArguments().getDouble("lon"),
+            lat = requireArguments().getFloat("lat").toDouble(),
+            lon = requireArguments().getFloat("lon").toDouble(),
         )
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { toolbar, windowInsets ->
