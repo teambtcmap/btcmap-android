@@ -25,14 +25,17 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.bundleOf
 import androidx.core.view.*
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import areas.AreaResultModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.search.SearchView
 import element.ElementFragment
 import elements.ElementsCluster
 import kotlinx.coroutines.delay
@@ -59,11 +62,14 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import search.SearchAdapter
+import search.SearchModel
 import search.SearchResultModel
 
 class MapFragment : Fragment() {
 
     private val model: MapModel by viewModel()
+    private val searchModel: SearchModel by viewModel()
 
     private val searchResultModel: SearchResultModel by activityViewModel()
     private val areaResultModel: AreaResultModel by activityViewModel()
@@ -134,16 +140,6 @@ class MapFragment : Fragment() {
         emptyClusterBitmap = null
 
         val markersRepo = MapMarkersRepo(requireContext(), model.conf)
-
-        binding.searchBar.setOnClickListener {
-            findNavController().navigate(
-                R.id.searchFragment,
-                bundleOf(
-                    "lat" to binding.map.boundingBox.centerLatitude.toFloat(),
-                    "lon" to binding.map.boundingBox.centerLongitude.toFloat(),
-                ),
-            )
-        }
 
         binding.searchBar.setOnMenuItemClickListener {
             val nav = findNavController()
@@ -356,6 +352,52 @@ class MapFragment : Fragment() {
             }
         }
 
+        binding.searchView.addTransitionListener { _, _, newState ->
+            when (newState) {
+                SearchView.TransitionState.SHOWN -> {
+                    WindowCompat.getInsetsController(
+                        requireActivity().window,
+                        requireActivity().window.decorView,
+                    ).isAppearanceLightStatusBars =
+                        when (requireContext().resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) {
+                            android.content.res.Configuration.UI_MODE_NIGHT_NO -> true
+                            else -> false
+                        }
+                }
+                else -> {
+                    WindowCompat.getInsetsController(
+                        requireActivity().window,
+                        requireActivity().window.decorView,
+                    ).isAppearanceLightStatusBars = !darkMap
+                }
+            }
+        }
+
+        val searchAdapter = SearchAdapter { row ->
+            binding.searchView.clearText()
+            binding.searchView.hide()
+
+            model.selectElement(row.element.id, true)
+            val mapController = binding.map.controller
+            mapController.setZoom(16.toDouble())
+            val startPoint =
+                GeoPoint(model.selectedElement.value!!.lat, model.selectedElement.value!!.lon)
+            mapController.setCenter(startPoint)
+            mapController.zoomTo(19.0)
+        }
+
+        binding.searchResults.layoutManager = LinearLayoutManager(requireContext())
+        binding.searchResults.adapter = searchAdapter
+
+        searchModel.searchResults
+            .onEach { searchAdapter.submitList(it) }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
+
+        binding.searchView.editText.doAfterTextChanged {
+            val text = it.toString()
+            searchModel.setSearchString(text)
+        }
+
 //        viewLifecycleOwner.lifecycleScope.launch {
 //            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
 //                val bounds = loadAreaBounds("de")
@@ -473,6 +515,7 @@ class MapFragment : Fragment() {
                         binding.map.boundingBox,
                     )
                 )
+                searchModel.setLocation(GeoPoint(binding.map.mapCenter))
                 return false
             }
 

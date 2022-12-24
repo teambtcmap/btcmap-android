@@ -40,6 +40,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?attr/colorSurface"
+        android:elevation="6dp"
         app:behavior_hideable="true"
         app:layout_behavior="@string/bottom_sheet_behavior"
         app:layout_insetEdge="bottom">
@@ -64,5 +65,20 @@
         app:layout_anchorGravity="end"
         app:layout_dodgeInsetEdges="bottom"
         app:srcCompat="@drawable/baseline_my_location_24" />
+
+    <com.google.android.material.search.SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:hint="@string/search_here"
+        app:layout_anchor="@id/searchBar">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/searchResults"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical" />
+
+    </com.google.android.material.search.SearchView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -9,13 +9,6 @@
         android:id="@+id/mapFragment"
         android:name="map.MapFragment">
         <action
-            android:id="@+id/action_mapFragment_to_searchFragment"
-            app:destination="@id/searchFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <action
             android:id="@+id/action_mapFragment_to_donationFragment"
             app:destination="@id/donationFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
@@ -60,24 +53,6 @@
         <action
             android:id="@+id/action_mapFragment_to_tagsFragment"
             app:destination="@id/tagsFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/searchFragment"
-        android:name="search.SearchFragment">
-        <argument
-            android:name="lat"
-            app:argType="float" />
-        <argument
-            android:name="lon"
-            app:argType="float" />
-        <action
-            android:id="@+id/action_searchFragment_to_elementFragment"
-            app:destination="@id/elementFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
