@@ -91,6 +91,7 @@ class AreaAdapter(
             val name: String,
             val status: String,
             val statusColor: Int,
+            val showCheckmark: Boolean,
         ) : Item()
     }
 
@@ -122,6 +123,7 @@ class AreaAdapter(
                 binding.apply {
                     icon.text = item.iconId
                     title.text = item.name
+                    checkmark.isVisible = item.showCheckmark
                     subtitle.text = item.status
                     subtitle.setTextColor(item.statusColor)
                     root.setOnClickListener { listener.onElementClick(item) }

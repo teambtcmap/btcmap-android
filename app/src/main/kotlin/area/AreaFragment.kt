@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import areas.AreaResultModel
 import areas.AreasRepo
 import elements.ElementsRepo
+import elements.bitcoinSurveyDate
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -34,7 +35,6 @@ import org.btcmap.R
 import org.btcmap.databinding.FragmentAreaBinding
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
-import java.time.ZonedDateTime
 
 class AreaFragment : Fragment() {
 
@@ -129,29 +129,22 @@ class AreaFragment : Fragment() {
                     minLon = box.lonWest,
                     maxLon = box.lonEast,
                 ).map {
-                    var status = ""
-                    var statusColor = 0
+                    val status: String
+                    val statusColor: Int
 
-                    val surveyDate = it.osmTags["survey:date"]?.jsonPrimitive?.content
-                        ?: it.osmTags["check_date"]?.jsonPrimitive?.content ?: ""
+                    val surveyDate = it.osmTags.bitcoinSurveyDate()
 
-                    if (surveyDate.isNotBlank()) {
-                        runCatching {
-                            val date = DateUtils.getRelativeDateTimeString(
-                                requireContext(),
-                                ZonedDateTime.parse(surveyDate + "T00:00:00Z")
-                                    .toEpochSecond() * 1000,
-                                DateUtils.SECOND_IN_MILLIS,
-                                DateUtils.WEEK_IN_MILLIS,
-                                0,
-                            ).split(",").first()
+                    if (surveyDate != null) {
+                        val date = DateUtils.getRelativeDateTimeString(
+                            requireContext(),
+                            surveyDate.toEpochSecond() * 1000,
+                            DateUtils.SECOND_IN_MILLIS,
+                            DateUtils.WEEK_IN_MILLIS,
+                            0,
+                        ).split(",").first()
 
-                            status = getString(R.string.verified_s, date)
-                            statusColor = requireContext().getOnSurfaceColor()
-                        }.onFailure {
-                            status = getString(R.string.verified_s, surveyDate)
-                            statusColor = requireContext().getOnSurfaceColor()
-                        }
+                        status = date
+                        statusColor = requireContext().getOnSurfaceColor()
                     } else {
                         status = getString(R.string.not_verified)
                         statusColor = requireContext().getErrorColor()
@@ -166,6 +159,7 @@ class AreaFragment : Fragment() {
                             ),
                         status = status,
                         statusColor = statusColor,
+                        showCheckmark = surveyDate != null,
                     )
                 }.sortedBy { it.name }.toMutableList()
 

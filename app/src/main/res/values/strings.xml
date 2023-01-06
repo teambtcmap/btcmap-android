@@ -2,7 +2,7 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">BTC Map</string>
-    <string name="add_place">Add place</string>
+    <string name="add_location">Add location</string>
     <string name="search">Search</string>
     <string name="clear_search">Clear search</string>
     <string name="kilometers_short">km</string>
@@ -42,11 +42,9 @@
     <string name="unnamed_user">Unnamed user</string>
     <string name="outdated">Outdated</string>
     <string name="up_to_date">Up-to-date</string>
-    <string name="not_verified_by_supertaggers">Not verified by Supertaggers</string>
     <string name="not_verified">Not verified</string>
-    <string name="verified_s">Verified: %1$s</string>
     <string name="show_more">Show more</string>
-    <string name="verify">Verify</string>
+    <string name="verify">Verify or Report</string>
     <string name="field_is_empty">Field is empty</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
@@ -66,6 +64,7 @@
     <string name="add_tag">Add tag</string>
     <string name="delete_tag">Delete tag</string>
     <string name="atm">ATM</string>
+    <string name="checkmark_icon">Checkmark icon</string>
     <plurals name="d_changes">
         <item quantity="zero">%d changes</item>
         <item quantity="one">%d change</item>

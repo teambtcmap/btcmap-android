@@ -22,6 +22,8 @@ import androidx.navigation.fragment.findNavController
 import conf.ConfRepo
 import elements.Element
 import elements.ElementsRepo
+import elements.OsmTags
+import elements.bitcoinSurveyDate
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
@@ -36,7 +38,6 @@ import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import search.SearchResultModel
-import java.time.ZonedDateTime
 
 class ElementFragment : Fragment() {
 
@@ -166,44 +167,27 @@ class ElementFragment : Fragment() {
     fun setElement(element: Element) {
         elementId = element.id
 
-        val tags = element.osmJson["tags"]!!.jsonObject
+        val tags: OsmTags = element.osmJson["tags"]!!.jsonObject
         binding.toolbar.title = tags["name"]?.jsonPrimitive?.content
             ?: if (element.tags["icon:android"]?.jsonPrimitive?.content == "local_atm") getString(R.string.atm) else getString(
                 R.string.unnamed_place
             )
 
-        val surveyDates = mutableListOf<String>()
+        val surveyDate = tags.bitcoinSurveyDate()
 
-        tags["survey:date"]?.jsonPrimitive?.content?.let {
-            surveyDates += it
-        }
+        if (surveyDate != null) {
+            val date = DateUtils.getRelativeDateTimeString(
+                requireContext(),
+                surveyDate.toEpochSecond() * 1000,
+                DateUtils.SECOND_IN_MILLIS,
+                DateUtils.WEEK_IN_MILLIS,
+                0,
+            ).split(",").first()
 
-        tags["check_date"]?.jsonPrimitive?.content?.let {
-            surveyDates += it
-        }
-
-        tags["check_date:currency:XBT"]?.jsonPrimitive?.content?.let {
-            surveyDates += it
-        }
-
-        if (surveyDates.isNotEmpty()) {
-            runCatching {
-                val date = DateUtils.getRelativeDateTimeString(
-                    requireContext(),
-                    ZonedDateTime.parse(surveyDates.max() + "T00:00:00Z").toEpochSecond() * 1000,
-                    DateUtils.SECOND_IN_MILLIS,
-                    DateUtils.WEEK_IN_MILLIS,
-                    0,
-                ).split(",").first()
-
-                binding.lastVerified.text = date
-                binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
-            }.onFailure {
-                binding.lastVerified.text = surveyDates.max()
-                binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
-            }
+            binding.lastVerified.text = date
+            binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
         } else {
-            binding.lastVerified.text = getString(R.string.not_verified_by_supertaggers)
+            binding.lastVerified.text = getString(R.string.not_verified)
             binding.lastVerified.setTextColor(requireContext().getErrorColor())
         }
 

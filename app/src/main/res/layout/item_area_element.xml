@@ -48,12 +48,29 @@
                 android:layout_height="wrap_content"
                 tools:text="Satoshi's Bar" />
 
-            <TextView
-                android:id="@+id/subtitle"
-                style="?textAppearanceCaption"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="Up-to-date" />
+                android:paddingTop="1dp">
+
+                <ImageView
+                    android:id="@+id/checkmark"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="4dp"
+                    android:contentDescription="@string/checkmark_icon"
+                    android:src="@drawable/baseline_verified_24" />
+
+                <TextView
+                    android:id="@+id/subtitle"
+                    style="?textAppearanceCaption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    tools:text="Up-to-date" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
