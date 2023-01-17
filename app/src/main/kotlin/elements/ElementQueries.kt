@@ -122,7 +122,8 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                     id,
                     lat,
                     lon,
-                    json_extract(tags, '$.icon:android') AS icon_id
+                    json_extract(tags, '$.icon:android') AS icon_id,
+                    json_extract(tags, '$.boost:expires') AS boost_expires
                 FROM element
                 WHERE
                     deleted_at = ''
@@ -148,6 +149,7 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                         lat = cursor.getDouble(1),
                         lon = cursor.getDouble(2),
                         iconId = cursor.getString(3),
+                        boostExpires = cursor.getZonedDateTime(4),
                     )
                 }
             }
@@ -163,7 +165,8 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                     e.id,
                     avg(e.lat) AS lat,
                     avg(e.lon) AS lon,
-                    json_extract(e.tags, '$.icon:android') AS icon_id
+                    json_extract(e.tags, '$.icon:android') AS icon_id,
+                    json_extract(e.tags, '$.boost:expires') AS boost_expires
                 FROM element e
                 WHERE e.deleted_at = ''
                 GROUP BY round(lat / ?) * ?, round(lon / ?) * ?
@@ -180,6 +183,7 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                         lat = cursor.getDouble(2),
                         lon = cursor.getDouble(3),
                         iconId = cursor.getString(4),
+                        boostExpires = cursor.getZonedDateTime(5),
                     )
                 }
             }

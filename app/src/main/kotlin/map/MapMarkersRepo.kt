@@ -34,15 +34,44 @@ class MapMarkersRepo(
         }
     }
 
+    private val boostedIconPaint by lazy {
+        Paint().apply {
+            val pinSizePx = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                PIN_SIZE_DP,
+                context.resources.displayMetrics,
+            )
+
+            typeface = context.iconTypeface()
+            textSize = pinSizePx / 2.1f
+            color = Color.WHITE
+            isAntiAlias = true
+        }
+    }
+
     private val cache = mutableMapOf<String?, BitmapDrawable>()
+
+    private val boostedCache = mutableMapOf<String?, BitmapDrawable>()
 
     fun getMarker(iconId: String): BitmapDrawable {
         var markerDrawable = cache[iconId]
 
         if (markerDrawable == null) {
             markerDrawable =
-                createMarkerIcon(iconId).toDrawable(context.resources)
+                createMarkerIcon(iconId, false).toDrawable(context.resources)
             cache[iconId] = markerDrawable
+        }
+
+        return markerDrawable
+    }
+
+    fun getBoostedMarker(iconId: String): BitmapDrawable {
+        var markerDrawable = boostedCache[iconId]
+
+        if (markerDrawable == null) {
+            markerDrawable =
+                createMarkerIcon(iconId, true).toDrawable(context.resources)
+            boostedCache[iconId] = markerDrawable
         }
 
         return markerDrawable
@@ -52,13 +81,22 @@ class MapMarkersRepo(
         cache.clear()
     }
 
-    private fun createMarkerIcon(iconId: String): Bitmap {
+    private fun createMarkerIcon(iconId: String, boosted: Boolean): Bitmap {
         val pinSizePx = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, 48f, context.resources.displayMetrics
         ).toInt()
 
         val emptyPinDrawable = ContextCompat.getDrawable(context, R.drawable.ic_marker)!!
-        DrawableCompat.setTint(emptyPinDrawable, context.getPrimaryContainerColor(conf.conf.value))
+
+        if (boosted) {
+            DrawableCompat.setTint(emptyPinDrawable, Color.parseColor("#f7931a"))
+        } else {
+            DrawableCompat.setTint(
+                emptyPinDrawable,
+                context.getPrimaryContainerColor(conf.conf.value)
+            )
+        }
+
         val emptyPinBitmap = emptyPinDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
 
         val markerIcon = createBitmap(emptyPinBitmap.width, emptyPinBitmap.height).applyCanvas {
@@ -80,7 +118,7 @@ class MapMarkersRepo(
                     iconId,
                     markerIcon.width / 2f - textWidth / 2f,
                     markerIcon.height / 2f - (iconPaint.fontMetrics.ascent + iconPaint.fontMetrics.descent) / 2 - markerIcon.height.toFloat() * 0.09f,
-                    iconPaint
+                    if (boosted) boostedIconPaint else iconPaint
                 )
             }
         }

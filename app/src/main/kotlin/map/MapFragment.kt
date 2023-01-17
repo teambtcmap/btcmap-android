@@ -65,6 +65,8 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import search.SearchAdapter
 import search.SearchModel
 import search.SearchResultModel
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 class MapFragment : Fragment() {
 
@@ -246,7 +248,16 @@ class MapFragment : Fragment() {
                     marker.position = GeoPoint(it.lat, it.lon)
 
                     if (it.count == 1L) {
-                        marker.icon = markersRepo.getMarker(it.iconId.ifBlank { "question_mark" })
+                        val icon = if (
+                            it.boostExpires != null
+                            && it.boostExpires.isAfter(ZonedDateTime.now(ZoneOffset.UTC))
+                        ) {
+                            markersRepo.getBoostedMarker(it.iconId.ifBlank { "question_mark" })
+                        } else {
+                            markersRepo.getMarker(it.iconId.ifBlank { "question_mark" })
+                        }
+
+                        marker.icon = icon
                         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     } else {
                         marker.icon = createClusterIcon(it).toDrawable(resources)
