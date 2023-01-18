@@ -31,7 +31,7 @@ private var iconTypeface: Typeface? = null
 
 fun Context.iconTypeface(): Typeface {
     if (iconTypeface == null) {
-        iconTypeface = Typeface.Builder(assets, "icons.ttf")
+        iconTypeface = Typeface.Builder(assets, "material-symbols-outlined-2022-12-06.ttf")
             .setFontVariationSettings("'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24")
             .build()
     }
