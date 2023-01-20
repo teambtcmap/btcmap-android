@@ -25,16 +25,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
-import map.getErrorColor
-import map.getOnSurfaceColor
-import map.name
-import map.toBoundingBox
+import map.*
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
 import org.btcmap.databinding.FragmentAreaBinding
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
+import org.locationtech.jts.geom.Coordinate
+import org.locationtech.jts.geom.GeometryFactory
 
 class AreaFragment : Fragment() {
 
@@ -114,21 +113,28 @@ class AreaFragment : Fragment() {
             areasRepo.selectById(requireArguments().getString("area_id")!!)
         } ?: return
 
-        binding.toolbar.title = area.name()
+        binding.toolbar.title = area.tags.name()
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         binding.list.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                val box = area.toBoundingBox()
+                val polygons = area.tags.polygons()
+                val boundingBox = boundingBox(polygons)
+                val geometryFactory = GeometryFactory()
 
                 val elements = elementsRepo.selectByBoundingBox(
-                    minLat = box.latSouth,
-                    maxLat = box.latNorth,
-                    minLon = box.lonWest,
-                    maxLon = box.lonEast,
-                ).map {
+                    minLat = boundingBox.latSouth,
+                    maxLat = boundingBox.latNorth,
+                    minLon = boundingBox.lonWest,
+                    maxLon = boundingBox.lonEast,
+                ).filter { element ->
+                    polygons.any {
+                        val coordinate = Coordinate(element.lon, element.lat)
+                        it.contains(geometryFactory.createPoint(coordinate))
+                    }
+                }.map {
                     val status: String
                     val statusColor: Int
 
@@ -170,8 +176,8 @@ class AreaFragment : Fragment() {
                 ).toInt()
 
                 val map = AreaAdapter.Item.Map(
-                    boundingBox = area.toBoundingBox(),
-                    boundingBoxPaddingPx = boundingBoxPaddingPx,
+                    polygons = area.tags.polygons(),
+                    paddingPx = boundingBoxPaddingPx,
                 )
 
                 val contact = AreaAdapter.Item.Contact(

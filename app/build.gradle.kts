@@ -136,6 +136,10 @@ dependencies {
     // https://github.com/osmdroid/osmdroid/releases
     implementation("org.osmdroid:osmdroid-android:6.1.14")
 
+    // Map utilities
+    // https://github.com/locationtech/jts/releases
+    implementation("org.locationtech.jts:jts-core:1.19.0")
+
     // Charts
     // https://github.com/PhilJay/MPAndroidChart/releases
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")

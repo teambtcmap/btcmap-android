@@ -201,6 +201,8 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                 """
                 SELECT
                     id,
+                    lat,
+                    lon,
                     json_extract(tags, '$.icon:android') AS icon_id,
                     json_extract(osm_json, '$.tags') AS osm_tags
                 FROM element
@@ -223,8 +225,10 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                 while (cursor.moveToNext()) {
                     this += AreaElement(
                         id = cursor.getString(0),
-                        icon = cursor.getString(1),
-                        osmTags = cursor.getJsonObject(2),
+                        lat = cursor.getDouble(1),
+                        lon = cursor.getDouble(2),
+                        icon = cursor.getString(3),
+                        osmTags = cursor.getJsonObject(4),
                     )
                 }
             }

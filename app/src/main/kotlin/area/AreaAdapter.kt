@@ -8,11 +8,12 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import icons.iconTypeface
+import map.showPolygons
 import okhttp3.HttpUrl
 import org.btcmap.databinding.ItemAreaElementBinding
 import org.btcmap.databinding.ItemContactBinding
 import org.btcmap.databinding.ItemMapBinding
-import org.osmdroid.util.BoundingBox
+import org.locationtech.jts.geom.Polygon
 
 class AreaAdapter(
     private val listener: Listener,
@@ -73,8 +74,8 @@ class AreaAdapter(
     sealed class Item {
 
         data class Map(
-            val boundingBox: BoundingBox,
-            val boundingBoxPaddingPx: Int,
+            val polygons: List<Polygon>,
+            val paddingPx: Int,
         ) : Item()
 
         data class Contact(
@@ -106,17 +107,8 @@ class AreaAdapter(
             listener: Listener,
         ) {
             if (item is Item.Map && binding is ItemMapBinding) {
-                binding.apply {
-                    map.post {
-                        map.zoomToBoundingBox(
-                            item.boundingBox,
-                            false,
-                            item.boundingBoxPaddingPx,
-                        )
-                    }
-
-                    root.setOnClickListener { listener.onMapClick() }
-                }
+                binding.map.showPolygons(item.polygons, item.paddingPx)
+                binding.root.setOnClickListener { listener.onMapClick() }
             }
 
             if (item is Item.Element && binding is ItemAreaElementBinding) {

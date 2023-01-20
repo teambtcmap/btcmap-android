@@ -91,10 +91,11 @@ class AreasRepo(
 
     private fun AreaJson.valid(): Boolean {
         return (tags["name"]?.jsonPrimitive?.content ?: "").isNotBlank()
-                && tags.containsKey("box:north") && tags["box:north"]!!.jsonPrimitive.doubleOrNull != null
+                && ((tags.containsKey("box:north") && tags["box:north"]!!.jsonPrimitive.doubleOrNull != null
                 && tags.containsKey("box:east") && tags["box:east"]!!.jsonPrimitive.doubleOrNull != null
                 && tags.containsKey("box:south") && tags["box:south"]!!.jsonPrimitive.doubleOrNull != null
-                && tags.containsKey("box:west") && tags["box:west"]!!.jsonPrimitive.doubleOrNull != null
+                && tags.containsKey("box:west") && tags["box:west"]!!.jsonPrimitive.doubleOrNull != null)
+                || tags.containsKey("geo_json"))
     }
 
     data class SyncReport(

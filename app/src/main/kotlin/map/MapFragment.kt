@@ -408,40 +408,7 @@ class MapFragment : Fragment() {
             val text = it.toString()
             searchModel.setSearchString(text)
         }
-
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-//                val bounds = loadAreaBounds("de")
-//                Toast.makeText(requireContext(), "Got ${bounds.size} polygons", Toast.LENGTH_SHORT).show()
-//
-//                bounds.forEach {
-//                    val poly = Polygon(binding.map)
-//                    poly.fillColor = Color.parseColor("#88f7931a")
-//                    poly.strokeWidth = 1f
-//                    poly.points = it.map { GeoPoint(it.second, it.first) }
-//                    binding.map.overlays.add(poly)
-//                    binding.map.invalidate()
-//                }
-//            }
-//        }
     }
-
-//    private suspend fun loadAreaBounds(id: String): List<List<Pair<Double, Double>>> {
-//        val url = "https://data.btcmap.org/areas/$id.json"
-//        val request = OkHttpClient().newCall(Request.Builder().url(url).build())
-//        val response = runCatching { request.await() }.getOrNull()
-//            ?: return emptyList()
-//
-//        val area: JsonObject = Json.decodeFromString(response.body!!.string())
-//        val geometry: JsonObject = area["geometry"]!!.jsonObject
-//        val coordinates: JsonArray = geometry["coordinates"]!!.jsonArray
-//
-//        return coordinates.map { polygon ->
-//            polygon.jsonArray[0].jsonArray.map {
-//                Pair(it.jsonArray[0].jsonPrimitive.double, it.jsonArray[1].jsonPrimitive.double)
-//            }
-//        }
-//    }
 
     override fun onResume() {
         super.onResume()
