@@ -5,7 +5,7 @@ import io.requery.android.database.sqlite.SQLiteDatabase
 import io.requery.android.database.sqlite.SQLiteOpenHelper
 
 fun persistentDatabase(context: Context): SQLiteOpenHelper {
-    return Database(context, "btcmap-2023-01-17.db")
+    return Database(context, "btcmap-2023-01-20.db")
 }
 
 fun inMemoryDatabase(): SQLiteOpenHelper {
