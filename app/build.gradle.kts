@@ -3,7 +3,7 @@ import java.net.URL
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.0"
 }
 
 android {
@@ -118,11 +118,11 @@ dependencies {
 
     // Material design components
     // https://github.com/material-components/material-components-android/releases
-    implementation("com.google.android.material:material:1.8.0-beta01")
+    implementation("com.google.android.material:material:1.8.0-rc01")
 
     // Helps to split the app into multiple independent screens
     // https://developer.android.com/jetpack/androidx/releases/fragment
-    debugImplementation("androidx.fragment:fragment-testing:1.5.4")
+    debugImplementation("androidx.fragment:fragment-testing:1.5.5")
 
     // Modern HTTP client
     // https://github.com/square/okhttp/blob/master/CHANGELOG.md
@@ -130,7 +130,7 @@ dependencies {
 
     // Injection library
     // https://github.com/InsertKoinIO/koin/blob/main/CHANGELOG.md
-    implementation("io.insert-koin:koin-android:3.3.1")
+    implementation("io.insert-koin:koin-android:3.3.2")
 
     // Open Street Map widget
     // https://github.com/osmdroid/osmdroid/releases
@@ -145,7 +145,8 @@ dependencies {
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     // Used to cache data and store user preferences
-    implementation("androidx.sqlite:sqlite-ktx:2.2.0")
+    // https://developer.android.com/kotlin/ktx#sqlite
+    implementation("androidx.sqlite:sqlite-ktx:2.3.0")
 
     // Bundle SQLite binaries
     // https://github.com/requery/sqlite-android/releases
@@ -169,8 +170,11 @@ dependencies {
     // https://developer.android.com/jetpack/androidx/releases/test
     androidTestImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:core-ktx:1.5.0")
-    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.4")
-    // TODO figure out why newer versions hang
-    androidTestImplementation("androidx.test:runner:1.4.0")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.5")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    // TODO remove when fixed upstream
+    // https://github.com/android/android-test/issues/1589
+    debugImplementation("androidx.test:monitor:1.6.1")
 }
