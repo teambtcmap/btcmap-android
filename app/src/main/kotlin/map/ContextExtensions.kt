@@ -5,6 +5,11 @@ import android.graphics.Color
 import conf.Conf
 import org.btcmap.R
 
+fun Context.getSurfaceColor(): Int {
+    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorSurface))
+    return attrs.getColor(0, 0)
+}
+
 fun Context.getOnSurfaceColor(): Int {
     val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnSurface))
     return attrs.getColor(0, 0)

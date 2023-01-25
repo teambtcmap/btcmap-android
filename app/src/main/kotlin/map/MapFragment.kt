@@ -504,6 +504,31 @@ class MapFragment : Fragment() {
     private fun BottomSheetBehavior<*>.addSlideCallback() {
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    requireActivity().window.statusBarColor = requireContext().getSurfaceColor()
+
+                    WindowCompat.getInsetsController(
+                        requireActivity().window,
+                        requireActivity().window.decorView,
+                    ).isAppearanceLightStatusBars =
+                        when (requireContext().resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) {
+                            android.content.res.Configuration.UI_MODE_NIGHT_NO -> true
+                            else -> false
+                        }
+                } else {
+                    requireActivity().window.statusBarColor = Color.TRANSPARENT
+
+                    val nightMode =
+                        resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+                    val darkMap = nightMode && model.conf.conf.value.darkMap
+
+                    WindowCompat.getInsetsController(
+                        requireActivity().window,
+                        requireActivity().window.decorView,
+                    ).isAppearanceLightStatusBars = !darkMap
+                }
+
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                     model.selectElement("", false)
                     binding.fab.show()
