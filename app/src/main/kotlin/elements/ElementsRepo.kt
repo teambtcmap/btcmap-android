@@ -160,6 +160,7 @@ class ElementsRepo(
                     ).chunked(1_000).forEach { chunk ->
                         elementQueries.insertOrReplace(chunk.map { it.toElement() })
                         count += chunk.size
+                        clustersCache.clear()
                     }
 
                     SyncReport(
@@ -208,9 +209,6 @@ class ElementsRepo(
                         ).chunked(1_000).forEach { chunk ->
                             elementQueries.insertOrReplace(chunk.map { it.toElement() })
                             count += chunk.size
-                        }
-
-                        if (count > 0) {
                             clustersCache.clear()
                         }
 
