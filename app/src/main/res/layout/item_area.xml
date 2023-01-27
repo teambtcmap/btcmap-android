@@ -9,30 +9,12 @@
     android:baselineAligned="false"
     android:gravity="center_vertical">
 
-    <FrameLayout
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_gravity="center"
-        android:layout_margin="16dp">
-
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/icon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:shapeAppearanceOverlay="@style/RoundedImageView" />
-
-        <ImageView
-            android:id="@+id/iconPlaceholder"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/user_avatar_placeholder_bg"
-            android:backgroundTint="?colorPrimary"
-            android:contentDescription="@string/icon"
-            android:padding="8dp"
-            android:src="@drawable/ic_place"
-            app:tint="?colorOnPrimary" />
-
-    </FrameLayout>
+        android:layout_margin="16dp"
+        app:shapeAppearanceOverlay="@style/RoundedImageView" />
 
     <LinearLayout
         android:layout_width="0dp"

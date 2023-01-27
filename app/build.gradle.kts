@@ -118,7 +118,7 @@ dependencies {
 
     // Material design components
     // https://github.com/material-components/material-components-android/releases
-    implementation("com.google.android.material:material:1.8.0-rc01")
+    implementation("com.google.android.material:material:1.8.0")
 
     // Helps to split the app into multiple independent screens
     // https://developer.android.com/jetpack/androidx/releases/fragment

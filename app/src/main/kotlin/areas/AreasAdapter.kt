@@ -2,15 +2,12 @@ package areas
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import coil.ImageLoader
-import coil.decode.SvgDecoder
 import coil.load
-import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil.size.ViewSizeResolver
+import org.btcmap.R
 import org.btcmap.databinding.ItemAreaBinding
 
 class AreasAdapter(
@@ -43,38 +40,11 @@ class AreasAdapter(
                 subtitle.text = item.distance
                 root.setOnClickListener { onItemClick(item) }
 
-                iconPlaceholder.isVisible = true
-                icon.load(null)
-
-                if (item.iconUrl.isNotBlank()) {
-                    if (item.iconUrl.endsWith(".svg")) {
-                        val imageLoader = ImageLoader.Builder(root.context)
-                            .components { add(SvgDecoder.Factory()) }.build()
-
-                        val imageRequest =
-                            ImageRequest.Builder(root.context).data(item.iconUrl).target(icon)
-                                .listener(object : ImageRequest.Listener {
-                                    override fun onSuccess(
-                                        request: ImageRequest,
-                                        result: SuccessResult,
-                                    ) {
-                                        iconPlaceholder.isVisible = false
-                                    }
-                                }).tag(item.id).build()
-
-                        imageLoader.enqueue(imageRequest)
-                    } else {
-                        icon.load(data = item.iconUrl) {
-                            listener(object : ImageRequest.Listener {
-                                override fun onSuccess(
-                                    request: ImageRequest,
-                                    result: SuccessResult,
-                                ) {
-                                    iconPlaceholder.isVisible = false
-                                }
-                            }).tag(item.id)
-                        }
-                    }
+                icon.load(item.iconUrl) {
+                    placeholder(R.drawable.item_area_placeholder)
+                    error(R.drawable.item_area_placeholder)
+                    size(ViewSizeResolver(icon))
+                    crossfade(true)
                 }
             }
         }
