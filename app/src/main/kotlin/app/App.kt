@@ -32,7 +32,6 @@ class App : Application(), ImageLoaderFactory {
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(this)
             .components { add(SvgDecoder.Factory()) }
-            .respectCacheHeaders(false) // TODO remove after the server fixes its cache headers
             .build()
     }
 }
