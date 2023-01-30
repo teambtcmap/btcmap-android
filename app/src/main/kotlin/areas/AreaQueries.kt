@@ -45,37 +45,6 @@ class AreaQueries(private val db: SQLiteOpenHelper) {
         }
     }
 
-    suspend fun selectAll(): List<Area> {
-        return withContext(Dispatchers.IO) {
-            val cursor = db.readableDatabase.query(
-                """
-                SELECT
-                    id,
-                    tags,
-                    created_at,
-                    updated_at,
-                    deleted_at
-                FROM area
-                WHERE deleted_at = '';
-                """
-            )
-
-            val rows = mutableListOf<Area>()
-
-            while (cursor.moveToNext()) {
-                rows += Area(
-                    id = cursor.getString(0),
-                    tags = cursor.getJsonObject(1),
-                    createdAt = cursor.getZonedDateTime(2)!!,
-                    updatedAt = cursor.getZonedDateTime(3)!!,
-                    deletedAt = cursor.getZonedDateTime(4),
-                )
-            }
-
-            rows
-        }
-    }
-
     suspend fun selectById(id: String): Area? {
         return withContext(Dispatchers.IO) {
             val cursor = db.readableDatabase.query(
@@ -103,6 +72,39 @@ class AreaQueries(private val db: SQLiteOpenHelper) {
                 updatedAt = cursor.getZonedDateTime(3)!!,
                 deletedAt = cursor.getZonedDateTime(4),
             )
+        }
+    }
+
+    suspend fun selectByType(type: String): List<Area> {
+        return withContext(Dispatchers.IO) {
+            val cursor = db.readableDatabase.query(
+                """
+                SELECT
+                    id,
+                    tags,
+                    created_at,
+                    updated_at,
+                    deleted_at
+                FROM area
+                WHERE 
+                    json_extract(tags, '$.type') = '$type'
+                    AND deleted_at = '';
+                """
+            )
+
+            val rows = mutableListOf<Area>()
+
+            while (cursor.moveToNext()) {
+                rows += Area(
+                    id = cursor.getString(0),
+                    tags = cursor.getJsonObject(1),
+                    createdAt = cursor.getZonedDateTime(2)!!,
+                    updatedAt = cursor.getZonedDateTime(3)!!,
+                    deletedAt = cursor.getZonedDateTime(4),
+                )
+            }
+
+            rows
         }
     }
 

@@ -42,20 +42,9 @@ class AreasFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        model.setArgs(
-            lat = requireArguments().getFloat("lat").toDouble(),
-            lon = requireArguments().getFloat("lon").toDouble(),
-        )
+        model.setArgs(requireArgs())
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { toolbar, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            toolbar.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                topMargin = insets.top
-            }
-            val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            binding.list.setPadding(0, 0, 0, navBarsInsets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        setInsets()
 
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
@@ -65,14 +54,18 @@ class AreasFragment : Fragment() {
         binding.list.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                model.state.collect {
-                    when (it) {
-                        is AreasModel.State.ShowingItems -> {
-                            adapter.submitList(it.items)
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                model.state.collect { state ->
+                    when (state) {
+                        is AreasModel.State.Loading -> {
+                            binding.progress.isVisible = true
+                            binding.list.isVisible = false
                         }
-
-                        else -> {}
+                        is AreasModel.State.Loaded -> {
+                            binding.progress.isVisible = false
+                            binding.list.isVisible = true
+                            adapter.submitList(state.items)
+                        }
                     }
                 }
             }
@@ -82,5 +75,24 @@ class AreasFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun requireArgs(): AreasModel.Args {
+        return AreasModel.Args(
+            lat = requireArguments().getFloat("lat").toDouble(),
+            lon = requireArguments().getFloat("lon").toDouble(),
+        )
+    }
+
+    private fun setInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { toolbar, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+            toolbar.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                topMargin = insets.top
+            }
+            val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            binding.list.setPadding(0, 0, 0, navBarsInsets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
     }
 }

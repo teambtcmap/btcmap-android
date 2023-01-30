@@ -18,9 +18,9 @@ class AreasRepo(
     private val json: Json,
 ) {
 
-    suspend fun selectAll() = queries.selectAll()
-
     suspend fun selectById(id: String) = queries.selectById(id)
+
+    suspend fun selectByType(type: String) = queries.selectByType(type)
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun sync(): Result<SyncReport> {

@@ -23,32 +23,36 @@ class AreasModel(
     private val _state = MutableStateFlow<State>(State.Loading)
     val state = _state.asStateFlow()
 
-    fun setArgs(lat: Double, lon: Double) {
-        val location = GeoPoint(lat, lon)
+    fun setArgs(args: Args) {
+        val location = GeoPoint(args.lat, args.lon)
 
         viewModelScope.launch {
-            val communities = areasRepo.selectAll().filter {
-                it.tags["type"]?.jsonPrimitive?.content != "country"
-            }.mapNotNull {
-                val polygons = runCatching {
-                    it.tags.polygons()
-                }.getOrElse {
-                    return@mapNotNull null
-                }
+            val communities = areasRepo
+                .selectByType("community")
+                .mapNotNull {
+                    val polygons = runCatching {
+                        it.tags.polygons()
+                    }.getOrElse {
+                        return@mapNotNull null
+                    }
 
-                if (polygons.isEmpty()) {
-                    return@mapNotNull null
-                }
+                    if (polygons.isEmpty()) {
+                        return@mapNotNull null
+                    }
 
-                val boundingBox = boundingBox(polygons)
-                Pair(it, boundingBox.centerWithDateLine.distanceToAsDouble(location) / 1000)
-            }.sortedBy { it.second }
+                    val boundingBox = boundingBox(polygons)
+                    Pair(it, boundingBox.centerWithDateLine.distanceToAsDouble(location) / 1000)
+                }.sortedBy { it.second }
+
+            val distanceFormat = NumberFormat.getNumberInstance().apply {
+                maximumFractionDigits = 1
+            }
 
             val items = communities.map {
                 val distanceStringBuilder = StringBuilder()
 
                 distanceStringBuilder.apply {
-                    append(DISTANCE_FORMAT.format(it.second))
+                    append(distanceFormat.format(it.second))
                     append(" ")
                     append(app.resources.getString(R.string.kilometers_short))
                 }
@@ -61,20 +65,19 @@ class AreasModel(
                 )
             }
 
-            _state.update { State.ShowingItems(items) }
+            _state.update { State.Loaded(items) }
         }
     }
+
+    data class Args(
+        val lat: Double,
+        val lon: Double,
+    )
 
     sealed class State {
 
         object Loading : State()
 
-        data class ShowingItems(val items: List<AreasAdapter.Item>) : State()
-    }
-
-    companion object {
-        private val DISTANCE_FORMAT = NumberFormat.getNumberInstance().apply {
-            maximumFractionDigits = 1
-        }
+        data class Loaded(val items: List<AreasAdapter.Item>) : State()
     }
 }
