@@ -40,45 +40,49 @@ class AreaModel(
                 maxLat = boundingBox.latNorth,
                 minLon = boundingBox.lonWest,
                 maxLon = boundingBox.lonEast,
-            ).filter { element ->
-                polygons.any {
-                    val coordinate = Coordinate(element.lon, element.lat)
-                    it.contains(geometryFactory.createPoint(coordinate))
+            )
+                .asSequence()
+                .filter { element ->
+                    polygons.any {
+                        val coordinate = Coordinate(element.lon, element.lat)
+                        it.contains(geometryFactory.createPoint(coordinate))
+                    }
                 }
-            }.map {
-                val status: String
-                val colorResId: Int
+                .sortedByDescending { it.osmTags.bitcoinSurveyDate() }
+                .map {
+                    val status: String
+                    val colorResId: Int
 
-                val surveyDate = it.osmTags.bitcoinSurveyDate()
+                    val surveyDate = it.osmTags.bitcoinSurveyDate()
 
-                if (surveyDate != null) {
-                    val date = DateUtils.getRelativeDateTimeString(
-                        app,
-                        surveyDate.toEpochSecond() * 1000,
-                        DateUtils.SECOND_IN_MILLIS,
-                        DateUtils.WEEK_IN_MILLIS,
-                        0,
-                    ).split(",").first()
+                    if (surveyDate != null) {
+                        val date = DateUtils.getRelativeDateTimeString(
+                            app,
+                            surveyDate.toEpochSecond() * 1000,
+                            DateUtils.SECOND_IN_MILLIS,
+                            DateUtils.WEEK_IN_MILLIS,
+                            0,
+                        ).split(",").first()
 
-                    status = date
-                    colorResId = R.attr.colorOnSurface
-                } else {
-                    status = app.getString(R.string.not_verified)
-                    colorResId = R.attr.colorError
-                }
+                        status = date
+                        colorResId = R.attr.colorOnSurface
+                    } else {
+                        status = app.getString(R.string.not_verified)
+                        colorResId = R.attr.colorError
+                    }
 
-                AreaAdapter.Item.Element(
-                    id = it.id,
-                    iconId = it.icon.ifBlank { "question_mark" },
-                    name = it.osmTags["name"]?.jsonPrimitive?.content
-                        ?: if (it.icon == "local_atm") app.getString(R.string.atm) else app.getString(
-                            R.string.unnamed_place
-                        ),
-                    status = status,
-                    colorResId = colorResId,
-                    showCheckmark = surveyDate != null,
-                )
-            }.sortedBy { it.name }.toMutableList()
+                    AreaAdapter.Item.Element(
+                        id = it.id,
+                        iconId = it.icon.ifBlank { "question_mark" },
+                        name = it.osmTags["name"]?.jsonPrimitive?.content
+                            ?: if (it.icon == "local_atm") app.getString(R.string.atm) else app.getString(
+                                R.string.unnamed_place
+                            ),
+                        status = status,
+                        colorResId = colorResId,
+                        showCheckmark = surveyDate != null,
+                    )
+                }.sortedBy { !it.showCheckmark }.toMutableList()
 
             val boundingBoxPaddingPx = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
