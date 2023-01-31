@@ -1,4 +1,4 @@
-package areas
+package area
 
 import androidx.sqlite.db.transaction
 import db.getJsonObject

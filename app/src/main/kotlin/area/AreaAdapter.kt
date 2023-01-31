@@ -2,6 +2,7 @@ package area
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.StyleableRes
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -91,7 +92,8 @@ class AreaAdapter(
             val iconId: String,
             val name: String,
             val status: String,
-            val statusColor: Int,
+            @StyleableRes
+            val colorResId: Int,
             val showCheckmark: Boolean,
         ) : Item()
     }
@@ -117,7 +119,8 @@ class AreaAdapter(
                     title.text = item.name
                     checkmark.isVisible = item.showCheckmark
                     subtitle.text = item.status
-                    subtitle.setTextColor(item.statusColor)
+                    val attrs = root.context.theme.obtainStyledAttributes(intArrayOf(item.colorResId))
+                    subtitle.setTextColor(attrs.getColor(0, 0))
                     root.setOnClickListener { listener.onElementClick(item) }
                 }
             }

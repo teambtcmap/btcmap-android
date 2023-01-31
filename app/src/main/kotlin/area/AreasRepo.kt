@@ -1,4 +1,4 @@
-package areas
+package area
 
 import db.*
 import http.await

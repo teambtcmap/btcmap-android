@@ -1,6 +1,5 @@
-package areas
+package area
 
-import area.AreaTags
 import java.time.ZonedDateTime
 
 data class Area(

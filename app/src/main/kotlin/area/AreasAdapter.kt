@@ -1,4 +1,4 @@
-package areas
+package area
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

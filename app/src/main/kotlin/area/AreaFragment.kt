@@ -3,8 +3,6 @@ package area
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.text.format.DateUtils
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,31 +15,19 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import areas.AreaResultModel
-import areas.AreasRepo
-import elements.ElementsRepo
-import elements.bitcoinSurveyDate
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.*
-import map.*
 import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
 import org.btcmap.databinding.FragmentAreaBinding
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
-import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.GeometryFactory
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AreaFragment : Fragment() {
 
-    private val areasRepo: AreasRepo by inject()
+    private val model: AreaModel by viewModel()
 
-    private val elementsRepo: ElementsRepo by inject()
-
-    private val areaResultModel: AreaResultModel by activityViewModel()
+    private val resultModel: AreaResultModel by activityViewModel()
 
     private var _binding: FragmentAreaBinding? = null
     private val binding get() = _binding!!
@@ -50,9 +36,8 @@ class AreaFragment : Fragment() {
         listener = object : AreaAdapter.Listener {
             override fun onMapClick() {
                 viewLifecycleOwner.lifecycleScope.launch {
-                    val area = areasRepo.selectById(requireArguments().getString("area_id")!!)
-                        ?: return@launch
-                    areaResultModel.area.update { area }
+                    val area = model.selectArea(requireArgs().areaId) ?: return@launch
+                    resultModel.area.update { area }
                     findNavController().navigate(R.id.action_areaFragment_to_mapFragment)
                 }
             }
@@ -82,15 +67,7 @@ class AreaFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { appBar, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            appBar.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                topMargin = insets.top
-            }
-            val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            binding.list.setPadding(0, 0, 0, navBarsInsets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        setInsets()
 
         binding.toolbar.apply {
             setNavigationOnClickListener {
@@ -101,7 +78,7 @@ class AreaFragment : Fragment() {
                 if (it.itemId == R.id.action_reports) {
                     findNavController().navigate(
                         R.id.reportsFragment,
-                        bundleOf("area_id" to requireArguments().getString("area_id")!!),
+                        bundleOf("area_id" to requireArgs().areaId),
                     )
                 }
 
@@ -109,91 +86,38 @@ class AreaFragment : Fragment() {
             }
         }
 
-        val area = runBlocking {
-            areasRepo.selectById(requireArguments().getString("area_id")!!)
-        } ?: return
-
-        binding.toolbar.title = area.tags.name()
-
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         binding.list.adapter = adapter
 
+        model.setArgs(requireArgs())
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                val polygons = area.tags.polygons()
-                val boundingBox = boundingBox(polygons)
-                val geometryFactory = GeometryFactory()
 
-                val elements = elementsRepo.selectByBoundingBox(
-                    minLat = boundingBox.latSouth,
-                    maxLat = boundingBox.latNorth,
-                    minLon = boundingBox.lonWest,
-                    maxLon = boundingBox.lonEast,
-                ).filter { element ->
-                    polygons.any {
-                        val coordinate = Coordinate(element.lon, element.lat)
-                        it.contains(geometryFactory.createPoint(coordinate))
+                model.state.collect { state ->
+                    when (state) {
+                        is AreaModel.State.Loading -> {
+                            binding.progress.isVisible = true
+                            binding.list.isVisible = false
+                        }
+                        is AreaModel.State.Loaded -> {
+                            val elements =
+                                state.items.filterIsInstance<AreaAdapter.Item.Element>().size
+
+                            binding.toolbar.title = state.area.tags.name()
+                            binding.toolbar.subtitle = resources.getQuantityString(
+                                R.plurals.d_places,
+                                elements,
+                                elements,
+                            )
+
+                            binding.progress.isVisible = false
+                            binding.list.isVisible = true
+
+                            adapter.submitList(state.items)
+                        }
                     }
-                }.map {
-                    val status: String
-                    val statusColor: Int
-
-                    val surveyDate = it.osmTags.bitcoinSurveyDate()
-
-                    if (surveyDate != null) {
-                        val date = DateUtils.getRelativeDateTimeString(
-                            requireContext(),
-                            surveyDate.toEpochSecond() * 1000,
-                            DateUtils.SECOND_IN_MILLIS,
-                            DateUtils.WEEK_IN_MILLIS,
-                            0,
-                        ).split(",").first()
-
-                        status = date
-                        statusColor = requireContext().getOnSurfaceColor()
-                    } else {
-                        status = getString(R.string.not_verified)
-                        statusColor = requireContext().getErrorColor()
-                    }
-
-                    AreaAdapter.Item.Element(
-                        id = it.id,
-                        iconId = it.icon.ifBlank { "question_mark" },
-                        name = it.osmTags["name"]?.jsonPrimitive?.content
-                            ?: if (it.icon == "local_atm") getString(R.string.atm) else getString(
-                                R.string.unnamed_place
-                            ),
-                        status = status,
-                        statusColor = statusColor,
-                        showCheckmark = surveyDate != null,
-                    )
-                }.sortedBy { it.name }.toMutableList()
-
-                val boundingBoxPaddingPx = TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP,
-                    16f,
-                    resources.displayMetrics,
-                ).toInt()
-
-                val map = AreaAdapter.Item.Map(
-                    polygons = area.tags.polygons(),
-                    paddingPx = boundingBoxPaddingPx,
-                )
-
-                val contact = AreaAdapter.Item.Contact(
-                    website = area.tags["contact:website"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
-                    twitter = area.tags["contact:twitter"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
-                    telegram = area.tags["contact:telegram"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
-                    discord = area.tags["contact:discord"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
-                    youtube = area.tags["contact:youtube"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
-                )
-
-                adapter.submitList(listOf(map, contact) + elements)
-                binding.toolbar.subtitle = resources.getQuantityString(
-                    R.plurals.d_places,
-                    elements.size,
-                    elements.size,
-                )
+                }
             }
         }
     }
@@ -201,5 +125,21 @@ class AreaFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun setInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { appBar, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+            appBar.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                topMargin = insets.top
+            }
+            val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            binding.list.setPadding(0, 0, 0, navBarsInsets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
+    }
+
+    private fun requireArgs(): AreaModel.Args {
+        return AreaModel.Args(requireArguments().getString("area_id")!!)
     }
 }

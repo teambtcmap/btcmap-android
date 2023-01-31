@@ -85,7 +85,7 @@
 
     <fragment
         android:id="@+id/areasFragment"
-        android:name="areas.AreasFragment">
+        android:name="area.AreasFragment">
         <argument
             android:name="lat"
             app:argType="float" />

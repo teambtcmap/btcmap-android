@@ -33,7 +33,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import areas.AreaResultModel
+import area.AreaResultModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.search.SearchView
 import element.ElementFragment

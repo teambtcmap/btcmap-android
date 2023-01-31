@@ -1,4 +1,4 @@
-package areas
+package area
 
 import android.os.Bundle
 import android.view.LayoutInflater

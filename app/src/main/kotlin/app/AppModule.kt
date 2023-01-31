@@ -1,9 +1,10 @@
 package app
 
-import areas.AreaQueries
-import areas.AreaResultModel
-import areas.AreasModel
-import areas.AreasRepo
+import area.AreaQueries
+import area.AreaResultModel
+import area.AreasModel
+import area.AreaModel
+import area.AreasRepo
 import conf.ConfQueries
 import conf.ConfRepo
 import elements.ElementQueries
@@ -36,6 +37,7 @@ val appModule = module {
     singleOf(::AreaQueries)
     singleOf(::AreasRepo)
     viewModelOf(::AreasModel)
+    viewModelOf(::AreaModel)
     viewModelOf(::AreaResultModel)
 
     singleOf(::ElementQueries)

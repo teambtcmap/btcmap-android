@@ -1,7 +1,7 @@
 package sync
 
 import android.util.Log
-import areas.AreasRepo
+import area.AreasRepo
 import conf.ConfRepo
 import reports.ReportsRepo
 import elements.ElementsRepo
