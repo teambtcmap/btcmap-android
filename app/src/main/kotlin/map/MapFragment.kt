@@ -34,6 +34,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import area.AreaResultModel
+import area.polygons
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.search.SearchView
 import element.ElementFragment
@@ -41,8 +42,6 @@ import elements.ElementsCluster
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.double
-import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.R
 import org.btcmap.databinding.FragmentMapBinding
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
@@ -339,15 +338,13 @@ class MapFragment : Fragment() {
 
                 if (pickedArea != null) {
                     binding.map.addViewportListener()
-
-                    binding.map.zoomToBoundingBox(
-                        BoundingBox(
-                            pickedArea.tags["box:north"]!!.jsonPrimitive.double,
-                            pickedArea.tags["box:east"]!!.jsonPrimitive.double,
-                            pickedArea.tags["box:south"]!!.jsonPrimitive.double,
-                            pickedArea.tags["box:west"]!!.jsonPrimitive.double,
-                        ), false
-                    )
+                    val boundingBox = boundingBox(pickedArea.tags.polygons())
+                    val boundingBoxPaddingPx = TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        16f,
+                        resources.displayMetrics,
+                    ).toInt()
+                    binding.map.zoomToBoundingBox(boundingBox, false, boundingBoxPaddingPx)
                     return@repeatOnLifecycle
                 }
 
