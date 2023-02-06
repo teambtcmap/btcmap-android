@@ -1,16 +1,17 @@
 package app
 
 import androidx.test.platform.app.InstrumentationRegistry
-import area.AreaModel
+import coil.decode.SvgDecoder
+import coil.imageLoader
 import org.junit.Test
-import org.koin.android.ext.android.get
 
-class AppModuleTest {
+class AppTest {
 
     @Test
-    fun dependencies() {
+    fun imageLoader() {
         val app =
             InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as App
-        app.get<AreaModel>()
+        val loader = app.imageLoader
+        assert(loader.components.decoderFactories.contains(SvgDecoder.Factory()))
     }
 }

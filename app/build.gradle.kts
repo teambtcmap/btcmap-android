@@ -16,7 +16,7 @@ android {
         targetSdk = 33
         versionCode = 41
         versionName = "0.6.1"
-        testInstrumentationRunner = "app.InstrumentationTestRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -78,7 +78,10 @@ android {
             isShrinkResources = true
 
             // Includes the default ProGuard rules file
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
