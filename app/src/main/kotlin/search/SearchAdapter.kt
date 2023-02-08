@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import elements.Element
+import element.Element
 import icons.iconTypeface
 import org.btcmap.databinding.ItemSearchResultBinding
 

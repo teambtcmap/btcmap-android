@@ -30,6 +30,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,7 +39,8 @@ import area.polygons
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.search.SearchView
 import element.ElementFragment
-import elements.ElementsCluster
+import element.ElementsCluster
+import filter.FilterResultModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -74,6 +76,7 @@ class MapFragment : Fragment() {
 
     private val searchResultModel: SearchResultModel by activityViewModel()
     private val areaResultModel: AreaResultModel by activityViewModel()
+    private val filterResultModel: FilterResultModel by activityViewModel()
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
@@ -146,6 +149,7 @@ class MapFragment : Fragment() {
             val nav = findNavController()
 
             when (it.itemId) {
+                R.id.action_filter -> nav.navigate(R.id.action_mapFragment_to_filterElementsFragment)
                 R.id.action_donate -> nav.navigate(R.id.donationFragment)
                 R.id.action_add_element -> {
                     val intent = Intent(Intent.ACTION_VIEW)
@@ -178,7 +182,7 @@ class MapFragment : Fragment() {
                     TileSystemWebMercator.MaxLatitude,
                     TileSystemWebMercator.MaxLongitude,
                     TileSystemWebMercator.MinLatitude,
-                    TileSystemWebMercator.MinLongitude
+                    TileSystemWebMercator.MinLongitude,
                 )
             )
             setMultiTouchControls(true)
@@ -233,6 +237,14 @@ class MapFragment : Fragment() {
         }
 
         val visibleElements = mutableListOf<Marker>()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            whenResumed {
+                filterResultModel.filteredCategories.collect {
+                    model.setExcludedCategories(it)
+                }
+            }
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             model.visibleElements.collectLatest { newElements ->
@@ -564,7 +576,7 @@ class MapFragment : Fragment() {
 
         if (emptyClusterBitmap == null) {
             val emptyClusterDrawable =
-                ContextCompat.getDrawable(requireContext(), R.drawable.ic_cluster)!!
+                ContextCompat.getDrawable(requireContext(), R.drawable.cluster)!!
             DrawableCompat.setTint(
                 emptyClusterDrawable,
                 requireContext().getPrimaryContainerColor(model.conf.conf.value)

@@ -7,8 +7,8 @@ import area.AreaModel
 import area.AreasRepo
 import conf.ConfQueries
 import conf.ConfRepo
-import elements.ElementQueries
-import elements.ElementsRepo
+import element.ElementQueries
+import element.ElementsRepo
 import events.EventQueries
 import events.EventsModel
 import events.EventsRepo
@@ -29,6 +29,8 @@ import sync.Sync
 import users.UserQueries
 import users.UsersModel
 import users.UsersRepo
+import filter.FilterElementsModel
+import filter.FilterResultModel
 
 val appModule = module {
     single { OkHttpClient.Builder().addInterceptor(BrotliInterceptor).build() }
@@ -66,4 +68,7 @@ val appModule = module {
 
     viewModelOf(::SearchModel)
     viewModelOf(::SearchResultModel)
+
+    viewModelOf(::FilterElementsModel)
+    viewModelOf(::FilterResultModel)
 }

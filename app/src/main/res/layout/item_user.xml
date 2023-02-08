@@ -28,7 +28,7 @@
             android:backgroundTint="?colorPrimary"
             android:contentDescription="@string/icon"
             android:padding="8dp"
-            android:src="@drawable/baseline_person_24"
+            android:src="@drawable/person_alt"
             app:tint="?colorOnPrimary" />
 
     </FrameLayout>
@@ -63,7 +63,7 @@
         android:layout_gravity="center"
         android:layout_marginEnd="8dp"
         android:contentDescription="@string/icon"
-        android:src="@drawable/ic_place"
+        android:src="@drawable/place"
         android:text="@string/tip" />
 
 </LinearLayout>

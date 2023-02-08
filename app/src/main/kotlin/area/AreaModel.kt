@@ -5,8 +5,8 @@ import android.text.format.DateUtils
 import android.util.TypedValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import elements.ElementsRepo
-import elements.bitcoinSurveyDate
+import element.ElementsRepo
+import element.bitcoinSurveyDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

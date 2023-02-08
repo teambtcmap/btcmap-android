@@ -1,7 +1,7 @@
 package search
 
 import androidx.lifecycle.ViewModel
-import elements.Element
+import element.Element
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class SearchResultModel : ViewModel() {

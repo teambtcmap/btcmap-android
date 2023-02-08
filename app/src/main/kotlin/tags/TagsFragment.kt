@@ -11,7 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import conf.ConfRepo
-import elements.ElementsRepo
+import element.ElementsRepo
 import http.await
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking

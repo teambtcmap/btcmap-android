@@ -48,7 +48,7 @@
         android:contentDescription="@string/delete_tag"
         android:focusable="true"
         android:padding="4dp"
-        android:src="@drawable/baseline_remove_24" />
+        android:src="@drawable/remove" />
 
 </LinearLayout>
 

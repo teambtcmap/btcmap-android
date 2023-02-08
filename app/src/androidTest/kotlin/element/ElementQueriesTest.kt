@@ -1,4 +1,4 @@
-package elements
+package element
 
 import db.inMemoryDatabase
 import kotlinx.coroutines.runBlocking
@@ -79,18 +79,48 @@ class ElementQueriesTest {
         }
     }
 
-    private fun testElement(): Element {
-        return Element(
-            id = "${arrayOf("node", "way", "relation").random()}:${Random.nextLong()}",
-            lat = Random.nextDouble(-90.0, 90.0),
-            lon = Random.nextDouble(-180.0, 180.0),
-            osmJson = JsonObject(mapOf("tags" to JsonObject(emptyMap()))),
-            tags = JsonObject(mapOf("icon:android" to JsonPrimitive(""))),
-            createdAt = ZonedDateTime.now(ZoneOffset.UTC)
-                .minusMinutes(Random.nextLong(60 * 24 * 30)),
-            updatedAt = ZonedDateTime.now(ZoneOffset.UTC)
-                .minusMinutes(Random.nextLong(60 * 24 * 30)),
-            deletedAt = null,
+    @Test
+    fun selectCategories() = runBlocking {
+        val elements = listOf(
+            testElement().copy(tags = JsonObject(mapOf("category" to JsonPrimitive("a")))),
+            testElement().copy(tags = JsonObject(mapOf("category" to JsonPrimitive("b")))),
         )
+        queries.insertOrReplace(elements)
+        assertEquals(
+            listOf(
+                ElementCategory("a", "", 1),
+                ElementCategory("b", "", 1),
+            ), queries.selectCategories()
+        )
+
+        var element = testElement().copy(tags = JsonObject(mapOf("category" to JsonPrimitive("a"))))
+        queries.insertOrReplace(listOf(element))
+        assertEquals(listOf(
+            ElementCategory("a", "", 2),
+            ElementCategory("b", "", 1),
+        ), queries.selectCategories())
+
+        element = testElement().copy(tags = JsonObject(mapOf("category" to JsonPrimitive("c"))))
+        queries.insertOrReplace(listOf(element))
+        assertEquals(listOf(
+            ElementCategory("a", "", 2),
+            ElementCategory("b", "", 1),
+            ElementCategory("c", "", 1),
+        ), queries.selectCategories())
     }
+}
+
+fun testElement(): Element {
+    return Element(
+        id = "${arrayOf("node", "way", "relation").random()}:${Random.nextLong()}",
+        lat = Random.nextDouble(-90.0, 90.0),
+        lon = Random.nextDouble(-180.0, 180.0),
+        osmJson = JsonObject(mapOf("tags" to JsonObject(emptyMap()))),
+        tags = JsonObject(mapOf("icon:android" to JsonPrimitive(""))),
+        createdAt = ZonedDateTime.now(ZoneOffset.UTC)
+            .minusMinutes(Random.nextLong(60 * 24 * 30)),
+        updatedAt = ZonedDateTime.now(ZoneOffset.UTC)
+            .minusMinutes(Random.nextLong(60 * 24 * 30)),
+        deletedAt = null,
+    )
 }

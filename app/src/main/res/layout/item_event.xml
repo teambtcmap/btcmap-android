@@ -24,7 +24,7 @@
             android:layout_gravity="center"
             android:layout_marginHorizontal="18dp"
             android:contentDescription="@string/icon"
-            android:src="@drawable/ic_place"
+            android:src="@drawable/place"
             app:tint="?attr/colorOnSurfaceVariant" />
 
         <LinearLayout
@@ -56,7 +56,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:contentDescription="@string/icon"
-            android:src="@drawable/ic_place"
+            android:src="@drawable/place"
             android:text="@string/tip" />
 
     </LinearLayout>

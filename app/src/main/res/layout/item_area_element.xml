@@ -60,7 +60,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="4dp"
                     android:contentDescription="@string/checkmark_icon"
-                    android:src="@drawable/baseline_verified_24" />
+                    android:src="@drawable/verified" />
 
                 <TextView
                     android:id="@+id/subtitle"

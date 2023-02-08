@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/action_reports"
-        android:icon="@drawable/ic_monitoring"
+        android:icon="@drawable/monitoring"
         android:title="@string/trends"
         app:showAsAction="ifRoom" />
 

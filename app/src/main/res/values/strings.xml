@@ -65,6 +65,7 @@
     <string name="delete_tag">Delete tag</string>
     <string name="atm">ATM</string>
     <string name="checkmark_icon">Checkmark icon</string>
+    <string name="filter">Filter</string>
     <plurals name="d_changes">
         <item quantity="zero">%d changes</item>
         <item quantity="one">%d change</item>

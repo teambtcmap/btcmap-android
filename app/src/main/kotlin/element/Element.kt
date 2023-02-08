@@ -1,4 +1,4 @@
-package elements
+package element
 
 import kotlinx.serialization.json.JsonObject
 import java.time.ZonedDateTime

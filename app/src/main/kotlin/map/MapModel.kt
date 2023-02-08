@@ -3,9 +3,9 @@ package map
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import conf.ConfRepo
-import elements.Element
-import elements.ElementsCluster
-import elements.ElementsRepo
+import element.Element
+import element.ElementsCluster
+import element.ElementsRepo
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import location.UserLocationRepository
@@ -41,6 +41,8 @@ class MapModel(
 
     val mapViewport = _mapViewport.asStateFlow()
 
+    private val _excludedCategories = MutableStateFlow<List<String>>(emptyList())
+
     private val _selectedElement: MutableStateFlow<Element?> = MutableStateFlow(null)
     val selectedElement = _selectedElement.asStateFlow()
 
@@ -50,19 +52,24 @@ class MapModel(
     init {
         combine(
             mapViewport,
-            conf.conf.map { it.lastSyncDate }
-        ) { viewport, _ ->
+            conf.conf.map { it.lastSyncDate },
+            _excludedCategories
+        ) { viewport, _, excludedCategories ->
             withContext(Dispatchers.Default) {
-                _visibleElements.update {
-                    elementsRepo.selectByBoundingBox(
-                        zoom = viewport.zoom,
-                        box = viewport.boundingBox,
-                    )
-                }
+                val clusters = elementsRepo.selectByBoundingBox(
+                    zoom = viewport.zoom,
+                    box = viewport.boundingBox,
+                    excludedCategories = excludedCategories.map { it },
+                )
+                _visibleElements.update { clusters }
             }
         }.launchIn(viewModelScope)
 
         locationRepo.requestLocationUpdates()
+    }
+
+    fun setExcludedCategories(excludedCategories: List<String>) {
+        _excludedCategories.update { excludedCategories }
     }
 
     fun onLocationPermissionGranted() {

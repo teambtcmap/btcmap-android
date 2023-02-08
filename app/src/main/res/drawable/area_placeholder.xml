@@ -9,6 +9,6 @@
     <item
         android:width="24dp"
         android:height="24dp"
-        android:drawable="@drawable/item_area_placeholder_icon"
+        android:drawable="@drawable/area_placeholder_icon"
         android:gravity="center" />
 </layer-list>

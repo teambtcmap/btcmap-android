@@ -1,4 +1,4 @@
-package elements
+package element
 
 data class AreaElement(
     val id: String,

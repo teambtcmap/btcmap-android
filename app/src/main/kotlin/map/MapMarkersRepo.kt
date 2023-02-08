@@ -77,16 +77,12 @@ class MapMarkersRepo(
         return markerDrawable
     }
 
-    fun invalidateCache() {
-        cache.clear()
-    }
-
     private fun createMarkerIcon(iconId: String, boosted: Boolean): Bitmap {
         val pinSizePx = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, 48f, context.resources.displayMetrics
         ).toInt()
 
-        val emptyPinDrawable = ContextCompat.getDrawable(context, R.drawable.ic_marker)!!
+        val emptyPinDrawable = ContextCompat.getDrawable(context, R.drawable.marker)!!
 
         if (boosted) {
             DrawableCompat.setTint(emptyPinDrawable, Color.parseColor("#f7931a"))

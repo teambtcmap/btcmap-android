@@ -54,7 +54,7 @@
                     android:drawablePadding="20dp"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="16dp"
-                    app:drawableStartCompat="@drawable/baseline_verified_24"
+                    app:drawableStartCompat="@drawable/verified"
                     app:drawableTint="?colorSecondary"
                     tools:text="Last verified on Oct 14, 2022" />
 
@@ -78,7 +78,7 @@
                 android:drawablePadding="20dp"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
-                app:drawableStartCompat="@drawable/ic_place"
+                app:drawableStartCompat="@drawable/place"
                 app:drawableTint="?colorSecondary" />
 
             <TextView
@@ -91,7 +91,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/baseline_call_24"
+                app:drawableStartCompat="@drawable/call"
                 app:drawableTint="?colorSecondary" />
 
             <TextView
@@ -104,7 +104,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/baseline_public_24"
+                app:drawableStartCompat="@drawable/earth"
                 app:drawableTint="?colorSecondary" />
 
             <TextView
@@ -116,7 +116,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/ic_contact_twitter"
+                app:drawableStartCompat="@drawable/contact_twitter"
                 app:drawableTint="?colorSecondary"
                 tools:text="BTCMapDotOrg" />
 
@@ -129,7 +129,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/ic_contact_facebook"
+                app:drawableStartCompat="@drawable/contact_facebook"
                 app:drawableTint="?colorSecondary"
                 tools:text="https://www.facebook.com" />
 
@@ -142,7 +142,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/ic_contact_instagram"
+                app:drawableStartCompat="@drawable/contact_instagram"
                 app:drawableTint="?colorSecondary"
                 tools:text="BTCMapDotOrg" />
 
@@ -156,7 +156,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/ic_contact_email"
+                app:drawableStartCompat="@drawable/contact_email"
                 app:drawableTint="?colorSecondary"
                 tools:text="BTCMapDotOrg" />
 
@@ -169,7 +169,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/baseline_schedule_24"
+                app:drawableStartCompat="@drawable/schedule"
                 app:drawableTint="?colorSecondary" />
 
             <TextView

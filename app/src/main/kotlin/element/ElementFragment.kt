@@ -20,10 +20,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import conf.ConfRepo
-import elements.Element
-import elements.ElementsRepo
-import elements.OsmTags
-import elements.bitcoinSurveyDate
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
@@ -77,7 +73,7 @@ class ElementFragment : Fragment() {
             val element = runBlocking { elementsRepo.selectById(elementId)!! }
             setElement(element)
 
-            binding.toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24)
+            binding.toolbar.setNavigationIcon(R.drawable.arrow_back)
 
             binding.toolbar.setNavigationOnClickListener {
                 findNavController().popBackStack()

@@ -17,7 +17,7 @@
             android:layout_height="40dp"
             android:layout_margin="8dp"
             android:background="?colorPrimary"
-            android:src="@drawable/baseline_public_24"
+            android:src="@drawable/earth"
             android:tint="?colorOnPrimary"
             app:contentPadding="8dp"
             app:shapeAppearanceOverlay="@style/RoundedImageView" />
@@ -28,7 +28,7 @@
             android:layout_height="40dp"
             android:layout_margin="8dp"
             android:background="?colorPrimary"
-            android:src="@drawable/ic_contact_twitter"
+            android:src="@drawable/contact_twitter"
             android:tint="?colorOnPrimary"
             app:contentPadding="8dp"
             app:shapeAppearanceOverlay="@style/RoundedImageView" />
@@ -39,7 +39,7 @@
             android:layout_height="40dp"
             android:layout_margin="8dp"
             android:background="?colorPrimary"
-            android:src="@drawable/ic_contact_telegram"
+            android:src="@drawable/contact_telegram"
             android:tint="?colorOnPrimary"
             app:contentPadding="8dp"
             app:shapeAppearanceOverlay="@style/RoundedImageView" />
@@ -50,7 +50,7 @@
             android:layout_height="40dp"
             android:layout_margin="8dp"
             android:background="?colorPrimary"
-            android:src="@drawable/ic_contact_discord"
+            android:src="@drawable/contact_discord"
             android:tint="?colorOnPrimary"
             app:contentPadding="8dp"
             app:shapeAppearanceOverlay="@style/RoundedImageView" />
@@ -61,7 +61,7 @@
             android:layout_height="40dp"
             android:layout_margin="8dp"
             android:background="?colorPrimary"
-            android:src="@drawable/ic_contact_youtube"
+            android:src="@drawable/contact_youtube"
             android:tint="?colorOnPrimary"
             app:contentPadding="8dp"
             app:shapeAppearanceOverlay="@style/RoundedImageView" />

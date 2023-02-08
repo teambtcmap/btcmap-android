@@ -1,6 +1,6 @@
-package elements
+package element
 
-import android.content.Context
+import android.app.Application
 import db.*
 import http.await
 import kotlinx.coroutines.*
@@ -14,13 +14,11 @@ import org.osmdroid.util.BoundingBox
 import java.time.ZonedDateTime
 
 class ElementsRepo(
-    private val context: Context,
+    private val app: Application,
     private val elementQueries: ElementQueries,
     private val json: Json,
     private val httpClient: OkHttpClient,
 ) {
-
-    private val clustersCache = mutableMapOf<Double, List<ElementsCluster>>()
 
     suspend fun selectById(id: String) = elementQueries.selectById(id)
 
@@ -43,6 +41,7 @@ class ElementsRepo(
     suspend fun selectByBoundingBox(
         zoom: Double?,
         box: BoundingBox,
+        excludedCategories: List<String>,
     ): List<ElementsCluster> {
         if (zoom == null) {
             return emptyList()
@@ -124,17 +123,18 @@ class ElementsRepo(
                 maxLat = box.latNorth,
                 minLon = box.lonWest,
                 maxLon = box.lonEast,
+                excludedCategories,
             )
         } else {
-            val clusters = clustersCache.getOrPut(step) {
-                elementQueries.selectClusters(step)
-            }
+            val clusters = elementQueries.selectClusters(step, excludedCategories)
 
             return withContext(Dispatchers.IO) {
                 clusters.filter { box.contains(it.lat, it.lon) }
             }
         }
     }
+
+    suspend fun selectCategories() = elementQueries.selectCategories()
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun fetchBundledElements(): Result<SyncReport> {
@@ -150,7 +150,7 @@ class ElementsRepo(
                 )
             }
 
-            context.assets.open("elements.json").use { bundledElements ->
+            app.assets.open("elements.json").use { bundledElements ->
                 withContext(Dispatchers.IO) {
                     var count = 0L
 
@@ -160,7 +160,6 @@ class ElementsRepo(
                     ).chunked(1_000).forEach { chunk ->
                         elementQueries.insertOrReplace(chunk.map { it.toElement() })
                         count += chunk.size
-                        clustersCache.clear()
                     }
 
                     SyncReport(
@@ -209,7 +208,6 @@ class ElementsRepo(
                         ).chunked(1_000).forEach { chunk ->
                             elementQueries.insertOrReplace(chunk.map { it.toElement() })
                             count += chunk.size
-                            clustersCache.clear()
                         }
 
                         Result.success(

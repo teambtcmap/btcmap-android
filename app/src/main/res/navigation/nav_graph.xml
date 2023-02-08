@@ -57,6 +57,14 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+
+        <action
+            android:id="@+id/action_mapFragment_to_filterElementsFragment"
+            app:destination="@id/filterElementsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -204,5 +212,9 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="login.LoginFragment" />
+
+    <fragment
+        android:id="@+id/filterElementsFragment"
+        android:name="filter.FilterElementsFragment" />
 
 </navigation>

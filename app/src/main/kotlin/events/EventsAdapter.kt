@@ -41,9 +41,9 @@ class EventsAdapter(
         fun bind(item: Item, isLast: Boolean, listener: Listener) {
             binding.apply {
                 when (item.type) {
-                    "create" -> icon.setImageResource(R.drawable.baseline_add_24)
-                    "update" -> icon.setImageResource(R.drawable.baseline_edit_24)
-                    "delete" -> icon.setImageResource(R.drawable.baseline_remove_24)
+                    "create" -> icon.setImageResource(R.drawable.add)
+                    "update" -> icon.setImageResource(R.drawable.edit)
+                    "delete" -> icon.setImageResource(R.drawable.remove)
                 }
 
                 title.text = item.elementName

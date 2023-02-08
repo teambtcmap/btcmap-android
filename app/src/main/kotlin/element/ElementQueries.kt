@@ -1,5 +1,6 @@
-package elements
+package element
 
+import androidx.core.database.getStringOrNull
 import androidx.sqlite.db.transaction
 import db.getJsonObject
 import db.getZonedDateTime
@@ -114,6 +115,7 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
         maxLat: Double,
         minLon: Double,
         maxLon: Double,
+        excludedCategories: List<String>,
     ): List<ElementsCluster> {
         return withContext(Dispatchers.IO) {
             val cursor = db.readableDatabase.query(
@@ -126,7 +128,9 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                     json_extract(tags, '$.boost:expires') AS boost_expires
                 FROM element
                 WHERE
-                    deleted_at = ''
+                    deleted_at = '' AND json_extract(tags, '$.category') NOT IN (${
+                    excludedCategories.joinToString { "'$it'" }
+                })
                     AND lat > ?
                     AND lat < ?
                     AND lon > ?
@@ -156,7 +160,10 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
         }
     }
 
-    suspend fun selectClusters(step: Double): List<ElementsCluster> {
+    suspend fun selectClusters(
+        step: Double,
+        excludedCategories: List<String>,
+    ): List<ElementsCluster> {
         return withContext(Dispatchers.IO) {
             val cursor = db.readableDatabase.query(
                 """
@@ -168,7 +175,9 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                     json_extract(e.tags, '$.icon:android') AS icon_id,
                     json_extract(e.tags, '$.boost:expires') AS boost_expires
                 FROM element e
-                WHERE e.deleted_at = ''
+                WHERE e.deleted_at = '' AND json_extract(e.tags, '$.category') NOT IN (${
+                    excludedCategories.joinToString { "'$it'" }
+                })
                 GROUP BY round(lat / ?) * ?, round(lon / ?) * ?
                 ORDER BY e.lat DESC;
                 """,
@@ -229,6 +238,35 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                         lon = cursor.getDouble(2),
                         icon = cursor.getString(3),
                         osmTags = cursor.getJsonObject(4),
+                    )
+                }
+            }
+        }
+    }
+
+    suspend fun selectCategories(): List<ElementCategory> {
+        return withContext(Dispatchers.IO) {
+            val cursor = db.readableDatabase.query(
+                """
+                SELECT 
+                    json_extract(tags, '$.category') AS category,
+                    json_extract(tags, '$.category:plural') AS category_plural,
+                    count(*) AS elements
+                FROM element
+                WHERE deleted_at = ''
+                GROUP BY category
+                ORDER BY category;
+                """
+            )
+
+            buildList {
+                while (cursor.moveToNext()) {
+                    add(
+                        ElementCategory(
+                            singular = cursor.getString(0),
+                            plural = cursor.getStringOrNull(1) ?: "",
+                            elements = cursor.getLong(2),
+                        )
                     )
                 }
             }

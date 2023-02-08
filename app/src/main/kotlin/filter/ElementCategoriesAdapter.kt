@@ -1,21 +1,18 @@
-package area
+package filter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import coil.load
-import coil.size.ViewSizeResolver
-import org.btcmap.R
-import org.btcmap.databinding.ItemAreaBinding
+import org.btcmap.databinding.ItemCategoryBinding
 
-class AreasAdapter(
-    private val onItemClick: (Item) -> Unit,
-) : ListAdapter<AreasAdapter.Item, AreasAdapter.ItemViewHolder>(DiffCallback()) {
+class ElementCategoriesAdapter(
+    private val listener: Listener,
+) : ListAdapter<ElementCategoriesAdapter.Item, ElementCategoriesAdapter.ItemViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        val binding = ItemAreaBinding.inflate(
+        val binding = ItemCategoryBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false,
@@ -25,26 +22,24 @@ class AreasAdapter(
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-        holder.bind(getItem(position), onItemClick)
+        holder.bind(getItem(position), listener)
     }
 
     class ItemViewHolder(
-        private val binding: ItemAreaBinding,
+        private val binding: ItemCategoryBinding,
     ) : ViewHolder(
         binding.root,
     ) {
 
-        fun bind(item: Item, onItemClick: (Item) -> Unit) {
+        fun bind(item: Item, listener: Listener) {
             binding.apply {
-                title.text = item.name
-                subtitle.text = item.distance
-                root.setOnClickListener { onItemClick(item) }
+                name.text = item.text
 
-                icon.load(item.iconUrl) {
-                    placeholder(R.drawable.area_placeholder)
-                    error(R.drawable.area_placeholder)
-                    size(ViewSizeResolver(icon))
-                    crossfade(true)
+                enabled.setOnCheckedChangeListener(null)
+                enabled.isChecked = item.enabled
+
+                enabled.setOnCheckedChangeListener { _, isChecked ->
+                    listener.onItemCheckedChange(item, isChecked)
                 }
             }
         }
@@ -63,14 +58,18 @@ class AreasAdapter(
             oldItem: Item,
             newItem: Item,
         ): Boolean {
-            return newItem == oldItem
+            return newItem.id == oldItem.id
         }
     }
 
     data class Item(
         val id: String,
-        val iconUrl: String,
-        val name: String,
-        val distance: String,
+        val text: String,
+        val enabled: Boolean,
     )
+
+    interface Listener {
+
+        fun onItemCheckedChange(item: Item, checked: Boolean)
+    }
 }
