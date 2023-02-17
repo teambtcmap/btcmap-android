@@ -54,12 +54,6 @@ data class UserQueries(private val db: SQLiteOpenHelper) {
                     count(e.user_id) AS changes
                 FROM user u
                 LEFT JOIN event e ON e.user_id = u.id AND e.deleted_at = ''
-                WHERE name != 'Igor Bubelov'
-                AND name != 'secondl1ght'
-                AND name != 'b-jazz-bot'
-                AND name != 'vindard'
-                AND name != 'Mateusz Konieczny'
-                AND name != 'ovruni'
                 GROUP BY u.id
                 ORDER BY changes DESC;
                 """
