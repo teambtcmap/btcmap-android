@@ -1,5 +1,7 @@
 package app
 
+import api.Api
+import api.ApiImpl
 import area.AreaQueries
 import area.AreaResultModel
 import area.AreasModel
@@ -31,10 +33,13 @@ import users.UsersModel
 import users.UsersRepo
 import filter.FilterElementsModel
 import filter.FilterResultModel
+import org.koin.dsl.bind
 
 val appModule = module {
     single { OkHttpClient.Builder().addInterceptor(BrotliInterceptor).build() }
     single { Json { ignoreUnknownKeys = true } }
+
+    singleOf(::ApiImpl).bind(Api::class)
 
     singleOf(::AreaQueries)
     singleOf(::AreasRepo)

@@ -1,83 +1,40 @@
 package area
 
-import db.*
-import http.await
+import api.Api
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.time.ZonedDateTime
 
 class AreasRepo(
+    private val api: Api,
     private val queries: AreaQueries,
-    private val httpClient: OkHttpClient,
-    private val json: Json,
 ) {
 
     suspend fun selectById(id: String) = queries.selectById(id)
 
     suspend fun selectByType(type: String) = queries.selectByType(type)
 
-    @OptIn(ExperimentalSerializationApi::class)
     suspend fun sync(): Result<SyncReport> {
         return runCatching {
             val startMillis = System.currentTimeMillis()
-
             val maxUpdatedAt = queries.selectMaxUpdatedAt()
 
-            val url = HttpUrl.Builder().apply {
-                scheme("https")
-                host("api.btcmap.org")
-                addPathSegment("v2")
-                addPathSegment("areas")
-
-                if (maxUpdatedAt != null) {
-                    addQueryParameter("updated_since", maxUpdatedAt.toString())
-                }
-            }.build()
-
-            val request = httpClient.newCall(Request.Builder().url(url).build())
-            val response = request.await()
-
-            if (!response.isSuccessful) {
-                throw Exception("Unexpected HTTP response code: ${response.code}")
-            }
-
             withContext(Dispatchers.IO) {
-                response.body!!.byteStream().use { responseBody ->
-                    withContext(Dispatchers.IO) {
-                        var count = 0L
+                var count = 0L
 
-                        json.decodeToSequence(
-                            stream = responseBody,
-                            deserializer = AreaJson.serializer(),
-                        ).chunked(1_000).forEach { chunk ->
-                            queries.insertOrReplace(chunk.filter { it.valid() }.map { it.toArea() })
-                            count += chunk.size
-                        }
-
-                        SyncReport(
-                            timeMillis = System.currentTimeMillis() - startMillis,
-                            createdOrUpdatedAreas = count,
-                        )
-                    }
+                api.getAreas(maxUpdatedAt).chunked(1_000).forEach { chunk ->
+                    queries.insertOrReplace(chunk.filter { it.valid() }.map { it.toArea() })
+                    count += chunk.size
                 }
+
+                SyncReport(
+                    timeMillis = System.currentTimeMillis() - startMillis,
+                    createdOrUpdatedAreas = count,
+                )
             }
         }
     }
-
-    @Serializable
-    private data class AreaJson(
-        val id: String,
-        val tags: JsonObject,
-        val created_at: String,
-        val updated_at: String,
-        val deleted_at: String,
-    )
 
     private fun AreaJson.toArea(): Area {
         return Area(
