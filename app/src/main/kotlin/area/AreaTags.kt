@@ -5,7 +5,6 @@ import kotlinx.serialization.json.*
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Polygon
-import org.osmdroid.util.BoundingBox
 
 typealias AreaTags = JsonObject
 
@@ -15,27 +14,6 @@ fun AreaTags.name(): String {
 
 fun AreaTags.polygons(): List<Polygon> {
     val geoFactory = GeometryFactory()
-
-    if (this["geo_json"] == null) {
-        val boundingBox = BoundingBox(
-            this["box:north"]!!.jsonPrimitive.double,
-            this["box:east"]!!.jsonPrimitive.double,
-            this["box:south"]!!.jsonPrimitive.double,
-            this["box:west"]!!.jsonPrimitive.double,
-        )
-
-        return listOf(
-            geoFactory.createPolygon(
-                arrayOf(
-                    Coordinate(boundingBox.lonEast, boundingBox.latNorth),
-                    Coordinate(boundingBox.lonEast, boundingBox.latSouth),
-                    Coordinate(boundingBox.lonWest, boundingBox.latSouth),
-                    Coordinate(boundingBox.lonWest, boundingBox.latNorth),
-                    Coordinate(boundingBox.lonEast, boundingBox.latNorth),
-                )
-            )
-        )
-    }
 
     val res = mutableListOf<Polygon>()
 

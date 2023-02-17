@@ -11,3 +11,7 @@ data class AreaJson(
     val updated_at: String,
     val deleted_at: String,
 )
+
+fun AreaJson.valid(): Boolean {
+    return tags.contains("name") && tags.contains("geo_json")
+}

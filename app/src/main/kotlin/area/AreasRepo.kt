@@ -3,7 +3,6 @@ package area
 import api.Api
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.*
 import java.time.ZonedDateTime
 
 class AreasRepo(
@@ -44,15 +43,6 @@ class AreasRepo(
             updatedAt = ZonedDateTime.parse(updated_at),
             deletedAt = if (deleted_at.isNotEmpty()) ZonedDateTime.parse(deleted_at) else null,
         )
-    }
-
-    private fun AreaJson.valid(): Boolean {
-        return (tags["name"]?.jsonPrimitive?.content ?: "").isNotBlank()
-                && ((tags.containsKey("box:north") && tags["box:north"]!!.jsonPrimitive.doubleOrNull != null
-                && tags.containsKey("box:east") && tags["box:east"]!!.jsonPrimitive.doubleOrNull != null
-                && tags.containsKey("box:south") && tags["box:south"]!!.jsonPrimitive.doubleOrNull != null
-                && tags.containsKey("box:west") && tags["box:west"]!!.jsonPrimitive.doubleOrNull != null)
-                || tags.containsKey("geo_json"))
     }
 
     data class SyncReport(
