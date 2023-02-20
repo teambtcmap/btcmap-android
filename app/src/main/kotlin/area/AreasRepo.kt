@@ -17,21 +17,22 @@ class AreasRepo(
     suspend fun sync(): Result<SyncReport> {
         return runCatching {
             val startMillis = System.currentTimeMillis()
-            val maxUpdatedAt = queries.selectMaxUpdatedAt()
+            var count = 0L
 
-            withContext(Dispatchers.IO) {
-                var count = 0L
+            while (true) {
+                val areas = api.getAreas(queries.selectMaxUpdatedAt(), BATCH_SIZE)
+                count += areas.size
+                queries.insertOrReplace(areas.map { it.toArea() })
 
-                api.getAreas(maxUpdatedAt).chunked(1_000).forEach { chunk ->
-                    queries.insertOrReplace(chunk.filter { it.valid() }.map { it.toArea() })
-                    count += chunk.size
+                if (areas.size < BATCH_SIZE) {
+                    break
                 }
-
-                SyncReport(
-                    timeMillis = System.currentTimeMillis() - startMillis,
-                    createdOrUpdatedAreas = count,
-                )
             }
+
+            SyncReport(
+                timeMillis = System.currentTimeMillis() - startMillis,
+                createdOrUpdatedAreas = count,
+            )
         }
     }
 
@@ -49,4 +50,8 @@ class AreasRepo(
         val timeMillis: Long,
         val createdOrUpdatedAreas: Long,
     )
+
+    companion object {
+        const val BATCH_SIZE = 50L
+    }
 }

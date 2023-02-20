@@ -8,7 +8,6 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import kotlinx.serialization.json.decodeToSequence
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -20,7 +19,7 @@ class ApiImpl(
 ) : Api {
 
     @OptIn(ExperimentalSerializationApi::class)
-    override suspend fun getAreas(updatedSince: ZonedDateTime?): List<AreaJson> {
+    override suspend fun getAreas(updatedSince: ZonedDateTime?, limit: Long): List<AreaJson> {
         val url = HttpUrl.Builder().apply {
             scheme("https")
             host("api.btcmap.org")
@@ -30,6 +29,8 @@ class ApiImpl(
             if (updatedSince != null) {
                 addQueryParameter("updated_since", updatedSince.toString())
             }
+
+            addQueryParameter("limit", limit.toString())
         }.build()
 
         val request = httpClient.newCall(Request.Builder().url(url).build())

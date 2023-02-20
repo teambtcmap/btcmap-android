@@ -36,7 +36,12 @@ import filter.FilterResultModel
 import org.koin.dsl.bind
 
 val appModule = module {
-    single { OkHttpClient.Builder().addInterceptor(BrotliInterceptor).build() }
+    single {
+        OkHttpClient.Builder()
+            .addInterceptor(BrotliInterceptor)
+            .build()
+    }
+
     single { Json { ignoreUnknownKeys = true } }
 
     singleOf(::ApiImpl).bind(Api::class)
