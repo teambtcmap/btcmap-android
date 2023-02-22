@@ -39,6 +39,10 @@ val appModule = module {
     single {
         OkHttpClient.Builder()
             .addInterceptor(BrotliInterceptor)
+//            .addInterceptor {
+//                Log.d("okhttp", it.request().url.toString())
+//                it.proceed(it.request())
+//            }
             .build()
     }
 

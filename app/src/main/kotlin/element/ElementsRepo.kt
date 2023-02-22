@@ -1,29 +1,24 @@
 package element
 
 import android.app.Application
+import api.Api
 import db.*
-import http.await
 import kotlinx.coroutines.*
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.osmdroid.util.BoundingBox
-import java.time.ZonedDateTime
 
 class ElementsRepo(
+    private val api: Api,
     private val app: Application,
-    private val elementQueries: ElementQueries,
+    private val queries: ElementQueries,
     private val json: Json,
-    private val httpClient: OkHttpClient,
 ) {
 
-    suspend fun selectById(id: String) = elementQueries.selectById(id)
+    suspend fun selectById(id: String) = queries.selectById(id)
 
     suspend fun selectBySearchString(searchString: String): List<Element> {
-        return elementQueries.selectBySearchString(searchString)
+        return queries.selectBySearchString(searchString)
     }
 
     suspend fun selectByBoundingBox(
@@ -31,7 +26,7 @@ class ElementsRepo(
         maxLat: Double,
         minLon: Double,
         maxLon: Double,
-    ) = elementQueries.selectByBoundingBox(
+    ) = queries.selectByBoundingBox(
         minLat,
         maxLat,
         minLon,
@@ -118,7 +113,7 @@ class ElementsRepo(
         }
 
         return if (zoom > 18) {
-            elementQueries.selectWithoutClustering(
+            queries.selectWithoutClustering(
                 minLat = box.latSouth,
                 maxLat = box.latNorth,
                 minLon = box.lonWest,
@@ -126,7 +121,7 @@ class ElementsRepo(
                 excludedCategories,
             )
         } else {
-            val clusters = elementQueries.selectClusters(step, excludedCategories)
+            val clusters = queries.selectClusters(step, excludedCategories)
 
             return withContext(Dispatchers.IO) {
                 clusters.filter { box.contains(it.lat, it.lon) }
@@ -134,14 +129,14 @@ class ElementsRepo(
         }
     }
 
-    suspend fun selectCategories() = elementQueries.selectCategories()
+    suspend fun selectCategories() = queries.selectCategories()
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun fetchBundledElements(): Result<SyncReport> {
         return runCatching {
             val startMillis = System.currentTimeMillis()
 
-            val rows = elementQueries.selectCount()
+            val rows = queries.selectCount()
 
             if (rows > 0) {
                 return@runCatching SyncReport(
@@ -157,8 +152,8 @@ class ElementsRepo(
                     json.decodeToSequence(
                         stream = bundledElements,
                         deserializer = ElementJson.serializer(),
-                    ).chunked(1_000).forEach { chunk ->
-                        elementQueries.insertOrReplace(chunk.map { it.toElement() })
+                    ).chunked(BATCH_SIZE).forEach { chunk ->
+                        queries.insertOrReplace(chunk.map { it.toElement() })
                         count += chunk.size
                     }
 
@@ -171,106 +166,34 @@ class ElementsRepo(
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     suspend fun sync(): Result<SyncReport> {
         return runCatching {
-            return withContext(Dispatchers.IO) {
-                val startMillis = System.currentTimeMillis()
+            val startMillis = System.currentTimeMillis()
+            var count = 0L
 
-                val maxUpdatedAt = elementQueries.selectMaxUpdatedAt()
+            while (true) {
+                val elements = api.getElements(queries.selectMaxUpdatedAt(), BATCH_SIZE.toLong())
+                count += elements.size
+                queries.insertOrReplace(elements.map { it.toElement() })
 
-                val url = HttpUrl.Builder().apply {
-                    scheme("https")
-                    host("api.btcmap.org")
-                    addPathSegment("v2")
-                    addPathSegment("elements")
-
-                    if (maxUpdatedAt != null) {
-                        addQueryParameter("updated_since", maxUpdatedAt.toString())
-                    }
-                }.build()
-
-                val response = httpClient
-                    .newCall(Request.Builder().url(url).build())
-                    .await()
-
-                if (!response.isSuccessful) {
-                    throw Exception("Unexpected HTTP response code: ${response.code}")
-                }
-
-                response.body!!.byteStream().use { responseBody ->
-                    withContext(Dispatchers.IO) {
-                        var count = 0L
-
-                        json.decodeToSequence(
-                            stream = responseBody,
-                            deserializer = ElementJson.serializer(),
-                        ).chunked(1_000).forEach { chunk ->
-                            elementQueries.insertOrReplace(chunk.map { it.toElement() })
-                            count += chunk.size
-                        }
-
-                        Result.success(
-                            SyncReport(
-                                timeMillis = System.currentTimeMillis() - startMillis,
-                                createdOrUpdatedElements = count,
-                            )
-                        )
-                    }
+                if (elements.size < BATCH_SIZE) {
+                    break
                 }
             }
+
+            SyncReport(
+                timeMillis = System.currentTimeMillis() - startMillis,
+                createdOrUpdatedElements = count,
+            )
         }
-    }
-
-    @Serializable
-    private data class ElementJson(
-        val id: String,
-        val osm_json: JsonObject,
-        val tags: JsonObject,
-        val created_at: String,
-        val updated_at: String,
-        val deleted_at: String,
-    )
-
-    private fun ElementJson.toElement(): Element {
-        val latLon = getLatLon()
-
-        return Element(
-            id = id,
-            lat = latLon.first,
-            lon = latLon.second,
-            osmJson = osm_json,
-            tags = tags,
-            createdAt = ZonedDateTime.parse(created_at),
-            updatedAt = ZonedDateTime.parse(updated_at),
-            deletedAt = if (deleted_at.isNotBlank()) ZonedDateTime.parse(deleted_at) else null,
-        )
-    }
-
-    private fun ElementJson.getLatLon(): Pair<Double, Double> {
-        val lat: Double
-        val lon: Double
-
-        if (osm_json["type"]!!.jsonPrimitive.content == "node") {
-            lat = osm_json["lat"]!!.jsonPrimitive.double
-            lon = osm_json["lon"]!!.jsonPrimitive.double
-        } else {
-            val bounds = osm_json["bounds"]!!.jsonObject
-
-            val boundsMinLat = bounds["minlat"]!!.jsonPrimitive.double
-            val boundsMinLon = bounds["minlon"]!!.jsonPrimitive.double
-            val boundsMaxLat = bounds["maxlat"]!!.jsonPrimitive.double
-            val boundsMaxLon = bounds["maxlon"]!!.jsonPrimitive.double
-
-            lat = (boundsMinLat + boundsMaxLat) / 2.0
-            lon = (boundsMinLon + boundsMaxLon) / 2.0
-        }
-
-        return Pair(lat, lon)
     }
 
     data class SyncReport(
         val timeMillis: Long,
         val createdOrUpdatedElements: Long,
     )
+
+    companion object {
+        private const val BATCH_SIZE = 1000
+    }
 }

@@ -1,8 +1,6 @@
 package area
 
 import api.Api
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.time.ZonedDateTime
 
 class AreasRepo(
@@ -52,6 +50,6 @@ class AreasRepo(
     )
 
     companion object {
-        const val BATCH_SIZE = 50L
+        private const val BATCH_SIZE = 50L
     }
 }
