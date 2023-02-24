@@ -5,7 +5,7 @@ import area.AreasRepo
 import conf.ConfRepo
 import reports.ReportsRepo
 import element.ElementsRepo
-import events.EventsRepo
+import event.EventsRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -95,7 +95,7 @@ class Sync(
                     eventsRepo.sync().onSuccess {
                         Log.d(
                             TAG,
-                            "Fetched ${it.createdOrUpdatedElements} new or updated events in ${it.timeMillis} ms"
+                            "Fetched ${it.createdOrUpdatedEvents} new or updated events in ${it.timeMillis} ms"
                         )
                     }.onFailure {
                         Log.e(TAG, "Failed to fetch new or updated events", it)

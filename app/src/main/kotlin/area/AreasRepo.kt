@@ -1,7 +1,6 @@
 package area
 
 import api.Api
-import java.time.ZonedDateTime
 
 class AreasRepo(
     private val api: Api,
@@ -32,16 +31,6 @@ class AreasRepo(
                 createdOrUpdatedAreas = count,
             )
         }
-    }
-
-    private fun AreaJson.toArea(): Area {
-        return Area(
-            id = id,
-            tags = tags,
-            createdAt = ZonedDateTime.parse(created_at),
-            updatedAt = ZonedDateTime.parse(updated_at),
-            deletedAt = if (deleted_at.isNotEmpty()) ZonedDateTime.parse(deleted_at) else null,
-        )
     }
 
     data class SyncReport(

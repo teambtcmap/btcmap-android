@@ -1,4 +1,4 @@
-package events
+package event
 
 import java.time.ZonedDateTime
 

@@ -1,4 +1,4 @@
-package events
+package event
 
 import androidx.core.database.getStringOrNull
 import androidx.sqlite.db.transaction

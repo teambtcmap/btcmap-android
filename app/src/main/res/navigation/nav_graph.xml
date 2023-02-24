@@ -111,7 +111,7 @@
 
     <fragment
         android:id="@+id/eventsFragment"
-        android:name="events.EventsFragment">
+        android:name="event.EventsFragment">
         <action
             android:id="@+id/action_eventsFragment_to_elementFragment"
             app:destination="@id/elementFragment"

@@ -2,6 +2,7 @@ package api
 
 import area.AreaJson
 import element.ElementJson
+import event.EventJson
 import http.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -81,6 +82,40 @@ class ApiImpl(
                     json.decodeFromStream(
                         stream = responseBody,
                         deserializer = ListSerializer(AreaJson.serializer()),
+                    )
+                }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    override suspend fun getEvents(updatedSince: ZonedDateTime?, limit: Long): List<EventJson> {
+        val url = HttpUrl.Builder().apply {
+            scheme("https")
+            host("api.btcmap.org")
+            addPathSegment("v2")
+            addPathSegment("events")
+
+            if (updatedSince != null) {
+                addQueryParameter("updated_since", updatedSince.toString())
+            }
+
+            addQueryParameter("limit", limit.toString())
+        }.build()
+
+        val request = httpClient.newCall(Request.Builder().url(url).build())
+        val response = request.await()
+
+        if (!response.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${response.code}")
+        }
+
+        return withContext(Dispatchers.IO) {
+            response.body!!.byteStream().use { responseBody ->
+                withContext(Dispatchers.IO) {
+                    json.decodeFromStream(
+                        stream = responseBody,
+                        deserializer = ListSerializer(EventJson.serializer()),
                     )
                 }
             }

@@ -1,4 +1,4 @@
-package events
+package event
 
 import android.os.Bundle
 import android.view.LayoutInflater

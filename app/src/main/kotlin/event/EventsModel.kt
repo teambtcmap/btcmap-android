@@ -1,4 +1,4 @@
-package events
+package event
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

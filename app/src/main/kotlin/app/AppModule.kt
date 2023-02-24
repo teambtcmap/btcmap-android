@@ -1,5 +1,6 @@
 package app
 
+import android.util.Log
 import api.Api
 import api.ApiImpl
 import area.AreaQueries
@@ -11,9 +12,9 @@ import conf.ConfQueries
 import conf.ConfRepo
 import element.ElementQueries
 import element.ElementsRepo
-import events.EventQueries
-import events.EventsModel
-import events.EventsRepo
+import event.EventQueries
+import event.EventsModel
+import event.EventsRepo
 import kotlinx.serialization.json.Json
 import location.UserLocationRepository
 import map.MapModel
@@ -39,10 +40,10 @@ val appModule = module {
     single {
         OkHttpClient.Builder()
             .addInterceptor(BrotliInterceptor)
-//            .addInterceptor {
-//                Log.d("okhttp", it.request().url.toString())
-//                it.proceed(it.request())
-//            }
+            .addInterceptor {
+                Log.d("okhttp", it.request().url.toString())
+                it.proceed(it.request())
+            }
             .build()
     }
 

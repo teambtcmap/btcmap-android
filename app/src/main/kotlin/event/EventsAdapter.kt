@@ -1,4 +1,4 @@
-package events
+package event
 
 import android.content.Intent
 import android.net.Uri
