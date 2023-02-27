@@ -11,8 +11,8 @@
     <string name="qr_code">QR code</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="btc_map_donation_address">BTC Map donation address</string>
-    <string name="donation_address_onchain" translatable="false">bc1qyyr7g9tew6sfa57mv2r6rvgj2ucakcmqnqzqjj</string>
-    <string name="donation_address_ln" translatable="false">LNURL1DP68GURN8GHJ7ERZXVUXVER9X4SNYTNY9EMX7MR5V9NK2CTSWQHXJME0D3H82UNVWQHKZURF9AMRZTMVDE6HYMP0XYA8GEF9</string>
+    <string name="donation_address_onchain" translatable="false">bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz</string>
+    <string name="donation_address_lightning" translatable="false">LNURL1DP68GURN8GHJ7MT9WF3KSCTWW3EJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQCJQMEY</string>
     <string name="help_us_improve_btc_map">Help us improve BTC Map</string>
     <string name="show_my_location">Show my location</string>
     <string name="show_tags">Show tags</string>

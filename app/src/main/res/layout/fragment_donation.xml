@@ -45,7 +45,7 @@
                 android:clickable="true"
                 android:contentDescription="@string/qr_code"
                 android:focusable="true"
-                android:src="@drawable/btc_address" />
+                android:src="@drawable/donation_qr_onchain" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -80,7 +80,7 @@
                 android:clickable="true"
                 android:contentDescription="@string/qr_code"
                 android:focusable="true"
-                android:src="@drawable/lnurl" />
+                android:src="@drawable/donation_qr_lightning" />
 
             <LinearLayout
                 android:layout_width="match_parent"

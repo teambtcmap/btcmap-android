@@ -56,7 +56,7 @@ class DonationFragment : Fragment() {
             listOf(lnQr, lnPay).forEach {
                 it.setOnClickListener {
                     val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse("lightning:${getString(R.string.donation_address_ln)}")
+                    intent.data = Uri.parse("lightning:${getString(R.string.donation_address_lightning)}")
                     runCatching {
                         startActivity(intent)
                     }.onFailure {
@@ -98,7 +98,7 @@ class DonationFragment : Fragment() {
         val clipManager =
             requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clipLabel = getString(R.string.btc_map_donation_address)
-        val clipText = getString(R.string.donation_address_ln)
+        val clipText = getString(R.string.donation_address_lightning)
         clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
         Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
     }
