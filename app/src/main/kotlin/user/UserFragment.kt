@@ -23,7 +23,6 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.R
 import org.btcmap.databinding.FragmentUserBinding
 import org.koin.android.ext.android.inject
-import users.UsersRepo
 
 class UserFragment : Fragment() {
 

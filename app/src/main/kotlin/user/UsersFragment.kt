@@ -1,4 +1,4 @@
-package users
+package user
 
 import android.os.Bundle
 import android.view.LayoutInflater

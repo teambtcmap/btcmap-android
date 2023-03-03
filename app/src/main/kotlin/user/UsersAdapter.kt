@@ -1,4 +1,4 @@
-package users
+package user
 
 import android.content.Intent
 import android.net.Uri

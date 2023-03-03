@@ -39,6 +39,6 @@ class AreasRepo(
     )
 
     companion object {
-        private const val BATCH_SIZE = 50L
+        private const val BATCH_SIZE = 100L
     }
 }

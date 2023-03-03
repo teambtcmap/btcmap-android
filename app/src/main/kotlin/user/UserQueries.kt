@@ -1,4 +1,4 @@
-package users
+package user
 
 import androidx.sqlite.db.transaction
 import db.getHttpUrl

@@ -123,7 +123,7 @@
 
     <fragment
         android:id="@+id/usersFragment"
-        android:name="users.UsersFragment">
+        android:name="user.UsersFragment">
         <action
             android:id="@+id/action_usersFragment_to_userFragment"
             app:destination="@id/userFragment"

@@ -29,9 +29,9 @@ import reports.ReportsRepo
 import search.SearchModel
 import search.SearchResultModel
 import sync.Sync
-import users.UserQueries
-import users.UsersModel
-import users.UsersRepo
+import user.UserQueries
+import user.UsersModel
+import user.UsersRepo
 import filter.FilterElementsModel
 import filter.FilterResultModel
 import org.koin.dsl.bind
