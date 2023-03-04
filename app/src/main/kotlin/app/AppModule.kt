@@ -1,6 +1,5 @@
 package app
 
-import android.util.Log
 import api.Api
 import api.ApiImpl
 import area.AreaQueries
@@ -40,10 +39,10 @@ val appModule = module {
     single {
         OkHttpClient.Builder()
             .addInterceptor(BrotliInterceptor)
-            .addInterceptor {
-                Log.d("okhttp", it.request().url.toString())
-                it.proceed(it.request())
-            }
+//            .addInterceptor {
+//                Log.d("okhttp", it.request().url.toString())
+//                it.proceed(it.request())
+//            }
             .build()
     }
 

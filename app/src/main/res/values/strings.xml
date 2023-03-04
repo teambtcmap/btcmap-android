@@ -66,6 +66,7 @@
     <string name="atm">ATM</string>
     <string name="checkmark_icon">Checkmark icon</string>
     <string name="filter">Filter</string>
+    <string name="syncing_data">Syncing data</string>
     <plurals name="d_changes">
         <item quantity="zero">%d changes</item>
         <item quantity="one">%d change</item>

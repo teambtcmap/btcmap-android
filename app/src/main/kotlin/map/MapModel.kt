@@ -49,6 +49,8 @@ class MapModel(
     private val _visibleElements = MutableStateFlow<List<ElementsCluster>>(emptyList())
     val visibleElements = _visibleElements.asStateFlow()
 
+    val syncActive = sync.active
+
     init {
         combine(
             mapViewport,

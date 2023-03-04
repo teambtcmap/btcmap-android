@@ -9,6 +9,9 @@ import event.EventsRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import user.UsersRepo
 import java.time.ZoneOffset
@@ -23,7 +26,11 @@ class Sync(
     private val eventsRepo: EventsRepo,
 ) {
 
+    private val _active = MutableStateFlow(false)
+    val active = _active.asStateFlow()
+
     suspend fun sync() {
+        _active.update { true }
         Log.d(TAG, "Sync was requested")
 
         val lastSyncDateTime = confRepo.conf.value.lastSyncDate
@@ -33,6 +40,7 @@ class Sync(
 
         if (lastSyncDateTime != null && lastSyncDateTime.isAfter(minSyncIntervalExpiryDate)) {
             Log.d(TAG, "Cache is up to date, skipping sync")
+            _active.update { false }
             return
         }
 
@@ -107,6 +115,8 @@ class Sync(
         Log.d(TAG, "Finished sync in ${System.currentTimeMillis() - startTime} ms")
 
         confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
+
+        _active.update { false }
     }
 
     companion object {
