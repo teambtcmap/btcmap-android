@@ -3,6 +3,10 @@ package db
 import android.content.Context
 import io.requery.android.database.sqlite.SQLiteDatabase
 import io.requery.android.database.sqlite.SQLiteOpenHelper
+import kotlinx.coroutines.flow.MutableStateFlow
+import java.time.LocalDateTime
+
+val elementsUpdatedAt = MutableStateFlow(LocalDateTime.now())
 
 fun persistentDatabase(context: Context): SQLiteOpenHelper {
     return Database(context, "btcmap-2023-03-04.db")

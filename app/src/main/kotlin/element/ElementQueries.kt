@@ -2,16 +2,23 @@ package element
 
 import androidx.core.database.getStringOrNull
 import androidx.sqlite.db.transaction
+import db.elementsUpdatedAt
 import db.getJsonObject
 import db.getZonedDateTime
 import io.requery.android.database.sqlite.SQLiteOpenHelper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 class ElementQueries(private val db: SQLiteOpenHelper) {
 
     suspend fun insertOrReplace(elements: List<Element>) {
+        if (elements.isEmpty()) {
+            return
+        }
+
         withContext(Dispatchers.IO) {
             db.writableDatabase.transaction {
                 elements.forEach {
@@ -43,6 +50,8 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                 }
             }
         }
+
+        elementsUpdatedAt.update { LocalDateTime.now() }
     }
 
     suspend fun selectById(id: String): Element? {

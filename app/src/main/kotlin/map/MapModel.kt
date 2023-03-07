@@ -54,7 +54,7 @@ class MapModel(
     init {
         combine(
             mapViewport,
-            conf.conf.map { it.lastSyncDate },
+            db.elementsUpdatedAt,
             _excludedCategories
         ) { viewport, _, excludedCategories ->
             withContext(Dispatchers.Default) {
