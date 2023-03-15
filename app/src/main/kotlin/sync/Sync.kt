@@ -30,6 +30,7 @@ class Sync(
     val active = _active.asStateFlow()
 
     suspend fun sync() {
+        val startTime = System.currentTimeMillis()
         _active.update { true }
         Log.d(TAG, "Sync was requested")
 
@@ -44,79 +45,54 @@ class Sync(
             return
         }
 
-        Log.d(TAG, "Fetching bundled elements")
+        runCatching {
+            Log.d(TAG, "Fetching bundled elements")
+            elementsRepo.fetchBundledElements()
 
-        elementsRepo.fetchBundledElements().onSuccess {
-            Log.d(
-                TAG,
-                "Fetched ${it.createdOrUpdatedElements} bundled elements in ${it.timeMillis} ms"
-            )
+            withContext(Dispatchers.Default) {
+                listOf(
+                    async { elementsRepo.sync() },
+                    async { reportsRepo.sync() },
+                    async {
+                        areasRepo.sync().onSuccess {
+                            Log.d(
+                                TAG,
+                                "Fetched ${it.createdOrUpdatedAreas} new or updated areas in ${it.timeMillis} ms"
+                            )
+                        }.onFailure {
+                            Log.e(TAG, "Failed to fetch new or updated areas", it)
+                        }
+                    },
+                    async {
+                        usersRepo.sync().onSuccess {
+                            Log.d(
+                                TAG,
+                                "Fetched ${it.createdOrUpdatedUsers} new or updated users in ${it.timeMillis} ms"
+                            )
+                        }.onFailure {
+                            Log.e(TAG, "Failed to fetch new or updated users", it)
+                        }
+                    },
+                    async {
+                        eventsRepo.sync().onSuccess {
+                            Log.d(
+                                TAG,
+                                "Fetched ${it.createdOrUpdatedEvents} new or updated events in ${it.timeMillis} ms"
+                            )
+                        }.onFailure {
+                            Log.e(TAG, "Failed to fetch new or updated events", it)
+                        }
+                    },
+                ).awaitAll()
+            }
+        }.onSuccess {
+            Log.d(TAG, "Finished sync in ${System.currentTimeMillis() - startTime} ms")
+            confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
+            _active.update { false }
         }.onFailure {
-            Log.e(TAG, "Failed to fetch bundled elements", it)
+            Log.e(TAG, "Sync failed", it)
+            _active.update { false }
         }
-
-        val startTime = System.currentTimeMillis()
-
-        withContext(Dispatchers.Default) {
-            listOf(
-                async {
-                    elementsRepo.sync().onSuccess {
-                        Log.d(
-                            TAG,
-                            "Fetched ${it.createdOrUpdatedElements} new or updated elements in ${it.timeMillis} ms"
-                        )
-                    }.onFailure {
-                        Log.e(TAG, "Failed to fetch new or updated elements", it)
-                    }
-                },
-                async {
-                    reportsRepo.sync().onSuccess {
-                        Log.d(
-                            TAG,
-                            "Fetched ${it.createdOrUpdatedReports} new or updated reports in ${it.timeMillis} ms"
-                        )
-                    }.onFailure {
-                        Log.e(TAG, "Failed to fetch new or updated reports", it)
-                    }
-                },
-                async {
-                    areasRepo.sync().onSuccess {
-                        Log.d(
-                            TAG,
-                            "Fetched ${it.createdOrUpdatedAreas} new or updated areas in ${it.timeMillis} ms"
-                        )
-                    }.onFailure {
-                        Log.e(TAG, "Failed to fetch new or updated areas", it)
-                    }
-                },
-                async {
-                    usersRepo.sync().onSuccess {
-                        Log.d(
-                            TAG,
-                            "Fetched ${it.createdOrUpdatedUsers} new or updated users in ${it.timeMillis} ms"
-                        )
-                    }.onFailure {
-                        Log.e(TAG, "Failed to fetch new or updated users", it)
-                    }
-                },
-                async {
-                    eventsRepo.sync().onSuccess {
-                        Log.d(
-                            TAG,
-                            "Fetched ${it.createdOrUpdatedEvents} new or updated events in ${it.timeMillis} ms"
-                        )
-                    }.onFailure {
-                        Log.e(TAG, "Failed to fetch new or updated events", it)
-                    }
-                },
-            ).awaitAll()
-        }
-
-        Log.d(TAG, "Finished sync in ${System.currentTimeMillis() - startTime} ms")
-
-        confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
-
-        _active.update { false }
     }
 
     companion object {

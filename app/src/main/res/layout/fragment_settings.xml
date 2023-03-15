@@ -88,6 +88,29 @@
             </LinearLayout>
 
             <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/database"
+                    android:textColor="?colorOnSurface"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/lastSyncDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.6"
+                    android:textAppearance="?textAppearanceListItemSecondary"
+                    tools:text="Last sync: 2023-03-15 10:33" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/account"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

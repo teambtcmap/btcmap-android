@@ -15,6 +15,9 @@ import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.FragmentSettingsBinding
 import org.koin.android.ext.android.inject
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 class SettingsFragment : Fragment() {
 
@@ -58,6 +61,18 @@ class SettingsFragment : Fragment() {
         binding.showTags.isChecked = conf.conf.value.showTags
         binding.showTags.setOnCheckedChangeListener { _, isChecked ->
             conf.update { it.copy(showTags = isChecked) }
+        }
+
+        val lastSyncDate = conf.conf.value.lastSyncDate
+
+        if (lastSyncDate != null) {
+            val dateFormat = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+            binding.lastSyncDate.text = getString(
+                R.string.last_sync_s,
+                dateFormat.format(lastSyncDate.withZoneSameInstant(ZoneOffset.systemDefault())),
+            )
+        } else {
+            binding.lastSyncDate.setText(R.string.database_is_empty)
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
