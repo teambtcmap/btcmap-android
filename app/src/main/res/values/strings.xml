@@ -3,8 +3,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">BTC Map</string>
     <string name="add_location">Add location</string>
-    <string name="search">Search</string>
-    <string name="clear_search">Clear search</string>
     <string name="kilometers_short">km</string>
     <string name="icon">Icon</string>
     <string name="donate">Donate</string>
@@ -16,7 +14,6 @@
     <string name="help_us_improve_btc_map">Help us improve BTC Map</string>
     <string name="show_my_location">Show my location</string>
     <string name="show_tags">Show tags</string>
-    <string name="hide_tags">Hide tags</string>
     <string name="copy_lnurl">Copy LNURL</string>
     <string name="search_here">Search here</string>
     <string name="settings">Settings</string>
@@ -40,8 +37,6 @@
     <string name="by_s">by %1$s</string>
     <string name="unnamed_place">Unnamed place</string>
     <string name="unnamed_user">Unnamed user</string>
-    <string name="outdated">Outdated</string>
-    <string name="up_to_date">Up-to-date</string>
     <string name="not_verified">Not verified</string>
     <string name="show_more">Show more</string>
     <string name="verify">Verify or Report</string>
