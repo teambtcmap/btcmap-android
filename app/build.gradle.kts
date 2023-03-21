@@ -80,7 +80,6 @@ android {
             // Includes the default ProGuard rules file
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
             )
         }
     }
@@ -103,7 +102,7 @@ tasks.register("bundleData") {
 dependencies {
     // Platform-agnostic JSON serialization
     // https://github.com/Kotlin/kotlinx.serialization/releases
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 
     // Simplifies in-app navigation
     // https://developer.android.com/jetpack/androidx/releases/navigation

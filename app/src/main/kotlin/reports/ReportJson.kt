@@ -7,21 +7,21 @@ import java.time.ZonedDateTime
 
 @Serializable
 data class ReportJson(
-    val area_id: String,
+    val areaId: String,
     val date: String,
     val tags: JsonObject,
-    val created_at: String,
-    val updated_at: String,
-    val deleted_at: String,
+    val createdAt: String,
+    val updatedAt: String,
+    val deletedAt: String,
 )
 
 fun ReportJson.toReport(): Report {
     return Report(
-        areaId = area_id,
+        areaId = areaId,
         date = LocalDate.parse(date),
         tags = tags,
-        createdAt = ZonedDateTime.parse(created_at),
-        updatedAt = ZonedDateTime.parse(updated_at),
-        deletedAt = if (deleted_at.isNotEmpty()) ZonedDateTime.parse(deleted_at) else null,
+        createdAt = ZonedDateTime.parse(createdAt),
+        updatedAt = ZonedDateTime.parse(updatedAt),
+        deletedAt = if (deletedAt.isNotEmpty()) ZonedDateTime.parse(deletedAt) else null,
     )
 }

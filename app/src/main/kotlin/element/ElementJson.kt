@@ -10,11 +10,11 @@ import java.time.ZonedDateTime
 @Serializable
 data class ElementJson(
     val id: String,
-    val osm_json: JsonObject,
+    val osmJson: JsonObject,
     val tags: JsonObject,
-    val created_at: String,
-    val updated_at: String,
-    val deleted_at: String,
+    val createdAt: String,
+    val updatedAt: String,
+    val deletedAt: String,
 )
 
 fun ElementJson.toElement(): Element {
@@ -24,11 +24,11 @@ fun ElementJson.toElement(): Element {
         id = id,
         lat = latLon.first,
         lon = latLon.second,
-        osmJson = osm_json,
+        osmJson = osmJson,
         tags = tags,
-        createdAt = ZonedDateTime.parse(created_at),
-        updatedAt = ZonedDateTime.parse(updated_at),
-        deletedAt = if (deleted_at.isNotBlank()) ZonedDateTime.parse(deleted_at) else null,
+        createdAt = ZonedDateTime.parse(createdAt),
+        updatedAt = ZonedDateTime.parse(updatedAt),
+        deletedAt = if (deletedAt.isNotBlank()) ZonedDateTime.parse(deletedAt) else null,
     )
 }
 
@@ -36,11 +36,11 @@ fun ElementJson.getLatLon(): Pair<Double, Double> {
     val lat: Double
     val lon: Double
 
-    if (osm_json["type"]!!.jsonPrimitive.content == "node") {
-        lat = osm_json["lat"]!!.jsonPrimitive.double
-        lon = osm_json["lon"]!!.jsonPrimitive.double
+    if (osmJson["type"]!!.jsonPrimitive.content == "node") {
+        lat = osmJson["lat"]!!.jsonPrimitive.double
+        lon = osmJson["lon"]!!.jsonPrimitive.double
     } else {
-        val bounds = osm_json["bounds"]!!.jsonObject
+        val bounds = osmJson["bounds"]!!.jsonObject
 
         val boundsMinLat = bounds["minlat"]!!.jsonPrimitive.double
         val boundsMinLon = bounds["minlon"]!!.jsonPrimitive.double

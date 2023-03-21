@@ -19,9 +19,9 @@ class AreaJsonTest {
                         "geo_json" to JsonObject(emptyMap()),
                     ),
                 ),
-                created_at = "",
-                updated_at = "",
-                deleted_at = "",
+                createdAt = "",
+                updatedAt = "",
+                deletedAt = "",
             ).valid(),
         )
 
@@ -38,9 +38,9 @@ class AreaJsonTest {
                         "box:east" to JsonPrimitive(10),
                     ),
                 ),
-                created_at = "",
-                updated_at = "",
-                deleted_at = "",
+                createdAt = "",
+                updatedAt = "",
+                deletedAt = "",
             ).valid(),
         )
     }

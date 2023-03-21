@@ -33,6 +33,8 @@ import user.UsersModel
 import user.UsersRepo
 import filter.FilterElementsModel
 import filter.FilterResultModel
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.JsonNamingStrategy
 import org.koin.dsl.bind
 
 val appModule = module {
@@ -46,7 +48,13 @@ val appModule = module {
             .build()
     }
 
-    single { Json { ignoreUnknownKeys = true } }
+    @OptIn(ExperimentalSerializationApi::class)
+    single {
+        Json {
+            ignoreUnknownKeys = true
+            namingStrategy = JsonNamingStrategy.SnakeCase
+        }
+    }
 
     singleOf(::ApiImpl).bind(Api::class)
 

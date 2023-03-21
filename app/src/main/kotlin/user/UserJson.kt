@@ -7,20 +7,20 @@ import java.time.ZonedDateTime
 @Serializable
 data class UserJson(
     val id: Long,
-    val osm_json: JsonObject,
+    val osmJson: JsonObject,
     val tags: JsonObject,
-    val created_at: String,
-    val updated_at: String,
-    val deleted_at: String,
+    val createdAt: String,
+    val updatedAt: String,
+    val deletedAt: String,
 )
 
 fun UserJson.toUser(): User {
     return User(
         id = id,
-        osmJson = osm_json,
+        osmJson = osmJson,
         tags = tags,
-        createdAt = ZonedDateTime.parse(created_at),
-        updatedAt = ZonedDateTime.parse(updated_at),
-        deletedAt = if (deleted_at.isNotBlank()) ZonedDateTime.parse(deleted_at) else null,
+        createdAt = ZonedDateTime.parse(createdAt),
+        updatedAt = ZonedDateTime.parse(updatedAt),
+        deletedAt = if (deletedAt.isNotBlank()) ZonedDateTime.parse(deletedAt) else null,
     )
 }
