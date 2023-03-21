@@ -2,6 +2,7 @@ package filter
 
 import android.app.Application
 import androidx.test.platform.app.InstrumentationRegistry
+import api.ApiImpl
 import db.inMemoryDatabase
 import element.ElementQueries
 import element.ElementsRepo
@@ -21,10 +22,10 @@ class FilterElementsModelTest {
     @Before
     fun beforeEach() {
         model = FilterElementsModel(ElementsRepo(
+            api = ApiImpl(OkHttpClient(), Json.Default),
             app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as Application,
-            elementQueries = ElementQueries(inMemoryDatabase()),
+            queries = ElementQueries(inMemoryDatabase()),
             json = Json.Default,
-            httpClient = OkHttpClient(),
         ))
     }
 

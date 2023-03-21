@@ -47,7 +47,7 @@ class DonationFragmentTest {
                 val context = InstrumentationRegistry.getInstrumentation().targetContext
                 val clipManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clipboardText = clipManager.primaryClip!!.getItemAt(clipManager.primaryClip!!.itemCount - 1).text
-                assertEquals(context.getString(R.string.donation_address_ln), clipboardText)
+                assertEquals(context.getString(R.string.donation_address_lightning), clipboardText)
             }
         }
     }

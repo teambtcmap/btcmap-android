@@ -2,6 +2,7 @@ package element
 
 import android.app.Application
 import androidx.test.platform.app.InstrumentationRegistry
+import api.ApiImpl
 import db.inMemoryDatabase
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -23,10 +24,10 @@ class ElementsRepoTest {
         queries = ElementQueries(inMemoryDatabase())
 
         repo = ElementsRepo(
+            api = ApiImpl(OkHttpClient(), Json.Default),
             app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as Application,
-            elementQueries = queries,
+            queries = queries,
             json = Json.Default,
-            httpClient = OkHttpClient(),
         )
     }
 

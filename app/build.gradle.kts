@@ -120,7 +120,7 @@ dependencies {
 
     // Material design components
     // https://github.com/material-components/material-components-android/releases
-    implementation("com.google.android.material:material:1.8.0")
+    implementation("com.google.android.material:material:1.9.0-beta01")
 
     // Helps to split the app into multiple independent screens
     // https://developer.android.com/jetpack/androidx/releases/fragment
@@ -155,7 +155,7 @@ dependencies {
     // TODO remove bundled SQLite when Android bumps its deps
     // > The JSON functions and operators are built into SQLite by default, as of SQLite version 3.38.0 (2022-02-22).
     // https://www.sqlite.org/json1.html
-    implementation("com.github.requery:sqlite-android:3.39.2")
+    implementation("com.github.requery:sqlite-android:3.41.1")
 
     // Used to download, cache and display images
     // https://github.com/coil-kt/coil/releases
