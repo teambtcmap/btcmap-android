@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 val elementsUpdatedAt = MutableStateFlow(LocalDateTime.now())
 
 fun persistentDatabase(context: Context): SQLiteOpenHelper {
-    return Database(context, "btcmap-2023-03-04.db")
+    return Database(context, "btcmap-2023-03-22.db")
 }
 
 fun inMemoryDatabase(): SQLiteOpenHelper {
@@ -75,6 +75,7 @@ private class Database(context: Context?, name: String?) : SQLiteOpenHelper(
                 type TEXT NOT NULL,
                 element_id TEXT NOT NULL,
                 user_id INTEGER NOT NULL,
+                tags TEXT NOT NULL,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL,
                 deleted_at TEXT NOT NULL

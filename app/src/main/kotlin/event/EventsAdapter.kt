@@ -18,6 +18,8 @@ class EventsAdapter(
     private val listener: Listener,
 ) : ListAdapter<EventsAdapter.Item, EventsAdapter.ItemViewHolder>(DiffCallback()) {
 
+    var canLoadMore = true
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val binding = ItemEventBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -29,7 +31,7 @@ class EventsAdapter(
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-        holder.bind(getItem(position), position == itemCount - 1, listener)
+        holder.bind(getItem(position), canLoadMore && position == itemCount - 1, listener)
     }
 
     class ItemViewHolder(
@@ -38,7 +40,7 @@ class EventsAdapter(
         binding.root,
     ) {
 
-        fun bind(item: Item, isLast: Boolean, listener: Listener) {
+        fun bind(item: Item, showLoadMoreButton: Boolean, listener: Listener) {
             binding.apply {
                 when (item.type) {
                     "create" -> icon.setImageResource(R.drawable.add)
@@ -91,7 +93,7 @@ class EventsAdapter(
                     tip.isVisible = false
                 }
 
-                showMoreContainer.isVisible = isLast
+                showMoreContainer.isVisible = showLoadMoreButton
                 showMore.setOnClickListener { listener.onShowMoreClick() }
 
                 root.setOnClickListener { listener.onItemClick(item) }

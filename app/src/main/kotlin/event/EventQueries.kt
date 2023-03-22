@@ -22,16 +22,18 @@ class EventQueries(private val db: SQLiteOpenHelper) {
                         type,
                         element_id,
                         user_id,
+                        tags,
                         created_at,
                         updated_at,
                         deleted_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?);
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                     """,
                     arrayOf(
                         it.id,
                         it.type,
                         it.elementId,
                         it.userId,
+                        it.tags,
                         it.createdAt,
                         it.updatedAt,
                         it.deletedAt ?: "",

@@ -17,11 +17,11 @@ class UsersRepo(
             var count = 0L
 
             while (true) {
-                val events = api.getUsers(queries.selectMaxUpdatedAt(), BATCH_SIZE)
-                count += events.size
-                queries.insertOrReplace(events.map { it.toUser() })
+                val users = api.getUsers(queries.selectMaxUpdatedAt(), BATCH_SIZE)
+                count += users.size
+                queries.insertOrReplace(users.map { it.toUser() })
 
-                if (events.size < BATCH_SIZE) {
+                if (users.size < BATCH_SIZE) {
                     break
                 }
             }

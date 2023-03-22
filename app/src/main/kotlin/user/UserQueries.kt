@@ -53,7 +53,7 @@ data class UserQueries(private val db: SQLiteOpenHelper) {
                     json_extract(u.osm_json, '$.description') AS description,
                     count(e.user_id) AS changes
                 FROM user u
-                LEFT JOIN event e ON e.user_id = u.id AND e.deleted_at = ''
+                LEFT JOIN event e ON e.user_id = u.id AND json_extract(e.tags, '$.automated') IS NULL
                 GROUP BY u.id
                 ORDER BY changes DESC;
                 """

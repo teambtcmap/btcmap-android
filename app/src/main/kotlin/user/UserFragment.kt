@@ -42,7 +42,9 @@ class UserFragment : Fragment() {
         }
 
         override fun onShowMoreClick() {}
-    })
+    }).apply {
+        canLoadMore = false
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
