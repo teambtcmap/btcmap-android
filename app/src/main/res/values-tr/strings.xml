@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">BTC Haritası</string>
+    <string name="add_location">Konum ekle</string>
+    <string name="kilometers_short">km</string>
+    <string name="icon">Simge</string>
+    <string name="donate">Bağış yap</string>
+    <string name="qr_code">QR kod</string>
+    <string name="copied_to_clipboard">Panoya kopyalandı</string>
+    <string name="btc_map_donation_address">BTC Haritası bağış adresi</string>
+    <string name="donation_address_onchain" translatable="false">bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz</string>
+    <string name="donation_address_lightning" translatable="false">LNURL1DP68GURN8GHJ7MT9WF3KSCTWW3EJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQCJQMEY</string>
+    <string name="help_us_improve_btc_map">BTC Haritasını iyileştirmemize yardımcı olun</string>
+    <string name="show_my_location">Konumumu göster</string>
+    <string name="show_tags">Etiketleri göster</string>
+    <string name="copy_lnurl">LNURL\'yi kopyala</string>
+    <string name="search_here">Burda ara</string>
+    <string name="settings">Ayarlar</string>
+    <string name="themed_pins">Temalı pimler</string>
+    <string name="dark_map">Karanlık harita</string>
+    <string name="trends">Trendler</string>
+    <string name="up_to_date_places">Güncel yerler</string>
+    <string name="total_places">Toplam yerler</string>
+    <string name="pay">Öde</string>
+    <string name="copy_address">Adresi kopyala</string>
+    <string name="you_dont_have_a_compatible_wallet">Uyumlu bir cüzdanınız yok</string>
+    <string name="communities">Topluluklar</string>
+    <string name="latest_changes">Son değişiklikler</string>
+    <string name="legacy_places">Eski yerler</string>
+    <string name="tip" tools:ignore="ExtraTranslation">⚡ İpucu</string>
+    <string name="osm_copyright">© OpenStreetMap katkıda bulunanlar</string>
+    <string name="view_on_osm">OSM\'de görüntüle</string>
+    <string name="edit_on_osm">OSM\'de düzenle</string>
+    <string name="supertagger_manual">Süper etiketleme kılavuzu</string>
+    <string name="top_supertaggers">En iyi süper etiketleyiciler</string>
+    <string name="by_s">%1$s tarafından</string>
+    <string name="unnamed_place">İsimsiz yer</string>
+    <string name="unnamed_user">Adsız kullanıcı</string>
+    <string name="not_verified">Doğrulanmadı</string>
+    <string name="show_more">Daha fazla göster</string>
+    <string name="verify">Doğrula veya Raporla</string>
+    <string name="field_is_empty">Alan boş</string>
+    <string name="login">Giriş yap</string>
+    <string name="password">Şifre</string>
+    <string name="email_address_or_username">E-mail adresi veya kullanıcı adı</string>
+    <string name="log_out">Çıkış yap</string>
+    <string name="connect_osm_account">OSM hesabını bağlayın</string>
+    <string name="failed_to_login">Giriş yapılamadı</string>
+    <string name="logged_in">Giriş</string>
+    <string name="edit_tags">Etiketleri düzenle</string>
+    <string name="your_changes_have_been_uploaded">Değişiklikleriniz yüklendi ve bir saat içinde haritada görünecektir.</string>
+    <string name="describe_your_changes">Değişikliklerinizi açıklayın</string>
+    <string name="upload">Yükle</string>
+    <string name="please_describe_your_changes">Lütfen değişikliklerinizi açıklayın</string>
+    <string name="failed_to_create_a_changeset">Değişiklik kümesi oluşturulamadı</string>
+    <string name="failed_to_update_tags">Etiketler güncellenemedi</string>
+    <string name="ways_and_relations_are_not_supported">Yollar ve ilişkiler desteklenmiyor</string>
+    <string name="add_tag">Etiket ekle</string>
+    <string name="delete_tag">Etiketi sil</string>
+    <string name="atm">ATM</string>
+    <string name="checkmark_icon">Onay işareti simgesi</string>
+    <string name="filter">Filtre</string>
+    <string name="syncing_data">Veriler senkronize ediliyor</string>
+    <string name="database">Veri tabanı</string>
+    <string name="last_sync_s">Son senkronizasyon: %1$s</string>
+    <string name="database_is_empty">Veritabanı boş</string>
+    <plurals name="d_changes">
+        <item quantity="zero">%d changes</item>
+        <item quantity="one">%d change</item>
+        <item quantity="two">%d changes</item>
+        <item quantity="few">%d changes</item>
+        <item quantity="many">%d changes</item>
+        <item quantity="other">%d changes</item>
+    </plurals>
+    <plurals name="d_places">
+        <item quantity="zero">%d places</item>
+        <item quantity="one">%d place</item>
+        <item quantity="two">%d places</item>
+        <item quantity="few">%d places</item>
+        <item quantity="many">%d places</item>
+        <item quantity="other">%d places</item>
+    </plurals>
+</resources>
