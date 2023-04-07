@@ -1,0 +1,9 @@
+Ana Özellikler:
+
+* Bitcoinlerinizi nerede harcayabileceğinizi görün
+* Yerel işletmeleri mal ve hizmetlerini satın alarak bitcoin kabul etmeye teşvik edin
+ * Açık Sokak Haritası ile kolayca yeni yerler ekleyin veya mevcut yerleri düzenleyin
+ * Daha eski ve daha ucuz cihazlarda bile sorunsuz ve hızlı kullanıcı deneyimi
+ * Modern ve minimalist Materyal Tasarımının keyfini çıkarın
+ * Hem açık hem de koyu temalar desteklenir
+ * Bu, gizliliğinize saygı duyan açık kaynaklı bir uygulamadır
