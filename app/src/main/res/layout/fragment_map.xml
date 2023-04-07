@@ -32,7 +32,7 @@
         android:layout_gravity="start|bottom"
         android:layout_margin="24dp"
         android:text="@string/osm_copyright"
-        android:textColor="#aa000000"
+        android:textColor="?colorOnSurface"
         android:textSize="12sp" />
 
     <FrameLayout
