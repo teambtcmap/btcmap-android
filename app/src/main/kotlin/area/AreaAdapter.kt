@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import icons.iconTypeface
+import map.enableDarkModeIfNecessary
 import map.showPolygons
 import okhttp3.HttpUrl
 import org.btcmap.databinding.ItemAreaElementBinding
@@ -107,6 +108,7 @@ class AreaAdapter(
             listener: Listener,
         ) {
             if (item is Item.Map && binding is ItemMapBinding) {
+                binding.map.enableDarkModeIfNecessary()
                 binding.map.showPolygons(item.polygons, item.paddingPx)
                 binding.root.setOnClickListener { listener.onMapClick() }
             }

@@ -37,7 +37,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import area.AreaResultModel
 import area.polygons
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.search.SearchView
 import com.google.android.material.snackbar.Snackbar
 import element.ElementFragment
 import element.ElementsCluster
@@ -189,6 +188,7 @@ class MapFragment : Fragment() {
             setMultiTouchControls(true)
             addLocationOverlay()
             addCancelSelectionOverlay()
+            enableDarkModeIfNecessary()
         }
 
         bottomSheetBehavior = BottomSheetBehavior.from(binding.elementDetails)
@@ -373,27 +373,6 @@ class MapFragment : Fragment() {
             }
         }
 
-        binding.searchView.addTransitionListener { _, _, newState ->
-            when (newState) {
-                SearchView.TransitionState.SHOWN -> {
-                    WindowCompat.getInsetsController(
-                        requireActivity().window,
-                        requireActivity().window.decorView,
-                    ).isAppearanceLightStatusBars =
-                        when (requireContext().resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) {
-                            android.content.res.Configuration.UI_MODE_NIGHT_NO -> true
-                            else -> false
-                        }
-                }
-                else -> {
-                    WindowCompat.getInsetsController(
-                        requireActivity().window,
-                        requireActivity().window.decorView,
-                    ).isAppearanceLightStatusBars = !darkMap
-                }
-            }
-        }
-
         val searchAdapter = SearchAdapter { row ->
             binding.searchView.clearText()
             binding.searchView.hide()
@@ -430,33 +409,6 @@ class MapFragment : Fragment() {
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        val nightMode =
-            resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
-
-        val darkMap = nightMode && model.conf.conf.value.darkMap
-
-        WindowCompat.getInsetsController(
-            requireActivity().window,
-            requireActivity().window.decorView,
-        ).isAppearanceLightStatusBars = !darkMap
-    }
-
-    override fun onPause() {
-        WindowCompat.getInsetsController(
-            requireActivity().window,
-            requireActivity().window.decorView,
-        ).isAppearanceLightStatusBars =
-            when (requireContext().resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) {
-                android.content.res.Configuration.UI_MODE_NIGHT_NO -> true
-                else -> false
-            }
-
-        super.onPause()
     }
 
     override fun onDestroyView() {
@@ -526,31 +478,6 @@ class MapFragment : Fragment() {
     private fun BottomSheetBehavior<*>.addSlideCallback() {
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
-                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    requireActivity().window.statusBarColor = requireContext().getSurfaceColor()
-
-                    WindowCompat.getInsetsController(
-                        requireActivity().window,
-                        requireActivity().window.decorView,
-                    ).isAppearanceLightStatusBars =
-                        when (requireContext().resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) {
-                            android.content.res.Configuration.UI_MODE_NIGHT_NO -> true
-                            else -> false
-                        }
-                } else {
-                    requireActivity().window.statusBarColor = Color.TRANSPARENT
-
-                    val nightMode =
-                        resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
-
-                    val darkMap = nightMode && model.conf.conf.value.darkMap
-
-                    WindowCompat.getInsetsController(
-                        requireActivity().window,
-                        requireActivity().window.decorView,
-                    ).isAppearanceLightStatusBars = !darkMap
-                }
-
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                     model.selectElement("", false)
                     binding.fab.show()
