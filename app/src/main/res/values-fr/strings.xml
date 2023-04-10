@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">BTC Map</string>
+    <string name="add_location">Ajouter une lieu</string>
+    <string name="kilometers_short">km</string>
+    <string name="icon">Icone</string>
+    <string name="donate">Don</string>
+    <string name="qr_code">Code QR</string>
+    <string name="copied_to_clipboard">Copier dans le presse-papier</string>
+    <string name="btc_map_donation_address">BTC Map adresse de don</string>
+    <string name="donation_address_onchain" translatable="false">bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz</string>
+    <string name="donation_address_lightning" translatable="false">LNURL1DP68GURN8GHJ7MT9WF3KSCTWW3EJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQCJQMEY</string>
+    <string name="help_us_improve_btc_map">Aidez-vous à améliorer BTC Map</string>
+    <string name="show_my_location">Voir mon emplacement</string>
+    <string name="show_tags">Montrer les étiquettes</string>
+    <string name="copy_lnurl">Copier LNURL</string>
+    <string name="search_here">Rechercher ici</string>
+    <string name="settings">Paramètres</string>
+    <string name="themed_pins">Thèmes épinglés</string>
+    <string name="dark_map">Carte sombre</string>
+    <string name="trends">Tendances</string>
+    <string name="up_to_date_places">Lieux à jour</string>
+    <string name="total_places">Total lieux</string>
+    <string name="pay">Payer</string>
+    <string name="copy_address">Copier l'adresse</string>
+    <string name="you_dont_have_a_compatible_wallet">Vous n\'avez pas un porte-feuille compatible</string>
+    <string name="communities">Communautés</string>
+    <string name="latest_changes">Derniers changements</string>
+    <string name="legacy_places">Legacy places</string>
+    <string name="tip" tools:ignore="ExtraTranslation">⚡ Tip</string>
+    <string name="osm_copyright">© OpenStreetMap contributors</string>
+    <string name="view_on_osm">Voir sur OSM</string>
+    <string name="edit_on_osm">Editer on OSM</string>
+    <string name="supertagger_manual">Super-étiquetteurs manual</string>
+    <string name="top_supertaggers">Top super-étiquetteurs</string>
+    <string name="by_s">par %1$s</string>
+    <string name="unnamed_place">Lieu sans nom</string>
+    <string name="unnamed_user">Utilisateur-trice-s sans nom</string>
+    <string name="not_verified">Non vérifié</string>
+    <string name="show_more">Voir plus</string>
+    <string name="verify">Vérifier ou signaler</string>
+    <string name="field_is_empty">Champ est vide</string>
+    <string name="login">Connexion</string>
+    <string name="password">Mot de passe</string>
+    <string name="email_address_or_username">Adresse e-mail ou nom d\'utilisateur</string>
+    <string name="log_out">Déconnexion</string>
+    <string name="connect_osm_account">Connecter un compte OSM</string>
+    <string name="failed_to_login">Échec de la connexion</string>
+    <string name="logged_in">Connecté</string>
+    <string name="edit_tags">Editer les étiquettes</string>
+    <string name="your_changes_have_been_uploaded">Vos modifications ont été téléchargées et elles apparaîtront sur la carte d\'ici une heure.</string>
+    <string name="describe_your_changes">Décrire vos modifications</string>
+    <string name="upload">Télécharger</string>
+    <string name="please_describe_your_changes">Veuillez décrire vos modifications</string>
+    <string name="failed_to_create_a_changeset">Échec de la création d'un jeu de modifications</string>
+    <string name="failed_to_update_tags">Échec de la mise à jour des étiquettes</string>
+    <string name="ways_and_relations_are_not_supported">Voies et relations non supportées</string>
+    <string name="add_tag">Ajouter une étiquette</string>
+    <string name="delete_tag">Supprimer une étiquette</string>
+    <string name="atm">DAB</string>
+    <string name="checkmark_icon">Icône de vérification</string>
+    <string name="filter">Filtrer</string>
+    <string name="syncing_data">Synchronisation des données</string>
+    <string name="database">Base de données</string>
+    <string name="last_sync_s">Dernière synchronisation: %1$s</string>
+    <string name="database_is_empty">Base de données est vide</string>
+    <plurals name="d_changes">
+        <item quantity="zero">%d modifications</item>
+        <item quantity="one">%d modification</item>
+        <item quantity="two">%d modifications</item>
+        <item quantity="few">%d modifications</item>
+        <item quantity="many">%d modifications</item>
+        <item quantity="other">%d modifications</item>
+    </plurals>
+    <plurals name="d_places">
+        <item quantity="zero">%d lieux</item>
+        <item quantity="one">%d lieu</item>
+        <item quantity="two">%d lieux</item>
+        <item quantity="few">%d lieux</item>
+        <item quantity="many">%d lieux</item>
+        <item quantity="other">%d lieux</item>
+    </plurals>
+</resources>
