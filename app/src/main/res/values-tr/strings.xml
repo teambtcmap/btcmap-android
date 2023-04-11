@@ -66,19 +66,11 @@
     <string name="last_sync_s">Son senkronizasyon: %1$s</string>
     <string name="database_is_empty">Veritabanı boş</string>
     <plurals name="d_changes">
-        <item quantity="zero">%d changes</item>
         <item quantity="one">%d change</item>
-        <item quantity="two">%d changes</item>
-        <item quantity="few">%d changes</item>
-        <item quantity="many">%d changes</item>
         <item quantity="other">%d changes</item>
     </plurals>
     <plurals name="d_places">
-        <item quantity="zero">%d places</item>
         <item quantity="one">%d place</item>
-        <item quantity="two">%d places</item>
-        <item quantity="few">%d places</item>
-        <item quantity="many">%d places</item>
         <item quantity="other">%d places</item>
     </plurals>
 </resources>

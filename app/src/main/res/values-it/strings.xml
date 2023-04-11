@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">BTC Map</string>
+    <string name="add_location">Add location</string>
+    <string name="kilometers_short">km</string>
+    <string name="icon">Icon</string>
+    <string name="donate">Donate</string>
+    <string name="qr_code">QR code</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="btc_map_donation_address">BTC Map donation address</string>
+    <string name="donation_address_onchain" translatable="false">bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz</string>
+    <string name="donation_address_lightning" translatable="false">LNURL1DP68GURN8GHJ7MT9WF3KSCTWW3EJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQCJQMEY</string>
+    <string name="help_us_improve_btc_map">Help us improve BTC Map</string>
+    <string name="show_my_location">Show my location</string>
+    <string name="show_tags">Show tags</string>
+    <string name="copy_lnurl">Copy LNURL</string>
+    <string name="search_here">Search here</string>
+    <string name="settings">Settings</string>
+    <string name="themed_pins">Themed pins</string>
+    <string name="dark_map">Dark map</string>
+    <string name="trends">Trends</string>
+    <string name="up_to_date_places">Up-to-date places</string>
+    <string name="total_places">Total places</string>
+    <string name="pay">Pay</string>
+    <string name="copy_address">Copy Address</string>
+    <string name="you_dont_have_a_compatible_wallet">You don\'t have a compatible wallet</string>
+    <string name="communities">Communities</string>
+    <string name="latest_changes">Latest changes</string>
+    <string name="legacy_places">Legacy places</string>
+    <string name="tip" tools:ignore="ExtraTranslation">⚡ Tip</string>
+    <string name="osm_copyright">© OpenStreetMap contributors</string>
+    <string name="view_on_osm">View on OSM</string>
+    <string name="edit_on_osm">Edit on OSM</string>
+    <string name="supertagger_manual">Supertagger manual</string>
+    <string name="top_supertaggers">Top supertaggers</string>
+    <string name="by_s">by %1$s</string>
+    <string name="unnamed_place">Unnamed place</string>
+    <string name="unnamed_user">Unnamed user</string>
+    <string name="not_verified">Not verified</string>
+    <string name="show_more">Show more</string>
+    <string name="verify">Verify or Report</string>
+    <string name="field_is_empty">Field is empty</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="email_address_or_username">Email Address or Username</string>
+    <string name="log_out">Log out</string>
+    <string name="connect_osm_account">Connect OSM account</string>
+    <string name="failed_to_login">Failed to login</string>
+    <string name="logged_in">Logged in</string>
+    <string name="edit_tags">Edit tags</string>
+    <string name="your_changes_have_been_uploaded">Your changes have been uploaded and they\'ll appear on the map within an hour.</string>
+    <string name="describe_your_changes">Describe your changes</string>
+    <string name="upload">Upload</string>
+    <string name="please_describe_your_changes">Please describe your changes</string>
+    <string name="failed_to_create_a_changeset">Failed to create a changeset</string>
+    <string name="failed_to_update_tags">Failed to update tags</string>
+    <string name="ways_and_relations_are_not_supported">Ways and relations aren\'t supported</string>
+    <string name="add_tag">Add tag</string>
+    <string name="delete_tag">Delete tag</string>
+    <string name="atm">ATM</string>
+    <string name="checkmark_icon">Checkmark icon</string>
+    <string name="filter">Filter</string>
+    <string name="syncing_data">Syncing data</string>
+    <string name="database">Database</string>
+    <string name="last_sync_s">Last sync: %1$s</string>
+    <string name="database_is_empty">Database is empty</string>
+    <plurals name="d_changes">
+        <item quantity="one">%d change</item>
+        <item quantity="other">%d changes</item>
+    </plurals>
+    <plurals name="d_places">
+        <item quantity="one">%d place</item>
+        <item quantity="other">%d places</item>
+    </plurals>
+</resources>

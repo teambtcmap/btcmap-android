@@ -23,7 +23,7 @@
     <string name="up_to_date_places">Lieux à jour</string>
     <string name="total_places">Total lieux</string>
     <string name="pay">Payer</string>
-    <string name="copy_address">Copier l'adresse</string>
+    <string name="copy_address">Copier l\'adresse</string>
     <string name="you_dont_have_a_compatible_wallet">Vous n\'avez pas un porte-feuille compatible</string>
     <string name="communities">Communautés</string>
     <string name="latest_changes">Derniers changements</string>
@@ -53,7 +53,7 @@
     <string name="describe_your_changes">Décrire vos modifications</string>
     <string name="upload">Télécharger</string>
     <string name="please_describe_your_changes">Veuillez décrire vos modifications</string>
-    <string name="failed_to_create_a_changeset">Échec de la création d'un jeu de modifications</string>
+    <string name="failed_to_create_a_changeset">Échec de la création d\'un jeu de modifications</string>
     <string name="failed_to_update_tags">Échec de la mise à jour des étiquettes</string>
     <string name="ways_and_relations_are_not_supported">Voies et relations non supportées</string>
     <string name="add_tag">Ajouter une étiquette</string>
@@ -66,18 +66,12 @@
     <string name="last_sync_s">Dernière synchronisation: %1$s</string>
     <string name="database_is_empty">Base de données est vide</string>
     <plurals name="d_changes">
-        <item quantity="zero">%d modifications</item>
         <item quantity="one">%d modification</item>
-        <item quantity="two">%d modifications</item>
-        <item quantity="few">%d modifications</item>
         <item quantity="many">%d modifications</item>
         <item quantity="other">%d modifications</item>
     </plurals>
     <plurals name="d_places">
-        <item quantity="zero">%d lieux</item>
         <item quantity="one">%d lieu</item>
-        <item quantity="two">%d lieux</item>
-        <item quantity="few">%d lieux</item>
         <item quantity="many">%d lieux</item>
         <item quantity="other">%d lieux</item>
     </plurals>

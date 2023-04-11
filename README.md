@@ -27,6 +27,43 @@
 
 [btcmap.org/support-us](https://btcmap.org/support-us)
 
+## 🌍 Help with Translation
+
+- [Afrikaans](app/src/main/res/values-af/strings.xml)
+- [Arabic](/app/src/main/res/values-ar/strings.xml)
+- [Bengali](/app/src/main/res/values-bn/strings.xml)
+- [Catalan](/app/src/main/res/values-ca/strings.xml)
+- [Chinese](/app/src/main/res/values-zh/strings.xml)
+- [Czech](/app/src/main/res/values-cs/strings.xml)
+- [Danish](/app/src/main/res/values-da/strings.xml)
+- [Dutch](/app/src/main/res/values-nl/strings.xml)
+- [English](/app/src/main/res/values/strings.xml)
+- [Finnish](/app/src/main/res/values-fi/strings.xml)
+- [French](/app/src/main/res/values-fr/strings.xml)
+- [German](/app/src/main/res/values-de/strings.xml)
+- [Greek](/app/src/main/res/values-el/strings.xml)
+- [Hebrew](/app/src/main/res/values-iw/strings.xml)
+- [Hindi](/app/src/main/res/values-hi/strings.xml)
+- [Hungarian](/app/src/main/res/values-hu/strings.xml)
+- [Italian](/app/src/main/res/values-it/strings.xml)
+- [Japanese](/app/src/main/res/values-ja/strings.xml)
+- [Korean](/app/src/main/res/values-ko/strings.xml)
+- [Norwegian](/app/src/main/res/values-no/strings.xml)
+- [Persian](/app/src/main/res/values-fa/strings.xml)
+- [Polish](/app/src/main/res/values-pl/strings.xml)
+- [Portuguese](/app/src/main/res/values-pt/strings.xml)
+- [Romanian](/app/src/main/res/values-ro/strings.xml)
+- [Russian](/app/src/main/res/values-ru/strings.xml)
+- [Serbian](/app/src/main/res/values-sr/strings.xml)
+- [Spanish](/app/src/main/res/values-es/strings.xml)
+- [Swedish](/app/src/main/res/values-sv/strings.xml)
+- [Turkish](/app/src/main/res/values-tr/strings.xml)
+- [Ukrainian](/app/src/main/res/values-uk/strings.xml)
+- [Urdu](/app/src/main/res/values-ur/strings.xml)
+- [Vietnamese](/app/src/main/res/values-vi/strings.xml)
+
+Feel free to open an issue if you can't find your language or regional dialect.
+
 ## FAQ
 
 ### Where does BTC Map take its data from?
