@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="donation_address_onchain" translatable="false">bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz</string>
+    <string name="donation_address_lightning" translatable="false">LNURL1DP68GURN8GHJ7MT9WF3KSCTWW3EJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQCJQMEY</string>
+</resources>

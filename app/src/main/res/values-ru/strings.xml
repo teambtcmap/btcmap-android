@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="app_name">Карта BTC</string>
     <string name="add_location">Добавить место</string>
     <string name="kilometers_short">км</string>
@@ -9,8 +9,6 @@
     <string name="qr_code">QR код</string>
     <string name="copied_to_clipboard">Адрес скопирован в буфер обмена</string>
     <string name="btc_map_donation_address">Адрес для пожертвований BTC Map</string>
-    <string name="donation_address_onchain" translatable="false">bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz</string>
-    <string name="donation_address_lightning" translatable="false">LNURL1DP68GURN8GHJ7MT9WF3KSCTWW3EJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQCJQMEY</string>
     <string name="help_us_improve_btc_map">Помогите нам улучшить BTC Map</string>
     <string name="show_my_location">Показать мое месторасположение</string>
     <string name="show_tags">Показать теги</string>
@@ -28,7 +26,7 @@
     <string name="communities">Сообщества</string>
     <string name="latest_changes">Последние изменения</string>
     <string name="legacy_places">Устаревшие места</string>
-    <string name="tip" tools:ignore="ExtraTranslation">⚡ На чай</string>
+    <string name="tip">⚡ На чай</string>
     <string name="osm_copyright">© Пользователи OpenStreetMap</string>
     <string name="view_on_osm">Открыть на OSM</string>
     <string name="edit_on_osm">Редактировать на OSM</string>
