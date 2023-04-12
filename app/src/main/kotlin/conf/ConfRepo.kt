@@ -33,7 +33,6 @@ class ConfRepo(
         val DEFAULT_CONF = Conf(
             lastSyncDate = null,
             themedPins = true,
-            darkMap = false,
             viewportNorthLat = 11.994133785187255,
             viewportEastLon = 121.95219572432649,
             viewportSouthLat = 11.945223417353624,

@@ -21,7 +21,6 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                     INTO conf (
                         last_sync_date,
                         themed_pins,
-                        dark_map,
                         viewport_north_lat,
                         viewport_east_lon,
                         viewport_south_lat,
@@ -35,7 +34,6 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                     arrayOf(
                         conf.lastSyncDate ?: "",
                         conf.themedPins.toSqliteInt(),
-                        conf.darkMap.toSqliteInt(),
                         conf.viewportNorthLat,
                         conf.viewportEastLon,
                         conf.viewportSouthLat,
@@ -58,7 +56,6 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                 SELECT
                     last_sync_date,
                     themed_pins,
-                    dark_map,
                     viewport_north_lat,
                     viewport_east_lon,
                     viewport_south_lat,
@@ -77,14 +74,13 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
             Conf(
                 lastSyncDate = cursor.getZonedDateTime(0),
                 themedPins = cursor.getBoolean(1),
-                darkMap = cursor.getBoolean(2),
-                viewportNorthLat = cursor.getDouble(3),
-                viewportEastLon = cursor.getDouble(4),
-                viewportSouthLat = cursor.getDouble(5),
-                viewportWestLon = cursor.getDouble(6),
-                showTags = cursor.getBoolean(7),
-                osmLogin = cursor.getString(8),
-                osmPassword = cursor.getString(9),
+                viewportNorthLat = cursor.getDouble(2),
+                viewportEastLon = cursor.getDouble(3),
+                viewportSouthLat = cursor.getDouble(4),
+                viewportWestLon = cursor.getDouble(5),
+                showTags = cursor.getBoolean(6),
+                osmLogin = cursor.getString(7),
+                osmPassword = cursor.getString(8),
             )
         }
     }

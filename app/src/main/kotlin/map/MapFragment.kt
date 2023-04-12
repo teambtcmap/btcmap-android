@@ -60,7 +60,6 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import search.SearchAdapter
@@ -305,11 +304,8 @@ class MapFragment : Fragment() {
         val nightMode =
             resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
 
-        val darkMap = nightMode && model.conf.conf.value.darkMap
-
-        if (darkMap) {
+        if (nightMode) {
             binding.map.overlayManager.tilesOverlay.apply {
-                setColorFilter(TilesOverlay.INVERT_COLORS)
                 loadingBackgroundColor = android.R.color.black
                 loadingLineColor = Color.argb(255, 0, 255, 0)
             }
