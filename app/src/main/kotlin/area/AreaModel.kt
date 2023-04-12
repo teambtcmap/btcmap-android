@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import element.ElementsRepo
 import element.bitcoinSurveyDate
+import element.name
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -74,10 +75,7 @@ class AreaModel(
                     AreaAdapter.Item.Element(
                         id = it.id,
                         iconId = it.icon.ifBlank { "question_mark" },
-                        name = it.osmTags["name"]?.jsonPrimitive?.content
-                            ?: if (it.icon == "local_atm") app.getString(R.string.atm) else app.getString(
-                                R.string.unnamed_place
-                            ),
+                        name = it.osmTags.name(app.resources),
                         status = status,
                         colorResId = colorResId,
                         showCheckmark = surveyDate != null,
