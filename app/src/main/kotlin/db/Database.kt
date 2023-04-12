@@ -41,7 +41,6 @@ private class Database(context: Context?, name: String?) : SQLiteOpenHelper(
             CREATE TABLE conf (
                 last_sync_date TEXT NOT NULL,
                 themed_pins INTEGER NOT NULL,
-                dark_map INTEGER NOT NULL,
                 viewport_north_lat REAL NOT NULL,
                 viewport_east_lon REAL NOT NULL,
                 viewport_south_lat REAL NOT NULL,

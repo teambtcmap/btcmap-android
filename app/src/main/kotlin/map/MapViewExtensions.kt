@@ -50,5 +50,10 @@ fun MapView.enableDarkModeIfNecessary() {
                 }
             }
         )
+
+        overlayManager.tilesOverlay.apply {
+            loadingBackgroundColor = android.R.color.black
+            loadingLineColor = Color.DKGRAY
+        }
     }
 }

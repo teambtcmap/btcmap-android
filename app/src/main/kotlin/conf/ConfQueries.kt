@@ -29,7 +29,7 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                         osm_login,
                         osm_password
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
                     """,
                     arrayOf(
                         conf.lastSyncDate ?: "",
