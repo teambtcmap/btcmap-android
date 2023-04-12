@@ -4,7 +4,6 @@ import java.time.ZonedDateTime
 
 data class Conf(
     val lastSyncDate: ZonedDateTime?,
-    val themedPins: Boolean,
     val viewportNorthLat: Double,
     val viewportEastLon: Double,
     val viewportSouthLat: Double,

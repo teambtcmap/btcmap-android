@@ -20,7 +20,6 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                     INSERT
                     INTO conf (
                         last_sync_date,
-                        themed_pins,
                         viewport_north_lat,
                         viewport_east_lon,
                         viewport_south_lat,
@@ -29,11 +28,10 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                         osm_login,
                         osm_password
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                     """,
                     arrayOf(
                         conf.lastSyncDate ?: "",
-                        conf.themedPins.toSqliteInt(),
                         conf.viewportNorthLat,
                         conf.viewportEastLon,
                         conf.viewportSouthLat,
@@ -55,7 +53,6 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                 """
                 SELECT
                     last_sync_date,
-                    themed_pins,
                     viewport_north_lat,
                     viewport_east_lon,
                     viewport_south_lat,
@@ -73,14 +70,13 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
 
             Conf(
                 lastSyncDate = cursor.getZonedDateTime(0),
-                themedPins = cursor.getBoolean(1),
-                viewportNorthLat = cursor.getDouble(2),
-                viewportEastLon = cursor.getDouble(3),
-                viewportSouthLat = cursor.getDouble(4),
-                viewportWestLon = cursor.getDouble(5),
-                showTags = cursor.getBoolean(6),
-                osmLogin = cursor.getString(7),
-                osmPassword = cursor.getString(8),
+                viewportNorthLat = cursor.getDouble(1),
+                viewportEastLon = cursor.getDouble(2),
+                viewportSouthLat = cursor.getDouble(3),
+                viewportWestLon = cursor.getDouble(4),
+                showTags = cursor.getBoolean(5),
+                osmLogin = cursor.getString(6),
+                osmPassword = cursor.getString(7),
             )
         }
     }

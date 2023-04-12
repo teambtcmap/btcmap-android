@@ -141,7 +141,7 @@ class MapFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         emptyClusterBitmap = null
 
-        val markersRepo = MapMarkersRepo(requireContext(), model.conf)
+        val markersRepo = MapMarkersRepo(requireContext())
 
         binding.searchBar.setOnMenuItemClickListener {
             val nav = findNavController()
@@ -504,7 +504,7 @@ class MapFragment : Fragment() {
                 ContextCompat.getDrawable(requireContext(), R.drawable.cluster)!!
             DrawableCompat.setTint(
                 emptyClusterDrawable,
-                requireContext().getPrimaryContainerColor(model.conf.conf.value)
+                requireContext().getPrimaryContainerColor()
             )
             emptyClusterBitmap =
                 emptyClusterDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
@@ -518,7 +518,7 @@ class MapFragment : Fragment() {
         clusterIcon.applyCanvas {
             val paint = Paint().apply {
                 textSize = pinSizePx.toFloat() / 3
-                color = requireContext().getOnPrimaryContainerColor(model.conf.conf.value)
+                color = requireContext().getOnPrimaryContainerColor()
             }
 
             val text = cluster.count.toString()

@@ -94,7 +94,7 @@ class ElementFragment : Fragment() {
                 mapController.setCenter(startPoint)
                 mapController.zoomTo(19.0)
 
-                val markersRepo = MapMarkersRepo(requireContext(), confRepo)
+                val markersRepo = MapMarkersRepo(requireContext())
                 val marker = Marker(binding.map)
                 marker.position = GeoPoint(element.lat, element.lon)
                 marker.icon = markersRepo.getMarker(

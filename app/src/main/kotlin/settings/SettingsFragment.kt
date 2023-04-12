@@ -47,12 +47,7 @@ class SettingsFragment : Fragment() {
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
-
-        binding.themedPins.isChecked = conf.conf.value.themedPins
-        binding.themedPins.setOnCheckedChangeListener { _, isChecked ->
-            conf.update { it.copy(themedPins = isChecked) }
-        }
-
+        
         binding.showTags.isChecked = conf.conf.value.showTags
         binding.showTags.setOnCheckedChangeListener { _, isChecked ->
             conf.update { it.copy(showTags = isChecked) }

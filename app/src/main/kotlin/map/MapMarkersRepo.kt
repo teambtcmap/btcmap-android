@@ -10,13 +10,11 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
-import conf.ConfRepo
 import icons.iconTypeface
 import org.btcmap.R
 
 class MapMarkersRepo(
     private val context: Context,
-    private val conf: ConfRepo,
 ) {
 
     private val iconPaint by lazy {
@@ -29,7 +27,7 @@ class MapMarkersRepo(
 
             typeface = context.iconTypeface()
             textSize = pinSizePx / 2.1f
-            color = context.getOnPrimaryContainerColor(conf.conf.value)
+            color = context.getOnPrimaryContainerColor()
             isAntiAlias = true
         }
     }
@@ -89,7 +87,7 @@ class MapMarkersRepo(
         } else {
             DrawableCompat.setTint(
                 emptyPinDrawable,
-                context.getPrimaryContainerColor(conf.conf.value)
+                context.getPrimaryContainerColor()
             )
         }
 
