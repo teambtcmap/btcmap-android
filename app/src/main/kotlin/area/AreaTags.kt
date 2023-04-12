@@ -1,15 +1,24 @@
 package area
 
+import android.content.res.Resources
+import element.name
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Polygon
+import java.util.*
 
 typealias AreaTags = JsonObject
 
-fun AreaTags.name(): String {
-    return this["name"]!!.jsonPrimitive.content
+fun AreaTags.name(
+    res: Resources,
+    locale: Locale = Locale.getDefault(),
+): String {
+    return name(
+        res = res,
+        locale = locale,
+    )
 }
 
 fun AreaTags.polygons(): List<Polygon> {

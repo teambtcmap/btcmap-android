@@ -58,7 +58,7 @@ class AreasModel(
                 AreasAdapter.Item(
                     id = it.first.id,
                     iconUrl = it.first.tags["icon:square"]?.jsonPrimitive?.content ?: "",
-                    name = it.first.tags.name(),
+                    name = it.first.tags.name(res = app.resources),
                     distance = distanceStringBuilder.toString(),
                 )
             }
