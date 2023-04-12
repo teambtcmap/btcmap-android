@@ -35,6 +35,7 @@ import filter.FilterElementsModel
 import filter.FilterResultModel
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.JsonNamingStrategy
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.koin.dsl.bind
 
 val appModule = module {
@@ -56,7 +57,13 @@ val appModule = module {
         }
     }
 
-    singleOf(::ApiImpl).bind(Api::class)
+    single {
+        ApiImpl(
+            baseUrl = "https://api.btcmap.org/v2".toHttpUrl(),
+            httpClient = get(),
+            json = get(),
+        )
+    }.bind(Api::class)
 
     singleOf(::AreaQueries)
     singleOf(::AreasRepo)

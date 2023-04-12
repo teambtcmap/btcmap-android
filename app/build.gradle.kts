@@ -128,7 +128,9 @@ dependencies {
 
     // Modern HTTP client
     // https://github.com/square/okhttp/blob/master/CHANGELOG.md
-    implementation("com.squareup.okhttp3:okhttp-brotli:4.10.0")
+    val okhttpVer = "4.10.0"
+    implementation("com.squareup.okhttp3:okhttp-brotli:$okhttpVer")
+    testImplementation("com.squareup.okhttp3:mockwebserver:$okhttpVer")
 
     // Injection library
     // https://github.com/InsertKoinIO/koin/blob/main/CHANGELOG.md
