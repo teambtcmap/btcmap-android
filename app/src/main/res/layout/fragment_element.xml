@@ -172,18 +172,6 @@
                 app:drawableStartCompat="@drawable/schedule"
                 app:drawableTint="?colorSecondary" />
 
-            <TextView
-                android:id="@+id/tags"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="24dp"
-                android:textSize="16sp"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/openingHours"
-                tools:text="Place description." />
-
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

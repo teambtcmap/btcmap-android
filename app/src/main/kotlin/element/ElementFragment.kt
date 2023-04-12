@@ -42,8 +42,6 @@ class ElementFragment : Fragment() {
 
     private val confRepo: ConfRepo by inject()
 
-    private val tagsJsonFormatter by lazy { Json { prettyPrint = true } }
-
     private val resultModel: SearchResultModel by activityViewModel()
 
     private var elementId = ""
@@ -153,8 +151,6 @@ class ElementFragment : Fragment() {
 
             true
         }
-
-        binding.tags.isVisible = confRepo.conf.value.showTags
     }
 
     override fun onDestroyView() {
@@ -288,8 +284,6 @@ class ElementFragment : Fragment() {
         val openingHours = tags["opening_hours"]?.jsonPrimitive?.content
         binding.openingHours.text = openingHours
         binding.openingHours.isVisible = openingHours != null
-
-        binding.tags.text = tagsJsonFormatter.encodeToString(JsonObject.serializer(), tags)
 
         val pouchUsername = element.tags["payment:pouch"]?.jsonPrimitive?.content ?: ""
 

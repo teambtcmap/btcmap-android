@@ -47,11 +47,6 @@ class SettingsFragment : Fragment() {
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
-        
-        binding.showTags.isChecked = conf.conf.value.showTags
-        binding.showTags.setOnCheckedChangeListener { _, isChecked ->
-            conf.update { it.copy(showTags = isChecked) }
-        }
 
         val lastSyncDate = conf.conf.value.lastSyncDate
 

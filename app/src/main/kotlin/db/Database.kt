@@ -20,7 +20,7 @@ private class Database(context: Context?, name: String?) : SQLiteOpenHelper(
     context,
     name,
     null,
-    1,
+    2,
 ) {
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -44,7 +44,6 @@ private class Database(context: Context?, name: String?) : SQLiteOpenHelper(
                 viewport_east_lon REAL NOT NULL,
                 viewport_south_lat REAL NOT NULL,
                 viewport_west_lon REAL NOT NULL,
-                show_tags INTEGER NOT NULL,
                 osm_login TEXT NOT NULL,
                 osm_password TEXT NOT NULL
             );

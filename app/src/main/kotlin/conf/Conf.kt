@@ -8,7 +8,6 @@ data class Conf(
     val viewportEastLon: Double,
     val viewportSouthLat: Double,
     val viewportWestLon: Double,
-    val showTags: Boolean,
     val osmLogin: String,
     val osmPassword: String,
 )

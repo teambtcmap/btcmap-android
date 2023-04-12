@@ -1,9 +1,7 @@
 package conf
 
 import androidx.sqlite.db.transaction
-import db.getBoolean
 import db.getZonedDateTime
-import db.toSqliteInt
 import io.requery.android.database.sqlite.SQLiteOpenHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,11 +22,10 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                         viewport_east_lon,
                         viewport_south_lat,
                         viewport_west_lon,
-                        show_tags,
                         osm_login,
                         osm_password
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                    VALUES (?, ?, ?, ?, ?, ?, ?);
                     """,
                     arrayOf(
                         conf.lastSyncDate ?: "",
@@ -36,7 +33,6 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                         conf.viewportEastLon,
                         conf.viewportSouthLat,
                         conf.viewportWestLon,
-                        conf.showTags.toSqliteInt(),
                         conf.osmLogin,
                         conf.osmPassword,
                     ),
@@ -57,7 +53,6 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                     viewport_east_lon,
                     viewport_south_lat,
                     viewport_west_lon,
-                    show_tags,
                     osm_login,
                     osm_password
                 FROM conf;
@@ -74,9 +69,8 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                 viewportEastLon = cursor.getDouble(2),
                 viewportSouthLat = cursor.getDouble(3),
                 viewportWestLon = cursor.getDouble(4),
-                showTags = cursor.getBoolean(5),
-                osmLogin = cursor.getString(6),
-                osmPassword = cursor.getString(7),
+                osmLogin = cursor.getString(5),
+                osmPassword = cursor.getString(6),
             )
         }
     }
