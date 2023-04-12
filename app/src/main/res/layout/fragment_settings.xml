@@ -50,34 +50,6 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/account"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/accountTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/log_out"
-                    android:textColor="?colorOnSurface"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:id="@+id/accountSubtitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:alpha="0.6"
-                    android:textAppearance="?textAppearanceListItemSecondary"
-                    tools:text="foo@bar.com" />
-
-            </LinearLayout>
-
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="40dp" />

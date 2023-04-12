@@ -36,8 +36,6 @@ class ConfRepo(
             viewportEastLon = 121.95219572432649,
             viewportSouthLat = 11.945223417353624,
             viewportWestLon = 121.90219745907318,
-            osmLogin = "",
-            osmPassword = "",
         )
     }
 }

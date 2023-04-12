@@ -12,14 +12,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import conf.ConfRepo
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
@@ -39,8 +37,6 @@ import search.SearchResultModel
 class ElementFragment : Fragment() {
 
     private val elementsRepo: ElementsRepo by inject()
-
-    private val confRepo: ConfRepo by inject()
 
     private val resultModel: SearchResultModel by activityViewModel()
 
@@ -134,18 +130,6 @@ class ElementFragment : Fragment() {
                     intent.data =
                         Uri.parse("https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions")
                     startActivity(intent)
-                }
-
-                R.id.action_edit_tags -> {
-                    if (confRepo.conf.value.osmLogin.isBlank()) {
-                        findNavController().navigate(R.id.loginFragment)
-                        return@setOnMenuItemClickListener true
-                    }
-
-                    findNavController().navigate(
-                        R.id.tagsFragment,
-                        bundleOf("element_id" to elementId),
-                    )
                 }
             }
 

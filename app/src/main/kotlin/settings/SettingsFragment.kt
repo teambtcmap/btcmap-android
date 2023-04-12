@@ -7,11 +7,8 @@ import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import conf.ConfRepo
-import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.FragmentSettingsBinding
 import org.koin.android.ext.android.inject
@@ -58,31 +55,6 @@ class SettingsFragment : Fragment() {
             )
         } else {
             binding.lastSyncDate.setText(R.string.database_is_empty)
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            whenResumed {
-                conf.conf.collect {
-                    if (it.osmLogin.isNotBlank()) {
-                        binding.accountTitle.setText(R.string.log_out)
-                        binding.accountSubtitle.isVisible = true
-                        binding.accountSubtitle.text = it.osmLogin
-
-                        binding.account.setOnClickListener {
-                            conf.update { prev ->
-                                prev.copy(osmLogin = "", osmPassword = "")
-                            }
-                        }
-                    } else {
-                        binding.accountTitle.setText(R.string.connect_osm_account)
-                        binding.accountSubtitle.isVisible = false
-
-                        binding.account.setOnClickListener {
-                            findNavController().navigate(R.id.loginFragment)
-                        }
-                    }
-                }
-            }
         }
     }
 

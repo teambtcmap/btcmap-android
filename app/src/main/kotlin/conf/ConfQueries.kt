@@ -21,11 +21,9 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                         viewport_north_lat,
                         viewport_east_lon,
                         viewport_south_lat,
-                        viewport_west_lon,
-                        osm_login,
-                        osm_password
+                        viewport_west_lon
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?);
+                    VALUES (?, ?, ?, ?, ?);
                     """,
                     arrayOf(
                         conf.lastSyncDate ?: "",
@@ -33,8 +31,6 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                         conf.viewportEastLon,
                         conf.viewportSouthLat,
                         conf.viewportWestLon,
-                        conf.osmLogin,
-                        conf.osmPassword,
                     ),
                 )
             }
@@ -52,9 +48,7 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                     viewport_north_lat,
                     viewport_east_lon,
                     viewport_south_lat,
-                    viewport_west_lon,
-                    osm_login,
-                    osm_password
+                    viewport_west_lon
                 FROM conf;
                 """,
             )
@@ -69,8 +63,6 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                 viewportEastLon = cursor.getDouble(2),
                 viewportSouthLat = cursor.getDouble(3),
                 viewportWestLon = cursor.getDouble(4),
-                osmLogin = cursor.getString(5),
-                osmPassword = cursor.getString(6),
             )
         }
     }
