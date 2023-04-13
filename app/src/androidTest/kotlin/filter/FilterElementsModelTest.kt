@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -21,12 +22,18 @@ class FilterElementsModelTest {
 
     @Before
     fun beforeEach() {
-        model = FilterElementsModel(ElementsRepo(
-            api = ApiImpl(OkHttpClient(), Json.Default),
-            app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as Application,
-            queries = ElementQueries(inMemoryDatabase()),
-            json = Json.Default,
-        ))
+        model = FilterElementsModel(
+            ElementsRepo(
+                api = ApiImpl(
+                    baseUrl = "".toHttpUrl(),
+                    httpClient = OkHttpClient(),
+                    json = Json.Default,
+                ),
+                app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as Application,
+                queries = ElementQueries(inMemoryDatabase()),
+                json = Json.Default,
+            )
+        )
     }
 
     @Test

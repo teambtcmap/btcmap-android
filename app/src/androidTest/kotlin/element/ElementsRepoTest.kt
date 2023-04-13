@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -24,7 +25,11 @@ class ElementsRepoTest {
         queries = ElementQueries(inMemoryDatabase())
 
         repo = ElementsRepo(
-            api = ApiImpl(OkHttpClient(), Json.Default),
+            api = ApiImpl(
+                baseUrl = "".toHttpUrl(),
+                httpClient = OkHttpClient(),
+                json = Json.Default,
+            ),
             app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as Application,
             queries = queries,
             json = Json.Default,
