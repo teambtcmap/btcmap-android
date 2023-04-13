@@ -37,7 +37,7 @@
     <string name="unnamed_user">Безымянный пользователь</string>
     <string name="not_verified">Не проверено</string>
     <string name="show_more">Показать больше</string>
-    <string name="verify">Подтвердить или пожаловаться</string>
+    <string name="verify">Редактировать</string>
     <string name="atm">Банкомат</string>
     <string name="checkmark_icon">Галочка</string>
     <string name="filter">Фильтр</string>
