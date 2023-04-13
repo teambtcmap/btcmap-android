@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
 import android.os.Bundle
@@ -427,6 +428,20 @@ class MapFragment : Fragment() {
     private fun MapView.addLocationOverlay() {
         val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(requireContext()), this)
         locationOverlay.enableMyLocation()
+
+        val iconSizePx = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, 16f, requireContext().resources.displayMetrics
+        ).toInt()
+
+        val icon =
+            ContextCompat.getDrawable(requireContext(), R.drawable.cluster)!!
+        DrawableCompat.setTint(
+            icon,
+            Color.parseColor("#4285f4"),
+        )
+
+        locationOverlay.setPersonIcon(icon.toBitmap(width = iconSizePx, height = iconSizePx))
+        locationOverlay.setPersonAnchor(0.5f, 0.5f)
         binding.map.overlays += locationOverlay
     }
 
