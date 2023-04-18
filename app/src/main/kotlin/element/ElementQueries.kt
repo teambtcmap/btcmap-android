@@ -96,8 +96,7 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                 """
                 SELECT *
                 FROM element
-                WHERE deleted_at = '' AND (UPPER(osm_json) LIKE '%' || UPPER(?) || '%')
-                LIMIT 100;
+                WHERE deleted_at = '' AND (UPPER(osm_json) LIKE '%' || UPPER(?) || '%');
                 """,
                 arrayOf(searchString),
             )
