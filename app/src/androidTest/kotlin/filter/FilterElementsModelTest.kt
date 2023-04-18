@@ -23,9 +23,10 @@ class FilterElementsModelTest {
     @Before
     fun beforeEach() {
         model = FilterElementsModel(
-            ElementsRepo(
+            app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as Application,
+            elementsRepo = ElementsRepo(
                 api = ApiImpl(
-                    baseUrl = "".toHttpUrl(),
+                    baseUrl = "http://localhost".toHttpUrl(),
                     httpClient = OkHttpClient(),
                     json = Json.Default,
                 ),

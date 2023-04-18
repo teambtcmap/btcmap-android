@@ -26,7 +26,7 @@ class ElementsRepoTest {
 
         repo = ElementsRepo(
             api = ApiImpl(
-                baseUrl = "".toHttpUrl(),
+                baseUrl = "http://localhost".toHttpUrl(),
                 httpClient = OkHttpClient(),
                 json = Json.Default,
             ),
@@ -46,7 +46,7 @@ class ElementsRepoTest {
         )
 
         assertEquals(
-            listOf(ElementCategory("a", "", 1), ElementCategory("b", "", 1)),
+            listOf(ElementCategory("a", 1), ElementCategory("b", 1)),
             repo.selectCategories()
         )
     }

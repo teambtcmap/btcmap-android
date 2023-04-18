@@ -1,5 +1,6 @@
 package filter
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import element.ElementCategory
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class FilterElementsModel(
+    private val app: Application,
     private val elementsRepo: ElementsRepo,
 ) : ViewModel() {
 
@@ -64,9 +66,9 @@ class FilterElementsModel(
 
     private fun ElementCategory.toItem(): ElementCategoriesAdapter.Item {
         return ElementCategoriesAdapter.Item(
-            this.singular,
-            "${this.pluralDisplayString()} (${this.elements})",
-            !filteredCategories.contains(this.singular),
+            this.id,
+            "${this.pluralDisplayString(app.resources)} (${this.elements})",
+            !filteredCategories.contains(this.id),
         )
     }
 }

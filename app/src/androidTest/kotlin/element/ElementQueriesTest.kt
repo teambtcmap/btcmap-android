@@ -88,24 +88,24 @@ class ElementQueriesTest {
         queries.insertOrReplace(elements)
         assertEquals(
             listOf(
-                ElementCategory("a", "", 1),
-                ElementCategory("b", "", 1),
+                ElementCategory("a", 1),
+                ElementCategory("b", 1),
             ), queries.selectCategories()
         )
 
         var element = testElement().copy(tags = JsonObject(mapOf("category" to JsonPrimitive("a"))))
         queries.insertOrReplace(listOf(element))
         assertEquals(listOf(
-            ElementCategory("a", "", 2),
-            ElementCategory("b", "", 1),
+            ElementCategory("a", 2),
+            ElementCategory("b", 1),
         ), queries.selectCategories())
 
         element = testElement().copy(tags = JsonObject(mapOf("category" to JsonPrimitive("c"))))
         queries.insertOrReplace(listOf(element))
         assertEquals(listOf(
-            ElementCategory("a", "", 2),
-            ElementCategory("b", "", 1),
-            ElementCategory("c", "", 1),
+            ElementCategory("a", 2),
+            ElementCategory("b", 1),
+            ElementCategory("c", 1),
         ), queries.selectCategories())
     }
 }

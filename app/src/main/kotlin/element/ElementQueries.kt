@@ -1,6 +1,5 @@
 package element
 
-import androidx.core.database.getStringOrNull
 import androidx.sqlite.db.transaction
 import db.elementsUpdatedAt
 import db.getJsonObject
@@ -258,7 +257,6 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                 """
                 SELECT 
                     json_extract(tags, '$.category') AS category,
-                    json_extract(tags, '$.category:plural') AS category_plural,
                     count(*) AS elements
                 FROM element
                 WHERE deleted_at = ''
@@ -271,9 +269,8 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                 while (cursor.moveToNext()) {
                     add(
                         ElementCategory(
-                            singular = cursor.getString(0),
-                            plural = cursor.getStringOrNull(1) ?: "",
-                            elements = cursor.getLong(2),
+                            id = cursor.getString(0),
+                            elements = cursor.getLong(1),
                         )
                     )
                 }
