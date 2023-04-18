@@ -376,7 +376,12 @@ class MapFragment : Fragment() {
         binding.searchResults.adapter = searchAdapter
 
         searchModel.searchResults
-            .onEach { searchAdapter.submitList(it) }
+            .onEach {
+                searchAdapter.submitList(it) {
+                    val layoutManager = binding.searchResults.layoutManager ?: return@submitList
+                    layoutManager.scrollToPosition(0)
+                }
+            }
             .launchIn(viewLifecycleOwner.lifecycleScope)
 
         binding.searchView.editText.doAfterTextChanged {
