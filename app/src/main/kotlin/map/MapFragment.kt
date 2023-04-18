@@ -355,6 +355,7 @@ class MapFragment : Fragment() {
                         binding.map.boundingBox,
                     )
                 )
+                searchModel.setLocation(GeoPoint(binding.map.mapCenter))
                 binding.map.addViewportListener()
             }
         }
