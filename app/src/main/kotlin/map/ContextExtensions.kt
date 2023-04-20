@@ -1,7 +1,7 @@
 package map
 
 import android.content.Context
-import org.btcmap.R
+import com.google.android.material.R
 
 fun Context.getOnSurfaceColor(): Int {
     val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnSurface))

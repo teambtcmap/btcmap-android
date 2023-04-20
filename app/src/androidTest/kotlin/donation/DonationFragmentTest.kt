@@ -20,7 +20,7 @@ class DonationFragmentTest {
     @Test
     fun launch() {
         launchFragmentInContainer<DonationFragment>(
-            themeResId = R.style.Theme_Material3_DynamicColors_DayNight,
+            themeResId = com.google.android.material.R.style.Theme_Material3_DynamicColors_DayNight,
         ).use {
             onView(withId(R.id.toolbar)).check(matches(isDisplayed()))
             onView(withId(R.id.message)).check(matches(isDisplayed()))

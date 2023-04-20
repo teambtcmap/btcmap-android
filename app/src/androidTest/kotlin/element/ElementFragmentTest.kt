@@ -19,7 +19,7 @@ class ElementFragmentTest {
     @Test
     fun launch() {
         launchFragmentInContainer<ElementFragment>(
-            themeResId = R.style.Theme_Material3_DynamicColors_DayNight,
+            themeResId = com.google.android.material.R.style.Theme_Material3_DynamicColors_DayNight,
         ).use { scenario ->
             val tags = mutableMapOf<String, JsonPrimitive>()
 

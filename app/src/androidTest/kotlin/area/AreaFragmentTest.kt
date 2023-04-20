@@ -82,7 +82,7 @@ class AreaFragmentTest {
         }
 
         launchFragmentInContainer<AreaFragment>(
-            themeResId = R.style.Theme_Material3_DynamicColors_DayNight,
+            themeResId = com.google.android.material.R.style.Theme_Material3_DynamicColors_DayNight,
             fragmentArgs = bundleOf(Pair("area_id", area.id)),
         ).use {
             onView(withId(R.id.toolbar)).check(matches(isDisplayed()))

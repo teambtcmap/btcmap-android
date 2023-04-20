@@ -66,10 +66,10 @@ class AreaModel(
                         ).split(",").first()
 
                         status = date
-                        colorResId = R.attr.colorOnSurface
+                        colorResId = com.google.android.material.R.attr.colorOnSurface
                     } else {
                         status = app.getString(R.string.not_verified)
-                        colorResId = R.attr.colorError
+                        colorResId = com.google.android.material.R.attr.colorError
                     }
 
                     AreaAdapter.Item.Element(

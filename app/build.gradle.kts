@@ -3,7 +3,7 @@ import java.net.URL
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
 }
 
 android {
@@ -120,21 +120,21 @@ dependencies {
 
     // Material design components
     // https://github.com/material-components/material-components-android/releases
-    implementation("com.google.android.material:material:1.9.0-beta01")
+    implementation("com.google.android.material:material:1.9.0-rc01")
 
     // Helps to split the app into multiple independent screens
     // https://developer.android.com/jetpack/androidx/releases/fragment
-    debugImplementation("androidx.fragment:fragment-testing:1.5.5")
+    debugImplementation("androidx.fragment:fragment-testing:1.5.7")
 
     // Modern HTTP client
     // https://github.com/square/okhttp/blob/master/CHANGELOG.md
-    val okhttpVer = "4.10.0"
+    val okhttpVer = "5.0.0-alpha.11"
     implementation("com.squareup.okhttp3:okhttp-brotli:$okhttpVer")
     testImplementation("com.squareup.okhttp3:mockwebserver:$okhttpVer")
 
     // Injection library
     // https://github.com/InsertKoinIO/koin/blob/main/CHANGELOG.md
-    implementation("io.insert-koin:koin-android:3.3.2")
+    implementation("io.insert-koin:koin-android:3.4.0")
 
     // Open Street Map widget
     // https://github.com/osmdroid/osmdroid/releases
@@ -150,7 +150,7 @@ dependencies {
 
     // Used to cache data and store user preferences
     // https://developer.android.com/kotlin/ktx#sqlite
-    implementation("androidx.sqlite:sqlite-ktx:2.3.0")
+    implementation("androidx.sqlite:sqlite-ktx:2.3.1")
 
     // Bundle SQLite binaries
     // https://github.com/requery/sqlite-android/releases
@@ -161,18 +161,18 @@ dependencies {
 
     // Used to download, cache and display images
     // https://github.com/coil-kt/coil/releases
-    val coilVer = "2.2.2"
+    val coilVer = "2.3.0"
     implementation("io.coil-kt:coil:$coilVer")
     implementation("io.coil-kt:coil-svg:$coilVer")
 
     // Common test dependencies
     // https://junit.org/junit4/
-    testImplementation("junit:junit:4.13.2")
+    val junitVer = "4.13.2"
+    testImplementation("junit:junit:$junitVer")
+    androidTestImplementation("junit:junit:$junitVer")
 
     // Common instrumented test dependencies
-    // https://junit.org/junit4/
     // https://developer.android.com/jetpack/androidx/releases/test
-    androidTestImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:core-ktx:1.5.0")
     androidTestImplementation("androidx.test.ext:junit-ktx:1.1.5")
     androidTestImplementation("androidx.test:runner:1.5.2")
