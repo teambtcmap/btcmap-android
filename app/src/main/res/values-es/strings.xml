@@ -11,12 +11,9 @@
     <string name="btc_map_donation_address">Dirección para donar a BTC Map</string>
     <string name="help_us_improve_btc_map">Ayúdanos a mejorar BTC Map</string>
     <string name="show_my_location">Mostrar mi ubicación</string>
-    <string name="show_tags">Mostrar etiquetas</string>
     <string name="copy_lnurl">Copiar LNURL</string>
     <string name="search_here">Buscar aquí</string>
     <string name="settings">Ajustes</string>
-    <string name="themed_pins">Marcadores en los colores del sistema</string>
-    <string name="dark_map">Mapa oscuro</string>
     <string name="trends">Tendencias</string>
     <string name="up_to_date_places">Lugares actualizados</string>
     <string name="total_places">Lugares totales</string>
@@ -49,7 +46,7 @@
     <string name="category_atm_plural">Cajeros automáticos</string>
     <string name="category_bar">Bar</string>
     <string name="category_bar_plural">Barras</string>
-    <string name="category_cafe">Cafe</string>
+    <string name="category_cafe">Café</string>
     <string name="category_cafe_plural">Cafes</string>
     <string name="category_hotel">Hotel</string>
     <string name="category_hotel_plural">Hoteles</string>
@@ -57,7 +54,7 @@
     <string name="category_other_plural">Otro</string>
     <string name="category_pub">Pub</string>
     <string name="category_pub_plural">Pubs</string>
-    <string name="category_restaurant">Restaurant</string>
+    <string name="category_restaurant">Restaurante</string>
     <string name="category_restaurant_plural">Restaurantes</string>
     <plurals name="d_changes">
         <item quantity="one">%d cambio</item>

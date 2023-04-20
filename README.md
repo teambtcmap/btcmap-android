@@ -57,6 +57,7 @@
 - [Serbian](/app/src/main/res/values-sr/strings.xml)
 - [Spanish](/app/src/main/res/values-es/strings.xml)
 - [Swedish](/app/src/main/res/values-sv/strings.xml)
+- [Thai](/app/src/main/res/values-th/strings.xml)
 - [Turkish](/app/src/main/res/values-tr/strings.xml)
 - [Ukrainian](/app/src/main/res/values-uk/strings.xml)
 - [Urdu](/app/src/main/res/values-ur/strings.xml)

@@ -11,12 +11,9 @@
     <string name="btc_map_donation_address">BTC Haritası bağış adresi</string>
     <string name="help_us_improve_btc_map">BTC Haritasını iyileştirmemize yardımcı olun</string>
     <string name="show_my_location">Konumumu göster</string>
-    <string name="show_tags">Etiketleri göster</string>
     <string name="copy_lnurl">LNURL\'yi kopyala</string>
     <string name="search_here">Burda ara</string>
     <string name="settings">Ayarlar</string>
-    <string name="themed_pins">Temalı pimler</string>
-    <string name="dark_map">Karanlık harita</string>
     <string name="trends">Trendler</string>
     <string name="up_to_date_places">Güncel yerler</string>
     <string name="total_places">Toplam yerler</string>

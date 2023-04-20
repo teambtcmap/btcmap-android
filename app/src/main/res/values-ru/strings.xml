@@ -11,12 +11,9 @@
     <string name="btc_map_donation_address">Адрес для пожертвований BTC Map</string>
     <string name="help_us_improve_btc_map">Помогите нам улучшить BTC Map</string>
     <string name="show_my_location">Показать мое месторасположение</string>
-    <string name="show_tags">Показать теги</string>
     <string name="copy_lnurl">Скопировать LNURL</string>
     <string name="search_here">Нажмите для поиска</string>
     <string name="settings">Настройки</string>
-    <string name="themed_pins">Стилизованные иконки</string>
-    <string name="dark_map">Темная карта</string>
     <string name="trends">Тренды</string>
     <string name="up_to_date_places">Недавно проверенные места</string>
     <string name="total_places">Общее колличество мест</string>

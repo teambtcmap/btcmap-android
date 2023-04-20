@@ -11,12 +11,9 @@
     <string name="btc_map_donation_address">BTC Map adresse de don</string>
     <string name="help_us_improve_btc_map">Aidez-vous à améliorer BTC Map</string>
     <string name="show_my_location">Voir mon emplacement</string>
-    <string name="show_tags">Montrer les étiquettes</string>
     <string name="copy_lnurl">Copier LNURL</string>
     <string name="search_here">Rechercher ici</string>
     <string name="settings">Paramètres</string>
-    <string name="themed_pins">Thèmes épinglés</string>
-    <string name="dark_map">Carte sombre</string>
     <string name="trends">Tendances</string>
     <string name="up_to_date_places">Lieux à jour</string>
     <string name="total_places">Total lieux</string>

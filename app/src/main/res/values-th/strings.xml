@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="app_name">แผนที่ BTC</string>
+    <string name="add_location">เพิ่มสถานที่</string>
+    <string name="kilometers_short">กม</string>
+    <string name="icon">ไอคอน</string>
+    <string name="donate">บริจาค</string>
+    <string name="qr_code">คิวอาร์โค้ด</string>
+    <string name="copied_to_clipboard">คัดลอกไปที่คลิปบอร์ดแล้ว</string>
+    <string name="btc_map_donation_address">ที่อยู่บริจาคแผนที่ BTC</string>
+    <string name="help_us_improve_btc_map">ช่วยเราปรับปรุงแผนที่ BTC</string>
+    <string name="show_my_location">แสดงตำแหน่งของฉัน</string>
+    <string name="copy_lnurl">สำเนา LNURL</string>
+    <string name="search_here">ค้นหาที่นี่</string>
+    <string name="settings">การตั้งค่า</string>
+    <string name="trends">แนวโน้ม</string>
+    <string name="up_to_date_places">สถานที่ที่ทันสมัย</string>
+    <string name="total_places">สถานที่ทั้งหมด</string>
+    <string name="pay">จ่าย</string>
+    <string name="copy_address">คัดลอกที่อยู่</string>
+    <string name="you_dont_have_a_compatible_wallet">คุณไม่มีกระเป๋าเงินที่เข้ากันได้</string>
+    <string name="communities">ชุมชน</string>
+    <string name="latest_changes">การเปลี่ยนแปลงล่าสุด</string>
+    <string name="legacy_places">สถานที่มรดก</string>
+    <string name="tip">⚡ เคล็ดลับ</string>
+    <string name="osm_copyright">© OpenStreetMap ผู้ให้ข้อมูล</string>
+    <string name="view_on_osm">เปิดดู OSM</string>
+    <string name="edit_on_osm">แก้ไขบน OSM</string>
+    <string name="supertagger_manual">Supertagger คู่มือ</string>
+    <string name="top_supertaggers">สูงสุด supertaggers</string>
+    <string name="by_s">โดย %1$s</string>
+    <string name="unnamed_place">สถานที่ไม่มีชื่อ</string>
+    <string name="unnamed_user">ผู้ใช้ที่ไม่มีชื่อ</string>
+    <string name="not_verified">ไม่ได้รับการยืนยัน</string>
+    <string name="show_more">แสดงมากขึ้น</string>
+    <string name="verify">ตรวจสอบหรือรายงาน</string>
+    <string name="atm">ATM</string>
+    <string name="checkmark_icon">ไอคอนเครื่องหมายถูก</string>
+    <string name="filter">กรอง</string>
+    <string name="syncing_data">กำลังซิงค์ข้อมูล</string>
+    <string name="database">ฐานข้อมูล</string>
+    <string name="last_sync_s">การซิงค์ครั้งล่าสุด: %1$s</string>
+    <string name="database_is_empty">ฐานข้อมูลว่างเปล่า</string>
+    <string name="category_atm">ATM</string>
+    <string name="category_atm_plural">ATMs</string>
+    <string name="category_bar">Bar</string>
+    <string name="category_bar_plural">บาร์</string>
+    <string name="category_cafe">Cafe</string>
+    <string name="category_cafe_plural">คาเฟ่</string>
+    <string name="category_hotel">Hotel</string>
+    <string name="category_hotel_plural">โรงแรม</string>
+    <string name="category_other">Other</string>
+    <string name="category_other_plural">อื่น</string>
+    <string name="category_pub">Pub</string>
+    <string name="category_pub_plural">ผับ</string>
+    <string name="category_restaurant">Restaurant</string>
+    <string name="category_restaurant_plural">ร้านอาหาร</string>
+    <plurals name="d_changes">
+        <item quantity="other">%d การเปลี่ยนแปลง</item>
+    </plurals>
+    <plurals name="d_places">
+        <item quantity="other">%d สถานที่</item>
+    </plurals>
+</resources>
