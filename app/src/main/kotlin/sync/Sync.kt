@@ -51,38 +51,11 @@ class Sync(
 
             withContext(Dispatchers.Default) {
                 listOf(
-                    async { elementsRepo.sync() },
-                    async { reportsRepo.sync() },
-                    async {
-                        areasRepo.sync().onSuccess {
-                            Log.d(
-                                TAG,
-                                "Fetched ${it.createdOrUpdatedAreas} new or updated areas in ${it.timeMillis} ms"
-                            )
-                        }.onFailure {
-                            Log.e(TAG, "Failed to fetch new or updated areas", it)
-                        }
-                    },
-                    async {
-                        usersRepo.sync().onSuccess {
-                            Log.d(
-                                TAG,
-                                "Fetched ${it.createdOrUpdatedUsers} new or updated users in ${it.timeMillis} ms"
-                            )
-                        }.onFailure {
-                            Log.e(TAG, "Failed to fetch new or updated users", it)
-                        }
-                    },
-                    async {
-                        eventsRepo.sync().onSuccess {
-                            Log.d(
-                                TAG,
-                                "Fetched ${it.createdOrUpdatedEvents} new or updated events in ${it.timeMillis} ms"
-                            )
-                        }.onFailure {
-                            Log.e(TAG, "Failed to fetch new or updated events", it)
-                        }
-                    },
+                    async { Log.d(TAG, elementsRepo.sync().getOrThrow().toString()) },
+                    async { Log.d(TAG, reportsRepo.sync().getOrThrow().toString()) },
+                    async { Log.d(TAG, areasRepo.sync().getOrThrow().toString()) },
+                    async { Log.d(TAG, usersRepo.sync().getOrThrow().toString()) },
+                    async { Log.d(TAG, eventsRepo.sync().getOrThrow().toString()) },
                 ).awaitAll()
             }
         }.onSuccess {
