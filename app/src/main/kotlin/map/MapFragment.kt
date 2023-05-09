@@ -30,7 +30,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -239,10 +238,8 @@ class MapFragment : Fragment() {
         val visibleElements = mutableListOf<Marker>()
 
         viewLifecycleOwner.lifecycleScope.launch {
-            whenResumed {
-                filterResultModel.filteredCategories.collect {
-                    model.setExcludedCategories(it)
-                }
+            filterResultModel.filteredCategories.collect {
+                model.setExcludedCategories(it)
             }
         }
 

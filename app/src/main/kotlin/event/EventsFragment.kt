@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.whenResumed
+import androidx.lifecycle.withResumed
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
@@ -26,12 +26,12 @@ class EventsFragment : Fragment() {
     private var _binding: FragmentEventsBinding? = null
     private val binding get() = _binding!!
 
-    val adapter = EventsAdapter(object : EventsAdapter.Listener {
+    private val adapter = EventsAdapter(object : EventsAdapter.Listener {
         override fun onItemClick(item: EventsAdapter.Item) {
             viewLifecycleOwner.lifecycleScope.launch {
-                whenResumed {
-                    val element = model.selectElementById(item.elementId) ?: return@whenResumed
+                val element = model.selectElementById(item.elementId) ?: return@launch
 
+                withResumed {
                     findNavController().navigate(
                         R.id.elementFragment,
                         bundleOf("element_id" to element.id),

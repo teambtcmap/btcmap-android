@@ -43,7 +43,7 @@ class ApiImpl(
         }
 
         return withContext(Dispatchers.IO) {
-            response.body!!.byteStream().use { responseBody ->
+            response.body.byteStream().use { responseBody ->
                 withContext(Dispatchers.IO) {
                     json.decodeFromStream(
                         stream = responseBody,
@@ -74,7 +74,7 @@ class ApiImpl(
         }
 
         return withContext(Dispatchers.IO) {
-            response.body!!.byteStream().use { responseBody ->
+            response.body.byteStream().use { responseBody ->
                 withContext(Dispatchers.IO) {
                     json.decodeFromStream(
                         stream = responseBody,
@@ -105,7 +105,7 @@ class ApiImpl(
         }
 
         return withContext(Dispatchers.IO) {
-            response.body!!.byteStream().use { responseBody ->
+            response.body.byteStream().use { responseBody ->
                 withContext(Dispatchers.IO) {
                     json.decodeFromStream(
                         stream = responseBody,
@@ -136,7 +136,7 @@ class ApiImpl(
         }
 
         return withContext(Dispatchers.IO) {
-            response.body!!.byteStream().use { responseBody ->
+            response.body.byteStream().use { responseBody ->
                 withContext(Dispatchers.IO) {
                     json.decodeFromStream(
                         stream = responseBody,
@@ -167,7 +167,7 @@ class ApiImpl(
         }
 
         return withContext(Dispatchers.IO) {
-            response.body!!.byteStream().use { responseBody ->
+            response.body.byteStream().use { responseBody ->
                 withContext(Dispatchers.IO) {
                     json.decodeFromStream(
                         stream = responseBody,

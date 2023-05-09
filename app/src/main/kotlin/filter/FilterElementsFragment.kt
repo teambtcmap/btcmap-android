@@ -11,7 +11,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenResumed
+import androidx.lifecycle.withResumed
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.flow.update
@@ -53,8 +53,8 @@ class FilterElementsFragment : Fragment() {
         binding.list.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
-            whenResumed {
-                model.state.collect { state ->
+            model.state.collect { state ->
+                withResumed {
                     when (state) {
                         is FilterElementsModel.State.Loading -> {
                             binding.progress.isVisible = true
