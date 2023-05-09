@@ -49,7 +49,7 @@ class Sync(
             Log.d(TAG, "Fetching bundled elements")
             elementsRepo.fetchBundledElements()
 
-            withContext(Dispatchers.Default) {
+            withContext(Dispatchers.IO) {
                 listOf(
                     async { Log.d(TAG, elementsRepo.sync().getOrThrow().toString()) },
                     async { Log.d(TAG, reportsRepo.sync().getOrThrow().toString()) },

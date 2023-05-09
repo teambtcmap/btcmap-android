@@ -100,6 +100,10 @@ tasks.register("bundleData") {
 }
 
 dependencies {
+    // Allows suspending functions
+    // https://github.com/Kotlin/kotlinx.coroutines/releases
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.0")
+
     // Platform-agnostic JSON serialization
     // https://github.com/Kotlin/kotlinx.serialization/releases
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
@@ -120,7 +124,7 @@ dependencies {
 
     // Material design components
     // https://github.com/material-components/material-components-android/releases
-    implementation("com.google.android.material:material:1.9.0-rc01")
+    implementation("com.google.android.material:material:1.9.0")
 
     // Helps to split the app into multiple independent screens
     // https://developer.android.com/jetpack/androidx/releases/fragment
@@ -138,7 +142,7 @@ dependencies {
 
     // Open Street Map widget
     // https://github.com/osmdroid/osmdroid/releases
-    implementation("org.osmdroid:osmdroid-android:6.1.14")
+    implementation("org.osmdroid:osmdroid-android:6.1.16")
 
     // Map utilities
     // https://github.com/locationtech/jts/releases

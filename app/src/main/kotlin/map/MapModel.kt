@@ -57,7 +57,7 @@ class MapModel(
             db.elementsUpdatedAt,
             _excludedCategories
         ) { viewport, _, excludedCategories ->
-            withContext(Dispatchers.Default) {
+            withContext(Dispatchers.IO) {
                 val clusters = elementsRepo.selectByBoundingBox(
                     zoom = viewport.zoom,
                     box = viewport.boundingBox,
