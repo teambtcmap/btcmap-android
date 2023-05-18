@@ -283,7 +283,7 @@ class ElementFragment : Fragment() {
             binding.elementAction.setOnClickListener {
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data =
-                    Uri.parse("https://btcmap.org/verify-location?&name=${element.osmJson["tags"]!!.jsonObject["name"]?.jsonPrimitive?.content ?: ""}&lat=${element.lat}&long=${element.lon}&${element.osmJson["type"]!!.jsonPrimitive.content}=${element.osmJson["id"]!!.jsonPrimitive.content}")
+                    Uri.parse("https://btcmap.org/verify-location?id=${elementId}")
                 startActivity(intent)
             }
         }
