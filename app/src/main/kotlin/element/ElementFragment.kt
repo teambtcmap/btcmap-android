@@ -283,7 +283,7 @@ class ElementFragment : Fragment() {
             binding.elementAction.setOnClickListener {
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data =
-                    Uri.parse("https://btcmap.org/verify-location?id=${elementId}")
+                    Uri.parse("https://btcmap.org/verify-location?id=$elementId")
                 startActivity(intent)
             }
         }
