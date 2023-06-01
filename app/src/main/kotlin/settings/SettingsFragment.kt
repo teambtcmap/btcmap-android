@@ -50,6 +50,11 @@ class SettingsFragment : Fragment() {
             conf.update { it.copy(showAtms = isChecked) }
         }
 
+        binding.showOsmAttribution.isChecked = conf.conf.value.showOsmAttribution
+        binding.showOsmAttribution.setOnCheckedChangeListener { _, isChecked ->
+            conf.update { it.copy(showOsmAttribution = isChecked) }
+        }
+
         val lastSyncDate = conf.conf.value.lastSyncDate
 
         if (lastSyncDate != null) {

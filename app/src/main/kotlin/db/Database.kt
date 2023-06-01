@@ -44,7 +44,8 @@ private class Database(context: Context?, name: String?) : SQLiteOpenHelper(
                 viewport_east_lon REAL NOT NULL,
                 viewport_south_lat REAL NOT NULL,
                 viewport_west_lon REAL NOT NULL,
-                show_atms INT NOT NULL
+                show_atms INTEGER NOT NULL,
+                show_osm_attribution INTEGER NOT NULL
             );
             """
         )

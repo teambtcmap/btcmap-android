@@ -37,6 +37,7 @@ class ConfRepo(
             viewportSouthLat = 11.945223417353624,
             viewportWestLon = 121.90219745907318,
             showAtms = true,
+            showOsmAttribution = true,
         )
     }
 }

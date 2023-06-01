@@ -56,6 +56,7 @@
     <string name="category_restaurant">Restaurant</string>
     <string name="category_restaurant_plural">Restaurants</string>
     <string name="show_atms">Show ATMs</string>
+    <string name="show_osm_attribution">Show OSM attribution</string>
     <plurals name="d_changes">
         <item quantity="other">%d changes</item>
     </plurals>

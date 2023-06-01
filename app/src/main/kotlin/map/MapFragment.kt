@@ -245,6 +245,12 @@ class MapFragment : Fragment() {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
+            model.conf.conf.map { it.showOsmAttribution }.collectLatest {
+                binding.osmAttribution.isVisible = it
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
             model.visibleElements.collectLatest { newElements ->
                 visibleElements.forEach {
                     binding.map.overlays -= it

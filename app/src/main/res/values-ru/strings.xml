@@ -5,7 +5,7 @@
     <string name="add_location">Добавить место</string>
     <string name="kilometers_short">км</string>
     <string name="icon">Иконка</string>
-    <string name="donate">Помочь проекту</string>
+    <string name="donate">Поддержать проект</string>
     <string name="qr_code">QR код</string>
     <string name="copied_to_clipboard">Адрес скопирован в буфер обмена</string>
     <string name="btc_map_donation_address">Адрес для пожертвований BTC Map</string>
@@ -21,7 +21,7 @@
     <string name="copy_address">Скопировать адрес</string>
     <string name="you_dont_have_a_compatible_wallet">У вас не установленно совместимых кошельков</string>
     <string name="communities">Сообщества</string>
-    <string name="latest_changes">Последние изменения</string>
+    <string name="latest_changes">Последние правки</string>
     <string name="legacy_places">Устаревшие места</string>
     <string name="tip">⚡ На чай</string>
     <string name="osm_copyright">© Пользователи OpenStreetMap</string>
@@ -56,6 +56,7 @@
     <string name="category_restaurant">Ресторан</string>
     <string name="category_restaurant_plural">Рестораны</string>
     <string name="show_atms">Показывать банкоматы</string>
+    <string name="show_osm_attribution">Показывать аттрибуцию OSM</string>
     <plurals name="d_changes">
         <item quantity="one">%d изменение</item>
         <item quantity="few">%d изменений</item>
