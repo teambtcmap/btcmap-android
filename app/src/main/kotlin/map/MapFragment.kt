@@ -39,7 +39,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import element.ElementFragment
 import element.ElementsCluster
-import filter.FilterResultModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -74,7 +73,6 @@ class MapFragment : Fragment() {
 
     private val searchResultModel: SearchResultModel by activityViewModel()
     private val areaResultModel: AreaResultModel by activityViewModel()
-    private val filterResultModel: FilterResultModel by activityViewModel()
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
@@ -147,7 +145,6 @@ class MapFragment : Fragment() {
             val nav = findNavController()
 
             when (it.itemId) {
-                R.id.action_filter -> nav.navigate(R.id.action_mapFragment_to_filterElementsFragment)
                 R.id.action_donate -> nav.navigate(R.id.donationFragment)
                 R.id.action_add_element -> {
                     val intent = Intent(Intent.ACTION_VIEW)
@@ -238,8 +235,12 @@ class MapFragment : Fragment() {
         val visibleElements = mutableListOf<Marker>()
 
         viewLifecycleOwner.lifecycleScope.launch {
-            filterResultModel.filteredCategories.collect {
-                model.setExcludedCategories(it)
+            model.conf.conf.map { it.showAtms }.collectLatest {
+                if (it) {
+                    model.setExcludedCategories(emptyList())
+                } else {
+                    model.setExcludedCategories(listOf("atm"))
+                }
             }
         }
 

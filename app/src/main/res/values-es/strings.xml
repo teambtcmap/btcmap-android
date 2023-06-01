@@ -37,7 +37,6 @@
     <string name="verify">Verificar o informar</string>
     <string name="atm">Cajero automático</string>
     <string name="checkmark_icon">Icono de marca de verificación</string>
-    <string name="filter">Filtrar</string>
     <string name="syncing_data">Sincronizando datos</string>
     <string name="database">Base de datos</string>
     <string name="last_sync_s">Última sincronización: %1$s</string>
@@ -56,6 +55,7 @@
     <string name="category_pub_plural">Pubs</string>
     <string name="category_restaurant">Restaurante</string>
     <string name="category_restaurant_plural">Restaurantes</string>
+    <string name="show_atms">Show ATMs</string>
     <plurals name="d_changes">
         <item quantity="one">%d cambio</item>
         <item quantity="other">%d cambios</item>

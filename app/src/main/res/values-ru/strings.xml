@@ -12,7 +12,7 @@
     <string name="help_us_improve_btc_map">Помогите нам улучшить BTC Map</string>
     <string name="show_my_location">Показать мое месторасположение</string>
     <string name="copy_lnurl">Скопировать LNURL</string>
-    <string name="search_here">Нажмите для поиска</string>
+    <string name="search_here">Поиск</string>
     <string name="settings">Настройки</string>
     <string name="trends">Тренды</string>
     <string name="up_to_date_places">Недавно проверенные места</string>
@@ -28,7 +28,7 @@
     <string name="view_on_osm">Открыть на OSM</string>
     <string name="edit_on_osm">Редактировать на OSM</string>
     <string name="supertagger_manual">Инструкция для редактора</string>
-    <string name="top_supertaggers">Список редакторов</string>
+    <string name="top_supertaggers">Редакторы</string>
     <string name="by_s">пользователем %1$s</string>
     <string name="unnamed_place">Безымянное место</string>
     <string name="unnamed_user">Безымянный пользователь</string>
@@ -37,10 +37,9 @@
     <string name="verify">Редактировать</string>
     <string name="atm">Банкомат</string>
     <string name="checkmark_icon">Галочка</string>
-    <string name="filter">Фильтр</string>
     <string name="syncing_data">Синхронизация данных</string>
     <string name="database">База данных</string>
-    <string name="last_sync_s">Последняя синхронизация: %1$s</string>
+    <string name="last_sync_s">Дата синхронизации: %1$s</string>
     <string name="database_is_empty">База данных пуста</string>
     <string name="category_atm">Банкомат</string>
     <string name="category_atm_plural">Банкоматы</string>
@@ -56,6 +55,7 @@
     <string name="category_pub_plural">Пабы</string>
     <string name="category_restaurant">Ресторан</string>
     <string name="category_restaurant_plural">Рестораны</string>
+    <string name="show_atms">Показывать банкоматы</string>
     <plurals name="d_changes">
         <item quantity="one">%d изменение</item>
         <item quantity="few">%d изменений</item>

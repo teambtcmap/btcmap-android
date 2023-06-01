@@ -37,7 +37,6 @@
     <string name="verify">Vérifier ou signaler</string>
     <string name="atm">DAB</string>
     <string name="checkmark_icon">Icône de vérification</string>
-    <string name="filter">Filtrer</string>
     <string name="syncing_data">Synchronisation des données</string>
     <string name="database">Base de données</string>
     <string name="last_sync_s">Dernière synchronisation: %1$s</string>
@@ -56,6 +55,7 @@
     <string name="category_pub_plural">Pubs</string>
     <string name="category_restaurant">Restaurant</string>
     <string name="category_restaurant_plural">Restaurants</string>
+    <string name="show_atms">Show ATMs</string>
     <plurals name="d_changes">
         <item quantity="one">%d modification</item>
         <item quantity="many">%d modifications</item>

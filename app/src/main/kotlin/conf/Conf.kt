@@ -8,4 +8,5 @@ data class Conf(
     val viewportEastLon: Double,
     val viewportSouthLat: Double,
     val viewportWestLon: Double,
+    val showAtms: Boolean,
 )

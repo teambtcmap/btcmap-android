@@ -31,8 +31,6 @@ import sync.Sync
 import user.UserQueries
 import user.UsersModel
 import user.UsersRepo
-import filter.FilterElementsModel
-import filter.FilterResultModel
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.JsonNamingStrategy
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -97,7 +95,4 @@ val appModule = module {
 
     viewModelOf(::SearchModel)
     viewModelOf(::SearchResultModel)
-
-    viewModelOf(::FilterElementsModel)
-    viewModelOf(::FilterResultModel)
 }

@@ -37,7 +37,6 @@
     <string name="verify">Επιβεβαίωση ή Αναφορά</string>
     <string name="atm">ATM</string>
     <string name="checkmark_icon">Εικονίδιο Επιλογής</string>
-    <string name="filter">Φίλτρο</string>
     <string name="syncing_data">Συγχρονισμός δεδομένων</string>
     <string name="database">Βάση δεδομένων</string>
     <string name="last_sync_s">Τελευταίος συγχρονισμός: %1$s</string>
@@ -56,6 +55,7 @@
     <string name="category_pub_plural">Pubs</string>
     <string name="category_restaurant">Εστιατόριο</string>
     <string name="category_restaurant_plural">Εστιατόρια</string>
+    <string name="show_atms">Show ATMs</string>
     <plurals name="d_changes">
         <item quantity="one">%d αλλαγή</item>
         <item quantity="other">%d αλλαγές</item>

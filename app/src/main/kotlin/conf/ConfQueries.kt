@@ -1,6 +1,7 @@
 package conf
 
 import androidx.sqlite.db.transaction
+import db.getBoolean
 import db.getZonedDateTime
 import io.requery.android.database.sqlite.SQLiteOpenHelper
 import kotlinx.coroutines.Dispatchers
@@ -21,9 +22,10 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                         viewport_north_lat,
                         viewport_east_lon,
                         viewport_south_lat,
-                        viewport_west_lon
+                        viewport_west_lon,
+                        show_atms
                     )
-                    VALUES (?, ?, ?, ?, ?);
+                    VALUES (?, ?, ?, ?, ?, ?);
                     """,
                     arrayOf(
                         conf.lastSyncDate ?: "",
@@ -31,6 +33,7 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                         conf.viewportEastLon,
                         conf.viewportSouthLat,
                         conf.viewportWestLon,
+                        if (conf.showAtms) 1 else 0,
                     ),
                 )
             }
@@ -48,7 +51,8 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                     viewport_north_lat,
                     viewport_east_lon,
                     viewport_south_lat,
-                    viewport_west_lon
+                    viewport_west_lon,
+                    show_atms
                 FROM conf;
                 """,
             )
@@ -63,6 +67,7 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                 viewportEastLon = cursor.getDouble(2),
                 viewportSouthLat = cursor.getDouble(3),
                 viewportWestLon = cursor.getDouble(4),
+                showAtms = cursor.getBoolean(5),
             )
         }
     }

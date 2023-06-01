@@ -37,7 +37,6 @@
     <string name="verify">Verify or Report</string>
     <string name="atm">ATM</string>
     <string name="checkmark_icon">Checkmark icon</string>
-    <string name="filter">Filter</string>
     <string name="syncing_data">Syncing data</string>
     <string name="database">Database</string>
     <string name="last_sync_s">Last sync: %1$s</string>
@@ -56,6 +55,7 @@
     <string name="category_pub_plural">Pubs</string>
     <string name="category_restaurant">Restaurant</string>
     <string name="category_restaurant_plural">Restaurants</string>
+    <string name="show_atms">Show ATMs</string>
     <plurals name="d_changes">
         <item quantity="one">%d change</item>
         <item quantity="other">%d changes</item>

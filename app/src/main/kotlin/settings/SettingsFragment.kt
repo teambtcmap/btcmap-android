@@ -45,6 +45,11 @@ class SettingsFragment : Fragment() {
             findNavController().popBackStack()
         }
 
+        binding.showAtms.isChecked = conf.conf.value.showAtms
+        binding.showAtms.setOnCheckedChangeListener { _, isChecked ->
+            conf.update { it.copy(showAtms = isChecked) }
+        }
+
         val lastSyncDate = conf.conf.value.lastSyncDate
 
         if (lastSyncDate != null) {

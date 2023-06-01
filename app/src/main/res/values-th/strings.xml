@@ -37,7 +37,6 @@
     <string name="verify">ตรวจสอบหรือรายงาน</string>
     <string name="atm">ATM</string>
     <string name="checkmark_icon">ไอคอนเครื่องหมายถูก</string>
-    <string name="filter">กรอง</string>
     <string name="syncing_data">กำลังซิงค์ข้อมูล</string>
     <string name="database">ฐานข้อมูล</string>
     <string name="last_sync_s">การซิงค์ครั้งล่าสุด: %1$s</string>
@@ -56,6 +55,7 @@
     <string name="category_pub_plural">ผับ</string>
     <string name="category_restaurant">Restaurant</string>
     <string name="category_restaurant_plural">ร้านอาหาร</string>
+    <string name="show_atms">Show ATMs</string>
     <plurals name="d_changes">
         <item quantity="other">%d การเปลี่ยนแปลง</item>
     </plurals>
