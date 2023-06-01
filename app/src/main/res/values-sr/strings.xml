@@ -27,8 +27,8 @@
     <string name="osm_copyright">© OpenStreetMap contributors</string>
     <string name="view_on_osm">View on OSM</string>
     <string name="edit_on_osm">Edit on OSM</string>
-    <string name="supertagger_manual">Supertagger manual</string>
-    <string name="top_supertaggers">Top supertaggers</string>
+    <string name="editor_manual">Editor manual</string>
+    <string name="users">Users</string>
     <string name="by_s">by %1$s</string>
     <string name="unnamed_place">Unnamed place</string>
     <string name="unnamed_user">Unnamed user</string>

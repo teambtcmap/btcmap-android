@@ -27,8 +27,8 @@
     <string name="osm_copyright">© Пользователи OpenStreetMap</string>
     <string name="view_on_osm">Открыть на OSM</string>
     <string name="edit_on_osm">Редактировать на OSM</string>
-    <string name="supertagger_manual">Инструкция для редактора</string>
-    <string name="top_supertaggers">Редакторы</string>
+    <string name="editor_manual">Инструкция для редакторов</string>
+    <string name="users">Пользователи</string>
     <string name="by_s">пользователем %1$s</string>
     <string name="unnamed_place">Безымянное место</string>
     <string name="unnamed_user">Безымянный пользователь</string>

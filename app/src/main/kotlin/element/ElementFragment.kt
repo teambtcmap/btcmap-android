@@ -125,7 +125,7 @@ class ElementFragment : Fragment() {
                     startActivity(intent)
                 }
 
-                R.id.action_supertagger_manual -> {
+                R.id.action_editor_manual -> {
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.data =
                         Uri.parse("https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions")

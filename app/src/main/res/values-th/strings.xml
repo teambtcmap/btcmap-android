@@ -27,8 +27,8 @@
     <string name="osm_copyright">© OpenStreetMap ผู้ให้ข้อมูล</string>
     <string name="view_on_osm">เปิดดู OSM</string>
     <string name="edit_on_osm">แก้ไขบน OSM</string>
-    <string name="supertagger_manual">Supertagger คู่มือ</string>
-    <string name="top_supertaggers">สูงสุด supertaggers</string>
+    <string name="editor_manual">Editor manual</string>
+    <string name="users">สูงสุด supertaggers</string>
     <string name="by_s">โดย %1$s</string>
     <string name="unnamed_place">สถานที่ไม่มีชื่อ</string>
     <string name="unnamed_user">ผู้ใช้ที่ไม่มีชื่อ</string>

@@ -2,11 +2,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_supertagger_manual"
-        android:title="@string/supertagger_manual"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/action_view_on_osm"
         android:title="@string/view_on_osm"
         app:showAsAction="never" />
@@ -14,6 +9,11 @@
     <item
         android:id="@+id/action_edit_on_osm"
         android:title="@string/edit_on_osm"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_editor_manual"
+        android:title="@string/editor_manual"
         app:showAsAction="never" />
 
 </menu>

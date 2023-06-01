@@ -25,7 +25,7 @@
 
     <item
         android:id="@+id/action_users"
-        android:title="@string/top_supertaggers"
+        android:title="@string/users"
         app:showAsAction="never" />
 
     <item
