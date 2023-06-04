@@ -43,7 +43,7 @@ class AreasModel(
                 }.sortedBy { it.second }
 
             val distanceFormat = NumberFormat.getNumberInstance().apply {
-                maximumFractionDigits = 1
+                maximumFractionDigits = 0
             }
 
             val items = communities.map {
