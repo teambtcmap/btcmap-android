@@ -37,7 +37,7 @@
     <string name="verify">Verifizieren oder Melden</string>
     <string name="atm">Geldautomat</string>
     <string name="checkmark_icon">Häkchen-Symbol</string>
-    <string name="syncing_data">Daten werden synchronisiert</string>
+    <string name="fetching_recent_changes">Fetching recent changes</string>
     <string name="database">Datenbank</string>
     <string name="last_sync_s">Letzte Synchronisierung: %1$s</string>
     <string name="database_is_empty">Datenbank ist leer</string>

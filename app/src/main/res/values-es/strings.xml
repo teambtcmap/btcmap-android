@@ -37,7 +37,7 @@
     <string name="verify">Verificar o informar</string>
     <string name="atm">Cajero automático</string>
     <string name="checkmark_icon">Icono de marca de verificación</string>
-    <string name="syncing_data">Sincronizando datos</string>
+    <string name="fetching_recent_changes">Fetching recent changes</string>
     <string name="database">Base de datos</string>
     <string name="last_sync_s">Última sincronización: %1$s</string>
     <string name="database_is_empty">La base de datos está vacía</string>

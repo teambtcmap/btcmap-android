@@ -37,7 +37,7 @@
     <string name="verify">Vérifier ou signaler</string>
     <string name="atm">DAB</string>
     <string name="checkmark_icon">Icône de vérification</string>
-    <string name="syncing_data">Synchronisation des données</string>
+    <string name="fetching_recent_changes">Fetching recent changes</string>
     <string name="database">Base de données</string>
     <string name="last_sync_s">Dernière synchronisation: %1$s</string>
     <string name="database_is_empty">Base de données est vide</string>

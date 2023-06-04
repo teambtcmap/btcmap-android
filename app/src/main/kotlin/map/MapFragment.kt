@@ -395,7 +395,7 @@ class MapFragment : Fragment() {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val snackBar = Snackbar.make(view, R.string.syncing_data, Snackbar.LENGTH_INDEFINITE)
+            val snackBar = Snackbar.make(view, R.string.fetching_recent_changes, Snackbar.LENGTH_INDEFINITE)
 
             model.syncActive.collect {
                 if (it) {

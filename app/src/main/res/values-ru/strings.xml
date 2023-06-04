@@ -37,7 +37,7 @@
     <string name="verify">Редактировать</string>
     <string name="atm">Банкомат</string>
     <string name="checkmark_icon">Галочка</string>
-    <string name="syncing_data">Синхронизация данных</string>
+    <string name="fetching_recent_changes">Загрузка последних изменений</string>
     <string name="database">База данных</string>
     <string name="last_sync_s">Дата синхронизации: %1$s</string>
     <string name="database_is_empty">База данных пуста</string>

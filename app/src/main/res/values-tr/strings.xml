@@ -37,7 +37,7 @@
     <string name="verify">Doğrula veya Raporla</string>
     <string name="atm">ATM</string>
     <string name="checkmark_icon">Onay işareti simgesi</string>
-    <string name="syncing_data">Veriler senkronize ediliyor</string>
+    <string name="fetching_recent_changes">Fetching recent changes</string>
     <string name="database">Veri tabanı</string>
     <string name="last_sync_s">Son senkronizasyon: %1$s</string>
     <string name="database_is_empty">Veritabanı boş</string>

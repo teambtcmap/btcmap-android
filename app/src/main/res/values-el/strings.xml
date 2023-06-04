@@ -37,7 +37,7 @@
     <string name="verify">Επιβεβαίωση ή Αναφορά</string>
     <string name="atm">ATM</string>
     <string name="checkmark_icon">Εικονίδιο Επιλογής</string>
-    <string name="syncing_data">Συγχρονισμός δεδομένων</string>
+    <string name="fetching_recent_changes">Fetching recent changes</string>
     <string name="database">Βάση δεδομένων</string>
     <string name="last_sync_s">Τελευταίος συγχρονισμός: %1$s</string>
     <string name="database_is_empty">Η βάση δεδομένων είναι κενή</string>
