@@ -495,6 +495,12 @@ class MapFragment : Fragment() {
                 } else {
                     binding.fab.isVisible = false
                 }
+
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    requireActivity().window.statusBarColor = requireContext().getSurfaceColor()
+                } else {
+                    requireActivity().window.statusBarColor = Color.TRANSPARENT
+                }
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
