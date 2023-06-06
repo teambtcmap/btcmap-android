@@ -13,10 +13,6 @@ data class AreaJson(
     val deletedAt: String,
 )
 
-fun AreaJson.valid(): Boolean {
-    return tags.contains("name") && tags.contains("geo_json")
-}
-
 fun AreaJson.toArea(): Area {
     return Area(
         id = id,

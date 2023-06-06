@@ -11,14 +11,12 @@
     <string name="btc_map_donation_address">Διεύθυνση δωρεάς στο BTC Map </string>
     <string name="help_us_improve_btc_map">Βοηθήστε μας να εξελίξουμε το BTC Map</string>
     <string name="show_my_location">Εμφάνιση της τοποθεσία μου</string>
-    <string name="copy_lnurl">Αντιγραφή LNURL</string>
     <string name="search_here">Αναζητήστε από εδώ</string>
     <string name="settings">Ρυθμίσεις</string>
     <string name="trends">Τάσεις</string>
     <string name="up_to_date_places">Ενημερωμένες Τοποθεσίες</string>
     <string name="total_places">Συνολικές Τοποθεσίες</string>
     <string name="pay">Πληρωμή</string>
-    <string name="copy_address">Αντιγραφή Διεύθυνσης</string>
     <string name="you_dont_have_a_compatible_wallet">Δεν διαθέτετε συμβατό πορτοφόλι</string>
     <string name="communities">Κοινότητες</string>
     <string name="latest_changes">Τελευταίες αλλαγές</string>
@@ -30,7 +28,7 @@
     <string name="editor_manual">Editor manual</string>
     <string name="users">Users</string>
     <string name="by_s">από %1$s</string>
-    <string name="unnamed_place">Ανώνυμη Περιοχή</string>
+    <string name="unnamed">Ανώνυμη Περιοχή</string>
     <string name="unnamed_user">Ανώνυμος Χρήστης</string>
     <string name="not_verified">Μη επαληθευμένο</string>
     <string name="show_more">Δείτε περισσότερα</string>
@@ -57,6 +55,8 @@
     <string name="category_restaurant_plural">Εστιατόρια</string>
     <string name="show_atms">Show ATMs</string>
     <string name="show_osm_attribution">Show OSM attribution</string>
+    <string name="pay_onchain">Pay Onchain</string>
+    <string name="pay_with_lightning">Pay with Lightning</string>
     <plurals name="d_changes">
         <item quantity="one">%d αλλαγή</item>
         <item quantity="other">%d αλλαγές</item>

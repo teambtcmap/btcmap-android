@@ -11,14 +11,12 @@
     <string name="btc_map_donation_address">ที่อยู่บริจาคแผนที่ BTC</string>
     <string name="help_us_improve_btc_map">ช่วยเราปรับปรุงแผนที่ BTC</string>
     <string name="show_my_location">แสดงตำแหน่งของฉัน</string>
-    <string name="copy_lnurl">สำเนา LNURL</string>
     <string name="search_here">ค้นหาที่นี่</string>
     <string name="settings">การตั้งค่า</string>
     <string name="trends">แนวโน้ม</string>
     <string name="up_to_date_places">สถานที่ที่ทันสมัย</string>
     <string name="total_places">สถานที่ทั้งหมด</string>
     <string name="pay">จ่าย</string>
-    <string name="copy_address">คัดลอกที่อยู่</string>
     <string name="you_dont_have_a_compatible_wallet">คุณไม่มีกระเป๋าเงินที่เข้ากันได้</string>
     <string name="communities">ชุมชน</string>
     <string name="latest_changes">การเปลี่ยนแปลงล่าสุด</string>
@@ -30,7 +28,7 @@
     <string name="editor_manual">Editor manual</string>
     <string name="users">สูงสุด supertaggers</string>
     <string name="by_s">โดย %1$s</string>
-    <string name="unnamed_place">สถานที่ไม่มีชื่อ</string>
+    <string name="unnamed">สถานที่ไม่มีชื่อ</string>
     <string name="unnamed_user">ผู้ใช้ที่ไม่มีชื่อ</string>
     <string name="not_verified">ไม่ได้รับการยืนยัน</string>
     <string name="show_more">แสดงมากขึ้น</string>
@@ -57,6 +55,8 @@
     <string name="category_restaurant_plural">ร้านอาหาร</string>
     <string name="show_atms">Show ATMs</string>
     <string name="show_osm_attribution">Show OSM attribution</string>
+    <string name="pay_onchain">Pay Onchain</string>
+    <string name="pay_with_lightning">Pay with Lightning</string>
     <plurals name="d_changes">
         <item quantity="other">%d การเปลี่ยนแปลง</item>
     </plurals>

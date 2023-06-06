@@ -100,7 +100,7 @@ class UserFragment : Fragment() {
                         date = it.eventDate,
                         type = it.eventType,
                         elementId = it.elementId,
-                        elementName = it.elementName.ifBlank { getString(R.string.unnamed_place) },
+                        elementName = it.elementName.ifBlank { getString(R.string.unnamed) },
                         username = "",
                         tipLnurl = "",
                     )

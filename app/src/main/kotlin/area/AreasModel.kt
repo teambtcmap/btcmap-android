@@ -27,6 +27,7 @@ class AreasModel(
         viewModelScope.launch {
             val communities = areasRepo
                 .selectByType("community")
+                .filter { it.tags.containsKey("icon:square") }
                 .mapNotNull {
                     val polygons = runCatching {
                         it.tags.polygons()

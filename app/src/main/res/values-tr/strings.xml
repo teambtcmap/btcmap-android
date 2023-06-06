@@ -11,14 +11,12 @@
     <string name="btc_map_donation_address">BTC Haritası bağış adresi</string>
     <string name="help_us_improve_btc_map">BTC Haritasını iyileştirmemize yardımcı olun</string>
     <string name="show_my_location">Konumumu göster</string>
-    <string name="copy_lnurl">LNURL\'yi kopyala</string>
     <string name="search_here">Burda ara</string>
     <string name="settings">Ayarlar</string>
     <string name="trends">Trendler</string>
     <string name="up_to_date_places">Güncel yerler</string>
     <string name="total_places">Toplam yerler</string>
     <string name="pay">Öde</string>
-    <string name="copy_address">Adresi kopyala</string>
     <string name="you_dont_have_a_compatible_wallet">Uyumlu bir cüzdanınız yok</string>
     <string name="communities">Topluluklar</string>
     <string name="latest_changes">Son değişiklikler</string>
@@ -30,7 +28,7 @@
     <string name="editor_manual">Editor manual</string>
     <string name="users">En iyi süper etiketleyiciler</string>
     <string name="by_s">%1$s tarafından</string>
-    <string name="unnamed_place">İsimsiz yer</string>
+    <string name="unnamed">İsimsiz yer</string>
     <string name="unnamed_user">Adsız kullanıcı</string>
     <string name="not_verified">Doğrulanmadı</string>
     <string name="show_more">Daha fazla göster</string>
@@ -57,6 +55,8 @@
     <string name="category_restaurant_plural">Restaurants</string>
     <string name="show_atms">Show ATMs</string>
     <string name="show_osm_attribution">Show OSM attribution</string>
+    <string name="pay_onchain">Pay Onchain</string>
+    <string name="pay_with_lightning">Pay with Lightning</string>
     <plurals name="d_changes">
         <item quantity="one">%d change</item>
         <item quantity="other">%d changes</item>

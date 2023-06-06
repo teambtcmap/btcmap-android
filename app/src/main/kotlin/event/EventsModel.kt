@@ -41,7 +41,7 @@ class EventsModel(
                     date = it.eventDate,
                     type = it.eventType,
                     elementId = it.elementId,
-                    elementName = it.elementName.ifBlank { app.getString(R.string.unnamed_place) },
+                    elementName = it.elementName.ifBlank { app.getString(R.string.unnamed) },
                     username = it.userName,
                     tipLnurl = it.userTips,
                 )

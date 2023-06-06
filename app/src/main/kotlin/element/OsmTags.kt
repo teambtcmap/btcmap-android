@@ -18,7 +18,7 @@ fun OsmTags.name(
 ): String {
     return name(
         atmLocalizedString = res.getString(R.string.atm),
-        unnamedPlaceLocalizedString = res.getString(R.string.unnamed_place),
+        unnamedPlaceLocalizedString = res.getString(R.string.unnamed),
         locale = locale,
     )
 }

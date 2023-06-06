@@ -11,14 +11,12 @@
     <string name="btc_map_donation_address">BTC Map Spendenadresse</string>
     <string name="help_us_improve_btc_map">Hilf uns BTC Map zu verbessern</string>
     <string name="show_my_location">Zeige meinen Standort</string>
-    <string name="copy_lnurl">LNURL kopieren</string>
     <string name="search_here">Hier suchen</string>
     <string name="settings">Einstellungen</string>
     <string name="trends">Trends</string>
     <string name="up_to_date_places">Aktuelle Standorte</string>
     <string name="total_places">Standorte gesamt</string>
     <string name="pay">Bezahlen</string>
-    <string name="copy_address">Adresse kopieren</string>
     <string name="you_dont_have_a_compatible_wallet">Du hast keine kompatible Wallet</string>
     <string name="communities">Gemeinschaften</string>
     <string name="latest_changes">Letzte Änderungen</string>
@@ -30,7 +28,7 @@
     <string name="editor_manual">Bearbeitungsanleitung</string>
     <string name="users">Benutzer</string>
     <string name="by_s">von %1$s</string>
-    <string name="unnamed_place">Unbenannter Standort</string>
+    <string name="unnamed">Unbenannter Standort</string>
     <string name="unnamed_user">Unbenannter Benutzer</string>
     <string name="not_verified">Nicht verifiziert</string>
     <string name="show_more">Mehr anzeigen</string>
@@ -57,6 +55,8 @@
     <string name="category_restaurant_plural">Restaurants</string>
     <string name="show_atms">Geldautomaten anzeigen</string>
     <string name="show_osm_attribution">OSM Zuschreibung anzeigen</string>
+    <string name="pay_onchain">Pay Onchain</string>
+    <string name="pay_with_lightning">Pay with Lightning</string>
     <plurals name="d_changes">
         <item quantity="one">%d Änderung</item>
         <item quantity="other">%d Änderungen</item>
