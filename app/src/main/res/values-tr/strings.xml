@@ -9,7 +9,6 @@
     <string name="qr_code">QR kod</string>
     <string name="copied_to_clipboard">Panoya kopyalandı</string>
     <string name="btc_map_donation_address">BTC Haritası bağış adresi</string>
-    <string name="help_us_improve_btc_map">BTC Haritasını iyileştirmemize yardımcı olun</string>
     <string name="show_my_location">Konumumu göster</string>
     <string name="search_here">Burda ara</string>
     <string name="settings">Ayarlar</string>

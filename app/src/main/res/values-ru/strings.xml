@@ -9,7 +9,6 @@
     <string name="qr_code">QR код</string>
     <string name="copied_to_clipboard">Адрес скопирован в буфер обмена</string>
     <string name="btc_map_donation_address">Адрес для пожертвований BTC Map</string>
-    <string name="help_us_improve_btc_map">Помогите нам улучшить BTC Map</string>
     <string name="show_my_location">Показать мое месторасположение</string>
     <string name="search_here">Поиск</string>
     <string name="settings">Настройки</string>

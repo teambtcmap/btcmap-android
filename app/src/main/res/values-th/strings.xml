@@ -9,7 +9,6 @@
     <string name="qr_code">คิวอาร์โค้ด</string>
     <string name="copied_to_clipboard">คัดลอกไปที่คลิปบอร์ดแล้ว</string>
     <string name="btc_map_donation_address">ที่อยู่บริจาคแผนที่ BTC</string>
-    <string name="help_us_improve_btc_map">ช่วยเราปรับปรุงแผนที่ BTC</string>
     <string name="show_my_location">แสดงตำแหน่งของฉัน</string>
     <string name="search_here">ค้นหาที่นี่</string>
     <string name="settings">การตั้งค่า</string>
