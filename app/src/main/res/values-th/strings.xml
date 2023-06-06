@@ -37,7 +37,7 @@
     <string name="checkmark_icon">ไอคอนเครื่องหมายถูก</string>
     <string name="fetching_recent_changes">Fetching recent changes</string>
     <string name="database">ฐานข้อมูล</string>
-    <string name="last_sync_s">การซิงค์ครั้งล่าสุด: %1$s</string>
+    <string name="updated_s">การซิงค์ครั้งล่าสุด: %1$s</string>
     <string name="database_is_empty">ฐานข้อมูลว่างเปล่า</string>
     <string name="category_atm">ATM</string>
     <string name="category_atm_plural">ATMs</string>

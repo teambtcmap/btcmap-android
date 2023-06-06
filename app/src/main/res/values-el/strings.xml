@@ -37,7 +37,7 @@
     <string name="checkmark_icon">Εικονίδιο Επιλογής</string>
     <string name="fetching_recent_changes">Fetching recent changes</string>
     <string name="database">Βάση δεδομένων</string>
-    <string name="last_sync_s">Τελευταίος συγχρονισμός: %1$s</string>
+    <string name="updated_s">Τελευταίος συγχρονισμός: %1$s</string>
     <string name="database_is_empty">Η βάση δεδομένων είναι κενή</string>
     <string name="category_atm">ATM</string>
     <string name="category_atm_plural">ATMs</string>

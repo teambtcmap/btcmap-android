@@ -37,7 +37,7 @@
     <string name="checkmark_icon">Icono de marca de verificación</string>
     <string name="fetching_recent_changes">Fetching recent changes</string>
     <string name="database">Base de datos</string>
-    <string name="last_sync_s">Última sincronización: %1$s</string>
+    <string name="updated_s">Última sincronización: %1$s</string>
     <string name="database_is_empty">La base de datos está vacía</string>
     <string name="category_atm">Cajero automático</string>
     <string name="category_atm_plural">Cajeros automáticos</string>

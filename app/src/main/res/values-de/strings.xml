@@ -37,7 +37,7 @@
     <string name="checkmark_icon">Häkchen-Symbol</string>
     <string name="fetching_recent_changes">Fetching recent changes</string>
     <string name="database">Datenbank</string>
-    <string name="last_sync_s">Letzte Synchronisierung: %1$s</string>
+    <string name="updated_s">Letzte Synchronisierung: %1$s</string>
     <string name="database_is_empty">Datenbank ist leer</string>
     <string name="category_atm">Geldautomat</string>
     <string name="category_atm_plural">Geldautomaten</string>

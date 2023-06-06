@@ -37,7 +37,7 @@
     <string name="checkmark_icon">Checkmark icon</string>
     <string name="fetching_recent_changes">Fetching recent changes</string>
     <string name="database">Database</string>
-    <string name="last_sync_s">Last sync: %1$s</string>
+    <string name="updated_s">Updated: %1$s</string>
     <string name="database_is_empty">Database is empty</string>
     <string name="category_atm">ATM</string>
     <string name="category_atm_plural">ATMs</string>

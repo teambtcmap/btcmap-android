@@ -60,7 +60,7 @@ class SettingsFragment : Fragment() {
         if (lastSyncDate != null) {
             val dateFormat = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
             binding.lastSyncDate.text = getString(
-                R.string.last_sync_s,
+                R.string.updated_s,
                 dateFormat.format(lastSyncDate.withZoneSameInstant(ZoneOffset.systemDefault())),
             )
         } else {
