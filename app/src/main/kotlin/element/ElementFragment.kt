@@ -128,7 +128,7 @@ class ElementFragment : Fragment() {
                 R.id.action_editor_manual -> {
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.data =
-                        Uri.parse("https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions")
+                        Uri.parse("https://wiki.btcmap.org/general/tagging-instructions.html")
                     startActivity(intent)
                 }
             }
