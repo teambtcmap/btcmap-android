@@ -117,6 +117,34 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
         }
     }
 
+    suspend fun selectByCategory(category: String): List<Element> {
+        return withContext(Dispatchers.IO) {
+            val cursor = db.readableDatabase.query(
+                """
+                SELECT *
+                FROM element
+                WHERE deleted_at = '' AND json_extract(tags, '$.category') = ?;
+                """,
+                arrayOf(category),
+            )
+
+            buildList {
+                while (cursor.moveToNext()) {
+                    this += Element(
+                        id = cursor.getString(0),
+                        lat = cursor.getDouble(1),
+                        lon = cursor.getDouble(2),
+                        osmJson = cursor.getJsonObject(3),
+                        tags = cursor.getJsonObject(4),
+                        createdAt = cursor.getZonedDateTime(5)!!,
+                        updatedAt = cursor.getZonedDateTime(6)!!,
+                        deletedAt = cursor.getZonedDateTime(7),
+                    )
+                }
+            }
+        }
+    }
+
     suspend fun selectWithoutClustering(
         minLat: Double,
         maxLat: Double,

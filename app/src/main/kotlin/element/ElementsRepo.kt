@@ -21,6 +21,10 @@ class ElementsRepo(
         return queries.selectBySearchString(searchString)
     }
 
+    suspend fun selectByCategory(category: String): List<Element> {
+        return queries.selectByCategory(category)
+    }
+
     suspend fun selectByBoundingBox(
         minLat: Double,
         maxLat: Double,

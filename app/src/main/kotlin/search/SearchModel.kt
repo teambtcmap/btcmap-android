@@ -48,7 +48,87 @@ class SearchModel(
                 var elements: List<Element>
 
                 val queryTimeMillis = measureTimeMillis {
-                    elements = elementsRepo.selectBySearchString(searchString)
+                    if (
+                        searchString.equals("atm", ignoreCase = true) ||
+                        searchString.equals("atms", ignoreCase = true) ||
+                        searchString.equals(
+                            app.getString(R.string.category_atm),
+                            ignoreCase = true
+                        ) ||
+                        searchString.equals(
+                            app.getString(R.string.category_atm_plural),
+                            ignoreCase = true
+                        )
+                    ) {
+                        elements = elementsRepo.selectByCategory("atm")
+                    } else if (
+                        searchString.equals("bar", ignoreCase = true) ||
+                        searchString.equals("bars", ignoreCase = true) ||
+                        searchString.equals(
+                            app.getString(R.string.category_bar),
+                            ignoreCase = true
+                        ) ||
+                        searchString.equals(
+                            app.getString(R.string.category_bar_plural),
+                            ignoreCase = true
+                        )
+                    ) {
+                        elements = elementsRepo.selectByCategory("bar")
+                    } else if (
+                        searchString.equals("cafe", ignoreCase = true) ||
+                        searchString.equals("cafes", ignoreCase = true) ||
+                        searchString.equals(
+                            app.getString(R.string.category_cafe),
+                            ignoreCase = true
+                        ) ||
+                        searchString.equals(
+                            app.getString(R.string.category_cafe_plural),
+                            ignoreCase = true
+                        )
+                    ) {
+                        elements = elementsRepo.selectByCategory("cafe")
+                    } else if (
+                        searchString.equals("hotel", ignoreCase = true) ||
+                        searchString.equals("hotels", ignoreCase = true) ||
+                        searchString.equals(
+                            app.getString(R.string.category_hotel),
+                            ignoreCase = true
+                        ) ||
+                        searchString.equals(
+                            app.getString(R.string.category_hotel_plural),
+                            ignoreCase = true
+                        )
+                    ) {
+                        elements = elementsRepo.selectByCategory("hotel")
+                    } else if (
+                        searchString.equals("pub", ignoreCase = true) ||
+                        searchString.equals("pubs", ignoreCase = true) ||
+                        searchString.equals(
+                            app.getString(R.string.category_pub),
+                            ignoreCase = true
+                        ) ||
+                        searchString.equals(
+                            app.getString(R.string.category_pub_plural),
+                            ignoreCase = true
+                        )
+                    ) {
+                        elements = elementsRepo.selectByCategory("pub")
+                    } else if (
+                        searchString.equals("restaurant", ignoreCase = true) ||
+                        searchString.equals("restaurants", ignoreCase = true) ||
+                        searchString.equals(
+                            app.getString(R.string.category_restaurant),
+                            ignoreCase = true
+                        ) ||
+                        searchString.equals(
+                            app.getString(R.string.category_restaurant_plural),
+                            ignoreCase = true
+                        )
+                    ) {
+                        elements = elementsRepo.selectByCategory("restaurant")
+                    } else {
+                        elements = elementsRepo.selectBySearchString(searchString)
+                    }
                 }
 
                 Log.d(TAG, "Search string: $searchString")
