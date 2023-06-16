@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <string name="app_name">Карта BTC</string>
+    <string name="app_name">Карта</string>
     <string name="add_location">Добавить место</string>
     <string name="kilometers_short">км</string>
     <string name="icon">Иконка</string>
