@@ -18,6 +18,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import coil.load
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
@@ -286,6 +287,18 @@ class ElementFragment : Fragment() {
                     Uri.parse("https://btcmap.org/verify-location?id=$elementId")
                 startActivity(intent)
             }
+        }
+
+        val imageUrl = tags["image"]?.jsonPrimitive?.contentOrNull?.toHttpUrlOrNull()
+
+        if (imageUrl != null) {
+            binding.image.isVisible = true
+            binding.image.load(imageUrl) {
+                this.fallback(R.drawable.merchant)
+                this.error(R.drawable.merchant)
+            }
+        } else {
+            binding.image.isVisible = false
         }
     }
 

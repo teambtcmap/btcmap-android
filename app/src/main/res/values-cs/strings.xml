@@ -56,6 +56,7 @@
     <string name="show_osm_attribution">Ukaž přispěvatelé OSM</string>
     <string name="pay_onchain">Zaplať Onchain</string>
     <string name="pay_with_lightning">Zaplať Lightning</string>
+    <string name="image">Image</string>
     <plurals name="d_changes">
         <item quantity="one">%d změn</item>
         <item quantity="few">%d změn</item>

@@ -56,6 +56,7 @@
     <string name="show_osm_attribution">Показывать аттрибуцию OSM</string>
     <string name="pay_onchain">Ончейн платеж</string>
     <string name="pay_with_lightning">Lightning платеж</string>
+    <string name="image">Image</string>
     <plurals name="d_changes">
         <item quantity="one">%d правка</item>
         <item quantity="few">%d правок</item>

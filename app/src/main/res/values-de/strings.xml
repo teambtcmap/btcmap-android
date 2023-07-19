@@ -56,6 +56,7 @@
     <string name="show_osm_attribution">OSM Zuschreibung anzeigen</string>
     <string name="pay_onchain">Pay Onchain</string>
     <string name="pay_with_lightning">Pay with Lightning</string>
+    <string name="image">Image</string>
     <plurals name="d_changes">
         <item quantity="one">%d Änderung</item>
         <item quantity="other">%d Änderungen</item>
