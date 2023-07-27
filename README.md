@@ -29,6 +29,8 @@
 
 ## 🌍 Help with Translation
 
+In order to translate the app to your language, you should click on a language link below and then press an edit button. 
+
 - [Afrikaans](app/src/main/res/values-af/strings.xml)
 - [Arabic](/app/src/main/res/values-ar/strings.xml)
 - [Bengali](/app/src/main/res/values-bn/strings.xml)
