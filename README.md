@@ -34,6 +34,7 @@ In order to translate the app to your language, you should click on a language l
 - [Afrikaans](app/src/main/res/values-af/strings.xml)
 - [Arabic](/app/src/main/res/values-ar/strings.xml)
 - [Bengali](/app/src/main/res/values-bn/strings.xml)
+- [Bulgarian](/app/src/main/res/values-bg/strings.xml)
 - [Catalan](/app/src/main/res/values-ca/strings.xml)
 - [Chinese](/app/src/main/res/values-zh/strings.xml)
 - [Czech](/app/src/main/res/values-cs/strings.xml)
