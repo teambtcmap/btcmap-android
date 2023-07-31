@@ -82,7 +82,7 @@ class ReportsFragment : Fragment() {
                         reports.map {
                             Pair(
                                 it.date.toString(),
-                                it.tags["up_to_date_elements"]?.jsonPrimitive?.longOrNull ?: 0,
+                                (it.tags["up_to_date_elements"]?.jsonPrimitive?.longOrNull ?: 0).toFloat(),
                             )
                         },
                     )
@@ -92,7 +92,7 @@ class ReportsFragment : Fragment() {
                         reports.map {
                             Pair(
                                 it.date.toString(),
-                                it.tags["total_elements"]?.jsonPrimitive?.longOrNull ?: 0,
+                                (it.tags["total_elements"]?.jsonPrimitive?.longOrNull ?: 0).toFloat(),
                             )
                         },
                     )
@@ -102,7 +102,7 @@ class ReportsFragment : Fragment() {
                         reports.map {
                             Pair(
                                 it.date.toString(),
-                                it.tags["legacy_elements"]?.jsonPrimitive?.longOrNull ?: 0,
+                                (it.tags["up_to_date_elements"]?.jsonPrimitive?.longOrNull ?: 0).toFloat() / (it.tags["total_elements"]?.jsonPrimitive?.longOrNull ?: 0).toFloat() * 100,
                             )
                         },
                     )
@@ -159,7 +159,7 @@ class ReportsFragment : Fragment() {
         }
     }
 
-    private fun show(chart: LineChart, data: List<Pair<String, Long>>) {
+    private fun show(chart: LineChart, data: List<Pair<String, Float>>) {
         val values = mutableListOf<Entry>()
 
         for (item in data) {
@@ -167,7 +167,7 @@ class ReportsFragment : Fragment() {
                 Entry(
                     OffsetDateTime.parse(item.first + "T00:00:00Z").toInstant().toEpochMilli()
                         .toFloat(),
-                    item.second.toFloat(),
+                    item.second,
                     null,
                 )
             )

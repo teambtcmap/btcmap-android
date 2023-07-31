@@ -19,7 +19,6 @@
     <string name="you_dont_have_a_compatible_wallet">Vous n\'avez pas un porte-feuille compatible</string>
     <string name="communities">Communautés</string>
     <string name="latest_changes">Derniers changements</string>
-    <string name="legacy_places">Legacy places</string>
     <string name="tip">⚡ Tip</string>
     <string name="osm_copyright">© OpenStreetMap contributors</string>
     <string name="view_on_osm">Voir sur OSM</string>
