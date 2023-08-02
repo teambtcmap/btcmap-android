@@ -37,7 +37,7 @@
                     android:orientation="vertical">
 
                     <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/chartUpToDateElements"
+                        android:id="@+id/chartVerifiedElements"
                         android:layout_width="match_parent"
                         android:layout_height="194dp"
                         android:layout_marginStart="16dp"
@@ -111,7 +111,7 @@
                     android:orientation="vertical">
 
                     <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/chartLegacyElements"
+                        android:id="@+id/chartVerifiedElementsFraction"
                         android:layout_width="match_parent"
                         android:layout_height="194dp"
                         android:layout_marginStart="16dp"

@@ -24,8 +24,6 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.longOrNull
 import map.getOnSurfaceColor
 import org.btcmap.databinding.FragmentReportsBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -62,9 +60,9 @@ class ReportsFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        initChart(binding.chartUpToDateElements)
+        initChart(binding.chartVerifiedElements)
         initChart(binding.chartTotalElements)
-        initChart(binding.chartLegacyElements)
+        initChart(binding.chartVerifiedElementsFraction)
 
         model.args.update {
             ReportsModel.Args(requireArguments().getString("area_id")!!)
@@ -72,39 +70,24 @@ class ReportsFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                model.reports.collect { reports ->
-                    if (reports.isEmpty()) {
+                model.data.collect { data ->
+                    if (data == null) {
                         return@collect
                     }
 
                     show(
-                        binding.chartUpToDateElements,
-                        reports.map {
-                            Pair(
-                                it.date.toString(),
-                                (it.tags["up_to_date_elements"]?.jsonPrimitive?.longOrNull ?: 0).toFloat(),
-                            )
-                        },
+                        chart = binding.chartVerifiedElements,
+                        data = data.verifiedPlaces.map { Pair(it.first, it.second.toFloat()) },
                     )
 
                     show(
-                        binding.chartTotalElements,
-                        reports.map {
-                            Pair(
-                                it.date.toString(),
-                                (it.tags["total_elements"]?.jsonPrimitive?.longOrNull ?: 0).toFloat(),
-                            )
-                        },
+                        chart = binding.chartTotalElements,
+                        data = data.totalPlaces.map { Pair(it.first, it.second.toFloat()) },
                     )
 
                     show(
-                        binding.chartLegacyElements,
-                        reports.map {
-                            Pair(
-                                it.date.toString(),
-                                (it.tags["up_to_date_elements"]?.jsonPrimitive?.longOrNull ?: 0).toFloat() / (it.tags["total_elements"]?.jsonPrimitive?.longOrNull ?: 0).toFloat() * 100,
-                            )
-                        },
+                        chart = binding.chartVerifiedElementsFraction,
+                        data = data.verifiedPlacesFraction,
                     )
                 }
             }
