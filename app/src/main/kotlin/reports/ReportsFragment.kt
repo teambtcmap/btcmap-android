@@ -28,6 +28,7 @@ import map.getOnSurfaceColor
 import org.btcmap.databinding.FragmentReportsBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.Instant
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
@@ -62,7 +63,8 @@ class ReportsFragment : Fragment() {
 
         initChart(binding.chartVerifiedElements)
         initChart(binding.chartTotalElements)
-        initChart(binding.chartVerifiedElementsFraction)
+        initVerifiedElementsFractionChart()
+        initDaysSinceVerifiedChart()
 
         model.args.update {
             ReportsModel.Args(requireArguments().getString("area_id")!!)
@@ -88,6 +90,11 @@ class ReportsFragment : Fragment() {
                     show(
                         chart = binding.chartVerifiedElementsFraction,
                         data = data.verifiedPlacesFraction,
+                    )
+
+                    showDaysSinceVerified(
+                        chart = binding.chartDaysSinceVerified,
+                        data = data.daysSinceVerified,
                     )
                 }
             }
@@ -139,6 +146,7 @@ class ReportsFragment : Fragment() {
                 Color.argb(0.12f, gridColor.red(), gridColor.green(), gridColor.blue())
             axisRight.textColor = requireContext().getOnSurfaceColor()
             axisRight.setDrawAxisLine(false)
+            axisRight.granularity = 1f
         }
     }
 
@@ -177,6 +185,131 @@ class ReportsFragment : Fragment() {
                 chart.axisLeft.axisMinimum
             }
 
+        dataSet.fillColor = Color.parseColor("#f7931a")
+
+        val dataSets: ArrayList<ILineDataSet> = ArrayList()
+        dataSets.add(dataSet)
+
+        chart.data = LineData(dataSets)
+        chart.invalidate()
+        chart.isVisible = true
+    }
+
+    private fun initVerifiedElementsFractionChart() {
+        binding.chartVerifiedElementsFraction.apply {
+            val topOffset =
+                TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    2f,
+                    resources.displayMetrics,
+                )
+
+            val bottomOffset =
+                TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    1f,
+                    resources.displayMetrics,
+                )
+
+            setExtraOffsets(0f, topOffset, 0f, bottomOffset)
+            minOffset = 0f
+
+            description.isEnabled = false
+            setTouchEnabled(false)
+            legend.isEnabled = false
+            xAxis.position = XAxis.XAxisPosition.BOTTOM
+            xAxis.setDrawGridLines(false)
+            xAxis.valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    val date = Instant.ofEpochMilli(value.toLong())
+                    return OffsetDateTime.ofInstant(date, ZoneOffset.UTC).toLocalDate().toString()
+                }
+            }
+            xAxis.textColor = requireContext().getOnSurfaceColor()
+            xAxis.labelCount = 4
+
+            axisLeft.setDrawGridLines(false)
+            axisLeft.isEnabled = false
+            val gridColor = Color.valueOf(requireContext().getOnSurfaceColor())
+            axisRight.gridColor =
+                Color.argb(0.12f, gridColor.red(), gridColor.green(), gridColor.blue())
+            axisRight.textColor = requireContext().getOnSurfaceColor()
+            axisRight.setDrawAxisLine(false)
+            axisRight.valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return "${value.toLong()}%"
+                }
+            }
+            axisRight.granularity = 1f
+        }
+    }
+
+    private fun initDaysSinceVerifiedChart() {
+        binding.chartDaysSinceVerified.apply {
+            val topOffset =
+                TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    2f,
+                    resources.displayMetrics,
+                )
+
+            val bottomOffset =
+                TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    1f,
+                    resources.displayMetrics,
+                )
+
+            setExtraOffsets(0f, topOffset, 0f, bottomOffset)
+            minOffset = 0f
+
+            description.isEnabled = false
+            setTouchEnabled(false)
+            legend.isEnabled = false
+            xAxis.position = XAxis.XAxisPosition.BOTTOM
+            xAxis.setDrawGridLines(false)
+            xAxis.valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    val date = Instant.ofEpochMilli(value.toLong())
+                    return OffsetDateTime.ofInstant(date, ZoneOffset.UTC).toLocalDate().toString()
+                }
+            }
+            xAxis.textColor = requireContext().getOnSurfaceColor()
+            xAxis.labelCount = 4
+
+            axisLeft.setDrawGridLines(false)
+            axisLeft.isEnabled = false
+            val gridColor = Color.valueOf(requireContext().getOnSurfaceColor())
+            axisRight.gridColor =
+                Color.argb(0.12f, gridColor.red(), gridColor.green(), gridColor.blue())
+            axisRight.textColor = requireContext().getOnSurfaceColor()
+            axisRight.setDrawAxisLine(false)
+            axisRight.granularity = 1f
+        }
+    }
+
+    private fun showDaysSinceVerified(chart: LineChart, data: List<Pair<LocalDate, Long>>) {
+        val values = mutableListOf<Entry>()
+
+        for (item in data) {
+            values.add(
+                Entry(
+                    item.first.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli().toFloat(),
+                    item.second.toFloat(),
+                    null,
+                )
+            )
+        }
+
+        val dataSet: ILineDataSet
+
+        dataSet = LineDataSet(values, null)
+        dataSet.color = Color.parseColor("#f7931a")
+        dataSet.valueTextColor = requireContext().getOnSurfaceColor()
+        dataSet.setDrawValues(false)
+        dataSet.valueTextSize = 9f
+        dataSet.setDrawCircles(false)
+        dataSet.setDrawFilled(true)
         dataSet.fillColor = Color.parseColor("#f7931a")
 
         val dataSets: ArrayList<ILineDataSet> = ArrayList()

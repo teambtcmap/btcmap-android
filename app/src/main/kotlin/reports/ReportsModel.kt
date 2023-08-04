@@ -2,6 +2,7 @@ package reports
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import db.toZonedDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -9,6 +10,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
+import java.time.Duration
+import java.time.LocalDate
+import java.time.ZonedDateTime
 
 class ReportsModel(
     private val reportsRepo: ReportsRepo,
@@ -56,6 +60,18 @@ class ReportsModel(
                                         second = upToDateElements.toFloat() / totalElements.toFloat() * 100f
                                     )
                                 },
+                                daysSinceVerified = reports.mapNotNull {
+                                    val avgVerificationDate =
+                                        it.tags["avg_verification_date"]?.jsonPrimitive?.content
+                                            ?: return@mapNotNull null
+                                    Pair(
+                                        first = it.date,
+                                        second = Duration.between(
+                                            avgVerificationDate.toZonedDateTime()!!,
+                                            ZonedDateTime.now(),
+                                        ).toDays(),
+                                    )
+                                }
                             )
                         }
                     }
@@ -70,5 +86,6 @@ class ReportsModel(
         val verifiedPlaces: List<Pair<String, Long>>,
         val totalPlaces: List<Pair<String, Long>>,
         val verifiedPlacesFraction: List<Pair<String, Float>>,
+        val daysSinceVerified: List<Pair<LocalDate, Long>>,
     )
 }
