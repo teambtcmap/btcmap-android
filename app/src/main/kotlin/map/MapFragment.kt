@@ -56,10 +56,10 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.util.TileSystemWebMercator
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.IconOverlay
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import org.osmdroid.views.overlay.Overlay
 import search.SearchAdapter
 import search.SearchModel
 import search.SearchResultModel
@@ -445,24 +445,35 @@ class MapFragment : Fragment() {
     }
 
     private fun MapView.addLocationOverlay() {
-        val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(requireContext()), this)
-        locationOverlay.enableMyLocation()
-        locationOverlay.setDirectionIcon(null)
-
         val iconSizePx = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 16f, requireContext().resources.displayMetrics
+            TypedValue.COMPLEX_UNIT_DIP,
+            16f,
+            requireContext().resources.displayMetrics,
         ).toInt()
 
-        val icon =
-            ContextCompat.getDrawable(requireContext(), R.drawable.cluster)!!
+        val icon = ContextCompat.getDrawable(requireContext(), R.drawable.cluster)!!
+            .toBitmap(width = iconSizePx, height = iconSizePx)
+            .toDrawable(resources)
+
         DrawableCompat.setTint(
             icon,
             Color.parseColor("#4285f4"),
         )
 
-        locationOverlay.setPersonIcon(icon.toBitmap(width = iconSizePx, height = iconSizePx))
-        locationOverlay.setPersonAnchor(0.5f, 0.5f)
-        binding.map.overlays += locationOverlay
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                var overlay: Overlay? = null
+
+                model.userLocation.collect {
+                    if (it != null) {
+                        binding.map.overlays -= overlay
+                        overlay = IconOverlay(it, icon)
+                        binding.map.overlays += overlay
+                        binding.map.invalidate()
+                    }
+                }
+            }
+        }
     }
 
     private fun MapView.addCancelSelectionOverlay() {
