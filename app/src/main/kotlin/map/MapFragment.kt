@@ -151,6 +151,7 @@ class MapFragment : Fragment() {
                     intent.data = Uri.parse("https://btcmap.org/add-location")
                     startActivity(intent)
                 }
+
                 R.id.action_areas -> {
                     nav.navigate(
                         R.id.areasFragment,
@@ -160,6 +161,7 @@ class MapFragment : Fragment() {
                         ),
                     )
                 }
+
                 R.id.action_trends -> nav.navigate(R.id.reportsFragment, bundleOf("area_id" to ""))
                 R.id.action_users -> nav.navigate(R.id.usersFragment)
                 R.id.action_events -> nav.navigate(R.id.eventsFragment)
@@ -228,7 +230,11 @@ class MapFragment : Fragment() {
             val userLocation = model.userLocation.value
 
             if (userLocation != null) {
-                binding.map.controller.setCenter(model.userLocation.value)
+                binding.map.controller.animateTo(
+                    model.userLocation.value,
+                    15.0,
+                    null,
+                )
             }
         }
 
@@ -395,7 +401,8 @@ class MapFragment : Fragment() {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val snackBar = Snackbar.make(view, R.string.fetching_recent_changes, Snackbar.LENGTH_INDEFINITE)
+            val snackBar =
+                Snackbar.make(view, R.string.fetching_recent_changes, Snackbar.LENGTH_INDEFINITE)
 
             model.syncActive.collect {
                 if (it) {
@@ -426,9 +433,11 @@ class MapFragment : Fragment() {
             BottomSheetBehavior.STATE_EXPANDED -> {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
             }
+
             BottomSheetBehavior.STATE_HALF_EXPANDED -> {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
             }
+
             else -> {
                 requireActivity().finish()
             }
