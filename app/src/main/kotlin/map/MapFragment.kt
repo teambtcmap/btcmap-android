@@ -447,6 +447,7 @@ class MapFragment : Fragment() {
     private fun MapView.addLocationOverlay() {
         val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(requireContext()), this)
         locationOverlay.enableMyLocation()
+        locationOverlay.setDirectionIcon(null)
 
         val iconSizePx = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, 16f, requireContext().resources.displayMetrics
