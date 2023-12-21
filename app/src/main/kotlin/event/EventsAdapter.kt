@@ -121,7 +121,7 @@ class EventsAdapter(
     data class Item(
         val date: ZonedDateTime,
         val type: String,
-        val elementId: String,
+        val elementId: Long,
         val elementName: String,
         val username: String,
         val tipLnurl: String,

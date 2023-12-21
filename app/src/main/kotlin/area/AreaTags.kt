@@ -2,14 +2,16 @@ package area
 
 import android.content.res.Resources
 import element.name
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.*
+import json.toList
+import json.toListOfArrays
+import org.json.JSONArray
+import org.json.JSONObject
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Polygon
 import java.util.*
 
-typealias AreaTags = JsonObject
+typealias AreaTags = JSONObject
 
 fun AreaTags.name(
     res: Resources,
@@ -26,60 +28,60 @@ fun AreaTags.polygons(): List<Polygon> {
 
     val res = mutableListOf<Polygon>()
 
-    val geoJson: JsonObject = Json.decodeFromString(this["geo_json"].toString())
+    val geoJson = this.getJSONObject("geo_json")
 
-    if (geoJson["type"]?.jsonPrimitive?.content == "FeatureCollection") {
-        val features = geoJson["features"]!!.jsonArray
+    if (geoJson.getString("type") == "FeatureCollection") {
+        val features = geoJson.getJSONArray("features")
 
-        features.forEach { feature ->
-            val geometry = feature.jsonObject["geometry"]!!.jsonObject
+        features.toList().forEach { feature ->
+            val geometry = feature.getJSONObject("geometry")
 
-            if (geometry["type"]?.jsonPrimitive?.content == "MultiPolygon") {
-                val coordinates = geometry["coordinates"]!!.jsonArray
+            if (geometry.getString("type") == "MultiPolygon") {
+                val coordinates = geometry.getJSONArray("coordinates").toList()
 
-                coordinates.map { it.jsonArray }.forEach { polys ->
-                    res += geoFactory.createPolygon(polys.first().jsonArray.map {
+                coordinates.map { JSONArray(it).toListOfArrays() }.forEach { polys ->
+                    res += geoFactory.createPolygon(polys.first().toListOfArrays().map {
                         Coordinate(
-                            it.jsonArray.first().jsonPrimitive.double,
-                            it.jsonArray.last().jsonPrimitive.double,
+                            it.getDouble(0),
+                            it.getDouble(1),
                         )
                     }.toTypedArray())
                 }
             }
 
-            if (geometry["type"]?.jsonPrimitive?.content == "Polygon") {
-                val coordinates = geometry["coordinates"]!!.jsonArray.first().jsonArray
+            if (geometry.getString("type") == "Polygon") {
+                val coordinates = geometry.getJSONArray("coordinates").getJSONArray(0).toListOfArrays()
 
                 res += geoFactory.createPolygon(coordinates.map {
                     Coordinate(
-                        it.jsonArray.first().jsonPrimitive.double,
-                        it.jsonArray.last().jsonPrimitive.double,
+                        it.getDouble(0),
+                        it.getDouble(1),
                     )
                 }.toTypedArray())
             }
         }
     }
 
-    if (geoJson["type"]?.jsonPrimitive?.content == "MultiPolygon") {
-        val coordinates = geoJson["coordinates"]!!.jsonArray
+    if (geoJson.getString("type") == "MultiPolygon") {
+        val coordinates = geoJson.getJSONArray("coordinates").toListOfArrays()
 
-        coordinates.map { it.jsonArray }.forEach { polys ->
-            val firstPoly = polys.first().jsonArray
+        coordinates.forEach { polys ->
+            val firstPoly = polys.toListOfArrays().first().toListOfArrays()
 
             res += geoFactory.createPolygon(firstPoly.map {
                 Coordinate(
-                    it.jsonArray.first().jsonPrimitive.double,
-                    it.jsonArray.last().jsonPrimitive.double,
+                    it.getDouble(0),
+                    it.getDouble(1),
                 )
             }.toTypedArray())
         }
     }
 
-    if (geoJson["type"]?.jsonPrimitive?.content == "Polygon") {
-        val coordinates = geoJson["coordinates"]!!.jsonArray
-            .first().jsonArray
-            .map { it.jsonArray }
-            .map { Coordinate(it.first().jsonPrimitive.double, it.last().jsonPrimitive.double) }
+    if (geoJson.getString("type") == "Polygon") {
+        val coordinates = geoJson.getJSONArray("coordinates").toListOfArrays()
+            .first()
+            .toListOfArrays()
+            .map { Coordinate(it.getDouble(0), it.getDouble(1)) }
 
         res += geoFactory.createPolygon(coordinates.toTypedArray())
     }

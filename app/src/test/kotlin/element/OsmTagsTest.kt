@@ -1,6 +1,5 @@
 package element
 
-import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.util.Locale
@@ -10,7 +9,7 @@ class OsmTagsTest {
     @Test
     fun name() {
         val name = "test"
-        val tags: OsmTags = OsmTags(mapOf("name" to JsonPrimitive(name)))
+        val tags: OsmTags = OsmTags(mapOf("name" to name))
         assertEquals(name, tags.name(atmLocalizedString = "", unnamedPlaceLocalizedString = ""))
     }
 
@@ -22,8 +21,8 @@ class OsmTagsTest {
 
         val tags: OsmTags = OsmTags(
             mapOf(
-                "name" to JsonPrimitive(name),
-                "name:${locale.language}" to JsonPrimitive(nameLocalized)
+                "name" to name,
+                "name:${locale.language}" to nameLocalized,
             )
         )
 
@@ -36,7 +35,7 @@ class OsmTagsTest {
     @Test
     fun nameEmpty() {
         val unnamedPlaceLocalizedString = "Unnamed"
-        val tags: OsmTags = OsmTags(emptyMap())
+        val tags: OsmTags = OsmTags()
 
         assertEquals(
             unnamedPlaceLocalizedString,
@@ -50,7 +49,7 @@ class OsmTagsTest {
     @Test
     fun nameAtm() {
         val atmLocalizedString = "ATM"
-        val tags: OsmTags = OsmTags(mapOf("amenity" to JsonPrimitive("atm")))
+        val tags: OsmTags = OsmTags(mapOf("amenity" to "atm"))
 
         assertEquals(
             atmLocalizedString,

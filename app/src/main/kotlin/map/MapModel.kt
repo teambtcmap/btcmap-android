@@ -96,7 +96,7 @@ class MapModel(
         }
     }
 
-    fun selectElement(elementId: String, moveToLocation: Boolean) {
+    fun selectElement(elementId: Long, moveToLocation: Boolean) {
         val element = runBlocking { elementsRepo.selectById(elementId) }
         _selectedElement.update { element }
 

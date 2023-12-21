@@ -25,7 +25,7 @@ class EventsModel(
         loadItems()
     }
 
-    suspend fun selectElementById(id: String) = elementsRepo.selectById(id)
+    suspend fun selectElementById(id: Long) = elementsRepo.selectById(id)
 
     fun onShowMoreItemsClick() {
         limit += LIMIT

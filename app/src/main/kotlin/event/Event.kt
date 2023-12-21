@@ -1,6 +1,6 @@
 package event
 
-import kotlinx.serialization.json.JsonObject
+import org.json.JSONObject
 import java.time.ZonedDateTime
 
 data class Event(
@@ -8,7 +8,7 @@ data class Event(
     val type: String,
     val elementId: String,
     val userId: Long,
-    val tags: JsonObject,
+    val tags: JSONObject,
     val createdAt: ZonedDateTime,
     val updatedAt: ZonedDateTime,
     val deletedAt: ZonedDateTime?,

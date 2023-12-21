@@ -1,31 +1,31 @@
 package api
 
 import area.AreaJson
+import area.toAreasJson
 import element.ElementJson
+import element.toElementsJson
 import event.EventJson
+import event.toEventsJson
 import http.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import reports.ReportJson
+import reports.toReportsJson
 import user.UserJson
+import user.toUsersJson
 import java.time.ZonedDateTime
 
 class ApiImpl(
     private val baseUrl: HttpUrl,
     private val httpClient: OkHttpClient,
-    private val json: Json,
 ) : Api {
 
-    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun getAreas(updatedSince: ZonedDateTime?, limit: Long): List<AreaJson> {
         val url = baseUrl.newBuilder().apply {
+            addPathSegment("v2")
             addPathSegment("areas")
 
             if (updatedSince != null) {
@@ -45,24 +45,17 @@ class ApiImpl(
         return withContext(Dispatchers.IO) {
             response.body.byteStream().use { responseBody ->
                 withContext(Dispatchers.IO) {
-                    json.decodeFromStream(
-                        stream = responseBody,
-                        deserializer = ListSerializer(AreaJson.serializer()),
-                    )
+                    responseBody.toAreasJson()
                 }
             }
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun getElements(updatedSince: ZonedDateTime?, limit: Long): List<ElementJson> {
         val url = baseUrl.newBuilder().apply {
+            addPathSegment("v3")
             addPathSegment("elements")
-
-            if (updatedSince != null) {
-                addQueryParameter("updated_since", updatedSince.toString())
-            }
-
+            addQueryParameter("updated_since", updatedSince?.toString() ?: "2020-01-01T00:00:00Z")
             addQueryParameter("limit", limit.toString())
         }.build()
 
@@ -76,18 +69,15 @@ class ApiImpl(
         return withContext(Dispatchers.IO) {
             response.body.byteStream().use { responseBody ->
                 withContext(Dispatchers.IO) {
-                    json.decodeFromStream(
-                        stream = responseBody,
-                        deserializer = ListSerializer(ElementJson.serializer()),
-                    )
+                    responseBody.toElementsJson()
                 }
             }
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun getEvents(updatedSince: ZonedDateTime?, limit: Long): List<EventJson> {
         val url = baseUrl.newBuilder().apply {
+            addPathSegment("v2")
             addPathSegment("events")
 
             if (updatedSince != null) {
@@ -107,18 +97,15 @@ class ApiImpl(
         return withContext(Dispatchers.IO) {
             response.body.byteStream().use { responseBody ->
                 withContext(Dispatchers.IO) {
-                    json.decodeFromStream(
-                        stream = responseBody,
-                        deserializer = ListSerializer(EventJson.serializer()),
-                    )
+                    responseBody.toEventsJson()
                 }
             }
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun getReports(updatedSince: ZonedDateTime?, limit: Long): List<ReportJson> {
         val url = baseUrl.newBuilder().apply {
+            addPathSegment("v2")
             addPathSegment("reports")
 
             if (updatedSince != null) {
@@ -138,18 +125,15 @@ class ApiImpl(
         return withContext(Dispatchers.IO) {
             response.body.byteStream().use { responseBody ->
                 withContext(Dispatchers.IO) {
-                    json.decodeFromStream(
-                        stream = responseBody,
-                        deserializer = ListSerializer(ReportJson.serializer()),
-                    )
+                    responseBody.toReportsJson()
                 }
             }
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun getUsers(updatedSince: ZonedDateTime?, limit: Long): List<UserJson> {
         val url = baseUrl.newBuilder().apply {
+            addPathSegment("v2")
             addPathSegment("users")
 
             if (updatedSince != null) {
@@ -169,10 +153,7 @@ class ApiImpl(
         return withContext(Dispatchers.IO) {
             response.body.byteStream().use { responseBody ->
                 withContext(Dispatchers.IO) {
-                    json.decodeFromStream(
-                        stream = responseBody,
-                        deserializer = ListSerializer(UserJson.serializer()),
-                    )
+                    responseBody.toUsersJson()
                 }
             }
         }

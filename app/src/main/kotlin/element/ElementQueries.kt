@@ -1,5 +1,6 @@
 package element
 
+import androidx.core.database.getStringOrNull
 import androidx.sqlite.db.transaction
 import db.elementsUpdatedAt
 import db.getJsonObject
@@ -26,22 +27,22 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                         INSERT OR REPLACE
                         INTO element (
                             id,
+                            osm_id,
                             lat,
                             lon,
                             osm_json,
                             tags,
-                            created_at,
                             updated_at,
                             deleted_at
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                         """,
                         arrayOf(
                             it.id,
+                            it.osmId,
                             it.lat,
                             it.lon,
                             it.osmJson,
                             it.tags,
-                            it.createdAt,
                             it.updatedAt,
                             it.deletedAt ?: "",
                         ),
@@ -53,17 +54,17 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
         elementsUpdatedAt.update { LocalDateTime.now() }
     }
 
-    suspend fun selectById(id: String): Element? {
+    suspend fun selectById(id: Long): Element? {
         return withContext(Dispatchers.IO) {
             val cursor = db.readableDatabase.query(
                 """
                 SELECT
                     id,
+                    osm_id,
                     lat,
                     lon,
                     osm_json,
                     tags,
-                    created_at,
                     updated_at,
                     deleted_at
                 FROM element
@@ -77,14 +78,14 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
             }
 
             Element(
-                id = cursor.getString(0),
-                lat = cursor.getDouble(1),
-                lon = cursor.getDouble(2),
-                osmJson = cursor.getJsonObject(3),
-                tags = cursor.getJsonObject(4),
-                createdAt = cursor.getZonedDateTime(5)!!,
-                updatedAt = cursor.getZonedDateTime(6)!!,
-                deletedAt = cursor.getZonedDateTime(7),
+                id = cursor.getLong(0),
+                osmId = cursor.getString(1),
+                lat = cursor.getDouble(2),
+                lon = cursor.getDouble(3),
+                osmJson = cursor.getJsonObject(4),
+                tags = cursor.getJsonObject(5),
+                updatedAt = cursor.getString(6)!!,
+                deletedAt = cursor.getStringOrNull(7),
             )
         }
     }
@@ -103,14 +104,14 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
             buildList {
                 while (cursor.moveToNext()) {
                     this += Element(
-                        id = cursor.getString(0),
-                        lat = cursor.getDouble(1),
-                        lon = cursor.getDouble(2),
-                        osmJson = cursor.getJsonObject(3),
-                        tags = cursor.getJsonObject(4),
-                        createdAt = cursor.getZonedDateTime(5)!!,
-                        updatedAt = cursor.getZonedDateTime(6)!!,
-                        deletedAt = cursor.getZonedDateTime(7),
+                        id = cursor.getLong(0),
+                        osmId = cursor.getString(1),
+                        lat = cursor.getDouble(2),
+                        lon = cursor.getDouble(3),
+                        osmJson = cursor.getJsonObject(4),
+                        tags = cursor.getJsonObject(5),
+                        updatedAt = cursor.getString(6)!!,
+                        deletedAt = cursor.getStringOrNull(7),
                     )
                 }
             }
@@ -131,14 +132,14 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
             buildList {
                 while (cursor.moveToNext()) {
                     this += Element(
-                        id = cursor.getString(0),
-                        lat = cursor.getDouble(1),
-                        lon = cursor.getDouble(2),
-                        osmJson = cursor.getJsonObject(3),
-                        tags = cursor.getJsonObject(4),
-                        createdAt = cursor.getZonedDateTime(5)!!,
-                        updatedAt = cursor.getZonedDateTime(6)!!,
-                        deletedAt = cursor.getZonedDateTime(7),
+                        id = cursor.getLong(0),
+                        osmId = cursor.getString(1),
+                        lat = cursor.getDouble(2),
+                        lon = cursor.getDouble(3),
+                        osmJson = cursor.getJsonObject(4),
+                        tags = cursor.getJsonObject(5),
+                        updatedAt = cursor.getString(6)!!,
+                        deletedAt = cursor.getStringOrNull(7),
                     )
                 }
             }
@@ -184,7 +185,7 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                 while (cursor.moveToNext()) {
                     this += ElementsCluster(
                         count = 1,
-                        id = cursor.getString(0),
+                        id = cursor.getLong(0),
                         lat = cursor.getDouble(1),
                         lon = cursor.getDouble(2),
                         iconId = cursor.getString(3),
@@ -223,7 +224,7 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                 while (cursor.moveToNext()) {
                     this += ElementsCluster(
                         count = cursor.getLong(0),
-                        id = cursor.getString(1),
+                        id = cursor.getLong(1),
                         lat = cursor.getDouble(2),
                         lon = cursor.getDouble(3),
                         iconId = cursor.getString(4),

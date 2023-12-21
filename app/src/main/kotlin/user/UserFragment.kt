@@ -19,7 +19,6 @@ import event.EventsAdapter
 import event.EventsRepo
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.R
 import org.btcmap.databinding.FragmentUserBinding
 import org.koin.android.ext.android.inject
@@ -74,7 +73,7 @@ class UserFragment : Fragment() {
             usersRepo.selectById(requireArguments().getLong("user_id"))
         } ?: return
 
-        val userName = user.osmJson["display_name"]?.jsonPrimitive?.content ?: return
+        val userName = user.osmJson.optString("display_name")
 
         binding.toolbar.setOnMenuItemClickListener {
             if (it.itemId == R.id.action_view_on_osm) {

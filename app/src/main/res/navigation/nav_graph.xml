@@ -167,7 +167,7 @@
         android:name="element.ElementFragment">
         <argument
             android:name="element_id"
-            app:argType="string" />
+            app:argType="long" />
         <action
             android:id="@+id/action_elementFragment_to_mapFragment"
             app:destination="@id/mapFragment"

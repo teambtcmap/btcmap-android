@@ -479,7 +479,7 @@ class MapFragment : Fragment() {
     private fun MapView.addCancelSelectionOverlay() {
         overlays += MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
-                model.selectElement("", false)
+                model.selectElement(0, false)
                 return true
             }
 
@@ -510,7 +510,7 @@ class MapFragment : Fragment() {
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                    model.selectElement("", false)
+                    model.selectElement(0, false)
                     binding.fab.show()
                     binding.fab.isVisible = true
                 } else {

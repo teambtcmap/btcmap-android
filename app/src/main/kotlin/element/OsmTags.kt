@@ -1,16 +1,14 @@
 package element
 
 import android.content.res.Resources
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.R
+import org.json.JSONObject
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.util.Locale
 
-typealias OsmTags = JsonObject
+typealias OsmTags = JSONObject
 
 fun OsmTags.name(
     res: Resources,
@@ -29,9 +27,9 @@ fun OsmTags.name(
     locale: Locale = Locale.getDefault(),
 ): String {
     val countryCode = locale.language
-    val localizedName = this["name:$countryCode"]?.jsonPrimitive?.contentOrNull ?: ""
-    val name = this["name"]?.jsonPrimitive?.contentOrNull ?: ""
-    val amenity = this["amenity"]?.jsonPrimitive?.contentOrNull ?: ""
+    val localizedName = this.optString("name:$countryCode")
+    val name = this.optString("name")
+    val amenity = this.optString("amenity")
 
     return localizedName.ifBlank {
         name.ifBlank {
@@ -47,17 +45,17 @@ fun OsmTags.name(
 fun OsmTags.bitcoinSurveyDate(): ZonedDateTime? {
     val validVerificationDates = mutableListOf<LocalDate>()
 
-    this["survey:date"]?.jsonPrimitive?.contentOrNull?.let { rawDate ->
+    this.optString("survey:date").let { rawDate ->
         runCatching { LocalDate.parse(rawDate) }
             .onSuccess { validVerificationDates += it }
     }
 
-    this["check_date"]?.jsonPrimitive?.contentOrNull?.let { rawDate ->
+    this.optString("check_date").let { rawDate ->
         runCatching { LocalDate.parse(rawDate) }
             .onSuccess { validVerificationDates += it }
     }
 
-    this["check_date:currency:XBT"]?.jsonPrimitive?.contentOrNull?.let { rawDate ->
+    this.optString("check_date:currency:XBT").let { rawDate ->
         runCatching { LocalDate.parse(rawDate) }
             .onSuccess { validVerificationDates += it }
     }

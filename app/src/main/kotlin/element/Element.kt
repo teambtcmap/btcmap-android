@@ -1,15 +1,14 @@
 package element
 
-import kotlinx.serialization.json.JsonObject
-import java.time.ZonedDateTime
+import org.json.JSONObject
 
 data class Element(
-    val id: String,
+    val id: Long,
+    val osmId: String,
     val lat: Double,
     val lon: Double,
-    val osmJson: JsonObject,
-    val tags: JsonObject,
-    val createdAt: ZonedDateTime,
-    val updatedAt: ZonedDateTime,
-    val deletedAt: ZonedDateTime?,
+    val osmJson: JSONObject,
+    val tags: JSONObject,
+    val updatedAt: String,
+    val deletedAt: String?,
 )

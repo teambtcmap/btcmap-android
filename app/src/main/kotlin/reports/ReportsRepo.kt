@@ -15,11 +15,11 @@ class ReportsRepo(
             var count = 0L
 
             while (true) {
-                val events = api.getReports(queries.selectMaxUpdatedAt(), BATCH_SIZE)
-                count += events.size
-                queries.insertOrReplace(events.map { it.toReport() })
+                val reports = api.getReports(queries.selectMaxUpdatedAt(), BATCH_SIZE)
+                count += reports.size
+                queries.insertOrReplace(reports.map { it.toReport() })
 
-                if (events.size < BATCH_SIZE) {
+                if (reports.size < BATCH_SIZE) {
                     break
                 }
             }

@@ -1,21 +1,18 @@
 package element
 
 import android.app.Application
+import android.util.Log
 import api.Api
-import db.*
 import kotlinx.coroutines.*
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.*
 import org.osmdroid.util.BoundingBox
 
 class ElementsRepo(
     private val api: Api,
     private val app: Application,
     private val queries: ElementQueries,
-    private val json: Json,
 ) {
 
-    suspend fun selectById(id: String) = queries.selectById(id)
+    suspend fun selectById(id: Long) = queries.selectById(id)
 
     suspend fun selectBySearchString(searchString: String): List<Element> {
         return queries.selectBySearchString(searchString)
@@ -135,7 +132,6 @@ class ElementsRepo(
 
     suspend fun selectCategories() = queries.selectCategories()
 
-    @OptIn(ExperimentalSerializationApi::class)
     suspend fun fetchBundledElements(): Result<SyncReport> {
         return runCatching {
             val startMillis = System.currentTimeMillis()
@@ -151,19 +147,13 @@ class ElementsRepo(
 
             app.assets.open("elements.json").use { bundledElements ->
                 withContext(Dispatchers.IO) {
-                    var count = 0L
-
-                    json.decodeToSequence(
-                        stream = bundledElements,
-                        deserializer = ElementJson.serializer(),
-                    ).chunked(BATCH_SIZE).forEach { chunk ->
-                        queries.insertOrReplace(chunk.map { it.toElement() })
-                        count += chunk.size
-                    }
+                    val elements = bundledElements.toElementsJson()
+                    val typedElements = elements.map { it.toElement() }
+                    queries.insertOrReplace(typedElements)
 
                     SyncReport(
                         timeMillis = System.currentTimeMillis() - startMillis,
-                        createdOrUpdatedElements = count,
+                        createdOrUpdatedElements = elements.size.toLong(),
                     )
                 }
             }
@@ -176,6 +166,7 @@ class ElementsRepo(
             var count = 0L
 
             while (true) {
+                Log.d("sync", "selectMaxUpdatedAt() = ${queries.selectMaxUpdatedAt()}")
                 val elements = api.getElements(queries.selectMaxUpdatedAt(), BATCH_SIZE.toLong())
                 count += elements.size
                 queries.insertOrReplace(elements.map { it.toElement() })

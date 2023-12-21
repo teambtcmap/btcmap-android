@@ -3,17 +3,16 @@ import java.net.URL
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
     namespace = "org.btcmap"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "org.btcmap"
         minSdk = 27
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 46
         versionName = "0.6.6"
 
@@ -92,7 +91,7 @@ android {
 
 tasks.register("bundleData") {
     doLast {
-        val src = URL("https://api.btcmap.org/v2/elements")
+        val src = URL("https://static.btcmap.org/elements-v3-2023-12-21.json")
         val destDir = File(projectDir, "src/main/assets")
         destDir.mkdirs()
         val destFile = File(destDir, "elements.json")
@@ -103,15 +102,11 @@ tasks.register("bundleData") {
 dependencies {
     // Allows suspending functions
     // https://github.com/Kotlin/kotlinx.coroutines/releases
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.0")
-
-    // Platform-agnostic JSON serialization
-    // https://github.com/Kotlin/kotlinx.serialization/releases
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0-RC")
 
     // Simplifies in-app navigation
     // https://developer.android.com/jetpack/androidx/releases/navigation
-    val navVer = "2.5.3"
+    val navVer = "2.7.5"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVer")
     implementation("androidx.navigation:navigation-ui-ktx:$navVer")
 
@@ -121,15 +116,15 @@ dependencies {
 
     // Used by osmdroid (original prefs API is deprecated)
     // https://developer.android.com/jetpack/androidx/releases/preference
-    implementation("androidx.preference:preference-ktx:1.2.0")
+    implementation("androidx.preference:preference-ktx:1.2.1")
 
     // Material design components
     // https://github.com/material-components/material-components-android/releases
-    implementation("com.google.android.material:material:1.9.0")
+    implementation("com.google.android.material:material:1.10.0")
 
     // Helps to split the app into multiple independent screens
     // https://developer.android.com/jetpack/androidx/releases/fragment
-    debugImplementation("androidx.fragment:fragment-testing:1.5.7")
+    debugImplementation("androidx.fragment:fragment-testing:1.6.2")
 
     // Modern HTTP client
     // https://github.com/square/okhttp/blob/master/CHANGELOG.md
@@ -139,11 +134,11 @@ dependencies {
 
     // Injection library
     // https://github.com/InsertKoinIO/koin/blob/main/CHANGELOG.md
-    implementation("io.insert-koin:koin-android:3.4.0")
+    implementation("io.insert-koin:koin-android:3.5.0")
 
     // Open Street Map widget
     // https://github.com/osmdroid/osmdroid/releases
-    implementation("org.osmdroid:osmdroid-android:6.1.16")
+    implementation("org.osmdroid:osmdroid-android:6.1.17")
 
     // Map utilities
     // https://github.com/locationtech/jts/releases
@@ -155,18 +150,18 @@ dependencies {
 
     // Used to cache data and store user preferences
     // https://developer.android.com/kotlin/ktx#sqlite
-    implementation("androidx.sqlite:sqlite-ktx:2.3.1")
+    implementation("androidx.sqlite:sqlite-ktx:2.4.0")
 
     // Bundle SQLite binaries
     // https://github.com/requery/sqlite-android/releases
     // TODO remove bundled SQLite when Android bumps its deps
     // > The JSON functions and operators are built into SQLite by default, as of SQLite version 3.38.0 (2022-02-22).
     // https://www.sqlite.org/json1.html
-    implementation("com.github.requery:sqlite-android:3.41.1")
+    implementation("com.github.requery:sqlite-android:3.43.0")
 
     // Used to download, cache and display images
     // https://github.com/coil-kt/coil/releases
-    val coilVer = "2.3.0"
+    val coilVer = "2.5.0"
     implementation("io.coil-kt:coil:$coilVer")
     implementation("io.coil-kt:coil-svg:$coilVer")
 
@@ -175,6 +170,7 @@ dependencies {
     val junitVer = "4.13.2"
     testImplementation("junit:junit:$junitVer")
     androidTestImplementation("junit:junit:$junitVer")
+    testImplementation("org.json:json:20231013")
 
     // Common instrumented test dependencies
     // https://developer.android.com/jetpack/androidx/releases/test

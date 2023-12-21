@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
-import kotlinx.serialization.json.*
 import org.btcmap.R
 import org.osmdroid.util.GeoPoint
 import java.text.NumberFormat
@@ -178,8 +177,8 @@ class SearchModel(
 
         return SearchAdapter.Item(
             element = this,
-            icon = tags["icon:android"]?.jsonPrimitive?.content ?: "question_mark",
-            name = osmJson["tags"]!!.jsonObject["name"]?.jsonPrimitive?.contentOrNull ?: "Unnamed",
+            icon = tags.optString("icon:android").ifBlank { "question_mark" },
+            name = osmJson.getJSONObject("tags").optString("name").ifBlank { "Unnamed" },
             distanceToUser = distanceStringBuilder.toString(),
         )
     }

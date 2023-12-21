@@ -1,15 +1,15 @@
 package reports
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
+import json.toJsonArray
+import org.json.JSONObject
+import java.io.InputStream
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
-@Serializable
 data class ReportJson(
     val areaId: String,
     val date: String,
-    val tags: JsonObject,
+    val tags: JSONObject,
     val createdAt: String,
     val updatedAt: String,
     val deletedAt: String,
@@ -24,4 +24,17 @@ fun ReportJson.toReport(): Report {
         updatedAt = ZonedDateTime.parse(updatedAt),
         deletedAt = if (deletedAt.isNotEmpty()) ZonedDateTime.parse(deletedAt) else null,
     )
+}
+
+fun InputStream.toReportsJson(): List<ReportJson> {
+    return toJsonArray().map {
+        ReportJson(
+            areaId = it.getString("area_id"),
+            date = it.getString("date"),
+            tags = it.getJSONObject("tags"),
+            createdAt = it.getString("created_at"),
+            updatedAt = it.getString("updated_at"),
+            deletedAt = it.getString("deleted_at"),
+        )
+    }
 }

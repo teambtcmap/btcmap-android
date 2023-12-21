@@ -1,16 +1,14 @@
 package db
 
 import android.database.Cursor
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.json.JSONObject
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
-fun Cursor.getJsonObject(columnIndex: Int): JsonObject {
-    return Json.decodeFromString(getString(columnIndex))
+fun Cursor.getJsonObject(columnIndex: Int): JSONObject {
+    return JSONObject(getString(columnIndex))
 }
 
 fun Cursor.getZonedDateTime(columnIndex: Int): ZonedDateTime? {

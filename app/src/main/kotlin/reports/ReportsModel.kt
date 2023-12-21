@@ -8,8 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.longOrNull
 import java.time.Duration
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -34,36 +32,46 @@ class ReportsModel(
                         withContext(Dispatchers.IO) {
                             Data(
                                 verifiedPlaces = reports.mapNotNull {
-                                    Pair(
-                                        first = it.date.toString(),
-                                        second = it.tags["up_to_date_elements"]?.jsonPrimitive?.longOrNull
-                                            ?: return@mapNotNull null
-                                    )
+                                    if (it.tags.optLong("up_to_date_elements", -1) == -1L) {
+                                        null
+                                    } else {
+                                        Pair(
+                                            first = it.date.toString(),
+                                            second = it.tags.getLong("up_to_date_elements"),
+                                        )
+                                    }
                                 },
                                 totalPlaces = reports.mapNotNull {
-                                    Pair(
-                                        first = it.date.toString(),
-                                        second = it.tags["total_elements"]?.jsonPrimitive?.longOrNull
-                                            ?: return@mapNotNull null
-                                    )
+                                    if (it.tags.optLong("total_elements", -1) == -1L) {
+                                        null
+                                    } else {
+                                        Pair(
+                                            first = it.date.toString(),
+                                            second = it.tags.getLong("total_elements"),
+                                        )
+                                    }
                                 },
                                 verifiedPlacesFraction = reports.mapNotNull {
-                                    val upToDateElements =
-                                        it.tags["up_to_date_elements"]?.jsonPrimitive?.longOrNull
-                                            ?: return@mapNotNull null
-                                    val totalElements =
-                                        it.tags["total_elements"]?.jsonPrimitive?.longOrNull
-                                            ?: return@mapNotNull null
+                                    val upToDateElements = if (it.tags.optLong("up_to_date_elements", -1) == -1L) {
+                                        return@mapNotNull null
+                                    } else {
+                                        it.tags.getLong("up_to_date_elements")
+                                    }
+
+                                    val totalElements = if (it.tags.optLong("total_elements", -1) == -1L) {
+                                        return@mapNotNull null
+                                    } else {
+                                        it.tags.getLong("total_elements")
+                                    }
 
                                     Pair(
                                         first = it.date.toString(),
                                         second = upToDateElements.toFloat() / totalElements.toFloat() * 100f
                                     )
                                 },
-                                daysSinceVerified = reports.mapNotNull {
+                                daysSinceVerified = reports.map {
                                     val avgVerificationDate =
-                                        it.tags["avg_verification_date"]?.jsonPrimitive?.content
-                                            ?: return@mapNotNull null
+                                        it.tags.optString("avg_verification_date")
                                     Pair(
                                         first = it.date,
                                         second = Duration.between(

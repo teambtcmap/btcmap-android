@@ -21,7 +21,6 @@ import androidx.navigation.fragment.findNavController
 import coil.load
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.*
 import map.MapMarkersRepo
 import map.enableDarkModeIfNecessary
 import map.getErrorColor
@@ -41,7 +40,7 @@ class ElementFragment : Fragment() {
 
     private val resultModel: SearchResultModel by activityViewModel()
 
-    private var elementId = ""
+    private var elementId = -1L
 
     private var _binding: FragmentElementBinding? = null
     private val binding get() = _binding!!
@@ -65,7 +64,7 @@ class ElementFragment : Fragment() {
                 WindowInsetsCompat.CONSUMED
             }
 
-            val elementId = requireArguments().getString("element_id")!!
+            val elementId = requireArguments().getLong("element_id")
             val element = runBlocking { elementsRepo.selectById(elementId)!! }
             setElement(element)
 
@@ -93,7 +92,7 @@ class ElementFragment : Fragment() {
                 val marker = Marker(binding.map)
                 marker.position = GeoPoint(element.lat, element.lon)
                 marker.icon = markersRepo.getMarker(
-                    element.tags["icon:android"]?.jsonPrimitive?.content ?: "question_mark"
+                    element.tags.optString("icon:android").ifBlank { "question_mark" }
                 )
                 binding.map.overlays.add(marker)
                 binding.map.enableDarkModeIfNecessary()
@@ -103,26 +102,20 @@ class ElementFragment : Fragment() {
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.action_view_on_osm -> {
+                    val element = runBlocking { elementsRepo.selectById(elementId)!! }
+                    val osmType = element.osmJson.optString("type")
+                    val osmId = element.osmJson.optLong("id")
                     val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse(
-                        "https://www.openstreetmap.org/${
-                            elementId.replace(
-                                ":", "/"
-                            )
-                        }"
-                    )
+                    intent.data = Uri.parse("https://www.openstreetmap.org/$osmType/$osmId")
                     startActivity(intent)
                 }
 
                 R.id.action_edit_on_osm -> {
+                    val element = runBlocking { elementsRepo.selectById(elementId)!! }
+                    val osmType = element.osmJson.optString("type")
+                    val osmId = element.osmJson.optLong("id")
                     val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse(
-                        "https://www.openstreetmap.org/edit?${
-                            elementId.replace(
-                                ":", "="
-                            )
-                        }"
-                    )
+                    intent.data = Uri.parse("https://www.openstreetmap.org/edit?$osmType=$osmId")
                     startActivity(intent)
                 }
 
@@ -146,7 +139,7 @@ class ElementFragment : Fragment() {
     fun setElement(element: Element) {
         elementId = element.id
 
-        val tags: OsmTags = element.osmJson["tags"]?.jsonObject ?: OsmTags(emptyMap())
+        val tags: OsmTags = element.osmJson.optJSONObject("tags") ?: OsmTags()
 
         binding.toolbar.title = tags.name(resources)
 
@@ -169,37 +162,34 @@ class ElementFragment : Fragment() {
         }
 
         val address = buildString {
-            if (tags.containsKey("addr:housenumber")) {
-                append(tags["addr:housenumber"]!!.jsonPrimitive.content)
+            if (tags.optString("addr:housenumber").isNotBlank()) {
+                append(tags.getString("addr:housenumber"))
             }
 
-            if (tags.containsKey("addr:street")) {
+            if (tags.optString("addr:street").isNotBlank()) {
                 append(" ")
-                append(tags["addr:street"]!!.jsonPrimitive.content)
+                append(tags.getString("addr:street"))
             }
 
-            if (tags.containsKey("addr:city")) {
+            if (tags.optString("addr:city").isNotBlank()) {
                 append(", ")
-                append(tags["addr:city"]!!.jsonPrimitive.content)
+                append(tags.getString("addr:city"))
             }
 
-            if (tags.containsKey("addr:postcode")) {
+            if (tags.optString("addr:postcode").isNotBlank()) {
                 append(", ")
-                append(tags["addr:postcode"]!!.jsonPrimitive.content)
+                append(tags.getString("addr:postcode"))
             }
         }.trim(',', ' ')
 
         binding.address.isVisible = address.isNotBlank()
         binding.address.text = address
 
-        val phone =
-            tags["phone"]?.jsonPrimitive?.content ?: tags["contact:phone"]?.jsonPrimitive?.content
-            ?: ""
+        val phone = tags.optString("phone").ifBlank { tags.optString("contact:phone") }
         binding.phone.text = phone
         binding.phone.isVisible = phone.isNotBlank()
 
-        val website = tags["website"]?.jsonPrimitive?.content
-            ?: tags["contact:website"]?.jsonPrimitive?.content ?: ""
+        val website = tags.optString("website").ifBlank { tags.optString("contact:website") }
         binding.website.text = website
             .replace("https://www.", "")
             .replace("http://www.", "")
@@ -208,10 +198,10 @@ class ElementFragment : Fragment() {
             .trim('/')
         binding.website.isVisible = website.isNotBlank() && website.toHttpUrlOrNull() != null
 
-        val twitter = tags["contact:twitter"]?.jsonPrimitive?.content
-        binding.twitter.text = twitter?.replace("https://twitter.com/", "")?.trim('@')
+        val twitter = tags.optString("contact:twitter")
+        binding.twitter.text = twitter.replace("https://twitter.com/", "")?.trim('@')
         binding.twitter.styleAsLink()
-        binding.twitter.isVisible = twitter != null
+        binding.twitter.isVisible = twitter.isNotBlank()
 
         binding.twitter.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW)
@@ -219,7 +209,7 @@ class ElementFragment : Fragment() {
             startActivity(intent)
         }
 
-        var facebookUrl = tags["contact:facebook"]?.jsonPrimitive?.content ?: ""
+        var facebookUrl = tags.optString("contact:facebook")
         var facebookUsername = ""
 
         if (facebookUrl.isNotBlank() && !facebookUrl.startsWith("https")) {
@@ -246,7 +236,7 @@ class ElementFragment : Fragment() {
             startActivity(intent)
         }
 
-        val instagram = tags["contact:instagram"]?.jsonPrimitive?.content ?: ""
+        val instagram = tags.optString("contact:instagram")
         binding.instagram.text = instagram
             .replace("https://www.instagram.com/", "")
             .replace("https://instagram.com/", "")
@@ -260,17 +250,15 @@ class ElementFragment : Fragment() {
             startActivity(intent)
         }
 
-        val email =
-            tags["email"]?.jsonPrimitive?.content ?: tags["contact:email"]?.jsonPrimitive?.content
-            ?: ""
+        val email = tags.optString("email").ifBlank { tags.optString("contact:email") }
         binding.email.text = email
         binding.email.isVisible = email.isNotBlank()
 
-        val openingHours = tags["opening_hours"]?.jsonPrimitive?.content
+        val openingHours = tags.optString("opening_hours")
         binding.openingHours.text = openingHours
-        binding.openingHours.isVisible = openingHours != null
+        binding.openingHours.isVisible = openingHours.isNotBlank()
 
-        val pouchUsername = element.tags["payment:pouch"]?.jsonPrimitive?.content ?: ""
+        val pouchUsername = element.tags.optString("payment:pouch")
 
         if (pouchUsername.isNotBlank()) {
             binding.elementAction.setText(R.string.pay)
@@ -289,7 +277,7 @@ class ElementFragment : Fragment() {
             }
         }
 
-        val imageUrl = tags["image"]?.jsonPrimitive?.contentOrNull?.toHttpUrlOrNull()
+        val imageUrl = tags.optString("image").toHttpUrlOrNull()
 
         if (imageUrl != null) {
             binding.image.isVisible = true

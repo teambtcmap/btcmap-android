@@ -14,7 +14,6 @@ import element.ElementsRepo
 import event.EventQueries
 import event.EventsModel
 import event.EventsRepo
-import kotlinx.serialization.json.Json
 import location.UserLocationRepository
 import map.MapModel
 import okhttp3.OkHttpClient
@@ -31,8 +30,6 @@ import sync.Sync
 import user.UserQueries
 import user.UsersModel
 import user.UsersRepo
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.JsonNamingStrategy
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.koin.dsl.bind
 
@@ -41,25 +38,16 @@ val appModule = module {
         OkHttpClient.Builder()
             .addInterceptor(BrotliInterceptor)
 //            .addInterceptor {
-//                Log.d("okhttp", it.request().url.toString())
+//                android.util.Log.d("okhttp", it.request().url.toString())
 //                it.proceed(it.request())
 //            }
             .build()
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
-    single {
-        Json {
-            ignoreUnknownKeys = true
-            namingStrategy = JsonNamingStrategy.SnakeCase
-        }
-    }
-
     single {
         ApiImpl(
-            baseUrl = "https://api.btcmap.org/v2".toHttpUrl(),
+            baseUrl = "https://api.btcmap.org".toHttpUrl(),
             httpClient = get(),
-            json = get(),
         )
     }.bind(Api::class)
 

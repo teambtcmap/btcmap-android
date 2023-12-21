@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.jsonPrimitive
 import map.boundingBox
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
@@ -94,11 +93,11 @@ class AreaModel(
             )
 
             val contact = AreaAdapter.Item.Contact(
-                website = area.tags["contact:website"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
-                twitter = area.tags["contact:twitter"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
-                telegram = area.tags["contact:telegram"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
-                discord = area.tags["contact:discord"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
-                youtube = area.tags["contact:youtube"]?.jsonPrimitive?.content?.toHttpUrlOrNull(),
+                website = area.tags.optString("contact:website").toHttpUrlOrNull(),
+                twitter = area.tags.optString("contact:twitter").toHttpUrlOrNull(),
+                telegram = area.tags.optString("contact:telegram").toHttpUrlOrNull(),
+                discord = area.tags.optString("contact:discord").toHttpUrlOrNull(),
+                youtube = area.tags.optString("contact:youtube").toHttpUrlOrNull(),
             )
 
             _state.update {

@@ -1,20 +1,15 @@
 package element
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.double
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import java.time.ZonedDateTime
+import json.toJsonArray
+import org.json.JSONObject
+import java.io.InputStream
 
-@Serializable
 data class ElementJson(
-    val id: String,
-    val osmJson: JsonObject,
-    val tags: JsonObject,
-    val createdAt: String,
+    val id: Long,
+    val osmData: JSONObject?,
+    val tags: JSONObject?,
     val updatedAt: String,
-    val deletedAt: String,
+    val deletedAt: String?,
 )
 
 fun ElementJson.toElement(): Element {
@@ -22,34 +17,61 @@ fun ElementJson.toElement(): Element {
 
     return Element(
         id = id,
+        osmId = getOsmId(),
         lat = latLon.first,
         lon = latLon.second,
-        osmJson = osmJson,
-        tags = tags,
-        createdAt = ZonedDateTime.parse(createdAt),
-        updatedAt = ZonedDateTime.parse(updatedAt),
-        deletedAt = if (deletedAt.isNotBlank()) ZonedDateTime.parse(deletedAt) else null,
+        osmJson = osmData ?: JSONObject(),
+        tags = tags ?: JSONObject(),
+        updatedAt = updatedAt,
+        deletedAt = deletedAt,
     )
 }
 
 fun ElementJson.getLatLon(): Pair<Double, Double> {
+    if (osmData == null) {
+        return Pair(0.0, 0.0)
+    }
+
     val lat: Double
     val lon: Double
 
-    if (osmJson["type"]!!.jsonPrimitive.content == "node") {
-        lat = osmJson["lat"]!!.jsonPrimitive.double
-        lon = osmJson["lon"]!!.jsonPrimitive.double
+    if (osmData.getString("type") == "node") {
+        lat = osmData.getDouble("lat")
+        lon = osmData.getDouble("lon")
     } else {
-        val bounds = osmJson["bounds"]!!.jsonObject
+        val bounds = osmData.getJSONObject("bounds")
 
-        val boundsMinLat = bounds["minlat"]!!.jsonPrimitive.double
-        val boundsMinLon = bounds["minlon"]!!.jsonPrimitive.double
-        val boundsMaxLat = bounds["maxlat"]!!.jsonPrimitive.double
-        val boundsMaxLon = bounds["maxlon"]!!.jsonPrimitive.double
+        val boundsMinLat = bounds.getDouble("minlat")
+        val boundsMinLon = bounds.getDouble("minlon")
+        val boundsMaxLat = bounds.getDouble("maxlat")
+        val boundsMaxLon = bounds.getDouble("maxlon")
 
         lat = (boundsMinLat + boundsMaxLat) / 2.0
         lon = (boundsMinLon + boundsMaxLon) / 2.0
     }
 
     return Pair(lat, lon)
+}
+
+fun ElementJson.getOsmId(): String {
+    if (osmData == null) {
+        return ""
+    }
+
+    val type = osmData.optString("type").ifBlank { return "" }
+    val id = osmData.optString("id").ifBlank { return "" }
+
+    return "$type:$id"
+}
+
+fun InputStream.toElementsJson(): List<ElementJson> {
+    return toJsonArray().map {
+        ElementJson(
+            id = it.getLong("id"),
+            osmData = it.optJSONObject("osm_data"),
+            tags = it.optJSONObject("tags"),
+            updatedAt = it.getString("updated_at"),
+            deletedAt = it.optString("deleted_at").ifBlank { null },
+        )
+    }
 }

@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import user.UsersRepo
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import kotlin.time.measureTime
 
 class Sync(
     private val areasRepo: AreasRepo,
@@ -47,7 +48,8 @@ class Sync(
 
         runCatching {
             Log.d(TAG, "Fetching bundled elements")
-            elementsRepo.fetchBundledElements()
+            val fetchBundledElementsDuration = measureTime { elementsRepo.fetchBundledElements() }
+            Log.d(TAG, "Fetched bundled elements in $fetchBundledElementsDuration")
 
             withContext(Dispatchers.IO) {
                 listOf(
