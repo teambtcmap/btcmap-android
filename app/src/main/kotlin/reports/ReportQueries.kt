@@ -54,7 +54,7 @@ class ReportQueries(private val db: SQLiteOpenHelper) {
                     updated_at,
                     deleted_at
                 FROM report
-                WHERE area_id = ?
+                WHERE area_id = ? AND deleted_at = ''
                 ORDER BY date;
                 """,
                 arrayOf(areaId),
