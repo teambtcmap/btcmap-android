@@ -89,7 +89,3 @@ You can delete such places from OpenStreetMap and BTC Map will pick up all your 
 ### I've found a place on BTC Map but it doesn't accept bitcoins
 
 OpenStreetMap might have outdated information about some places, you can delete the `currency:XBT` tag or set it to `no` in order to remove this place from BTC Map.
-
----
-
-![Untitled](https://user-images.githubusercontent.com/85003930/194117128-2f96bafd-2379-407a-a584-6c03396a42cc.png)
