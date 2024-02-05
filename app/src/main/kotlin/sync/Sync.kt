@@ -13,10 +13,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
+import log.LogRecordQueries
+import org.json.JSONObject
 import user.UsersRepo
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
-import kotlin.time.measureTime
 
 class Sync(
     private val areasRepo: AreasRepo,
@@ -25,6 +26,7 @@ class Sync(
     private val reportsRepo: ReportsRepo,
     private val usersRepo: UsersRepo,
     private val eventsRepo: EventsRepo,
+    private val logRecordQueries: LogRecordQueries,
 ) {
 
     private val _active = MutableStateFlow(false)
@@ -47,9 +49,13 @@ class Sync(
         }
 
         runCatching {
-            Log.d(TAG, "Fetching bundled elements")
-            val fetchBundledElementsDuration = measureTime { elementsRepo.fetchBundledElements() }
-            Log.d(TAG, "Fetched bundled elements in $fetchBundledElementsDuration")
+            withContext(Dispatchers.IO) {
+                logRecordQueries.insert(JSONObject(mapOf("message" to "started sync")))
+
+                if (elementsRepo.selectCount() == 0L && elementsRepo.hasBundledElements()) {
+                    elementsRepo.fetchBundledElements().getOrThrow()
+                }
+            }
 
             withContext(Dispatchers.IO) {
                 listOf(

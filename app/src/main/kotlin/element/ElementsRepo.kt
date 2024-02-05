@@ -4,12 +4,15 @@ import android.app.Application
 import android.util.Log
 import api.Api
 import kotlinx.coroutines.*
+import log.LogRecordQueries
+import org.json.JSONObject
 import org.osmdroid.util.BoundingBox
 
 class ElementsRepo(
     private val api: Api,
     private val app: Application,
     private val queries: ElementQueries,
+    private val logRecordQueries: LogRecordQueries,
 ) {
 
     suspend fun selectById(id: Long) = queries.selectById(id)
@@ -130,30 +133,33 @@ class ElementsRepo(
         }
     }
 
-    suspend fun selectCategories() = queries.selectCategories()
+    suspend fun selectCount(): Long {
+        return withContext(Dispatchers.IO) { queries.selectCount() }
+    }
 
-    suspend fun fetchBundledElements(): Result<SyncReport> {
+    suspend fun hasBundledElements(): Boolean {
+        return withContext(Dispatchers.IO) {
+            app.resources.assets.list("")!!.contains("elements.json")
+        }
+    }
+
+    suspend fun fetchBundledElements(): Result<Unit> {
         return runCatching {
-            val startMillis = System.currentTimeMillis()
-
-            val rows = queries.selectCount()
-
-            if (rows > 0) {
-                return@runCatching SyncReport(
-                    timeMillis = System.currentTimeMillis() - startMillis,
-                    createdOrUpdatedElements = 0,
-                )
-            }
+            val startMs = System.currentTimeMillis()
 
             app.assets.open("elements.json").use { bundledElements ->
                 withContext(Dispatchers.IO) {
-                    val elements = bundledElements.toElementsJson()
-                    val typedElements = elements.map { it.toElement() }
-                    queries.insertOrReplace(typedElements)
+                    val elements = bundledElements.toElementsJson().map { it.toElement() }
+                    queries.insertOrReplace(elements)
 
-                    SyncReport(
-                        timeMillis = System.currentTimeMillis() - startMillis,
-                        createdOrUpdatedElements = elements.size.toLong(),
+                    logRecordQueries.insert(
+                        JSONObject(
+                            mapOf(
+                                "message" to "fetched bundled elements",
+                                "count" to elements.size.toLong(),
+                                "time_ms" to System.currentTimeMillis() - startMs,
+                            )
+                        )
                     )
                 }
             }
