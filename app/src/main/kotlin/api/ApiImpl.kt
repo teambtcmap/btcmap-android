@@ -107,11 +107,7 @@ class ApiImpl(
         val url = baseUrl.newBuilder().apply {
             addPathSegment("v2")
             addPathSegment("reports")
-
-            if (updatedSince != null) {
-                addQueryParameter("updated_since", updatedSince.toString())
-            }
-
+            addQueryParameter("updated_since", updatedSince?.toString() ?: "2000-01-01T00:00:00Z")
             addQueryParameter("limit", limit.toString())
         }.build()
 
