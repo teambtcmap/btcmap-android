@@ -91,7 +91,7 @@ android {
 
 tasks.register("bundleData") {
     doLast {
-        val src = URL("https://static.btcmap.org/elements-v3-2023-12-21.json")
+        val src = URL("https://static.btcmap.org/api/v3/elements.json")
         val destDir = File(projectDir, "src/main/assets")
         destDir.mkdirs()
         val destFile = File(destDir, "elements.json")
