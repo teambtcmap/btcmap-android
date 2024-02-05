@@ -40,3 +40,25 @@ TODO
 - Add incremental sync
 - Show sync indicator
 - Update donation info
+
+## [0.6.1] - 2023-02-05
+
+- Fix issue with out of sync cache
+- Improve place picker animation
+- Cache downloaded images
+- Speed up communities screen
+- Speed up community screen
+- Order places by verification date
+- Use polygon bounding box when selecting communities
+
+## [0.6.0] - 2023-01-20
+
+- Show community reports
+- Show more precise community bounds, when available
+- Show boosted places
+- Update search bar
+
+## [0.5.10] - 2022-11-22
+
+- Show more verification tags
+- Prettify charts
