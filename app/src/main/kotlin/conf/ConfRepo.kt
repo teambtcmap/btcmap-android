@@ -32,10 +32,10 @@ class ConfRepo(
     companion object {
         val DEFAULT_CONF = Conf(
             lastSyncDate = null,
-            viewportNorthLat = 11.994133785187255,
-            viewportEastLon = 121.95219572432649,
-            viewportSouthLat = 11.945223417353624,
-            viewportWestLon = 121.90219745907318,
+            viewportNorthLat = 12.116667 + 0.04,
+            viewportEastLon = -68.933333 + 0.04 + 0.03,
+            viewportSouthLat = 12.116667 - 0.04,
+            viewportWestLon = -68.933333 - 0.04 + 0.03,
             showAtms = true,
             showOsmAttribution = true,
         )
