@@ -56,12 +56,15 @@
     <string name="pay_onchain">Pagar Onchain</string>
     <string name="pay_with_lightning">Pagamentos com Lightning</string>
     <string name="image">Imagem</string>
+    <string name="issues">Issues</string>
     <plurals name="d_changes">
         <item quantity="one">%d mudança</item>
+        <item quantity="many">%d mudanças</item>
         <item quantity="other">%d mudanças</item>
     </plurals>
     <plurals name="d_places">
         <item quantity="one">%d lugar</item>
+        <item quantity="many">%d lugares</item>
         <item quantity="other">%d lugares</item>
     </plurals>
 </resources>

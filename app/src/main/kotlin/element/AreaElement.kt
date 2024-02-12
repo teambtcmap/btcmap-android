@@ -9,4 +9,6 @@ data class AreaElement(
     val icon: String,
     val osmTags: OsmTags,
     val issues: JSONArray,
+    val osmType: String,
+    val osmId: Long,
 )

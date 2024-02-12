@@ -160,6 +160,13 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_areaFragment_to_issuesFragment"
+            app:destination="@id/issuesFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -181,5 +188,13 @@
     <fragment
         android:id="@+id/filterElementsFragment"
         android:name="filter.FilterElementsFragment" />
+
+    <fragment
+        android:id="@+id/issuesFragment"
+        android:name="issue.IssuesFragment">
+        <argument
+            android:name="area_id"
+            app:argType="string" />
+    </fragment>
 
 </navigation>

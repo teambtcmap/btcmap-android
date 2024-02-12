@@ -33,6 +33,7 @@ import user.UsersRepo
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.koin.dsl.bind
 import log.LogRecordQueries
+import issue.IssuesModel
 
 val appModule = module {
     single {
@@ -86,4 +87,6 @@ val appModule = module {
 
     viewModelOf(::SearchModel)
     viewModelOf(::SearchResultModel)
+
+    viewModelOf(::IssuesModel)
 }

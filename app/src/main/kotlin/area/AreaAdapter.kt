@@ -154,6 +154,7 @@ class AreaAdapter(
                         item.count,
                         item.count,
                     )
+                    root.setOnClickListener { listener.onIssuesClick() }
                 }
             }
 
@@ -206,12 +207,13 @@ class AreaAdapter(
     }
 
     interface Listener {
-
         fun onMapClick()
 
-        fun onElementClick(item: Item.Element)
-
         fun onUrlClick(url: HttpUrl)
+
+        fun onIssuesClick()
+
+        fun onElementClick(item: Item.Element)
     }
 
     companion object {

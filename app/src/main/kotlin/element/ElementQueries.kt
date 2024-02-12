@@ -251,7 +251,9 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                     lon,
                     json_extract(tags, '$.icon:android') AS icon_id,
                     json_extract(osm_json, '$.tags') AS osm_tags,
-                    json_extract(tags, '$.issues') AS issues
+                    json_extract(tags, '$.issues') AS issues,
+                    json_extract(osm_json, '$.type') AS osm_type,
+                    json_extract(osm_json, '$.id') AS osm_id
                 FROM element
                 WHERE
                 deleted_at = ''
@@ -276,7 +278,9 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                         lon = cursor.getDouble(2),
                         icon = cursor.getString(3),
                         osmTags = cursor.getJsonObject(4),
-                        issues = cursor.getJsonArray(5)
+                        issues = cursor.getJsonArray(5),
+                        osmType = cursor.getString(6),
+                        osmId = cursor.getLong(7),
                     )
                 }
             }

@@ -42,17 +42,24 @@ class AreaFragment : Fragment() {
                 }
             }
 
+            override fun onUrlClick(url: HttpUrl) {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse(url.toString())
+                startActivity(intent)
+            }
+
+            override fun onIssuesClick() {
+                findNavController().navigate(
+                    R.id.action_areaFragment_to_issuesFragment,
+                    bundleOf("area_id" to requireArgs().areaId),
+                )
+            }
+
             override fun onElementClick(item: AreaAdapter.Item.Element) {
                 findNavController().navigate(
                     R.id.elementFragment,
                     bundleOf("element_id" to item.id),
                 )
-            }
-
-            override fun onUrlClick(url: HttpUrl) {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = Uri.parse(url.toString())
-                startActivity(intent)
             }
         },
     )
@@ -100,6 +107,7 @@ class AreaFragment : Fragment() {
                             binding.progress.isVisible = true
                             binding.list.isVisible = false
                         }
+
                         is AreaModel.State.Loaded -> {
                             val elements =
                                 state.items.filterIsInstance<AreaAdapter.Item.Element>().size
