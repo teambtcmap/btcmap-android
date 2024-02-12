@@ -13,6 +13,7 @@ import map.showPolygons
 import okhttp3.HttpUrl
 import org.btcmap.databinding.ItemAreaElementBinding
 import org.btcmap.databinding.ItemContactBinding
+import org.btcmap.databinding.ItemIssuesBinding
 import org.btcmap.databinding.ItemMapBinding
 import org.locationtech.jts.geom.Polygon
 
@@ -24,6 +25,7 @@ class AreaAdapter(
         return when (getItem(position)) {
             is Item.Map -> VIEW_TYPE_MAP
             is Item.Contact -> VIEW_TYPE_CONTACT
+            is Item.Issues -> VIEW_TYPE_ISSUES
             is Item.Element -> VIEW_TYPE_ELEMENT
         }
     }
@@ -43,6 +45,14 @@ class AreaAdapter(
 
             VIEW_TYPE_CONTACT -> {
                 ItemContactBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false,
+                )
+            }
+
+            VIEW_TYPE_ISSUES -> {
+                ItemIssuesBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false,
@@ -87,6 +97,10 @@ class AreaAdapter(
             val youtube: HttpUrl?,
         ) : Item()
 
+        data class Issues(
+            val count: Int,
+        ) : Item()
+
         data class Element(
             val id: String,
             val iconId: String,
@@ -94,6 +108,7 @@ class AreaAdapter(
             val status: String,
             val colorResId: Int,
             val showCheckmark: Boolean,
+            val issues: Int,
         ) : Item()
     }
 
@@ -111,18 +126,6 @@ class AreaAdapter(
                 binding.map.enableDarkModeIfNecessary()
                 binding.map.showPolygons(item.polygons, item.paddingPx)
                 binding.root.setOnClickListener { listener.onMapClick() }
-            }
-
-            if (item is Item.Element && binding is ItemAreaElementBinding) {
-                binding.apply {
-                    icon.text = item.iconId
-                    title.text = item.name
-                    checkmark.isVisible = item.showCheckmark
-                    subtitle.text = item.status
-                    val attrs = root.context.theme.obtainStyledAttributes(intArrayOf(item.colorResId))
-                    subtitle.setTextColor(attrs.getColor(0, 0))
-                    root.setOnClickListener { listener.onElementClick(item) }
-                }
             }
 
             if (item is Item.Contact && binding is ItemContactBinding) {
@@ -143,6 +146,29 @@ class AreaAdapter(
                     youtube.setOnClickListener { item.youtube?.let { listener.onUrlClick(it) } }
                 }
             }
+
+            if (item is Item.Issues && binding is ItemIssuesBinding) {
+                binding.apply {
+                    count.text = root.resources.getQuantityString(
+                        org.btcmap.R.plurals.d_issues_found,
+                        item.count,
+                        item.count,
+                    )
+                }
+            }
+
+            if (item is Item.Element && binding is ItemAreaElementBinding) {
+                binding.apply {
+                    icon.text = item.iconId
+                    title.text = item.name
+                    checkmark.isVisible = item.showCheckmark
+                    subtitle.text = item.status
+                    val attrs =
+                        root.context.theme.obtainStyledAttributes(intArrayOf(item.colorResId))
+                    subtitle.setTextColor(attrs.getColor(0, 0))
+                    root.setOnClickListener { listener.onElementClick(item) }
+                }
+            }
         }
     }
 
@@ -156,6 +182,7 @@ class AreaAdapter(
                 oldItem.id == newItem.id
             } else (oldItem is Item.Map && newItem is Item.Map)
                     || (oldItem is Item.Contact && newItem is Item.Contact)
+                    || (oldItem is Item.Issues && newItem is Item.Issues)
         }
 
         override fun areContentsTheSame(
@@ -167,6 +194,10 @@ class AreaAdapter(
             }
 
             if (oldItem is Item.Contact && newItem is Item.Contact) {
+                return true
+            }
+
+            if (oldItem is Item.Issues && newItem is Item.Issues) {
                 return true
             }
 
@@ -186,6 +217,7 @@ class AreaAdapter(
     companion object {
         const val VIEW_TYPE_MAP = 0
         const val VIEW_TYPE_CONTACT = 1
-        const val VIEW_TYPE_ELEMENT = 2
+        const val VIEW_TYPE_ISSUES = 2
+        const val VIEW_TYPE_ELEMENT = 3
     }
 }

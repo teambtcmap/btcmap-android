@@ -72,4 +72,12 @@
         <item quantity="many">%d places</item>
         <item quantity="other">%d places</item>
     </plurals>
+    <plurals name="d_issues_found" translatable="false">
+        <item quantity="zero">%d issues found</item>
+        <item quantity="one">%d issue found</item>
+        <item quantity="two">%d issues found</item>
+        <item quantity="few">%d issues found</item>
+        <item quantity="many">%d issues found</item>
+        <item quantity="other">%d issues found</item>
+    </plurals>
 </resources>

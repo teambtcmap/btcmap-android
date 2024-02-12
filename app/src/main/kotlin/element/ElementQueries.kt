@@ -3,6 +3,7 @@ package element
 import androidx.core.database.getStringOrNull
 import androidx.sqlite.db.transaction
 import db.elementsUpdatedAt
+import db.getJsonArray
 import db.getJsonObject
 import db.getZonedDateTime
 import io.requery.android.database.sqlite.SQLiteOpenHelper
@@ -249,7 +250,8 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                     lat,
                     lon,
                     json_extract(tags, '$.icon:android') AS icon_id,
-                    json_extract(osm_json, '$.tags') AS osm_tags
+                    json_extract(osm_json, '$.tags') AS osm_tags,
+                    json_extract(tags, '$.issues') AS issues
                 FROM element
                 WHERE
                 deleted_at = ''
@@ -274,6 +276,7 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                         lon = cursor.getDouble(2),
                         icon = cursor.getString(3),
                         osmTags = cursor.getJsonObject(4),
+                        issues = cursor.getJsonArray(5)
                     )
                 }
             }

@@ -78,6 +78,7 @@ class AreaModel(
                         status = status,
                         colorResId = colorResId,
                         showCheckmark = surveyDate != null,
+                        issues = it.issues.length(),
                     )
                 }.sortedBy { !it.showCheckmark }.toMutableList()
 
@@ -100,10 +101,21 @@ class AreaModel(
                 youtube = area.tags.optString("contact:youtube").toHttpUrlOrNull(),
             )
 
+            val issuesCount = elements.sumOf { it.issues }
+
+            val items = buildList {
+                add(map)
+                add(contact)
+
+                if (issuesCount > 0) {
+                    add(AreaAdapter.Item.Issues(issuesCount))
+                }
+            } + elements
+
             _state.update {
                 State.Loaded(
                     area = area,
-                    items = listOf(map, contact) + elements,
+                    items = items,
                 )
             }
         }
