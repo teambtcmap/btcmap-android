@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Duration
 import java.time.LocalDate
-import java.time.ZonedDateTime
+import java.time.ZoneOffset
 
 class ReportsModel(
     private val reportsRepo: ReportsRepo,
@@ -79,7 +79,7 @@ class ReportsModel(
                                         first = it.date,
                                         second = Duration.between(
                                             avgVerificationDate.toZonedDateTime()!!,
-                                            ZonedDateTime.now(),
+                                            it.date.atStartOfDay(ZoneOffset.UTC),
                                         ).toDays(),
                                     )
                                 }
