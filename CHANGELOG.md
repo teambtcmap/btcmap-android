@@ -110,3 +110,60 @@ TODO
 
 - Connect OpenStreetMap account (optional)
 - Add built-in tag editor
+
+## [0.4.13] - 2022-10-23
+
+- Show more contact methods
+- Prettify links
+- Allow users to go back to search results
+- Save scroll position on taggers screen
+- Fix issue with Australia
+
+## [0.4.12] - 2022-10-22
+
+- Show community contact details
+- Speed up community screen
+- Show last verification date for every place
+
+## [0.4.11] - 2022-10-19
+
+- Speed up map
+- Allow users to report outdated places
+- Switch to new areas API
+- Fix a few bugs
+
+## [0.4.10] - 2022-10-17
+
+- Speed up events loading
+- Show Facebook links
+- Don't count deleted events
+- Speed up area screen
+- Show area icons
+- Make user edits clickable
+
+## [0.4.9] - 2022-10-15
+
+- Speed up sync
+- Re-design pin clusters
+- Save scroll position on recent changes screen
+- Speed up recent changes loading
+- Show pins on place screen
+- Sort communities by distance
+- Add more place actions
+
+## [0.4.8] - 2022-10-14
+
+- Show last verification dates
+
+## [0.4.7] - 2022-10-13
+
+- Add element screen
+- Improve screen transitions
+- Re-arrange menu items
+- Change event timeline icons
+- Fix a few minor bugs
+- Include all contributions made by Bill on Bitcoin Island
+
+## [0.4.6] - 2022-10-13
+
+- Flush users cache
