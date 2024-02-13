@@ -62,3 +62,51 @@ TODO
 
 - Show more verification tags
 - Prettify charts
+
+## [0.5.9] - 2022-11-10
+
+- Improve payment flow
+- Fix issue with event parsing
+
+## [0.5.7] - 2022-11-09
+
+- Bring back 32-bit ARM support
+- Add pay with Pouch button
+- Exclude certain users and bots from the leaderboard
+
+## [0.5.6] - 2022-11-05
+
+- Speed-up sync
+- Enable Brotli compression
+- Upgrade Material components
+
+## [0.5.5] - 2022-11-03
+
+- Fix cluster placement
+- Fix app freezes
+- Reduce APK size
+
+## [0.5.4] - 2022-11-01
+
+- Change place icon style
+- Show more icons
+
+## [0.5.3] - 2022-10-30
+
+- Fix issue with clustering
+- Add verify place button
+- Prettify social links
+
+## [0.5.2] - 2022-10-29
+
+- Improve clustering
+
+## [0.5.1] - 2022-10-26
+
+- Show more contact details
+- Improve dynamic theme switching
+
+## [0.5.0] - 2022-10-25
+
+- Connect OpenStreetMap account (optional)
+- Add built-in tag editor
