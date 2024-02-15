@@ -232,3 +232,47 @@ TODO
 - Add trends screen
 - Simplify donation flow
 - Fix minor issue with navigation
+
+## [0.3.6] - 2022-10-04
+
+- Add themed pins
+- Add dark map
+- Add settings screen
+- Speed up search
+- Speed up sync
+
+## [0.3.5] - 2022-09-16
+
+- Change launcher icon
+- Provide monochrome icon
+- Introduce minimal sync interval
+- Change pin appearance
+
+## [0.3.4] - 2022-09-04
+
+- Highlight LN-enabled places
+- Sync elements every time the map is shown
+
+## [0.3.3] - 2022-07-11
+
+- Add more place icons
+- Show Lightning-enabled places
+- Fix issue with pin size
+
+## [0.3.2] - 2022-06-09
+
+- Provide self-signed APK for each release
+- Provide self-signed APKs for latest commits
+- Add more icons
+- Minor bugfixes
+
+## [0.2.0] - 2022-05-27
+
+- Add dark mode support for map pins
+- Shrink APK size
+- Cluster pins in dense areas
+- Support bundled data (optional)
+- Add more place icons
+- Improve sync
+
+## [0.1.0] - 2022-05-14
