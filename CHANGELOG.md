@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
@@ -167,3 +167,68 @@ TODO
 ## [0.4.6] - 2022-10-13
 
 - Flush users cache
+
+## [0.4.5] - 2022-10-12
+
+- Add user profile screen
+- Add area screen
+- Remove sync indicator
+- Improve location permissions handling
+- Speed up sync
+
+## [0.4.4] - 2022-10-11
+
+- Fix signature
+
+## [0.4.3] - 2022-10-11
+
+- Prettify charts
+- Speed up DB queries to make all screens instantly loadable
+
+## [0.4.2] - 2022-10-10
+
+- Prettify charts
+- Add top mappers screen
+- Make areas selectable
+- Cache areas
+- Cache users
+- Cache events
+
+## [0.4.1] - 2022-10-08
+
+- Add OSM link on element screen
+- Hide deleted places
+- Add more icons
+- Don't show countries on communities screen
+
+## [0.4.0] - 2022-10-07
+
+- Show daily reports in offline mode
+- Add OSM attribution
+- Make element events clickable
+- Bug fixes and performance improvements
+
+## [0.3.11] - 2022-10-06
+
+- Improve LNURL parsing
+
+## [0.3.10] - 2022-10-06
+
+- Add Lightning tips
+- Re-design latest changes screen
+
+## [0.3.9] - 2022-10-05
+
+- Save last location
+- Make icons easier to click
+
+## [0.3.8] - 2022-10-05
+
+- Add communities screen
+- Change default location
+
+## [0.3.7] - 2022-10-04
+
+- Add trends screen
+- Simplify donation flow
+- Fix minor issue with navigation
