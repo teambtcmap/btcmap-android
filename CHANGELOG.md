@@ -6,7 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-TODO
+- Add area issues screen
+- Change default location to Curacao
+- Zoom to current location
+- Enable search by localized place categories
+- Show percentage of verified places
+- Show days since verified
+- Add Portuguese translation
+- Show place images, when available
+- Hide deleted reports
+- Show issues count on area screen
+- Let debug builds coexist with the release builds
 
 ## [0.6.6] - 2023-06-06
 
