@@ -102,7 +102,7 @@ class AreaAdapter(
         ) : Item()
 
         data class Element(
-            val id: String,
+            val id: Long,
             val iconId: String,
             val name: String,
             val status: String,

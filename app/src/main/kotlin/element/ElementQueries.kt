@@ -273,7 +273,7 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
             buildList {
                 while (cursor.moveToNext()) {
                     this += AreaElement(
-                        id = cursor.getString(0),
+                        id = cursor.getLong(0),
                         lat = cursor.getDouble(1),
                         lon = cursor.getDouble(2),
                         icon = cursor.getString(3),
