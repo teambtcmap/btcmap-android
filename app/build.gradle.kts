@@ -70,6 +70,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
+
         release {
             // Enables code shrinking, obfuscation, and optimization
             isMinifyEnabled = true
