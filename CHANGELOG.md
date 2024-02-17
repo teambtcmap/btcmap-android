@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 - Show community meetup locations
+- Show community description, if available
 - Add area issues screen
 - Change default location to Curacao
 - Zoom to current location

@@ -105,6 +105,11 @@ class AreaModel(
 
             val items = buildList {
                 add(map)
+
+                if (area.tags.has("description")) {
+                    add(AreaAdapter.Item.Description(area.tags.getString("description")))
+                }
+
                 add(contact)
 
                 if (issuesCount > 0) {

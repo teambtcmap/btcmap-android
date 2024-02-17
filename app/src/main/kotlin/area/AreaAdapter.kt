@@ -11,6 +11,7 @@ import icons.iconTypeface
 import map.enableDarkModeIfNecessary
 import map.showPolygons
 import okhttp3.HttpUrl
+import org.btcmap.databinding.ItemAreaDescriptionBinding
 import org.btcmap.databinding.ItemAreaElementBinding
 import org.btcmap.databinding.ItemContactBinding
 import org.btcmap.databinding.ItemIssuesBinding
@@ -24,6 +25,7 @@ class AreaAdapter(
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
             is Item.Map -> VIEW_TYPE_MAP
+            is Item.Description -> VIEW_TYPE_DESCRIPTION
             is Item.Contact -> VIEW_TYPE_CONTACT
             is Item.Issues -> VIEW_TYPE_ISSUES
             is Item.Element -> VIEW_TYPE_ELEMENT
@@ -37,6 +39,14 @@ class AreaAdapter(
         val binding = when (viewType) {
             VIEW_TYPE_MAP -> {
                 ItemMapBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false,
+                )
+            }
+
+            VIEW_TYPE_DESCRIPTION -> {
+                ItemAreaDescriptionBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false,
@@ -89,6 +99,10 @@ class AreaAdapter(
             val paddingPx: Int,
         ) : Item()
 
+        data class Description(
+            val text: String,
+        ) : Item()
+
         data class Contact(
             val website: HttpUrl?,
             val twitter: HttpUrl?,
@@ -128,6 +142,12 @@ class AreaAdapter(
                 binding.root.setOnClickListener { listener.onMapClick() }
             }
 
+            if (item is Item.Description && binding is ItemAreaDescriptionBinding) {
+                binding.apply {
+                    text.text = item.text
+                }
+            }
+            
             if (item is Item.Contact && binding is ItemContactBinding) {
                 binding.apply {
                     website.isVisible = item.website != null
@@ -218,8 +238,9 @@ class AreaAdapter(
 
     companion object {
         const val VIEW_TYPE_MAP = 0
-        const val VIEW_TYPE_CONTACT = 1
-        const val VIEW_TYPE_ISSUES = 2
-        const val VIEW_TYPE_ELEMENT = 3
+        const val VIEW_TYPE_DESCRIPTION = 1
+        const val VIEW_TYPE_CONTACT = 2
+        const val VIEW_TYPE_ISSUES = 3
+        const val VIEW_TYPE_ELEMENT = 4
     }
 }
