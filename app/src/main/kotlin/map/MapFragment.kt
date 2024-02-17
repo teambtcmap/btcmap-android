@@ -265,36 +265,56 @@ class MapFragment : Fragment() {
                 visibleElements.clear()
 
                 newElements.forEach {
-                    val marker = Marker(binding.map)
-                    marker.position = GeoPoint(it.lat, it.lon)
+                    when (it) {
+                        is MapModel.MapItem.ElementsCluster -> {
+                            val marker = Marker(binding.map)
+                            marker.position = GeoPoint(it.cluster.lat, it.cluster.lon)
 
-                    if (it.count == 1L) {
-                        val icon = if (
-                            it.boostExpires != null
-                            && it.boostExpires.isAfter(ZonedDateTime.now(ZoneOffset.UTC))
-                        ) {
-                            markersRepo.getBoostedMarker(it.iconId.ifBlank { "question_mark" })
-                        } else {
-                            markersRepo.getMarker(it.iconId.ifBlank { "question_mark" })
+                            if (it.cluster.count == 1L) {
+                                val icon = if (
+                                    it.cluster.boostExpires != null
+                                    && it.cluster.boostExpires.isAfter(ZonedDateTime.now(ZoneOffset.UTC))
+                                ) {
+                                    markersRepo.getBoostedMarker(it.cluster.iconId.ifBlank { "question_mark" })
+                                } else {
+                                    markersRepo.getMarker(it.cluster.iconId.ifBlank { "question_mark" })
+                                }
+
+                                marker.icon = icon
+                                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            } else {
+                                marker.icon = createClusterIcon(it.cluster).toDrawable(resources)
+                                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                            }
+
+                            marker.setOnMarkerClickListener { _, _ ->
+                                if (it.cluster.count == 1L) {
+                                    model.selectElement(it.cluster.id, false)
+                                }
+
+                                true
+                            }
+
+                            visibleElements += marker
+                            binding.map.overlays += marker
                         }
+                        is MapModel.MapItem.Meetup -> {
+                            val marker = Marker(binding.map)
+                            marker.position = GeoPoint(it.meetup.lat, it.meetup.lon)
+                            marker.icon = markersRepo.meetupMarker
+                            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            marker.setOnMarkerClickListener { _, _ ->
+                                findNavController().navigate(
+                                    resId = R.id.areaFragment,
+                                    args = bundleOf("area_id" to it.meetup.areaId),
+                                )
 
-                        marker.icon = icon
-                        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    } else {
-                        marker.icon = createClusterIcon(it).toDrawable(resources)
-                        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                    }
-
-                    marker.setOnMarkerClickListener { _, _ ->
-                        if (it.count == 1L) {
-                            model.selectElement(it.id, false)
+                                true
+                            }
+                            visibleElements += marker
+                            binding.map.overlays += marker
                         }
-
-                        true
                     }
-
-                    visibleElements += marker
-                    binding.map.overlays += marker
                 }
 
                 binding.map.invalidate()

@@ -125,4 +125,32 @@ class AreaQueries(private val db: SQLiteOpenHelper) {
         }
 
     }
+
+    suspend fun selectMeetups(): List<Meetup> {
+        return withContext(Dispatchers.IO) {
+            val cursor = db.readableDatabase.query(
+                """
+                SELECT
+                    json_extract(tags, '$.meetup_lat') AS lat,
+                    json_extract(tags, '$.meetup_lon') AS lon,
+                    id
+                FROM area
+                WHERE 
+                    lat IS NOT NULL AND lon IS NOT NULL
+                """
+            )
+
+            val rows = mutableListOf<Meetup>()
+
+            while (cursor.moveToNext()) {
+                rows += Meetup(
+                    lat = cursor.getDouble(0),
+                    lon = cursor.getDouble(1),
+                    areaId = cursor.getString(2),
+                )
+            }
+
+            rows
+        }
+    }
 }

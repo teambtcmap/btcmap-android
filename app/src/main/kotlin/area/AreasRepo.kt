@@ -11,6 +11,8 @@ class AreasRepo(
 
     suspend fun selectByType(type: String) = queries.selectByType(type)
 
+    suspend fun selectMeetups() = queries.selectMeetups()
+
     suspend fun sync(): Result<SyncReport> {
         return runCatching {
             val startMillis = System.currentTimeMillis()

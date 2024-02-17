@@ -2,9 +2,9 @@ package map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import area.AreasRepo
 import conf.ConfRepo
 import element.Element
-import element.ElementsCluster
 import element.ElementsRepo
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -18,6 +18,7 @@ class MapModel(
     private val locationRepo: UserLocationRepository,
     private val sync: Sync,
     private val elementsRepo: ElementsRepo,
+    private val areasRepo: AreasRepo,
 ) : ViewModel() {
 
     val userLocation: StateFlow<GeoPoint?> = locationRepo.location
@@ -46,8 +47,8 @@ class MapModel(
     private val _selectedElement: MutableStateFlow<Element?> = MutableStateFlow(null)
     val selectedElement = _selectedElement.asStateFlow()
 
-    private val _visibleElements = MutableStateFlow<List<ElementsCluster>>(emptyList())
-    val visibleElements = _visibleElements.asStateFlow()
+    private val _items = MutableStateFlow<List<MapItem>>(emptyList())
+    val visibleElements = _items.asStateFlow()
 
     val syncActive = sync.active
 
@@ -63,7 +64,8 @@ class MapModel(
                     box = viewport.boundingBox,
                     excludedCategories = excludedCategories.map { it },
                 )
-                _visibleElements.update { clusters }
+                val meetups = areasRepo.selectMeetups().map { MapItem.Meetup(it) }
+                _items.update { clusters.map { MapItem.ElementsCluster(it) } + meetups }
             }
         }.launchIn(viewModelScope)
 
@@ -120,5 +122,10 @@ class MapModel(
         val point1 = destinationPoint(distance, 45.0)
         val point2 = destinationPoint(distance, -135.0)
         return BoundingBox.fromGeoPoints(listOf(point1, point2))
+    }
+
+    sealed class MapItem {
+        data class ElementsCluster(val cluster: element.ElementsCluster) : MapItem()
+        data class Meetup(val meetup: area.Meetup) : MapItem()
     }
 }

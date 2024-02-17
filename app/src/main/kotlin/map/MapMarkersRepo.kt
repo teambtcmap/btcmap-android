@@ -32,7 +32,7 @@ class MapMarkersRepo(
         }
     }
 
-    private val boostedIconPaint by lazy {
+    private val whiteIconPaint by lazy {
         Paint().apply {
             val pinSizePx = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
@@ -51,12 +51,19 @@ class MapMarkersRepo(
 
     private val boostedCache = mutableMapOf<String?, BitmapDrawable>()
 
+    val meetupMarker by lazy {
+        createMarkerIcon("groups", BackgroundType.MEETUP).toDrawable(context.resources)
+    }
+
     fun getMarker(iconId: String): BitmapDrawable {
         var markerDrawable = cache[iconId]
 
         if (markerDrawable == null) {
             markerDrawable =
-                createMarkerIcon(iconId, false).toDrawable(context.resources)
+                createMarkerIcon(
+                    iconId,
+                    BackgroundType.PRIMARY_CONTAINER
+                ).toDrawable(context.resources)
             cache[iconId] = markerDrawable
         }
 
@@ -68,26 +75,34 @@ class MapMarkersRepo(
 
         if (markerDrawable == null) {
             markerDrawable =
-                createMarkerIcon(iconId, true).toDrawable(context.resources)
+                createMarkerIcon(iconId, BackgroundType.BOOSTED).toDrawable(context.resources)
             boostedCache[iconId] = markerDrawable
         }
 
         return markerDrawable
     }
 
-    private fun createMarkerIcon(iconId: String, boosted: Boolean): Bitmap {
+    private fun createMarkerIcon(iconId: String, backgroundType: BackgroundType): Bitmap {
         val pinSizePx = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, 48f, context.resources.displayMetrics
         ).toInt()
 
         val emptyPinDrawable = ContextCompat.getDrawable(context, R.drawable.marker)!!
 
-        if (boosted) {
-            DrawableCompat.setTint(emptyPinDrawable, Color.parseColor("#f7931a"))
-        } else {
-            DrawableCompat.setTint(
+        when (backgroundType) {
+            BackgroundType.PRIMARY_CONTAINER -> DrawableCompat.setTint(
                 emptyPinDrawable,
                 context.getPrimaryContainerColor()
+            )
+
+            BackgroundType.BOOSTED -> DrawableCompat.setTint(
+                emptyPinDrawable,
+                Color.parseColor("#f7931a")
+            )
+
+            BackgroundType.MEETUP -> DrawableCompat.setTint(
+                emptyPinDrawable,
+                Color.parseColor("#0e95af")
             )
         }
 
@@ -112,7 +127,7 @@ class MapMarkersRepo(
                     iconId,
                     markerIcon.width / 2f - textWidth / 2f,
                     markerIcon.height / 2f - (iconPaint.fontMetrics.ascent + iconPaint.fontMetrics.descent) / 2 - markerIcon.height.toFloat() * 0.09f,
-                    if (boosted) boostedIconPaint else iconPaint
+                    if (backgroundType == BackgroundType.BOOSTED || backgroundType == BackgroundType.MEETUP) whiteIconPaint else iconPaint
                 )
             }
         }
@@ -122,5 +137,11 @@ class MapMarkersRepo(
 
     companion object {
         private const val PIN_SIZE_DP = 48f
+    }
+
+    enum class BackgroundType {
+        PRIMARY_CONTAINER,
+        BOOSTED,
+        MEETUP,
     }
 }
