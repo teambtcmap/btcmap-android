@@ -102,6 +102,7 @@ class UserFragment : Fragment() {
                         elementName = it.elementName.ifBlank { getString(R.string.unnamed) },
                         username = "",
                         tipLnurl = "",
+                        osmId = it.osmId,
                     )
                 }
                 adapter.submitList(items)

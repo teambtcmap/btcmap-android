@@ -1,5 +1,7 @@
 package event
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -29,13 +31,19 @@ class EventsFragment : Fragment() {
     private val adapter = EventsAdapter(object : EventsAdapter.Listener {
         override fun onItemClick(item: EventsAdapter.Item) {
             viewLifecycleOwner.lifecycleScope.launch {
-                val element = model.selectElementById(item.elementId) ?: return@launch
+                val element = model.selectElementById(item.elementId)
 
-                withResumed {
-                    findNavController().navigate(
-                        R.id.elementFragment,
-                        bundleOf("element_id" to element.id),
-                    )
+                if (element != null) {
+                    withResumed {
+                        findNavController().navigate(
+                            R.id.elementFragment,
+                            bundleOf("element_id" to element.id),
+                        )
+                    }
+                } else {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse("https://www.openstreetmap.org/${item.osmId.replace(":", "/")}")
+                    startActivity(intent)
                 }
             }
         }

@@ -50,12 +50,13 @@ class EventQueries(private val db: SQLiteOpenHelper) {
                 SELECT
                     ev.type AS event_type,
                     el.id AS element_id,
+                    ev.element_id AS osm_id,
                     json_extract(el.osm_json, '$.tags.name') AS element_name,
                     ev.created_at AS event_date,
                     json_extract(u.osm_json, '$.display_name') AS user_name,
                     json_extract(u.osm_json, '$.description') AS user_description
                 FROM event ev
-                JOIN element el ON el.osm_id = ev.element_id
+                LEFT JOIN element el ON el.osm_id = ev.element_id
                 JOIN user u ON u.id = ev.user_id
                 WHERE ev.deleted_at == ''
                 ORDER BY ev.created_at DESC
@@ -69,10 +70,11 @@ class EventQueries(private val db: SQLiteOpenHelper) {
                     this += EventListItem(
                         eventType = cursor.getString(0),
                         elementId = cursor.getLong(1),
-                        elementName = cursor.getStringOrNull(2) ?: "",
-                        eventDate = cursor.getZonedDateTime(3)!!,
-                        userName = cursor.getString(4),
-                        userTips = getLnUrl(cursor.getString(5)),
+                        osmId = cursor.getStringOrNull(2) ?: "",
+                        elementName = cursor.getStringOrNull(3) ?: "",
+                        eventDate = cursor.getZonedDateTime(4)!!,
+                        userName = cursor.getString(5),
+                        userTips = getLnUrl(cursor.getString(6)),
                     )
                 }
             }
@@ -86,10 +88,11 @@ class EventQueries(private val db: SQLiteOpenHelper) {
                 SELECT
                     ev.type AS event_type,
                     el.id AS element_id,
-                    json_extract(el.osm_json, '${'$'}.tags.name') AS element_name,
+                    ev.element_id AS osm_id,
+                    json_extract(el.osm_json, '$.tags.name') AS element_name,
                     ev.created_at AS event_date
                 FROM event ev
-                JOIN element el ON el.id = ev.element_id
+                LEFT JOIN element el ON el.osm_id = ev.element_id
                 JOIN user u ON u.id = ev.user_id
                 WHERE ev.user_id = ?
                 ORDER BY ev.created_at DESC;
@@ -102,8 +105,9 @@ class EventQueries(private val db: SQLiteOpenHelper) {
                     this += EventListItem(
                         eventType = cursor.getString(0),
                         elementId = cursor.getLong(1),
-                        elementName = cursor.getStringOrNull(2) ?: "",
-                        eventDate = cursor.getZonedDateTime(3)!!,
+                        osmId = cursor.getStringOrNull(2) ?: "",
+                        elementName = cursor.getStringOrNull(3) ?: "",
+                        eventDate = cursor.getZonedDateTime(4)!!,
                         userName = "",
                         userTips = "",
                     )

@@ -125,6 +125,7 @@ class EventsAdapter(
         val elementName: String,
         val username: String,
         val tipLnurl: String,
+        val osmId: String,
     )
 
     interface Listener {

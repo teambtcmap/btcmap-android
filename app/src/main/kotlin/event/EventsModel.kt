@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.btcmap.R
 
 class EventsModel(
     private val eventsRepo: EventsRepo,
@@ -41,9 +40,10 @@ class EventsModel(
                     date = it.eventDate,
                     type = it.eventType,
                     elementId = it.elementId,
-                    elementName = it.elementName.ifBlank { app.getString(R.string.unnamed) },
+                    elementName = it.elementName.ifBlank { it.osmId },
                     username = it.userName,
                     tipLnurl = it.userTips,
+                    osmId = it.osmId,
                 )
             }
 
