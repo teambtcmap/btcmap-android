@@ -17,6 +17,7 @@ import reports.toReportsJson
 import user.UserJson
 import user.toUsersJson
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class ApiImpl(
     private val baseUrl: HttpUrl,
@@ -29,7 +30,7 @@ class ApiImpl(
             addPathSegment("areas")
 
             if (updatedSince != null) {
-                addQueryParameter("updated_since", updatedSince.toString())
+                addQueryParameter("updated_since", updatedSince.apiFormat())
             }
 
             addQueryParameter("limit", limit.toString())
@@ -55,7 +56,7 @@ class ApiImpl(
         val url = baseUrl.newBuilder().apply {
             addPathSegment("v3")
             addPathSegment("elements")
-            addQueryParameter("updated_since", updatedSince?.toString() ?: "2020-01-01T00:00:00Z")
+            addQueryParameter("updated_since", updatedSince.apiFormat())
             addQueryParameter("limit", limit.toString())
         }.build()
 
@@ -107,7 +108,7 @@ class ApiImpl(
         val url = baseUrl.newBuilder().apply {
             addPathSegment("v2")
             addPathSegment("reports")
-            addQueryParameter("updated_since", updatedSince?.toString() ?: "2000-01-01T00:00:00Z")
+            addQueryParameter("updated_since", updatedSince.apiFormat())
             addQueryParameter("limit", limit.toString())
         }.build()
 
@@ -133,7 +134,7 @@ class ApiImpl(
             addPathSegment("users")
 
             if (updatedSince != null) {
-                addQueryParameter("updated_since", updatedSince.toString())
+                addQueryParameter("updated_since", updatedSince.apiFormat())
             }
 
             addQueryParameter("limit", limit.toString())
@@ -154,4 +155,8 @@ class ApiImpl(
             }
         }
     }
+}
+
+private fun ZonedDateTime?.apiFormat(): String {
+    return this?.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) ?: "2020-01-01T00:00:00Z"
 }
