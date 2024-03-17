@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Fix issue with deleted places not being shown in a change log
 - Fix issue with date format
+- Warn the users about outdated places
 
 ## [0.7.0] - 2024-02-18
 

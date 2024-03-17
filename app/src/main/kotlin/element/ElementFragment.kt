@@ -12,13 +12,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import coil.load
+import icons.iconTypeface
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import map.MapMarkersRepo
@@ -33,6 +36,7 @@ import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import search.SearchResultModel
+import java.time.ZonedDateTime
 
 class ElementFragment : Fragment() {
 
@@ -129,6 +133,8 @@ class ElementFragment : Fragment() {
 
             true
         }
+
+        binding.outdated.typeface = requireContext().iconTypeface()
     }
 
     override fun onDestroyView() {
@@ -145,6 +151,8 @@ class ElementFragment : Fragment() {
 
         val surveyDate = tags.bitcoinSurveyDate()
 
+        val outdatedUri = "https://wiki.btcmap.org/general/outdated".toUri()
+
         if (surveyDate != null) {
             val date = DateUtils.getRelativeDateTimeString(
                 requireContext(),
@@ -155,10 +163,24 @@ class ElementFragment : Fragment() {
             ).split(",").first()
 
             binding.lastVerified.text = date
-            binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
+
+            if (surveyDate.isAfter(ZonedDateTime.now().minusYears(1))) {
+                binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
+                binding.lastVerified.setOnClickListener(null)
+                binding.outdated.isInvisible = true
+                binding.outdated.setOnClickListener(null)
+            } else {
+                binding.lastVerified.setTextColor(requireContext().getErrorColor())
+                binding.lastVerified.setOnClickListener { openUri(outdatedUri) }
+                binding.outdated.isInvisible = false
+                binding.outdated.setOnClickListener { openUri(outdatedUri) }
+            }
         } else {
             binding.lastVerified.text = getString(R.string.not_verified)
             binding.lastVerified.setTextColor(requireContext().getErrorColor())
+            binding.lastVerified.setOnClickListener { openUri(outdatedUri) }
+            binding.outdated.isInvisible = false
+            binding.outdated.setOnClickListener { openUri(outdatedUri) }
         }
 
         val address = buildString {
@@ -198,8 +220,8 @@ class ElementFragment : Fragment() {
             .trim('/')
         binding.website.isVisible = website.isNotBlank() && website.toHttpUrlOrNull() != null
 
-        val twitter = tags.optString("contact:twitter")
-        binding.twitter.text = twitter.replace("https://twitter.com/", "")?.trim('@')
+        val twitter: String = tags.optString("contact:twitter")
+        binding.twitter.text = twitter.replace("https://twitter.com/", "").trim('@')
         binding.twitter.styleAsLink()
         binding.twitter.isVisible = twitter.isNotBlank()
 
@@ -302,5 +324,11 @@ class ElementFragment : Fragment() {
             },
             TextView.BufferType.SPANNABLE,
         )
+    }
+
+    private fun openUri(uri: Uri) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = uri
+        startActivity(intent)
     }
 }
