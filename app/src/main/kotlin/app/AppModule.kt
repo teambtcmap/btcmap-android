@@ -1,5 +1,6 @@
 package app
 
+import android.content.Context
 import api.Api
 import api.ApiImpl
 import area.AreaQueries
@@ -27,6 +28,8 @@ import reports.ReportsRepo
 import search.SearchModel
 import search.SearchResultModel
 import sync.Sync
+import sync.BackgroundSyncScheduler
+import sync.SyncNotificationController
 import user.UserQueries
 import user.UsersModel
 import user.UsersRepo
@@ -39,10 +42,14 @@ val appModule = module {
     single {
         OkHttpClient.Builder()
             .addInterceptor(BrotliInterceptor)
-//            .addInterceptor {
-//                android.util.Log.d("okhttp", it.request().url.toString())
-//                it.proceed(it.request())
-//            }
+            .apply {
+                if (get<Context>().isDebuggable()) {
+                    addInterceptor {
+                        android.util.Log.d("okhttp", it.request().url.toString())
+                        it.proceed(it.request())
+                    }
+                }
+            }
             .build()
     }
 
@@ -52,6 +59,9 @@ val appModule = module {
             httpClient = get(),
         )
     }.bind(Api::class)
+
+    singleOf(::BackgroundSyncScheduler)
+    singleOf(::SyncNotificationController)
 
     singleOf(::AreaQueries)
     singleOf(::AreasRepo)

@@ -169,6 +169,13 @@ dependencies {
     implementation("io.coil-kt:coil:$coilVer")
     implementation("io.coil-kt:coil-svg:$coilVer")
 
+    // Background job scheduler
+    // Used to fetch new data in background
+    // https://developer.android.com/jetpack/androidx/releases/work
+    val workVer = "2.9.0"
+    implementation("androidx.work:work-runtime-ktx:$workVer")
+    androidTestImplementation("androidx.work:work-testing:$workVer")
+
     // Common test dependencies
     // https://junit.org/junit4/
     val junitVer = "4.13.2"

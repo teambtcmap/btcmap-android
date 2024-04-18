@@ -27,6 +27,7 @@ class Sync(
     private val usersRepo: UsersRepo,
     private val eventsRepo: EventsRepo,
     private val logRecordQueries: LogRecordQueries,
+    private val syncNotificationController: SyncNotificationController,
 ) {
 
     private val _active = MutableStateFlow(false)
@@ -48,6 +49,8 @@ class Sync(
             return
         }
 
+        var elementsSyncReport: ElementsRepo.SyncReport? = null
+
         runCatching {
             withContext(Dispatchers.IO) {
                 logRecordQueries.insert(JSONObject(mapOf("message" to "started sync")))
@@ -59,7 +62,10 @@ class Sync(
 
             withContext(Dispatchers.IO) {
                 listOf(
-                    async { Log.d(TAG, elementsRepo.sync().getOrThrow().toString()) },
+                    async {
+                        elementsSyncReport = elementsRepo.sync().getOrThrow()
+                        Log.d(TAG, elementsSyncReport.toString())
+                    },
                     async { Log.d(TAG, reportsRepo.sync().getOrThrow().toString()) },
                     async { Log.d(TAG, areasRepo.sync().getOrThrow().toString()) },
                     async { Log.d(TAG, usersRepo.sync().getOrThrow().toString()) },
@@ -69,6 +75,7 @@ class Sync(
         }.onSuccess {
             Log.d(TAG, "Finished sync in ${System.currentTimeMillis() - startTime} ms")
             confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
+            syncNotificationController.showPostSyncNotifications(elementsSyncReport)
             _active.update { false }
         }.onFailure {
             Log.e(TAG, "Sync failed", it)

@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -96,6 +97,10 @@ class MapFragment : Fragment() {
             model.onLocationPermissionGranted()
         }
     }
+
+    private val postNotificationsPermissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { }
 
     private var emptyClusterBitmap: Bitmap? = null
 
@@ -298,6 +303,7 @@ class MapFragment : Fragment() {
                             visibleElements += marker
                             binding.map.overlays += marker
                         }
+
                         is MapModel.MapItem.Meetup -> {
                             val marker = Marker(binding.map)
                             marker.position = GeoPoint(it.meetup.lat, it.meetup.lon)
@@ -431,6 +437,12 @@ class MapFragment : Fragment() {
                     snackBar.dismiss()
                 }
             }
+        }
+
+        if (Build.VERSION.SDK_INT >= 33) {
+            postNotificationsPermissionRequest.launch(
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS)
+            )
         }
     }
 
