@@ -50,6 +50,21 @@ val appModule = module {
                     }
                 }
             }
+            .addInterceptor {
+                var res = it.proceed(it.request())
+
+                var retryAttempts = 0
+
+                while (res.code == 429 && retryAttempts < 10) {
+                    android.util.Log.w("okhttp", "Got 429, retrying ${it.request().url}")
+                    res.close()
+                    Thread.sleep(retryAttempts * 1000 + (Math.random() * 1000.0).toLong())
+                    res = it.proceed(it.request())
+                    retryAttempts++
+                }
+
+                res
+            }
             .build()
     }
 
