@@ -57,6 +57,7 @@
     <string name="pay_with_lightning">Платете с Lightning</string>
     <string name="image">Снимка</string>
     <string name="issues">Issues</string>
+    <string name="sync_failed_s">Sync failed: %1$s</string>
     <plurals name="d_changes">
         <item quantity="one">%d промяна</item>
         <item quantity="other">%d промени</item>

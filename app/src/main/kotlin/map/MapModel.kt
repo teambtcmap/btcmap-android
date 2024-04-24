@@ -114,7 +114,11 @@ class MapModel(
 
     fun syncElements() {
         viewModelScope.launch {
-            runCatching { sync.sync() }
+            runCatching {
+                if (!sync.active.value) {
+                    sync.sync()
+                }
+            }
         }
     }
 

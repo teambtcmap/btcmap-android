@@ -20,7 +20,9 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
             return Result.retry()
         }
 
-        sync.sync()
+        if (!sync.active.value) {
+            sync.sync()
+        }
 
         return Result.success()
     }

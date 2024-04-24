@@ -1,6 +1,7 @@
 package sync
 
 import android.content.Context
+import android.util.Log
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
@@ -11,6 +12,7 @@ import java.util.concurrent.TimeUnit
 
 class BackgroundSyncScheduler(private val context: Context) {
     fun schedule() {
+        Log.d("sync", "Scheduling background sync")
         val workManager = WorkManager.getInstance(context)
 
         val constraints = Constraints.Builder()
@@ -18,6 +20,7 @@ class BackgroundSyncScheduler(private val context: Context) {
             .build()
 
         val periodicSyncRequest = if (context.isDebuggable()) {
+            Log.d("sync", "App is debuggable, scheduling hourly sync")
             PeriodicWorkRequestBuilder<SyncWorker>(
                 repeatInterval = 1,
                 repeatIntervalTimeUnit = TimeUnit.HOURS,
@@ -38,9 +41,10 @@ class BackgroundSyncScheduler(private val context: Context) {
             ExistingPeriodicWorkPolicy.UPDATE,
             periodicSyncRequest,
         )
+        Log.d("sync", "Scheduled background sync")
     }
 
     companion object {
-        private const val WORK_NAME = "sync"
+        const val WORK_NAME = "sync"
     }
 }

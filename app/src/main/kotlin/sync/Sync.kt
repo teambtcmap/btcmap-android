@@ -39,6 +39,7 @@ class Sync(
         Log.d(TAG, "Sync was requested")
 
         val lastSyncDateTime = confRepo.conf.value.lastSyncDate
+        val initialSyncComplete = lastSyncDateTime != null
         val minSyncIntervalExpiryDate = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(10)
         Log.d(TAG, "Last sync date: $lastSyncDateTime")
         Log.d(TAG, "Min sync interval expiry date: $minSyncIntervalExpiryDate")
@@ -49,7 +50,7 @@ class Sync(
             return
         }
 
-        var elementsSyncReport: ElementsRepo.SyncReport? = null
+        var eventsSyncReport: EventsRepo.SyncReport? = null
 
         runCatching {
             withContext(Dispatchers.IO) {
@@ -62,23 +63,27 @@ class Sync(
 
             withContext(Dispatchers.IO) {
                 listOf(
-                    async {
-                        elementsSyncReport = elementsRepo.sync().getOrThrow()
-                        Log.d(TAG, elementsSyncReport.toString())
-                    },
-                    async { Log.d(TAG, reportsRepo.sync().getOrThrow().toString()) },
-                    async { Log.d(TAG, areasRepo.sync().getOrThrow().toString()) },
-                    async { Log.d(TAG, usersRepo.sync().getOrThrow().toString()) },
-                    async { Log.d(TAG, eventsRepo.sync().getOrThrow().toString()) },
+                    async { elementsRepo.sync().getOrThrow() },
+                    async { reportsRepo.sync().getOrThrow() },
+                    async { areasRepo.sync().getOrThrow() },
+                    async { usersRepo.sync().getOrThrow() },
+                    async { eventsSyncReport = eventsRepo.sync().getOrThrow() },
                 ).awaitAll()
             }
         }.onSuccess {
-            Log.d(TAG, "Finished sync in ${System.currentTimeMillis() - startTime} ms")
+            val syncTimeMs = System.currentTimeMillis() - startTime
+            Log.d(TAG, "Finished sync in $syncTimeMs ms")
             confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
-            syncNotificationController.showPostSyncNotifications(elementsSyncReport)
+            if (initialSyncComplete) {
+                syncNotificationController.showPostSyncNotifications(
+                    syncTimeMs,
+                    eventsSyncReport?.newEvents ?: emptyList(),
+                )
+            }
             _active.update { false }
         }.onFailure {
             Log.e(TAG, "Sync failed", it)
+            syncNotificationController.showSyncFailedNotification(it)
             _active.update { false }
         }
     }

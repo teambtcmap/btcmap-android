@@ -57,6 +57,7 @@
     <string name="pay_with_lightning">Pay with Lightning</string>
     <string name="image">Image</string>
     <string name="issues">Issues</string>
+    <string name="sync_failed_s">Sync failed: %1$s</string>
     <plurals name="d_changes">
         <item quantity="other">%d changes</item>
     </plurals>

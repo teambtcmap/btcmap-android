@@ -14,12 +14,19 @@ class EventsRepo(
     suspend fun sync(): Result<SyncReport> {
         return runCatching {
             val startMillis = System.currentTimeMillis()
-            var count = 0L
+            val createdOrUpdatedEvents = mutableListOf<Event>()
+            val newEvents = mutableListOf<Event>()
+            val maxUpdatedAtBeforeSync = queries.selectMaxUpdatedAt()
 
             while (true) {
-                val events = api.getEvents(queries.selectMaxUpdatedAt(), BATCH_SIZE)
-                count += events.size
-                queries.insertOrReplace(events.map { it.toEvent() })
+                val events =
+                    api.getEvents(queries.selectMaxUpdatedAt(), BATCH_SIZE).map { it.toEvent() }
+                createdOrUpdatedEvents += events
+                newEvents += events.filter {
+                    maxUpdatedAtBeforeSync == null
+                            || it.createdAt.isAfter(maxUpdatedAtBeforeSync)
+                }
+                queries.insertOrReplace(events)
 
                 if (events.size < BATCH_SIZE) {
                     break
@@ -28,14 +35,16 @@ class EventsRepo(
 
             SyncReport(
                 timeMillis = System.currentTimeMillis() - startMillis,
-                createdOrUpdatedEvents = count,
+                createdOrUpdatedEvents = createdOrUpdatedEvents,
+                newEvents = newEvents,
             )
         }
     }
 
     data class SyncReport(
         val timeMillis: Long,
-        val createdOrUpdatedEvents: Long,
+        val createdOrUpdatedEvents: List<Event>,
+        val newEvents: List<Event>,
     )
 
     companion object {
