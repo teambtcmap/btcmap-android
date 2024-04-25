@@ -12,6 +12,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // TODO get rid of it. It's still needed for charts and bundled SQLite
         maven("https://jitpack.io")
     }
 }
