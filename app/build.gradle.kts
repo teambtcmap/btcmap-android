@@ -106,11 +106,11 @@ tasks.register("bundleData") {
 dependencies {
     // Allows suspending functions
     // https://github.com/Kotlin/kotlinx.coroutines/releases
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0-RC")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
     // Simplifies in-app navigation
     // https://developer.android.com/jetpack/androidx/releases/navigation
-    val navVer = "2.7.5"
+    val navVer = "2.7.7"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVer")
     implementation("androidx.navigation:navigation-ui-ktx:$navVer")
 
@@ -124,7 +124,7 @@ dependencies {
 
     // Material design components
     // https://github.com/material-components/material-components-android/releases
-    implementation("com.google.android.material:material:1.10.0")
+    implementation("com.google.android.material:material:1.11.0")
 
     // Helps to split the app into multiple independent screens
     // https://developer.android.com/jetpack/androidx/releases/fragment
@@ -132,7 +132,7 @@ dependencies {
 
     // Modern HTTP client
     // https://github.com/square/okhttp/blob/master/CHANGELOG.md
-    val okhttpVer = "5.0.0-alpha.11"
+    val okhttpVer = "5.0.0-alpha.14"
     implementation("com.squareup.okhttp3:okhttp-brotli:$okhttpVer")
     testImplementation("com.squareup.okhttp3:mockwebserver:$okhttpVer")
 
@@ -142,7 +142,7 @@ dependencies {
 
     // Open Street Map widget
     // https://github.com/osmdroid/osmdroid/releases
-    implementation("org.osmdroid:osmdroid-android:6.1.17")
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
 
     // Map utilities
     // https://github.com/locationtech/jts/releases
@@ -161,11 +161,11 @@ dependencies {
     // TODO remove bundled SQLite when Android bumps its deps
     // > The JSON functions and operators are built into SQLite by default, as of SQLite version 3.38.0 (2022-02-22).
     // https://www.sqlite.org/json1.html
-    implementation("com.github.requery:sqlite-android:3.43.0")
+    implementation("com.github.requery:sqlite-android:3.45.0")
 
     // Used to download, cache and display images
     // https://github.com/coil-kt/coil/releases
-    val coilVer = "2.5.0"
+    val coilVer = "2.6.0"
     implementation("io.coil-kt:coil:$coilVer")
     implementation("io.coil-kt:coil-svg:$coilVer")
 
