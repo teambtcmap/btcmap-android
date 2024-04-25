@@ -65,6 +65,16 @@ class SettingsFragment : Fragment() {
             conf.update { it.copy(showOsmAttribution = isChecked) }
         }
 
+        binding.showSyncSummary.isChecked = conf.conf.value.showSyncSummary
+        binding.showSyncSummary.setOnCheckedChangeListener { _, isChecked ->
+            conf.update { it.copy(showSyncSummary = isChecked) }
+        }
+
+        binding.showAllNewElements.isChecked = conf.conf.value.showAllNewElements
+        binding.showAllNewElements.setOnCheckedChangeListener { _, isChecked ->
+            conf.update { it.copy(showAllNewElements = isChecked) }
+        }
+
         val lastSyncDate = conf.conf.value.lastSyncDate
 
         if (lastSyncDate != null) {

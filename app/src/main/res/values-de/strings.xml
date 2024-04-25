@@ -59,6 +59,8 @@
     <string name="issues">Issues</string>
     <string name="sync_failed_s">Sync failed: %1$s</string>
     <string name="new_local_merchant_accepts_bitcoins">New local merchant accepts bitcoins</string>
+    <string name="show_sync_summary">Show sync summary</string>
+    <string name="show_all_new_elements">Show all new elements</string>
     <plurals name="d_changes">
         <item quantity="one">%d Änderung</item>
         <item quantity="other">%d Änderungen</item>

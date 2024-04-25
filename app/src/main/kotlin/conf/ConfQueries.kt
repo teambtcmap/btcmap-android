@@ -24,9 +24,11 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                         viewport_south_lat,
                         viewport_west_lon,
                         show_atms,
-                        show_osm_attribution
+                        show_osm_attribution,
+                        show_sync_summary,
+                        show_all_new_elements
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?);
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
                     """,
                     arrayOf(
                         conf.lastSyncDate ?: "",
@@ -36,6 +38,8 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                         conf.viewportWestLon,
                         if (conf.showAtms) 1 else 0,
                         if (conf.showOsmAttribution) 1 else 0,
+                        if (conf.showSyncSummary) 1 else 0,
+                        if (conf.showAllNewElements) 1 else 0,
                     ),
                 )
             }
@@ -55,7 +59,9 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                     viewport_south_lat,
                     viewport_west_lon,
                     show_atms,
-                    show_osm_attribution
+                    show_osm_attribution,
+                    show_sync_summary,
+                    show_all_new_elements
                 FROM conf;
                 """,
             )
@@ -72,6 +78,8 @@ class ConfQueries(private val db: SQLiteOpenHelper) {
                 viewportWestLon = cursor.getDouble(4),
                 showAtms = cursor.getBoolean(5),
                 showOsmAttribution = cursor.getBoolean(6),
+                showSyncSummary = cursor.getBoolean(7),
+                showAllNewElements = cursor.getBoolean(8),
             )
         }
     }

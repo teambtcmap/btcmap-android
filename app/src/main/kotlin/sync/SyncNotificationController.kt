@@ -13,6 +13,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import app.isDebuggable
+import conf.Conf
 import element.ElementsRepo
 import element.name
 import event.Event
@@ -31,6 +32,7 @@ class SyncNotificationController(
         syncTimeMs: Long,
         newEvents: List<Event>,
         mapViewport: BoundingBox,
+        conf: Conf,
     ) {
         if (ActivityCompat.checkSelfPermission(
                 context,
@@ -40,9 +42,7 @@ class SyncNotificationController(
             return
         }
 
-        val showSyncSummary = context.isDebuggable()
-
-        if (showSyncSummary) {
+        if (conf.showSyncSummary) {
             createSyncSummaryNotificationChannel(context)
 
             val builder = NotificationCompat.Builder(context, SYNC_SUMMARY_CHANNEL_ID)
@@ -65,6 +65,10 @@ class SyncNotificationController(
                 .notify(Random.Default.nextInt(1, Int.MAX_VALUE), builder.build())
         }
 
+        if (conf.lastSyncDate == null) {
+            return
+        }
+
         createNewMerchantsNotificationChannel(context)
 
         newEvents.forEach { newEvent ->
@@ -79,7 +83,7 @@ class SyncNotificationController(
                     endLongitude = element.lon,
                 )
 
-                val distanceThresholdMeters = if (context.isDebuggable()) {
+                val distanceThresholdMeters = if (conf.showAllNewElements) {
                     100_000_000f
                 } else {
                     100_000f

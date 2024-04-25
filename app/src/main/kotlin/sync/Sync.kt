@@ -40,8 +40,7 @@ class Sync(
         Log.d(TAG, "Sync was requested")
 
         val lastSyncDateTime = confRepo.conf.value.lastSyncDate
-        val initialSyncComplete = lastSyncDateTime != null
-        val minSyncIntervalExpiryDate = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(10)
+        val minSyncIntervalExpiryDate = ZonedDateTime.now(ZoneOffset.UTC).minusSeconds(1)
         Log.d(TAG, "Last sync date: $lastSyncDateTime")
         Log.d(TAG, "Min sync interval expiry date: $minSyncIntervalExpiryDate")
 
@@ -74,14 +73,13 @@ class Sync(
         }.onSuccess {
             val syncTimeMs = System.currentTimeMillis() - startTime
             Log.d(TAG, "Finished sync in $syncTimeMs ms")
+            syncNotificationController.showPostSyncNotifications(
+                syncTimeMs = syncTimeMs,
+                newEvents = eventsSyncReport?.newEvents ?: emptyList(),
+                mapViewport = confRepo.conf.value.mapViewport(),
+                conf = confRepo.conf.value,
+            )
             confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
-            if (initialSyncComplete) {
-                syncNotificationController.showPostSyncNotifications(
-                    syncTimeMs = syncTimeMs,
-                    newEvents = eventsSyncReport?.newEvents ?: emptyList(),
-                    mapViewport = confRepo.conf.value.mapViewport(),
-                )
-            }
             _active.update { false }
         }.onFailure {
             Log.e(TAG, "Sync failed", it)

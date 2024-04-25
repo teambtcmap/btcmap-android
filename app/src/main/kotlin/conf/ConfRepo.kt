@@ -1,5 +1,7 @@
 package conf
 
+import android.content.Context
+import app.isDebuggable
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,10 +13,11 @@ import kotlinx.coroutines.runBlocking
 
 class ConfRepo(
     private val queries: ConfQueries,
+    private val context: Context,
 ) {
 
     private val _conf: MutableStateFlow<Conf> = MutableStateFlow(
-        runBlocking { queries.select() ?: DEFAULT_CONF }
+        runBlocking { queries.select() ?: default() }
     )
 
     val conf: StateFlow<Conf> = _conf.asStateFlow()
@@ -29,8 +32,8 @@ class ConfRepo(
         _conf.update { newConf(conf.value) }
     }
 
-    companion object {
-        val DEFAULT_CONF = Conf(
+    fun default(): Conf {
+        return Conf(
             lastSyncDate = null,
             viewportNorthLat = 12.116667 + 0.04,
             viewportEastLon = -68.933333 + 0.04 + 0.03,
@@ -38,6 +41,8 @@ class ConfRepo(
             viewportWestLon = -68.933333 - 0.04 + 0.03,
             showAtms = true,
             showOsmAttribution = true,
+            showSyncSummary = context.isDebuggable(),
+            showAllNewElements = context.isDebuggable(),
         )
     }
 }
