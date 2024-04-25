@@ -91,6 +91,42 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
         }
     }
 
+    suspend fun selectByOsmId(osmId: String): Element? {
+        return withContext(Dispatchers.IO) {
+            val cursor = db.readableDatabase.query(
+                """
+                SELECT
+                    id,
+                    osm_id,
+                    lat,
+                    lon,
+                    osm_json,
+                    tags,
+                    updated_at,
+                    deleted_at
+                FROM element
+                WHERE osm_id = ?;
+                """,
+                arrayOf(osmId),
+            )
+
+            if (!cursor.moveToNext()) {
+                return@withContext null
+            }
+
+            Element(
+                id = cursor.getLong(0),
+                osmId = cursor.getString(1),
+                lat = cursor.getDouble(2),
+                lon = cursor.getDouble(3),
+                osmJson = cursor.getJsonObject(4),
+                tags = cursor.getJsonObject(5),
+                updatedAt = cursor.getString(6)!!,
+                deletedAt = cursor.getStringOrNull(7),
+            )
+        }
+    }
+
     suspend fun selectBySearchString(searchString: String): List<Element> {
         return withContext(Dispatchers.IO) {
             val cursor = db.readableDatabase.query(

@@ -17,6 +17,8 @@ class ElementsRepo(
 
     suspend fun selectById(id: Long) = queries.selectById(id)
 
+    suspend fun selectByOsmId(osmId: String) = queries.selectByOsmId(osmId)
+
     suspend fun selectBySearchString(searchString: String): List<Element> {
         return queries.selectBySearchString(searchString)
     }

@@ -1,5 +1,6 @@
 package conf
 
+import org.osmdroid.util.BoundingBox
 import java.time.ZonedDateTime
 
 data class Conf(
@@ -11,3 +12,12 @@ data class Conf(
     val showAtms: Boolean,
     val showOsmAttribution: Boolean,
 )
+
+fun Conf.mapViewport(): BoundingBox {
+    return BoundingBox(
+        viewportNorthLat,
+        viewportEastLon,
+        viewportSouthLat,
+        viewportWestLon,
+    )
+}

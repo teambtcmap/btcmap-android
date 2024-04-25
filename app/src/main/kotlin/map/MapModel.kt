@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import area.AreasRepo
 import conf.ConfRepo
+import conf.mapViewport
 import element.Element
 import element.ElementsRepo
 import kotlinx.coroutines.*
@@ -29,15 +30,7 @@ class MapModel(
     )
 
     private val _mapViewport: MutableStateFlow<MapViewport> = MutableStateFlow(
-        MapViewport(
-            zoom = null,
-            boundingBox = BoundingBox(
-                conf.conf.value.viewportNorthLat,
-                conf.conf.value.viewportEastLon,
-                conf.conf.value.viewportSouthLat,
-                conf.conf.value.viewportWestLon,
-            ),
-        )
+        MapViewport(zoom = null, boundingBox = conf.conf.value.mapViewport())
     )
 
     val mapViewport = _mapViewport.asStateFlow()

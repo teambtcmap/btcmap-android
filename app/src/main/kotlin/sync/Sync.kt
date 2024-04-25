@@ -3,6 +3,7 @@ package sync
 import android.util.Log
 import area.AreasRepo
 import conf.ConfRepo
+import conf.mapViewport
 import reports.ReportsRepo
 import element.ElementsRepo
 import event.EventsRepo
@@ -76,8 +77,9 @@ class Sync(
             confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
             if (initialSyncComplete) {
                 syncNotificationController.showPostSyncNotifications(
-                    syncTimeMs,
-                    eventsSyncReport?.newEvents ?: emptyList(),
+                    syncTimeMs = syncTimeMs,
+                    newEvents = eventsSyncReport?.newEvents ?: emptyList(),
+                    mapViewport = confRepo.conf.value.mapViewport(),
                 )
             }
             _active.update { false }
