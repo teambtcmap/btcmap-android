@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 val elementsUpdatedAt = MutableStateFlow(LocalDateTime.now())
 
-const val DB_FILE_NAME = "btcmap-2024-04-25.db"
+const val DB_FILE_NAME = "btcmap-2024-04-26.db"
 const val DB_VERSION = 1
 
 class Database(context: Context) : SQLiteOpenHelper(
