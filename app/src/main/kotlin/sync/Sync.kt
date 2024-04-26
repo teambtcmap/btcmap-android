@@ -14,8 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
-import log.LogRecordQueries
-import org.json.JSONObject
 import user.UsersRepo
 import java.time.Duration
 import java.time.ZoneOffset
@@ -28,7 +26,6 @@ class Sync(
     private val reportsRepo: ReportsRepo,
     private val usersRepo: UsersRepo,
     private val eventsRepo: EventsRepo,
-    private val logRecordQueries: LogRecordQueries,
     private val syncNotificationController: SyncNotificationController,
 ) {
 
@@ -51,8 +48,6 @@ class Sync(
 
         runCatching {
             withContext(Dispatchers.IO) {
-                logRecordQueries.insert(JSONObject(mapOf("message" to "started sync")))
-
                 if (elementsRepo.selectCount() == 0L && elementsRepo.hasBundledElements()) {
                     elementsRepo.fetchBundledElements().getOrThrow()
                 }

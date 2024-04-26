@@ -35,8 +35,9 @@ import user.UsersModel
 import user.UsersRepo
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.koin.dsl.bind
-import log.LogRecordQueries
 import issue.IssuesModel
+import db.Database
+import io.requery.android.database.sqlite.SQLiteOpenHelper
 
 val appModule = module {
     single {
@@ -75,6 +76,8 @@ val appModule = module {
         )
     }.bind(Api::class)
 
+    singleOf(::Database).bind(SQLiteOpenHelper::class)
+
     singleOf(::BackgroundSyncScheduler)
     singleOf(::SyncNotificationController)
 
@@ -105,8 +108,6 @@ val appModule = module {
     singleOf(::UserQueries)
     singleOf(::UsersRepo)
     viewModelOf(::UsersModel)
-
-    singleOf(::LogRecordQueries)
 
     viewModelOf(::MapModel)
 

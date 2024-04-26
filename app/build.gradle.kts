@@ -15,8 +15,6 @@ android {
         targetSdk = 34
         versionCode = 48
         versionName = "0.7.1"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -160,6 +158,8 @@ dependencies {
     // https://github.com/requery/sqlite-android/releases
     // TODO remove bundled SQLite when Android bumps its deps
     // > The JSON functions and operators are built into SQLite by default, as of SQLite version 3.38.0 (2022-02-22).
+    // API 33 -> 3.32
+    // API 34 -> 3.39 (~45% of our install base)
     // https://www.sqlite.org/json1.html
     implementation("com.github.requery:sqlite-android:3.45.0")
 
@@ -174,23 +174,10 @@ dependencies {
     // https://developer.android.com/jetpack/androidx/releases/work
     val workVer = "2.9.0"
     implementation("androidx.work:work-runtime-ktx:$workVer")
-    androidTestImplementation("androidx.work:work-testing:$workVer")
 
     // Common test dependencies
     // https://junit.org/junit4/
     val junitVer = "4.13.2"
     testImplementation("junit:junit:$junitVer")
-    androidTestImplementation("junit:junit:$junitVer")
     testImplementation("org.json:json:20231013")
-
-    // Common instrumented test dependencies
-    // https://developer.android.com/jetpack/androidx/releases/test
-    androidTestImplementation("androidx.test:core-ktx:1.5.0")
-    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.5")
-    androidTestImplementation("androidx.test:runner:1.5.2")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-
-    // TODO remove when fixed upstream
-    // https://github.com/android/android-test/issues/1589
-    debugImplementation("androidx.test:monitor:1.6.1")
 }

@@ -4,8 +4,6 @@ import android.app.Application
 import api.Api
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import log.LogRecordQueries
-import org.json.JSONObject
 import org.osmdroid.util.BoundingBox
 import java.time.Duration
 import java.time.ZoneOffset
@@ -15,7 +13,6 @@ class ElementsRepo(
     private val api: Api,
     private val app: Application,
     private val queries: ElementQueries,
-    private val logRecordQueries: LogRecordQueries,
 ) {
 
     suspend fun selectById(id: Long) = queries.selectById(id)
@@ -150,22 +147,10 @@ class ElementsRepo(
 
     suspend fun fetchBundledElements(): Result<Unit> {
         return runCatching {
-            val startMs = System.currentTimeMillis()
-
             app.assets.open("elements.json").use { bundledElements ->
                 withContext(Dispatchers.IO) {
                     val elements = bundledElements.toElementsJson().map { it.toElement() }
                     queries.insertOrReplace(elements)
-
-                    logRecordQueries.insert(
-                        JSONObject(
-                            mapOf(
-                                "message" to "fetched bundled elements",
-                                "count" to elements.size.toLong(),
-                                "time_ms" to System.currentTimeMillis() - startMs,
-                            )
-                        )
-                    )
                 }
             }
         }
