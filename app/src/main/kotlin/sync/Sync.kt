@@ -3,9 +3,9 @@ package sync
 import android.util.Log
 import area.AreasRepo
 import conf.ConfRepo
-import conf.mapViewport
 import reports.ReportsRepo
 import element.ElementsRepo
+import event.Event
 import event.EventsRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import log.LogRecordQueries
 import org.json.JSONObject
 import user.UsersRepo
+import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
@@ -35,22 +36,18 @@ class Sync(
     val active = _active.asStateFlow()
 
     suspend fun sync() {
-        val startTime = System.currentTimeMillis()
         _active.update { true }
-        Log.d(TAG, "Sync was requested")
+        val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
+        val lastSyncFinishedAt = confRepo.conf.value.lastSyncDate
 
-        val lastSyncDateTime = confRepo.conf.value.lastSyncDate
-        val minSyncIntervalExpiryDate = ZonedDateTime.now(ZoneOffset.UTC).minusSeconds(1)
-        Log.d(TAG, "Last sync date: $lastSyncDateTime")
-        Log.d(TAG, "Min sync interval expiry date: $minSyncIntervalExpiryDate")
-
-        if (lastSyncDateTime != null && lastSyncDateTime.isAfter(minSyncIntervalExpiryDate)) {
-            Log.d(TAG, "Cache is up to date, skipping sync")
+        if (lastSyncFinishedAt != null
+            && Duration.between(lastSyncFinishedAt, startedAt).toMinutes() < 1
+        ) {
             _active.update { false }
             return
         }
 
-        var eventsSyncReport: EventsRepo.SyncReport? = null
+        var syncReport: SyncReport? = null
 
         runCatching {
             withContext(Dispatchers.IO) {
@@ -62,21 +59,32 @@ class Sync(
             }
 
             withContext(Dispatchers.IO) {
+                val elementsReport = async { elementsRepo.sync().getOrThrow() }
+                val reportsReport = async { reportsRepo.sync().getOrThrow() }
+                val areasReport = async { areasRepo.sync().getOrThrow() }
+                val usersReport = async { usersRepo.sync().getOrThrow() }
+                val eventsReport = async { eventsRepo.sync().getOrThrow() }
+
                 listOf(
-                    async { elementsRepo.sync().getOrThrow() },
-                    async { reportsRepo.sync().getOrThrow() },
-                    async { areasRepo.sync().getOrThrow() },
-                    async { usersRepo.sync().getOrThrow() },
-                    async { eventsSyncReport = eventsRepo.sync().getOrThrow() },
+                    elementsReport,
+                    reportsReport,
+                    areasReport,
+                    usersReport,
+                    eventsReport,
                 ).awaitAll()
+
+                syncReport = SyncReport(
+                    startedAt = startedAt,
+                    finishedAt = ZonedDateTime.now(ZoneOffset.UTC),
+                    newElements = elementsReport.await().newElements,
+                    updatedElements = elementsReport.await().updatedElements,
+                    newEvents = eventsReport.await().newEvents,
+                    updatedEvents = eventsReport.await().updatedEvents,
+                )
             }
         }.onSuccess {
-            val syncTimeMs = System.currentTimeMillis() - startTime
-            Log.d(TAG, "Finished sync in $syncTimeMs ms")
             syncNotificationController.showPostSyncNotifications(
-                syncTimeMs = syncTimeMs,
-                newEvents = eventsSyncReport?.newEvents ?: emptyList(),
-                mapViewport = confRepo.conf.value.mapViewport(),
+                report = syncReport!!,
                 conf = confRepo.conf.value,
             )
             confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
@@ -92,3 +100,12 @@ class Sync(
         private const val TAG = "sync"
     }
 }
+
+data class SyncReport(
+    val startedAt: ZonedDateTime,
+    val finishedAt: ZonedDateTime,
+    val newElements: Long,
+    val updatedElements: Long,
+    val newEvents: List<Event>,
+    val updatedEvents: List<Event>,
+)

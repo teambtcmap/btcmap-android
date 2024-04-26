@@ -1,12 +1,15 @@
 package element
 
 import android.app.Application
-import android.util.Log
 import api.Api
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import log.LogRecordQueries
 import org.json.JSONObject
 import org.osmdroid.util.BoundingBox
+import java.time.Duration
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 class ElementsRepo(
     private val api: Api,
@@ -170,14 +173,18 @@ class ElementsRepo(
 
     suspend fun sync(): Result<SyncReport> {
         return runCatching {
-            val startMillis = System.currentTimeMillis()
-            var count = 0L
+            val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
+            var newElements = 0L
+            var updatedElements = 0L
 
             while (true) {
-                Log.d("sync", "selectMaxUpdatedAt() = ${queries.selectMaxUpdatedAt()}")
-                val elements = api.getElements(queries.selectMaxUpdatedAt(), BATCH_SIZE.toLong())
-                count += elements.size
-                queries.insertOrReplace(elements.map { it.toElement() })
+                val elements = api.getElements(queries.selectMaxUpdatedAt(), BATCH_SIZE)
+                    .map { it.toElement() }
+
+                queries.insertOrReplace(elements).apply {
+                    newElements += newRows
+                    updatedElements += updatedElements
+                }
 
                 if (elements.size < BATCH_SIZE) {
                     break
@@ -185,18 +192,20 @@ class ElementsRepo(
             }
 
             SyncReport(
-                timeMillis = System.currentTimeMillis() - startMillis,
-                createdOrUpdatedElements = count,
+                duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+                newElements = newElements,
+                updatedElements = updatedElements,
             )
         }
     }
 
     data class SyncReport(
-        val timeMillis: Long,
-        val createdOrUpdatedElements: Long,
+        val duration: Duration,
+        val newElements: Long,
+        val updatedElements: Long,
     )
 
     companion object {
-        private const val BATCH_SIZE = 1000
+        private const val BATCH_SIZE = 1000L
     }
 }

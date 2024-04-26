@@ -15,14 +15,26 @@ import java.time.ZonedDateTime
 
 class ElementQueries(private val db: SQLiteOpenHelper) {
 
-    suspend fun insertOrReplace(elements: List<Element>) {
+    suspend fun insertOrReplace(elements: List<Element>): InsertOrReplaceResult {
+        var newRows = 0L
+        var updatedRows = 0L
+
         if (elements.isEmpty()) {
-            return
+            return InsertOrReplaceResult(
+                newRows = newRows,
+                updatedRows = updatedRows,
+            )
         }
 
         withContext(Dispatchers.IO) {
             db.writableDatabase.transaction {
                 elements.forEach {
+                    if (selectById(it.id) == null) {
+                        newRows += 1
+                    } else {
+                        updatedRows += 1
+                    }
+
                     execSQL(
                         """
                         INSERT OR REPLACE
@@ -53,7 +65,17 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
         }
 
         elementsUpdatedAt.update { LocalDateTime.now() }
+
+        return InsertOrReplaceResult(
+            newRows = newRows,
+            updatedRows = updatedRows,
+        )
     }
+
+    data class InsertOrReplaceResult(
+        val newRows: Long,
+        val updatedRows: Long,
+    )
 
     suspend fun selectById(id: Long): Element? {
         return withContext(Dispatchers.IO) {

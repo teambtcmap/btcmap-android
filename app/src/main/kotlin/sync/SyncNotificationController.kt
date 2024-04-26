@@ -14,13 +14,13 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import app.isDebuggable
 import conf.Conf
+import conf.mapViewport
 import element.ElementsRepo
 import element.name
-import event.Event
 import kotlinx.coroutines.runBlocking
 import org.btcmap.R
 import org.json.JSONObject
-import org.osmdroid.util.BoundingBox
+import java.time.Duration
 import kotlin.random.Random
 
 class SyncNotificationController(
@@ -29,9 +29,7 @@ class SyncNotificationController(
 ) {
 
     fun showPostSyncNotifications(
-        syncTimeMs: Long,
-        newEvents: List<Event>,
-        mapViewport: BoundingBox,
+        report: SyncReport,
         conf: Conf,
     ) {
         if (ActivityCompat.checkSelfPermission(
@@ -43,18 +41,22 @@ class SyncNotificationController(
         }
 
         if (conf.showSyncSummary) {
+            val syncTimeMillis = Duration.between(report.startedAt, report.finishedAt).toMillis()
+
             createSyncSummaryNotificationChannel(context)
 
             val builder = NotificationCompat.Builder(context, SYNC_SUMMARY_CHANNEL_ID)
                 .setSmallIcon(R.drawable.area_placeholder_icon)
                 .setContentTitle("Finished sync")
-                .setContentText("Finished sync in $syncTimeMs ms")
                 .setStyle(
                     NotificationCompat.BigTextStyle()
                         .bigText(
                             """
-                                |Time: $syncTimeMs ms
-                                |New events: ${newEvents.size}
+                                |Time: $syncTimeMillis ms
+                                |New elements: ${report.newElements}
+                                |Updated elements: ${report.updatedElements}
+                                |New events: ${report.newEvents.size}
+                                |Updated events: ${report.updatedEvents.size}
                             """.trimMargin()
                         )
                 )
@@ -71,14 +73,14 @@ class SyncNotificationController(
 
         createNewMerchantsNotificationChannel(context)
 
-        newEvents.forEach { newEvent ->
+        report.newEvents.forEach { newEvent ->
             if (newEvent.type == "create") {
                 val element =
                     runBlocking { elementsRepo.selectByOsmId(newEvent.elementId) } ?: return
 
                 val distanceMeters = getDistanceInMeters(
-                    startLatitude = mapViewport.centerLatitude,
-                    startLongitude = mapViewport.centerLongitude,
+                    startLatitude = conf.mapViewport().centerLatitude,
+                    startLongitude = conf.mapViewport().centerLongitude,
                     endLatitude = element.lat,
                     endLongitude = element.lon,
                 )
