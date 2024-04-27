@@ -7,8 +7,19 @@ import conf.ConfRepo
 import conf.mapViewport
 import element.Element
 import element.ElementsRepo
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import location.UserLocationRepository
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
@@ -42,8 +53,6 @@ class MapModel(
 
     private val _items = MutableStateFlow<List<MapItem>>(emptyList())
     val visibleElements = _items.asStateFlow()
-
-    val syncActive = sync.active
 
     init {
         combine(

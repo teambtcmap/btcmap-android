@@ -37,7 +37,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import area.AreaResultModel
 import area.polygons
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.snackbar.Snackbar
 import element.ElementFragment
 import element.ElementsCluster
 import kotlinx.coroutines.delay
@@ -424,19 +423,6 @@ class MapFragment : Fragment() {
         binding.searchView.editText.doAfterTextChanged {
             val text = it.toString()
             searchModel.setSearchString(text)
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            val snackBar =
-                Snackbar.make(view, R.string.fetching_recent_changes, Snackbar.LENGTH_INDEFINITE)
-
-            model.syncActive.collect {
-                if (it) {
-                    snackBar.show()
-                } else {
-                    snackBar.dismiss()
-                }
-            }
         }
 
         if (Build.VERSION.SDK_INT >= 33) {

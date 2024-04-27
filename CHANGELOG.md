@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [0.7.2]
+## [Unreleased]
+
+- Remove sync progress indicator from the map screen
+
+## [0.7.2] - 2023-04-26
 
 - Notify user of new places nearby
 - Perform daily sync in background
