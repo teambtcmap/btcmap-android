@@ -168,7 +168,7 @@ class ElementsRepo(
 
                 queries.insertOrReplace(elements).apply {
                     newElements += newRows
-                    updatedElements += updatedElements
+                    updatedElements += updatedRows
                 }
 
                 if (elements.size < BATCH_SIZE) {
