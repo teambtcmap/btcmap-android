@@ -22,6 +22,9 @@ class ConfRepo(
 
     val conf: StateFlow<Conf> = _conf.asStateFlow()
 
+    val current: Conf
+        get() = conf.value
+
     init {
         conf
             .onEach { queries.insertOrReplace(it) }

@@ -1,6 +1,5 @@
 package sync
 
-import android.util.Log
 import area.AreasRepo
 import conf.ConfRepo
 import reports.ReportsRepo
@@ -10,50 +9,38 @@ import event.EventsRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import time.now
 import user.UsersRepo
-import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 class Sync(
     private val areasRepo: AreasRepo,
-    private val confRepo: ConfRepo,
     private val elementsRepo: ElementsRepo,
     private val reportsRepo: ReportsRepo,
     private val usersRepo: UsersRepo,
     private val eventsRepo: EventsRepo,
+    private val conf: ConfRepo,
     private val syncNotificationController: SyncNotificationController,
 ) {
+    private val mutex = Mutex()
 
-    private val _active = MutableStateFlow(false)
-    val active = _active.asStateFlow()
-
-    suspend fun sync() {
-        _active.update { true }
-        val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
-        val lastSyncFinishedAt = confRepo.conf.value.lastSyncDate
-
-        if (lastSyncFinishedAt != null
-            && Duration.between(lastSyncFinishedAt, startedAt).toMinutes() < 1
-        ) {
-            _active.update { false }
-            return
+    suspend fun sync(doNothingIfAlreadySyncing: Boolean) = withContext(Dispatchers.IO) {
+        if (doNothingIfAlreadySyncing && mutex.isLocked) {
+            return@withContext
         }
 
-        var syncReport: SyncReport? = null
+        mutex.withLock {
+            runCatching {
+                val startedAt = now()
 
-        runCatching {
-            withContext(Dispatchers.IO) {
                 if (elementsRepo.selectCount() == 0L && elementsRepo.hasBundledElements()) {
                     elementsRepo.fetchBundledElements().getOrThrow()
                 }
-            }
 
-            withContext(Dispatchers.IO) {
                 val elementsReport = async { elementsRepo.sync().getOrThrow() }
                 val reportsReport = async { reportsRepo.sync().getOrThrow() }
                 val areasReport = async { areasRepo.sync().getOrThrow() }
@@ -68,7 +55,7 @@ class Sync(
                     eventsReport,
                 ).awaitAll()
 
-                syncReport = SyncReport(
+                val fullReport = SyncReport(
                     startedAt = startedAt,
                     finishedAt = ZonedDateTime.now(ZoneOffset.UTC),
                     newElements = elementsReport.await().newElements,
@@ -76,23 +63,17 @@ class Sync(
                     newEvents = eventsReport.await().newEvents,
                     updatedEvents = eventsReport.await().updatedEvents,
                 )
-            }
-        }.onSuccess {
-            syncNotificationController.showPostSyncNotifications(
-                report = syncReport!!,
-                conf = confRepo.conf.value,
-            )
-            confRepo.update { it.copy(lastSyncDate = ZonedDateTime.now(ZoneOffset.UTC)) }
-            _active.update { false }
-        }.onFailure {
-            Log.e(TAG, "Sync failed", it)
-            syncNotificationController.showSyncFailedNotification(it)
-            _active.update { false }
-        }
-    }
 
-    companion object {
-        private const val TAG = "sync"
+                syncNotificationController.showPostSyncNotifications(
+                    report = fullReport,
+                    conf = conf.current,
+                )
+            }.onSuccess {
+                conf.update { it.copy(lastSyncDate = now()) }
+            }.onFailure {
+                syncNotificationController.showSyncFailedNotification(it)
+            }
+        }
     }
 }
 
