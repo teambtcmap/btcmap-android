@@ -6,12 +6,12 @@ import element.ElementJson
 import element.toElementsJson
 import event.EventJson
 import event.toEventsJson
-import http.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.coroutines.executeAsync
 import reports.ReportJson
 import reports.toReportsJson
 import user.UserJson
@@ -37,7 +37,7 @@ class ApiImpl(
         }.build()
 
         val request = httpClient.newCall(Request.Builder().url(url).build())
-        val response = request.await()
+        val response = request.executeAsync()
 
         if (!response.isSuccessful) {
             throw Exception("Unexpected HTTP response code: ${response.code}")
@@ -61,7 +61,7 @@ class ApiImpl(
         }.build()
 
         val request = httpClient.newCall(Request.Builder().url(url).build())
-        val response = request.await()
+        val response = request.executeAsync()
 
         if (!response.isSuccessful) {
             throw Exception("Unexpected HTTP response code: ${response.code}")
@@ -89,7 +89,7 @@ class ApiImpl(
         }.build()
 
         val request = httpClient.newCall(Request.Builder().url(url).build())
-        val response = request.await()
+        val response = request.executeAsync()
 
         if (!response.isSuccessful) {
             throw Exception("Unexpected HTTP response code: ${response.code}")
@@ -113,7 +113,7 @@ class ApiImpl(
         }.build()
 
         val request = httpClient.newCall(Request.Builder().url(url).build())
-        val response = request.await()
+        val response = request.executeAsync()
 
         if (!response.isSuccessful) {
             throw Exception("Unexpected HTTP response code: ${response.code}")
@@ -141,7 +141,7 @@ class ApiImpl(
         }.build()
 
         val request = httpClient.newCall(Request.Builder().url(url).build())
-        val response = request.await()
+        val response = request.executeAsync()
 
         if (!response.isSuccessful) {
             throw Exception("Unexpected HTTP response code: ${response.code}")

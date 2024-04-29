@@ -131,6 +131,7 @@ dependencies {
     // Modern HTTP client
     // https://github.com/square/okhttp/blob/master/CHANGELOG.md
     val okhttpVer = "5.0.0-alpha.14"
+    implementation("com.squareup.okhttp3:okhttp-coroutines:$okhttpVer")
     implementation("com.squareup.okhttp3:okhttp-brotli:$okhttpVer")
     testImplementation("com.squareup.okhttp3:mockwebserver:$okhttpVer")
 

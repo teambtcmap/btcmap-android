@@ -9,6 +9,7 @@ import event.EventsRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -35,39 +36,41 @@ class Sync(
 
         mutex.withLock {
             runCatching {
-                val startedAt = now()
+                coroutineScope {
+                    val startedAt = now()
 
-                if (elementsRepo.selectCount() == 0L && elementsRepo.hasBundledElements()) {
-                    elementsRepo.fetchBundledElements().getOrThrow()
+                    if (elementsRepo.selectCount() == 0L && elementsRepo.hasBundledElements()) {
+                        elementsRepo.fetchBundledElements().getOrThrow()
+                    }
+
+                    val elementsReport = async { elementsRepo.sync().getOrThrow() }
+                    val reportsReport = async { reportsRepo.sync().getOrThrow() }
+                    val areasReport = async { areasRepo.sync().getOrThrow() }
+                    val usersReport = async { usersRepo.sync().getOrThrow() }
+                    val eventsReport = async { eventsRepo.sync().getOrThrow() }
+
+                    listOf(
+                        elementsReport,
+                        reportsReport,
+                        areasReport,
+                        usersReport,
+                        eventsReport,
+                    ).awaitAll()
+
+                    val fullReport = SyncReport(
+                        startedAt = startedAt,
+                        finishedAt = ZonedDateTime.now(ZoneOffset.UTC),
+                        newElements = elementsReport.await().newElements,
+                        updatedElements = elementsReport.await().updatedElements,
+                        newEvents = eventsReport.await().newEvents,
+                        updatedEvents = eventsReport.await().updatedEvents,
+                    )
+
+                    syncNotificationController.showPostSyncNotifications(
+                        report = fullReport,
+                        conf = conf.current,
+                    )
                 }
-
-                val elementsReport = async { elementsRepo.sync().getOrThrow() }
-                val reportsReport = async { reportsRepo.sync().getOrThrow() }
-                val areasReport = async { areasRepo.sync().getOrThrow() }
-                val usersReport = async { usersRepo.sync().getOrThrow() }
-                val eventsReport = async { eventsRepo.sync().getOrThrow() }
-
-                listOf(
-                    elementsReport,
-                    reportsReport,
-                    areasReport,
-                    usersReport,
-                    eventsReport,
-                ).awaitAll()
-
-                val fullReport = SyncReport(
-                    startedAt = startedAt,
-                    finishedAt = ZonedDateTime.now(ZoneOffset.UTC),
-                    newElements = elementsReport.await().newElements,
-                    updatedElements = elementsReport.await().updatedElements,
-                    newEvents = eventsReport.await().newEvents,
-                    updatedEvents = eventsReport.await().updatedEvents,
-                )
-
-                syncNotificationController.showPostSyncNotifications(
-                    report = fullReport,
-                    conf = conf.current,
-                )
             }.onSuccess {
                 conf.update { it.copy(lastSyncDate = now()) }
             }.onFailure {
