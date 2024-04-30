@@ -104,6 +104,9 @@ tasks.register("bundleData") {
 
         val eventsSrc = URL("https://static.btcmap.org/api/v2/events.json")
         File(destDir, "events.json").writeText(eventsSrc.readText())
+
+        val areasSrc = URL("https://static.btcmap.org/api/v2/areas.json")
+        File(destDir, "areas.json").writeText(areasSrc.readText())
     }
 }
 

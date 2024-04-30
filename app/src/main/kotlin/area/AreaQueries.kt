@@ -153,4 +153,18 @@ class AreaQueries(private val db: SQLiteOpenHelper) {
             rows
         }
     }
+
+    suspend fun selectCount(): Long {
+        return withContext(Dispatchers.IO) {
+            val cursor = db.readableDatabase.query(
+                """
+                SELECT count(*)
+                FROM area;
+                """
+            )
+
+            cursor.moveToNext()
+            cursor.getLong(0)
+        }
+    }
 }

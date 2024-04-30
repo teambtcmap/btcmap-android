@@ -50,6 +50,10 @@ class Sync(
                         eventsRepo.fetchBundledEvents()
                     }
 
+                    if (areasRepo.selectCount() == 0L && areasRepo.hasBundledAreas()) {
+                        areasRepo.fetchBundledAreas()
+                    }
+
                     val elementsReport = async { elementsRepo.sync() }
                     val reportsReport = async { reportsRepo.sync() }
                     val areasReport = async { areasRepo.sync() }

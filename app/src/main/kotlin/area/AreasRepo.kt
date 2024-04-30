@@ -1,10 +1,14 @@
 package area
 
+import android.content.Context
 import api.Api
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class AreasRepo(
     private val api: Api,
     private val queries: AreaQueries,
+    private val context: Context,
 ) {
 
     suspend fun selectById(id: String) = queries.selectById(id)
@@ -12,6 +16,23 @@ class AreasRepo(
     suspend fun selectByType(type: String) = queries.selectByType(type)
 
     suspend fun selectMeetups() = queries.selectMeetups()
+
+    suspend fun selectCount() = queries.selectCount()
+
+    suspend fun hasBundledAreas(): Boolean {
+        return withContext(Dispatchers.IO) {
+            context.resources.assets.list("")!!.contains("areas.json")
+        }
+    }
+
+    suspend fun fetchBundledAreas() {
+        withContext(Dispatchers.IO) {
+            context.assets.open("areas.json").use { bundledAreas ->
+                val areas = bundledAreas.toAreasJson().map { it.toArea() }
+                queries.insertOrReplace(areas)
+            }
+        }
+    }
 
     suspend fun sync(): SyncReport {
         val startMillis = System.currentTimeMillis()
