@@ -17,7 +17,7 @@ class EventsRepo(
     suspend fun sync(): SyncReport {
         val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
         val newEvents = mutableListOf<Event>()
-        val updatedEvents = mutableListOf<Event>()
+        var updatedEvents = 0L
         val maxUpdatedAtBeforeSync = queries.selectMaxUpdatedAt()
 
         while (true) {
@@ -30,7 +30,7 @@ class EventsRepo(
                 ) {
                     newEvents += it
                 } else {
-                    updatedEvents += it
+                    updatedEvents += 1
                 }
             }
 
@@ -51,7 +51,7 @@ class EventsRepo(
     data class SyncReport(
         val duration: Duration,
         val newEvents: List<Event>,
-        val updatedEvents: List<Event>,
+        val updatedEvents: Long,
     )
 
     companion object {

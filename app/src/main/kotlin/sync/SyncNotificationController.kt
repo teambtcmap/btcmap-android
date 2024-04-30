@@ -53,9 +53,11 @@ class SyncNotificationController(
                         .bigText(
                             """
                                 |Time: $syncTimeMillis ms
-                                |Elements: ${report.newElements} new, ${report.updatedElements} updated
-                                |Events: ${report.newEvents.size} new, ${report.updatedEvents.size} updated
-                                |Reports: ${report.newReports.size} new, ${report.updatedReports.size} updated
+                                |Elements: ${report.elementsReport.newElements} new, ${report.elementsReport.updatedElements} updated in ${report.elementsReport.duration.toMillis()} ms
+                                |Events: ${report.eventsReport.newEvents.size} new, ${report.eventsReport.updatedEvents} updated in ${report.eventsReport.duration.toMillis()} ms
+                                |Reports: ${report.reportsReport.newReports} new, ${report.reportsReport.updatedReports} updated in ${report.reportsReport.duration.toMillis()} ms
+                                |Areas: ${report.areasReport.createdOrUpdatedAreas} in ${report.areasReport.timeMillis}
+                                |Users: ${report.usersReport.createdOrUpdatedUsers} in ${report.usersReport.timeMillis}
                             """.trimMargin()
                         )
                 )
@@ -72,7 +74,7 @@ class SyncNotificationController(
 
         createNewMerchantsNotificationChannel(context)
 
-        report.newEvents.forEach { newEvent ->
+        report.eventsReport.newEvents.forEach { newEvent ->
             if (newEvent.type == "create") {
                 val element =
                     runBlocking { elementsRepo.selectByOsmId(newEvent.elementId) } ?: return

@@ -35,8 +35,8 @@ class ReportsRepo(
 
     suspend fun sync(): SyncReport {
         val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
-        val newReports = mutableListOf<Report>()
-        val updatedReports = mutableListOf<Report>()
+        var newReports = 0L
+        var updatedReports = 0L
         val maxUpdatedAtBeforeSync = queries.selectMaxUpdatedAt()
 
         while (true) {
@@ -47,9 +47,9 @@ class ReportsRepo(
                 if (maxUpdatedAtBeforeSync == null
                     || it.createdAt.isAfter(maxUpdatedAtBeforeSync)
                 ) {
-                    newReports += it
+                    newReports += 1
                 } else {
-                    updatedReports += it
+                    updatedReports += 1
                 }
             }
 
@@ -69,8 +69,8 @@ class ReportsRepo(
 
     data class SyncReport(
         val duration: Duration,
-        val newReports: List<Report>,
-        val updatedReports: List<Report>,
+        val newReports: Long,
+        val updatedReports: Long,
     )
 
     companion object {

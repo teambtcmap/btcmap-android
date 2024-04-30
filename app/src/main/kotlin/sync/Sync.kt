@@ -4,7 +4,6 @@ import area.AreasRepo
 import conf.ConfRepo
 import reports.ReportsRepo
 import element.ElementsRepo
-import event.Event
 import event.EventsRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -13,7 +12,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import reports.Report
 import time.now
 import user.UsersRepo
 import java.time.ZoneOffset
@@ -65,12 +63,11 @@ class Sync(
                     val fullReport = SyncReport(
                         startedAt = startedAt,
                         finishedAt = ZonedDateTime.now(ZoneOffset.UTC),
-                        newElements = elementsReport.await().newElements,
-                        updatedElements = elementsReport.await().updatedElements,
-                        newReports = reportsReport.await().newReports,
-                        updatedReports = reportsReport.await().updatedReports,
-                        newEvents = eventsReport.await().newEvents,
-                        updatedEvents = eventsReport.await().updatedEvents,
+                        elementsReport = elementsReport.await(),
+                        reportsReport = reportsReport.await(),
+                        eventsReport = eventsReport.await(),
+                        areasReport = areasReport.await(),
+                        usersReport = usersReport.await(),
                     )
 
                     syncNotificationController.showPostSyncNotifications(
@@ -90,10 +87,9 @@ class Sync(
 data class SyncReport(
     val startedAt: ZonedDateTime,
     val finishedAt: ZonedDateTime,
-    val newElements: Long,
-    val updatedElements: Long,
-    val newReports: List<Report>,
-    val updatedReports: List<Report>,
-    val newEvents: List<Event>,
-    val updatedEvents: List<Event>,
+    val elementsReport: ElementsRepo.SyncReport,
+    val reportsReport: ReportsRepo.SyncReport,
+    val eventsReport: EventsRepo.SyncReport,
+    val areasReport: AreasRepo.SyncReport,
+    val usersReport: UsersRepo.SyncReport,
 )
