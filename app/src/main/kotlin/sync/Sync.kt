@@ -13,6 +13,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import reports.Report
 import time.now
 import user.UsersRepo
 import java.time.ZoneOffset
@@ -43,8 +44,12 @@ class Sync(
                         elementsRepo.fetchBundledElements().getOrThrow()
                     }
 
+                    if (reportsRepo.selectCount() == 0L && reportsRepo.hasBundledReports()) {
+                        reportsRepo.fetchBundledReports()
+                    }
+
                     val elementsReport = async { elementsRepo.sync().getOrThrow() }
-                    val reportsReport = async { reportsRepo.sync().getOrThrow() }
+                    val reportsReport = async { reportsRepo.sync() }
                     val areasReport = async { areasRepo.sync().getOrThrow() }
                     val usersReport = async { usersRepo.sync().getOrThrow() }
                     val eventsReport = async { eventsRepo.sync().getOrThrow() }
@@ -62,6 +67,8 @@ class Sync(
                         finishedAt = ZonedDateTime.now(ZoneOffset.UTC),
                         newElements = elementsReport.await().newElements,
                         updatedElements = elementsReport.await().updatedElements,
+                        newReports = reportsReport.await().newReports,
+                        updatedReports = reportsReport.await().updatedReports,
                         newEvents = eventsReport.await().newEvents,
                         updatedEvents = eventsReport.await().updatedEvents,
                     )
@@ -85,6 +92,8 @@ data class SyncReport(
     val finishedAt: ZonedDateTime,
     val newElements: Long,
     val updatedElements: Long,
+    val newReports: List<Report>,
+    val updatedReports: List<Report>,
     val newEvents: List<Event>,
     val updatedEvents: List<Event>,
 )

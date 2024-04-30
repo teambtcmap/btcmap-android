@@ -92,4 +92,18 @@ class ReportQueries(private val db: SQLiteOpenHelper) {
         }
 
     }
+
+    suspend fun selectCount(): Long {
+        return withContext(Dispatchers.IO) {
+            val cursor = db.readableDatabase.query(
+                """
+                SELECT count(*)
+                FROM report;
+                """
+            )
+
+            cursor.moveToNext()
+            cursor.getLong(0)
+        }
+    }
 }

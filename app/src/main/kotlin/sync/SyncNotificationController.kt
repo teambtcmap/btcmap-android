@@ -53,10 +53,9 @@ class SyncNotificationController(
                         .bigText(
                             """
                                 |Time: $syncTimeMillis ms
-                                |New elements: ${report.newElements}
-                                |Updated elements: ${report.updatedElements}
-                                |New events: ${report.newEvents.size}
-                                |Updated events: ${report.updatedEvents.size}
+                                |Elements: ${report.newElements} new, ${report.updatedElements} updated
+                                |Events: ${report.newEvents.size} new, ${report.updatedEvents.size} updated
+                                |Reports: ${report.newReports.size} new, ${report.updatedReports.size} updated
                             """.trimMargin()
                         )
                 )
