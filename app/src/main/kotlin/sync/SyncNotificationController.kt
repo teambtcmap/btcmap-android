@@ -57,7 +57,7 @@ class SyncNotificationController(
                                 |Events: ${report.eventsReport.newEvents.size} new, ${report.eventsReport.updatedEvents} updated in ${report.eventsReport.duration.toMillis()} ms
                                 |Reports: ${report.reportsReport.newReports} new, ${report.reportsReport.updatedReports} updated in ${report.reportsReport.duration.toMillis()} ms
                                 |Areas: ${report.areasReport.newAreas} new, ${report.areasReport.updatedAreas} updated in ${report.areasReport.duration.toMillis()} ms
-                                |Users: ${report.usersReport.createdOrUpdatedUsers} in ${report.usersReport.timeMillis}
+                                |Users: ${report.usersReport.newUsers} new, ${report.usersReport.updatedUsers} updated in ${report.usersReport.duration.toMillis()} ms
                             """.trimMargin()
                         )
                 )

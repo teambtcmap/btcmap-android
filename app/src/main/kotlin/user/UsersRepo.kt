@@ -4,6 +4,9 @@ import android.content.Context
 import api.Api
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.Duration
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 class UsersRepo(
     private val api: Api,
@@ -33,13 +36,25 @@ class UsersRepo(
     }
 
     suspend fun sync(): SyncReport {
-        val startMillis = System.currentTimeMillis()
-        var count = 0L
+        val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
+        var newUsers = 0L
+        var updatedUsers = 0L
+        val maxUpdatedAtBeforeSync = queries.selectMaxUpdatedAt()
 
         while (true) {
-            val users = api.getUsers(queries.selectMaxUpdatedAt(), BATCH_SIZE)
-            count += users.size
-            queries.insertOrReplace(users.map { it.toUser() })
+            val users = api.getUsers(queries.selectMaxUpdatedAt(), BATCH_SIZE).map { it.toUser() }
+
+            users.forEach {
+                if (maxUpdatedAtBeforeSync == null
+                    || it.createdAt.isAfter(maxUpdatedAtBeforeSync)
+                ) {
+                    newUsers += 1
+                } else {
+                    updatedUsers += 1
+                }
+            }
+
+            queries.insertOrReplace(users)
 
             if (users.size < BATCH_SIZE) {
                 break
@@ -47,14 +62,16 @@ class UsersRepo(
         }
 
         return SyncReport(
-            timeMillis = System.currentTimeMillis() - startMillis,
-            createdOrUpdatedUsers = count,
+            duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+            newUsers = newUsers,
+            updatedUsers = updatedUsers,
         )
     }
 
     data class SyncReport(
-        val timeMillis: Long,
-        val createdOrUpdatedUsers: Long,
+        val duration: Duration,
+        val newUsers: Long,
+        val updatedUsers: Long,
     )
 
     companion object {
