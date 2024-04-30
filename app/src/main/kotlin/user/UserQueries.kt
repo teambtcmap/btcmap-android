@@ -133,4 +133,18 @@ data class UserQueries(private val db: SQLiteOpenHelper) {
             cursor.getZonedDateTime(0)
         }
     }
+
+    suspend fun selectCount(): Long {
+        return withContext(Dispatchers.IO) {
+            val cursor = db.readableDatabase.query(
+                """
+                SELECT count(*)
+                FROM user;
+                """
+            )
+
+            cursor.moveToNext()
+            cursor.getLong(0)
+        }
+    }
 }

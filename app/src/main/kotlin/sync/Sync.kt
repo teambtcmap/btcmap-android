@@ -54,6 +54,10 @@ class Sync(
                         areasRepo.fetchBundledAreas()
                     }
 
+                    if (usersRepo.selectCount() == 0L && usersRepo.hasBundledUsers()) {
+                        usersRepo.fetchBundledUsers()
+                    }
+
                     val elementsReport = async { elementsRepo.sync() }
                     val reportsReport = async { reportsRepo.sync() }
                     val areasReport = async { areasRepo.sync() }
