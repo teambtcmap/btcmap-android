@@ -4,6 +4,9 @@ import android.content.Context
 import api.Api
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.Duration
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 class AreasRepo(
     private val api: Api,
@@ -35,13 +38,25 @@ class AreasRepo(
     }
 
     suspend fun sync(): SyncReport {
-        val startMillis = System.currentTimeMillis()
-        var count = 0L
+        val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
+        var newAreas = 0L
+        var updatedAreas = 0L
+        val maxUpdatedAtBeforeSync = queries.selectMaxUpdatedAt()
 
         while (true) {
-            val areas = api.getAreas(queries.selectMaxUpdatedAt(), BATCH_SIZE)
-            count += areas.size
-            queries.insertOrReplace(areas.map { it.toArea() })
+            val areas = api.getAreas(queries.selectMaxUpdatedAt(), BATCH_SIZE).map { it.toArea() }
+
+            areas.forEach {
+                if (maxUpdatedAtBeforeSync == null
+                    || it.createdAt.isAfter(maxUpdatedAtBeforeSync)
+                ) {
+                    newAreas += 1
+                } else {
+                    updatedAreas += 1
+                }
+            }
+
+            queries.insertOrReplace(areas)
 
             if (areas.size < BATCH_SIZE) {
                 break
@@ -49,14 +64,16 @@ class AreasRepo(
         }
 
         return SyncReport(
-            timeMillis = System.currentTimeMillis() - startMillis,
-            createdOrUpdatedAreas = count,
+            duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+            newAreas = newAreas,
+            updatedAreas = updatedAreas,
         )
     }
 
     data class SyncReport(
-        val timeMillis: Long,
-        val createdOrUpdatedAreas: Long,
+        val duration: Duration,
+        val newAreas: Long,
+        val updatedAreas: Long,
     )
 
     companion object {
