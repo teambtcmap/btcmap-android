@@ -41,18 +41,18 @@ class Sync(
                     val startedAt = now()
 
                     if (elementsRepo.selectCount() == 0L && elementsRepo.hasBundledElements()) {
-                        elementsRepo.fetchBundledElements().getOrThrow()
+                        elementsRepo.fetchBundledElements()
                     }
 
                     if (reportsRepo.selectCount() == 0L && reportsRepo.hasBundledReports()) {
                         reportsRepo.fetchBundledReports()
                     }
 
-                    val elementsReport = async { elementsRepo.sync().getOrThrow() }
+                    val elementsReport = async { elementsRepo.sync() }
                     val reportsReport = async { reportsRepo.sync() }
-                    val areasReport = async { areasRepo.sync().getOrThrow() }
-                    val usersReport = async { usersRepo.sync().getOrThrow() }
-                    val eventsReport = async { eventsRepo.sync().getOrThrow() }
+                    val areasReport = async { areasRepo.sync() }
+                    val usersReport = async { usersRepo.sync() }
+                    val eventsReport = async { eventsRepo.sync() }
 
                     listOf(
                         elementsReport,

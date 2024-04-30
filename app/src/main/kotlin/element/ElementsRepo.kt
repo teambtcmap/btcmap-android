@@ -145,43 +145,39 @@ class ElementsRepo(
         }
     }
 
-    suspend fun fetchBundledElements(): Result<Unit> {
-        return runCatching {
+    suspend fun fetchBundledElements() {
+        withContext(Dispatchers.IO) {
             app.assets.open("elements.json").use { bundledElements ->
-                withContext(Dispatchers.IO) {
-                    val elements = bundledElements.toElementsJson().map { it.toElement() }
-                    queries.insertOrReplace(elements)
-                }
+                val elements = bundledElements.toElementsJson().map { it.toElement() }
+                queries.insertOrReplace(elements)
             }
         }
     }
 
-    suspend fun sync(): Result<SyncReport> {
-        return runCatching {
-            val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
-            var newElements = 0L
-            var updatedElements = 0L
+    suspend fun sync(): SyncReport {
+        val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
+        var newElements = 0L
+        var updatedElements = 0L
 
-            while (true) {
-                val elements = api.getElements(queries.selectMaxUpdatedAt(), BATCH_SIZE)
-                    .map { it.toElement() }
+        while (true) {
+            val elements = api.getElements(queries.selectMaxUpdatedAt(), BATCH_SIZE)
+                .map { it.toElement() }
 
-                queries.insertOrReplace(elements).apply {
-                    newElements += newRows
-                    updatedElements += updatedRows
-                }
-
-                if (elements.size < BATCH_SIZE) {
-                    break
-                }
+            queries.insertOrReplace(elements).apply {
+                newElements += newRows
+                updatedElements += updatedRows
             }
 
-            SyncReport(
-                duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
-                newElements = newElements,
-                updatedElements = updatedElements,
-            )
+            if (elements.size < BATCH_SIZE) {
+                break
+            }
         }
+
+        return SyncReport(
+            duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+            newElements = newElements,
+            updatedElements = updatedElements,
+        )
     }
 
     data class SyncReport(

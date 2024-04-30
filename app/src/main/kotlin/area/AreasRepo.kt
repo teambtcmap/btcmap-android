@@ -13,26 +13,24 @@ class AreasRepo(
 
     suspend fun selectMeetups() = queries.selectMeetups()
 
-    suspend fun sync(): Result<SyncReport> {
-        return runCatching {
-            val startMillis = System.currentTimeMillis()
-            var count = 0L
+    suspend fun sync(): SyncReport {
+        val startMillis = System.currentTimeMillis()
+        var count = 0L
 
-            while (true) {
-                val areas = api.getAreas(queries.selectMaxUpdatedAt(), BATCH_SIZE)
-                count += areas.size
-                queries.insertOrReplace(areas.map { it.toArea() })
+        while (true) {
+            val areas = api.getAreas(queries.selectMaxUpdatedAt(), BATCH_SIZE)
+            count += areas.size
+            queries.insertOrReplace(areas.map { it.toArea() })
 
-                if (areas.size < BATCH_SIZE) {
-                    break
-                }
+            if (areas.size < BATCH_SIZE) {
+                break
             }
-
-            SyncReport(
-                timeMillis = System.currentTimeMillis() - startMillis,
-                createdOrUpdatedAreas = count,
-            )
         }
+
+        return SyncReport(
+            timeMillis = System.currentTimeMillis() - startMillis,
+            createdOrUpdatedAreas = count,
+        )
     }
 
     data class SyncReport(

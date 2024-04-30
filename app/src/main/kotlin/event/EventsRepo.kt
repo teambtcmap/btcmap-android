@@ -14,40 +14,38 @@ class EventsRepo(
 
     suspend fun selectByUserIdAsListItems(userId: Long) = queries.selectByUserId(userId)
 
-    suspend fun sync(): Result<SyncReport> {
-        return runCatching {
-            val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
-            val newEvents = mutableListOf<Event>()
-            val updatedEvents = mutableListOf<Event>()
-            val maxUpdatedAtBeforeSync = queries.selectMaxUpdatedAt()
+    suspend fun sync(): SyncReport {
+        val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
+        val newEvents = mutableListOf<Event>()
+        val updatedEvents = mutableListOf<Event>()
+        val maxUpdatedAtBeforeSync = queries.selectMaxUpdatedAt()
 
-            while (true) {
-                val events =
-                    api.getEvents(queries.selectMaxUpdatedAt(), BATCH_SIZE).map { it.toEvent() }
+        while (true) {
+            val events =
+                api.getEvents(queries.selectMaxUpdatedAt(), BATCH_SIZE).map { it.toEvent() }
 
-                events.forEach {
-                    if (maxUpdatedAtBeforeSync == null
-                        || it.createdAt.isAfter(maxUpdatedAtBeforeSync)
-                    ) {
-                        newEvents += it
-                    } else {
-                        updatedEvents += it
-                    }
-                }
-
-                queries.insertOrReplace(events)
-
-                if (events.size < BATCH_SIZE) {
-                    break
+            events.forEach {
+                if (maxUpdatedAtBeforeSync == null
+                    || it.createdAt.isAfter(maxUpdatedAtBeforeSync)
+                ) {
+                    newEvents += it
+                } else {
+                    updatedEvents += it
                 }
             }
 
-            SyncReport(
-                duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
-                newEvents = newEvents,
-                updatedEvents = updatedEvents,
-            )
+            queries.insertOrReplace(events)
+
+            if (events.size < BATCH_SIZE) {
+                break
+            }
         }
+
+        return SyncReport(
+            duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+            newEvents = newEvents,
+            updatedEvents = updatedEvents,
+        )
     }
 
     data class SyncReport(

@@ -11,26 +11,24 @@ class UsersRepo(
 
     suspend fun selectById(id: Long) = queries.selectById(id)
 
-    suspend fun sync(): Result<SyncReport> {
-        return runCatching {
-            val startMillis = System.currentTimeMillis()
-            var count = 0L
+    suspend fun sync(): SyncReport {
+        val startMillis = System.currentTimeMillis()
+        var count = 0L
 
-            while (true) {
-                val users = api.getUsers(queries.selectMaxUpdatedAt(), BATCH_SIZE)
-                count += users.size
-                queries.insertOrReplace(users.map { it.toUser() })
+        while (true) {
+            val users = api.getUsers(queries.selectMaxUpdatedAt(), BATCH_SIZE)
+            count += users.size
+            queries.insertOrReplace(users.map { it.toUser() })
 
-                if (users.size < BATCH_SIZE) {
-                    break
-                }
+            if (users.size < BATCH_SIZE) {
+                break
             }
-
-            SyncReport(
-                timeMillis = System.currentTimeMillis() - startMillis,
-                createdOrUpdatedUsers = count,
-            )
         }
+
+        return SyncReport(
+            timeMillis = System.currentTimeMillis() - startMillis,
+            createdOrUpdatedUsers = count,
+        )
     }
 
     data class SyncReport(
