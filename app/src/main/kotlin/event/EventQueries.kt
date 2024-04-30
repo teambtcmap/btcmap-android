@@ -133,6 +133,20 @@ class EventQueries(private val db: SQLiteOpenHelper) {
         }
     }
 
+    suspend fun selectCount(): Long {
+        return withContext(Dispatchers.IO) {
+            val cursor = db.readableDatabase.query(
+                """
+                SELECT count(*)
+                FROM event;
+                """
+            )
+
+            cursor.moveToNext()
+            cursor.getLong(0)
+        }
+    }
+
     private fun getLnUrl(description: String): String {
         val pattern = Pattern.compile("\\(lightning:[^)]*\\)", Pattern.CASE_INSENSITIVE)
         val matcher = pattern.matcher(description)

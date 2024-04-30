@@ -18,3 +18,4 @@ build/
 # App data
 app/src/main/assets/elements.json
 app/src/main/assets/reports.json
+app/src/main/assets/events.json

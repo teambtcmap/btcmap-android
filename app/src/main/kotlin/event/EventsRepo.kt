@@ -1,6 +1,9 @@
 package event
 
+import android.content.Context
 import api.Api
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
@@ -8,11 +11,29 @@ import java.time.ZonedDateTime
 class EventsRepo(
     private val api: Api,
     private val queries: EventQueries,
+    private val context: Context,
 ) {
 
     suspend fun selectAll(limit: Long) = queries.selectAll(limit)
 
     suspend fun selectByUserIdAsListItems(userId: Long) = queries.selectByUserId(userId)
+
+    suspend fun selectCount() = queries.selectCount()
+
+    suspend fun hasBundledEvents(): Boolean {
+        return withContext(Dispatchers.IO) {
+            context.resources.assets.list("")!!.contains("events.json")
+        }
+    }
+
+    suspend fun fetchBundledEvents() {
+        withContext(Dispatchers.IO) {
+            context.assets.open("events.json").use { bundledEvents ->
+                val events = bundledEvents.toEventsJson().map { it.toEvent() }
+                queries.insertOrReplace(events)
+            }
+        }
+    }
 
     suspend fun sync(): SyncReport {
         val startedAt = ZonedDateTime.now(ZoneOffset.UTC)

@@ -46,6 +46,10 @@ class Sync(
                         reportsRepo.fetchBundledReports()
                     }
 
+                    if (eventsRepo.selectCount() == 0L && eventsRepo.hasBundledEvents()) {
+                        eventsRepo.fetchBundledEvents()
+                    }
+
                     val elementsReport = async { elementsRepo.sync() }
                     val reportsReport = async { reportsRepo.sync() }
                     val areasReport = async { areasRepo.sync() }
