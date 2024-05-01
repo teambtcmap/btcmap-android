@@ -29,7 +29,8 @@
 
 ## 🌍 Help with Translation
 
-In order to translate the app to your language, you should click on a language link below and then press an edit button. 
+In order to translate the app to your language, you should click on a language link below and then
+press an edit button.
 
 - [Afrikaans](app/src/main/res/values-af/strings.xml)
 - [Arabic](/app/src/main/res/values-ar/strings.xml)
@@ -78,14 +79,16 @@ https://www.openstreetmap.org
 
 ### Can I add or edit places?
 
-Absolutely, you are very welcome to do that. This is a good place to start: 
+Absolutely, you are very welcome to do that. This is a good place to start:
 
 [Tagging Instructions](https://wiki.btcmap.org/general/tagging-instructions.html)
 
 ### BTC Map shows a place which doesn't exist, how can I delete it?
 
-You can delete such places from OpenStreetMap and BTC Map will pick up all your changes within 10 minutes.
+You can delete such places from OpenStreetMap and BTC Map will pick up all your changes within 10
+minutes.
 
 ### I've found a place on BTC Map but it doesn't accept bitcoins
 
-OpenStreetMap might have outdated information about some places, you can delete the `currency:XBT` tag or set it to `no` in order to remove this place from BTC Map.
+OpenStreetMap might have outdated information about some places, you can delete the `currency:XBT`
+tag or set it to `no` in order to remove this place from BTC Map.

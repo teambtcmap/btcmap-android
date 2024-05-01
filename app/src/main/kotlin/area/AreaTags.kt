@@ -9,7 +9,7 @@ import org.json.JSONObject
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Polygon
-import java.util.*
+import java.util.Locale
 
 typealias AreaTags = JSONObject
 
@@ -50,7 +50,8 @@ fun AreaTags.polygons(): List<Polygon> {
             }
 
             if (geometry.getString("type") == "Polygon") {
-                val coordinates = geometry.getJSONArray("coordinates").getJSONArray(0).toListOfArrays()
+                val coordinates =
+                    geometry.getJSONArray("coordinates").getJSONArray(0).toListOfArrays()
 
                 res += geoFactory.createPolygon(coordinates.map {
                     Coordinate(

@@ -21,7 +21,12 @@ fun Context.createFontIconBitmap(iconId: String, sizePx: Int): Bitmap {
     bitmap.applyCanvas {
         drawRect(0f, 0f, sizePx.toFloat(), sizePx.toFloat(), Paint().apply { color = Color.RED })
         val textWidth = paint.measureText(iconId)
-        drawText(iconId, width.toFloat() / 2f - textWidth / 2f, height.toFloat() / 2f - (paint.fontMetrics.ascent + paint.fontMetrics.descent) / 2f, paint)
+        drawText(
+            iconId,
+            width.toFloat() / 2f - textWidth / 2f,
+            height.toFloat() / 2f - (paint.fontMetrics.ascent + paint.fontMetrics.descent) / 2f,
+            paint,
+        )
     }
 
     return bitmap

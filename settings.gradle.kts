@@ -1,6 +1,15 @@
+// Based on Android Studio new app template
+// The only difference is the inclusion of jitpack (TODO remove)
+
 pluginManagement {
     repositories {
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         mavenCentral()
         gradlePluginPortal()
     }

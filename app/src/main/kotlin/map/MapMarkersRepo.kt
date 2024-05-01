@@ -1,7 +1,9 @@
 package map
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.util.TypedValue
 import androidx.core.content.ContextCompat

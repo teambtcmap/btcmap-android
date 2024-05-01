@@ -56,7 +56,8 @@ class DonationFragment : Fragment() {
             listOf(lnQr, lnPay).forEach {
                 it.setOnClickListener {
                     val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse("lightning:${getString(R.string.donation_address_lightning)}")
+                    intent.data =
+                        Uri.parse("lightning:${getString(R.string.donation_address_lightning)}")
                     runCatching {
                         startActivity(intent)
                     }.onFailure {

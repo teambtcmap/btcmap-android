@@ -8,7 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
-import androidx.core.view.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -42,7 +44,8 @@ class EventsFragment : Fragment() {
                     }
                 } else {
                     val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse("https://www.openstreetmap.org/${item.osmId.replace(":", "/")}")
+                    intent.data =
+                        Uri.parse("https://www.openstreetmap.org/${item.osmId.replace(":", "/")}")
                     startActivity(intent)
                 }
             }

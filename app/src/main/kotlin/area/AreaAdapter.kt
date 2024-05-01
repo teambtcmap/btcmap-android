@@ -147,7 +147,7 @@ class AreaAdapter(
                     text.text = item.text
                 }
             }
-            
+
             if (item is Item.Contact && binding is ItemContactBinding) {
                 binding.apply {
                     website.isVisible = item.website != null
