@@ -112,6 +112,18 @@ class ElementFragment : Fragment() {
                     requireContext().startActivity(Intent.createChooser(intent, null))
                 }
 
+                R.id.action_share -> {
+                    val element = runBlocking { elementsRepo.selectById(elementId)!! }
+                    val osmType = element.osmJson.optString("type")
+                    val osmId = element.osmJson.optLong("id")
+                    val uri = Uri.parse("https://btcmap.org/merchant/$osmType:$osmId")
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        putExtra(Intent.EXTRA_TEXT, uri.toString())
+                        type = "text/plain"
+                    }
+                    requireContext().startActivity(Intent.createChooser(intent, null))
+                }
+
                 R.id.action_view_on_osm -> {
                     val element = runBlocking { elementsRepo.selectById(elementId)!! }
                     val osmType = element.osmJson.optString("type")

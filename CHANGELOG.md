@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Bundle the latest data snapshots
 - Remove sync progress indicator from the map screen
+- Add place directions
+- Add share location button
 
 ## [0.7.2] - 2023-04-26
 
