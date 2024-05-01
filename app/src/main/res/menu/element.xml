@@ -2,6 +2,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_show_directions"
+        android:title="Directions"
+        android:icon="@drawable/directions"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_view_on_osm"
         android:title="@string/view_on_osm"
         app:showAsAction="never" />

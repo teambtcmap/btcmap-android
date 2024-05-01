@@ -105,6 +105,13 @@ class ElementFragment : Fragment() {
 
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
+                R.id.action_show_directions -> {
+                    val element = runBlocking { elementsRepo.selectById(elementId)!! }
+                    val uri = "geo:${element.lat},${element.lon}?q=${element.name(resources)}"
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+                    requireContext().startActivity(Intent.createChooser(intent, null))
+                }
+
                 R.id.action_view_on_osm -> {
                     val element = runBlocking { elementsRepo.selectById(elementId)!! }
                     val osmType = element.osmJson.optString("type")

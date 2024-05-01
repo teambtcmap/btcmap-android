@@ -19,7 +19,6 @@ import element.ElementsRepo
 import element.name
 import kotlinx.coroutines.runBlocking
 import org.btcmap.R
-import org.json.JSONObject
 import java.time.Duration
 import kotlin.random.Random
 
@@ -98,11 +97,7 @@ class SyncNotificationController(
 
                 val builder = NotificationCompat.Builder(context, NEW_MERCHANTS_CHANNEL_ID)
                     .setSmallIcon(R.drawable.add_location)
-                    .setContentTitle(
-                        (element.osmJson.optJSONObject("tags") ?: JSONObject()).name(
-                            context.resources,
-                        )
-                    )
+                    .setContentTitle(element.name(context.resources))
                     .setContentText(context.getString(R.string.new_local_merchant_accepts_bitcoins))
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
