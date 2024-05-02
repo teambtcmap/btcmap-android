@@ -26,6 +26,9 @@ jobs:
       - name: Run verification tasks
         run: ./gradlew check
 
+      - name: Bundle the latest data snapshot
+        run: ./gradlew bundleData
+
       - name: Assemble APKs
         run: ./gradlew assemble
 
