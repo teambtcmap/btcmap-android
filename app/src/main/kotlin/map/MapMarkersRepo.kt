@@ -53,6 +53,8 @@ class MapMarkersRepo(
 
     private val boostedCache = mutableMapOf<String?, BitmapDrawable>()
 
+    private val warningCache = mutableMapOf<String?, BitmapDrawable>()
+
     val meetupMarker by lazy {
         createMarkerIcon("groups", BackgroundType.MEETUP).toDrawable(context.resources)
     }
@@ -84,6 +86,18 @@ class MapMarkersRepo(
         return markerDrawable
     }
 
+    fun getWarningMarker(iconId: String): BitmapDrawable {
+        var markerDrawable = warningCache[iconId]
+
+        if (markerDrawable == null) {
+            markerDrawable =
+                createMarkerIcon(iconId, BackgroundType.WARNING).toDrawable(context.resources)
+            warningCache[iconId] = markerDrawable
+        }
+
+        return markerDrawable
+    }
+
     private fun createMarkerIcon(iconId: String, backgroundType: BackgroundType): Bitmap {
         val pinSizePx = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, 48f, context.resources.displayMetrics
@@ -106,6 +120,11 @@ class MapMarkersRepo(
                 emptyPinDrawable,
                 Color.parseColor("#0e95af")
             )
+
+            BackgroundType.WARNING -> DrawableCompat.setTint(
+                emptyPinDrawable,
+                context.getPrimaryContainerColor(),
+            )
         }
 
         val emptyPinBitmap = emptyPinDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
@@ -124,6 +143,12 @@ class MapMarkersRepo(
 //                    (markerIcon.height / 2 - pinSizePx / 2 / 2).toFloat() - markerIcon.height.toFloat() * 0.09f,
 //                    Paint()
 //                )
+
+                if (backgroundType == BackgroundType.WARNING) {
+                    iconPaint.color = context.getErrorColor()
+                } else {
+                    iconPaint.color = context.getOnPrimaryContainerColor()
+                }
 
                 drawText(
                     iconId,
@@ -144,6 +169,7 @@ class MapMarkersRepo(
     enum class BackgroundType {
         PRIMARY_CONTAINER,
         BOOSTED,
+        WARNING,
         MEETUP,
     }
 }

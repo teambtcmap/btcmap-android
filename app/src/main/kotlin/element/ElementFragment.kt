@@ -168,6 +168,17 @@ class ElementFragment : Fragment() {
 
         binding.toolbar.title = tags.name(resources)
 
+        if (element.osmTag("payment:lightning:requires_companion_app") == "yes") {
+            binding.companionWarning.isVisible = true
+            binding.companionWarning.setTextColor(requireContext().getErrorColor())
+            val companionApp = element
+                .osmTag("payment:lightning:companion_app_url")
+                .ifBlank { getString(R.string.unknown) }
+            binding.companionWarning.text = getString(R.string.companion_warning, companionApp)
+        } else {
+            binding.companionWarning.isVisible = false
+        }
+
         val surveyDate = tags.bitcoinSurveyDate()
 
         val outdatedUri = "https://wiki.btcmap.org/general/outdated".toUri()

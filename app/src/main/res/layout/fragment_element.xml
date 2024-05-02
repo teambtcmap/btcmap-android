@@ -89,6 +89,18 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/companionWarning"
+                style="?attr/textAppearanceSubtitle1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autoLink="web"
+                android:drawablePadding="20dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp"
+                app:drawableStartCompat="@drawable/warning"
+                app:drawableTint="?colorError" />
+
+            <TextView
                 android:id="@+id/address"
                 style="?attr/textAppearanceSubtitle1"
                 android:layout_width="match_parent"

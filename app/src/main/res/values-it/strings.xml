@@ -63,6 +63,8 @@
     <string name="show_all_new_elements">Show all new elements</string>
     <string name="directions">Directions</string>
     <string name="share">Share</string>
+    <string name="unknown">unknown</string>
+    <string name="companion_warning">You\'ll need a companion app (%1$s) in order to make a payment. This app doesn\'t require you to fill any personal data, to the best of our knowledge. Please let us know if it\'s not the case and we\'ll remove this place.</string>
     <plurals name="d_changes">
         <item quantity="one">%d change</item>
         <item quantity="many">%d changes</item>

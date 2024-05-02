@@ -15,5 +15,13 @@ data class Element(
 )
 
 fun Element.name(res: Resources): String {
-    return (osmJson.optJSONObject("tags") ?: JSONObject()).name(res)
+    return osmTags().name(res)
+}
+
+fun Element.osmTag(name: String): String {
+    return osmTags().optString(name, "")
+}
+
+fun Element.osmTags(): OsmTags {
+    return (osmJson.optJSONObject("tags") ?: JSONObject())
 }

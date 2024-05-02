@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Remove sync progress indicator from the map screen
 - Add place directions
 - Add share location button
+- Add companion app warnings for the minority of places which require it
 
 ## [0.7.2] - 2023-04-26
 

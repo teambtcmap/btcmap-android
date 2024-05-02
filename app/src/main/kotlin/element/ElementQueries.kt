@@ -220,7 +220,8 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                     lat,
                     lon,
                     json_extract(tags, '$.icon:android') AS icon_id,
-                    json_extract(tags, '$.boost:expires') AS boost_expires
+                    json_extract(tags, '$.boost:expires') AS boost_expires,
+                    json_extract(osm_json, '$.tags.payment:lightning:requires_companion_app') AS requires_companion_app
                 FROM element
                 WHERE
                     deleted_at = '' AND json_extract(tags, '$.category') NOT IN (${
@@ -249,6 +250,7 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                         lon = cursor.getDouble(2),
                         iconId = cursor.getString(3),
                         boostExpires = cursor.getZonedDateTime(4),
+                        requiresCompanionApp = (cursor.getStringOrNull(5) ?: "no") == "yes"
                     )
                 }
             }
@@ -268,7 +270,8 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                     avg(e.lat) AS lat,
                     avg(e.lon) AS lon,
                     json_extract(e.tags, '$.icon:android') AS icon_id,
-                    json_extract(e.tags, '$.boost:expires') AS boost_expires
+                    json_extract(e.tags, '$.boost:expires') AS boost_expires,
+                    json_extract(e.osm_json, '$.tags.payment:lightning:requires_companion_app') AS requires_companion_app
                 FROM element e
                 WHERE e.deleted_at = '' AND json_extract(e.tags, '$.category') NOT IN (${
                     excludedCategories.joinToString { "'$it'" }
@@ -288,6 +291,7 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
                         lon = cursor.getDouble(3),
                         iconId = cursor.getString(4),
                         boostExpires = cursor.getZonedDateTime(5),
+                        requiresCompanionApp = (cursor.getStringOrNull(6) ?: "no") == "yes"
                     )
                 }
             }

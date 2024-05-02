@@ -283,7 +283,9 @@ class MapFragment : Fragment() {
                             marker.position = GeoPoint(it.cluster.lat, it.cluster.lon)
 
                             if (it.cluster.count == 1L) {
-                                val icon = if (
+                                val icon = if (it.cluster.requiresCompanionApp) {
+                                    markersRepo.getWarningMarker(it.cluster.iconId.ifBlank { "question_mark" })
+                                } else if (
                                     it.cluster.boostExpires != null
                                     && it.cluster.boostExpires.isAfter(ZonedDateTime.now(ZoneOffset.UTC))
                                 ) {
