@@ -65,6 +65,7 @@
     <string name="companion_warning">You\'ll need a companion app (%1$s) in order to make a payment. This app doesn\'t require you to fill any personal data, to the best of our knowledge. Please let us know if it\'s not the case and we\'ll remove this place.</string>
     <string name="percentage_of_verified_places">Percentage of verified places</string>
     <string name="days_since_verified">Days since verified</string>
+    <string name="new_merchant_accepts_bitcoins">New merchant accepts bitcoins</string>
     <plurals name="d_changes">
         <item quantity="one">%d промяна</item>
         <item quantity="other">%d промени</item>
