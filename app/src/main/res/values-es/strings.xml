@@ -33,7 +33,6 @@
     <string name="verify">Verificar o informar</string>
     <string name="atm">Cajero automático</string>
     <string name="checkmark_icon">Icono de marca de verificación</string>
-    <string name="fetching_recent_changes">Fetching recent changes</string>
     <string name="database">Base de datos</string>
     <string name="updated_s">Última sincronización: %1$s</string>
     <string name="database_is_empty">La base de datos está vacía</string>
@@ -45,7 +44,6 @@
     <string name="category_cafe_plural">Cafes</string>
     <string name="category_hotel">Hotel</string>
     <string name="category_hotel_plural">Hoteles</string>
-    <string name="category_other">Other</string>
     <string name="category_other_plural">Otro</string>
     <string name="category_pub">Pub</string>
     <string name="category_pub_plural">Pubs</string>
@@ -65,6 +63,8 @@
     <string name="share">Share</string>
     <string name="unknown">unknown</string>
     <string name="companion_warning">You\'ll need a companion app (%1$s) in order to make a payment. This app doesn\'t require you to fill any personal data, to the best of our knowledge. Please let us know if it\'s not the case and we\'ll remove this place.</string>
+    <string name="percentage_of_verified_places">Percentage of verified places</string>
+    <string name="days_since_verified">Days since verified</string>
     <plurals name="d_changes">
         <item quantity="one">%d cambio</item>
         <item quantity="many">%d cambios</item>

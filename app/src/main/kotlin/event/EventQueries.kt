@@ -67,14 +67,16 @@ class EventQueries(private val db: SQLiteOpenHelper) {
 
             buildList {
                 while (cursor.moveToNext()) {
-                    this += EventListItem(
-                        eventType = cursor.getString(0),
-                        elementId = cursor.getLong(1),
-                        osmId = cursor.getStringOrNull(2) ?: "",
-                        elementName = cursor.getStringOrNull(3) ?: "",
-                        eventDate = cursor.getZonedDateTime(4)!!,
-                        userName = cursor.getString(5),
-                        userTips = getLnUrl(cursor.getString(6)),
+                    add(
+                        EventListItem(
+                            eventType = cursor.getString(0),
+                            elementId = cursor.getLong(1),
+                            osmId = cursor.getStringOrNull(2) ?: "",
+                            elementName = cursor.getStringOrNull(3) ?: "",
+                            eventDate = cursor.getZonedDateTime(4)!!,
+                            userName = cursor.getString(5),
+                            userTips = getLnUrl(cursor.getString(6)),
+                        )
                     )
                 }
             }
@@ -102,14 +104,16 @@ class EventQueries(private val db: SQLiteOpenHelper) {
 
             buildList {
                 while (cursor.moveToNext()) {
-                    this += EventListItem(
-                        eventType = cursor.getString(0),
-                        elementId = cursor.getLong(1),
-                        osmId = cursor.getStringOrNull(2) ?: "",
-                        elementName = cursor.getStringOrNull(3) ?: "",
-                        eventDate = cursor.getZonedDateTime(4)!!,
-                        userName = "",
-                        userTips = "",
+                    add(
+                        EventListItem(
+                            eventType = cursor.getString(0),
+                            elementId = cursor.getLong(1),
+                            osmId = cursor.getStringOrNull(2) ?: "",
+                            elementName = cursor.getStringOrNull(3) ?: "",
+                            eventDate = cursor.getZonedDateTime(4)!!,
+                            userName = "",
+                            userTips = "",
+                        )
                     )
                 }
             }

@@ -1,4 +1,4 @@
-import java.net.URL
+import java.net.URI
 
 plugins {
     alias(libs.plugins.android.application)
@@ -18,12 +18,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
         freeCompilerArgs += "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi"
         freeCompilerArgs += "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
     }
@@ -100,20 +100,20 @@ tasks.register("bundleData") {
         val destDir = File(projectDir, "src/main/assets")
         destDir.mkdirs()
 
-        val elementsSrc = URL("https://static.btcmap.org/api/v3/elements.json")
-        File(destDir, "elements.json").writeText(elementsSrc.readText())
+        val elementsSrc = URI("https://static.btcmap.org/api/v3/elements.json")
+        File(destDir, "elements.json").writeText(elementsSrc.toURL().readText())
 
-        val reportsSrc = URL("https://static.btcmap.org/api/v2/reports.json")
-        File(destDir, "reports.json").writeText(reportsSrc.readText())
+        val reportsSrc = URI("https://static.btcmap.org/api/v2/reports.json")
+        File(destDir, "reports.json").writeText(reportsSrc.toURL().readText())
 
-        val eventsSrc = URL("https://static.btcmap.org/api/v2/events.json")
-        File(destDir, "events.json").writeText(eventsSrc.readText())
+        val eventsSrc = URI("https://static.btcmap.org/api/v2/events.json")
+        File(destDir, "events.json").writeText(eventsSrc.toURL().readText())
 
-        val areasSrc = URL("https://static.btcmap.org/api/v2/areas.json")
-        File(destDir, "areas.json").writeText(areasSrc.readText())
+        val areasSrc = URI("https://static.btcmap.org/api/v2/areas.json")
+        File(destDir, "areas.json").writeText(areasSrc.toURL().readText())
 
-        val usersSrc = URL("https://static.btcmap.org/api/v2/users.json")
-        File(destDir, "users.json").writeText(usersSrc.readText())
+        val usersSrc = URI("https://static.btcmap.org/api/v2/users.json")
+        File(destDir, "users.json").writeText(usersSrc.toURL().readText())
     }
 }
 
@@ -124,6 +124,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.sqlite.ktx)
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.constraintlayout)
 
     implementation(libs.material)
@@ -137,7 +138,6 @@ dependencies {
     implementation(libs.sqlite)
     implementation(libs.coil.core)
     implementation(libs.coil.svg)
-    implementation(libs.androidx.work.runtime.ktx)
 
     testImplementation(libs.junit)
     testImplementation(libs.json)

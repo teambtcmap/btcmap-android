@@ -128,7 +128,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Percentage of verified places"
+                            android:text="@string/percentage_of_verified_places"
                             android:textAppearance="?attr/textAppearanceHeadline6" />
 
                     </LinearLayout>
@@ -165,7 +165,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Days since verified"
+                            android:text="@string/days_since_verified"
                             android:textAppearance="?attr/textAppearanceHeadline6" />
 
                     </LinearLayout>

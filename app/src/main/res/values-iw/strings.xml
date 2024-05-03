@@ -33,7 +33,6 @@
     <string name="verify">אמת או דווח</string>
     <string name="atm">כספומט</string>
     <string name="checkmark_icon">סימן אישור</string>
-    <string name="fetching_recent_changes">משיג שינויים אחרוניים</string>
     <string name="database">בסיס מידע</string>
     <string name="updated_s">Updated: %1$s</string>
     <string name="database_is_empty">בסיס המידע רק</string>
@@ -45,7 +44,6 @@
     <string name="category_cafe_plural">בתי כפה</string>
     <string name="category_hotel">מלון</string>
     <string name="category_hotel_plural">מלונות</string>
-    <string name="category_other">אחר</string>
     <string name="category_other_plural">אחרי/ות</string>
     <string name="category_pub">פב</string>
     <string name="category_pub_plural">פבים</string>
@@ -65,6 +63,8 @@
     <string name="share">Share</string>
     <string name="unknown">unknown</string>
     <string name="companion_warning">You\'ll need a companion app (%1$s) in order to make a payment. This app doesn\'t require you to fill any personal data, to the best of our knowledge. Please let us know if it\'s not the case and we\'ll remove this place.</string>
+    <string name="percentage_of_verified_places">Percentage of verified places</string>
+    <string name="days_since_verified">Days since verified</string>
     <plurals name="d_changes">
         <item quantity="one">שינויים %d</item>
         <item quantity="two">שינויים %d</item>

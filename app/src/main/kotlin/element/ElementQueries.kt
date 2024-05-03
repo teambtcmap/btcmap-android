@@ -162,15 +162,17 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
 
             buildList {
                 while (cursor.moveToNext()) {
-                    this += Element(
-                        id = cursor.getLong(0),
-                        osmId = cursor.getString(1),
-                        lat = cursor.getDouble(2),
-                        lon = cursor.getDouble(3),
-                        osmJson = cursor.getJsonObject(4),
-                        tags = cursor.getJsonObject(5),
-                        updatedAt = cursor.getString(6)!!,
-                        deletedAt = cursor.getStringOrNull(7),
+                    add(
+                        Element(
+                            id = cursor.getLong(0),
+                            osmId = cursor.getString(1),
+                            lat = cursor.getDouble(2),
+                            lon = cursor.getDouble(3),
+                            osmJson = cursor.getJsonObject(4),
+                            tags = cursor.getJsonObject(5),
+                            updatedAt = cursor.getString(6)!!,
+                            deletedAt = cursor.getStringOrNull(7),
+                        )
                     )
                 }
             }
@@ -190,15 +192,17 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
 
             buildList {
                 while (cursor.moveToNext()) {
-                    this += Element(
-                        id = cursor.getLong(0),
-                        osmId = cursor.getString(1),
-                        lat = cursor.getDouble(2),
-                        lon = cursor.getDouble(3),
-                        osmJson = cursor.getJsonObject(4),
-                        tags = cursor.getJsonObject(5),
-                        updatedAt = cursor.getString(6)!!,
-                        deletedAt = cursor.getStringOrNull(7),
+                    add(
+                        Element(
+                            id = cursor.getLong(0),
+                            osmId = cursor.getString(1),
+                            lat = cursor.getDouble(2),
+                            lon = cursor.getDouble(3),
+                            osmJson = cursor.getJsonObject(4),
+                            tags = cursor.getJsonObject(5),
+                            updatedAt = cursor.getString(6)!!,
+                            deletedAt = cursor.getStringOrNull(7),
+                        )
                     )
                 }
             }
@@ -243,14 +247,16 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
 
             buildList {
                 while (cursor.moveToNext()) {
-                    this += ElementsCluster(
-                        count = 1,
-                        id = cursor.getLong(0),
-                        lat = cursor.getDouble(1),
-                        lon = cursor.getDouble(2),
-                        iconId = cursor.getString(3),
-                        boostExpires = cursor.getZonedDateTime(4),
-                        requiresCompanionApp = (cursor.getStringOrNull(5) ?: "no") == "yes"
+                    add(
+                        ElementsCluster(
+                            count = 1,
+                            id = cursor.getLong(0),
+                            lat = cursor.getDouble(1),
+                            lon = cursor.getDouble(2),
+                            iconId = cursor.getString(3),
+                            boostExpires = cursor.getZonedDateTime(4),
+                            requiresCompanionApp = (cursor.getStringOrNull(5) ?: "no") == "yes"
+                        )
                     )
                 }
             }
@@ -284,14 +290,16 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
 
             buildList {
                 while (cursor.moveToNext()) {
-                    this += ElementsCluster(
-                        count = cursor.getLong(0),
-                        id = cursor.getLong(1),
-                        lat = cursor.getDouble(2),
-                        lon = cursor.getDouble(3),
-                        iconId = cursor.getString(4),
-                        boostExpires = cursor.getZonedDateTime(5),
-                        requiresCompanionApp = (cursor.getStringOrNull(6) ?: "no") == "yes"
+                    add(
+                        ElementsCluster(
+                            count = cursor.getLong(0),
+                            id = cursor.getLong(1),
+                            lat = cursor.getDouble(2),
+                            lon = cursor.getDouble(3),
+                            iconId = cursor.getString(4),
+                            boostExpires = cursor.getZonedDateTime(5),
+                            requiresCompanionApp = (cursor.getStringOrNull(6) ?: "no") == "yes"
+                        )
                     )
                 }
             }
@@ -334,41 +342,16 @@ class ElementQueries(private val db: SQLiteOpenHelper) {
 
             buildList {
                 while (cursor.moveToNext()) {
-                    this += AreaElement(
-                        id = cursor.getLong(0),
-                        lat = cursor.getDouble(1),
-                        lon = cursor.getDouble(2),
-                        icon = cursor.getString(3),
-                        osmTags = cursor.getJsonObject(4),
-                        issues = cursor.getJsonArray(5),
-                        osmType = cursor.getString(6),
-                        osmId = cursor.getLong(7),
-                    )
-                }
-            }
-        }
-    }
-
-    suspend fun selectCategories(): List<ElementCategory> {
-        return withContext(Dispatchers.IO) {
-            val cursor = db.readableDatabase.query(
-                """
-                SELECT 
-                    json_extract(tags, '$.category') AS category,
-                    count(*) AS elements
-                FROM element
-                WHERE deleted_at = ''
-                GROUP BY category
-                ORDER BY category;
-                """
-            )
-
-            buildList {
-                while (cursor.moveToNext()) {
                     add(
-                        ElementCategory(
-                            id = cursor.getString(0),
-                            elements = cursor.getLong(1),
+                        AreaElement(
+                            id = cursor.getLong(0),
+                            lat = cursor.getDouble(1),
+                            lon = cursor.getDouble(2),
+                            icon = cursor.getString(3),
+                            osmTags = cursor.getJsonObject(4),
+                            issues = cursor.getJsonArray(5),
+                            osmType = cursor.getString(6),
+                            osmId = cursor.getLong(7),
                         )
                     )
                 }

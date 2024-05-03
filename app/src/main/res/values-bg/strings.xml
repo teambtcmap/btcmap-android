@@ -33,7 +33,6 @@
     <string name="verify">Удостоверете или Докладвайте</string>
     <string name="atm">Банкомат</string>
     <string name="checkmark_icon">Икона на отметка</string>
-    <string name="fetching_recent_changes">Извличане на последните промени</string>
     <string name="database">База данни</string>
     <string name="updated_s">Променено на: %1$s</string>
     <string name="database_is_empty">Базата данни е празна</string>
@@ -45,7 +44,6 @@
     <string name="category_cafe_plural">Кафета</string>
     <string name="category_hotel">Хотел</string>
     <string name="category_hotel_plural">Хотели</string>
-    <string name="category_other">Други</string>
     <string name="category_other_plural">Други</string>
     <string name="category_pub">Кръчма</string>
     <string name="category_pub_plural">Кръчми</string>
@@ -65,6 +63,8 @@
     <string name="share">Share</string>
     <string name="unknown">unknown</string>
     <string name="companion_warning">You\'ll need a companion app (%1$s) in order to make a payment. This app doesn\'t require you to fill any personal data, to the best of our knowledge. Please let us know if it\'s not the case and we\'ll remove this place.</string>
+    <string name="percentage_of_verified_places">Percentage of verified places</string>
+    <string name="days_since_verified">Days since verified</string>
     <plurals name="d_changes">
         <item quantity="one">%d промяна</item>
         <item quantity="other">%d промени</item>

@@ -61,12 +61,14 @@ data class UserQueries(private val db: SQLiteOpenHelper) {
 
             buildList {
                 while (cursor.moveToNext()) {
-                    this += UserListItem(
-                        id = cursor.getLong(0),
-                        image = cursor.getHttpUrl(1),
-                        name = cursor.getString(2),
-                        tips = getLnUrl(cursor.getString(3)),
-                        changes = cursor.getLong(4),
+                    add(
+                        UserListItem(
+                            id = cursor.getLong(0),
+                            image = cursor.getHttpUrl(1),
+                            name = cursor.getString(2),
+                            tips = getLnUrl(cursor.getString(3)),
+                            changes = cursor.getLong(4),
+                        )
                     )
                 }
             }

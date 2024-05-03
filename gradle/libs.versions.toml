@@ -17,7 +17,7 @@ constraintlayout = "2.1.4"
 preference = "1.2.1"
 # Material design components
 # https://github.com/material-components/material-components-android/releases
-material = "1.11.0"
+material = "1.12.0"
 # Modern HTTP client
 # https://github.com/square/okhttp/blob/master/CHANGELOG.md
 okhttp = "5.0.0-alpha.14"

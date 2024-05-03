@@ -33,7 +33,6 @@
     <string name="verify">Ověř nebo Nahláš</string>
     <string name="atm">Bankomat</string>
     <string name="checkmark_icon">Ikona zaškrtnutí</string>
-    <string name="fetching_recent_changes">Stahuji poslední změny</string>
     <string name="database">Databáze</string>
     <string name="updated_s">Aktualizováno: %1$s</string>
     <string name="database_is_empty">Databáze je prázdná</string>
@@ -45,7 +44,6 @@
     <string name="category_cafe_plural">Kavárny</string>
     <string name="category_hotel">Hotel</string>
     <string name="category_hotel_plural">Hotely</string>
-    <string name="category_other">Ostatní</string>
     <string name="category_other_plural">Ostatní</string>
     <string name="category_pub">Hospoda</string>
     <string name="category_pub_plural">Hospody</string>
@@ -65,6 +63,8 @@
     <string name="share">Share</string>
     <string name="unknown">unknown</string>
     <string name="companion_warning">You\'ll need a companion app (%1$s) in order to make a payment. This app doesn\'t require you to fill any personal data, to the best of our knowledge. Please let us know if it\'s not the case and we\'ll remove this place.</string>
+    <string name="percentage_of_verified_places">Percentage of verified places</string>
+    <string name="days_since_verified">Days since verified</string>
     <plurals name="d_changes">
         <item quantity="one">%d změn</item>
         <item quantity="few">%d změn</item>

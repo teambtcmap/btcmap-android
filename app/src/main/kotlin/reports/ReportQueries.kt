@@ -62,13 +62,15 @@ class ReportQueries(private val db: SQLiteOpenHelper) {
 
             buildList {
                 while (cursor.moveToNext()) {
-                    this += Report(
-                        areaId = cursor.getString(0),
-                        date = cursor.getDate(1),
-                        tags = cursor.getJsonObject(2),
-                        createdAt = cursor.getZonedDateTime(3)!!,
-                        updatedAt = cursor.getZonedDateTime(4)!!,
-                        deletedAt = cursor.getZonedDateTime(5),
+                    add(
+                        Report(
+                            areaId = cursor.getString(0),
+                            date = cursor.getDate(1),
+                            tags = cursor.getJsonObject(2),
+                            createdAt = cursor.getZonedDateTime(3)!!,
+                            updatedAt = cursor.getZonedDateTime(4)!!,
+                            deletedAt = cursor.getZonedDateTime(5),
+                        )
                     )
                 }
             }
