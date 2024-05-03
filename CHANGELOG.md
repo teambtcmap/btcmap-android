@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.7.3] - 2024-05-03
 
 - Bundle the latest data snapshots
 - Remove sync progress indicator from the map screen
@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Add companion app warnings for the minority of places which require it
 - Fix crashes during sync
 
-## [0.7.2] - 2023-04-26
+## [0.7.2] - 2024-04-26
 
 - Notify user of new places nearby
 - Perform daily sync in background
