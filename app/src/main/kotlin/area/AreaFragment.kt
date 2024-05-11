@@ -151,6 +151,6 @@ class AreaFragment : Fragment() {
     }
 
     private fun requireArgs(): AreaModel.Args {
-        return AreaModel.Args(requireArguments().getString("area_id")!!)
+        return AreaModel.Args(requireArguments().getLong("area_id"))
     }
 }

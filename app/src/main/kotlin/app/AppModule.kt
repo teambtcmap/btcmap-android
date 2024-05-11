@@ -1,6 +1,5 @@
 package app
 
-import android.content.Context
 import api.Api
 import api.ApiImpl
 import area.AreaModel
@@ -20,9 +19,6 @@ import io.requery.android.database.sqlite.SQLiteOpenHelper
 import issue.IssuesModel
 import location.UserLocationRepository
 import map.MapModel
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.OkHttpClient
-import okhttp3.brotli.BrotliInterceptor
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -40,43 +36,11 @@ import user.UsersModel
 import user.UsersRepo
 
 val appModule = module {
-    single {
-        OkHttpClient.Builder()
-            .addInterceptor(BrotliInterceptor)
-            .apply {
-                if (get<Context>().isDebuggable()) {
-                    addInterceptor {
-                        android.util.Log.d("okhttp", it.request().url.toString())
-                        it.proceed(it.request())
-                    }
-                }
-            }
-            .addInterceptor {
-                var res = it.proceed(it.request())
-
-                var retryAttempts = 0
-
-                while (res.code == 429 && retryAttempts < 10) {
-                    android.util.Log.w("okhttp", "Got 429, retrying ${it.request().url}")
-                    res.close()
-                    Thread.sleep(retryAttempts * 1000 + (Math.random() * 1000.0).toLong())
-                    res = it.proceed(it.request())
-                    retryAttempts++
-                }
-
-                res
-            }
-            .build()
-    }
-
-    single {
-        ApiImpl(
-            baseUrl = "https://api.btcmap.org".toHttpUrl(),
-            httpClient = get(),
-        )
-    }.bind(Api::class)
-
     singleOf(::Database).bind(SQLiteOpenHelper::class)
+
+    single { ApiImpl() }.bind(Api::class)
+
+    singleOf(::Sync)
 
     singleOf(::BackgroundSyncScheduler)
     singleOf(::SyncNotificationController)
@@ -102,8 +66,6 @@ val appModule = module {
     singleOf(::ReportQueries)
     singleOf(::ReportsRepo)
     viewModelOf(::ReportsModel)
-
-    singleOf(::Sync)
 
     singleOf(::UserQueries)
     singleOf(::UsersRepo)

@@ -1,6 +1,7 @@
 package event
 
 import android.content.Context
+import androidx.sqlite.db.transaction
 import api.Api
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,11 +15,13 @@ class EventsRepo(
     private val context: Context,
 ) {
 
-    suspend fun selectAll(limit: Long) = queries.selectAll(limit)
+    suspend fun selectAll(limit: Long) =
+        withContext(Dispatchers.IO) { queries.selectAll(limit) }
 
-    suspend fun selectByUserIdAsListItems(userId: Long) = queries.selectByUserId(userId)
+    suspend fun selectByUserIdAsListItems(userId: Long) =
+        withContext(Dispatchers.IO) { queries.selectByUserId(userId) }
 
-    suspend fun selectCount() = queries.selectCount()
+    suspend fun selectCount() = withContext(Dispatchers.IO) { queries.selectCount() }
 
     suspend fun hasBundledEvents(): Boolean {
         return withContext(Dispatchers.IO) {
@@ -29,43 +32,69 @@ class EventsRepo(
     suspend fun fetchBundledEvents() {
         withContext(Dispatchers.IO) {
             context.assets.open("events.json").use { bundledEvents ->
-                val events = bundledEvents.toEventsJson().map { it.toEvent() }
-                queries.insertOrReplace(events)
+                val events = bundledEvents
+                    .toEventsJson()
+                    .filter { it.deletedAt == null }
+                    .map { it.toEvent() }
+
+                queries.db.writableDatabase.transaction {
+                    events.forEach { queries.insertOrReplace(it) }
+                }
             }
         }
     }
 
     suspend fun sync(): SyncReport {
         val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
-        val newEvents = mutableListOf<Event>()
-        var updatedEvents = 0L
-        val maxUpdatedAtBeforeSync = queries.selectMaxUpdatedAt()
+        val newItems = mutableListOf<Event>()
+        var updatedItems = 0L
+        var deletedItems = 0L
+        var maxKnownUpdatedAt = withContext(Dispatchers.IO) { queries.selectMaxUpdatedAt() }
 
         while (true) {
-            val events =
-                api.getEvents(queries.selectMaxUpdatedAt(), BATCH_SIZE).map { it.toEvent() }
+            val delta = api.getEvents(maxKnownUpdatedAt, BATCH_SIZE)
 
-            events.forEach {
-                if (maxUpdatedAtBeforeSync == null
-                    || it.createdAt.isAfter(maxUpdatedAtBeforeSync)
-                ) {
-                    newEvents += it
-                } else {
-                    updatedEvents += 1
+            if (delta.isEmpty()) {
+                break
+            } else {
+                maxKnownUpdatedAt = ZonedDateTime.parse(delta.maxBy { it.updatedAt }.updatedAt)
+            }
+
+            withContext(Dispatchers.IO) {
+                queries.db.writableDatabase.transaction {
+                    delta.forEach {
+                        val cached = queries.selectById(it.id)
+
+                        if (it.deletedAt == null) {
+                            if (cached == null) {
+                                newItems += it.toEvent()
+                            } else {
+                                updatedItems++
+                            }
+
+                            queries.insertOrReplace(it.toEvent())
+                        } else {
+                            if (cached == null) {
+                                // Already evicted from cache, nothing to do here
+                            } else {
+                                queries.deleteById(it.id)
+                                deletedItems++
+                            }
+                        }
+                    }
                 }
             }
 
-            queries.insertOrReplace(events)
-
-            if (events.size < BATCH_SIZE) {
+            if (delta.size < BATCH_SIZE) {
                 break
             }
         }
 
         return SyncReport(
             duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
-            newEvents = newEvents,
-            updatedEvents = updatedEvents,
+            newEvents = newItems,
+            updatedEvents = updatedItems,
+            deletedEvents = deletedItems,
         )
     }
 
@@ -73,6 +102,7 @@ class EventsRepo(
         val duration: Duration,
         val newEvents: List<Event>,
         val updatedEvents: Long,
+        val deletedEvents: Long,
     )
 
     companion object {

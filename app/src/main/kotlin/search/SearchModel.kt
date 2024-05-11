@@ -178,7 +178,7 @@ class SearchModel(
         return SearchAdapter.Item(
             element = this,
             icon = tags.optString("icon:android").ifBlank { "question_mark" },
-            name = osmJson.getJSONObject("tags").optString("name").ifBlank { "Unnamed" },
+            name = overpassData.getJSONObject("tags").optString("name").ifBlank { "Unnamed" },
             distanceToUser = distanceStringBuilder.toString(),
         )
     }

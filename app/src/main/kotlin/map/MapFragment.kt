@@ -174,7 +174,7 @@ class MapFragment : Fragment() {
                     )
                 }
 
-                R.id.action_trends -> nav.navigate(R.id.reportsFragment, bundleOf("area_id" to ""))
+                R.id.action_trends -> nav.navigate(R.id.reportsFragment)
                 R.id.action_users -> nav.navigate(R.id.usersFragment)
                 R.id.action_events -> nav.navigate(R.id.eventsFragment)
                 R.id.action_settings -> nav.navigate(R.id.settingsFragment)

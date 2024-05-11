@@ -6,31 +6,27 @@ import java.io.InputStream
 import java.time.ZonedDateTime
 
 data class AreaJson(
-    val id: String,
-    val tags: JSONObject,
-    val createdAt: String,
+    val id: Long,
+    val tags: JSONObject?,
     val updatedAt: String,
-    val deletedAt: String,
+    val deletedAt: String?,
 )
 
 fun AreaJson.toArea(): Area {
     return Area(
         id = id,
-        tags = tags,
-        createdAt = ZonedDateTime.parse(createdAt),
+        tags = tags!!,
         updatedAt = ZonedDateTime.parse(updatedAt),
-        deletedAt = if (deletedAt.isNotEmpty()) ZonedDateTime.parse(deletedAt) else null,
     )
 }
 
 fun InputStream.toAreasJson(): List<AreaJson> {
     return toJsonArray().map {
         AreaJson(
-            id = it.getString("id"),
-            tags = it.getJSONObject("tags"),
-            createdAt = it.getString("created_at"),
+            id = it.getLong("id"),
+            tags = it.optJSONObject("tags") ?: JSONObject(),
             updatedAt = it.getString("updated_at"),
-            deletedAt = it.getString("deleted_at"),
+            deletedAt = it.optString("deleted_at").ifBlank { null },
         )
     }
 }

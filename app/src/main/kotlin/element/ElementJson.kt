@@ -13,29 +13,10 @@ data class ElementJson(
 )
 
 fun ElementJson.toElement(): Element {
-    val latLon = getLatLon()
-
-    return Element(
-        id = id,
-        osmId = getOsmId(),
-        lat = latLon.first,
-        lon = latLon.second,
-        osmJson = osmData ?: JSONObject(),
-        tags = tags ?: JSONObject(),
-        updatedAt = updatedAt,
-        deletedAt = deletedAt,
-    )
-}
-
-fun ElementJson.getLatLon(): Pair<Double, Double> {
-    if (osmData == null) {
-        return Pair(0.0, 0.0)
-    }
-
     val lat: Double
     val lon: Double
 
-    if (osmData.getString("type") == "node") {
+    if (osmData!!.getString("type") == "node") {
         lat = osmData.getDouble("lat")
         lon = osmData.getDouble("lon")
     } else {
@@ -50,18 +31,14 @@ fun ElementJson.getLatLon(): Pair<Double, Double> {
         lon = (boundsMinLon + boundsMaxLon) / 2.0
     }
 
-    return Pair(lat, lon)
-}
-
-fun ElementJson.getOsmId(): String {
-    if (osmData == null) {
-        return ""
-    }
-
-    val type = osmData.optString("type").ifBlank { return "" }
-    val id = osmData.optString("id").ifBlank { return "" }
-
-    return "$type:$id"
+    return Element(
+        id = id,
+        overpassData = osmData,
+        tags = tags!!,
+        updatedAt = updatedAt,
+        lat = lat,
+        lon = lon,
+    )
 }
 
 fun InputStream.toElementsJson(): List<ElementJson> {

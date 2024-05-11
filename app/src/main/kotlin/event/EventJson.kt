@@ -7,39 +7,48 @@ import java.time.ZonedDateTime
 
 data class EventJson(
     val id: Long,
-    val type: String,
-    val elementId: String,
-    val userId: Long,
-    val tags: JSONObject,
-    val createdAt: String,
+    val userId: Long?,
+    val elementId: Long?,
+    val type: Long?,
+    val tags: JSONObject?,
+    val createdAt: String?,
     val updatedAt: String,
-    val deletedAt: String,
+    val deletedAt: String?,
 )
 
 fun EventJson.toEvent(): Event {
     return Event(
         id = id,
-        type = type,
-        elementId = elementId,
-        userId = userId,
-        tags = tags,
+        userId = userId!!,
+        elementId = elementId!!,
+        type = type!!,
+        tags = tags!!,
         createdAt = ZonedDateTime.parse(createdAt),
         updatedAt = ZonedDateTime.parse(updatedAt),
-        deletedAt = if (deletedAt.isNotEmpty()) ZonedDateTime.parse(deletedAt) else null,
     )
 }
 
 fun InputStream.toEventsJson(): List<EventJson> {
     return toJsonArray().map {
+        val userId = it.optLong("user_id")
+        val elementId = it.optLong("element_id")
+        val type = it.optLong("type")
+
         EventJson(
             id = it.getLong("id"),
-            type = it.getString("type"),
-            elementId = it.getString("element_id"),
-            userId = it.getLong("user_id"),
-            tags = it.getJSONObject("tags"),
-            createdAt = it.getString("created_at"),
+            userId = if (userId == 0L) {
+                null
+            } else userId,
+            elementId = if (elementId == 0L) {
+                null
+            } else elementId,
+            type = if (type == 0L) {
+                null
+            } else type,
+            tags = it.optJSONObject("tags") ?: JSONObject(),
+            createdAt = it.optString("created_at").ifBlank { null },
             updatedAt = it.getString("updated_at"),
-            deletedAt = it.getString("deleted_at"),
+            deletedAt = it.optString("deleted_at").ifBlank { null },
         )
     }
 }

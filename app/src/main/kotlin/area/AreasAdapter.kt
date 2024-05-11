@@ -68,7 +68,7 @@ class AreasAdapter(
     }
 
     data class Item(
-        val id: String,
+        val id: Long,
         val iconUrl: String,
         val name: String,
         val distance: String,

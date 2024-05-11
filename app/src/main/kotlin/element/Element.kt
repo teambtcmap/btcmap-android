@@ -5,23 +5,21 @@ import org.json.JSONObject
 
 data class Element(
     val id: Long,
-    val osmId: String,
-    val lat: Double,
-    val lon: Double,
-    val osmJson: JSONObject,
+    val overpassData: JSONObject,
     val tags: JSONObject,
     val updatedAt: String,
-    val deletedAt: String?,
+    val lat: Double,
+    val lon: Double,
 )
 
-fun Element.name(res: Resources): String {
-    return osmTags().name(res)
+fun Element.osmTags(): OsmTags {
+    return (overpassData.optJSONObject("tags") ?: JSONObject())
 }
 
 fun Element.osmTag(name: String): String {
     return osmTags().optString(name, "")
 }
 
-fun Element.osmTags(): OsmTags {
-    return (osmJson.optJSONObject("tags") ?: JSONObject())
+fun Element.name(res: Resources): String {
+    return osmTags().name(res)
 }

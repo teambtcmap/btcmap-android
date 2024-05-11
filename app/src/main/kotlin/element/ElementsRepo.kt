@@ -1,11 +1,15 @@
 package element
 
 import android.app.Application
+import androidx.sqlite.db.transaction
 import api.Api
+import db.elementsUpdatedAt
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.osmdroid.util.BoundingBox
 import java.time.Duration
+import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
@@ -15,16 +19,14 @@ class ElementsRepo(
     private val queries: ElementQueries,
 ) {
 
-    suspend fun selectById(id: Long) = queries.selectById(id)
-
-    suspend fun selectByOsmId(osmId: String) = queries.selectByOsmId(osmId)
+    suspend fun selectById(id: Long) = withContext(Dispatchers.IO) { queries.selectById(id) }
 
     suspend fun selectBySearchString(searchString: String): List<Element> {
-        return queries.selectBySearchString(searchString)
+        return withContext(Dispatchers.IO) { queries.selectBySearchString(searchString) }
     }
 
     suspend fun selectByCategory(category: String): List<Element> {
-        return queries.selectByCategory(category)
+        return withContext(Dispatchers.IO) { queries.selectByCategory(category) }
     }
 
     suspend fun selectByBoundingBox(
@@ -32,12 +34,14 @@ class ElementsRepo(
         maxLat: Double,
         minLon: Double,
         maxLon: Double,
-    ) = queries.selectByBoundingBox(
-        minLat,
-        maxLat,
-        minLon,
-        maxLon,
-    )
+    ) = withContext(Dispatchers.IO) {
+        queries.selectByBoundingBox(
+            minLat,
+            maxLat,
+            minLon,
+            maxLon,
+        )
+    }
 
     suspend fun selectByBoundingBox(
         zoom: Double?,
@@ -119,17 +123,18 @@ class ElementsRepo(
         }
 
         return if (zoom > 18) {
-            queries.selectWithoutClustering(
-                minLat = box.latSouth,
-                maxLat = box.latNorth,
-                minLon = box.lonWest,
-                maxLon = box.lonEast,
-                excludedCategories,
-            )
+            withContext(Dispatchers.IO) {
+                queries.selectWithoutClustering(
+                    minLat = box.latSouth,
+                    maxLat = box.latNorth,
+                    minLon = box.lonWest,
+                    maxLon = box.lonEast,
+                    excludedCategories,
+                )
+            }
         } else {
-            val clusters = queries.selectClusters(step, excludedCategories)
-
             return withContext(Dispatchers.IO) {
+                val clusters = queries.selectClusters(step, excludedCategories)
                 clusters.filter { box.contains(it.lat, it.lon) }
             }
         }
@@ -148,35 +153,71 @@ class ElementsRepo(
     suspend fun fetchBundledElements() {
         withContext(Dispatchers.IO) {
             app.assets.open("elements.json").use { bundledElements ->
-                val elements = bundledElements.toElementsJson().map { it.toElement() }
-                queries.insertOrReplace(elements)
+                val elements = bundledElements
+                    .toElementsJson()
+                    .filter { it.deletedAt == null }
+                    .map { it.toElement() }
+
+                queries.db.writableDatabase.transaction {
+                    elements.forEach { queries.insertOrReplace(it) }
+                }
             }
         }
     }
 
     suspend fun sync(): SyncReport {
         val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
-        var newElements = 0L
-        var updatedElements = 0L
+        var newItems = 0L
+        var updatedItems = 0L
+        var deletedItems = 0L
+        var maxKnownUpdatedAt = withContext(Dispatchers.IO) { queries.selectMaxUpdatedAt() }
 
         while (true) {
-            val elements = api.getElements(queries.selectMaxUpdatedAt(), BATCH_SIZE)
-                .map { it.toElement() }
+            val delta = api.getElements(maxKnownUpdatedAt, BATCH_SIZE)
 
-            queries.insertOrReplace(elements).apply {
-                newElements += newRows
-                updatedElements += updatedRows
+            if (delta.isEmpty()) {
+                break
+            } else {
+                maxKnownUpdatedAt = ZonedDateTime.parse(delta.maxBy { it.updatedAt }.updatedAt)
             }
 
-            if (elements.size < BATCH_SIZE) {
+            withContext(Dispatchers.IO) {
+                queries.db.writableDatabase.transaction {
+                    delta.forEach {
+                        val cached = queries.selectById(it.id)
+
+                        if (it.deletedAt == null) {
+                            if (cached == null) {
+                                newItems++
+                            } else {
+                                updatedItems++
+                            }
+
+                            queries.insertOrReplace(it.toElement())
+                        } else {
+                            if (cached == null) {
+                                // Already evicted from cache, nothing to do here
+                            } else {
+                                queries.deleteById(it.id)
+                                deletedItems++
+                            }
+                        }
+                    }
+                }
+            }
+
+            elementsUpdatedAt.update { LocalDateTime.now() }
+
+            if (delta.size < BATCH_SIZE) {
                 break
             }
         }
 
         return SyncReport(
             duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
-            newElements = newElements,
-            updatedElements = updatedElements,
+            newElements = newItems,
+            updatedElements = updatedItems,
+            deletedElements = deletedItems,
         )
     }
 
@@ -184,6 +225,7 @@ class ElementsRepo(
         val duration: Duration,
         val newElements: Long,
         val updatedElements: Long,
+        val deletedElements: Long,
     )
 
     companion object {

@@ -126,17 +126,17 @@ class AreaModel(
         }
     }
 
-    suspend fun selectArea(id: String): Area? {
+    suspend fun selectArea(id: Long): Area? {
         return areasRepo.selectById(id)
     }
 
     data class Args(
-        val areaId: String,
+        val areaId: Long,
     )
 
     sealed class State {
 
-        object Loading : State()
+        data object Loading : State()
 
         data class Loaded(
             val area: Area,

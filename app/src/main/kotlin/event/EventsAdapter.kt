@@ -43,9 +43,9 @@ class EventsAdapter(
         fun bind(item: Item, showLoadMoreButton: Boolean, listener: Listener) {
             binding.apply {
                 when (item.type) {
-                    "create" -> icon.setImageResource(R.drawable.add)
-                    "update" -> icon.setImageResource(R.drawable.edit)
-                    "delete" -> icon.setImageResource(R.drawable.remove)
+                    1L -> icon.setImageResource(R.drawable.add)
+                    2L -> icon.setImageResource(R.drawable.edit)
+                    3L -> icon.setImageResource(R.drawable.remove)
                 }
 
                 title.text = item.elementName
@@ -120,12 +120,11 @@ class EventsAdapter(
 
     data class Item(
         val date: ZonedDateTime,
-        val type: String,
+        val type: Long,
         val elementId: Long,
         val elementName: String,
         val username: String,
         val tipLnurl: String,
-        val osmId: String,
     )
 
     interface Listener {

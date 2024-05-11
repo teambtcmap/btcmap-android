@@ -103,16 +103,16 @@ tasks.register("bundleData") {
         val elementsSrc = URI("https://static.btcmap.org/api/v3/elements.json")
         File(destDir, "elements.json").writeText(elementsSrc.toURL().readText())
 
-        val reportsSrc = URI("https://static.btcmap.org/api/v2/reports.json")
+        val reportsSrc = URI("https://static.btcmap.org/api/v3/reports.json")
         File(destDir, "reports.json").writeText(reportsSrc.toURL().readText())
 
-        val eventsSrc = URI("https://static.btcmap.org/api/v2/events.json")
+        val eventsSrc = URI("https://static.btcmap.org/api/v3/events.json")
         File(destDir, "events.json").writeText(eventsSrc.toURL().readText())
 
-        val areasSrc = URI("https://static.btcmap.org/api/v2/areas.json")
+        val areasSrc = URI("https://static.btcmap.org/api/v3/areas.json")
         File(destDir, "areas.json").writeText(areasSrc.toURL().readText())
 
-        val usersSrc = URI("https://static.btcmap.org/api/v2/users.json")
+        val usersSrc = URI("https://static.btcmap.org/api/v3/users.json")
         File(destDir, "users.json").writeText(usersSrc.toURL().readText())
     }
 }

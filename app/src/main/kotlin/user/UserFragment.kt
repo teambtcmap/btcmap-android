@@ -75,7 +75,7 @@ class UserFragment : Fragment() {
             usersRepo.selectById(requireArguments().getLong("user_id"))
         } ?: return
 
-        val userName = user.osmJson.optString("display_name")
+        val userName = user.osmData.optString("display_name")
 
         binding.toolbar.setOnMenuItemClickListener {
             if (it.itemId == R.id.action_view_on_osm) {
@@ -104,7 +104,6 @@ class UserFragment : Fragment() {
                         elementName = it.elementName.ifBlank { getString(R.string.unnamed) },
                         username = "",
                         tipLnurl = "",
-                        osmId = it.osmId,
                     )
                 }
                 adapter.submitList(items)

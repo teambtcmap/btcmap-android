@@ -67,7 +67,7 @@ class ReportsFragment : Fragment() {
         initDaysSinceVerifiedChart()
 
         model.args.update {
-            ReportsModel.Args(requireArguments().getString("area_id")!!)
+            ReportsModel.Args(requireArguments().getLong("area_id", 662L))
         }
 
         viewLifecycleOwner.lifecycleScope.launch {

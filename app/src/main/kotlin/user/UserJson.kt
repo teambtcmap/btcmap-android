@@ -7,21 +7,18 @@ import java.time.ZonedDateTime
 
 data class UserJson(
     val id: Long,
-    val osmJson: JSONObject,
-    val tags: JSONObject,
-    val createdAt: String,
+    val osmData: JSONObject?,
+    val tags: JSONObject?,
     val updatedAt: String,
-    val deletedAt: String,
+    val deletedAt: String?,
 )
 
 fun UserJson.toUser(): User {
     return User(
         id = id,
-        osmJson = osmJson,
-        tags = tags,
-        createdAt = ZonedDateTime.parse(createdAt),
+        osmData = osmData!!,
+        tags = tags!!,
         updatedAt = ZonedDateTime.parse(updatedAt),
-        deletedAt = if (deletedAt.isNotBlank()) ZonedDateTime.parse(deletedAt) else null,
     )
 }
 
@@ -29,11 +26,10 @@ fun InputStream.toUsersJson(): List<UserJson> {
     return toJsonArray().map {
         UserJson(
             id = it.getLong("id"),
-            osmJson = it.getJSONObject("osm_json"),
-            tags = it.getJSONObject("tags"),
-            createdAt = it.getString("created_at"),
+            osmData = it.optJSONObject("osm_data") ?: JSONObject(),
+            tags = it.optJSONObject("tags") ?: JSONObject(),
             updatedAt = it.getString("updated_at"),
-            deletedAt = it.getString("deleted_at"),
+            deletedAt = it.optString("deleted_at").ifBlank { null },
         )
     }
 }

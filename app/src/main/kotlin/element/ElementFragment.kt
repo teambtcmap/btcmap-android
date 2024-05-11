@@ -114,8 +114,8 @@ class ElementFragment : Fragment() {
 
                 R.id.action_share -> {
                     val element = runBlocking { elementsRepo.selectById(elementId)!! }
-                    val osmType = element.osmJson.optString("type")
-                    val osmId = element.osmJson.optLong("id")
+                    val osmType = element.overpassData.optString("type")
+                    val osmId = element.overpassData.optLong("id")
                     val uri = Uri.parse("https://btcmap.org/merchant/$osmType:$osmId")
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         putExtra(Intent.EXTRA_TEXT, uri.toString())
@@ -126,8 +126,8 @@ class ElementFragment : Fragment() {
 
                 R.id.action_view_on_osm -> {
                     val element = runBlocking { elementsRepo.selectById(elementId)!! }
-                    val osmType = element.osmJson.optString("type")
-                    val osmId = element.osmJson.optLong("id")
+                    val osmType = element.overpassData.optString("type")
+                    val osmId = element.overpassData.optLong("id")
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.data = Uri.parse("https://www.openstreetmap.org/$osmType/$osmId")
                     startActivity(intent)
@@ -135,8 +135,8 @@ class ElementFragment : Fragment() {
 
                 R.id.action_edit_on_osm -> {
                     val element = runBlocking { elementsRepo.selectById(elementId)!! }
-                    val osmType = element.osmJson.optString("type")
-                    val osmId = element.osmJson.optLong("id")
+                    val osmType = element.overpassData.optString("type")
+                    val osmId = element.overpassData.optLong("id")
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.data = Uri.parse("https://www.openstreetmap.org/edit?$osmType=$osmId")
                     startActivity(intent)
@@ -164,7 +164,7 @@ class ElementFragment : Fragment() {
     fun setElement(element: Element) {
         elementId = element.id
 
-        val tags: OsmTags = element.osmJson.optJSONObject("tags") ?: OsmTags()
+        val tags: OsmTags = element.overpassData.optJSONObject("tags") ?: OsmTags()
 
         binding.toolbar.title = tags.name(resources)
 

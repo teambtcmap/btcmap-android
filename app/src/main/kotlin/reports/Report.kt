@@ -5,10 +5,9 @@ import java.time.LocalDate
 import java.time.ZonedDateTime
 
 data class Report(
-    val areaId: String,
+    val id: Long,
+    val areaId: Long,
     val date: LocalDate,
     val tags: JSONObject,
-    val createdAt: ZonedDateTime,
     val updatedAt: ZonedDateTime,
-    val deletedAt: ZonedDateTime?,
 )

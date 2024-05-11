@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 class EventsModel(
     private val eventsRepo: EventsRepo,
     private val elementsRepo: ElementsRepo,
-    private val app: Application,
+    app: Application,
 ) : AndroidViewModel(app) {
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(State.Loading)
@@ -33,17 +33,16 @@ class EventsModel(
 
     private fun loadItems() {
         viewModelScope.launch {
-            val allNotDeleted = eventsRepo.selectAll(limit)
+            val all = eventsRepo.selectAll(limit)
 
-            val items = allNotDeleted.map {
+            val items = all.map {
                 EventsAdapter.Item(
                     date = it.eventDate,
                     type = it.eventType,
                     elementId = it.elementId,
-                    elementName = it.elementName.ifBlank { it.osmId },
+                    elementName = it.elementName.ifBlank { it.elementId.toString() },
                     username = it.userName,
                     tipLnurl = it.userTips,
-                    osmId = it.osmId,
                 )
             }
 
@@ -53,7 +52,7 @@ class EventsModel(
 
     sealed class State {
 
-        object Loading : State()
+        data object Loading : State()
 
         data class ShowingItems(val items: List<EventsAdapter.Item>) : State()
     }

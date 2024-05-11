@@ -50,13 +50,6 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <action
-            android:id="@+id/action_mapFragment_to_filterElementsFragment"
-            app:destination="@id/filterElementsFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -72,7 +65,7 @@
         android:name="reports.ReportsFragment">
         <argument
             android:name="area_id"
-            app:argType="string" />
+            app:argType="long" />
     </fragment>
 
     <fragment
@@ -137,7 +130,7 @@
         android:name="area.AreaFragment">
         <argument
             android:name="area_id"
-            app:argType="string" />
+            app:argType="long" />
         <action
             android:id="@+id/action_areaFragment_to_mapFragment"
             app:destination="@id/mapFragment"
@@ -186,15 +179,11 @@
     </fragment>
 
     <fragment
-        android:id="@+id/filterElementsFragment"
-        android:name="filter.FilterElementsFragment" />
-
-    <fragment
         android:id="@+id/issuesFragment"
         android:name="issue.IssuesFragment">
         <argument
             android:name="area_id"
-            app:argType="string" />
+            app:argType="long" />
     </fragment>
 
 </navigation>

@@ -1,170 +1,118 @@
 package area
 
-import androidx.sqlite.db.transaction
 import db.getJsonObject
 import db.getZonedDateTime
 import io.requery.android.database.sqlite.SQLiteOpenHelper
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.time.ZonedDateTime
 
-class AreaQueries(private val db: SQLiteOpenHelper) {
+class AreaQueries(val db: SQLiteOpenHelper) {
 
-    suspend fun insertOrReplace(areas: List<Area>) {
-        withContext(Dispatchers.IO) {
-            db.writableDatabase.transaction {
-                areas.forEach {
-                    execSQL(
-                        """
-                        INSERT OR REPLACE
-                        INTO area(
-                            id,
-                            tags,
-                            created_at,
-                            updated_at,
-                            deleted_at
-                        )
-                        VALUES(
-                            ?,
-                            ?,
-                            ?,
-                            ?,
-                            ?
-                        );
-                        """,
-                        arrayOf(
-                            it.id,
-                            it.tags,
-                            it.createdAt,
-                            it.updatedAt,
-                            it.deletedAt ?: "",
-                        ),
-                    )
-                }
-            }
-        }
+    fun insertOrReplace(area: Area) {
+        db.writableDatabase.execSQL(
+            """
+            INSERT OR REPLACE
+            INTO area(id, tags, updated_at)
+            VALUES(?, ?, ?)
+            """,
+            arrayOf(
+                area.id,
+                area.tags,
+                area.updatedAt,
+            ),
+        )
     }
 
-    suspend fun selectById(id: String): Area? {
-        return withContext(Dispatchers.IO) {
-            val cursor = db.readableDatabase.query(
-                """
-                SELECT
-                    id,
-                    tags,
-                    created_at,
-                    updated_at,
-                    deleted_at
-                FROM area
-                WHERE id = ?;
-                """,
-                arrayOf(id),
-            )
+    fun selectById(id: Long): Area? {
+        val cursor = db.readableDatabase.query(
+            """
+            SELECT id, tags, updated_at
+            FROM area
+            WHERE id = ?;
+            """,
+            arrayOf(id),
+        )
 
-            if (!cursor.moveToNext()) {
-                return@withContext null
-            }
+        if (!cursor.moveToNext()) {
+            return null
+        }
 
-            Area(
-                id = cursor.getString(0),
+        return Area(
+            id = cursor.getLong(0),
+            tags = cursor.getJsonObject(1),
+            updatedAt = cursor.getZonedDateTime(2)!!,
+        )
+    }
+
+    fun selectByType(type: String): List<Area> {
+        val cursor = db.readableDatabase.query(
+            """
+            SELECT id, tags, updated_at
+            FROM area
+            WHERE json_extract(tags, '$.type') = ?
+            """,
+            arrayOf(type),
+        )
+
+        val rows = mutableListOf<Area>()
+
+        while (cursor.moveToNext()) {
+            rows += Area(
+                id = cursor.getLong(0),
                 tags = cursor.getJsonObject(1),
-                createdAt = cursor.getZonedDateTime(2)!!,
-                updatedAt = cursor.getZonedDateTime(3)!!,
-                deletedAt = cursor.getZonedDateTime(4),
+                updatedAt = cursor.getZonedDateTime(2)!!,
             )
         }
+
+        return rows
     }
 
-    suspend fun selectByType(type: String): List<Area> {
-        return withContext(Dispatchers.IO) {
-            val cursor = db.readableDatabase.query(
-                """
-                SELECT
-                    id,
-                    tags,
-                    created_at,
-                    updated_at,
-                    deleted_at
-                FROM area
-                WHERE 
-                    json_extract(tags, '$.type') = '$type'
-                    AND deleted_at = '';
-                """
-            )
+    fun selectMaxUpdatedAt(): ZonedDateTime? {
+        val cursor = db.readableDatabase.query("SELECT max(updated_at) FROM area")
 
-            val rows = mutableListOf<Area>()
-
-            while (cursor.moveToNext()) {
-                rows += Area(
-                    id = cursor.getString(0),
-                    tags = cursor.getJsonObject(1),
-                    createdAt = cursor.getZonedDateTime(2)!!,
-                    updatedAt = cursor.getZonedDateTime(3)!!,
-                    deletedAt = cursor.getZonedDateTime(4),
-                )
-            }
-
-            rows
+        if (!cursor.moveToNext()) {
+            return null
         }
+
+        return cursor.getZonedDateTime(0)
     }
 
-    suspend fun selectMaxUpdatedAt(): ZonedDateTime? {
-        return withContext(Dispatchers.IO) {
-            val cursor = db.readableDatabase.query(
-                """
-                SELECT max(updated_at)
-                FROM area;
-                """
+    fun selectMeetups(): List<Meetup> {
+        val cursor = db.readableDatabase.query(
+            """
+            SELECT
+                json_extract(tags, '$.meetup_lat') AS lat,
+                json_extract(tags, '$.meetup_lon') AS lon,
+                id
+            FROM area
+            WHERE 
+                lat IS NOT NULL 
+                AND lon IS NOT NULL
+            """
+        )
+
+        val rows = mutableListOf<Meetup>()
+
+        while (cursor.moveToNext()) {
+            rows += Meetup(
+                lat = cursor.getDouble(0),
+                lon = cursor.getDouble(1),
+                areaId = cursor.getString(2),
             )
-
-            if (!cursor.moveToNext()) {
-                return@withContext null
-            }
-
-            cursor.getZonedDateTime(0)
         }
 
+        return rows
     }
 
-    suspend fun selectMeetups(): List<Meetup> {
-        return withContext(Dispatchers.IO) {
-            val cursor = db.readableDatabase.query(
-                """
-                SELECT
-                    json_extract(tags, '$.meetup_lat') AS lat,
-                    json_extract(tags, '$.meetup_lon') AS lon,
-                    id
-                FROM area
-                WHERE 
-                    lat IS NOT NULL AND lon IS NOT NULL
-                """
-            )
-
-            val rows = mutableListOf<Meetup>()
-
-            while (cursor.moveToNext()) {
-                rows += Meetup(
-                    lat = cursor.getDouble(0),
-                    lon = cursor.getDouble(1),
-                    areaId = cursor.getString(2),
-                )
-            }
-
-            rows
-        }
+    fun selectCount(): Long {
+        val cursor = db.readableDatabase.query("SELECT count(*) FROM area")
+        cursor.moveToNext()
+        return cursor.getLong(0)
     }
 
-    suspend fun selectCount(): Long {
-        return withContext(Dispatchers.IO) {
-            val cursor = db.readableDatabase.query(
-                """
-                SELECT count(*)
-                FROM area;
-                """
-            )
-
-            cursor.moveToNext()
-            cursor.getLong(0)
-        }
+    fun deleteById(id: Long) {
+        db.readableDatabase.query(
+            "DELETE FROM area WHERE id = ?",
+            arrayOf(id),
+        )
     }
 }

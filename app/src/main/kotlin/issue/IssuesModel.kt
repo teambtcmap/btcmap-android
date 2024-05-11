@@ -63,7 +63,7 @@ class IssuesModel(
         }
     }
 
-    data class Args(val areaId: String)
+    data class Args(val areaId: Long)
 
     sealed class State {
 

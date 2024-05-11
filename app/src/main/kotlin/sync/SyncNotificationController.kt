@@ -52,11 +52,11 @@ class SyncNotificationController(
                         .bigText(
                             """
                                 |Time: $syncTimeMillis ms
-                                |Elements: ${report.elementsReport.newElements} new, ${report.elementsReport.updatedElements} updated in ${report.elementsReport.duration.toMillis()} ms
-                                |Events: ${report.eventsReport.newEvents.size} new, ${report.eventsReport.updatedEvents} updated in ${report.eventsReport.duration.toMillis()} ms
-                                |Reports: ${report.reportsReport.newReports} new, ${report.reportsReport.updatedReports} updated in ${report.reportsReport.duration.toMillis()} ms
-                                |Areas: ${report.areasReport.newAreas} new, ${report.areasReport.updatedAreas} updated in ${report.areasReport.duration.toMillis()} ms
-                                |Users: ${report.usersReport.newUsers} new, ${report.usersReport.updatedUsers} updated in ${report.usersReport.duration.toMillis()} ms
+                                |Elements: ${report.elementsReport.newElements}/${report.elementsReport.updatedElements}/${report.elementsReport.deletedElements} in ${report.elementsReport.duration.toMillis()} ms
+                                |Events: ${report.eventsReport.newEvents.size}/${report.eventsReport.updatedEvents}/${report.eventsReport.deletedEvents} in ${report.eventsReport.duration.toMillis()} ms
+                                |Reports: ${report.reportsReport.newReports}/${report.reportsReport.updatedReports}/${report.reportsReport.deletedReports} in ${report.reportsReport.duration.toMillis()} ms
+                                |Areas: ${report.areasReport.newAreas}/${report.areasReport.updatedAreas}/${report.areasReport.deletedAreas} in ${report.areasReport.duration.toMillis()} ms
+                                |Users: ${report.usersReport.newUsers}/${report.usersReport.updatedUsers}/${report.usersReport.deletedUsers} in ${report.usersReport.duration.toMillis()} ms
                             """.trimMargin()
                         )
                 )
@@ -74,9 +74,8 @@ class SyncNotificationController(
         createNewMerchantsNotificationChannel(context)
 
         report.eventsReport.newEvents.forEach { newEvent ->
-            if (newEvent.type == "create") {
-                val element =
-                    runBlocking { elementsRepo.selectByOsmId(newEvent.elementId) } ?: return
+            if (newEvent.type == 1L) {
+                val element = runBlocking { elementsRepo.selectById(newEvent.elementId) } ?: return
 
                 val distanceMeters = getDistanceInMeters(
                     startLatitude = conf.mapViewport().centerLatitude,

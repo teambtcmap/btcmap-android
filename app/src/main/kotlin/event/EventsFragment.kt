@@ -1,11 +1,10 @@
 package event
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
@@ -43,10 +42,7 @@ class EventsFragment : Fragment() {
                         )
                     }
                 } else {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data =
-                        Uri.parse("https://www.openstreetmap.org/${item.osmId.replace(":", "/")}")
-                    startActivity(intent)
+                    Toast.makeText(requireContext(), "Element not found", Toast.LENGTH_SHORT).show()
                 }
             }
         }

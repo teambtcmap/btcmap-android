@@ -5,9 +5,7 @@ import java.time.ZonedDateTime
 
 data class User(
     val id: Long,
-    val osmJson: JSONObject,
+    val osmData: JSONObject,
     val tags: JSONObject,
-    val createdAt: ZonedDateTime,
     val updatedAt: ZonedDateTime,
-    val deletedAt: ZonedDateTime?,
 )

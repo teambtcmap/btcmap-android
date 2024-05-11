@@ -87,6 +87,6 @@ class IssuesFragment : Fragment() {
     }
 
     private fun requireArgs(): IssuesModel.Args {
-        return IssuesModel.Args(requireArguments().getString("area_id")!!)
+        return IssuesModel.Args(requireArguments().getLong("area_id"))
     }
 }

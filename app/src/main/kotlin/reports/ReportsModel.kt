@@ -91,7 +91,7 @@ class ReportsModel(
         }
     }
 
-    data class Args(val areaId: String)
+    data class Args(val areaId: Long)
 
     data class Data(
         val verifiedPlaces: List<Pair<String, Long>>,
