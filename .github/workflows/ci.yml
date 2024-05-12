@@ -39,6 +39,7 @@ jobs:
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           generate_release_notes: true
+          append_body: false
           tag_name: 'preview'
           prerelease: true
           name: 'preview'
