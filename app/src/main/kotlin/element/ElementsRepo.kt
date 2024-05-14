@@ -25,8 +25,12 @@ class ElementsRepo(
         return withContext(Dispatchers.IO) { queries.selectBySearchString(searchString) }
     }
 
-    suspend fun selectByCategory(category: String): List<Element> {
-        return withContext(Dispatchers.IO) { queries.selectByCategory(category) }
+    suspend fun selectByOsmTagValue(tagName: String, tagValue: String): List<Element> {
+        return withContext(Dispatchers.IO) { queries.selectByOsmTagValue(tagName, tagValue) }
+    }
+
+    suspend fun selectByBtcMapTagValue(tagName: String, tagValue: String): List<Element> {
+        return withContext(Dispatchers.IO) { queries.selectByBtcMapTagValue(tagName, tagValue) }
     }
 
     suspend fun selectByBoundingBox(

@@ -164,6 +164,17 @@ class MapFragment : Fragment() {
                     startActivity(intent)
                 }
 
+                R.id.action_delivery -> {
+                    nav.navigate(
+                        R.id.deliveryFragment,
+                        bundleOf(
+                            "userLat" to binding.map.boundingBox.centerLatitude.toFloat(),
+                            "userLon" to binding.map.boundingBox.centerLongitude.toFloat(),
+                            "searchAreaId" to 662L,
+                        ),
+                    )
+                }
+
                 R.id.action_areas -> {
                     nav.navigate(
                         R.id.areasFragment,

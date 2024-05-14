@@ -66,6 +66,7 @@
     <string name="percentage_of_verified_places">Percentage of verified places</string>
     <string name="days_since_verified">Days since verified</string>
     <string name="new_merchant_accepts_bitcoins">New merchant accepts bitcoins</string>
+    <string name="delivery">Delivery</string>
     <plurals name="d_changes">
         <item quantity="one">%d change</item>
         <item quantity="few">%d changes</item>

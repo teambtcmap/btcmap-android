@@ -87,6 +87,20 @@
     </fragment>
 
     <fragment
+        android:id="@+id/deliveryFragment"
+        android:name="delivery.DeliveryFragment">
+        <argument
+            android:name="userLat"
+            app:argType="float" />
+        <argument
+            android:name="userLon"
+            app:argType="float" />
+        <argument
+            android:name="searchAreaId"
+            app:argType="long" />
+    </fragment>
+
+    <fragment
         android:id="@+id/eventsFragment"
         android:name="event.EventsFragment">
         <action

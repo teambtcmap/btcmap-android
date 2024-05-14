@@ -59,7 +59,7 @@ class SearchModel(
                             ignoreCase = true
                         )
                     ) {
-                        elements = elementsRepo.selectByCategory("atm")
+                        elements = elementsRepo.selectByBtcMapTagValue("category", "atm")
                     } else if (
                         searchString.equals("bar", ignoreCase = true) ||
                         searchString.equals("bars", ignoreCase = true) ||
@@ -72,7 +72,7 @@ class SearchModel(
                             ignoreCase = true
                         )
                     ) {
-                        elements = elementsRepo.selectByCategory("bar")
+                        elements = elementsRepo.selectByBtcMapTagValue("category", "bar")
                     } else if (
                         searchString.equals("cafe", ignoreCase = true) ||
                         searchString.equals("cafes", ignoreCase = true) ||
@@ -85,7 +85,7 @@ class SearchModel(
                             ignoreCase = true
                         )
                     ) {
-                        elements = elementsRepo.selectByCategory("cafe")
+                        elements = elementsRepo.selectByBtcMapTagValue("category", "cafe")
                     } else if (
                         searchString.equals("hotel", ignoreCase = true) ||
                         searchString.equals("hotels", ignoreCase = true) ||
@@ -98,7 +98,7 @@ class SearchModel(
                             ignoreCase = true
                         )
                     ) {
-                        elements = elementsRepo.selectByCategory("hotel")
+                        elements = elementsRepo.selectByBtcMapTagValue("category", "hotel")
                     } else if (
                         searchString.equals("pub", ignoreCase = true) ||
                         searchString.equals("pubs", ignoreCase = true) ||
@@ -111,7 +111,7 @@ class SearchModel(
                             ignoreCase = true
                         )
                     ) {
-                        elements = elementsRepo.selectByCategory("pub")
+                        elements = elementsRepo.selectByBtcMapTagValue("category", "pub")
                     } else if (
                         searchString.equals("restaurant", ignoreCase = true) ||
                         searchString.equals("restaurants", ignoreCase = true) ||
@@ -124,7 +124,7 @@ class SearchModel(
                             ignoreCase = true
                         )
                     ) {
-                        elements = elementsRepo.selectByCategory("restaurant")
+                        elements = elementsRepo.selectByBtcMapTagValue("category", "restaurant")
                     } else {
                         elements = elementsRepo.selectBySearchString(searchString)
                     }

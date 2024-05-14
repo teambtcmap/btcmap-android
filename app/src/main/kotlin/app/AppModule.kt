@@ -10,6 +10,7 @@ import area.AreasRepo
 import conf.ConfQueries
 import conf.ConfRepo
 import db.Database
+import delivery.DeliveryModel
 import element.ElementQueries
 import element.ElementsRepo
 import event.EventQueries
@@ -77,4 +78,6 @@ val appModule = module {
     viewModelOf(::SearchResultModel)
 
     viewModelOf(::IssuesModel)
+
+    viewModelOf(::DeliveryModel)
 }

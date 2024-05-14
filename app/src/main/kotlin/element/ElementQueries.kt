@@ -95,7 +95,7 @@ class ElementQueries(val db: SQLiteOpenHelper) {
         }
     }
 
-    fun selectByCategory(category: String): List<Element> {
+    fun selectByOsmTagValue(tagName: String, tagValue: String): List<Element> {
         val cursor = db.readableDatabase.query(
             """
             SELECT
@@ -103,13 +103,44 @@ class ElementQueries(val db: SQLiteOpenHelper) {
                 overpass_data,
                 tags,
                 updated_at,
-                deleted_at,
                 ext_lat,
                 ext_lon            
             FROM element
-            WHERE json_extract(tags, '$.category') = ?
+            WHERE json_extract(overpass_data, '$.tags.$tagName') = ?
             """,
-            arrayOf(category),
+            arrayOf(tagValue),
+        )
+
+        return buildList {
+            while (cursor.moveToNext()) {
+                add(
+                    Element(
+                        id = cursor.getLong(0),
+                        overpassData = cursor.getJsonObject(1),
+                        tags = cursor.getJsonObject(2),
+                        updatedAt = cursor.getString(3)!!,
+                        lat = cursor.getDouble(4),
+                        lon = cursor.getDouble(5),
+                    )
+                )
+            }
+        }
+    }
+
+    fun selectByBtcMapTagValue(tagName: String, tagValue: String): List<Element> {
+        val cursor = db.readableDatabase.query(
+            """
+            SELECT
+                id,
+                overpass_data,
+                tags,
+                updated_at,
+                ext_lat,
+                ext_lon            
+            FROM element
+            WHERE json_extract(tags, '$.$tagName') = ?
+            """,
+            arrayOf(tagValue),
         )
 
         return buildList {
@@ -143,15 +174,15 @@ class ElementQueries(val db: SQLiteOpenHelper) {
                 ext_lon,
                 json_extract(tags, '$.icon:android') AS icon_id,
                 json_extract(tags, '$.boost:expires') AS boost_expires,
-                json_extract(osm_json, '$.tags.payment:lightning:requires_companion_app') AS requires_companion_app
+                json_extract(overpass_data, '$.tags.payment:lightning:requires_companion_app') AS requires_companion_app
             FROM element
             WHERE
-                `json_extract(tags, '$.category') NOT IN (${excludedCategories.joinToString { "'$it'" }})
+                json_extract(tags, '$.category') NOT IN (${excludedCategories.joinToString { "'$it'" }})
                 AND ext_lat > ?
                 AND ext_lat < ?
                 AND ext_lon > ?
                 AND ext_lon < ?
-            ORDER BY lat DESC
+            ORDER BY ext_lat DESC
             """,
             arrayOf(
                 minLat,

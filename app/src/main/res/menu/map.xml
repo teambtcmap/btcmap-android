@@ -14,6 +14,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_delivery"
+        android:title="@string/delivery"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_areas"
         android:title="@string/communities"
         app:showAsAction="never" />
