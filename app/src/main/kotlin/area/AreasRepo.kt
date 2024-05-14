@@ -1,7 +1,6 @@
 package area
 
 import android.content.Context
-import androidx.sqlite.db.transaction
 import api.Api
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -38,9 +37,7 @@ class AreasRepo(
                     .filter { it.deletedAt == null }
                     .map { it.toArea() }
 
-                queries.db.writableDatabase.transaction {
-                    areas.forEach { queries.insertOrReplace(it) }
-                }
+                areas.forEach { queries.insertOrReplace(it) }
             }
         }
     }
@@ -62,25 +59,23 @@ class AreasRepo(
             }
 
             withContext(Dispatchers.IO) {
-                queries.db.writableDatabase.transaction {
-                    delta.forEach {
-                        val cached = queries.selectById(it.id)
+                delta.forEach {
+                    val cached = queries.selectById(it.id)
 
-                        if (it.deletedAt == null) {
-                            if (cached == null) {
-                                newItems++
-                            } else {
-                                updatedItems++
-                            }
-
-                            queries.insertOrReplace(it.toArea())
+                    if (it.deletedAt == null) {
+                        if (cached == null) {
+                            newItems++
                         } else {
-                            if (cached == null) {
-                                // Already evicted from cache, nothing to do here
-                            } else {
-                                queries.deleteById(it.id)
-                                deletedItems++
-                            }
+                            updatedItems++
+                        }
+
+                        queries.insertOrReplace(it.toArea())
+                    } else {
+                        if (cached == null) {
+                            // Already evicted from cache, nothing to do here
+                        } else {
+                            queries.deleteById(it.id)
+                            deletedItems++
                         }
                     }
                 }

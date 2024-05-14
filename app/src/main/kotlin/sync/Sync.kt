@@ -4,6 +4,7 @@ import area.AreasRepo
 import conf.ConfRepo
 import element.ElementsRepo
 import event.EventsRepo
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -58,19 +59,15 @@ class Sync(
                         areasRepo.fetchBundledAreas()
                     }
 
-                    val elementsReport = async { elementsRepo.sync() }
-                    val reportsReport = async { reportsRepo.sync() }
-                    val eventsReport = async { eventsRepo.sync() }
-                    val areasReport = async { areasRepo.sync() }
-                    val usersReport = async { usersRepo.sync() }
+                    val syncJobs = mutableListOf<Deferred<Any>>()
 
-                    listOf(
-                        elementsReport,
-                        reportsReport,
-                        areasReport,
-                        usersReport,
-                        eventsReport,
-                    ).awaitAll()
+                    val elementsReport = async { elementsRepo.sync() }.also { syncJobs += it }
+                    val reportsReport = async { reportsRepo.sync() }.also { syncJobs += it }
+                    val eventsReport = async { eventsRepo.sync() }.also { syncJobs += it }
+                    val areasReport = async { areasRepo.sync() }.also { syncJobs += it }
+                    val usersReport = async { usersRepo.sync() }.also { syncJobs += it }
+
+                    syncJobs.awaitAll()
 
                     val fullReport = SyncReport(
                         startedAt = startedAt,

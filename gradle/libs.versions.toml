@@ -35,22 +35,17 @@ jts = "1.19.0"
 mpandroidchart = "v3.1.0"
 # Used to cache data and store user preferences
 # https://developer.android.com/kotlin/ktx#sqlite
-sqliteKtx = "2.4.0"
-# Bundle SQLite binaries
-# https://github.com/requery/sqlite-android/releases
-# TODO remove bundled SQLite when Android bumps its deps
-# > The JSON functions and operators are built into SQLite by default, as of SQLite version 3.38.0 (2022-02-22).
-# API 33 -> 3.32
-# API 34 -> 3.39 (~45% of our install base)
-# https://www.sqlite.org/json1.html
-sqlite = "3.45.0"
+sqlite = "2.5.0-alpha01"
+deprecatedsqlite = "3.45.0"
 # Used to download, cache and display images
 # https://github.com/coil-kt/coil/releases
 coil = "2.6.0"
 # Background job scheduler
 # Used to fetch new data in background
 # https://developer.android.com/jetpack/androidx/releases/work
-work = "2.9.0"
+work = "2.10.0-alpha02"
+# TODO remove when work bumps its dep (an old version causes crash on startup)
+room = "2.7.0-alpha01"
 # Common test dependencies
 # https://junit.org/junit4/
 junit = "4.13.2"
@@ -65,7 +60,9 @@ androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navi
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference" }
-androidx-sqlite-ktx = { module = "androidx.sqlite:sqlite-ktx", version.ref = "sqliteKtx" }
+androidx-sqlite-ktx = { module = "androidx.sqlite:sqlite-ktx", version.ref = "sqlite" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+androidx-room = { module = "androidx.room:room-runtime", version.ref = "room" }
 
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 okhttp-coroutines = { group = "com.squareup.okhttp3", name = "okhttp-coroutines", version.ref = "okhttp" }
@@ -75,7 +72,7 @@ koin = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 osmdroid = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid" }
 jts = { module = "org.locationtech.jts:jts-core", version.ref = "jts" }
 mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
-sqlite = { module = "com.github.requery:sqlite-android", version.ref = "sqlite" }
+deprecatedsqlite = { module = "com.github.requery:sqlite-android", version.ref = "deprecatedsqlite" }
 coil-core = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }
 

@@ -1,6 +1,7 @@
 package db
 
 import android.database.Cursor
+import androidx.sqlite.SQLiteStatement
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONArray
@@ -10,6 +11,10 @@ import java.time.ZonedDateTime
 
 fun Cursor.getJsonObject(columnIndex: Int): JSONObject {
     return JSONObject(getString(columnIndex))
+}
+
+fun SQLiteStatement.getJsonObject(columnIndex: Int): JSONObject {
+    return JSONObject(getText(columnIndex))
 }
 
 fun Cursor.getJsonArray(columnIndex: Int): JSONArray {
@@ -22,6 +27,10 @@ fun Cursor.getJsonArray(columnIndex: Int): JSONArray {
 
 fun Cursor.getZonedDateTime(columnIndex: Int): ZonedDateTime? {
     return (getString(columnIndex) ?: "").toZonedDateTime()
+}
+
+fun SQLiteStatement.getZonedDateTime(columnIndex: Int): ZonedDateTime {
+    return getText(columnIndex).toZonedDateTime()!!
 }
 
 fun Cursor.getDate(columnIndex: Int): LocalDate {

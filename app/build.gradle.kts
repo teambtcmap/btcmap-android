@@ -124,8 +124,10 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.sqlite.ktx)
+    implementation(libs.androidx.sqlite.bundled)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.room)
 
     implementation(libs.material)
     implementation(libs.okhttp.coroutines)
@@ -135,7 +137,7 @@ dependencies {
     implementation(libs.osmdroid)
     implementation(libs.jts)
     implementation(libs.mpandroidchart)
-    implementation(libs.sqlite)
+    implementation(libs.deprecatedsqlite)
     implementation(libs.coil.core)
     implementation(libs.coil.svg)
 

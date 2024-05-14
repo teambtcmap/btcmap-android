@@ -19,7 +19,6 @@ class Database(context: Context) : SQLiteOpenHelper(
 ) {
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL(CREATE_AREA_TABLE)
         db.execSQL(CREATE_CONF_TABLE)
         db.execSQL(CREATE_EVENT_TABLE)
         db.execSQL(CREATE_ELEMENT_TABLE)
@@ -28,30 +27,12 @@ class Database(context: Context) : SQLiteOpenHelper(
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        if (oldVersion == 1 && newVersion == 2) {
-            db.execSQL("DROP TABLE area;")
-            db.execSQL(CREATE_AREA_TABLE)
-
-            db.execSQL("DROP TABLE element;")
-            db.execSQL(CREATE_ELEMENT_TABLE)
-
-            db.execSQL("DROP TABLE event;")
-            db.execSQL(CREATE_EVENT_TABLE)
-
-            db.execSQL("DROP TABLE report;")
-            db.execSQL(CREATE_REPORT_TABLE)
-
-            db.execSQL("DROP TABLE user;")
-            db.execSQL(CREATE_USER_TABLE)
-        } else {
-            db.execSQL("DROP TABLE area;")
-            db.execSQL("DROP TABLE conf;")
-            db.execSQL("DROP TABLE element;")
-            db.execSQL("DROP TABLE event;")
-            db.execSQL("DROP TABLE report;")
-            db.execSQL("DROP TABLE user;")
-            onCreate(db)
-        }
+        db.execSQL("DROP TABLE conf;")
+        db.execSQL("DROP TABLE element;")
+        db.execSQL("DROP TABLE event;")
+        db.execSQL("DROP TABLE report;")
+        db.execSQL("DROP TABLE user;")
+        onCreate(db)
     }
 
     companion object {
@@ -67,7 +48,7 @@ class Database(context: Context) : SQLiteOpenHelper(
             """
 
         const val CREATE_AREA_TABLE = """
-            CREATE TABLE area (
+            CREATE TABLE IF NOT EXISTS area (
                 id INTEGER NOT NULL PRIMARY KEY,
                 tags TEXT NOT NULL,
                 updated_at TEXT NOT NULL
