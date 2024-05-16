@@ -1,6 +1,5 @@
 package db
 
-import android.database.Cursor
 import androidx.sqlite.SQLiteStatement
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -9,43 +8,45 @@ import org.json.JSONObject
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
-fun Cursor.getJsonObject(columnIndex: Int): JSONObject {
-    return JSONObject(getString(columnIndex))
-}
-
 fun SQLiteStatement.getJsonObject(columnIndex: Int): JSONObject {
     return JSONObject(getText(columnIndex))
 }
 
-fun Cursor.getJsonArray(columnIndex: Int): JSONArray {
+fun SQLiteStatement.getJsonArray(columnIndex: Int): JSONArray {
     return if (isNull(columnIndex)) {
         JSONArray()
     } else {
-        JSONArray(getString(columnIndex))
+        JSONArray(getText(columnIndex))
     }
-}
-
-fun Cursor.getZonedDateTime(columnIndex: Int): ZonedDateTime? {
-    return (getString(columnIndex) ?: "").toZonedDateTime()
 }
 
 fun SQLiteStatement.getZonedDateTime(columnIndex: Int): ZonedDateTime {
     return getText(columnIndex).toZonedDateTime()!!
 }
 
-fun Cursor.getDate(columnIndex: Int): LocalDate {
-    return LocalDate.parse(getString(columnIndex))
+fun SQLiteStatement.getZonedDateTimeOrNull(columnIndex: Int): ZonedDateTime? {
+    return if (isNull(columnIndex)) {
+        null
+    } else {
+        getZonedDateTime(columnIndex)
+    }
 }
 
-fun Cursor.getBoolean(columnIndex: Int): Boolean {
-    return getInt(columnIndex) != 0
+fun SQLiteStatement.getText(columnIndex: Int, defaultValue: String): String {
+    return if (isNull(columnIndex)) {
+        defaultValue
+    } else {
+        getText(columnIndex)
+    }
 }
 
-fun Cursor.getHttpUrl(columnIndex: Int): HttpUrl? {
-    return (getString(columnIndex) ?: "").toHttpUrlOrNull()
+fun SQLiteStatement.getDate(columnIndex: Int): LocalDate {
+    return LocalDate.parse(getText(columnIndex))
 }
 
-fun Boolean.toSqliteInt(): Int = if (this) 1 else 0
+fun SQLiteStatement.getHttpUrlOrNull(columnIndex: Int): HttpUrl? {
+    return (getText(columnIndex, "")).toHttpUrlOrNull()
+}
 
 fun String.toZonedDateTime(): ZonedDateTime? {
     return if (isNullOrEmpty()) {

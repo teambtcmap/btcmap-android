@@ -1,7 +1,6 @@
 package reports
 
 import android.content.Context
-import androidx.sqlite.db.transaction
 import api.Api
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,10 +14,17 @@ class ReportsRepo(
     private val context: Context,
 ) {
 
-    suspend fun selectByAreaId(areaId: Long) =
-        withContext(Dispatchers.IO) { queries.selectByAreaId(areaId) }
+    suspend fun selectByAreaId(areaId: Long): List<Report> {
+        return withContext(Dispatchers.IO) {
+            queries.selectByAreaId(areaId)
+        }
+    }
 
-    suspend fun selectCount() = withContext(Dispatchers.IO) { queries.selectCount() }
+    suspend fun selectCount(): Long {
+        return withContext(Dispatchers.IO) {
+            queries.selectCount()
+        }
+    }
 
     suspend fun hasBundledReports(): Boolean {
         return withContext(Dispatchers.IO) {
@@ -29,70 +35,66 @@ class ReportsRepo(
     suspend fun fetchBundledReports() {
         withContext(Dispatchers.IO) {
             context.assets.open("reports.json").use { bundledReports ->
-                val reports = bundledReports
-                    .toReportsJson()
-                    .filter { it.deletedAt == null }
-                    .map { it.toReport() }
-
-                queries.db.writableDatabase.transaction {
-                    reports.forEach { queries.insertOrReplace(it) }
-                }
+                queries.insertOrReplace(
+                    bundledReports
+                        .toReportsJson()
+                        .filter { it.deletedAt == null }
+                        .map { it.toReport() }
+                )
             }
         }
     }
 
     suspend fun sync(): SyncReport {
-        val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
-        var newItems = 0L
-        var updatedItems = 0L
-        var deletedItems = 0L
-        var maxKnownUpdatedAt = withContext(Dispatchers.IO) { queries.selectMaxUpdatedAt() }
+        return withContext(Dispatchers.IO) {
+            val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
+            var newItems = 0L
+            var updatedItems = 0L
+            var deletedItems = 0L
+            var maxKnownUpdatedAt = queries.selectMaxUpdatedAt()
 
-        while (true) {
-            val delta = api.getReports(maxKnownUpdatedAt, BATCH_SIZE)
+            while (true) {
+                val delta = api.getReports(maxKnownUpdatedAt, BATCH_SIZE)
 
-            if (delta.isEmpty()) {
-                break
-            } else {
-                maxKnownUpdatedAt = ZonedDateTime.parse(delta.maxBy { it.updatedAt }.updatedAt)
-            }
+                if (delta.isEmpty()) {
+                    break
+                } else {
+                    maxKnownUpdatedAt = ZonedDateTime.parse(delta.maxBy { it.updatedAt }.updatedAt)
+                }
 
-            withContext(Dispatchers.IO) {
-                queries.db.writableDatabase.transaction {
-                    delta.forEach {
-                        val cached = queries.selectById(it.id)
+                delta.forEach {
+                    val cached = queries.selectById(it.id)
 
-                        if (it.deletedAt == null) {
-                            if (cached == null) {
-                                newItems++
-                            } else {
-                                updatedItems++
-                            }
-
-                            queries.insertOrReplace(it.toReport())
+                    if (it.deletedAt == null) {
+                        if (cached == null) {
+                            newItems++
                         } else {
-                            if (cached == null) {
-                                // Already evicted from cache, nothing to do here
-                            } else {
-                                queries.deleteById(it.id)
-                                deletedItems++
-                            }
+                            updatedItems++
+                        }
+
+                        queries.insertOrReplace(it.toReport())
+                    } else {
+                        if (cached == null) {
+                            // Already evicted from cache, nothing to do here
+                        } else {
+                            queries.deleteById(it.id)
+                            deletedItems++
                         }
                     }
                 }
+
+                if (delta.size < BATCH_SIZE) {
+                    break
+                }
             }
 
-            if (delta.size < BATCH_SIZE) {
-                break
-            }
+            SyncReport(
+                duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+                newReports = newItems,
+                updatedReports = updatedItems,
+                deletedReports = deletedItems,
+            )
         }
-
-        return SyncReport(
-            duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
-            newReports = newItems,
-            updatedReports = updatedItems,
-            deletedReports = deletedItems,
-        )
     }
 
     data class SyncReport(

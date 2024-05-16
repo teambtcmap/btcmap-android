@@ -1,12 +1,6 @@
 package area
 
-import androidx.sqlite.driver.AndroidSQLiteDriver
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import androidx.sqlite.execSQL
-import db.Database
-import org.json.JSONObject
 import org.junit.Test
-import java.time.ZonedDateTime
 
 class AreaQueriesTest {
 

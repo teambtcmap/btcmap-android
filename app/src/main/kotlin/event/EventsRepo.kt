@@ -1,7 +1,6 @@
 package event
 
 import android.content.Context
-import androidx.sqlite.db.transaction
 import api.Api
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,13 +14,23 @@ class EventsRepo(
     private val context: Context,
 ) {
 
-    suspend fun selectAll(limit: Long) =
-        withContext(Dispatchers.IO) { queries.selectAll(limit) }
+    suspend fun selectAll(limit: Long): List<EventListItem> {
+        return withContext(Dispatchers.IO) {
+            queries.selectAll(limit)
+        }
+    }
 
-    suspend fun selectByUserIdAsListItems(userId: Long) =
-        withContext(Dispatchers.IO) { queries.selectByUserId(userId) }
+    suspend fun selectByUserIdAsListItems(userId: Long): List<EventListItem> {
+        return withContext(Dispatchers.IO) {
+            queries.selectByUserId(userId)
+        }
+    }
 
-    suspend fun selectCount() = withContext(Dispatchers.IO) { queries.selectCount() }
+    suspend fun selectCount(): Long {
+        return withContext(Dispatchers.IO) {
+            queries.selectCount()
+        }
+    }
 
     suspend fun hasBundledEvents(): Boolean {
         return withContext(Dispatchers.IO) {
@@ -32,70 +41,66 @@ class EventsRepo(
     suspend fun fetchBundledEvents() {
         withContext(Dispatchers.IO) {
             context.assets.open("events.json").use { bundledEvents ->
-                val events = bundledEvents
-                    .toEventsJson()
-                    .filter { it.deletedAt == null }
-                    .map { it.toEvent() }
-
-                queries.db.writableDatabase.transaction {
-                    events.forEach { queries.insertOrReplace(it) }
-                }
+                queries.insertOrReplace(
+                    bundledEvents
+                        .toEventsJson()
+                        .filter { it.deletedAt == null }
+                        .map { it.toEvent() }
+                )
             }
         }
     }
 
     suspend fun sync(): SyncReport {
-        val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
-        val newItems = mutableListOf<Event>()
-        var updatedItems = 0L
-        var deletedItems = 0L
-        var maxKnownUpdatedAt = withContext(Dispatchers.IO) { queries.selectMaxUpdatedAt() }
+        return withContext(Dispatchers.IO) {
+            val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
+            val newItems = mutableListOf<Event>()
+            var updatedItems = 0L
+            var deletedItems = 0L
+            var maxKnownUpdatedAt = queries.selectMaxUpdatedAt()
 
-        while (true) {
-            val delta = api.getEvents(maxKnownUpdatedAt, BATCH_SIZE)
+            while (true) {
+                val delta = api.getEvents(maxKnownUpdatedAt, BATCH_SIZE)
 
-            if (delta.isEmpty()) {
-                break
-            } else {
-                maxKnownUpdatedAt = ZonedDateTime.parse(delta.maxBy { it.updatedAt }.updatedAt)
-            }
+                if (delta.isEmpty()) {
+                    break
+                } else {
+                    maxKnownUpdatedAt = ZonedDateTime.parse(delta.maxBy { it.updatedAt }.updatedAt)
+                }
 
-            withContext(Dispatchers.IO) {
-                queries.db.writableDatabase.transaction {
-                    delta.forEach {
-                        val cached = queries.selectById(it.id)
+                delta.forEach {
+                    val cached = queries.selectById(it.id)
 
-                        if (it.deletedAt == null) {
-                            if (cached == null) {
-                                newItems += it.toEvent()
-                            } else {
-                                updatedItems++
-                            }
-
-                            queries.insertOrReplace(it.toEvent())
+                    if (it.deletedAt == null) {
+                        if (cached == null) {
+                            newItems += it.toEvent()
                         } else {
-                            if (cached == null) {
-                                // Already evicted from cache, nothing to do here
-                            } else {
-                                queries.deleteById(it.id)
-                                deletedItems++
-                            }
+                            updatedItems++
+                        }
+
+                        queries.insertOrReplace(it.toEvent())
+                    } else {
+                        if (cached == null) {
+                            // Already evicted from cache, nothing to do here
+                        } else {
+                            queries.deleteById(it.id)
+                            deletedItems++
                         }
                     }
                 }
+
+                if (delta.size < BATCH_SIZE) {
+                    break
+                }
             }
 
-            if (delta.size < BATCH_SIZE) {
-                break
-            }
+            SyncReport(
+                duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+                newEvents = newItems,
+                updatedEvents = updatedItems,
+                deletedEvents = deletedItems,
+            )
         }
-
-        return SyncReport(
-            duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
-            newEvents = newItems,
-            updatedEvents = updatedItems,
-            deletedEvents = deletedItems,
-        )
     }
 
     data class SyncReport(

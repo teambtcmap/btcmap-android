@@ -1,103 +1,45 @@
 package db
 
 import android.content.Context
-import io.requery.android.database.sqlite.SQLiteDatabase
-import io.requery.android.database.sqlite.SQLiteOpenHelper
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.execSQL
+import androidx.sqlite.use
+import area.AreaQueries
+import conf.ConfQueries
+import element.ElementQueries
+import event.EventQueries
 import kotlinx.coroutines.flow.MutableStateFlow
+import reports.ReportQueries
+import user.UserQueries
 import java.time.LocalDateTime
 
 val elementsUpdatedAt = MutableStateFlow(LocalDateTime.now())
 
-const val DB_FILE_NAME = "btcmap-2024-04-26.db"
-const val DB_VERSION = 2
+private const val DB_FILE_NAME = "btcmap-2024-05-15.db"
 
-class Database(context: Context) : SQLiteOpenHelper(
-    context,
-    DB_FILE_NAME,
-    null,
-    DB_VERSION,
-) {
+fun openDbConnection(context: Context): SQLiteConnection {
+    return BundledSQLiteDriver().open(context.getDatabasePath(DB_FILE_NAME).absolutePath)
+        .apply {
+            execSQL("PRAGMA journal_mode=WAL")
+            execSQL("PRAGMA synchronous=NORMAL")
 
-    override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL(CREATE_CONF_TABLE)
-        db.execSQL(CREATE_EVENT_TABLE)
-        db.execSQL(CREATE_ELEMENT_TABLE)
-        db.execSQL(CREATE_REPORT_TABLE)
-        db.execSQL(CREATE_USER_TABLE)
-    }
+            val version = prepare("SELECT user_version FROM pragma_user_version").use {
+                if (it.step()) {
+                    it.getInt(0)
+                } else {
+                    0
+                }
+            }
 
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE conf;")
-        db.execSQL("DROP TABLE element;")
-        db.execSQL("DROP TABLE event;")
-        db.execSQL("DROP TABLE report;")
-        db.execSQL("DROP TABLE user;")
-        onCreate(db)
-    }
-
-    companion object {
-        const val CREATE_ELEMENT_TABLE = """
-            CREATE TABLE element (
-                id INTEGER NOT NULL PRIMARY KEY,
-                overpass_data TEXT NOT NULL,
-                tags TEXT NOT NULL,
-                updated_at TEXT NOT NULL,
-                ext_lat REAL NOT NULL,
-                ext_lon REAL NOT NULL
-            );
-            """
-
-        const val CREATE_AREA_TABLE = """
-            CREATE TABLE IF NOT EXISTS area (
-                id INTEGER NOT NULL PRIMARY KEY,
-                tags TEXT NOT NULL,
-                updated_at TEXT NOT NULL
-            );
-            """
-
-        const val CREATE_EVENT_TABLE = """
-            CREATE TABLE event (
-                id INTEGER NOT NULL PRIMARY KEY,
-                user_id INTEGER NOT NULL,
-                element_id INTEGER NOT NULL,
-                type INTEGER NOT NULL,
-                tags TEXT NOT NULL,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL
-            );
-            """
-
-        const val CREATE_REPORT_TABLE = """
-            CREATE TABLE report (
-                id INTEGER PRIMARY KEY,
-                area_id INTEGER NOT NULL,
-                date TEXT NOT NULL,
-                tags TEXT NOT NULL,
-                updated_at TEXT NOT NULL
-            );
-            """
-
-        const val CREATE_USER_TABLE = """
-            CREATE TABLE user (
-                id INTEGER NOT NULL PRIMARY KEY,
-                osm_data TEXT NOT NULL,
-                tags TEXT NOT NULL,
-                updated_at TEXT NOT NULL
-            );
-            """
-
-        const val CREATE_CONF_TABLE = """
-            CREATE TABLE conf (
-                last_sync_date TEXT NOT NULL,
-                viewport_north_lat REAL NOT NULL,
-                viewport_east_lon REAL NOT NULL,
-                viewport_south_lat REAL NOT NULL,
-                viewport_west_lon REAL NOT NULL,
-                show_atms INTEGER NOT NULL,
-                show_osm_attribution INTEGER NOT NULL,
-                show_sync_summary INTEGER NOT NULL,
-                show_all_new_elements INTEGER NOT NULL
-            );
-            """
-    }
+            if (version == 0) {
+                execSQL(ElementQueries.CREATE_TABLE)
+                execSQL(EventQueries.CREATE_TABLE)
+                execSQL(ReportQueries.CREATE_TABLE)
+                execSQL(UserQueries.CREATE_TABLE)
+                execSQL(AreaQueries.CREATE_TABLE)
+                execSQL(ConfQueries.CREATE_TABLE)
+                execSQL("PRAGMA user_version=1")
+            }
+        }
 }

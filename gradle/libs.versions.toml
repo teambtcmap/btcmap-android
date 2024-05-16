@@ -35,8 +35,7 @@ jts = "1.19.0"
 mpandroidchart = "v3.1.0"
 # Used to cache data and store user preferences
 # https://developer.android.com/kotlin/ktx#sqlite
-sqlite = "2.5.0-alpha01"
-deprecatedsqlite = "3.45.0"
+sqlite = "2.5.0-alpha02"
 # Used to download, cache and display images
 # https://github.com/coil-kt/coil/releases
 coil = "2.6.0"
@@ -45,7 +44,7 @@ coil = "2.6.0"
 # https://developer.android.com/jetpack/androidx/releases/work
 work = "2.10.0-alpha02"
 # TODO remove when work bumps its dep (an old version causes crash on startup)
-room = "2.7.0-alpha01"
+room = "2.7.0-alpha02"
 # Common test dependencies
 # https://junit.org/junit4/
 junit = "4.13.2"
@@ -55,13 +54,12 @@ json = "20240303"
 [libraries]
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 
-androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
-androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
-androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
+androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
+androidx-navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
+androidx-navigation-ui = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference" }
-androidx-sqlite-ktx = { module = "androidx.sqlite:sqlite-ktx", version.ref = "sqlite" }
-androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+androidx-preference = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference" }
+androidx-sqlite = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 androidx-room = { module = "androidx.room:room-runtime", version.ref = "room" }
 
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
@@ -72,7 +70,6 @@ koin = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 osmdroid = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid" }
 jts = { module = "org.locationtech.jts:jts-core", version.ref = "jts" }
 mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
-deprecatedsqlite = { module = "com.github.requery:sqlite-android", version.ref = "deprecatedsqlite" }
 coil-core = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }
 

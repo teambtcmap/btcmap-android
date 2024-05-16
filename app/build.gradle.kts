@@ -42,14 +42,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "DebugProbesKt.bin"
         }
-
-        // TODO remove bundled SQLite when Android bumps its deps
-        // > The JSON functions and operators are built into SQLite by default, as of SQLite version 3.38.0 (2022-02-22).
-        // https://www.sqlite.org/json1.html
-        //jniLibs.excludes += "/lib/armeabi-v7a/libsqlite3x.so"
-        //jniLibs.excludes += "lib/arm64-v8a/libsqlite3x.so"
-        jniLibs.excludes += "/lib/x86/**"
-        //jniLibs.excludes += "/lib/x86_64/**"
     }
 
     flavorDimensions += "store"
@@ -120,12 +112,11 @@ tasks.register("bundleData") {
 dependencies {
     implementation(libs.kotlinx.coroutines)
 
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.androidx.preference.ktx)
-    implementation(libs.androidx.sqlite.ktx)
-    implementation(libs.androidx.sqlite.bundled)
-    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.navigation.ui)
+    implementation(libs.androidx.preference)
+    implementation(libs.androidx.sqlite)
+    implementation(libs.androidx.work)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.room)
 
@@ -137,7 +128,6 @@ dependencies {
     implementation(libs.osmdroid)
     implementation(libs.jts)
     implementation(libs.mpandroidchart)
-    implementation(libs.deprecatedsqlite)
     implementation(libs.coil.core)
     implementation(libs.coil.svg)
 

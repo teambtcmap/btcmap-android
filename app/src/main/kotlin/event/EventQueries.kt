@@ -1,16 +1,43 @@
 package event
 
-import androidx.core.database.getStringOrNull
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
+import androidx.sqlite.use
 import db.getJsonObject
+import db.getText
 import db.getZonedDateTime
-import io.requery.android.database.sqlite.SQLiteOpenHelper
 import java.time.ZonedDateTime
 import java.util.regex.Pattern
 
-class EventQueries(val db: SQLiteOpenHelper) {
+class EventQueries(private val conn: SQLiteConnection) {
+
+    companion object {
+        const val CREATE_TABLE = """
+            CREATE TABLE event (
+                id INTEGER NOT NULL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                element_id INTEGER NOT NULL,
+                type INTEGER NOT NULL,
+                tags TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+            """
+    }
+
+    fun insertOrReplace(events: List<Event>) {
+        conn.execSQL("BEGIN IMMEDIATE TRANSACTION")
+
+        try {
+            events.forEach { insertOrReplace(it) }
+            conn.execSQL("END TRANSACTION")
+        } catch (t: Throwable) {
+            conn.execSQL("ROLLBACK TRANSACTION")
+        }
+    }
 
     fun insertOrReplace(event: Event) {
-        db.writableDatabase.execSQL(
+        conn.prepare(
             """
             INSERT OR REPLACE
             INTO event(
@@ -21,22 +48,25 @@ class EventQueries(val db: SQLiteOpenHelper) {
                 tags,
                 created_at,
                 updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
-            arrayOf(
-                event.id,
-                event.userId,
-                event.elementId,
-                event.type,
-                event.tags,
-                event.createdAt,
-                event.updatedAt,
-            ),
-        )
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+            """
+        ).use {
+            event.apply {
+                it.bindLong(1, id)
+                it.bindLong(2, userId)
+                it.bindLong(3, elementId)
+                it.bindLong(4, type)
+                it.bindText(5, tags.toString())
+                it.bindText(6, createdAt.toString())
+                it.bindText(7, updatedAt.toString())
+            }
+
+            it.step()
+        }
     }
 
     fun selectById(id: Long): Event? {
-        val cursor = db.readableDatabase.query(
+        return conn.prepare(
             """
             SELECT
                 id,
@@ -47,28 +77,29 @@ class EventQueries(val db: SQLiteOpenHelper) {
                 created_at,
                 updated_at
             FROM event
-            WHERE id = ?
-            """,
-            arrayOf(id),
-        )
+            WHERE id = ?1
+            """
+        ).use {
+            it.bindLong(1, id)
 
-        if (!cursor.moveToNext()) {
-            return null
+            if (it.step()) {
+                Event(
+                    id = it.getLong(0),
+                    userId = it.getLong(1),
+                    elementId = it.getLong(2),
+                    type = it.getLong(3),
+                    tags = it.getJsonObject(4),
+                    createdAt = it.getZonedDateTime(5),
+                    updatedAt = it.getZonedDateTime(6),
+                )
+            } else {
+                null
+            }
         }
-
-        return Event(
-            id = cursor.getLong(0),
-            userId = cursor.getLong(1),
-            elementId = cursor.getLong(2),
-            type = cursor.getLong(3),
-            tags = cursor.getJsonObject(4),
-            createdAt = cursor.getZonedDateTime(5)!!,
-            updatedAt = cursor.getZonedDateTime(6)!!,
-        )
     }
 
     fun selectAll(limit: Long): List<EventListItem> {
-        val cursor = db.readableDatabase.query(
+        return conn.prepare(
             """
             SELECT
                 ev.type AS event_type,
@@ -81,29 +112,30 @@ class EventQueries(val db: SQLiteOpenHelper) {
             LEFT JOIN element el ON el.id = ev.element_id
             JOIN user u ON u.id = ev.user_id
             ORDER BY ev.created_at DESC
-            LIMIT ?
-            """,
-            arrayOf(limit),
-        )
+            LIMIT ?1
+            """
+        ).use {
+            it.bindLong(1, limit)
 
-        return buildList {
-            while (cursor.moveToNext()) {
-                add(
-                    EventListItem(
-                        eventType = cursor.getLong(0),
-                        elementId = cursor.getLong(1),
-                        elementName = cursor.getStringOrNull(2) ?: "",
-                        eventDate = cursor.getZonedDateTime(3)!!,
-                        userName = cursor.getString(4),
-                        userTips = getLnUrl(cursor.getString(5)),
+            buildList {
+                while (it.step()) {
+                    add(
+                        EventListItem(
+                            eventType = it.getLong(0),
+                            elementId = it.getLong(1),
+                            elementName = it.getText(2, ""),
+                            eventDate = it.getZonedDateTime(3),
+                            userName = it.getText(4),
+                            userTips = getLnUrl(it.getText(5)),
+                        )
                     )
-                )
+                }
             }
         }
     }
 
     fun selectByUserId(userId: Long): List<EventListItem> {
-        val cursor = db.readableDatabase.query(
+        return conn.prepare(
             """
             SELECT
                 ev.type AS event_type,
@@ -113,49 +145,51 @@ class EventQueries(val db: SQLiteOpenHelper) {
             FROM event ev
             LEFT JOIN element el ON el.id = ev.element_id
             JOIN user u ON u.id = ev.user_id
-            WHERE ev.user_id = ?
+            WHERE ev.user_id = ?1
             ORDER BY ev.created_at DESC
-            """,
-            arrayOf(userId),
-        )
+            """
+        ).use {
+            it.bindLong(1, userId)
 
-        return buildList {
-            while (cursor.moveToNext()) {
-                add(
-                    EventListItem(
-                        eventType = cursor.getLong(0),
-                        elementId = cursor.getLong(1),
-                        elementName = cursor.getStringOrNull(2) ?: "",
-                        eventDate = cursor.getZonedDateTime(3)!!,
-                        userName = "",
-                        userTips = "",
+            buildList {
+                while (it.step()) {
+                    add(
+                        EventListItem(
+                            eventType = it.getLong(0),
+                            elementId = it.getLong(1),
+                            elementName = it.getText(2, ""),
+                            eventDate = it.getZonedDateTime(3),
+                            userName = "",
+                            userTips = "",
+                        )
                     )
-                )
+                }
             }
         }
     }
 
     fun selectMaxUpdatedAt(): ZonedDateTime? {
-        val cursor = db.readableDatabase.query("SELECT max(updated_at) FROM event")
-
-        if (!cursor.moveToNext()) {
-            return null
+        return conn.prepare("SELECT max(updated_at) FROM event").use {
+            if (it.step()) {
+                it.getZonedDateTime(0)
+            } else {
+                null
+            }
         }
-
-        return cursor.getZonedDateTime(0)
     }
 
     fun selectCount(): Long {
-        val cursor = db.readableDatabase.query("SELECT count(*) FROM event")
-        cursor.moveToNext()
-        return cursor.getLong(0)
+        return conn.prepare("SELECT count(*) FROM event").use {
+            it.step()
+            it.getLong(0)
+        }
     }
 
     fun deleteById(id: Long) {
-        db.readableDatabase.query(
-            "DELETE FROM event WHERE id = ?",
-            arrayOf(id),
-        )
+        conn.prepare("DELETE FROM event WHERE id = ?1").use {
+            it.bindLong(1, id)
+            it.step()
+        }
     }
 
     private fun getLnUrl(description: String): String {

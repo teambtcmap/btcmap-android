@@ -1,12 +1,34 @@
 package area
 
 import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 import androidx.sqlite.use
 import db.getJsonObject
 import db.getZonedDateTime
 import java.time.ZonedDateTime
 
 class AreaQueries(private val conn: SQLiteConnection) {
+
+    companion object {
+        const val CREATE_TABLE = """
+            CREATE TABLE area (
+                id INTEGER NOT NULL PRIMARY KEY,
+                tags TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+            """
+    }
+
+    fun insertOrReplace(areas: List<Area>) {
+        conn.execSQL("BEGIN IMMEDIATE TRANSACTION")
+
+        try {
+            areas.forEach { insertOrReplace(it) }
+            conn.execSQL("END TRANSACTION")
+        } catch (t: Throwable) {
+            conn.execSQL("ROLLBACK TRANSACTION")
+        }
+    }
 
     fun insertOrReplace(area: Area) {
         conn.prepare("INSERT OR REPLACE INTO area(id, tags, updated_at) VALUES(?1, ?2, ?3)").use {
@@ -18,10 +40,10 @@ class AreaQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectById(id: Long): Area? {
-        conn.prepare("SELECT id, tags, updated_at FROM area WHERE id = ?1").use {
+        return conn.prepare("SELECT id, tags, updated_at FROM area WHERE id = ?1").use {
             it.bindLong(1, id)
 
-            return if (it.step()) {
+            if (it.step()) {
                 Area(
                     id = it.getLong(0),
                     tags = it.getJsonObject(1),
@@ -34,32 +56,32 @@ class AreaQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectByType(type: String): List<Area> {
-        val sql = """
+        return conn.prepare(
+            """
             SELECT id, tags, updated_at
             FROM area
             WHERE json_extract(tags, '$.type') = ?1
             """
-
-        val rows = mutableListOf<Area>()
-
-        conn.prepare(sql).use {
+        ).use {
             it.bindText(1, type)
 
-            while (it.step()) {
-                rows += Area(
-                    id = it.getLong(0),
-                    tags = it.getJsonObject(1),
-                    updatedAt = it.getZonedDateTime(2),
-                )
+            buildList {
+                while (it.step()) {
+                    add(
+                        Area(
+                            id = it.getLong(0),
+                            tags = it.getJsonObject(1),
+                            updatedAt = it.getZonedDateTime(2),
+                        )
+                    )
+                }
             }
         }
-
-        return rows
     }
 
     fun selectMaxUpdatedAt(): ZonedDateTime? {
-        conn.prepare("SELECT max(updated_at) FROM area").use {
-            return if (it.step()) {
+        return conn.prepare("SELECT max(updated_at) FROM area").use {
+            if (it.step()) {
                 it.getZonedDateTime(0)
             } else {
                 null
@@ -68,7 +90,8 @@ class AreaQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectMeetups(): List<Meetup> {
-        val sql = """
+        return conn.prepare(
+            """
             SELECT
                 json_extract(tags, '$.meetup_lat') AS lat,
                 json_extract(tags, '$.meetup_lon') AS lon,
@@ -78,20 +101,19 @@ class AreaQueries(private val conn: SQLiteConnection) {
                 lat IS NOT NULL 
                 AND lon IS NOT NULL
             """
-
-        val rows = mutableListOf<Meetup>()
-
-        conn.prepare(sql).use {
-            while (it.step()) {
-                rows += Meetup(
-                    lat = it.getDouble(0),
-                    lon = it.getDouble(1),
-                    areaId = it.getLong(2),
-                )
+        ).use {
+            buildList {
+                while (it.step()) {
+                    add(
+                        Meetup(
+                            lat = it.getDouble(0),
+                            lon = it.getDouble(1),
+                            areaId = it.getLong(2),
+                        )
+                    )
+                }
             }
         }
-
-        return rows
     }
 
     fun selectCount(): Long {

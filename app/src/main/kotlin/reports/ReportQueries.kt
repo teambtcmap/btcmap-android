@@ -1,15 +1,40 @@
 package reports
 
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
+import androidx.sqlite.use
 import db.getDate
 import db.getJsonObject
 import db.getZonedDateTime
-import io.requery.android.database.sqlite.SQLiteOpenHelper
 import java.time.ZonedDateTime
 
-class ReportQueries(val db: SQLiteOpenHelper) {
+class ReportQueries(private val conn: SQLiteConnection) {
+
+    companion object {
+        const val CREATE_TABLE = """
+            CREATE TABLE report (
+                id INTEGER PRIMARY KEY,
+                area_id INTEGER NOT NULL,
+                date TEXT NOT NULL,
+                tags TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+            """
+    }
+
+    fun insertOrReplace(reports: List<Report>) {
+        conn.execSQL("BEGIN IMMEDIATE TRANSACTION")
+
+        try {
+            reports.forEach { insertOrReplace(it) }
+            conn.execSQL("END TRANSACTION")
+        } catch (t: Throwable) {
+            conn.execSQL("ROLLBACK TRANSACTION")
+        }
+    }
 
     fun insertOrReplace(report: Report) {
-        db.writableDatabase.execSQL(
+        conn.prepare(
             """
             INSERT OR REPLACE
             INTO report(
@@ -19,49 +44,23 @@ class ReportQueries(val db: SQLiteOpenHelper) {
                 tags,
                 updated_at
             )
-            VALUES (?, ?, ?, ?, ?)
-            """,
-            arrayOf(
-                report.id,
-                report.areaId,
-                report.date,
-                report.tags,
-                report.updatedAt,
-            ),
-        )
+            VALUES (?1, ?2, ?3, ?4, ?5)
+            """
+        ).use {
+            report.apply {
+                it.bindLong(1, id)
+                it.bindLong(2, areaId)
+                it.bindText(3, date.toString())
+                it.bindText(4, tags.toString())
+                it.bindText(5, updatedAt.toString())
+            }
+
+            it.step()
+        }
     }
 
     fun selectById(id: Long): Report? {
-        val cursor = db.readableDatabase.query(
-            """
-                SELECT
-                    id,
-                    area_id,
-                    date,
-                    tags,
-                    updated_at
-                FROM report
-                WHERE id = ?
-                ORDER BY date
-                """,
-            arrayOf(id),
-        )
-
-        if (!cursor.moveToNext()) {
-            return null
-        }
-
-        return Report(
-            id = cursor.getLong(0),
-            areaId = cursor.getLong(1),
-            date = cursor.getDate(2),
-            tags = cursor.getJsonObject(3),
-            updatedAt = cursor.getZonedDateTime(4)!!,
-        )
-    }
-
-    fun selectByAreaId(areaId: Long): List<Report> {
-        val cursor = db.readableDatabase.query(
+        return conn.prepare(
             """
             SELECT
                 id,
@@ -70,47 +69,79 @@ class ReportQueries(val db: SQLiteOpenHelper) {
                 tags,
                 updated_at
             FROM report
-            WHERE area_id = ?
+            WHERE id = ?1
             ORDER BY date
-            """,
-            arrayOf(areaId),
-        )
+            """
+        ).use {
+            it.bindLong(1, id)
 
-        return buildList {
-            while (cursor.moveToNext()) {
-                add(
-                    Report(
-                        id = cursor.getLong(0),
-                        areaId = cursor.getLong(1),
-                        date = cursor.getDate(2),
-                        tags = cursor.getJsonObject(3),
-                        updatedAt = cursor.getZonedDateTime(4)!!,
-                    )
+            if (it.step()) {
+                Report(
+                    id = it.getLong(0),
+                    areaId = it.getLong(1),
+                    date = it.getDate(2),
+                    tags = it.getJsonObject(3),
+                    updatedAt = it.getZonedDateTime(4),
                 )
+            } else {
+                null
+            }
+        }
+    }
+
+    fun selectByAreaId(areaId: Long): List<Report> {
+        return conn.prepare(
+            """
+            SELECT
+                id,
+                area_id,
+                date,
+                tags,
+                updated_at
+            FROM report
+            WHERE area_id = ?1
+            ORDER BY date
+            """
+        ).use {
+            it.bindLong(1, areaId)
+
+            buildList {
+                while (it.step()) {
+                    add(
+                        Report(
+                            id = it.getLong(0),
+                            areaId = it.getLong(1),
+                            date = it.getDate(2),
+                            tags = it.getJsonObject(3),
+                            updatedAt = it.getZonedDateTime(4),
+                        )
+                    )
+                }
             }
         }
     }
 
     fun selectMaxUpdatedAt(): ZonedDateTime? {
-        val cursor = db.readableDatabase.query("SELECT max(updated_at) FROM report")
-
-        if (!cursor.moveToNext()) {
-            return null
+        return conn.prepare("SELECT max(updated_at) FROM report").use {
+            if (it.step()) {
+                it.getZonedDateTime(0)
+            } else {
+                null
+            }
         }
-
-        return cursor.getZonedDateTime(0)
     }
 
     fun selectCount(): Long {
-        val cursor = db.readableDatabase.query("SELECT count(*) FROM report")
-        cursor.moveToNext()
-        return cursor.getLong(0)
+        return conn.prepare("SELECT count(*) FROM report").use {
+            it.step()
+            it.getLong(0)
+        }
     }
 
     fun deleteById(id: Long) {
-        db.readableDatabase.query(
-            "DELETE FROM report WHERE id = ?",
-            arrayOf(id),
-        )
+        conn.prepare("DELETE FROM report WHERE id = ?1").use {
+            it.bindLong(1, id)
+            it.step()
+        }
     }
 }

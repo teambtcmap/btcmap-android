@@ -2,6 +2,7 @@ package conf
 
 import android.content.Context
 import app.isDebuggable
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 class ConfRepo(
     private val queries: ConfQueries,
@@ -17,7 +18,7 @@ class ConfRepo(
 ) {
 
     private val _conf: MutableStateFlow<Conf> = MutableStateFlow(
-        runBlocking { queries.select() ?: default() }
+        queries.select() ?: default()
     )
 
     val conf: StateFlow<Conf> = _conf.asStateFlow()
@@ -27,7 +28,7 @@ class ConfRepo(
 
     init {
         conf
-            .onEach { queries.insertOrReplace(it) }
+            .onEach { withContext(Dispatchers.IO) { queries.insertOrReplace(it) } }
             .launchIn(GlobalScope)
     }
 

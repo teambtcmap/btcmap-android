@@ -1,16 +1,40 @@
 package user
 
-import db.getHttpUrl
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
+import androidx.sqlite.use
+import db.getHttpUrlOrNull
 import db.getJsonObject
 import db.getZonedDateTime
-import io.requery.android.database.sqlite.SQLiteOpenHelper
 import java.time.ZonedDateTime
 import java.util.regex.Pattern
 
-data class UserQueries(val db: SQLiteOpenHelper) {
+data class UserQueries(private val conn: SQLiteConnection) {
+
+    companion object {
+        const val CREATE_TABLE = """
+            CREATE TABLE user (
+                id INTEGER NOT NULL PRIMARY KEY,
+                osm_data TEXT NOT NULL,
+                tags TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+            """
+    }
+
+    fun insertOrReplace(users: List<User>) {
+        conn.execSQL("BEGIN IMMEDIATE TRANSACTION")
+
+        try {
+            users.forEach { insertOrReplace(it) }
+            conn.execSQL("END TRANSACTION")
+        } catch (t: Throwable) {
+            conn.execSQL("ROLLBACK TRANSACTION")
+        }
+    }
 
     fun insertOrReplace(user: User) {
-        db.writableDatabase.execSQL(
+        conn.prepare(
             """
             INSERT OR REPLACE
             INTO user (
@@ -18,19 +42,22 @@ data class UserQueries(val db: SQLiteOpenHelper) {
                 osm_data,
                 tags,
                 updated_at
-            ) VALUES (?, ?, ?, ?)
-            """,
-            arrayOf(
-                user.id,
-                user.osmData,
-                user.tags,
-                user.updatedAt,
-            ),
-        )
+            ) VALUES (?1, ?2, ?3, ?4)
+            """
+        ).use {
+            user.apply {
+                it.bindLong(1, id)
+                it.bindText(2, osmData.toString())
+                it.bindText(3, tags.toString())
+                it.bindText(4, updatedAt.toString())
+            }
+
+            it.step()
+        }
     }
 
     fun selectAll(): List<UserListItem> {
-        val cursor = db.readableDatabase.query(
+        return conn.prepare(
             """
             SELECT
                 u.id AS id,
@@ -43,25 +70,25 @@ data class UserQueries(val db: SQLiteOpenHelper) {
             GROUP BY u.id
             ORDER BY changes DESC
             """
-        )
-
-        return buildList {
-            while (cursor.moveToNext()) {
-                add(
-                    UserListItem(
-                        id = cursor.getLong(0),
-                        image = cursor.getHttpUrl(1),
-                        name = cursor.getString(2),
-                        tips = getLnUrl(cursor.getString(3)),
-                        changes = cursor.getLong(4),
+        ).use {
+            buildList {
+                while (it.step()) {
+                    add(
+                        UserListItem(
+                            id = it.getLong(0),
+                            image = it.getHttpUrlOrNull(1),
+                            name = it.getText(2),
+                            tips = getLnUrl(it.getText(3)),
+                            changes = it.getLong(4),
+                        )
                     )
-                )
+                }
             }
         }
     }
 
     fun selectById(id: Long): User? {
-        val cursor = db.readableDatabase.query(
+        return conn.prepare(
             """
             SELECT
                 id,
@@ -69,44 +96,46 @@ data class UserQueries(val db: SQLiteOpenHelper) {
                 tags,
                 updated_at
             FROM user
-            WHERE id = ?
-            """,
-            arrayOf(id),
-        )
+            WHERE id = ?1
+            """
+        ).use {
+            it.bindLong(1, id)
 
-        if (!cursor.moveToNext()) {
-            return null
+            if (it.step()) {
+                User(
+                    id = it.getLong(0),
+                    osmData = it.getJsonObject(1),
+                    tags = it.getJsonObject(2),
+                    updatedAt = it.getZonedDateTime(3),
+                )
+            } else {
+                null
+            }
         }
-
-        return User(
-            id = cursor.getLong(0),
-            osmData = cursor.getJsonObject(1),
-            tags = cursor.getJsonObject(2),
-            updatedAt = cursor.getZonedDateTime(3)!!,
-        )
     }
 
     fun selectMaxUpdatedAt(): ZonedDateTime? {
-        val cursor = db.readableDatabase.query("SELECT max(updated_at) FROM user")
-
-        if (!cursor.moveToNext()) {
-            return null
+        return conn.prepare("SELECT max(updated_at) FROM user").use {
+            if (it.step()) {
+                it.getZonedDateTime(0)
+            } else {
+                null
+            }
         }
-
-        return cursor.getZonedDateTime(0)
     }
 
     fun selectCount(): Long {
-        val cursor = db.readableDatabase.query("SELECT count(*) FROM user")
-        cursor.moveToNext()
-        return cursor.getLong(0)
+        return conn.prepare("SELECT count(*) FROM user").use {
+            it.step()
+            it.getLong(0)
+        }
     }
 
     fun deleteById(id: Long) {
-        db.readableDatabase.query(
-            "DELETE FROM user WHERE id = ?",
-            arrayOf(id),
-        )
+        conn.prepare("DELETE FROM user WHERE id = ?1").use {
+            it.bindLong(1, id)
+            it.step()
+        }
     }
 
     private fun getLnUrl(description: String): String {

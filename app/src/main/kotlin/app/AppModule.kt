@@ -1,8 +1,5 @@
 package app
 
-import android.content.Context
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import androidx.sqlite.execSQL
 import api.Api
 import api.ApiImpl
 import area.AreaModel
@@ -12,15 +9,13 @@ import area.AreasModel
 import area.AreasRepo
 import conf.ConfQueries
 import conf.ConfRepo
-import db.DB_FILE_NAME
-import db.Database
+import db.openDbConnection
 import delivery.DeliveryModel
 import element.ElementQueries
 import element.ElementsRepo
 import event.EventQueries
 import event.EventsModel
 import event.EventsRepo
-import io.requery.android.database.sqlite.SQLiteOpenHelper
 import issue.IssuesModel
 import location.UserLocationRepository
 import map.MapModel
@@ -41,12 +36,7 @@ import user.UsersModel
 import user.UsersRepo
 
 val appModule = module {
-    singleOf(::Database).bind(SQLiteOpenHelper::class)
-    single {
-        val context = get<Context>()
-        BundledSQLiteDriver().open(context.getDatabasePath(DB_FILE_NAME).absolutePath)
-            .apply { execSQL(Database.CREATE_AREA_TABLE) }
-    }
+    single { openDbConnection(get()) }
 
     single { ApiImpl() }.bind(Api::class)
 

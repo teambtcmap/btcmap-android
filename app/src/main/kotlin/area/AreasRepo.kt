@@ -14,14 +14,29 @@ class AreasRepo(
     private val context: Context,
 ) {
 
-    suspend fun selectById(id: Long) = withContext(Dispatchers.IO) { queries.selectById(id) }
+    suspend fun selectById(id: Long): Area? {
+        return withContext(Dispatchers.IO) {
+            queries.selectById(id)
+        }
+    }
 
-    suspend fun selectByType(type: String) =
-        withContext(Dispatchers.IO) { queries.selectByType(type) }
+    suspend fun selectByType(type: String): List<Area> {
+        return withContext(Dispatchers.IO) {
+            queries.selectByType(type)
+        }
+    }
 
-    suspend fun selectMeetups() = withContext(Dispatchers.IO) { queries.selectMeetups() }
+    suspend fun selectMeetups(): List<Meetup> {
+        return withContext(Dispatchers.IO) {
+            queries.selectMeetups()
+        }
+    }
 
-    suspend fun selectCount() = withContext(Dispatchers.IO) { queries.selectCount() }
+    suspend fun selectCount(): Long {
+        return withContext(Dispatchers.IO) {
+            queries.selectCount()
+        }
+    }
 
     suspend fun hasBundledAreas(): Boolean {
         return withContext(Dispatchers.IO) {
@@ -32,33 +47,33 @@ class AreasRepo(
     suspend fun fetchBundledAreas() {
         withContext(Dispatchers.IO) {
             context.assets.open("areas.json").use { bundledAreas ->
-                val areas = bundledAreas
-                    .toAreasJson()
-                    .filter { it.deletedAt == null }
-                    .map { it.toArea() }
-
-                areas.forEach { queries.insertOrReplace(it) }
+                queries.insertOrReplace(
+                    bundledAreas
+                        .toAreasJson()
+                        .filter { it.deletedAt == null }
+                        .map { it.toArea() }
+                )
             }
         }
     }
 
     suspend fun sync(): SyncReport {
-        val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
-        var newItems = 0L
-        var updatedItems = 0L
-        var deletedItems = 0L
-        var maxKnownUpdatedAt = withContext(Dispatchers.IO) { queries.selectMaxUpdatedAt() }
+        return withContext(Dispatchers.IO) {
+            val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
+            var newItems = 0L
+            var updatedItems = 0L
+            var deletedItems = 0L
+            var maxKnownUpdatedAt = queries.selectMaxUpdatedAt()
 
-        while (true) {
-            val delta = api.getAreas(maxKnownUpdatedAt, BATCH_SIZE)
+            while (true) {
+                val delta = api.getAreas(maxKnownUpdatedAt, BATCH_SIZE)
 
-            if (delta.isEmpty()) {
-                break
-            } else {
-                maxKnownUpdatedAt = ZonedDateTime.parse(delta.maxBy { it.updatedAt }.updatedAt)
-            }
+                if (delta.isEmpty()) {
+                    break
+                } else {
+                    maxKnownUpdatedAt = ZonedDateTime.parse(delta.maxBy { it.updatedAt }.updatedAt)
+                }
 
-            withContext(Dispatchers.IO) {
                 delta.forEach {
                     val cached = queries.selectById(it.id)
 
@@ -79,19 +94,19 @@ class AreasRepo(
                         }
                     }
                 }
+
+                if (delta.size < BATCH_SIZE) {
+                    break
+                }
             }
 
-            if (delta.size < BATCH_SIZE) {
-                break
-            }
+            SyncReport(
+                duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+                newAreas = newItems,
+                updatedAreas = updatedItems,
+                deletedAreas = deletedItems,
+            )
         }
-
-        return SyncReport(
-            duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
-            newAreas = newItems,
-            updatedAreas = updatedItems,
-            deletedAreas = deletedItems,
-        )
     }
 
     data class SyncReport(
