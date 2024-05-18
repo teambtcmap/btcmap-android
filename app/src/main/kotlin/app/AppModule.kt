@@ -1,5 +1,6 @@
 package app
 
+import android.content.Context
 import api.Api
 import api.ApiImpl
 import area.AreaModel
@@ -36,7 +37,7 @@ import user.UsersModel
 import user.UsersRepo
 
 val appModule = module {
-    single { Database(get()) }
+    single { Database(get<Context>().getDatabasePath("btcmap-2024-05-15.db").absolutePath) }
 
     single { ApiImpl() }.bind(Api::class)
 

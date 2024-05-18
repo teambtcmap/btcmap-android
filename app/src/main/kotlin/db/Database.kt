@@ -1,6 +1,5 @@
 package db
 
-import android.content.Context
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
@@ -15,10 +14,10 @@ import user.UserQueries
 import java.time.LocalDateTime
 import java.util.concurrent.locks.ReentrantLock
 
-class Database(context: Context) {
+class Database(path: String) {
 
     private val conn: SQLiteConnection =
-        BundledSQLiteDriver().open(context.getDatabasePath("btcmap-2024-05-15.db").absolutePath)
+        BundledSQLiteDriver().open(path)
             .apply {
                 execSQL("PRAGMA journal_mode=WAL")
                 execSQL("PRAGMA synchronous=NORMAL")
