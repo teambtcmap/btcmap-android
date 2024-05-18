@@ -78,7 +78,7 @@ class UsersRepo(
                             updatedItems++
                         }
 
-                        queries.insertOrReplace(it.toUser())
+                        queries.insertOrReplace(listOf(it.toUser()))
                     } else {
                         if (cached == null) {
                             // Already evicted from cache, nothing to do here

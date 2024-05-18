@@ -78,7 +78,7 @@ class EventsRepo(
                             updatedItems++
                         }
 
-                        queries.insertOrReplace(it.toEvent())
+                        queries.insertOrReplace(listOf(it.toEvent()))
                     } else {
                         if (cached == null) {
                             // Already evicted from cache, nothing to do here

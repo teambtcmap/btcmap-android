@@ -210,7 +210,7 @@ class ElementsRepo(
                             updatedItems++
                         }
 
-                        queries.insertOrReplace(it.toElement())
+                        queries.insertOrReplace(listOf(it.toElement()))
                     } else {
                         if (cached == null) {
                             // Already evicted from cache, nothing to do here

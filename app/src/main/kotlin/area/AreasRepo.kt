@@ -84,7 +84,7 @@ class AreasRepo(
                             updatedItems++
                         }
 
-                        queries.insertOrReplace(it.toArea())
+                        queries.insertOrReplace(listOf(it.toArea()))
                     } else {
                         if (cached == null) {
                             // Already evicted from cache, nothing to do here

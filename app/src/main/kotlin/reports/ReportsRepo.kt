@@ -72,7 +72,7 @@ class ReportsRepo(
                             updatedItems++
                         }
 
-                        queries.insertOrReplace(it.toReport())
+                        queries.insertOrReplace(listOf(it.toReport()))
                     } else {
                         if (cached == null) {
                             // Already evicted from cache, nothing to do here

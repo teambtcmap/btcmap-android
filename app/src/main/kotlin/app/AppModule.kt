@@ -9,7 +9,7 @@ import area.AreasModel
 import area.AreasRepo
 import conf.ConfQueries
 import conf.ConfRepo
-import db.openDbConnection
+import db.Database
 import delivery.DeliveryModel
 import element.ElementQueries
 import element.ElementsRepo
@@ -36,7 +36,7 @@ import user.UsersModel
 import user.UsersRepo
 
 val appModule = module {
-    single { openDbConnection(get()) }
+    single { Database(get()) }
 
     single { ApiImpl() }.bind(Api::class)
 

@@ -13,33 +13,58 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import reports.ReportQueries
 import user.UserQueries
 import java.time.LocalDateTime
+import java.util.concurrent.locks.ReentrantLock
 
-val elementsUpdatedAt = MutableStateFlow(LocalDateTime.now())
+class Database(context: Context) {
 
-private const val DB_FILE_NAME = "btcmap-2024-05-15.db"
+    private val conn: SQLiteConnection =
+        BundledSQLiteDriver().open(context.getDatabasePath("btcmap-2024-05-15.db").absolutePath)
+            .apply {
+                execSQL("PRAGMA journal_mode=WAL")
+                execSQL("PRAGMA synchronous=NORMAL")
 
-fun openDbConnection(context: Context): SQLiteConnection {
-    return BundledSQLiteDriver().open(context.getDatabasePath(DB_FILE_NAME).absolutePath)
-        .apply {
-            execSQL("PRAGMA journal_mode=WAL")
-            execSQL("PRAGMA synchronous=NORMAL")
+                val version = prepare("SELECT user_version FROM pragma_user_version").use {
+                    if (it.step()) {
+                        it.getInt(0)
+                    } else {
+                        0
+                    }
+                }
 
-            val version = prepare("SELECT user_version FROM pragma_user_version").use {
-                if (it.step()) {
-                    it.getInt(0)
-                } else {
-                    0
+                if (version == 0) {
+                    execSQL(ElementQueries.CREATE_TABLE)
+                    execSQL(EventQueries.CREATE_TABLE)
+                    execSQL(ReportQueries.CREATE_TABLE)
+                    execSQL(UserQueries.CREATE_TABLE)
+                    execSQL(AreaQueries.CREATE_TABLE)
+                    execSQL(ConfQueries.CREATE_TABLE)
+                    execSQL("PRAGMA user_version=1")
                 }
             }
 
-            if (version == 0) {
-                execSQL(ElementQueries.CREATE_TABLE)
-                execSQL(EventQueries.CREATE_TABLE)
-                execSQL(ReportQueries.CREATE_TABLE)
-                execSQL(UserQueries.CREATE_TABLE)
-                execSQL(AreaQueries.CREATE_TABLE)
-                execSQL(ConfQueries.CREATE_TABLE)
-                execSQL("PRAGMA user_version=1")
+    private val connLock = ReentrantLock()
+
+    fun <T> withConn(action: (conn: SQLiteConnection) -> T): T {
+        connLock.lock()
+        return try {
+            action(conn)
+        } finally {
+            connLock.unlock()
+        }
+    }
+
+    fun <T> transaction(action: (conn: SQLiteConnection) -> T) {
+        return withConn { conn ->
+            conn.execSQL("BEGIN TRANSACTION")
+
+            try {
+                action(conn)
+                conn.execSQL("END TRANSACTION")
+            } catch (t: Throwable) {
+                conn.execSQL("ROLLBACK TRANSACTION")
             }
         }
+    }
 }
+
+val elementsUpdatedAt = MutableStateFlow(LocalDateTime.now())
