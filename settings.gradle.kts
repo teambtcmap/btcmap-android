@@ -1,13 +1,13 @@
-// Based on Android Studio new app template
-// The only difference is the inclusion of jitpack (TODO remove)
+rootProject.name = "btc-map"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {
         google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
             }
         }
         mavenCentral()
@@ -16,15 +16,18 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-
     repositories {
-        google()
+        google {
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
         mavenCentral()
-        // TODO get rid of it. It's still needed for charts and bundled SQLite
+        // TODO get rid of it. It's still needed for charts
         maven("https://jitpack.io")
     }
 }
 
-rootProject.name = "BTC Map"
 include(":app")
