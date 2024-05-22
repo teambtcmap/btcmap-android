@@ -48,10 +48,14 @@ room = "2.7.0-alpha02"
 # Platform-agnostic JSON handling
 # https://github.com/Kotlin/kotlinx.serialization/releases
 serialization = "1.6.3"
+# Platform-agnostic date and time handling
+# https://github.com/Kotlin/kotlinx-datetime/releases
+datetime = "0.6.0"
 
 [libraries]
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 
 androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 androidx-navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
