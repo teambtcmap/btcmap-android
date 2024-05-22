@@ -8,7 +8,7 @@ import org.json.JSONObject
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
-fun SQLiteStatement.getJsonObject(columnIndex: Int): JSONObject {
+fun SQLiteStatement.getJsonObjectOld(columnIndex: Int): JSONObject {
     return JSONObject(getText(columnIndex))
 }
 

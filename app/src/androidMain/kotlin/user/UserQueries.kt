@@ -3,7 +3,7 @@ package user
 import androidx.sqlite.use
 import db.Database
 import db.getHttpUrlOrNull
-import db.getJsonObject
+import db.getJsonObjectOld
 import db.getZonedDateTime
 import java.time.ZonedDateTime
 import java.util.regex.Pattern
@@ -99,8 +99,8 @@ data class UserQueries(private val db: Database) {
                 if (it.step()) {
                     User(
                         id = it.getLong(0),
-                        osmData = it.getJsonObject(1),
-                        tags = it.getJsonObject(2),
+                        osmData = it.getJsonObjectOld(1),
+                        tags = it.getJsonObjectOld(2),
                         updatedAt = it.getZonedDateTime(3),
                     )
                 } else {

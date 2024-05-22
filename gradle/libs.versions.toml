@@ -45,14 +45,13 @@ coil = "2.6.0"
 work = "2.10.0-alpha02"
 # TODO remove when work bumps its dep (an old version causes crash on startup)
 room = "2.7.0-alpha02"
-# Common test dependencies
-# https://junit.org/junit4/
-junit = "4.13.2"
-# https://mvnrepository.com/artifact/org.json/json
-json = "20240303"
+# Platform-agnostic JSON handling
+# https://github.com/Kotlin/kotlinx.serialization/releases
+serialization = "1.6.3"
 
 [libraries]
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 
 androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 androidx-navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
@@ -72,9 +71,6 @@ jts = { module = "org.locationtech.jts:jts-core", version.ref = "jts" }
 mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
 coil-core = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }
-
-junit = { module = "junit:junit", version.ref = "junit" }
-json = { module = "org.json:json", version.ref = "json" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

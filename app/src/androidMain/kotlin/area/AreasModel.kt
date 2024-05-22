@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import map.boundingBox
 import org.btcmap.R
 import org.osmdroid.util.GeoPoint
@@ -26,7 +28,7 @@ class AreasModel(
         viewModelScope.launch {
             val communities = areasRepo
                 .selectByType("community")
-                .filter { it.tags.optString("icon:square").isNotBlank() }
+                .filter { it.tags.containsKey("icon:square") }
                 .mapNotNull {
                     val polygons = runCatching {
                         it.tags.polygons()
@@ -57,8 +59,8 @@ class AreasModel(
 
                 AreasAdapter.Item(
                     id = it.first.id,
-                    iconUrl = it.first.tags.optString("icon:square"),
-                    name = it.first.tags.name(res = app.resources),
+                    iconUrl = it.first.tags["icon:square"]?.jsonPrimitive?.contentOrNull ?: "",
+                    name = it.first.tags.name(),
                     distance = distanceStringBuilder.toString(),
                 )
             }

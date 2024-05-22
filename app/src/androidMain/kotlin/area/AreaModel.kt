@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import map.boundingBox
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
@@ -94,11 +96,11 @@ class AreaModel(
             )
 
             val contact = AreaAdapter.Item.Contact(
-                website = area.tags.optString("contact:website").toHttpUrlOrNull(),
-                twitter = area.tags.optString("contact:twitter").toHttpUrlOrNull(),
-                telegram = area.tags.optString("contact:telegram").toHttpUrlOrNull(),
-                discord = area.tags.optString("contact:discord").toHttpUrlOrNull(),
-                youtube = area.tags.optString("contact:youtube").toHttpUrlOrNull(),
+                website = area.tags["contact:website"]?.jsonPrimitive?.contentOrNull?.toHttpUrlOrNull(),
+                twitter = area.tags["contact:twitter"]?.jsonPrimitive?.contentOrNull?.toHttpUrlOrNull(),
+                telegram = area.tags["contact:telegram"]?.jsonPrimitive?.contentOrNull?.toHttpUrlOrNull(),
+                discord = area.tags["contact:discord"]?.jsonPrimitive?.contentOrNull?.toHttpUrlOrNull(),
+                youtube = area.tags["contact:youtube"]?.jsonPrimitive?.contentOrNull?.toHttpUrlOrNull(),
             )
 
             val issuesCount = elements.sumOf { it.issues }
@@ -106,8 +108,12 @@ class AreaModel(
             val items = buildList {
                 add(map)
 
-                if (area.tags.has("description")) {
-                    add(AreaAdapter.Item.Description(area.tags.getString("description")))
+                if (area.tags.containsKey("description")) {
+                    add(
+                        AreaAdapter.Item.Description(
+                            area.tags["description"]?.jsonPrimitive?.content ?: ""
+                        )
+                    )
                 }
 
                 add(contact)

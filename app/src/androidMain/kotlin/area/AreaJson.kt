@@ -1,13 +1,15 @@
 package area
 
 import json.toJsonArray
-import org.json.JSONObject
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 import java.io.InputStream
 import java.time.ZonedDateTime
 
 data class AreaJson(
     val id: Long,
-    val tags: JSONObject?,
+    val tags: JsonObject?,
     val updatedAt: String,
     val deletedAt: String?,
 )
@@ -24,7 +26,11 @@ fun InputStream.toAreasJson(): List<AreaJson> {
     return toJsonArray().map {
         AreaJson(
             id = it.getLong("id"),
-            tags = it.optJSONObject("tags") ?: JSONObject(),
+            tags = if (it.has("tags")) {
+                Json.parseToJsonElement(it.getString("tags")).jsonObject
+            } else {
+                null
+            },
             updatedAt = it.getString("updated_at"),
             deletedAt = it.optString("deleted_at").ifBlank { null },
         )

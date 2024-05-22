@@ -25,7 +25,6 @@ kotlin {
             implementation(libs.androidx.navigation.fragment)
             implementation(libs.androidx.navigation.ui)
             implementation(libs.androidx.preference)
-            //implementation(libs.androidx.sqlite)
             implementation(libs.androidx.work)
             implementation(libs.androidx.constraintlayout)
             implementation(libs.androidx.room)
@@ -42,6 +41,7 @@ kotlin {
             implementation(libs.coil.svg)
         }
         commonMain.dependencies {
+            implementation(libs.kotlinx.serialization)
             implementation(libs.androidx.sqlite)
         }
     }
@@ -124,11 +124,6 @@ android {
 
     buildFeatures {
         viewBinding = true
-    }
-
-    dependencies {
-        testImplementation(libs.junit)
-        testImplementation(libs.json)
     }
 }
 

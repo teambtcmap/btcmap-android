@@ -3,7 +3,7 @@ package element
 import androidx.sqlite.use
 import db.Database
 import db.getJsonArray
-import db.getJsonObject
+import db.getJsonObjectOld
 import db.getText
 import db.getZonedDateTime
 import db.getZonedDateTimeOrNull
@@ -72,8 +72,8 @@ class ElementQueries(private val db: Database) {
                 if (it.step()) {
                     Element(
                         id = it.getLong(0),
-                        overpassData = it.getJsonObject(1),
-                        tags = it.getJsonObject(2),
+                        overpassData = it.getJsonObjectOld(1),
+                        tags = it.getJsonObjectOld(2),
                         updatedAt = it.getText(3),
                         lat = it.getDouble(4),
                         lon = it.getDouble(5),
@@ -107,8 +107,8 @@ class ElementQueries(private val db: Database) {
                         add(
                             Element(
                                 id = it.getLong(0),
-                                overpassData = it.getJsonObject(1),
-                                tags = it.getJsonObject(2),
+                                overpassData = it.getJsonObjectOld(1),
+                                tags = it.getJsonObjectOld(2),
                                 updatedAt = it.getText(3),
                                 lat = it.getDouble(4),
                                 lon = it.getDouble(5),
@@ -142,8 +142,8 @@ class ElementQueries(private val db: Database) {
                         add(
                             Element(
                                 id = it.getLong(0),
-                                overpassData = it.getJsonObject(1),
-                                tags = it.getJsonObject(2),
+                                overpassData = it.getJsonObjectOld(1),
+                                tags = it.getJsonObjectOld(2),
                                 updatedAt = it.getText(3),
                                 lat = it.getDouble(4),
                                 lon = it.getDouble(5),
@@ -177,8 +177,8 @@ class ElementQueries(private val db: Database) {
                         add(
                             Element(
                                 id = it.getLong(0),
-                                overpassData = it.getJsonObject(1),
-                                tags = it.getJsonObject(2),
+                                overpassData = it.getJsonObjectOld(1),
+                                tags = it.getJsonObjectOld(2),
                                 updatedAt = it.getText(3),
                                 lat = it.getDouble(4),
                                 lon = it.getDouble(5),
@@ -318,7 +318,7 @@ class ElementQueries(private val db: Database) {
                                 lat = it.getDouble(1),
                                 lon = it.getDouble(2),
                                 icon = it.getText(3),
-                                osmTags = it.getJsonObject(4),
+                                osmTags = it.getJsonObjectOld(4),
                                 issues = it.getJsonArray(5),
                                 osmType = it.getText(6),
                                 osmId = it.getLong(7),

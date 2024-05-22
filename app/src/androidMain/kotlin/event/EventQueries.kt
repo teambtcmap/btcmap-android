@@ -2,7 +2,7 @@ package event
 
 import androidx.sqlite.use
 import db.Database
-import db.getJsonObject
+import db.getJsonObjectOld
 import db.getText
 import db.getZonedDateTime
 import java.time.ZonedDateTime
@@ -81,7 +81,7 @@ class EventQueries(private val db: Database) {
                         userId = it.getLong(1),
                         elementId = it.getLong(2),
                         type = it.getLong(3),
-                        tags = it.getJsonObject(4),
+                        tags = it.getJsonObjectOld(4),
                         createdAt = it.getZonedDateTime(5),
                         updatedAt = it.getZonedDateTime(6),
                     )

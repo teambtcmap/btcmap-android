@@ -3,7 +3,7 @@ package reports
 import androidx.sqlite.use
 import db.Database
 import db.getDate
-import db.getJsonObject
+import db.getJsonObjectOld
 import db.getZonedDateTime
 import java.time.ZonedDateTime
 
@@ -73,7 +73,7 @@ class ReportQueries(private val db: Database) {
                         id = it.getLong(0),
                         areaId = it.getLong(1),
                         date = it.getDate(2),
-                        tags = it.getJsonObject(3),
+                        tags = it.getJsonObjectOld(3),
                         updatedAt = it.getZonedDateTime(4),
                     )
                 } else {
@@ -107,7 +107,7 @@ class ReportQueries(private val db: Database) {
                                 id = it.getLong(0),
                                 areaId = it.getLong(1),
                                 date = it.getDate(2),
-                                tags = it.getJsonObject(3),
+                                tags = it.getJsonObjectOld(3),
                                 updatedAt = it.getZonedDateTime(4),
                             )
                         )

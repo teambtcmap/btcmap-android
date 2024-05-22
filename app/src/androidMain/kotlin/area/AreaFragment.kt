@@ -115,7 +115,7 @@ class AreaFragment : Fragment() {
                             val elements =
                                 state.items.filterIsInstance<AreaAdapter.Item.Element>().size
 
-                            binding.toolbar.title = state.area.tags.name(res = resources)
+                            binding.toolbar.title = state.area.tags.name()
                             binding.toolbar.subtitle = resources.getQuantityString(
                                 R.plurals.d_places,
                                 elements,
