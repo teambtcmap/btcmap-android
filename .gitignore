@@ -16,8 +16,8 @@ build/
 .gradle
 
 # App data
-app/src/main/assets/elements.json
-app/src/main/assets/reports.json
-app/src/main/assets/events.json
-app/src/main/assets/areas.json
-app/src/main/assets/users.json
+app/src/androidMain/assets/elements.json
+app/src/androidMain/assets/reports.json
+app/src/androidMain/assets/events.json
+app/src/androidMain/assets/areas.json
+app/src/androidMain/assets/users.json
