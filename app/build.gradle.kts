@@ -1,13 +1,59 @@
 import java.net.URI
 
 plugins {
+    alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlinAndroid)
+}
+
+kotlin {
+    androidTarget {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "11"
+                freeCompilerArgs += "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi"
+                freeCompilerArgs += "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+            }
+        }
+    }
+
+    jvm("desktop")
+
+    sourceSets {
+        androidMain.dependencies {
+            implementation(libs.kotlinx.coroutines)
+
+            implementation(libs.androidx.navigation.fragment)
+            implementation(libs.androidx.navigation.ui)
+            implementation(libs.androidx.preference)
+            //implementation(libs.androidx.sqlite)
+            implementation(libs.androidx.work)
+            implementation(libs.androidx.constraintlayout)
+            implementation(libs.androidx.room)
+
+            implementation(libs.material)
+            implementation(libs.okhttp.coroutines)
+            implementation(libs.okhttp.brotli)
+            implementation(libs.okhttp.mockwebserver)
+            implementation(libs.koin)
+            implementation(libs.osmdroid)
+            implementation(libs.jts)
+            implementation(libs.mpandroidchart)
+            implementation(libs.coil.core)
+            implementation(libs.coil.svg)
+        }
+        commonMain.dependencies {
+            implementation(libs.androidx.sqlite)
+        }
+    }
 }
 
 android {
     namespace = "org.btcmap"
     compileSdk = 34
+
+    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    sourceSets["main"].res.srcDirs("src/androidMain/res")
+    sourceSets["main"].resources.srcDirs("src/commonMain/resources")
 
     defaultConfig {
         applicationId = "org.btcmap"
@@ -20,12 +66,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs += "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi"
-        freeCompilerArgs += "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
     }
 
     signingConfigs {
@@ -85,6 +125,11 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    dependencies {
+        testImplementation(libs.junit)
+        testImplementation(libs.json)
+    }
 }
 
 tasks.register("bundleData") {
@@ -107,30 +152,4 @@ tasks.register("bundleData") {
         val usersSrc = URI("https://static.btcmap.org/api/v3/users.json")
         File(destDir, "users.json").writeText(usersSrc.toURL().readText())
     }
-}
-
-dependencies {
-    implementation(libs.kotlinx.coroutines)
-
-    implementation(libs.androidx.navigation.fragment)
-    implementation(libs.androidx.navigation.ui)
-    implementation(libs.androidx.preference)
-    implementation(libs.androidx.sqlite)
-    implementation(libs.androidx.work)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.room)
-
-    implementation(libs.material)
-    implementation(libs.okhttp.coroutines)
-    implementation(libs.okhttp.brotli)
-    implementation(libs.okhttp.mockwebserver)
-    implementation(libs.koin)
-    implementation(libs.osmdroid)
-    implementation(libs.jts)
-    implementation(libs.mpandroidchart)
-    implementation(libs.coil.core)
-    implementation(libs.coil.svg)
-
-    testImplementation(libs.junit)
-    testImplementation(libs.json)
 }
