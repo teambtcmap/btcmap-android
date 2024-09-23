@@ -2,6 +2,9 @@ package db
 
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.driver.bundled.SQLITE_OPEN_CREATE
+import androidx.sqlite.driver.bundled.SQLITE_OPEN_FULLMUTEX
+import androidx.sqlite.driver.bundled.SQLITE_OPEN_READWRITE
 import androidx.sqlite.execSQL
 import androidx.sqlite.use
 import area.AreaQueries
@@ -17,7 +20,10 @@ import java.util.concurrent.locks.ReentrantLock
 class Database(path: String) {
 
     private val conn: SQLiteConnection =
-        BundledSQLiteDriver().open(path)
+        BundledSQLiteDriver().open(
+            path,
+            SQLITE_OPEN_READWRITE or SQLITE_OPEN_CREATE or SQLITE_OPEN_FULLMUTEX
+        )
             .apply {
                 execSQL("PRAGMA journal_mode=WAL")
                 execSQL("PRAGMA synchronous=NORMAL")
