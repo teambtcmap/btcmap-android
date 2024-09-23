@@ -17,7 +17,9 @@ build/
 
 # App data
 app/src/androidMain/assets/elements.json
+app/src/androidMain/assets/element-comments.json
 app/src/androidMain/assets/reports.json
 app/src/androidMain/assets/events.json
 app/src/androidMain/assets/areas.json
+app/src/androidMain/assets/area-elements.json
 app/src/androidMain/assets/users.json
