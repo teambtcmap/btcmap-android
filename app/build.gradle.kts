@@ -51,7 +51,7 @@ kotlin {
 
 android {
     namespace = "org.btcmap"
-    compileSdk = 34
+    compileSdk = 35
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].res.srcDirs("src/androidMain/res")
@@ -60,7 +60,7 @@ android {
     defaultConfig {
         applicationId = "org.btcmap"
         minSdk = 27
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 50
         versionName = "0.7.3"
     }
