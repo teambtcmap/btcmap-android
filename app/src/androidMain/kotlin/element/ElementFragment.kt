@@ -25,7 +25,6 @@ import icons.iconTypeface
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import map.MapMarkersRepo
-import map.enableDarkModeIfNecessary
 import map.getErrorColor
 import map.getOnSurfaceColor
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -99,7 +98,6 @@ class ElementFragment : Fragment() {
                     element.tags.optString("icon:android").ifBlank { "question_mark" }
                 )
                 binding.map.overlays.add(marker)
-                binding.map.enableDarkModeIfNecessary()
             }
         }
 

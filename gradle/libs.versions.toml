@@ -1,6 +1,6 @@
 [versions]
 # https://developer.android.com/build/releases/gradle-plugin
-agp = "8.6.1"
+agp = "8.7.0"
 # https://github.com/JetBrains/kotlin/releases
 kotlin = "1.9.25"
 # Allows suspending functions
@@ -34,8 +34,8 @@ jts = "1.20.0"
 # https://github.com/PhilJay/MPAndroidChart/releases
 mpandroidchart = "v3.1.0"
 # Used to cache data and store user preferences
-# https://developer.android.com/kotlin/ktx#sqlite
-sqlite = "2.5.0-alpha08"
+# https://developer.android.com/jetpack/androidx/releases/sqlite
+sqlite = "2.5.0-alpha09"
 # Used to download, cache and display images
 # https://github.com/coil-kt/coil/releases
 coil = "2.7.0"

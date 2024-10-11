@@ -208,7 +208,6 @@ class MapFragment : Fragment() {
             setMultiTouchControls(true)
             addLocationOverlay()
             addCancelSelectionOverlay()
-            enableDarkModeIfNecessary()
         }
 
         bottomSheetBehavior = BottomSheetBehavior.from(binding.elementDetails)
