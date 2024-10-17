@@ -1,14 +1,15 @@
 package user
 
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.use
-import db.Database
 import db.getHttpUrlOrNull
 import db.getJsonObjectOld
 import db.getZonedDateTime
+import db.transaction
 import java.time.ZonedDateTime
 import java.util.regex.Pattern
 
-data class UserQueries(private val db: Database) {
+data class UserQueries(private val conn: SQLiteConnection) {
 
     companion object {
         const val CREATE_TABLE = """
@@ -22,7 +23,7 @@ data class UserQueries(private val db: Database) {
     }
 
     fun insertOrReplace(users: List<User>) {
-        db.transaction { conn ->
+        conn.transaction { conn ->
             users.forEach { user ->
                 conn.prepare(
                     """
@@ -49,9 +50,8 @@ data class UserQueries(private val db: Database) {
     }
 
     fun selectAll(): List<UserListItem> {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     u.id AS id,
                     json_extract(u.osm_data, '$.img.href') AS image,
@@ -63,28 +63,26 @@ data class UserQueries(private val db: Database) {
                 GROUP BY u.id
                 ORDER BY changes DESC
                 """
-            ).use {
-                buildList {
-                    while (it.step()) {
-                        add(
-                            UserListItem(
-                                id = it.getLong(0),
-                                image = it.getHttpUrlOrNull(1),
-                                name = it.getText(2),
-                                tips = getLnUrl(it.getText(3)),
-                                changes = it.getLong(4),
-                            )
+        ).use {
+            buildList {
+                while (it.step()) {
+                    add(
+                        UserListItem(
+                            id = it.getLong(0),
+                            image = it.getHttpUrlOrNull(1),
+                            name = it.getText(2),
+                            tips = getLnUrl(it.getText(3)),
+                            changes = it.getLong(4),
                         )
-                    }
+                    )
                 }
             }
         }
     }
 
     fun selectById(id: Long): User? {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     id,
                     osm_data,
@@ -93,50 +91,43 @@ data class UserQueries(private val db: Database) {
                 FROM user
                 WHERE id = ?1
                 """
-            ).use {
-                it.bindLong(1, id)
+        ).use {
+            it.bindLong(1, id)
 
-                if (it.step()) {
-                    User(
-                        id = it.getLong(0),
-                        osmData = it.getJsonObjectOld(1),
-                        tags = it.getJsonObjectOld(2),
-                        updatedAt = it.getZonedDateTime(3),
-                    )
-                } else {
-                    null
-                }
+            if (it.step()) {
+                User(
+                    id = it.getLong(0),
+                    osmData = it.getJsonObjectOld(1),
+                    tags = it.getJsonObjectOld(2),
+                    updatedAt = it.getZonedDateTime(3),
+                )
+            } else {
+                null
             }
         }
     }
 
     fun selectMaxUpdatedAt(): ZonedDateTime? {
-        return db.withConn { conn ->
-            conn.prepare("SELECT max(updated_at) FROM user").use {
-                if (it.step()) {
-                    it.getZonedDateTime(0)
-                } else {
-                    null
-                }
+        return conn.prepare("SELECT max(updated_at) FROM user").use {
+            if (it.step()) {
+                it.getZonedDateTime(0)
+            } else {
+                null
             }
         }
     }
 
     fun selectCount(): Long {
-        return db.withConn { conn ->
-            conn.prepare("SELECT count(*) FROM user").use {
-                it.step()
-                it.getLong(0)
-            }
+        return conn.prepare("SELECT count(*) FROM user").use {
+            it.step()
+            it.getLong(0)
         }
     }
 
     fun deleteById(id: Long) {
-        db.withConn { conn ->
-            conn.prepare("DELETE FROM user WHERE id = ?1").use {
-                it.bindLong(1, id)
-                it.step()
-            }
+        conn.prepare("DELETE FROM user WHERE id = ?1").use {
+            it.bindLong(1, id)
+            it.step()
         }
     }
 

@@ -62,10 +62,15 @@ class Sync(
                     val syncJobs = mutableListOf<Deferred<Any>>()
 
                     val elementsReport = async { elementsRepo.sync() }.also { syncJobs += it }
+                    elementsReport.await()
                     val reportsReport = async { reportsRepo.sync() }.also { syncJobs += it }
+                    reportsReport.await()
                     val eventsReport = async { eventsRepo.sync() }.also { syncJobs += it }
+                    eventsReport.await()
                     val areasReport = async { areasRepo.sync() }.also { syncJobs += it }
+                    areasReport.await()
                     val usersReport = async { usersRepo.sync() }.also { syncJobs += it }
+                    usersReport.await()
 
                     syncJobs.awaitAll()
 
@@ -87,6 +92,7 @@ class Sync(
             }.onSuccess {
                 conf.update { it.copy(lastSyncDate = now()) }
             }.onFailure {
+                it.printStackTrace()
                 syncNotificationController.showSyncFailedNotification(it)
             }
         }

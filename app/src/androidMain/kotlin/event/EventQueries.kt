@@ -1,14 +1,15 @@
 package event
 
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.use
-import db.Database
 import db.getJsonObjectOld
 import db.getText
 import db.getZonedDateTime
+import db.transaction
 import java.time.ZonedDateTime
 import java.util.regex.Pattern
 
-class EventQueries(private val db: Database) {
+class EventQueries(private val conn: SQLiteConnection) {
 
     companion object {
         const val CREATE_TABLE = """
@@ -25,7 +26,7 @@ class EventQueries(private val db: Database) {
     }
 
     fun insertOrReplace(events: List<Event>) {
-        db.transaction { conn ->
+        conn.transaction { conn ->
             events.forEach { event ->
                 conn.prepare(
                     """
@@ -58,9 +59,8 @@ class EventQueries(private val db: Database) {
     }
 
     fun selectById(id: Long): Event? {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     id,
                     user_id,
@@ -72,30 +72,28 @@ class EventQueries(private val db: Database) {
                 FROM event
                 WHERE id = ?1
                 """
-            ).use {
-                it.bindLong(1, id)
+        ).use {
+            it.bindLong(1, id)
 
-                if (it.step()) {
-                    Event(
-                        id = it.getLong(0),
-                        userId = it.getLong(1),
-                        elementId = it.getLong(2),
-                        type = it.getLong(3),
-                        tags = it.getJsonObjectOld(4),
-                        createdAt = it.getZonedDateTime(5),
-                        updatedAt = it.getZonedDateTime(6),
-                    )
-                } else {
-                    null
-                }
+            if (it.step()) {
+                Event(
+                    id = it.getLong(0),
+                    userId = it.getLong(1),
+                    elementId = it.getLong(2),
+                    type = it.getLong(3),
+                    tags = it.getJsonObjectOld(4),
+                    createdAt = it.getZonedDateTime(5),
+                    updatedAt = it.getZonedDateTime(6),
+                )
+            } else {
+                null
             }
         }
     }
 
     fun selectAll(limit: Long): List<EventListItem> {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     ev.type AS event_type,
                     el.id AS element_id,
@@ -109,31 +107,29 @@ class EventQueries(private val db: Database) {
                 ORDER BY ev.created_at DESC
                 LIMIT ?1
                 """
-            ).use {
-                it.bindLong(1, limit)
+        ).use {
+            it.bindLong(1, limit)
 
-                buildList {
-                    while (it.step()) {
-                        add(
-                            EventListItem(
-                                eventType = it.getLong(0),
-                                elementId = it.getLong(1),
-                                elementName = it.getText(2, ""),
-                                eventDate = it.getZonedDateTime(3),
-                                userName = it.getText(4),
-                                userTips = getLnUrl(it.getText(5)),
-                            )
+            buildList {
+                while (it.step()) {
+                    add(
+                        EventListItem(
+                            eventType = it.getLong(0),
+                            elementId = it.getLong(1),
+                            elementName = it.getText(2, ""),
+                            eventDate = it.getZonedDateTime(3),
+                            userName = it.getText(4),
+                            userTips = getLnUrl(it.getText(5)),
                         )
-                    }
+                    )
                 }
             }
         }
     }
 
     fun selectByUserId(userId: Long): List<EventListItem> {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     ev.type AS event_type,
                     el.id AS element_id,
@@ -145,54 +141,47 @@ class EventQueries(private val db: Database) {
                 WHERE ev.user_id = ?1
                 ORDER BY ev.created_at DESC
                 """
-            ).use {
-                it.bindLong(1, userId)
+        ).use {
+            it.bindLong(1, userId)
 
-                buildList {
-                    while (it.step()) {
-                        add(
-                            EventListItem(
-                                eventType = it.getLong(0),
-                                elementId = it.getLong(1),
-                                elementName = it.getText(2, ""),
-                                eventDate = it.getZonedDateTime(3),
-                                userName = "",
-                                userTips = "",
-                            )
+            buildList {
+                while (it.step()) {
+                    add(
+                        EventListItem(
+                            eventType = it.getLong(0),
+                            elementId = it.getLong(1),
+                            elementName = it.getText(2, ""),
+                            eventDate = it.getZonedDateTime(3),
+                            userName = "",
+                            userTips = "",
                         )
-                    }
+                    )
                 }
             }
         }
     }
 
     fun selectMaxUpdatedAt(): ZonedDateTime? {
-        return db.withConn { conn ->
-            conn.prepare("SELECT max(updated_at) FROM event").use {
-                if (it.step()) {
-                    it.getZonedDateTime(0)
-                } else {
-                    null
-                }
+        return conn.prepare("SELECT max(updated_at) FROM event").use {
+            if (it.step()) {
+                it.getZonedDateTime(0)
+            } else {
+                null
             }
         }
     }
 
     fun selectCount(): Long {
-        return db.withConn { conn ->
-            conn.prepare("SELECT count(*) FROM event").use {
-                it.step()
-                it.getLong(0)
-            }
+        return conn.prepare("SELECT count(*) FROM event").use {
+            it.step()
+            it.getLong(0)
         }
     }
 
     fun deleteById(id: Long) {
-        db.withConn { conn ->
-            conn.prepare("DELETE FROM event WHERE id = ?1").use {
-                it.bindLong(1, id)
-                it.step()
-            }
+        conn.prepare("DELETE FROM event WHERE id = ?1").use {
+            it.bindLong(1, id)
+            it.step()
         }
     }
 

@@ -37,7 +37,7 @@ import user.UsersModel
 import user.UsersRepo
 
 val appModule = module {
-    single { Database(get<Context>().getDatabasePath("btcmap-2024-05-15.db").absolutePath) }
+    single { Database(get<Context>().getDatabasePath("btcmap-2024-05-15.db").absolutePath).conn }
 
     single { ApiImpl() }.bind(Api::class)
 

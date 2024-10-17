@@ -1,11 +1,12 @@
 package conf
 
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import androidx.sqlite.use
-import db.Database
 import db.getZonedDateTime
+import db.transaction
 
-class ConfQueries(private val db: Database) {
+class ConfQueries(private val conn: SQLiteConnection) {
 
     companion object {
         const val CREATE_TABLE = """
@@ -24,7 +25,7 @@ class ConfQueries(private val db: Database) {
     }
 
     fun insertOrReplace(conf: Conf) {
-        db.transaction { conn ->
+        conn.transaction { conn ->
             conn.execSQL("DELETE FROM conf")
 
             conn.prepare(
@@ -58,9 +59,8 @@ class ConfQueries(private val db: Database) {
     }
 
     fun select(): Conf? {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     last_sync_date,
                     viewport_north_lat,
@@ -73,22 +73,21 @@ class ConfQueries(private val db: Database) {
                     show_all_new_elements
                 FROM conf
                 """
-            ).use {
-                if (it.step()) {
-                    Conf(
-                        lastSyncDate = it.getZonedDateTime(0),
-                        viewportNorthLat = it.getDouble(1),
-                        viewportEastLon = it.getDouble(2),
-                        viewportSouthLat = it.getDouble(3),
-                        viewportWestLon = it.getDouble(4),
-                        showAtms = it.getBoolean(5),
-                        showOsmAttribution = it.getBoolean(6),
-                        showSyncSummary = it.getBoolean(7),
-                        showAllNewElements = it.getBoolean(8),
-                    )
-                } else {
-                    null
-                }
+        ).use {
+            if (it.step()) {
+                Conf(
+                    lastSyncDate = it.getZonedDateTime(0),
+                    viewportNorthLat = it.getDouble(1),
+                    viewportEastLon = it.getDouble(2),
+                    viewportSouthLat = it.getDouble(3),
+                    viewportWestLon = it.getDouble(4),
+                    showAtms = it.getBoolean(5),
+                    showOsmAttribution = it.getBoolean(6),
+                    showSyncSummary = it.getBoolean(7),
+                    showAllNewElements = it.getBoolean(8),
+                )
+            } else {
+                null
             }
         }
     }

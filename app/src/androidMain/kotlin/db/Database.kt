@@ -15,11 +15,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import reports.ReportQueries
 import user.UserQueries
 import java.time.LocalDateTime
-import java.util.concurrent.locks.ReentrantLock
 
 class Database(path: String) {
-
-    private val conn: SQLiteConnection =
+    val conn: SQLiteConnection =
         BundledSQLiteDriver().open(
             path,
             SQLITE_OPEN_READWRITE or SQLITE_OPEN_CREATE or SQLITE_OPEN_FULLMUTEX
@@ -46,29 +44,16 @@ class Database(path: String) {
                     execSQL("PRAGMA user_version=1")
                 }
             }
+}
 
-    private val connLock = ReentrantLock()
+fun <T> SQLiteConnection.transaction(action: (conn: SQLiteConnection) -> T) {
+    this.execSQL("BEGIN TRANSACTION")
 
-    fun <T> withConn(action: (conn: SQLiteConnection) -> T): T {
-        connLock.lock()
-        return try {
-            action(conn)
-        } finally {
-            connLock.unlock()
-        }
-    }
-
-    fun <T> transaction(action: (conn: SQLiteConnection) -> T) {
-        return withConn { conn ->
-            conn.execSQL("BEGIN TRANSACTION")
-
-            try {
-                action(conn)
-                conn.execSQL("END TRANSACTION")
-            } catch (t: Throwable) {
-                conn.execSQL("ROLLBACK TRANSACTION")
-            }
-        }
+    try {
+        action(this)
+        this.execSQL("END TRANSACTION")
+    } catch (t: Throwable) {
+        this.execSQL("ROLLBACK TRANSACTION")
     }
 }
 

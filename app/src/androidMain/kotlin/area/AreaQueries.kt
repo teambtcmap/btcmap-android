@@ -1,13 +1,14 @@
 package area
 
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.use
-import db.Database
 import db.getInstant
 import db.getJsonObject
 import db.getZonedDateTime
+import db.transaction
 import java.time.ZonedDateTime
 
-class AreaQueries(private val db: Database) {
+class AreaQueries(private val conn: SQLiteConnection) {
 
     companion object {
         const val CREATE_TABLE = """
@@ -20,7 +21,7 @@ class AreaQueries(private val db: Database) {
     }
 
     fun insertOrReplace(areas: List<Area>) {
-        db.transaction { conn ->
+        conn.transaction { conn ->
             areas.forEach { area ->
                 conn.prepare("INSERT OR REPLACE INTO area(id, tags, updated_at) VALUES(?1, ?2, ?3)")
                     .use {
@@ -34,65 +35,58 @@ class AreaQueries(private val db: Database) {
     }
 
     fun selectById(id: Long): Area? {
-        return db.withConn { conn ->
-            conn.prepare("SELECT id, tags, updated_at FROM area WHERE id = ?1").use {
-                it.bindLong(1, id)
+        return conn.prepare("SELECT id, tags, updated_at FROM area WHERE id = ?1").use {
+            it.bindLong(1, id)
 
-                if (it.step()) {
-                    Area(
-                        id = it.getLong(0),
-                        tags = it.getJsonObject(1),
-                        updatedAt = it.getInstant(2),
-                    )
-                } else {
-                    null
-                }
+            if (it.step()) {
+                Area(
+                    id = it.getLong(0),
+                    tags = it.getJsonObject(1),
+                    updatedAt = it.getInstant(2),
+                )
+            } else {
+                null
             }
         }
     }
 
     fun selectByType(type: String): List<Area> {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT id, tags, updated_at
                 FROM area
                 WHERE json_extract(tags, '$.type') = ?1
                 """
-            ).use {
-                it.bindText(1, type)
+        ).use {
+            it.bindText(1, type)
 
-                buildList {
-                    while (it.step()) {
-                        add(
-                            Area(
-                                id = it.getLong(0),
-                                tags = it.getJsonObject(1),
-                                updatedAt = it.getInstant(2),
-                            )
+            buildList {
+                while (it.step()) {
+                    add(
+                        Area(
+                            id = it.getLong(0),
+                            tags = it.getJsonObject(1),
+                            updatedAt = it.getInstant(2),
                         )
-                    }
+                    )
                 }
             }
         }
     }
 
     fun selectMaxUpdatedAt(): ZonedDateTime? {
-        return db.withConn { conn ->
-            conn.prepare("SELECT max(updated_at) FROM area").use {
-                if (it.step()) {
-                    it.getZonedDateTime(0)
-                } else {
-                    null
-                }
+        return conn.prepare("SELECT max(updated_at) FROM area").use {
+            if (it.step()) {
+                it.getZonedDateTime(0)
+            } else {
+                null
             }
         }
     }
 
     fun selectMeetups(): List<Meetup> {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     json_extract(tags, '$.meetup_lat') AS lat,
                     json_extract(tags, '$.meetup_lon') AS lon,
@@ -102,37 +96,32 @@ class AreaQueries(private val db: Database) {
                     lat IS NOT NULL 
                     AND lon IS NOT NULL
                 """
-            ).use {
-                buildList {
-                    while (it.step()) {
-                        add(
-                            Meetup(
-                                lat = it.getDouble(0),
-                                lon = it.getDouble(1),
-                                areaId = it.getLong(2),
-                            )
+        ).use {
+            buildList {
+                while (it.step()) {
+                    add(
+                        Meetup(
+                            lat = it.getDouble(0),
+                            lon = it.getDouble(1),
+                            areaId = it.getLong(2),
                         )
-                    }
+                    )
                 }
             }
         }
     }
 
     fun selectCount(): Long {
-        return db.withConn { conn ->
-            conn.prepare("SELECT count(*) FROM area").use {
-                it.step()
-                it.getLong(0)
-            }
+        return conn.prepare("SELECT count(*) FROM area").use {
+            it.step()
+            it.getLong(0)
         }
     }
 
     fun deleteById(id: Long) {
-        db.withConn { conn ->
-            conn.prepare("DELETE FROM area WHERE id = ?1").use {
-                it.bindLong(1, id)
-                it.step()
-            }
+        return conn.prepare("DELETE FROM area WHERE id = ?1").use {
+            it.bindLong(1, id)
+            it.step()
         }
     }
 }

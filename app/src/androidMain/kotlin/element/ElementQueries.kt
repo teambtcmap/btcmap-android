@@ -1,15 +1,16 @@
 package element
 
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.use
-import db.Database
 import db.getJsonArray
 import db.getJsonObjectOld
 import db.getText
 import db.getZonedDateTime
 import db.getZonedDateTimeOrNull
+import db.transaction
 import java.time.ZonedDateTime
 
-class ElementQueries(private val db: Database) {
+class ElementQueries(private val conn: SQLiteConnection) {
 
     companion object {
         const val CREATE_TABLE = """
@@ -25,7 +26,7 @@ class ElementQueries(private val db: Database) {
     }
 
     fun insertOrReplace(elements: List<Element>) {
-        db.transaction { conn ->
+        conn.transaction { conn ->
             elements.forEach { element ->
                 conn.prepare(
                     """
@@ -53,9 +54,8 @@ class ElementQueries(private val db: Database) {
     }
 
     fun selectById(id: Long): Element? {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     id,
                     overpass_data,
@@ -66,29 +66,27 @@ class ElementQueries(private val db: Database) {
                 FROM element
                 WHERE id = ?1
                 """
-            ).use {
-                it.bindLong(1, id)
+        ).use {
+            it.bindLong(1, id)
 
-                if (it.step()) {
-                    Element(
-                        id = it.getLong(0),
-                        overpassData = it.getJsonObjectOld(1),
-                        tags = it.getJsonObjectOld(2),
-                        updatedAt = it.getText(3),
-                        lat = it.getDouble(4),
-                        lon = it.getDouble(5),
-                    )
-                } else {
-                    null
-                }
+            if (it.step()) {
+                Element(
+                    id = it.getLong(0),
+                    overpassData = it.getJsonObjectOld(1),
+                    tags = it.getJsonObjectOld(2),
+                    updatedAt = it.getText(3),
+                    lat = it.getDouble(4),
+                    lon = it.getDouble(5),
+                )
+            } else {
+                null
             }
         }
     }
 
     fun selectBySearchString(searchString: String): List<Element> {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     id,
                     overpass_data,
@@ -99,31 +97,29 @@ class ElementQueries(private val db: Database) {
                 FROM element
                 WHERE UPPER(overpass_data) LIKE '%' || UPPER(?1) || '%'
                 """
-            ).use {
-                it.bindText(1, searchString)
+        ).use {
+            it.bindText(1, searchString)
 
-                buildList {
-                    while (it.step()) {
-                        add(
-                            Element(
-                                id = it.getLong(0),
-                                overpassData = it.getJsonObjectOld(1),
-                                tags = it.getJsonObjectOld(2),
-                                updatedAt = it.getText(3),
-                                lat = it.getDouble(4),
-                                lon = it.getDouble(5),
-                            )
+            buildList {
+                while (it.step()) {
+                    add(
+                        Element(
+                            id = it.getLong(0),
+                            overpassData = it.getJsonObjectOld(1),
+                            tags = it.getJsonObjectOld(2),
+                            updatedAt = it.getText(3),
+                            lat = it.getDouble(4),
+                            lon = it.getDouble(5),
                         )
-                    }
+                    )
                 }
             }
         }
     }
 
     fun selectByOsmTagValue(tagName: String, tagValue: String): List<Element> {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     id,
                     overpass_data,
@@ -134,31 +130,29 @@ class ElementQueries(private val db: Database) {
                 FROM element
                 WHERE json_extract(overpass_data, '$.tags.$tagName') = ?1
                 """
-            ).use {
-                it.bindText(1, tagValue)
+        ).use {
+            it.bindText(1, tagValue)
 
-                buildList {
-                    while (it.step()) {
-                        add(
-                            Element(
-                                id = it.getLong(0),
-                                overpassData = it.getJsonObjectOld(1),
-                                tags = it.getJsonObjectOld(2),
-                                updatedAt = it.getText(3),
-                                lat = it.getDouble(4),
-                                lon = it.getDouble(5),
-                            )
+            buildList {
+                while (it.step()) {
+                    add(
+                        Element(
+                            id = it.getLong(0),
+                            overpassData = it.getJsonObjectOld(1),
+                            tags = it.getJsonObjectOld(2),
+                            updatedAt = it.getText(3),
+                            lat = it.getDouble(4),
+                            lon = it.getDouble(5),
                         )
-                    }
+                    )
                 }
             }
         }
     }
 
     fun selectByBtcMapTagValue(tagName: String, tagValue: String): List<Element> {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     id,
                     overpass_data,
@@ -169,22 +163,21 @@ class ElementQueries(private val db: Database) {
                 FROM element
                 WHERE json_extract(tags, '$.$tagName') = ?1
                 """
-            ).use {
-                it.bindText(1, tagValue)
+        ).use {
+            it.bindText(1, tagValue)
 
-                buildList {
-                    while (it.step()) {
-                        add(
-                            Element(
-                                id = it.getLong(0),
-                                overpassData = it.getJsonObjectOld(1),
-                                tags = it.getJsonObjectOld(2),
-                                updatedAt = it.getText(3),
-                                lat = it.getDouble(4),
-                                lon = it.getDouble(5),
-                            )
+            buildList {
+                while (it.step()) {
+                    add(
+                        Element(
+                            id = it.getLong(0),
+                            overpassData = it.getJsonObjectOld(1),
+                            tags = it.getJsonObjectOld(2),
+                            updatedAt = it.getText(3),
+                            lat = it.getDouble(4),
+                            lon = it.getDouble(5),
                         )
-                    }
+                    )
                 }
             }
         }
@@ -197,9 +190,8 @@ class ElementQueries(private val db: Database) {
         maxLon: Double,
         excludedCategories: List<String>,
     ): List<ElementsCluster> {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     id,
                     ext_lat,
@@ -216,26 +208,25 @@ class ElementQueries(private val db: Database) {
                     AND ext_lon < ?4
                 ORDER BY ext_lat DESC
                 """
-            ).use {
-                it.bindDouble(1, minLat)
-                it.bindDouble(2, maxLat)
-                it.bindDouble(3, minLon)
-                it.bindDouble(4, maxLon)
+        ).use {
+            it.bindDouble(1, minLat)
+            it.bindDouble(2, maxLat)
+            it.bindDouble(3, minLon)
+            it.bindDouble(4, maxLon)
 
-                buildList {
-                    while (it.step()) {
-                        add(
-                            ElementsCluster(
-                                count = 1,
-                                id = it.getLong(0),
-                                lat = it.getDouble(1),
-                                lon = it.getDouble(2),
-                                iconId = it.getText(3),
-                                boostExpires = it.getZonedDateTimeOrNull(4),
-                                requiresCompanionApp = it.getText(5, defaultValue = "no") == "yes",
-                            )
+            buildList {
+                while (it.step()) {
+                    add(
+                        ElementsCluster(
+                            count = 1,
+                            id = it.getLong(0),
+                            lat = it.getDouble(1),
+                            lon = it.getDouble(2),
+                            iconId = it.getText(3),
+                            boostExpires = it.getZonedDateTimeOrNull(4),
+                            requiresCompanionApp = it.getText(5, defaultValue = "no") == "yes",
                         )
-                    }
+                    )
                 }
             }
         }
@@ -245,9 +236,8 @@ class ElementQueries(private val db: Database) {
         step: Double,
         excludedCategories: List<String>,
     ): List<ElementsCluster> {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     count(*),
                     e.id,
@@ -261,23 +251,22 @@ class ElementQueries(private val db: Database) {
                 GROUP BY round(ext_lat / ?1) * ?1, round(ext_lon / ?1) * ?1
                 ORDER BY e.ext_lat DESC
                 """
-            ).use {
-                it.bindDouble(1, step)
+        ).use {
+            it.bindDouble(1, step)
 
-                buildList {
-                    while (it.step()) {
-                        add(
-                            ElementsCluster(
-                                count = it.getLong(0),
-                                id = it.getLong(1),
-                                lat = it.getDouble(2),
-                                lon = it.getDouble(3),
-                                iconId = it.getText(4),
-                                boostExpires = it.getZonedDateTimeOrNull(5),
-                                requiresCompanionApp = it.getText(6, defaultValue = "no") == "yes",
-                            )
+            buildList {
+                while (it.step()) {
+                    add(
+                        ElementsCluster(
+                            count = it.getLong(0),
+                            id = it.getLong(1),
+                            lat = it.getDouble(2),
+                            lon = it.getDouble(3),
+                            iconId = it.getText(4),
+                            boostExpires = it.getZonedDateTimeOrNull(5),
+                            requiresCompanionApp = it.getText(6, defaultValue = "no") == "yes",
                         )
-                    }
+                    )
                 }
             }
         }
@@ -289,9 +278,8 @@ class ElementQueries(private val db: Database) {
         minLon: Double,
         maxLon: Double,
     ): List<AreaElement> {
-        return db.withConn { conn ->
-            conn.prepare(
-                """
+        return conn.prepare(
+            """
                 SELECT
                     id,
                     ext_lat,
@@ -304,59 +292,52 @@ class ElementQueries(private val db: Database) {
                 FROM element
                 WHERE ext_lat > ?1 AND ext_lat < ?2 AND ext_lon > ?3 AND ext_lon < ?4
                 """
-            ).use {
-                it.bindDouble(1, minLat)
-                it.bindDouble(2, maxLat)
-                it.bindDouble(3, minLon)
-                it.bindDouble(4, maxLon)
+        ).use {
+            it.bindDouble(1, minLat)
+            it.bindDouble(2, maxLat)
+            it.bindDouble(3, minLon)
+            it.bindDouble(4, maxLon)
 
-                buildList {
-                    while (it.step()) {
-                        add(
-                            AreaElement(
-                                id = it.getLong(0),
-                                lat = it.getDouble(1),
-                                lon = it.getDouble(2),
-                                icon = it.getText(3),
-                                osmTags = it.getJsonObjectOld(4),
-                                issues = it.getJsonArray(5),
-                                osmType = it.getText(6),
-                                osmId = it.getLong(7),
-                            )
+            buildList {
+                while (it.step()) {
+                    add(
+                        AreaElement(
+                            id = it.getLong(0),
+                            lat = it.getDouble(1),
+                            lon = it.getDouble(2),
+                            icon = it.getText(3),
+                            osmTags = it.getJsonObjectOld(4),
+                            issues = it.getJsonArray(5),
+                            osmType = it.getText(6),
+                            osmId = it.getLong(7),
                         )
-                    }
+                    )
                 }
             }
         }
     }
 
     fun selectMaxUpdatedAt(): ZonedDateTime? {
-        return db.withConn { conn ->
-            conn.prepare("SELECT max(updated_at) FROM element").use {
-                if (it.step()) {
-                    it.getZonedDateTime(0)
-                } else {
-                    null
-                }
+        return conn.prepare("SELECT max(updated_at) FROM element").use {
+            if (it.step()) {
+                it.getZonedDateTime(0)
+            } else {
+                null
             }
         }
     }
 
     fun selectCount(): Long {
-        return db.withConn { conn ->
-            conn.prepare("SELECT count(*) FROM element").use {
-                it.step()
-                it.getLong(0)
-            }
+        return conn.prepare("SELECT count(*) FROM element").use {
+            it.step()
+            it.getLong(0)
         }
     }
 
     fun deleteById(id: Long) {
-        db.withConn { conn ->
-            conn.prepare("DELETE FROM element WHERE id = ?1").use {
-                it.bindLong(1, id)
-                it.step()
-            }
+        conn.prepare("DELETE FROM element WHERE id = ?1").use {
+            it.bindLong(1, id)
+            it.step()
         }
     }
 }
