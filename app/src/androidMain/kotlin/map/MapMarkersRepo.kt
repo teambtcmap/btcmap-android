@@ -49,6 +49,26 @@ class MapMarkersRepo(
         }
     }
 
+    private val commentCountCirclePaint by lazy {
+        Paint().apply {
+            color = Color.parseColor("#0c9073")
+            isAntiAlias = true
+        }
+    }
+
+    private val commentsCountTextPaint by lazy {
+        Paint().apply {
+            val pinSizePx = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                PIN_SIZE_DP,
+                context.resources.displayMetrics,
+            )
+            textSize = pinSizePx / 4f
+            color = Color.WHITE
+            isAntiAlias = true
+        }
+    }
+
     private val cache = mutableMapOf<String?, BitmapDrawable>()
 
     private val boostedCache = mutableMapOf<String?, BitmapDrawable>()
@@ -56,31 +76,40 @@ class MapMarkersRepo(
     private val warningCache = mutableMapOf<String?, BitmapDrawable>()
 
     val meetupMarker by lazy {
-        createMarkerIcon("groups", BackgroundType.MEETUP).toDrawable(context.resources)
+        createMarkerIcon("groups", BackgroundType.MEETUP, 0).toDrawable(context.resources)
     }
 
-    fun getMarker(iconId: String): BitmapDrawable {
-        var markerDrawable = cache[iconId]
+    fun getMarker(iconId: String, comments: Long): BitmapDrawable {
+        var markerDrawable = if (comments == 0L) null else cache[iconId]
 
         if (markerDrawable == null) {
             markerDrawable =
                 createMarkerIcon(
                     iconId,
-                    BackgroundType.PRIMARY_CONTAINER
+                    BackgroundType.PRIMARY_CONTAINER,
+                    comments,
                 ).toDrawable(context.resources)
-            cache[iconId] = markerDrawable
+            if (comments == 0L) {
+                cache[iconId] = markerDrawable
+            }
         }
 
         return markerDrawable
     }
 
-    fun getBoostedMarker(iconId: String): BitmapDrawable {
-        var markerDrawable = boostedCache[iconId]
+    fun getBoostedMarker(iconId: String, comments: Long): BitmapDrawable {
+        var markerDrawable = if (comments == 0L) null else boostedCache[iconId]
 
         if (markerDrawable == null) {
             markerDrawable =
-                createMarkerIcon(iconId, BackgroundType.BOOSTED).toDrawable(context.resources)
-            boostedCache[iconId] = markerDrawable
+                createMarkerIcon(
+                    iconId,
+                    BackgroundType.BOOSTED,
+                    comments
+                ).toDrawable(context.resources)
+            if (comments == 0L) {
+                boostedCache[iconId] = markerDrawable
+            }
         }
 
         return markerDrawable
@@ -91,14 +120,18 @@ class MapMarkersRepo(
 
         if (markerDrawable == null) {
             markerDrawable =
-                createMarkerIcon(iconId, BackgroundType.WARNING).toDrawable(context.resources)
+                createMarkerIcon(iconId, BackgroundType.WARNING, 0).toDrawable(context.resources)
             warningCache[iconId] = markerDrawable
         }
 
         return markerDrawable
     }
 
-    private fun createMarkerIcon(iconId: String, backgroundType: BackgroundType): Bitmap {
+    private fun createMarkerIcon(
+        iconId: String,
+        backgroundType: BackgroundType,
+        comments: Long
+    ): Bitmap {
         val pinSizePx = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, 48f, context.resources.displayMetrics
         ).toInt()
@@ -155,6 +188,25 @@ class MapMarkersRepo(
                     markerIcon.width / 2f - textWidth / 2f,
                     markerIcon.height / 2f - (iconPaint.fontMetrics.ascent + iconPaint.fontMetrics.descent) / 2 - markerIcon.height.toFloat() * 0.09f,
                     if (backgroundType == BackgroundType.BOOSTED || backgroundType == BackgroundType.MEETUP) whiteIconPaint else iconPaint
+                )
+            }
+        }
+
+        if (comments > 0) {
+            markerIcon.applyCanvas {
+                val textWidth = commentsCountTextPaint.measureText(comments.toString())
+                drawOval(
+                    markerIcon.width.toFloat() * 0.65f,
+                    0f,
+                    markerIcon.width.toFloat() * 0.65f + markerIcon.width.toFloat() * 0.35f,
+                    markerIcon.height.toFloat() * 0.35f,
+                    commentCountCirclePaint,
+                )
+                drawText(
+                    comments.toString(),
+                    markerIcon.width * 0.82f - textWidth / 2f,
+                    markerIcon.height / 4f - (commentsCountTextPaint.fontMetrics.ascent + commentsCountTextPaint.fontMetrics.descent) / 2 - markerIcon.height.toFloat() * 0.07f,
+                    commentsCountTextPaint,
                 )
             }
         }

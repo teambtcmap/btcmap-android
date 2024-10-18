@@ -299,9 +299,15 @@ class MapFragment : Fragment() {
                                     it.cluster.boostExpires != null
                                     && it.cluster.boostExpires.isAfter(ZonedDateTime.now(ZoneOffset.UTC))
                                 ) {
-                                    markersRepo.getBoostedMarker(it.cluster.iconId.ifBlank { "question_mark" })
+                                    markersRepo.getBoostedMarker(
+                                        it.cluster.iconId.ifBlank { "question_mark" },
+                                        it.cluster.comments,
+                                    )
                                 } else {
-                                    markersRepo.getMarker(it.cluster.iconId.ifBlank { "question_mark" })
+                                    markersRepo.getMarker(
+                                        it.cluster.iconId.ifBlank { "question_mark" },
+                                        it.cluster.comments,
+                                    )
                                 }
 
                                 marker.icon = icon

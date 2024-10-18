@@ -193,20 +193,21 @@ class ElementQueries(private val conn: SQLiteConnection) {
         return conn.prepare(
             """
                 SELECT
-                    id,
-                    ext_lat,
-                    ext_lon,
-                    json_extract(tags, '$.icon:android') AS icon_id,
-                    json_extract(tags, '$.boost:expires') AS boost_expires,
-                    json_extract(overpass_data, '$.tags.payment:lightning:requires_companion_app') AS requires_companion_app
-                FROM element
+                    e.id,
+                    e.ext_lat,
+                    e.ext_lon,
+                    json_extract(e.tags, '$.icon:android') AS icon_id,
+                    json_extract(e.tags, '$.boost:expires') AS boost_expires,
+                    json_extract(e.overpass_data, '$.tags.payment:lightning:requires_companion_app') AS requires_companion_app,
+                    (SELECT count(*) from element_comment c WHERE c.element_id = e.id) AS comments
+                FROM element e
                 WHERE
-                    json_extract(tags, '$.category') NOT IN (${excludedCategories.joinToString { "'$it'" }})
-                    AND ext_lat > ?1
-                    AND ext_lat < ?2
-                    AND ext_lon > ?3
-                    AND ext_lon < ?4
-                ORDER BY ext_lat DESC
+                    json_extract(e.tags, '$.category') NOT IN (${excludedCategories.joinToString { "'$it'" }})
+                    AND e.ext_lat > ?1
+                    AND e.ext_lat < ?2
+                    AND e.ext_lon > ?3
+                    AND e.ext_lon < ?4
+                ORDER BY e.ext_lat DESC
                 """
         ).use {
             it.bindDouble(1, minLat)
@@ -225,6 +226,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
                             iconId = it.getText(3),
                             boostExpires = it.getZonedDateTimeOrNull(4),
                             requiresCompanionApp = it.getText(5, defaultValue = "no") == "yes",
+                            comments = it.getLong(6),
                         )
                     )
                 }
@@ -245,7 +247,8 @@ class ElementQueries(private val conn: SQLiteConnection) {
                     avg(e.ext_lon) AS lon,
                     json_extract(e.tags, '$.icon:android') AS icon_id,
                     json_extract(e.tags, '$.boost:expires') AS boost_expires,
-                    json_extract(e.overpass_data, '$.tags.payment:lightning:requires_companion_app') AS requires_companion_app
+                    json_extract(e.overpass_data, '$.tags.payment:lightning:requires_companion_app') AS requires_companion_app,
+                    (SELECT count(*) from element_comment c WHERE c.element_id = e.id) AS comments
                 FROM element e
                 WHERE json_extract(e.tags, '$.category') NOT IN (${excludedCategories.joinToString { "'$it'" }})
                 GROUP BY round(ext_lat / ?1) * ?1, round(ext_lon / ?1) * ?1
@@ -265,6 +268,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
                             iconId = it.getText(4),
                             boostExpires = it.getZonedDateTimeOrNull(5),
                             requiresCompanionApp = it.getText(6, defaultValue = "no") == "yes",
+                            comments = it.getLong(7),
                         )
                     )
                 }

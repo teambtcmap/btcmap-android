@@ -95,7 +95,7 @@ class ElementFragment : Fragment() {
                 val marker = Marker(binding.map)
                 marker.position = GeoPoint(element.lat, element.lon)
                 marker.icon = markersRepo.getMarker(
-                    element.tags.optString("icon:android").ifBlank { "question_mark" }
+                    element.tags.optString("icon:android").ifBlank { "question_mark" }, 0
                 )
                 binding.map.overlays.add(marker)
             }

@@ -10,4 +10,5 @@ data class ElementsCluster(
     val iconId: String,
     val boostExpires: ZonedDateTime?,
     val requiresCompanionApp: Boolean,
+    val comments: Long,
 )
