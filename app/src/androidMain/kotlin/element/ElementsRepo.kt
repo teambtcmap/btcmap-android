@@ -181,6 +181,7 @@ class ElementsRepo(
                     .map { it.toElement() })
             }
         }
+        elementsUpdatedAt.update { LocalDateTime.now() }
     }
 
     suspend fun sync(): SyncReport {

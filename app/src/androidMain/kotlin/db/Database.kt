@@ -10,6 +10,7 @@ import androidx.sqlite.use
 import area.AreaQueries
 import conf.ConfQueries
 import element.ElementQueries
+import element_comment.ElementCommentQueries
 import event.EventQueries
 import kotlinx.coroutines.flow.MutableStateFlow
 import reports.ReportQueries
@@ -35,6 +36,7 @@ class Database(path: String) {
                 }
 
                 if (version == 0) {
+                    execSQL(ElementCommentQueries.CREATE_TABLE)
                     execSQL(ElementQueries.CREATE_TABLE)
                     execSQL(EventQueries.CREATE_TABLE)
                     execSQL(ReportQueries.CREATE_TABLE)

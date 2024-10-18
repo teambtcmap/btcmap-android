@@ -35,9 +35,11 @@ import sync.SyncNotificationController
 import user.UserQueries
 import user.UsersModel
 import user.UsersRepo
+import element_comment.ElementCommentQueries
+import element_comment.ElementCommentRepo
 
 val appModule = module {
-    single { Database(get<Context>().getDatabasePath("btcmap-2024-05-15.db").absolutePath).conn }
+    single { Database(get<Context>().getDatabasePath("btcmap-2024-10-18.db").absolutePath).conn }
 
     single { ApiImpl() }.bind(Api::class)
 
@@ -54,6 +56,9 @@ val appModule = module {
 
     singleOf(::ElementQueries)
     singleOf(::ElementsRepo)
+
+    singleOf(::ElementCommentQueries)
+    singleOf(::ElementCommentRepo)
 
     singleOf(::ConfQueries)
     singleOf(::ConfRepo)

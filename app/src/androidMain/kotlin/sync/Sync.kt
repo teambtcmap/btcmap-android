@@ -3,6 +3,7 @@ package sync
 import area.AreasRepo
 import conf.ConfRepo
 import element.ElementsRepo
+import element_comment.ElementCommentRepo
 import event.EventsRepo
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +21,7 @@ import java.time.ZonedDateTime
 
 class Sync(
     private val areasRepo: AreasRepo,
+    private val elementCommentRepo: ElementCommentRepo,
     private val elementsRepo: ElementsRepo,
     private val reportsRepo: ReportsRepo,
     private val usersRepo: UsersRepo,
@@ -38,6 +40,10 @@ class Sync(
             runCatching {
                 coroutineScope {
                     val startedAt = now()
+
+                    if (elementCommentRepo.selectCount() == 0L && elementCommentRepo.hasBundledElements()) {
+                        elementCommentRepo.fetchBundledElements()
+                    }
 
                     if (elementsRepo.selectCount() == 0L && elementsRepo.hasBundledElements()) {
                         elementsRepo.fetchBundledElements()
@@ -61,6 +67,9 @@ class Sync(
 
                     val syncJobs = mutableListOf<Deferred<Any>>()
 
+                    val elementCommentReport =
+                        async { elementCommentRepo.sync() }.also { syncJobs += it }
+                    elementCommentReport.await()
                     val elementsReport = async { elementsRepo.sync() }.also { syncJobs += it }
                     elementsReport.await()
                     val reportsReport = async { reportsRepo.sync() }.also { syncJobs += it }
@@ -82,6 +91,7 @@ class Sync(
                         eventsReport = eventsReport.await(),
                         areasReport = areasReport.await(),
                         usersReport = usersReport.await(),
+                        elementCommentReport = elementCommentReport.await(),
                     )
 
                     syncNotificationController.showPostSyncNotifications(
@@ -102,6 +112,7 @@ class Sync(
 data class SyncReport(
     val startedAt: ZonedDateTime,
     val finishedAt: ZonedDateTime,
+    val elementCommentReport: ElementCommentRepo.SyncReport,
     val elementsReport: ElementsRepo.SyncReport,
     val reportsReport: ReportsRepo.SyncReport,
     val eventsReport: EventsRepo.SyncReport,

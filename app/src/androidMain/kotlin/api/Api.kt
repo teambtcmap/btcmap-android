@@ -4,6 +4,8 @@ import area.AreaJson
 import area.toAreasJson
 import element.ElementJson
 import element.toElementsJson
+import element_comment.ElementCommentJson
+import element_comment.toElementCommentsJson
 import event.EventJson
 import event.toEventsJson
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +27,11 @@ private val BASE_URL = "https://api.btcmap.org".toHttpUrl()
 
 interface Api {
     suspend fun getAreas(updatedSince: ZonedDateTime?, limit: Long): List<AreaJson>
+
+    suspend fun getElementComments(
+        updatedSince: ZonedDateTime?,
+        limit: Long
+    ): List<ElementCommentJson>
 
     suspend fun getElements(updatedSince: ZonedDateTime?, limit: Long): List<ElementJson>
 
@@ -55,6 +62,28 @@ class ApiImpl(
 
         return withContext(Dispatchers.IO) {
             res.body.byteStream().use { it.toAreasJson() }
+        }
+    }
+
+    override suspend fun getElementComments(
+        updatedSince: ZonedDateTime?,
+        limit: Long
+    ): List<ElementCommentJson> {
+        val url = baseUrl.newBuilder().apply {
+            addPathSegment("v3")
+            addPathSegment("element-comments")
+            addQueryParameter("updated_since", updatedSince.apiFormat())
+            addQueryParameter("limit", "$limit")
+        }.build()
+
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return withContext(Dispatchers.IO) {
+            res.body.byteStream().use { it.toElementCommentsJson() }
         }
     }
 
