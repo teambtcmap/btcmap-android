@@ -54,6 +54,7 @@ class ConfQueries(private val conn: SQLiteConnection) {
                 it.bindLong(7, if (conf.showOsmAttribution) 1 else 0)
                 it.bindLong(8, if (conf.showSyncSummary) 1 else 0)
                 it.bindLong(9, if (conf.showAllNewElements) 1 else 0)
+                it.step()
             }
         }
     }
