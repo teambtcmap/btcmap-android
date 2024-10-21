@@ -20,7 +20,9 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
+import element_comment.ElementCommentRepo
 import icons.iconTypeface
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
@@ -41,9 +43,13 @@ class ElementFragment : Fragment() {
 
     private val elementsRepo: ElementsRepo by inject()
 
+    private val elementCommentRepo: ElementCommentRepo by inject()
+
     private val resultModel: SearchResultModel by activityViewModel()
 
     private var elementId = -1L
+
+    val commentsAdapter = CommentsAdapter()
 
     private var _binding: FragmentElementBinding? = null
     private val binding get() = _binding!!
@@ -56,6 +62,10 @@ class ElementFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        binding.comments.layoutManager = LinearLayoutManager(requireContext())
+        binding.comments.isNestedScrollingEnabled = false
+        binding.comments.adapter = commentsAdapter
+
         if (arguments != null) {
             ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { appBar, windowInsets ->
                 val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
@@ -338,6 +348,11 @@ class ElementFragment : Fragment() {
         } else {
             binding.image.isVisible = false
         }
+
+        val comments = runBlocking { elementCommentRepo.selectByElementId(element.id) }
+        binding.commentsTitle.text = getString(R.string.comments_d, comments.size)
+        binding.commentsTitle.isVisible = comments.isNotEmpty()
+        commentsAdapter.submitList(comments)
     }
 
     private fun TextView.styleAsLink() {

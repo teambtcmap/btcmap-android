@@ -89,6 +89,7 @@ class ElementCommentQueries(private val conn: SQLiteConnection) {
                     updated_at
                 FROM element_comment
                 WHERE element_id = ?1
+                ORDER BY created_at DESC
                 """
         ).use {
             it.bindLong(1, elementId)

@@ -202,6 +202,28 @@
                 app:drawableStartCompat="@drawable/schedule"
                 app:drawableTint="?colorSecondary" />
 
+            <TextView
+                android:id="@+id/comments_title"
+                style="?attr/textAppearanceSubtitle1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="20dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp"
+                android:singleLine="true"
+                android:text="@string/comments_d"
+                app:drawableStartCompat="@drawable/comment"
+                app:drawableTint="?colorSecondary" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/comments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="60dp" />
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
