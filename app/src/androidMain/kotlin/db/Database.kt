@@ -46,6 +46,8 @@ class Database(path: String) {
                     execSQL(ConfQueries.CREATE_TABLE)
                     execSQL("PRAGMA user_version=1")
                 }
+
+                execSQL(ElementCommentQueries.CREATE_INDICES)
             }
 }
 

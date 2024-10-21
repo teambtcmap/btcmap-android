@@ -18,6 +18,9 @@ class ElementCommentQueries(private val conn: SQLiteConnection) {
                 updated_at TEXT NOT NULL
             );
             """
+        const val CREATE_INDICES = """
+            CREATE INDEX IF NOT EXISTS element_comment_element_id ON element_comment(element_id);
+            """
     }
 
     fun insertOrReplace(comments: List<ElementComment>) {
