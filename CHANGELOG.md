@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.8.0] - 2024-10-24
+
+- Show place comments
+- Hide ATMs by default
+- Show places offering delivery
+- Migrate to faster and more efficient v3 API
+
 ## [0.7.3] - 2024-05-03
 
 - Bundle the latest data snapshots
