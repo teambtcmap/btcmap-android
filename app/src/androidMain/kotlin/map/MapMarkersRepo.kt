@@ -69,62 +69,28 @@ class MapMarkersRepo(
         }
     }
 
-    private val cache = mutableMapOf<String?, BitmapDrawable>()
-
-    private val boostedCache = mutableMapOf<String?, BitmapDrawable>()
-
-    private val warningCache = mutableMapOf<String?, BitmapDrawable>()
-
     val meetupMarker by lazy {
         createMarkerIcon("groups", BackgroundType.MEETUP, 0).toDrawable(context.resources)
     }
 
     fun getMarker(iconId: String, comments: Long): BitmapDrawable {
-        var markerDrawable = if (comments == 0L) null else cache[iconId]
-
-        if (markerDrawable == null) {
-            markerDrawable =
-                createMarkerIcon(
-                    iconId,
-                    BackgroundType.PRIMARY_CONTAINER,
-                    comments,
-                ).toDrawable(context.resources)
-            if (comments == 0L) {
-                cache[iconId] = markerDrawable
-            }
-        }
-
-        return markerDrawable
+        return createMarkerIcon(
+            iconId,
+            BackgroundType.PRIMARY_CONTAINER,
+            comments,
+        ).toDrawable(context.resources)
     }
 
     fun getBoostedMarker(iconId: String, comments: Long): BitmapDrawable {
-        var markerDrawable = if (comments == 0L) null else boostedCache[iconId]
-
-        if (markerDrawable == null) {
-            markerDrawable =
-                createMarkerIcon(
-                    iconId,
-                    BackgroundType.BOOSTED,
-                    comments
-                ).toDrawable(context.resources)
-            if (comments == 0L) {
-                boostedCache[iconId] = markerDrawable
-            }
-        }
-
-        return markerDrawable
+        return createMarkerIcon(
+            iconId,
+            BackgroundType.BOOSTED,
+            comments
+        ).toDrawable(context.resources)
     }
 
     fun getWarningMarker(iconId: String): BitmapDrawable {
-        var markerDrawable = warningCache[iconId]
-
-        if (markerDrawable == null) {
-            markerDrawable =
-                createMarkerIcon(iconId, BackgroundType.WARNING, 0).toDrawable(context.resources)
-            warningCache[iconId] = markerDrawable
-        }
-
-        return markerDrawable
+        return createMarkerIcon(iconId, BackgroundType.WARNING, 0).toDrawable(context.resources)
     }
 
     private fun createMarkerIcon(
