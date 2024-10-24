@@ -35,8 +35,8 @@ class CommentsAdapter :
         fun bind(item: ElementComment) {
             binding.apply {
                 message.text = item.comment
-                val dateFormat = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                date.text = dateFormat.format(OffsetDateTime.parse(item.createdAt))
+                val dateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+                date.text = OffsetDateTime.parse(item.createdAt).toLocalDate().format(dateFormat)
             }
         }
     }
