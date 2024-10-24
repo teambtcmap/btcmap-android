@@ -43,7 +43,7 @@ class ConfRepo(
             viewportEastLon = -68.933333 + 0.04 + 0.03,
             viewportSouthLat = 12.116667 - 0.04,
             viewportWestLon = -68.933333 - 0.04 + 0.03,
-            showAtms = true,
+            showAtms = false,
             showOsmAttribution = true,
             showSyncSummary = context.isDebuggable(),
             showAllNewElements = context.isDebuggable(),
