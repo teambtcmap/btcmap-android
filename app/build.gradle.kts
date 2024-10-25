@@ -39,6 +39,7 @@ kotlin {
             implementation(libs.mpandroidchart)
             implementation(libs.coil.core)
             implementation(libs.coil.svg)
+            implementation(libs.maplibre)
         }
         commonMain.dependencies {
             implementation(libs.kotlinx.serialization)

@@ -29,13 +29,17 @@ import kotlinx.coroutines.runBlocking
 import map.MapMarkersRepo
 import map.getErrorColor
 import map.getOnSurfaceColor
+import map.initStyle
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.overlay.Marker
+import org.maplibre.android.annotations.IconFactory
+import org.maplibre.android.annotations.MarkerOptions
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.camera.CameraUpdateFactory
+import org.maplibre.android.geometry.LatLng
 import search.SearchResultModel
 import java.time.ZonedDateTime
 
@@ -94,20 +98,21 @@ class ElementFragment : Fragment() {
                 findNavController().navigate(R.id.action_elementFragment_to_mapFragment)
             }
 
-            binding.map.post {
-                val mapController = binding.map.controller
-                mapController.setZoom(16.toDouble())
-                val startPoint = GeoPoint(element.lat, element.lon)
-                mapController.setCenter(startPoint)
-                mapController.zoomTo(19.0)
-
+            binding.map.getMapAsync { map ->
+                map.uiSettings.setAllGesturesEnabled(false)
+                map.initStyle(requireContext())
+                map.cameraPosition =
+                    CameraPosition.Builder().target(LatLng(element.lat, element.lon)).zoom(15.0)
+                        .build()
                 val markersRepo = MapMarkersRepo(requireContext())
-                val marker = Marker(binding.map)
-                marker.position = GeoPoint(element.lat, element.lon)
-                marker.icon = markersRepo.getMarker(
+                val icon = markersRepo.getMarker(
                     element.tags.optString("icon:android").ifBlank { "question_mark" }, 0
                 )
-                binding.map.overlays.add(marker)
+                val markerOptions = MarkerOptions()
+                    .position(LatLng(element.lat, element.lon))
+                    .icon(IconFactory.getInstance(requireContext()).fromBitmap(icon.bitmap))
+                map.addMarker(markerOptions)
+                map.animateCamera(CameraUpdateFactory.zoomTo(17.0), 3_000)
             }
         }
 

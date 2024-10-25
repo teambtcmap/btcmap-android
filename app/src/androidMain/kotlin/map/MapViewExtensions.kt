@@ -1,7 +1,10 @@
 package map
 
+import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import org.locationtech.jts.geom.Polygon
+import org.maplibre.android.maps.MapLibreMap
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 
@@ -22,5 +25,16 @@ fun MapView.showPolygons(polygons: List<Polygon>, paddingPx: Int) {
             false,
             paddingPx,
         )
+    }
+}
+
+fun MapLibreMap.initStyle(context: Context) {
+    val nightMode =
+        context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+
+    if (nightMode) {
+        setStyle("https://tiles.openfreemap.org/styles/positron")
+    } else {
+        setStyle("https://tiles.openfreemap.org/styles/bright")
     }
 }

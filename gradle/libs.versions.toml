@@ -51,6 +51,8 @@ serialization = "1.7.3"
 # Platform-agnostic date and time handling
 # https://github.com/Kotlin/kotlinx-datetime/releases
 datetime = "0.6.1"
+# https://github.com/maplibre/maplibre-native/releases
+maplibre = "11.5.2"
 
 [libraries]
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -75,6 +77,7 @@ jts = { module = "org.locationtech.jts:jts-core", version.ref = "jts" }
 mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
 coil-core = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }
+maplibre = { module = "org.maplibre.gl:android-sdk", version.ref = "maplibre" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
