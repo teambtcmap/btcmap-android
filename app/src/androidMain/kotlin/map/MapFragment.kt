@@ -38,7 +38,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import area.AreaResultModel
-import area.polygons
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import element.ElementFragment
 import element.ElementsCluster
@@ -54,20 +53,18 @@ import org.btcmap.R
 import org.btcmap.databinding.FragmentMapBinding
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.maplibre.android.annotations.IconFactory
+import org.maplibre.android.annotations.Marker
+import org.maplibre.android.annotations.MarkerOptions
+import org.maplibre.android.camera.CameraUpdateFactory
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.android.gestures.MoveGestureDetector
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMap.OnMoveListener
 import org.osmdroid.config.Configuration
-import org.osmdroid.events.MapEventsReceiver
-import org.osmdroid.events.MapListener
-import org.osmdroid.events.ScrollEvent
-import org.osmdroid.events.ZoomEvent
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.util.TileSystemWebMercator
-import org.osmdroid.views.CustomZoomButtonsController
-import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.IconOverlay
-import org.osmdroid.views.overlay.MapEventsOverlay
-import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.Overlay
 import search.SearchAdapter
 import search.SearchModel
 import search.SearchResultModel
@@ -168,8 +165,8 @@ class MapFragment : Fragment() {
                     nav.navigate(
                         R.id.deliveryFragment,
                         bundleOf(
-                            "userLat" to binding.map.boundingBox.centerLatitude.toFloat(),
-                            "userLon" to binding.map.boundingBox.centerLongitude.toFloat(),
+                            "userLat" to model.mapViewport.value.boundingBox.centerLatitude.toFloat(),
+                            "userLon" to model.mapViewport.value.boundingBox.centerLongitude.toFloat(),
                             "searchAreaId" to 662L,
                         ),
                     )
@@ -179,8 +176,8 @@ class MapFragment : Fragment() {
                     nav.navigate(
                         R.id.areasFragment,
                         bundleOf(
-                            "lat" to binding.map.boundingBox.centerLatitude.toFloat(),
-                            "lon" to binding.map.boundingBox.centerLongitude.toFloat(),
+                            "lat" to model.mapViewport.value.boundingBox.centerLatitude.toFloat(),
+                            "lon" to model.mapViewport.value.boundingBox.centerLongitude.toFloat(),
                         ),
                     )
                 }
@@ -194,20 +191,17 @@ class MapFragment : Fragment() {
             true
         }
 
-        binding.map.apply {
-            zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-            minZoomLevel = 4.0
-            setScrollableAreaLimitDouble(
-                BoundingBox(
-                    TileSystemWebMercator.MaxLatitude,
-                    TileSystemWebMercator.MaxLongitude,
-                    TileSystemWebMercator.MinLatitude,
-                    TileSystemWebMercator.MinLongitude,
-                )
-            )
-            setMultiTouchControls(true)
-            addLocationOverlay()
-            addCancelSelectionOverlay()
+        binding.map.getMapAsync {
+            it.initStyle(requireContext())
+            it.addCancelSelectionOverlay()
+            it.setOnMarkerClickListener {
+                if (it.snippet.isNotBlank()) {
+                    val id = it.snippet.toLong()
+                    model.selectElement(id, false)
+                }
+
+                true
+            }
         }
 
         bottomSheetBehavior = BottomSheetBehavior.from(binding.elementDetails)
@@ -252,11 +246,16 @@ class MapFragment : Fragment() {
             val userLocation = model.userLocation.value
 
             if (userLocation != null) {
-                binding.map.controller.animateTo(
-                    model.userLocation.value,
-                    15.0,
-                    null,
-                )
+                binding.map.getMapAsync {
+                    it.animateCamera(
+                        CameraUpdateFactory.newLatLngZoom(
+                            LatLng(
+                                userLocation.latitude, userLocation.longitude
+                            ),
+                            14.0,
+                        )
+                    )
+                }
             }
         }
 
@@ -280,75 +279,73 @@ class MapFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             model.visibleElements.collectLatest { newElements ->
-                visibleElements.forEach {
-                    binding.map.overlays -= it
-                }
+                binding.map.getMapAsync { map ->
+                    visibleElements.forEach { map.removeMarker(it) }
+                    visibleElements.clear()
+                    newElements.forEach {
+                        when (it) {
+                            is MapModel.MapItem.ElementsCluster -> {
+                                val marker =
+                                    MarkerOptions().position(LatLng(it.cluster.lat, it.cluster.lon))
 
-                visibleElements.clear()
-
-                newElements.forEach {
-                    when (it) {
-                        is MapModel.MapItem.ElementsCluster -> {
-                            val marker = Marker(binding.map)
-                            marker.position = GeoPoint(it.cluster.lat, it.cluster.lon)
-
-                            if (it.cluster.count == 1L) {
-                                val icon = if (it.cluster.requiresCompanionApp) {
-                                    markersRepo.getWarningMarker(it.cluster.iconId.ifBlank { "question_mark" })
-                                } else if (
-                                    it.cluster.boostExpires != null
-                                    && it.cluster.boostExpires.isAfter(ZonedDateTime.now(ZoneOffset.UTC))
-                                ) {
-                                    markersRepo.getBoostedMarker(
-                                        it.cluster.iconId.ifBlank { "question_mark" },
-                                        it.cluster.comments,
-                                    )
-                                } else {
-                                    markersRepo.getMarker(
-                                        it.cluster.iconId.ifBlank { "question_mark" },
-                                        it.cluster.comments,
-                                    )
-                                }
-
-                                marker.icon = icon
-                                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                            } else {
-                                marker.icon = createClusterIcon(it.cluster).toDrawable(resources)
-                                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                            }
-
-                            marker.setOnMarkerClickListener { _, _ ->
                                 if (it.cluster.count == 1L) {
-                                    model.selectElement(it.cluster.id, false)
+                                    val icon = if (it.cluster.requiresCompanionApp) {
+                                        markersRepo.getWarningMarker(it.cluster.iconId.ifBlank { "question_mark" })
+                                    } else if (it.cluster.boostExpires != null && it.cluster.boostExpires.isAfter(
+                                            ZonedDateTime.now(
+                                                ZoneOffset.UTC
+                                            )
+                                        )
+                                    ) {
+                                        markersRepo.getBoostedMarker(
+                                            it.cluster.iconId.ifBlank { "question_mark" },
+                                            it.cluster.comments,
+                                        )
+                                    } else {
+                                        markersRepo.getMarker(
+                                            it.cluster.iconId.ifBlank { "question_mark" },
+                                            it.cluster.comments,
+                                        )
+                                    }
+
+                                    marker.icon(
+                                        IconFactory.getInstance(requireContext())
+                                            .fromBitmap(icon.bitmap)
+                                    )
+                                    marker.snippet(it.cluster.id.toString())
+                                    // TODO marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                                } else {
+                                    val icon = createClusterIcon(it.cluster).toDrawable(resources)
+                                    marker.icon(
+                                        IconFactory.getInstance(requireContext())
+                                            .fromBitmap(icon.bitmap)
+                                    )
+                                    // TODO marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                                 }
 
-                                true
+                                visibleElements += map.addMarker(marker)
                             }
 
-                            visibleElements += marker
-                            binding.map.overlays += marker
-                        }
-
-                        is MapModel.MapItem.Meetup -> {
-                            val marker = Marker(binding.map)
-                            marker.position = GeoPoint(it.meetup.lat, it.meetup.lon)
-                            marker.icon = markersRepo.meetupMarker
-                            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                            marker.setOnMarkerClickListener { _, _ ->
-                                findNavController().navigate(
-                                    resId = R.id.areaFragment,
-                                    args = bundleOf("area_id" to it.meetup.areaId),
-                                )
-
-                                true
+                            is MapModel.MapItem.Meetup -> {
+// TODO
+//                                val marker = Marker(binding.map)
+//                                marker.position = GeoPoint(it.meetup.lat, it.meetup.lon)
+//                                marker.icon = markersRepo.meetupMarker
+//                                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+//                                marker.setOnMarkerClickListener { _, _ ->
+//                                    findNavController().navigate(
+//                                        resId = R.id.areaFragment,
+//                                        args = bundleOf("area_id" to it.meetup.areaId),
+//                                    )
+//
+//                                    true
+//                                }
+//                                visibleElements += marker
+//                                binding.map.overlays += marker
                             }
-                            visibleElements += marker
-                            binding.map.overlays += marker
                         }
                     }
                 }
-
-                binding.map.invalidate()
             }
         }
 
@@ -364,18 +361,6 @@ class MapFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                var attempts = 0
-
-                while (binding.map.getIntrinsicScreenRect(null).height() == 0) {
-                    if (attempts >= 100) {
-                        requireActivity().finish()
-                        return@repeatOnLifecycle
-                    } else {
-                        attempts++
-                        delay(10)
-                    }
-                }
-
                 val pickedPlace = searchResultModel.element.value
                 searchResultModel.element.update { null }
 
@@ -383,41 +368,44 @@ class MapFragment : Fragment() {
                 areaResultModel.area.update { null }
 
                 if (pickedPlace != null) {
-                    binding.map.addViewportListener()
-                    val mapController = binding.map.controller
-                    mapController.setZoom(16.toDouble())
-                    val startPoint =
-                        GeoPoint(pickedPlace.lat, pickedPlace.lon)
-                    mapController.setCenter(startPoint)
-                    binding.map.post {
-                        mapController.zoomTo(19.0)
-                    }
-                    model.selectElement(pickedPlace.id, true)
+// TODO
+//                    binding.map.addViewportListener()
+//                    val mapController = binding.map.controller
+//                    mapController.setZoom(16.toDouble())
+//                    val startPoint =
+//                        GeoPoint(pickedPlace.lat, pickedPlace.lon)
+//                    mapController.setCenter(startPoint)
+//                    binding.map.post {
+//                        mapController.zoomTo(19.0)
+//                    }
+//                    model.selectElement(pickedPlace.id, true)
                     return@repeatOnLifecycle
                 }
 
                 if (pickedArea != null) {
-                    binding.map.addViewportListener()
-                    val boundingBox = boundingBox(pickedArea.tags.polygons())
-                    val boundingBoxPaddingPx = TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP,
-                        16f,
-                        resources.displayMetrics,
-                    ).toInt()
-                    binding.map.zoomToBoundingBox(boundingBox, false, boundingBoxPaddingPx)
+// TODO
+//                    binding.map.addViewportListener()
+//                    val boundingBox = boundingBox(pickedArea.tags.polygons())
+//                    val boundingBoxPaddingPx = TypedValue.applyDimension(
+//                        TypedValue.COMPLEX_UNIT_DIP,
+//                        16f,
+//                        resources.displayMetrics,
+//                    ).toInt()
+//                    binding.map.zoomToBoundingBox(boundingBox, false, boundingBoxPaddingPx)
                     return@repeatOnLifecycle
                 }
 
-                val firstBoundingBox = model.mapViewport.firstOrNull()?.boundingBox
-                binding.map.zoomToBoundingBox(firstBoundingBox, false)
-                model.setMapViewport(
-                    MapModel.MapViewport(
-                        binding.map.zoomLevelDouble,
-                        binding.map.boundingBox,
+                val firstBoundingBox =
+                    model.mapViewport.firstOrNull()?.boundingBox?.toLatLngBounds()!!
+
+                binding.map.getMapAsync {
+                    it.moveCamera(
+                        CameraUpdateFactory.newLatLngBounds(
+                            firstBoundingBox, 0
+                        )
                     )
-                )
-                searchModel.setLocation(GeoPoint(binding.map.mapCenter))
-                binding.map.addViewportListener()
+                    it.addViewportListener()
+                }
             }
         }
 
@@ -426,25 +414,24 @@ class MapFragment : Fragment() {
             binding.searchView.hide()
 
             model.selectElement(row.element.id, true)
-            val mapController = binding.map.controller
-            mapController.setZoom(16.toDouble())
-            val startPoint =
-                GeoPoint(model.selectedElement.value!!.lat, model.selectedElement.value!!.lon)
-            mapController.setCenter(startPoint)
-            mapController.zoomTo(19.0)
+// TODO
+//            val mapController = binding.map.controller
+//            mapController.setZoom(16.toDouble())
+//            val startPoint =
+//                GeoPoint(model.selectedElement.value!!.lat, model.selectedElement.value!!.lon)
+//            mapController.setCenter(startPoint)
+//            mapController.zoomTo(19.0)
         }
 
         binding.searchResults.layoutManager = LinearLayoutManager(requireContext())
         binding.searchResults.adapter = searchAdapter
 
-        searchModel.searchResults
-            .onEach {
-                searchAdapter.submitList(it) {
-                    val layoutManager = binding.searchResults.layoutManager ?: return@submitList
-                    layoutManager.scrollToPosition(0)
-                }
+        searchModel.searchResults.onEach {
+            searchAdapter.submitList(it) {
+                val layoutManager = binding.searchResults.layoutManager ?: return@submitList
+                layoutManager.scrollToPosition(0)
             }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         binding.searchView.editText.doAfterTextChanged {
             val text = it.toString()
@@ -456,6 +443,21 @@ class MapFragment : Fragment() {
                 arrayOf(Manifest.permission.POST_NOTIFICATIONS)
             )
         }
+    }
+
+    private fun BoundingBox.toLatLngBounds(): LatLngBounds {
+        return LatLngBounds.from(
+            latNorth = latNorth,
+            lonEast = lonEast,
+            latSouth = latSouth,
+            lonWest = lonWest,
+        )
+    }
+
+    private fun LatLngBounds.toBoundingBox(): BoundingBox {
+        return BoundingBox(
+            latitudeNorth, longitudeEast, latitudeSouth, longitudeWest
+        )
     }
 
     override fun onDestroyView() {
@@ -488,65 +490,35 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun MapView.addLocationOverlay() {
-        val iconSizePx = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            16f,
-            requireContext().resources.displayMetrics,
-        ).toInt()
-
-        val icon = ContextCompat.getDrawable(requireContext(), R.drawable.cluster)!!
-            .toBitmap(width = iconSizePx, height = iconSizePx)
-            .toDrawable(resources)
-
-        DrawableCompat.setTint(
-            icon,
-            Color.parseColor("#4285f4"),
-        )
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                var overlay: Overlay? = null
-
-                model.userLocation.collect {
-                    if (it != null) {
-                        binding.map.overlays -= overlay
-                        overlay = IconOverlay(it, icon)
-                        binding.map.overlays += overlay
-                        binding.map.invalidate()
-                    }
-                }
-            }
+    private fun MapLibreMap.addCancelSelectionOverlay() {
+        addOnMapClickListener {
+            model.selectElement(0, false)
+            true
         }
     }
 
-    private fun MapView.addCancelSelectionOverlay() {
-        overlays += MapEventsOverlay(object : MapEventsReceiver {
-            override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
-                model.selectElement(0, false)
-                return true
+    private fun MapLibreMap.addViewportListener() {
+        this.projection.visibleRegion.latLngBounds
+        addOnMoveListener(object : OnMoveListener {
+            override fun onMoveBegin(p0: MoveGestureDetector) {
             }
 
-            override fun longPressHelper(p: GeoPoint?): Boolean {
-                return false
+            override fun onMove(p0: MoveGestureDetector) {
             }
-        })
-    }
 
-    private fun MapView.addViewportListener() {
-        addMapListener(object : MapListener {
-            override fun onScroll(event: ScrollEvent?): Boolean {
+            override fun onMoveEnd(p0: MoveGestureDetector) {
                 model.setMapViewport(
                     MapModel.MapViewport(
-                        binding.map.zoomLevelDouble,
-                        binding.map.boundingBox,
+                        zoom = cameraPosition.zoom,
+                        boundingBox = projection.visibleRegion.latLngBounds.toBoundingBox(),
                     )
                 )
-                searchModel.setLocation(GeoPoint(binding.map.mapCenter))
-                return false
+                searchModel.setLocation(
+                    GeoPoint(
+                        cameraPosition.target!!.latitude, cameraPosition.target!!.longitude
+                    )
+                )
             }
-
-            override fun onZoom(event: ZoomEvent?) = false
         })
     }
 
@@ -599,8 +571,7 @@ class MapFragment : Fragment() {
             val emptyClusterDrawable =
                 ContextCompat.getDrawable(requireContext(), R.drawable.cluster)!!
             DrawableCompat.setTint(
-                emptyClusterDrawable,
-                requireContext().getPrimaryContainerColor()
+                emptyClusterDrawable, requireContext().getPrimaryContainerColor()
             )
             emptyClusterBitmap =
                 emptyClusterDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
