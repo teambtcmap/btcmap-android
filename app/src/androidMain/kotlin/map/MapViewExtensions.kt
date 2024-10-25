@@ -4,28 +4,20 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import org.locationtech.jts.geom.Polygon
+import org.maplibre.android.annotations.PolygonOptions
+import org.maplibre.android.camera.CameraUpdateFactory
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapView
 
-fun MapView.showPolygons(polygons: List<Polygon>, paddingPx: Int) {
-    post {
-        polygons.forEach { poly ->
-            val osmPoly = org.osmdroid.views.overlay.Polygon(this)
-            osmPoly.fillPaint.color = Color.parseColor("#88f7931a")
-            osmPoly.outlinePaint.strokeWidth = 3f
-            osmPoly.outlinePaint.color = Color.parseColor("#f7931a")
-            osmPoly.points = poly.coordinates.map { GeoPoint(it.y, it.x) }
-            overlays.add(osmPoly)
-            invalidate()
-        }
-
-        zoomToBoundingBox(
-            boundingBox(polygons),
-            false,
-            paddingPx,
-        )
+fun MapLibreMap.showPolygons(polygons: List<Polygon>, paddingPx: Int) {
+    polygons.forEach { poly ->
+        val librePoly = PolygonOptions().addAll(poly.coordinates.map { LatLng(it.y, it.x) })
+            .fillColor(Color.parseColor("#88f7931a")).strokeColor(Color.parseColor("#f7931a"))
+        addPolygon(librePoly)
     }
+    val allPoints = polygons.flatMap { it.coordinates.toList() }.map { LatLng(it.y, it.x) }
+    moveCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.fromLatLngs(allPoints), paddingPx))
 }
 
 fun MapLibreMap.initStyle(context: Context) {
