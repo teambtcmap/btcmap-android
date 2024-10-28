@@ -25,8 +25,8 @@ fun MapLibreMap.initStyle(context: Context) {
         context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 
     if (nightMode) {
-        setStyle("https://tiles.openfreemap.org/styles/positron")
+        setStyle("https://static.btcmap.org/map-styles/dark.json")
     } else {
-        setStyle("https://tiles.openfreemap.org/styles/bright")
+        setStyle("https://static.btcmap.org/map-styles/light.json")
     }
 }
