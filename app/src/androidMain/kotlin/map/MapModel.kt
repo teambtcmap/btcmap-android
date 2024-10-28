@@ -21,6 +21,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import location.UserLocationRepository
+import org.maplibre.android.geometry.LatLngBounds
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import sync.Sync
@@ -63,7 +64,7 @@ class MapModel(
             withContext(Dispatchers.IO) {
                 val clusters = elementsRepo.selectByBoundingBox(
                     zoom = viewport.zoom,
-                    box = viewport.boundingBox,
+                    bounds = viewport.boundingBox.toLatLngBounds(),
                     excludedCategories = excludedCategories.map { it },
                 )
                 val meetups = areasRepo.selectMeetups().map { MapItem.Meetup(it) }
@@ -129,5 +130,14 @@ class MapModel(
     sealed class MapItem {
         data class ElementsCluster(val cluster: element.ElementsCluster) : MapItem()
         data class Meetup(val meetup: area.Meetup) : MapItem()
+    }
+
+    private fun BoundingBox.toLatLngBounds(): LatLngBounds {
+        return LatLngBounds.from(
+            latNorth = latNorth,
+            lonEast = lonEast,
+            latSouth = latSouth,
+            lonWest = lonWest,
+        )
     }
 }

@@ -1,7 +1,5 @@
 package conf
 
-import android.content.Context
-import app.isDebuggable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +12,6 @@ import kotlinx.coroutines.withContext
 
 class ConfRepo(
     private val queries: ConfQueries,
-    private val context: Context,
 ) {
 
     private val _conf: MutableStateFlow<Conf> = MutableStateFlow(
@@ -45,8 +42,8 @@ class ConfRepo(
             viewportWestLon = -68.933333 - 0.04 + 0.03,
             showAtms = false,
             showOsmAttribution = true,
-            showSyncSummary = context.isDebuggable(),
-            showAllNewElements = context.isDebuggable(),
+            showSyncSummary = false,
+            showAllNewElements = false,
         )
     }
 }

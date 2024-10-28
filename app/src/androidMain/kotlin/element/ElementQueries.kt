@@ -235,7 +235,8 @@ class ElementQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectClusters(
-        step: Double,
+        stepLat: Double,
+        stepLon: Double,
         excludedCategories: List<String>,
     ): List<ElementsCluster> {
         return conn.prepare(
@@ -251,11 +252,12 @@ class ElementQueries(private val conn: SQLiteConnection) {
                     (SELECT count(*) from element_comment c WHERE c.element_id = e.id) AS comments
                 FROM element e
                 WHERE json_extract(e.tags, '$.category') NOT IN (${excludedCategories.joinToString { "'$it'" }})
-                GROUP BY round(ext_lat / ?1) * ?1, round(ext_lon / ?1) * ?1
+                GROUP BY round(ext_lat / ?1) * ?1, round(ext_lon / ?2) * ?2
                 ORDER BY e.ext_lat DESC
                 """
         ).use {
-            it.bindDouble(1, step)
+            it.bindDouble(1, stepLat)
+            it.bindDouble(2, stepLon)
 
             buildList {
                 while (it.step()) {

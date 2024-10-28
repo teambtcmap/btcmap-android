@@ -6,11 +6,13 @@ import db.elementsUpdatedAt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
-import org.osmdroid.util.BoundingBox
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.geometry.LatLngBounds
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import kotlin.math.pow
 
 class ElementsRepo(
     private val api: Api,
@@ -63,7 +65,7 @@ class ElementsRepo(
 
     suspend fun selectByBoundingBox(
         zoom: Double?,
-        box: BoundingBox,
+        bounds: LatLngBounds,
         excludedCategories: List<String>,
     ): List<ElementsCluster> {
         if (zoom == null) {
@@ -71,90 +73,25 @@ class ElementsRepo(
         }
 
         return withContext(Dispatchers.IO) {
-            var step = 1.0
-
-            if (zoom >= 1.0) {
-                step = 35.0
-            }
-
-            if (zoom >= 2.0) {
-                step = 25.0
-            }
-
-            if (zoom >= 3.0) {
-                step = 17.0
-            }
-
-            if (zoom >= 4.0) {
-                step = 13.0
-            }
-
-            if (zoom >= 5.0) {
-                step = 6.5
-            }
-
-            if (zoom > 6.0) {
-                step = 3.0
-            }
-
-            if (zoom > 7.0) {
-                step = 1.5
-            }
-
-            if (zoom > 8.0) {
-                step = 0.8
-            }
-
-            if (zoom > 9.0) {
-                step = 0.4
-            }
-
-            if (zoom > 10.0) {
-                step = 0.2
-            }
-
-            if (zoom > 11.0) {
-                step = 0.1
-            }
-
-            if (zoom > 12.0) {
-                step = 0.04
-            }
-
-            if (zoom > 13.0) {
-                step = 0.02
-            }
-
-            if (zoom > 14.0) {
-                step = 0.005
-            }
-
-            if (zoom > 15.0) {
-                step = 0.003
-            }
-
-            if (zoom > 16.0) {
-                step = 0.002
-            }
-
-            if (zoom > 17.0) {
-                step = 0.001
-            }
-
             if (zoom > 18) {
                 withContext(Dispatchers.IO) {
                     queries.selectWithoutClustering(
-                        minLat = box.latSouth,
-                        maxLat = box.latNorth,
-                        minLon = box.lonWest,
-                        maxLon = box.lonEast,
+                        minLat = bounds.latitudeSouth,
+                        maxLat = bounds.latitudeNorth,
+                        minLon = bounds.longitudeWest,
+                        maxLon = bounds.longitudeEast,
                         excludedCategories,
                     )
                 }
             } else {
+                val step = 50.0 / 2.0.pow(zoom)
                 withContext(Dispatchers.IO) {
-                    val clusters = queries.selectClusters(step, excludedCategories)
-                    clusters.filter { box.contains(it.lat, it.lon) }
+                    val clusters = queries.selectClusters(
+                        step / 2,
+                        step,
+                        excludedCategories,
+                    )
+                    clusters.filter { bounds.contains(LatLng(it.lat, it.lon)) }
                 }
             }
         }

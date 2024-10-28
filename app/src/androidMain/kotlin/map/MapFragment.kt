@@ -65,6 +65,7 @@ import org.maplibre.android.maps.MapLibreMap.OnMoveListener
 import org.osmdroid.config.Configuration
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.util.TileSystemWebMercator
 import search.SearchAdapter
 import search.SearchModel
 import search.SearchResultModel
@@ -193,13 +194,14 @@ class MapFragment : Fragment() {
 
         binding.map.getMapAsync {
             it.initStyle(requireContext())
+            it.uiSettings.isCompassEnabled = false
+            it.uiSettings.isRotateGesturesEnabled = false
             it.addCancelSelectionOverlay()
             it.setOnMarkerClickListener {
                 if (it.snippet.isNotBlank()) {
                     val id = it.snippet.toLong()
                     model.selectElement(id, false)
                 }
-
                 true
             }
         }
@@ -399,12 +401,18 @@ class MapFragment : Fragment() {
                     model.mapViewport.firstOrNull()?.boundingBox?.toLatLngBounds()!!
 
                 binding.map.getMapAsync {
+                    it.addViewportListener()
                     it.moveCamera(
                         CameraUpdateFactory.newLatLngBounds(
                             firstBoundingBox, 0
                         )
                     )
-                    it.addViewportListener()
+                    model.setMapViewport(
+                        MapModel.MapViewport(
+                            zoom = it.cameraPosition.zoom,
+                            boundingBox = it.projection.visibleRegion.latLngBounds.toBoundingBox(),
+                        )
+                    )
                 }
             }
         }
@@ -498,7 +506,6 @@ class MapFragment : Fragment() {
     }
 
     private fun MapLibreMap.addViewportListener() {
-        this.projection.visibleRegion.latLngBounds
         addOnMoveListener(object : OnMoveListener {
             override fun onMoveBegin(p0: MoveGestureDetector) {
             }
