@@ -24,17 +24,6 @@
         android:hint="@string/search_here"
         app:menu="@menu/map" />
 
-    <TextView
-        android:id="@+id/osmAttribution"
-        style="?attr/textAppearanceListItemSecondary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start|bottom"
-        android:layout_margin="24dp"
-        android:text="@string/osm_copyright"
-        android:textColor="?colorOnSurface"
-        android:textSize="12sp" />
-
     <FrameLayout
         android:id="@+id/elementDetails"
         android:layout_width="match_parent"

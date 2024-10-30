@@ -65,7 +65,6 @@ import org.maplibre.android.maps.MapLibreMap.OnMoveListener
 import org.osmdroid.config.Configuration
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.util.TileSystemWebMercator
 import search.SearchAdapter
 import search.SearchModel
 import search.SearchResultModel
@@ -137,7 +136,6 @@ class MapFragment : Fragment() {
             bottomSheetBehavior.expandedOffset = insets.top
 
             val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            binding.osmAttribution.translationY = -navBarsInsets.bottom.toFloat()
             binding.fab.translationY = -navBarsInsets.bottom.toFloat()
 
             WindowInsetsCompat.CONSUMED
@@ -270,12 +268,6 @@ class MapFragment : Fragment() {
                 } else {
                     model.setExcludedCategories(listOf("atm"))
                 }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            model.conf.conf.map { it.showOsmAttribution }.collectLatest {
-                binding.osmAttribution.isVisible = it
             }
         }
 

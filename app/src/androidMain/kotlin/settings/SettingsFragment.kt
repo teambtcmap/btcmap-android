@@ -52,11 +52,6 @@ class SettingsFragment : Fragment() {
             conf.update { it.copy(showAtms = isChecked) }
         }
 
-        binding.showOsmAttribution.isChecked = conf.conf.value.showOsmAttribution
-        binding.showOsmAttribution.setOnCheckedChangeListener { _, isChecked ->
-            conf.update { it.copy(showOsmAttribution = isChecked) }
-        }
-
         binding.showSyncSummary.isChecked = conf.conf.value.showSyncSummary
         binding.showSyncSummary.setOnCheckedChangeListener { _, isChecked ->
             conf.update { it.copy(showSyncSummary = isChecked) }

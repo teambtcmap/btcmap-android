@@ -39,7 +39,7 @@ import element_comment.ElementCommentQueries
 import element_comment.ElementCommentRepo
 
 val appModule = module {
-    single { Database(get<Context>().getDatabasePath("btcmap-2024-10-24.db").absolutePath).conn }
+    single { Database(get<Context>().getDatabasePath("btcmap-2024-10-30.db").absolutePath).conn }
 
     single { ApiImpl() }.bind(Api::class)
 

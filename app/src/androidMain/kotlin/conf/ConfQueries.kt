@@ -17,7 +17,6 @@ class ConfQueries(private val conn: SQLiteConnection) {
                 viewport_south_lat REAL NOT NULL,
                 viewport_west_lon REAL NOT NULL,
                 show_atms INTEGER NOT NULL,
-                show_osm_attribution INTEGER NOT NULL,
                 show_sync_summary INTEGER NOT NULL,
                 show_all_new_elements INTEGER NOT NULL
             );
@@ -38,11 +37,10 @@ class ConfQueries(private val conn: SQLiteConnection) {
                     viewport_south_lat,
                     viewport_west_lon,
                     show_atms,
-                    show_osm_attribution,
                     show_sync_summary,
                     show_all_new_elements
                 )
-                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
+                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8);
                 """
             ).use {
                 it.bindText(1, conf.lastSyncDate?.toString() ?: "")
@@ -51,9 +49,8 @@ class ConfQueries(private val conn: SQLiteConnection) {
                 it.bindDouble(4, conf.viewportSouthLat)
                 it.bindDouble(5, conf.viewportWestLon)
                 it.bindLong(6, if (conf.showAtms) 1 else 0)
-                it.bindLong(7, if (conf.showOsmAttribution) 1 else 0)
-                it.bindLong(8, if (conf.showSyncSummary) 1 else 0)
-                it.bindLong(9, if (conf.showAllNewElements) 1 else 0)
+                it.bindLong(7, if (conf.showSyncSummary) 1 else 0)
+                it.bindLong(8, if (conf.showAllNewElements) 1 else 0)
                 it.step()
             }
         }
@@ -69,7 +66,6 @@ class ConfQueries(private val conn: SQLiteConnection) {
                     viewport_south_lat,
                     viewport_west_lon,
                     show_atms,
-                    show_osm_attribution,
                     show_sync_summary,
                     show_all_new_elements
                 FROM conf
@@ -83,9 +79,8 @@ class ConfQueries(private val conn: SQLiteConnection) {
                     viewportSouthLat = it.getDouble(3),
                     viewportWestLon = it.getDouble(4),
                     showAtms = it.getBoolean(5),
-                    showOsmAttribution = it.getBoolean(6),
-                    showSyncSummary = it.getBoolean(7),
-                    showAllNewElements = it.getBoolean(8),
+                    showSyncSummary = it.getBoolean(6),
+                    showAllNewElements = it.getBoolean(7),
                 )
             } else {
                 null

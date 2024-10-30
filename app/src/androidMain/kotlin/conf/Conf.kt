@@ -10,7 +10,6 @@ data class Conf(
     val viewportSouthLat: Double,
     val viewportWestLon: Double,
     val showAtms: Boolean,
-    val showOsmAttribution: Boolean,
     val showSyncSummary: Boolean,
     val showAllNewElements: Boolean,
 )

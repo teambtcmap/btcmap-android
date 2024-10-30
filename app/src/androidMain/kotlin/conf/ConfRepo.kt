@@ -41,7 +41,6 @@ class ConfRepo(
             viewportSouthLat = 12.116667 - 0.04,
             viewportWestLon = -68.933333 - 0.04 + 0.03,
             showAtms = false,
-            showOsmAttribution = true,
             showSyncSummary = false,
             showAllNewElements = false,
         )
