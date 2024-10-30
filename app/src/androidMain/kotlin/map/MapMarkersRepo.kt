@@ -29,7 +29,6 @@ class MapMarkersRepo(
 
             typeface = context.iconTypeface()
             textSize = pinSizePx / 2.1f
-            color = context.getOnPrimaryContainerColor()
             isAntiAlias = true
         }
     }
@@ -107,7 +106,7 @@ class MapMarkersRepo(
         when (backgroundType) {
             BackgroundType.PRIMARY_CONTAINER -> DrawableCompat.setTint(
                 emptyPinDrawable,
-                context.getPrimaryContainerColor()
+                context.markerBackgroundColor(),
             )
 
             BackgroundType.BOOSTED -> DrawableCompat.setTint(
@@ -146,7 +145,7 @@ class MapMarkersRepo(
                 if (backgroundType == BackgroundType.WARNING) {
                     iconPaint.color = context.getErrorColor()
                 } else {
-                    iconPaint.color = context.getOnPrimaryContainerColor()
+                    iconPaint.color = context.onMarkerBackgroundColor()
                 }
 
                 drawText(
