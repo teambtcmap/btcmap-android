@@ -42,7 +42,7 @@ class ConfRepo(
             viewportWestLon = -68.933333 - 0.04 + 0.03,
             showAtms = false,
             showSyncSummary = false,
-            showAllNewElements = false,
+            notifyOfNewElementsNearby = false,
         )
     }
 }

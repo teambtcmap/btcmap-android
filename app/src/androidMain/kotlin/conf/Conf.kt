@@ -11,7 +11,7 @@ data class Conf(
     val viewportWestLon: Double,
     val showAtms: Boolean,
     val showSyncSummary: Boolean,
-    val showAllNewElements: Boolean,
+    val notifyOfNewElementsNearby: Boolean,
 )
 
 fun Conf.mapViewport(): BoundingBox {

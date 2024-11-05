@@ -59,10 +59,10 @@
                 android:paddingBottom="8dp">
 
                 <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/showSyncSummary"
+                    android:id="@+id/notifyOfNewElementsNearby"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/show_sync_summary"
+                    android:text="@string/new_merchant_notifications"
                     android:textSize="16sp" />
 
             </LinearLayout>
@@ -79,10 +79,10 @@
                 android:paddingBottom="8dp">
 
                 <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/showAllNewElements"
+                    android:id="@+id/showSyncSummary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/show_all_new_elements"
+                    android:text="@string/show_sync_summary"
                     android:textSize="16sp" />
 
             </LinearLayout>

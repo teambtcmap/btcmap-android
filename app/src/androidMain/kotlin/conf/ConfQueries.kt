@@ -50,7 +50,7 @@ class ConfQueries(private val conn: SQLiteConnection) {
                 it.bindDouble(5, conf.viewportWestLon)
                 it.bindLong(6, if (conf.showAtms) 1 else 0)
                 it.bindLong(7, if (conf.showSyncSummary) 1 else 0)
-                it.bindLong(8, if (conf.showAllNewElements) 1 else 0)
+                it.bindLong(8, if (conf.notifyOfNewElementsNearby) 1 else 0)
                 it.step()
             }
         }
@@ -80,7 +80,7 @@ class ConfQueries(private val conn: SQLiteConnection) {
                     viewportWestLon = it.getDouble(4),
                     showAtms = it.getBoolean(5),
                     showSyncSummary = it.getBoolean(6),
-                    showAllNewElements = it.getBoolean(7),
+                    notifyOfNewElementsNearby = it.getBoolean(7),
                 )
             } else {
                 null

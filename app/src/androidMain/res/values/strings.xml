@@ -68,6 +68,7 @@
     <string name="new_merchant_accepts_bitcoins">New merchant accepts bitcoins</string>
     <string name="delivery">Delivery</string>
     <string name="comments_d" translatable="false">Comments (%1$d)</string>
+    <string name="new_merchant_notifications" translatable="false">New merchant notifications</string>
     <plurals name="d_changes">
         <item quantity="zero">%d changes</item>
         <item quantity="one">%d change</item>

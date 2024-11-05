@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -101,10 +100,6 @@ class MapFragment : Fragment() {
             model.onLocationPermissionGranted()
         }
     }
-
-    private val postNotificationsPermissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions(),
-    ) { }
 
     private var emptyClusterBitmap: Bitmap? = null
 
@@ -436,12 +431,6 @@ class MapFragment : Fragment() {
         binding.searchView.editText.doAfterTextChanged {
             val text = it.toString()
             searchModel.setSearchString(text)
-        }
-
-        if (Build.VERSION.SDK_INT >= 33) {
-            postNotificationsPermissionRequest.launch(
-                arrayOf(Manifest.permission.POST_NOTIFICATIONS)
-            )
         }
     }
 

@@ -68,7 +68,7 @@ class SyncNotificationController(
                 .notify(Random.Default.nextInt(1, Int.MAX_VALUE), builder.build())
         }
 
-        if (conf.lastSyncDate == null) {
+        if (conf.lastSyncDate == null || !conf.notifyOfNewElementsNearby) {
             return
         }
 
@@ -85,28 +85,14 @@ class SyncNotificationController(
                     endLongitude = element.lon,
                 )
 
-                val localRadiusMeters = 100_000f
-
-                val distanceThresholdMeters = if (conf.showAllNewElements) {
-                    100_000_000f
-                } else {
-                    localRadiusMeters
-                }
-
-                if (distanceMeters > distanceThresholdMeters) {
+                if (distanceMeters > 100_000f) {
                     return
-                }
-
-                val contentText = if (distanceMeters > localRadiusMeters) {
-                    context.getString(R.string.new_merchant_accepts_bitcoins)
-                } else {
-                    context.getString(R.string.new_local_merchant_accepts_bitcoins)
                 }
 
                 val builder = NotificationCompat.Builder(context, NEW_MERCHANTS_CHANNEL_ID)
                     .setSmallIcon(R.drawable.add_location)
                     .setContentTitle(element.name(context.resources))
-                    .setContentText(contentText)
+                    .setContentText(context.getString(R.string.new_local_merchant_accepts_bitcoins))
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
                 NotificationManagerCompat.from(context)

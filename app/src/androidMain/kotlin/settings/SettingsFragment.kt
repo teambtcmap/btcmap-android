@@ -1,9 +1,12 @@
 package settings
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -24,6 +27,10 @@ class SettingsFragment : Fragment() {
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
+
+    private val postNotificationsPermissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,9 +64,16 @@ class SettingsFragment : Fragment() {
             conf.update { it.copy(showSyncSummary = isChecked) }
         }
 
-        binding.showAllNewElements.isChecked = conf.conf.value.showAllNewElements
-        binding.showAllNewElements.setOnCheckedChangeListener { _, isChecked ->
-            conf.update { it.copy(showAllNewElements = isChecked) }
+        binding.notifyOfNewElementsNearby.isEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
+        binding.notifyOfNewElementsNearby.isChecked = conf.conf.value.notifyOfNewElementsNearby
+        binding.notifyOfNewElementsNearby.setOnCheckedChangeListener { _, isChecked ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                postNotificationsPermissionRequest.launch(
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS)
+                )
+            }
+            conf.update { it.copy(notifyOfNewElementsNearby = isChecked) }
         }
 
         val lastSyncDate = conf.conf.value.lastSyncDate
