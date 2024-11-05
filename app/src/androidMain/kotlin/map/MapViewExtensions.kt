@@ -25,8 +25,8 @@ fun MapLibreMap.initStyle(context: Context) {
         context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 
     if (nightMode) {
-        setStyle("https://static.btcmap.org/map-styles/dark.json")
+        setStyle("asset://dark.json")
     } else {
-        setStyle("https://static.btcmap.org/map-styles/light.json")
+        setStyle("asset://light.json")
     }
 }
