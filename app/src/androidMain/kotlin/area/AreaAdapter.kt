@@ -141,6 +141,7 @@ class AreaAdapter(
                     it.initStyle(binding.root.context)
                     it.showPolygons(item.polygons, item.paddingPx)
                 }
+                binding.mapClickHandler.setOnClickListener { listener.onMapClick() }
             }
 
             if (item is Item.Description && binding is ItemAreaDescriptionBinding) {

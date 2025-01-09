@@ -1,6 +1,6 @@
 [versions]
 # https://developer.android.com/build/releases/gradle-plugin
-agp = "8.7.1"
+agp = "8.7.3"
 # https://github.com/JetBrains/kotlin/releases
 kotlin = "1.9.25"
 # Allows suspending functions

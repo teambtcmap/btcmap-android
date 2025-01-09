@@ -4,7 +4,9 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.net.Uri
 import android.os.Bundle
@@ -37,6 +39,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import area.AreaResultModel
+import area.polygons
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import element.ElementFragment
 import element.ElementsCluster
@@ -58,9 +61,8 @@ import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
-import org.maplibre.android.gestures.MoveGestureDetector
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.MapLibreMap.OnMoveListener
+import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
 import org.osmdroid.config.Configuration
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
@@ -140,6 +142,10 @@ class MapFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        binding.map.getMapAsync {
+            it.addOnCameraIdleListener(onCameraIdleListener)
+        }
+
         emptyClusterBitmap = null
 
         val markersRepo = MapMarkersRepo(requireContext())
@@ -296,42 +302,30 @@ class MapFragment : Fragment() {
                                             it.cluster.comments,
                                         )
                                     }
-
+                                    val newBitmap = Bitmap.createBitmap(
+                                        icon.bitmap.width,
+                                        icon.bitmap.height * 2,
+                                        Bitmap.Config.ARGB_8888
+                                    )
+                                    val canvas = Canvas(newBitmap)
+                                    canvas.drawBitmap(icon.bitmap, Matrix(), null)
                                     marker.icon(
                                         IconFactory.getInstance(requireContext())
-                                            .fromBitmap(icon.bitmap)
+                                            .fromBitmap(newBitmap)
                                     )
                                     marker.snippet(it.cluster.id.toString())
-                                    // TODO marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                                 } else {
                                     val icon = createClusterIcon(it.cluster).toDrawable(resources)
                                     marker.icon(
                                         IconFactory.getInstance(requireContext())
                                             .fromBitmap(icon.bitmap)
                                     )
-                                    // TODO marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                                 }
 
                                 visibleElements += map.addMarker(marker)
                             }
 
-                            is MapModel.MapItem.Meetup -> {
-// TODO
-//                                val marker = Marker(binding.map)
-//                                marker.position = GeoPoint(it.meetup.lat, it.meetup.lon)
-//                                marker.icon = markersRepo.meetupMarker
-//                                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-//                                marker.setOnMarkerClickListener { _, _ ->
-//                                    findNavController().navigate(
-//                                        resId = R.id.areaFragment,
-//                                        args = bundleOf("area_id" to it.meetup.areaId),
-//                                    )
-//
-//                                    true
-//                                }
-//                                visibleElements += marker
-//                                binding.map.overlays += marker
-                            }
+                            is MapModel.MapItem.Meetup -> {}
                         }
                     }
                 }
@@ -357,30 +351,35 @@ class MapFragment : Fragment() {
                 areaResultModel.area.update { null }
 
                 if (pickedPlace != null) {
-// TODO
-//                    binding.map.addViewportListener()
-//                    val mapController = binding.map.controller
-//                    mapController.setZoom(16.toDouble())
-//                    val startPoint =
-//                        GeoPoint(pickedPlace.lat, pickedPlace.lon)
-//                    mapController.setCenter(startPoint)
-//                    binding.map.post {
-//                        mapController.zoomTo(19.0)
-//                    }
-//                    model.selectElement(pickedPlace.id, true)
+                    binding.map.getMapAsync {
+                        model.selectElement(pickedPlace.id, true)
+                        it.moveCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(
+                                    model.selectedElement.value!!.lat,
+                                    model.selectedElement.value!!.lon
+                                ), 16.0
+                            )
+                        )
+                    }
                     return@repeatOnLifecycle
                 }
 
                 if (pickedArea != null) {
-// TODO
-//                    binding.map.addViewportListener()
-//                    val boundingBox = boundingBox(pickedArea.tags.polygons())
-//                    val boundingBoxPaddingPx = TypedValue.applyDimension(
-//                        TypedValue.COMPLEX_UNIT_DIP,
-//                        16f,
-//                        resources.displayMetrics,
-//                    ).toInt()
-//                    binding.map.zoomToBoundingBox(boundingBox, false, boundingBoxPaddingPx)
+                    binding.map.getMapAsync {
+                        val boundingBox = boundingBox(pickedArea.tags.polygons())
+                        val boundingBoxPaddingPx = TypedValue.applyDimension(
+                            TypedValue.COMPLEX_UNIT_DIP,
+                            16f,
+                            resources.displayMetrics,
+                        ).toInt()
+                        it.moveCamera(
+                            CameraUpdateFactory.newLatLngBounds(
+                                boundingBox.toLatLngBounds(),
+                                boundingBoxPaddingPx
+                            )
+                        )
+                    }
                     return@repeatOnLifecycle
                 }
 
@@ -388,16 +387,9 @@ class MapFragment : Fragment() {
                     model.mapViewport.firstOrNull()?.boundingBox?.toLatLngBounds()!!
 
                 binding.map.getMapAsync {
-                    it.addViewportListener()
                     it.moveCamera(
                         CameraUpdateFactory.newLatLngBounds(
                             firstBoundingBox, 0
-                        )
-                    )
-                    model.setMapViewport(
-                        MapModel.MapViewport(
-                            zoom = it.cameraPosition.zoom,
-                            boundingBox = it.projection.visibleRegion.latLngBounds.toBoundingBox(),
                         )
                     )
                 }
@@ -409,13 +401,16 @@ class MapFragment : Fragment() {
             binding.searchView.hide()
 
             model.selectElement(row.element.id, true)
-// TODO
-//            val mapController = binding.map.controller
-//            mapController.setZoom(16.toDouble())
-//            val startPoint =
-//                GeoPoint(model.selectedElement.value!!.lat, model.selectedElement.value!!.lon)
-//            mapController.setCenter(startPoint)
-//            mapController.zoomTo(19.0)
+            binding.map.getMapAsync {
+                it.moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(
+                            model.selectedElement.value!!.lat,
+                            model.selectedElement.value!!.lon
+                        ), 16.0
+                    )
+                )
+            }
         }
 
         binding.searchResults.layoutManager = LinearLayoutManager(requireContext())
@@ -451,6 +446,7 @@ class MapFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.map.getMapAsync { it.removeOnCameraIdleListener(onCameraIdleListener) }
         _binding = null
     }
 
@@ -486,28 +482,20 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun MapLibreMap.addViewportListener() {
-        addOnMoveListener(object : OnMoveListener {
-            override fun onMoveBegin(p0: MoveGestureDetector) {
-            }
-
-            override fun onMove(p0: MoveGestureDetector) {
-            }
-
-            override fun onMoveEnd(p0: MoveGestureDetector) {
-                model.setMapViewport(
-                    MapModel.MapViewport(
-                        zoom = cameraPosition.zoom,
-                        boundingBox = projection.visibleRegion.latLngBounds.toBoundingBox(),
-                    )
+    private val onCameraIdleListener = OnCameraIdleListener {
+        binding.map.getMapAsync { map ->
+            model.setMapViewport(
+                MapModel.MapViewport(
+                    zoom = map.cameraPosition.zoom,
+                    boundingBox = map.projection.visibleRegion.latLngBounds.toBoundingBox(),
                 )
-                searchModel.setLocation(
-                    GeoPoint(
-                        cameraPosition.target!!.latitude, cameraPosition.target!!.longitude
-                    )
+            )
+            searchModel.setLocation(
+                GeoPoint(
+                    map.cameraPosition.target!!.latitude, map.cameraPosition.target!!.longitude
                 )
-            }
-        })
+            )
+        }
     }
 
     private fun BottomSheetBehavior<*>.addSlideCallback() {

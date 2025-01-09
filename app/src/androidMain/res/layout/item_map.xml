@@ -9,4 +9,10 @@
         android:layout_width="match_parent"
         android:layout_height="192dp" />
 
+    <View
+        android:id="@+id/mapClickHandler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true" />
+
 </FrameLayout>

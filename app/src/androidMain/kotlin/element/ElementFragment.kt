@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
@@ -93,7 +94,7 @@ class ElementFragment : Fragment() {
 
             binding.mapContainer.isVisible = true
 
-            binding.mapContainer.setOnClickListener {
+            binding.mapClickHandler.setOnClickListener {
                 resultModel.element.update { element }
                 findNavController().navigate(R.id.action_elementFragment_to_mapFragment)
             }
