@@ -11,14 +11,14 @@ import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.osmdroid.util.GeoPoint
+import org.maplibre.android.geometry.LatLng
 
 class UserLocationRepository(
     private val context: Context,
 ) {
     private var requestedLocationUpdates = false
 
-    private val _location: MutableStateFlow<GeoPoint?> = MutableStateFlow(null)
+    private val _location: MutableStateFlow<LatLng?> = MutableStateFlow(null)
     val location = _location.asStateFlow()
 
     private val listener: LocationListener = LocationListener { onNewLocation(it) }
@@ -52,7 +52,7 @@ class UserLocationRepository(
 
             if (lastKnownLocation != null) {
                 _location.update {
-                    GeoPoint(
+                    LatLng(
                         lastKnownLocation.latitude,
                         lastKnownLocation.longitude
                     )
@@ -69,7 +69,7 @@ class UserLocationRepository(
 
             if (lastKnownLocation != null) {
                 _location.update {
-                    GeoPoint(
+                    LatLng(
                         lastKnownLocation.latitude,
                         lastKnownLocation.longitude
                     )
@@ -100,7 +100,7 @@ class UserLocationRepository(
 
     private fun onNewLocation(location: Location) {
         Log.d(TAG, "Got new location: ${location.latitude},${location.longitude}")
-        _location.update { GeoPoint(location.latitude, location.longitude) }
+        _location.update { LatLng(location.latitude, location.longitude) }
     }
 
     companion object {

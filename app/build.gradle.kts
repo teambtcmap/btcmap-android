@@ -24,7 +24,6 @@ kotlin {
 
             implementation(libs.androidx.navigation.fragment)
             implementation(libs.androidx.navigation.ui)
-            implementation(libs.androidx.preference)
             implementation(libs.androidx.work)
             implementation(libs.androidx.constraintlayout)
             implementation(libs.androidx.room)
@@ -34,7 +33,6 @@ kotlin {
             implementation(libs.okhttp.brotli)
             implementation(libs.okhttp.mockwebserver)
             implementation(libs.koin)
-            implementation(libs.osmdroid)
             implementation(libs.jts)
             implementation(libs.mpandroidchart)
             implementation(libs.coil.core)

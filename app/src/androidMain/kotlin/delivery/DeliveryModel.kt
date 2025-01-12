@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.btcmap.R
-import org.osmdroid.util.GeoPoint
+import org.maplibre.android.geometry.LatLng
 import java.text.NumberFormat
 
 class DeliveryModel(
@@ -58,7 +58,7 @@ class DeliveryModel(
                 _items.update {
                     sortedElements.map {
                         it.toAdapterItem(
-                            GeoPoint(
+                            LatLng(
                                 args.userLat,
                                 args.userLon,
                             )
@@ -73,12 +73,12 @@ class DeliveryModel(
         this.args.update { args }
     }
 
-    private fun Element.toAdapterItem(userLocation: GeoPoint?): DeliveryAdapter.Item {
+    private fun Element.toAdapterItem(userLocation: LatLng?): DeliveryAdapter.Item {
         val distanceStringBuilder = StringBuilder()
 
         if (userLocation != null) {
-            val elementLocation = GeoPoint(lat, lon)
-            val distanceKm = userLocation.distanceToAsDouble(elementLocation) / 1000
+            val elementLocation = LatLng(lat, lon)
+            val distanceKm = userLocation.distanceTo(elementLocation)
 
             distanceStringBuilder.apply {
                 append(DISTANCE_FORMAT.format(distanceKm))

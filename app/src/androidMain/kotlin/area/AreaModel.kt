@@ -38,10 +38,10 @@ class AreaModel(
             val geometryFactory = GeometryFactory()
 
             val elements = elementsRepo.selectByBoundingBox(
-                minLat = boundingBox.latSouth,
-                maxLat = boundingBox.latNorth,
-                minLon = boundingBox.lonWest,
-                maxLon = boundingBox.lonEast,
+                minLat = boundingBox.getLatSouth(),
+                maxLat = boundingBox.getLatNorth(),
+                minLon = boundingBox.getLonWest(),
+                maxLon = boundingBox.getLonEast(),
             )
                 .asSequence()
                 .filter { element ->

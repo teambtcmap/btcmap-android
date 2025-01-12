@@ -21,9 +21,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import location.UserLocationRepository
+import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
-import org.osmdroid.util.BoundingBox
-import org.osmdroid.util.GeoPoint
 import sync.Sync
 
 class MapModel(
@@ -34,11 +33,11 @@ class MapModel(
     private val areasRepo: AreasRepo,
 ) : ViewModel() {
 
-    val userLocation: StateFlow<GeoPoint?> = locationRepo.location
+    val userLocation: StateFlow<LatLng?> = locationRepo.location
 
     data class MapViewport(
         val zoom: Double?,
-        val boundingBox: BoundingBox,
+        val boundingBox: LatLngBounds,
     )
 
     private val _mapViewport: MutableStateFlow<MapViewport> = MutableStateFlow(
@@ -64,7 +63,7 @@ class MapModel(
             withContext(Dispatchers.IO) {
                 val clusters = elementsRepo.selectByBoundingBox(
                     zoom = viewport.zoom,
-                    bounds = viewport.boundingBox.toLatLngBounds(),
+                    bounds = viewport.boundingBox,
                     excludedCategories = excludedCategories.map { it },
                 )
                 val meetups = areasRepo.selectMeetups().map { MapItem.Meetup(it) }
@@ -84,7 +83,7 @@ class MapModel(
 
         viewModelScope.launch {
             val location = withTimeout(5_000) { userLocation.filterNotNull().first() }
-            setMapViewport(MapViewport(null, location.toBoundingBox(1_000.0)))
+            setMapViewport(MapViewport(null, location.toBoundingBox()))
         }
     }
 
@@ -93,10 +92,10 @@ class MapModel(
 
         conf.update {
             it.copy(
-                viewportNorthLat = viewport.boundingBox.latNorth,
-                viewportEastLon = viewport.boundingBox.lonEast,
-                viewportSouthLat = viewport.boundingBox.latSouth,
-                viewportWestLon = viewport.boundingBox.lonWest,
+                viewportNorthLat = viewport.boundingBox.getLatNorth(),
+                viewportEastLon = viewport.boundingBox.getLonEast(),
+                viewportSouthLat = viewport.boundingBox.getLatSouth(),
+                viewportWestLon = viewport.boundingBox.getLonWest(),
             )
         }
     }
@@ -109,7 +108,7 @@ class MapModel(
             _mapViewport.update {
                 MapViewport(
                     null,
-                    GeoPoint(element.lat, element.lon).toBoundingBox(100.0),
+                    LatLng(element.lat, element.lon).toBoundingBox(),
                 )
             }
         }
@@ -121,23 +120,14 @@ class MapModel(
         }
     }
 
-    private fun GeoPoint.toBoundingBox(distance: Double): BoundingBox {
-        val point1 = destinationPoint(distance, 45.0)
-        val point2 = destinationPoint(distance, -135.0)
-        return BoundingBox.fromGeoPoints(listOf(point1, point2))
+    private fun LatLng.toBoundingBox(): LatLngBounds {
+        val point1 = LatLng(latitude - 0.001, longitude - 0.001)
+        val point2 = LatLng(latitude + 0.001, longitude + 0.001)
+        return LatLngBounds.fromLatLngs(listOf(point1, point2))
     }
 
     sealed class MapItem {
         data class ElementsCluster(val cluster: element.ElementsCluster) : MapItem()
         data class Meetup(val meetup: area.Meetup) : MapItem()
-    }
-
-    private fun BoundingBox.toLatLngBounds(): LatLngBounds {
-        return LatLngBounds.from(
-            latNorth = latNorth,
-            lonEast = lonEast,
-            latSouth = latSouth,
-            lonWest = lonWest,
-        )
     }
 }

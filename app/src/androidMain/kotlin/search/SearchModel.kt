@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import org.btcmap.R
-import org.osmdroid.util.GeoPoint
+import org.maplibre.android.geometry.LatLng
 import java.text.NumberFormat
 import kotlin.system.measureTimeMillis
 
@@ -32,7 +32,7 @@ class SearchModel(
         }
     }
 
-    private val location = MutableStateFlow<GeoPoint?>(null)
+    private val location = MutableStateFlow<LatLng?>(null)
 
     private val searchString = MutableStateFlow("")
 
@@ -153,7 +153,7 @@ class SearchModel(
         }.launchIn(viewModelScope)
     }
 
-    fun setLocation(location: GeoPoint?) {
+    fun setLocation(location: LatLng?) {
         this.location.update { location }
     }
 
@@ -161,12 +161,12 @@ class SearchModel(
         this.searchString.update { searchString }
     }
 
-    private fun Element.toAdapterItem(userLocation: GeoPoint?): SearchAdapter.Item {
+    private fun Element.toAdapterItem(userLocation: LatLng?): SearchAdapter.Item {
         val distanceStringBuilder = StringBuilder()
 
         if (userLocation != null) {
-            val elementLocation = GeoPoint(lat, lon)
-            val distanceKm = userLocation.distanceToAsDouble(elementLocation) / 1000
+            val elementLocation = LatLng(lat, lon)
+            val distanceKm = userLocation.distanceTo(elementLocation)
 
             distanceStringBuilder.apply {
                 append(DISTANCE_FORMAT.format(distanceKm))

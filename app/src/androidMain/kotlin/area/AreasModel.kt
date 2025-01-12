@@ -11,7 +11,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import map.boundingBox
 import org.btcmap.R
-import org.osmdroid.util.GeoPoint
+import org.maplibre.android.geometry.LatLng
 import java.text.NumberFormat
 
 class AreasModel(
@@ -23,7 +23,7 @@ class AreasModel(
     val state = _state.asStateFlow()
 
     fun setArgs(args: Args) {
-        val location = GeoPoint(args.lat, args.lon)
+        val location = LatLng(args.lat, args.lon)
 
         viewModelScope.launch {
             val communities = areasRepo
@@ -41,7 +41,7 @@ class AreasModel(
                     }
 
                     val boundingBox = boundingBox(polygons)
-                    Pair(it, boundingBox.centerWithDateLine.distanceToAsDouble(location) / 1000)
+                    Pair(it, boundingBox.center.distanceTo(location))
                 }.sortedBy { it.second }
 
             val distanceFormat = NumberFormat.getNumberInstance().apply {

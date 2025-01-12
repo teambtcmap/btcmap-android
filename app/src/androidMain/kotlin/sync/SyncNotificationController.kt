@@ -79,8 +79,8 @@ class SyncNotificationController(
                 val element = runBlocking { elementsRepo.selectById(newEvent.elementId) } ?: return
 
                 val distanceMeters = getDistanceInMeters(
-                    startLatitude = conf.mapViewport().centerLatitude,
-                    startLongitude = conf.mapViewport().centerLongitude,
+                    startLatitude = conf.mapViewport().center.latitude,
+                    startLongitude = conf.mapViewport().center.longitude,
                     endLatitude = element.lat,
                     endLongitude = element.lon,
                 )

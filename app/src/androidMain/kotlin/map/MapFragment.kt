@@ -36,7 +36,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import area.AreaResultModel
 import area.polygons
@@ -63,9 +62,6 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
-import org.osmdroid.config.Configuration
-import org.osmdroid.util.BoundingBox
-import org.osmdroid.util.GeoPoint
 import search.SearchAdapter
 import search.SearchModel
 import search.SearchResultModel
@@ -110,11 +106,6 @@ class MapFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        Configuration.getInstance().load(
-            requireContext(),
-            PreferenceManager.getDefaultSharedPreferences(requireContext()),
-        )
-
         _binding = FragmentMapBinding.inflate(inflater, container, false)
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.searchBar) { view, windowInsets ->
@@ -165,8 +156,8 @@ class MapFragment : Fragment() {
                     nav.navigate(
                         R.id.deliveryFragment,
                         bundleOf(
-                            "userLat" to model.mapViewport.value.boundingBox.centerLatitude.toFloat(),
-                            "userLon" to model.mapViewport.value.boundingBox.centerLongitude.toFloat(),
+                            "userLat" to model.mapViewport.value.boundingBox.center.latitude.toFloat(),
+                            "userLon" to model.mapViewport.value.boundingBox.center.longitude.toFloat(),
                             "searchAreaId" to 662L,
                         ),
                     )
@@ -176,8 +167,8 @@ class MapFragment : Fragment() {
                     nav.navigate(
                         R.id.areasFragment,
                         bundleOf(
-                            "lat" to model.mapViewport.value.boundingBox.centerLatitude.toFloat(),
-                            "lon" to model.mapViewport.value.boundingBox.centerLongitude.toFloat(),
+                            "lat" to model.mapViewport.value.boundingBox.center.latitude.toFloat(),
+                            "lon" to model.mapViewport.value.boundingBox.center.longitude.toFloat(),
                         ),
                     )
                 }
@@ -375,7 +366,7 @@ class MapFragment : Fragment() {
                         ).toInt()
                         it.moveCamera(
                             CameraUpdateFactory.newLatLngBounds(
-                                boundingBox.toLatLngBounds(),
+                                boundingBox,
                                 boundingBoxPaddingPx
                             )
                         )
@@ -384,7 +375,7 @@ class MapFragment : Fragment() {
                 }
 
                 val firstBoundingBox =
-                    model.mapViewport.firstOrNull()?.boundingBox?.toLatLngBounds()!!
+                    model.mapViewport.firstOrNull()?.boundingBox!!
 
                 binding.map.getMapAsync {
                     it.moveCamera(
@@ -427,21 +418,6 @@ class MapFragment : Fragment() {
             val text = it.toString()
             searchModel.setSearchString(text)
         }
-    }
-
-    private fun BoundingBox.toLatLngBounds(): LatLngBounds {
-        return LatLngBounds.from(
-            latNorth = latNorth,
-            lonEast = lonEast,
-            latSouth = latSouth,
-            lonWest = lonWest,
-        )
-    }
-
-    private fun LatLngBounds.toBoundingBox(): BoundingBox {
-        return BoundingBox(
-            latitudeNorth, longitudeEast, latitudeSouth, longitudeWest
-        )
     }
 
     override fun onDestroyView() {
@@ -487,11 +463,11 @@ class MapFragment : Fragment() {
             model.setMapViewport(
                 MapModel.MapViewport(
                     zoom = map.cameraPosition.zoom,
-                    boundingBox = map.projection.visibleRegion.latLngBounds.toBoundingBox(),
+                    boundingBox = map.projection.visibleRegion.latLngBounds,
                 )
             )
             searchModel.setLocation(
-                GeoPoint(
+                LatLng(
                     map.cameraPosition.target!!.latitude, map.cameraPosition.target!!.longitude
                 )
             )

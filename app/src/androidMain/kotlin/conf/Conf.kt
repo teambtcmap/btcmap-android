@@ -1,6 +1,6 @@
 package conf
 
-import org.osmdroid.util.BoundingBox
+import org.maplibre.android.geometry.LatLngBounds
 import java.time.ZonedDateTime
 
 data class Conf(
@@ -14,11 +14,11 @@ data class Conf(
     val notifyOfNewElementsNearby: Boolean,
 )
 
-fun Conf.mapViewport(): BoundingBox {
-    return BoundingBox(
-        viewportNorthLat,
-        viewportEastLon,
-        viewportSouthLat,
-        viewportWestLon,
+fun Conf.mapViewport(): LatLngBounds {
+    return LatLngBounds.from(
+        latNorth = viewportNorthLat,
+        lonEast = viewportEastLon,
+        latSouth = viewportSouthLat,
+        lonWest = viewportWestLon,
     )
 }

@@ -2,19 +2,16 @@
 # https://developer.android.com/build/releases/gradle-plugin
 agp = "8.7.3"
 # https://github.com/JetBrains/kotlin/releases
-kotlin = "1.9.25"
+kotlin = "2.1.0"
 # Allows suspending functions
 # https://github.com/Kotlin/kotlinx.coroutines/releases
-coroutines = "1.9.0"
+coroutines = "1.10.1"
 # Simplifies in-app navigation
 # https://developer.android.com/jetpack/androidx/releases/navigation
-navigation = "2.8.1"
+navigation = "2.8.5"
 # Helps with keeping our view hierarchies flat
 # https://developer.android.com/jetpack/androidx/releases/constraintlayout
-constraintlayout = "2.1.4"
-# Used by osmdroid (original prefs API is deprecated)
-# https://developer.android.com/jetpack/androidx/releases/preference
-preference = "1.2.1"
+constraintlayout = "2.2.0"
 # Material design components
 # https://github.com/material-components/material-components-android/releases
 material = "1.12.0"
@@ -24,9 +21,6 @@ okhttp = "5.0.0-alpha.14"
 # Injection library
 # https://github.com/InsertKoinIO/koin/blob/main/CHANGELOG.md
 koin = "3.5.0"
-# Open Street Map widget
-# https://github.com/osmdroid/osmdroid/releases
-osmdroid = "6.1.20"
 # Map utilities
 # https://github.com/locationtech/jts/releases
 jts = "1.20.0"
@@ -35,24 +29,24 @@ jts = "1.20.0"
 mpandroidchart = "v3.1.0"
 # Used to cache data and store user preferences
 # https://developer.android.com/jetpack/androidx/releases/sqlite
-sqlite = "2.5.0-alpha10"
+sqlite = "2.5.0-alpha12"
 # Used to download, cache and display images
 # https://github.com/coil-kt/coil/releases
 coil = "2.7.0"
 # Background job scheduler
 # Used to fetch new data in background
 # https://developer.android.com/jetpack/androidx/releases/work
-work = "2.10.0-alpha04"
+work = "2.10.0"
 # TODO remove when work bumps its dep (an old version causes crash on startup)
-room = "2.7.0-alpha08"
+room = "2.7.0-alpha12"
 # Platform-agnostic JSON handling
 # https://github.com/Kotlin/kotlinx.serialization/releases
-serialization = "1.7.3"
+serialization = "1.8.0"
 # Platform-agnostic date and time handling
 # https://github.com/Kotlin/kotlinx-datetime/releases
 datetime = "0.6.1"
 # https://github.com/maplibre/maplibre-native/releases
-maplibre = "11.5.2"
+maplibre = "11.8.0"
 
 [libraries]
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -63,7 +57,6 @@ androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "work
 androidx-navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
 androidx-navigation-ui = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-androidx-preference = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference" }
 androidx-sqlite = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 androidx-room = { module = "androidx.room:room-runtime", version.ref = "room" }
 
@@ -72,12 +65,11 @@ okhttp-coroutines = { group = "com.squareup.okhttp3", name = "okhttp-coroutines"
 okhttp-brotli = { group = "com.squareup.okhttp3", name = "okhttp-brotli", version.ref = "okhttp" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 koin = { module = "io.insert-koin:koin-android", version.ref = "koin" }
-osmdroid = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid" }
 jts = { module = "org.locationtech.jts:jts-core", version.ref = "jts" }
 mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
 coil-core = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }
-maplibre = { module = "org.maplibre.gl:android-sdk", version.ref = "maplibre" }
+maplibre = { module = "org.maplibre.gl:android-sdk-vulkan", version.ref = "maplibre" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
