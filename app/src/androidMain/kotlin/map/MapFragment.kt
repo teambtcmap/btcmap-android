@@ -187,9 +187,9 @@ class MapFragment : Fragment() {
             it.uiSettings.isCompassEnabled = false
             it.uiSettings.isRotateGesturesEnabled = false
             it.addCancelSelectionOverlay()
-            it.setOnMarkerClickListener {
-                if (it.snippet.isNotBlank()) {
-                    val id = it.snippet.toLong()
+            it.setOnMarkerClickListener { marker ->
+                if (!marker.snippet.isNullOrBlank()) {
+                    val id = marker.snippet.toLong()
                     model.selectElement(id, false)
                 }
                 true
