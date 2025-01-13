@@ -337,8 +337,10 @@ class ElementFragment : Fragment() {
             binding.elementAction.setText(R.string.verify)
             binding.elementAction.setOnClickListener {
                 val intent = Intent(Intent.ACTION_VIEW)
+                val osmType = element.overpassData.optString("type")
+                val osmId = element.overpassData.optLong("id")
                 intent.data =
-                    Uri.parse("https://btcmap.org/verify-location?id=$elementId")
+                    Uri.parse("https://btcmap.org/verify-location?id=$osmType:$osmId")
                 startActivity(intent)
             }
         }
