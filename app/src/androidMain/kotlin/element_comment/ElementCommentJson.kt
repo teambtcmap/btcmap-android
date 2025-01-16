@@ -29,7 +29,7 @@ fun InputStream.toElementCommentsJson(): List<ElementCommentJson> {
             elementId = it.optLong("element_id"),
             comment = it.optString("comment").ifBlank { null },
             createdAt = it.optString("created_at").ifBlank { null },
-            updatedAt = it.getString("created_at"),
+            updatedAt = it.getString("updated_at"),
             deletedAt = it.optString("deleted_at").ifBlank { null },
         )
     }

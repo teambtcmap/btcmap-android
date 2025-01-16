@@ -38,6 +38,7 @@ kotlin {
             implementation(libs.coil.core)
             implementation(libs.coil.svg)
             implementation(libs.maplibre)
+            implementation(libs.qrgenerator)
         }
         commonMain.dependencies {
             implementation(libs.kotlinx.serialization)

@@ -11,9 +11,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isInvisible
@@ -324,25 +324,20 @@ class ElementFragment : Fragment() {
         binding.openingHours.text = openingHours
         binding.openingHours.isVisible = openingHours.isNotBlank()
 
-        val pouchUsername = element.tags.optString("payment:pouch")
+        binding.elementAction.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW)
+            val osmType = element.overpassData.optString("type")
+            val osmId = element.overpassData.optLong("id")
+            intent.data =
+                Uri.parse("https://btcmap.org/verify-location?id=$osmType:$osmId")
+            startActivity(intent)
+        }
 
-        if (pouchUsername.isNotBlank()) {
-            binding.elementAction.setText(R.string.pay)
-            binding.elementAction.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = Uri.parse("https://app.pouch.ph/$pouchUsername")
-                startActivity(intent)
-            }
-        } else {
-            binding.elementAction.setText(R.string.verify)
-            binding.elementAction.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW)
-                val osmType = element.overpassData.optString("type")
-                val osmId = element.overpassData.optLong("id")
-                intent.data =
-                    Uri.parse("https://btcmap.org/verify-location?id=$osmType:$osmId")
-                startActivity(intent)
-            }
+        binding.addComment.setOnClickListener {
+            findNavController().navigate(
+                resId = R.id.addElementCommentFragment,
+                args = bundleOf("element_id" to elementId),
+            )
         }
 
         val imageUrl = tags.optString("image").toHttpUrlOrNull()

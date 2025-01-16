@@ -200,4 +200,12 @@
             app:argType="long" />
     </fragment>
 
+    <fragment
+        android:id="@+id/addElementCommentFragment"
+        android:name="element_comment.AddElementCommentFragment">
+        <argument
+            android:name="element_id"
+            app:argType="long" />
+    </fragment>
+
 </navigation>

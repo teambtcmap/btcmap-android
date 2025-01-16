@@ -1,6 +1,6 @@
 [versions]
 # https://developer.android.com/build/releases/gradle-plugin
-agp = "8.7.3"
+agp = "8.8.0"
 # https://github.com/JetBrains/kotlin/releases
 kotlin = "2.1.0"
 # Allows suspending functions
@@ -47,6 +47,7 @@ serialization = "1.8.0"
 datetime = "0.6.1"
 # https://github.com/maplibre/maplibre-native/releases
 maplibre = "11.8.0"
+qrgenerator = "1.0.5"
 
 [libraries]
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -70,6 +71,7 @@ mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "
 coil-core = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }
 maplibre = { module = "org.maplibre.gl:android-sdk-vulkan", version.ref = "maplibre" }
+qrgenerator = { module = "com.github.androidmads:QRGenerator", version.ref = "qrgenerator" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
