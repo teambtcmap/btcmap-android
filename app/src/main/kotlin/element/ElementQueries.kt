@@ -326,7 +326,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
     fun selectMaxUpdatedAt(): ZonedDateTime? {
         return conn.prepare("SELECT max(updated_at) FROM element").use {
             if (it.step()) {
-                it.getZonedDateTime(0)
+                it.getZonedDateTimeOrNull(0)
             } else {
                 null
             }

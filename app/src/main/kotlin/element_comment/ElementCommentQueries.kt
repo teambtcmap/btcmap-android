@@ -3,6 +3,7 @@ package element_comment
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.use
 import db.getZonedDateTime
+import db.getZonedDateTimeOrNull
 import db.transaction
 import java.time.ZonedDateTime
 
@@ -113,7 +114,7 @@ class ElementCommentQueries(private val conn: SQLiteConnection) {
     fun selectMaxUpdatedAt(): ZonedDateTime? {
         return conn.prepare("SELECT max(updated_at) FROM element_comment").use {
             if (it.step()) {
-                it.getZonedDateTime(0)
+                it.getZonedDateTimeOrNull(0)
             } else {
                 null
             }

@@ -5,6 +5,7 @@ import androidx.sqlite.use
 import db.getInstant
 import db.getJsonObject
 import db.getZonedDateTime
+import db.getZonedDateTimeOrNull
 import db.transaction
 import java.time.ZonedDateTime
 
@@ -77,7 +78,7 @@ class AreaQueries(private val conn: SQLiteConnection) {
     fun selectMaxUpdatedAt(): ZonedDateTime? {
         return conn.prepare("SELECT max(updated_at) FROM area").use {
             if (it.step()) {
-                it.getZonedDateTime(0)
+                it.getZonedDateTimeOrNull(0)
             } else {
                 null
             }

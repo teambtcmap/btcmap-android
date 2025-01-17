@@ -4,6 +4,7 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import androidx.sqlite.use
 import db.getZonedDateTime
+import db.getZonedDateTimeOrNull
 import db.transaction
 
 class ConfQueries(private val conn: SQLiteConnection) {
@@ -73,7 +74,7 @@ class ConfQueries(private val conn: SQLiteConnection) {
         ).use {
             if (it.step()) {
                 Conf(
-                    lastSyncDate = it.getZonedDateTime(0),
+                    lastSyncDate = it.getZonedDateTimeOrNull(0),
                     viewportNorthLat = it.getDouble(1),
                     viewportEastLon = it.getDouble(2),
                     viewportSouthLat = it.getDouble(3),

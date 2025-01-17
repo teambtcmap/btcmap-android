@@ -52,6 +52,14 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "DebugProbesKt.bin"
         }
+
+        jniLibs {
+            // Exclude all x86 lib variants
+            excludes += "/lib/x86/*.so"
+            excludes += "/lib/x86_64/*.so"
+            // Exclude all armeabi-v7a lib variants
+            excludes += "/lib/armeabi-v7a/*.so"
+        }
     }
 
     flavorDimensions += "store"
