@@ -22,6 +22,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -103,11 +104,9 @@ class AddElementCommentFragment : Fragment() {
                 } else {
                     val body = res.body.string()
                     Log.d("RPC", body)
-                    val json = JSONObject(body)
-                    val result = json.getJSONObject("result")
 
                     withContext(Dispatchers.Main) {
-                        onPaymentRequestReceived(result.getString("payment_request"))
+                        onPaymentRequestResponse(JSONObject(body))
                     }
                 }
             }
@@ -124,8 +123,21 @@ class AddElementCommentFragment : Fragment() {
         binding.generateInvoice.isEnabled = true
     }
 
-    private fun onPaymentRequestReceived(paymentRequest: String) {
-        invoice = paymentRequest
+    private fun onPaymentRequestResponse(rpcResponse: JSONObject) {
+        if (rpcResponse.has("error")) {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Error")
+                .setMessage(rpcResponse.getJSONObject("error").toString())
+                .setPositiveButton("Close", null)
+                .setOnDismissListener {
+                    binding.comment.isEnabled = true
+                    binding.generateInvoice.isEnabled = true
+                }
+                .show()
+            return
+        }
+
+        invoice = rpcResponse.getJSONObject("result").getString("payment_request")
         val qrEncoder = QRGEncoder(invoice, null, QRGContents.Type.TEXT, 1000)
         qrEncoder.colorBlack = Color.BLACK
         qrEncoder.colorWhite = Color.WHITE
