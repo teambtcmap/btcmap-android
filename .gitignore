@@ -23,3 +23,7 @@ app/src/main/assets/events.json
 app/src/main/assets/areas.json
 app/src/main/assets/area-elements.json
 app/src/main/assets/users.json
+
+# Signed APK dirs
+app/fdroid
+app/play

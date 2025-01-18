@@ -13,8 +13,8 @@ android {
         applicationId = "org.btcmap"
         minSdk = 27
         targetSdk = 35
-        versionCode = 52
-        versionName = "0.9.0"
+        versionCode = 53
+        versionName = "0.9.1"
     }
 
     compileOptions {
