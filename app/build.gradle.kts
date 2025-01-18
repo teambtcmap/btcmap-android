@@ -5,25 +5,9 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
 }
 
-//kotlin {
-//    androidTarget {
-//        compilations.all {
-//            kotlinOptions {
-//                jvmTarget = "11"
-//                freeCompilerArgs += "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi"
-//                freeCompilerArgs += "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
-//            }
-//        }
-//    }
-//}
-
 android {
     namespace = "org.btcmap"
     compileSdk = 35
-
-    //sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    //sourceSets["main"].res.srcDirs("src/androidMain/res")
-    //sourceSets["main"].resources.srcDirs("src/commonMain/resources")
 
     defaultConfig {
         applicationId = "org.btcmap"
@@ -36,15 +20,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    signingConfigs {
-        create("selfSigned") {
-            storeFile = File(rootDir, "release.jks")
-            storePassword = "btcmap"
-            keyAlias = "btcmap"
-            keyPassword = "btcmap"
-        }
     }
 
     packaging {
@@ -63,7 +38,6 @@ android {
     }
 
     flavorDimensions += "store"
-    flavorDimensions += "signature"
 
     productFlavors {
         create("fdroid") {
@@ -74,19 +48,17 @@ android {
             dimension = "store"
             applicationIdSuffix = ".app"
         }
-
-        create("selfSigned") {
-            dimension = "signature"
-            signingConfig = signingConfigs.getByName("selfSigned")
-        }
     }
 
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
+            manifestPlaceholders["appIcon"] = "@drawable/launcher_debug"
         }
 
         release {
+            manifestPlaceholders["appIcon"] = "@drawable/launcher"
+
             // Enables code shrinking, obfuscation, and optimization
             isMinifyEnabled = true
 
@@ -97,6 +69,8 @@ android {
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
             )
+
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -139,7 +113,7 @@ dependencies {
 
 tasks.register("bundleData") {
     doLast {
-        val destDir = File(projectDir, "src/androidMain/assets")
+        val destDir = File(projectDir, "src/main/assets")
         destDir.mkdirs()
 
         val elementsSrc = URI("https://static.btcmap.org/api/v3/elements.json")

@@ -17,7 +17,7 @@
         android:allowBackup="false"
         android:dataExtractionRules="@xml/backup_rules"
         android:fullBackupContent="false"
-        android:icon="@drawable/launcher"
+        android:icon="${appIcon}"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
