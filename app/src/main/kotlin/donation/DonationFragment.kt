@@ -15,7 +15,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import org.btcmap.R
 import org.btcmap.databinding.FragmentDonationBinding
 
@@ -35,7 +34,7 @@ class DonationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.apply {
-            toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+            toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
             listOf(qr, pay).forEach {
                 it.setOnClickListener {
                     val intent = Intent(Intent.ACTION_VIEW)

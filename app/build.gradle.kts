@@ -77,6 +77,7 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    
     kotlinOptions {
         jvmTarget = "11"
     }
@@ -86,8 +87,6 @@ android {
         implementation(libs.kotlinx.serialization)
         implementation(libs.kotlinx.datetime)
 
-        implementation(libs.androidx.navigation.fragment)
-        implementation(libs.androidx.navigation.ui)
         implementation(libs.androidx.work)
         implementation(libs.androidx.constraintlayout)
         implementation(libs.androidx.room)

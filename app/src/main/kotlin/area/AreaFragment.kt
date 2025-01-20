@@ -13,18 +13,23 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import element.ElementFragment
+import issue.IssuesFragment
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import map.MapFragment
 import okhttp3.HttpUrl
 import org.btcmap.R
 import org.btcmap.databinding.FragmentAreaBinding
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import reports.ReportsFragment
 
 class AreaFragment : Fragment() {
 
@@ -45,9 +50,9 @@ class AreaFragment : Fragment() {
                 viewLifecycleOwner.lifecycleScope.launch {
                     val area = model.selectArea(args.value.areaId) ?: return@launch
                     resultModel.area.update { area }
-                    findNavController().navigate(
-                        R.id.mapFragment,
-                    )
+                    parentFragmentManager.commit {
+                        replace<MapFragment>(R.id.nav_host_fragment)
+                    }
                 }
             }
 
@@ -58,17 +63,23 @@ class AreaFragment : Fragment() {
             }
 
             override fun onIssuesClick() {
-                findNavController().navigate(
-                    R.id.issuesFragment,
-                    bundleOf("area_id" to args.value.areaId),
-                )
+                parentFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    replace<IssuesFragment>(
+                        R.id.nav_host_fragment, null, bundleOf("area_id" to args.value.areaId)
+                    )
+                    addToBackStack(null)
+                }
             }
 
             override fun onElementClick(item: AreaAdapter.Item.Element) {
-                findNavController().navigate(
-                    R.id.elementFragment,
-                    bundleOf("element_id" to item.id),
-                )
+                parentFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    replace<ElementFragment>(
+                        R.id.nav_host_fragment, null, bundleOf("element_id" to item.id)
+                    )
+                    addToBackStack(null)
+                }
             }
         },
     )
@@ -87,15 +98,18 @@ class AreaFragment : Fragment() {
 
         binding.toolbar.apply {
             setNavigationOnClickListener {
-                findNavController().popBackStack()
+                parentFragmentManager.popBackStack()
             }
 
             setOnMenuItemClickListener {
                 if (it.itemId == R.id.action_reports) {
-                    findNavController().navigate(
-                        R.id.reportsFragment,
-                        bundleOf("area_id" to args.value.areaId),
-                    )
+                    parentFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        replace<ReportsFragment>(
+                            R.id.nav_host_fragment, null, bundleOf("area_id" to args.value.areaId)
+                        )
+                        addToBackStack(null)
+                    }
                 }
 
                 true

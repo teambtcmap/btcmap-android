@@ -32,16 +32,21 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import area.AreaResultModel
+import area.AreasFragment
 import area.polygons
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import delivery.DeliveryFragment
+import donation.DonationFragment
 import element.ElementFragment
 import element.ElementsCluster
+import event.EventsFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
@@ -61,9 +66,12 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
+import reports.ReportsFragment
 import search.SearchAdapter
 import search.SearchModel
 import search.SearchResultModel
+import settings.SettingsFragment
+import user.UsersFragment
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
@@ -141,10 +149,15 @@ class MapFragment : Fragment() {
         val markersRepo = MapMarkersRepo(requireContext())
 
         binding.searchBar.setOnMenuItemClickListener {
-            val nav = findNavController()
-
             when (it.itemId) {
-                R.id.action_donate -> nav.navigate(R.id.donationFragment)
+                R.id.action_donate -> {
+                    parentFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        replace<DonationFragment>(R.id.nav_host_fragment)
+                        addToBackStack(null)
+                    }
+                }
+
                 R.id.action_add_element -> {
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.data = Uri.parse("https://btcmap.org/add-location")
@@ -152,30 +165,63 @@ class MapFragment : Fragment() {
                 }
 
                 R.id.action_delivery -> {
-                    nav.navigate(
-                        R.id.deliveryFragment,
-                        bundleOf(
-                            "userLat" to model.mapViewport.value.boundingBox.center.latitude.toFloat(),
-                            "userLon" to model.mapViewport.value.boundingBox.center.longitude.toFloat(),
-                            "searchAreaId" to 662L,
-                        ),
-                    )
+                    parentFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        replace<DeliveryFragment>(
+                            R.id.nav_host_fragment, null, bundleOf(
+                                "userLat" to model.mapViewport.value.boundingBox.center.latitude.toFloat(),
+                                "userLon" to model.mapViewport.value.boundingBox.center.longitude.toFloat(),
+                                "searchAreaId" to 662L,
+                            )
+                        )
+                        addToBackStack(null)
+                    }
                 }
 
                 R.id.action_areas -> {
-                    nav.navigate(
-                        R.id.areasFragment,
-                        bundleOf(
-                            "lat" to model.mapViewport.value.boundingBox.center.latitude.toFloat(),
-                            "lon" to model.mapViewport.value.boundingBox.center.longitude.toFloat(),
-                        ),
-                    )
+                    parentFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        replace<AreasFragment>(
+                            R.id.nav_host_fragment, null, bundleOf(
+                                "lat" to model.mapViewport.value.boundingBox.center.latitude.toFloat(),
+                                "lon" to model.mapViewport.value.boundingBox.center.longitude.toFloat(),
+                            )
+                        )
+                        addToBackStack(null)
+                    }
                 }
 
-                R.id.action_trends -> nav.navigate(R.id.reportsFragment)
-                R.id.action_users -> nav.navigate(R.id.usersFragment)
-                R.id.action_events -> nav.navigate(R.id.eventsFragment)
-                R.id.action_settings -> nav.navigate(R.id.settingsFragment)
+                R.id.action_trends -> {
+                    parentFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        replace<ReportsFragment>(R.id.nav_host_fragment)
+                        addToBackStack(null)
+                    }
+                }
+
+                R.id.action_users -> {
+                    parentFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        replace<UsersFragment>(R.id.nav_host_fragment)
+                        addToBackStack(null)
+                    }
+                }
+
+                R.id.action_events -> {
+                    parentFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        replace<EventsFragment>(R.id.nav_host_fragment)
+                        addToBackStack(null)
+                    }
+                }
+
+                R.id.action_settings -> {
+                    parentFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        replace<SettingsFragment>(R.id.nav_host_fragment)
+                        addToBackStack(null)
+                    }
+                }
             }
 
             true

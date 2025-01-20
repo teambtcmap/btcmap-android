@@ -11,12 +11,14 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withResumed
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import element.ElementFragment
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.FragmentEventsBinding
@@ -36,10 +38,11 @@ class EventsFragment : Fragment() {
 
                 if (element != null) {
                     withResumed {
-                        findNavController().navigate(
-                            R.id.elementFragment,
-                            bundleOf("element_id" to element.id),
-                        )
+                        parentFragmentManager.commit {
+                            setReorderingAllowed(true)
+                            replace<ElementFragment>(R.id.nav_host_fragment, null, bundleOf("element_id" to element.id))
+                            addToBackStack(null)
+                        }
                     }
                 } else {
                     Toast.makeText(requireContext(), "Element not found", Toast.LENGTH_SHORT).show()
@@ -73,7 +76,7 @@ class EventsFragment : Fragment() {
         }
 
         binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+            parentFragmentManager.popBackStack()
         }
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())

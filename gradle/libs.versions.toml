@@ -6,9 +6,6 @@ kotlin = "2.1.0"
 # Allows suspending functions
 # https://github.com/Kotlin/kotlinx.coroutines/releases
 coroutines = "1.10.1"
-# Simplifies in-app navigation
-# https://developer.android.com/jetpack/androidx/releases/navigation
-navigation = "2.8.5"
 # Helps with keeping our view hierarchies flat
 # https://developer.android.com/jetpack/androidx/releases/constraintlayout
 constraintlayout = "2.2.0"
@@ -57,8 +54,6 @@ kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 
 androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
-androidx-navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
-androidx-navigation-ui = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-sqlite = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 androidx-room = { module = "androidx.room:room-runtime", version.ref = "room" }

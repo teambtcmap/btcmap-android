@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -41,7 +40,7 @@ class DeliveryFragment : Fragment() {
 
     private val adapter = DeliveryAdapter { item ->
         resultModel.element.update { item.element }
-        findNavController().popBackStack()
+        parentFragmentManager.popBackStack()
     }
 
     override fun onCreateView(
@@ -65,7 +64,7 @@ class DeliveryFragment : Fragment() {
         }
 
         binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+            parentFragmentManager.popBackStack()
         }
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())

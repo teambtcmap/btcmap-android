@@ -12,7 +12,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import conf.ConfRepo
 import org.btcmap.R
 import org.btcmap.databinding.FragmentSettingsBinding
@@ -51,7 +50,7 @@ class SettingsFragment : Fragment() {
         }
 
         binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+            parentFragmentManager.popBackStack()
         }
 
         binding.showAtms.isChecked = conf.conf.value.showAtms

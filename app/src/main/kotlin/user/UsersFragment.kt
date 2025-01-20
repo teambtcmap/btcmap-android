@@ -10,10 +10,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import org.btcmap.R
@@ -27,8 +28,12 @@ class UsersFragment : Fragment() {
     private var _binding: FragmentUsersBinding? = null
     private val binding get() = _binding!!
 
-    val adapter = UsersAdapter {
-        findNavController().navigate(R.id.userFragment, bundleOf("user_id" to it.id))
+    private val adapter = UsersAdapter {
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace<UserFragment>(R.id.nav_host_fragment, null, bundleOf("user_id" to it.id))
+            addToBackStack(null)
+        }
     }
 
     override fun onCreateView(
@@ -52,7 +57,7 @@ class UsersFragment : Fragment() {
         }
 
         binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+            parentFragmentManager.popBackStack()
         }
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())

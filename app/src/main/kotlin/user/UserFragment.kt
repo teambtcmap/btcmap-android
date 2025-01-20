@@ -12,11 +12,14 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import delivery.DeliveryFragment
+import element.ElementFragment
 import event.EventsAdapter
 import event.EventsRepo
 import kotlinx.coroutines.launch
@@ -44,10 +47,13 @@ class UserFragment : Fragment() {
 
     private val adapter = EventsAdapter(object : EventsAdapter.Listener {
         override fun onItemClick(item: EventsAdapter.Item) {
-            findNavController().navigate(
-                R.id.elementFragment,
-                bundleOf("element_id" to item.elementId),
-            )
+            parentFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace<ElementFragment>(
+                    R.id.nav_host_fragment, null, bundleOf("element_id" to item.elementId)
+                )
+                addToBackStack(null)
+            }
         }
 
         override fun onShowMoreClick() {}
@@ -76,7 +82,7 @@ class UserFragment : Fragment() {
         }
 
         binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+            parentFragmentManager.popBackStack()
         }
 
         val user = runBlocking {

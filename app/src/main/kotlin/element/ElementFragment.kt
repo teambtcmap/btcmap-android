@@ -20,13 +20,16 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
+import element_comment.AddElementCommentFragment
 import element_comment.ElementCommentRepo
 import icons.iconTypeface
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
+import map.MapFragment
 import map.MapMarkersRepo
 import map.getErrorColor
 import map.getOnSurfaceColor
@@ -89,14 +92,16 @@ class ElementFragment : Fragment() {
             binding.toolbar.setNavigationIcon(R.drawable.arrow_back)
 
             binding.toolbar.setNavigationOnClickListener {
-                findNavController().popBackStack()
+                parentFragmentManager.popBackStack()
             }
 
             binding.mapContainer.isVisible = true
 
             binding.mapClickHandler.setOnClickListener {
                 resultModel.element.update { element }
-                findNavController().navigate(R.id.mapFragment)
+                parentFragmentManager.commit {
+                    replace<MapFragment>(R.id.nav_host_fragment)
+                }
             }
 
             binding.map.getMapAsync { map ->
@@ -334,10 +339,15 @@ class ElementFragment : Fragment() {
         }
 
         binding.addComment.setOnClickListener {
-            findNavController().navigate(
-                resId = R.id.addElementCommentFragment,
-                args = bundleOf("element_id" to elementId),
-            )
+            parentFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace<AddElementCommentFragment>(
+                    R.id.nav_host_fragment,
+                    null,
+                    bundleOf("element_id" to elementId)
+                )
+                addToBackStack(null)
+            }
         }
 
         val imageUrl = tags.optString("image").toHttpUrlOrNull()

@@ -12,10 +12,11 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import org.btcmap.R
@@ -37,10 +38,13 @@ class AreasFragment : Fragment() {
     }
 
     private val adapter = AreasAdapter {
-        findNavController().navigate(
-            resId = R.id.areaFragment,
-            args = bundleOf("area_id" to it.id),
-        )
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace<AreaFragment>(
+                R.id.nav_host_fragment, null, bundleOf("area_id" to it.id)
+            )
+            addToBackStack(null)
+        }
     }
 
     override fun onCreateView(
@@ -59,7 +63,7 @@ class AreasFragment : Fragment() {
         setInsets()
 
         binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+            parentFragmentManager.popBackStack()
         }
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
