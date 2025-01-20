@@ -40,7 +40,12 @@ class EventsModel(
                     date = it.eventDate,
                     type = it.eventType,
                     elementId = it.elementId,
-                    elementName = it.elementName.ifBlank { it.elementId.toString() },
+                    elementName = it.elementName.ifBlank {
+                        it.tags.optString(
+                            "element_name",
+                            it.elementId.toString(),
+                        )
+                    },
                     username = it.userName,
                     tipLnurl = it.userTips,
                 )

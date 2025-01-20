@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/reportsFragment"
-        android:name="reports.ReportsFragment"/>
+        android:name="reports.ReportsFragment" />
 
     <fragment
         android:id="@+id/areasFragment"
@@ -27,29 +27,11 @@
 
     <fragment
         android:id="@+id/deliveryFragment"
-        android:name="delivery.DeliveryFragment">
-        <argument
-            android:name="userLat"
-            app:argType="float" />
-        <argument
-            android:name="userLon"
-            app:argType="float" />
-        <argument
-            android:name="searchAreaId"
-            app:argType="long" />
-    </fragment>
+        android:name="delivery.DeliveryFragment" />
 
     <fragment
         android:id="@+id/eventsFragment"
-        android:name="event.EventsFragment">
-        <action
-            android:id="@+id/action_eventsFragment_to_elementFragment"
-            app:destination="@id/elementFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-    </fragment>
+        android:name="event.EventsFragment" />
 
     <fragment
         android:id="@+id/usersFragment"

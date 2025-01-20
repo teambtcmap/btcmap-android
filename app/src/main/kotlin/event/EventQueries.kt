@@ -97,11 +97,12 @@ class EventQueries(private val conn: SQLiteConnection) {
             """
                 SELECT
                     ev.type AS event_type,
-                    el.id AS element_id,
+                    ev.element_id AS element_id,
                     json_extract(el.overpass_data, '$.tags.name') AS element_name,
                     ev.created_at AS event_date,
                     json_extract(u.osm_data, '$.display_name') AS user_name,
-                    json_extract(u.osm_data, '$.description') AS user_description
+                    json_extract(u.osm_data, '$.description') AS user_description,
+                    ev.tags as tags
                 FROM event ev
                 LEFT JOIN element el ON el.id = ev.element_id
                 JOIN user u ON u.id = ev.user_id
@@ -121,6 +122,7 @@ class EventQueries(private val conn: SQLiteConnection) {
                             eventDate = it.getZonedDateTime(3),
                             userName = it.getText(4),
                             userTips = getLnUrl(it.getText(5)),
+                            tags = it.getJsonObjectOld(6),
                         )
                     )
                 }
@@ -135,7 +137,8 @@ class EventQueries(private val conn: SQLiteConnection) {
                     ev.type AS event_type,
                     el.id AS element_id,
                     json_extract(el.overpass_data, '$.tags.name') AS element_name,
-                    ev.created_at AS event_date
+                    ev.created_at AS event_date,
+                    ev.tags as tags
                 FROM event ev
                 LEFT JOIN element el ON el.id = ev.element_id
                 JOIN user u ON u.id = ev.user_id
@@ -155,6 +158,7 @@ class EventQueries(private val conn: SQLiteConnection) {
                             eventDate = it.getZonedDateTime(3),
                             userName = "",
                             userTips = "",
+                            tags = it.getJsonObjectOld(4),
                         )
                     )
                 }

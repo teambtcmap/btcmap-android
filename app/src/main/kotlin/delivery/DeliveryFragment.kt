@@ -1,6 +1,7 @@
 package delivery
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,14 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import search.SearchResultModel
 
 class DeliveryFragment : Fragment() {
+
+    private val args = lazy {
+        DeliveryModel.Args(
+            userLat = requireArguments().getFloat("userLat").toDouble(),
+            userLon = requireArguments().getFloat("userLon").toDouble(),
+            searchAreaId = requireArguments().getLong("searchAreaId"),
+        )
+    }
 
     private val model: DeliveryModel by viewModel()
 
@@ -69,19 +78,12 @@ class DeliveryFragment : Fragment() {
             }
         }
 
-        model.setArgs(requireArgs())
+        Log.d("DeliveryFragment", "args: ${args.value}")
+        model.setArgs(args.value)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun requireArgs(): DeliveryModel.Args {
-        return DeliveryModel.Args(
-            userLat = requireArguments().getFloat("userLat").toDouble(),
-            userLon = requireArguments().getFloat("userLon").toDouble(),
-            searchAreaId = requireArguments().getLong("searchAreaId"),
-        )
     }
 }
