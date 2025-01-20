@@ -1,6 +1,7 @@
 package area
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +29,13 @@ class AreasFragment : Fragment() {
     private var _binding: FragmentAreasBinding? = null
     private val binding get() = _binding!!
 
+    private val args = lazy {
+        AreasModel.Args(
+            lat = requireArguments().getFloat("lat").toDouble(),
+            lon = requireArguments().getFloat("lon").toDouble(),
+        )
+    }
+
     private val adapter = AreasAdapter {
         findNavController().navigate(
             resId = R.id.areaFragment,
@@ -45,7 +53,8 @@ class AreasFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        model.setArgs(requireArgs())
+        Log.d("AreasFragment", "args: ${args.value}")
+        model.setArgs(args.value)
 
         setInsets()
 
@@ -79,13 +88,6 @@ class AreasFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun requireArgs(): AreasModel.Args {
-        return AreasModel.Args(
-            lat = requireArguments().getFloat("lat").toDouble(),
-            lon = requireArguments().getFloat("lon").toDouble(),
-        )
     }
 
     private fun setInsets() {

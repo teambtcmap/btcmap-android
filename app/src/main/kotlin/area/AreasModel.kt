@@ -41,7 +41,7 @@ class AreasModel(
                     }
 
                     val boundingBox = boundingBox(polygons)
-                    Pair(it, boundingBox.center.distanceTo(location))
+                    Pair(it, boundingBox.center.distanceTo(location) / 1_000)
                 }.sortedBy { it.second }
 
             val distanceFormat = NumberFormat.getNumberInstance().apply {
