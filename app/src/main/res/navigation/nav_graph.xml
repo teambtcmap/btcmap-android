@@ -19,11 +19,7 @@
 
     <fragment
         android:id="@+id/reportsFragment"
-        android:name="reports.ReportsFragment">
-        <argument
-            android:name="area_id"
-            app:argType="long" />
-    </fragment>
+        android:name="reports.ReportsFragment"/>
 
     <fragment
         android:id="@+id/areasFragment"

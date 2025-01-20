@@ -34,6 +34,10 @@ import java.time.ZoneOffset
 
 class ReportsFragment : Fragment() {
 
+    private val args = lazy {
+        ReportsModel.Args(arguments?.getLong("area_id", 662L) ?: 662L)
+    }
+
     private val model: ReportsModel by viewModel()
 
     private var _binding: FragmentReportsBinding? = null
@@ -66,9 +70,7 @@ class ReportsFragment : Fragment() {
         initVerifiedElementsFractionChart()
         initDaysSinceVerifiedChart()
 
-        model.args.update {
-            ReportsModel.Args(requireArguments().getLong("area_id", 662L))
-        }
+        model.args.update { args.value }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
