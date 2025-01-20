@@ -96,7 +96,7 @@ class ElementFragment : Fragment() {
 
             binding.mapClickHandler.setOnClickListener {
                 resultModel.element.update { element }
-                findNavController().navigate(R.id.action_elementFragment_to_mapFragment)
+                findNavController().navigate(R.id.mapFragment)
             }
 
             binding.map.getMapAsync { map ->

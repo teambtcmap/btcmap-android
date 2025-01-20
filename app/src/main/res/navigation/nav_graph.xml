@@ -35,98 +35,26 @@
 
     <fragment
         android:id="@+id/usersFragment"
-        android:name="user.UsersFragment">
-        <action
-            android:id="@+id/action_usersFragment_to_userFragment"
-            app:destination="@id/userFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-    </fragment>
+        android:name="user.UsersFragment" />
 
     <fragment
         android:id="@+id/userFragment"
-        android:name="user.UserFragment">
-        <argument
-            android:name="user_id"
-            app:argType="long" />
-        <action
-            android:id="@+id/action_userFragment_to_elementFragment"
-            app:destination="@id/elementFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-    </fragment>
+        android:name="user.UserFragment" />
 
     <fragment
         android:id="@+id/areaFragment"
-        android:name="area.AreaFragment">
-        <argument
-            android:name="area_id"
-            app:argType="long" />
-        <action
-            android:id="@+id/action_areaFragment_to_mapFragment"
-            app:destination="@id/mapFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:launchSingleTop="true"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <action
-            android:id="@+id/action_areaFragment_to_elementFragment"
-            app:destination="@id/elementFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <action
-            android:id="@+id/action_areaFragment_to_reportsFragment"
-            app:destination="@id/reportsFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <action
-            android:id="@+id/action_areaFragment_to_issuesFragment"
-            app:destination="@id/issuesFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-    </fragment>
+        android:name="area.AreaFragment" />
 
     <fragment
         android:id="@+id/elementFragment"
-        android:name="element.ElementFragment">
-        <argument
-            android:name="element_id"
-            app:argType="long" />
-        <action
-            android:id="@+id/action_elementFragment_to_mapFragment"
-            app:destination="@id/mapFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:launchSingleTop="true"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-    </fragment>
+        android:name="element.ElementFragment" />
 
     <fragment
         android:id="@+id/issuesFragment"
-        android:name="issue.IssuesFragment">
-        <argument
-            android:name="area_id"
-            app:argType="long" />
-    </fragment>
+        android:name="issue.IssuesFragment" />
 
     <fragment
         android:id="@+id/addElementCommentFragment"
-        android:name="element_comment.AddElementCommentFragment">
-        <argument
-            android:name="element_id"
-            app:argType="long" />
-    </fragment>
+        android:name="element_comment.AddElementCommentFragment" />
 
 </navigation>

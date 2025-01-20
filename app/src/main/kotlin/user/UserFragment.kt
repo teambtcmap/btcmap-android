@@ -27,6 +27,14 @@ import org.koin.android.ext.android.inject
 
 class UserFragment : Fragment() {
 
+    private data class Args(
+        val userId: Long,
+    )
+
+    private val args = lazy {
+        Args(requireArguments().getLong("user_id"))
+    }
+
     private val usersRepo: UsersRepo by inject()
 
     private val eventsRepo: EventsRepo by inject()
@@ -72,7 +80,7 @@ class UserFragment : Fragment() {
         }
 
         val user = runBlocking {
-            usersRepo.selectById(requireArguments().getLong("user_id"))
+            usersRepo.selectById(args.value.userId)
         } ?: return
 
         val userName = user.osmData.optString("display_name")

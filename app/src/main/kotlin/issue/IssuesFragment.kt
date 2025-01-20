@@ -22,6 +22,10 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class IssuesFragment : Fragment() {
 
+    private val args = lazy {
+        IssuesModel.Args(requireArguments().getLong("area_id"))
+    }
+
     private val model: IssuesModel by viewModel()
 
     private var _binding: FragmentIssuesBinding? = null
@@ -63,7 +67,7 @@ class IssuesFragment : Fragment() {
         binding.list.adapter = adapter
         binding.list.setHasFixedSize(true)
 
-        model.setArgs(requireArgs())
+        model.setArgs(args.value)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -84,9 +88,5 @@ class IssuesFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun requireArgs(): IssuesModel.Args {
-        return IssuesModel.Args(requireArguments().getLong("area_id"))
     }
 }

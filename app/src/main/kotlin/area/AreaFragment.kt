@@ -28,6 +28,10 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AreaFragment : Fragment() {
 
+    private val args = lazy {
+        AreaModel.Args(requireArguments().getLong("area_id"))
+    }
+
     private val model: AreaModel by viewModel()
 
     private val resultModel: AreaResultModel by activityViewModel()
@@ -39,9 +43,11 @@ class AreaFragment : Fragment() {
         listener = object : AreaAdapter.Listener {
             override fun onMapClick() {
                 viewLifecycleOwner.lifecycleScope.launch {
-                    val area = model.selectArea(requireArgs().areaId) ?: return@launch
+                    val area = model.selectArea(args.value.areaId) ?: return@launch
                     resultModel.area.update { area }
-                    findNavController().navigate(R.id.action_areaFragment_to_mapFragment)
+                    findNavController().navigate(
+                        R.id.mapFragment,
+                    )
                 }
             }
 
@@ -53,8 +59,8 @@ class AreaFragment : Fragment() {
 
             override fun onIssuesClick() {
                 findNavController().navigate(
-                    R.id.action_areaFragment_to_issuesFragment,
-                    bundleOf("area_id" to requireArgs().areaId),
+                    R.id.issuesFragment,
+                    bundleOf("area_id" to args.value.areaId),
                 )
             }
 
@@ -88,7 +94,7 @@ class AreaFragment : Fragment() {
                 if (it.itemId == R.id.action_reports) {
                     findNavController().navigate(
                         R.id.reportsFragment,
-                        bundleOf("area_id" to requireArgs().areaId),
+                        bundleOf("area_id" to args.value.areaId),
                     )
                 }
 
@@ -99,7 +105,7 @@ class AreaFragment : Fragment() {
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         binding.list.adapter = adapter
 
-        model.setArgs(requireArgs())
+        model.setArgs(args.value)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -148,9 +154,5 @@ class AreaFragment : Fragment() {
             binding.list.setPadding(0, 0, 0, navBarsInsets.bottom)
             WindowInsetsCompat.CONSUMED
         }
-    }
-
-    private fun requireArgs(): AreaModel.Args {
-        return AreaModel.Args(requireArguments().getLong("area_id"))
     }
 }

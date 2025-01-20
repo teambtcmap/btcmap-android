@@ -37,10 +37,17 @@ import org.json.JSONObject
 
 class AddElementCommentFragment : Fragment() {
 
+    private data class Args(
+        val elementId: Long,
+    )
+
+    private val args = lazy {
+        Args(requireArguments().getLong("element_id"))
+    }
+
     private var _binding: FragmentAddElementCommentBinding? = null
     private val binding get() = _binding!!
 
-    private var elementId = 0L
     private var invoice = ""
 
     override fun onCreateView(
@@ -54,8 +61,6 @@ class AddElementCommentFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        elementId = requireArguments().getLong("element_id")
 
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
@@ -94,9 +99,11 @@ class AddElementCommentFragment : Fragment() {
                 val httpClient = OkHttpClient()
                 val url = "https://api.btcmap.org/rpc"
                 val requestBody =
-                    """{"jsonrpc": "2.0", "method": "add_paid_element_comment", "params": {"element_id": "$elementId", "comment": "$comment"}, "id": 1}""".trimIndent()
+                    """{"jsonrpc": "2.0", "method": "add_paid_element_comment", "params": {"element_id": "${args.value.elementId}", "comment": "$comment"}, "id": 1}""".trimIndent()
                 val res = httpClient.newCall(
-                    Request.Builder().post(requestBody.toRequestBody("application/json".toMediaType())).url(url).build()
+                    Request.Builder()
+                        .post(requestBody.toRequestBody("application/json".toMediaType())).url(url)
+                        .build()
                 ).executeAsync()
 
                 if (!res.isSuccessful) {
