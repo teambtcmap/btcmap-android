@@ -69,6 +69,21 @@ class ElementFragment : Fragment() {
         return binding.root
     }
 
+    fun onPartialExpanded(progress: Float) {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { appBar, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+            appBar.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                topMargin = if (progress < 0.5) {
+                    0
+                } else {
+                    (insets.top * progress).toInt()
+                }
+            }
+            WindowInsetsCompat.CONSUMED
+        }
+        binding.toolbar.requestApplyInsets()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.comments.layoutManager = LinearLayoutManager(requireContext())
         binding.comments.isNestedScrollingEnabled = false
@@ -339,7 +354,7 @@ class ElementFragment : Fragment() {
         }
 
         binding.addComment.setOnClickListener {
-            parentFragmentManager.commit {
+            requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<AddElementCommentFragment>(
                     R.id.nav_host_fragment,

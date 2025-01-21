@@ -6,12 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
@@ -94,9 +90,7 @@ class AreaFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setInsets()
-
-        binding.toolbar.apply {
+        binding.topAppBar.apply {
             setNavigationOnClickListener {
                 parentFragmentManager.popBackStack()
             }
@@ -135,8 +129,8 @@ class AreaFragment : Fragment() {
                             val elements =
                                 state.items.filterIsInstance<AreaAdapter.Item.Element>().size
 
-                            binding.toolbar.title = state.area.tags.name()
-                            binding.toolbar.subtitle = resources.getQuantityString(
+                            binding.topAppBar.title = state.area.tags.name()
+                            binding.topAppBar.subtitle = resources.getQuantityString(
                                 R.plurals.d_places,
                                 elements,
                                 elements,
@@ -156,17 +150,5 @@ class AreaFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun setInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { appBar, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            appBar.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                topMargin = insets.top
-            }
-            val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            binding.list.setPadding(0, 0, 0, navBarsInsets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
     }
 }

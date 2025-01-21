@@ -44,9 +44,8 @@ serialization = "1.8.0"
 datetime = "0.6.1"
 # https://github.com/maplibre/maplibre-native/releases
 maplibre = "11.8.0"
+# https://github.com/androidmads/QRGenerator/releases
 qrgenerator = "1.0.5"
-kotlinVersion = "2.1.0"
-coreKtx = "1.15.0"
 
 [libraries]
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -54,7 +53,6 @@ kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 
 androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
-androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-sqlite = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 androidx-room = { module = "androidx.room:room-runtime", version.ref = "room" }
 
@@ -69,8 +67,7 @@ coil-core = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }
 maplibre = { module = "org.maplibre.gl:android-sdk-vulkan", version.ref = "maplibre" }
 qrgenerator = { module = "com.github.androidmads:QRGenerator", version.ref = "qrgenerator" }
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

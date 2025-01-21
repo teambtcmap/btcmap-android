@@ -67,6 +67,8 @@
     <string name="days_since_verified">Days since verified</string>
     <string name="new_merchant_accepts_bitcoins">New merchant accepts bitcoins</string>
     <string name="delivery">Delivery</string>
+    <string name="add_element_comment_disclosure_1">All comments are anonymous but we collect a small fee in sats as a spam protection measure</string>
+    <string name="add_element_comment_disclosure_2">You can close this screen after paying an invoice and your comment will appear on the map shortly</string>
     <plurals name="d_changes">
         <item quantity="one">%d mudança</item>
         <item quantity="many">%d mudanças</item>

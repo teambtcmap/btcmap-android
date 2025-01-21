@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "org.btcmap"
-        minSdk = 27
+        minSdk = 29
         targetSdk = 35
         versionCode = 53
         versionName = "0.9.1"
@@ -30,8 +30,8 @@ android {
 
         jniLibs {
             // Exclude all x86 lib variants
-            excludes += "/lib/x86/*.so"
-            excludes += "/lib/x86_64/*.so"
+            //excludes += "/lib/x86/*.so"
+            //excludes += "/lib/x86_64/*.so"
             // Exclude all armeabi-v7a lib variants
             excludes += "/lib/armeabi-v7a/*.so"
         }
@@ -92,7 +92,6 @@ android {
         implementation(libs.kotlinx.datetime)
 
         implementation(libs.androidx.work)
-        implementation(libs.androidx.constraintlayout)
         implementation(libs.androidx.room)
         implementation(libs.androidx.sqlite)
 
@@ -107,11 +106,7 @@ android {
         implementation(libs.coil.svg)
         implementation(libs.maplibre)
         implementation(libs.qrgenerator)
-
     }
-}
-dependencies {
-    implementation(libs.androidx.core.ktx)
 }
 
 tasks.register("bundleData") {

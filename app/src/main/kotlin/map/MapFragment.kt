@@ -5,11 +5,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +17,6 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.applyCanvas
@@ -29,7 +28,6 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
@@ -116,23 +114,8 @@ class MapFragment : Fragment() {
         _binding = FragmentMapBinding.inflate(inflater, container, false)
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.searchBar) { view, windowInsets ->
-            val baseTopMargin = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                8f,
-                resources.displayMetrics,
-            ).toInt()
-
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-
-            view.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                topMargin = insets.top + baseTopMargin
-            }
-
-            bottomSheetBehavior.expandedOffset = insets.top
-
             val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
             binding.fab.translationY = -navBarsInsets.bottom.toFloat()
-
             WindowInsetsCompat.CONSUMED
         }
 
@@ -529,15 +512,12 @@ class MapFragment : Fragment() {
                 } else {
                     binding.fab.isVisible = false
                 }
-
-                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    requireActivity().window.statusBarColor = requireContext().getSurfaceColor()
-                } else {
-                    requireActivity().window.statusBarColor = Color.TRANSPARENT
-                }
             }
 
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                elementFragment.onPartialExpanded(slideOffset)
+                Log.d("map", slideOffset.toString())
+            }
         })
     }
 

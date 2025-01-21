@@ -5,12 +5,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
@@ -60,9 +56,7 @@ class AreasFragment : Fragment() {
         Log.d("AreasFragment", "args: ${args.value}")
         model.setArgs(args.value)
 
-        setInsets()
-
-        binding.toolbar.setNavigationOnClickListener {
+        binding.topAppBar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
@@ -92,17 +86,5 @@ class AreasFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun setInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { toolbar, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            toolbar.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                topMargin = insets.top
-            }
-            val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            binding.list.setPadding(0, 0, 0, navBarsInsets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
     }
 }

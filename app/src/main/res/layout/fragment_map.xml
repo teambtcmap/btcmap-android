@@ -5,24 +5,42 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <org.maplibre.android.maps.MapView
+        android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <org.maplibre.android.maps.MapView
-            android:id="@+id/map"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    </org.maplibre.android.maps.MapView>
 
-    </LinearLayout>
-
-    <com.google.android.material.search.SearchBar
-        android:id="@+id/searchBar"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:fitsSystemWindows="true">
+
+        <com.google.android.material.search.SearchBar
+            android:id="@+id/search_bar"
+            android:layout_width="match_parent"
+            app:menu="@menu/map"
+            android:layout_height="wrap_content"
+            android:hint="@string/search_here" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <com.google.android.material.search.SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:hint="@string/search_here"
-        app:menu="@menu/map" />
+        app:layout_anchor="@id/search_bar">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/searchResults"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical" />
+
+    </com.google.android.material.search.SearchView>
 
     <FrameLayout
         android:id="@+id/elementDetails"
@@ -54,20 +72,5 @@
         app:layout_anchorGravity="end"
         app:layout_dodgeInsetEdges="bottom"
         app:srcCompat="@drawable/my_location" />
-
-    <com.google.android.material.search.SearchView
-        android:id="@+id/searchView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:hint="@string/search_here"
-        app:layout_anchor="@id/searchBar">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/searchResults"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="vertical" />
-
-    </com.google.android.material.search.SearchView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

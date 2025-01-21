@@ -10,10 +10,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import org.btcmap.R
 import org.btcmap.databinding.FragmentDonationBinding
@@ -34,7 +30,7 @@ class DonationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.apply {
-            toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
+            topAppBar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
             listOf(qr, pay).forEach {
                 it.setOnClickListener {
                     val intent = Intent(Intent.ACTION_VIEW)
@@ -69,14 +65,6 @@ class DonationFragment : Fragment() {
                 }
             }
             lnCopy.setOnClickListener { onLnCopyButtonClick() }
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { toolbar, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            toolbar.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                topMargin = insets.top
-            }
-            WindowInsetsCompat.CONSUMED
         }
     }
 

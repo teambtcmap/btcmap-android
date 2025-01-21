@@ -6,11 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
@@ -18,7 +14,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import delivery.DeliveryFragment
 import element.ElementFragment
 import event.EventsAdapter
 import event.EventsRepo
@@ -71,17 +66,7 @@ class UserFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { appBar, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            appBar.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                topMargin = insets.top
-            }
-            val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            binding.list.setPadding(0, 0, 0, navBarsInsets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
-
-        binding.toolbar.setNavigationOnClickListener {
+        binding.topAppBar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
@@ -91,7 +76,7 @@ class UserFragment : Fragment() {
 
         val userName = user.osmData.optString("display_name")
 
-        binding.toolbar.setOnMenuItemClickListener {
+        binding.topAppBar.setOnMenuItemClickListener {
             if (it.itemId == R.id.action_view_on_osm) {
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data = Uri.parse("https://www.openstreetmap.org/user/${userName}")
@@ -106,7 +91,7 @@ class UserFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                binding.toolbar.title = userName.ifBlank { getString(R.string.unnamed_user) }
+                binding.topAppBar.title = userName.ifBlank { getString(R.string.unnamed_user) }
 
                 val items = eventsRepo.selectByUserIdAsListItems(
                     requireArguments().getLong("user_id"),
@@ -121,7 +106,7 @@ class UserFragment : Fragment() {
                     )
                 }
                 adapter.submitList(items)
-                binding.toolbar.subtitle = resources.getQuantityString(
+                binding.topAppBar.subtitle = resources.getQuantityString(
                     R.plurals.d_changes,
                     items.size,
                     items.size,
