@@ -11,7 +11,7 @@
 <p align="center">
 <a href="https://github.com/bubelov/btcmap-android/releases" alt="GitHub release"><img src="https://img.shields.io/github/release/bubelov/btcmap-android.svg" ></a>
 <a href="https://www.gnu.org/licenses/gpl-3.0" alt="License: GPLv3"><img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg"></a>
-<a href="https://github.com/bubelov/btcmap-android/actions" alt="Build Status"><img src="https://github.com/bubelov/btcmap-android/workflows/ci.yml/badge.svg?branch=master&event=push"></a>
+<a href="https://github.com/bubelov/btcmap-android/actions" alt="Build Status"><img src="https://github.com/teambtcmap/btcmap-android/workflows/ci.yml/badge.svg?branch=master&event=push"></a>
 </p>
 
 ## Screenshots
