@@ -99,7 +99,6 @@ class UserLocationRepository(
     }
 
     private fun onNewLocation(location: Location) {
-        Log.d(TAG, "Got new location: ${location.latitude},${location.longitude}")
         _location.update { LatLng(location.latitude, location.longitude) }
     }
 

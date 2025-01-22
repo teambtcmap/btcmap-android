@@ -1,6 +1,7 @@
 package map
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -62,8 +63,12 @@ import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.location.LocationComponentActivationOptions
+import org.maplibre.android.location.LocationComponentOptions
+import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
+import org.maplibre.android.maps.Style
 import reports.ReportsFragment
 import search.SearchAdapter
 import search.SearchModel
@@ -101,7 +106,41 @@ class MapFragment : Fragment() {
     ) {
         if (it.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
             model.onLocationPermissionGranted()
+            onLocationPermissionsGranted()
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun onLocationPermissionsGranted() {
+        binding.map.getMapAsync { map ->
+            map.getStyle { style ->
+                val locationComponentOptions =
+                    LocationComponentOptions.builder(requireContext())
+                        .pulseEnabled(true)
+                        .build()
+                val locationComponentActivationOptions =
+                    buildLocationComponentActivationOptions(style, locationComponentOptions)
+                map.locationComponent.activateLocationComponent(locationComponentActivationOptions)
+                map.locationComponent.isLocationComponentEnabled = true
+            }
+        }
+    }
+
+    private fun buildLocationComponentActivationOptions(
+        style: Style,
+        locationComponentOptions: LocationComponentOptions
+    ): LocationComponentActivationOptions {
+        return LocationComponentActivationOptions
+            .builder(requireContext(), style)
+            .locationComponentOptions(locationComponentOptions)
+            .useDefaultLocationEngine(true)
+            .locationEngineRequest(
+                LocationEngineRequest.Builder(750)
+                    .setFastestInterval(750)
+                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                    .build()
+            )
+            .build()
     }
 
     private var emptyClusterBitmap: Bitmap? = null
