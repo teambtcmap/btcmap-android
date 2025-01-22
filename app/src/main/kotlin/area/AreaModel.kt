@@ -5,24 +5,25 @@ import android.text.format.DateUtils
 import android.util.TypedValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import area_element.AreaElementRepo
 import element.ElementsRepo
 import element.bitcoinSurveyDate
 import element.name
+import element.osmTags
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
-import map.boundingBox
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
-import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.GeometryFactory
+import org.json.JSONArray
 
 class AreaModel(
     private val areasRepo: AreasRepo,
     private val elementsRepo: ElementsRepo,
+    private val areaElementRepo: AreaElementRepo,
     private val app: Application,
 ) : AndroidViewModel(app) {
 
@@ -33,29 +34,14 @@ class AreaModel(
         viewModelScope.launch {
             val area = areasRepo.selectById(args.areaId)!!
 
-            val polygons = area.tags.polygons()
-            val boundingBox = boundingBox(polygons)
-            val geometryFactory = GeometryFactory()
-
-            val elements = elementsRepo.selectByBoundingBox(
-                minLat = boundingBox.getLatSouth(),
-                maxLat = boundingBox.getLatNorth(),
-                minLon = boundingBox.getLonWest(),
-                maxLon = boundingBox.getLonEast(),
-            )
-                .asSequence()
-                .filter { element ->
-                    polygons.any {
-                        val coordinate = Coordinate(element.lon, element.lat)
-                        it.contains(geometryFactory.createPoint(coordinate))
-                    }
-                }
-                .sortedByDescending { it.osmTags.bitcoinSurveyDate() }
+            val elements = areaElementRepo.selectByAreaId(area.id)
+                .mapNotNull { elementsRepo.selectById(it.elementId) }
+                .sortedByDescending { it.osmTags().bitcoinSurveyDate() }
                 .map {
                     val status: String
                     val colorResId: Int
 
-                    val surveyDate = it.osmTags.bitcoinSurveyDate()
+                    val surveyDate = it.osmTags().bitcoinSurveyDate()
 
                     if (surveyDate != null) {
                         val date = DateUtils.getRelativeDateTimeString(
@@ -75,12 +61,12 @@ class AreaModel(
 
                     AreaAdapter.Item.Element(
                         id = it.id,
-                        iconId = it.icon.ifBlank { "question_mark" },
-                        name = it.osmTags.name(app.resources),
+                        iconId = it.tags.optString("icon:android").ifBlank { "question_mark" },
+                        name = it.name(app.resources),
                         status = status,
                         colorResId = colorResId,
                         showCheckmark = surveyDate != null,
-                        issues = it.issues.length(),
+                        issues = (it.tags.optJSONArray("issues") ?: JSONArray()).length(),
                     )
                 }.sortedBy { !it.showCheckmark }.toMutableList()
 
