@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import area.AreasRepo
-import area.polygons
+import area_element.AreaElementRepo
 import element.ElementsRepo
 import element.name
 import json.toList
@@ -12,13 +12,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import map.boundingBox
-import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.GeometryFactory
+import org.json.JSONArray
 
 class IssuesModel(
     private val areasRepo: AreasRepo,
     private val elementsRepo: ElementsRepo,
+    private val areaElementRepo: AreaElementRepo,
     private val app: Application,
 ) : AndroidViewModel(app) {
 
@@ -29,32 +28,22 @@ class IssuesModel(
         viewModelScope.launch {
             val area = areasRepo.selectById(args.areaId)!!
 
-            val polygons = area.tags.polygons()
-            val boundingBox = boundingBox(polygons)
-            val geometryFactory = GeometryFactory()
-
-            val elements = elementsRepo.selectByBoundingBox(
-                minLat = boundingBox.getLatSouth(),
-                maxLat = boundingBox.getLatNorth(),
-                minLon = boundingBox.getLonWest(),
-                maxLon = boundingBox.getLonEast(),
-            ).filter { element ->
-                polygons.any {
-                    val coordinate = Coordinate(element.lon, element.lat)
-                    it.contains(geometryFactory.createPoint(coordinate))
-                }
-            }
+            val elements = areaElementRepo.selectByAreaId(area.id)
+                .mapNotNull { elementsRepo.selectById(it.elementId) }
 
             val issues = elements.map { element ->
-                val osmUrl = "https://www.openstreetmap.org/${element.osmType}/${element.osmId}"
+                val osmUrl =
+                    "https://www.openstreetmap.org/${element.overpassData.getString("type")}/${
+                        element.overpassData.getLong("id")
+                    }"
 
-                element.issues.toList().map {
+                (element.tags.optJSONArray("issues") ?: JSONArray()).toList().map {
                     IssuesAdapter.Item(
                         type = it.getString("type"),
                         severity = it.getInt("severity"),
                         description = it.getString("description"),
                         osmUrl = osmUrl,
-                        elementName = element.osmTags.name(app.resources)
+                        elementName = element.name(app.resources)
                     )
                 }
             }.flatten()

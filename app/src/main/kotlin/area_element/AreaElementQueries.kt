@@ -85,7 +85,6 @@ class AreaElementQueries(private val conn: SQLiteConnection) {
                     updated_at
                 FROM area_element
                 WHERE area_id = ?1
-                ORDER BY created_at DESC
                 """
         ).use {
             it.bindLong(1, areaId)
@@ -115,7 +114,6 @@ class AreaElementQueries(private val conn: SQLiteConnection) {
                     updated_at
                 FROM area_element
                 WHERE element_id = ?1
-                ORDER BY created_at DESC
                 """
         ).use {
             it.bindLong(1, elementId)
