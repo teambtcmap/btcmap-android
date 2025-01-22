@@ -26,7 +26,7 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.appcompat.widget.LinearLayoutCompat
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -35,14 +35,14 @@
             android:paddingBottom="24dp">
 
             <ImageView
-                android:id="@+id/qr"
+                android:id="@+id/onchain_qr"
                 android:layout_width="match_parent"
                 android:layout_height="230dp"
                 android:layout_marginHorizontal="40dp"
                 android:clickable="true"
                 android:contentDescription="@string/qr_code"
                 android:focusable="true"
-                android:src="@drawable/donation_qr_onchain" />
+                tools:background="#ff0000" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -52,32 +52,32 @@
                 android:gravity="center">
 
                 <Button
-                    android:id="@+id/pay"
+                    android:id="@+id/onchain_pay"
+                    style="style/Widget.MaterialComponents.Button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
-                    android:text="@string/pay_onchain"
-                    tools:ignore="ButtonStyle" />
+                    android:text="@string/pay_onchain" />
 
                 <Button
-                    android:id="@+id/copy"
+                    android:id="@+id/onchain_copy_address"
+                    style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="@android:string/copy"
-                    tools:ignore="ButtonStyle" />
+                    android:text="@android:string/copy" />
 
             </LinearLayout>
 
             <ImageView
-                android:id="@+id/lnQr"
+                android:id="@+id/ln_qr"
                 android:layout_width="match_parent"
                 android:layout_height="230dp"
                 android:layout_marginHorizontal="40dp"
                 android:clickable="true"
                 android:contentDescription="@string/qr_code"
                 android:focusable="true"
-                android:src="@drawable/donation_qr_lightning" />
+                tools:background="#ff0000" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -87,24 +87,24 @@
                 android:gravity="center">
 
                 <Button
-                    android:id="@+id/lnPay"
+                    android:id="@+id/ln_pay"
+                    style="style/Widget.MaterialComponents.Button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
-                    android:text="@string/pay_with_lightning"
-                    tools:ignore="ButtonStyle" />
+                    android:text="@string/pay_with_lightning" />
 
                 <Button
-                    android:id="@+id/lnCopy"
+                    android:id="@+id/ln_copy_address"
+                    style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="@android:string/copy"
-                    tools:ignore="ButtonStyle" />
+                    android:text="@android:string/copy" />
 
             </LinearLayout>
 
-        </androidx.appcompat.widget.LinearLayoutCompat>
+        </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
 

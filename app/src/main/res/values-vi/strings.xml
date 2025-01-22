@@ -74,4 +74,7 @@
     <string name="comment">Comment</string>
     <string name="generate_invoice">Generate Invoice</string>
     <string name="add_comment">Add Comment</string>
+    <string name="error">Error</string>
+    <string name="close">Close</string>
+    <string name="invalid_payment_url">Invalid payment URL</string>
 </resources>
