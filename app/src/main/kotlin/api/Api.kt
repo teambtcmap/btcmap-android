@@ -2,6 +2,8 @@ package api
 
 import area.AreaJson
 import area.toAreasJson
+import area_element.AreaElementJson
+import area_element.toAreaElementsJson
 import element.ElementJson
 import element.toElementsJson
 import element_comment.ElementCommentJson
@@ -40,6 +42,8 @@ interface Api {
     suspend fun getReports(updatedSince: ZonedDateTime?, limit: Long): List<ReportJson>
 
     suspend fun getUsers(updatedSince: ZonedDateTime?, limit: Long): List<UserJson>
+
+    suspend fun getAreaElements(updatedSince: ZonedDateTime?, limit: Long): List<AreaElementJson>
 }
 
 class ApiImpl(
@@ -160,6 +164,28 @@ class ApiImpl(
 
         return withContext(Dispatchers.IO) {
             res.body.byteStream().use { it.toUsersJson() }
+        }
+    }
+
+    override suspend fun getAreaElements(
+        updatedSince: ZonedDateTime?,
+        limit: Long
+    ): List<AreaElementJson> {
+        val url = baseUrl.newBuilder().apply {
+            addPathSegment("v3")
+            addPathSegment("area-elements")
+            addQueryParameter("updated_since", updatedSince.apiFormat())
+            addQueryParameter("limit", "$limit")
+        }.build()
+
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return withContext(Dispatchers.IO) {
+            res.body.byteStream().use { it.toAreaElementsJson() }
         }
     }
 }

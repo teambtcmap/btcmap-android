@@ -58,6 +58,7 @@ class SyncNotificationController(
                                 |Areas: ${report.areasReport.newAreas}/${report.areasReport.updatedAreas}/${report.areasReport.deletedAreas} in ${report.areasReport.duration.toMillis()} ms
                                 |Users: ${report.usersReport.newUsers}/${report.usersReport.updatedUsers}/${report.usersReport.deletedUsers} in ${report.usersReport.duration.toMillis()} ms
                                 |Element Comments: ${report.elementCommentReport.newElementComments}/${report.elementCommentReport.updatedElementComments}/${report.elementCommentReport.deletedElementComments} in ${report.elementCommentReport.duration.toMillis()} ms
+                                |Area Elements: ${report.areaElementsReport.newAreaElements}/${report.areaElementsReport.updatedAreaElements}/${report.areaElementsReport.deletedAreaElements} in ${report.areaElementsReport.duration.toMillis()} ms
                             """.trimMargin()
                         )
                 )

@@ -37,9 +37,11 @@ import user.UsersModel
 import user.UsersRepo
 import element_comment.ElementCommentQueries
 import element_comment.ElementCommentRepo
+import area_element.AreaElementQueries
+import area_element.AreaElementRepo
 
 val appModule = module {
-    single { Database(get<Context>().getDatabasePath("btcmap-2025-01-18.db").absolutePath).conn }
+    single { Database(get<Context>().getDatabasePath("btcmap-2025-01-22.db").absolutePath).conn }
 
     single { ApiImpl() }.bind(Api::class)
 
@@ -59,6 +61,9 @@ val appModule = module {
 
     singleOf(::ElementCommentQueries)
     singleOf(::ElementCommentRepo)
+
+    singleOf(::AreaElementQueries)
+    singleOf(::AreaElementRepo)
 
     singleOf(::ConfQueries)
     singleOf(::ConfRepo)

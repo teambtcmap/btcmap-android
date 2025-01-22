@@ -1,6 +1,7 @@
 package sync
 
 import area.AreasRepo
+import area_element.AreaElementRepo
 import conf.ConfRepo
 import element.ElementsRepo
 import element_comment.ElementCommentRepo
@@ -26,6 +27,7 @@ class Sync(
     private val reportsRepo: ReportsRepo,
     private val usersRepo: UsersRepo,
     private val eventsRepo: EventsRepo,
+    private val areaElementRepo: AreaElementRepo,
     private val conf: ConfRepo,
     private val syncNotificationController: SyncNotificationController,
 ) {
@@ -40,6 +42,10 @@ class Sync(
             runCatching {
                 coroutineScope {
                     val startedAt = now()
+
+                    if (areaElementRepo.selectCount() == 0L && areaElementRepo.hasBundledAreaElements()) {
+                        areaElementRepo.fetchBundledAreaElements()
+                    }
 
                     if (elementCommentRepo.selectCount() == 0L && elementCommentRepo.hasBundledElements()) {
                         elementCommentRepo.fetchBundledElements()
@@ -67,6 +73,9 @@ class Sync(
 
                     val syncJobs = mutableListOf<Deferred<Any>>()
 
+                    val areaElementsReport =
+                        async { areaElementRepo.sync() }.also { syncJobs += it }
+                    areaElementsReport.await()
                     val elementCommentReport =
                         async { elementCommentRepo.sync() }.also { syncJobs += it }
                     elementCommentReport.await()
@@ -92,6 +101,7 @@ class Sync(
                         areasReport = areasReport.await(),
                         usersReport = usersReport.await(),
                         elementCommentReport = elementCommentReport.await(),
+                        areaElementsReport = areaElementsReport.await(),
                     )
 
                     syncNotificationController.showPostSyncNotifications(
@@ -118,4 +128,5 @@ data class SyncReport(
     val eventsReport: EventsRepo.SyncReport,
     val areasReport: AreasRepo.SyncReport,
     val usersReport: UsersRepo.SyncReport,
+    val areaElementsReport: AreaElementRepo.SyncReport,
 )

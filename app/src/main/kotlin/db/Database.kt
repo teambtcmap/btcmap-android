@@ -8,6 +8,7 @@ import androidx.sqlite.driver.bundled.SQLITE_OPEN_READWRITE
 import androidx.sqlite.execSQL
 import androidx.sqlite.use
 import area.AreaQueries
+import area_element.AreaElementQueries
 import conf.ConfQueries
 import element.ElementQueries
 import element_comment.ElementCommentQueries
@@ -37,6 +38,7 @@ class Database(path: String) {
                 }
 
                 if (version == 0) {
+                    execSQL(AreaElementQueries.CREATE_TABLE)
                     execSQL(ElementCommentQueries.CREATE_TABLE)
                     execSQL(ElementQueries.CREATE_TABLE)
                     execSQL(EventQueries.CREATE_TABLE)
@@ -47,6 +49,7 @@ class Database(path: String) {
                     execSQL("PRAGMA user_version=1")
                 }
 
+                execSQL(AreaElementQueries.CREATE_INDICES)
                 execSQL(ElementCommentQueries.CREATE_INDICES)
             }
 }
