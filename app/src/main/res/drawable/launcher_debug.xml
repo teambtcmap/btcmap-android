@@ -1,4 +1,6 @@
-<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="UnusedResources">
     <background android:drawable="@android:color/white" />
     <foreground android:drawable="@drawable/launcher_fg_debug" />
     <monochrome android:drawable="@drawable/launcher_fg_monochrome_debug" />

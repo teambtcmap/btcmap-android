@@ -20,7 +20,6 @@
     <string name="communities">Сообщества</string>
     <string name="latest_changes">Последние правки</string>
     <string name="tip">⚡ На чай</string>
-    <string name="osm_copyright">© Пользователи OpenStreetMap</string>
     <string name="view_on_osm">Открыть на OSM</string>
     <string name="edit_on_osm">Редактировать на OSM</string>
     <string name="editor_manual">Инструкция для редакторов</string>
@@ -50,7 +49,6 @@
     <string name="category_restaurant">Ресторан</string>
     <string name="category_restaurant_plural">Рестораны</string>
     <string name="show_atms">Показывать банкоматы</string>
-    <string name="show_osm_attribution">Показывать аттрибуцию OSM</string>
     <string name="pay_onchain">Ончейн платеж</string>
     <string name="pay_with_lightning">Lightning платеж</string>
     <string name="image">Image</string>
@@ -58,14 +56,12 @@
     <string name="sync_failed_s">Sync failed: %1$s</string>
     <string name="new_local_merchant_accepts_bitcoins">New local merchant accepts bitcoins</string>
     <string name="show_sync_summary">Show sync summary</string>
-    <string name="show_all_new_elements">Show all new elements</string>
     <string name="directions">Directions</string>
     <string name="share">Share</string>
     <string name="unknown">unknown</string>
     <string name="companion_warning">You\'ll need a companion app (%1$s) in order to make a payment. This app doesn\'t require you to fill any personal data, to the best of our knowledge. Please let us know if it\'s not the case and we\'ll remove this place.</string>
     <string name="percentage_of_verified_places">Percentage of verified places</string>
     <string name="days_since_verified">Days since verified</string>
-    <string name="new_merchant_accepts_bitcoins">New merchant accepts bitcoins</string>
     <string name="delivery">Delivery</string>
     <string name="add_element_comment_disclosure_1">All comments are anonymous but we collect a small fee in sats as a spam protection measure</string>
     <string name="add_element_comment_disclosure_2">You can close this screen after paying an invoice and your comment will appear on the map shortly</string>
@@ -81,4 +77,7 @@
         <item quantity="many">%d мест</item>
         <item quantity="other">%d мест</item>
     </plurals>
+    <string name="comment">Comment</string>
+    <string name="generate_invoice">Generate Invoice</string>
+    <string name="add_comment">Add Comment</string>
 </resources>

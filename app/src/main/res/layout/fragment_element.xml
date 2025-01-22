@@ -56,6 +56,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
                 <Button
                     android:id="@+id/elementAction"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -64,7 +65,8 @@
                     android:layout_gravity="center"
                     android:layout_marginHorizontal="16dp"
                     android:layout_weight="1"
-                    android:text="Verify/Report" />
+                    android:text="@string/verify" />
+
                 <Button
                     android:id="@+id/addComment"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -73,7 +75,7 @@
                     android:layout_gravity="center"
                     android:layout_marginHorizontal="16dp"
                     android:layout_weight="1"
-                    android:text="Add Comment" />
+                    android:text="@string/add_comment" />
             </LinearLayout>
 
             <LinearLayout
