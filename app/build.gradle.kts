@@ -33,7 +33,7 @@ android {
             // excludes += "/lib/x86/*.so"
             // excludes += "/lib/x86_64/*.so"
             // Exclude all armeabi-v7a lib variants
-            excludes += "/lib/armeabi-v7a/*.so"
+            // excludes += "/lib/armeabi-v7a/*.so"
         }
     }
 

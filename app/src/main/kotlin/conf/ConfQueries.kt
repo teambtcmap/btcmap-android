@@ -3,7 +3,6 @@ package conf
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import androidx.sqlite.use
-import db.getZonedDateTime
 import db.getZonedDateTimeOrNull
 import db.transaction
 
@@ -44,7 +43,12 @@ class ConfQueries(private val conn: SQLiteConnection) {
                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8);
                 """
             ).use {
-                it.bindText(1, conf.lastSyncDate?.toString() ?: "")
+                val lastSyncDate = conf.lastSyncDate
+                if (lastSyncDate != null) {
+                    it.bindText(1, lastSyncDate.toString())
+                } else {
+                    it.bindNull(1)
+                }
                 it.bindDouble(2, conf.viewportNorthLat)
                 it.bindDouble(3, conf.viewportEastLon)
                 it.bindDouble(4, conf.viewportSouthLat)
