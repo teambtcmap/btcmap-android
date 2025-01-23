@@ -56,6 +56,7 @@ press an edit button.
 - [Persian](/app/src/main/res/values-fa/strings.xml)
 - [Polish](/app/src/main/res/values-pl/strings.xml)
 - [Portuguese](/app/src/main/res/values-pt/strings.xml)
+- [Portuguese (Brazil)](/app/src/main/res/values-pt-rBR/strings.xml)
 - [Romanian](/app/src/main/res/values-ro/strings.xml)
 - [Russian](/app/src/main/res/values-ru/strings.xml)
 - [Serbian](/app/src/main/res/values-sr/strings.xml)
