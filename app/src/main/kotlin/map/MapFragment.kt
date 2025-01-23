@@ -295,6 +295,13 @@ class MapFragment : Fragment() {
             }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            onLocationPermissionsGranted()
+        }
+
         binding.fab.setOnClickListener {
             if (ActivityCompat.checkSelfPermission(
                     requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
