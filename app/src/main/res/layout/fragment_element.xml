@@ -68,7 +68,7 @@
                     android:text="@string/verify" />
 
                 <Button
-                    android:id="@+id/addComment"
+                    android:id="@+id/comments"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -235,7 +235,7 @@
                 app:drawableTint="?colorSecondary" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/comments"
+                android:id="@+id/comments_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 

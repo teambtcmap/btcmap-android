@@ -73,6 +73,8 @@
     <string name="error">Error</string>
     <string name="close">Close</string>
     <string name="invalid_payment_url">Invalid payment URL</string>
+    <string name="comments">Comments</string>
+    <string name="add">Add</string>
     <plurals name="d_changes">
         <item quantity="zero">%d changes</item>
         <item quantity="one">%d change</item>
@@ -96,5 +98,13 @@
         <item quantity="few">%d issues found</item>
         <item quantity="many">%d issues found</item>
         <item quantity="other">%d issues found</item>
+    </plurals>
+    <plurals name="d_comments">
+        <item quantity="zero">Comments (%d)</item>
+        <item quantity="one">Comment (%d)</item>
+        <item quantity="two">Comments (%d)</item>
+        <item quantity="few">Comments (%d)</item>
+        <item quantity="many">Comments (%d)</item>
+        <item quantity="other">Comments (%d)</item>
     </plurals>
 </resources>

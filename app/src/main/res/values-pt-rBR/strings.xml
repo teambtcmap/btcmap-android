@@ -80,4 +80,11 @@
   <string name="error">Erro</string>
   <string name="close">Fechar</string>
   <string name="invalid_payment_url">URL de pagamento inválida</string>
+    <string name="comments">Comments</string>
+  <string name="add">Add</string>
+  <plurals name="d_comments">
+    <item quantity="one">Comment (%d)</item>
+    <item quantity="many">Comments (%d)</item>
+    <item quantity="other">Comments (%d)</item>
+  </plurals>
 </resources>

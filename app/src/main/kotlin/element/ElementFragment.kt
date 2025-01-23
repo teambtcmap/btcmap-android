@@ -24,8 +24,8 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
-import element_comment.AddElementCommentFragment
 import element_comment.ElementCommentRepo
+import element_comment.ElementCommentsFragment
 import icons.iconTypeface
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
@@ -85,9 +85,9 @@ class ElementFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.comments.layoutManager = LinearLayoutManager(requireContext())
-        binding.comments.isNestedScrollingEnabled = false
-        binding.comments.adapter = commentsAdapter
+        binding.commentsList.layoutManager = LinearLayoutManager(requireContext())
+        binding.commentsList.isNestedScrollingEnabled = false
+        binding.commentsList.adapter = commentsAdapter
 
         if (arguments != null) {
             ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { appBar, windowInsets ->
@@ -353,10 +353,10 @@ class ElementFragment : Fragment() {
             startActivity(intent)
         }
 
-        binding.addComment.setOnClickListener {
+        binding.comments.setOnClickListener {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
-                replace<AddElementCommentFragment>(
+                replace<ElementCommentsFragment>(
                     R.id.nav_host_fragment,
                     null,
                     bundleOf("element_id" to elementId)
@@ -380,6 +380,7 @@ class ElementFragment : Fragment() {
         val comments = runBlocking { elementCommentRepo.selectByElementId(element.id) }
         binding.commentsTitle.text = getString(R.string.comments_d, comments.size)
         binding.commentsTitle.isVisible = comments.isNotEmpty()
+        binding.comments.text = resources.getQuantityString(R.plurals.d_comments, comments.size, comments.size)
         commentsAdapter.submitList(comments)
     }
 
