@@ -16,7 +16,7 @@ import org.btcmap.databinding.ItemAreaElementBinding
 import org.btcmap.databinding.ItemContactBinding
 import org.btcmap.databinding.ItemIssuesBinding
 import org.btcmap.databinding.ItemMapBinding
-import org.locationtech.jts.geom.Polygon
+import org.maplibre.geojson.Polygon
 
 class AreaAdapter(
     private val listener: Listener,

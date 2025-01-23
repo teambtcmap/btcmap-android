@@ -18,9 +18,6 @@ okhttp = "5.0.0-alpha.14"
 # Injection library
 # https://github.com/InsertKoinIO/koin/blob/main/CHANGELOG.md
 koin = "3.5.0"
-# Map utilities
-# https://github.com/locationtech/jts/releases
-jts = "1.20.0"
 # Charts
 # https://github.com/PhilJay/MPAndroidChart/releases
 mpandroidchart = "v3.1.0"
@@ -61,7 +58,6 @@ okhttp-coroutines = { group = "com.squareup.okhttp3", name = "okhttp-coroutines"
 okhttp-brotli = { group = "com.squareup.okhttp3", name = "okhttp-brotli", version.ref = "okhttp" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 koin = { module = "io.insert-koin:koin-android", version.ref = "koin" }
-jts = { module = "org.locationtech.jts:jts-core", version.ref = "jts" }
 mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
 coil-core = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }

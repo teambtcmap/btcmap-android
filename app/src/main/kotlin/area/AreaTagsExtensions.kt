@@ -5,13 +5,10 @@ import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.GeometryFactory
-import org.locationtech.jts.geom.Polygon
+import org.maplibre.geojson.Point
+import org.maplibre.geojson.Polygon
 
 fun AreaTags.polygons(): List<Polygon> {
-    val geoFactory = GeometryFactory()
-
     val res = mutableListOf<Polygon>()
 
     val geoJson = this["geo_json"]?.jsonObject!!
@@ -26,13 +23,13 @@ fun AreaTags.polygons(): List<Polygon> {
                 val coordinates = geometry["coordinates"]?.jsonArray!!
 
                 coordinates.map { polys -> polys.jsonArray.map { it.jsonArray } }.forEach { polys ->
-                    res += geoFactory.createPolygon(polys.first().jsonArray.map { it.jsonArray }
+                    res += Polygon.fromLngLats(listOf(polys.first().jsonArray.map { it.jsonArray }
                         .map {
-                            Coordinate(
+                            Point.fromLngLat(
                                 it[0].jsonPrimitive.double,
                                 it[1].jsonPrimitive.double,
                             )
-                        }.toTypedArray())
+                        }))
                 }
             }
 
@@ -40,12 +37,14 @@ fun AreaTags.polygons(): List<Polygon> {
                 val coordinates =
                     geometry["coordinates"]?.jsonArray!![0].jsonArray.map { it.jsonArray }
 
-                res += geoFactory.createPolygon(coordinates.map {
-                    Coordinate(
+                val lngLats = coordinates.map {
+                    Point.fromLngLat(
                         it[0].jsonPrimitive.double,
                         it[1].jsonPrimitive.double,
                     )
-                }.toTypedArray())
+                }
+
+                res += Polygon.fromLngLats(listOf(lngLats))
             }
         }
     }
@@ -56,12 +55,12 @@ fun AreaTags.polygons(): List<Polygon> {
         coordinates.forEach { polys ->
             val firstPoly = polys.map { it.jsonArray }.first().map { it.jsonArray }
 
-            res += geoFactory.createPolygon(firstPoly.map {
-                Coordinate(
+            res += Polygon.fromLngLats(listOf(firstPoly.map {
+                Point.fromLngLat(
                     it[0].jsonPrimitive.double,
                     it[1].jsonPrimitive.double,
                 )
-            }.toTypedArray())
+            }))
         }
     }
 
@@ -69,9 +68,9 @@ fun AreaTags.polygons(): List<Polygon> {
         val coordinates = geoJson["coordinates"]?.jsonArray!!.map { it.jsonArray }
             .first()
             .map { it.jsonArray }
-            .map { Coordinate(it[0].jsonPrimitive.double, it[1].jsonPrimitive.double) }
+            .map { Point.fromLngLat(it[0].jsonPrimitive.double, it[1].jsonPrimitive.double) }
 
-        res += geoFactory.createPolygon(coordinates.toTypedArray())
+        res += Polygon.fromLngLats(listOf(coordinates))
     }
 
     return res
