@@ -369,10 +369,7 @@ class ElementFragment : Fragment() {
 
         if (imageUrl != null) {
             binding.image.isVisible = true
-            binding.image.load(imageUrl) {
-                this.fallback(R.drawable.merchant)
-                this.error(R.drawable.merchant)
-            }
+            binding.image.load(imageUrl)
         } else {
             binding.image.isVisible = false
         }
@@ -380,7 +377,8 @@ class ElementFragment : Fragment() {
         val comments = runBlocking { elementCommentRepo.selectByElementId(element.id) }
         binding.commentsTitle.text = getString(R.string.comments_d, comments.size)
         binding.commentsTitle.isVisible = comments.isNotEmpty()
-        binding.comments.text = resources.getQuantityString(R.plurals.d_comments, comments.size, comments.size)
+        binding.comments.text =
+            resources.getQuantityString(R.plurals.d_comments, comments.size, comments.size)
         commentsAdapter.submitList(comments)
     }
 

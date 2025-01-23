@@ -29,6 +29,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
@@ -37,6 +38,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import app.dpToPx
 import area.AreaResultModel
 import area.AreasFragment
 import area.bounds
@@ -152,9 +154,16 @@ class MapFragment : Fragment() {
     ): View {
         _binding = FragmentMapBinding.inflate(inflater, container, false)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.searchBar) { view, windowInsets ->
-            val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            binding.fab.translationY = -navBarsInsets.bottom.toFloat()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top
+                rightMargin = insets.right + v.context.dpToPx(24)
+                bottomMargin = insets.bottom + v.context.dpToPx(24)
+                leftMargin = insets.left
+            }
+
             WindowInsetsCompat.CONSUMED
         }
 

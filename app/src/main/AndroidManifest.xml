@@ -20,7 +20,7 @@
         android:icon="${appIcon}"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.BtcMap">
+        android:theme="@style/Theme.Material3.DayNight.NoActionBar">
 
         <activity
             android:name="activity.Activity"

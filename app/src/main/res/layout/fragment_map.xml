@@ -21,9 +21,9 @@
         <com.google.android.material.search.SearchBar
             android:id="@+id/search_bar"
             android:layout_width="match_parent"
-            app:menu="@menu/map"
             android:layout_height="wrap_content"
-            android:hint="@string/search_here" />
+            android:hint="@string/search_here"
+            app:menu="@menu/map" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -68,9 +68,6 @@
         android:layout_margin="24dp"
         android:contentDescription="@string/show_my_location"
         app:elevation="0dp"
-        app:layout_anchor="@id/elementDetails"
-        app:layout_anchorGravity="end"
-        app:layout_dodgeInsetEdges="bottom"
         app:srcCompat="@drawable/my_location" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

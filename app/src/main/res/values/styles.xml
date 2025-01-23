@@ -2,20 +2,6 @@
 
 <resources>
 
-    <style name="Theme.BtcMap" parent="Theme.Material3.DynamicColors.DayNight">
-        <item name="android:windowLightStatusBar">@bool/window_light_status_bar</item>
-        <!-- TODO remove once we switch to 35+ -->
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <!-- TODO remove once we switch to 35+ -->
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <!-- TODO remove once we switch to 35+ -->
-        <item name="windowActionBar">false</item>
-        <!-- TODO remove once we switch to 35+ -->
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <bool name="window_light_status_bar">true</bool>
-
     <style name="RoundedImageView" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">20dp</item>

@@ -24,6 +24,12 @@ import org.btcmap.databinding.FragmentDonationBinding
 
 class DonationFragment : Fragment() {
 
+    companion object {
+        const val ONCHAIN = "bc1qy3c4tq8tdv2rj0g74r84sjjg2rqdeljn3u498e"
+        const val LIGHTNING =
+            "LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9AR4V3J3F4ZS4MX2FN"
+    }
+
     private var _binding: FragmentDonationBinding? = null
     private val binding get() = _binding!!
 
@@ -54,7 +60,7 @@ class DonationFragment : Fragment() {
     }
 
     private fun initOnchain() {
-        val paymentAddress = getString(R.string.donation_address_onchain)
+        val paymentAddress = ONCHAIN
         val paymentUrl = "bitcoin:$paymentAddress"
 
         val qrEncoder = QRGEncoder(paymentUrl, null, QRGContents.Type.TEXT, 1000)
@@ -76,7 +82,7 @@ class DonationFragment : Fragment() {
     }
 
     private fun initLightning() {
-        val paymentAddress = getString(R.string.donation_address_lightning)
+        val paymentAddress = LIGHTNING
         val paymentUrl = "lightning:$paymentAddress"
 
         val qrEncoder = QRGEncoder(paymentUrl, null, QRGContents.Type.TEXT, 1000)

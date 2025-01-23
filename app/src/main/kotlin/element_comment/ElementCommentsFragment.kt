@@ -5,6 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
@@ -12,6 +15,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import app.dpToPx
 import element.CommentsAdapter
 import kotlinx.coroutines.launch
 import org.btcmap.R
@@ -49,6 +53,18 @@ class ElementCommentsFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { v, windowInsets ->
+                    val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+                    v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        topMargin = insets.top
+                        rightMargin = insets.right + v.context.dpToPx(24)
+                        bottomMargin = insets.bottom + v.context.dpToPx(24)
+                        leftMargin = insets.left
+                    }
+
+                    WindowInsetsCompat.CONSUMED
+                }
                 binding.topAppBar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
                 binding.topAppBar.setOnMenuItemClickListener {
                     when (it.itemId) {

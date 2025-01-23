@@ -100,7 +100,6 @@ android {
         implementation(libs.okhttp.brotli)
         implementation(libs.okhttp.mockwebserver)
         implementation(libs.koin)
-        //implementation(libs.jts)
         implementation(libs.mpandroidchart)
         implementation(libs.coil.core)
         implementation(libs.coil.svg)
