@@ -5,10 +5,27 @@ import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
 
-fun AreaTags.polygons(): List<Polygon> {
+fun AreaTags.bounds(): LatLngBounds {
+    val coordinates = polygons().flatMap { it.coordinates().first() }
+
+    val minLat = coordinates.minBy { it.latitude() }.latitude()
+    val maxLat = coordinates.maxBy { it.latitude() }.latitude()
+    val minLon = coordinates.minBy { it.longitude() }.longitude()
+    val maxLon = coordinates.maxBy { it.longitude() }.longitude()
+
+    return LatLngBounds.from(
+        latNorth = maxLat,
+        lonEast = maxLon,
+        latSouth = minLat,
+        lonWest = minLon,
+    )
+}
+
+private fun AreaTags.polygons(): List<Polygon> {
     val res = mutableListOf<Polygon>()
 
     val geoJson = this["geo_json"]?.jsonObject!!

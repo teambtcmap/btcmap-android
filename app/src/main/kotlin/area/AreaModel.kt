@@ -77,7 +77,8 @@ class AreaModel(
             ).toInt()
 
             val map = AreaAdapter.Item.Map(
-                polygons = area.tags.polygons(),
+                geoJson = area.tags["geo_json"].toString(),
+                bounds = area.tags.bounds(),
                 paddingPx = boundingBoxPaddingPx,
             )
 

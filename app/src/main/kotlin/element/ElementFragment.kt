@@ -33,7 +33,7 @@ import map.MapFragment
 import map.MapMarkersRepo
 import map.getErrorColor
 import map.getOnSurfaceColor
-import map.initStyle
+import map.styleBuilder
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
@@ -121,7 +121,7 @@ class ElementFragment : Fragment() {
 
             binding.map.getMapAsync { map ->
                 map.uiSettings.setAllGesturesEnabled(false)
-                map.initStyle(requireContext())
+                map.setStyle(styleBuilder(requireContext()))
                 map.cameraPosition =
                     CameraPosition.Builder().target(LatLng(element.lat, element.lon)).zoom(15.0)
                         .build()

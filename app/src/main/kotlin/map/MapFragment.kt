@@ -39,7 +39,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import area.AreaResultModel
 import area.AreasFragment
-import area.polygons
+import area.bounds
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import delivery.DeliveryFragment
 import donation.DonationFragment
@@ -250,9 +250,11 @@ class MapFragment : Fragment() {
         }
 
         binding.map.getMapAsync {
-            it.initStyle(requireContext())
+            it.setStyle(styleBuilder(requireContext()))
             it.uiSettings.isCompassEnabled = false
             it.uiSettings.isRotateGesturesEnabled = false
+            it.uiSettings.isLogoEnabled = false
+            it.uiSettings.isAttributionEnabled = false
             it.addCancelSelectionOverlay()
             it.setOnMarkerClickListener { marker ->
                 if (!marker.snippet.isNullOrBlank()) {
@@ -425,7 +427,6 @@ class MapFragment : Fragment() {
 
                 if (pickedArea != null) {
                     binding.map.getMapAsync {
-                        val boundingBox = boundingBox(pickedArea.tags.polygons())
                         val boundingBoxPaddingPx = TypedValue.applyDimension(
                             TypedValue.COMPLEX_UNIT_DIP,
                             16f,
@@ -433,7 +434,7 @@ class MapFragment : Fragment() {
                         ).toInt()
                         it.moveCamera(
                             CameraUpdateFactory.newLatLngBounds(
-                                boundingBox,
+                                pickedArea.tags.bounds(),
                                 boundingBoxPaddingPx
                             )
                         )

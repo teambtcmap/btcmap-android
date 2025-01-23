@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
-import map.boundingBox
 import org.btcmap.R
 import org.maplibre.android.geometry.LatLng
 import java.text.NumberFormat
@@ -30,18 +29,13 @@ class AreasModel(
                 .selectByType("community")
                 .filter { it.tags.containsKey("icon:square") }
                 .mapNotNull {
-                    val polygons = runCatching {
-                        it.tags.polygons()
+                    val bounds = runCatching {
+                        it.tags.bounds()
                     }.getOrElse {
                         return@mapNotNull null
                     }
 
-                    if (polygons.isEmpty()) {
-                        return@mapNotNull null
-                    }
-
-                    val boundingBox = boundingBox(polygons)
-                    Pair(it, boundingBox.center.distanceTo(location) / 1_000)
+                    Pair(it, bounds.center.distanceTo(location) / 1_000)
                 }.sortedBy { it.second }
 
             val distanceFormat = NumberFormat.getNumberInstance().apply {

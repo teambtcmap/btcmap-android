@@ -1,5 +1,6 @@
 package area
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -8,15 +9,18 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import icons.iconTypeface
-import map.initStyle
-import map.showPolygons
+import map.styleBuilder
 import okhttp3.HttpUrl
 import org.btcmap.databinding.ItemAreaDescriptionBinding
 import org.btcmap.databinding.ItemAreaElementBinding
 import org.btcmap.databinding.ItemContactBinding
 import org.btcmap.databinding.ItemIssuesBinding
 import org.btcmap.databinding.ItemMapBinding
-import org.maplibre.geojson.Polygon
+import org.maplibre.android.camera.CameraUpdateFactory
+import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.android.style.layers.FillLayer
+import org.maplibre.android.style.layers.PropertyFactory
+import org.maplibre.android.style.sources.GeoJsonSource
 
 class AreaAdapter(
     private val listener: Listener,
@@ -95,7 +99,8 @@ class AreaAdapter(
     sealed class Item {
 
         data class Map(
-            val polygons: List<Polygon>,
+            val geoJson: String,
+            val bounds: LatLngBounds,
             val paddingPx: Int,
         ) : Item()
 
@@ -137,11 +142,32 @@ class AreaAdapter(
             listener: Listener,
         ) {
             if (item is Item.Map && binding is ItemMapBinding) {
-                binding.map.getMapAsync {
-                    it.initStyle(binding.root.context)
-                    it.showPolygons(item.polygons, item.paddingPx)
+                binding.map.getMapAsync { map ->
+                    val source = GeoJsonSource("area", item.geoJson)
+
+                    val layer = FillLayer("layer", "area")
+                        .withProperties(
+                            PropertyFactory.fillColor(Color.parseColor("#88f7931a")),
+                            PropertyFactory.fillAntialias(true),
+                        )
+
+                    map.setStyle(
+                        styleBuilder(binding.root.context)
+                            .withSource(source)
+                            .withLayer(layer)
+                    )
+
+                    map.moveCamera(
+                        CameraUpdateFactory.newLatLngBounds(
+                            item.bounds, item.paddingPx
+                        )
+                    )
+
+                    map.addOnMapClickListener {
+                        listener.onMapClick()
+                        true
+                    }
                 }
-                binding.mapClickHandler.setOnClickListener { listener.onMapClick() }
             }
 
             if (item is Item.Description && binding is ItemAreaDescriptionBinding) {
