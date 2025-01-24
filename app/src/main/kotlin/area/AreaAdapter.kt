@@ -11,6 +11,7 @@ import androidx.viewbinding.ViewBinding
 import icons.iconTypeface
 import map.styleBuilder
 import okhttp3.HttpUrl
+import org.btcmap.R
 import org.btcmap.databinding.ItemAreaDescriptionBinding
 import org.btcmap.databinding.ItemAreaElementBinding
 import org.btcmap.databinding.ItemContactBinding
@@ -197,11 +198,7 @@ class AreaAdapter(
 
             if (item is Item.Issues && binding is ItemIssuesBinding) {
                 binding.apply {
-                    count.text = root.resources.getQuantityString(
-                        org.btcmap.R.plurals.d_issues_found,
-                        item.count,
-                        item.count,
-                    )
+                    count.text = binding.root.context.getString(R.string.issues_d, item.count)
                     root.setOnClickListener { listener.onIssuesClick() }
                 }
             }

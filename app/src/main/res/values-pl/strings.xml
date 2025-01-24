@@ -73,6 +73,7 @@
     <string name="invalid_payment_url">Invalid payment URL</string>
     <string name="comments">Comments</string>
     <string name="add">Add</string>
+    <string name="issues_d">Issues: %1$d</string>
     <plurals name="d_comments">
         <item quantity="one">Comment (%d)</item>
         <item quantity="few">Comments (%d)</item>

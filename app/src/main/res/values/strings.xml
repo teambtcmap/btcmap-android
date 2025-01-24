@@ -75,14 +75,7 @@
     <string name="invalid_payment_url">Invalid payment URL</string>
     <string name="comments">Comments</string>
     <string name="add">Add</string>
-    <plurals name="d_issues_found" translatable="false">
-        <item quantity="zero">%d issues found</item>
-        <item quantity="one">%d issue found</item>
-        <item quantity="two">%d issues found</item>
-        <item quantity="few">%d issues found</item>
-        <item quantity="many">%d issues found</item>
-        <item quantity="other">%d issues found</item>
-    </plurals>
+    <string name="issues_d">Issues: %1$d</string>
     <plurals name="d_comments">
         <item quantity="zero">Comments (%d)</item>
         <item quantity="one">Comment (%d)</item>
