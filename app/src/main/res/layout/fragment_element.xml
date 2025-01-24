@@ -27,24 +27,18 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <FrameLayout
-                android:id="@+id/mapContainer"
+            <org.maplibre.android.maps.MapView
+                android:id="@+id/map"
                 android:layout_width="match_parent"
                 android:layout_height="192dp"
-                android:paddingBottom="4dp"
-                android:visibility="gone">
-
-                <org.maplibre.android.maps.MapView
-                    android:id="@+id/map"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-                <View
-                    android:id="@+id/mapClickHandler"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clickable="true" />
-            </FrameLayout>
+                android:layout_marginBottom="4dp"
+                android:visibility="gone"
+                app:maplibre_uiAttribution="false"
+                app:maplibre_uiLogo="false"
+                app:maplibre_uiRotateGestures="false"
+                app:maplibre_uiScrollGestures="false"
+                app:maplibre_uiTiltGestures="false"
+                app:maplibre_uiZoomGestures="false" />
 
             <ImageView
                 android:id="@+id/image"
@@ -64,7 +58,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="1"
                     android:text="@string/verify" />
 
@@ -74,9 +69,39 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_weight="1"
+                    android:text="@string/comments" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/boost"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:text="@string/boost" />
+
+                <Button
+                    android:id="@+id/add_comment"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
                     android:layout_weight="1"
                     android:text="@string/add_comment" />
+
             </LinearLayout>
 
             <LinearLayout

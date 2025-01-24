@@ -13,8 +13,6 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
@@ -27,6 +25,7 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
+import element_comment.AddElementCommentFragment
 import element_comment.ElementCommentRepo
 import element_comment.ElementCommentsFragment
 import icons.iconTypeface
@@ -92,7 +91,7 @@ class ElementFragment : Fragment() {
         if (arguments != null) {
             ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { appBar, windowInsets ->
                 val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-                appBar.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                appBar.updateLayoutParams<LinearLayout.LayoutParams> {
                     topMargin = insets.top
                 }
                 val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
@@ -110,16 +109,17 @@ class ElementFragment : Fragment() {
                 parentFragmentManager.popBackStack()
             }
 
-            binding.mapContainer.isVisible = true
-
-            binding.mapClickHandler.setOnClickListener {
-                resultModel.element.update { element }
-                parentFragmentManager.commit {
-                    replace<MapFragment>(R.id.nav_host_fragment)
-                }
-            }
+            binding.map.isVisible = true
 
             binding.map.getMapAsync { map ->
+                map.addOnMapClickListener {
+                    resultModel.element.update { element }
+                    parentFragmentManager.commit {
+                        replace<MapFragment>(R.id.nav_host_fragment)
+                    }
+                    true
+                }
+
                 map.uiSettings.setAllGesturesEnabled(false)
                 map.setStyle(styleBuilder(requireContext()))
                 map.cameraPosition =
@@ -357,6 +357,20 @@ class ElementFragment : Fragment() {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<ElementCommentsFragment>(
+                    R.id.nav_host_fragment,
+                    null,
+                    bundleOf("element_id" to elementId)
+                )
+                addToBackStack(null)
+            }
+        }
+
+        binding.boost.isEnabled = false
+        
+        binding.addComment.setOnClickListener {
+            requireActivity().supportFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace<AddElementCommentFragment>(
                     R.id.nav_host_fragment,
                     null,
                     bundleOf("element_id" to elementId)

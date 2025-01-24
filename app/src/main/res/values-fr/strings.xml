@@ -74,4 +74,5 @@
     <string name="comments">Comments</string>
     <string name="add">Add</string>
     <string name="issues_d">Issues: %1$d</string>
+    <string name="boost">Boost</string>
 </resources>
