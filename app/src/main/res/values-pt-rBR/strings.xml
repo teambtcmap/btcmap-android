@@ -74,4 +74,5 @@
     <string name="add">Add</string>
     <string name="issues_d">Issues: %1$d</string>
     <string name="boost">Boost</string>
+    <string name="boost_merchant">Boost Merchant</string>
 </resources>

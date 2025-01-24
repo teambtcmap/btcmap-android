@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.recyclerview.widget.LinearLayoutManager
+import boost_element.BoostElementFragment
 import coil.load
 import element_comment.AddElementCommentFragment
 import element_comment.ElementCommentRepo
@@ -365,7 +366,17 @@ class ElementFragment : Fragment() {
             }
         }
 
-        binding.boost.isEnabled = false
+        binding.boost.setOnClickListener {
+            requireActivity().supportFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace<BoostElementFragment>(
+                    R.id.nav_host_fragment,
+                    null,
+                    bundleOf("element_id" to elementId)
+                )
+                addToBackStack(null)
+            }
+        }
         
         binding.addComment.setOnClickListener {
             requireActivity().supportFragmentManager.commit {
@@ -392,6 +403,7 @@ class ElementFragment : Fragment() {
         binding.commentsTitle.text = getString(R.string.comments_d, comments.size)
         binding.commentsTitle.isVisible = comments.isNotEmpty()
         binding.comments.text = getString(R.string.comments_d, comments.size)
+        binding.comments.isEnabled = comments.isNotEmpty()
         commentsAdapter.submitList(comments)
     }
 
