@@ -377,8 +377,7 @@ class ElementFragment : Fragment() {
         val comments = runBlocking { elementCommentRepo.selectByElementId(element.id) }
         binding.commentsTitle.text = getString(R.string.comments_d, comments.size)
         binding.commentsTitle.isVisible = comments.isNotEmpty()
-        binding.comments.text =
-            resources.getQuantityString(R.plurals.d_comments, comments.size, comments.size)
+        binding.comments.text = getString(R.string.comments_d, comments.size)
         commentsAdapter.submitList(comments)
     }
 
