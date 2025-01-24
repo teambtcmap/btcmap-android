@@ -21,6 +21,7 @@
         <com.google.android.material.search.SearchBar
             android:id="@+id/search_bar"
             android:layout_width="match_parent"
+            app:defaultScrollFlagsEnabled="false"
             android:layout_height="wrap_content"
             android:hint="@string/search_here"
             app:menu="@menu/map" />
@@ -49,8 +50,7 @@
         android:background="?attr/colorSurface"
         android:elevation="6dp"
         app:behavior_hideable="true"
-        app:layout_behavior="@string/bottom_sheet_behavior"
-        app:layout_insetEdge="bottom">
+        app:layout_behavior="@string/bottom_sheet_behavior">
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/elementFragment"

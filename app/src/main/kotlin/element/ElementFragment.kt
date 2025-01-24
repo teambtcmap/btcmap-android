@@ -10,8 +10,11 @@ import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
@@ -72,12 +75,9 @@ class ElementFragment : Fragment() {
     fun onPartialExpanded(progress: Float) {
         ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { appBar, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            appBar.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                topMargin = if (progress < 0.5) {
-                    0
-                } else {
-                    (insets.top * progress).toInt()
-                }
+            val interpolator = AccelerateInterpolator()
+            appBar.updateLayoutParams<LinearLayout.LayoutParams> {
+                topMargin = (insets.top * interpolator.getInterpolation(progress)).toInt()
             }
             WindowInsetsCompat.CONSUMED
         }
