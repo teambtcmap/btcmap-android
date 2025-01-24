@@ -65,10 +65,6 @@
     <string name="delivery">Delivery</string>
     <string name="add_element_comment_disclosure_1">All comments are anonymous but we collect a small fee in sats as a spam protection measure</string>
     <string name="add_element_comment_disclosure_2">You can close this screen after paying an invoice and your comment will appear on the map shortly</string>
-    <plurals name="d_places">
-        <item quantity="one">%d τοποθεσία</item>
-        <item quantity="other">%d τοποθεσίες</item>
-    </plurals>
     <string name="comment">Comment</string>
     <string name="generate_invoice">Generate Invoice</string>
     <string name="add_comment">Add Comment</string>

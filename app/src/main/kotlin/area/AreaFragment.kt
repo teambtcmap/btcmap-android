@@ -126,19 +126,9 @@ class AreaFragment : Fragment() {
                         }
 
                         is AreaModel.State.Loaded -> {
-                            val elements =
-                                state.items.filterIsInstance<AreaAdapter.Item.Element>().size
-
                             binding.topAppBar.title = state.area.tags.name()
-                            binding.topAppBar.subtitle = resources.getQuantityString(
-                                R.plurals.d_places,
-                                elements,
-                                elements,
-                            )
-
                             binding.progress.isVisible = false
                             binding.list.isVisible = true
-
                             adapter.submitList(state.items)
                         }
                     }
