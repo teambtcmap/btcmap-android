@@ -64,11 +64,6 @@
   <string name="delivery">Entrega</string>
   <string name="add_element_comment_disclosure_1">Todos os comentários são anônimos, mas cobramos uma pequena taxa em sats como medida de proteção de spam</string>
   <string name="add_element_comment_disclosure_2">Você pode fechar esta tela após pagar uma fatura e o seu comentário irá aparecer no mapa em breve</string>
-  <plurals name="d_changes">
-    <item quantity="one">%d mudança</item>
-    <item quantity="many">%d mudanças</item>
-    <item quantity="other">%d mudanças</item>
-  </plurals>
   <plurals name="d_places">
     <item quantity="one">%d lugar</item>
     <item quantity="many">%d lugares</item>

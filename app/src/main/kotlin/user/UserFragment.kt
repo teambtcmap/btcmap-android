@@ -106,11 +106,6 @@ class UserFragment : Fragment() {
                     )
                 }
                 adapter.submitList(items)
-                binding.topAppBar.subtitle = resources.getQuantityString(
-                    R.plurals.d_changes,
-                    items.size,
-                    items.size,
-                )
             }
         }
     }

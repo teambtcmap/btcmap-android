@@ -15,6 +15,7 @@ import coil.request.SuccessResult
 import okhttp3.HttpUrl
 import org.btcmap.R
 import org.btcmap.databinding.ItemUserBinding
+import java.text.NumberFormat
 
 class UsersAdapter(
     private val onItemClick: (Item) -> Unit,
@@ -43,9 +44,7 @@ class UsersAdapter(
         fun bind(item: Item, onItemClick: (Item) -> Unit) {
             binding.apply {
                 title.text = item.name
-                subtitle.text = root.context.resources.getQuantityString(
-                    R.plurals.d_changes, item.changes.toInt(), item.changes
-                )
+                subtitle.text = NumberFormat.getNumberInstance().format(item.changes)
 
                 if (item.tipLnurl.isNotBlank()) {
                     tip.isVisible = true

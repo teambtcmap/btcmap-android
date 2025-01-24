@@ -5,6 +5,6 @@
         android:id="@+id/action_view_on_osm"
         android:icon="@drawable/earth"
         android:title="@string/view_on_osm"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 
 </menu>

@@ -46,12 +46,28 @@
             android:layout_height="wrap_content"
             tools:text="Satoshi Nakamoto" />
 
-        <TextView
-            android:id="@+id/subtitle"
-            style="?textAppearanceCaption"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="666 changes" />
+            tools:ignore="UseCompoundDrawables">
+
+            <ImageView
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="4dp"
+                android:contentDescription="@string/icon"
+                android:src="@drawable/edit" />
+
+            <TextView
+                android:id="@+id/subtitle"
+                style="?textAppearanceCaption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="123" />
+
+        </LinearLayout>
+
 
     </LinearLayout>
 
