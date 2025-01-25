@@ -83,4 +83,7 @@
     <string name="months_12">12 Months</string>
     <string name="boost_invoice_hint">You can close this screen after paying an invoice and your boost will appear on the map shortly</string>
     <string name="months_3">3 Months</string>
+    <string name="current_fee">Current fee:</string>
+    <string name="loading">loading</string>
+    <string name="d_sat">%1$s sat</string>
 </resources>

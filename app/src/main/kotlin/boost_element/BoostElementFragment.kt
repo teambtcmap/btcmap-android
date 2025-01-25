@@ -29,6 +29,7 @@ import okhttp3.coroutines.executeAsync
 import org.btcmap.R
 import org.btcmap.databinding.FragmentBoostElementBinding
 import org.json.JSONObject
+import java.text.NumberFormat
 
 class BoostElementFragment : Fragment() {
 
@@ -64,6 +65,29 @@ class BoostElementFragment : Fragment() {
         binding.generateInvoice.setOnClickListener { onGenerateInvoiceButtonClick() }
         binding.payInvoice.setOnClickListener { onPayInvoiceClick() }
         binding.copyInvoice.setOnClickListener { onCopyInvoiceClick() }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                val httpClient = OkHttpClient()
+                val url = "https://api.btcmap.org/rpc"
+                val requestBody =
+                    """{"jsonrpc": "2.0", "method": "paywall_get_boost_element_quote", "id": 1}""".trimIndent()
+                val res = httpClient.newCall(
+                    Request.Builder()
+                        .post(requestBody.toRequestBody("application/json".toMediaType())).url(url)
+                        .build()
+                ).executeAsync()
+
+                if (res.isSuccessful) {
+                    val body = res.body.string()
+                    Log.d("RPC", body)
+
+                    withContext(Dispatchers.Main) {
+                        onFeeResponse(JSONObject(body))
+                    }
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -81,6 +105,9 @@ class BoostElementFragment : Fragment() {
         }
 
         binding.durationOptions.isEnabled = false
+        binding.boost1m.isEnabled = false
+        binding.boost3m.isEnabled = false
+        binding.boost12m.isEnabled = false
         binding.generateInvoice.isEnabled = false
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -88,7 +115,7 @@ class BoostElementFragment : Fragment() {
                 val httpClient = OkHttpClient()
                 val url = "https://api.btcmap.org/rpc"
                 val requestBody =
-                    """{"jsonrpc": "2.0", "method": "submit_element_boost", "params": {"element_id": "${args.value.elementId}", "days": $days}, "id": 1}""".trimIndent()
+                    """{"jsonrpc": "2.0", "method": "paywall_boost_element", "params": {"element_id": "${args.value.elementId}", "days": $days}, "id": 1}""".trimIndent()
                 val res = httpClient.newCall(
                     Request.Builder()
                         .post(requestBody.toRequestBody("application/json".toMediaType())).url(url)
@@ -116,7 +143,29 @@ class BoostElementFragment : Fragment() {
             Toast.LENGTH_LONG,
         ).show()
         binding.durationOptions.isEnabled = true
+        binding.boost1m.isEnabled = true
+        binding.boost3m.isEnabled = true
+        binding.boost12m.isEnabled = true
         binding.generateInvoice.isEnabled = true
+    }
+
+    private fun onFeeResponse(rpcResponse: JSONObject) {
+        if (rpcResponse.has("error")) {
+            return
+        }
+
+        val quote30d = rpcResponse.getJSONObject("result").getString("quote_30d_sat")
+        val quote90d = rpcResponse.getJSONObject("result").getString("quote_90d_sat")
+        val quote365d = rpcResponse.getJSONObject("result").getString("quote_365d_sat")
+
+        binding.boost1m.append(" - ")
+        binding.boost1m.append(getString(R.string.d_sat, NumberFormat.getNumberInstance().format(quote30d.toInt())))
+
+        binding.boost3m.append(" - ")
+        binding.boost3m.append(getString(R.string.d_sat, NumberFormat.getNumberInstance().format(quote90d.toInt())))
+
+        binding.boost12m.append(" - ")
+        binding.boost12m.append(getString(R.string.d_sat, NumberFormat.getNumberInstance().format(quote365d.toInt())))
     }
 
     private fun onPaymentRequestResponse(rpcResponse: JSONObject) {
@@ -127,6 +176,9 @@ class BoostElementFragment : Fragment() {
                 .setPositiveButton(R.string.close, null)
                 .setOnDismissListener {
                     binding.durationOptions.isEnabled = true
+                    binding.boost1m.isEnabled = true
+                    binding.boost3m.isEnabled = true
+                    binding.boost12m.isEnabled = true
                     binding.generateInvoice.isEnabled = true
                 }
                 .show()

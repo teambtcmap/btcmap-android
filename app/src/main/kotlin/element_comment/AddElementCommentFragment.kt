@@ -64,6 +64,29 @@ class AddElementCommentFragment : Fragment() {
         binding.generateInvoice.setOnClickListener { onGenerateInvoiceButtonClick() }
         binding.payInvoice.setOnClickListener { onPayInvoiceClick() }
         binding.copyInvoice.setOnClickListener { onCopyInvoiceClick() }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                val httpClient = OkHttpClient()
+                val url = "https://api.btcmap.org/rpc"
+                val requestBody =
+                    """{"jsonrpc": "2.0", "method": "paywall_get_add_element_comment_quote", "id": 1}""".trimIndent()
+                val res = httpClient.newCall(
+                    Request.Builder()
+                        .post(requestBody.toRequestBody("application/json".toMediaType())).url(url)
+                        .build()
+                ).executeAsync()
+
+                if (res.isSuccessful) {
+                    val body = res.body.string()
+                    Log.d("RPC", body)
+
+                    withContext(Dispatchers.Main) {
+                        onFeeResponse(JSONObject(body))
+                    }
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -86,7 +109,7 @@ class AddElementCommentFragment : Fragment() {
                 val httpClient = OkHttpClient()
                 val url = "https://api.btcmap.org/rpc"
                 val requestBody =
-                    """{"jsonrpc": "2.0", "method": "add_paid_element_comment", "params": {"element_id": "${args.value.elementId}", "comment": "$comment"}, "id": 1}""".trimIndent()
+                    """{"jsonrpc": "2.0", "method": "paywall_add_element_comment", "params": {"element_id": "${args.value.elementId}", "comment": "$comment"}, "id": 1}""".trimIndent()
                 val res = httpClient.newCall(
                     Request.Builder()
                         .post(requestBody.toRequestBody("application/json".toMediaType())).url(url)
@@ -115,6 +138,15 @@ class AddElementCommentFragment : Fragment() {
         ).show()
         binding.comment.isEnabled = true
         binding.generateInvoice.isEnabled = true
+    }
+
+    private fun onFeeResponse(rpcResponse: JSONObject) {
+        if (rpcResponse.has("error")) {
+            return
+        }
+
+        val quote = rpcResponse.getJSONObject("result").getString("quote_sat")
+        binding.fee.text = getString(R.string.d_sat, quote)
     }
 
     private fun onPaymentRequestResponse(rpcResponse: JSONObject) {
