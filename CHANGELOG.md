@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.9.2] - 2025-01-25
+
+- Add merchant boosts
+- Add comments screen
+- Speed up element search within an area
+- Show user location marker
+- Improve Material theme support
+- Remove Google blob from APK
+- Show more info on deleted elements
+- Add Polish translation
+- Add Brazilian translation
+- Fix issue with reports
+- Fix issue with distance units
+- Fix crashes under certain conditions
+
+- Allow users to post merchant comments
+- Fix issue with cold sync
+- Add special icon for debug builds
+- Improve error handling
+
 ## [0.9.1] - 2025-01-18
 
 - Allow users to post merchant comments
