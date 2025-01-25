@@ -75,12 +75,12 @@
     <string name="comments">Komentarze</string>
     <string name="add">Dodaj</string>
     <string name="issues_d">Problemy: %1$d</string>
-    <string name="boost">Boost</string>
-    <string name="boost_merchant">Boost Merchant</string>
-    <string name="comments_d">Comments (%1$d)</string>
-    <string name="boost_description">Make this merchant stand out in Bitcoin orange on the map, shine in the search results, and be discovered in the exclusive boosted locations section!\n\nThe fee is used to support the BTC Map open source project and continue it\'s development.</string>
-    <string name="months_1">1 Month</string>
-    <string name="months_12">12 Months</string>
-    <string name="boost_invoice_hint">You can close this screen after paying an invoice and your boost will appear on the map shortly</string>
-    <string name="months_3">3 Months</string>
+    <string name="boost">Podbij</string>
+    <string name="boost_merchant">Podbij sprzedawcę</string>
+    <string name="comments_d">Komentarze (%1$d)</string>
+    <string name="boost_description">Wyróżnij tego sprzedawcę na mapie kolorem bitcoinowej pomarańczy, zwiększ jego widoczność w wynikach wyszukiwania i umieść w ekskluzywnej sekcji promowanych lokalizacji!\n\nOpłata wspiera rozwój otwartoźródłowego projektu BTC Map i umożliwia jego dalsze ulepszanie.</string>
+    <string name="months_1">1 miesiąc</string>
+    <string name="months_12">12 miesięcy</string>
+    <string name="boost_invoice_hint">Możesz zamknąć ten ekran po opłaceniu faktury, a twoje podbicie wkrótce pojawi się na mapie.</string>
+    <string name="months_3">3 miesiące</string>
 </resources>
