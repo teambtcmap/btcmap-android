@@ -63,6 +63,7 @@
     <string name="percentage_of_verified_places">Procent zweryfikowanych miejsc</string>
     <string name="days_since_verified">Dni od weryfikacji</string>
     <string name="delivery">Dostawa</string>
+    <string name="new_merchant_notifications">New merchant notifications</string>
     <string name="add_element_comment_disclosure_1">Wszystkie komentarze są anonimowe, ale pobieramy niewielką opłatę w satoshi jako środek ochrony przed spamem</string>
     <string name="add_element_comment_disclosure_2">Możesz zamknąć ten ekran po opłaceniu faktury, a twój komentarz wkrótce pojawi się na mapie</string>
     <string name="comment">Komentarz</string>
@@ -76,4 +77,10 @@
     <string name="issues_d">Problemy: %1$d</string>
     <string name="boost">Boost</string>
     <string name="boost_merchant">Boost Merchant</string>
+    <string name="comments_d">Comments (%1$d)</string>
+    <string name="boost_description">Make this merchant stand out in Bitcoin orange on the map, shine in the search results, and be discovered in the exclusive boosted locations section!\n\nThe fee is used to support the BTC Map open source project and continue it\'s development.</string>
+    <string name="months_1">1 Month</string>
+    <string name="months_12">12 Months</string>
+    <string name="boost_invoice_hint">You can close this screen after paying an invoice and your boost will appear on the map shortly</string>
+    <string name="months_3">3 Months</string>
 </resources>

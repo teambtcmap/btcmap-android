@@ -39,7 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="Make this merchant stand out in Bitcoin orange on the map, shine in the search results, and be discovered in the exclusive boosted locations section!\n\nThe fee is used to support the BTC Map open source project and continue it's development." />
+                android:text="@string/boost_description" />
 
             <RadioGroup
                 android:id="@+id/duration_options"
@@ -50,20 +50,20 @@
                     android:id="@+id/boost_1m"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1 Month" />
+                    android:text="@string/months_1" />
 
                 <RadioButton
                     android:id="@+id/boost_3m"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="3 Months" />
+                    android:text="@string/months_3" />
 
                 <RadioButton
                     android:id="@+id/boost_12m"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="12 Months" />
+                    android:text="@string/months_12" />
 
             </RadioGroup>
 
@@ -123,7 +123,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="You can close this screen after paying an invoice and your boost will appear on the map shortly"
+                android:text="@string/boost_invoice_hint"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
