@@ -1,14 +1,11 @@
 [versions]
 # https://developer.android.com/build/releases/gradle-plugin
-agp = "8.8.0"
+agp = "8.9.0"
 # https://github.com/JetBrains/kotlin/releases
 kotlin = "2.1.0"
 # Allows suspending functions
 # https://github.com/Kotlin/kotlinx.coroutines/releases
 coroutines = "1.10.1"
-# Helps with keeping our view hierarchies flat
-# https://developer.android.com/jetpack/androidx/releases/constraintlayout
-constraintlayout = "2.2.0"
 # Material design components
 # https://github.com/material-components/material-components-android/releases
 material = "1.12.0"
