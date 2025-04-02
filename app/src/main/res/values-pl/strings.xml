@@ -63,6 +63,7 @@
     <string name="percentage_of_verified_places">Procent zweryfikowanych miejsc</string>
     <string name="days_since_verified">Dni od weryfikacji</string>
     <string name="delivery">Dostawa</string>
+    <string name="comments_d">Komentarze (%1$d)</string>
     <string name="new_merchant_notifications">New merchant notifications</string>
     <string name="add_element_comment_disclosure_1">Wszystkie komentarze są anonimowe, ale pobieramy niewielką opłatę w satoshi jako środek ochrony przed spamem</string>
     <string name="add_element_comment_disclosure_2">Możesz zamknąć ten ekran po opłaceniu faktury, a twój komentarz wkrótce pojawi się na mapie</string>
@@ -77,13 +78,12 @@
     <string name="issues_d">Problemy: %1$d</string>
     <string name="boost">Podbij</string>
     <string name="boost_merchant">Podbij sprzedawcę</string>
-    <string name="comments_d">Komentarze (%1$d)</string>
     <string name="boost_description">Wyróżnij tego sprzedawcę na mapie kolorem bitcoinowej pomarańczy, zwiększ jego widoczność w wynikach wyszukiwania i umieść w ekskluzywnej sekcji promowanych lokalizacji!\n\nOpłata wspiera rozwój otwartoźródłowego projektu BTC Map i umożliwia jego dalsze ulepszanie.</string>
     <string name="months_1">1 miesiąc</string>
+    <string name="months_3">3 miesiące</string>
     <string name="months_12">12 miesięcy</string>
     <string name="boost_invoice_hint">Możesz zamknąć ten ekran po opłaceniu faktury, a twoje podbicie wkrótce pojawi się na mapie.</string>
-    <string name="months_3">3 miesiące</string>
-    <string name="current_fee">Current fee:</string>
-    <string name="loading">loading</string>
+    <string name="current_fee">Bieżąca opłata:</string>
+    <string name="loading">ładuję</string>
     <string name="d_sat">%1$s sat</string>
 </resources>
