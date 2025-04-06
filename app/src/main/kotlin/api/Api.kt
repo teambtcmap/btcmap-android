@@ -4,8 +4,8 @@ import area.AreaJson
 import area.toAreasJson
 import area_element.AreaElementJson
 import area_element.toAreaElementsJson
-import element.ElementJson
-import element.toElementsJson
+import element.Element
+import element.toElements
 import element_comment.ElementCommentJson
 import element_comment.toElementCommentsJson
 import event.EventJson
@@ -35,7 +35,7 @@ interface Api {
         limit: Long
     ): List<ElementCommentJson>
 
-    suspend fun getElements(updatedSince: ZonedDateTime?, limit: Long): List<ElementJson>
+    suspend fun getElements(updatedSince: ZonedDateTime?, limit: Long): List<Element>
 
     suspend fun getEvents(updatedSince: ZonedDateTime?, limit: Long): List<EventJson>
 
@@ -91,10 +91,31 @@ class ApiImpl(
         }
     }
 
-    override suspend fun getElements(updatedSince: ZonedDateTime?, limit: Long): List<ElementJson> {
+    override suspend fun getElements(updatedSince: ZonedDateTime?, limit: Long): List<Element> {
         val url = baseUrl.newBuilder().apply {
-            addPathSegment("v3")
+            addPathSegment("v4")
             addPathSegment("elements")
+
+            addQueryParameter("f", "lat")
+            addQueryParameter("f", "lon")
+            addQueryParameter("f", "icon")
+            addQueryParameter("f", "name")
+            addQueryParameter("f", "updated_at")
+            addQueryParameter("f", "deleted_at")
+
+            addQueryParameter("f", "required_app_url")
+            addQueryParameter("f", "boosted_until")
+            addQueryParameter("f", "verified_at")
+            addQueryParameter("f", "address")
+            addQueryParameter("f", "opening_hours")
+            addQueryParameter("f", "website")
+            addQueryParameter("f", "phone")
+            addQueryParameter("f", "email")
+            addQueryParameter("f", "twitter")
+            addQueryParameter("f", "facebook")
+            addQueryParameter("f", "instagram")
+            addQueryParameter("f", "line")
+
             addQueryParameter("updated_since", updatedSince.apiFormat())
             addQueryParameter("limit", "$limit")
         }.build()
@@ -106,7 +127,7 @@ class ApiImpl(
         }
 
         return withContext(Dispatchers.IO) {
-            res.body.byteStream().use { it.toElementsJson() }
+            res.body.byteStream().use { it.toElements() }
         }
     }
 

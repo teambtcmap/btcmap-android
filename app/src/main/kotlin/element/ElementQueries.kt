@@ -1,10 +1,11 @@
 package element
 
 import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.use
-import db.getJsonArray
-import db.getJsonObjectOld
-import db.getText
+import db.getHttpUrlOrNull
+import db.getLocalDateOrNull
+import db.getTextOrNull
 import db.getZonedDateTime
 import db.getZonedDateTimeOrNull
 import db.transaction
@@ -13,40 +14,155 @@ import java.time.ZonedDateTime
 class ElementQueries(private val conn: SQLiteConnection) {
 
     companion object {
+        const val TABLE_NAME = "element"
+
+        const val COL_ID = "id"
+        const val COL_LAT = "lat"
+        const val COL_LON = "lon"
+        const val COL_ICON = "icon"
+        const val COL_NAME = "name"
+        const val COL_UPDATED_AT = "updated_at"
+        const val COL_DELETED_AT = "deleted_at"
+        const val COL_REQUIRED_APP_URL = "required_app_url"
+        const val COL_BOOSTED_UNTIL = "boosted_until"
+        const val COL_VERIFIED_AT = "verified_at"
+        const val COL_ADDRESS = "address"
+        const val COL_OPENING_HOURS = "opening_hours"
+        const val COL_WEBSITE = "website"
+        const val COL_PHONE = "phone"
+        const val COL_EMAIL = "email"
+        const val COL_TWITTER = "twitter"
+        const val COL_FACEBOOK = "facebook"
+        const val COL_INSTAGRAM = "instagram"
+        const val COL_LINE = "line"
+
+        val PROJ_FULL = listOf(
+            COL_ID,
+            COL_LAT,
+            COL_LON,
+            COL_ICON,
+            COL_NAME,
+            COL_UPDATED_AT,
+            COL_DELETED_AT,
+            COL_REQUIRED_APP_URL,
+            COL_BOOSTED_UNTIL,
+            COL_VERIFIED_AT,
+            COL_ADDRESS,
+            COL_OPENING_HOURS,
+            COL_WEBSITE,
+            COL_PHONE,
+            COL_EMAIL,
+            COL_TWITTER,
+            COL_FACEBOOK,
+            COL_INSTAGRAM,
+            COL_LINE,
+        )
+
         const val CREATE_TABLE = """
-            CREATE TABLE element (
-                id INTEGER NOT NULL PRIMARY KEY,
-                overpass_data TEXT NOT NULL,
-                tags TEXT NOT NULL,
-                updated_at TEXT NOT NULL,
-                ext_lat REAL NOT NULL,
-                ext_lon REAL NOT NULL
+            CREATE TABLE $TABLE_NAME (
+                $COL_ID INTEGER NOT NULL PRIMARY KEY,
+                $COL_LAT REAL NOT NULL,
+                $COL_LON REAL NOT NULL,
+                $COL_ICON TEXT NOT NULL,
+                $COL_NAME TEXT NOT NULL,
+                $COL_UPDATED_AT TEXT NOT NULL,
+                $COL_DELETED_AT TEXT,
+                $COL_REQUIRED_APP_URL TEXT,
+                $COL_BOOSTED_UNTIL TEXT,
+                $COL_VERIFIED_AT TEXT,
+                $COL_ADDRESS TEXT,
+                $COL_OPENING_HOURS TEXT,
+                $COL_WEBSITE TEXT,
+                $COL_PHONE TEXT,
+                $COL_EMAIL TEXT,
+                $COL_TWITTER TEXT,
+                $COL_FACEBOOK TEXT,
+                $COL_INSTAGRAM TEXT,
+                $COL_LINE TEXT
             );
             """
     }
 
     fun insertOrReplace(elements: List<Element>) {
+        val sql = """
+            INSERT OR REPLACE
+            INTO $TABLE_NAME (${PROJ_FULL.joinToString()}) 
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)
+        """
         conn.transaction { conn ->
             elements.forEach { element ->
-                conn.prepare(
-                    """
-                    INSERT OR REPLACE
-                    INTO element (
-                        id,
-                        overpass_data,
-                        tags,
-                        updated_at,
-                        ext_lat,
-                        ext_lon
-                    ) VALUES (?1, ?2, ?3, ?4, ?5, ?6)
-                    """
-                ).use {
+                conn.prepare(sql).use {
                     it.bindLong(1, element.id)
-                    it.bindText(2, element.overpassData.toString())
-                    it.bindText(3, element.tags.toString())
-                    it.bindText(4, element.updatedAt)
-                    it.bindDouble(5, element.lat)
-                    it.bindDouble(6, element.lon)
+                    it.bindDouble(2, element.lat)
+                    it.bindDouble(3, element.lon)
+                    it.bindText(4, element.icon)
+                    it.bindText(5, element.name)
+                    it.bindText(6, element.updatedAt.toString())
+                    if (element.deletedAt == null) {
+                        it.bindNull(7)
+                    } else {
+                        it.bindText(7, element.deletedAt.toString())
+                    }
+                    if (element.requiredAppUrl == null) {
+                        it.bindNull(8)
+                    } else {
+                        it.bindText(8, element.requiredAppUrl.toString())
+                    }
+                    if (element.boostedUntil == null) {
+                        it.bindNull(9)
+                    } else {
+                        it.bindText(9, element.boostedUntil.toString())
+                    }
+                    if (element.verifiedAt == null) {
+                        it.bindNull(10)
+                    } else {
+                        it.bindText(10, element.verifiedAt.toString())
+                    }
+                    if (element.address == null) {
+                        it.bindNull(11)
+                    } else {
+                        it.bindText(11, element.address)
+                    }
+                    if (element.openingHours == null) {
+                        it.bindNull(12)
+                    } else {
+                        it.bindText(12, element.openingHours)
+                    }
+                    if (element.website == null) {
+                        it.bindNull(13)
+                    } else {
+                        it.bindText(13, element.website.toString())
+                    }
+                    if (element.phone == null) {
+                        it.bindNull(14)
+                    } else {
+                        it.bindText(14, element.phone)
+                    }
+                    if (element.email == null) {
+                        it.bindNull(15)
+                    } else {
+                        it.bindText(15, element.email)
+                    }
+                    if (element.twitter == null) {
+                        it.bindNull(16)
+                    } else {
+                        it.bindText(16, element.twitter.toString())
+                    }
+                    if (element.facebook == null) {
+                        it.bindNull(17)
+                    } else {
+                        it.bindText(17, element.facebook.toString())
+                    }
+                    if (element.instagram == null) {
+                        it.bindNull(18)
+                    } else {
+                        it.bindText(18, element.instagram.toString())
+                    }
+                    if (element.line == null) {
+                        it.bindNull(19)
+                    } else {
+                        it.bindText(19, element.line.toString())
+                    }
                     it.step()
                 }
             }
@@ -56,28 +172,14 @@ class ElementQueries(private val conn: SQLiteConnection) {
     fun selectById(id: Long): Element? {
         return conn.prepare(
             """
-                SELECT
-                    id,
-                    overpass_data,
-                    tags,
-                    updated_at,
-                    ext_lat,
-                    ext_lon
+                SELECT ${PROJ_FULL.joinToString()}
                 FROM element
-                WHERE id = ?1
+                WHERE $COL_ID = ?1
                 """
         ).use {
             it.bindLong(1, id)
-
             if (it.step()) {
-                Element(
-                    id = it.getLong(0),
-                    overpassData = it.getJsonObjectOld(1),
-                    tags = it.getJsonObjectOld(2),
-                    updatedAt = it.getText(3),
-                    lat = it.getDouble(4),
-                    lon = it.getDouble(5),
-                )
+                it.toElement()
             } else {
                 null
             }
@@ -87,97 +189,15 @@ class ElementQueries(private val conn: SQLiteConnection) {
     fun selectBySearchString(searchString: String): List<Element> {
         return conn.prepare(
             """
-                SELECT
-                    id,
-                    overpass_data,
-                    tags,
-                    updated_at,
-                    ext_lat,
-                    ext_lon
+                SELECT ${PROJ_FULL.joinToString()}
                 FROM element
-                WHERE UPPER(overpass_data) LIKE '%' || UPPER(?1) || '%'
+                WHERE UPPER($COL_NAME) LIKE '%' || UPPER(?1) || '%'
                 """
         ).use {
             it.bindText(1, searchString)
-
             buildList {
                 while (it.step()) {
-                    add(
-                        Element(
-                            id = it.getLong(0),
-                            overpassData = it.getJsonObjectOld(1),
-                            tags = it.getJsonObjectOld(2),
-                            updatedAt = it.getText(3),
-                            lat = it.getDouble(4),
-                            lon = it.getDouble(5),
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    fun selectByOsmTagValue(tagName: String, tagValue: String): List<Element> {
-        return conn.prepare(
-            """
-                SELECT
-                    id,
-                    overpass_data,
-                    tags,
-                    updated_at,
-                    ext_lat,
-                    ext_lon            
-                FROM element
-                WHERE json_extract(overpass_data, '$.tags.$tagName') = ?1
-                """
-        ).use {
-            it.bindText(1, tagValue)
-
-            buildList {
-                while (it.step()) {
-                    add(
-                        Element(
-                            id = it.getLong(0),
-                            overpassData = it.getJsonObjectOld(1),
-                            tags = it.getJsonObjectOld(2),
-                            updatedAt = it.getText(3),
-                            lat = it.getDouble(4),
-                            lon = it.getDouble(5),
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    fun selectByBtcMapTagValue(tagName: String, tagValue: String): List<Element> {
-        return conn.prepare(
-            """
-                SELECT
-                    id,
-                    overpass_data,
-                    tags,
-                    updated_at,
-                    ext_lat,
-                    ext_lon            
-                FROM element
-                WHERE json_extract(tags, '$.$tagName') = ?1
-                """
-        ).use {
-            it.bindText(1, tagValue)
-
-            buildList {
-                while (it.step()) {
-                    add(
-                        Element(
-                            id = it.getLong(0),
-                            overpassData = it.getJsonObjectOld(1),
-                            tags = it.getJsonObjectOld(2),
-                            updatedAt = it.getText(3),
-                            lat = it.getDouble(4),
-                            lon = it.getDouble(5),
-                        )
-                    )
+                    add(it.toElement())
                 }
             }
         }
@@ -188,33 +208,30 @@ class ElementQueries(private val conn: SQLiteConnection) {
         maxLat: Double,
         minLon: Double,
         maxLon: Double,
-        excludedCategories: List<String>,
     ): List<ElementsCluster> {
         return conn.prepare(
             """
                 SELECT
-                    e.id,
-                    e.ext_lat,
-                    e.ext_lon,
-                    json_extract(e.tags, '$.icon:android') AS icon_id,
-                    json_extract(e.tags, '$.boost:expires') AS boost_expires,
-                    json_extract(e.overpass_data, '$.tags.payment:lightning:requires_companion_app') AS requires_companion_app,
-                    (SELECT count(*) from element_comment c WHERE c.element_id = e.id) AS comments
-                FROM element e
+                    e.$COL_ID,
+                    e.$COL_LAT,
+                    e.$COL_LON,
+                    e.$COL_ICON,
+                    e.$COL_BOOSTED_UNTIL,
+                    e.$COL_REQUIRED_APP_URL,
+                    (SELECT count(*) from element_comment c WHERE c.element_id = e.$COL_ID) AS comments
+                FROM $TABLE_NAME e
                 WHERE
-                    json_extract(e.tags, '$.category') NOT IN (${excludedCategories.joinToString { "'$it'" }})
-                    AND e.ext_lat > ?1
-                    AND e.ext_lat < ?2
-                    AND e.ext_lon > ?3
-                    AND e.ext_lon < ?4
-                ORDER BY e.ext_lat DESC
+                    e.$COL_LAT > ?1
+                    AND e.$COL_LAT < ?2
+                    AND e.$COL_LON > ?3
+                    AND e.$COL_LON < ?4
+                ORDER BY e.$COL_LAT DESC
                 """
         ).use {
             it.bindDouble(1, minLat)
             it.bindDouble(2, maxLat)
             it.bindDouble(3, minLon)
             it.bindDouble(4, maxLon)
-
             buildList {
                 while (it.step()) {
                     add(
@@ -225,7 +242,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
                             lon = it.getDouble(2),
                             iconId = it.getText(3),
                             boostExpires = it.getZonedDateTimeOrNull(4),
-                            requiresCompanionApp = it.getText(5, defaultValue = "no") == "yes",
+                            requiresCompanionApp = it.getHttpUrlOrNull(5) != null,
                             comments = it.getLong(6),
                         )
                     )
@@ -237,28 +254,25 @@ class ElementQueries(private val conn: SQLiteConnection) {
     fun selectClusters(
         stepLat: Double,
         stepLon: Double,
-        excludedCategories: List<String>,
     ): List<ElementsCluster> {
         return conn.prepare(
             """
                 SELECT
                     count(*),
-                    e.id,
-                    avg(e.ext_lat) AS lat,
-                    avg(e.ext_lon) AS lon,
-                    json_extract(e.tags, '$.icon:android') AS icon_id,
-                    json_extract(e.tags, '$.boost:expires') AS boost_expires,
-                    json_extract(e.overpass_data, '$.tags.payment:lightning:requires_companion_app') AS requires_companion_app,
-                    (SELECT count(*) from element_comment c WHERE c.element_id = e.id) AS comments
-                FROM element e
-                WHERE json_extract(e.tags, '$.category') NOT IN (${excludedCategories.joinToString { "'$it'" }})
-                GROUP BY round(ext_lat / ?1) * ?1, round(ext_lon / ?2) * ?2
-                ORDER BY e.ext_lat DESC
+                    e.$COL_ID,
+                    avg(e.$COL_LAT) AS $COL_LAT,
+                    avg(e.$COL_LON) AS $COL_LAT,
+                    e.$COL_ICON,
+                    e.$COL_BOOSTED_UNTIL,
+                    e.$COL_REQUIRED_APP_URL,
+                    (SELECT count(*) from element_comment c WHERE c.element_id = e.$COL_ID) AS comments
+                FROM $TABLE_NAME e
+                GROUP BY round($COL_LAT / ?1) * ?1, round($COL_LON / ?2) * ?2
+                ORDER BY e.$COL_LAT DESC
                 """
         ).use {
             it.bindDouble(1, stepLat)
             it.bindDouble(2, stepLon)
-
             buildList {
                 while (it.step()) {
                     add(
@@ -269,7 +283,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
                             lon = it.getDouble(3),
                             iconId = it.getText(4),
                             boostExpires = it.getZonedDateTimeOrNull(5),
-                            requiresCompanionApp = it.getText(6, defaultValue = "no") == "yes",
+                            requiresCompanionApp = it.getHttpUrlOrNull(6) != null,
                             comments = it.getLong(7),
                         )
                     )
@@ -283,48 +297,28 @@ class ElementQueries(private val conn: SQLiteConnection) {
         maxLat: Double,
         minLon: Double,
         maxLon: Double,
-    ): List<AreaElement> {
+    ): List<Element> {
         return conn.prepare(
             """
-                SELECT
-                    id,
-                    ext_lat,
-                    ext_lon,
-                    json_extract(tags, '$.icon:android') AS icon_id,
-                    json_extract(overpass_data, '$.tags') AS osm_tags,
-                    json_extract(tags, '$.issues') AS issues,
-                    json_extract(overpass_data, '$.type') AS osm_type,
-                    json_extract(overpass_data, '$.id') AS osm_id
-                FROM element
-                WHERE ext_lat > ?1 AND ext_lat < ?2 AND ext_lon > ?3 AND ext_lon < ?4
+                SELECT ${PROJ_FULL.joinToString()}
+                FROM $TABLE_NAME
+                WHERE $COL_LAT > ?1 AND $COL_LAT < ?2 AND $COL_LON > ?3 AND $COL_LON < ?4
                 """
         ).use {
             it.bindDouble(1, minLat)
             it.bindDouble(2, maxLat)
             it.bindDouble(3, minLon)
             it.bindDouble(4, maxLon)
-
             buildList {
                 while (it.step()) {
-                    add(
-                        AreaElement(
-                            id = it.getLong(0),
-                            lat = it.getDouble(1),
-                            lon = it.getDouble(2),
-                            icon = it.getText(3),
-                            osmTags = it.getJsonObjectOld(4),
-                            issues = it.getJsonArray(5),
-                            osmType = it.getText(6),
-                            osmId = it.getLong(7),
-                        )
-                    )
+                    add(it.toElement())
                 }
             }
         }
     }
 
     fun selectMaxUpdatedAt(): ZonedDateTime? {
-        return conn.prepare("SELECT max(updated_at) FROM element").use {
+        return conn.prepare("SELECT max($COL_UPDATED_AT) FROM $TABLE_NAME").use {
             if (it.step()) {
                 it.getZonedDateTimeOrNull(0)
             } else {
@@ -334,16 +328,40 @@ class ElementQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectCount(): Long {
-        return conn.prepare("SELECT count(*) FROM element").use {
+        return conn.prepare("SELECT count(*) FROM $TABLE_NAME").use {
             it.step()
             it.getLong(0)
         }
     }
 
     fun deleteById(id: Long) {
-        conn.prepare("DELETE FROM element WHERE id = ?1").use {
+        conn.prepare("DELETE FROM $TABLE_NAME WHERE $COL_ID = ?1").use {
             it.bindLong(1, id)
             it.step()
         }
+    }
+
+    private fun SQLiteStatement.toElement(): Element {
+        return Element(
+            id = getLong(0),
+            lat = getDouble(1),
+            lon = getDouble(2),
+            icon = getText(3),
+            name = getText(4),
+            updatedAt = getZonedDateTime(5),
+            deletedAt = getZonedDateTimeOrNull(6),
+            requiredAppUrl = getHttpUrlOrNull(7),
+            boostedUntil = getZonedDateTimeOrNull(8),
+            verifiedAt = getLocalDateOrNull(9),
+            address = getTextOrNull(10),
+            openingHours = getTextOrNull(11),
+            website = getHttpUrlOrNull(12),
+            phone = getTextOrNull(13),
+            email = getTextOrNull(14),
+            twitter = getHttpUrlOrNull(15),
+            facebook = getHttpUrlOrNull(16),
+            instagram = getHttpUrlOrNull(17),
+            line = getHttpUrlOrNull(18),
+        )
     }
 }

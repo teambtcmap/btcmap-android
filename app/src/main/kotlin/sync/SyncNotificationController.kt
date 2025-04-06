@@ -92,7 +92,7 @@ class SyncNotificationController(
 
                 val builder = NotificationCompat.Builder(context, NEW_MERCHANTS_CHANNEL_ID)
                     .setSmallIcon(R.drawable.add_location)
-                    .setContentTitle(element.name(context.resources))
+                    .setContentTitle(element.name)
                     .setContentText(context.getString(R.string.new_local_merchant_accepts_bitcoins))
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 

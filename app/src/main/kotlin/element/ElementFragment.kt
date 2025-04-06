@@ -25,7 +25,6 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.recyclerview.widget.LinearLayoutManager
 import boost_element.BoostElementFragment
-import coil.load
 import element_comment.AddElementCommentFragment
 import element_comment.ElementCommentRepo
 import element_comment.ElementCommentsFragment
@@ -37,7 +36,6 @@ import map.MapMarkersRepo
 import map.getErrorColor
 import map.getOnSurfaceColor
 import map.styleBuilder
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
 import org.koin.android.ext.android.inject
@@ -128,10 +126,9 @@ class ElementFragment : Fragment() {
                         .build()
                 val markersRepo = MapMarkersRepo(requireContext())
                 val icon = markersRepo.getMarker(
-                    element.tags.optString("icon:android").ifBlank { "question_mark" }, 0
+                    element.icon, 0
                 )
-                val markerOptions = MarkerOptions()
-                    .position(LatLng(element.lat, element.lon))
+                val markerOptions = MarkerOptions().position(LatLng(element.lat, element.lon))
                     .icon(IconFactory.getInstance(requireContext()).fromBitmap(icon.bitmap))
                 map.addMarker(markerOptions)
                 map.animateCamera(CameraUpdateFactory.zoomTo(17.0), 3_000)
@@ -142,45 +139,45 @@ class ElementFragment : Fragment() {
             when (it.itemId) {
                 R.id.action_show_directions -> {
                     val element = runBlocking { elementsRepo.selectById(elementId)!! }
-                    val uri = "geo:${element.lat},${element.lon}?q=${element.name(resources)}"
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+                    val uri = "geo:${element.lat},${element.lon}?q=${element.name}".toUri()
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
                     requireContext().startActivity(Intent.createChooser(intent, null))
                 }
 
                 R.id.action_share -> {
-                    val element = runBlocking { elementsRepo.selectById(elementId)!! }
-                    val osmType = element.overpassData.optString("type")
-                    val osmId = element.overpassData.optLong("id")
-                    val uri = Uri.parse("https://btcmap.org/merchant/$osmType:$osmId")
-                    val intent = Intent(Intent.ACTION_SEND).apply {
-                        putExtra(Intent.EXTRA_TEXT, uri.toString())
-                        type = "text/plain"
-                    }
-                    requireContext().startActivity(Intent.createChooser(intent, null))
+//                    val element = runBlocking { elementsRepo.selectById(elementId)!! }
+//                    val osmType = element.osmId.split(":").first()
+//                    val osmId = element.osmId.split(":").last()
+//                    val uri = Uri.parse("https://btcmap.org/merchant/$osmType:$osmId")
+//                    val intent = Intent(Intent.ACTION_SEND).apply {
+//                        putExtra(Intent.EXTRA_TEXT, uri.toString())
+//                        type = "text/plain"
+//                    }
+//                    requireContext().startActivity(Intent.createChooser(intent, null))
                 }
 
                 R.id.action_view_on_osm -> {
-                    val element = runBlocking { elementsRepo.selectById(elementId)!! }
-                    val osmType = element.overpassData.optString("type")
-                    val osmId = element.overpassData.optLong("id")
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse("https://www.openstreetmap.org/$osmType/$osmId")
-                    startActivity(intent)
+//                    val element = runBlocking { elementsRepo.selectById(elementId)!! }
+//                    val osmType = element.osmId.split(":").first()
+//                    val osmId = element.osmId.split(":").last()
+//                    val intent = Intent(Intent.ACTION_VIEW)
+//                    intent.data = Uri.parse("https://www.openstreetmap.org/$osmType/$osmId")
+//                    startActivity(intent)
                 }
 
                 R.id.action_edit_on_osm -> {
-                    val element = runBlocking { elementsRepo.selectById(elementId)!! }
-                    val osmType = element.overpassData.optString("type")
-                    val osmId = element.overpassData.optLong("id")
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse("https://www.openstreetmap.org/edit?$osmType=$osmId")
-                    startActivity(intent)
+//                    val element = runBlocking { elementsRepo.selectById(elementId)!! }
+//                    val osmType = element.osmId.split(":").first()
+//                    val osmId = element.osmId.split(":").last()
+//                    val intent = Intent(Intent.ACTION_VIEW)
+//                    intent.data = Uri.parse("https://www.openstreetmap.org/edit?$osmType=$osmId")
+//                    startActivity(intent)
                 }
 
                 R.id.action_editor_manual -> {
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.data =
-                        Uri.parse("https://wiki.btcmap.org/general/tagging-instructions.html")
+                        "https://wiki.btcmap.org/general/tagging-instructions.html".toUri()
                     startActivity(intent)
                 }
             }
@@ -199,29 +196,23 @@ class ElementFragment : Fragment() {
     fun setElement(element: Element) {
         elementId = element.id
 
-        val tags: OsmTags = element.overpassData.optJSONObject("tags") ?: OsmTags()
+        binding.toolbar.title = element.name
 
-        binding.toolbar.title = tags.name(resources)
-
-        if (element.osmTag("payment:lightning:requires_companion_app") == "yes") {
+        if (element.requiredAppUrl != null) {
             binding.companionWarning.isVisible = true
             binding.companionWarning.setTextColor(requireContext().getErrorColor())
-            val companionApp = element
-                .osmTag("payment:lightning:companion_app_url")
-                .ifBlank { getString(R.string.unknown) }
-            binding.companionWarning.text = getString(R.string.companion_warning, companionApp)
+            binding.companionWarning.text =
+                getString(R.string.companion_warning, element.requiredAppUrl)
         } else {
             binding.companionWarning.isVisible = false
         }
 
-        val surveyDate = tags.bitcoinSurveyDate()
-
         val outdatedUri = "https://wiki.btcmap.org/general/outdated".toUri()
 
-        if (surveyDate != null) {
+        if (element.verifiedAt != null) {
             val date = DateUtils.getRelativeDateTimeString(
                 requireContext(),
-                surveyDate.toEpochSecond() * 1000,
+                element.verifiedAt.toEpochDay() * 24 * 3600 * 1000,
                 DateUtils.SECOND_IN_MILLIS,
                 DateUtils.WEEK_IN_MILLIS,
                 0,
@@ -229,7 +220,8 @@ class ElementFragment : Fragment() {
 
             binding.lastVerified.text = date
 
-            if (surveyDate.isAfter(ZonedDateTime.now().minusYears(1))) {
+            val verifiedAt = ZonedDateTime.parse("${element.verifiedAt}T00:00:00Z")
+            if (verifiedAt.isAfter(ZonedDateTime.now().minusYears(1))) {
                 binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
                 binding.lastVerified.setOnClickListener(null)
                 binding.outdated.isInvisible = true
@@ -248,119 +240,78 @@ class ElementFragment : Fragment() {
             binding.outdated.setOnClickListener { openUri(outdatedUri) }
         }
 
-        val address = buildString {
-            if (tags.optString("addr:housenumber").isNotBlank()) {
-                append(tags.getString("addr:housenumber"))
-            }
+        binding.address.text = element.address
+        binding.address.isInvisible = element.address == null
 
-            if (tags.optString("addr:street").isNotBlank()) {
-                append(" ")
-                append(tags.getString("addr:street"))
-            }
+        binding.phone.text = element.phone
+        binding.phone.isInvisible = element.phone == null
 
-            if (tags.optString("addr:city").isNotBlank()) {
-                append(", ")
-                append(tags.getString("addr:city"))
-            }
+        binding.website.text = element.website.toString()
+        binding.website.isInvisible = element.website == null
 
-            if (tags.optString("addr:postcode").isNotBlank()) {
-                append(", ")
-                append(tags.getString("addr:postcode"))
-            }
-        }.trim(',', ' ')
-
-        binding.address.isVisible = address.isNotBlank()
-        binding.address.text = address
-
-        val phone = tags.optString("phone").ifBlank { tags.optString("contact:phone") }
-        binding.phone.text = phone
-        binding.phone.isVisible = phone.isNotBlank()
-
-        val website = tags.optString("website").ifBlank { tags.optString("contact:website") }
-        binding.website.text = website
-            .replace("https://www.", "")
-            .replace("http://www.", "")
-            .replace("https://", "")
-            .replace("http://", "")
-            .trim('/')
-        binding.website.isVisible = website.isNotBlank() && website.toHttpUrlOrNull() != null
-
-        val twitter: String = tags.optString("contact:twitter")
-        binding.twitter.text = twitter.replace("https://twitter.com/", "").trim('@')
-        binding.twitter.styleAsLink()
-        binding.twitter.isVisible = twitter.isNotBlank()
-
-        binding.twitter.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = Uri.parse("https://twitter.com/${binding.twitter.text}")
-            startActivity(intent)
-        }
-
-        var facebookUrl = tags.optString("contact:facebook")
-        var facebookUsername = ""
-
-        if (facebookUrl.isNotBlank() && !facebookUrl.startsWith("https")) {
-            facebookUsername = facebookUrl
-            facebookUrl = "https://www.facebook.com/$facebookUrl"
-        }
-
-        if (facebookUsername.isNotBlank()) {
-            binding.facebook.text = facebookUsername
+        if (element.twitter == null) {
+            binding.twitter.isVisible = false
         } else {
-            binding.facebook.text = facebookUrl
-                .replace("https://www.facebook.com/", "")
-                .replace("https://facebook.com/", "")
-                .trimEnd('/')
+            binding.twitter.isVisible = true
+            binding.twitter.text =
+                element.twitter.toString().replace("https://twitter.com/", "").trim('@')
+            binding.twitter.styleAsLink()
+            binding.twitter.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = element.twitter.toString().toUri()
+                startActivity(intent)
+            }
         }
 
-        binding.facebook.styleAsLink()
-        binding.facebook.isVisible =
-            (facebookUrl.isNotBlank() && facebookUrl.toHttpUrlOrNull() != null) || facebookUsername.isNotBlank()
-
-        binding.facebook.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = Uri.parse(facebookUrl)
-            startActivity(intent)
+        if (element.facebook == null) {
+            binding.facebook.isVisible = false
+        } else {
+            binding.facebook.isVisible = true
+            binding.facebook.text =
+                element.facebook.toString().replace("https://www.facebook.com/", "")
+                    .replace("https://facebook.com/", "").trimEnd('/')
+            binding.facebook.styleAsLink()
+            binding.facebook.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = element.facebook.toString().toUri()
+                startActivity(intent)
+            }
         }
 
-        val instagram = tags.optString("contact:instagram")
-        binding.instagram.text = instagram
-            .replace("https://www.instagram.com/", "")
-            .replace("https://instagram.com/", "")
-            .trim('@', '/')
-        binding.instagram.styleAsLink()
-        binding.instagram.isVisible = instagram.isNotBlank()
-
-        binding.instagram.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = Uri.parse("https://www.instagram.com/${binding.instagram.text}")
-            startActivity(intent)
+        if (element.instagram == null) {
+            binding.instagram.isVisible = false
+        } else {
+            binding.instagram.isVisible = true
+            binding.instagram.text =
+                element.instagram.toString().replace("https://www.instagram.com/", "")
+                    .replace("https://instagram.com/", "").trim('@', '/')
+            binding.instagram.styleAsLink()
+            binding.instagram.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = element.instagram.toString().toUri()
+                startActivity(intent)
+            }
         }
 
-        val email = tags.optString("email").ifBlank { tags.optString("contact:email") }
-        binding.email.text = email
-        binding.email.isVisible = email.isNotBlank()
+        binding.email.text = element.email
+        binding.email.isInvisible = element.email == null
 
-        val openingHours = tags.optString("opening_hours")
-        binding.openingHours.text = openingHours
-        binding.openingHours.isVisible = openingHours.isNotBlank()
+        binding.openingHours.text = element.openingHours
+        binding.openingHours.isInvisible = element.openingHours == null
 
         binding.elementAction.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW)
-            val osmType = element.overpassData.optString("type")
-            val osmId = element.overpassData.optLong("id")
-            intent.data =
-                Uri.parse("https://btcmap.org/verify-location?id=$osmType:$osmId")
-            startActivity(intent)
+//            val intent = Intent(Intent.ACTION_VIEW)
+//            val osmType = element.overpassData.optString("type")
+//            val osmId = element.overpassData.optLong("id")
+//            intent.data = Uri.parse("https://btcmap.org/verify-location?id=$osmType:$osmId")
+//            startActivity(intent)
         }
 
         binding.comments.setOnClickListener {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<ElementCommentsFragment>(
-                    R.id.nav_host_fragment,
-                    null,
-                    bundleOf("element_id" to elementId)
+                    R.id.nav_host_fragment, null, bundleOf("element_id" to elementId)
                 )
                 addToBackStack(null)
             }
@@ -370,34 +321,30 @@ class ElementFragment : Fragment() {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<BoostElementFragment>(
-                    R.id.nav_host_fragment,
-                    null,
-                    bundleOf("element_id" to elementId)
+                    R.id.nav_host_fragment, null, bundleOf("element_id" to elementId)
                 )
                 addToBackStack(null)
             }
         }
-        
+
         binding.addComment.setOnClickListener {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<AddElementCommentFragment>(
-                    R.id.nav_host_fragment,
-                    null,
-                    bundleOf("element_id" to elementId)
+                    R.id.nav_host_fragment, null, bundleOf("element_id" to elementId)
                 )
                 addToBackStack(null)
             }
         }
 
-        val imageUrl = tags.optString("image").toHttpUrlOrNull()
-
-        if (imageUrl != null) {
-            binding.image.isVisible = true
-            binding.image.load(imageUrl)
-        } else {
-            binding.image.isVisible = false
-        }
+//        val imageUrl = tags.optString("image").toHttpUrlOrNull()
+//
+//        if (imageUrl != null) {
+//            binding.image.isVisible = true
+//            binding.image.load(imageUrl)
+//        } else {
+//            binding.image.isVisible = false
+//        }
 
         val comments = runBlocking { elementCommentRepo.selectByElementId(element.id) }
         binding.commentsTitle.text = getString(R.string.comments_d, comments.size)
@@ -411,10 +358,7 @@ class ElementFragment : Fragment() {
         setText(
             SpannableString(text).apply {
                 setSpan(
-                    URLSpan(""),
-                    0,
-                    length,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                    URLSpan(""), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
             },
             TextView.BufferType.SPANNABLE,

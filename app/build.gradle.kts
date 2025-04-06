@@ -113,25 +113,25 @@ tasks.register("bundleData") {
         val destDir = File(projectDir, "src/main/assets")
         destDir.mkdirs()
 
-        val elementsSrc = URI("https://static.btcmap.org/api/v3/elements.json")
+        val elementsSrc = URI("https://static.btcmap.org/api/v4/elements.json")
         File(destDir, "elements.json").writeText(elementsSrc.toURL().readText())
 
-        val elementCommentsSrc = URI("https://static.btcmap.org/api/v3/element-comments.json")
-        File(destDir, "element-comments.json").writeText(elementCommentsSrc.toURL().readText())
+        //val elementCommentsSrc = URI("https://static.btcmap.org/api/v3/element-comments.json")
+        //File(destDir, "element-comments.json").writeText(elementCommentsSrc.toURL().readText())
 
-        val reportsSrc = URI("https://static.btcmap.org/api/v3/reports.json")
-        File(destDir, "reports.json").writeText(reportsSrc.toURL().readText())
+        //val reportsSrc = URI("https://static.btcmap.org/api/v3/reports.json")
+        //File(destDir, "reports.json").writeText(reportsSrc.toURL().readText())
 
-        val eventsSrc = URI("https://static.btcmap.org/api/v3/events.json")
-        File(destDir, "events.json").writeText(eventsSrc.toURL().readText())
+        //val eventsSrc = URI("https://static.btcmap.org/api/v3/events.json")
+        //File(destDir, "events.json").writeText(eventsSrc.toURL().readText())
 
-        val areasSrc = URI("https://static.btcmap.org/api/v3/areas.json")
-        File(destDir, "areas.json").writeText(areasSrc.toURL().readText())
+        //val areasSrc = URI("https://static.btcmap.org/api/v3/areas.json")
+        //File(destDir, "areas.json").writeText(areasSrc.toURL().readText())
 
-        val areaElementsSrc = URI("https://static.btcmap.org/api/v3/area-elements.json")
-        File(destDir, "area-elements.json").writeText(areaElementsSrc.toURL().readText())
+        //val areaElementsSrc = URI("https://static.btcmap.org/api/v3/area-elements.json")
+        //File(destDir, "area-elements.json").writeText(areaElementsSrc.toURL().readText())
 
-        val usersSrc = URI("https://static.btcmap.org/api/v3/users.json")
-        File(destDir, "users.json").writeText(usersSrc.toURL().readText())
+        //val usersSrc = URI("https://static.btcmap.org/api/v3/users.json")
+        //File(destDir, "users.json").writeText(usersSrc.toURL().readText())
     }
 }

@@ -32,9 +32,25 @@ fun SQLiteStatement.getZonedDateTimeOrNull(columnIndex: Int): ZonedDateTime? {
     }
 }
 
+fun SQLiteStatement.getLocalDateOrNull(columnIndex: Int): LocalDate? {
+    return if (isNull(columnIndex)) {
+        null
+    } else {
+        LocalDate.parse(getText(columnIndex))
+    }
+}
+
 fun SQLiteStatement.getText(columnIndex: Int, defaultValue: String): String {
     return if (isNull(columnIndex)) {
         defaultValue
+    } else {
+        getText(columnIndex)
+    }
+}
+
+fun SQLiteStatement.getTextOrNull(columnIndex: Int): String? {
+    return if (isNull(columnIndex)) {
+        null
     } else {
         getText(columnIndex)
     }

@@ -47,87 +47,7 @@ class SearchModel(
                 var elements: List<Element>
 
                 val queryTimeMillis = measureTimeMillis {
-                    if (
-                        searchString.equals("atm", ignoreCase = true) ||
-                        searchString.equals("atms", ignoreCase = true) ||
-                        searchString.equals(
-                            app.getString(R.string.category_atm),
-                            ignoreCase = true
-                        ) ||
-                        searchString.equals(
-                            app.getString(R.string.category_atm_plural),
-                            ignoreCase = true
-                        )
-                    ) {
-                        elements = elementsRepo.selectByBtcMapTagValue("category", "atm")
-                    } else if (
-                        searchString.equals("bar", ignoreCase = true) ||
-                        searchString.equals("bars", ignoreCase = true) ||
-                        searchString.equals(
-                            app.getString(R.string.category_bar),
-                            ignoreCase = true
-                        ) ||
-                        searchString.equals(
-                            app.getString(R.string.category_bar_plural),
-                            ignoreCase = true
-                        )
-                    ) {
-                        elements = elementsRepo.selectByBtcMapTagValue("category", "bar")
-                    } else if (
-                        searchString.equals("cafe", ignoreCase = true) ||
-                        searchString.equals("cafes", ignoreCase = true) ||
-                        searchString.equals(
-                            app.getString(R.string.category_cafe),
-                            ignoreCase = true
-                        ) ||
-                        searchString.equals(
-                            app.getString(R.string.category_cafe_plural),
-                            ignoreCase = true
-                        )
-                    ) {
-                        elements = elementsRepo.selectByBtcMapTagValue("category", "cafe")
-                    } else if (
-                        searchString.equals("hotel", ignoreCase = true) ||
-                        searchString.equals("hotels", ignoreCase = true) ||
-                        searchString.equals(
-                            app.getString(R.string.category_hotel),
-                            ignoreCase = true
-                        ) ||
-                        searchString.equals(
-                            app.getString(R.string.category_hotel_plural),
-                            ignoreCase = true
-                        )
-                    ) {
-                        elements = elementsRepo.selectByBtcMapTagValue("category", "hotel")
-                    } else if (
-                        searchString.equals("pub", ignoreCase = true) ||
-                        searchString.equals("pubs", ignoreCase = true) ||
-                        searchString.equals(
-                            app.getString(R.string.category_pub),
-                            ignoreCase = true
-                        ) ||
-                        searchString.equals(
-                            app.getString(R.string.category_pub_plural),
-                            ignoreCase = true
-                        )
-                    ) {
-                        elements = elementsRepo.selectByBtcMapTagValue("category", "pub")
-                    } else if (
-                        searchString.equals("restaurant", ignoreCase = true) ||
-                        searchString.equals("restaurants", ignoreCase = true) ||
-                        searchString.equals(
-                            app.getString(R.string.category_restaurant),
-                            ignoreCase = true
-                        ) ||
-                        searchString.equals(
-                            app.getString(R.string.category_restaurant_plural),
-                            ignoreCase = true
-                        )
-                    ) {
-                        elements = elementsRepo.selectByBtcMapTagValue("category", "restaurant")
-                    } else {
-                        elements = elementsRepo.selectBySearchString(searchString)
-                    }
+                    elements = elementsRepo.selectBySearchString(searchString)
                 }
 
                 Log.d(TAG, "Search string: $searchString")
@@ -177,8 +97,8 @@ class SearchModel(
 
         return SearchAdapter.Item(
             element = this,
-            icon = tags.optString("icon:android").ifBlank { "question_mark" },
-            name = overpassData.getJSONObject("tags").optString("name").ifBlank { "Unnamed" },
+            icon = this.icon,
+            name = this.name,
             distanceToUser = distanceStringBuilder.toString(),
         )
     }

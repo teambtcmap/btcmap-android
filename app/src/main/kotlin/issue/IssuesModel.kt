@@ -31,24 +31,24 @@ class IssuesModel(
             val elements = areaElementRepo.selectByAreaId(area.id)
                 .mapNotNull { elementsRepo.selectById(it.elementId) }
 
-            val issues = elements.map { element ->
-                val osmUrl =
-                    "https://www.openstreetmap.org/${element.overpassData.getString("type")}/${
-                        element.overpassData.getLong("id")
-                    }"
+//            val issues = elements.map { element ->
+//                val osmUrl =
+//                    "https://www.openstreetmap.org/${element.overpassData.getString("type")}/${
+//                        element.overpassData.getLong("id")
+//                    }"
+//
+//                (element.tags.optJSONArray("issues") ?: JSONArray()).toList().map {
+//                    IssuesAdapter.Item(
+//                        type = it.getString("type"),
+//                        severity = it.getInt("severity"),
+//                        description = it.getString("description"),
+//                        osmUrl = osmUrl,
+//                        elementName = element.name(app.resources)
+//                    )
+//                }
+//            }.flatten()
 
-                (element.tags.optJSONArray("issues") ?: JSONArray()).toList().map {
-                    IssuesAdapter.Item(
-                        type = it.getString("type"),
-                        severity = it.getInt("severity"),
-                        description = it.getString("description"),
-                        osmUrl = osmUrl,
-                        elementName = element.name(app.resources)
-                    )
-                }
-            }.flatten()
-
-            _state.update { State.ShowingItems(issues.sortedByDescending { it.severity }) }
+//            _state.update { State.ShowingItems(issues.sortedByDescending { it.severity }) }
         }
     }
 

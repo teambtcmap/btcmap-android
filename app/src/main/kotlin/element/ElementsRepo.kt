@@ -32,27 +32,12 @@ class ElementsRepo(
         }
     }
 
-    suspend fun selectByOsmTagValue(tagName: String, tagValue: String): List<Element> {
-        return withContext(Dispatchers.IO) {
-            queries.selectByOsmTagValue(
-                tagName,
-                tagValue,
-            )
-        }
-    }
-
-    suspend fun selectByBtcMapTagValue(tagName: String, tagValue: String): List<Element> {
-        return withContext(Dispatchers.IO) {
-            queries.selectByBtcMapTagValue(tagName, tagValue)
-        }
-    }
-
     suspend fun selectByBoundingBox(
         minLat: Double,
         maxLat: Double,
         minLon: Double,
         maxLon: Double,
-    ): List<AreaElement> {
+    ): List<Element> {
         return withContext(Dispatchers.IO) {
             queries.selectByBoundingBox(
                 minLat,
@@ -66,7 +51,6 @@ class ElementsRepo(
     suspend fun selectByBoundingBox(
         zoom: Double?,
         bounds: LatLngBounds,
-        excludedCategories: List<String>,
     ): List<ElementsCluster> {
         if (zoom == null) {
             return emptyList()
@@ -80,7 +64,6 @@ class ElementsRepo(
                         maxLat = bounds.latitudeNorth,
                         minLon = bounds.longitudeWest,
                         maxLon = bounds.longitudeEast,
-                        excludedCategories,
                     )
                 }
             } else {
@@ -89,7 +72,6 @@ class ElementsRepo(
                     val clusters = queries.selectClusters(
                         step / 2,
                         step,
-                        excludedCategories,
                     )
                     clusters.filter { bounds.contains(LatLng(it.lat, it.lon)) }
                 }
@@ -112,10 +94,7 @@ class ElementsRepo(
     suspend fun fetchBundledElements() {
         withContext(Dispatchers.IO) {
             app.assets.open("elements.json").use { bundledElements ->
-                queries.insertOrReplace(bundledElements
-                    .toElementsJson()
-                    .filter { it.deletedAt == null }
-                    .map { it.toElement() })
+                queries.insertOrReplace(bundledElements.toBundledElements().map { it.toElement() })
             }
         }
         elementsUpdatedAt.update { LocalDateTime.now() }
@@ -135,7 +114,7 @@ class ElementsRepo(
                 if (delta.isEmpty()) {
                     break
                 } else {
-                    maxKnownUpdatedAt = ZonedDateTime.parse(delta.maxBy { it.updatedAt }.updatedAt)
+                    maxKnownUpdatedAt = delta.maxBy { it.updatedAt }.updatedAt
                 }
 
                 delta.forEach {
@@ -148,7 +127,7 @@ class ElementsRepo(
                             updatedItems++
                         }
 
-                        queries.insertOrReplace(listOf(it.toElement()))
+                        queries.insertOrReplace(listOf(it))
                     } else {
                         if (cached == null) {
                             // Already evicted from cache, nothing to do here

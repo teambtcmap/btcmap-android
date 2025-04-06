@@ -7,9 +7,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import area_element.AreaElementRepo
 import element.ElementsRepo
-import element.bitcoinSurveyDate
-import element.name
-import element.osmTags
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -18,7 +15,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
-import org.json.JSONArray
 
 class AreaModel(
     private val areasRepo: AreasRepo,
@@ -36,17 +32,17 @@ class AreaModel(
 
             val elements = areaElementRepo.selectByAreaId(area.id)
                 .mapNotNull { elementsRepo.selectById(it.elementId) }
-                .sortedByDescending { it.osmTags().bitcoinSurveyDate() }
+                .sortedByDescending { it.verifiedAt }
                 .map {
                     val status: String
                     val colorResId: Int
 
-                    val surveyDate = it.osmTags().bitcoinSurveyDate()
+                    //val surveyDate = it.verifiedAt
 
-                    if (surveyDate != null) {
+                    if (it.verifiedAt != null) {
                         val date = DateUtils.getRelativeDateTimeString(
                             app,
-                            surveyDate.toEpochSecond() * 1000,
+                            it.verifiedAt.toEpochDay() * 24 * 3_600 * 1_000,
                             DateUtils.SECOND_IN_MILLIS,
                             DateUtils.WEEK_IN_MILLIS,
                             0,
@@ -61,12 +57,12 @@ class AreaModel(
 
                     AreaAdapter.Item.Element(
                         id = it.id,
-                        iconId = it.tags.optString("icon:android").ifBlank { "question_mark" },
-                        name = it.name(app.resources),
+                        iconId = it.icon,
+                        name = it.name,
                         status = status,
                         colorResId = colorResId,
-                        showCheckmark = surveyDate != null,
-                        issues = (it.tags.optJSONArray("issues") ?: JSONArray()).length(),
+                        showCheckmark = it.verifiedAt != null,
+                        issues = 0,
                     )
                 }.sortedBy { !it.showCheckmark }.toMutableList()
 

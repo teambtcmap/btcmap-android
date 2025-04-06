@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import reports.ReportsRepo
 import time.now
 import user.UsersRepo
+import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
@@ -43,65 +44,100 @@ class Sync(
                 coroutineScope {
                     val startedAt = now()
 
-                    if (areaElementRepo.selectCount() == 0L && areaElementRepo.hasBundledAreaElements()) {
-                        areaElementRepo.fetchBundledAreaElements()
-                    }
+//                    if (areaElementRepo.selectCount() == 0L && areaElementRepo.hasBundledAreaElements()) {
+//                        areaElementRepo.fetchBundledAreaElements()
+//                    }
 
-                    if (elementCommentRepo.selectCount() == 0L && elementCommentRepo.hasBundledElements()) {
-                        elementCommentRepo.fetchBundledElements()
-                    }
+//                    if (elementCommentRepo.selectCount() == 0L && elementCommentRepo.hasBundledElements()) {
+//                        elementCommentRepo.fetchBundledElements()
+//                    }
 
                     if (elementsRepo.selectCount() == 0L && elementsRepo.hasBundledElements()) {
                         elementsRepo.fetchBundledElements()
                     }
 
-                    if (reportsRepo.selectCount() == 0L && reportsRepo.hasBundledReports()) {
-                        reportsRepo.fetchBundledReports()
-                    }
+//                    if (reportsRepo.selectCount() == 0L && reportsRepo.hasBundledReports()) {
+//                        reportsRepo.fetchBundledReports()
+//                    }
 
-                    if (eventsRepo.selectCount() == 0L && eventsRepo.hasBundledEvents()) {
-                        eventsRepo.fetchBundledEvents()
-                    }
+//                    if (eventsRepo.selectCount() == 0L && eventsRepo.hasBundledEvents()) {
+//                        eventsRepo.fetchBundledEvents()
+//                    }
 
-                    if (usersRepo.selectCount() == 0L && usersRepo.hasBundledUsers()) {
-                        usersRepo.fetchBundledUsers()
-                    }
+//                    if (usersRepo.selectCount() == 0L && usersRepo.hasBundledUsers()) {
+//                        usersRepo.fetchBundledUsers()
+//                    }
 
-                    if (areasRepo.selectCount() == 0L && areasRepo.hasBundledAreas()) {
-                        areasRepo.fetchBundledAreas()
-                    }
+//                    if (areasRepo.selectCount() == 0L && areasRepo.hasBundledAreas()) {
+//                        areasRepo.fetchBundledAreas()
+//                    }
 
-                    val syncJobs = mutableListOf<Deferred<Any>>()
-
-                    val areaElementsReport =
-                        async { areaElementRepo.sync() }.also { syncJobs += it }
-                    areaElementsReport.await()
-                    val elementCommentReport =
-                        async { elementCommentRepo.sync() }.also { syncJobs += it }
-                    elementCommentReport.await()
-                    val elementsReport = async { elementsRepo.sync() }.also { syncJobs += it }
-                    elementsReport.await()
-                    val reportsReport = async { reportsRepo.sync() }.also { syncJobs += it }
-                    reportsReport.await()
-                    val eventsReport = async { eventsRepo.sync() }.also { syncJobs += it }
-                    eventsReport.await()
-                    val areasReport = async { areasRepo.sync() }.also { syncJobs += it }
-                    areasReport.await()
-                    val usersReport = async { usersRepo.sync() }.also { syncJobs += it }
-                    usersReport.await()
-
-                    syncJobs.awaitAll()
+//                    val syncJobs = mutableListOf<Deferred<Any>>()
+//
+//                    val areaElementsReport =
+//                        async { areaElementRepo.sync() }.also { syncJobs += it }
+//                    areaElementsReport.await()
+//                    val elementCommentReport =
+//                        async { elementCommentRepo.sync() }.also { syncJobs += it }
+//                    elementCommentReport.await()
+//                    val elementsReport = async { elementsRepo.sync() }.also { syncJobs += it }
+//                    elementsReport.await()
+//                    val reportsReport = async { reportsRepo.sync() }.also { syncJobs += it }
+//                    reportsReport.await()
+//                    val eventsReport = async { eventsRepo.sync() }.also { syncJobs += it }
+//                    eventsReport.await()
+//                    val areasReport = async { areasRepo.sync() }.also { syncJobs += it }
+//                    areasReport.await()
+//                    val usersReport = async { usersRepo.sync() }.also { syncJobs += it }
+//                    usersReport.await()
+//
+//                    syncJobs.awaitAll()
 
                     val fullReport = SyncReport(
                         startedAt = startedAt,
                         finishedAt = ZonedDateTime.now(ZoneOffset.UTC),
-                        elementsReport = elementsReport.await(),
-                        reportsReport = reportsReport.await(),
-                        eventsReport = eventsReport.await(),
-                        areasReport = areasReport.await(),
-                        usersReport = usersReport.await(),
-                        elementCommentReport = elementCommentReport.await(),
-                        areaElementsReport = areaElementsReport.await(),
+                        elementsReport = ElementsRepo.SyncReport(
+                            duration = Duration.ofSeconds(0),
+                            newElements = 0,
+                            updatedElements = 0,
+                            deletedElements = 0,
+                        ),
+                        reportsReport = ReportsRepo.SyncReport(
+                            duration = Duration.ofSeconds(0),
+                            newReports = 0,
+                            updatedReports = 0,
+                            deletedReports = 0,
+                        ),
+                        eventsReport = EventsRepo.SyncReport(
+                            duration = Duration.ofSeconds(0),
+                            newEvents = emptyList(),
+                            updatedEvents = 0,
+                            deletedEvents = 0,
+                        ),
+                        areasReport = AreasRepo.SyncReport(
+                            duration = Duration.ofSeconds(0),
+                            newAreas = 0,
+                            updatedAreas = 0,
+                            deletedAreas = 0,
+                        ),
+                        usersReport = UsersRepo.SyncReport(
+                            duration = Duration.ofSeconds(0),
+                            newUsers = 0,
+                            updatedUsers = 0,
+                            deletedUsers = 0,
+                        ),
+                        elementCommentReport = ElementCommentRepo.SyncReport(
+                            duration = Duration.ofSeconds(0),
+                            newElementComments = 0,
+                            updatedElementComments = 0,
+                            deletedElementComments = 0,
+                        ),
+                        areaElementsReport = AreaElementRepo.SyncReport(
+                            duration = Duration.ofSeconds(0),
+                            newAreaElements = 0,
+                            updatedAreaElements = 0,
+                            deletedAreaElements = 0,
+                        ),
                     )
 
                     syncNotificationController.showPostSyncNotifications(

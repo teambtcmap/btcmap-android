@@ -43,7 +43,6 @@ import area.AreaResultModel
 import area.AreasFragment
 import area.bounds
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import delivery.DeliveryFragment
 import donation.DonationFragment
 import element.ElementFragment
 import element.ElementsCluster
@@ -195,20 +194,6 @@ class MapFragment : Fragment() {
                     startActivity(intent)
                 }
 
-                R.id.action_delivery -> {
-                    parentFragmentManager.commit {
-                        setReorderingAllowed(true)
-                        replace<DeliveryFragment>(
-                            R.id.nav_host_fragment, null, bundleOf(
-                                "userLat" to model.mapViewport.value.boundingBox.center.latitude.toFloat(),
-                                "userLon" to model.mapViewport.value.boundingBox.center.longitude.toFloat(),
-                                "searchAreaId" to 662L,
-                            )
-                        )
-                        addToBackStack(null)
-                    }
-                }
-
                 R.id.action_areas -> {
                     parentFragmentManager.commit {
                         setReorderingAllowed(true)
@@ -337,16 +322,6 @@ class MapFragment : Fragment() {
         }
 
         val visibleElements = mutableListOf<Marker>()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            model.conf.conf.map { it.showAtms }.collectLatest {
-                if (it) {
-                    model.setExcludedCategories(emptyList())
-                } else {
-                    model.setExcludedCategories(listOf("atm"))
-                }
-            }
-        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             model.visibleElements.collectLatest { newElements ->

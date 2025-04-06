@@ -46,8 +46,6 @@ class MapModel(
 
     val mapViewport = _mapViewport.asStateFlow()
 
-    private val _excludedCategories = MutableStateFlow<List<String>>(emptyList())
-
     private val _selectedElement: MutableStateFlow<Element?> = MutableStateFlow(null)
     val selectedElement = _selectedElement.asStateFlow()
 
@@ -57,14 +55,12 @@ class MapModel(
     init {
         combine(
             mapViewport,
-            db.elementsUpdatedAt,
-            _excludedCategories
-        ) { viewport, _, excludedCategories ->
+            db.elementsUpdatedAt
+        ) { viewport, _ ->
             withContext(Dispatchers.IO) {
                 val clusters = elementsRepo.selectByBoundingBox(
                     zoom = viewport.zoom,
                     bounds = viewport.boundingBox,
-                    excludedCategories = excludedCategories.map { it },
                 )
                 val meetups = areasRepo.selectMeetups().map { MapItem.Meetup(it) }
                 _items.update { clusters.map { MapItem.ElementsCluster(it) } + meetups }
@@ -72,10 +68,6 @@ class MapModel(
         }.launchIn(viewModelScope)
 
         locationRepo.requestLocationUpdates()
-    }
-
-    fun setExcludedCategories(excludedCategories: List<String>) {
-        _excludedCategories.update { excludedCategories }
     }
 
     fun onLocationPermissionGranted() {
