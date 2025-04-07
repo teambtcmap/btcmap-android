@@ -1,6 +1,5 @@
 package element
 
-import android.util.Log
 import json.toJsonArray
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -66,168 +65,44 @@ fun BundledElement.toElement(): Element {
 }
 
 fun InputStream.toElements(): List<Element> {
-    return toJsonArray().mapNotNull { it.toElementOrNull() }
+    return toJsonArray().map { it.toElement() }
 }
 
 fun InputStream.toBundledElements(): List<BundledElement> {
-    return toJsonArray().mapNotNull { it.toBundledElementOrNull() }
+    return toJsonArray().mapNotNull { it.toBundledElement() }
 }
 
-private fun JSONObject.toElementOrNull(): Element? {
-    val id = try {
-        getLong("id")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: id", t)
-        return null
-    }
-    val lat = try {
-        getDouble("lat")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: lat", t)
-        return null
-    }
-    val lon = try {
-        getDouble("lon")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: lon", t)
-        return null
-    }
-    val icon = try {
-        getString("icon")
-    } catch (t: Throwable) {
-        Log.e("Element:kt", "invalid field: icon", t)
-        return null
-    }
-    val name = try {
-        getString("name")
-    } catch (t: Throwable) {
-        Log.e("Element:kt", "invalid field: name", t)
-        return null
-    }
-    val updatedAt = try {
-        getZonedDateTime("updated_at")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: updated_at", t)
-        return null
-    }
-    val deletedAt = try {
-        optZonedDateTime("deleted_at")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: deleted_at", t)
-        return null
-    }
-    val requiredAppUrl = try {
-        optHttpUrl("required_app_url")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: required_app_url", t)
-        return null
-    }
-    val boostedUntil = try {
-        optZonedDateTime("boosted_until")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: boosted_until", t)
-        return null
-    }
-    val verifiedAt = try {
-        optLocalDate("verified_at")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: verified_at", t)
-        return null
-    }
-    val address = optString("verified_at").ifBlank { null }
-    val openingHours = optString("opening_hours").ifBlank { null }
-    val website = try {
-        optHttpUrl("website")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: website", t)
-        return null
-    }
-    val phone = optString("phone").ifBlank { null }
-    val email = optString("email").ifBlank { null }
-    val twitter = try {
-        optHttpUrl("twitter")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: twitter", t)
-        return null
-    }
-    val facebook = try {
-        optHttpUrl("facebook")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: facebook", t)
-        return null
-    }
-    val instagram = try {
-        optHttpUrl("instagram")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: instagram", t)
-        return null
-    }
-    val line = try {
-        optHttpUrl("line")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: line", t)
-        return null
-    }
+private fun JSONObject.toElement(): Element {
     return Element(
-        id = id,
-        lat = lat,
-        lon = lon,
-        icon = icon,
-        name = name,
-        updatedAt = updatedAt,
-        deletedAt = deletedAt,
-        requiredAppUrl = requiredAppUrl,
-        boostedUntil = boostedUntil,
-        verifiedAt = verifiedAt,
-        address = address,
-        openingHours = openingHours,
-        website = website,
-        phone = phone,
-        email = email,
-        twitter = twitter,
-        facebook = facebook,
-        instagram = instagram,
-        line = line,
+        id = getLong("id"),
+        lat = getDouble("lat"),
+        lon = getDouble("lon"),
+        icon = getString("icon"),
+        name = getString("name"),
+        updatedAt = getZonedDateTime("updated_at"),
+        deletedAt = optZonedDateTime("deleted_at"),
+        requiredAppUrl = optHttpUrl("required_app_url"),
+        boostedUntil = optZonedDateTime("boosted_until"),
+        verifiedAt = optLocalDate("verified_at"),
+        address = optString("verified_at").ifBlank { null },
+        openingHours = optString("opening_hours").ifBlank { null },
+        website = optHttpUrl("website"),
+        phone = optString("phone").ifBlank { null },
+        email = optString("email").ifBlank { null },
+        twitter = optHttpUrl("twitter"),
+        facebook = optHttpUrl("facebook"),
+        instagram = optHttpUrl("instagram"),
+        line = optHttpUrl("line"),
     )
 }
 
-private fun JSONObject.toBundledElementOrNull(): BundledElement? {
-    val id = try {
-        getLong("id")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: id", t)
-        return null
-    }
-    val lat = try {
-        getDouble("lat")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: lat", t)
-        return null
-    }
-    val lon = try {
-        getDouble("lon")
-    } catch (t: Throwable) {
-        Log.e("Element.kt", "invalid field: lon", t)
-        return null
-    }
-    val icon = try {
-        getString("icon")
-    } catch (t: Throwable) {
-        Log.e("Element:kt", "invalid field: icon", t)
-        return null
-    }
-    val name = try {
-        getString("name")
-    } catch (t: Throwable) {
-        Log.e("Element:kt", "invalid field: name", t)
-        return null
-    }
+private fun JSONObject.toBundledElement(): BundledElement? {
     return BundledElement(
-        id = id,
-        lat = lat,
-        lon = lon,
-        icon = icon,
-        name = name,
+        id = getLong("id"),
+        lat = getDouble("lat"),
+        lon = getDouble("lon"),
+        icon = getString("icon"),
+        name = getString("name"),
     )
 }
 

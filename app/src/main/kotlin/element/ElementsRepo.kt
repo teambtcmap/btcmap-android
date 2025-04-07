@@ -162,6 +162,6 @@ class ElementsRepo(
     )
 
     companion object {
-        private const val BATCH_SIZE = 1000L
+        private const val BATCH_SIZE = 10_000L
     }
 }

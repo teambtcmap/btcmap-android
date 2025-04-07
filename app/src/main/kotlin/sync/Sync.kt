@@ -80,7 +80,7 @@ class Sync(
 //                    val elementCommentReport =
 //                        async { elementCommentRepo.sync() }.also { syncJobs += it }
 //                    elementCommentReport.await()
-//                    val elementsReport = async { elementsRepo.sync() }.also { syncJobs += it }
+                    val elementsReport = elementsRepo.sync()
 //                    elementsReport.await()
 //                    val reportsReport = async { reportsRepo.sync() }.also { syncJobs += it }
 //                    reportsReport.await()
@@ -96,12 +96,7 @@ class Sync(
                     val fullReport = SyncReport(
                         startedAt = startedAt,
                         finishedAt = ZonedDateTime.now(ZoneOffset.UTC),
-                        elementsReport = ElementsRepo.SyncReport(
-                            duration = Duration.ofSeconds(0),
-                            newElements = 0,
-                            updatedElements = 0,
-                            deletedElements = 0,
-                        ),
+                        elementsReport = elementsReport,
                         reportsReport = ReportsRepo.SyncReport(
                             duration = Duration.ofSeconds(0),
                             newReports = 0,
