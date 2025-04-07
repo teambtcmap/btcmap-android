@@ -46,6 +46,7 @@ import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import search.SearchResultModel
+import java.time.LocalDate
 import java.time.ZonedDateTime
 
 class ElementFragment : Fragment() {
@@ -212,7 +213,7 @@ class ElementFragment : Fragment() {
         if (element.verifiedAt != null) {
             val date = DateUtils.getRelativeDateTimeString(
                 requireContext(),
-                element.verifiedAt.toEpochDay() * 24 * 3600 * 1000,
+                LocalDate.parse(element.verifiedAt).toEpochDay() * 24 * 3600 * 1000,
                 DateUtils.SECOND_IN_MILLIS,
                 DateUtils.WEEK_IN_MILLIS,
                 0,
@@ -294,10 +295,10 @@ class ElementFragment : Fragment() {
         }
 
         binding.email.text = element.email
-        binding.email.isInvisible = element.email == null
+        binding.email.isVisible = element.email != null
 
         binding.openingHours.text = element.openingHours
-        binding.openingHours.isInvisible = element.openingHours == null
+        binding.openingHours.isVisible = element.openingHours != null
 
         binding.elementAction.setOnClickListener {
 //            val intent = Intent(Intent.ACTION_VIEW)

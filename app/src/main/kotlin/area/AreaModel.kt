@@ -15,6 +15,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
+import java.time.LocalDate
 
 class AreaModel(
     private val areasRepo: AreasRepo,
@@ -37,12 +38,10 @@ class AreaModel(
                     val status: String
                     val colorResId: Int
 
-                    //val surveyDate = it.verifiedAt
-
                     if (it.verifiedAt != null) {
                         val date = DateUtils.getRelativeDateTimeString(
                             app,
-                            it.verifiedAt.toEpochDay() * 24 * 3_600 * 1_000,
+                            LocalDate.parse(it.verifiedAt).toEpochDay() * 24 * 3_600 * 1_000,
                             DateUtils.SECOND_IN_MILLIS,
                             DateUtils.WEEK_IN_MILLIS,
                             0,

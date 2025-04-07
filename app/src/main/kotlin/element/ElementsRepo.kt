@@ -114,7 +114,7 @@ class ElementsRepo(
                 if (delta.isEmpty()) {
                     break
                 } else {
-                    maxKnownUpdatedAt = delta.maxBy { it.updatedAt }.updatedAt
+                    maxKnownUpdatedAt = ZonedDateTime.parse(delta.maxBy { it.updatedAt }.updatedAt)
                 }
 
                 delta.forEach {
