@@ -16,13 +16,7 @@ build/
 .gradle
 
 # App data
-app/src/main/assets/elements.json
-app/src/main/assets/element-comments.json
-app/src/main/assets/reports.json
-app/src/main/assets/events.json
-app/src/main/assets/areas.json
-app/src/main/assets/area-elements.json
-app/src/main/assets/users.json
+app/src/main/assets/places-snapshot.json
 
 # Signed APK dirs
 app/fdroid

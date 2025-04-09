@@ -87,13 +87,13 @@ class ElementsRepo(
 
     suspend fun hasBundledElements(): Boolean {
         return withContext(Dispatchers.IO) {
-            app.resources.assets.list("")!!.contains("elements.json")
+            app.resources.assets.list("")!!.contains(BUNDLED_PLACES_FILE_NAME)
         }
     }
 
     suspend fun fetchBundledElements() {
         withContext(Dispatchers.IO) {
-            app.assets.open("elements.json").use { bundledElements ->
+            app.assets.open(BUNDLED_PLACES_FILE_NAME).use { bundledElements ->
                 queries.insertOrReplace(bundledElements.toBundledElements().map { it.toElement() })
             }
         }
@@ -162,6 +162,7 @@ class ElementsRepo(
     )
 
     companion object {
+        private const val BUNDLED_PLACES_FILE_NAME = "places-snapshot.json"
         private const val BATCH_SIZE = 10_000L
     }
 }
