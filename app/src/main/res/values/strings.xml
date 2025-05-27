@@ -48,7 +48,7 @@
     <string name="category_pub_plural">Pubs</string>
     <string name="category_restaurant">Restaurant</string>
     <string name="category_restaurant_plural">Restaurants</string>
-    <string name="show_atms">Show ATMs</string>
+    <string name="show_atms">Show ATMs / Exchanges</string>
     <string name="pay_onchain">Pay Onchain</string>
     <string name="pay_with_lightning">Pay with Lightning</string>
     <string name="image">Image</string>
