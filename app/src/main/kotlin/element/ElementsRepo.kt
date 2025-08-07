@@ -162,7 +162,7 @@ class ElementsRepo(
     )
 
     companion object {
-        private const val BUNDLED_PLACES_FILE_NAME = "places-snapshot.json"
+        private const val BUNDLED_PLACES_FILE_NAME = "bundled-places.json"
         private const val BATCH_SIZE = 10_000L
     }
 }

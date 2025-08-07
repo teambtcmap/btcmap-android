@@ -80,8 +80,8 @@ class Sync(
 //                    val elementCommentReport =
 //                        async { elementCommentRepo.sync() }.also { syncJobs += it }
 //                    elementCommentReport.await()
-                    val elementsReport = elementsRepo.sync()
-                    val elementCommentReport = elementCommentRepo.sync()
+//                    val elementsReport = elementsRepo.sync()
+//                    val elementCommentReport = elementCommentRepo.sync()
 //                    elementsReport.await()
 //                    val reportsReport = async { reportsRepo.sync() }.also { syncJobs += it }
 //                    reportsReport.await()
@@ -97,7 +97,12 @@ class Sync(
                     val fullReport = SyncReport(
                         startedAt = startedAt,
                         finishedAt = ZonedDateTime.now(ZoneOffset.UTC),
-                        elementsReport = elementsReport,
+                        elementsReport = ElementsRepo.SyncReport(
+                            duration = Duration.ofSeconds(0),
+                            newElements = 0,
+                            updatedElements = 0,
+                            deletedElements = 0,
+                        ),
                         reportsReport = ReportsRepo.SyncReport(
                             duration = Duration.ofSeconds(0),
                             newReports = 0,
@@ -122,7 +127,12 @@ class Sync(
                             updatedUsers = 0,
                             deletedUsers = 0,
                         ),
-                        elementCommentReport = elementCommentReport,
+                        elementCommentReport = ElementCommentRepo.SyncReport(
+                            duration = Duration.ofSeconds(0),
+                            newElementComments = 0,
+                            updatedElementComments = 0,
+                            deletedElementComments = 0,
+                        ),
                         areaElementsReport = AreaElementRepo.SyncReport(
                             duration = Duration.ofSeconds(0),
                             newAreaElements = 0,
