@@ -16,7 +16,7 @@ build/
 .gradle
 
 # App data
-app/src/main/assets/places-snapshot.json
+app/src/main/assets/bundled-places.json
 
 # Signed APK dirs
 app/fdroid
