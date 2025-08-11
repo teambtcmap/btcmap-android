@@ -30,6 +30,8 @@ data class Element(
     val facebook: String?,
     val instagram: String?,
     val line: String?,
+    // internal metadata fields
+    val bundled: Boolean,
 )
 
 data class BundledElement(
@@ -62,6 +64,8 @@ fun BundledElement.toElement(): Element {
         facebook = null,
         instagram = null,
         line = null,
+        // mark as bundled
+        bundled = true,
     )
 }
 
@@ -94,6 +98,7 @@ private fun JSONObject.toElement(): Element {
         facebook = optString("facebook").ifBlank { null },
         instagram = optString("instagram").ifBlank { null },
         line = optString("line").ifBlank { null },
+        bundled = false,
     )
 }
 

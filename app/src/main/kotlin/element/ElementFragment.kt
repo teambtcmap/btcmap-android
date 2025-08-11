@@ -199,6 +199,13 @@ class ElementFragment : Fragment() {
 
         binding.toolbar.title = element.name
 
+        binding.bundledWarning.isVisible = element.bundled
+
+        binding.verifyOrReport.isVisible = !element.bundled
+        binding.comments.isVisible = !element.bundled
+        binding.boost.isVisible = !element.bundled
+        binding.addComment.isVisible = !element.bundled
+
         if (element.requiredAppUrl != null) {
             binding.companionWarning.isVisible = true
             binding.companionWarning.setTextColor(requireContext().getErrorColor())
@@ -223,22 +230,30 @@ class ElementFragment : Fragment() {
 
             val verifiedAt = ZonedDateTime.parse("${element.verifiedAt}T00:00:00Z")
             if (verifiedAt.isAfter(ZonedDateTime.now().minusYears(1))) {
+                binding.lastVerified.isInvisible = false
                 binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
                 binding.lastVerified.setOnClickListener(null)
                 binding.outdated.isInvisible = true
                 binding.outdated.setOnClickListener(null)
             } else {
+                binding.lastVerified.isInvisible = false
                 binding.lastVerified.setTextColor(requireContext().getErrorColor())
                 binding.lastVerified.setOnClickListener { openUri(outdatedUri) }
                 binding.outdated.isInvisible = false
                 binding.outdated.setOnClickListener { openUri(outdatedUri) }
             }
         } else {
-            binding.lastVerified.text = getString(R.string.not_verified)
-            binding.lastVerified.setTextColor(requireContext().getErrorColor())
-            binding.lastVerified.setOnClickListener { openUri(outdatedUri) }
-            binding.outdated.isInvisible = false
-            binding.outdated.setOnClickListener { openUri(outdatedUri) }
+            if (!element.bundled) {
+                binding.lastVerified.isInvisible = false
+                binding.lastVerified.text = getString(R.string.not_verified)
+                binding.lastVerified.setTextColor(requireContext().getErrorColor())
+                binding.lastVerified.setOnClickListener { openUri(outdatedUri) }
+                binding.outdated.isInvisible = false
+                binding.outdated.setOnClickListener { openUri(outdatedUri) }
+            } else {
+                binding.lastVerified.isInvisible = true
+                binding.outdated.isInvisible = true
+            }
         }
 
         binding.address.text = element.address
@@ -300,7 +315,7 @@ class ElementFragment : Fragment() {
         binding.openingHours.text = element.openingHours
         binding.openingHours.isVisible = element.openingHours != null
 
-        binding.elementAction.setOnClickListener {
+        binding.verifyOrReport.setOnClickListener {
 //            val intent = Intent(Intent.ACTION_VIEW)
 //            val osmType = element.overpassData.optString("type")
 //            val osmId = element.overpassData.optLong("id")

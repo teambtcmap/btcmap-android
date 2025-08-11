@@ -40,12 +40,22 @@
                 app:maplibre_uiTiltGestures="false"
                 app:maplibre_uiZoomGestures="false" />
 
+            <TextView
+                android:id="@+id/bundledWarning"
+                style="?attr/textAppearanceSubtitle1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="?attr/colorSecondary"
+                android:padding="16dp"
+                android:text="@string/more_details_will_appear_after_full_sync" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <Button
-                    android:id="@+id/elementAction"
+                    android:id="@+id/verifyOrReport"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

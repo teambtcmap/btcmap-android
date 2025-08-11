@@ -86,4 +86,5 @@
     <string name="current_fee">Bieżąca opłata:</string>
     <string name="loading">ładuję</string>
     <string name="d_sat">%1$s sat</string>
+    <string name="more_details_will_appear_after_full_sync">More details will appear after full sync</string>
 </resources>

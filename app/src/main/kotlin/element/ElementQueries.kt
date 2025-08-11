@@ -4,9 +4,7 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.use
 import db.getHttpUrlOrNull
-import db.getLocalDateOrNull
 import db.getTextOrNull
-import db.getZonedDateTime
 import db.getZonedDateTimeOrNull
 import db.transaction
 import java.time.ZonedDateTime
@@ -35,6 +33,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
         const val COL_FACEBOOK = "facebook"
         const val COL_INSTAGRAM = "instagram"
         const val COL_LINE = "line"
+        const val COL_BUNDLED = "bundled"
 
         val PROJ_FULL = listOf(
             COL_ID,
@@ -56,6 +55,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
             COL_FACEBOOK,
             COL_INSTAGRAM,
             COL_LINE,
+            COL_BUNDLED,
         )
 
         const val CREATE_TABLE = """
@@ -78,7 +78,8 @@ class ElementQueries(private val conn: SQLiteConnection) {
                 $COL_TWITTER TEXT,
                 $COL_FACEBOOK TEXT,
                 $COL_INSTAGRAM TEXT,
-                $COL_LINE TEXT
+                $COL_LINE TEXT,
+                $COL_BUNDLED TEXT
             );
             """
     }
@@ -87,7 +88,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
         val sql = """
             INSERT OR REPLACE
             INTO $TABLE_NAME (${PROJ_FULL.joinToString()}) 
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)
         """
         conn.transaction { conn ->
             elements.forEach { element ->
@@ -163,6 +164,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
                     } else {
                         it.bindText(19, element.line.toString())
                     }
+                    it.bindBoolean(20, element.bundled)
                     it.step()
                 }
             }
@@ -362,6 +364,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
             facebook = getTextOrNull(16),
             instagram = getTextOrNull(17),
             line = getTextOrNull(18),
+            bundled = getBoolean(19),
         )
     }
 }
