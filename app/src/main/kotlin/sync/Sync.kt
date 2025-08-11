@@ -1,5 +1,6 @@
 package sync
 
+import android.util.Log
 import area.AreasRepo
 import area_element.AreaElementRepo
 import conf.ConfRepo
@@ -80,7 +81,8 @@ class Sync(
 //                    val elementCommentReport =
 //                        async { elementCommentRepo.sync() }.also { syncJobs += it }
 //                    elementCommentReport.await()
-//                    val elementsReport = elementsRepo.sync()
+                    val elementsReport = elementsRepo.sync()
+                    Log.d("sync-reports", elementsReport.toString())
 //                    val elementCommentReport = elementCommentRepo.sync()
 //                    elementsReport.await()
 //                    val reportsReport = async { reportsRepo.sync() }.also { syncJobs += it }
@@ -97,12 +99,7 @@ class Sync(
                     val fullReport = SyncReport(
                         startedAt = startedAt,
                         finishedAt = ZonedDateTime.now(ZoneOffset.UTC),
-                        elementsReport = ElementsRepo.SyncReport(
-                            duration = Duration.ofSeconds(0),
-                            newElements = 0,
-                            updatedElements = 0,
-                            deletedElements = 0,
-                        ),
+                        elementsReport = elementsReport,
                         reportsReport = ReportsRepo.SyncReport(
                             duration = Duration.ofSeconds(0),
                             newReports = 0,

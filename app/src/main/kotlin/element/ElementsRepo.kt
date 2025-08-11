@@ -109,7 +109,7 @@ class ElementsRepo(
             var maxKnownUpdatedAt = queries.selectMaxUpdatedAt()
 
             while (true) {
-                val delta = api.getElements(maxKnownUpdatedAt, BATCH_SIZE)
+                val delta = api.getPlaces(maxKnownUpdatedAt, BATCH_SIZE)
 
                 if (delta.isEmpty()) {
                     break

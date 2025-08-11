@@ -35,7 +35,7 @@ interface Api {
         limit: Long
     ): List<ElementCommentJson>
 
-    suspend fun getElements(updatedSince: ZonedDateTime?, limit: Long): List<Element>
+    suspend fun getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<Element>
 
     suspend fun getEvents(updatedSince: ZonedDateTime?, limit: Long): List<EventJson>
 
@@ -91,31 +91,11 @@ class ApiImpl(
         }
     }
 
-    override suspend fun getElements(updatedSince: ZonedDateTime?, limit: Long): List<Element> {
+    override suspend fun getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<Element> {
         val url = baseUrl.newBuilder().apply {
             addPathSegment("v4")
-            addPathSegment("elements")
-
-            addQueryParameter("f", "lat")
-            addQueryParameter("f", "lon")
-            addQueryParameter("f", "icon")
-            addQueryParameter("f", "name")
-            addQueryParameter("f", "updated_at")
-            addQueryParameter("f", "deleted_at")
-
-            addQueryParameter("f", "required_app_url")
-            addQueryParameter("f", "boosted_until")
-            addQueryParameter("f", "verified_at")
-            addQueryParameter("f", "address")
-            addQueryParameter("f", "opening_hours")
-            addQueryParameter("f", "website")
-            addQueryParameter("f", "phone")
-            addQueryParameter("f", "email")
-            addQueryParameter("f", "twitter")
-            addQueryParameter("f", "facebook")
-            addQueryParameter("f", "instagram")
-            addQueryParameter("f", "line")
-
+            addPathSegment("places")
+            addQueryParameter("fields", "lat,lon,icon,name,updated_at,deleted_at,required_app_url,boosted_until,verified_at,address,opening_hours,website,phone,email,twitter,facebook,instagram,line,comments")
             addQueryParameter("updated_since", updatedSince.apiFormat())
             addQueryParameter("limit", "$limit")
         }.build()
