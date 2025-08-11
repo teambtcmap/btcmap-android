@@ -74,8 +74,8 @@ class ApiImpl(
         limit: Long
     ): List<ElementCommentJson> {
         val url = baseUrl.newBuilder().apply {
-            addPathSegment("v3")
-            addPathSegment("element-comments")
+            addPathSegment("v4")
+            addPathSegment("place-comments")
             addQueryParameter("updated_since", updatedSince.apiFormat())
             addQueryParameter("limit", "$limit")
         }.build()

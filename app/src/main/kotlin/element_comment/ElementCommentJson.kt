@@ -26,8 +26,8 @@ fun InputStream.toElementCommentsJson(): List<ElementCommentJson> {
     return toJsonArray().map {
         ElementCommentJson(
             id = it.getLong("id"),
-            elementId = it.optLong("element_id"),
-            comment = it.optString("comment").ifBlank { null },
+            elementId = it.optLong("place_id"),
+            comment = it.optString("text").ifBlank { null },
             createdAt = it.optString("created_at").ifBlank { null },
             updatedAt = it.getString("updated_at"),
             deletedAt = it.optString("deleted_at").ifBlank { null },

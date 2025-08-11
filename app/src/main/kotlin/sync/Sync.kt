@@ -83,7 +83,8 @@ class Sync(
 //                    elementCommentReport.await()
                     val elementsReport = elementsRepo.sync()
                     Log.d("sync-reports", elementsReport.toString())
-//                    val elementCommentReport = elementCommentRepo.sync()
+                    val elementCommentReport = elementCommentRepo.sync()
+                    Log.d("sync-reports", elementCommentReport.toString())
 //                    elementsReport.await()
 //                    val reportsReport = async { reportsRepo.sync() }.also { syncJobs += it }
 //                    reportsReport.await()
@@ -124,12 +125,7 @@ class Sync(
                             updatedUsers = 0,
                             deletedUsers = 0,
                         ),
-                        elementCommentReport = ElementCommentRepo.SyncReport(
-                            duration = Duration.ofSeconds(0),
-                            newElementComments = 0,
-                            updatedElementComments = 0,
-                            deletedElementComments = 0,
-                        ),
+                        elementCommentReport = elementCommentReport,
                         areaElementsReport = AreaElementRepo.SyncReport(
                             duration = Duration.ofSeconds(0),
                             newAreaElements = 0,
