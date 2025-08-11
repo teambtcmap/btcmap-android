@@ -2,7 +2,6 @@ package element
 
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
-import androidx.sqlite.use
 import db.getHttpUrlOrNull
 import db.getTextOrNull
 import db.getZonedDateTimeOrNull

@@ -21,7 +21,7 @@ fun Context.onMarkerBackgroundColor(): Int {
 }
 
 fun Context.getPrimaryColor(): Int {
-    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorPrimary))
+    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorPrimarySurface))
     return attrs.getColor(0, 0)
 }
 
@@ -51,7 +51,7 @@ fun Context.getOnPrimaryContainerColor(): Int {
 }
 
 fun Context.getErrorColor(): Int {
-    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorError))
+    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnErrorContainer))
     return attrs.getColor(0, 0)
 }
 

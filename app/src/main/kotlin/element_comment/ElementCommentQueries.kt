@@ -1,7 +1,6 @@
 package element_comment
 
 import androidx.sqlite.SQLiteConnection
-import androidx.sqlite.use
 import db.getZonedDateTime
 import db.getZonedDateTimeOrNull
 import db.transaction

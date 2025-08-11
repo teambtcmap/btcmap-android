@@ -1,7 +1,6 @@
 package area
 
 import androidx.sqlite.SQLiteConnection
-import androidx.sqlite.use
 import db.getInstant
 import db.getJsonObject
 import db.getZonedDateTime

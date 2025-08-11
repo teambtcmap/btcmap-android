@@ -1,7 +1,6 @@
 package user
 
 import androidx.sqlite.SQLiteConnection
-import androidx.sqlite.use
 import db.getHttpUrlOrNull
 import db.getJsonObjectOld
 import db.getZonedDateTime

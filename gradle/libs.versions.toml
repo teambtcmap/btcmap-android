@@ -2,42 +2,40 @@
 # https://developer.android.com/build/releases/gradle-plugin
 agp = "8.12.0"
 # https://github.com/JetBrains/kotlin/releases
-kotlin = "2.1.0"
+kotlin = "2.2.0"
 # Allows suspending functions
 # https://github.com/Kotlin/kotlinx.coroutines/releases
-coroutines = "1.10.1"
+coroutines = "1.10.2"
 # Material design components
 # https://github.com/material-components/material-components-android/releases
-material = "1.12.0"
+material = "1.13.0-rc01"
 # Modern HTTP client
 # https://github.com/square/okhttp/blob/master/CHANGELOG.md
-okhttp = "5.0.0-alpha.14"
+okhttp = "5.1.0"
 # Injection library
 # https://github.com/InsertKoinIO/koin/blob/main/CHANGELOG.md
-koin = "3.5.0"
+koin = "4.1.0"
 # Charts
 # https://github.com/PhilJay/MPAndroidChart/releases
 mpandroidchart = "v3.1.0"
 # Used to cache data and store user preferences
 # https://developer.android.com/jetpack/androidx/releases/sqlite
-sqlite = "2.5.0-alpha12"
+sqlite = "2.5.2"
 # Used to download, cache and display images
 # https://github.com/coil-kt/coil/releases
 coil = "2.7.0"
 # Background job scheduler
 # Used to fetch new data in background
 # https://developer.android.com/jetpack/androidx/releases/work
-work = "2.10.0"
-# TODO remove when work bumps its dep (an old version causes crash on startup)
-room = "2.7.0-alpha12"
+work = "2.10.3"
 # Platform-agnostic JSON handling
 # https://github.com/Kotlin/kotlinx.serialization/releases
-serialization = "1.8.0"
+serialization = "1.9.0"
 # Platform-agnostic date and time handling
 # https://github.com/Kotlin/kotlinx-datetime/releases
-datetime = "0.6.1"
+datetime = "0.7.1"
 # https://github.com/maplibre/maplibre-native/releases
-maplibre = "11.8.0"
+maplibre = "11.13.0"
 # https://github.com/androidmads/QRGenerator/releases
 qrgenerator = "1.0.5"
 
@@ -48,7 +46,6 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 
 androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 androidx-sqlite = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
-androidx-room = { module = "androidx.room:room-runtime", version.ref = "room" }
 
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 okhttp-coroutines = { group = "com.squareup.okhttp3", name = "okhttp-coroutines", version.ref = "okhttp" }

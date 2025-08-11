@@ -6,7 +6,6 @@ import androidx.sqlite.driver.bundled.SQLITE_OPEN_CREATE
 import androidx.sqlite.driver.bundled.SQLITE_OPEN_FULLMUTEX
 import androidx.sqlite.driver.bundled.SQLITE_OPEN_READWRITE
 import androidx.sqlite.execSQL
-import androidx.sqlite.use
 import area.AreaQueries
 import area_element.AreaElementQueries
 import conf.ConfQueries

@@ -51,7 +51,7 @@ class AreaModel(
                         colorResId = com.google.android.material.R.attr.colorOnSurface
                     } else {
                         status = app.getString(R.string.not_verified)
-                        colorResId = com.google.android.material.R.attr.colorError
+                        colorResId = com.google.android.material.R.attr.colorOnErrorContainer
                     }
 
                     AreaAdapter.Item.Element(

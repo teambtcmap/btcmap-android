@@ -1,6 +1,6 @@
 package area
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 data class Area(
     val id: Long,

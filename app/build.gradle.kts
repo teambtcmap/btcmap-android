@@ -22,6 +22,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    kotlin.compilerOptions.optIn.add("kotlin.time.ExperimentalTime")
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -92,7 +94,6 @@ android {
         implementation(libs.kotlinx.datetime)
 
         implementation(libs.androidx.work)
-        implementation(libs.androidx.room)
         implementation(libs.androidx.sqlite)
 
         implementation(libs.material)

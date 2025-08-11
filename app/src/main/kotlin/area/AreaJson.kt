@@ -1,11 +1,11 @@
 package area
 
 import json.toJsonArray
-import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import java.io.InputStream
+import kotlin.time.Instant
 
 data class AreaJson(
     val id: Long,

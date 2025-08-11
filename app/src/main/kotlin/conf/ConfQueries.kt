@@ -2,7 +2,6 @@ package conf
 
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
-import androidx.sqlite.use
 import db.getZonedDateTimeOrNull
 import db.transaction
 
