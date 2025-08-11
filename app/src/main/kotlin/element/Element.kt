@@ -9,7 +9,6 @@ import java.time.LocalDate
 import java.time.ZonedDateTime
 
 data class Element(
-    // core fields, bundled with the app
     val id: Long,
     val lat: Double,
     val lon: Double,
@@ -17,7 +16,6 @@ data class Element(
     val name: String,
     val updatedAt: String,
     val deletedAt: String?,
-    // secondary fields, fetched from backend
     val requiredAppUrl: String?,
     val boostedUntil: String?,
     val verifiedAt: String?,
@@ -30,8 +28,8 @@ data class Element(
     val facebook: String?,
     val instagram: String?,
     val line: String?,
-    // internal metadata fields
     val bundled: Boolean,
+    val comments: Long,
 )
 
 data class BundledElement(
@@ -40,6 +38,7 @@ data class BundledElement(
     val lon: Double,
     val icon: String,
     val name: String,
+    val comments: Long,
 )
 
 fun BundledElement.toElement(): Element {
@@ -49,7 +48,6 @@ fun BundledElement.toElement(): Element {
         lon = this.lon,
         icon = this.icon,
         name = this.name,
-        // follow-up sync will populate missing fields
         updatedAt = "2000-01-01T00:00:00Z",
         deletedAt = null,
         requiredAppUrl = null,
@@ -64,8 +62,8 @@ fun BundledElement.toElement(): Element {
         facebook = null,
         instagram = null,
         line = null,
-        // mark as bundled
         bundled = true,
+        comments = this.comments,
     )
 }
 
@@ -99,6 +97,7 @@ private fun JSONObject.toElement(): Element {
         instagram = optString("instagram").ifBlank { null },
         line = optString("line").ifBlank { null },
         bundled = false,
+        comments = optLong("comments", 0),
     )
 }
 
@@ -109,6 +108,7 @@ private fun JSONObject.toBundledElement(): BundledElement? {
         lon = getDouble("lon"),
         icon = getString("icon"),
         name = getString("name"),
+        comments = optLong("comments", 0),
     )
 }
 

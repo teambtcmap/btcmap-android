@@ -113,7 +113,7 @@ tasks.register("bundleData") {
     doLast {
         val destDir = File(projectDir, "src/main/assets")
         destDir.mkdirs()
-        val placesSrc = URI("https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,name")
+        val placesSrc = URI("https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,name,comments,boosted_until")
         File(destDir, "bundled-places.json").writeText(placesSrc.toURL().readText())
     }
 }

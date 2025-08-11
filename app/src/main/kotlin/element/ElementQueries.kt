@@ -33,6 +33,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
         const val COL_INSTAGRAM = "instagram"
         const val COL_LINE = "line"
         const val COL_BUNDLED = "bundled"
+        const val COL_COMMENTS = "comments"
 
         val PROJ_FULL = listOf(
             COL_ID,
@@ -55,6 +56,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
             COL_INSTAGRAM,
             COL_LINE,
             COL_BUNDLED,
+            COL_COMMENTS,
         )
 
         const val CREATE_TABLE = """
@@ -78,7 +80,8 @@ class ElementQueries(private val conn: SQLiteConnection) {
                 $COL_FACEBOOK TEXT,
                 $COL_INSTAGRAM TEXT,
                 $COL_LINE TEXT,
-                $COL_BUNDLED TEXT
+                $COL_BUNDLED TEXT,
+                $COL_COMMENTS INTEGER NOT NULL
             );
             """
     }
@@ -87,7 +90,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
         val sql = """
             INSERT OR REPLACE
             INTO $TABLE_NAME (${PROJ_FULL.joinToString()}) 
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21)
         """
         conn.transaction { conn ->
             elements.forEach { element ->
@@ -164,6 +167,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
                         it.bindText(19, element.line.toString())
                     }
                     it.bindBoolean(20, element.bundled)
+                    it.bindLong(21, element.comments)
                     it.step()
                 }
             }
@@ -213,20 +217,20 @@ class ElementQueries(private val conn: SQLiteConnection) {
         return conn.prepare(
             """
                 SELECT
-                    e.$COL_ID,
-                    e.$COL_LAT,
-                    e.$COL_LON,
-                    e.$COL_ICON,
-                    e.$COL_BOOSTED_UNTIL,
-                    e.$COL_REQUIRED_APP_URL,
-                    (SELECT count(*) from element_comment c WHERE c.element_id = e.$COL_ID) AS comments
-                FROM $TABLE_NAME e
+                    $COL_ID,
+                    $COL_LAT,
+                    $COL_LON,
+                    $COL_ICON,
+                    $COL_BOOSTED_UNTIL,
+                    $COL_REQUIRED_APP_URL,
+                    $COL_COMMENTS
+                FROM $TABLE_NAME
                 WHERE
-                    e.$COL_LAT > ?1
-                    AND e.$COL_LAT < ?2
-                    AND e.$COL_LON > ?3
-                    AND e.$COL_LON < ?4
-                ORDER BY e.$COL_LAT DESC
+                    $COL_LAT > ?1
+                    AND $COL_LAT < ?2
+                    AND $COL_LON > ?3
+                    AND $COL_LON < ?4
+                ORDER BY $COL_LAT DESC
                 """
         ).use {
             it.bindDouble(1, minLat)
@@ -260,16 +264,16 @@ class ElementQueries(private val conn: SQLiteConnection) {
             """
                 SELECT
                     count(*),
-                    e.$COL_ID,
-                    avg(e.$COL_LAT) AS $COL_LAT,
-                    avg(e.$COL_LON) AS $COL_LAT,
-                    e.$COL_ICON,
-                    e.$COL_BOOSTED_UNTIL,
-                    e.$COL_REQUIRED_APP_URL,
-                    (SELECT count(*) from element_comment c WHERE c.element_id = e.$COL_ID) AS comments
-                FROM $TABLE_NAME e
+                    $COL_ID,
+                    avg($COL_LAT) AS $COL_LAT,
+                    avg($COL_LON) AS $COL_LON,
+                    $COL_ICON,
+                    $COL_BOOSTED_UNTIL,
+                    $COL_REQUIRED_APP_URL,
+                    $COL_COMMENTS
+                FROM $TABLE_NAME
                 GROUP BY round($COL_LAT / ?1) * ?1, round($COL_LON / ?2) * ?2
-                ORDER BY e.$COL_LAT DESC
+                ORDER BY $COL_LAT DESC
                 """
         ).use {
             it.bindDouble(1, stepLat)
@@ -364,6 +368,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
             instagram = getTextOrNull(17),
             line = getTextOrNull(18),
             bundled = getBoolean(19),
+            comments = getLong(20),
         )
     }
 }
