@@ -39,6 +39,7 @@ data class BundledElement(
     val icon: String,
     val name: String,
     val comments: Long,
+    val boostedUntil: String?,
 )
 
 fun BundledElement.toElement(): Element {
@@ -51,7 +52,7 @@ fun BundledElement.toElement(): Element {
         updatedAt = "2000-01-01T00:00:00Z",
         deletedAt = null,
         requiredAppUrl = null,
-        boostedUntil = null,
+        boostedUntil = this.boostedUntil,
         verifiedAt = null,
         address = null,
         openingHours = null,
@@ -109,6 +110,7 @@ private fun JSONObject.toBundledElement(): BundledElement? {
         icon = getString("icon"),
         name = getString("name"),
         comments = optLong("comments", 0),
+        boostedUntil = optString("boosted_until").ifBlank { null },
     )
 }
 
