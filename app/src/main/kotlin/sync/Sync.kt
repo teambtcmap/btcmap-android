@@ -82,9 +82,7 @@ class Sync(
 //                        async { elementCommentRepo.sync() }.also { syncJobs += it }
 //                    elementCommentReport.await()
                     val elementsReport = elementsRepo.sync()
-                    Log.d("sync-reports", elementsReport.toString())
                     val elementCommentReport = elementCommentRepo.sync()
-                    Log.d("sync-reports", elementCommentReport.toString())
 //                    elementsReport.await()
 //                    val reportsReport = async { reportsRepo.sync() }.also { syncJobs += it }
 //                    reportsReport.await()
@@ -133,7 +131,7 @@ class Sync(
                             deletedAreaElements = 0,
                         ),
                     )
-
+                    Log.d("sync-reports", fullReport.toString())
                     syncNotificationController.showPostSyncNotifications(
                         report = fullReport,
                         conf = conf.current,

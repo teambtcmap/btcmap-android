@@ -1,6 +1,7 @@
 package element
 
 import android.app.Application
+import android.util.Log
 import api.Api
 import db.elementsUpdatedAt
 import kotlinx.coroutines.Dispatchers
@@ -92,10 +93,12 @@ class ElementsRepo(
     }
 
     suspend fun fetchBundledElements() {
+        val bundledElements = withContext(Dispatchers.IO) {
+            app.assets.open(BUNDLED_PLACES_FILE_NAME).use { it.toBundledElements() }
+        }
+        Log.d("ElementsRepo", "Found ${bundledElements.size} bundled elements")
         withContext(Dispatchers.IO) {
-            app.assets.open(BUNDLED_PLACES_FILE_NAME).use { bundledElements ->
-                queries.insertOrReplace(bundledElements.toBundledElements().map { it.toElement() })
-            }
+            queries.insertOrReplace(bundledElements.map { it.toElement() })
         }
         elementsUpdatedAt.update { LocalDateTime.now() }
     }
