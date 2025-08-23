@@ -25,6 +25,7 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.recyclerview.widget.LinearLayoutManager
 import boost_element.BoostElementFragment
+import conf.ConfRepo
 import element_comment.AddElementCommentFragment
 import element_comment.ElementCommentRepo
 import element_comment.ElementCommentsFragment
@@ -54,6 +55,8 @@ class ElementFragment : Fragment() {
     private val elementsRepo: ElementsRepo by inject()
 
     private val elementCommentRepo: ElementCommentRepo by inject()
+
+    private val confRepo: ConfRepo by inject()
 
     private val resultModel: SearchResultModel by activityViewModel()
 
@@ -121,7 +124,7 @@ class ElementFragment : Fragment() {
                 }
 
                 map.uiSettings.setAllGesturesEnabled(false)
-                map.setStyle(styleBuilder(requireContext()))
+                map.setStyle(styleBuilder(requireContext(), confRepo.current))
                 map.cameraPosition =
                     CameraPosition.Builder().target(LatLng(element.lat, element.lon)).zoom(15.0)
                         .build()

@@ -244,7 +244,7 @@ class MapFragment : Fragment() {
         }
 
         binding.map.getMapAsync {
-            it.setStyle(styleBuilder(requireContext()))
+            it.setStyle(styleBuilder(requireContext(), model.conf.current))
             it.uiSettings.isCompassEnabled = false
             it.uiSettings.isRotateGesturesEnabled = false
             it.uiSettings.isLogoEnabled = false

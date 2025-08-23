@@ -1,5 +1,6 @@
 package conf
 
+import okhttp3.HttpUrl
 import org.maplibre.android.geometry.LatLngBounds
 import java.time.ZonedDateTime
 
@@ -12,6 +13,7 @@ data class Conf(
     val showAtms: Boolean,
     val showSyncSummary: Boolean,
     val notifyOfNewElementsNearby: Boolean,
+    val mapStyleUrl: HttpUrl?,
 )
 
 fun Conf.mapViewport(): LatLngBounds {

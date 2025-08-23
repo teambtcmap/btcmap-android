@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import conf.Conf
 import icons.iconTypeface
 import map.styleBuilder
 import okhttp3.HttpUrl
@@ -103,6 +104,7 @@ class AreaAdapter(
             val geoJson: String,
             val bounds: LatLngBounds,
             val paddingPx: Int,
+            val conf: Conf,
         ) : Item()
 
         data class Description(
@@ -153,7 +155,7 @@ class AreaAdapter(
                         )
 
                     map.setStyle(
-                        styleBuilder(binding.root.context)
+                        styleBuilder(binding.root.context, item.conf)
                             .withSource(source)
                             .withLayer(layer)
                     )

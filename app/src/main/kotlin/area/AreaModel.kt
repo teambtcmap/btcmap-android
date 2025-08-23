@@ -6,6 +6,7 @@ import android.util.TypedValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import area_element.AreaElementRepo
+import conf.ConfRepo
 import element.ElementsRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +22,7 @@ class AreaModel(
     private val areasRepo: AreasRepo,
     private val elementsRepo: ElementsRepo,
     private val areaElementRepo: AreaElementRepo,
+    private val confRepo: ConfRepo,
     private val app: Application,
 ) : AndroidViewModel(app) {
 
@@ -75,6 +77,7 @@ class AreaModel(
                 geoJson = area.tags["geo_json"].toString(),
                 bounds = area.tags.bounds(),
                 paddingPx = boundingBoxPaddingPx,
+                conf = confRepo.current,
             )
 
             val contact = AreaAdapter.Item.Contact(

@@ -43,6 +43,7 @@ class ConfRepo(
             showAtms = false,
             showSyncSummary = false,
             notifyOfNewElementsNearby = false,
+            mapStyleUrl = null,
         )
     }
 }
