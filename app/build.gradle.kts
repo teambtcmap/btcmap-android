@@ -29,14 +29,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "DebugProbesKt.bin"
         }
-
-        jniLibs {
-            // Exclude all x86 lib variants
-            // excludes += "/lib/x86/*.so"
-            // excludes += "/lib/x86_64/*.so"
-            // Exclude all armeabi-v7a lib variants
-            // excludes += "/lib/armeabi-v7a/*.so"
-        }
     }
 
     flavorDimensions += "store"
@@ -49,6 +41,15 @@ android {
         create("play") {
             dimension = "store"
             applicationIdSuffix = ".app"
+        }
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "x86_64")
+            isUniversalApk = true
         }
     }
 
@@ -113,7 +114,8 @@ tasks.register("bundleData") {
     doLast {
         val destDir = File(projectDir, "src/main/assets")
         destDir.mkdirs()
-        val placesSrc = URI("https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,name,comments,boosted_until")
+        val placesSrc =
+            URI("https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,name,comments,boosted_until")
         File(destDir, "bundled-places.json").writeText(placesSrc.toURL().readText())
     }
 }
