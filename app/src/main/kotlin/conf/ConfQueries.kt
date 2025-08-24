@@ -4,7 +4,6 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import db.getZonedDateTimeOrNull
 import db.transaction
-import okhttp3.HttpUrl.Companion.toHttpUrl
 
 class ConfQueries(private val conn: SQLiteConnection) {
 
@@ -19,7 +18,7 @@ class ConfQueries(private val conn: SQLiteConnection) {
                 show_atms INTEGER NOT NULL,
                 show_sync_summary INTEGER NOT NULL,
                 show_all_new_elements INTEGER NOT NULL,
-                map_style_url TEXT
+                map_style TEXT NOT NULL
             );
             """
     }
@@ -40,9 +39,9 @@ class ConfQueries(private val conn: SQLiteConnection) {
                     show_atms,
                     show_sync_summary,
                     show_all_new_elements,
-                    map_style_url
+                    map_style
                 )
-                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8);
+                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
                 """
             ).use {
                 val lastSyncDate = conf.lastSyncDate
@@ -58,11 +57,7 @@ class ConfQueries(private val conn: SQLiteConnection) {
                 it.bindLong(6, if (conf.showAtms) 1 else 0)
                 it.bindLong(7, if (conf.showSyncSummary) 1 else 0)
                 it.bindLong(8, if (conf.notifyOfNewElementsNearby) 1 else 0)
-                if (conf.mapStyleUrl != null) {
-                    it.bindText(9, conf.mapStyleUrl.toString())
-                } else {
-                    it.bindNull(9)
-                }
+                it.bindText(9, conf.mapStyle.toString())
                 it.step()
             }
         }
@@ -80,7 +75,7 @@ class ConfQueries(private val conn: SQLiteConnection) {
                     show_atms,
                     show_sync_summary,
                     show_all_new_elements,
-                    map_style_url
+                    map_style
                 FROM conf
                 """
         ).use {
@@ -94,9 +89,7 @@ class ConfQueries(private val conn: SQLiteConnection) {
                     showAtms = it.getBoolean(5),
                     showSyncSummary = it.getBoolean(6),
                     notifyOfNewElementsNearby = it.getBoolean(7),
-                    mapStyleUrl = if (it.isNull(8)) {
-                        null
-                    } else it.getText(8).toHttpUrl(),
+                    mapStyle = MapStyle.valueOf(it.getText(8))
                 )
             } else {
                 null

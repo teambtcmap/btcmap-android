@@ -28,6 +28,7 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
@@ -43,6 +44,7 @@ import area.AreaResultModel
 import area.AreasFragment
 import area.bounds
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import conf.MapStyle
 import donation.DonationFragment
 import element.ElementFragment
 import element.ElementsCluster
@@ -51,7 +53,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -95,6 +96,10 @@ class MapFragment : Fragment() {
     }
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
+
+    private val insetsController: WindowInsetsControllerCompat? by lazy {
+        activity?.window?.decorView?.let(ViewCompat::getWindowInsetsController)
+    }
 
     private var backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -262,6 +267,22 @@ class MapFragment : Fragment() {
         bottomSheetBehavior = BottomSheetBehavior.from(binding.elementDetails)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         bottomSheetBehavior.addSlideCallback()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            model.conf.conf.collectLatest {
+                when (it.mapStyle) {
+                    MapStyle.Liberty, MapStyle.Bright, MapStyle.Positron -> {
+                        insetsController?.isAppearanceLightStatusBars = true
+                    }
+
+                    MapStyle.Dark -> {
+                        insetsController?.isAppearanceLightStatusBars = false
+                    }
+
+                    else -> {}
+                }
+            }
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             val elementDetailsToolbar = getElementDetailsToolbar() ?: return@launch

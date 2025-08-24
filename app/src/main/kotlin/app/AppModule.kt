@@ -40,7 +40,7 @@ import area_element.AreaElementQueries
 import area_element.AreaElementRepo
 
 val appModule = module {
-    single { Database(get<Context>().getDatabasePath("btcmap-2025-08-23.db").absolutePath).conn }
+    single { Database(get<Context>().getDatabasePath("btcmap-2025-08-24.db").absolutePath).conn }
 
     single { ApiImpl() }.bind(Api::class)
 

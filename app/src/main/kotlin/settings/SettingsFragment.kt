@@ -11,8 +11,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import conf.ConfRepo
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import conf.MapStyle
+import conf.name
 import org.btcmap.R
 import org.btcmap.databinding.FragmentSettingsBinding
 import org.koin.android.ext.android.inject
@@ -40,39 +40,26 @@ class SettingsFragment : Fragment() {
         return binding.root
     }
 
-    private fun HttpUrl?.toStyleName(): String {
-        return when (this) {
-            null -> getString(R.string.style_auto)
-            "https://tiles.openfreemap.org/styles/liberty".toHttpUrl() -> getString(R.string.style_liberty)
-            "https://tiles.openfreemap.org/styles/positron".toHttpUrl() -> getString(R.string.style_positron)
-            "https://tiles.openfreemap.org/styles/bright".toHttpUrl() -> getString(R.string.style_bright)
-            "https://static.btcmap.org/map-styles/dark.json".toHttpUrl() -> getString(R.string.style_dark)
-            else -> conf.current.mapStyleUrl.toString()
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.topAppBar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-        binding.currentMapStyle.text = conf.current.mapStyleUrl.toStyleName()
+        binding.currentMapStyle.text = conf.current.mapStyle.name(requireContext())
 
         binding.mapStyleButton.setOnClickListener {
-            val dialog = MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.map_style)
-                .setView(R.layout.dialog_map_style)
-                .show()
+            val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.map_style)
+                .setView(R.layout.dialog_map_style).show()
 
-            val setupInterval = fun RadioButton?.(url: HttpUrl?) {
+            val setupInterval = fun RadioButton?.(style: MapStyle) {
                 if (this == null) return
 
-                text = url.toStyleName()
-                isChecked = conf.current.mapStyleUrl == url
+                text = style.name(requireContext())
+                isChecked = conf.current.mapStyle == style
 
                 setOnCheckedChangeListener { _, isChecked ->
                     if (isChecked) {
-                        conf.update { it.copy(mapStyleUrl = url) }
+                        conf.update { it.copy(mapStyle = style) }
                         binding.currentMapStyle.text = text
                         dialog.dismiss()
                     }
@@ -80,23 +67,11 @@ class SettingsFragment : Fragment() {
             }
 
             setupInterval.apply {
-                invoke(dialog.findViewById(R.id.auto), null)
-                invoke(
-                    dialog.findViewById(R.id.liberty),
-                    "https://tiles.openfreemap.org/styles/liberty".toHttpUrl()
-                )
-                invoke(
-                    dialog.findViewById(R.id.positron),
-                    "https://tiles.openfreemap.org/styles/positron".toHttpUrl()
-                )
-                invoke(
-                    dialog.findViewById(R.id.bright),
-                    "https://tiles.openfreemap.org/styles/bright".toHttpUrl()
-                )
-                invoke(
-                    dialog.findViewById(R.id.dark),
-                    "https://static.btcmap.org/map-styles/dark.json".toHttpUrl()
-                )
+                invoke(dialog.findViewById(R.id.auto), MapStyle.Auto)
+                invoke(dialog.findViewById(R.id.liberty), MapStyle.Liberty)
+                invoke(dialog.findViewById(R.id.positron), MapStyle.Positron)
+                invoke(dialog.findViewById(R.id.bright), MapStyle.Bright)
+                invoke(dialog.findViewById(R.id.dark), MapStyle.Dark)
             }
         }
 
