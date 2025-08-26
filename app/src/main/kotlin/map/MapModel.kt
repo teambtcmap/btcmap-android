@@ -2,6 +2,7 @@ package map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.sqlite.SQLiteConnection
 import area.AreasRepo
 import conf.ConfRepo
 import conf.mapViewport
@@ -31,6 +32,7 @@ class MapModel(
     private val sync: Sync,
     private val elementsRepo: ElementsRepo,
     private val areasRepo: AreasRepo,
+    private val conn: SQLiteConnection,
 ) : ViewModel() {
 
     val userLocation: StateFlow<LatLng?> = locationRepo.location
@@ -62,7 +64,7 @@ class MapModel(
                     zoom = viewport.zoom,
                     bounds = viewport.boundingBox,
                 )
-                val meetups = areasRepo.selectMeetups().map { MapItem.Meetup(it) }
+                val meetups = event.selectAll(conn).map { MapItem.Event(it) }
                 _items.update { clusters.map { MapItem.ElementsCluster(it) } + meetups }
             }
         }.launchIn(viewModelScope)
@@ -120,6 +122,6 @@ class MapModel(
 
     sealed class MapItem {
         data class ElementsCluster(val cluster: element.ElementsCluster) : MapItem()
-        data class Meetup(val meetup: area.Meetup) : MapItem()
+        data class Event(val event: event.Event) : MapItem()
     }
 }

@@ -391,7 +391,27 @@ class MapFragment : Fragment() {
                                 visibleElements += map.addMarker(marker)
                             }
 
-                            is MapModel.MapItem.Meetup -> {}
+                            is MapModel.MapItem.Event -> {
+                                val marker =
+                                    MarkerOptions().position(LatLng(it.event.lat, it.event.lon))
+                                val icon = markersRepo.getBoostedMarker(
+                                    "groups",
+                                    0,
+                                )
+                                val newBitmap = Bitmap.createBitmap(
+                                    icon.bitmap.width,
+                                    icon.bitmap.height * 2,
+                                    Bitmap.Config.ARGB_8888
+                                )
+                                val canvas = Canvas(newBitmap)
+                                canvas.drawBitmap(icon.bitmap, Matrix(), null)
+                                marker.icon(
+                                    IconFactory.getInstance(requireContext())
+                                        .fromBitmap(newBitmap)
+                                )
+                                marker.snippet(it.event.id.toString())
+                                visibleElements += map.addMarker(marker)
+                            }
                         }
                     }
                 }
