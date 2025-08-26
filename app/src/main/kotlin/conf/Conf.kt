@@ -4,17 +4,13 @@ import android.content.Context
 import android.content.res.Configuration
 import org.btcmap.R
 import org.maplibre.android.geometry.LatLngBounds
-import java.time.ZonedDateTime
 
 data class Conf(
-    val lastSyncDate: ZonedDateTime?,
     val viewportNorthLat: Double,
     val viewportEastLon: Double,
     val viewportSouthLat: Double,
     val viewportWestLon: Double,
     val showAtms: Boolean,
-    val showSyncSummary: Boolean,
-    val notifyOfNewElementsNearby: Boolean,
     val mapStyle: MapStyle,
 )
 
@@ -42,9 +38,9 @@ fun MapStyle.uri(context: Context): String {
             val nightMode =
                 context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
             if (nightMode) {
-                "asset://dark.json"
+                "https://static.btcmap.org/map-styles/dark.json"
             } else {
-                "asset://light.json"
+                "https://static.btcmap.org/map-styles/light.json"
             }
         }
 

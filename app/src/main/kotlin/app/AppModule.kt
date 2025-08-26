@@ -28,9 +28,7 @@ import reports.ReportsModel
 import reports.ReportsRepo
 import search.SearchModel
 import search.SearchResultModel
-import sync.BackgroundSyncScheduler
 import sync.Sync
-import sync.SyncNotificationController
 import user.UserQueries
 import user.UsersModel
 import user.UsersRepo
@@ -45,9 +43,6 @@ val appModule = module {
     single { ApiImpl() }.bind(Api::class)
 
     singleOf(::Sync)
-
-    singleOf(::BackgroundSyncScheduler)
-    singleOf(::SyncNotificationController)
 
     singleOf(::AreaQueries)
     singleOf(::AreasRepo)

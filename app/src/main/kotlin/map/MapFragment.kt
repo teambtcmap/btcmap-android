@@ -25,7 +25,6 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -41,14 +40,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.dpToPx
 import area.AreaResultModel
-import area.AreasFragment
 import area.bounds
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import conf.MapStyle
-import donation.DonationFragment
 import element.ElementFragment
 import element.ElementsCluster
-import event.EventsFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
@@ -71,12 +67,10 @@ import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
 import org.maplibre.android.maps.Style
-import reports.ReportsFragment
 import search.SearchAdapter
 import search.SearchModel
 import search.SearchResultModel
 import settings.SettingsFragment
-import user.UsersFragment
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
@@ -185,13 +179,13 @@ class MapFragment : Fragment() {
 
         binding.searchBar.setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.action_donate -> {
-                    parentFragmentManager.commit {
-                        setReorderingAllowed(true)
-                        replace<DonationFragment>(R.id.nav_host_fragment)
-                        addToBackStack(null)
-                    }
-                }
+//                R.id.action_donate -> {
+//                    parentFragmentManager.commit {
+//                        setReorderingAllowed(true)
+//                        replace<DonationFragment>(R.id.nav_host_fragment)
+//                        addToBackStack(null)
+//                    }
+//                }
 
                 R.id.action_add_element -> {
                     val intent = Intent(Intent.ACTION_VIEW)
@@ -199,42 +193,42 @@ class MapFragment : Fragment() {
                     startActivity(intent)
                 }
 
-                R.id.action_areas -> {
-                    parentFragmentManager.commit {
-                        setReorderingAllowed(true)
-                        replace<AreasFragment>(
-                            R.id.nav_host_fragment, null, bundleOf(
-                                "lat" to model.mapViewport.value.boundingBox.center.latitude.toFloat(),
-                                "lon" to model.mapViewport.value.boundingBox.center.longitude.toFloat(),
-                            )
-                        )
-                        addToBackStack(null)
-                    }
-                }
+//                R.id.action_areas -> {
+//                    parentFragmentManager.commit {
+//                        setReorderingAllowed(true)
+//                        replace<AreasFragment>(
+//                            R.id.nav_host_fragment, null, bundleOf(
+//                                "lat" to model.mapViewport.value.boundingBox.center.latitude.toFloat(),
+//                                "lon" to model.mapViewport.value.boundingBox.center.longitude.toFloat(),
+//                            )
+//                        )
+//                        addToBackStack(null)
+//                    }
+//                }
 
-                R.id.action_trends -> {
-                    parentFragmentManager.commit {
-                        setReorderingAllowed(true)
-                        replace<ReportsFragment>(R.id.nav_host_fragment)
-                        addToBackStack(null)
-                    }
-                }
+//                R.id.action_trends -> {
+//                    parentFragmentManager.commit {
+//                        setReorderingAllowed(true)
+//                        replace<ReportsFragment>(R.id.nav_host_fragment)
+//                        addToBackStack(null)
+//                    }
+//                }
 
-                R.id.action_users -> {
-                    parentFragmentManager.commit {
-                        setReorderingAllowed(true)
-                        replace<UsersFragment>(R.id.nav_host_fragment)
-                        addToBackStack(null)
-                    }
-                }
+//                R.id.action_users -> {
+//                    parentFragmentManager.commit {
+//                        setReorderingAllowed(true)
+//                        replace<UsersFragment>(R.id.nav_host_fragment)
+//                        addToBackStack(null)
+//                    }
+//                }
 
-                R.id.action_events -> {
-                    parentFragmentManager.commit {
-                        setReorderingAllowed(true)
-                        replace<EventsFragment>(R.id.nav_host_fragment)
-                        addToBackStack(null)
-                    }
-                }
+//                R.id.action_events -> {
+//                    parentFragmentManager.commit {
+//                        setReorderingAllowed(true)
+//                        replace<EventsFragment>(R.id.nav_host_fragment)
+//                        addToBackStack(null)
+//                    }
+//                }
 
                 R.id.action_settings -> {
                     parentFragmentManager.commit {

@@ -35,14 +35,11 @@ class ConfRepo(
 
     fun default(): Conf {
         return Conf(
-            lastSyncDate = null,
             viewportNorthLat = 12.116667 + 0.04,
             viewportEastLon = -68.933333 + 0.04 + 0.03,
             viewportSouthLat = 12.116667 - 0.04,
             viewportWestLon = -68.933333 - 0.04 + 0.03,
             showAtms = false,
-            showSyncSummary = false,
-            notifyOfNewElementsNearby = false,
             mapStyle = MapStyle.Auto,
         )
     }
