@@ -13,9 +13,6 @@ import conf.ConfRepo
 import db.Database
 import element.ElementQueries
 import element.ElementsRepo
-import event.EventQueries
-import event.EventsModel
-import event.EventsRepo
 import issue.IssuesModel
 import location.UserLocationRepository
 import map.MapModel
@@ -61,10 +58,6 @@ val appModule = module {
 
     singleOf(::ConfQueries)
     singleOf(::ConfRepo)
-
-    singleOf(::EventQueries)
-    singleOf(::EventsRepo)
-    viewModelOf(::EventsModel)
 
     singleOf(::UserLocationRepository)
 

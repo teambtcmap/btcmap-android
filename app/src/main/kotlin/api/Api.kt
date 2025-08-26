@@ -8,8 +8,8 @@ import element.Element
 import element.toElements
 import element_comment.ElementCommentJson
 import element_comment.toElementCommentsJson
-import event.EventJson
-import event.toEventsJson
+import event.Event
+import json.toJsonArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
@@ -28,16 +28,16 @@ import java.time.format.DateTimeFormatter
 private val BASE_URL = "https://api.btcmap.org".toHttpUrl()
 
 interface Api {
-    suspend fun getAreas(updatedSince: ZonedDateTime?, limit: Long): List<AreaJson>
+    suspend fun getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<Element>
 
     suspend fun getElementComments(
         updatedSince: ZonedDateTime?,
         limit: Long
     ): List<ElementCommentJson>
 
-    suspend fun getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<Element>
+    suspend fun getEvents(): List<Event>
 
-    suspend fun getEvents(updatedSince: ZonedDateTime?, limit: Long): List<EventJson>
+    suspend fun getAreas(updatedSince: ZonedDateTime?, limit: Long): List<AreaJson>
 
     suspend fun getReports(updatedSince: ZonedDateTime?, limit: Long): List<ReportJson>
 
@@ -50,6 +50,39 @@ class ApiImpl(
     private val baseUrl: HttpUrl = BASE_URL,
     private val httpClient: OkHttpClient = apiHttpClient(),
 ) : Api {
+    override suspend fun getEvents(): List<Event> {
+        val url = baseUrl.newBuilder().apply {
+            addPathSegment("v4")
+            addPathSegment("events")
+        }.build()
+
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return withContext(Dispatchers.IO) {
+            res.body.byteStream().use { stream ->
+                stream.toJsonArray().map {
+                    Event(
+                        id = it.getLong("id"),
+                        lat = it.getDouble("lat"),
+                        lon = it.getDouble("lon"),
+                        name = it.getString("name"),
+                        website = it.getString("website").toHttpUrl(),
+                        starts_at = ZonedDateTime.parse(it.getString("starts_at")),
+                        ends_at = if (it.isNull("ends_at")) null else ZonedDateTime.parse(
+                            it.getString(
+                                "ends_at"
+                            )
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     override suspend fun getAreas(updatedSince: ZonedDateTime?, limit: Long): List<AreaJson> {
         val url = baseUrl.newBuilder().apply {
             addPathSegment("v3")
@@ -95,7 +128,10 @@ class ApiImpl(
         val url = baseUrl.newBuilder().apply {
             addPathSegment("v4")
             addPathSegment("places")
-            addQueryParameter("fields", "lat,lon,icon,name,updated_at,deleted_at,required_app_url,boosted_until,verified_at,address,opening_hours,website,phone,email,twitter,facebook,instagram,line,comments")
+            addQueryParameter(
+                "fields",
+                "lat,lon,icon,name,updated_at,deleted_at,required_app_url,boosted_until,verified_at,address,opening_hours,website,phone,email,twitter,facebook,instagram,line,comments"
+            )
             addQueryParameter("updated_since", updatedSince.apiFormat())
             addQueryParameter("limit", "$limit")
         }.build()
@@ -108,25 +144,6 @@ class ApiImpl(
 
         return withContext(Dispatchers.IO) {
             res.body.byteStream().use { it.toElements() }
-        }
-    }
-
-    override suspend fun getEvents(updatedSince: ZonedDateTime?, limit: Long): List<EventJson> {
-        val url = baseUrl.newBuilder().apply {
-            addPathSegment("v3")
-            addPathSegment("events")
-            addQueryParameter("updated_since", updatedSince.apiFormat())
-            addQueryParameter("limit", "$limit")
-        }.build()
-
-        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
-
-        if (!res.isSuccessful) {
-            throw Exception("Unexpected HTTP response code: ${res.code}")
-        }
-
-        return withContext(Dispatchers.IO) {
-            res.body.byteStream().use { it.toEventsJson() }
         }
     }
 

@@ -11,7 +11,6 @@ import area_element.AreaElementQueries
 import conf.ConfQueries
 import element.ElementQueries
 import element_comment.ElementCommentQueries
-import event.EventQueries
 import kotlinx.coroutines.flow.MutableStateFlow
 import reports.ReportQueries
 import user.UserQueries
@@ -40,11 +39,11 @@ class Database(path: String) {
                     execSQL(AreaElementQueries.CREATE_TABLE)
                     execSQL(ElementCommentQueries.CREATE_TABLE)
                     execSQL(ElementQueries.CREATE_TABLE)
-                    execSQL(EventQueries.CREATE_TABLE)
                     execSQL(ReportQueries.CREATE_TABLE)
                     execSQL(UserQueries.CREATE_TABLE)
                     execSQL(AreaQueries.CREATE_TABLE)
                     execSQL(ConfQueries.CREATE_TABLE)
+                    execSQL(event.SCHEMA)
                     execSQL("PRAGMA user_version=1")
                 }
 

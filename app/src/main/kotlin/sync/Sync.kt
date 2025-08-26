@@ -1,6 +1,8 @@
 package sync
 
 import android.util.Log
+import androidx.sqlite.SQLiteConnection
+import api.Api
 import element.ElementsRepo
 import element_comment.ElementCommentRepo
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +17,8 @@ import java.time.ZonedDateTime
 class Sync(
     private val elementsRepo: ElementsRepo,
     private val elementCommentRepo: ElementCommentRepo,
+    private val api: Api,
+    private val conn: SQLiteConnection,
 ) {
     private val mutex = Mutex()
 
@@ -34,6 +38,9 @@ class Sync(
 
                     val elementsReport = elementsRepo.sync()
                     val elementCommentReport = elementCommentRepo.sync()
+
+                    val events = api.getEvents()
+                    event.deleteAllAndInsertBatch(events, conn)
 
                     val fullReport = SyncReport(
                         startedAt = startedAt,

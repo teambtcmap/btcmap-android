@@ -6,18 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
-import androidx.fragment.app.replace
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import element.ElementFragment
-import event.EventsAdapter
-import event.EventsRepo
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.btcmap.R
 import org.btcmap.databinding.FragmentUserBinding
@@ -35,26 +25,8 @@ class UserFragment : Fragment() {
 
     private val usersRepo: UsersRepo by inject()
 
-    private val eventsRepo: EventsRepo by inject()
-
     private var _binding: FragmentUserBinding? = null
     private val binding get() = _binding!!
-
-    private val adapter = EventsAdapter(object : EventsAdapter.Listener {
-        override fun onItemClick(item: EventsAdapter.Item) {
-            parentFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<ElementFragment>(
-                    R.id.nav_host_fragment, null, bundleOf("element_id" to item.elementId)
-                )
-                addToBackStack(null)
-            }
-        }
-
-        override fun onShowMoreClick() {}
-    }).apply {
-        canLoadMore = false
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -87,27 +59,6 @@ class UserFragment : Fragment() {
         }
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
-        binding.list.adapter = adapter
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                binding.topAppBar.title = userName.ifBlank { getString(R.string.unnamed_user) }
-
-                val items = eventsRepo.selectByUserIdAsListItems(
-                    requireArguments().getLong("user_id"),
-                ).map {
-                    EventsAdapter.Item(
-                        date = it.eventDate,
-                        type = it.eventType,
-                        elementId = it.elementId,
-                        elementName = it.elementName.ifBlank { getString(R.string.unnamed) },
-                        username = "",
-                        tipLnurl = "",
-                    )
-                }
-                adapter.submitList(items)
-            }
-        }
     }
 
     override fun onDestroyView() {
