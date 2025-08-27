@@ -26,6 +26,7 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -53,6 +54,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.R
 import org.btcmap.databinding.FragmentMapBinding
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
@@ -181,6 +183,19 @@ class MapFragment : Fragment() {
             WindowInsetsCompat.CONSUMED
         }
 
+        ViewCompat.setOnApplyWindowInsetsListener(binding.placeTypeSwitch) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top
+                rightMargin = insets.right
+                bottomMargin = insets.bottom + v.context.dpToPx(20)
+                leftMargin = insets.left + v.context.dpToPx(24)
+            }
+
+            WindowInsetsCompat.CONSUMED
+        }
+
         return binding.root
     }
 
@@ -192,6 +207,54 @@ class MapFragment : Fragment() {
         emptyClusterBitmap = null
 
         val markersRepo = MapMarkersRepo(requireContext())
+
+        binding.filterEventsInactive.setOnClickListener {
+            binding.filterMerchantsActive.isVisible = false
+            binding.filterMerchantsInactive.isVisible = true
+            binding.filterEventsActive.isVisible = true
+            binding.filterEventsInactive.isVisible = false
+
+            binding.map.getMapAsync { map ->
+                val filter =
+                    if (binding.filterMerchantsActive.isVisible) {
+                        MapModel.Filter.Merchants
+                    } else {
+                        MapModel.Filter.Events
+                    }
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    model.loadData(
+                        bounds = map.projection.visibleRegion.latLngBounds,
+                        zoom = map.cameraPosition.zoom,
+                        filter = filter,
+                    )
+                }
+            }
+        }
+
+        binding.filterMerchantsInactive.setOnClickListener {
+            binding.filterMerchantsActive.isVisible = true
+            binding.filterMerchantsInactive.isVisible = false
+            binding.filterEventsActive.isVisible = false
+            binding.filterEventsInactive.isVisible = true
+
+            binding.map.getMapAsync { map ->
+                val filter =
+                    if (binding.filterMerchantsActive.isVisible) {
+                        MapModel.Filter.Merchants
+                    } else {
+                        MapModel.Filter.Events
+                    }
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    model.loadData(
+                        bounds = map.projection.visibleRegion.latLngBounds,
+                        zoom = map.cameraPosition.zoom,
+                        filter = filter,
+                    )
+                }
+            }
+        }
 
         binding.searchBar.setOnMenuItemClickListener {
             when (it.itemId) {
@@ -266,9 +329,17 @@ class MapFragment : Fragment() {
             it.uiSettings.isAttributionEnabled = false
             it.addCancelSelectionOverlay()
             it.setOnMarkerClickListener { marker ->
-                if (!marker.snippet.isNullOrBlank()) {
-                    val id = marker.snippet.toLong()
-                    model.selectElement(id)
+                val snippet = marker.snippet
+                if (!snippet.isNullOrBlank()) {
+                    if (snippet.startsWith("event:")) {
+                        val url = snippet.replace("event:", "").toHttpUrl()
+                        val browserIntent =
+                            Intent(Intent.ACTION_VIEW, url.toString().toUri())
+                        startActivity(browserIntent)
+                    } else {
+                        val id = marker.snippet.toLong()
+                        model.selectElement(id)
+                    }
                 }
                 true
             }
@@ -409,7 +480,7 @@ class MapFragment : Fragment() {
                                 val marker =
                                     MarkerOptions().position(LatLng(it.event.lat, it.event.lon))
                                 val icon = markersRepo.getBoostedMarker(
-                                    "groups",
+                                    "event",
                                     0,
                                 )
                                 val newBitmap = Bitmap.createBitmap(
@@ -423,7 +494,7 @@ class MapFragment : Fragment() {
                                     IconFactory.getInstance(requireContext())
                                         .fromBitmap(newBitmap)
                                 )
-                                marker.snippet(it.event.id.toString())
+                                marker.snippet("event:${it.event.website}")
                                 visibleElements += map.addMarker(marker)
                             }
                         }
@@ -575,9 +646,17 @@ class MapFragment : Fragment() {
                 map.projection.visibleRegion.latLngBounds
 
             viewLifecycleOwner.lifecycleScope.launch {
+                val filter =
+                    if (binding.filterMerchantsActive.isVisible) {
+                        MapModel.Filter.Merchants
+                    } else {
+                        MapModel.Filter.Events
+                    }
+
                 model.loadData(
                     bounds = map.projection.visibleRegion.latLngBounds,
                     zoom = map.cameraPosition.zoom,
+                    filter = filter,
                 )
             }
 

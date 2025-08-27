@@ -13,6 +13,7 @@
     </org.maplibre.android.maps.MapView>
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
@@ -21,9 +22,9 @@
         <com.google.android.material.search.SearchBar
             android:id="@+id/search_bar"
             android:layout_width="match_parent"
-            app:defaultScrollFlagsEnabled="false"
             android:layout_height="wrap_content"
             android:hint="@string/search_here"
+            app:defaultScrollFlagsEnabled="false"
             app:menu="@menu/map" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -59,6 +60,55 @@
             android:layout_height="match_parent" />
 
     </FrameLayout>
+
+    <com.google.android.material.button.MaterialButtonGroup
+        android:id="@+id/placeTypeSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:spacing="8dp">
+
+        <Button
+            android:id="@+id/filterMerchantsActive"
+            style="?attr/materialIconButtonFilledStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription=""
+            android:gravity="center"
+            app:icon="@drawable/store"
+            app:iconGravity="textStart" />
+
+        <Button
+            android:id="@+id/filterMerchantsInactive"
+            style="?attr/materialIconButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription=""
+            android:gravity="center"
+            android:visibility="gone"
+            app:icon="@drawable/store"
+            app:iconGravity="textStart" />
+
+        <Button
+            android:id="@+id/filterEventsActive"
+            style="?attr/materialIconButtonFilledStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription=""
+            android:visibility="gone"
+            app:icon="@drawable/event"
+            app:iconGravity="textStart" />
+
+        <Button
+            android:id="@+id/filterEventsInactive"
+            style="?attr/materialIconButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription=""
+            app:icon="@drawable/event"
+            app:iconGravity="textStart" />
+    </com.google.android.material.button.MaterialButtonGroup>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

@@ -30,14 +30,27 @@ class MapModel(
     private val _items = MutableStateFlow<List<MapItem>>(emptyList())
     val visibleElements = _items.asStateFlow()
 
-    suspend fun loadData(bounds: LatLngBounds, zoom: Double) {
+    enum class Filter {
+        Merchants,
+        Events,
+    }
+
+    suspend fun loadData(bounds: LatLngBounds, zoom: Double, filter: Filter) {
         withContext(Dispatchers.IO) {
-            val clusters = elementsRepo.selectByBoundingBox(
-                zoom = zoom,
-                bounds = bounds,
-            )
-            val meetups = event.selectAll(conn).map { MapItem.Event(it) }
-            _items.update { clusters.map { MapItem.ElementsCluster(it) } + meetups }
+            when (filter) {
+                Filter.Merchants -> {
+                    val clusters = elementsRepo.selectByBoundingBox(
+                        zoom = zoom,
+                        bounds = bounds,
+                    )
+                    _items.update { clusters.map { MapItem.ElementsCluster(it) } }
+                }
+
+                Filter.Events -> {
+                    val meetups = event.selectAll(conn).map { MapItem.Event(it) }
+                    _items.update { meetups }
+                }
+            }
         }
     }
 
