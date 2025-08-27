@@ -105,13 +105,12 @@ class MapFragment : Fragment() {
         ActivityResultContracts.RequestMultiplePermissions(),
     ) {
         if (it.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
-            model.onLocationPermissionGranted()
-            onLocationPermissionsGranted()
+            onLocationPermissionsGranted(true)
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun onLocationPermissionsGranted() {
+    private fun onLocationPermissionsGranted(firstTime: Boolean) {
         binding.map.getMapAsync { map ->
             map.getStyle { style ->
                 val locationComponentOptions =
@@ -120,8 +119,23 @@ class MapFragment : Fragment() {
                         .build()
                 val locationComponentActivationOptions =
                     buildLocationComponentActivationOptions(style, locationComponentOptions)
-                map.locationComponent.activateLocationComponent(locationComponentActivationOptions)
+                map.locationComponent.activateLocationComponent(
+                    locationComponentActivationOptions
+                )
                 map.locationComponent.isLocationComponentEnabled = true
+
+                if (firstTime) {
+                    val lastKnownLocation = map.locationComponent.lastKnownLocation
+
+                    if (lastKnownLocation != null) {
+                        map.animateCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(lastKnownLocation),
+                                14.0,
+                            )
+                        )
+                    }
+                }
             }
         }
     }
@@ -308,7 +322,7 @@ class MapFragment : Fragment() {
                 requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            onLocationPermissionsGranted()
+            onLocationPermissionsGranted(false)
         }
 
         binding.fab.setOnClickListener {
@@ -320,15 +334,13 @@ class MapFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            val userLocation = model.userLocation.value
+            binding.map.getMapAsync { map ->
+                val lastKnownLocation = map.locationComponent.lastKnownLocation
 
-            if (userLocation != null) {
-                binding.map.getMapAsync {
-                    it.animateCamera(
+                if (lastKnownLocation != null) {
+                    map.animateCamera(
                         CameraUpdateFactory.newLatLngZoom(
-                            LatLng(
-                                userLocation.latitude, userLocation.longitude
-                            ),
+                            LatLng(lastKnownLocation),
                             14.0,
                         )
                     )
@@ -429,6 +441,21 @@ class MapFragment : Fragment() {
         )
 
         viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                val firstBoundingBox =
+                    model.mapViewport.firstOrNull()?.boundingBox!!
+
+                binding.map.getMapAsync {
+                    it.moveCamera(
+                        CameraUpdateFactory.newLatLngBounds(
+                            firstBoundingBox, 0
+                        )
+                    )
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 val pickedPlace = searchResultModel.element.value
                 searchResultModel.element.update { null }
@@ -466,17 +493,6 @@ class MapFragment : Fragment() {
                         )
                     }
                     return@repeatOnLifecycle
-                }
-
-                val firstBoundingBox =
-                    model.mapViewport.firstOrNull()?.boundingBox!!
-
-                binding.map.getMapAsync {
-                    it.moveCamera(
-                        CameraUpdateFactory.newLatLngBounds(
-                            firstBoundingBox, 0
-                        )
-                    )
                 }
             }
         }

@@ -14,7 +14,6 @@ import db.Database
 import element.ElementQueries
 import element.ElementsRepo
 import issue.IssuesModel
-import location.UserLocationRepository
 import map.MapModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.module.dsl.singleOf
@@ -58,8 +57,6 @@ val appModule = module {
 
     singleOf(::ConfQueries)
     singleOf(::ConfRepo)
-
-    singleOf(::UserLocationRepository)
 
     singleOf(::ReportQueries)
     singleOf(::ReportsRepo)
