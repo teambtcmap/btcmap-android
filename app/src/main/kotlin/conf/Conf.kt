@@ -3,13 +3,8 @@ package conf
 import android.content.Context
 import android.content.res.Configuration
 import org.btcmap.R
-import org.maplibre.android.geometry.LatLngBounds
 
 data class Conf(
-    val viewportNorthLat: Double,
-    val viewportEastLon: Double,
-    val viewportSouthLat: Double,
-    val viewportWestLon: Double,
     val showAtms: Boolean,
     val mapStyle: MapStyle,
 )
@@ -49,13 +44,4 @@ fun MapStyle.uri(context: Context): String {
         MapStyle.Bright -> "https://tiles.openfreemap.org/styles/bright"
         MapStyle.Dark -> "https://static.btcmap.org/map-styles/dark.json"
     }
-}
-
-fun Conf.mapViewport(): LatLngBounds {
-    return LatLngBounds.from(
-        latNorth = viewportNorthLat,
-        lonEast = viewportEastLon,
-        latSouth = viewportSouthLat,
-        lonWest = viewportWestLon,
-    )
 }

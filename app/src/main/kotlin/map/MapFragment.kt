@@ -2,6 +2,7 @@ package map
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -48,7 +49,6 @@ import element.ElementFragment
 import element.ElementsCluster
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -72,6 +72,7 @@ import search.SearchAdapter
 import search.SearchModel
 import search.SearchResultModel
 import settings.SettingsFragment
+import settings.mapViewport
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
@@ -267,7 +268,7 @@ class MapFragment : Fragment() {
             it.setOnMarkerClickListener { marker ->
                 if (!marker.snippet.isNullOrBlank()) {
                     val id = marker.snippet.toLong()
-                    model.selectElement(id, false)
+                    model.selectElement(id)
                 }
                 true
             }
@@ -443,13 +444,12 @@ class MapFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
-                val firstBoundingBox =
-                    model.mapViewport.firstOrNull()?.boundingBox!!
+                val prefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
                 binding.map.getMapAsync {
                     it.moveCamera(
                         CameraUpdateFactory.newLatLngBounds(
-                            firstBoundingBox, 0
+                            prefs.mapViewport, 0
                         )
                     )
                 }
@@ -466,7 +466,7 @@ class MapFragment : Fragment() {
 
                 if (pickedPlace != null) {
                     binding.map.getMapAsync {
-                        model.selectElement(pickedPlace.id, true)
+                        model.selectElement(pickedPlace.id)
                         it.moveCamera(
                             CameraUpdateFactory.newLatLngZoom(
                                 LatLng(
@@ -502,7 +502,7 @@ class MapFragment : Fragment() {
             binding.searchView.clearText()
             binding.searchView.hide()
 
-            model.selectElement(row.element.id, true)
+            model.selectElement(row.element.id)
             binding.map.getMapAsync {
                 it.moveCamera(
                     CameraUpdateFactory.newLatLngZoom(
@@ -564,19 +564,23 @@ class MapFragment : Fragment() {
 
     private fun MapLibreMap.addCancelSelectionOverlay() {
         addOnMapClickListener {
-            model.selectElement(0, false)
+            model.selectElement(0)
             true
         }
     }
 
     private val onCameraIdleListener = OnCameraIdleListener {
         binding.map.getMapAsync { map ->
-            model.setMapViewport(
-                MapModel.MapViewport(
+            requireActivity().getPreferences(Context.MODE_PRIVATE).mapViewport =
+                map.projection.visibleRegion.latLngBounds
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                model.loadData(
+                    bounds = map.projection.visibleRegion.latLngBounds,
                     zoom = map.cameraPosition.zoom,
-                    boundingBox = map.projection.visibleRegion.latLngBounds,
                 )
-            )
+            }
+
             searchModel.setLocation(
                 LatLng(
                     map.cameraPosition.target!!.latitude, map.cameraPosition.target!!.longitude
@@ -589,7 +593,7 @@ class MapFragment : Fragment() {
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                    model.selectElement(0, false)
+                    model.selectElement(0)
                     binding.fab.show()
                     binding.fab.isVisible = true
                 } else {
