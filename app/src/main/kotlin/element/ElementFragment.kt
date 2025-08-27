@@ -26,6 +26,7 @@ import androidx.fragment.app.replace
 import androidx.recyclerview.widget.LinearLayoutManager
 import boost_element.BoostElementFragment
 import conf.ConfRepo
+import conf.uri
 import element_comment.AddElementCommentFragment
 import element_comment.ElementCommentRepo
 import element_comment.ElementCommentsFragment
@@ -36,7 +37,6 @@ import map.MapFragment
 import map.MapMarkersRepo
 import map.getErrorColor
 import map.getOnSurfaceColor
-import map.styleBuilder
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
 import org.koin.android.ext.android.inject
@@ -46,6 +46,7 @@ import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.maps.Style
 import search.SearchResultModel
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -124,7 +125,9 @@ class ElementFragment : Fragment() {
                 }
 
                 map.uiSettings.setAllGesturesEnabled(false)
-                map.setStyle(styleBuilder(requireContext(), confRepo.current))
+                map.setStyle(
+                    Style.Builder().fromUri(confRepo.current.mapStyle.uri(requireContext()))
+                )
                 map.cameraPosition =
                     CameraPosition.Builder().target(LatLng(element.lat, element.lon)).zoom(15.0)
                         .build()

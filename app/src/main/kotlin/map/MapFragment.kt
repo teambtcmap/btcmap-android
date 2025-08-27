@@ -43,6 +43,7 @@ import area.AreaResultModel
 import area.bounds
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import conf.MapStyle
+import conf.uri
 import element.ElementFragment
 import element.ElementsCluster
 import kotlinx.coroutines.delay
@@ -257,7 +258,7 @@ class MapFragment : Fragment() {
         }
 
         binding.map.getMapAsync {
-            it.setStyle(styleBuilder(requireContext(), model.conf.current))
+            it.setStyle(Style.Builder().fromUri(model.conf.current.mapStyle.uri(requireContext())))
             it.uiSettings.isCompassEnabled = false
             it.uiSettings.isRotateGesturesEnabled = false
             it.uiSettings.isLogoEnabled = false

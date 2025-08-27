@@ -8,9 +8,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
-import conf.Conf
+import conf.MapStyle
+import conf.uri
 import icons.iconTypeface
-import map.styleBuilder
 import okhttp3.HttpUrl
 import org.btcmap.R
 import org.btcmap.databinding.ItemAreaDescriptionBinding
@@ -20,6 +20,7 @@ import org.btcmap.databinding.ItemIssuesBinding
 import org.btcmap.databinding.ItemMapBinding
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonSource
@@ -104,7 +105,7 @@ class AreaAdapter(
             val geoJson: String,
             val bounds: LatLngBounds,
             val paddingPx: Int,
-            val conf: Conf,
+            val style: MapStyle,
         ) : Item()
 
         data class Description(
@@ -148,16 +149,14 @@ class AreaAdapter(
                 binding.map.getMapAsync { map ->
                     val source = GeoJsonSource("area", item.geoJson)
 
-                    val layer = FillLayer("layer", "area")
-                        .withProperties(
+                    val layer = FillLayer("layer", "area").withProperties(
                             PropertyFactory.fillColor(Color.parseColor("#88f7931a")),
                             PropertyFactory.fillAntialias(true),
                         )
 
                     map.setStyle(
-                        styleBuilder(binding.root.context, item.conf)
-                            .withSource(source)
-                            .withLayer(layer)
+                        Style.Builder().fromUri(item.style.uri(binding.root.context))
+                            .withSource(source).withLayer(layer)
                     )
 
                     map.moveCamera(
@@ -228,9 +227,7 @@ class AreaAdapter(
         ): Boolean {
             return if (oldItem is Item.Element && newItem is Item.Element) {
                 oldItem.id == newItem.id
-            } else (oldItem is Item.Map && newItem is Item.Map)
-                    || (oldItem is Item.Contact && newItem is Item.Contact)
-                    || (oldItem is Item.Issues && newItem is Item.Issues)
+            } else (oldItem is Item.Map && newItem is Item.Map) || (oldItem is Item.Contact && newItem is Item.Contact) || (oldItem is Item.Issues && newItem is Item.Issues)
         }
 
         override fun areContentsTheSame(

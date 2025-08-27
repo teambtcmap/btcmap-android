@@ -77,7 +77,7 @@ class AreaModel(
                 geoJson = area.tags["geo_json"].toString(),
                 bounds = area.tags.bounds(),
                 paddingPx = boundingBoxPaddingPx,
-                conf = confRepo.current,
+                style = confRepo.current.mapStyle,
             )
 
             val contact = AreaAdapter.Item.Contact(
