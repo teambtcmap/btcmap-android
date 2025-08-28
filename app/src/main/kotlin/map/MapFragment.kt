@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
@@ -44,8 +45,6 @@ import app.dpToPx
 import area.AreaResultModel
 import area.bounds
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import conf.MapStyle
-import conf.uri
 import element.ElementFragment
 import element.ElementsCluster
 import kotlinx.coroutines.delay
@@ -73,8 +72,12 @@ import org.maplibre.android.maps.Style
 import search.SearchAdapter
 import search.SearchModel
 import search.SearchResultModel
+import settings.MapStyle
 import settings.SettingsFragment
+import settings.mapStyle
 import settings.mapViewport
+import settings.prefs
+import settings.uri
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
@@ -322,7 +325,7 @@ class MapFragment : Fragment() {
         }
 
         binding.map.getMapAsync {
-            it.setStyle(Style.Builder().fromUri(model.conf.current.mapStyle.uri(requireContext())))
+            it.setStyle(Style.Builder().fromUri(prefs.mapStyle.uri(requireContext())))
             it.uiSettings.isCompassEnabled = false
             it.uiSettings.isRotateGesturesEnabled = false
             it.uiSettings.isLogoEnabled = false
@@ -349,20 +352,15 @@ class MapFragment : Fragment() {
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         bottomSheetBehavior.addSlideCallback()
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            model.conf.conf.collectLatest {
-                when (it.mapStyle) {
-                    MapStyle.Liberty, MapStyle.Bright, MapStyle.Positron -> {
-                        insetsController?.isAppearanceLightStatusBars = true
-                    }
-
-                    MapStyle.Dark -> {
-                        insetsController?.isAppearanceLightStatusBars = false
-                    }
-
-                    else -> {}
-                }
+        when (prefs.mapStyle) {
+            MapStyle.Auto -> {
+                val nightMode =
+                    requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+                insetsController?.isAppearanceLightStatusBars = !nightMode
             }
+
+            MapStyle.Dark -> insetsController?.isAppearanceLightStatusBars = false
+            else -> insetsController?.isAppearanceLightStatusBars = true
         }
 
         viewLifecycleOwner.lifecycleScope.launch {

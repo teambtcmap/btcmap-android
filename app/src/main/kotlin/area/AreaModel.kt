@@ -6,7 +6,6 @@ import android.util.TypedValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import area_element.AreaElementRepo
-import conf.ConfRepo
 import element.ElementsRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,13 +15,14 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
+import settings.mapStyle
+import settings.prefs
 import java.time.LocalDate
 
 class AreaModel(
     private val areasRepo: AreasRepo,
     private val elementsRepo: ElementsRepo,
     private val areaElementRepo: AreaElementRepo,
-    private val confRepo: ConfRepo,
     private val app: Application,
 ) : AndroidViewModel(app) {
 
@@ -77,7 +77,7 @@ class AreaModel(
                 geoJson = area.tags["geo_json"].toString(),
                 bounds = area.tags.bounds(),
                 paddingPx = boundingBoxPaddingPx,
-                style = confRepo.current.mapStyle,
+                style = app.prefs.mapStyle,
             )
 
             val contact = AreaAdapter.Item.Contact(

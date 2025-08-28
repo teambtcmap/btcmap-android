@@ -8,8 +8,6 @@ import area.AreaQueries
 import area.AreaResultModel
 import area.AreasModel
 import area.AreasRepo
-import conf.ConfQueries
-import conf.ConfRepo
 import db.Database
 import element.ElementQueries
 import element.ElementsRepo
@@ -54,9 +52,6 @@ val appModule = module {
 
     singleOf(::AreaElementQueries)
     singleOf(::AreaElementRepo)
-
-    singleOf(::ConfQueries)
-    singleOf(::ConfRepo)
 
     singleOf(::ReportQueries)
     singleOf(::ReportsRepo)

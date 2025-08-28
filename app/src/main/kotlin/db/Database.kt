@@ -8,7 +8,6 @@ import androidx.sqlite.driver.bundled.SQLITE_OPEN_READWRITE
 import androidx.sqlite.execSQL
 import area.AreaQueries
 import area_element.AreaElementQueries
-import conf.ConfQueries
 import element.ElementQueries
 import element_comment.ElementCommentQueries
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +41,6 @@ class Database(path: String) {
                     execSQL(ReportQueries.CREATE_TABLE)
                     execSQL(UserQueries.CREATE_TABLE)
                     execSQL(AreaQueries.CREATE_TABLE)
-                    execSQL(ConfQueries.CREATE_TABLE)
                     execSQL(event.SCHEMA)
                     execSQL("PRAGMA user_version=1")
                 }

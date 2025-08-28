@@ -8,8 +8,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
-import conf.MapStyle
-import conf.uri
 import icons.iconTypeface
 import okhttp3.HttpUrl
 import org.btcmap.R
@@ -24,6 +22,8 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonSource
+import settings.MapStyle
+import settings.uri
 
 class AreaAdapter(
     private val listener: Listener,
@@ -150,9 +150,9 @@ class AreaAdapter(
                     val source = GeoJsonSource("area", item.geoJson)
 
                     val layer = FillLayer("layer", "area").withProperties(
-                            PropertyFactory.fillColor(Color.parseColor("#88f7931a")),
-                            PropertyFactory.fillAntialias(true),
-                        )
+                        PropertyFactory.fillColor(Color.parseColor("#88f7931a")),
+                        PropertyFactory.fillAntialias(true),
+                    )
 
                     map.setStyle(
                         Style.Builder().fromUri(item.style.uri(binding.root.context))

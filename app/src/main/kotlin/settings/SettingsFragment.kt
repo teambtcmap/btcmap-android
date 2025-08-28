@@ -7,16 +7,10 @@ import android.view.ViewGroup
 import android.widget.RadioButton
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import conf.ConfRepo
-import conf.MapStyle
-import conf.name
 import org.btcmap.R
 import org.btcmap.databinding.FragmentSettingsBinding
-import org.koin.android.ext.android.inject
 
 class SettingsFragment : Fragment() {
-
-    private val conf: ConfRepo by inject()
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
@@ -35,7 +29,7 @@ class SettingsFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        binding.currentMapStyle.text = conf.current.mapStyle.name(requireContext())
+        binding.currentMapStyle.text = prefs.mapStyle.name(requireContext())
 
         binding.mapStyleButton.setOnClickListener {
             val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.map_style)
@@ -45,11 +39,11 @@ class SettingsFragment : Fragment() {
                 if (this == null) return
 
                 text = style.name(requireContext())
-                isChecked = conf.current.mapStyle == style
+                isChecked = prefs.mapStyle == style
 
                 setOnCheckedChangeListener { _, isChecked ->
                     if (isChecked) {
-                        conf.update { it.copy(mapStyle = style) }
+                        prefs.mapStyle = style
                         binding.currentMapStyle.text = text
                         dialog.dismiss()
                     }
@@ -65,9 +59,9 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        binding.showAtms.isChecked = conf.conf.value.showAtms
+        binding.showAtms.isChecked = prefs.showAtms
         binding.showAtms.setOnCheckedChangeListener { _, isChecked ->
-            conf.update { it.copy(showAtms = isChecked) }
+            prefs.showAtms = isChecked
         }
     }
 

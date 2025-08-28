@@ -3,7 +3,6 @@ package map
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.sqlite.SQLiteConnection
-import conf.ConfRepo
 import element.Element
 import element.ElementsRepo
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +17,6 @@ import org.maplibre.android.geometry.LatLngBounds
 import sync.Sync
 
 class MapModel(
-    val conf: ConfRepo,
     private val sync: Sync,
     val elementsRepo: ElementsRepo,
     private val conn: SQLiteConnection,
