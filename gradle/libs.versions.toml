@@ -38,6 +38,8 @@ datetime = "0.7.1"
 maplibre = "11.13.0"
 # https://github.com/androidmads/QRGenerator/releases
 qrgenerator = "1.0.5"
+# https://github.com/mrudultora/Colorpicker/releases
+colorpicker = "1.2.0"
 
 [libraries]
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -57,6 +59,7 @@ coil-core = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }
 maplibre = { module = "org.maplibre.gl:android-sdk-vulkan", version.ref = "maplibre" }
 qrgenerator = { module = "com.github.androidmads:QRGenerator", version.ref = "qrgenerator" }
+colorpicker = { module = "com.github.mrudultora:Colorpicker", version.ref = "colorpicker" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

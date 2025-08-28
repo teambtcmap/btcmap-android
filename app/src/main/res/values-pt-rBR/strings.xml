@@ -92,4 +92,5 @@
     <string name="style_positron">Positron</string>
     <string name="style_bright">Bright</string>
     <string name="style_dark">Dark (experimental)</string>
+    <string name="marker_background_color">Marker background color</string>
 </resources>

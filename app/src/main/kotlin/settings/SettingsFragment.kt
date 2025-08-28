@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.RadioButton
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.mrudultora.colorpicker.ColorPickerPopUp
+import com.mrudultora.colorpicker.ColorPickerPopUp.OnPickColorListener
 import org.btcmap.R
 import org.btcmap.databinding.FragmentSettingsBinding
 
@@ -30,6 +32,32 @@ class SettingsFragment : Fragment() {
         }
 
         binding.currentMapStyle.text = prefs.mapStyle.name(requireContext())
+
+        binding.markerBackgroundColor.text =
+            "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
+
+        binding.markerBackgroundColor.setOnClickListener {
+            val colorPickerPopUp = ColorPickerPopUp(context)
+            colorPickerPopUp.setShowAlpha(true)
+                .setDefaultColor(prefs.markerBackgroundColor(requireContext()))
+                .setDialogTitle(getString(R.string.marker_background_color))
+                .setOnPickColorListener(object : OnPickColorListener {
+                    override fun onColorPicked(color: Int) {
+                        prefs.setMarkerBackgroundColor(color)
+                    }
+
+                    override fun onCancel() {
+                        colorPickerPopUp.dismissDialog() // Dismiss the dialog.
+                    }
+                })
+                .show()
+            colorPickerPopUp.negativeButton.setOnClickListener {
+                prefs.setMarkerBackgroundColor(null)
+                binding.markerBackgroundColor.text =
+                    "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
+                colorPickerPopUp.dismissDialog()
+            }
+        }
 
         binding.mapStyleButton.setOnClickListener {
             val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.map_style)

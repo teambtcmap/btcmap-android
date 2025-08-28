@@ -107,6 +107,7 @@ android {
         implementation(libs.coil.svg)
         implementation(libs.maplibre)
         implementation(libs.qrgenerator)
+        implementation(libs.colorpicker)
     }
 }
 

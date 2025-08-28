@@ -76,6 +76,7 @@ import settings.MapStyle
 import settings.SettingsFragment
 import settings.mapStyle
 import settings.mapViewport
+import settings.markerBackgroundColor
 import settings.prefs
 import settings.uri
 import java.time.ZoneOffset
@@ -446,9 +447,12 @@ class MapFragment : Fragment() {
                                             it.cluster.comments,
                                         )
                                     } else {
-                                        markersRepo.getMarker(
-                                            it.cluster.iconId.ifBlank { "question_mark" },
-                                            it.cluster.comments,
+                                        requireContext().marker(
+                                            iconId = it.cluster.iconId.ifBlank { "question_mark" },
+                                            backgroundColor = prefs.markerBackgroundColor(
+                                                requireContext()
+                                            ),
+                                            counter = it.cluster.comments,
                                         )
                                     }
                                     val newBitmap = Bitmap.createBitmap(

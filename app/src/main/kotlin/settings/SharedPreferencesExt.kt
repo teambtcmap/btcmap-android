@@ -8,6 +8,7 @@ import android.content.SharedPreferences
 import android.content.res.Configuration
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
+import map.markerBackgroundColor
 import org.btcmap.R
 import org.maplibre.android.geometry.LatLngBounds
 
@@ -117,5 +118,22 @@ fun MapStyle.uri(context: Context): String {
         MapStyle.Positron -> "https://tiles.openfreemap.org/styles/positron"
         MapStyle.Bright -> "https://tiles.openfreemap.org/styles/bright"
         MapStyle.Dark -> "https://static.btcmap.org/map-styles/dark.json"
+    }
+}
+
+fun SharedPreferences.markerBackgroundColor(ctx: Context): Int {
+    return getInt("markerBackgroundColor", ctx.markerBackgroundColor())
+}
+
+fun SharedPreferences.setMarkerBackgroundColor(color: Int?) {
+    edit {
+        if (color == null) {
+            remove("markerBackgroundColor")
+        } else {
+            putInt(
+                "markerBackgroundColor",
+                color,
+            )
+        }
     }
 }
