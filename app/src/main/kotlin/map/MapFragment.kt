@@ -49,6 +49,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import element.ElementFragment
 import element.ElementsCluster
 import element.ElementsRepo
+import element_comment.ElementCommentRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -495,9 +496,12 @@ class MapFragment : Fragment() {
                             is MapModel.MapItem.Event -> {
                                 val marker =
                                     MarkerOptions().position(LatLng(it.event.lat, it.event.lon))
-                                val icon = markersRepo.getBoostedMarker(
-                                    "event",
-                                    0,
+                                val icon = requireContext().marker(
+                                    iconId = "event",
+                                    backgroundColor = prefs.markerBackgroundColor(
+                                        requireContext()
+                                    ),
+                                    counter = 0,
                                 )
                                 val newBitmap = Bitmap.createBitmap(
                                     icon.bitmap.width,
@@ -535,6 +539,10 @@ class MapFragment : Fragment() {
                 val conn by inject<SQLiteConnection>()
                 val events = api.getEvents()
                 withContext(Dispatchers.IO) { event.deleteAllAndInsertBatch(events, conn) }
+                refreshData()
+
+                val commentsRepo by inject<ElementCommentRepo>()
+                commentsRepo.sync()
                 refreshData()
             }
         }
