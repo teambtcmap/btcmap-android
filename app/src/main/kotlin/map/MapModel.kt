@@ -6,18 +6,16 @@ import androidx.sqlite.SQLiteConnection
 import element.Element
 import element.ElementsRepo
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
-import sync.Sync
 
 class MapModel(
-    private val sync: Sync,
     val elementsRepo: ElementsRepo,
     private val conn: SQLiteConnection,
 ) : ViewModel() {
@@ -26,7 +24,7 @@ class MapModel(
     val selectedElement = _selectedElement.asStateFlow()
 
     private val _items = MutableStateFlow<List<MapItem>>(emptyList())
-    val visibleElements = _items.asStateFlow()
+    val items = _items.asStateFlow()
 
     enum class Filter {
         Merchants,
@@ -34,28 +32,35 @@ class MapModel(
         Exchanges,
     }
 
-    suspend fun loadData(bounds: LatLngBounds, zoom: Double, filter: Filter) {
-        withContext(Dispatchers.IO) {
-            when (filter) {
-                Filter.Merchants -> {
-                    val clusters = elementsRepo.selectByBoundingBox(
-                        zoom = zoom,
-                        bounds = bounds,
-                    )
-                    _items.update { clusters.map { MapItem.ElementsCluster(it) } }
-                }
+    private var prevLoadItems: Job? = null
 
-                Filter.Events -> {
-                    val meetups = event.selectAll(conn).map { MapItem.Event(it) }
-                    _items.update { meetups }
-                }
+    fun loadItems(bounds: LatLngBounds, zoom: Double, filter: Filter) {
+        prevLoadItems?.cancel()
 
-                Filter.Exchanges -> {
-                    val clusters = elementsRepo.selectExchangesByBoundingBox(
-                        zoom = zoom,
-                        bounds = bounds,
-                    )
-                    _items.update { clusters.map { MapItem.ElementsCluster(it) } }
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                when (filter) {
+                    Filter.Merchants -> {
+                        val clusters = elementsRepo.selectByBoundingBox(
+                            zoom = zoom,
+                            bounds = bounds,
+                        )
+                        _items.update { clusters.map { MapItem.ElementsCluster(it) } }
+                    }
+
+                    Filter.Events -> {
+                        val meetups =
+                            event.selectAll(conn).map { MapItem.Event(it) }
+                        _items.update { meetups }
+                    }
+
+                    Filter.Exchanges -> {
+                        val clusters = elementsRepo.selectExchangesByBoundingBox(
+                            zoom = zoom,
+                            bounds = bounds,
+                        )
+                        _items.update { clusters.map { MapItem.ElementsCluster(it) } }
+                    }
                 }
             }
         }
@@ -64,18 +69,6 @@ class MapModel(
     fun selectElement(elementId: Long) {
         val element = runBlocking { elementsRepo.selectById(elementId) }
         _selectedElement.update { element }
-    }
-
-    fun syncElements() {
-        viewModelScope.launch {
-            sync.sync(doNothingIfAlreadySyncing = true)
-        }
-    }
-
-    private fun LatLng.toBoundingBox(): LatLngBounds {
-        val point1 = LatLng(latitude - 0.001, longitude - 0.001)
-        val point2 = LatLng(latitude + 0.001, longitude + 0.001)
-        return LatLngBounds.fromLatLngs(listOf(point1, point2))
     }
 
     sealed class MapItem {

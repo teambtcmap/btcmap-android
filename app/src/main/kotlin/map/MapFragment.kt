@@ -2,7 +2,6 @@ package map
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -47,6 +46,7 @@ import area.bounds
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import element.ElementFragment
 import element.ElementsCluster
+import element.ElementsRepo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
@@ -56,6 +56,7 @@ import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.R
 import org.btcmap.databinding.FragmentMapBinding
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.maplibre.android.annotations.IconFactory
@@ -223,13 +224,11 @@ class MapFragment : Fragment() {
             binding.filterExchangesInactive.isVisible = true
 
             binding.map.getMapAsync { map ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    model.loadData(
-                        bounds = map.projection.visibleRegion.latLngBounds,
-                        zoom = map.cameraPosition.zoom,
-                        filter = MapModel.Filter.Merchants,
-                    )
-                }
+                model.loadItems(
+                    bounds = map.projection.visibleRegion.latLngBounds,
+                    zoom = map.cameraPosition.zoom,
+                    filter = MapModel.Filter.Merchants,
+                )
             }
         }
 
@@ -244,13 +243,11 @@ class MapFragment : Fragment() {
             binding.filterExchangesInactive.isVisible = true
 
             binding.map.getMapAsync { map ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    model.loadData(
-                        bounds = map.projection.visibleRegion.latLngBounds,
-                        zoom = map.cameraPosition.zoom,
-                        filter = MapModel.Filter.Events,
-                    )
-                }
+                model.loadItems(
+                    bounds = map.projection.visibleRegion.latLngBounds,
+                    zoom = map.cameraPosition.zoom,
+                    filter = MapModel.Filter.Events,
+                )
             }
         }
 
@@ -265,13 +262,11 @@ class MapFragment : Fragment() {
             binding.filterExchangesInactive.isVisible = false
 
             binding.map.getMapAsync { map ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    model.loadData(
-                        bounds = map.projection.visibleRegion.latLngBounds,
-                        zoom = map.cameraPosition.zoom,
-                        filter = MapModel.Filter.Exchanges,
-                    )
-                }
+                model.loadItems(
+                    bounds = map.projection.visibleRegion.latLngBounds,
+                    zoom = map.cameraPosition.zoom,
+                    filter = MapModel.Filter.Exchanges,
+                )
             }
         }
 
@@ -438,7 +433,7 @@ class MapFragment : Fragment() {
         val visibleElements = mutableListOf<Marker>()
 
         viewLifecycleOwner.lifecycleScope.launch {
-            model.visibleElements.collectLatest { newElements ->
+            model.items.collectLatest { newElements ->
                 binding.map.getMapAsync { map ->
                     visibleElements.forEach { map.removeMarker(it) }
                     visibleElements.clear()
@@ -522,7 +517,19 @@ class MapFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                model.syncElements()
+                val elementsRepo by inject<ElementsRepo>()
+
+                if (elementsRepo.selectCount() == 0L && elementsRepo.hasBundledElements()) {
+                    elementsRepo.fetchBundledElements()
+
+                    binding.map.getMapAsync { map ->
+                        model.loadItems(
+                            bounds = map.projection.visibleRegion.latLngBounds,
+                            zoom = map.cameraPosition.zoom,
+                            filter = MapModel.Filter.Merchants,
+                        )
+                    }
+                }
             }
         }
 
@@ -532,8 +539,6 @@ class MapFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
-                val prefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
-
                 binding.map.getMapAsync {
                     it.moveCamera(
                         CameraUpdateFactory.newLatLngBounds(
@@ -659,23 +664,23 @@ class MapFragment : Fragment() {
 
     private val onCameraIdleListener = OnCameraIdleListener {
         binding.map.getMapAsync { map ->
-            requireActivity().getPreferences(Context.MODE_PRIVATE).mapViewport =
+            prefs.mapViewport =
                 map.projection.visibleRegion.latLngBounds
 
-            viewLifecycleOwner.lifecycleScope.launch {
-                val filter =
-                    if (binding.filterMerchantsActive.isVisible) {
-                        MapModel.Filter.Merchants
-                    } else {
-                        MapModel.Filter.Events
-                    }
+            val filter =
+                if (binding.filterMerchantsActive.isVisible) {
+                    MapModel.Filter.Merchants
+                } else if (binding.filterEventsActive.isVisible) {
+                    MapModel.Filter.Events
+                } else {
+                    MapModel.Filter.Exchanges
+                }
 
-                model.loadData(
-                    bounds = map.projection.visibleRegion.latLngBounds,
-                    zoom = map.cameraPosition.zoom,
-                    filter = filter,
-                )
-            }
+            model.loadItems(
+                bounds = map.projection.visibleRegion.latLngBounds,
+                zoom = map.cameraPosition.zoom,
+                filter = filter,
+            )
 
             searchModel.setLocation(
                 LatLng(
