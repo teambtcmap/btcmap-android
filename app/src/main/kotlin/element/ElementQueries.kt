@@ -226,7 +226,58 @@ class ElementQueries(private val conn: SQLiteConnection) {
                     $COL_COMMENTS
                 FROM $TABLE_NAME
                 WHERE
-                    $COL_LAT > ?1
+                    $COL_ICON <> 'local_atm'
+                    AND $COL_ICON <> 'currency_exchange'
+                    AND $COL_LAT > ?1
+                    AND $COL_LAT < ?2
+                    AND $COL_LON > ?3
+                    AND $COL_LON < ?4
+                ORDER BY $COL_LAT DESC
+                """
+        ).use {
+            it.bindDouble(1, minLat)
+            it.bindDouble(2, maxLat)
+            it.bindDouble(3, minLon)
+            it.bindDouble(4, maxLon)
+            buildList {
+                while (it.step()) {
+                    add(
+                        ElementsCluster(
+                            count = 1,
+                            id = it.getLong(0),
+                            lat = it.getDouble(1),
+                            lon = it.getDouble(2),
+                            iconId = it.getText(3),
+                            boostExpires = it.getZonedDateTimeOrNull(4),
+                            requiresCompanionApp = it.getHttpUrlOrNull(5) != null,
+                            comments = it.getLong(6),
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun selectExchangesWithoutClustering(
+        minLat: Double,
+        maxLat: Double,
+        minLon: Double,
+        maxLon: Double,
+    ): List<ElementsCluster> {
+        return conn.prepare(
+            """
+                SELECT
+                    $COL_ID,
+                    $COL_LAT,
+                    $COL_LON,
+                    $COL_ICON,
+                    $COL_BOOSTED_UNTIL,
+                    $COL_REQUIRED_APP_URL,
+                    $COL_COMMENTS
+                FROM $TABLE_NAME
+                WHERE
+                    ($COL_ICON = 'local_atm' OR $COL_ICON = 'currency_exchange')
+                    AND $COL_LAT > ?1
                     AND $COL_LAT < ?2
                     AND $COL_LON > ?3
                     AND $COL_LON < ?4
@@ -272,6 +323,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
                     $COL_REQUIRED_APP_URL,
                     $COL_COMMENTS
                 FROM $TABLE_NAME
+                WHERE ($COL_ICON <> 'local_atm' AND $COL_ICON <> 'currency_exchange')
                 GROUP BY round($COL_LAT / ?1) * ?1, round($COL_LON / ?2) * ?2
                 ORDER BY $COL_LAT DESC
                 """

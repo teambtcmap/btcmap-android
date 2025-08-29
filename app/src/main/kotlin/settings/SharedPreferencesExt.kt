@@ -45,14 +45,6 @@ var SharedPreferences.mapViewport: LatLngBounds
         }
     }
 
-var SharedPreferences.showAtms: Boolean
-    get() = getBoolean("showAtms", false)
-    set(value) {
-        edit {
-            putBoolean("showAtms", value)
-        }
-    }
-
 var SharedPreferences.mapStyle: MapStyle
     get() {
         return mapStyleFromPrefValue(getString("mapStyle", "auto") ?: "auto")

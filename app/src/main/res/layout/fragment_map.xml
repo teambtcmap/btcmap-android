@@ -108,6 +108,25 @@
             android:contentDescription=""
             app:icon="@drawable/event"
             app:iconGravity="textStart" />
+
+        <Button
+            android:id="@+id/filterExchangesActive"
+            style="?attr/materialIconButtonFilledStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription=""
+            android:visibility="gone"
+            app:icon="@drawable/exchange"
+            app:iconGravity="textStart" />
+
+        <Button
+            android:id="@+id/filterExchangesInactive"
+            style="?attr/materialIconButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription=""
+            app:icon="@drawable/exchange"
+            app:iconGravity="textStart" />
     </com.google.android.material.button.MaterialButtonGroup>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

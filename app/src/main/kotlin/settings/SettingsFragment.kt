@@ -86,11 +86,6 @@ class SettingsFragment : Fragment() {
                 invoke(dialog.findViewById(R.id.dark), MapStyle.Dark)
             }
         }
-
-        binding.showAtms.isChecked = prefs.showAtms
-        binding.showAtms.setOnCheckedChangeListener { _, isChecked ->
-            prefs.showAtms = isChecked
-        }
     }
 
     override fun onDestroyView() {

@@ -212,49 +212,64 @@ class MapFragment : Fragment() {
 
         val markersRepo = MapMarkersRepo(requireContext())
 
-        binding.filterEventsInactive.setOnClickListener {
-            binding.filterMerchantsActive.isVisible = false
-            binding.filterMerchantsInactive.isVisible = true
-            binding.filterEventsActive.isVisible = true
-            binding.filterEventsInactive.isVisible = false
+        binding.filterMerchantsInactive.setOnClickListener {
+            binding.filterMerchantsActive.isVisible = true
+            binding.filterMerchantsInactive.isVisible = false
+
+            binding.filterEventsActive.isVisible = false
+            binding.filterEventsInactive.isVisible = true
+
+            binding.filterExchangesActive.isVisible = false
+            binding.filterExchangesInactive.isVisible = true
 
             binding.map.getMapAsync { map ->
-                val filter =
-                    if (binding.filterMerchantsActive.isVisible) {
-                        MapModel.Filter.Merchants
-                    } else {
-                        MapModel.Filter.Events
-                    }
-
                 viewLifecycleOwner.lifecycleScope.launch {
                     model.loadData(
                         bounds = map.projection.visibleRegion.latLngBounds,
                         zoom = map.cameraPosition.zoom,
-                        filter = filter,
+                        filter = MapModel.Filter.Merchants,
                     )
                 }
             }
         }
 
-        binding.filterMerchantsInactive.setOnClickListener {
-            binding.filterMerchantsActive.isVisible = true
-            binding.filterMerchantsInactive.isVisible = false
-            binding.filterEventsActive.isVisible = false
-            binding.filterEventsInactive.isVisible = true
+        binding.filterEventsInactive.setOnClickListener {
+            binding.filterMerchantsActive.isVisible = false
+            binding.filterMerchantsInactive.isVisible = true
+
+            binding.filterEventsActive.isVisible = true
+            binding.filterEventsInactive.isVisible = false
+
+            binding.filterExchangesActive.isVisible = false
+            binding.filterExchangesInactive.isVisible = true
 
             binding.map.getMapAsync { map ->
-                val filter =
-                    if (binding.filterMerchantsActive.isVisible) {
-                        MapModel.Filter.Merchants
-                    } else {
-                        MapModel.Filter.Events
-                    }
-
                 viewLifecycleOwner.lifecycleScope.launch {
                     model.loadData(
                         bounds = map.projection.visibleRegion.latLngBounds,
                         zoom = map.cameraPosition.zoom,
-                        filter = filter,
+                        filter = MapModel.Filter.Events,
+                    )
+                }
+            }
+        }
+
+        binding.filterExchangesInactive.setOnClickListener {
+            binding.filterMerchantsActive.isVisible = false
+            binding.filterMerchantsInactive.isVisible = true
+
+            binding.filterEventsActive.isVisible = false
+            binding.filterEventsInactive.isVisible = true
+
+            binding.filterExchangesActive.isVisible = true
+            binding.filterExchangesInactive.isVisible = false
+
+            binding.map.getMapAsync { map ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    model.loadData(
+                        bounds = map.projection.visibleRegion.latLngBounds,
+                        zoom = map.cameraPosition.zoom,
+                        filter = MapModel.Filter.Exchanges,
                     )
                 }
             }

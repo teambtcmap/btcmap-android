@@ -31,6 +31,7 @@ class MapModel(
     enum class Filter {
         Merchants,
         Events,
+        Exchanges,
     }
 
     suspend fun loadData(bounds: LatLngBounds, zoom: Double, filter: Filter) {
@@ -47,6 +48,14 @@ class MapModel(
                 Filter.Events -> {
                     val meetups = event.selectAll(conn).map { MapItem.Event(it) }
                     _items.update { meetups }
+                }
+
+                Filter.Exchanges -> {
+                    val clusters = elementsRepo.selectExchangesByBoundingBox(
+                        zoom = zoom,
+                        bounds = bounds,
+                    )
+                    _items.update { clusters.map { MapItem.ElementsCluster(it) } }
                 }
             }
         }

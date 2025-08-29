@@ -80,6 +80,26 @@ class ElementsRepo(
         }
     }
 
+    suspend fun selectExchangesByBoundingBox(
+        zoom: Double?,
+        bounds: LatLngBounds,
+    ): List<ElementsCluster> {
+        if (zoom == null) {
+            return emptyList()
+        }
+
+        return withContext(Dispatchers.IO) {
+            withContext(Dispatchers.IO) {
+                queries.selectExchangesWithoutClustering(
+                    minLat = bounds.latitudeSouth,
+                    maxLat = bounds.latitudeNorth,
+                    minLon = bounds.longitudeWest,
+                    maxLon = bounds.longitudeEast,
+                )
+            }
+        }
+    }
+
     suspend fun selectCount(): Long {
         return withContext(Dispatchers.IO) {
             queries.selectCount()
