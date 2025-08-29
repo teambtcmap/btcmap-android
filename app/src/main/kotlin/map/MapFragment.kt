@@ -40,6 +40,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.sqlite.SQLiteConnection
+import api.Api
 import app.dpToPx
 import area.AreaResultModel
 import area.bounds
@@ -47,12 +49,14 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import element.ElementFragment
 import element.ElementsCluster
 import element.ElementsRepo
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.R
 import org.btcmap.databinding.FragmentMapBinding
@@ -521,15 +525,17 @@ class MapFragment : Fragment() {
 
                 if (elementsRepo.selectCount() == 0L && elementsRepo.hasBundledElements()) {
                     elementsRepo.fetchBundledElements()
-
-                    binding.map.getMapAsync { map ->
-                        model.loadItems(
-                            bounds = map.projection.visibleRegion.latLngBounds,
-                            zoom = map.cameraPosition.zoom,
-                            filter = MapModel.Filter.Merchants,
-                        )
-                    }
+                    refreshData()
                 }
+
+                elementsRepo.sync()
+                refreshData()
+
+                val api by inject<Api>()
+                val conn by inject<SQLiteConnection>()
+                val events = api.getEvents()
+                withContext(Dispatchers.IO) { event.deleteAllAndInsertBatch(events, conn) }
+                refreshData()
             }
         }
 
@@ -667,26 +673,34 @@ class MapFragment : Fragment() {
             prefs.mapViewport =
                 map.projection.visibleRegion.latLngBounds
 
-            val filter =
-                if (binding.filterMerchantsActive.isVisible) {
-                    MapModel.Filter.Merchants
-                } else if (binding.filterEventsActive.isVisible) {
-                    MapModel.Filter.Events
-                } else {
-                    MapModel.Filter.Exchanges
-                }
-
-            model.loadItems(
-                bounds = map.projection.visibleRegion.latLngBounds,
-                zoom = map.cameraPosition.zoom,
-                filter = filter,
-            )
+            refreshData()
 
             searchModel.setLocation(
                 LatLng(
                     map.cameraPosition.target!!.latitude, map.cameraPosition.target!!.longitude
                 )
             )
+        }
+    }
+
+    private fun refreshData() {
+        binding.map.getMapAsync { map ->
+            viewLifecycleOwner.lifecycleScope.launch {
+                val filter =
+                    if (binding.filterMerchantsActive.isVisible) {
+                        MapModel.Filter.Merchants
+                    } else if (binding.filterEventsActive.isVisible) {
+                        MapModel.Filter.Events
+                    } else {
+                        MapModel.Filter.Exchanges
+                    }
+
+                model.loadItems(
+                    bounds = map.projection.visibleRegion.latLngBounds,
+                    zoom = map.cameraPosition.zoom,
+                    filter = filter,
+                )
+            }
         }
     }
 

@@ -37,7 +37,7 @@ class MapModel(
     fun loadItems(bounds: LatLngBounds, zoom: Double, filter: Filter) {
         prevLoadItems?.cancel()
 
-        viewModelScope.launch {
+        prevLoadItems = viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 when (filter) {
                     Filter.Merchants -> {
