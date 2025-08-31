@@ -28,19 +28,6 @@ android {
         }
     }
 
-    flavorDimensions += "store"
-
-    productFlavors {
-        create("fdroid") {
-            dimension = "store"
-        }
-
-        create("play") {
-            dimension = "store"
-            applicationIdSuffix = ".app"
-        }
-    }
-
     splits {
         abi {
             isEnable = true

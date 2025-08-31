@@ -32,7 +32,7 @@ jobs:
         run: ./gradlew bundleData
 
       - name: Assemble APKs
-        run: ./gradlew assembleFdroidRelease
+        run: ./gradlew assembleRelease
 
       - name: Create preview release
         uses: softprops/action-gh-release@v2
@@ -41,4 +41,4 @@ jobs:
           tag_name: 'preview'
           prerelease: true
           name: 'preview'
-          files: app/build/outputs/apk/fdroid/release/app-*.apk
+          files: app/build/outputs/apk/release/app-*.apk
