@@ -5,7 +5,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import java.io.InputStream
-import kotlin.time.Instant
+import java.time.ZonedDateTime
 
 data class AreaJson(
     val id: Long,
@@ -18,7 +18,7 @@ fun AreaJson.toArea(): Area {
     return Area(
         id = id,
         tags = tags!!,
-        updatedAt = Instant.parse(updatedAt),
+        updatedAt = ZonedDateTime.parse(updatedAt),
     )
 }
 

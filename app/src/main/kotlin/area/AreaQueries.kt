@@ -1,9 +1,7 @@
 package area
 
 import androidx.sqlite.SQLiteConnection
-import db.getInstant
 import db.getJsonObject
-import db.getZonedDateTime
 import db.getZonedDateTimeOrNull
 import db.transaction
 import java.time.ZonedDateTime
@@ -42,7 +40,7 @@ class AreaQueries(private val conn: SQLiteConnection) {
                 Area(
                     id = it.getLong(0),
                     tags = it.getJsonObject(1),
-                    updatedAt = it.getInstant(2),
+                    updatedAt = ZonedDateTime.parse(it.getText(2)),
                 )
             } else {
                 null
@@ -66,7 +64,7 @@ class AreaQueries(private val conn: SQLiteConnection) {
                         Area(
                             id = it.getLong(0),
                             tags = it.getJsonObject(1),
-                            updatedAt = it.getInstant(2),
+                            updatedAt = ZonedDateTime.parse(it.getText(2)),
                         )
                     )
                 }

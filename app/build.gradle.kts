@@ -21,8 +21,6 @@ android {
         versionName = "0.9.2"
     }
 
-    kotlin.compilerOptions.optIn.add("kotlin.time.ExperimentalTime")
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -87,7 +85,6 @@ android {
     dependencies {
         implementation(libs.kotlinx.coroutines)
         implementation(libs.kotlinx.serialization)
-        implementation(libs.kotlinx.datetime)
 
         implementation(libs.androidx.work)
         implementation(libs.androidx.sqlite)

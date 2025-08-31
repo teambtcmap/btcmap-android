@@ -1,9 +1,9 @@
 package area
 
-import kotlin.time.Instant
+import java.time.ZonedDateTime
 
 data class Area(
     val id: Long,
     val tags: AreaTags,
-    val updatedAt: Instant,
+    val updatedAt: ZonedDateTime,
 )

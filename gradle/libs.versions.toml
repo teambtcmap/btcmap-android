@@ -31,9 +31,6 @@ work = "2.10.3"
 # Platform-agnostic JSON handling
 # https://github.com/Kotlin/kotlinx.serialization/releases
 serialization = "1.9.0"
-# Platform-agnostic date and time handling
-# https://github.com/Kotlin/kotlinx-datetime/releases
-datetime = "0.7.1"
 # https://github.com/maplibre/maplibre-native/releases
 maplibre = "11.13.0"
 # https://github.com/androidmads/QRGenerator/releases
@@ -44,7 +41,6 @@ colorpicker = "1.2.0"
 [libraries]
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
-kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 
 androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 androidx-sqlite = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
