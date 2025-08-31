@@ -5,21 +5,20 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
 }
 
+kotlin {
+    jvmToolchain(21)
+}
+
 android {
     namespace = "org.btcmap"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "org.btcmap"
         minSdk = 29
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 54
         versionName = "0.9.2"
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlin.compilerOptions.optIn.add("kotlin.time.ExperimentalTime")
@@ -79,10 +78,6 @@ android {
 
     buildFeatures {
         viewBinding = true
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
     }
 
     dependenciesInfo {
