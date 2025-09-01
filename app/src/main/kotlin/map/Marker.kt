@@ -1,7 +1,6 @@
 package map
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.util.TypedValue
@@ -20,6 +19,8 @@ fun Context.marker(
     iconId: String,
     backgroundColor: Int,
     iconColor: Int,
+    countBackgroundColor: Int,
+    countFontColor: Int,
     counter: Long
 ): BitmapDrawable {
     val pinSizePx = TypedValue.applyDimension(
@@ -67,7 +68,7 @@ fun Context.marker(
     if (counter > 0) {
         val commentCountCirclePaint by lazy {
             Paint().apply {
-                color = Color.parseColor("#0c9073")
+                color = countBackgroundColor
                 isAntiAlias = true
             }
         }
@@ -80,7 +81,7 @@ fun Context.marker(
                     resources.displayMetrics,
                 )
                 textSize = pinSizePx / 4f
-                color = Color.WHITE
+                color = countFontColor
                 isAntiAlias = true
             }
         }

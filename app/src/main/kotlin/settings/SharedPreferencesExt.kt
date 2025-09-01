@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import android.graphics.Color
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import map.markerBackgroundColor
@@ -142,6 +143,40 @@ fun SharedPreferences.setMarkerIconColor(color: Int?) {
         } else {
             putInt(
                 "markerIconColor",
+                color,
+            )
+        }
+    }
+}
+
+fun SharedPreferences.commentCountBackgroundColor(ctx: Context): Int {
+    return getInt("commentCountBackgroundColor", Color.parseColor("#0c9073"))
+}
+
+fun SharedPreferences.setCommentCountBackgroundColor(color: Int?) {
+    edit {
+        if (color == null) {
+            remove("commentCountBackgroundColor")
+        } else {
+            putInt(
+                "commentCountBackgroundColor",
+                color,
+            )
+        }
+    }
+}
+
+fun SharedPreferences.commentCountFontColor(ctx: Context): Int {
+    return getInt("commentCountFontColor", Color.WHITE)
+}
+
+fun SharedPreferences.setCommentCountFontColor(color: Int?) {
+    edit {
+        if (color == null) {
+            remove("commentCountFontColor")
+        } else {
+            putInt(
+                "commentCountFontColor",
                 color,
             )
         }

@@ -40,7 +40,6 @@ class SettingsFragment : Fragment() {
             val colorPickerPopUp = ColorPickerPopUp(context)
             colorPickerPopUp.setShowAlpha(true)
                 .setDefaultColor(prefs.markerBackgroundColor(requireContext()))
-                .setDialogTitle(getString(R.string.marker_background_color))
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setMarkerBackgroundColor(color)
@@ -66,7 +65,6 @@ class SettingsFragment : Fragment() {
             val colorPickerPopUp = ColorPickerPopUp(context)
             colorPickerPopUp.setShowAlpha(true)
                 .setDefaultColor(prefs.markerIconColor(requireContext()))
-                .setDialogTitle(getString(R.string.marker_background_color))
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setMarkerIconColor(color)
@@ -81,6 +79,56 @@ class SettingsFragment : Fragment() {
                 prefs.setMarkerIconColor(null)
                 binding.markerIconColor.text =
                     "#${prefs.markerIconColor(requireContext()).toHexString()}"
+                colorPickerPopUp.dismissDialog()
+            }
+        }
+
+        binding.commentCountBackgroundColor.text =
+            "#${prefs.commentCountBackgroundColor(requireContext()).toHexString()}"
+
+        binding.changeCommentCountBackgroundColor.setOnClickListener {
+            val colorPickerPopUp = ColorPickerPopUp(context)
+            colorPickerPopUp.setShowAlpha(true)
+                .setDefaultColor(prefs.commentCountBackgroundColor(requireContext()))
+                .setOnPickColorListener(object : OnPickColorListener {
+                    override fun onColorPicked(color: Int) {
+                        prefs.setCommentCountBackgroundColor(color)
+                    }
+
+                    override fun onCancel() {
+                        colorPickerPopUp.dismissDialog() // Dismiss the dialog.
+                    }
+                })
+                .show()
+            colorPickerPopUp.negativeButton.setOnClickListener {
+                prefs.setCommentCountBackgroundColor(null)
+                binding.commentCountBackgroundColor.text =
+                    "#${prefs.commentCountBackgroundColor(requireContext()).toHexString()}"
+                colorPickerPopUp.dismissDialog()
+            }
+        }
+
+        binding.commentCountFontColor.text =
+            "#${prefs.commentCountFontColor(requireContext()).toHexString()}"
+
+        binding.changeCommentCountFontColor.setOnClickListener {
+            val colorPickerPopUp = ColorPickerPopUp(context)
+            colorPickerPopUp.setShowAlpha(true)
+                .setDefaultColor(prefs.commentCountFontColor(requireContext()))
+                .setOnPickColorListener(object : OnPickColorListener {
+                    override fun onColorPicked(color: Int) {
+                        prefs.setCommentCountFontColor(color)
+                    }
+
+                    override fun onCancel() {
+                        colorPickerPopUp.dismissDialog() // Dismiss the dialog.
+                    }
+                })
+                .show()
+            colorPickerPopUp.negativeButton.setOnClickListener {
+                prefs.setCommentCountFontColor(null)
+                binding.commentCountFontColor.text =
+                    "#${prefs.commentCountFontColor(requireContext()).toHexString()}"
                 colorPickerPopUp.dismissDialog()
             }
         }

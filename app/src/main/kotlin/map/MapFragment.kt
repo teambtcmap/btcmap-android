@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.net.Uri
@@ -80,6 +81,8 @@ import search.SearchModel
 import search.SearchResultModel
 import settings.MapStyle
 import settings.SettingsFragment
+import settings.commentCountBackgroundColor
+import settings.commentCountFontColor
 import settings.mapStyle
 import settings.mapViewport
 import settings.markerBackgroundColor
@@ -216,8 +219,6 @@ class MapFragment : Fragment() {
         }
 
         emptyClusterBitmap = null
-
-        val markersRepo = MapMarkersRepo(requireContext())
 
         binding.filterMerchantsInactive.setOnClickListener {
             binding.filterMerchantsActive.isVisible = true
@@ -395,16 +396,37 @@ class MapFragment : Fragment() {
 
                                 if (it.cluster.count == 1L) {
                                     val icon = if (it.cluster.requiresCompanionApp) {
-                                        markersRepo.getWarningMarker(it.cluster.iconId.ifBlank { "question_mark" })
+                                        requireContext().marker(
+                                            iconId = it.cluster.iconId.ifBlank { "question_mark" },
+                                            backgroundColor = prefs.markerBackgroundColor(
+                                                requireContext()
+                                            ),
+                                            iconColor = requireContext().getErrorColor(),
+                                            countBackgroundColor = prefs.commentCountBackgroundColor(
+                                                requireContext()
+                                            ),
+                                            countFontColor = prefs.commentCountFontColor(
+                                                requireContext()
+                                            ),
+                                            counter = it.cluster.comments,
+                                        )
                                     } else if (it.cluster.boostExpires != null && it.cluster.boostExpires.isAfter(
                                             ZonedDateTime.now(
                                                 ZoneOffset.UTC
                                             )
                                         )
                                     ) {
-                                        markersRepo.getBoostedMarker(
-                                            it.cluster.iconId.ifBlank { "question_mark" },
-                                            it.cluster.comments,
+                                        requireContext().marker(
+                                            iconId = it.cluster.iconId.ifBlank { "question_mark" },
+                                            backgroundColor = Color.parseColor("#f7931a"),
+                                            iconColor = prefs.markerIconColor(requireContext()),
+                                            countBackgroundColor = prefs.commentCountBackgroundColor(
+                                                requireContext()
+                                            ),
+                                            countFontColor = prefs.commentCountFontColor(
+                                                requireContext()
+                                            ),
+                                            counter = it.cluster.comments,
                                         )
                                     } else {
                                         requireContext().marker(
@@ -413,6 +435,12 @@ class MapFragment : Fragment() {
                                                 requireContext()
                                             ),
                                             iconColor = prefs.markerIconColor(requireContext()),
+                                            countBackgroundColor = prefs.commentCountBackgroundColor(
+                                                requireContext()
+                                            ),
+                                            countFontColor = prefs.commentCountFontColor(
+                                                requireContext()
+                                            ),
                                             counter = it.cluster.comments,
                                         )
                                     }
@@ -448,6 +476,12 @@ class MapFragment : Fragment() {
                                         requireContext()
                                     ),
                                     iconColor = prefs.markerIconColor(requireContext()),
+                                    countBackgroundColor = prefs.commentCountBackgroundColor(
+                                        requireContext()
+                                    ),
+                                    countFontColor = prefs.commentCountFontColor(
+                                        requireContext()
+                                    ),
                                     counter = 0,
                                 )
                                 val newBitmap = Bitmap.createBitmap(

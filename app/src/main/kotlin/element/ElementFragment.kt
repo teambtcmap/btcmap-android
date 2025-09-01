@@ -32,17 +32,13 @@ import icons.iconTypeface
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import map.MapFragment
-import map.MapMarkersRepo
 import map.getErrorColor
 import map.getOnSurfaceColor
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
-import org.maplibre.android.annotations.IconFactory
-import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.camera.CameraPosition
-import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.Style
 import search.SearchResultModel
@@ -130,14 +126,6 @@ class ElementFragment : Fragment() {
                 map.cameraPosition =
                     CameraPosition.Builder().target(LatLng(element.lat, element.lon)).zoom(15.0)
                         .build()
-                val markersRepo = MapMarkersRepo(requireContext())
-                val icon = markersRepo.getMarker(
-                    element.icon, 0
-                )
-                val markerOptions = MarkerOptions().position(LatLng(element.lat, element.lon))
-                    .icon(IconFactory.getInstance(requireContext()).fromBitmap(icon.bitmap))
-                map.addMarker(markerOptions)
-                map.animateCamera(CameraUpdateFactory.zoomTo(17.0), 3_000)
             }
         }
 
