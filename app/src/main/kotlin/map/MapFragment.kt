@@ -44,8 +44,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.sqlite.SQLiteConnection
 import api.Api
 import app.dpToPx
-import area.AreaResultModel
-import area.bounds
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import element.ElementFragment
 import element.ElementsCluster
@@ -99,7 +97,6 @@ class MapFragment : Fragment() {
     private val searchModel: SearchModel by viewModel()
 
     private val searchResultModel: SearchResultModel by activityViewModel()
-    private val areaResultModel: AreaResultModel by activityViewModel()
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
@@ -503,47 +500,6 @@ class MapFragment : Fragment() {
                             prefs.mapViewport, 0
                         )
                     )
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                val pickedPlace = searchResultModel.element.value
-                searchResultModel.element.update { null }
-
-                val pickedArea = areaResultModel.area.value
-                areaResultModel.area.update { null }
-
-                if (pickedPlace != null) {
-                    binding.map.getMapAsync {
-                        model.selectElement(pickedPlace.id)
-                        it.moveCamera(
-                            CameraUpdateFactory.newLatLngZoom(
-                                LatLng(
-                                    model.selectedElement.value!!.lat,
-                                    model.selectedElement.value!!.lon
-                                ), 16.0
-                            )
-                        )
-                    }
-                    return@repeatOnLifecycle
-                }
-
-                if (pickedArea != null) {
-                    binding.map.getMapAsync {
-                        val boundingBoxPaddingPx = TypedValue.applyDimension(
-                            TypedValue.COMPLEX_UNIT_DIP,
-                            16f,
-                            resources.displayMetrics,
-                        ).toInt()
-                        it.moveCamera(
-                            CameraUpdateFactory.newLatLngBounds(
-                                pickedArea.tags.bounds(), boundingBoxPaddingPx
-                            )
-                        )
-                    }
-                    return@repeatOnLifecycle
                 }
             }
         }

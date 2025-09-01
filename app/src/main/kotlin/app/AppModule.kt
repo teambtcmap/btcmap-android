@@ -3,15 +3,9 @@ package app
 import android.content.Context
 import api.Api
 import api.ApiImpl
-import area.AreaModel
-import area.AreaQueries
-import area.AreaResultModel
-import area.AreasModel
-import area.AreasRepo
 import db.Database
 import element.ElementQueries
 import element.ElementsRepo
-import issue.IssuesModel
 import map.MapModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.module.dsl.singleOf
@@ -38,12 +32,6 @@ val appModule = module {
 
     singleOf(::Sync)
 
-    singleOf(::AreaQueries)
-    singleOf(::AreasRepo)
-    viewModelOf(::AreasModel)
-    viewModelOf(::AreaModel)
-    viewModelOf(::AreaResultModel)
-
     singleOf(::ElementQueries)
     singleOf(::ElementsRepo)
 
@@ -65,6 +53,4 @@ val appModule = module {
 
     viewModelOf(::SearchModel)
     viewModelOf(::SearchResultModel)
-
-    viewModelOf(::IssuesModel)
 }

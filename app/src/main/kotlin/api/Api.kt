@@ -1,7 +1,5 @@
 package api
 
-import area.AreaJson
-import area.toAreasJson
 import area_element.AreaElementJson
 import area_element.toAreaElementsJson
 import element.Element
@@ -36,8 +34,6 @@ interface Api {
     ): List<ElementCommentJson>
 
     suspend fun getEvents(): List<Event>
-
-    suspend fun getAreas(updatedSince: ZonedDateTime?, limit: Long): List<AreaJson>
 
     suspend fun getReports(updatedSince: ZonedDateTime?, limit: Long): List<ReportJson>
 
@@ -80,25 +76,6 @@ class ApiImpl(
                     )
                 }
             }
-        }
-    }
-
-    override suspend fun getAreas(updatedSince: ZonedDateTime?, limit: Long): List<AreaJson> {
-        val url = baseUrl.newBuilder().apply {
-            addPathSegment("v3")
-            addPathSegment("areas")
-            addQueryParameter("updated_since", updatedSince.apiFormat())
-            addQueryParameter("limit", "$limit")
-        }.build()
-
-        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
-
-        if (!res.isSuccessful) {
-            throw Exception("Unexpected HTTP response code: ${res.code}")
-        }
-
-        return withContext(Dispatchers.IO) {
-            res.body.byteStream().use { it.toAreasJson() }
         }
     }
 

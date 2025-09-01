@@ -6,7 +6,6 @@ import androidx.sqlite.driver.bundled.SQLITE_OPEN_CREATE
 import androidx.sqlite.driver.bundled.SQLITE_OPEN_FULLMUTEX
 import androidx.sqlite.driver.bundled.SQLITE_OPEN_READWRITE
 import androidx.sqlite.execSQL
-import area.AreaQueries
 import area_element.AreaElementQueries
 import element.ElementQueries
 import element_comment.ElementCommentQueries
@@ -40,7 +39,6 @@ class Database(path: String) {
                     execSQL(ElementQueries.CREATE_TABLE)
                     execSQL(ReportQueries.CREATE_TABLE)
                     execSQL(UserQueries.CREATE_TABLE)
-                    execSQL(AreaQueries.CREATE_TABLE)
                     execSQL(event.SCHEMA)
                     execSQL("PRAGMA user_version=1")
                 }
