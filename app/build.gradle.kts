@@ -21,22 +21,6 @@ android {
         versionName = "0.9.2"
     }
 
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            excludes += "DebugProbesKt.bin"
-        }
-    }
-
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include("arm64-v8a", "x86_64")
-            isUniversalApk = true
-        }
-    }
-
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -46,14 +30,17 @@ android {
         release {
             manifestPlaceholders["appIcon"] = "@drawable/launcher"
 
-            // Enables code shrinking, obfuscation, and optimization
+            // https://developer.android.com/topic/performance/app-optimization/enable-app-optimization
+
+            // Enables code-related app optimization.
             isMinifyEnabled = true
 
-            // Enables resource shrinking
+            // Enables resource shrinking.
             isShrinkResources = true
 
             // Includes the default ProGuard rules file
             proguardFiles(
+                // Default file with automatically generated optimization rules.
                 getDefaultProguardFile("proguard-android-optimize.txt"),
             )
 
@@ -65,8 +52,13 @@ android {
         viewBinding = true
     }
 
-    dependenciesInfo {
-        includeInApk = false
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "x86_64")
+            isUniversalApk = true
+        }
     }
 
     dependencies {
@@ -92,10 +84,12 @@ android {
 
 tasks.register("bundleData") {
     doLast {
-        val destDir = File(projectDir, "src/main/assets")
-        destDir.mkdirs()
-        val placesSrc =
-            URI("https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,name,comments,boosted_until")
-        File(destDir, "bundled-places.json").writeText(placesSrc.toURL().readText())
+        File(
+            File(projectDir, "src/main/assets"),
+            "bundled-places.json"
+        ).writeText(
+            URI("https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,name,comments,boosted_until").toURL()
+                .readText()
+        )
     }
 }
