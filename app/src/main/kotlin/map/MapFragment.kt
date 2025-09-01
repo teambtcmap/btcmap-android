@@ -81,8 +81,8 @@ import search.SearchModel
 import search.SearchResultModel
 import settings.MapStyle
 import settings.SettingsFragment
-import settings.commentCountBackgroundColor
-import settings.commentCountFontColor
+import settings.badgeBackgroundColor
+import settings.badgeTextColor
 import settings.mapStyle
 import settings.mapViewport
 import settings.markerBackgroundColor
@@ -401,14 +401,14 @@ class MapFragment : Fragment() {
                                             backgroundColor = prefs.markerBackgroundColor(
                                                 requireContext()
                                             ),
-                                            iconColor = requireContext().getErrorColor(),
-                                            countBackgroundColor = prefs.commentCountBackgroundColor(
+                                            iconColor = prefs.markerIconColor(requireContext()),
+                                            countBackgroundColor = prefs.badgeBackgroundColor(
                                                 requireContext()
                                             ),
-                                            countFontColor = prefs.commentCountFontColor(
+                                            countFontColor = prefs.badgeTextColor(
                                                 requireContext()
                                             ),
-                                            counter = it.cluster.comments,
+                                            badgeText = "!",
                                         )
                                     } else if (it.cluster.boostExpires != null && it.cluster.boostExpires.isAfter(
                                             ZonedDateTime.now(
@@ -420,13 +420,15 @@ class MapFragment : Fragment() {
                                             iconId = it.cluster.iconId.ifBlank { "question_mark" },
                                             backgroundColor = Color.parseColor("#f7931a"),
                                             iconColor = prefs.markerIconColor(requireContext()),
-                                            countBackgroundColor = prefs.commentCountBackgroundColor(
+                                            countBackgroundColor = prefs.badgeBackgroundColor(
                                                 requireContext()
                                             ),
-                                            countFontColor = prefs.commentCountFontColor(
+                                            countFontColor = prefs.badgeTextColor(
                                                 requireContext()
                                             ),
-                                            counter = it.cluster.comments,
+                                            badgeText = if (it.cluster.comments > 0) {
+                                                it.cluster.comments.toString()
+                                            } else "",
                                         )
                                     } else {
                                         requireContext().marker(
@@ -435,13 +437,15 @@ class MapFragment : Fragment() {
                                                 requireContext()
                                             ),
                                             iconColor = prefs.markerIconColor(requireContext()),
-                                            countBackgroundColor = prefs.commentCountBackgroundColor(
+                                            countBackgroundColor = prefs.badgeBackgroundColor(
                                                 requireContext()
                                             ),
-                                            countFontColor = prefs.commentCountFontColor(
+                                            countFontColor = prefs.badgeTextColor(
                                                 requireContext()
                                             ),
-                                            counter = it.cluster.comments,
+                                            badgeText = if (it.cluster.comments > 0) {
+                                                it.cluster.comments.toString()
+                                            } else "",
                                         )
                                     }
                                     val newBitmap = Bitmap.createBitmap(
@@ -476,13 +480,13 @@ class MapFragment : Fragment() {
                                         requireContext()
                                     ),
                                     iconColor = prefs.markerIconColor(requireContext()),
-                                    countBackgroundColor = prefs.commentCountBackgroundColor(
+                                    countBackgroundColor = prefs.badgeBackgroundColor(
                                         requireContext()
                                     ),
-                                    countFontColor = prefs.commentCountFontColor(
+                                    countFontColor = prefs.badgeTextColor(
                                         requireContext()
                                     ),
-                                    counter = 0,
+                                    badgeText = "",
                                 )
                                 val newBitmap = Bitmap.createBitmap(
                                     icon.bitmap.width,
@@ -732,14 +736,14 @@ class MapFragment : Fragment() {
 
     private fun createClusterIcon(cluster: ElementsCluster): Bitmap {
         val pinSizePx = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 32f, requireContext().resources.displayMetrics
+            TypedValue.COMPLEX_UNIT_DIP, 38f, requireContext().resources.displayMetrics
         ).toInt()
 
         if (emptyClusterBitmap == null) {
             val emptyClusterDrawable =
                 ContextCompat.getDrawable(requireContext(), R.drawable.cluster)!!
             DrawableCompat.setTint(
-                emptyClusterDrawable, requireContext().getPrimaryContainerColor()
+                emptyClusterDrawable, prefs.markerBackgroundColor(requireContext())
             )
             emptyClusterBitmap =
                 emptyClusterDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
@@ -753,7 +757,7 @@ class MapFragment : Fragment() {
         clusterIcon.applyCanvas {
             val paint = Paint().apply {
                 textSize = pinSizePx.toFloat() / 3
-                color = requireContext().getOnPrimaryContainerColor()
+                color = prefs.markerIconColor(requireContext())
             }
 
             val text = cluster.count.toString()

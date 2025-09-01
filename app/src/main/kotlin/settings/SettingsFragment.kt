@@ -83,16 +83,16 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        binding.commentCountBackgroundColor.text =
-            "#${prefs.commentCountBackgroundColor(requireContext()).toHexString()}"
+        binding.badgeBackgroundColor.text =
+            "#${prefs.badgeBackgroundColor(requireContext()).toHexString()}"
 
-        binding.changeCommentCountBackgroundColor.setOnClickListener {
+        binding.changeBadgeBackgroundColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
             colorPickerPopUp.setShowAlpha(true)
-                .setDefaultColor(prefs.commentCountBackgroundColor(requireContext()))
+                .setDefaultColor(prefs.badgeBackgroundColor(requireContext()))
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
-                        prefs.setCommentCountBackgroundColor(color)
+                        prefs.setBadgeBackgroundColor(color)
                     }
 
                     override fun onCancel() {
@@ -101,23 +101,23 @@ class SettingsFragment : Fragment() {
                 })
                 .show()
             colorPickerPopUp.negativeButton.setOnClickListener {
-                prefs.setCommentCountBackgroundColor(null)
-                binding.commentCountBackgroundColor.text =
-                    "#${prefs.commentCountBackgroundColor(requireContext()).toHexString()}"
+                prefs.setBadgeBackgroundColor(null)
+                binding.badgeBackgroundColor.text =
+                    "#${prefs.badgeBackgroundColor(requireContext()).toHexString()}"
                 colorPickerPopUp.dismissDialog()
             }
         }
 
-        binding.commentCountFontColor.text =
-            "#${prefs.commentCountFontColor(requireContext()).toHexString()}"
+        binding.badgeTextColor.text =
+            "#${prefs.badgeTextColor(requireContext()).toHexString()}"
 
-        binding.changeCommentCountFontColor.setOnClickListener {
+        binding.changeBadgeTextColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
             colorPickerPopUp.setShowAlpha(true)
-                .setDefaultColor(prefs.commentCountFontColor(requireContext()))
+                .setDefaultColor(prefs.badgeTextColor(requireContext()))
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
-                        prefs.setCommentCountFontColor(color)
+                        prefs.setBadgeTextColor(color)
                     }
 
                     override fun onCancel() {
@@ -126,9 +126,9 @@ class SettingsFragment : Fragment() {
                 })
                 .show()
             colorPickerPopUp.negativeButton.setOnClickListener {
-                prefs.setCommentCountFontColor(null)
-                binding.commentCountFontColor.text =
-                    "#${prefs.commentCountFontColor(requireContext()).toHexString()}"
+                prefs.setBadgeTextColor(null)
+                binding.badgeTextColor.text =
+                    "#${prefs.badgeTextColor(requireContext()).toHexString()}"
                 colorPickerPopUp.dismissDialog()
             }
         }

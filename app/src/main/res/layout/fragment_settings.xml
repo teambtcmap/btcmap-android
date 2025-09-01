@@ -124,7 +124,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/changeCommentCountBackgroundColor"
+                android:id="@+id/changeBadgeBackgroundColor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?selectableItemBackground"
@@ -139,22 +139,22 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/comment_count_background_color"
+                    android:text="@string/badge_background"
                     android:textColor="?colorOnSurface"
                     android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/commentCountBackgroundColor"
+                    android:id="@+id/badgeBackgroundColor"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:alpha="0.6"
                     android:textAppearance="?textAppearanceListItemSecondary"
-                    tools:text="Auto" />
+                    tools:text="#ffffff" />
 
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/changeCommentCountFontColor"
+                android:id="@+id/changeBadgeTextColor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?selectableItemBackground"
@@ -169,17 +169,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/comment_count_background_color"
+                    android:text="@string/badge_text"
                     android:textColor="?colorOnSurface"
                     android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/commentCountFontColor"
+                    android:id="@+id/badgeTextColor"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:alpha="0.6"
                     android:textAppearance="?textAppearanceListItemSecondary"
-                    tools:text="Auto" />
+                    tools:text="#ffffff" />
 
             </LinearLayout>
 

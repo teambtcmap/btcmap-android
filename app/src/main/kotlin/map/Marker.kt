@@ -21,7 +21,7 @@ fun Context.marker(
     iconColor: Int,
     countBackgroundColor: Int,
     countFontColor: Int,
-    counter: Long
+    badgeText: String,
 ): BitmapDrawable {
     val pinSizePx = TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP, 48f, resources.displayMetrics
@@ -65,7 +65,7 @@ fun Context.marker(
         }
     }
 
-    if (counter > 0) {
+    if (badgeText.isNotBlank()) {
         val commentCountCirclePaint by lazy {
             Paint().apply {
                 color = countBackgroundColor
@@ -87,7 +87,7 @@ fun Context.marker(
         }
 
         markerIcon.applyCanvas {
-            val textWidth = commentsCountTextPaint.measureText(counter.toString())
+            val textWidth = commentsCountTextPaint.measureText(badgeText)
             drawOval(
                 markerIcon.width.toFloat() * 0.65f,
                 0f,
@@ -96,7 +96,7 @@ fun Context.marker(
                 commentCountCirclePaint,
             )
             drawText(
-                counter.toString(),
+                badgeText,
                 markerIcon.width * 0.82f - textWidth / 2f,
                 markerIcon.height / 4f - (commentsCountTextPaint.fontMetrics.ascent + commentsCountTextPaint.fontMetrics.descent) / 2 - markerIcon.height.toFloat() * 0.07f,
                 commentsCountTextPaint,

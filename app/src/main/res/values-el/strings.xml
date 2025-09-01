@@ -95,5 +95,6 @@
     <string name="style_dark">Dark (experimental)</string>
     <string name="marker_background_color">Marker background</string>
     <string name="marker_icon_color">Marker icon</string>
-    <string name="comment_count_background_color">Comment count background</string>
+    <string name="badge_background">Badge background</string>
+    <string name="badge_text">Badge text</string>
 </resources>

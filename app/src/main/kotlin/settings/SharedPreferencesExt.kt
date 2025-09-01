@@ -149,34 +149,34 @@ fun SharedPreferences.setMarkerIconColor(color: Int?) {
     }
 }
 
-fun SharedPreferences.commentCountBackgroundColor(ctx: Context): Int {
-    return getInt("commentCountBackgroundColor", Color.parseColor("#0c9073"))
+fun SharedPreferences.badgeBackgroundColor(ctx: Context): Int {
+    return getInt("badgeBackgroundColor", Color.parseColor("#0c9073"))
 }
 
-fun SharedPreferences.setCommentCountBackgroundColor(color: Int?) {
+fun SharedPreferences.setBadgeBackgroundColor(color: Int?) {
     edit {
         if (color == null) {
-            remove("commentCountBackgroundColor")
+            remove("badgeBackgroundColor")
         } else {
             putInt(
-                "commentCountBackgroundColor",
+                "badgeBackgroundColor",
                 color,
             )
         }
     }
 }
 
-fun SharedPreferences.commentCountFontColor(ctx: Context): Int {
-    return getInt("commentCountFontColor", Color.WHITE)
+fun SharedPreferences.badgeTextColor(ctx: Context): Int {
+    return getInt("badgeTextColor", Color.WHITE)
 }
 
-fun SharedPreferences.setCommentCountFontColor(color: Int?) {
+fun SharedPreferences.setBadgeTextColor(color: Int?) {
     edit {
         if (color == null) {
-            remove("commentCountFontColor")
+            remove("badgeTextColor")
         } else {
             putInt(
-                "commentCountFontColor",
+                "badgeTextColor",
                 color,
             )
         }
