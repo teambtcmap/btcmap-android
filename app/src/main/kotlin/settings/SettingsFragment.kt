@@ -58,6 +58,31 @@ class SettingsFragment : Fragment() {
             }
         }
 
+        binding.boostedMarkerBackgroundColor.text =
+            "#${prefs.boostedMarkerBackgroundColor(requireContext()).toHexString()}"
+
+        binding.changeBoostedMarkerBackgroundColor.setOnClickListener {
+            val colorPickerPopUp = ColorPickerPopUp(context)
+            colorPickerPopUp.setShowAlpha(true)
+                .setDefaultColor(prefs.boostedMarkerBackgroundColor(requireContext()))
+                .setOnPickColorListener(object : OnPickColorListener {
+                    override fun onColorPicked(color: Int) {
+                        prefs.setBoostedMarkerBackgroundColor(color)
+                    }
+
+                    override fun onCancel() {
+                        colorPickerPopUp.dismissDialog() // Dismiss the dialog.
+                    }
+                })
+                .show()
+            colorPickerPopUp.negativeButton.setOnClickListener {
+                prefs.setBoostedMarkerBackgroundColor(null)
+                binding.boostedMarkerBackgroundColor.text =
+                    "#${prefs.boostedMarkerBackgroundColor(requireContext()).toHexString()}"
+                colorPickerPopUp.dismissDialog()
+            }
+        }
+
         binding.markerIconColor.text =
             "#${prefs.markerIconColor(requireContext()).toHexString()}"
 

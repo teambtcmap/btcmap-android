@@ -13,6 +13,7 @@ import map.markerBackgroundColor
 import map.onMarkerBackgroundColor
 import org.btcmap.R
 import org.maplibre.android.geometry.LatLngBounds
+import androidx.core.graphics.toColorInt
 
 val Application.prefs: SharedPreferences
     get() {
@@ -126,6 +127,27 @@ fun SharedPreferences.setMarkerBackgroundColor(color: Int?) {
         } else {
             putInt(
                 "markerBackgroundColor",
+                color,
+            )
+        }
+    }
+}
+
+private const val KEY_BOOSTED_MARKER_BACKGROUND_COLOR = "boostedMarkerBackgroundColor"
+
+private val DEFAULT_MARKER_BACKGROUND_COLOR = "#f7931a".toColorInt()
+
+fun SharedPreferences.boostedMarkerBackgroundColor(ctx: Context): Int {
+    return getInt(KEY_BOOSTED_MARKER_BACKGROUND_COLOR, DEFAULT_MARKER_BACKGROUND_COLOR)
+}
+
+fun SharedPreferences.setBoostedMarkerBackgroundColor(color: Int?) {
+    edit {
+        if (color == null) {
+            remove(KEY_BOOSTED_MARKER_BACKGROUND_COLOR)
+        } else {
+            putInt(
+                KEY_BOOSTED_MARKER_BACKGROUND_COLOR,
                 color,
             )
         }

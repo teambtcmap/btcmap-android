@@ -83,6 +83,7 @@ import settings.MapStyle
 import settings.SettingsFragment
 import settings.badgeBackgroundColor
 import settings.badgeTextColor
+import settings.boostedMarkerBackgroundColor
 import settings.mapStyle
 import settings.mapViewport
 import settings.markerBackgroundColor
@@ -132,9 +133,7 @@ class MapFragment : Fragment() {
         binding.map.getMapAsync { map ->
             map.getStyle { style ->
                 val locationComponentOptions =
-                    LocationComponentOptions.builder(requireContext())
-                        .pulseEnabled(true)
-                        .build()
+                    LocationComponentOptions.builder(requireContext()).pulseEnabled(true).build()
                 val locationComponentActivationOptions =
                     buildLocationComponentActivationOptions(style, locationComponentOptions)
                 map.locationComponent.activateLocationComponent(
@@ -159,20 +158,14 @@ class MapFragment : Fragment() {
     }
 
     private fun buildLocationComponentActivationOptions(
-        style: Style,
-        locationComponentOptions: LocationComponentOptions
+        style: Style, locationComponentOptions: LocationComponentOptions
     ): LocationComponentActivationOptions {
-        return LocationComponentActivationOptions
-            .builder(requireContext(), style)
-            .locationComponentOptions(locationComponentOptions)
-            .useDefaultLocationEngine(true)
+        return LocationComponentActivationOptions.builder(requireContext(), style)
+            .locationComponentOptions(locationComponentOptions).useDefaultLocationEngine(true)
             .locationEngineRequest(
-                LocationEngineRequest.Builder(750)
-                    .setFastestInterval(750)
-                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                    .build()
-            )
-            .build()
+                LocationEngineRequest.Builder(750).setFastestInterval(750)
+                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build()
+            ).build()
     }
 
     private var emptyClusterBitmap: Bitmap? = null
@@ -309,8 +302,7 @@ class MapFragment : Fragment() {
                 if (!snippet.isNullOrBlank()) {
                     if (snippet.startsWith("event:")) {
                         val url = snippet.replace("event:", "").toHttpUrl()
-                        val browserIntent =
-                            Intent(Intent.ACTION_VIEW, url.toString().toUri())
+                        val browserIntent = Intent(Intent.ACTION_VIEW, url.toString().toUri())
                         startActivity(browserIntent)
                     } else {
                         val id = marker.snippet.toLong()
@@ -395,59 +387,27 @@ class MapFragment : Fragment() {
                                     MarkerOptions().position(LatLng(it.cluster.lat, it.cluster.lon))
 
                                 if (it.cluster.count == 1L) {
-                                    val icon = if (it.cluster.requiresCompanionApp) {
-                                        requireContext().marker(
-                                            iconId = it.cluster.iconId.ifBlank { "question_mark" },
-                                            backgroundColor = prefs.markerBackgroundColor(
-                                                requireContext()
-                                            ),
-                                            iconColor = prefs.markerIconColor(requireContext()),
-                                            countBackgroundColor = prefs.badgeBackgroundColor(
-                                                requireContext()
-                                            ),
-                                            countFontColor = prefs.badgeTextColor(
-                                                requireContext()
-                                            ),
-                                            badgeText = "!",
-                                        )
-                                    } else if (it.cluster.boostExpires != null && it.cluster.boostExpires.isAfter(
-                                            ZonedDateTime.now(
-                                                ZoneOffset.UTC
+                                    val icon = requireContext().marker(
+                                        iconId = it.cluster.iconId.ifBlank { "question_mark" },
+                                        backgroundColor = if (it.cluster.boostExpires != null && it.cluster.boostExpires.isAfter(
+                                                ZonedDateTime.now(
+                                                    ZoneOffset.UTC
+                                                )
                                             )
-                                        )
-                                    ) {
-                                        requireContext().marker(
-                                            iconId = it.cluster.iconId.ifBlank { "question_mark" },
-                                            backgroundColor = Color.parseColor("#f7931a"),
-                                            iconColor = prefs.markerIconColor(requireContext()),
-                                            countBackgroundColor = prefs.badgeBackgroundColor(
-                                                requireContext()
-                                            ),
-                                            countFontColor = prefs.badgeTextColor(
-                                                requireContext()
-                                            ),
-                                            badgeText = if (it.cluster.comments > 0) {
-                                                it.cluster.comments.toString()
-                                            } else "",
-                                        )
-                                    } else {
-                                        requireContext().marker(
-                                            iconId = it.cluster.iconId.ifBlank { "question_mark" },
-                                            backgroundColor = prefs.markerBackgroundColor(
-                                                requireContext()
-                                            ),
-                                            iconColor = prefs.markerIconColor(requireContext()),
-                                            countBackgroundColor = prefs.badgeBackgroundColor(
-                                                requireContext()
-                                            ),
-                                            countFontColor = prefs.badgeTextColor(
-                                                requireContext()
-                                            ),
-                                            badgeText = if (it.cluster.comments > 0) {
-                                                it.cluster.comments.toString()
-                                            } else "",
-                                        )
-                                    }
+                                        ) prefs.boostedMarkerBackgroundColor(requireContext()) else prefs.markerBackgroundColor(
+                                            requireContext()
+                                        ),
+                                        iconColor = prefs.markerIconColor(requireContext()),
+                                        countBackgroundColor = prefs.badgeBackgroundColor(
+                                            requireContext()
+                                        ),
+                                        countFontColor = prefs.badgeTextColor(
+                                            requireContext()
+                                        ),
+                                        badgeText = if (it.cluster.requiresCompanionApp) {
+                                            "!"
+                                        } else if (it.cluster.comments == 0L) "" else it.cluster.comments.toString()
+                                    )
                                     val newBitmap = Bitmap.createBitmap(
                                         icon.bitmap.width,
                                         icon.bitmap.height * 2,
@@ -496,8 +456,7 @@ class MapFragment : Fragment() {
                                 val canvas = Canvas(newBitmap)
                                 canvas.drawBitmap(icon.bitmap, Matrix(), null)
                                 marker.icon(
-                                    IconFactory.getInstance(requireContext())
-                                        .fromBitmap(newBitmap)
+                                    IconFactory.getInstance(requireContext()).fromBitmap(newBitmap)
                                 )
                                 marker.snippet("event:${it.event.website}")
                                 visibleElements += map.addMarker(marker)
@@ -580,8 +539,7 @@ class MapFragment : Fragment() {
                         ).toInt()
                         it.moveCamera(
                             CameraUpdateFactory.newLatLngBounds(
-                                pickedArea.tags.bounds(),
-                                boundingBoxPaddingPx
+                                pickedArea.tags.bounds(), boundingBoxPaddingPx
                             )
                         )
                     }
@@ -599,8 +557,7 @@ class MapFragment : Fragment() {
                 it.moveCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(
-                            model.selectedElement.value!!.lat,
-                            model.selectedElement.value!!.lon
+                            model.selectedElement.value!!.lat, model.selectedElement.value!!.lon
                         ), 16.0
                     )
                 )
@@ -663,8 +620,7 @@ class MapFragment : Fragment() {
 
     private val onCameraIdleListener = OnCameraIdleListener {
         binding.map.getMapAsync { map ->
-            prefs.mapViewport =
-                map.projection.visibleRegion.latLngBounds
+            prefs.mapViewport = map.projection.visibleRegion.latLngBounds
 
             refreshData()
 
@@ -679,14 +635,13 @@ class MapFragment : Fragment() {
     private fun refreshData() {
         binding.map.getMapAsync { map ->
             viewLifecycleOwner.lifecycleScope.launch {
-                val filter =
-                    if (binding.filterMerchantsActive.isVisible) {
-                        MapModel.Filter.Merchants
-                    } else if (binding.filterEventsActive.isVisible) {
-                        MapModel.Filter.Events
-                    } else {
-                        MapModel.Filter.Exchanges
-                    }
+                val filter = if (binding.filterMerchantsActive.isVisible) {
+                    MapModel.Filter.Merchants
+                } else if (binding.filterEventsActive.isVisible) {
+                    MapModel.Filter.Events
+                } else {
+                    MapModel.Filter.Exchanges
+                }
 
                 model.loadItems(
                     bounds = map.projection.visibleRegion.latLngBounds,

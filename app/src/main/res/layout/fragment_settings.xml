@@ -89,7 +89,37 @@
                     android:layout_height="wrap_content"
                     android:alpha="0.6"
                     android:textAppearance="?textAppearanceListItemSecondary"
-                    tools:text="Auto" />
+                    tools:text="#ffffff" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/changeBoostedMarkerBackgroundColor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minHeight="64dp"
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/boosted_marker_background"
+                    android:textColor="?colorOnSurface"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/boostedMarkerBackgroundColor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.6"
+                    android:textAppearance="?textAppearanceListItemSecondary"
+                    tools:text="#ffffff" />
 
             </LinearLayout>
 
@@ -119,7 +149,7 @@
                     android:layout_height="wrap_content"
                     android:alpha="0.6"
                     android:textAppearance="?textAppearanceListItemSecondary"
-                    tools:text="Auto" />
+                    tools:text="#ffffff" />
 
             </LinearLayout>
 

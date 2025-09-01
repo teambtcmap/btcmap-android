@@ -97,4 +97,5 @@
     <string name="marker_icon_color">Marker icon</string>
     <string name="badge_background">Badge background</string>
     <string name="badge_text">Badge text</string>
+    <string name="boosted_marker_background">Boosted marker background</string>
 </resources>
