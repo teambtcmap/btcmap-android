@@ -16,7 +16,12 @@ import org.btcmap.R
 
 private const val PIN_SIZE_DP = 48f
 
-fun Context.marker(iconId: String, backgroundColor: Int, counter: Long): BitmapDrawable {
+fun Context.marker(
+    iconId: String,
+    backgroundColor: Int,
+    iconColor: Int,
+    counter: Long
+): BitmapDrawable {
     val pinSizePx = TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP, 48f, resources.displayMetrics
     ).toInt()
@@ -49,7 +54,7 @@ fun Context.marker(iconId: String, backgroundColor: Int, counter: Long): BitmapD
     if (iconId.isNotBlank()) {
         markerIcon.applyCanvas {
             val textWidth = iconPaint.measureText(iconId)
-            iconPaint.color = onMarkerBackgroundColor()
+            iconPaint.color = iconColor
             drawText(
                 iconId,
                 markerIcon.width / 2f - textWidth / 2f,

@@ -36,7 +36,7 @@ class SettingsFragment : Fragment() {
         binding.markerBackgroundColor.text =
             "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
 
-        binding.markerBackgroundColor.setOnClickListener {
+        binding.changeMarkerBackgroundColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
             colorPickerPopUp.setShowAlpha(true)
                 .setDefaultColor(prefs.markerBackgroundColor(requireContext()))
@@ -55,6 +55,32 @@ class SettingsFragment : Fragment() {
                 prefs.setMarkerBackgroundColor(null)
                 binding.markerBackgroundColor.text =
                     "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
+                colorPickerPopUp.dismissDialog()
+            }
+        }
+
+        binding.markerIconColor.text =
+            "#${prefs.markerIconColor(requireContext()).toHexString()}"
+
+        binding.changeMarkerIconColor.setOnClickListener {
+            val colorPickerPopUp = ColorPickerPopUp(context)
+            colorPickerPopUp.setShowAlpha(true)
+                .setDefaultColor(prefs.markerIconColor(requireContext()))
+                .setDialogTitle(getString(R.string.marker_background_color))
+                .setOnPickColorListener(object : OnPickColorListener {
+                    override fun onColorPicked(color: Int) {
+                        prefs.setMarkerIconColor(color)
+                    }
+
+                    override fun onCancel() {
+                        colorPickerPopUp.dismissDialog() // Dismiss the dialog.
+                    }
+                })
+                .show()
+            colorPickerPopUp.negativeButton.setOnClickListener {
+                prefs.setMarkerIconColor(null)
+                binding.markerIconColor.text =
+                    "#${prefs.markerIconColor(requireContext()).toHexString()}"
                 colorPickerPopUp.dismissDialog()
             }
         }

@@ -9,6 +9,7 @@ import android.content.res.Configuration
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import map.markerBackgroundColor
+import map.onMarkerBackgroundColor
 import org.btcmap.R
 import org.maplibre.android.geometry.LatLngBounds
 
@@ -124,6 +125,23 @@ fun SharedPreferences.setMarkerBackgroundColor(color: Int?) {
         } else {
             putInt(
                 "markerBackgroundColor",
+                color,
+            )
+        }
+    }
+}
+
+fun SharedPreferences.markerIconColor(ctx: Context): Int {
+    return getInt("markerIconColor", ctx.onMarkerBackgroundColor())
+}
+
+fun SharedPreferences.setMarkerIconColor(color: Int?) {
+    edit {
+        if (color == null) {
+            remove("markerIconColor")
+        } else {
+            putInt(
+                "markerIconColor",
                 color,
             )
         }

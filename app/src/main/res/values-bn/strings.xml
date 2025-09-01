@@ -94,4 +94,5 @@
     <string name="style_bright">Bright</string>
     <string name="style_dark">Dark (experimental)</string>
     <string name="marker_background_color">Marker background color</string>
+    <string name="marker_icon_color">Marker icon color</string>
 </resources>

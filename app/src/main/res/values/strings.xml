@@ -96,4 +96,5 @@
     <string name="dialog_positive_button_text" translatable="false">Save</string>
     <string name="dialog_negative_button_text" translatable="false">Reset</string>
     <string name="marker_background_color">Marker background color</string>
+    <string name="marker_icon_color">Marker icon color</string>
 </resources>
