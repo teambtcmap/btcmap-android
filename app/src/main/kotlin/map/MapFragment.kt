@@ -277,56 +277,11 @@ class MapFragment : Fragment() {
 
         binding.searchBar.setOnMenuItemClickListener {
             when (it.itemId) {
-//                R.id.action_donate -> {
-//                    parentFragmentManager.commit {
-//                        setReorderingAllowed(true)
-//                        replace<DonationFragment>(R.id.nav_host_fragment)
-//                        addToBackStack(null)
-//                    }
-//                }
-
                 R.id.action_add_element -> {
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.data = Uri.parse("https://btcmap.org/add-location")
                     startActivity(intent)
                 }
-
-//                R.id.action_areas -> {
-//                    parentFragmentManager.commit {
-//                        setReorderingAllowed(true)
-//                        replace<AreasFragment>(
-//                            R.id.nav_host_fragment, null, bundleOf(
-//                                "lat" to model.mapViewport.value.boundingBox.center.latitude.toFloat(),
-//                                "lon" to model.mapViewport.value.boundingBox.center.longitude.toFloat(),
-//                            )
-//                        )
-//                        addToBackStack(null)
-//                    }
-//                }
-
-//                R.id.action_trends -> {
-//                    parentFragmentManager.commit {
-//                        setReorderingAllowed(true)
-//                        replace<ReportsFragment>(R.id.nav_host_fragment)
-//                        addToBackStack(null)
-//                    }
-//                }
-
-//                R.id.action_users -> {
-//                    parentFragmentManager.commit {
-//                        setReorderingAllowed(true)
-//                        replace<UsersFragment>(R.id.nav_host_fragment)
-//                        addToBackStack(null)
-//                    }
-//                }
-
-//                R.id.action_events -> {
-//                    parentFragmentManager.commit {
-//                        setReorderingAllowed(true)
-//                        replace<EventsFragment>(R.id.nav_host_fragment)
-//                        addToBackStack(null)
-//                    }
-//                }
 
                 R.id.action_settings -> {
                     parentFragmentManager.commit {
@@ -367,17 +322,6 @@ class MapFragment : Fragment() {
         bottomSheetBehavior = BottomSheetBehavior.from(binding.elementDetails)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         bottomSheetBehavior.addSlideCallback()
-
-        when (prefs.mapStyle) {
-            MapStyle.Auto -> {
-                val nightMode =
-                    requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-                insetsController?.isAppearanceLightStatusBars = !nightMode
-            }
-
-            MapStyle.Dark -> insetsController?.isAppearanceLightStatusBars = false
-            else -> insetsController?.isAppearanceLightStatusBars = true
-        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             val elementDetailsToolbar = getElementDetailsToolbar() ?: return@launch
@@ -787,5 +731,34 @@ class MapFragment : Fragment() {
         }
 
         return clusterIcon
+    }
+
+    override fun onResume() {
+        super.onResume()
+        styleStatusBar()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        restoreDefaultStatusBar()
+    }
+
+    fun styleStatusBar() {
+        when (prefs.mapStyle) {
+            MapStyle.Auto -> {
+                val nightMode =
+                    requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+                insetsController?.isAppearanceLightStatusBars = !nightMode
+            }
+
+            MapStyle.Dark -> insetsController?.isAppearanceLightStatusBars = false
+            else -> insetsController?.isAppearanceLightStatusBars = true
+        }
+    }
+
+    fun restoreDefaultStatusBar() {
+        val nightMode =
+            requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        insetsController?.isAppearanceLightStatusBars = !nightMode
     }
 }
