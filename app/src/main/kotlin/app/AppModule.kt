@@ -13,7 +13,6 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 import search.SearchModel
 import search.SearchResultModel
-import sync.Sync
 import user.UserQueries
 import user.UsersModel
 import user.UsersRepo
@@ -24,8 +23,6 @@ val appModule = module {
     single { Database(get<Context>().getDatabasePath("btcmap-2025-08-24.db").absolutePath).conn }
 
     single { ApiImpl() }.bind(Api::class)
-
-    singleOf(::Sync)
 
     singleOf(::ElementQueries)
     singleOf(::ElementsRepo)
