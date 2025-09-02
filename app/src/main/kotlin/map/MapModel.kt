@@ -2,7 +2,6 @@ package map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.sqlite.SQLiteConnection
 import element.Element
 import element.ElementsRepo
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +16,6 @@ import org.maplibre.android.geometry.LatLngBounds
 
 class MapModel(
     val elementsRepo: ElementsRepo,
-    private val conn: SQLiteConnection,
 ) : ViewModel() {
 
     private val _selectedElement: MutableStateFlow<Element?> = MutableStateFlow(null)
@@ -50,7 +48,7 @@ class MapModel(
 
                     Filter.Events -> {
                         val meetups =
-                            event.selectAll(conn).map { MapItem.Event(it) }
+                            event.selectAll().map { MapItem.Event(it) }
                         _items.update { meetups }
                     }
 

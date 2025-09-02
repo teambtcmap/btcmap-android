@@ -3,7 +3,9 @@ package event
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.execSQL
+import conn
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import transaction
 import java.time.ZonedDateTime
 import kotlin.collections.forEach
 
@@ -35,18 +37,14 @@ val SCHEMA = """
     )
 """
 
-fun deleteAllAndInsertBatch(events: List<Event>, conn: SQLiteConnection) {
-    conn.execSQL("BEGIN TRANSACTION")
-    try {
+fun deleteAllAndInsertBatch(events: List<Event>, conn: SQLiteConnection = conn()) {
+    conn.transaction {
         deleteAll(conn)
         insertBatch(events, conn)
-        conn.execSQL("END TRANSACTION")
-    } catch (_: Throwable) {
-        conn.execSQL("ROLLBACK TRANSACTION")
     }
 }
 
-fun insertBatch(events: List<Event>, conn: SQLiteConnection) {
+private fun insertBatch(events: List<Event>, conn: SQLiteConnection) {
     val sql = """
             INSERT
             INTO $TABLE_NAME (${Columns.entries.joinToString()}) 
@@ -74,7 +72,7 @@ fun insertBatch(events: List<Event>, conn: SQLiteConnection) {
     }
 }
 
-fun selectAll(conn: SQLiteConnection): List<Event> {
+fun selectAll(conn: SQLiteConnection = conn()): List<Event> {
     return conn.prepare(
         """
                 SELECT ${Columns.entries.joinToString()}
@@ -89,7 +87,7 @@ fun selectAll(conn: SQLiteConnection): List<Event> {
     }
 }
 
-fun deleteAll(conn: SQLiteConnection) {
+private fun deleteAll(conn: SQLiteConnection) {
     conn.execSQL("DELETE FROM $TABLE_NAME")
 }
 

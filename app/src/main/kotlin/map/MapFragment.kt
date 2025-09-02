@@ -475,11 +475,9 @@ class MapFragment : Fragment() {
 
                 elementsRepo.sync()
                 refreshData()
-
                 val api by inject<Api>()
-                val conn by inject<SQLiteConnection>()
                 val events = api.getEvents()
-                withContext(Dispatchers.IO) { event.deleteAllAndInsertBatch(events, conn) }
+                withContext(Dispatchers.IO) { event.deleteAllAndInsertBatch(events) }
                 refreshData()
 
                 val commentsRepo by inject<ElementCommentRepo>()

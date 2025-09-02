@@ -1,12 +1,12 @@
 package element_comment
 
 import androidx.sqlite.SQLiteConnection
-import db.getZonedDateTime
-import db.getZonedDateTimeOrNull
-import db.transaction
+import conn
+import getZonedDateTimeOrNull
+import transaction
 import java.time.ZonedDateTime
 
-class ElementCommentQueries(private val conn: SQLiteConnection) {
+class ElementCommentQueries {
 
     companion object {
         const val CREATE_TABLE = """
@@ -23,33 +23,37 @@ class ElementCommentQueries(private val conn: SQLiteConnection) {
             """
     }
 
-    fun insertOrReplace(comments: List<ElementComment>) {
-        conn.transaction { conn ->
+    fun insertOrReplace(comments: List<ElementComment>, conn: SQLiteConnection = conn()) {
+        val sql = """
+            INSERT OR REPLACE
+            INTO element_comment (
+                id,
+                element_id,
+                comment,
+                created_at,
+                updated_at
+            ) VALUES (?1, ?2, ?3, ?4, ?5)
+        """
+
+        conn.transaction {
+            val stmt = conn.prepare(sql)
+
             comments.forEach { comment ->
-                conn.prepare(
-                    """
-                    INSERT OR REPLACE
-                    INTO element_comment (
-                        id,
-                        element_id,
-                        comment,
-                        created_at,
-                        updated_at
-                    ) VALUES (?1, ?2, ?3, ?4, ?5)
-                    """
-                ).use {
-                    it.bindLong(1, comment.id)
-                    it.bindLong(2, comment.elementId)
-                    it.bindText(3, comment.comment)
-                    it.bindText(4, comment.createdAt)
-                    it.bindText(5, comment.updatedAt)
-                    it.step()
-                }
+                stmt.reset()
+                stmt.clearBindings()
+
+                stmt.bindLong(1, comment.id)
+                stmt.bindLong(2, comment.elementId)
+                stmt.bindText(3, comment.comment)
+                stmt.bindText(4, comment.createdAt)
+                stmt.bindText(5, comment.updatedAt)
+
+                stmt.step()
             }
         }
     }
 
-    fun selectById(id: Long): ElementComment? {
+    fun selectById(id: Long, conn: SQLiteConnection = conn()): ElementComment? {
         return conn.prepare(
             """
                 SELECT
@@ -78,7 +82,7 @@ class ElementCommentQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectByElementId(elementId: Long): List<ElementComment> {
+    fun selectByElementId(elementId: Long, conn: SQLiteConnection = conn()): List<ElementComment> {
         return conn.prepare(
             """
                 SELECT
@@ -110,7 +114,7 @@ class ElementCommentQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectMaxUpdatedAt(): ZonedDateTime? {
+    fun selectMaxUpdatedAt(conn: SQLiteConnection = conn()): ZonedDateTime? {
         return conn.prepare("SELECT max(updated_at) FROM element_comment").use {
             if (it.step()) {
                 it.getZonedDateTimeOrNull(0)
@@ -120,14 +124,14 @@ class ElementCommentQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectCount(): Long {
+    fun selectCount(conn: SQLiteConnection = conn()): Long {
         return conn.prepare("SELECT count(*) FROM element_comment").use {
             it.step()
             it.getLong(0)
         }
     }
 
-    fun deleteById(id: Long) {
+    fun deleteById(id: Long, conn: SQLiteConnection = conn()) {
         conn.prepare("DELETE FROM element_comment WHERE id = ?1").use {
             it.bindLong(1, id)
             it.step()

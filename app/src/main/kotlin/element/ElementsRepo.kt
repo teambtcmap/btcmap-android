@@ -3,14 +3,11 @@ package element
 import android.app.Application
 import android.util.Log
 import api.Api
-import db.elementsUpdatedAt
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import java.time.Duration
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import kotlin.math.pow
@@ -120,7 +117,6 @@ class ElementsRepo(
         withContext(Dispatchers.IO) {
             queries.insertOrReplace(bundledElements.map { it.toElement() })
         }
-        elementsUpdatedAt.update { LocalDateTime.now() }
     }
 
     suspend fun sync(): SyncReport {
@@ -160,8 +156,6 @@ class ElementsRepo(
                         }
                     }
                 }
-
-                elementsUpdatedAt.update { LocalDateTime.now() }
 
                 if (delta.size < BATCH_SIZE) {
                     break

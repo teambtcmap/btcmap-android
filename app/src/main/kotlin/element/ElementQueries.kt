@@ -2,13 +2,14 @@ package element
 
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
-import db.getHttpUrlOrNull
-import db.getTextOrNull
-import db.getZonedDateTimeOrNull
-import db.transaction
+import conn
+import getHttpUrlOrNull
+import getTextOrNull
+import getZonedDateTimeOrNull
+import transaction
 import java.time.ZonedDateTime
 
-class ElementQueries(private val conn: SQLiteConnection) {
+class ElementQueries {
 
     companion object {
         const val TABLE_NAME = "element"
@@ -86,95 +87,99 @@ class ElementQueries(private val conn: SQLiteConnection) {
             """
     }
 
-    fun insertOrReplace(elements: List<Element>) {
+    fun insertOrReplace(elements: List<Element>, conn: SQLiteConnection = conn()) {
         val sql = """
             INSERT OR REPLACE
             INTO $TABLE_NAME (${PROJ_FULL.joinToString()}) 
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21)
         """
-        conn.transaction { conn ->
+
+        conn.transaction {
+            val stmt = conn.prepare(sql)
+
             elements.forEach { element ->
-                conn.prepare(sql).use {
-                    it.bindLong(1, element.id)
-                    it.bindDouble(2, element.lat)
-                    it.bindDouble(3, element.lon)
-                    it.bindText(4, element.icon)
-                    it.bindText(5, element.name)
-                    it.bindText(6, element.updatedAt.toString())
-                    if (element.deletedAt == null) {
-                        it.bindNull(7)
-                    } else {
-                        it.bindText(7, element.deletedAt.toString())
-                    }
-                    if (element.requiredAppUrl == null) {
-                        it.bindNull(8)
-                    } else {
-                        it.bindText(8, element.requiredAppUrl.toString())
-                    }
-                    if (element.boostedUntil == null) {
-                        it.bindNull(9)
-                    } else {
-                        it.bindText(9, element.boostedUntil.toString())
-                    }
-                    if (element.verifiedAt == null) {
-                        it.bindNull(10)
-                    } else {
-                        it.bindText(10, element.verifiedAt.toString())
-                    }
-                    if (element.address == null) {
-                        it.bindNull(11)
-                    } else {
-                        it.bindText(11, element.address)
-                    }
-                    if (element.openingHours == null) {
-                        it.bindNull(12)
-                    } else {
-                        it.bindText(12, element.openingHours)
-                    }
-                    if (element.website == null) {
-                        it.bindNull(13)
-                    } else {
-                        it.bindText(13, element.website.toString())
-                    }
-                    if (element.phone == null) {
-                        it.bindNull(14)
-                    } else {
-                        it.bindText(14, element.phone)
-                    }
-                    if (element.email == null) {
-                        it.bindNull(15)
-                    } else {
-                        it.bindText(15, element.email)
-                    }
-                    if (element.twitter == null) {
-                        it.bindNull(16)
-                    } else {
-                        it.bindText(16, element.twitter.toString())
-                    }
-                    if (element.facebook == null) {
-                        it.bindNull(17)
-                    } else {
-                        it.bindText(17, element.facebook.toString())
-                    }
-                    if (element.instagram == null) {
-                        it.bindNull(18)
-                    } else {
-                        it.bindText(18, element.instagram.toString())
-                    }
-                    if (element.line == null) {
-                        it.bindNull(19)
-                    } else {
-                        it.bindText(19, element.line.toString())
-                    }
-                    it.bindBoolean(20, element.bundled)
-                    it.bindLong(21, element.comments)
-                    it.step()
+                stmt.reset()
+                stmt.clearBindings()
+
+                stmt.bindLong(1, element.id)
+                stmt.bindDouble(2, element.lat)
+                stmt.bindDouble(3, element.lon)
+                stmt.bindText(4, element.icon)
+                stmt.bindText(5, element.name)
+                stmt.bindText(6, element.updatedAt.toString())
+                if (element.deletedAt == null) {
+                    stmt.bindNull(7)
+                } else {
+                    stmt.bindText(7, element.deletedAt.toString())
                 }
+                if (element.requiredAppUrl == null) {
+                    stmt.bindNull(8)
+                } else {
+                    stmt.bindText(8, element.requiredAppUrl.toString())
+                }
+                if (element.boostedUntil == null) {
+                    stmt.bindNull(9)
+                } else {
+                    stmt.bindText(9, element.boostedUntil.toString())
+                }
+                if (element.verifiedAt == null) {
+                    stmt.bindNull(10)
+                } else {
+                    stmt.bindText(10, element.verifiedAt.toString())
+                }
+                if (element.address == null) {
+                    stmt.bindNull(11)
+                } else {
+                    stmt.bindText(11, element.address)
+                }
+                if (element.openingHours == null) {
+                    stmt.bindNull(12)
+                } else {
+                    stmt.bindText(12, element.openingHours)
+                }
+                if (element.website == null) {
+                    stmt.bindNull(13)
+                } else {
+                    stmt.bindText(13, element.website.toString())
+                }
+                if (element.phone == null) {
+                    stmt.bindNull(14)
+                } else {
+                    stmt.bindText(14, element.phone)
+                }
+                if (element.email == null) {
+                    stmt.bindNull(15)
+                } else {
+                    stmt.bindText(15, element.email)
+                }
+                if (element.twitter == null) {
+                    stmt.bindNull(16)
+                } else {
+                    stmt.bindText(16, element.twitter.toString())
+                }
+                if (element.facebook == null) {
+                    stmt.bindNull(17)
+                } else {
+                    stmt.bindText(17, element.facebook.toString())
+                }
+                if (element.instagram == null) {
+                    stmt.bindNull(18)
+                } else {
+                    stmt.bindText(18, element.instagram.toString())
+                }
+                if (element.line == null) {
+                    stmt.bindNull(19)
+                } else {
+                    stmt.bindText(19, element.line.toString())
+                }
+                stmt.bindBoolean(20, element.bundled)
+                stmt.bindLong(21, element.comments)
+                stmt.step()
             }
         }
     }
 
-    fun selectById(id: Long): Element? {
+    fun selectById(id: Long, conn: SQLiteConnection = conn()): Element? {
         return conn.prepare(
             """
                 SELECT ${PROJ_FULL.joinToString()}
@@ -191,7 +196,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectBySearchString(searchString: String): List<Element> {
+    fun selectBySearchString(searchString: String, conn: SQLiteConnection = conn()): List<Element> {
         return conn.prepare(
             """
                 SELECT ${PROJ_FULL.joinToString()}
@@ -213,6 +218,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
         maxLat: Double,
         minLon: Double,
         maxLon: Double,
+        conn: SQLiteConnection = conn(),
     ): List<ElementsCluster> {
         return conn.prepare(
             """
@@ -263,6 +269,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
         maxLat: Double,
         minLon: Double,
         maxLon: Double,
+        conn: SQLiteConnection = conn(),
     ): List<ElementsCluster> {
         return conn.prepare(
             """
@@ -310,6 +317,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
     fun selectClusters(
         stepLat: Double,
         stepLon: Double,
+        conn: SQLiteConnection = conn(),
     ): List<ElementsCluster> {
         return conn.prepare(
             """
@@ -354,6 +362,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
         maxLat: Double,
         minLon: Double,
         maxLon: Double,
+        conn: SQLiteConnection = conn(),
     ): List<Element> {
         return conn.prepare(
             """
@@ -374,7 +383,7 @@ class ElementQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectMaxUpdatedAt(): ZonedDateTime? {
+    fun selectMaxUpdatedAt(conn: SQLiteConnection = conn()): ZonedDateTime? {
         return conn.prepare("SELECT max($COL_UPDATED_AT) FROM $TABLE_NAME").use {
             if (it.step()) {
                 it.getZonedDateTimeOrNull(0)
@@ -384,14 +393,14 @@ class ElementQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectCount(): Long {
+    fun selectCount(conn: SQLiteConnection = conn()): Long {
         return conn.prepare("SELECT count(*) FROM $TABLE_NAME").use {
             it.step()
             it.getLong(0)
         }
     }
 
-    fun deleteById(id: Long) {
+    fun deleteById(id: Long, conn: SQLiteConnection = conn()) {
         conn.prepare("DELETE FROM $TABLE_NAME WHERE $COL_ID = ?1").use {
             it.bindLong(1, id)
             it.step()
