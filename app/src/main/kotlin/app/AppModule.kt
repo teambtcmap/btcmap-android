@@ -11,9 +11,6 @@ import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
-import reports.ReportQueries
-import reports.ReportsModel
-import reports.ReportsRepo
 import search.SearchModel
 import search.SearchResultModel
 import sync.Sync
@@ -22,8 +19,6 @@ import user.UsersModel
 import user.UsersRepo
 import element_comment.ElementCommentQueries
 import element_comment.ElementCommentRepo
-import area_element.AreaElementQueries
-import area_element.AreaElementRepo
 
 val appModule = module {
     single { Database(get<Context>().getDatabasePath("btcmap-2025-08-24.db").absolutePath).conn }
@@ -37,13 +32,6 @@ val appModule = module {
 
     singleOf(::ElementCommentQueries)
     singleOf(::ElementCommentRepo)
-
-    singleOf(::AreaElementQueries)
-    singleOf(::AreaElementRepo)
-
-    singleOf(::ReportQueries)
-    singleOf(::ReportsRepo)
-    viewModelOf(::ReportsModel)
 
     singleOf(::UserQueries)
     singleOf(::UsersRepo)

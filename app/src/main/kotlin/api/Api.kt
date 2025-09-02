@@ -1,7 +1,5 @@
 package api
 
-import area_element.AreaElementJson
-import area_element.toAreaElementsJson
 import element.Element
 import element.toElements
 import element_comment.ElementCommentJson
@@ -16,8 +14,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.brotli.BrotliInterceptor
 import okhttp3.coroutines.executeAsync
-import reports.ReportJson
-import reports.toReportsJson
 import user.UserJson
 import user.toUsersJson
 import java.time.ZonedDateTime
@@ -35,11 +31,7 @@ interface Api {
 
     suspend fun getEvents(): List<Event>
 
-    suspend fun getReports(updatedSince: ZonedDateTime?, limit: Long): List<ReportJson>
-
     suspend fun getUsers(updatedSince: ZonedDateTime?, limit: Long): List<UserJson>
-
-    suspend fun getAreaElements(updatedSince: ZonedDateTime?, limit: Long): List<AreaElementJson>
 }
 
 class ApiImpl(
@@ -124,25 +116,6 @@ class ApiImpl(
         }
     }
 
-    override suspend fun getReports(updatedSince: ZonedDateTime?, limit: Long): List<ReportJson> {
-        val url = baseUrl.newBuilder().apply {
-            addPathSegment("v3")
-            addPathSegment("reports")
-            addQueryParameter("updated_since", updatedSince.apiFormat())
-            addQueryParameter("limit", "$limit")
-        }.build()
-
-        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
-
-        if (!res.isSuccessful) {
-            throw Exception("Unexpected HTTP response code: ${res.code}")
-        }
-
-        return withContext(Dispatchers.IO) {
-            res.body.byteStream().use { it.toReportsJson() }
-        }
-    }
-
     override suspend fun getUsers(updatedSince: ZonedDateTime?, limit: Long): List<UserJson> {
         val url = baseUrl.newBuilder().apply {
             addPathSegment("v3")
@@ -159,28 +132,6 @@ class ApiImpl(
 
         return withContext(Dispatchers.IO) {
             res.body.byteStream().use { it.toUsersJson() }
-        }
-    }
-
-    override suspend fun getAreaElements(
-        updatedSince: ZonedDateTime?,
-        limit: Long
-    ): List<AreaElementJson> {
-        val url = baseUrl.newBuilder().apply {
-            addPathSegment("v3")
-            addPathSegment("area-elements")
-            addQueryParameter("updated_since", updatedSince.apiFormat())
-            addQueryParameter("limit", "$limit")
-        }.build()
-
-        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
-
-        if (!res.isSuccessful) {
-            throw Exception("Unexpected HTTP response code: ${res.code}")
-        }
-
-        return withContext(Dispatchers.IO) {
-            res.body.byteStream().use { it.toAreaElementsJson() }
         }
     }
 }

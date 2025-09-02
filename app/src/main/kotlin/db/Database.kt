@@ -6,11 +6,9 @@ import androidx.sqlite.driver.bundled.SQLITE_OPEN_CREATE
 import androidx.sqlite.driver.bundled.SQLITE_OPEN_FULLMUTEX
 import androidx.sqlite.driver.bundled.SQLITE_OPEN_READWRITE
 import androidx.sqlite.execSQL
-import area_element.AreaElementQueries
 import element.ElementQueries
 import element_comment.ElementCommentQueries
 import kotlinx.coroutines.flow.MutableStateFlow
-import reports.ReportQueries
 import user.UserQueries
 import java.time.LocalDateTime
 import java.util.concurrent.locks.ReentrantLock
@@ -34,16 +32,13 @@ class Database(path: String) {
                 }
 
                 if (version == 0) {
-                    execSQL(AreaElementQueries.CREATE_TABLE)
                     execSQL(ElementCommentQueries.CREATE_TABLE)
                     execSQL(ElementQueries.CREATE_TABLE)
-                    execSQL(ReportQueries.CREATE_TABLE)
                     execSQL(UserQueries.CREATE_TABLE)
                     execSQL(event.SCHEMA)
                     execSQL("PRAGMA user_version=1")
                 }
-
-                execSQL(AreaElementQueries.CREATE_INDICES)
+                
                 execSQL(ElementCommentQueries.CREATE_INDICES)
             }
 }
