@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import db.table.place.Place
 import element.Element
 import icons.iconTypeface
 import org.btcmap.databinding.ItemSearchResultBinding
@@ -34,7 +35,7 @@ class SearchAdapter(
     }
 
     data class Item(
-        val element: Element,
+        val element: Place,
         val icon: String,
         val name: String,
         val distanceToUser: String,

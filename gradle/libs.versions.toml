@@ -2,57 +2,36 @@
 # https://developer.android.com/build/releases/gradle-plugin
 agp = "8.12.2"
 # https://github.com/JetBrains/kotlin/releases
-kotlin = "2.2.0"
+kotlin = "2.2.10"
 # Allows suspending functions
 # https://github.com/Kotlin/kotlinx.coroutines/releases
 coroutines = "1.10.2"
 # Material design components
 # https://github.com/material-components/material-components-android/releases
-material = "1.13.0-rc01"
+material = "1.13.0"
 # Modern HTTP client
 # https://github.com/square/okhttp/blob/master/CHANGELOG.md
 okhttp = "5.1.0"
-# Injection library
-# https://github.com/InsertKoinIO/koin/blob/main/CHANGELOG.md
-koin = "4.1.0"
-# Charts
-# https://github.com/PhilJay/MPAndroidChart/releases
-mpandroidchart = "v3.1.0"
-# Used to cache data and store user preferences
-# https://developer.android.com/jetpack/androidx/releases/sqlite
-sqlite = "2.5.2"
-# Used to download, cache and display images
-# https://github.com/coil-kt/coil/releases
-coil = "2.7.0"
-# Background job scheduler
-# Used to fetch new data in background
-# https://developer.android.com/jetpack/androidx/releases/work
-work = "2.10.3"
-# Platform-agnostic JSON handling
-# https://github.com/Kotlin/kotlinx.serialization/releases
-serialization = "1.9.0"
+# Map widget with vector support
 # https://github.com/maplibre/maplibre-native/releases
-maplibre = "11.13.0"
+maplibre = "11.13.1"
+# Used for displaying LN invoices
 # https://github.com/androidmads/QRGenerator/releases
 qrgenerator = "1.0.5"
+# Helps customize colors, when necessary
 # https://github.com/mrudultora/Colorpicker/releases
 colorpicker = "1.2.0"
+# Some handly fragment transition extensions
+# https://developer.android.com/jetpack/androidx/releases/fragment
+fragment = "1.8.9"
 
 [libraries]
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
-kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
-
-androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
-androidx-sqlite = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+androidx-fragment = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment" }
 
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 okhttp-coroutines = { group = "com.squareup.okhttp3", name = "okhttp-coroutines", version.ref = "okhttp" }
 okhttp-brotli = { group = "com.squareup.okhttp3", name = "okhttp-brotli", version.ref = "okhttp" }
-okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
-koin = { module = "io.insert-koin:koin-android", version.ref = "koin" }
-mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
-coil-core = { module = "io.coil-kt:coil", version.ref = "coil" }
-coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }
 maplibre = { module = "org.maplibre.gl:android-sdk-vulkan", version.ref = "maplibre" }
 qrgenerator = { module = "com.github.androidmads:QRGenerator", version.ref = "qrgenerator" }
 colorpicker = { module = "com.github.mrudultora:Colorpicker", version.ref = "colorpicker" }

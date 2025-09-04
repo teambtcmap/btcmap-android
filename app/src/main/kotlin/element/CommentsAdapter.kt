@@ -5,14 +5,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import element_comment.ElementComment
+import db.table.comment.Comment
 import org.btcmap.databinding.ItemCommentBinding
-import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 class CommentsAdapter :
-    ListAdapter<ElementComment, CommentsAdapter.ItemViewHolder>(DiffCallback()) {
+    ListAdapter<Comment, CommentsAdapter.ItemViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val binding = ItemCommentBinding.inflate(
@@ -32,27 +31,27 @@ class CommentsAdapter :
     ) : ViewHolder(
         binding.root,
     ) {
-        fun bind(item: ElementComment) {
+        fun bind(item: Comment) {
             binding.apply {
                 message.text = item.comment
                 val dateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-                date.text = OffsetDateTime.parse(item.createdAt).toLocalDate().format(dateFormat)
+                date.text = item.createdAt.format(dateFormat)
             }
         }
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<ElementComment>() {
+    class DiffCallback : DiffUtil.ItemCallback<Comment>() {
 
         override fun areItemsTheSame(
-            oldItem: ElementComment,
-            newItem: ElementComment,
+            oldItem: Comment,
+            newItem: Comment,
         ): Boolean {
             return newItem == oldItem
         }
 
         override fun areContentsTheSame(
-            oldItem: ElementComment,
-            newItem: ElementComment,
+            oldItem: Comment,
+            newItem: Comment,
         ): Boolean {
             return newItem == oldItem
         }

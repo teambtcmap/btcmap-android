@@ -1,5 +1,8 @@
 package element
 
+import api.GetPlacesItem
+import bundle.BundledPlace
+import db.table.place.Place
 import json.toJsonArray
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -32,85 +35,28 @@ data class Element(
     val comments: Long,
 )
 
-data class BundledElement(
-    val id: Long,
-    val lat: Double,
-    val lon: Double,
-    val icon: String,
-    val name: String,
-    val comments: Long,
-    val boostedUntil: String?,
-)
-
-fun BundledElement.toElement(): Element {
-    return Element(
-        id = this.id,
-        lat = this.lat,
-        lon = this.lon,
-        icon = this.icon,
-        name = this.name,
-        updatedAt = "2000-01-01T00:00:00Z",
-        deletedAt = null,
-        requiredAppUrl = null,
-        boostedUntil = this.boostedUntil,
-        verifiedAt = null,
-        address = null,
-        openingHours = null,
-        website = null,
-        phone = null,
-        email = null,
-        twitter = null,
-        facebook = null,
-        instagram = null,
-        line = null,
-        bundled = true,
-        comments = this.comments,
-    )
-}
-
-fun InputStream.toElements(): List<Element> {
-    return toJsonArray().map { it.toElement() }
-}
-
-fun InputStream.toBundledElements(): List<BundledElement> {
-    return toJsonArray().mapNotNull { it.toBundledElement() }
-}
-
-private fun JSONObject.toElement(): Element {
-    return Element(
-        id = getLong("id"),
-        lat = getDouble("lat"),
-        lon = getDouble("lon"),
-        icon = getString("icon"),
-        name = getString("name"),
-        updatedAt = getString("updated_at"),
-        deletedAt = optString("deleted_at").ifBlank { null },
-        requiredAppUrl = optString("required_app_url").ifBlank { null },
-        boostedUntil = optString("boosted_until").ifBlank { null },
-        verifiedAt = optString("verified_at").ifBlank { null },
-        address = optString("verified_at").ifBlank { null },
-        openingHours = optString("opening_hours").ifBlank { null },
-        website = optString("website").ifBlank { null },
-        phone = optString("phone").ifBlank { null },
-        email = optString("email").ifBlank { null },
-        twitter = optString("twitter").ifBlank { null },
-        facebook = optString("facebook").ifBlank { null },
-        instagram = optString("instagram").ifBlank { null },
-        line = optString("line").ifBlank { null },
+private fun GetPlacesItem.toPlace(): Place {
+    return Place(
+        id = id,
+        lat = lat,
+        lon = lon,
+        icon = icon,
+        name = name,
+        updatedAt = ZonedDateTime.parse(updatedAt),
+        requiredAppUrl = requiredAppUrl?.toHttpUrl(),
+        boostedUntil = if (boostedUntil == null) null else ZonedDateTime.parse(boostedUntil),
+        verifiedAt = if (verifiedAt == null) null else ZonedDateTime.parse(verifiedAt + "T00:00:00Z"),
+        address = address,
+        openingHours = openingHours,
+        website = website?.toHttpUrl(),
+        phone = phone,
+        email = email,
+        twitter = twitter?.toHttpUrl(),
+        facebook = facebook?.toHttpUrl(),
+        instagram = instagram?.toHttpUrl(),
+        line = line?.toHttpUrl(),
         bundled = false,
-        comments = optLong("comments", 0),
-    )
-}
-
-private fun JSONObject.toBundledElement(): BundledElement? {
-    return BundledElement(
-        id = getLong("id"),
-        lat = getDouble("lat"),
-        lon = getDouble("lon"),
-        icon = getString("icon"),
-        name = getString("name"),
-        comments = optLong("comments", 0),
-        boostedUntil = optString("boosted_until").ifBlank { null },
+        comments = comments,
     )
 }
 

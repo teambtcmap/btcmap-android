@@ -5,6 +5,7 @@ import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import db.table.place.Place
 import element.Element
 import element.ElementsRepo
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +45,7 @@ class SearchModel(
             if (searchString.length < MIN_QUERY_LENGTH) {
                 _searchResults.update { emptyList() }
             } else {
-                var elements: List<Element>
+                var elements: List<Place>
 
                 val queryTimeMillis = measureTimeMillis {
                     elements = elementsRepo.selectBySearchString(searchString)
@@ -81,7 +82,7 @@ class SearchModel(
         this.searchString.update { searchString }
     }
 
-    private fun Element.toAdapterItem(userLocation: LatLng?): SearchAdapter.Item {
+    private fun Place.toAdapterItem(userLocation: LatLng?): SearchAdapter.Item {
         val distanceStringBuilder = StringBuilder()
 
         if (userLocation != null) {
@@ -98,7 +99,7 @@ class SearchModel(
         return SearchAdapter.Item(
             element = this,
             icon = this.icon,
-            name = this.name,
+            name = this.name ?: "",
             distanceToUser = distanceStringBuilder.toString(),
         )
     }

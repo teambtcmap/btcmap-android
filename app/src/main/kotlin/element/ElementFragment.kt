@@ -21,10 +21,15 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.recyclerview.widget.LinearLayoutManager
+import api.ApiImpl
 import boost_element.BoostElementFragment
+import db.db
+import db.table.place.Place
+import db.table.comment.CommentQueries
 import element_comment.AddElementCommentFragment
 import element_comment.ElementCommentRepo
 import element_comment.ElementCommentsFragment
@@ -36,8 +41,6 @@ import map.getErrorColor
 import map.getOnSurfaceColor
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.Style
@@ -45,16 +48,19 @@ import search.SearchResultModel
 import settings.mapStyle
 import settings.prefs
 import settings.uri
-import java.time.LocalDate
 import java.time.ZonedDateTime
 
 class ElementFragment : Fragment() {
 
-    private val elementsRepo: ElementsRepo by inject()
+    private val elementsRepo: ElementsRepo by lazy {
+        ElementsRepo(ApiImpl())
+    }
 
-    private val elementCommentRepo: ElementCommentRepo by inject()
+    private val elementCommentRepo: ElementCommentRepo by lazy {
+        ElementCommentRepo(ApiImpl(), db)
+    }
 
-    private val resultModel: SearchResultModel by activityViewModel()
+    private val resultModel: SearchResultModel by activityViewModels()
 
     private var elementId = -1L
 
@@ -99,7 +105,7 @@ class ElementFragment : Fragment() {
             }
 
             val elementId = requireArguments().getLong("element_id")
-            val element = runBlocking { elementsRepo.selectById(elementId)!! }
+            val element = runBlocking { elementsRepo.selectById(elementId) }
             setElement(element)
 
             binding.toolbar.setNavigationIcon(R.drawable.arrow_back)
@@ -187,7 +193,7 @@ class ElementFragment : Fragment() {
         _binding = null
     }
 
-    fun setElement(element: Element) {
+    fun setElement(element: Place) {
         elementId = element.id
 
         binding.toolbar.title = element.name
@@ -213,7 +219,7 @@ class ElementFragment : Fragment() {
         if (element.verifiedAt != null) {
             val date = DateUtils.getRelativeDateTimeString(
                 requireContext(),
-                LocalDate.parse(element.verifiedAt).toEpochDay() * 24 * 3600 * 1000,
+                element.verifiedAt.toLocalDate().toEpochDay() * 24 * 3600 * 1000,
                 DateUtils.SECOND_IN_MILLIS,
                 DateUtils.WEEK_IN_MILLIS,
                 0,
@@ -221,8 +227,7 @@ class ElementFragment : Fragment() {
 
             binding.lastVerified.text = date
 
-            val verifiedAt = ZonedDateTime.parse("${element.verifiedAt}T00:00:00Z")
-            if (verifiedAt.isAfter(ZonedDateTime.now().minusYears(1))) {
+            if (element.verifiedAt.isAfter(ZonedDateTime.now().minusYears(1))) {
                 binding.lastVerified.isInvisible = false
                 binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
                 binding.lastVerified.setOnClickListener(null)
@@ -355,7 +360,10 @@ class ElementFragment : Fragment() {
 //            binding.image.isVisible = false
 //        }
 
-        val comments = runBlocking { elementCommentRepo.selectByElementId(element.id) }
+        val comments = CommentQueries.selectByPlaceId(
+            element.id,
+            db,
+        )
         binding.commentsTitle.text = getString(R.string.comments_d, comments.size)
         binding.commentsTitle.isVisible = comments.isNotEmpty()
         binding.comments.text = getString(R.string.comments_d, comments.size)

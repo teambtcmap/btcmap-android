@@ -2,12 +2,12 @@ package map
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.net.Uri
@@ -35,34 +35,29 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.sqlite.SQLiteConnection
-import api.Api
-import app.dpToPx
+import api.ApiImpl
+import app.App
+import bundle.BundledPlaces
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import db.db
+import db.table.place.Cluster
 import element.ElementFragment
-import element.ElementsCluster
 import element.ElementsRepo
-import element_comment.ElementCommentRepo
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.R
 import org.btcmap.databinding.FragmentMapBinding
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.activityViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.maplibre.android.annotations.IconFactory
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
@@ -88,15 +83,25 @@ import settings.markerBackgroundColor
 import settings.markerIconColor
 import settings.prefs
 import settings.uri
+import sync.CommentSync
+import sync.EventSync
+import sync.PlaceSync
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 class MapFragment : Fragment() {
 
-    private val model: MapModel by viewModel()
-    private val searchModel: SearchModel by viewModel()
+    private val model: MapModel by lazy {
+        MapModel(ElementsRepo(ApiImpl()))
+    }
+    private val searchModel: SearchModel by lazy {
+        SearchModel(
+            requireContext().applicationContext as App,
+            ElementsRepo(ApiImpl())
+        )
+    }
 
-    private val searchResultModel: SearchResultModel by activityViewModel()
+    private val searchResultModel: SearchResultModel by activityViewModels()
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
@@ -123,6 +128,10 @@ class MapFragment : Fragment() {
         if (it.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
             onLocationPermissionsGranted(true)
         }
+    }
+
+    fun Context.dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
     }
 
     @SuppressLint("MissingPermission")
@@ -466,23 +475,19 @@ class MapFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                val elementsRepo by inject<ElementsRepo>()
-
-                if (elementsRepo.selectCount() == 0L && elementsRepo.hasBundledElements()) {
-                    elementsRepo.fetchBundledElements()
+                if (BundledPlaces.import(requireContext(), db)) {
                     refreshData()
                 }
 
-                elementsRepo.sync()
-                refreshData()
-                val api by inject<Api>()
-                val events = api.getEvents()
-                withContext(Dispatchers.IO) { event.deleteAllAndInsertBatch(events) }
-                refreshData()
+                if (PlaceSync.run(db).rowsAffected > 0) {
+                    refreshData()
+                }
 
-                val commentsRepo by inject<ElementCommentRepo>()
-                commentsRepo.sync()
-                refreshData()
+                if (EventSync.run(db).rowsAffected > 0) {
+                    refreshData()
+                }
+
+                CommentSync.run(db)
             }
         }
 
@@ -643,7 +648,7 @@ class MapFragment : Fragment() {
         return elementFragment.requireView().findViewById(R.id.toolbar)!!
     }
 
-    private fun createClusterIcon(cluster: ElementsCluster): Bitmap {
+    private fun createClusterIcon(cluster: Cluster): Bitmap {
         val pinSizePx = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, 38f, requireContext().resources.displayMetrics
         ).toInt()

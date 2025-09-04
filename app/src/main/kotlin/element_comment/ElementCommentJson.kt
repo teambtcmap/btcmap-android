@@ -1,7 +1,9 @@
 package element_comment
 
+import db.table.comment.Comment
 import json.toJsonArray
 import java.io.InputStream
+import java.time.ZonedDateTime
 
 data class ElementCommentJson(
     val id: Long,
@@ -12,13 +14,13 @@ data class ElementCommentJson(
     val deletedAt: String?,
 )
 
-fun ElementCommentJson.toElementComment(): ElementComment {
-    return ElementComment(
+fun ElementCommentJson.toElementComment(): Comment {
+    return Comment(
         id = id,
-        elementId = elementId!!,
+        placeId = elementId!!,
         comment = comment!!,
-        createdAt = createdAt!!,
-        updatedAt = updatedAt,
+        createdAt = ZonedDateTime.parse(createdAt!!),
+        updatedAt = ZonedDateTime.parse(updatedAt),
     )
 }
 

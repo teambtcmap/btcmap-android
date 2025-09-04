@@ -1,5 +1,6 @@
 package element_comment
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,12 +16,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import app.dpToPx
+import api.ApiImpl
+import db.db
+import db.table.comment.CommentQueries
 import element.CommentsAdapter
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementCommentsBinding
-import org.koin.android.ext.android.inject
 
 class ElementCommentsFragment : Fragment() {
 
@@ -35,9 +37,15 @@ class ElementCommentsFragment : Fragment() {
     private var _binding: FragmentElementCommentsBinding? = null
     private val binding get() = _binding!!
 
-    private val elementCommentRepo: ElementCommentRepo by inject()
+    private val elementCommentRepo: ElementCommentRepo by lazy {
+        ElementCommentRepo(ApiImpl(), db)
+    }
 
     private val adapter = CommentsAdapter()
+
+    fun Context.dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -111,7 +119,7 @@ class ElementCommentsFragment : Fragment() {
     }
 
     private suspend fun showComments() {
-        val comments = elementCommentRepo.selectByElementId(args.value.elementId)
+        val comments = CommentQueries.selectByPlaceId(args.value.elementId, db)
         adapter.submitList(comments)
     }
 }

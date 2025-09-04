@@ -63,19 +63,11 @@ android {
 
     dependencies {
         implementation(libs.kotlinx.coroutines)
-        implementation(libs.kotlinx.serialization)
-
-        implementation(libs.androidx.work)
-        implementation(libs.androidx.sqlite)
+        implementation(libs.androidx.fragment)
 
         implementation(libs.material)
         implementation(libs.okhttp.coroutines)
         implementation(libs.okhttp.brotli)
-        implementation(libs.okhttp.mockwebserver)
-        implementation(libs.koin)
-        implementation(libs.mpandroidchart)
-        implementation(libs.coil.core)
-        implementation(libs.coil.svg)
         implementation(libs.maplibre)
         implementation(libs.qrgenerator)
         implementation(libs.colorpicker)

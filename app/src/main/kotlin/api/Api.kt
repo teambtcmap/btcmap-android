@@ -1,10 +1,7 @@
 package api
 
-import element.Element
-import element.toElements
 import element_comment.ElementCommentJson
 import element_comment.toElementCommentsJson
-import event.Event
 import json.toJsonArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,27 +11,89 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.brotli.BrotliInterceptor
 import okhttp3.coroutines.executeAsync
+import org.json.JSONObject
+import java.io.InputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 private val BASE_URL = "https://api.btcmap.org".toHttpUrl()
 
+data class GetEventsItem(
+    val id: Long,
+    val lat: Double,
+    val lon: Double,
+    val name: String,
+    val website: HttpUrl,
+    val startsAt: ZonedDateTime,
+    val endsAt: ZonedDateTime?,
+)
+
+data class GetPlacesItem(
+    val id: Long,
+    val lat: Double,
+    val lon: Double,
+    val icon: String,
+    val name: String,
+    val updatedAt: String,
+    val deletedAt: String?,
+    val requiredAppUrl: String?,
+    val boostedUntil: String?,
+    val verifiedAt: String?,
+    val address: String?,
+    val openingHours: String?,
+    val website: String?,
+    val phone: String?,
+    val email: String?,
+    val twitter: String?,
+    val facebook: String?,
+    val instagram: String?,
+    val line: String?,
+    val bundled: Boolean,
+    val comments: Long?,
+)
+
+private fun JSONObject.toGetPlacesItem(): GetPlacesItem {
+    return GetPlacesItem(
+        id = getLong("id"),
+        lat = getDouble("lat"),
+        lon = getDouble("lon"),
+        icon = getString("icon"),
+        name = getString("name"),
+        updatedAt = getString("updated_at"),
+        deletedAt = optString("deleted_at").ifBlank { null },
+        requiredAppUrl = optString("required_app_url").ifBlank { null },
+        boostedUntil = optString("boosted_until").ifBlank { null },
+        verifiedAt = optString("verified_at").ifBlank { null },
+        address = optString("verified_at").ifBlank { null },
+        openingHours = optString("opening_hours").ifBlank { null },
+        website = optString("website").ifBlank { null },
+        phone = optString("phone").ifBlank { null },
+        email = optString("email").ifBlank { null },
+        twitter = optString("twitter").ifBlank { null },
+        facebook = optString("facebook").ifBlank { null },
+        instagram = optString("instagram").ifBlank { null },
+        line = optString("line").ifBlank { null },
+        bundled = false,
+        comments = optLong("comments", 0),
+    )
+}
+
 interface Api {
-    suspend fun getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<Element>
+    suspend fun getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPlacesItem>
 
     suspend fun getElementComments(
         updatedSince: ZonedDateTime?,
         limit: Long
     ): List<ElementCommentJson>
 
-    suspend fun getEvents(): List<Event>
+    suspend fun getEvents(): List<GetEventsItem>
 }
 
 class ApiImpl(
     private val baseUrl: HttpUrl = BASE_URL,
     private val httpClient: OkHttpClient = apiHttpClient(),
 ) : Api {
-    override suspend fun getEvents(): List<Event> {
+    override suspend fun getEvents(): List<GetEventsItem> {
         val url = baseUrl.newBuilder().apply {
             addPathSegment("v4")
             addPathSegment("events")
@@ -49,14 +108,14 @@ class ApiImpl(
         return withContext(Dispatchers.IO) {
             res.body.byteStream().use { stream ->
                 stream.toJsonArray().map {
-                    Event(
+                    GetEventsItem(
                         id = it.getLong("id"),
                         lat = it.getDouble("lat"),
                         lon = it.getDouble("lon"),
                         name = it.getString("name"),
                         website = it.getString("website").toHttpUrl(),
-                        starts_at = ZonedDateTime.parse(it.getString("starts_at")),
-                        ends_at = if (it.isNull("ends_at")) null else ZonedDateTime.parse(
+                        startsAt = ZonedDateTime.parse(it.getString("starts_at")),
+                        endsAt = if (it.isNull("ends_at")) null else ZonedDateTime.parse(
                             it.getString(
                                 "ends_at"
                             )
@@ -89,7 +148,7 @@ class ApiImpl(
         }
     }
 
-    override suspend fun getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<Element> {
+    override suspend fun getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPlacesItem> {
         val url = baseUrl.newBuilder().apply {
             addPathSegment("v4")
             addPathSegment("places")
@@ -108,9 +167,13 @@ class ApiImpl(
         }
 
         return withContext(Dispatchers.IO) {
-            res.body.byteStream().use { it.toElements() }
+            res.body.byteStream().use { it.toGetPlacesItems() }
         }
     }
+}
+
+fun InputStream.toGetPlacesItems(): List<GetPlacesItem> {
+    return toJsonArray().map { it.toGetPlacesItem() }
 }
 
 private fun apiHttpClient(): OkHttpClient {

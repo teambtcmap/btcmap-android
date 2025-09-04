@@ -1,55 +1,38 @@
 package element
 
-import android.app.Application
-import android.util.Log
 import api.Api
+import db.db
+import db.table.place.Cluster
+import db.table.place.Place
+import db.table.place.PlaceQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
-import java.time.Duration
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 import kotlin.math.pow
 
 class ElementsRepo(
     private val api: Api,
-    private val app: Application,
-    private val queries: ElementQueries,
 ) {
 
-    suspend fun selectById(id: Long): Element? {
+    suspend fun selectById(id: Long): Place {
         return withContext(Dispatchers.IO) {
-            queries.selectById(id)
+            PlaceQueries.selectById(id, db)
         }
     }
 
-    suspend fun selectBySearchString(searchString: String): List<Element> {
+    suspend fun selectBySearchString(searchString: String): List<Place> {
         return withContext(Dispatchers.IO) {
-            queries.selectBySearchString(searchString)
-        }
-    }
-
-    suspend fun selectByBoundingBox(
-        minLat: Double,
-        maxLat: Double,
-        minLon: Double,
-        maxLon: Double,
-    ): List<Element> {
-        return withContext(Dispatchers.IO) {
-            queries.selectByBoundingBox(
-                minLat,
-                maxLat,
-                minLon,
-                maxLon,
-            )
+            PlaceQueries.selectBySearchString(searchString, db)
         }
     }
 
     suspend fun selectByBoundingBox(
         zoom: Double?,
         bounds: LatLngBounds,
-    ): List<ElementsCluster> {
+        includeMerchants: Boolean,
+        includeExchanges: Boolean,
+    ): List<Cluster> {
         if (zoom == null) {
             return emptyList()
         }
@@ -57,129 +40,29 @@ class ElementsRepo(
         return withContext(Dispatchers.IO) {
             if (zoom > 18) {
                 withContext(Dispatchers.IO) {
-                    queries.selectWithoutClustering(
+                    PlaceQueries.selectWithoutClustering(
                         minLat = bounds.latitudeSouth,
                         maxLat = bounds.latitudeNorth,
                         minLon = bounds.longitudeWest,
                         maxLon = bounds.longitudeEast,
+                        includeMerchants = includeMerchants,
+                        includeExchanges = includeExchanges,
+                        db,
                     )
                 }
             } else {
                 val step = 50.0 / 2.0.pow(zoom)
                 withContext(Dispatchers.IO) {
-                    val clusters = queries.selectClusters(
+                    val clusters = PlaceQueries.selectClusters(
                         step / 2,
                         step,
+                        includeMerchants = includeMerchants,
+                        includeExchanges = includeExchanges,
+                        db,
                     )
                     clusters.filter { bounds.contains(LatLng(it.lat, it.lon)) }
                 }
             }
         }
-    }
-
-    suspend fun selectExchangesByBoundingBox(
-        zoom: Double?,
-        bounds: LatLngBounds,
-    ): List<ElementsCluster> {
-        if (zoom == null) {
-            return emptyList()
-        }
-
-        return withContext(Dispatchers.IO) {
-            withContext(Dispatchers.IO) {
-                queries.selectExchangesWithoutClustering(
-                    minLat = bounds.latitudeSouth,
-                    maxLat = bounds.latitudeNorth,
-                    minLon = bounds.longitudeWest,
-                    maxLon = bounds.longitudeEast,
-                )
-            }
-        }
-    }
-
-    suspend fun selectCount(): Long {
-        return withContext(Dispatchers.IO) {
-            queries.selectCount()
-        }
-    }
-
-    suspend fun hasBundledElements(): Boolean {
-        return withContext(Dispatchers.IO) {
-            app.resources.assets.list("")!!.contains(BUNDLED_PLACES_FILE_NAME)
-        }
-    }
-
-    suspend fun fetchBundledElements() {
-        val bundledElements = withContext(Dispatchers.IO) {
-            app.assets.open(BUNDLED_PLACES_FILE_NAME).use { it.toBundledElements() }
-        }
-        Log.d("ElementsRepo", "Found ${bundledElements.size} bundled elements")
-        withContext(Dispatchers.IO) {
-            queries.insertOrReplace(bundledElements.map { it.toElement() })
-        }
-    }
-
-    suspend fun sync(): SyncReport {
-        return withContext(Dispatchers.IO) {
-            val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
-            var newItems = 0L
-            var updatedItems = 0L
-            var deletedItems = 0L
-            var maxKnownUpdatedAt = queries.selectMaxUpdatedAt()
-
-            while (true) {
-                val delta = api.getPlaces(maxKnownUpdatedAt, BATCH_SIZE)
-
-                if (delta.isEmpty()) {
-                    break
-                } else {
-                    maxKnownUpdatedAt = ZonedDateTime.parse(delta.maxBy { it.updatedAt }.updatedAt)
-                }
-
-                delta.forEach {
-                    val cached = queries.selectById(it.id)
-
-                    if (it.deletedAt == null) {
-                        if (cached == null) {
-                            newItems++
-                        } else {
-                            updatedItems++
-                        }
-
-                        queries.insertOrReplace(listOf(it))
-                    } else {
-                        if (cached == null) {
-                            // Already evicted from cache, nothing to do here
-                        } else {
-                            queries.deleteById(it.id)
-                            deletedItems++
-                        }
-                    }
-                }
-
-                if (delta.size < BATCH_SIZE) {
-                    break
-                }
-            }
-
-            SyncReport(
-                duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
-                newElements = newItems,
-                updatedElements = updatedItems,
-                deletedElements = deletedItems,
-            )
-        }
-    }
-
-    data class SyncReport(
-        val duration: Duration,
-        val newElements: Long,
-        val updatedElements: Long,
-        val deletedElements: Long,
-    )
-
-    companion object {
-        private const val BUNDLED_PLACES_FILE_NAME = "bundled-places.json"
-        private const val BATCH_SIZE = 10_000L
     }
 }

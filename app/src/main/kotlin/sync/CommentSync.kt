@@ -1,27 +1,27 @@
-package element_comment
+package sync
 
 import android.database.sqlite.SQLiteDatabase
-import api.Api
+import androidx.core.database.sqlite.transaction
+import api.ApiImpl
 import db.table.comment.CommentQueries
+import element_comment.toElementComment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
-class ElementCommentRepo(
-    private val api: Api,
-    private val db: SQLiteDatabase,
-) {
+object CommentSync {
+    private const val BATCH_SIZE = 1_000L
 
-    suspend fun sync(): SyncReport {
+    suspend fun run(db: SQLiteDatabase): Report {
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
             var rowsAffected = 0L
             var maxKnownUpdatedAt = CommentQueries.selectMaxUpdatedAt(db)
 
             while (true) {
-                val delta = api.getElementComments(maxKnownUpdatedAt, BATCH_SIZE)
+                val delta = ApiImpl().getElementComments(maxKnownUpdatedAt, BATCH_SIZE)
 
                 if (delta.isEmpty()) {
                     break
@@ -32,10 +32,12 @@ class ElementCommentRepo(
                 val newOrChanged = delta.filter { it.deletedAt == null }
                 val deleted = delta.filter { it.deletedAt != null }
 
-                CommentQueries.insert(newOrChanged.map { it.toElementComment() }, db)
-                
-                deleted.forEach {
-                    CommentQueries.deleteById(it.id, db)
+                db.transaction {
+                    CommentQueries.insert(newOrChanged.map { it.toElementComment() }, db)
+
+                    deleted.forEach {
+                        CommentQueries.deleteById(it.id, db)
+                    }
                 }
 
                 rowsAffected += delta.size
@@ -45,19 +47,15 @@ class ElementCommentRepo(
                 }
             }
 
-            SyncReport(
+            Report(
                 duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                 rowsAffected = rowsAffected,
             )
         }
     }
 
-    data class SyncReport(
+    data class Report(
         val duration: Duration,
         val rowsAffected: Long,
     )
-
-    companion object {
-        private const val BATCH_SIZE = 5000L
-    }
 }

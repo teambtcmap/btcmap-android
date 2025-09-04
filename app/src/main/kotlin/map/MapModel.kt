@@ -2,6 +2,10 @@ package map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import db.db
+import db.table.event.EventQueries
+import db.table.place.Cluster
+import db.table.place.Place
 import element.Element
 import element.ElementsRepo
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +22,7 @@ class MapModel(
     val elementsRepo: ElementsRepo,
 ) : ViewModel() {
 
-    private val _selectedElement: MutableStateFlow<Element?> = MutableStateFlow(null)
+    private val _selectedElement: MutableStateFlow<Place?> = MutableStateFlow(null)
     val selectedElement = _selectedElement.asStateFlow()
 
     private val _items = MutableStateFlow<List<MapItem>>(emptyList())
@@ -42,20 +46,24 @@ class MapModel(
                         val clusters = elementsRepo.selectByBoundingBox(
                             zoom = zoom,
                             bounds = bounds,
+                            includeMerchants = true,
+                            includeExchanges = false,
                         )
                         _items.update { clusters.map { MapItem.ElementsCluster(it) } }
                     }
 
                     Filter.Events -> {
                         val meetups =
-                            event.selectAll().map { MapItem.Event(it) }
+                            EventQueries.selectAll(db).map { MapItem.Event(it) }
                         _items.update { meetups }
                     }
 
                     Filter.Exchanges -> {
-                        val clusters = elementsRepo.selectExchangesByBoundingBox(
+                        val clusters = elementsRepo.selectByBoundingBox(
                             zoom = zoom,
                             bounds = bounds,
+                            includeMerchants = false,
+                            includeExchanges = true,
                         )
                         _items.update { clusters.map { MapItem.ElementsCluster(it) } }
                     }
@@ -65,12 +73,16 @@ class MapModel(
     }
 
     fun selectElement(elementId: Long) {
-        val element = runBlocking { elementsRepo.selectById(elementId) }
-        _selectedElement.update { element }
+        if (elementId == 0L) {
+            _selectedElement.update { null }
+        } else {
+            val element = runBlocking { elementsRepo.selectById(elementId) }
+            _selectedElement.update { element }
+        }
     }
 
     sealed class MapItem {
-        data class ElementsCluster(val cluster: element.ElementsCluster) : MapItem()
-        data class Event(val event: event.Event) : MapItem()
+        data class ElementsCluster(val cluster: Cluster) : MapItem()
+        data class Event(val event: db.table.event.Event) : MapItem()
     }
 }
