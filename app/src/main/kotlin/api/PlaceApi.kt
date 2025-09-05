@@ -1,6 +1,7 @@
 package api
 
 import json.toJsonArray
+import json.toJsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -63,6 +64,40 @@ object PlaceApi {
 
         return withContext(Dispatchers.IO) {
             res.body.byteStream().use { it.toGetPlacesItems() }
+        }
+    }
+
+    data class BoostQuote(
+        val quote30dsat: Long,
+        val quote90dsat: Long,
+        val quote365dsat: Long,
+    )
+
+    suspend fun getBoostQuote(): BoostQuote {
+        val url = prefs.apiUrl
+            .newBuilder().apply {
+                addPathSegment("v4")
+                addPathSegment("places")
+                addPathSegment("boost")
+                addPathSegment("quote")
+            }.build()
+
+        val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return withContext(Dispatchers.IO) {
+            res.body.byteStream().use {
+                val body = it.toJsonObject()
+
+                BoostQuote(
+                    quote30dsat = body.getLong("quote_30d_sat"),
+                    quote90dsat = body.getLong("quote_90d_sat"),
+                    quote365dsat = body.getLong("quote_365d_sat"),
+                )
+            }
         }
     }
 

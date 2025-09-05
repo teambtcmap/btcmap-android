@@ -25,7 +25,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.recyclerview.widget.LinearLayoutManager
-import boost_element.BoostElementFragment
+import boost.BoostFragment
 import db.db
 import db.table.place.Place
 import db.table.comment.CommentQueries
@@ -328,8 +328,8 @@ class ElementFragment : Fragment() {
         binding.boost.setOnClickListener {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
-                replace<BoostElementFragment>(
-                    R.id.fragmentContainerView, null, bundleOf("element_id" to elementId)
+                replace<BoostFragment>(
+                    R.id.fragmentContainerView, null, bundleOf("place_id" to elementId)
                 )
                 addToBackStack(null)
             }

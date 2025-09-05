@@ -1,4 +1,4 @@
-package boost_element
+package boost
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -17,6 +17,7 @@ import androidmads.library.qrgenearator.QRGEncoder
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import api.PlaceApi
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,14 +32,14 @@ import org.btcmap.databinding.FragmentBoostElementBinding
 import org.json.JSONObject
 import java.text.NumberFormat
 
-class BoostElementFragment : Fragment() {
+class BoostFragment : Fragment() {
 
     private data class Args(
         val elementId: Long,
     )
 
     private val args = lazy {
-        Args(requireArguments().getLong("element_id"))
+        Args(requireArguments().getLong("place_id"))
     }
 
     private var _binding: FragmentBoostElementBinding? = null
@@ -67,26 +68,14 @@ class BoostElementFragment : Fragment() {
         binding.copyInvoice.setOnClickListener { onCopyInvoiceClick() }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                val httpClient = OkHttpClient()
-                val url = "https://api.btcmap.org/rpc"
-                val requestBody =
-                    """{"jsonrpc": "2.0", "method": "paywall_get_boost_element_quote", "id": 1}""".trimIndent()
-                val res = httpClient.newCall(
-                    Request.Builder()
-                        .post(requestBody.toRequestBody("application/json".toMediaType())).url(url)
-                        .build()
-                ).executeAsync()
-
-                if (res.isSuccessful) {
-                    val body = res.body.string()
-                    Log.d("RPC", body)
-
-                    withContext(Dispatchers.Main) {
-                        onFeeResponse(JSONObject(body))
-                    }
-                }
+            val quote = try {
+                PlaceApi.getBoostQuote()
+            } catch (_: Throwable) {
+                parentFragmentManager.popBackStack()
+                return@launch
             }
+
+            onQuoteReceived(quote)
         }
     }
 
@@ -149,23 +138,30 @@ class BoostElementFragment : Fragment() {
         binding.generateInvoice.isEnabled = true
     }
 
-    private fun onFeeResponse(rpcResponse: JSONObject) {
-        if (rpcResponse.has("error")) {
-            return
-        }
-
-        val quote30d = rpcResponse.getJSONObject("result").getString("quote_30d_sat")
-        val quote90d = rpcResponse.getJSONObject("result").getString("quote_90d_sat")
-        val quote365d = rpcResponse.getJSONObject("result").getString("quote_365d_sat")
-
+    private fun onQuoteReceived(quote: PlaceApi.BoostQuote) {
         binding.boost1m.append(" - ")
-        binding.boost1m.append(getString(R.string.d_sat, NumberFormat.getNumberInstance().format(quote30d.toInt())))
+        binding.boost1m.append(
+            getString(
+                R.string.d_sat,
+                NumberFormat.getNumberInstance().format(quote.quote30dsat),
+            )
+        )
 
         binding.boost3m.append(" - ")
-        binding.boost3m.append(getString(R.string.d_sat, NumberFormat.getNumberInstance().format(quote90d.toInt())))
+        binding.boost3m.append(
+            getString(
+                R.string.d_sat,
+                NumberFormat.getNumberInstance().format(quote.quote90dsat),
+            )
+        )
 
         binding.boost12m.append(" - ")
-        binding.boost12m.append(getString(R.string.d_sat, NumberFormat.getNumberInstance().format(quote365d.toInt())))
+        binding.boost12m.append(
+            getString(
+                R.string.d_sat,
+                NumberFormat.getNumberInstance().format(quote.quote365dsat),
+            )
+        )
     }
 
     private fun onPaymentRequestResponse(rpcResponse: JSONObject) {
