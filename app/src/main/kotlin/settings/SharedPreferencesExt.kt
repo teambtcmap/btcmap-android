@@ -1,34 +1,19 @@
 package settings
 
-import activity.Activity
-import android.app.Application
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Color
 import androidx.core.content.edit
-import androidx.fragment.app.Fragment
 import map.markerBackgroundColor
 import map.onMarkerBackgroundColor
 import org.btcmap.R
 import org.maplibre.android.geometry.LatLngBounds
 import androidx.core.graphics.toColorInt
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 
-val Application.prefs: SharedPreferences
-    get() {
-        return getSharedPreferences("prefs", MODE_PRIVATE)
-    }
-
-val Activity.prefs: SharedPreferences
-    get() {
-        return application.prefs
-    }
-
-val Fragment.prefs: SharedPreferences
-    get() {
-        return requireActivity().application.prefs
-    }
+lateinit var prefs: SharedPreferences
 
 var SharedPreferences.mapViewport: LatLngBounds
     get() {
@@ -204,3 +189,15 @@ fun SharedPreferences.setBadgeTextColor(color: Int?) {
         }
     }
 }
+
+private const val KEY_API_URL = "apiUrl"
+
+var SharedPreferences.apiUrl: HttpUrl
+    get() {
+        return getString(KEY_API_URL, "https://api.btcmap.org")!!.toHttpUrl()
+    }
+    set(value) {
+        edit {
+            putString(KEY_API_URL, value.toString())
+        }
+    }

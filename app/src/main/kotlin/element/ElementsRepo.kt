@@ -1,6 +1,5 @@
 package element
 
-import api.Api
 import db.db
 import db.table.place.Cluster
 import db.table.place.Place
@@ -11,9 +10,7 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import kotlin.math.pow
 
-class ElementsRepo(
-    private val api: Api,
-) {
+class ElementsRepo {
 
     suspend fun selectById(id: Long): Place {
         return withContext(Dispatchers.IO) {

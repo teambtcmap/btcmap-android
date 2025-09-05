@@ -2,9 +2,10 @@ package sync
 
 import android.database.sqlite.SQLiteDatabase
 import androidx.core.database.sqlite.transaction
-import api.ApiImpl
+import api.CommentApi
+import api.CommentApi.GetCommentsItem
+import db.table.comment.Comment
 import db.table.comment.CommentQueries
-import element_comment.toElementComment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Duration
@@ -14,6 +15,11 @@ import java.time.ZonedDateTime
 object CommentSync {
     private const val BATCH_SIZE = 1_000L
 
+    data class Report(
+        val duration: Duration,
+        val rowsAffected: Long,
+    )
+
     suspend fun run(db: SQLiteDatabase): Report {
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
@@ -21,7 +27,14 @@ object CommentSync {
             var maxKnownUpdatedAt = CommentQueries.selectMaxUpdatedAt(db)
 
             while (true) {
-                val delta = ApiImpl().getElementComments(maxKnownUpdatedAt, BATCH_SIZE)
+                val delta = try {
+                    CommentApi.getComments(maxKnownUpdatedAt, BATCH_SIZE)
+                } catch (_: Throwable) {
+                    return@withContext Report(
+                        duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+                        rowsAffected = rowsAffected,
+                    )
+                }
 
                 if (delta.isEmpty()) {
                     break
@@ -33,7 +46,7 @@ object CommentSync {
                 val deleted = delta.filter { it.deletedAt != null }
 
                 db.transaction {
-                    CommentQueries.insert(newOrChanged.map { it.toElementComment() }, db)
+                    CommentQueries.insert(newOrChanged.map { it.toComment() }, db)
 
                     deleted.forEach {
                         CommentQueries.deleteById(it.id, db)
@@ -54,8 +67,13 @@ object CommentSync {
         }
     }
 
-    data class Report(
-        val duration: Duration,
-        val rowsAffected: Long,
-    )
+    private fun GetCommentsItem.toComment(): Comment {
+        return Comment(
+            id = id,
+            placeId = elementId!!,
+            comment = comment!!,
+            createdAt = ZonedDateTime.parse(createdAt!!),
+            updatedAt = ZonedDateTime.parse(updatedAt),
+        )
+    }
 }

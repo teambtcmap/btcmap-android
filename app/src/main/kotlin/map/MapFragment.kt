@@ -42,7 +42,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import api.ApiImpl
 import app.App
 import bundle.BundledPlaces
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -92,12 +91,12 @@ import java.time.ZonedDateTime
 class MapFragment : Fragment() {
 
     private val model: MapModel by lazy {
-        MapModel(ElementsRepo(ApiImpl()))
+        MapModel(ElementsRepo())
     }
     private val searchModel: SearchModel by lazy {
         SearchModel(
             requireContext().applicationContext as App,
-            ElementsRepo(ApiImpl())
+            ElementsRepo()
         )
     }
 
@@ -287,7 +286,7 @@ class MapFragment : Fragment() {
                 R.id.action_settings -> {
                     parentFragmentManager.commit {
                         setReorderingAllowed(true)
-                        replace<SettingsFragment>(R.id.nav_host_fragment)
+                        replace<SettingsFragment>(R.id.fragmentContainerView)
                         addToBackStack(null)
                     }
                 }

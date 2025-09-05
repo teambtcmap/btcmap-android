@@ -2,7 +2,7 @@ package sync
 
 import android.database.sqlite.SQLiteDatabase
 import androidx.core.database.sqlite.transaction
-import api.ApiImpl
+import api.PlaceApi
 import db.table.place.Place
 import db.table.place.PlaceQueries
 import kotlinx.coroutines.Dispatchers
@@ -22,8 +22,14 @@ object PlaceSync {
             var rowsAffected = 0L
             var maxKnownUpdatedAt = PlaceQueries.selectMaxUpdatedAt(db)
             while (true) {
-                val delta =
-                    ApiImpl().getPlaces(maxKnownUpdatedAt, BATCH_SIZE)
+                val delta = try {
+                    PlaceApi.getPlaces(maxKnownUpdatedAt, BATCH_SIZE)
+                } catch (_: Throwable) {
+                    return@withContext Report(
+                        duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+                        rowsAffected = rowsAffected,
+                    )
+                }
 
                 if (delta.isEmpty()) {
                     break

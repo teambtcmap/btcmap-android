@@ -16,13 +16,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import api.ApiImpl
 import db.db
 import db.table.comment.CommentQueries
 import element.CommentsAdapter
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementCommentsBinding
+import settings.prefs
 
 class ElementCommentsFragment : Fragment() {
 
@@ -36,10 +36,6 @@ class ElementCommentsFragment : Fragment() {
 
     private var _binding: FragmentElementCommentsBinding? = null
     private val binding get() = _binding!!
-
-    private val elementCommentRepo: ElementCommentRepo by lazy {
-        ElementCommentRepo(ApiImpl(), db)
-    }
 
     private val adapter = CommentsAdapter()
 
@@ -80,7 +76,7 @@ class ElementCommentsFragment : Fragment() {
                             parentFragmentManager.commit {
                                 setReorderingAllowed(true)
                                 replace<AddElementCommentFragment>(
-                                    R.id.nav_host_fragment,
+                                    R.id.fragmentContainerView,
                                     null,
                                     bundleOf("element_id" to args.value.elementId)
                                 )
@@ -101,7 +97,7 @@ class ElementCommentsFragment : Fragment() {
                     parentFragmentManager.commit {
                         setReorderingAllowed(true)
                         replace<AddElementCommentFragment>(
-                            R.id.nav_host_fragment,
+                            R.id.fragmentContainerView,
                             null,
                             bundleOf("element_id" to args.value.elementId)
                         )

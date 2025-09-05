@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import db.table.place.Place
-import element.Element
 import icons.iconTypeface
 import org.btcmap.databinding.ItemSearchResultBinding
 

@@ -2,7 +2,7 @@ package sync
 
 import android.database.sqlite.SQLiteDatabase
 import androidx.core.database.sqlite.transaction
-import api.ApiImpl
+import api.EventApi
 import db.table.event.Event
 import db.table.event.EventQueries
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +16,14 @@ object EventSync {
     suspend fun run(db: SQLiteDatabase): Report {
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
-            val events = ApiImpl().getEvents()
+            val events = try {
+                EventApi.getEvents()
+            } catch (_: Throwable) {
+                return@withContext Report(
+                    duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+                    rowsAffected = 0,
+                )
+            }
 
             db.transaction {
                 EventQueries.deleteAll(this)

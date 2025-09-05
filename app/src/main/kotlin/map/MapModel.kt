@@ -6,7 +6,6 @@ import db.db
 import db.table.event.EventQueries
 import db.table.place.Cluster
 import db.table.place.Place
-import element.Element
 import element.ElementsRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

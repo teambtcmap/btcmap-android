@@ -25,13 +25,11 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.recyclerview.widget.LinearLayoutManager
-import api.ApiImpl
 import boost_element.BoostElementFragment
 import db.db
 import db.table.place.Place
 import db.table.comment.CommentQueries
 import element_comment.AddElementCommentFragment
-import element_comment.ElementCommentRepo
 import element_comment.ElementCommentsFragment
 import icons.iconTypeface
 import kotlinx.coroutines.flow.update
@@ -53,11 +51,7 @@ import java.time.ZonedDateTime
 class ElementFragment : Fragment() {
 
     private val elementsRepo: ElementsRepo by lazy {
-        ElementsRepo(ApiImpl())
-    }
-
-    private val elementCommentRepo: ElementCommentRepo by lazy {
-        ElementCommentRepo(ApiImpl(), db)
+        ElementsRepo()
     }
 
     private val resultModel: SearchResultModel by activityViewModels()
@@ -120,7 +114,7 @@ class ElementFragment : Fragment() {
                 map.addOnMapClickListener {
                     resultModel.element.update { element }
                     parentFragmentManager.commit {
-                        replace<MapFragment>(R.id.nav_host_fragment)
+                        replace<MapFragment>(R.id.fragmentContainerView)
                     }
                     true
                 }
@@ -325,7 +319,7 @@ class ElementFragment : Fragment() {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<ElementCommentsFragment>(
-                    R.id.nav_host_fragment, null, bundleOf("element_id" to elementId)
+                    R.id.fragmentContainerView, null, bundleOf("element_id" to elementId)
                 )
                 addToBackStack(null)
             }
@@ -335,7 +329,7 @@ class ElementFragment : Fragment() {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<BoostElementFragment>(
-                    R.id.nav_host_fragment, null, bundleOf("element_id" to elementId)
+                    R.id.fragmentContainerView, null, bundleOf("element_id" to elementId)
                 )
                 addToBackStack(null)
             }
@@ -345,7 +339,7 @@ class ElementFragment : Fragment() {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<AddElementCommentFragment>(
-                    R.id.nav_host_fragment, null, bundleOf("element_id" to elementId)
+                    R.id.fragmentContainerView, null, bundleOf("element_id" to elementId)
                 )
                 addToBackStack(null)
             }
