@@ -5,7 +5,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -25,6 +24,8 @@ import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.FragmentBoostElementBinding
 import java.text.NumberFormat
+import androidx.core.net.toUri
+import api.InvoiceApi.paid
 
 class BoostFragment : Fragment() {
 
@@ -86,11 +87,11 @@ class BoostFragment : Fragment() {
                         continue
                     }
 
-                    if (invoice.status == "paid") {
+                    if (invoice.paid) {
                         withResumed {
                             Toast.makeText(
                                 requireContext(),
-                                "Place has been boosted",
+                                getString(R.string.place_has_been_boosted),
                                 Toast.LENGTH_LONG,
                             ).show()
                             parentFragmentManager.popBackStack()
@@ -185,7 +186,7 @@ class BoostFragment : Fragment() {
 
     private fun onPayInvoiceClick() {
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("lightning:$paymentRequest")
+        intent.data = "lightning:$paymentRequest".toUri()
         runCatching {
             startActivity(intent)
         }.onFailure {
@@ -200,7 +201,7 @@ class BoostFragment : Fragment() {
     private fun onCopyInvoiceClick() {
         val clipManager =
             requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clipLabel = "BTC Map Boost Payment Request"
+        val clipLabel = getString(R.string.btc_map_boost_payment_request)
         val clipText = paymentRequest
         clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
         Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()

@@ -98,4 +98,6 @@
     <string name="badge_background">Badge background</string>
     <string name="badge_text">Badge text</string>
     <string name="boosted_marker_background">Boosted marker background</string>
+    <string name="place_has_been_boosted">Place has been boosted</string>
+    <string name="btc_map_boost_payment_request">BTC Map Boost Payment Request</string>
 </resources>

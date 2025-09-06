@@ -15,6 +15,9 @@ object InvoiceApi {
         val status: String,
     )
 
+    val Invoice.paid: Boolean
+        get() = status == "paid"
+
     suspend fun getInvoice(uuid: String): Invoice {
         val url = prefs.apiUrl
             .newBuilder().apply {
