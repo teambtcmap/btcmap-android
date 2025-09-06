@@ -624,7 +624,6 @@ class MapFragment : Fragment() {
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 elementFragment.onPartialExpanded(slideOffset)
-                Log.d("map", slideOffset.toString())
             }
         })
     }

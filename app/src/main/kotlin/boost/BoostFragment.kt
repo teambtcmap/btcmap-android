@@ -19,17 +19,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import api.PlaceApi
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.coroutines.executeAsync
 import org.btcmap.R
 import org.btcmap.databinding.FragmentBoostElementBinding
-import org.json.JSONObject
 import java.text.NumberFormat
 
 class BoostFragment : Fragment() {
@@ -45,7 +38,8 @@ class BoostFragment : Fragment() {
     private var _binding: FragmentBoostElementBinding? = null
     private val binding get() = _binding!!
 
-    private var invoice = ""
+    private var paymentRequest = ""
+    private var invoiceUuid = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -77,6 +71,13 @@ class BoostFragment : Fragment() {
 
             onQuoteReceived(quote)
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            while (true) {
+                Log.d("invoice", "waiting")
+                delay(500)
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -100,42 +101,26 @@ class BoostFragment : Fragment() {
         binding.generateInvoice.isEnabled = false
 
         viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                val httpClient = OkHttpClient()
-                val url = "https://api.btcmap.org/rpc"
-                val requestBody =
-                    """{"jsonrpc": "2.0", "method": "paywall_boost_element", "params": {"element_id": "${args.value.elementId}", "days": $days}, "id": 1}""".trimIndent()
-                val res = httpClient.newCall(
-                    Request.Builder()
-                        .post(requestBody.toRequestBody("application/json".toMediaType())).url(url)
-                        .build()
-                ).executeAsync()
-
-                if (!res.isSuccessful) {
-                    onRpcRequestFail(res.code)
-                } else {
-                    val body = res.body.string()
-                    Log.d("RPC", body)
-
-                    withContext(Dispatchers.Main) {
-                        onPaymentRequestResponse(JSONObject(body))
+            val invoice = try {
+                PlaceApi.boost(args.value.elementId, days.toLong())
+            } catch (t: Throwable) {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.error)
+                    .setMessage(t.toString())
+                    .setPositiveButton(R.string.close, null)
+                    .setOnDismissListener {
+                        binding.durationOptions.isEnabled = true
+                        binding.boost1m.isEnabled = true
+                        binding.boost3m.isEnabled = true
+                        binding.boost12m.isEnabled = true
+                        binding.generateInvoice.isEnabled = true
                     }
-                }
+                    .show()
+                return@launch
             }
-        }
-    }
 
-    private fun onRpcRequestFail(code: Int) {
-        Toast.makeText(
-            requireContext(),
-            "Unexpected response code: $code",
-            Toast.LENGTH_LONG,
-        ).show()
-        binding.durationOptions.isEnabled = true
-        binding.boost1m.isEnabled = true
-        binding.boost3m.isEnabled = true
-        binding.boost12m.isEnabled = true
-        binding.generateInvoice.isEnabled = true
+            onInvoiceReceived(invoice)
+        }
     }
 
     private fun onQuoteReceived(quote: PlaceApi.BoostQuote) {
@@ -164,25 +149,10 @@ class BoostFragment : Fragment() {
         )
     }
 
-    private fun onPaymentRequestResponse(rpcResponse: JSONObject) {
-        if (rpcResponse.has("error")) {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.error)
-                .setMessage(rpcResponse.getJSONObject("error").toString())
-                .setPositiveButton(R.string.close, null)
-                .setOnDismissListener {
-                    binding.durationOptions.isEnabled = true
-                    binding.boost1m.isEnabled = true
-                    binding.boost3m.isEnabled = true
-                    binding.boost12m.isEnabled = true
-                    binding.generateInvoice.isEnabled = true
-                }
-                .show()
-            return
-        }
-
-        invoice = rpcResponse.getJSONObject("result").getString("payment_request")
-        val qrEncoder = QRGEncoder(invoice, null, QRGContents.Type.TEXT, 1000)
+    private fun onInvoiceReceived(invoice: PlaceApi.BoostResponse) {
+        this.paymentRequest = invoice.paymentRequest
+        this.invoiceUuid = invoice.invoiceUuid
+        val qrEncoder = QRGEncoder(invoice.paymentRequest, null, QRGContents.Type.TEXT, 1000)
         qrEncoder.colorBlack = Color.BLACK
         qrEncoder.colorWhite = Color.WHITE
         val bitmap = qrEncoder.getBitmap(0)
@@ -195,7 +165,7 @@ class BoostFragment : Fragment() {
 
     private fun onPayInvoiceClick() {
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("lightning:$invoice")
+        intent.data = Uri.parse("lightning:$paymentRequest")
         runCatching {
             startActivity(intent)
         }.onFailure {
@@ -211,7 +181,7 @@ class BoostFragment : Fragment() {
         val clipManager =
             requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clipLabel = "BTC Map Boost Payment Request"
-        val clipText = invoice
+        val clipText = paymentRequest
         clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
         Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
     }
