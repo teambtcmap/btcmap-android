@@ -7,7 +7,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +16,8 @@ import androidmads.library.qrgenearator.QRGEncoder
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withResumed
+import api.InvoiceApi
 import api.PlaceApi
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.delay
@@ -74,8 +75,28 @@ class BoostFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             while (true) {
-                Log.d("invoice", "waiting")
                 delay(500)
+
+                val invoiceUuid = invoiceUuid
+
+                if (!invoiceUuid.isBlank()) {
+                    val invoice = try {
+                        InvoiceApi.getInvoice(invoiceUuid)
+                    } catch (_: Throwable) {
+                        continue
+                    }
+
+                    if (invoice.status == "paid") {
+                        withResumed {
+                            Toast.makeText(
+                                requireContext(),
+                                "Place has been boosted",
+                                Toast.LENGTH_LONG,
+                            ).show()
+                            parentFragmentManager.popBackStack()
+                        }
+                    }
+                }
             }
         }
     }
@@ -158,7 +179,6 @@ class BoostFragment : Fragment() {
         val bitmap = qrEncoder.getBitmap(0)
         binding.qr.isVisible = true
         binding.qr.setImageBitmap(bitmap)
-        binding.invoiceHint.isVisible = true
         binding.payInvoice.isVisible = true
         binding.copyInvoice.isVisible = true
     }
