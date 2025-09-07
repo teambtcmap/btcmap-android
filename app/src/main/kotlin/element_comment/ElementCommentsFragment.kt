@@ -22,7 +22,6 @@ import element.CommentsAdapter
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementCommentsBinding
-import settings.prefs
 
 class ElementCommentsFragment : Fragment() {
 
@@ -70,26 +69,6 @@ class ElementCommentsFragment : Fragment() {
                     WindowInsetsCompat.CONSUMED
                 }
                 binding.topAppBar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
-                binding.topAppBar.setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.action_add -> {
-                            parentFragmentManager.commit {
-                                setReorderingAllowed(true)
-                                replace<AddElementCommentFragment>(
-                                    R.id.fragmentContainerView,
-                                    null,
-                                    bundleOf("element_id" to args.value.elementId)
-                                )
-                                addToBackStack(null)
-                            }
-                            true
-                        }
-
-                        else -> {
-                            false
-                        }
-                    }
-                }
                 binding.list.layoutManager = LinearLayoutManager(requireContext())
                 binding.list.adapter = adapter
                 binding.list.setHasFixedSize(true)
@@ -114,7 +93,7 @@ class ElementCommentsFragment : Fragment() {
         _binding = null
     }
 
-    private suspend fun showComments() {
+    private fun showComments() {
         val comments = CommentQueries.selectByPlaceId(args.value.elementId, db)
         adapter.submitList(comments)
     }
