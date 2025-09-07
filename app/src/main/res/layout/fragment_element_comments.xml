@@ -15,7 +15,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="?attr/actionBarSize"
-            app:menu="@menu/element_comments"
             app:navigationIcon="?attr/homeAsUpIndicator"
             app:title="@string/comments" />
 
