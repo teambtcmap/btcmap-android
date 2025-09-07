@@ -29,8 +29,8 @@ import boost.BoostFragment
 import db.db
 import db.table.place.Place
 import db.table.comment.CommentQueries
-import element_comment.AddElementCommentFragment
-import element_comment.ElementCommentsFragment
+import comment.AddCommentFragment
+import comment.CommentsFragment
 import icons.iconTypeface
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
@@ -132,7 +132,7 @@ class ElementFragment : Fragment() {
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.action_show_directions -> {
-                    val element = runBlocking { elementsRepo.selectById(elementId)!! }
+                    val element = runBlocking { elementsRepo.selectById(elementId) }
                     val uri = "geo:${element.lat},${element.lon}?q=${element.name}".toUri()
                     val intent = Intent(Intent.ACTION_VIEW, uri)
                     requireContext().startActivity(Intent.createChooser(intent, null))
@@ -318,7 +318,7 @@ class ElementFragment : Fragment() {
         binding.comments.setOnClickListener {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
-                replace<ElementCommentsFragment>(
+                replace<CommentsFragment>(
                     R.id.fragmentContainerView, null, bundleOf("element_id" to elementId)
                 )
                 addToBackStack(null)
@@ -338,7 +338,7 @@ class ElementFragment : Fragment() {
         binding.addComment.setOnClickListener {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
-                replace<AddElementCommentFragment>(
+                replace<AddCommentFragment>(
                     R.id.fragmentContainerView, null, bundleOf("element_id" to elementId)
                 )
                 addToBackStack(null)

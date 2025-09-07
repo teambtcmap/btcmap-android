@@ -1,11 +1,10 @@
-package element_comment
+package comment
 
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -29,8 +28,9 @@ import okhttp3.coroutines.executeAsync
 import org.btcmap.R
 import org.btcmap.databinding.FragmentAddElementCommentBinding
 import org.json.JSONObject
+import androidx.core.net.toUri
 
-class AddElementCommentFragment : Fragment() {
+class AddCommentFragment : Fragment() {
 
     private data class Args(
         val elementId: Long,
@@ -177,7 +177,7 @@ class AddElementCommentFragment : Fragment() {
 
     private fun onPayInvoiceClick() {
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("lightning:$invoice")
+        intent.data = "lightning:$invoice".toUri()
         runCatching {
             startActivity(intent)
         }.onFailure {

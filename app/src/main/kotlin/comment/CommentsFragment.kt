@@ -1,4 +1,4 @@
-package element_comment
+package comment
 
 import android.content.Context
 import android.os.Bundle
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementCommentsBinding
 
-class ElementCommentsFragment : Fragment() {
+class CommentsFragment : Fragment() {
 
     private data class Args(
         val elementId: Long,
@@ -75,7 +75,7 @@ class ElementCommentsFragment : Fragment() {
                 binding.fab.setOnClickListener {
                     parentFragmentManager.commit {
                         setReorderingAllowed(true)
-                        replace<AddElementCommentFragment>(
+                        replace<AddCommentFragment>(
                             R.id.fragmentContainerView,
                             null,
                             bundleOf("element_id" to args.value.elementId)
