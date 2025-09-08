@@ -1,12 +1,9 @@
 package api
 
 import json.toJsonArray
-import json.toJsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.coroutines.executeAsync
 import settings.apiUrl
 import settings.prefs
@@ -66,76 +63,6 @@ object PlaceApi {
 
         return withContext(Dispatchers.IO) {
             res.body.byteStream().use { it.toGetPlacesItems() }
-        }
-    }
-
-    data class BoostQuote(
-        val quote30dsat: Long,
-        val quote90dsat: Long,
-        val quote365dsat: Long,
-    )
-
-    suspend fun getBoostQuote(): BoostQuote {
-        val url = prefs.apiUrl
-            .newBuilder().apply {
-                addPathSegment("v4")
-                addPathSegment("places")
-                addPathSegment("boost")
-                addPathSegment("quote")
-            }.build()
-
-        val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
-
-        if (!res.isSuccessful) {
-            throw Exception("Unexpected HTTP response code: ${res.code}")
-        }
-
-        return withContext(Dispatchers.IO) {
-            res.body.byteStream().use {
-                val body = it.toJsonObject()
-
-                BoostQuote(
-                    quote30dsat = body.getLong("quote_30d_sat"),
-                    quote90dsat = body.getLong("quote_90d_sat"),
-                    quote365dsat = body.getLong("quote_365d_sat"),
-                )
-            }
-        }
-    }
-
-    data class BoostResponse(
-        val paymentRequest: String,
-        val invoiceUuid: String,
-    )
-
-    suspend fun boost(placeId: Long, days: Long): BoostResponse {
-        val url = prefs.apiUrl
-            .newBuilder().apply {
-                addPathSegment("v4")
-                addPathSegment("places")
-                addPathSegment(placeId.toString())
-                addPathSegment("boost")
-            }.build()
-
-        val res = apiHttpClient().newCall(
-            Request.Builder()
-                .post("""{ "days": $days }""".toRequestBody("application/json".toMediaType()))
-                .url(url).build()
-        ).executeAsync()
-
-        if (!res.isSuccessful) {
-            throw Exception("Unexpected HTTP response code: ${res.code}")
-        }
-
-        return withContext(Dispatchers.IO) {
-            res.body.byteStream().use {
-                val body = it.toJsonObject()
-
-                BoostResponse(
-                    paymentRequest = body.getString("payment_request"),
-                    invoiceUuid = body.getString("invoice_uuid"),
-                )
-            }
         }
     }
 
