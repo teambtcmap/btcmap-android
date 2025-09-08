@@ -8,6 +8,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.coroutines.executeAsync
+import org.json.JSONObject
 import settings.apiUrl
 import settings.prefs
 import java.io.InputStream
@@ -106,9 +107,13 @@ object CommentApi {
                 addPathSegment("place-comments")
             }.build()
 
+        val req = JSONObject()
+        req.put("place_id", placeId.toString())
+        req.put("comment", comment)
+
         val res = apiHttpClient().newCall(
             Request.Builder()
-                .post("""{ "place_id": "$placeId", "comment": $comment }""".toRequestBody("application/json".toMediaType()))
+                .post(req.toString().toRequestBody("application/json".toMediaType()))
                 .url(url).build()
         ).executeAsync()
 

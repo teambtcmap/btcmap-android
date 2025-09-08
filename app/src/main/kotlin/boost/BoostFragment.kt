@@ -193,6 +193,7 @@ class BoostFragment : Fragment() {
                 val invoice = try {
                     InvoiceApi.getInvoice(invoiceUuid)
                 } catch (_: Throwable) {
+                    delay(500)
                     continue
                 }
 
@@ -205,6 +206,8 @@ class BoostFragment : Fragment() {
                         ).show()
                         parentFragmentManager.popBackStack()
                     }
+                } else {
+                    delay(500)
                 }
             }
         }

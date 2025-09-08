@@ -131,15 +131,6 @@
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/invoiceHint"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/add_element_comment_disclosure_2"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
         </androidx.appcompat.widget.LinearLayoutCompat>
 
     </androidx.core.widget.NestedScrollView>

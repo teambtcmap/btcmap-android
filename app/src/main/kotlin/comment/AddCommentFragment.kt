@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,18 +16,15 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.coroutines.executeAsync
 import org.btcmap.R
 import org.btcmap.databinding.FragmentAddElementCommentBinding
-import org.json.JSONObject
 import androidx.core.net.toUri
+import androidx.lifecycle.withResumed
+import api.CommentApi
+import api.InvoiceApi
+import api.InvoiceApi.paid
+import kotlinx.coroutines.delay
 
 class AddCommentFragment : Fragment() {
 
@@ -42,8 +38,6 @@ class AddCommentFragment : Fragment() {
 
     private var _binding: FragmentAddElementCommentBinding? = null
     private val binding get() = _binding!!
-
-    private var invoice = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,29 +55,117 @@ class AddCommentFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        binding.generateInvoice.setOnClickListener { onGenerateInvoiceButtonClick() }
-        binding.payInvoice.setOnClickListener { onPayInvoiceClick() }
-        binding.copyInvoice.setOnClickListener { onCopyInvoiceClick() }
+        // disable some views until quote is fetched
+        val tempDisabledViews = arrayOf(
+            binding.comment,
+            binding.generateInvoice,
+        ).also {
+            it.forEach { view ->
+                view.isEnabled = false
+            }
+        }
 
+        // get quote and make enable generate invoice button on success
         viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                val httpClient = OkHttpClient()
-                val url = "https://api.btcmap.org/rpc"
-                val requestBody =
-                    """{"jsonrpc": "2.0", "method": "paywall_get_add_element_comment_quote", "id": 1}""".trimIndent()
-                val res = httpClient.newCall(
-                    Request.Builder()
-                        .post(requestBody.toRequestBody("application/json".toMediaType())).url(url)
-                        .build()
-                ).executeAsync()
+            val quote = try {
+                CommentApi.getQuote()
+            } catch (_: Throwable) {
+                parentFragmentManager.popBackStack()
+                return@launch
+            } finally {
+                tempDisabledViews.forEach { it.isEnabled = true }
+            }
 
-                if (res.isSuccessful) {
-                    val body = res.body.string()
-                    Log.d("RPC", body)
+            binding.fee.text = getString(R.string.d_sat, quote.quoteSat.toString())
+        }
 
-                    withContext(Dispatchers.Main) {
-                        onFeeResponse(JSONObject(body))
+        var invoice: CommentApi.PostResponse? = null
+
+        // send boost request and fetch an invoice
+        binding.generateInvoice.setOnClickListener {
+            tempDisabledViews.forEach { it.isEnabled = false }
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                invoice = try {
+                    CommentApi.post(
+                        placeId = args.value.elementId,
+                        comment = binding.comment.text.toString(),
+                    )
+                } catch (t: Throwable) {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.error)
+                        .setMessage(t.toString())
+                        .setPositiveButton(R.string.close, null)
+                        .show()
+                    return@launch
+                } finally {
+                    tempDisabledViews.forEach { it.isEnabled = true }
+                }
+
+                val qrEncoder = QRGEncoder(invoice.paymentRequest, null, QRGContents.Type.TEXT, 1000)
+                qrEncoder.colorBlack = Color.BLACK
+                qrEncoder.colorWhite = Color.WHITE
+                val bitmap = qrEncoder.getBitmap(0)
+                binding.qr.isVisible = true
+                binding.qr.setImageBitmap(bitmap)
+                binding.payInvoice.isVisible = true
+                binding.copyInvoice.isVisible = true
+            }
+        }
+
+        binding.payInvoice.setOnClickListener {
+            val paymentRequest = invoice?.paymentRequest ?: return@setOnClickListener
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = "lightning:$paymentRequest".toUri()
+            runCatching {
+                startActivity(intent)
+            }.onFailure {
+                Toast.makeText(
+                    requireContext(),
+                    R.string.you_dont_have_a_compatible_wallet,
+                    Toast.LENGTH_LONG,
+                ).show()
+            }
+        }
+
+        binding.copyInvoice.setOnClickListener {
+            val paymentRequest = invoice?.paymentRequest ?: return@setOnClickListener
+            val clipManager =
+                requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clipLabel = "BTC Map Comment Payment Request"
+            val clipText = paymentRequest
+            clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
+            Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+        }
+
+        // once invoice is fetched, start polling it's status, till we know it's paid
+        viewLifecycleOwner.lifecycleScope.launch {
+            while (true) {
+                val invoiceUuid = invoice?.invoiceUuid
+
+                if (invoiceUuid == null) {
+                    delay(50)
+                    continue
+                }
+
+                val invoice = try {
+                    InvoiceApi.getInvoice(invoiceUuid)
+                } catch (_: Throwable) {
+                    delay(500)
+                    continue
+                }
+
+                if (invoice.paid) {
+                    withResumed {
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.your_comment_has_been_posted),
+                            Toast.LENGTH_LONG,
+                        ).show()
+                        parentFragmentManager.popBackStack()
                     }
+                } else {
+                    delay(500)
                 }
             }
         }
@@ -92,109 +174,5 @@ class AddCommentFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun onGenerateInvoiceButtonClick() {
-        if (binding.comment.length() == 0) {
-            return
-        }
-
-        val comment = binding.comment.text.toString()
-
-        binding.comment.isEnabled = false
-        binding.generateInvoice.isEnabled = false
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                val httpClient = OkHttpClient()
-                val url = "https://api.btcmap.org/rpc"
-                val requestBody =
-                    """{"jsonrpc": "2.0", "method": "paywall_add_element_comment", "params": {"element_id": "${args.value.elementId}", "comment": "$comment"}, "id": 1}""".trimIndent()
-                val res = httpClient.newCall(
-                    Request.Builder()
-                        .post(requestBody.toRequestBody("application/json".toMediaType())).url(url)
-                        .build()
-                ).executeAsync()
-
-                if (!res.isSuccessful) {
-                    onRpcRequestFail(res.code)
-                } else {
-                    val body = res.body.string()
-                    Log.d("RPC", body)
-
-                    withContext(Dispatchers.Main) {
-                        onPaymentRequestResponse(JSONObject(body))
-                    }
-                }
-            }
-        }
-    }
-
-    private fun onRpcRequestFail(code: Int) {
-        Toast.makeText(
-            requireContext(),
-            "Unexpected response code: $code",
-            Toast.LENGTH_LONG,
-        ).show()
-        binding.comment.isEnabled = true
-        binding.generateInvoice.isEnabled = true
-    }
-
-    private fun onFeeResponse(rpcResponse: JSONObject) {
-        if (rpcResponse.has("error")) {
-            return
-        }
-
-        val quote = rpcResponse.getJSONObject("result").getString("quote_sat")
-        binding.fee.text = getString(R.string.d_sat, quote)
-    }
-
-    private fun onPaymentRequestResponse(rpcResponse: JSONObject) {
-        if (rpcResponse.has("error")) {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Error")
-                .setMessage(rpcResponse.getJSONObject("error").toString())
-                .setPositiveButton("Close", null)
-                .setOnDismissListener {
-                    binding.comment.isEnabled = true
-                    binding.generateInvoice.isEnabled = true
-                }
-                .show()
-            return
-        }
-
-        invoice = rpcResponse.getJSONObject("result").getString("payment_request")
-        val qrEncoder = QRGEncoder(invoice, null, QRGContents.Type.TEXT, 1000)
-        qrEncoder.colorBlack = Color.BLACK
-        qrEncoder.colorWhite = Color.WHITE
-        val bitmap = qrEncoder.getBitmap(0)
-        binding.qr.isVisible = true
-        binding.qr.setImageBitmap(bitmap)
-        binding.invoiceHint.isVisible = true
-        binding.payInvoice.isVisible = true
-        binding.copyInvoice.isVisible = true
-    }
-
-    private fun onPayInvoiceClick() {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = "lightning:$invoice".toUri()
-        runCatching {
-            startActivity(intent)
-        }.onFailure {
-            Toast.makeText(
-                requireContext(),
-                R.string.you_dont_have_a_compatible_wallet,
-                Toast.LENGTH_LONG,
-            ).show()
-        }
-    }
-
-    private fun onCopyInvoiceClick() {
-        val clipManager =
-            requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clipLabel = "BTC Map Comment Payment Request"
-        val clipText = invoice
-        clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
-        Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
     }
 }
