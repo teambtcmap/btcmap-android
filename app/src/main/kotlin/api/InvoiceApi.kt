@@ -5,10 +5,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
 import okhttp3.coroutines.executeAsync
-import settings.apiUrl
-import settings.prefs
 
 object InvoiceApi {
+
+    private const val ENDPOINT = "invoices"
 
     data class Invoice(
         val uuid: String,
@@ -19,12 +19,7 @@ object InvoiceApi {
         get() = status == "paid"
 
     suspend fun getInvoice(uuid: String): Invoice {
-        val url = prefs.apiUrl
-            .newBuilder().apply {
-                addPathSegment("v4")
-                addPathSegment("invoices")
-                addPathSegment(uuid)
-            }.build()
+        val url = apiUrl(ENDPOINT).addPathSegment(uuid).build()
 
         val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
 

@@ -100,4 +100,5 @@
     <string name="place_has_been_boosted">Place has been boosted</string>
     <string name="btc_map_boost_payment_request">BTC Map Boost Payment Request</string>
     <string name="your_comment_has_been_posted">Your comment has been posted</string>
+    <string name="btc_map_comment_payment_request">BTC Map Comment Payment Request</string>
 </resources>

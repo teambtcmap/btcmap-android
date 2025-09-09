@@ -2,6 +2,14 @@ package api
 
 import okhttp3.OkHttpClient
 import okhttp3.brotli.BrotliInterceptor
+import settings.apiUrl
+import settings.prefs
+
+fun apiUrl(endpoint: String) = prefs.apiUrl
+    .newBuilder().apply {
+        addPathSegment("v4")
+        addPathSegment(endpoint)
+    }
 
 fun apiHttpClient(): OkHttpClient {
     return OkHttpClient.Builder()

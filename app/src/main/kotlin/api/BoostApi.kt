@@ -7,10 +7,11 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.coroutines.executeAsync
-import settings.apiUrl
-import settings.prefs
+import org.json.JSONObject
 
 object BoostApi {
+
+    private const val ENDPOINT = "place-boosts"
 
     data class QuoteResponse(
         val quote30dsat: Long,
@@ -19,12 +20,7 @@ object BoostApi {
     )
 
     suspend fun getQuote(): QuoteResponse {
-        val url = prefs.apiUrl
-            .newBuilder().apply {
-                addPathSegment("v4")
-                addPathSegment("place-boosts")
-                addPathSegment("quote")
-            }.build()
+        val url = apiUrl(ENDPOINT).addPathSegment("quote").build()
 
         val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
 
@@ -45,21 +41,22 @@ object BoostApi {
         }
     }
 
-    data class PostResponse(
+    data class BoostResponse(
         val paymentRequest: String,
         val invoiceUuid: String,
     )
 
-    suspend fun post(placeId: Long, days: Long): PostResponse {
-        val url = prefs.apiUrl
-            .newBuilder().apply {
-                addPathSegment("v4")
-                addPathSegment("place-boosts")
-            }.build()
+    suspend fun boost(placeId: Long, days: Long): BoostResponse {
+        val url = apiUrl(ENDPOINT).build()
+
+        val req = JSONObject().apply {
+            put("place_id", placeId.toString())
+            put("days", days)
+        }
 
         val res = apiHttpClient().newCall(
             Request.Builder()
-                .post("""{ "place_id": "$placeId", "days": $days }""".toRequestBody("application/json".toMediaType()))
+                .post(req.toString().toRequestBody("application/json".toMediaType()))
                 .url(url).build()
         ).executeAsync()
 
@@ -71,7 +68,7 @@ object BoostApi {
             res.body.byteStream().use {
                 val body = it.toJsonObject()
 
-                PostResponse(
+                BoostResponse(
                     paymentRequest = body.getString("payment_request"),
                     invoiceUuid = body.getString("invoice_uuid"),
                 )

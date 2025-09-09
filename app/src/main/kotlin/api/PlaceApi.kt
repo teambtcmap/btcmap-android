@@ -5,13 +5,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
 import okhttp3.coroutines.executeAsync
-import settings.apiUrl
-import settings.prefs
 import java.io.InputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 object PlaceApi {
+
+    private const val ENDPOINT = "places"
 
     data class GetPlacesItem(
         val id: Long,
@@ -36,35 +36,6 @@ object PlaceApi {
         val bundled: Boolean,
         val comments: Long?,
     )
-
-    suspend fun getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPlacesItem> {
-        val url = prefs.apiUrl
-            .newBuilder().apply {
-                addPathSegment("v4")
-                addPathSegment("places")
-                addQueryParameter(
-                    "fields",
-                    "lat,lon,icon,name,updated_at,deleted_at,required_app_url,boosted_until,verified_at,address,opening_hours,website,phone,email,twitter,facebook,instagram,line,comments"
-                )
-                addQueryParameter("limit", "$limit")
-                if (updatedSince != null) {
-                    addQueryParameter(
-                        "updated_since",
-                        updatedSince.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                    )
-                }
-            }.build()
-
-        val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
-
-        if (!res.isSuccessful) {
-            throw Exception("Unexpected HTTP response code: ${res.code}")
-        }
-
-        return withContext(Dispatchers.IO) {
-            res.body.byteStream().use { it.toGetPlacesItems() }
-        }
-    }
 
     fun InputStream.toGetPlacesItems(): List<GetPlacesItem> {
         return toJsonArray().map {
@@ -91,6 +62,32 @@ object PlaceApi {
                 bundled = false,
                 comments = it.optLong("comments", 0),
             )
+        }
+    }
+
+    suspend fun getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPlacesItem> {
+        val url = apiUrl(ENDPOINT).apply {
+            addQueryParameter(
+                "fields",
+                "lat,lon,icon,name,updated_at,deleted_at,required_app_url,boosted_until,verified_at,address,opening_hours,website,phone,email,twitter,facebook,instagram,line,comments"
+            )
+            addQueryParameter("limit", "$limit")
+            if (updatedSince != null) {
+                addQueryParameter(
+                    "updated_since",
+                    updatedSince.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                )
+            }
+        }.build()
+
+        val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return withContext(Dispatchers.IO) {
+            res.body.byteStream().use { it.toGetPlacesItems() }
         }
     }
 }

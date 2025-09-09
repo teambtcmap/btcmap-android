@@ -7,12 +7,12 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
 import okhttp3.coroutines.executeAsync
-import settings.apiUrl
-import settings.prefs
 import java.io.InputStream
 import java.time.ZonedDateTime
 
 object EventApi {
+
+    private const val ENDPOINT = "events"
 
     data class GetEventsItem(
         val id: Long,
@@ -23,24 +23,6 @@ object EventApi {
         val startsAt: ZonedDateTime,
         val endsAt: ZonedDateTime?,
     )
-
-    suspend fun getEvents(): List<GetEventsItem> {
-        val url = prefs.apiUrl
-            .newBuilder().apply {
-                addPathSegment("v4")
-                addPathSegment("events")
-            }.build()
-
-        val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
-
-        if (!res.isSuccessful) {
-            throw Exception("Unexpected HTTP response code: ${res.code}")
-        }
-
-        return withContext(Dispatchers.IO) {
-            res.body.byteStream().use { it.toGetEventsItems() }
-        }
-    }
 
     private fun InputStream.toGetEventsItems(): List<GetEventsItem> {
         return toJsonArray().map {
@@ -57,6 +39,20 @@ object EventApi {
                     )
                 )
             )
+        }
+    }
+
+    suspend fun getEvents(): List<GetEventsItem> {
+        val url = apiUrl(ENDPOINT).build()
+
+        val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return withContext(Dispatchers.IO) {
+            res.body.byteStream().use { it.toGetEventsItems() }
         }
     }
 }

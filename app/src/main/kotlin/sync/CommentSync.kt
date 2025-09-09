@@ -8,11 +8,13 @@ import db.table.comment.Comment
 import db.table.comment.CommentQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import log.log
 import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 object CommentSync {
+
     private const val BATCH_SIZE = 1_000L
 
     data class Report(
@@ -29,7 +31,8 @@ object CommentSync {
             while (true) {
                 val delta = try {
                     CommentApi.getComments(maxKnownUpdatedAt, BATCH_SIZE)
-                } catch (_: Throwable) {
+                } catch (t: Throwable) {
+                    t.log()
                     return@withContext Report(
                         duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                         rowsAffected = rowsAffected,

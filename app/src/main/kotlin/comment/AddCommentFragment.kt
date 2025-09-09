@@ -25,6 +25,7 @@ import api.CommentApi
 import api.InvoiceApi
 import api.InvoiceApi.paid
 import kotlinx.coroutines.delay
+import log.log
 
 class AddCommentFragment : Fragment() {
 
@@ -69,7 +70,8 @@ class AddCommentFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val quote = try {
                 CommentApi.getQuote()
-            } catch (_: Throwable) {
+            } catch (t: Throwable) {
+                t.log()
                 parentFragmentManager.popBackStack()
                 return@launch
             } finally {
@@ -79,15 +81,15 @@ class AddCommentFragment : Fragment() {
             binding.fee.text = getString(R.string.d_sat, quote.quoteSat.toString())
         }
 
-        var invoice: CommentApi.PostResponse? = null
+        var addCommentResponse: CommentApi.AddCommentResponse? = null
 
         // send boost request and fetch an invoice
         binding.generateInvoice.setOnClickListener {
             tempDisabledViews.forEach { it.isEnabled = false }
 
             viewLifecycleOwner.lifecycleScope.launch {
-                invoice = try {
-                    CommentApi.post(
+                addCommentResponse = try {
+                    CommentApi.addComment(
                         placeId = args.value.elementId,
                         comment = binding.comment.text.toString(),
                     )
@@ -102,7 +104,8 @@ class AddCommentFragment : Fragment() {
                     tempDisabledViews.forEach { it.isEnabled = true }
                 }
 
-                val qrEncoder = QRGEncoder(invoice.paymentRequest, null, QRGContents.Type.TEXT, 1000)
+                val qrEncoder =
+                    QRGEncoder(addCommentResponse.paymentRequest, null, QRGContents.Type.TEXT, 1000)
                 qrEncoder.colorBlack = Color.BLACK
                 qrEncoder.colorWhite = Color.WHITE
                 val bitmap = qrEncoder.getBitmap(0)
@@ -114,7 +117,7 @@ class AddCommentFragment : Fragment() {
         }
 
         binding.payInvoice.setOnClickListener {
-            val paymentRequest = invoice?.paymentRequest ?: return@setOnClickListener
+            val paymentRequest = addCommentResponse?.paymentRequest ?: return@setOnClickListener
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data = "lightning:$paymentRequest".toUri()
             runCatching {
@@ -129,19 +132,20 @@ class AddCommentFragment : Fragment() {
         }
 
         binding.copyInvoice.setOnClickListener {
-            val paymentRequest = invoice?.paymentRequest ?: return@setOnClickListener
+            val paymentRequest = addCommentResponse?.paymentRequest ?: return@setOnClickListener
             val clipManager =
                 requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clipLabel = "BTC Map Comment Payment Request"
+            val clipLabel = getString(R.string.btc_map_comment_payment_request)
             val clipText = paymentRequest
             clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
-            Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT)
+                .show()
         }
 
         // once invoice is fetched, start polling it's status, till we know it's paid
         viewLifecycleOwner.lifecycleScope.launch {
             while (true) {
-                val invoiceUuid = invoice?.invoiceUuid
+                val invoiceUuid = addCommentResponse?.invoiceUuid
 
                 if (invoiceUuid == null) {
                     delay(50)

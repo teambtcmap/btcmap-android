@@ -9,13 +9,13 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.coroutines.executeAsync
 import org.json.JSONObject
-import settings.apiUrl
-import settings.prefs
 import java.io.InputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 object CommentApi {
+
+    private const val ENDPOINT = "place-comments"
 
     data class GetCommentsItem(
         val id: Long,
@@ -43,9 +43,7 @@ object CommentApi {
         updatedSince: ZonedDateTime?,
         limit: Long,
     ): List<GetCommentsItem> {
-        val url = prefs.apiUrl.newBuilder().apply {
-            addPathSegment("v4")
-            addPathSegment("place-comments")
+        val url = apiUrl(ENDPOINT).apply {
             addQueryParameter("limit", "$limit")
             if (updatedSince != null) {
                 addQueryParameter(
@@ -71,12 +69,7 @@ object CommentApi {
     )
 
     suspend fun getQuote(): QuoteResponse {
-        val url = prefs.apiUrl
-            .newBuilder().apply {
-                addPathSegment("v4")
-                addPathSegment("place-comments")
-                addPathSegment("quote")
-            }.build()
+        val url = apiUrl(ENDPOINT).addPathSegment("quote").build()
 
         val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
 
@@ -95,21 +88,18 @@ object CommentApi {
         }
     }
 
-    data class PostResponse(
+    data class AddCommentResponse(
         val paymentRequest: String,
         val invoiceUuid: String,
     )
 
-    suspend fun post(placeId: Long, comment: String): PostResponse {
-        val url = prefs.apiUrl
-            .newBuilder().apply {
-                addPathSegment("v4")
-                addPathSegment("place-comments")
-            }.build()
+    suspend fun addComment(placeId: Long, comment: String): AddCommentResponse {
+        val url = apiUrl(ENDPOINT).build()
 
-        val req = JSONObject()
-        req.put("place_id", placeId.toString())
-        req.put("comment", comment)
+        val req = JSONObject().apply {
+            put("place_id", placeId.toString())
+            put("comment", comment)
+        }
 
         val res = apiHttpClient().newCall(
             Request.Builder()
@@ -125,7 +115,7 @@ object CommentApi {
             res.body.byteStream().use {
                 val body = it.toJsonObject()
 
-                PostResponse(
+                AddCommentResponse(
                     paymentRequest = body.getString("payment_request"),
                     invoiceUuid = body.getString("invoice_uuid"),
                 )

@@ -26,6 +26,7 @@ import java.text.NumberFormat
 import androidx.core.net.toUri
 import api.InvoiceApi.paid
 import api.BoostApi
+import log.log
 
 class BoostFragment : Fragment() {
 
@@ -72,7 +73,8 @@ class BoostFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val quote = try {
                 BoostApi.getQuote()
-            } catch (_: Throwable) {
+            } catch (t: Throwable) {
+                t.log()
                 parentFragmentManager.popBackStack()
                 return@launch
             } finally {
@@ -104,7 +106,7 @@ class BoostFragment : Fragment() {
             )
         }
 
-        var invoice: BoostApi.PostResponse? = null
+        var boostResponse: BoostApi.BoostResponse? = null
 
         // send boost request and fetch an invoice
         binding.generateInvoice.setOnClickListener {
@@ -116,15 +118,11 @@ class BoostFragment : Fragment() {
                 30
             }
 
-            binding.durationOptions.isEnabled = false
-            binding.boost1m.isEnabled = false
-            binding.boost3m.isEnabled = false
-            binding.boost12m.isEnabled = false
-            binding.generateInvoice.isEnabled = false
+            tempDisabledViews.forEach { it.isEnabled = false }
 
             viewLifecycleOwner.lifecycleScope.launch {
-                invoice = try {
-                    BoostApi.post(
+                boostResponse = try {
+                    BoostApi.boost(
                         placeId = args.value.elementId,
                         days = days.toLong(),
                     )
@@ -133,18 +131,13 @@ class BoostFragment : Fragment() {
                         .setTitle(R.string.error)
                         .setMessage(t.toString())
                         .setPositiveButton(R.string.close, null)
-                        .setOnDismissListener {
-                            binding.durationOptions.isEnabled = true
-                            binding.boost1m.isEnabled = true
-                            binding.boost3m.isEnabled = true
-                            binding.boost12m.isEnabled = true
-                            binding.generateInvoice.isEnabled = true
-                        }
                         .show()
                     return@launch
+                } finally {
+                    tempDisabledViews.forEach { it.isEnabled = true }
                 }
 
-                val qrEncoder = QRGEncoder(invoice.paymentRequest, null, QRGContents.Type.TEXT, 1000)
+                val qrEncoder = QRGEncoder(boostResponse.paymentRequest, null, QRGContents.Type.TEXT, 1000)
                 qrEncoder.colorBlack = Color.BLACK
                 qrEncoder.colorWhite = Color.WHITE
                 val bitmap = qrEncoder.getBitmap(0)
@@ -156,7 +149,7 @@ class BoostFragment : Fragment() {
         }
 
         binding.payInvoice.setOnClickListener {
-            val paymentRequest = invoice?.paymentRequest ?: return@setOnClickListener
+            val paymentRequest = boostResponse?.paymentRequest ?: return@setOnClickListener
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data = "lightning:$paymentRequest".toUri()
             runCatching {
@@ -171,7 +164,7 @@ class BoostFragment : Fragment() {
         }
 
         binding.copyInvoice.setOnClickListener {
-            val paymentRequest = invoice?.paymentRequest ?: return@setOnClickListener
+            val paymentRequest = boostResponse?.paymentRequest ?: return@setOnClickListener
             val clipManager =
                 requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clipLabel = getString(R.string.btc_map_boost_payment_request)
@@ -183,7 +176,7 @@ class BoostFragment : Fragment() {
         // once invoice is fetched, start polling it's status, till we know it's paid
         viewLifecycleOwner.lifecycleScope.launch {
             while (true) {
-                val invoiceUuid = invoice?.invoiceUuid
+                val invoiceUuid = boostResponse?.invoiceUuid
 
                 if (invoiceUuid == null) {
                     delay(50)
