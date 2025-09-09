@@ -171,15 +171,15 @@ class BoostFragment : Fragment() {
         // once invoice is fetched, start polling it's status, till we know it's paid
         viewLifecycleOwner.lifecycleScope.launch {
             while (true) {
-                val invoiceUuid = boostResponse?.invoiceUuid
+                val invoiceId = boostResponse?.invoiceUuid
 
-                if (invoiceUuid == null) {
+                if (invoiceId == null) {
                     delay(50)
                     continue
                 }
 
                 val invoice = try {
-                    InvoiceApi.getInvoice(invoiceUuid)
+                    InvoiceApi.getInvoice(invoiceId)
                 } catch (_: Throwable) {
                     delay(500)
                     continue

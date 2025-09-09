@@ -11,15 +11,15 @@ object InvoiceApi {
     private const val ENDPOINT = "invoices"
 
     data class Invoice(
-        val uuid: String,
+        val id: String,
         val status: String,
     )
 
     val Invoice.paid: Boolean
         get() = status == "paid"
 
-    suspend fun getInvoice(uuid: String): Invoice {
-        val url = apiUrl(ENDPOINT).addPathSegment(uuid).build()
+    suspend fun getInvoice(id: String): Invoice {
+        val url = apiUrl(ENDPOINT).addPathSegment(id).build()
 
         val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
 
@@ -32,7 +32,7 @@ object InvoiceApi {
                 val body = it.toJsonObject()
 
                 Invoice(
-                    uuid = body.getString("uuid"),
+                    id = body.getString("id"),
                     status = body.getString("status"),
                 )
             }
