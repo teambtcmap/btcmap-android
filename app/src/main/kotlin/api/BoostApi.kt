@@ -8,6 +8,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.coroutines.executeAsync
 import org.json.JSONObject
+import java.io.InputStream
 
 object BoostApi {
 
@@ -42,9 +43,20 @@ object BoostApi {
     }
 
     data class BoostResponse(
-        val paymentRequest: String,
-        val invoiceUuid: String,
+        val invoiceId: String,
+        val invoice: String,
     )
+
+    private fun InputStream.toBoostResponse(): BoostResponse {
+        return use { stream ->
+            val body = stream.toJsonObject()
+
+            BoostResponse(
+                invoiceId = body.getString("invoice_id"),
+                invoice = body.getString("invoice"),
+            )
+        }
+    }
 
     suspend fun boost(placeId: Long, days: Long): BoostResponse {
         val url = apiUrl(ENDPOINT).build()
@@ -55,8 +67,7 @@ object BoostApi {
         }
 
         val res = apiHttpClient().newCall(
-            Request.Builder()
-                .post(req.toString().toRequestBody("application/json".toMediaType()))
+            Request.Builder().post(req.toString().toRequestBody("application/json".toMediaType()))
                 .url(url).build()
         ).executeAsync()
 
@@ -65,14 +76,7 @@ object BoostApi {
         }
 
         return withContext(Dispatchers.IO) {
-            res.body.byteStream().use {
-                val body = it.toJsonObject()
-
-                BoostResponse(
-                    paymentRequest = body.getString("payment_request"),
-                    invoiceUuid = body.getString("invoice_uuid"),
-                )
-            }
+            res.body.byteStream().toBoostResponse()
         }
     }
 }

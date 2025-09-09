@@ -131,7 +131,7 @@ class BoostFragment : Fragment() {
                 }
 
                 val qrEncoder =
-                    QRGEncoder(boostResponse.paymentRequest, null, QRGContents.Type.TEXT, 1000)
+                    QRGEncoder(boostResponse.invoice, null, QRGContents.Type.TEXT, 1000)
                 qrEncoder.colorBlack = Color.BLACK
                 qrEncoder.colorWhite = Color.WHITE
                 val bitmap = qrEncoder.getBitmap(0)
@@ -143,9 +143,9 @@ class BoostFragment : Fragment() {
         }
 
         binding.payInvoice.setOnClickListener {
-            val paymentRequest = boostResponse?.paymentRequest ?: return@setOnClickListener
+            val invoice = boostResponse?.invoice ?: return@setOnClickListener
             val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = "lightning:$paymentRequest".toUri()
+            intent.data = "lightning:$invoice".toUri()
             runCatching {
                 startActivity(intent)
             }.onFailure {
@@ -158,11 +158,11 @@ class BoostFragment : Fragment() {
         }
 
         binding.copyInvoice.setOnClickListener {
-            val paymentRequest = boostResponse?.paymentRequest ?: return@setOnClickListener
+            val invoice = boostResponse?.invoice ?: return@setOnClickListener
             val clipManager =
                 requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clipLabel = getString(R.string.btc_map_boost_payment_request)
-            val clipText = paymentRequest
+            val clipText = invoice
             clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
             Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT)
                 .show()
@@ -171,7 +171,7 @@ class BoostFragment : Fragment() {
         // once invoice is fetched, start polling it's status, till we know it's paid
         viewLifecycleOwner.lifecycleScope.launch {
             while (true) {
-                val invoiceId = boostResponse?.invoiceUuid
+                val invoiceId = boostResponse?.invoiceId
 
                 if (invoiceId == null) {
                     delay(50)

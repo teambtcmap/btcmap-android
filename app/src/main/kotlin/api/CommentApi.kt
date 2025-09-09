@@ -89,9 +89,20 @@ object CommentApi {
     }
 
     data class AddCommentResponse(
-        val paymentRequest: String,
-        val invoiceUuid: String,
+        val invoiceId: String,
+        val invoice: String,
     )
+
+    private fun InputStream.toAddCommentResponse(): AddCommentResponse {
+        return use { stream ->
+            val body = stream.toJsonObject()
+
+            AddCommentResponse(
+                invoiceId = body.getString("invoice_id"),
+                invoice = body.getString("invoice"),
+            )
+        }
+    }
 
     suspend fun addComment(placeId: Long, comment: String): AddCommentResponse {
         val url = apiUrl(ENDPOINT).build()
@@ -112,14 +123,7 @@ object CommentApi {
         }
 
         return withContext(Dispatchers.IO) {
-            res.body.byteStream().use {
-                val body = it.toJsonObject()
-
-                AddCommentResponse(
-                    paymentRequest = body.getString("payment_request"),
-                    invoiceUuid = body.getString("invoice_uuid"),
-                )
-            }
+            res.body.byteStream().toAddCommentResponse()
         }
     }
 }

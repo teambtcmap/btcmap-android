@@ -105,7 +105,7 @@ class AddCommentFragment : Fragment() {
                 }
 
                 val qrEncoder =
-                    QRGEncoder(addCommentResponse.paymentRequest, null, QRGContents.Type.TEXT, 1000)
+                    QRGEncoder(addCommentResponse.invoice, null, QRGContents.Type.TEXT, 1000)
                 qrEncoder.colorBlack = Color.BLACK
                 qrEncoder.colorWhite = Color.WHITE
                 val bitmap = qrEncoder.getBitmap(0)
@@ -117,9 +117,9 @@ class AddCommentFragment : Fragment() {
         }
 
         binding.payInvoice.setOnClickListener {
-            val paymentRequest = addCommentResponse?.paymentRequest ?: return@setOnClickListener
+            val invoice = addCommentResponse?.invoice ?: return@setOnClickListener
             val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = "lightning:$paymentRequest".toUri()
+            intent.data = "lightning:$invoice".toUri()
             runCatching {
                 startActivity(intent)
             }.onFailure {
@@ -132,11 +132,11 @@ class AddCommentFragment : Fragment() {
         }
 
         binding.copyInvoice.setOnClickListener {
-            val paymentRequest = addCommentResponse?.paymentRequest ?: return@setOnClickListener
+            val invoice = addCommentResponse?.invoice ?: return@setOnClickListener
             val clipManager =
                 requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clipLabel = getString(R.string.btc_map_comment_payment_request)
-            val clipText = paymentRequest
+            val clipText = invoice
             clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
             Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT)
                 .show()
@@ -145,7 +145,7 @@ class AddCommentFragment : Fragment() {
         // once invoice is fetched, start polling it's status, till we know it's paid
         viewLifecycleOwner.lifecycleScope.launch {
             while (true) {
-                val invoiceId = addCommentResponse?.invoiceUuid
+                val invoiceId = addCommentResponse?.invoiceId
 
                 if (invoiceId == null) {
                     delay(50)
