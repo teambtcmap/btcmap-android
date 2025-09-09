@@ -30,13 +30,9 @@ import log.log
 
 class BoostFragment : Fragment() {
 
-    private data class Args(
-        val elementId: Long,
-    )
+    private data class Args(val placeId: Long)
 
-    private val args = lazy {
-        Args(requireArguments().getLong("place_id"))
-    }
+    private val args by lazy { Args(requireArguments().getLong("place_id")) }
 
     private var _binding: FragmentBoostElementBinding? = null
     private val binding get() = _binding!!
@@ -63,11 +59,7 @@ class BoostFragment : Fragment() {
             binding.boost3m,
             binding.boost12m,
             binding.generateInvoice,
-        ).also {
-            it.forEach { view ->
-                view.isEnabled = false
-            }
-        }
+        ).also { views -> views.forEach { it.isEnabled = false } }
 
         // get quote and make enable generate invoice button on success
         viewLifecycleOwner.lifecycleScope.launch {
@@ -76,6 +68,10 @@ class BoostFragment : Fragment() {
             } catch (t: Throwable) {
                 t.log()
                 parentFragmentManager.popBackStack()
+                MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.error)
+                    .setMessage(t.toString())
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
                 return@launch
             } finally {
                 tempDisabledViews.forEach { it.isEnabled = true }
@@ -123,21 +119,19 @@ class BoostFragment : Fragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 boostResponse = try {
                     BoostApi.boost(
-                        placeId = args.value.elementId,
+                        placeId = args.placeId,
                         days = days.toLong(),
                     )
                 } catch (t: Throwable) {
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.error)
-                        .setMessage(t.toString())
-                        .setPositiveButton(R.string.close, null)
-                        .show()
+                    MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.error)
+                        .setMessage(t.toString()).setPositiveButton(R.string.close, null).show()
                     return@launch
                 } finally {
                     tempDisabledViews.forEach { it.isEnabled = true }
                 }
 
-                val qrEncoder = QRGEncoder(boostResponse.paymentRequest, null, QRGContents.Type.TEXT, 1000)
+                val qrEncoder =
+                    QRGEncoder(boostResponse.paymentRequest, null, QRGContents.Type.TEXT, 1000)
                 qrEncoder.colorBlack = Color.BLACK
                 qrEncoder.colorWhite = Color.WHITE
                 val bitmap = qrEncoder.getBitmap(0)
@@ -170,7 +164,8 @@ class BoostFragment : Fragment() {
             val clipLabel = getString(R.string.btc_map_boost_payment_request)
             val clipText = paymentRequest
             clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
-            Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT)
+                .show()
         }
 
         // once invoice is fetched, start polling it's status, till we know it's paid
@@ -191,14 +186,7 @@ class BoostFragment : Fragment() {
                 }
 
                 if (invoice.paid) {
-                    withResumed {
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.place_has_been_boosted),
-                            Toast.LENGTH_LONG,
-                        ).show()
-                        parentFragmentManager.popBackStack()
-                    }
+                    withResumed { parentFragmentManager.popBackStack() }
                 } else {
                     delay(500)
                 }
