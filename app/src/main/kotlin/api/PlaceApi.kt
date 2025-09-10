@@ -50,7 +50,7 @@ object PlaceApi {
                 requiredAppUrl = it.optString("required_app_url").ifBlank { null },
                 boostedUntil = it.optString("boosted_until").ifBlank { null },
                 verifiedAt = it.optString("verified_at").ifBlank { null },
-                address = it.optString("verified_at").ifBlank { null },
+                address = it.optString("address").ifBlank { null },
                 openingHours = it.optString("opening_hours").ifBlank { null },
                 website = it.optString("website").ifBlank { null },
                 phone = it.optString("phone").ifBlank { null },
