@@ -245,7 +245,6 @@
                 android:drawablePadding="20dp"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
-                android:singleLine="true"
                 app:drawableStartCompat="@drawable/schedule"
                 app:drawableTint="?colorSecondary" />
 

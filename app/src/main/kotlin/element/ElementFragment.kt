@@ -17,7 +17,6 @@ import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
@@ -222,40 +221,40 @@ class ElementFragment : Fragment() {
             binding.lastVerified.text = date
 
             if (element.verifiedAt.isAfter(ZonedDateTime.now().minusYears(1))) {
-                binding.lastVerified.isInvisible = false
+                binding.lastVerified.isVisible = true
                 binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
                 binding.lastVerified.setOnClickListener(null)
-                binding.outdated.isInvisible = true
+                binding.outdated.isVisible = false
                 binding.outdated.setOnClickListener(null)
             } else {
-                binding.lastVerified.isInvisible = false
+                binding.lastVerified.isVisible = true
                 binding.lastVerified.setTextColor(requireContext().getErrorColor())
                 binding.lastVerified.setOnClickListener { openUri(outdatedUri) }
-                binding.outdated.isInvisible = false
+                binding.outdated.isVisible = true
                 binding.outdated.setOnClickListener { openUri(outdatedUri) }
             }
         } else {
             if (!element.bundled) {
-                binding.lastVerified.isInvisible = false
+                binding.lastVerified.isVisible = true
                 binding.lastVerified.text = getString(R.string.not_verified)
                 binding.lastVerified.setTextColor(requireContext().getErrorColor())
                 binding.lastVerified.setOnClickListener { openUri(outdatedUri) }
-                binding.outdated.isInvisible = false
+                binding.outdated.isVisible = true
                 binding.outdated.setOnClickListener { openUri(outdatedUri) }
             } else {
-                binding.lastVerified.isInvisible = true
-                binding.outdated.isInvisible = true
+                binding.lastVerified.isVisible = false
+                binding.outdated.isVisible = false
             }
         }
 
         binding.address.text = element.address
-        binding.address.isInvisible = element.address == null
+        binding.address.isVisible = !element.address.isNullOrBlank()
 
         binding.phone.text = element.phone
-        binding.phone.isInvisible = element.phone == null
+        binding.phone.isVisible = !element.phone.isNullOrBlank()
 
         binding.website.text = element.website.toString()
-        binding.website.isInvisible = element.website == null
+        binding.website.isVisible = element.website != null
 
         if (element.twitter == null) {
             binding.twitter.isVisible = false
