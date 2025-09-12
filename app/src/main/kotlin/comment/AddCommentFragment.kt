@@ -30,11 +30,11 @@ import log.log
 class AddCommentFragment : Fragment() {
 
     private data class Args(
-        val elementId: Long,
+        val placeId: Long,
     )
 
-    private val args = lazy {
-        Args(requireArguments().getLong("element_id"))
+    private val args by lazy {
+        Args(requireArguments().getLong("place_id"))
     }
 
     private var _binding: FragmentAddElementCommentBinding? = null
@@ -56,120 +56,124 @@ class AddCommentFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        // disable some views until quote is fetched
-        val tempDisabledViews = arrayOf(
-            binding.comment,
-            binding.generateInvoice,
-        ).also {
-            it.forEach { view ->
-                view.isEnabled = false
-            }
-        }
+        // disable invoice generation until quote is fetched
+        binding.generateInvoice.isEnabled = false
 
-        // get quote and make enable generate invoice button on success
+        // get quote and enable generate invoice button on success
         viewLifecycleOwner.lifecycleScope.launch {
-            val quote = try {
-                CommentApi.getQuote()
+            try {
+                val quote = CommentApi.getQuote()
+
+                withResumed {
+                    binding.fee.text = getString(R.string.d_sat, quote.quoteSat.toString())
+                    binding.generateInvoice.isEnabled = true
+                }
             } catch (t: Throwable) {
                 t.log()
-                parentFragmentManager.popBackStack()
+                withResumed {
+                    parentFragmentManager.popBackStack()
+                    MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.error)
+                        .setMessage(t.toString())
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                }
                 return@launch
-            } finally {
-                tempDisabledViews.forEach { it.isEnabled = true }
             }
-
-            binding.fee.text = getString(R.string.d_sat, quote.quoteSat.toString())
         }
 
-        var addCommentResponse: CommentApi.AddCommentResponse? = null
-
-        // send boost request and fetch an invoice
+        // send comment request and fetch an invoice
         binding.generateInvoice.setOnClickListener {
-            tempDisabledViews.forEach { it.isEnabled = false }
+            binding.comment.isEnabled = false
+            binding.generateInvoice.isEnabled = false
 
             viewLifecycleOwner.lifecycleScope.launch {
-                addCommentResponse = try {
+                val addCommentResponse = try {
                     CommentApi.addComment(
-                        placeId = args.value.elementId,
+                        placeId = args.placeId,
                         comment = binding.comment.text.toString(),
                     )
                 } catch (t: Throwable) {
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.error)
-                        .setMessage(t.toString())
-                        .setPositiveButton(R.string.close, null)
-                        .show()
-                    return@launch
-                } finally {
-                    tempDisabledViews.forEach { it.isEnabled = true }
-                }
-
-                val qrEncoder =
-                    QRGEncoder(addCommentResponse.invoice, null, QRGContents.Type.TEXT, 1000)
-                qrEncoder.colorBlack = Color.BLACK
-                qrEncoder.colorWhite = Color.WHITE
-                val bitmap = qrEncoder.getBitmap(0)
-                binding.qr.isVisible = true
-                binding.qr.setImageBitmap(bitmap)
-                binding.payInvoice.isVisible = true
-                binding.copyInvoice.isVisible = true
-            }
-        }
-
-        binding.payInvoice.setOnClickListener {
-            val invoice = addCommentResponse?.invoice ?: return@setOnClickListener
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = "lightning:$invoice".toUri()
-            runCatching {
-                startActivity(intent)
-            }.onFailure {
-                Toast.makeText(
-                    requireContext(),
-                    R.string.you_dont_have_a_compatible_wallet,
-                    Toast.LENGTH_LONG,
-                ).show()
-            }
-        }
-
-        binding.copyInvoice.setOnClickListener {
-            val invoice = addCommentResponse?.invoice ?: return@setOnClickListener
-            val clipManager =
-                requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clipLabel = getString(R.string.btc_map_comment_payment_request)
-            val clipText = invoice
-            clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
-            Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT)
-                .show()
-        }
-
-        // once invoice is fetched, start polling it's status, till we know it's paid
-        viewLifecycleOwner.lifecycleScope.launch {
-            while (true) {
-                val invoiceId = addCommentResponse?.invoiceId
-
-                if (invoiceId == null) {
-                    delay(50)
-                    continue
-                }
-
-                val invoice = try {
-                    InvoiceApi.getInvoice(invoiceId)
-                } catch (_: Throwable) {
-                    delay(500)
-                    continue
-                }
-
-                if (invoice.paid) {
+                    t.log()
                     withResumed {
+                        binding.comment.isEnabled = true
+                        binding.generateInvoice.isEnabled = true
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(R.string.error)
+                            .setMessage(t.toString())
+                            .setPositiveButton(R.string.close, null)
+                            .show()
+                    }
+                    return@launch
+                }
+
+                // if invoice is fetched, monitor its status in background
+                launch {
+                    while (true) {
+                        val invoice = try {
+                            InvoiceApi.getInvoice(addCommentResponse.invoiceId)
+                        } catch (_: Throwable) {
+                            delay(500)
+                            continue
+                        }
+
+                        if (invoice.paid) {
+                            withResumed {
+                                Toast.makeText(
+                                    requireContext(),
+                                    getString(R.string.your_comment_has_been_posted),
+                                    Toast.LENGTH_LONG,
+                                ).show()
+                                parentFragmentManager.popBackStack()
+                            }
+                        } else {
+                            delay(500)
+                        }
+                    }
+                }
+
+                withResumed {
+                    val qrEncoder =
+                        QRGEncoder(addCommentResponse.invoice, null, QRGContents.Type.TEXT, 1000)
+                    qrEncoder.colorBlack = Color.BLACK
+                    qrEncoder.colorWhite = Color.WHITE
+                    val bitmap = qrEncoder.getBitmap(0)
+
+                    binding.qr.isVisible = true
+                    binding.qr.setImageBitmap(bitmap)
+
+                    binding.payInvoice.isVisible = true
+                    binding.payInvoice.setOnClickListener {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.data = "lightning:${addCommentResponse.invoice}".toUri()
+                        runCatching {
+                            startActivity(intent)
+                        }.onFailure {
+                            Toast.makeText(
+                                requireContext(),
+                                R.string.you_dont_have_a_compatible_wallet,
+                                Toast.LENGTH_LONG,
+                            ).show()
+                        }
+                    }
+
+                    binding.copyInvoice.isVisible = true
+                    binding.copyInvoice.setOnClickListener {
+                        val clipManager =
+                            requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipLabel = getString(R.string.btc_map_comment_payment_request)
+                        clipManager.setPrimaryClip(
+                            ClipData.newPlainText(
+                                clipLabel,
+                                addCommentResponse.invoice,
+                            )
+                        )
                         Toast.makeText(
                             requireContext(),
-                            getString(R.string.your_comment_has_been_posted),
-                            Toast.LENGTH_LONG,
-                        ).show()
-                        parentFragmentManager.popBackStack()
+                            R.string.copied_to_clipboard,
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
                     }
-                } else {
-                    delay(500)
                 }
             }
         }

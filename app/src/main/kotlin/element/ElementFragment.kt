@@ -318,7 +318,7 @@ class ElementFragment : Fragment() {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<CommentsFragment>(
-                    R.id.fragmentContainerView, null, bundleOf("element_id" to elementId)
+                    R.id.fragmentContainerView, null, bundleOf("place_id" to elementId)
                 )
                 addToBackStack(null)
             }

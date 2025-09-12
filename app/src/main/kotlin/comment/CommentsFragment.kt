@@ -1,6 +1,5 @@
 package comment
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,28 +18,25 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import db.db
 import db.table.comment.CommentQueries
 import element.CommentsAdapter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementCommentsBinding
+import sync.CommentSync
 
 class CommentsFragment : Fragment() {
 
     private data class Args(
-        val elementId: Long,
+        val placeId: Long,
     )
 
-    private val args = lazy {
-        Args(requireArguments().getLong("element_id"))
+    private val args by lazy {
+        Args(requireArguments().getLong("place_id"))
     }
 
     private var _binding: FragmentElementCommentsBinding? = null
     private val binding get() = _binding!!
-
-    private val adapter = CommentsAdapter()
-
-    fun Context.dpToPx(dp: Int): Int {
-        return (dp * resources.displayMetrics.density).toInt()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,36 +50,53 @@ class CommentsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.topAppBar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
+
+        binding.list.layoutManager = LinearLayoutManager(requireContext())
+        val adapter = CommentsAdapter()
+        binding.list.adapter = adapter
+        binding.list.setHasFixedSize(true)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top
+                rightMargin = insets.right + (resources.displayMetrics.density * 24).toInt()
+                bottomMargin = insets.bottom + (resources.displayMetrics.density * 24).toInt()
+                leftMargin = insets.left
+            }
+
+            WindowInsetsCompat.CONSUMED
+        }
+
+        binding.fab.setOnClickListener {
+            parentFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace<AddCommentFragment>(
+                    R.id.fragmentContainerView,
+                    null,
+                    bundleOf("place_id" to args.placeId)
+                )
+                addToBackStack(null)
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { v, windowInsets ->
-                    val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                val comments = withContext(Dispatchers.IO) {
+                    CommentQueries.selectByPlaceId(args.placeId, db)
+                }
 
-                    v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        topMargin = insets.top
-                        rightMargin = insets.right + v.context.dpToPx(24)
-                        bottomMargin = insets.bottom + v.context.dpToPx(24)
-                        leftMargin = insets.left
+                adapter.submitList(comments)
+
+                if (CommentSync.run(db).rowsAffected > 0) {
+                    val comments = withContext(Dispatchers.IO) {
+                        CommentQueries.selectByPlaceId(args.placeId, db)
                     }
 
-                    WindowInsetsCompat.CONSUMED
+                    adapter.submitList(comments)
                 }
-                binding.topAppBar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
-                binding.list.layoutManager = LinearLayoutManager(requireContext())
-                binding.list.adapter = adapter
-                binding.list.setHasFixedSize(true)
-                binding.fab.setOnClickListener {
-                    parentFragmentManager.commit {
-                        setReorderingAllowed(true)
-                        replace<AddCommentFragment>(
-                            R.id.fragmentContainerView,
-                            null,
-                            bundleOf("element_id" to args.value.elementId)
-                        )
-                        addToBackStack(null)
-                    }
-                }
-                showComments()
             }
         }
     }
@@ -91,10 +104,5 @@ class CommentsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun showComments() {
-        val comments = CommentQueries.selectByPlaceId(args.value.elementId, db)
-        adapter.submitList(comments)
     }
 }

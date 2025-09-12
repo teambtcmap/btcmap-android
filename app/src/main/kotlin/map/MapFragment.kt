@@ -12,7 +12,6 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -70,7 +69,6 @@ import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
 import org.maplibre.android.maps.Style
 import search.SearchAdapter
 import search.SearchModel
-import search.SearchResultModel
 import settings.MapStyle
 import settings.SettingsFragment
 import settings.badgeBackgroundColor
@@ -99,8 +97,6 @@ class MapFragment : Fragment() {
             ElementsRepo()
         )
     }
-
-    private val searchResultModel: SearchResultModel by activityViewModels()
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
@@ -279,7 +275,7 @@ class MapFragment : Fragment() {
             when (it.itemId) {
                 R.id.action_add_element -> {
                     val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse("https://btcmap.org/add-location")
+                    intent.data = "https://btcmap.org/add-location".toUri()
                     startActivity(intent)
                 }
 
@@ -413,11 +409,8 @@ class MapFragment : Fragment() {
                                             "!"
                                         } else if (it.cluster.comments == 0L) "" else it.cluster.comments.toString()
                                     )
-                                    val newBitmap = Bitmap.createBitmap(
-                                        icon.bitmap.width,
-                                        icon.bitmap.height * 2,
-                                        Bitmap.Config.ARGB_8888
-                                    )
+                                    val newBitmap =
+                                        createBitmap(icon.bitmap.width, icon.bitmap.height * 2)
                                     val canvas = Canvas(newBitmap)
                                     canvas.drawBitmap(icon.bitmap, Matrix(), null)
                                     marker.icon(
@@ -453,11 +446,8 @@ class MapFragment : Fragment() {
                                     ),
                                     badgeText = "",
                                 )
-                                val newBitmap = Bitmap.createBitmap(
-                                    icon.bitmap.width,
-                                    icon.bitmap.height * 2,
-                                    Bitmap.Config.ARGB_8888
-                                )
+                                val newBitmap =
+                                    createBitmap(icon.bitmap.width, icon.bitmap.height * 2)
                                 val canvas = Canvas(newBitmap)
                                 canvas.drawBitmap(icon.bitmap, Matrix(), null)
                                 marker.icon(
@@ -486,7 +476,9 @@ class MapFragment : Fragment() {
                     refreshData()
                 }
 
-                CommentSync.run(db)
+                if (CommentSync.run(db).rowsAffected > 0) {
+                    refreshData()
+                }
             }
         }
 
