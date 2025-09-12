@@ -34,6 +34,7 @@ object CommentQueries {
                 SELECT ${Comment.columns}
                 FROM ${CommentSchema.NAME}
                 WHERE ${CommentSchema.Columns.PlaceId} = ?1
+                ORDER BY ${CommentSchema.Columns.CreatedAt} DESC
             """,
             arrayOf(placeId.toString())
         )
