@@ -170,7 +170,7 @@ class ElementFragment : Fragment() {
                 R.id.action_editor_manual -> {
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.data =
-                        "https://wiki.btcmap.org/general/tagging-instructions.html".toUri()
+                        "https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants".toUri()
                     startActivity(intent)
                 }
             }
@@ -207,7 +207,7 @@ class ElementFragment : Fragment() {
             binding.companionWarning.isVisible = false
         }
 
-        val outdatedUri = "https://wiki.btcmap.org/general/outdated".toUri()
+        val outdatedUri = "https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Verifying-Existing-Merchants".toUri()
 
         if (element.verifiedAt != null) {
             val date = DateUtils.getRelativeDateTimeString(
