@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
@@ -190,6 +191,7 @@ class ElementFragment : Fragment() {
         elementId = element.id
 
         binding.toolbar.title = element.name
+        binding.toolbar.setSingleLine(false)
 
         binding.bundledWarning.isVisible = element.bundled
 
@@ -293,7 +295,7 @@ class ElementFragment : Fragment() {
                     .replace("https://www.facebook.com/", "")
                     .replace("https://facebook.com/", "").trimEnd('/')
             if (text.contains("/") && text.split("/").size == 2) {
-               text = text.split("/").first()
+                text = text.split("/").first()
             }
             binding.facebook.text = text
             binding.facebook.styleAsLink()
@@ -398,5 +400,14 @@ class ElementFragment : Fragment() {
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = uri
         startActivity(intent)
+    }
+
+    fun Toolbar.setSingleLine(singleLine: Boolean) {
+        for (i in 0..childCount) {
+            val child = getChildAt(i)
+            if (child is TextView) {
+                child.isSingleLine = singleLine
+            }
+        }
     }
 }
