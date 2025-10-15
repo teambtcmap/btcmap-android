@@ -272,7 +272,7 @@ class ElementFragment : Fragment() {
         }
 
         if (element.telegram == null) {
-            binding.facebook.isVisible = false
+            binding.telegram.isVisible = false
         } else {
             binding.telegram.isVisible = true
             binding.telegram.text = element.telegram.toString().replace("https://t.me/", "")
