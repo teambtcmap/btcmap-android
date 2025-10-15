@@ -71,6 +71,7 @@ object PlaceSync {
                             requiredAppUrl = it.requiredAppUrl?.toHttpUrlOrNull(),
                             boostedUntil = it.boostedUntil?.toZonedDateTime(),
                             comments = it.comments,
+                            telegram = it.telegram,
                         )
                     }, db)
 

@@ -198,6 +198,19 @@
                 tools:text="BTCMapDotOrg" />
 
             <TextView
+                android:id="@+id/telegram"
+                style="?attr/textAppearanceSubtitle1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="20dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp"
+                android:singleLine="true"
+                app:drawableStartCompat="@drawable/telegram"
+                app:drawableTint="?colorSecondary"
+                tools:text="https://telegram.org/" />
+
+            <TextView
                 android:id="@+id/facebook"
                 style="?attr/textAppearanceSubtitle1"
                 android:layout_width="match_parent"

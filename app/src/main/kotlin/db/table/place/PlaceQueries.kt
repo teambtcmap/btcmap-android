@@ -11,7 +11,7 @@ object PlaceQueries {
     ) {
         val sql = """
             INSERT OR REPLACE INTO ${PlaceSchema.NAME} (${Place.columns}) 
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21)
         """
 
         val stmt = db.compileStatement(sql)
@@ -93,6 +93,11 @@ object PlaceQueries {
                     stmt.bindNull(20)
                 } else {
                     stmt.bindLong(20, row.comments)
+                }
+                if (row.telegram == null) {
+                    stmt.bindNull(21)
+                } else {
+                    stmt.bindString(21, row.telegram.toString())
                 }
                 stmt.executeInsert()
             }

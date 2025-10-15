@@ -25,7 +25,8 @@ object PlaceSchema {
                 ${Columns.Line} TEXT,                
                 ${Columns.RequiredAppUrl} TEXT,
                 ${Columns.BoostedUntil} TEXT,
-                ${Columns.Comments} INTEGER
+                ${Columns.Comments} INTEGER,
+                ${Columns.Telegram} TEXT
             )
         """
     }
@@ -50,7 +51,8 @@ object PlaceSchema {
         Line("line"),
         RequiredAppUrl("required_app_url"),
         BoostedUntil("boosted_until"),
-        Comments("comments");
+        Comments("comments"),
+        Telegram("telegram");
 
         override fun toString() = sqlName
     }

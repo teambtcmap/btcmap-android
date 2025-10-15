@@ -3,6 +3,8 @@ package api
 import json.toJsonArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request
 import okhttp3.coroutines.executeAsync
 import java.io.InputStream
@@ -35,6 +37,7 @@ object PlaceApi {
         val line: String?,
         val bundled: Boolean,
         val comments: Long?,
+        val telegram: HttpUrl?,
     )
 
     fun InputStream.toGetPlacesItems(): List<GetPlacesItem> {
@@ -61,6 +64,7 @@ object PlaceApi {
                 line = it.optString("line").ifBlank { null },
                 bundled = false,
                 comments = it.optLong("comments", 0),
+                telegram = it.optString("telegram", "").toHttpUrlOrNull(),
             )
         }
     }
@@ -69,7 +73,7 @@ object PlaceApi {
         val url = apiUrl(ENDPOINT).apply {
             addQueryParameter(
                 "fields",
-                "lat,lon,icon,name,updated_at,deleted_at,required_app_url,boosted_until,verified_at,address,opening_hours,website,phone,email,twitter,facebook,instagram,line,comments"
+                "lat,lon,icon,name,updated_at,deleted_at,required_app_url,boosted_until,verified_at,address,opening_hours,website,phone,email,twitter,facebook,instagram,line,comments,telegram"
             )
             addQueryParameter("limit", "$limit")
             if (updatedSince != null) {

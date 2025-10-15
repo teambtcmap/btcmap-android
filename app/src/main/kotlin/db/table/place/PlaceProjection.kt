@@ -28,6 +28,7 @@ data class PlaceProjectionFull(
     val requiredAppUrl: HttpUrl?,
     val boostedUntil: ZonedDateTime?,
     val comments: Long?,
+    val telegram: HttpUrl?,
 ) {
     companion object {
         val columns: String
@@ -60,7 +61,8 @@ data class PlaceProjectionFull(
                         18
                     )
                 ),
-                comments = if (cursor.isNull(19)) null else cursor.getLong(19)
+                comments = if (cursor.isNull(19)) null else cursor.getLong(19),
+                telegram = if (cursor.isNull(20)) null else cursor.getString(20).toHttpUrl(),
             )
         }
     }

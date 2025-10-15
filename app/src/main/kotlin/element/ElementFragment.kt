@@ -207,7 +207,8 @@ class ElementFragment : Fragment() {
             binding.companionWarning.isVisible = false
         }
 
-        val outdatedUri = "https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Verifying-Existing-Merchants".toUri()
+        val outdatedUri =
+            "https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Verifying-Existing-Merchants".toUri()
 
         if (element.verifiedAt != null) {
             val date = DateUtils.getRelativeDateTimeString(
@@ -270,13 +271,31 @@ class ElementFragment : Fragment() {
             }
         }
 
+        if (element.telegram == null) {
+            binding.facebook.isVisible = false
+        } else {
+            binding.telegram.isVisible = true
+            binding.telegram.text = element.telegram.toString().replace("https://t.me/", "")
+            binding.telegram.styleAsLink()
+            binding.telegram.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = element.telegram.toString().toUri()
+                startActivity(intent)
+            }
+        }
+
         if (element.facebook == null) {
             binding.facebook.isVisible = false
         } else {
             binding.facebook.isVisible = true
-            binding.facebook.text =
-                element.facebook.toString().replace("https://www.facebook.com/", "")
+            var text =
+                element.facebook.toString().replace("https://www.facebook.com/people/", "")
+                    .replace("https://www.facebook.com/", "")
                     .replace("https://facebook.com/", "").trimEnd('/')
+            if (text.contains("/") && text.split("/").size == 2) {
+               text = text.split("/").first()
+            }
+            binding.facebook.text = text
             binding.facebook.styleAsLink()
             binding.facebook.setOnClickListener {
                 val intent = Intent(Intent.ACTION_VIEW)

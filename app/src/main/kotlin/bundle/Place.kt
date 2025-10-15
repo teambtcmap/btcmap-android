@@ -81,6 +81,7 @@ object BundledPlaces {
             line = null,
             bundled = true,
             comments = this.comments,
+            telegram = null,
         )
     }
 }
