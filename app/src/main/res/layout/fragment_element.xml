@@ -185,19 +185,6 @@
                 app:drawableTint="?colorSecondary" />
 
             <TextView
-                android:id="@+id/twitter"
-                style="?attr/textAppearanceSubtitle1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawablePadding="20dp"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="16dp"
-                android:singleLine="true"
-                app:drawableStartCompat="@drawable/contact_twitter"
-                app:drawableTint="?colorSecondary"
-                tools:text="BTCMapDotOrg" />
-
-            <TextView
                 android:id="@+id/telegram"
                 style="?attr/textAppearanceSubtitle1"
                 android:layout_width="match_parent"
@@ -209,6 +196,32 @@
                 app:drawableStartCompat="@drawable/telegram"
                 app:drawableTint="?colorSecondary"
                 tools:text="https://telegram.org/" />
+
+            <TextView
+                android:id="@+id/line"
+                style="?attr/textAppearanceSubtitle1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="20dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp"
+                android:singleLine="true"
+                app:drawableStartCompat="@drawable/line"
+                app:drawableTint="?colorSecondary"
+                tools:text="https://www.line.me/" />
+
+            <TextView
+                android:id="@+id/twitter"
+                style="?attr/textAppearanceSubtitle1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="20dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp"
+                android:singleLine="true"
+                app:drawableStartCompat="@drawable/contact_twitter"
+                app:drawableTint="?colorSecondary"
+                tools:text="BTCMapDotOrg" />
 
             <TextView
                 android:id="@+id/facebook"

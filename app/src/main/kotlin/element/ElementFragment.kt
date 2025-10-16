@@ -256,7 +256,7 @@ class ElementFragment : Fragment() {
         binding.phone.text = element.phone
         binding.phone.isVisible = !element.phone.isNullOrBlank()
 
-        binding.website.text = element.website.toString()
+        binding.website.text = element.website.toString().replace("https://", "").trimEnd('/')
         binding.website.isVisible = element.website != null
 
         if (element.twitter == null) {
@@ -286,12 +286,30 @@ class ElementFragment : Fragment() {
             }
         }
 
+        if (element.line == null) {
+            binding.line.isVisible = false
+        } else {
+            binding.line.isVisible = true
+            if (element.line.queryParameter("accountId").isNullOrBlank()) {
+                binding.line.text = element.line.toString().replace("https://line.me/R/ti/p/@", "")
+            } else {
+                binding.line.text = element.line.queryParameter("accountId")
+            }
+            binding.line.styleAsLink()
+            binding.line.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = element.line.toString().toUri()
+                startActivity(intent)
+            }
+        }
+
         if (element.facebook == null) {
             binding.facebook.isVisible = false
         } else {
             binding.facebook.isVisible = true
             var text =
                 element.facebook.toString().replace("https://www.facebook.com/people/", "")
+                    .replace("https://www.facebook.com/p/", "")
                     .replace("https://www.facebook.com/", "")
                     .replace("https://facebook.com/", "").trimEnd('/')
             if (text.contains("/") && text.split("/").size == 2) {
