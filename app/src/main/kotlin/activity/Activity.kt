@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import org.btcmap.databinding.ActivityBinding
-import org.maplibre.android.MapLibre
 
 class Activity : AppCompatActivity() {
 
@@ -12,10 +11,9 @@ class Activity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MapLibre.getInstance(this)
+        enableEdgeToEdge() // TODO remove once min api is 35
+        window.isNavigationBarContrastEnforced = false // remove nav bar scrim for 3 button mode
         binding = ActivityBinding.inflate(layoutInflater)
-        enableEdgeToEdge()
         setContentView(binding.root)
-        window.isNavigationBarContrastEnforced = false
     }
 }
