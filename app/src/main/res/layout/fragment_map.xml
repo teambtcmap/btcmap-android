@@ -61,73 +61,40 @@
 
     </FrameLayout>
 
-    <com.google.android.material.button.MaterialButtonGroup
-        android:id="@+id/placeTypeSwitch"
+    <LinearLayout
+        android:id="@+id/buttonGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:orientation="vertical"
-        android:spacing="8dp">
+        android:padding="4dp">
 
-        <Button
-            android:id="@+id/filterMerchantsActive"
-            style="?attr/materialIconButtonFilledStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription=""
-            android:gravity="center"
-            app:icon="@drawable/store"
-            app:iconGravity="textStart" />
+        <view.IconButton
+            android:id="@+id/sync"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:alpha="0.3"
+            android:visibility="invisible" />
 
-        <Button
-            android:id="@+id/filterMerchantsInactive"
-            style="?attr/materialIconButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription=""
-            android:gravity="center"
-            android:visibility="gone"
-            app:icon="@drawable/store"
-            app:iconGravity="textStart" />
+        <view.IconButton
+            android:id="@+id/showMerchants"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="16dp" />
 
-        <Button
-            android:id="@+id/filterEventsActive"
-            style="?attr/materialIconButtonFilledStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription=""
-            android:visibility="gone"
-            app:icon="@drawable/event"
-            app:iconGravity="textStart" />
+        <view.IconButton
+            android:id="@+id/showEvents"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="16dp" />
 
-        <Button
-            android:id="@+id/filterEventsInactive"
-            style="?attr/materialIconButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription=""
-            app:icon="@drawable/event"
-            app:iconGravity="textStart" />
+        <view.IconButton
+            android:id="@+id/showExchanges"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="16dp" />
 
-        <Button
-            android:id="@+id/filterExchangesActive"
-            style="?attr/materialIconButtonFilledStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription=""
-            android:visibility="gone"
-            app:icon="@drawable/exchange"
-            app:iconGravity="textStart" />
-
-        <Button
-            android:id="@+id/filterExchangesInactive"
-            style="?attr/materialIconButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription=""
-            app:icon="@drawable/exchange"
-            app:iconGravity="textStart" />
-    </com.google.android.material.button.MaterialButtonGroup>
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

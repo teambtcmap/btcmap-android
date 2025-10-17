@@ -176,6 +176,13 @@ class MapFragment : Fragment() {
     ): View {
         _binding = FragmentMapBinding.inflate(inflater, container, false)
 
+        binding.sync.setDrawable(R.drawable.sync)
+        binding.showMerchants.setDrawable(R.drawable.store)
+        binding.showEvents.setDrawable(R.drawable.event)
+        binding.showExchanges.setDrawable(R.drawable.exchange)
+
+        binding.showMerchants.isSelected = true
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
@@ -189,7 +196,7 @@ class MapFragment : Fragment() {
             WindowInsetsCompat.CONSUMED
         }
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.placeTypeSwitch) { v, windowInsets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.buttonGroup) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
             v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -212,15 +219,10 @@ class MapFragment : Fragment() {
 
         emptyClusterBitmap = null
 
-        binding.filterMerchantsInactive.setOnClickListener {
-            binding.filterMerchantsActive.isVisible = true
-            binding.filterMerchantsInactive.isVisible = false
-
-            binding.filterEventsActive.isVisible = false
-            binding.filterEventsInactive.isVisible = true
-
-            binding.filterExchangesActive.isVisible = false
-            binding.filterExchangesInactive.isVisible = true
+        binding.showMerchants.setOnClickListener {
+            binding.showMerchants.isSelected = true
+            binding.showEvents.isSelected = false
+            binding.showExchanges.isSelected = false
 
             binding.map.getMapAsync { map ->
                 model.loadItems(
@@ -231,15 +233,10 @@ class MapFragment : Fragment() {
             }
         }
 
-        binding.filterEventsInactive.setOnClickListener {
-            binding.filterMerchantsActive.isVisible = false
-            binding.filterMerchantsInactive.isVisible = true
-
-            binding.filterEventsActive.isVisible = true
-            binding.filterEventsInactive.isVisible = false
-
-            binding.filterExchangesActive.isVisible = false
-            binding.filterExchangesInactive.isVisible = true
+        binding.showEvents.setOnClickListener {
+            binding.showMerchants.isSelected = false
+            binding.showEvents.isSelected = true
+            binding.showExchanges.isSelected = false
 
             binding.map.getMapAsync { map ->
                 model.loadItems(
@@ -250,15 +247,10 @@ class MapFragment : Fragment() {
             }
         }
 
-        binding.filterExchangesInactive.setOnClickListener {
-            binding.filterMerchantsActive.isVisible = false
-            binding.filterMerchantsInactive.isVisible = true
-
-            binding.filterEventsActive.isVisible = false
-            binding.filterEventsInactive.isVisible = true
-
-            binding.filterExchangesActive.isVisible = true
-            binding.filterExchangesInactive.isVisible = false
+        binding.showExchanges.setOnClickListener {
+            binding.showMerchants.isSelected = false
+            binding.showEvents.isSelected = false
+            binding.showExchanges.isSelected = true
 
             binding.map.getMapAsync { map ->
                 model.loadItems(
@@ -452,6 +444,8 @@ class MapFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                binding.sync.isVisible = true
+
                 if (BundledPlaces.import(requireContext(), db)) {
                     refreshData()
                 }
@@ -467,6 +461,8 @@ class MapFragment : Fragment() {
                 if (CommentSync.run(db).rowsAffected > 0) {
                     refreshData()
                 }
+
+                binding.sync.isVisible = false
             }
         }
 
@@ -573,9 +569,9 @@ class MapFragment : Fragment() {
     private fun refreshData() {
         binding.map.getMapAsync { map ->
             viewLifecycleOwner.lifecycleScope.launch {
-                val filter = if (binding.filterMerchantsActive.isVisible) {
+                val filter = if (binding.showMerchants.isSelected) {
                     MapModel.Filter.Merchants
-                } else if (binding.filterEventsActive.isVisible) {
+                } else if (binding.showEvents.isSelected) {
                     MapModel.Filter.Events
                 } else {
                     MapModel.Filter.Exchanges
