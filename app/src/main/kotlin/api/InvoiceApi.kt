@@ -1,13 +1,15 @@
 package api
 
+import http.httpClient
 import json.toJsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
 import okhttp3.coroutines.executeAsync
+import settings.apiUrlV4
+import settings.prefs
 
 object InvoiceApi {
-
     private const val ENDPOINT = "invoices"
 
     data class Invoice(
@@ -19,9 +21,8 @@ object InvoiceApi {
         get() = status == "paid"
 
     suspend fun getInvoice(id: String): Invoice {
-        val url = apiUrl(ENDPOINT).addPathSegment(id).build()
-
-        val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
+        val url = prefs.apiUrlV4(ENDPOINT, id)
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
 
         if (!res.isSuccessful) {
             throw Exception("Unexpected HTTP response code: ${res.code}")

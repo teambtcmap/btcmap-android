@@ -10,7 +10,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
-import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -34,7 +33,6 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
@@ -395,16 +393,12 @@ class MapFragment : Fragment() {
                                                     ZoneOffset.UTC
                                                 )
                                             )
-                                        ) prefs.boostedMarkerBackgroundColor(requireContext()) else prefs.markerBackgroundColor(
+                                        ) prefs.boostedMarkerBackgroundColor() else prefs.markerBackgroundColor(
                                             requireContext()
                                         ),
                                         iconColor = prefs.markerIconColor(requireContext()),
-                                        countBackgroundColor = prefs.badgeBackgroundColor(
-                                            requireContext()
-                                        ),
-                                        countFontColor = prefs.badgeTextColor(
-                                            requireContext()
-                                        ),
+                                        countBackgroundColor = prefs.badgeBackgroundColor(),
+                                        countFontColor = prefs.badgeTextColor(),
                                         badgeText = if (it.cluster.requiresCompanionApp) {
                                             "!"
                                         } else if (it.cluster.comments == 0L) "" else it.cluster.comments.toString()
@@ -434,16 +428,10 @@ class MapFragment : Fragment() {
                                     MarkerOptions().position(LatLng(it.event.lat, it.event.lon))
                                 val icon = requireContext().marker(
                                     iconId = "event",
-                                    backgroundColor = prefs.markerBackgroundColor(
-                                        requireContext()
-                                    ),
+                                    backgroundColor = prefs.markerBackgroundColor(requireContext()),
                                     iconColor = prefs.markerIconColor(requireContext()),
-                                    countBackgroundColor = prefs.badgeBackgroundColor(
-                                        requireContext()
-                                    ),
-                                    countFontColor = prefs.badgeTextColor(
-                                        requireContext()
-                                    ),
+                                    countBackgroundColor = prefs.badgeBackgroundColor(),
+                                    countFontColor = prefs.badgeTextColor(),
                                     badgeText = "",
                                 )
                                 val newBitmap =

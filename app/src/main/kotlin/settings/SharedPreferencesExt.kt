@@ -122,7 +122,7 @@ private const val KEY_BOOSTED_MARKER_BACKGROUND_COLOR = "boostedMarkerBackground
 
 private val DEFAULT_MARKER_BACKGROUND_COLOR = "#f7931a".toColorInt()
 
-fun SharedPreferences.boostedMarkerBackgroundColor(ctx: Context): Int {
+fun SharedPreferences.boostedMarkerBackgroundColor(): Int {
     return getInt(KEY_BOOSTED_MARKER_BACKGROUND_COLOR, DEFAULT_MARKER_BACKGROUND_COLOR)
 }
 
@@ -156,8 +156,8 @@ fun SharedPreferences.setMarkerIconColor(color: Int?) {
     }
 }
 
-fun SharedPreferences.badgeBackgroundColor(ctx: Context): Int {
-    return getInt("badgeBackgroundColor", Color.parseColor("#0c9073"))
+fun SharedPreferences.badgeBackgroundColor(): Int {
+    return getInt("badgeBackgroundColor", "#0c9073".toColorInt())
 }
 
 fun SharedPreferences.setBadgeBackgroundColor(color: Int?) {
@@ -173,7 +173,7 @@ fun SharedPreferences.setBadgeBackgroundColor(color: Int?) {
     }
 }
 
-fun SharedPreferences.badgeTextColor(ctx: Context): Int {
+fun SharedPreferences.badgeTextColor(): Int {
     return getInt("badgeTextColor", Color.WHITE)
 }
 
@@ -201,3 +201,11 @@ var SharedPreferences.apiUrl: HttpUrl
             putString(KEY_API_URL, value.toString())
         }
     }
+
+fun SharedPreferences.apiUrlV4(vararg pathSegments: String): HttpUrl {
+    val builder = apiUrl.newBuilder().addPathSegment("v4")
+    pathSegments.forEach {
+        builder.addPathSegment(it)
+    }
+    return builder.build()
+}

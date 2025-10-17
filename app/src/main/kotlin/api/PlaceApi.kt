@@ -1,5 +1,6 @@
 package api
 
+import http.httpClient
 import json.toJsonArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -7,6 +8,8 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request
 import okhttp3.coroutines.executeAsync
+import settings.apiUrlV4
+import settings.prefs
 import java.io.InputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -70,10 +73,33 @@ object PlaceApi {
     }
 
     suspend fun getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPlacesItem> {
-        val url = apiUrl(ENDPOINT).apply {
+        val fields = listOf(
+            "lat",
+            "lon",
+            "icon",
+            "name",
+            "updated_at",
+            "deleted_at",
+            "required_app_url",
+            "boosted_until",
+            "verified_at",
+            "address",
+            "opening_hours",
+            "website",
+            "phone",
+            "email",
+            "twitter",
+            "facebook",
+            "instagram",
+            "line",
+            "comments",
+            "telegram",
+        )
+
+        val url = prefs.apiUrlV4(ENDPOINT).newBuilder().apply {
             addQueryParameter(
                 "fields",
-                "lat,lon,icon,name,updated_at,deleted_at,required_app_url,boosted_until,verified_at,address,opening_hours,website,phone,email,twitter,facebook,instagram,line,comments,telegram"
+                fields.joinToString(separator = ","),
             )
             addQueryParameter("limit", "$limit")
             if (updatedSince != null) {
@@ -84,7 +110,7 @@ object PlaceApi {
             }
         }.build()
 
-        val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
 
         if (!res.isSuccessful) {
             throw Exception("Unexpected HTTP response code: ${res.code}")

@@ -1,5 +1,6 @@
 package api
 
+import http.httpClient
 import json.toJsonArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -7,11 +8,12 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
 import okhttp3.coroutines.executeAsync
+import settings.apiUrlV4
+import settings.prefs
 import java.io.InputStream
 import java.time.ZonedDateTime
 
 object EventApi {
-
     private const val ENDPOINT = "events"
 
     data class GetEventsItem(
@@ -43,9 +45,8 @@ object EventApi {
     }
 
     suspend fun getEvents(): List<GetEventsItem> {
-        val url = apiUrl(ENDPOINT).build()
-
-        val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
+        val url = prefs.apiUrlV4(ENDPOINT)
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
 
         if (!res.isSuccessful) {
             throw Exception("Unexpected HTTP response code: ${res.code}")

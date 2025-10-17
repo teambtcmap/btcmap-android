@@ -1,5 +1,6 @@
 package api
 
+import http.httpClient
 import json.toJsonArray
 import json.toJsonObject
 import kotlinx.coroutines.Dispatchers
@@ -9,12 +10,13 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.coroutines.executeAsync
 import org.json.JSONObject
+import settings.apiUrlV4
+import settings.prefs
 import java.io.InputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 object CommentApi {
-
     private const val ENDPOINT = "place-comments"
 
     data class GetCommentsItem(
@@ -43,7 +45,7 @@ object CommentApi {
         updatedSince: ZonedDateTime?,
         limit: Long,
     ): List<GetCommentsItem> {
-        val url = apiUrl(ENDPOINT).apply {
+        val url = prefs.apiUrlV4(ENDPOINT).newBuilder().apply {
             addQueryParameter("limit", "$limit")
             if (updatedSince != null) {
                 addQueryParameter(
@@ -53,7 +55,7 @@ object CommentApi {
             }
         }.build()
 
-        val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
 
         if (!res.isSuccessful) {
             throw Exception("Unexpected HTTP response code: ${res.code}")
@@ -69,9 +71,9 @@ object CommentApi {
     )
 
     suspend fun getQuote(): QuoteResponse {
-        val url = apiUrl(ENDPOINT).addPathSegment("quote").build()
+        val url = prefs.apiUrlV4(ENDPOINT, "quote")
 
-        val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
 
         if (!res.isSuccessful) {
             throw Exception("Unexpected HTTP response code: ${res.code}")
@@ -105,14 +107,14 @@ object CommentApi {
     }
 
     suspend fun addComment(placeId: Long, comment: String): AddCommentResponse {
-        val url = apiUrl(ENDPOINT).build()
+        val url = prefs.apiUrlV4(ENDPOINT)
 
         val req = JSONObject().apply {
             put("place_id", placeId.toString())
             put("comment", comment)
         }
 
-        val res = apiHttpClient().newCall(
+        val res = httpClient.newCall(
             Request.Builder()
                 .post(req.toString().toRequestBody("application/json".toMediaType()))
                 .url(url).build()

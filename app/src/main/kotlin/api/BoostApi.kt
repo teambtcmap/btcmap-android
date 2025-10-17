@@ -1,5 +1,6 @@
 package api
 
+import http.httpClient
 import json.toJsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -8,10 +9,11 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.coroutines.executeAsync
 import org.json.JSONObject
+import settings.apiUrlV4
+import settings.prefs
 import java.io.InputStream
 
 object BoostApi {
-
     private const val ENDPOINT = "place-boosts"
 
     data class QuoteResponse(
@@ -21,9 +23,8 @@ object BoostApi {
     )
 
     suspend fun getQuote(): QuoteResponse {
-        val url = apiUrl(ENDPOINT).addPathSegment("quote").build()
-
-        val res = apiHttpClient().newCall(Request.Builder().url(url).build()).executeAsync()
+        val url = prefs.apiUrlV4(ENDPOINT, "quote")
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
 
         if (!res.isSuccessful) {
             throw Exception("Unexpected HTTP response code: ${res.code}")
@@ -59,14 +60,14 @@ object BoostApi {
     }
 
     suspend fun boost(placeId: Long, days: Long): BoostResponse {
-        val url = apiUrl(ENDPOINT).build()
+        val url = prefs.apiUrlV4(ENDPOINT)
 
         val req = JSONObject().apply {
             put("place_id", placeId.toString())
             put("days", days)
         }
 
-        val res = apiHttpClient().newCall(
+        val res = httpClient.newCall(
             Request.Builder().post(req.toString().toRequestBody("application/json".toMediaType()))
                 .url(url).build()
         ).executeAsync()
