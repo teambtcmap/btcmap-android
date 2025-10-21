@@ -102,4 +102,7 @@
     <string name="btc_map_boost_payment_request">BTC Map Boost Payment Request</string>
     <string name="your_comment_has_been_posted">Your comment has been posted</string>
     <string name="btc_map_comment_payment_request">BTC Map Comment Payment Request</string>
+    <string name="update_available">Update available</string>
+    <string name="update_available_description">If you installed this app from a store, you can ignore this and let your store manage updates. If you installed via a direct APK, press the \"Get APK\" button to update.</string>
+    <string name="get_apk">Get APK</string>
 </resources>

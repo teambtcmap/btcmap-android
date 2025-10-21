@@ -3,6 +3,7 @@ package view
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
@@ -30,7 +31,7 @@ class IconButton @JvmOverloads constructor(
     private val strokePaint by lazy {
         Paint().apply {
             style = Paint.Style.STROKE
-            strokeWidth = resources.displayMetrics.density
+            strokeWidth = resources.displayMetrics.density * 2
             color = context.getOnPrimaryContainerColor()
             isAntiAlias = true
         }
@@ -38,7 +39,10 @@ class IconButton @JvmOverloads constructor(
 
     var icon: Bitmap? = null
 
+    var iconColor: Int = Color.GREEN
+
     init {
+        iconColor = context.getOnPrimaryContainerColor()
         setDrawable(R.drawable.store)
     }
 
@@ -46,7 +50,7 @@ class IconButton @JvmOverloads constructor(
         val drawable = ContextCompat.getDrawable(context, resId)!!
         DrawableCompat.setTint(
             drawable,
-            context.getOnPrimaryContainerColor(),
+            iconColor,
         )
         val drawableSize = (resources.displayMetrics.density * 22).toInt()
         icon = drawable.toBitmap(width = drawableSize, height = drawableSize)

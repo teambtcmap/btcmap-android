@@ -50,7 +50,17 @@ fun Context.getOnPrimaryContainerColor(): Int {
     return attrs.getColor(0, 0)
 }
 
+fun Context.getOnErrorColor(): Int {
+    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnError))
+    return attrs.getColor(0, 0)
+}
+
 fun Context.getErrorColor(): Int {
+    val attrs = theme.obtainStyledAttributes(intArrayOf(android.R.attr.colorError))
+    return attrs.getColor(0, 0)
+}
+
+fun Context.getOnErrorContainerColor(): Int {
     val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnErrorContainer))
     return attrs.getColor(0, 0)
 }

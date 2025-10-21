@@ -73,8 +73,16 @@
             android:id="@+id/sync"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:layout_marginTop="16dp"
             android:alpha="0.3"
-            android:visibility="invisible" />
+            android:visibility="gone" />
+
+        <view.IconButton
+            android:id="@+id/update"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="16dp"
+            android:visibility="gone" />
 
         <view.IconButton
             android:id="@+id/showMerchants"

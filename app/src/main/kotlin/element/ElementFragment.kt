@@ -35,7 +35,7 @@ import icons.iconTypeface
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import map.MapFragment
-import map.getErrorColor
+import map.getOnErrorColor
 import map.getOnSurfaceColor
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementBinding
@@ -202,7 +202,7 @@ class ElementFragment : Fragment() {
 
         if (element.requiredAppUrl != null) {
             binding.companionWarning.isVisible = true
-            binding.companionWarning.setTextColor(requireContext().getErrorColor())
+            binding.companionWarning.setTextColor(requireContext().getOnErrorColor())
             binding.companionWarning.text =
                 getString(R.string.companion_warning, element.requiredAppUrl)
         } else {
@@ -231,7 +231,7 @@ class ElementFragment : Fragment() {
                 binding.outdated.setOnClickListener(null)
             } else {
                 binding.lastVerified.isVisible = true
-                binding.lastVerified.setTextColor(requireContext().getErrorColor())
+                binding.lastVerified.setTextColor(requireContext().getOnErrorColor())
                 binding.lastVerified.setOnClickListener { openUri(outdatedUri) }
                 binding.outdated.isVisible = true
                 binding.outdated.setOnClickListener { openUri(outdatedUri) }
@@ -240,7 +240,7 @@ class ElementFragment : Fragment() {
             if (!element.bundled) {
                 binding.lastVerified.isVisible = true
                 binding.lastVerified.text = getString(R.string.not_verified)
-                binding.lastVerified.setTextColor(requireContext().getErrorColor())
+                binding.lastVerified.setTextColor(requireContext().getOnErrorColor())
                 binding.lastVerified.setOnClickListener { openUri(outdatedUri) }
                 binding.outdated.isVisible = true
                 binding.outdated.setOnClickListener { openUri(outdatedUri) }

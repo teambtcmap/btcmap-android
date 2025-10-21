@@ -38,20 +38,26 @@ import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.withResumed
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.App
 import bundle.BundledPlaces
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import db.db
 import db.table.place.Cluster
 import element.ElementFragment
 import element.ElementsRepo
+import http.httpClient
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.Request
+import okhttp3.coroutines.executeAsync
+import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.btcmap.databinding.FragmentMapBinding
 import org.maplibre.android.annotations.IconFactory
@@ -183,6 +189,24 @@ class MapFragment : Fragment() {
 
         binding.showMerchants.isSelected = true
 
+        binding.update.iconColor = requireContext().getErrorColor()
+        binding.update.setDrawable(R.drawable.warning)
+        binding.update.isVisible = false
+
+        binding.update.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.update_available)
+                .setMessage(R.string.update_available_description)
+                .setPositiveButton(R.string.get_apk) { dialog, which ->
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data =
+                        "https://github.com/teambtcmap/btcmap-android/releases/latest".toUri()
+                    startActivity(intent)
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
@@ -215,6 +239,26 @@ class MapFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.map.getMapAsync {
             it.addOnCameraIdleListener(onCameraIdleListener)
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            withResumed {
+                launch {
+                    try {
+                        val latestVer = httpClient.newCall(
+                            Request.Builder()
+                                .url("https://static.btcmap.org/android/latest-app-ver".toHttpUrl())
+                                .build()
+                        ).executeAsync().body.string().trim()
+
+                        if (latestVer != BuildConfig.VERSION_NAME) {
+                            withResumed { binding.update.isVisible = true }
+                        }
+                    } catch (_: Throwable) {
+
+                    }
+                }
+            }
         }
 
         emptyClusterBitmap = null
