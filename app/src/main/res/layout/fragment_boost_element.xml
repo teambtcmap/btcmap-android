@@ -48,20 +48,20 @@
 
                 <RadioButton
                     android:id="@+id/boost_1m"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/months_1" />
 
                 <RadioButton
                     android:id="@+id/boost_3m"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:checked="true"
                     android:text="@string/months_3" />
 
                 <RadioButton
                     android:id="@+id/boost_12m"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/months_12" />
 

@@ -22,6 +22,7 @@ object BoostApi {
         val quote365dsat: Long,
     )
 
+    // https://github.com/teambtcmap/btcmap-api/blob/master/docs/rest/v4/place-boosts.md#get-a-boost-quote
     suspend fun getQuote(): QuoteResponse {
         val url = prefs.apiUrlV4(ENDPOINT, "quote")
         val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
@@ -59,6 +60,7 @@ object BoostApi {
         }
     }
 
+    // https://github.com/teambtcmap/btcmap-api/blob/master/docs/rest/v4/place-boosts.md#order-boost
     suspend fun boost(placeId: Long, days: Long): BoostResponse {
         val url = prefs.apiUrlV4(ENDPOINT)
 
