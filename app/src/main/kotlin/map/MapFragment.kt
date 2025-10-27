@@ -203,7 +203,7 @@ class MapFragment : Fragment() {
                         "https://github.com/teambtcmap/btcmap-android/releases/latest".toUri()
                     startActivity(intent)
                 }
-                .setNegativeButton(android.R.string.cancel, null)
+                .setNegativeButton(R.string.ignore, null)
                 .show()
         }
 
