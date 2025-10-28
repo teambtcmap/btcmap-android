@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.os.Bundle
@@ -46,8 +47,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import db.db
 import db.table.place.Cluster
-import element.ElementFragment
-import element.ElementsRepo
+import place.PlaceFragment
 import http.httpClient
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -92,13 +92,11 @@ import java.time.ZonedDateTime
 
 class MapFragment : Fragment() {
 
-    private val model: MapModel by lazy {
-        MapModel(ElementsRepo())
-    }
+    private val model = MapModel()
+
     private val searchModel: SearchModel by lazy {
         SearchModel(
-            requireContext().applicationContext as App,
-            ElementsRepo()
+            requireContext().applicationContext as App
         )
     }
 
@@ -106,7 +104,7 @@ class MapFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val elementFragment by lazy {
-        childFragmentManager.findFragmentById(R.id.elementFragment) as ElementFragment
+        childFragmentManager.findFragmentById(R.id.elementFragment) as PlaceFragment
     }
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
@@ -371,7 +369,7 @@ class MapFragment : Fragment() {
         model.selectedElement.onEach {
             if (it != null) {
                 getElementDetailsToolbar()
-                elementFragment.setElement(it)
+                elementFragment.setPlace(it)
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
             } else {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
@@ -433,8 +431,8 @@ class MapFragment : Fragment() {
                                             requireContext()
                                         ),
                                         iconColor = prefs.markerIconColor(requireContext()),
-                                        countBackgroundColor = prefs.badgeBackgroundColor(),
-                                        countFontColor = prefs.badgeTextColor(),
+                                        countBackgroundColor = if (it.cluster.requiresCompanionApp) Color.RED else prefs.badgeBackgroundColor(),
+                                        countFontColor = if (it.cluster.requiresCompanionApp) Color.WHITE else prefs.badgeTextColor(),
                                         badgeText = if (it.cluster.requiresCompanionApp) {
                                             "!"
                                         } else if (it.cluster.comments == 0L) "" else it.cluster.comments.toString()
@@ -643,7 +641,7 @@ class MapFragment : Fragment() {
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                elementFragment.onPartialExpanded(slideOffset)
+                elementFragment.onSlide(slideOffset)
             }
         })
     }

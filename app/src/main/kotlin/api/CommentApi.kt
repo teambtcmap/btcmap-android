@@ -70,6 +70,7 @@ object CommentApi {
         val quoteSat: Long,
     )
 
+    // https://github.com/teambtcmap/btcmap-api/blob/master/docs/rest/v4/place-comments.md#get-a-comment-quote
     suspend fun getQuote(): QuoteResponse {
         val url = prefs.apiUrlV4(ENDPOINT, "quote")
 
@@ -106,6 +107,7 @@ object CommentApi {
         }
     }
 
+    // https://github.com/teambtcmap/btcmap-api/blob/master/docs/rest/v4/place-comments.md#order-comment
     suspend fun addComment(placeId: Long, comment: String): AddCommentResponse {
         val url = prefs.apiUrlV4(ENDPOINT)
 

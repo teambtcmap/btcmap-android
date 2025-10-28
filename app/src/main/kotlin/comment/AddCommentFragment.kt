@@ -63,7 +63,6 @@ class AddCommentFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val quote = CommentApi.getQuote()
-
                 withResumed {
                     binding.fee.text = getString(R.string.d_sat, quote.quoteSat.toString())
                     binding.generateInvoice.isEnabled = true

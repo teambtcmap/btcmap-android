@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        app:menu="@menu/element"
+        app:menu="@menu/place"
         tools:text="Satoshi's Bar" />
 
     <androidx.core.widget.NestedScrollView

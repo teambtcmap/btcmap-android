@@ -20,6 +20,7 @@ object InvoiceApi {
     val Invoice.paid: Boolean
         get() = status == "paid"
 
+    // https://github.com/teambtcmap/btcmap-api/blob/master/docs/rest/v4/invoices.md#get-by-id
     suspend fun getInvoice(id: String): Invoice {
         val url = prefs.apiUrlV4(ENDPOINT, id)
         val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()

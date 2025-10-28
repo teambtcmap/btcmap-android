@@ -17,13 +17,14 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import db.db
 import db.table.comment.CommentQueries
-import element.CommentsAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.databinding.FragmentElementCommentsBinding
 import sync.CommentSync
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 class CommentsFragment : Fragment() {
 
@@ -88,14 +89,26 @@ class CommentsFragment : Fragment() {
                     CommentQueries.selectByPlaceId(args.placeId, db)
                 }
 
-                adapter.submitList(comments)
+                val commentDateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+
+                adapter.submitList(comments.map {
+                    CommentsAdapterItem(
+                        comment = it.comment,
+                        localizedDate = it.createdAt.format(commentDateFormat),
+                    )
+                })
 
                 if (CommentSync.run(db).rowsAffected > 0) {
                     val comments = withContext(Dispatchers.IO) {
                         CommentQueries.selectByPlaceId(args.placeId, db)
                     }
 
-                    adapter.submitList(comments)
+                    adapter.submitList(comments.map {
+                        CommentsAdapterItem(
+                            comment = it.comment,
+                            localizedDate = it.createdAt.format(commentDateFormat),
+                        )
+                    })
                 }
             }
         }

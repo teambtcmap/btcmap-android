@@ -15,7 +15,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 object PlaceApi {
-
     private const val ENDPOINT = "places"
 
     data class GetPlacesItem(
@@ -72,6 +71,7 @@ object PlaceApi {
         }
     }
 
+    // https://github.com/teambtcmap/btcmap-api/blob/master/docs/rest/v4/places.md#chronological-sync
     suspend fun getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPlacesItem> {
         val fields = listOf(
             "lat",

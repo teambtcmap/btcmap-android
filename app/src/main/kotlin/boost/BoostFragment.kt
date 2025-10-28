@@ -61,45 +61,49 @@ class BoostFragment : Fragment() {
             binding.generateInvoice,
         ).also { views -> views.forEach { it.isEnabled = false } }
 
-        // get quote and make enable generate invoice button on success
+        // get quote
         viewLifecycleOwner.lifecycleScope.launch {
             val quote = try {
                 BoostApi.getQuote()
             } catch (t: Throwable) {
                 t.log()
-                parentFragmentManager.popBackStack()
-                MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.error)
-                    .setMessage(t.toString())
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show()
+                withResumed {
+                    parentFragmentManager.popBackStack()
+                    MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.error)
+                        .setMessage(t.toString())
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                }
                 return@launch
-            } finally {
-                tempDisabledViews.forEach { it.isEnabled = true }
             }
 
-            binding.boost1m.append(" - ")
-            binding.boost1m.append(
-                getString(
-                    R.string.d_sat,
-                    NumberFormat.getNumberInstance().format(quote.quote30dsat),
-                )
-            )
+            withResumed {
+                tempDisabledViews.forEach { it.isEnabled = true }
 
-            binding.boost3m.append(" - ")
-            binding.boost3m.append(
-                getString(
-                    R.string.d_sat,
-                    NumberFormat.getNumberInstance().format(quote.quote90dsat),
+                binding.boost1m.append(" - ")
+                binding.boost1m.append(
+                    getString(
+                        R.string.d_sat,
+                        NumberFormat.getNumberInstance().format(quote.quote30dsat),
+                    )
                 )
-            )
 
-            binding.boost12m.append(" - ")
-            binding.boost12m.append(
-                getString(
-                    R.string.d_sat,
-                    NumberFormat.getNumberInstance().format(quote.quote365dsat),
+                binding.boost3m.append(" - ")
+                binding.boost3m.append(
+                    getString(
+                        R.string.d_sat,
+                        NumberFormat.getNumberInstance().format(quote.quote90dsat),
+                    )
                 )
-            )
+
+                binding.boost12m.append(" - ")
+                binding.boost12m.append(
+                    getString(
+                        R.string.d_sat,
+                        NumberFormat.getNumberInstance().format(quote.quote365dsat),
+                    )
+                )
+            }
         }
 
         var boostResponse: BoostApi.BoostResponse? = null
@@ -123,22 +127,28 @@ class BoostFragment : Fragment() {
                         days = days.toLong(),
                     )
                 } catch (t: Throwable) {
-                    MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.error)
-                        .setMessage(t.toString()).setPositiveButton(R.string.close, null).show()
+                    withResumed {
+                        MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.error)
+                            .setMessage(t.toString()).setPositiveButton(R.string.close, null).show()
+                    }
                     return@launch
                 } finally {
-                    tempDisabledViews.forEach { it.isEnabled = true }
+                    withResumed {
+                        tempDisabledViews.forEach { it.isEnabled = true }
+                    }
                 }
 
-                val qrEncoder =
-                    QRGEncoder(boostResponse.invoice, null, QRGContents.Type.TEXT, 1000)
-                qrEncoder.colorBlack = Color.BLACK
-                qrEncoder.colorWhite = Color.WHITE
-                val bitmap = qrEncoder.getBitmap(0)
-                binding.qr.isVisible = true
-                binding.qr.setImageBitmap(bitmap)
-                binding.payInvoice.isVisible = true
-                binding.copyInvoice.isVisible = true
+                withResumed {
+                    val qrEncoder =
+                        QRGEncoder(boostResponse.invoice, null, QRGContents.Type.TEXT, 1000)
+                    qrEncoder.colorBlack = Color.BLACK
+                    qrEncoder.colorWhite = Color.WHITE
+                    val bitmap = qrEncoder.getBitmap(0)
+                    binding.qr.isVisible = true
+                    binding.qr.setImageBitmap(bitmap)
+                    binding.payInvoice.isVisible = true
+                    binding.copyInvoice.isVisible = true
+                }
             }
         }
 

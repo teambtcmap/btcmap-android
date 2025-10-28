@@ -44,6 +44,7 @@ object EventApi {
         }
     }
 
+    // https://github.com/teambtcmap/btcmap-api/blob/master/docs/rest/v4/events.md#get-list
     suspend fun getEvents(): List<GetEventsItem> {
         val url = prefs.apiUrlV4(ENDPOINT)
         val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()

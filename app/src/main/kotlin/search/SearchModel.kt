@@ -5,13 +5,16 @@ import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import db.db
 import db.table.place.Place
-import element.ElementsRepo
+import db.table.place.PlaceQueries
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.maplibre.android.geometry.LatLng
 import java.text.NumberFormat
@@ -19,7 +22,6 @@ import kotlin.system.measureTimeMillis
 
 class SearchModel(
     private val app: Application,
-    private val elementsRepo: ElementsRepo,
 ) : ViewModel() {
 
     companion object {
@@ -47,7 +49,9 @@ class SearchModel(
                 var elements: List<Place>
 
                 val queryTimeMillis = measureTimeMillis {
-                    elements = elementsRepo.selectBySearchString(searchString)
+                    elements = withContext(Dispatchers.IO) {
+                        PlaceQueries.selectBySearchString(searchString, db)
+                    }
                 }
 
                 Log.d(TAG, "Search string: $searchString")
