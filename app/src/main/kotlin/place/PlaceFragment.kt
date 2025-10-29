@@ -1,7 +1,6 @@
 package place
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
@@ -62,8 +61,8 @@ class PlaceFragment : Fragment() {
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.directions -> {
-                    val element = PlaceQueries.selectById(placeId, db)
-                    val uri = "geo:${element.lat},${element.lon}?q=${element.name}".toUri()
+                    val place = PlaceQueries.selectById(placeId, db)
+                    val uri = "geo:${place.lat},${place.lon}?q=${place.name}".toUri()
                     val intent = Intent(Intent.ACTION_VIEW, uri)
                     requireContext().startActivity(Intent.createChooser(intent, null))
                 }

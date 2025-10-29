@@ -47,6 +47,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import db.db
 import db.table.place.Cluster
+import db.table.place.PlaceQueries
 import place.PlaceFragment
 import http.httpClient
 import kotlinx.coroutines.delay
@@ -71,6 +72,7 @@ import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
 import org.maplibre.android.maps.Style
+import place.isMerchant
 import search.SearchAdapter
 import search.SearchModel
 import settings.MapStyle
@@ -528,7 +530,16 @@ class MapFragment : Fragment() {
             binding.searchView.clearText()
             binding.searchView.hide()
 
-            model.selectElement(row.element.id)
+            val place = PlaceQueries.selectById(row.placeId, db)
+
+            if (place.isMerchant()) {
+                binding.showMerchants.performClick()
+            } else {
+                binding.showExchanges.performClick()
+            }
+
+            model.selectElement(row.placeId)
+
             binding.map.getMapAsync {
                 it.moveCamera(
                     CameraUpdateFactory.newLatLngZoom(
@@ -550,9 +561,15 @@ class MapFragment : Fragment() {
             }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
-        binding.searchView.editText.doAfterTextChanged {
-            val text = it.toString()
-            searchModel.setSearchString(text)
+        binding.searchView.editText.doAfterTextChanged { searchString ->
+            binding.map.getMapAsync { map ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    searchModel.search(
+                        referenceLocation = map.projection.visibleRegion.latLngBounds.center,
+                        searchString = searchString.toString(),
+                    )
+                }
+            }
         }
     }
 
@@ -597,14 +614,7 @@ class MapFragment : Fragment() {
     private val onCameraIdleListener = OnCameraIdleListener {
         binding.map.getMapAsync { map ->
             prefs.mapViewport = map.projection.visibleRegion.latLngBounds
-
             refreshData()
-
-            searchModel.setLocation(
-                LatLng(
-                    map.cameraPosition.target!!.latitude, map.cameraPosition.target!!.longitude
-                )
-            )
         }
     }
 

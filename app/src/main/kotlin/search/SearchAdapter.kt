@@ -1,18 +1,16 @@
 package search
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import db.table.place.Place
 import icons.iconTypeface
 import org.btcmap.databinding.ItemSearchResultBinding
 
 class SearchAdapter(
-    private val onItemClick: (Item) -> Unit,
-) : ListAdapter<SearchAdapter.Item, SearchAdapter.ItemViewHolder>(DiffCallback()) {
+    private val onItemClick: (SearchAdapterItem) -> Unit,
+) : ListAdapter<SearchAdapterItem, SearchAdapter.ItemViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -33,45 +31,36 @@ class SearchAdapter(
         holder.bind(getItem(position), onItemClick)
     }
 
-    data class Item(
-        val element: Place,
-        val icon: String,
-        val name: String,
-        val distanceToUser: String,
-    )
-
     class ItemViewHolder(
         private val binding: ItemSearchResultBinding,
     ) : RecyclerView.ViewHolder(
         binding.root,
     ) {
 
-        fun bind(item: Item, onItemClick: (Item) -> Unit) {
+        fun bind(item: SearchAdapterItem, onItemClick: (SearchAdapterItem) -> Unit) {
             binding.apply {
                 icon.text = item.icon
                 name.text = item.name
-                distance.visibility =
-                    if (item.distanceToUser.isNotEmpty()) View.VISIBLE else View.GONE
                 distance.text = item.distanceToUser
                 root.setOnClickListener { onItemClick(item) }
             }
         }
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<Item>() {
+    class DiffCallback : DiffUtil.ItemCallback<SearchAdapterItem>() {
 
         override fun areItemsTheSame(
-            oldItem: Item,
-            newItem: Item,
+            oldItem: SearchAdapterItem,
+            newItem: SearchAdapterItem,
         ): Boolean {
-            return newItem.element.id == oldItem.element.id
+            return newItem == oldItem
         }
 
         override fun areContentsTheSame(
-            oldItem: Item,
-            newItem: Item,
+            oldItem: SearchAdapterItem,
+            newItem: SearchAdapterItem,
         ): Boolean {
-            return true
+            return newItem == oldItem
         }
     }
 }
