@@ -21,9 +21,7 @@ class SearchAdapter(
             parent,
             false,
         )
-
-        binding.icon.typeface = parent.context.iconTypeface()
-
+        binding.icon.typeface = iconTypeface
         return ItemViewHolder(binding)
     }
 

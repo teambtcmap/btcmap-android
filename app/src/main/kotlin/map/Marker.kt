@@ -47,7 +47,7 @@ fun Context.marker(
             resources.displayMetrics,
         )
 
-        typeface = iconTypeface()
+        typeface = iconTypeface
         textSize = pinSizePx / 2.1f
         isAntiAlias = true
     }

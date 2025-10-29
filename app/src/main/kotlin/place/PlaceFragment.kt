@@ -86,7 +86,7 @@ class PlaceFragment : Fragment() {
             true
         }
 
-        binding.outdated.typeface = requireContext().iconTypeface()
+        binding.outdated.typeface = iconTypeface
 
         commentsAdapter = CommentsAdapter()
         binding.commentsList.layoutManager = LinearLayoutManager(requireContext())

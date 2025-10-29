@@ -1,6 +1,7 @@
 package settings
 
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Color
@@ -10,10 +11,15 @@ import map.onMarkerBackgroundColor
 import org.btcmap.R
 import org.maplibre.android.geometry.LatLngBounds
 import androidx.core.graphics.toColorInt
+import app.App
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 
 lateinit var prefs: SharedPreferences
+
+fun init(app: App) {
+    prefs = app.getSharedPreferences("prefs", MODE_PRIVATE)
+}
 
 var SharedPreferences.mapViewport: LatLngBounds
     get() {
