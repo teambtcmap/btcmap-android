@@ -8,7 +8,7 @@ class App : Application() {
         super.onCreate()
         settings.init(this)
         db.init(this)
-        icons.init(this)
+        typeface.init(this)
         MapLibre.getInstance(this)
     }
 }

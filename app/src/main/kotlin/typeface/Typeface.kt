@@ -1,4 +1,4 @@
-package icons
+package typeface
 
 import android.graphics.Typeface
 import app.App

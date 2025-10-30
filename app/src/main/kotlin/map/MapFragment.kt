@@ -60,7 +60,7 @@ import okhttp3.Request
 import okhttp3.coroutines.executeAsync
 import org.btcmap.BuildConfig
 import org.btcmap.R
-import org.btcmap.databinding.FragmentMapBinding
+import org.btcmap.databinding.MapFragmentBinding
 import org.maplibre.android.annotations.IconFactory
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
@@ -102,7 +102,7 @@ class MapFragment : Fragment() {
         )
     }
 
-    private var _binding: FragmentMapBinding? = null
+    private var _binding: MapFragmentBinding? = null
     private val binding get() = _binding!!
 
     private val elementFragment by lazy {
@@ -180,7 +180,7 @@ class MapFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentMapBinding.inflate(inflater, container, false)
+        _binding = MapFragmentBinding.inflate(inflater, container, false)
 
         binding.sync.setDrawable(R.drawable.sync)
         binding.showMerchants.setDrawable(R.drawable.store)

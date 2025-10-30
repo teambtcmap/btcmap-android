@@ -10,11 +10,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mrudultora.colorpicker.ColorPickerPopUp
 import com.mrudultora.colorpicker.ColorPickerPopUp.OnPickColorListener
 import org.btcmap.R
-import org.btcmap.databinding.FragmentSettingsBinding
+import org.btcmap.databinding.SettingsFragmentBinding
 
 class SettingsFragment : Fragment() {
 
-    private var _binding: FragmentSettingsBinding? = null
+    private var _binding: SettingsFragmentBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -22,7 +22,7 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        _binding = SettingsFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -160,7 +160,7 @@ class SettingsFragment : Fragment() {
 
         binding.mapStyleButton.setOnClickListener {
             val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.map_style)
-                .setView(R.layout.dialog_map_style).show()
+                .setView(R.layout.map_style_dialog).show()
 
             val setupInterval = fun RadioButton?.(style: MapStyle) {
                 if (this == null) return

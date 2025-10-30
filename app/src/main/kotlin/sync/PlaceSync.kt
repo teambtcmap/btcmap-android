@@ -1,13 +1,13 @@
 package sync
 
 import android.database.sqlite.SQLiteDatabase
+import android.util.Log
 import androidx.core.database.sqlite.transaction
 import api.PlaceApi
 import db.table.place.Place
 import db.table.place.PlaceQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import log.log
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import time.toZonedDateTime
 import java.time.Duration
@@ -26,7 +26,7 @@ object PlaceSync {
                 val delta = try {
                     PlaceApi.getPlaces(maxKnownUpdatedAt, BATCH_SIZE)
                 } catch (t: Throwable) {
-                    t.log()
+                    Log.e(null, null, t)
                     return@withContext Report(
                         duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                         rowsAffected = rowsAffected,

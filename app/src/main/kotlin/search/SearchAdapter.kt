@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import icons.iconTypeface
-import org.btcmap.databinding.ItemSearchResultBinding
+import typeface.iconTypeface
+import org.btcmap.databinding.SearchAdapterItemBinding
 
 class SearchAdapter(
     private val onItemClick: (SearchAdapterItem) -> Unit,
@@ -16,7 +16,7 @@ class SearchAdapter(
         parent: ViewGroup,
         viewType: Int,
     ): ItemViewHolder {
-        val binding = ItemSearchResultBinding.inflate(
+        val binding = SearchAdapterItemBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false,
@@ -30,7 +30,7 @@ class SearchAdapter(
     }
 
     class ItemViewHolder(
-        private val binding: ItemSearchResultBinding,
+        private val binding: SearchAdapterItemBinding,
     ) : RecyclerView.ViewHolder(
         binding.root,
     ) {

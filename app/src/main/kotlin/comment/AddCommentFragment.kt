@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,14 +19,13 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.btcmap.R
-import org.btcmap.databinding.FragmentAddElementCommentBinding
 import androidx.core.net.toUri
 import androidx.lifecycle.withResumed
 import api.CommentApi
 import api.InvoiceApi
 import api.InvoiceApi.paid
 import kotlinx.coroutines.delay
-import log.log
+import org.btcmap.databinding.AddCommentFragmentBinding
 
 class AddCommentFragment : Fragment() {
 
@@ -37,7 +37,7 @@ class AddCommentFragment : Fragment() {
         Args(requireArguments().getLong("place_id"))
     }
 
-    private var _binding: FragmentAddElementCommentBinding? = null
+    private var _binding: AddCommentFragmentBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -45,7 +45,7 @@ class AddCommentFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentAddElementCommentBinding.inflate(inflater, container, false)
+        _binding = AddCommentFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -68,7 +68,7 @@ class AddCommentFragment : Fragment() {
                     binding.generateInvoice.isEnabled = true
                 }
             } catch (t: Throwable) {
-                t.log()
+                Log.e(null, null, t)
                 withResumed {
                     parentFragmentManager.popBackStack()
                     MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.error)
@@ -92,7 +92,7 @@ class AddCommentFragment : Fragment() {
                         comment = binding.comment.text.toString(),
                     )
                 } catch (t: Throwable) {
-                    t.log()
+                    Log.e(null, null, t)
                     withResumed {
                         binding.comment.isEnabled = true
                         binding.generateInvoice.isEnabled = true

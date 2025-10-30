@@ -12,16 +12,6 @@ import org.json.JSONObject
 import java.io.InputStream
 import java.time.ZonedDateTime
 
-data class BundledPlace(
-    val id: Long,
-    val lat: Double,
-    val lon: Double,
-    val icon: String,
-    val name: String,
-    val comments: Long?,
-    val boostedUntil: ZonedDateTime?,
-)
-
 object BundledPlaces {
     const val FILE_NAME = "bundled-places.json"
 

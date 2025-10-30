@@ -1,6 +1,7 @@
 package sync
 
 import android.database.sqlite.SQLiteDatabase
+import android.util.Log
 import androidx.core.database.sqlite.transaction
 import api.CommentApi
 import api.CommentApi.GetCommentsItem
@@ -8,7 +9,6 @@ import db.table.comment.Comment
 import db.table.comment.CommentQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import log.log
 import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
@@ -32,7 +32,7 @@ object CommentSync {
                 val delta = try {
                     CommentApi.getComments(maxKnownUpdatedAt, BATCH_SIZE)
                 } catch (t: Throwable) {
-                    t.log()
+                    Log.e(null, null, t)
                     return@withContext Report(
                         duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                         rowsAffected = rowsAffected,

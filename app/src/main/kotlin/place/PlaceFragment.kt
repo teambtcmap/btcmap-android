@@ -32,11 +32,11 @@ import comment.CommentsAdapter
 import comment.CommentsAdapterItem
 import comment.CommentsFragment
 import db.table.place.PlaceQueries
-import icons.iconTypeface
+import typeface.iconTypeface
 import map.getErrorColor
 import map.getOnSurfaceColor
 import org.btcmap.R
-import org.btcmap.databinding.FragmentPlaceBinding
+import org.btcmap.databinding.PlaceFragmentBinding
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -47,13 +47,13 @@ class PlaceFragment : Fragment() {
 
     private lateinit var commentsAdapter: CommentsAdapter
 
-    private var _binding: FragmentPlaceBinding? = null
+    private var _binding: PlaceFragmentBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentPlaceBinding.inflate(inflater, container, false)
+        _binding = PlaceFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 

@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,12 +22,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.btcmap.R
-import org.btcmap.databinding.FragmentBoostElementBinding
 import java.text.NumberFormat
 import androidx.core.net.toUri
 import api.InvoiceApi.paid
 import api.BoostApi
-import log.log
+import org.btcmap.databinding.BoostFragmentBinding
 
 class BoostFragment : Fragment() {
 
@@ -34,7 +34,7 @@ class BoostFragment : Fragment() {
 
     private val args by lazy { Args(requireArguments().getLong("place_id")) }
 
-    private var _binding: FragmentBoostElementBinding? = null
+    private var _binding: BoostFragmentBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -42,7 +42,7 @@ class BoostFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentBoostElementBinding.inflate(inflater, container, false)
+        _binding = BoostFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -66,7 +66,7 @@ class BoostFragment : Fragment() {
             val quote = try {
                 BoostApi.getQuote()
             } catch (t: Throwable) {
-                t.log()
+                Log.e(null, null, t)
                 withResumed {
                     parentFragmentManager.popBackStack()
                     MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.error)

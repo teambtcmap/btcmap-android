@@ -18,7 +18,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 lateinit var prefs: SharedPreferences
 
 fun init(app: App) {
-    prefs = app.getSharedPreferences("prefs", MODE_PRIVATE)
+    prefs = app.getSharedPreferences("settings", MODE_PRIVATE)
 }
 
 var SharedPreferences.mapViewport: LatLngBounds

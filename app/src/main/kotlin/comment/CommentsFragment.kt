@@ -21,7 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
-import org.btcmap.databinding.FragmentElementCommentsBinding
+import org.btcmap.databinding.CommentsFragmentBinding
 import sync.CommentSync
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -36,7 +36,7 @@ class CommentsFragment : Fragment() {
         Args(requireArguments().getLong("place_id"))
     }
 
-    private var _binding: FragmentElementCommentsBinding? = null
+    private var _binding: CommentsFragmentBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -44,7 +44,7 @@ class CommentsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentElementCommentsBinding.inflate(inflater, container, false)
+        _binding = CommentsFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 

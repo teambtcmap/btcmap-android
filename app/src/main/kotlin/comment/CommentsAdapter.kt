@@ -5,13 +5,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import org.btcmap.databinding.ItemCommentBinding
+import org.btcmap.databinding.CommentsAdapterItemBinding
 
 class CommentsAdapter :
     ListAdapter<CommentsAdapterItem, CommentsAdapter.ItemViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        val binding = ItemCommentBinding.inflate(
+        val binding = CommentsAdapterItemBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false,
@@ -24,7 +24,7 @@ class CommentsAdapter :
     }
 
     class ItemViewHolder(
-        private val binding: ItemCommentBinding,
+        private val binding: CommentsAdapterItemBinding,
     ) : ViewHolder(
         binding.root,
     ) {

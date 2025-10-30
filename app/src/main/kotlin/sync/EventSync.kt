@@ -1,13 +1,13 @@
 package sync
 
 import android.database.sqlite.SQLiteDatabase
+import android.util.Log
 import androidx.core.database.sqlite.transaction
 import api.EventApi
 import db.table.event.Event
 import db.table.event.EventQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import log.log
 import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
@@ -20,7 +20,7 @@ object EventSync {
             val events = try {
                 EventApi.getEvents()
             } catch (t: Throwable) {
-                t.log()
+                Log.e(null, null, t)
                 return@withContext Report(
                     duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                     rowsAffected = 0,
