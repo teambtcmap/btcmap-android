@@ -61,6 +61,7 @@ import okhttp3.coroutines.executeAsync
 import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.btcmap.databinding.MapFragmentBinding
+import org.json.JSONObject
 import org.maplibre.android.annotations.IconFactory
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
@@ -182,31 +183,6 @@ class MapFragment : Fragment() {
     ): View {
         _binding = MapFragmentBinding.inflate(inflater, container, false)
 
-        binding.sync.setDrawable(R.drawable.icon_sync)
-        binding.showMerchants.setDrawable(R.drawable.icon_store)
-        binding.showEvents.setDrawable(R.drawable.icon_event)
-        binding.showExchanges.setDrawable(R.drawable.icon_exchange)
-
-        binding.showMerchants.isSelected = true
-
-        binding.update.iconColor = requireContext().getErrorColor()
-        binding.update.setDrawable(R.drawable.icon_warning)
-        binding.update.isVisible = false
-
-        binding.update.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.update_available)
-                .setMessage(R.string.update_available_description)
-                .setPositiveButton(R.string.get_apk) { dialog, which ->
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data =
-                        "https://github.com/teambtcmap/btcmap-android/releases/latest".toUri()
-                    startActivity(intent)
-                }
-                .setNegativeButton(R.string.ignore, null)
-                .show()
-        }
-
         ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
@@ -243,16 +219,39 @@ class MapFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             withResumed {
+                binding.update.isVisible = false
+
                 launch {
                     try {
-                        val latestVer = httpClient.newCall(
+                        val latestVerJson = httpClient.newCall(
                             Request.Builder()
                                 .url("https://static.btcmap.org/android/latest-app-ver".toHttpUrl())
                                 .build()
                         ).executeAsync().body.string().trim()
 
-                        if (latestVer != BuildConfig.VERSION_NAME) {
-                            withResumed { binding.update.isVisible = true }
+                        val latestVer = JSONObject(latestVerJson)
+                        val latestVerCode = latestVer.getInt("code")
+                        val latestVerName = latestVer.getString("name")
+
+                        if (latestVerCode > BuildConfig.VERSION_CODE) {
+                            withResumed {
+                                binding.update.isVisible = true
+
+                                binding.update.setOnClickListener {
+                                    MaterialAlertDialogBuilder(requireContext())
+                                        .setTitle(R.string.update_available)
+                                        .setMessage(getString(R.string.update_available_description,
+                                            BuildConfig.VERSION_NAME, latestVerName))
+                                        .setPositiveButton(R.string.get_apk) { dialog, which ->
+                                            val intent = Intent(Intent.ACTION_VIEW)
+                                            intent.data =
+                                                "https://github.com/teambtcmap/btcmap-android/releases/latest".toUri()
+                                            startActivity(intent)
+                                        }
+                                        .setNegativeButton(R.string.ignore, null)
+                                        .show()
+                                }
+                            }
                         }
                     } catch (_: Throwable) {
 
@@ -429,10 +428,8 @@ class MapFragment : Fragment() {
                                                     ZoneOffset.UTC
                                                 )
                                             )
-                                        ) prefs.boostedMarkerBackgroundColor() else prefs.markerBackgroundColor(
-                                            requireContext()
-                                        ),
-                                        iconColor = prefs.markerIconColor(requireContext()),
+                                        ) prefs.boostedMarkerBackgroundColor() else prefs.markerBackgroundColor(),
+                                        iconColor = prefs.markerIconColor(),
                                         countBackgroundColor = if (it.cluster.requiresCompanionApp) Color.RED else prefs.badgeBackgroundColor(),
                                         countFontColor = if (it.cluster.requiresCompanionApp) Color.WHITE else prefs.badgeTextColor(),
                                         badgeText = if (it.cluster.requiresCompanionApp) {
@@ -464,8 +461,8 @@ class MapFragment : Fragment() {
                                     MarkerOptions().position(LatLng(it.event.lat, it.event.lon))
                                 val icon = requireContext().marker(
                                     iconId = "event",
-                                    backgroundColor = prefs.markerBackgroundColor(requireContext()),
-                                    iconColor = prefs.markerIconColor(requireContext()),
+                                    backgroundColor = prefs.markerBackgroundColor(),
+                                    iconColor = prefs.markerIconColor(),
                                     countBackgroundColor = prefs.badgeBackgroundColor(),
                                     countFontColor = prefs.badgeTextColor(),
                                     badgeText = "",
@@ -683,7 +680,7 @@ class MapFragment : Fragment() {
             val emptyClusterDrawable =
                 ContextCompat.getDrawable(requireContext(), R.drawable.map_cluster)!!
             DrawableCompat.setTint(
-                emptyClusterDrawable, prefs.markerBackgroundColor(requireContext())
+                emptyClusterDrawable, prefs.markerBackgroundColor()
             )
             emptyClusterBitmap =
                 emptyClusterDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
@@ -697,7 +694,7 @@ class MapFragment : Fragment() {
         clusterIcon.applyCanvas {
             val paint = Paint().apply {
                 textSize = pinSizePx.toFloat() / 3
-                color = prefs.markerIconColor(requireContext())
+                color = prefs.markerIconColor()
             }
 
             val text = cluster.count.toString()

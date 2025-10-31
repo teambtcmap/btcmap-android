@@ -75,32 +75,39 @@
             android:layout_height="40dp"
             android:layout_marginTop="16dp"
             android:alpha="0.3"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:iconSrc="@drawable/icon_sync" />
 
         <view.IconButton
             android:id="@+id/update"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginTop="16dp"
-            android:visibility="gone" />
+            app:fillColor="?attr/colorPrimaryContainer"
+            app:iconColor="?attr/colorError"
+            app:iconSrc="@drawable/icon_warning" />
 
         <view.IconButton
             android:id="@+id/showMerchants"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            app:iconSrc="@drawable/icon_store"
+            app:selected="true" />
 
         <view.IconButton
             android:id="@+id/showEvents"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            app:iconSrc="@drawable/icon_event" />
 
         <view.IconButton
             android:id="@+id/showExchanges"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            app:iconSrc="@drawable/icon_exchange" />
 
     </LinearLayout>
 

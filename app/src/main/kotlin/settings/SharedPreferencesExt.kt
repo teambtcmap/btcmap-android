@@ -6,8 +6,6 @@ import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Color
 import androidx.core.content.edit
-import map.markerBackgroundColor
-import map.onMarkerBackgroundColor
 import org.btcmap.R
 import org.maplibre.android.geometry.LatLngBounds
 import androidx.core.graphics.toColorInt
@@ -107,8 +105,8 @@ fun MapStyle.uri(context: Context): String {
     }
 }
 
-fun SharedPreferences.markerBackgroundColor(ctx: Context): Int {
-    return getInt("markerBackgroundColor", ctx.markerBackgroundColor())
+fun SharedPreferences.markerBackgroundColor(): Int {
+    return getInt("markerBackgroundColor", "#0e95af".toColorInt())
 }
 
 fun SharedPreferences.setMarkerBackgroundColor(color: Int?) {
@@ -145,8 +143,8 @@ fun SharedPreferences.setBoostedMarkerBackgroundColor(color: Int?) {
     }
 }
 
-fun SharedPreferences.markerIconColor(ctx: Context): Int {
-    return getInt("markerIconColor", ctx.onMarkerBackgroundColor())
+fun SharedPreferences.markerIconColor(): Int {
+    return getInt("markerIconColor", Color.WHITE)
 }
 
 fun SharedPreferences.setMarkerIconColor(color: Int?) {
@@ -163,7 +161,7 @@ fun SharedPreferences.setMarkerIconColor(color: Int?) {
 }
 
 fun SharedPreferences.badgeBackgroundColor(): Int {
-    return getInt("badgeBackgroundColor", "#0c9073".toColorInt())
+    return getInt("badgeBackgroundColor", "#00a63e".toColorInt())
 }
 
 fun SharedPreferences.setBadgeBackgroundColor(color: Int?) {

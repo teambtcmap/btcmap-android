@@ -34,12 +34,12 @@ class SettingsFragment : Fragment() {
         binding.currentMapStyle.text = prefs.mapStyle.name(requireContext())
 
         binding.markerBackgroundColor.text =
-            "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
+            "#${prefs.markerBackgroundColor().toHexString()}"
 
         binding.changeMarkerBackgroundColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
             colorPickerPopUp.setShowAlpha(true)
-                .setDefaultColor(prefs.markerBackgroundColor(requireContext()))
+                .setDefaultColor(prefs.markerBackgroundColor())
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setMarkerBackgroundColor(color)
@@ -53,7 +53,7 @@ class SettingsFragment : Fragment() {
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setMarkerBackgroundColor(null)
                 binding.markerBackgroundColor.text =
-                    "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
+                    "#${prefs.markerBackgroundColor().toHexString()}"
                 colorPickerPopUp.dismissDialog()
             }
         }
@@ -84,12 +84,12 @@ class SettingsFragment : Fragment() {
         }
 
         binding.markerIconColor.text =
-            "#${prefs.markerIconColor(requireContext()).toHexString()}"
+            "#${prefs.markerIconColor().toHexString()}"
 
         binding.changeMarkerIconColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
             colorPickerPopUp.setShowAlpha(true)
-                .setDefaultColor(prefs.markerIconColor(requireContext()))
+                .setDefaultColor(prefs.markerIconColor())
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setMarkerIconColor(color)
@@ -103,7 +103,7 @@ class SettingsFragment : Fragment() {
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setMarkerIconColor(null)
                 binding.markerIconColor.text =
-                    "#${prefs.markerIconColor(requireContext()).toHexString()}"
+                    "#${prefs.markerIconColor().toHexString()}"
                 colorPickerPopUp.dismissDialog()
             }
         }

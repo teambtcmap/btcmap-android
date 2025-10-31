@@ -3,7 +3,6 @@ package view
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
@@ -23,7 +22,7 @@ class IconButton @JvmOverloads constructor(
     private val fillPaint by lazy {
         Paint().apply {
             style = Paint.Style.FILL
-            color = context.getPrimaryContainerColor()
+            color = fillColor
             isAntiAlias = true
         }
     }
@@ -31,27 +30,103 @@ class IconButton @JvmOverloads constructor(
     private val strokePaint by lazy {
         Paint().apply {
             style = Paint.Style.STROKE
-            strokeWidth = resources.displayMetrics.density * 2
-            color = context.getOnPrimaryContainerColor()
+            strokeWidth = this@IconButton.strokeWidth
+            color = strokeColor
             isAntiAlias = true
         }
     }
 
     var icon: Bitmap? = null
+        private set
 
-    var iconColor: Int = Color.GREEN
+    var iconColor: Int = context.getOnPrimaryContainerColor()
+        set(value) {
+            field = value
+            updateIcon()
+        }
+
+    var fillColor: Int = context.getPrimaryContainerColor()
+        set(value) {
+            field = value
+            fillPaint.color = value
+            invalidate()
+        }
+
+    var strokeColor: Int = context.getOnPrimaryContainerColor()
+        set(value) {
+            field = value
+            strokePaint.color = value
+            invalidate()
+        }
+
+    var strokeWidth: Float = resources.displayMetrics.density * 2
+        set(value) {
+            field = value
+            strokePaint.strokeWidth = value
+            invalidate()
+        }
+
+    private var iconResId: Int = R.drawable.icon_store
 
     init {
-        iconColor = context.getOnPrimaryContainerColor()
-        setDrawable(R.drawable.icon_store)
+        // Read attributes from XML
+        attrs?.let { parseAttributes(it) }
+        updateIcon()
+    }
+
+    private fun parseAttributes(attrs: AttributeSet) {
+        val typedArray = context.obtainStyledAttributes(
+            attrs,
+            R.styleable.IconButton,
+            0,
+            0
+        )
+
+        try {
+            // Get icon resource
+            iconResId = typedArray.getResourceId(
+                R.styleable.IconButton_iconSrc,
+                R.drawable.icon_store
+            )
+
+            // Get colors
+            iconColor = typedArray.getColor(
+                R.styleable.IconButton_iconColor,
+                context.getOnPrimaryContainerColor()
+            )
+
+            fillColor = typedArray.getColor(
+                R.styleable.IconButton_fillColor,
+                context.getPrimaryContainerColor()
+            )
+
+            strokeColor = typedArray.getColor(
+                R.styleable.IconButton_strokeColor,
+                context.getOnPrimaryContainerColor()
+            )
+
+            // Get stroke width
+            strokeWidth = typedArray.getDimension(
+                R.styleable.IconButton_strokeWidth,
+                resources.displayMetrics.density * 2
+            )
+
+            if (typedArray.getBoolean(R.styleable.IconButton_selected, false)) {
+                isSelected = true
+            }
+        } finally {
+            typedArray.recycle()
+        }
     }
 
     fun setDrawable(resId: Int) {
-        val drawable = ContextCompat.getDrawable(context, resId)!!
-        DrawableCompat.setTint(
-            drawable,
-            iconColor,
-        )
+        iconResId = resId
+        updateIcon()
+    }
+
+    private fun updateIcon() {
+        val drawable = ContextCompat.getDrawable(context, iconResId) ?: return
+        DrawableCompat.setTint(drawable, iconColor)
         val drawableSize = (resources.displayMetrics.density * 22).toInt()
         icon = drawable.toBitmap(width = drawableSize, height = drawableSize)
         invalidate()
@@ -75,7 +150,6 @@ class IconButton @JvmOverloads constructor(
         }
 
         val icon = this.icon
-
         if (icon != null) {
             canvas.drawBitmap(
                 icon,
