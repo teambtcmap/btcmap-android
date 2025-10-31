@@ -112,6 +112,6 @@
         android:layout_margin="24dp"
         android:contentDescription="@string/show_my_location"
         app:elevation="0dp"
-        app:srcCompat="@drawable/my_location" />
+        app:srcCompat="@drawable/icon_my_location" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

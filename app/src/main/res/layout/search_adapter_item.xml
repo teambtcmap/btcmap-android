@@ -14,7 +14,7 @@
         android:layout_height="40dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:background="@drawable/user_avatar_placeholder_bg"
+        android:background="@drawable/search_result_icon_background"
         android:backgroundTint="?colorPrimary"
         android:gravity="center"
         android:textColor="?colorOnPrimary"

@@ -1,41 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-<!--    <item-->
-<!--        android:id="@+id/action_donate"-->
-<!--        android:icon="@drawable/currency_bitcoin"-->
-<!--        android:title="@string/donate"-->
-<!--        app:showAsAction="never" />-->
-
     <item
-        android:id="@+id/action_add_element"
-        android:icon="@drawable/add_location"
+        android:id="@+id/add_place"
+        android:icon="@drawable/icon_add_location"
         android:title="@string/add_location"
         app:showAsAction="ifRoom" />
 
-<!--    <item-->
-<!--        android:id="@+id/action_areas"-->
-<!--        android:title="@string/communities"-->
-<!--        app:showAsAction="never" />-->
-
-<!--    <item-->
-<!--        android:id="@+id/action_trends"-->
-<!--        android:title="@string/trends"-->
-<!--        app:showAsAction="never" />-->
-
-<!--    <item-->
-<!--        android:id="@+id/action_users"-->
-<!--        android:title="@string/users"-->
-<!--        app:showAsAction="never" />-->
-
-<!--    <item-->
-<!--        android:id="@+id/action_events"-->
-<!--        android:title="@string/latest_changes"-->
-<!--        app:showAsAction="never" />-->
-
     <item
-        android:id="@+id/action_settings"
-        android:icon="@drawable/settings"
+        android:id="@+id/settings"
+        android:icon="@drawable/icon_settings"
         android:title="@string/settings"
         app:showAsAction="ifRoom" />
 

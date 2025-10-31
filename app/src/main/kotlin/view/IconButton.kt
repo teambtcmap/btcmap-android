@@ -43,7 +43,7 @@ class IconButton @JvmOverloads constructor(
 
     init {
         iconColor = context.getOnPrimaryContainerColor()
-        setDrawable(R.drawable.store)
+        setDrawable(R.drawable.icon_store)
     }
 
     fun setDrawable(resId: Int) {

@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/directions"
-        android:icon="@drawable/directions"
+        android:icon="@drawable/icon_directions"
         android:title="@string/directions"
         app:showAsAction="ifRoom" />
 

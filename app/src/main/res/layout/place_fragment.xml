@@ -118,7 +118,7 @@
                     android:drawablePadding="20dp"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="16dp"
-                    app:drawableStartCompat="@drawable/verified"
+                    app:drawableStartCompat="@drawable/icon_verified"
                     app:drawableTint="?colorSecondary"
                     tools:text="Last verified on Oct 14, 2022" />
 
@@ -144,7 +144,7 @@
                 android:drawablePadding="20dp"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
-                app:drawableStartCompat="@drawable/warning"
+                app:drawableStartCompat="@drawable/icon_warning"
                 app:drawableTint="?colorError" />
 
             <TextView
@@ -155,7 +155,7 @@
                 android:drawablePadding="20dp"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
-                app:drawableStartCompat="@drawable/place"
+                app:drawableStartCompat="@drawable/icon_place"
                 app:drawableTint="?colorSecondary" />
 
             <TextView
@@ -168,7 +168,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/call"
+                app:drawableStartCompat="@drawable/icon_call"
                 app:drawableTint="?colorSecondary" />
 
             <TextView
@@ -181,7 +181,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/earth"
+                app:drawableStartCompat="@drawable/icon_earth"
                 app:drawableTint="?colorSecondary" />
 
             <TextView
@@ -193,7 +193,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/telegram"
+                app:drawableStartCompat="@drawable/icon_telegram"
                 app:drawableTint="?colorSecondary"
                 tools:text="https://telegram.org/" />
 
@@ -206,7 +206,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/line"
+                app:drawableStartCompat="@drawable/icon_line"
                 app:drawableTint="?colorSecondary"
                 tools:text="https://www.line.me/" />
 
@@ -219,7 +219,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/contact_twitter"
+                app:drawableStartCompat="@drawable/icon_twitter"
                 app:drawableTint="?colorSecondary"
                 tools:text="BTCMapDotOrg" />
 
@@ -232,7 +232,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/contact_facebook"
+                app:drawableStartCompat="@drawable/icon_facebook"
                 app:drawableTint="?colorSecondary"
                 tools:text="https://www.facebook.com" />
 
@@ -245,7 +245,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/contact_instagram"
+                app:drawableStartCompat="@drawable/icon_instagram"
                 app:drawableTint="?colorSecondary"
                 tools:text="BTCMapDotOrg" />
 
@@ -259,7 +259,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
                 android:singleLine="true"
-                app:drawableStartCompat="@drawable/contact_email"
+                app:drawableStartCompat="@drawable/icon_email"
                 app:drawableTint="?colorSecondary"
                 tools:text="BTCMapDotOrg" />
 
@@ -271,7 +271,7 @@
                 android:drawablePadding="20dp"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="16dp"
-                app:drawableStartCompat="@drawable/schedule"
+                app:drawableStartCompat="@drawable/icon_schedule"
                 app:drawableTint="?colorSecondary" />
 
             <TextView
@@ -284,7 +284,7 @@
                 android:paddingVertical="16dp"
                 android:singleLine="true"
                 android:text="@string/comments_d"
-                app:drawableStartCompat="@drawable/comment"
+                app:drawableStartCompat="@drawable/icon_comment"
                 app:drawableTint="?colorSecondary" />
 
             <androidx.recyclerview.widget.RecyclerView

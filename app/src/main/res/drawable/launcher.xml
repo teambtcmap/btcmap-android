@@ -2,6 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="UnusedResources">
     <background android:drawable="@android:color/white" />
-    <foreground android:drawable="@drawable/launcher_fg" />
-    <monochrome android:drawable="@drawable/launcher_fg_monochrome" />
+    <foreground android:drawable="@drawable/launcher_foreground" />
+    <monochrome android:drawable="@drawable/launcher_foreground_monochrome" />
 </adaptive-icon>

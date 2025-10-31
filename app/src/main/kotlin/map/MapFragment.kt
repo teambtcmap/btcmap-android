@@ -182,15 +182,15 @@ class MapFragment : Fragment() {
     ): View {
         _binding = MapFragmentBinding.inflate(inflater, container, false)
 
-        binding.sync.setDrawable(R.drawable.sync)
-        binding.showMerchants.setDrawable(R.drawable.store)
-        binding.showEvents.setDrawable(R.drawable.event)
-        binding.showExchanges.setDrawable(R.drawable.exchange)
+        binding.sync.setDrawable(R.drawable.icon_sync)
+        binding.showMerchants.setDrawable(R.drawable.icon_store)
+        binding.showEvents.setDrawable(R.drawable.icon_event)
+        binding.showExchanges.setDrawable(R.drawable.icon_exchange)
 
         binding.showMerchants.isSelected = true
 
         binding.update.iconColor = requireContext().getErrorColor()
-        binding.update.setDrawable(R.drawable.warning)
+        binding.update.setDrawable(R.drawable.icon_warning)
         binding.update.isVisible = false
 
         binding.update.setOnClickListener {
@@ -307,13 +307,13 @@ class MapFragment : Fragment() {
 
         binding.searchBar.setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.action_add_element -> {
+                R.id.add_place -> {
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.data = "https://btcmap.org/add-location".toUri()
                     startActivity(intent)
                 }
 
-                R.id.action_settings -> {
+                R.id.settings -> {
                     parentFragmentManager.commit {
                         setReorderingAllowed(true)
                         replace<SettingsFragment>(R.id.fragmentContainerView)
@@ -681,7 +681,7 @@ class MapFragment : Fragment() {
 
         if (emptyClusterBitmap == null) {
             val emptyClusterDrawable =
-                ContextCompat.getDrawable(requireContext(), R.drawable.cluster)!!
+                ContextCompat.getDrawable(requireContext(), R.drawable.map_cluster)!!
             DrawableCompat.setTint(
                 emptyClusterDrawable, prefs.markerBackgroundColor(requireContext())
             )

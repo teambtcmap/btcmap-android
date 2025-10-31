@@ -15,7 +15,7 @@
         android:layout_gravity="center"
         android:layout_marginHorizontal="18dp"
         android:contentDescription="@string/icon"
-        android:src="@drawable/person_alt"
+        android:src="@drawable/icon_person"
         app:tint="?attr/colorOnSurfaceVariant" />
 
     <LinearLayout

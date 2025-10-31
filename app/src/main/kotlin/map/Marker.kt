@@ -27,7 +27,7 @@ fun Context.marker(
         TypedValue.COMPLEX_UNIT_DIP, 48f, resources.displayMetrics
     ).toInt()
 
-    val emptyPinDrawable = ContextCompat.getDrawable(this, R.drawable.marker)!!
+    val emptyPinDrawable = ContextCompat.getDrawable(this, R.drawable.map_marker)!!
 
     DrawableCompat.setTint(
         emptyPinDrawable,
