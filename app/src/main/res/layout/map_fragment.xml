@@ -83,7 +83,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginTop="16dp"
-            app:fillColor="?attr/colorPrimaryContainer"
+            app:backgroundColor="?attr/colorPrimaryContainer"
             app:iconColor="?attr/colorError"
             app:iconSrc="@drawable/icon_warning" />
 
@@ -92,6 +92,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginTop="16dp"
+            android:elevation="4dp"
             app:iconSrc="@drawable/icon_store"
             app:selected="true" />
 
@@ -111,14 +112,13 @@
 
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <view.IconButton
         android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="56dp"
         android:layout_gravity="end|bottom"
+        android:layout_height="56dp"
         android:layout_margin="24dp"
-        android:contentDescription="@string/show_my_location"
-        app:elevation="0dp"
-        app:srcCompat="@drawable/icon_my_location" />
+        android:paddingBottom="200dp"
+        app:iconSrc="@drawable/icon_my_location" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

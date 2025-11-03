@@ -81,6 +81,9 @@ import settings.SettingsFragment
 import settings.badgeBackgroundColor
 import settings.badgeTextColor
 import settings.boostedMarkerBackgroundColor
+import settings.buttonBackgroundColor
+import settings.buttonBorderColor
+import settings.buttonIconColor
 import settings.mapStyle
 import settings.mapViewport
 import settings.markerBackgroundColor
@@ -216,6 +219,24 @@ class MapFragment : Fragment() {
         binding.map.getMapAsync {
             it.addOnCameraIdleListener(onCameraIdleListener)
         }
+
+        binding.sync.backgroundColor(prefs.buttonBackgroundColor(requireContext()))
+        binding.sync.iconColor(prefs.buttonIconColor(requireContext()))
+
+        binding.showMerchants.backgroundColor(prefs.buttonBackgroundColor(requireContext()))
+        binding.showMerchants.iconColor(prefs.buttonIconColor(requireContext()))
+        binding.showMerchants.borderColor(prefs.buttonBorderColor(requireContext()))
+
+        binding.showEvents.backgroundColor(prefs.buttonBackgroundColor(requireContext()))
+        binding.showEvents.iconColor(prefs.buttonIconColor(requireContext()))
+        binding.showEvents.borderColor(prefs.buttonBorderColor(requireContext()))
+
+        binding.showExchanges.backgroundColor(prefs.buttonBackgroundColor(requireContext()))
+        binding.showExchanges.iconColor(prefs.buttonIconColor(requireContext()))
+        binding.showExchanges.borderColor(prefs.buttonBorderColor(requireContext()))
+
+        binding.fab.backgroundColor(prefs.buttonBackgroundColor(requireContext()))
+        binding.fab.iconColor(prefs.buttonIconColor(requireContext()))
 
         viewLifecycleOwner.lifecycleScope.launch {
             withResumed {
@@ -640,7 +661,6 @@ class MapFragment : Fragment() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                     model.selectElement(0)
-                    binding.fab.show()
                     binding.fab.isVisible = true
                 } else {
                     binding.fab.isVisible = false

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="IconButton">
+        <attr name="backgroundColor" format="color" />
         <attr name="iconSrc" format="reference" />
         <attr name="iconColor" format="color" />
-        <attr name="fillColor" format="color" />
-        <attr name="strokeColor" format="color" />
-        <attr name="strokeWidth" format="dimension" />
+        <attr name="borderColor" format="color" />
+        <attr name="borderWidth" format="dimension" />
         <attr name="selected" format="boolean" />
     </declare-styleable>
 </resources>

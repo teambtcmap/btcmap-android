@@ -16,62 +16,53 @@ import org.btcmap.R
 class IconButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
 
-    private val fillPaint by lazy {
-        Paint().apply {
-            style = Paint.Style.FILL
-            color = fillColor
-            isAntiAlias = true
-        }
+    private val backgroundPaint = Paint().apply {
+        style = Paint.Style.FILL
+        isAntiAlias = true
     }
 
-    private val strokePaint by lazy {
-        Paint().apply {
-            style = Paint.Style.STROKE
-            strokeWidth = this@IconButton.strokeWidth
-            color = strokeColor
-            isAntiAlias = true
-        }
+    private val borderPaint = Paint().apply {
+        style = Paint.Style.STROKE
+        isAntiAlias = true
     }
+
+    var iconResId = R.drawable.icon_store
+
+    var iconColor = context.getOnPrimaryContainerColor()
 
     var icon: Bitmap? = null
         private set
 
-    var iconColor: Int = context.getOnPrimaryContainerColor()
-        set(value) {
-            field = value
-            updateIcon()
-        }
-
-    var fillColor: Int = context.getPrimaryContainerColor()
-        set(value) {
-            field = value
-            fillPaint.color = value
-            invalidate()
-        }
-
-    var strokeColor: Int = context.getOnPrimaryContainerColor()
-        set(value) {
-            field = value
-            strokePaint.color = value
-            invalidate()
-        }
-
-    var strokeWidth: Float = resources.displayMetrics.density * 2
-        set(value) {
-            field = value
-            strokePaint.strokeWidth = value
-            invalidate()
-        }
-
-    private var iconResId: Int = R.drawable.icon_store
-
     init {
-        // Read attributes from XML
         attrs?.let { parseAttributes(it) }
-        updateIcon()
+    }
+
+    fun backgroundColor(color: Int) {
+        backgroundPaint.color = color
+        invalidate()
+    }
+
+    fun borderColor(color: Int) {
+        borderPaint.color = color
+        invalidate()
+    }
+
+    fun icon(resId: Int, color: Int) {
+        icon = generateIcon(resId, color)
+        invalidate()
+    }
+
+    fun iconResId(id: Int) {
+        iconResId = id
+        icon(iconResId, iconColor)
+    }
+
+    fun iconColor(color: Int) {
+        iconColor = color
+        icon(iconResId, iconColor)
     }
 
     private fun parseAttributes(attrs: AttributeSet) {
@@ -83,33 +74,36 @@ class IconButton @JvmOverloads constructor(
         )
 
         try {
-            // Get icon resource
+            backgroundColor(
+                typedArray.getColor(
+                    R.styleable.IconButton_backgroundColor,
+                    context.getPrimaryContainerColor(),
+                )
+            )
+
+            borderColor(
+                typedArray.getColor(
+                    R.styleable.IconButton_borderColor,
+                    context.getOnPrimaryContainerColor(),
+                )
+            )
+
+            borderPaint.strokeWidth = typedArray.getDimension(
+                R.styleable.IconButton_borderWidth,
+                resources.displayMetrics.density * 2,
+            )
+
             iconResId = typedArray.getResourceId(
                 R.styleable.IconButton_iconSrc,
-                R.drawable.icon_store
+                R.drawable.icon_store,
             )
 
-            // Get colors
             iconColor = typedArray.getColor(
                 R.styleable.IconButton_iconColor,
-                context.getOnPrimaryContainerColor()
+                context.getOnPrimaryContainerColor(),
             )
 
-            fillColor = typedArray.getColor(
-                R.styleable.IconButton_fillColor,
-                context.getPrimaryContainerColor()
-            )
-
-            strokeColor = typedArray.getColor(
-                R.styleable.IconButton_strokeColor,
-                context.getOnPrimaryContainerColor()
-            )
-
-            // Get stroke width
-            strokeWidth = typedArray.getDimension(
-                R.styleable.IconButton_strokeWidth,
-                resources.displayMetrics.density * 2
-            )
+            icon(iconResId, iconColor)
 
             if (typedArray.getBoolean(R.styleable.IconButton_selected, false)) {
                 isSelected = true
@@ -119,17 +113,11 @@ class IconButton @JvmOverloads constructor(
         }
     }
 
-    fun setDrawable(resId: Int) {
-        iconResId = resId
-        updateIcon()
-    }
-
-    private fun updateIcon() {
-        val drawable = ContextCompat.getDrawable(context, iconResId) ?: return
-        DrawableCompat.setTint(drawable, iconColor)
+    private fun generateIcon(iconResId: Int, color: Int): Bitmap? {
+        val drawable = ContextCompat.getDrawable(context, iconResId) ?: return null
+        DrawableCompat.setTint(drawable, color)
         val drawableSize = (resources.displayMetrics.density * 22).toInt()
-        icon = drawable.toBitmap(width = drawableSize, height = drawableSize)
-        invalidate()
+        return drawable.toBitmap(width = drawableSize, height = drawableSize)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -138,24 +126,23 @@ class IconButton @JvmOverloads constructor(
         val centerX = width / 2f
         val centerY = height / 2f
 
-        canvas.drawCircle(centerX, centerY, width / 2.0f, fillPaint)
+        canvas.drawCircle(centerX, centerY, width / 2.0f, backgroundPaint)
 
         if (isSelected) {
             canvas.drawCircle(
                 centerX,
                 centerY,
-                width / 2.0f - strokePaint.strokeWidth / 2,
-                strokePaint
+                width / 2.0f - borderPaint.strokeWidth / 2,
+                borderPaint,
             )
         }
 
-        val icon = this.icon
-        if (icon != null) {
+        icon?.let { icon ->
             canvas.drawBitmap(
                 icon,
                 width / 2f - icon.width / 2f,
                 height / 2f - icon.height / 2f,
-                null
+                null,
             )
         }
     }

@@ -185,6 +185,81 @@ class SettingsFragment : Fragment() {
                 invoke(dialog.findViewById(R.id.dark), MapStyle.Dark)
             }
         }
+
+        binding.buttonBackgroundColor.text =
+            "#${prefs.buttonBackgroundColor(requireContext()).toHexString()}"
+
+        binding.changeButtonBackgroundColor.setOnClickListener {
+            val colorPickerPopUp = ColorPickerPopUp(context)
+            colorPickerPopUp.setShowAlpha(true)
+                .setDefaultColor(prefs.buttonBackgroundColor(requireContext()))
+                .setOnPickColorListener(object : OnPickColorListener {
+                    override fun onColorPicked(color: Int) {
+                        prefs.setButtonBackgroundColor(color)
+                    }
+
+                    override fun onCancel() {
+                        colorPickerPopUp.dismissDialog() // Dismiss the dialog.
+                    }
+                })
+                .show()
+            colorPickerPopUp.negativeButton.setOnClickListener {
+                prefs.setButtonBackgroundColor(null)
+                binding.buttonBackgroundColor.text =
+                    "#${prefs.buttonBackgroundColor(requireContext()).toHexString()}"
+                colorPickerPopUp.dismissDialog()
+            }
+        }
+
+        binding.buttonIconColor.text =
+            "#${prefs.buttonIconColor(requireContext()).toHexString()}"
+
+        binding.changeButtonIconColor.setOnClickListener {
+            val colorPickerPopUp = ColorPickerPopUp(context)
+            colorPickerPopUp.setShowAlpha(true)
+                .setDefaultColor(prefs.buttonIconColor(requireContext()))
+                .setOnPickColorListener(object : OnPickColorListener {
+                    override fun onColorPicked(color: Int) {
+                        prefs.setButtonIconColor(color)
+                    }
+
+                    override fun onCancel() {
+                        colorPickerPopUp.dismissDialog() // Dismiss the dialog.
+                    }
+                })
+                .show()
+            colorPickerPopUp.negativeButton.setOnClickListener {
+                prefs.setButtonIconColor(null)
+                binding.buttonIconColor.text =
+                    "#${prefs.buttonIconColor(requireContext()).toHexString()}"
+                colorPickerPopUp.dismissDialog()
+            }
+        }
+
+        binding.buttonBorderColor.text =
+            "#${prefs.buttonBorderColor(requireContext()).toHexString()}"
+
+        binding.changeButtonBorderColor.setOnClickListener {
+            val colorPickerPopUp = ColorPickerPopUp(context)
+            colorPickerPopUp.setShowAlpha(true)
+                .setDefaultColor(prefs.buttonBorderColor(requireContext()))
+                .setOnPickColorListener(object : OnPickColorListener {
+                    override fun onColorPicked(color: Int) {
+                        prefs.setButtonBorderColor(color)
+                    }
+
+                    override fun onCancel() {
+                        colorPickerPopUp.dismissDialog() // Dismiss the dialog.
+                    }
+                })
+                .show()
+            colorPickerPopUp.negativeButton.setOnClickListener {
+                prefs.setButtonBorderColor(null)
+                binding.buttonBorderColor.text =
+                    "#${prefs.buttonBorderColor(requireContext()).toHexString()}"
+                colorPickerPopUp.dismissDialog()
+            }
+        }
     }
 
     override fun onDestroyView() {

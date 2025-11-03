@@ -10,6 +10,8 @@ import org.btcmap.R
 import org.maplibre.android.geometry.LatLngBounds
 import androidx.core.graphics.toColorInt
 import app.App
+import map.getOnPrimaryContainerColor
+import map.getPrimaryContainerColor
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 
@@ -212,4 +214,61 @@ fun SharedPreferences.apiUrlV4(vararg pathSegments: String): HttpUrl {
         builder.addPathSegment(it)
     }
     return builder.build()
+}
+
+private const val KEY_BUTTON_BACKGROUND_COLOR = "buttonBackgroundColor"
+
+fun SharedPreferences.buttonBackgroundColor(context: Context): Int {
+    return getInt(KEY_BUTTON_BACKGROUND_COLOR, context.getPrimaryContainerColor())
+}
+
+fun SharedPreferences.setButtonBackgroundColor(color: Int?) {
+    edit {
+        if (color == null) {
+            remove(KEY_BUTTON_BACKGROUND_COLOR)
+        } else {
+            putInt(
+                KEY_BUTTON_BACKGROUND_COLOR,
+                color,
+            )
+        }
+    }
+}
+
+private const val KEY_BUTTON_ICON_COLOR = "buttonIconColor"
+
+fun SharedPreferences.buttonIconColor(context: Context): Int {
+    return getInt(KEY_BUTTON_ICON_COLOR, context.getOnPrimaryContainerColor())
+}
+
+fun SharedPreferences.setButtonIconColor(color: Int?) {
+    edit {
+        if (color == null) {
+            remove(KEY_BUTTON_ICON_COLOR)
+        } else {
+            putInt(
+                KEY_BUTTON_ICON_COLOR,
+                color,
+            )
+        }
+    }
+}
+
+private const val KEY_BUTTON_BORDER_COLOR = "buttonBorderColor"
+
+fun SharedPreferences.buttonBorderColor(context: Context): Int {
+    return getInt(KEY_BUTTON_BORDER_COLOR, context.getOnPrimaryContainerColor())
+}
+
+fun SharedPreferences.setButtonBorderColor(color: Int?) {
+    edit {
+        if (color == null) {
+            remove(KEY_BUTTON_BORDER_COLOR)
+        } else {
+            putInt(
+                KEY_BUTTON_BORDER_COLOR,
+                color,
+            )
+        }
+    }
 }
