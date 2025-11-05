@@ -11,7 +11,9 @@ import org.maplibre.android.geometry.LatLngBounds
 import androidx.core.graphics.toColorInt
 import app.App
 import map.getOnPrimaryContainerColor
+import map.getOnTertiaryContainerColor
 import map.getPrimaryContainerColor
+import map.getTertiaryContainerColor
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 
@@ -107,8 +109,8 @@ fun MapStyle.uri(context: Context): String {
     }
 }
 
-fun SharedPreferences.markerBackgroundColor(): Int {
-    return getInt("markerBackgroundColor", "#0e95af".toColorInt())
+fun SharedPreferences.markerBackgroundColor(context: Context): Int {
+    return getInt("markerBackgroundColor", context.getPrimaryContainerColor())
 }
 
 fun SharedPreferences.setMarkerBackgroundColor(color: Int?) {
@@ -126,10 +128,8 @@ fun SharedPreferences.setMarkerBackgroundColor(color: Int?) {
 
 private const val KEY_BOOSTED_MARKER_BACKGROUND_COLOR = "boostedMarkerBackgroundColor"
 
-private val DEFAULT_MARKER_BACKGROUND_COLOR = "#f7931a".toColorInt()
-
 fun SharedPreferences.boostedMarkerBackgroundColor(): Int {
-    return getInt(KEY_BOOSTED_MARKER_BACKGROUND_COLOR, DEFAULT_MARKER_BACKGROUND_COLOR)
+    return getInt(KEY_BOOSTED_MARKER_BACKGROUND_COLOR, "#f7931a".toColorInt())
 }
 
 fun SharedPreferences.setBoostedMarkerBackgroundColor(color: Int?) {
@@ -145,8 +145,8 @@ fun SharedPreferences.setBoostedMarkerBackgroundColor(color: Int?) {
     }
 }
 
-fun SharedPreferences.markerIconColor(): Int {
-    return getInt("markerIconColor", Color.WHITE)
+fun SharedPreferences.markerIconColor(context: Context): Int {
+    return getInt("markerIconColor", context.getOnPrimaryContainerColor())
 }
 
 fun SharedPreferences.setMarkerIconColor(color: Int?) {
@@ -162,8 +162,8 @@ fun SharedPreferences.setMarkerIconColor(color: Int?) {
     }
 }
 
-fun SharedPreferences.badgeBackgroundColor(): Int {
-    return getInt("badgeBackgroundColor", "#00a63e".toColorInt())
+fun SharedPreferences.badgeBackgroundColor(context: Context): Int {
+    return getInt("badgeBackgroundColor", context.getOnPrimaryContainerColor())
 }
 
 fun SharedPreferences.setBadgeBackgroundColor(color: Int?) {
@@ -179,8 +179,8 @@ fun SharedPreferences.setBadgeBackgroundColor(color: Int?) {
     }
 }
 
-fun SharedPreferences.badgeTextColor(): Int {
-    return getInt("badgeTextColor", Color.WHITE)
+fun SharedPreferences.badgeTextColor(context: Context): Int {
+    return getInt("badgeTextColor", context.getPrimaryContainerColor())
 }
 
 fun SharedPreferences.setBadgeTextColor(color: Int?) {
@@ -219,7 +219,7 @@ fun SharedPreferences.apiUrlV4(vararg pathSegments: String): HttpUrl {
 private const val KEY_BUTTON_BACKGROUND_COLOR = "buttonBackgroundColor"
 
 fun SharedPreferences.buttonBackgroundColor(context: Context): Int {
-    return getInt(KEY_BUTTON_BACKGROUND_COLOR, context.getPrimaryContainerColor())
+    return getInt(KEY_BUTTON_BACKGROUND_COLOR, context.getTertiaryContainerColor())
 }
 
 fun SharedPreferences.setButtonBackgroundColor(color: Int?) {
@@ -238,7 +238,7 @@ fun SharedPreferences.setButtonBackgroundColor(color: Int?) {
 private const val KEY_BUTTON_ICON_COLOR = "buttonIconColor"
 
 fun SharedPreferences.buttonIconColor(context: Context): Int {
-    return getInt(KEY_BUTTON_ICON_COLOR, context.getOnPrimaryContainerColor())
+    return getInt(KEY_BUTTON_ICON_COLOR, context.getOnTertiaryContainerColor())
 }
 
 fun SharedPreferences.setButtonIconColor(color: Int?) {
@@ -257,7 +257,7 @@ fun SharedPreferences.setButtonIconColor(color: Int?) {
 private const val KEY_BUTTON_BORDER_COLOR = "buttonBorderColor"
 
 fun SharedPreferences.buttonBorderColor(context: Context): Int {
-    return getInt(KEY_BUTTON_BORDER_COLOR, context.getOnPrimaryContainerColor())
+    return getInt(KEY_BUTTON_BORDER_COLOR, context.getOnTertiaryContainerColor())
 }
 
 fun SharedPreferences.setButtonBorderColor(color: Int?) {

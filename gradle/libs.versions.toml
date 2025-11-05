@@ -8,7 +8,7 @@ kotlin = "2.2.20"
 coroutines = "1.10.2"
 # Material design components
 # https://github.com/material-components/material-components-android/releases
-material = "1.14.0-alpha05"
+material = "1.14.0-alpha06"
 # Modern HTTP client
 # https://github.com/square/okhttp/blob/master/CHANGELOG.md
 okhttp = "5.2.1"

@@ -20,7 +20,7 @@
         android:icon="${appIcon}"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar">
+        android:theme="@style/Theme.Material3Expressive.DynamicColors.DayNight.NoActionBar">
 
         <activity
             android:name="activity.Activity"

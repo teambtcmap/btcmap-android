@@ -13,6 +13,16 @@ fun Context.getPrimaryContainerColor(): Int {
     return attrs.getColor(0, 0)
 }
 
+fun Context.getTertiaryContainerColor(): Int {
+    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorTertiaryContainer))
+    return attrs.getColor(0, 0)
+}
+
+fun Context.getOnTertiaryContainerColor(): Int {
+    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnTertiaryContainer))
+    return attrs.getColor(0, 0)
+}
+
 fun Context.getOnPrimaryContainerColor(): Int {
     val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnPrimaryContainer))
     return attrs.getColor(0, 0)

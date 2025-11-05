@@ -11,6 +11,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
+import android.graphics.Typeface
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -261,8 +262,12 @@ class MapFragment : Fragment() {
                                 binding.update.setOnClickListener {
                                     MaterialAlertDialogBuilder(requireContext())
                                         .setTitle(R.string.update_available)
-                                        .setMessage(getString(R.string.update_available_description,
-                                            BuildConfig.VERSION_NAME, latestVerName))
+                                        .setMessage(
+                                            getString(
+                                                R.string.update_available_description,
+                                                BuildConfig.VERSION_NAME, latestVerName
+                                            )
+                                        )
                                         .setPositiveButton(R.string.get_apk) { dialog, which ->
                                             val intent = Intent(Intent.ACTION_VIEW)
                                             intent.data =
@@ -442,17 +447,23 @@ class MapFragment : Fragment() {
                                     MarkerOptions().position(LatLng(it.cluster.lat, it.cluster.lon))
 
                                 if (it.cluster.count == 1L) {
+                                    val boosted =
+                                        it.cluster.boostExpires != null && it.cluster.boostExpires.isAfter(
+                                            ZonedDateTime.now(
+                                                ZoneOffset.UTC
+                                            )
+                                        )
+
                                     val icon = requireContext().marker(
                                         iconId = it.cluster.iconId.ifBlank { "question_mark" },
-                                        backgroundColor = if (it.cluster.boostExpires != null && it.cluster.boostExpires.isAfter(
-                                                ZonedDateTime.now(
-                                                    ZoneOffset.UTC
-                                                )
-                                            )
-                                        ) prefs.boostedMarkerBackgroundColor() else prefs.markerBackgroundColor(),
-                                        iconColor = prefs.markerIconColor(),
-                                        countBackgroundColor = if (it.cluster.requiresCompanionApp) Color.RED else prefs.badgeBackgroundColor(),
-                                        countFontColor = if (it.cluster.requiresCompanionApp) Color.WHITE else prefs.badgeTextColor(),
+                                        backgroundColor = if (boosted) prefs.boostedMarkerBackgroundColor() else prefs.markerBackgroundColor(requireContext()),
+                                        iconColor = if (boosted) Color.WHITE else prefs.markerIconColor(requireContext()),
+                                        countBackgroundColor = if (it.cluster.requiresCompanionApp) Color.RED else prefs.badgeBackgroundColor(
+                                            requireContext()
+                                        ),
+                                        countFontColor = if (it.cluster.requiresCompanionApp) Color.WHITE else prefs.badgeTextColor(
+                                            requireContext()
+                                        ),
                                         badgeText = if (it.cluster.requiresCompanionApp) {
                                             "!"
                                         } else if (it.cluster.comments == 0L) "" else it.cluster.comments.toString()
@@ -482,10 +493,10 @@ class MapFragment : Fragment() {
                                     MarkerOptions().position(LatLng(it.event.lat, it.event.lon))
                                 val icon = requireContext().marker(
                                     iconId = "event",
-                                    backgroundColor = prefs.markerBackgroundColor(),
-                                    iconColor = prefs.markerIconColor(),
-                                    countBackgroundColor = prefs.badgeBackgroundColor(),
-                                    countFontColor = prefs.badgeTextColor(),
+                                    backgroundColor = prefs.markerBackgroundColor(requireContext()),
+                                    iconColor = prefs.markerIconColor(requireContext()),
+                                    countBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
+                                    countFontColor = prefs.badgeTextColor(requireContext()),
                                     badgeText = "",
                                 )
                                 val newBitmap =
@@ -700,7 +711,7 @@ class MapFragment : Fragment() {
             val emptyClusterDrawable =
                 ContextCompat.getDrawable(requireContext(), R.drawable.map_cluster)!!
             DrawableCompat.setTint(
-                emptyClusterDrawable, prefs.markerBackgroundColor()
+                emptyClusterDrawable, prefs.markerBackgroundColor(requireContext())
             )
             emptyClusterBitmap =
                 emptyClusterDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
@@ -714,7 +725,8 @@ class MapFragment : Fragment() {
         clusterIcon.applyCanvas {
             val paint = Paint().apply {
                 textSize = pinSizePx.toFloat() / 3
-                color = prefs.markerIconColor()
+                color = prefs.markerIconColor(requireContext())
+                typeface = Typeface.DEFAULT_BOLD
             }
 
             val text = cluster.count.toString()

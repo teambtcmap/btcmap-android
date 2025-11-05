@@ -34,12 +34,12 @@ class SettingsFragment : Fragment() {
         binding.currentMapStyle.text = prefs.mapStyle.name(requireContext())
 
         binding.markerBackgroundColor.text =
-            "#${prefs.markerBackgroundColor().toHexString()}"
+            "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
 
         binding.changeMarkerBackgroundColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
             colorPickerPopUp.setShowAlpha(true)
-                .setDefaultColor(prefs.markerBackgroundColor())
+                .setDefaultColor(prefs.markerBackgroundColor(requireContext()))
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setMarkerBackgroundColor(color)
@@ -53,7 +53,7 @@ class SettingsFragment : Fragment() {
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setMarkerBackgroundColor(null)
                 binding.markerBackgroundColor.text =
-                    "#${prefs.markerBackgroundColor().toHexString()}"
+                    "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
                 colorPickerPopUp.dismissDialog()
             }
         }
@@ -84,12 +84,12 @@ class SettingsFragment : Fragment() {
         }
 
         binding.markerIconColor.text =
-            "#${prefs.markerIconColor().toHexString()}"
+            "#${prefs.markerIconColor(requireContext()).toHexString()}"
 
         binding.changeMarkerIconColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
             colorPickerPopUp.setShowAlpha(true)
-                .setDefaultColor(prefs.markerIconColor())
+                .setDefaultColor(prefs.markerIconColor(requireContext()))
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setMarkerIconColor(color)
@@ -103,18 +103,18 @@ class SettingsFragment : Fragment() {
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setMarkerIconColor(null)
                 binding.markerIconColor.text =
-                    "#${prefs.markerIconColor().toHexString()}"
+                    "#${prefs.markerIconColor(requireContext()).toHexString()}"
                 colorPickerPopUp.dismissDialog()
             }
         }
 
         binding.badgeBackgroundColor.text =
-            "#${prefs.badgeBackgroundColor().toHexString()}"
+            "#${prefs.badgeBackgroundColor(requireContext()).toHexString()}"
 
         binding.changeBadgeBackgroundColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
             colorPickerPopUp.setShowAlpha(true)
-                .setDefaultColor(prefs.badgeBackgroundColor())
+                .setDefaultColor(prefs.badgeBackgroundColor(requireContext()))
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setBadgeBackgroundColor(color)
@@ -128,18 +128,18 @@ class SettingsFragment : Fragment() {
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setBadgeBackgroundColor(null)
                 binding.badgeBackgroundColor.text =
-                    "#${prefs.badgeBackgroundColor().toHexString()}"
+                    "#${prefs.badgeBackgroundColor(requireContext()).toHexString()}"
                 colorPickerPopUp.dismissDialog()
             }
         }
 
         binding.badgeTextColor.text =
-            "#${prefs.badgeTextColor().toHexString()}"
+            "#${prefs.badgeTextColor(requireContext()).toHexString()}"
 
         binding.changeBadgeTextColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
             colorPickerPopUp.setShowAlpha(true)
-                .setDefaultColor(prefs.badgeTextColor())
+                .setDefaultColor(prefs.badgeTextColor(requireContext()))
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setBadgeTextColor(color)
@@ -153,7 +153,7 @@ class SettingsFragment : Fragment() {
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setBadgeTextColor(null)
                 binding.badgeTextColor.text =
-                    "#${prefs.badgeTextColor().toHexString()}"
+                    "#${prefs.badgeTextColor(requireContext()).toHexString()}"
                 colorPickerPopUp.dismissDialog()
             }
         }
