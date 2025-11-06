@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.0] - 2025-11-06
+
+- Add map style picker
+- Show Bitcoin-related events and meetups
+- Split map objects into 3 groups (merchants, events, exchanges)
+- Improve boost/comment payment flow
+- Add LINE links (popular in Thailand)
+- Implement full theming support
+- Support Material 3 Expressive Colors
+- Switch to v4 API
+- Add Slovak translation
+- Improve Czech translation
+- Improve Spanish translation
+- Improve Polish translation
+- Improve Portuguese translation
+- Improve Brazilian translation
+
 ## [0.9.2] - 2025-01-25
 
 - Add merchant boosts

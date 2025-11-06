@@ -83,8 +83,6 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginTop="16dp"
-            app:backgroundColor="?attr/colorPrimaryContainer"
-            app:iconColor="?attr/colorError"
             app:iconSrc="@drawable/icon_warning" />
 
         <view.IconButton

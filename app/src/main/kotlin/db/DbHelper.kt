@@ -22,6 +22,6 @@ class DbHelper(context: Context) :
 
     companion object {
         const val DATABASE_VERSION = 1
-        const val DATABASE_NAME = "btcmap-2025-10-15.db"
+        const val DATABASE_NAME = "btcmap-2025-11-06.db"
     }
 }

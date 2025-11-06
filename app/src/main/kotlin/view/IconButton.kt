@@ -12,6 +12,10 @@ import androidx.core.graphics.drawable.toBitmap
 import map.getOnPrimaryContainerColor
 import map.getPrimaryContainerColor
 import org.btcmap.R
+import settings.buttonBackgroundColor
+import settings.buttonBorderColor
+import settings.buttonIconColor
+import settings.prefs
 
 class IconButton @JvmOverloads constructor(
     context: Context,
@@ -31,7 +35,7 @@ class IconButton @JvmOverloads constructor(
 
     var iconResId = R.drawable.icon_store
 
-    var iconColor = context.getOnPrimaryContainerColor()
+    var iconColor = 0
 
     var icon: Bitmap? = null
         private set
@@ -77,14 +81,14 @@ class IconButton @JvmOverloads constructor(
             backgroundColor(
                 typedArray.getColor(
                     R.styleable.IconButton_backgroundColor,
-                    context.getPrimaryContainerColor(),
+                    prefs.buttonBackgroundColor(context),
                 )
             )
 
             borderColor(
                 typedArray.getColor(
                     R.styleable.IconButton_borderColor,
-                    context.getOnPrimaryContainerColor(),
+                    prefs.buttonBorderColor(context),
                 )
             )
 
@@ -100,7 +104,7 @@ class IconButton @JvmOverloads constructor(
 
             iconColor = typedArray.getColor(
                 R.styleable.IconButton_iconColor,
-                context.getOnPrimaryContainerColor(),
+                prefs.buttonIconColor(context),
             )
 
             icon(iconResId, iconColor)

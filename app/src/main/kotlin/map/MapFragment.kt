@@ -221,23 +221,7 @@ class MapFragment : Fragment() {
             it.addOnCameraIdleListener(onCameraIdleListener)
         }
 
-        binding.sync.backgroundColor(prefs.buttonBackgroundColor(requireContext()))
-        binding.sync.iconColor(prefs.buttonIconColor(requireContext()))
-
-        binding.showMerchants.backgroundColor(prefs.buttonBackgroundColor(requireContext()))
-        binding.showMerchants.iconColor(prefs.buttonIconColor(requireContext()))
-        binding.showMerchants.borderColor(prefs.buttonBorderColor(requireContext()))
-
-        binding.showEvents.backgroundColor(prefs.buttonBackgroundColor(requireContext()))
-        binding.showEvents.iconColor(prefs.buttonIconColor(requireContext()))
-        binding.showEvents.borderColor(prefs.buttonBorderColor(requireContext()))
-
-        binding.showExchanges.backgroundColor(prefs.buttonBackgroundColor(requireContext()))
-        binding.showExchanges.iconColor(prefs.buttonIconColor(requireContext()))
-        binding.showExchanges.borderColor(prefs.buttonBorderColor(requireContext()))
-
-        binding.fab.backgroundColor(prefs.buttonBackgroundColor(requireContext()))
-        binding.fab.iconColor(prefs.buttonIconColor(requireContext()))
+        binding.update.iconColor(requireContext().getErrorColor())
 
         viewLifecycleOwner.lifecycleScope.launch {
             withResumed {
@@ -254,6 +238,7 @@ class MapFragment : Fragment() {
                         val latestVer = JSONObject(latestVerJson)
                         val latestVerCode = latestVer.getInt("code")
                         val latestVerName = latestVer.getString("name")
+                        val latestVerUrl = latestVer.getString("url")
 
                         if (latestVerCode > BuildConfig.VERSION_CODE) {
                             withResumed {
@@ -270,8 +255,7 @@ class MapFragment : Fragment() {
                                         )
                                         .setPositiveButton(R.string.get_apk) { dialog, which ->
                                             val intent = Intent(Intent.ACTION_VIEW)
-                                            intent.data =
-                                                "https://github.com/teambtcmap/btcmap-android/releases/latest".toUri()
+                                            intent.data = latestVerUrl.toUri()
                                             startActivity(intent)
                                         }
                                         .setNegativeButton(R.string.ignore, null)
@@ -456,8 +440,12 @@ class MapFragment : Fragment() {
 
                                     val icon = requireContext().marker(
                                         iconId = it.cluster.iconId.ifBlank { "question_mark" },
-                                        backgroundColor = if (boosted) prefs.boostedMarkerBackgroundColor() else prefs.markerBackgroundColor(requireContext()),
-                                        iconColor = if (boosted) Color.WHITE else prefs.markerIconColor(requireContext()),
+                                        backgroundColor = if (boosted) prefs.boostedMarkerBackgroundColor() else prefs.markerBackgroundColor(
+                                            requireContext()
+                                        ),
+                                        iconColor = if (boosted) Color.WHITE else prefs.markerIconColor(
+                                            requireContext()
+                                        ),
                                         countBackgroundColor = if (it.cluster.requiresCompanionApp) requireContext().getErrorColor() else prefs.badgeBackgroundColor(
                                             requireContext()
                                         ),
