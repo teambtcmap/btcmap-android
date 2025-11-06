@@ -1,6 +1,7 @@
 package place
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
@@ -87,6 +88,11 @@ class PlaceFragment : Fragment() {
         }
 
         binding.outdated.typeface = iconTypeface
+        binding.outdated.setTextColor(requireContext().getErrorColor())
+
+        binding.companionWarning.setTextColor(requireContext().getErrorColor())
+        binding.companionWarning.compoundDrawableTintList =
+            ColorStateList.valueOf(requireContext().getErrorColor())
 
         commentsAdapter = CommentsAdapter()
         binding.commentsList.layoutManager = LinearLayoutManager(requireContext())
@@ -116,7 +122,7 @@ class PlaceFragment : Fragment() {
             binding.companionWarning.isVisible = true
             binding.companionWarning.setTextColor(requireContext().getErrorColor())
             binding.companionWarning.text =
-                getString(R.string.companion_warning, place.requiredAppUrl)
+                getString(R.string.companion_warning, place.requiredAppUrl.toString().trimEnd('/'))
         } else {
             binding.companionWarning.isVisible = false
         }

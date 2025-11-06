@@ -458,7 +458,7 @@ class MapFragment : Fragment() {
                                         iconId = it.cluster.iconId.ifBlank { "question_mark" },
                                         backgroundColor = if (boosted) prefs.boostedMarkerBackgroundColor() else prefs.markerBackgroundColor(requireContext()),
                                         iconColor = if (boosted) Color.WHITE else prefs.markerIconColor(requireContext()),
-                                        countBackgroundColor = if (it.cluster.requiresCompanionApp) Color.RED else prefs.badgeBackgroundColor(
+                                        countBackgroundColor = if (it.cluster.requiresCompanionApp) requireContext().getErrorColor() else prefs.badgeBackgroundColor(
                                             requireContext()
                                         ),
                                         countFontColor = if (it.cluster.requiresCompanionApp) Color.WHITE else prefs.badgeTextColor(
