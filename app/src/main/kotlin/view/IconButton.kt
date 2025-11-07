@@ -9,8 +9,6 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.toBitmap
-import map.getOnPrimaryContainerColor
-import map.getPrimaryContainerColor
 import org.btcmap.R
 import settings.buttonBackgroundColor
 import settings.buttonBorderColor
@@ -57,11 +55,6 @@ class IconButton @JvmOverloads constructor(
     fun icon(resId: Int, color: Int) {
         icon = generateIcon(resId, color)
         invalidate()
-    }
-
-    fun iconResId(id: Int) {
-        iconResId = id
-        icon(iconResId, iconColor)
     }
 
     fun iconColor(color: Int) {
@@ -130,15 +123,17 @@ class IconButton @JvmOverloads constructor(
         val centerX = width / 2f
         val centerY = height / 2f
 
-        canvas.drawCircle(centerX, centerY, width / 2.0f, backgroundPaint)
-
         if (isSelected) {
+            canvas.drawCircle(centerX, centerY, width / 2.0f - borderPaint.strokeWidth / 2, backgroundPaint)
+
             canvas.drawCircle(
                 centerX,
                 centerY,
                 width / 2.0f - borderPaint.strokeWidth / 2,
                 borderPaint,
             )
+        } else {
+            canvas.drawCircle(centerX, centerY, width / 2.0f, backgroundPaint)
         }
 
         icon?.let { icon ->
