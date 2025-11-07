@@ -31,32 +31,10 @@ class SettingsFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        binding.currentMapStyle.text = prefs.mapStyle.name(requireContext())
+        initMapStyleButton()
 
-        binding.markerBackgroundColor.text =
-            "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
-
-        binding.changeMarkerBackgroundColor.setOnClickListener {
-            val colorPickerPopUp = ColorPickerPopUp(context)
-            colorPickerPopUp.setShowAlpha(true)
-                .setDefaultColor(prefs.markerBackgroundColor(requireContext()))
-                .setOnPickColorListener(object : OnPickColorListener {
-                    override fun onColorPicked(color: Int) {
-                        prefs.setMarkerBackgroundColor(color)
-                    }
-
-                    override fun onCancel() {
-                        colorPickerPopUp.dismissDialog() // Dismiss the dialog.
-                    }
-                })
-                .show()
-            colorPickerPopUp.negativeButton.setOnClickListener {
-                prefs.setMarkerBackgroundColor(null)
-                binding.markerBackgroundColor.text =
-                    "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
-                colorPickerPopUp.dismissDialog()
-            }
-        }
+        initMarkerBackgroundButton()
+        initMarkerIconButton()
 
         binding.boostedMarkerBackgroundColor.text =
             "#${prefs.boostedMarkerBackgroundColor().toHexString()}"
@@ -79,31 +57,6 @@ class SettingsFragment : Fragment() {
                 prefs.setBoostedMarkerBackgroundColor(null)
                 binding.boostedMarkerBackgroundColor.text =
                     "#${prefs.boostedMarkerBackgroundColor().toHexString()}"
-                colorPickerPopUp.dismissDialog()
-            }
-        }
-
-        binding.markerIconColor.text =
-            "#${prefs.markerIconColor(requireContext()).toHexString()}"
-
-        binding.changeMarkerIconColor.setOnClickListener {
-            val colorPickerPopUp = ColorPickerPopUp(context)
-            colorPickerPopUp.setShowAlpha(true)
-                .setDefaultColor(prefs.markerIconColor(requireContext()))
-                .setOnPickColorListener(object : OnPickColorListener {
-                    override fun onColorPicked(color: Int) {
-                        prefs.setMarkerIconColor(color)
-                    }
-
-                    override fun onCancel() {
-                        colorPickerPopUp.dismissDialog() // Dismiss the dialog.
-                    }
-                })
-                .show()
-            colorPickerPopUp.negativeButton.setOnClickListener {
-                prefs.setMarkerIconColor(null)
-                binding.markerIconColor.text =
-                    "#${prefs.markerIconColor(requireContext()).toHexString()}"
                 colorPickerPopUp.dismissDialog()
             }
         }
@@ -155,34 +108,6 @@ class SettingsFragment : Fragment() {
                 binding.badgeTextColor.text =
                     "#${prefs.badgeTextColor(requireContext()).toHexString()}"
                 colorPickerPopUp.dismissDialog()
-            }
-        }
-
-        binding.mapStyleButton.setOnClickListener {
-            val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.map_style)
-                .setView(R.layout.map_style_dialog).show()
-
-            val setupInterval = fun RadioButton?.(style: MapStyle) {
-                if (this == null) return
-
-                text = style.name(requireContext())
-                isChecked = prefs.mapStyle == style
-
-                setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) {
-                        prefs.mapStyle = style
-                        binding.currentMapStyle.text = text
-                        dialog.dismiss()
-                    }
-                }
-            }
-
-            setupInterval.apply {
-                invoke(dialog.findViewById(R.id.auto), MapStyle.Auto)
-                invoke(dialog.findViewById(R.id.liberty), MapStyle.Liberty)
-                invoke(dialog.findViewById(R.id.positron), MapStyle.Positron)
-                invoke(dialog.findViewById(R.id.bright), MapStyle.Bright)
-                invoke(dialog.findViewById(R.id.dark), MapStyle.Dark)
             }
         }
 
@@ -265,5 +190,103 @@ class SettingsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun initMapStyleButton() {
+        binding.currentMapStyle.text = prefs.mapStyle.name(requireContext())
+
+        binding.mapStyleButton.setOnClickListener {
+            val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.map_style)
+                .setView(R.layout.map_style_dialog).show()
+
+            val setupInterval = fun RadioButton?.(style: MapStyle) {
+                if (this == null) return
+
+                text = style.name(requireContext())
+                isChecked = prefs.mapStyle == style
+
+                setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) {
+                        prefs.mapStyle = style
+                        binding.currentMapStyle.text = text
+                        dialog.dismiss()
+                    }
+                }
+            }
+
+            setupInterval.apply {
+                invoke(dialog.findViewById(R.id.auto), MapStyle.Auto)
+                invoke(dialog.findViewById(R.id.liberty), MapStyle.Liberty)
+                invoke(dialog.findViewById(R.id.positron), MapStyle.Positron)
+                invoke(dialog.findViewById(R.id.bright), MapStyle.Bright)
+                invoke(dialog.findViewById(R.id.dark), MapStyle.Dark)
+            }
+        }
+    }
+
+    private fun initMarkerBackgroundButton() {
+        binding.markerBackgroundColor.text =
+            "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
+        binding.markerBackgroundColor.setTextColor(prefs.markerBackgroundColor(requireContext()))
+
+        binding.changeMarkerBackgroundColor.setOnClickListener {
+            val colorPickerPopUp = ColorPickerPopUp(context)
+            colorPickerPopUp.setShowAlpha(true)
+                .setDefaultColor(prefs.markerBackgroundColor(requireContext()))
+                .setOnPickColorListener(object : OnPickColorListener {
+                    override fun onColorPicked(color: Int) {
+                        prefs.setMarkerBackgroundColor(color)
+                        binding.markerBackgroundColor.setTextColor(color)
+                    }
+
+                    override fun onCancel() {
+                        colorPickerPopUp.dismissDialog()
+                    }
+                })
+                .show()
+            colorPickerPopUp.negativeButton.setText(R.string.reset)
+            colorPickerPopUp.negativeButton.setOnClickListener {
+                prefs.setMarkerBackgroundColor(null)
+                binding.markerBackgroundColor.text =
+                    "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
+                binding.markerBackgroundColor.setTextColor(
+                    prefs.markerBackgroundColor(
+                        requireContext()
+                    )
+                )
+                colorPickerPopUp.dismissDialog()
+            }
+        }
+    }
+
+    private fun initMarkerIconButton() {
+        binding.markerIconColor.text =
+            "#${prefs.markerIconColor(requireContext()).toHexString()}"
+        binding.markerIconColor.setTextColor(prefs.markerIconColor(requireContext()))
+
+        binding.changeMarkerIconColor.setOnClickListener {
+            val colorPickerPopUp = ColorPickerPopUp(context)
+            colorPickerPopUp.setShowAlpha(true)
+                .setDefaultColor(prefs.markerIconColor(requireContext()))
+                .setOnPickColorListener(object : OnPickColorListener {
+                    override fun onColorPicked(color: Int) {
+                        prefs.setMarkerIconColor(color)
+                        binding.markerIconColor.setTextColor(color)
+                    }
+
+                    override fun onCancel() {
+                        colorPickerPopUp.dismissDialog()
+                    }
+                })
+                .show()
+            colorPickerPopUp.negativeButton.setText(R.string.reset)
+            colorPickerPopUp.negativeButton.setOnClickListener {
+                prefs.setMarkerIconColor(null)
+                binding.markerIconColor.text =
+                    "#${prefs.markerIconColor(requireContext()).toHexString()}"
+                binding.markerIconColor.setTextColor(prefs.markerIconColor(requireContext()))
+                colorPickerPopUp.dismissDialog()
+            }
+        }
     }
 }
