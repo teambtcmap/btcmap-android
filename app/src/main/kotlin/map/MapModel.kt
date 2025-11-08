@@ -14,9 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
-import kotlin.math.pow
 
 class MapModel() : ViewModel() {
 
@@ -95,31 +93,15 @@ class MapModel() : ViewModel() {
         }
 
         return withContext(Dispatchers.IO) {
-            if (zoom > 18) {
-                withContext(Dispatchers.IO) {
-                    PlaceQueries.selectWithoutClustering(
-                        minLat = bounds.latitudeSouth,
-                        maxLat = bounds.latitudeNorth,
-                        minLon = bounds.longitudeWest,
-                        maxLon = bounds.longitudeEast,
-                        includeMerchants = includeMerchants,
-                        includeExchanges = includeExchanges,
-                        db,
-                    )
-                }
-            } else {
-                val step = 50.0 / 2.0.pow(zoom)
-                withContext(Dispatchers.IO) {
-                    val clusters = PlaceQueries.selectClusters(
-                        step / 2,
-                        step,
-                        includeMerchants = includeMerchants,
-                        includeExchanges = includeExchanges,
-                        db,
-                    )
-                    clusters.filter { bounds.contains(LatLng(it.lat, it.lon)) }
-                }
-            }
+            PlaceQueries.selectWithoutClustering(
+                minLat = bounds.latitudeSouth,
+                maxLat = bounds.latitudeNorth,
+                minLon = bounds.longitudeWest,
+                maxLon = bounds.longitudeEast,
+                includeMerchants = includeMerchants,
+                includeExchanges = includeExchanges,
+                db,
+            )
         }
     }
 }

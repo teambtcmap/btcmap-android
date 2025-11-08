@@ -7,26 +7,17 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Matrix
-import android.graphics.Paint
-import android.graphics.Typeface
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.applyCanvas
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.graphics.drawable.toBitmap
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -47,12 +38,10 @@ import bundle.BundledPlaces
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import db.db
-import db.table.place.Cluster
 import db.table.place.PlaceQueries
 import place.PlaceFragment
 import http.httpClient
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -63,9 +52,6 @@ import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.btcmap.databinding.MapFragmentBinding
 import org.json.JSONObject
-import org.maplibre.android.annotations.IconFactory
-import org.maplibre.android.annotations.Marker
-import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.LocationComponentActivationOptions
@@ -74,28 +60,27 @@ import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
 import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.CircleLayer
+import org.maplibre.android.style.layers.PropertyFactory
+import org.maplibre.android.style.sources.GeoJsonSource
 import place.isMerchant
 import search.SearchAdapter
 import search.SearchModel
 import settings.MapStyle
 import settings.SettingsFragment
-import settings.badgeBackgroundColor
-import settings.badgeTextColor
-import settings.boostedMarkerBackgroundColor
-import settings.buttonBackgroundColor
-import settings.buttonBorderColor
-import settings.buttonIconColor
 import settings.mapStyle
 import settings.mapViewport
 import settings.markerBackgroundColor
-import settings.markerIconColor
 import settings.prefs
 import settings.uri
 import sync.CommentSync
 import sync.EventSync
 import sync.PlaceSync
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
+import db.table.place.PlaceProjectionCluster
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
+import org.maplibre.android.style.layers.SymbolLayer
+import org.maplibre.android.style.sources.GeoJsonOptions
 
 class MapFragment : Fragment() {
 
@@ -417,89 +402,103 @@ class MapFragment : Fragment() {
             }
         }
 
-        val visibleElements = mutableListOf<Marker>()
+        val merchants = PlaceQueries.selectWithoutClustering(
+            minLat = -90.0,
+            maxLat = 90.0,
+            minLon = -180.0,
+            maxLon = 180.0,
+            includeMerchants = true,
+            includeExchanges = false,
+            db,
+        )
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            model.items.collectLatest { newElements ->
-                binding.map.getMapAsync { map ->
-                    visibleElements.forEach { map.removeMarker(it) }
-                    visibleElements.clear()
-                    newElements.forEach {
-                        when (it) {
-                            is MapModel.MapItem.ElementsCluster -> {
-                                val marker =
-                                    MarkerOptions().position(LatLng(it.cluster.lat, it.cluster.lon))
+        binding.map.getMapAsync { map ->
+            map.getStyle { style ->
+                val markerDrawable =
+                    AppCompatResources.getDrawable(requireContext(), R.drawable.map_marker)!!
+                DrawableCompat.setTint(
+                    markerDrawable,
+                    prefs.markerBackgroundColor(requireContext())
+                )
 
-                                if (it.cluster.count == 1L) {
-                                    val boosted =
-                                        it.cluster.boostExpires != null && it.cluster.boostExpires.isAfter(
-                                            ZonedDateTime.now(
-                                                ZoneOffset.UTC
-                                            )
-                                        )
+                style.addImage(
+                    "btcmap-marker",
+                    markerDrawable,
+                )
 
-                                    val icon = requireContext().marker(
-                                        iconId = it.cluster.iconId.ifBlank { "question_mark" },
-                                        backgroundColor = if (boosted) prefs.boostedMarkerBackgroundColor() else prefs.markerBackgroundColor(
-                                            requireContext()
-                                        ),
-                                        iconColor = if (boosted) Color.WHITE else prefs.markerIconColor(
-                                            requireContext()
-                                        ),
-                                        countBackgroundColor = if (it.cluster.requiresCompanionApp) requireContext().getErrorColor() else prefs.badgeBackgroundColor(
-                                            requireContext()
-                                        ),
-                                        countFontColor = if (it.cluster.requiresCompanionApp) Color.WHITE else prefs.badgeTextColor(
-                                            requireContext()
-                                        ),
-                                        badgeText = if (it.cluster.requiresCompanionApp) {
-                                            "!"
-                                        } else if (it.cluster.comments == 0L) "" else it.cluster.comments.toString()
-                                    )
-                                    val newBitmap =
-                                        createBitmap(icon.bitmap.width, icon.bitmap.height * 2)
-                                    val canvas = Canvas(newBitmap)
-                                    canvas.drawBitmap(icon.bitmap, Matrix(), null)
-                                    marker.icon(
-                                        IconFactory.getInstance(requireContext())
-                                            .fromBitmap(newBitmap)
-                                    )
-                                    marker.snippet(it.cluster.id.toString())
-                                } else {
-                                    val icon = createClusterIcon(it.cluster).toDrawable(resources)
-                                    marker.icon(
-                                        IconFactory.getInstance(requireContext())
-                                            .fromBitmap(icon.bitmap)
-                                    )
-                                }
+                val source = GeoJsonSource(
+                    "places-source",
+                    merchants.toGeoJson(),
+                    GeoJsonOptions()
+                        .withCluster(true)
+                        .withClusterMaxZoom(14)
+                        .withClusterRadius(50)
+                )
+                style.addSource(source)
 
-                                visibleElements += map.addMarker(marker)
-                            }
+                val unclustered = SymbolLayer("unclustered-points", "places-source")
+                unclustered.setProperties(
+                    PropertyFactory.iconImage("btcmap-marker"),
+                    PropertyFactory.iconAnchor(Expression.literal("bottom")),
+                    PropertyFactory.iconAllowOverlap(true), // Important
+                    PropertyFactory.iconIgnorePlacement(true) // Important
+                )
+                unclustered.setFilter(
+                    Expression.neq(Expression.get("cluster"), true)
+                )
+                style.addLayer(unclustered)
 
-                            is MapModel.MapItem.Event -> {
-                                val marker =
-                                    MarkerOptions().position(LatLng(it.event.lat, it.event.lon))
-                                val icon = requireContext().marker(
-                                    iconId = "event",
-                                    backgroundColor = prefs.markerBackgroundColor(requireContext()),
-                                    iconColor = prefs.markerIconColor(requireContext()),
-                                    countBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
-                                    countFontColor = prefs.badgeTextColor(requireContext()),
-                                    badgeText = "",
-                                )
-                                val newBitmap =
-                                    createBitmap(icon.bitmap.width, icon.bitmap.height * 2)
-                                val canvas = Canvas(newBitmap)
-                                canvas.drawBitmap(icon.bitmap, Matrix(), null)
-                                marker.icon(
-                                    IconFactory.getInstance(requireContext()).fromBitmap(newBitmap)
-                                )
-                                marker.snippet("event:${it.event.website}")
-                                visibleElements += map.addMarker(marker)
-                            }
-                        }
-                    }
+                val iconMapping = icon.init(requireContext(), style)
+
+                val categoryIcons = SymbolLayer("category-icons", "places-source").apply {
+                    setProperties(
+                        PropertyFactory.iconImage(
+                            Expression.match(
+                                Expression.get("iconId"),
+                                *iconMapping.toTypedArray()
+                            )
+                        ),
+                        PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
+                        PropertyFactory.iconOffset(
+                            arrayOf(
+                                0f,
+                                -29f
+                            )
+                        ),
+                        PropertyFactory.iconAllowOverlap(true),
+                        PropertyFactory.iconIgnorePlacement(true)
+                    )
+                    setFilter(Expression.neq(Expression.get("cluster"), true))
                 }
+                style.addLayer(categoryIcons)
+
+                val circles = CircleLayer("merchant-clusters", "places-source")
+                circles.setProperties(
+                    PropertyFactory.circleColor(prefs.markerBackgroundColor(requireContext())),
+                    PropertyFactory.circleRadius(18f),
+                )
+                val pointCount = Expression.toNumber(Expression.get("point_count"))
+                circles.setFilter(
+                    Expression.all(
+                        Expression.has("point_count"),
+                        Expression.gte(
+                            pointCount,
+                            Expression.literal(1)
+                        )
+                    )
+                )
+                style.addLayer(circles)
+
+                val count = SymbolLayer("count", "places-source")
+                count.setProperties(
+                    PropertyFactory.textFont(arrayOf("Noto Sans Regular")),
+                    PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
+                    PropertyFactory.textSize(12f),
+                    PropertyFactory.textColor(Color.WHITE),
+                    PropertyFactory.textIgnorePlacement(true),
+                    PropertyFactory.textAllowOverlap(true)
+                )
+                style.addLayer(count)
             }
         }
 
@@ -589,6 +588,8 @@ class MapFragment : Fragment() {
             }
         }
     }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -690,47 +691,6 @@ class MapFragment : Fragment() {
         return elementFragment.requireView().findViewById(R.id.toolbar)!!
     }
 
-    private fun createClusterIcon(cluster: Cluster): Bitmap {
-        val pinSizePx = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 38f, requireContext().resources.displayMetrics
-        ).toInt()
-
-        if (emptyClusterBitmap == null) {
-            val emptyClusterDrawable =
-                ContextCompat.getDrawable(requireContext(), R.drawable.map_cluster)!!
-            DrawableCompat.setTint(
-                emptyClusterDrawable, prefs.markerBackgroundColor(requireContext())
-            )
-            emptyClusterBitmap =
-                emptyClusterDrawable.toBitmap(width = pinSizePx, height = pinSizePx)
-        }
-
-        val clusterIcon =
-            createBitmap(emptyClusterBitmap!!.width, emptyClusterBitmap!!.height).applyCanvas {
-                drawBitmap(emptyClusterBitmap!!, 0f, 0f, Paint())
-            }
-
-        clusterIcon.applyCanvas {
-            val paint = Paint().apply {
-                textSize = pinSizePx.toFloat() / 3
-                color = prefs.markerIconColor(requireContext())
-                typeface = Typeface.DEFAULT_BOLD
-            }
-
-            val text = cluster.count.toString()
-            val textWidth = paint.measureText(text)
-
-            drawText(
-                text,
-                clusterIcon.width / 2f - textWidth / 2,
-                clusterIcon.height / 2f - (paint.fontMetrics.ascent + paint.fontMetrics.descent) / 2,
-                paint
-            )
-        }
-
-        return clusterIcon
-    }
-
     override fun onResume() {
         super.onResume()
         styleStatusBar()
@@ -758,5 +718,49 @@ class MapFragment : Fragment() {
         val nightMode =
             requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
         insetsController?.isAppearanceLightStatusBars = !nightMode
+    }
+
+    private fun List<PlaceProjectionCluster>.toGeoJson(): String {
+        val sb = StringBuilder()
+        sb.append(
+            """
+        {
+            "type": "FeatureCollection",
+            "features": [
+        """.trimIndent()
+        )
+
+        this.forEachIndexed { index, place ->
+            if (index > 0) {
+                sb.append(",")
+            }
+            sb.append(
+                """
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [${place.lon}, ${place.lat}]
+                },
+                "properties": {
+                    "id": ${place.id},
+                    "count": ${place.count},
+                    "iconId": "${place.iconId}",
+                    "requiresCompanionApp": ${place.requiresCompanionApp},
+                    "comments": ${place.comments}
+                }
+            }
+        """.trimIndent()
+            )
+        }
+
+        sb.append(
+            """
+            ]
+        }
+        """.trimIndent()
+        )
+
+        return sb.toString()
     }
 }
