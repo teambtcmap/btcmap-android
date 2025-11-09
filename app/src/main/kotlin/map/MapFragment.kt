@@ -2,12 +2,11 @@ package map
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.graphics.Color
+import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -33,11 +32,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withResumed
 import androidx.recyclerview.widget.LinearLayoutManager
-import app.App
 import bundle.BundledPlaces
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import db.db
+import db.table.place.Place
 import db.table.place.PlaceQueries
 import place.PlaceFragment
 import http.httpClient
@@ -58,14 +57,12 @@ import org.maplibre.android.location.LocationComponentActivationOptions
 import org.maplibre.android.location.LocationComponentOptions
 import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonSource
 import place.isMerchant
 import search.SearchAdapter
-import search.SearchModel
 import settings.MapStyle
 import settings.SettingsFragment
 import settings.mapStyle
@@ -77,26 +74,27 @@ import sync.CommentSync
 import sync.EventSync
 import sync.PlaceSync
 import db.table.place.PlaceProjectionCluster
+import fragment.dpToPx
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
+import search.SearchAdapterItem
+import java.text.NumberFormat
 
 class MapFragment : Fragment() {
-
-    private val model = MapModel()
-
-    private val searchModel: SearchModel by lazy {
-        SearchModel(
-            requireContext().applicationContext as App
-        )
-    }
 
     private var _binding: MapFragmentBinding? = null
     private val binding get() = _binding!!
 
-    private val elementFragment by lazy {
-        childFragmentManager.findFragmentById(R.id.elementFragment) as PlaceFragment
+    private val placeFragment by lazy {
+        childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment
     }
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
@@ -117,10 +115,6 @@ class MapFragment : Fragment() {
         if (it.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
             onLocationPermissionsGranted(true)
         }
-    }
-
-    fun Context.dpToPx(dp: Int): Int {
-        return (dp * resources.displayMetrics.density).toInt()
     }
 
     @SuppressLint("MissingPermission")
@@ -163,142 +157,17 @@ class MapFragment : Fragment() {
             ).build()
     }
 
-    private var emptyClusterBitmap: Bitmap? = null
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
         _binding = MapFragmentBinding.inflate(inflater, container, false)
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.top
-                rightMargin = insets.right + v.context.dpToPx(24)
-                bottomMargin = insets.bottom + v.context.dpToPx(24)
-                leftMargin = insets.left
-            }
-
-            WindowInsetsCompat.CONSUMED
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.buttonGroup) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.top
-                rightMargin = insets.right
-                bottomMargin = insets.bottom + v.context.dpToPx(20)
-                leftMargin = insets.left + v.context.dpToPx(24)
-            }
-
-            WindowInsetsCompat.CONSUMED
-        }
-
+        initInsets(binding)
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.map.getMapAsync {
-            it.addOnCameraIdleListener(onCameraIdleListener)
-        }
-
-        binding.update.iconColor(requireContext().getErrorColor())
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            withResumed {
-                binding.update.isVisible = false
-
-                launch {
-                    try {
-                        val latestVerJson = httpClient.newCall(
-                            Request.Builder()
-                                .url("https://static.btcmap.org/android/latest-app-ver".toHttpUrl())
-                                .build()
-                        ).executeAsync().body.string().trim()
-
-                        val latestVer = JSONObject(latestVerJson)
-                        val latestVerCode = latestVer.getInt("code")
-                        val latestVerName = latestVer.getString("name")
-                        val latestVerUrl = latestVer.getString("url")
-
-                        if (latestVerCode > BuildConfig.VERSION_CODE) {
-                            withResumed {
-                                binding.update.isVisible = true
-
-                                binding.update.setOnClickListener {
-                                    MaterialAlertDialogBuilder(requireContext())
-                                        .setTitle(R.string.update_available)
-                                        .setMessage(
-                                            getString(
-                                                R.string.update_available_description,
-                                                BuildConfig.VERSION_NAME, latestVerName
-                                            )
-                                        )
-                                        .setPositiveButton(R.string.get_apk) { dialog, which ->
-                                            val intent = Intent(Intent.ACTION_VIEW)
-                                            intent.data = latestVerUrl.toUri()
-                                            startActivity(intent)
-                                        }
-                                        .setNegativeButton(R.string.ignore, null)
-                                        .show()
-                                }
-                            }
-                        }
-                    } catch (_: Throwable) {
-
-                    }
-                }
-            }
-        }
-
-        emptyClusterBitmap = null
-
-        binding.showMerchants.setOnClickListener {
-            binding.showMerchants.isSelected = true
-            binding.showEvents.isSelected = false
-            binding.showExchanges.isSelected = false
-
-            binding.map.getMapAsync { map ->
-                model.loadItems(
-                    bounds = map.projection.visibleRegion.latLngBounds,
-                    zoom = map.cameraPosition.zoom,
-                    filter = MapModel.Filter.Merchants,
-                )
-            }
-        }
-
-        binding.showEvents.setOnClickListener {
-            binding.showMerchants.isSelected = false
-            binding.showEvents.isSelected = true
-            binding.showExchanges.isSelected = false
-
-            binding.map.getMapAsync { map ->
-                model.loadItems(
-                    bounds = map.projection.visibleRegion.latLngBounds,
-                    zoom = map.cameraPosition.zoom,
-                    filter = MapModel.Filter.Events,
-                )
-            }
-        }
-
-        binding.showExchanges.setOnClickListener {
-            binding.showMerchants.isSelected = false
-            binding.showEvents.isSelected = false
-            binding.showExchanges.isSelected = true
-
-            binding.map.getMapAsync { map ->
-                model.loadItems(
-                    bounds = map.projection.visibleRegion.latLngBounds,
-                    zoom = map.cameraPosition.zoom,
-                    filter = MapModel.Filter.Exchanges,
-                )
-            }
-        }
-
+    private fun initSearchBar(binding: MapFragmentBinding) {
         binding.searchBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.add_place -> {
@@ -318,27 +187,41 @@ class MapFragment : Fragment() {
 
             true
         }
+    }
+
+    private fun selectPlace(place: Place?) {
+        if (place != null) {
+            runBlocking { getPlaceDetailsToolbar() }
+            placeFragment.setPlace(place)
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+        } else {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        initSearchBar(binding)
+
+        launchUpdateChecker()
+
+        binding.showMerchants.setOnClickListener { setFilter(Filter.MERCHANTS) }
+        binding.showEvents.setOnClickListener { setFilter(Filter.EVENTS) }
+        binding.showExchanges.setOnClickListener { setFilter(Filter.EXCHANGES) }
 
         binding.map.getMapAsync {
+            it.addOnCameraIdleListener {
+                prefs.mapViewport = it.projection.visibleRegion.latLngBounds
+            }
+
             it.setStyle(Style.Builder().fromUri(prefs.mapStyle.uri(requireContext())))
             it.uiSettings.isCompassEnabled = false
             it.uiSettings.isRotateGesturesEnabled = false
             it.uiSettings.isLogoEnabled = false
             it.uiSettings.isAttributionEnabled = false
             it.addCancelSelectionOverlay()
-            it.setOnMarkerClickListener { marker ->
-                val snippet = marker.snippet
-                if (!snippet.isNullOrBlank()) {
-                    if (snippet.startsWith("event:")) {
-                        val url = snippet.replace("event:", "").toHttpUrl()
-                        val browserIntent = Intent(Intent.ACTION_VIEW, url.toString().toUri())
-                        startActivity(browserIntent)
-                    } else {
-                        val id = marker.snippet.toLong()
-                        model.selectElement(id)
-                    }
-                }
-                true
+
+            it.getStyle { style ->
+                icon.init(requireContext(), style)
             }
         }
 
@@ -347,7 +230,7 @@ class MapFragment : Fragment() {
         bottomSheetBehavior.addSlideCallback()
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val elementDetailsToolbar = getElementDetailsToolbar() ?: return@launch
+            val elementDetailsToolbar = getPlaceDetailsToolbar() ?: return@launch
             bottomSheetBehavior.peekHeight = elementDetailsToolbar.height * 3
             bottomSheetBehavior.halfExpandedRatio = 0.33f
             bottomSheetBehavior.isFitToContents = false
@@ -361,16 +244,6 @@ class MapFragment : Fragment() {
                 }
             }
         }
-
-        model.selectedElement.onEach {
-            if (it != null) {
-                getElementDetailsToolbar()
-                elementFragment.setPlace(it)
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-            } else {
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-            }
-        }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         if (ActivityCompat.checkSelfPermission(
                 requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
@@ -402,124 +275,26 @@ class MapFragment : Fragment() {
             }
         }
 
-        val merchants = PlaceQueries.selectWithoutClustering(
-            minLat = -90.0,
-            maxLat = 90.0,
-            minLon = -180.0,
-            maxLon = 180.0,
-            includeMerchants = true,
-            includeExchanges = false,
-            db,
-        )
-
-        binding.map.getMapAsync { map ->
-            map.getStyle { style ->
-                val markerDrawable =
-                    AppCompatResources.getDrawable(requireContext(), R.drawable.map_marker)!!
-                DrawableCompat.setTint(
-                    markerDrawable,
-                    prefs.markerBackgroundColor(requireContext())
-                )
-
-                style.addImage(
-                    "btcmap-marker",
-                    markerDrawable,
-                )
-
-                val source = GeoJsonSource(
-                    "places-source",
-                    merchants.toGeoJson(),
-                    GeoJsonOptions()
-                        .withCluster(true)
-                        .withClusterMaxZoom(14)
-                        .withClusterRadius(50)
-                )
-                style.addSource(source)
-
-                val unclustered = SymbolLayer("unclustered-points", "places-source")
-                unclustered.setProperties(
-                    PropertyFactory.iconImage("btcmap-marker"),
-                    PropertyFactory.iconAnchor(Expression.literal("bottom")),
-                    PropertyFactory.iconAllowOverlap(true), // Important
-                    PropertyFactory.iconIgnorePlacement(true) // Important
-                )
-                unclustered.setFilter(
-                    Expression.neq(Expression.get("cluster"), true)
-                )
-                style.addLayer(unclustered)
-
-                val iconMapping = icon.init(requireContext(), style)
-
-                val categoryIcons = SymbolLayer("category-icons", "places-source").apply {
-                    setProperties(
-                        PropertyFactory.iconImage(
-                            Expression.match(
-                                Expression.get("iconId"),
-                                *iconMapping.toTypedArray()
-                            )
-                        ),
-                        PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
-                        PropertyFactory.iconOffset(
-                            arrayOf(
-                                0f,
-                                -29f
-                            )
-                        ),
-                        PropertyFactory.iconAllowOverlap(true),
-                        PropertyFactory.iconIgnorePlacement(true)
-                    )
-                    setFilter(Expression.neq(Expression.get("cluster"), true))
-                }
-                style.addLayer(categoryIcons)
-
-                val circles = CircleLayer("merchant-clusters", "places-source")
-                circles.setProperties(
-                    PropertyFactory.circleColor(prefs.markerBackgroundColor(requireContext())),
-                    PropertyFactory.circleRadius(18f),
-                )
-                val pointCount = Expression.toNumber(Expression.get("point_count"))
-                circles.setFilter(
-                    Expression.all(
-                        Expression.has("point_count"),
-                        Expression.gte(
-                            pointCount,
-                            Expression.literal(1)
-                        )
-                    )
-                )
-                style.addLayer(circles)
-
-                val count = SymbolLayer("count", "places-source")
-                count.setProperties(
-                    PropertyFactory.textFont(arrayOf("Noto Sans Regular")),
-                    PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
-                    PropertyFactory.textSize(12f),
-                    PropertyFactory.textColor(Color.WHITE),
-                    PropertyFactory.textIgnorePlacement(true),
-                    PropertyFactory.textAllowOverlap(true)
-                )
-                style.addLayer(count)
-            }
-        }
+        setFilter(Filter.MERCHANTS)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.sync.isVisible = true
 
                 if (BundledPlaces.import(requireContext(), db)) {
-                    refreshData()
+                    reloadData()
                 }
 
                 if (PlaceSync.run(db).rowsAffected > 0) {
-                    refreshData()
+                    reloadData()
                 }
 
                 if (EventSync.run(db).rowsAffected > 0) {
-                    refreshData()
+                    reloadData()
                 }
 
                 if (CommentSync.run(db).rowsAffected > 0) {
-                    refreshData()
+                    reloadData()
                 }
 
                 binding.sync.isVisible = false
@@ -554,13 +329,13 @@ class MapFragment : Fragment() {
                 binding.showExchanges.performClick()
             }
 
-            model.selectElement(row.placeId)
+            selectPlace(place)
 
             binding.map.getMapAsync {
                 it.moveCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(
-                            model.selectedElement.value!!.lat, model.selectedElement.value!!.lon
+                            place.lat, place.lon
                         ), 16.0
                     )
                 )
@@ -570,7 +345,7 @@ class MapFragment : Fragment() {
         binding.searchResults.layoutManager = LinearLayoutManager(requireContext())
         binding.searchResults.adapter = searchAdapter
 
-        searchModel.searchResults.onEach {
+        searchResults.onEach {
             searchAdapter.submitList(it) {
                 val layoutManager = binding.searchResults.layoutManager ?: return@submitList
                 layoutManager.scrollToPosition(0)
@@ -580,7 +355,7 @@ class MapFragment : Fragment() {
         binding.searchView.editText.doAfterTextChanged { searchString ->
             binding.map.getMapAsync { map ->
                 viewLifecycleOwner.lifecycleScope.launch {
-                    searchModel.search(
+                    search(
                         referenceLocation = map.projection.visibleRegion.latLngBounds.center,
                         searchString = searchString.toString(),
                     )
@@ -589,11 +364,8 @@ class MapFragment : Fragment() {
         }
     }
 
-
-
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.map.getMapAsync { it.removeOnCameraIdleListener(onCameraIdleListener) }
         _binding = null
     }
 
@@ -624,35 +396,8 @@ class MapFragment : Fragment() {
 
     private fun MapLibreMap.addCancelSelectionOverlay() {
         addOnMapClickListener {
-            model.selectElement(0)
+            selectPlace(null)
             true
-        }
-    }
-
-    private val onCameraIdleListener = OnCameraIdleListener {
-        binding.map.getMapAsync { map ->
-            prefs.mapViewport = map.projection.visibleRegion.latLngBounds
-            refreshData()
-        }
-    }
-
-    private fun refreshData() {
-        binding.map.getMapAsync { map ->
-            viewLifecycleOwner.lifecycleScope.launch {
-                val filter = if (binding.showMerchants.isSelected) {
-                    MapModel.Filter.Merchants
-                } else if (binding.showEvents.isSelected) {
-                    MapModel.Filter.Events
-                } else {
-                    MapModel.Filter.Exchanges
-                }
-
-                model.loadItems(
-                    bounds = map.projection.visibleRegion.latLngBounds,
-                    zoom = map.cameraPosition.zoom,
-                    filter = filter,
-                )
-            }
         }
     }
 
@@ -660,7 +405,7 @@ class MapFragment : Fragment() {
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                    model.selectElement(0)
+                    selectPlace(null)
                     binding.fab.isVisible = true
                 } else {
                     binding.fab.isVisible = false
@@ -668,15 +413,15 @@ class MapFragment : Fragment() {
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                elementFragment.onSlide(slideOffset)
+                placeFragment.onSlide(slideOffset)
             }
         })
     }
 
-    private suspend fun getElementDetailsToolbar(): Toolbar? {
+    private suspend fun getPlaceDetailsToolbar(): Toolbar? {
         var attempts = 0
 
-        while (elementFragment.view == null || elementFragment.requireView()
+        while (placeFragment.view == null || placeFragment.requireView()
                 .findViewById<View>(R.id.toolbar)!!.height == 0
         ) {
             if (attempts >= 100) {
@@ -688,7 +433,7 @@ class MapFragment : Fragment() {
             }
         }
 
-        return elementFragment.requireView().findViewById(R.id.toolbar)!!
+        return placeFragment.requireView().findViewById(R.id.toolbar)!!
     }
 
     override fun onResume() {
@@ -762,5 +507,299 @@ class MapFragment : Fragment() {
         )
 
         return sb.toString()
+    }
+
+    private enum class Filter {
+        MERCHANTS,
+        EVENTS,
+        EXCHANGES,
+    }
+
+    private var filter = Filter.MERCHANTS
+
+    private fun setFilter(filter: Filter) {
+        this.filter = filter
+        binding.showMerchants.isSelected = filter == Filter.MERCHANTS
+        binding.showEvents.isSelected = filter == Filter.EVENTS
+        binding.showExchanges.isSelected = filter == Filter.EXCHANGES
+        reloadData()
+    }
+
+    private fun reloadData() {
+        when (filter) {
+            Filter.MERCHANTS -> reloadMerchants()
+            Filter.EVENTS -> reloadEvents()
+            Filter.EXCHANGES -> reloadExchanges()
+        }
+    }
+
+    private var merchantsSource = GeoJsonSource(
+        "merchantsSource",
+        """{"type":"FeatureCollection","features":[]}""",
+        GeoJsonOptions()
+            .withCluster(true)
+            .withClusterMaxZoom(14)
+            .withClusterRadius(50)
+    )
+
+    private val merchantsClusterBackgroundLayer by lazy {
+        CircleLayer("merchantsClusterBackground", merchantsSource.id).apply {
+            setProperties(
+                PropertyFactory.circleColor(prefs.markerBackgroundColor(requireContext())),
+                PropertyFactory.circleRadius(18f),
+            )
+            val pointCount = Expression.toNumber(Expression.get("point_count"))
+            setFilter(
+                Expression.all(
+                    Expression.has("point_count"),
+                    Expression.gte(
+                        pointCount,
+                        Expression.literal(1)
+                    )
+                )
+            )
+        }
+    }
+
+    private val merchantsClusterCountLayer = SymbolLayer("merchantsClusterCount", merchantsSource.id).apply {
+        setProperties(
+            PropertyFactory.textFont(arrayOf("Noto Sans Regular")),
+            PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
+            PropertyFactory.textSize(12f),
+            PropertyFactory.textColor(Color.WHITE),
+            PropertyFactory.textIgnorePlacement(true),
+            PropertyFactory.textAllowOverlap(true)
+        )
+    }
+
+    private val unclusteredMerchantsLayer = SymbolLayer("unclusteredMerchants", merchantsSource.id).apply {
+        setProperties(
+            PropertyFactory.iconImage("btcmap-marker"),
+            PropertyFactory.iconAnchor(Expression.literal("bottom")),
+            PropertyFactory.iconAllowOverlap(true), // Important
+            PropertyFactory.iconIgnorePlacement(true) // Important
+        )
+        setFilter(
+            Expression.neq(Expression.get("cluster"), true)
+        )
+    }
+
+    private val unclusteredMerchantsCategoryIconsLayer = SymbolLayer("unclusteredMerchantsCategoryIcons", merchantsSource.id).apply {
+        setProperties(
+            PropertyFactory.iconImage(
+                Expression.match(
+                    Expression.get("iconId"),
+                    *icon.matcher().toTypedArray()
+                )
+            ),
+            PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
+            PropertyFactory.iconOffset(
+                arrayOf(
+                    0f,
+                    -29f
+                )
+            ),
+            PropertyFactory.iconAllowOverlap(true),
+            PropertyFactory.iconIgnorePlacement(true)
+        )
+        setFilter(Expression.neq(Expression.get("cluster"), true))
+    }
+
+    private fun reloadMerchants() {
+        val merchants = PlaceQueries.selectWithoutClustering(
+            minLat = -90.0,
+            maxLat = 90.0,
+            minLon = -180.0,
+            maxLon = 180.0,
+            includeMerchants = true,
+            includeExchanges = false,
+            db,
+        )
+
+        binding.map.getMapAsync { map ->
+            map.getStyle { style ->
+                if (style.getImage("btcmap-marker") == null) {
+                    val markerDrawable =
+                        AppCompatResources.getDrawable(requireContext(), R.drawable.map_marker)!!
+                    DrawableCompat.setTint(
+                        markerDrawable,
+                        prefs.markerBackgroundColor(requireContext())
+                    )
+
+                    style.addImage(
+                        "btcmap-marker",
+                        markerDrawable,
+                    )
+                }
+
+                if (!style.sources.contains(merchantsSource)) {
+                    style.addSource(merchantsSource)
+                }
+
+                if (style.getLayer(unclusteredMerchantsLayer.id) == null) {
+                    style.addLayer(unclusteredMerchantsLayer)
+                }
+
+                if (style.getLayer(unclusteredMerchantsCategoryIconsLayer.id) == null) {
+                    style.addLayer(unclusteredMerchantsCategoryIconsLayer)
+                }
+
+                if (style.getLayer(merchantsClusterBackgroundLayer.id) == null) {
+                    style.addLayer(merchantsClusterBackgroundLayer)
+                }
+
+                if (style.getLayer(merchantsClusterCountLayer.id) == null) {
+                    style.addLayer(merchantsClusterCountLayer)
+                }
+
+                merchantsSource.setGeoJson(merchants.toGeoJson())
+            }
+        }
+    }
+
+    private fun reloadEvents() {
+
+    }
+
+    private fun reloadExchanges() {
+
+    }
+
+    private fun launchUpdateChecker() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            withResumed {
+                binding.update.isVisible = false
+
+                launch {
+                    try {
+                        val latestVerJson = httpClient.newCall(
+                            Request.Builder()
+                                .url("https://static.btcmap.org/android/latest-app-ver".toHttpUrl())
+                                .build()
+                        ).executeAsync().body.string().trim()
+
+                        val latestVer = JSONObject(latestVerJson)
+                        val latestVerCode = latestVer.getInt("code")
+                        val latestVerName = latestVer.getString("name")
+                        val latestVerUrl = latestVer.getString("url")
+
+                        if (latestVerCode > BuildConfig.VERSION_CODE) {
+                            withResumed {
+                                binding.update.isVisible = true
+                                binding.update.iconColor(requireContext().getErrorColor())
+
+                                binding.update.setOnClickListener {
+                                    MaterialAlertDialogBuilder(requireContext())
+                                        .setTitle(R.string.update_available)
+                                        .setMessage(
+                                            getString(
+                                                R.string.update_available_description,
+                                                BuildConfig.VERSION_NAME, latestVerName
+                                            )
+                                        )
+                                        .setPositiveButton(R.string.get_apk) { _, _ ->
+                                            val intent = Intent(Intent.ACTION_VIEW)
+                                            intent.data = latestVerUrl.toUri()
+                                            startActivity(intent)
+                                        }
+                                        .setNegativeButton(R.string.ignore, null)
+                                        .show()
+                                }
+                            }
+                        }
+                    } catch (_: Throwable) {
+
+                    }
+                }
+            }
+        }
+    }
+
+    companion object {
+        private const val MIN_QUERY_LENGTH = 3
+
+        private val DISTANCE_FORMAT = NumberFormat.getNumberInstance().apply {
+            maximumFractionDigits = 1
+        }
+    }
+
+    private val _searchResults = MutableStateFlow<List<SearchAdapterItem>>(emptyList())
+    val searchResults = _searchResults.asStateFlow()
+
+    suspend fun search(referenceLocation: LatLng, searchString: String) {
+        if (searchString.length < MIN_QUERY_LENGTH) {
+            _searchResults.update { emptyList() }
+        } else {
+            val unsortedPlaces = withContext(Dispatchers.IO) {
+                PlaceQueries.selectBySearchString(searchString, db)
+            }
+
+            val sortedPlaces = unsortedPlaces.sortedBy {
+                getDistanceInMeters(
+                    startLatitude = referenceLocation.latitude,
+                    startLongitude = referenceLocation.longitude,
+                    endLatitude = it.lat,
+                    endLongitude = it.lon,
+                )
+            }
+
+            _searchResults.update { sortedPlaces.map { it.toAdapterItem(referenceLocation) } }
+        }
+    }
+
+    private fun Place.toAdapterItem(referenceLocation: LatLng): SearchAdapterItem {
+        val distanceMeters = referenceLocation.distanceTo(LatLng(lat, lon))
+
+        val distanceString = if (distanceMeters < 1_000) {
+            resources.getString(R.string.s_m, DISTANCE_FORMAT.format(distanceMeters))
+        } else {
+            resources.getString(R.string.s_km, DISTANCE_FORMAT.format(distanceMeters / 1_000))
+        }
+
+        return SearchAdapterItem(
+            placeId = this.id,
+            icon = this.icon,
+            name = this.name ?: "",
+            distanceToUser = distanceString,
+        )
+    }
+
+    private fun getDistanceInMeters(
+        startLatitude: Double,
+        startLongitude: Double,
+        endLatitude: Double,
+        endLongitude: Double,
+    ): Double {
+        val distance = FloatArray(1)
+        Location.distanceBetween(startLatitude, startLongitude, endLatitude, endLongitude, distance)
+        return distance[0].toDouble()
+    }
+
+    private fun initInsets(binding: MapFragmentBinding) {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top
+                rightMargin = insets.right + dpToPx(24)
+                bottomMargin = insets.bottom + dpToPx(24)
+                leftMargin = insets.left
+            }
+
+            WindowInsetsCompat.CONSUMED
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.buttonGroup) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top
+                rightMargin = insets.right
+                bottomMargin = insets.bottom + dpToPx(20)
+                leftMargin = insets.left + dpToPx(24)
+            }
+
+            WindowInsetsCompat.CONSUMED
+        }
     }
 }

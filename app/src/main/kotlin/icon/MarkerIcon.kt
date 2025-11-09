@@ -175,12 +175,14 @@ private val KNOWN_ICONS = """
         wine_bar
     """.trimIndent().lines().map { it.trim() }
 
-fun init(context: Context, style: Style): List<Expression> {
+fun init(context: Context, style: Style) {
     KNOWN_ICONS.forEach { icon ->
         val bitmap = generateIconBitmap(context, icon)
         style.addImage("marker-icon-$icon", bitmap)
     }
+}
 
+fun matcher(): List<Expression> {
     return buildList {
         KNOWN_ICONS.forEach { icon ->
             add(Expression.literal(icon))
