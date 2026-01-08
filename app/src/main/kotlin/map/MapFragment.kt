@@ -200,6 +200,10 @@ class MapFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        initMerchantsMap()
+        initEventsMap()
+        initExchangesMap()
+
         initSearchBar(binding)
 
         launchUpdateChecker()
@@ -221,6 +225,20 @@ class MapFragment : Fragment() {
             it.addCancelSelectionOverlay()
 
             it.getStyle { style ->
+                if (style.getImage("btcmap-marker") == null) {
+                    val markerDrawable =
+                        AppCompatResources.getDrawable(requireContext(), R.drawable.map_marker)!!
+                    DrawableCompat.setTint(
+                        markerDrawable,
+                        prefs.markerBackgroundColor(requireContext())
+                    )
+
+                    style.addImage(
+                        "btcmap-marker",
+                        markerDrawable,
+                    )
+                }
+
                 icon.init(requireContext(), style)
             }
         }
@@ -362,6 +380,22 @@ class MapFragment : Fragment() {
                 }
             }
         }
+
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            val merchants =
+//                withContext(Dispatchers.IO) { PlaceQueries.selectMerchants(db).toGeoJson() }
+//            merchantsSource.setGeoJson(merchants)
+//        }
+    }
+
+    private suspend fun reloadData() {
+//        val merchants =
+//            withContext(Dispatchers.IO) { PlaceQueries.selectMerchants(db).toGeoJson() }
+//        merchantsSource.setGeoJson(merchants)
+//
+//        val exchanges =
+//            withContext(Dispatchers.IO) { PlaceQueries.selectExchanges(db).toGeoJson() }
+//        exchangesSource.setGeoJson(exchanges)
     }
 
     override fun onDestroyView() {
@@ -519,150 +553,196 @@ class MapFragment : Fragment() {
 
     private fun setFilter(filter: Filter) {
         this.filter = filter
+
         binding.showMerchants.isSelected = filter == Filter.MERCHANTS
         binding.showEvents.isSelected = filter == Filter.EVENTS
         binding.showExchanges.isSelected = filter == Filter.EXCHANGES
-        reloadData()
-    }
 
-    private fun reloadData() {
         when (filter) {
-            Filter.MERCHANTS -> reloadMerchants()
-            Filter.EVENTS -> reloadEvents()
-            Filter.EXCHANGES -> reloadExchanges()
+            Filter.MERCHANTS -> showMerchants()
+            Filter.EVENTS -> showEvents()
+            Filter.EXCHANGES -> showExchanges()
         }
     }
 
-    private var merchantsSource = GeoJsonSource(
-        "merchantsSource",
-        """{"type":"FeatureCollection","features":[]}""",
-        GeoJsonOptions()
-            .withCluster(true)
-            .withClusterMaxZoom(14)
-            .withClusterRadius(50)
-    )
+    private lateinit var merchantsSource: GeoJsonSource
+    private lateinit var eventsSource: GeoJsonSource
+    private lateinit var exchangesSource: GeoJsonSource
 
-    private val merchantsClusterBackgroundLayer by lazy {
-        CircleLayer("merchantsClusterBackground", merchantsSource.id).apply {
-            setProperties(
-                PropertyFactory.circleColor(prefs.markerBackgroundColor(requireContext())),
-                PropertyFactory.circleRadius(18f),
-            )
-            val pointCount = Expression.toNumber(Expression.get("point_count"))
-            setFilter(
-                Expression.all(
-                    Expression.has("point_count"),
-                    Expression.gte(
-                        pointCount,
-                        Expression.literal(1)
+    private fun initMerchantsMap() {
+        val merchantsSource = GeoJsonSource(
+            "merchantsSource",
+            """{"type":"FeatureCollection","features":[]}""",
+            GeoJsonOptions()
+                .withCluster(true)
+                .withClusterMaxZoom(14)
+                .withClusterRadius(50)
+        )
+
+        val merchantsClusterBackgroundLayer by lazy {
+            CircleLayer("merchantsClusterBackground", merchantsSource.id).apply {
+                setProperties(
+                    PropertyFactory.circleColor(prefs.markerBackgroundColor(requireContext())),
+                    PropertyFactory.circleRadius(18f),
+                )
+                val pointCount = Expression.toNumber(Expression.get("point_count"))
+                setFilter(
+                    Expression.all(
+                        Expression.has("point_count"),
+                        Expression.gte(
+                            pointCount,
+                            Expression.literal(1)
+                        )
                     )
                 )
-            )
+            }
         }
-    }
 
-    private val merchantsClusterCountLayer = SymbolLayer("merchantsClusterCount", merchantsSource.id).apply {
-        setProperties(
-            PropertyFactory.textFont(arrayOf("Noto Sans Regular")),
-            PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
-            PropertyFactory.textSize(12f),
-            PropertyFactory.textColor(Color.WHITE),
-            PropertyFactory.textIgnorePlacement(true),
-            PropertyFactory.textAllowOverlap(true)
-        )
-    }
-
-    private val unclusteredMerchantsLayer = SymbolLayer("unclusteredMerchants", merchantsSource.id).apply {
-        setProperties(
-            PropertyFactory.iconImage("btcmap-marker"),
-            PropertyFactory.iconAnchor(Expression.literal("bottom")),
-            PropertyFactory.iconAllowOverlap(true), // Important
-            PropertyFactory.iconIgnorePlacement(true) // Important
-        )
-        setFilter(
-            Expression.neq(Expression.get("cluster"), true)
-        )
-    }
-
-    private val unclusteredMerchantsCategoryIconsLayer = SymbolLayer("unclusteredMerchantsCategoryIcons", merchantsSource.id).apply {
-        setProperties(
-            PropertyFactory.iconImage(
-                Expression.match(
-                    Expression.get("iconId"),
-                    *icon.matcher().toTypedArray()
+        val merchantsClusterCountLayer =
+            SymbolLayer("merchantsClusterCount", merchantsSource.id).apply {
+                setProperties(
+                    PropertyFactory.textFont(arrayOf("Noto Sans Regular")),
+                    PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
+                    PropertyFactory.textSize(12f),
+                    PropertyFactory.textColor(Color.WHITE),
+                    PropertyFactory.textIgnorePlacement(true),
+                    PropertyFactory.textAllowOverlap(true)
                 )
-            ),
-            PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
-            PropertyFactory.iconOffset(
-                arrayOf(
-                    0f,
-                    -29f
-                )
-            ),
-            PropertyFactory.iconAllowOverlap(true),
-            PropertyFactory.iconIgnorePlacement(true)
-        )
-        setFilter(Expression.neq(Expression.get("cluster"), true))
-    }
+            }
 
-    private fun reloadMerchants() {
-        val merchants = PlaceQueries.selectWithoutClustering(
-            minLat = -90.0,
-            maxLat = 90.0,
-            minLon = -180.0,
-            maxLon = 180.0,
-            includeMerchants = true,
-            includeExchanges = false,
-            db,
-        )
+        val unclusteredMerchantsLayer =
+            SymbolLayer("unclusteredMerchants", merchantsSource.id).apply {
+                setProperties(
+                    PropertyFactory.iconImage("btcmap-marker"),
+                    PropertyFactory.iconAnchor(Expression.literal("bottom")),
+                    PropertyFactory.iconAllowOverlap(true), // Important
+                    PropertyFactory.iconIgnorePlacement(true) // Important
+                )
+                setFilter(
+                    Expression.neq(Expression.get("cluster"), true)
+                )
+            }
+
+        val unclusteredMerchantsCategoryIconsLayer =
+            SymbolLayer("unclusteredMerchantsCategoryIcons", merchantsSource.id).apply {
+                setProperties(
+                    PropertyFactory.iconImage(
+                        Expression.match(
+                            Expression.get("iconId"),
+                            *icon.matcher().toTypedArray()
+                        )
+                    ),
+                    PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
+                    PropertyFactory.iconOffset(
+                        arrayOf(
+                            0f,
+                            -29f
+                        )
+                    ),
+                    PropertyFactory.iconAllowOverlap(true),
+                    PropertyFactory.iconIgnorePlacement(true)
+                )
+                setFilter(Expression.neq(Expression.get("cluster"), true))
+            }
 
         binding.map.getMapAsync { map ->
             map.getStyle { style ->
-                if (style.getImage("btcmap-marker") == null) {
-                    val markerDrawable =
-                        AppCompatResources.getDrawable(requireContext(), R.drawable.map_marker)!!
-                    DrawableCompat.setTint(
-                        markerDrawable,
-                        prefs.markerBackgroundColor(requireContext())
-                    )
+                style.addSource(merchantsSource)
 
-                    style.addImage(
-                        "btcmap-marker",
-                        markerDrawable,
-                    )
-                }
+                style.addLayer(merchantsClusterBackgroundLayer)
+                style.addLayer(merchantsClusterCountLayer)
 
-                if (!style.sources.contains(merchantsSource)) {
-                    style.addSource(merchantsSource)
-                }
-
-                if (style.getLayer(unclusteredMerchantsLayer.id) == null) {
-                    style.addLayer(unclusteredMerchantsLayer)
-                }
-
-                if (style.getLayer(unclusteredMerchantsCategoryIconsLayer.id) == null) {
-                    style.addLayer(unclusteredMerchantsCategoryIconsLayer)
-                }
-
-                if (style.getLayer(merchantsClusterBackgroundLayer.id) == null) {
-                    style.addLayer(merchantsClusterBackgroundLayer)
-                }
-
-                if (style.getLayer(merchantsClusterCountLayer.id) == null) {
-                    style.addLayer(merchantsClusterCountLayer)
-                }
-
-                merchantsSource.setGeoJson(merchants.toGeoJson())
+                style.addLayer(unclusteredMerchantsLayer)
+                style.addLayer(unclusteredMerchantsCategoryIconsLayer)
             }
+        }
+
+        this.merchantsSource = merchantsSource
+    }
+
+    private fun initEventsMap() {
+        val eventsSource = GeoJsonSource(
+            "eventsSource",
+            """{"type":"FeatureCollection","features":[]}""",
+        )
+
+        this.eventsSource = eventsSource
+    }
+
+    private fun initExchangesMap() {
+        val exchangesSource = GeoJsonSource(
+            "exchangesSource",
+            """{"type":"FeatureCollection","features":[]}""",
+        )
+
+        val exchangesLayer =
+            SymbolLayer("exchanges", exchangesSource.id).apply {
+                setProperties(
+                    PropertyFactory.iconImage("btcmap-marker"),
+                    PropertyFactory.iconAnchor(Expression.literal("bottom")),
+                    PropertyFactory.iconAllowOverlap(true),
+                    PropertyFactory.iconIgnorePlacement(true)
+                )
+            }
+
+        val exchangesCategoryIconsLayer =
+            SymbolLayer("exchangesCategoryIcons", exchangesSource.id).apply {
+                setProperties(
+                    PropertyFactory.iconImage(
+                        Expression.match(
+                            Expression.get("iconId"),
+                            *icon.matcher().toTypedArray()
+                        )
+                    ),
+                    PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
+                    PropertyFactory.iconOffset(
+                        arrayOf(
+                            0f,
+                            -29f
+                        )
+                    ),
+                    PropertyFactory.iconAllowOverlap(true),
+                    PropertyFactory.iconIgnorePlacement(true)
+                )
+            }
+
+        binding.map.getMapAsync { map ->
+            map.getStyle { style ->
+                style.addSource(exchangesSource)
+
+                style.addLayer(exchangesLayer)
+                style.addLayer(exchangesCategoryIconsLayer)
+            }
+        }
+
+        this.exchangesSource = exchangesSource
+    }
+
+    private fun showMerchants() {
+        eventsSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
+        exchangesSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val merchants =
+                withContext(Dispatchers.IO) { PlaceQueries.selectMerchants(db).toGeoJson() }
+            merchantsSource.setGeoJson(merchants)
         }
     }
 
-    private fun reloadEvents() {
-
+    private fun showEvents() {
+        merchantsSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
+        exchangesSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
     }
 
-    private fun reloadExchanges() {
+    private fun showExchanges() {
+        merchantsSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
+        eventsSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            val exchanges =
+                withContext(Dispatchers.IO) { PlaceQueries.selectExchanges(db).toGeoJson() }
+            exchangesSource.setGeoJson(exchanges)
+        }
     }
 
     private fun launchUpdateChecker() {

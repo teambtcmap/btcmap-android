@@ -272,6 +272,94 @@ object PlaceQueries {
         }
     }
 
+    fun selectMerchants(db: SQLiteDatabase): List<Cluster> {
+        val sql = """
+            SELECT
+                ${PlaceSchema.Columns.Id},
+                ${PlaceSchema.Columns.Lat},
+                ${PlaceSchema.Columns.Lon},
+                ${PlaceSchema.Columns.Icon},
+                ${PlaceSchema.Columns.BoostedUntil},
+                ${PlaceSchema.Columns.RequiredAppUrl},
+                ${PlaceSchema.Columns.Comments}
+            FROM ${PlaceSchema.NAME}
+            WHERE
+                ${PlaceSchema.Columns.Icon} <> 'local_atm' AND ${PlaceSchema.Columns.Icon} <> 'currency_exchange'
+            ORDER BY ${PlaceSchema.Columns.Lat} DESC
+        """
+
+        val cursor = db.rawQuery(sql, null)
+
+        cursor.use {
+            val rows = mutableListOf<Cluster>()
+
+            while (cursor.moveToNext()) {
+                rows.add(
+                    Cluster(
+                        count = 1,
+                        id = it.getLong(0),
+                        lat = it.getDouble(1),
+                        lon = it.getDouble(2),
+                        iconId = it.getString(3),
+                        boostExpires = if (it.isNull(4)) null else ZonedDateTime.parse(
+                            it.getString(
+                                4,
+                            )
+                        ),
+                        requiresCompanionApp = !it.isNull(5),
+                        comments = if (it.isNull(6)) 0 else it.getLong(6),
+                    )
+                )
+            }
+
+            return rows
+        }
+    }
+
+    fun selectExchanges(db: SQLiteDatabase): List<Cluster> {
+        val sql = """
+            SELECT
+                ${PlaceSchema.Columns.Id},
+                ${PlaceSchema.Columns.Lat},
+                ${PlaceSchema.Columns.Lon},
+                ${PlaceSchema.Columns.Icon},
+                ${PlaceSchema.Columns.BoostedUntil},
+                ${PlaceSchema.Columns.RequiredAppUrl},
+                ${PlaceSchema.Columns.Comments}
+            FROM ${PlaceSchema.NAME}
+            WHERE
+                ${PlaceSchema.Columns.Icon} = 'local_atm' OR ${PlaceSchema.Columns.Icon} = 'currency_exchange'
+            ORDER BY ${PlaceSchema.Columns.Lat} DESC
+        """
+
+        val cursor = db.rawQuery(sql, null)
+
+        cursor.use {
+            val rows = mutableListOf<Cluster>()
+
+            while (cursor.moveToNext()) {
+                rows.add(
+                    Cluster(
+                        count = 1,
+                        id = it.getLong(0),
+                        lat = it.getDouble(1),
+                        lon = it.getDouble(2),
+                        iconId = it.getString(3),
+                        boostExpires = if (it.isNull(4)) null else ZonedDateTime.parse(
+                            it.getString(
+                                4,
+                            )
+                        ),
+                        requiresCompanionApp = !it.isNull(5),
+                        comments = if (it.isNull(6)) 0 else it.getLong(6),
+                    )
+                )
+            }
+
+            return rows
+        }
+    }
+
     fun selectMaxUpdatedAt(db: SQLiteDatabase): ZonedDateTime? {
         db.rawQuery("SELECT max(${PlaceSchema.Columns.UpdatedAt}) FROM ${PlaceSchema.NAME}", null)
             .use {
