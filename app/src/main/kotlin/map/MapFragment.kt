@@ -19,6 +19,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
@@ -100,7 +101,7 @@ class MapFragment : Fragment() {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
 
     private val insetsController: WindowInsetsControllerCompat? by lazy {
-        activity?.window?.decorView?.let(ViewCompat::getWindowInsetsController)
+        WindowCompat.getInsetsController(requireActivity().window, requireActivity().window.decorView)
     }
 
     private var backPressedCallback = object : OnBackPressedCallback(true) {
