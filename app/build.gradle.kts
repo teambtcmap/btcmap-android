@@ -2,7 +2,6 @@ import java.net.URI
 
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlinAndroid)
 }
 
 kotlin {
