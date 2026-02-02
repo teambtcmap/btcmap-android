@@ -1,16 +1,20 @@
 import java.net.URI
 
 plugins {
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.android.application)
 }
 
 kotlin {
+    // why?
     jvmToolchain(21)
 }
 
 android {
     namespace = "org.btcmap"
-    compileSdk = 36
+
+    compileSdk {
+        version = release(36)
+    }
 
     defaultConfig {
         applicationId = "org.btcmap"
@@ -18,6 +22,8 @@ android {
         targetSdk = 36
         versionCode = 55
         versionName = "1.0.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -71,6 +77,9 @@ android {
         implementation(libs.maplibre)
         implementation(libs.qrgenerator)
         implementation(libs.colorpicker)
+
+        androidTestImplementation(libs.androidx.test)
+        androidTestImplementation(libs.androidx.test.runner)
     }
 }
 
