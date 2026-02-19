@@ -82,6 +82,12 @@ class AddCommentFragment : Fragment() {
 
         // send comment request and fetch an invoice
         binding.generateInvoice.setOnClickListener {
+            val commentText = binding.comment.text.toString().trim()
+            if (commentText.isEmpty()) {
+                Toast.makeText(requireContext(), R.string.comment_cannot_be_empty, Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             binding.comment.isEnabled = false
             binding.generateInvoice.isEnabled = false
 
@@ -89,7 +95,7 @@ class AddCommentFragment : Fragment() {
                 val addCommentResponse = try {
                     CommentApi.addComment(
                         placeId = args.placeId,
-                        comment = binding.comment.text.toString(),
+                        comment = commentText,
                     )
                 } catch (t: Throwable) {
                     Log.e(null, null, t)
