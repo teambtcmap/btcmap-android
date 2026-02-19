@@ -82,7 +82,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
@@ -192,9 +191,9 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun selectPlace(place: Place?) {
+    private suspend fun selectPlace(place: Place?) {
         if (place != null) {
-            runBlocking { getPlaceDetailsToolbar() }
+            getPlaceDetailsToolbar()
             placeFragment.setPlace(place)
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
         } else {
@@ -225,7 +224,6 @@ class MapFragment : Fragment() {
             it.uiSettings.isRotateGesturesEnabled = false
             it.uiSettings.isLogoEnabled = false
             it.uiSettings.isAttributionEnabled = false
-            it.addCancelSelectionOverlay()
             it.addMarkerClickListener()
 
             it.getStyle { style ->
@@ -351,7 +349,9 @@ class MapFragment : Fragment() {
                 binding.showExchanges.performClick()
             }
 
-            selectPlace(place)
+            viewLifecycleOwner.lifecycleScope.launch {
+                selectPlace(place)
+            }
 
             binding.map.getMapAsync {
                 it.moveCamera(
@@ -392,16 +392,6 @@ class MapFragment : Fragment() {
 //        }
     }
 
-    private suspend fun reloadData() {
-//        val merchants =
-//            withContext(Dispatchers.IO) { PlaceQueries.selectMerchants(db).toGeoJson() }
-//        merchantsSource.setGeoJson(merchants)
-//
-//        val exchanges =
-//            withContext(Dispatchers.IO) { PlaceQueries.selectExchanges(db).toGeoJson() }
-//        exchangesSource.setGeoJson(exchanges)
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -432,18 +422,22 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun MapLibreMap.addCancelSelectionOverlay() {
-    }
-
     private fun MapLibreMap.addMarkerClickListener() {
-        val layerIds = listOf("unclusteredMerchants", "unclusteredMerchantsCategoryIcons", "exchanges", "exchangesCategoryIcons", "events", "eventsCategoryIcons")
+        val layerIds = listOf(
+            LAYER_UNCLUSTERED_MERCHANTS,
+            LAYER_MERCHANTS_CATEGORY_ICONS,
+            LAYER_EXCHANGES,
+            LAYER_EXCHANGES_CATEGORY_ICONS,
+            LAYER_EVENTS,
+            LAYER_EVENTS_CATEGORY_ICONS
+        )
 
         addOnMapClickListener { point ->
             val screenLocation = projection.toScreenLocation(point)
             val features = queryRenderedFeatures(screenLocation, *layerIds.toTypedArray())
             
             if (features.isEmpty()) {
-                selectPlace(null)
+                viewLifecycleOwner.lifecycleScope.launch { selectPlace(null) }
                 return@addOnMapClickListener false
             }
             
@@ -470,7 +464,7 @@ class MapFragment : Fragment() {
                 if (idValue != null) {
                     val placeId = idValue.asLong
                     val place = PlaceQueries.selectById(placeId, db)
-                    selectPlace(place)
+                    viewLifecycleOwner.lifecycleScope.launch { selectPlace(place) }
                     return@addOnMapClickListener true
                 }
             } catch (e: Exception) {
@@ -485,7 +479,7 @@ class MapFragment : Fragment() {
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                    selectPlace(null)
+                    viewLifecycleOwner.lifecycleScope.launch { selectPlace(null) }
                     binding.fab.isVisible = true
                 } else {
                     binding.fab.isVisible = false
@@ -501,19 +495,22 @@ class MapFragment : Fragment() {
     private suspend fun getPlaceDetailsToolbar(): Toolbar? {
         var attempts = 0
 
-        while (placeFragment.view == null || placeFragment.requireView()
-                .findViewById<View>(R.id.toolbar)!!.height == 0
-        ) {
+        while (true) {
+            val fragmentView = placeFragment.view ?: break
+            val toolbar = fragmentView.findViewById<View>(R.id.toolbar) ?: break
+            if (toolbar.height > 0) {
+                return toolbar as Toolbar
+            }
+            
             if (attempts >= 100) {
                 requireActivity().finish()
                 return null
-            } else {
-                attempts++
-                delay(10)
             }
+            attempts++
+            delay(10)
         }
 
-        return placeFragment.requireView().findViewById(R.id.toolbar)!!
+        return placeFragment.view?.findViewById(R.id.toolbar)
     }
 
     override fun onResume() {
@@ -659,7 +656,7 @@ class MapFragment : Fragment() {
     private fun initMerchantsMap() {
         val merchantsSource = GeoJsonSource(
             "merchantsSource",
-            """{"type":"FeatureCollection","features":[]}""",
+            EMPTY_GEOJSON,
             GeoJsonOptions()
                 .withCluster(true)
                 .withClusterMaxZoom(14)
@@ -723,7 +720,7 @@ class MapFragment : Fragment() {
                     PropertyFactory.iconOffset(
                         arrayOf(
                             0f,
-                            -29f
+                            ICON_OFFSET_Y
                         )
                     ),
                     PropertyFactory.iconAllowOverlap(true),
@@ -750,32 +747,73 @@ class MapFragment : Fragment() {
     private fun initEventsMap() {
         val eventsSource = GeoJsonSource(
             "eventsSource",
-            """{"type":"FeatureCollection","features":[]}""",
+            EMPTY_GEOJSON,
+            GeoJsonOptions()
+                .withCluster(true)
+                .withClusterMaxZoom(14)
+                .withClusterRadius(50)
         )
 
+        val eventsClusterBackgroundLayer by lazy {
+            CircleLayer("eventsClusterBackground", eventsSource.id).apply {
+                setProperties(
+                    PropertyFactory.circleColor(prefs.markerBackgroundColor(requireContext())),
+                    PropertyFactory.circleRadius(18f),
+                )
+                val pointCount = Expression.toNumber(Expression.get("point_count"))
+                setFilter(
+                    Expression.all(
+                        Expression.has("point_count"),
+                        Expression.gte(
+                            pointCount,
+                            Expression.literal(1)
+                        )
+                    )
+                )
+            }
+        }
+
+        val eventsClusterCountLayer =
+            SymbolLayer("eventsClusterCount", eventsSource.id).apply {
+                setProperties(
+                    PropertyFactory.textFont(arrayOf("Noto Sans Regular")),
+                    PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
+                    PropertyFactory.textSize(12f),
+                    PropertyFactory.textColor(Color.WHITE),
+                    PropertyFactory.textIgnorePlacement(true),
+                    PropertyFactory.textAllowOverlap(true)
+                )
+            }
+
         val eventsLayer =
-            SymbolLayer("events", eventsSource.id).apply {
+            SymbolLayer(LAYER_EVENTS, eventsSource.id).apply {
                 setProperties(
                     PropertyFactory.iconImage("btcmap-marker"),
                     PropertyFactory.iconAnchor(Expression.literal("bottom")),
                     PropertyFactory.iconAllowOverlap(true),
                     PropertyFactory.iconIgnorePlacement(true)
                 )
+                setFilter(
+                    Expression.neq(Expression.get("cluster"), true)
+                )
             }
 
         val eventsCategoryIconsLayer =
-            SymbolLayer("eventsCategoryIcons", eventsSource.id).apply {
+            SymbolLayer(LAYER_EVENTS_CATEGORY_ICONS, eventsSource.id).apply {
                 setProperties(
                     PropertyFactory.iconImage("marker-icon-event"),
                     PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
                     PropertyFactory.iconOffset(
                         arrayOf(
                             0f,
-                            -29f
+                            ICON_OFFSET_Y
                         )
                     ),
                     PropertyFactory.iconAllowOverlap(true),
                     PropertyFactory.iconIgnorePlacement(true)
+                )
+                setFilter(
+                    Expression.neq(Expression.get("cluster"), true)
                 )
             }
 
@@ -783,6 +821,8 @@ class MapFragment : Fragment() {
             map.getStyle { style ->
                 style.addSource(eventsSource)
 
+                style.addLayer(eventsClusterBackgroundLayer)
+                style.addLayer(eventsClusterCountLayer)
                 style.addLayer(eventsLayer)
                 style.addLayer(eventsCategoryIconsLayer)
             }
@@ -794,21 +834,59 @@ class MapFragment : Fragment() {
     private fun initExchangesMap() {
         val exchangesSource = GeoJsonSource(
             "exchangesSource",
-            """{"type":"FeatureCollection","features":[]}""",
+            EMPTY_GEOJSON,
+            GeoJsonOptions()
+                .withCluster(true)
+                .withClusterMaxZoom(14)
+                .withClusterRadius(50)
         )
 
+        val exchangesClusterBackgroundLayer by lazy {
+            CircleLayer("exchangesClusterBackground", exchangesSource.id).apply {
+                setProperties(
+                    PropertyFactory.circleColor(prefs.markerBackgroundColor(requireContext())),
+                    PropertyFactory.circleRadius(18f),
+                )
+                val pointCount = Expression.toNumber(Expression.get("point_count"))
+                setFilter(
+                    Expression.all(
+                        Expression.has("point_count"),
+                        Expression.gte(
+                            pointCount,
+                            Expression.literal(1)
+                        )
+                    )
+                )
+            }
+        }
+
+        val exchangesClusterCountLayer =
+            SymbolLayer("exchangesClusterCount", exchangesSource.id).apply {
+                setProperties(
+                    PropertyFactory.textFont(arrayOf("Noto Sans Regular")),
+                    PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
+                    PropertyFactory.textSize(12f),
+                    PropertyFactory.textColor(Color.WHITE),
+                    PropertyFactory.textIgnorePlacement(true),
+                    PropertyFactory.textAllowOverlap(true)
+                )
+            }
+
         val exchangesLayer =
-            SymbolLayer("exchanges", exchangesSource.id).apply {
+            SymbolLayer(LAYER_EXCHANGES, exchangesSource.id).apply {
                 setProperties(
                     PropertyFactory.iconImage("btcmap-marker"),
                     PropertyFactory.iconAnchor(Expression.literal("bottom")),
                     PropertyFactory.iconAllowOverlap(true),
                     PropertyFactory.iconIgnorePlacement(true)
                 )
+                setFilter(
+                    Expression.neq(Expression.get("cluster"), true)
+                )
             }
 
         val exchangesCategoryIconsLayer =
-            SymbolLayer("exchangesCategoryIcons", exchangesSource.id).apply {
+            SymbolLayer(LAYER_EXCHANGES_CATEGORY_ICONS, exchangesSource.id).apply {
                 setProperties(
                     PropertyFactory.iconImage(
                         Expression.match(
@@ -820,11 +898,14 @@ class MapFragment : Fragment() {
                     PropertyFactory.iconOffset(
                         arrayOf(
                             0f,
-                            -29f
+                            ICON_OFFSET_Y
                         )
                     ),
                     PropertyFactory.iconAllowOverlap(true),
                     PropertyFactory.iconIgnorePlacement(true)
+                )
+                setFilter(
+                    Expression.neq(Expression.get("cluster"), true)
                 )
             }
 
@@ -832,6 +913,8 @@ class MapFragment : Fragment() {
             map.getStyle { style ->
                 style.addSource(exchangesSource)
 
+                style.addLayer(exchangesClusterBackgroundLayer)
+                style.addLayer(exchangesClusterCountLayer)
                 style.addLayer(exchangesLayer)
                 style.addLayer(exchangesCategoryIconsLayer)
             }
@@ -841,9 +924,7 @@ class MapFragment : Fragment() {
     }
 
     private fun showMerchants() {
-        eventsSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
-        exchangesSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
-
+        clearOtherSources(merchantsSource)
         viewLifecycleOwner.lifecycleScope.launch {
             val merchants =
                 withContext(Dispatchers.IO) { PlaceQueries.selectMerchants(db).toGeoJson() }
@@ -852,9 +933,7 @@ class MapFragment : Fragment() {
     }
 
     private fun showEvents() {
-        merchantsSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
-        exchangesSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
-
+        clearOtherSources(eventsSource)
         viewLifecycleOwner.lifecycleScope.launch {
             val events =
                 withContext(Dispatchers.IO) { EventQueries.selectAll(db).toEventsGeoJson() }
@@ -863,13 +942,28 @@ class MapFragment : Fragment() {
     }
 
     private fun showExchanges() {
-        merchantsSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
-        eventsSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
-
+        clearOtherSources(exchangesSource)
         viewLifecycleOwner.lifecycleScope.launch {
             val exchanges =
                 withContext(Dispatchers.IO) { PlaceQueries.selectExchanges(db).toGeoJson() }
             exchangesSource.setGeoJson(exchanges)
+        }
+    }
+
+    private fun clearOtherSources(activeSource: GeoJsonSource) {
+        when (activeSource) {
+            merchantsSource -> {
+                eventsSource.setGeoJson(EMPTY_GEOJSON)
+                exchangesSource.setGeoJson(EMPTY_GEOJSON)
+            }
+            eventsSource -> {
+                merchantsSource.setGeoJson(EMPTY_GEOJSON)
+                exchangesSource.setGeoJson(EMPTY_GEOJSON)
+            }
+            exchangesSource -> {
+                merchantsSource.setGeoJson(EMPTY_GEOJSON)
+                eventsSource.setGeoJson(EMPTY_GEOJSON)
+            }
         }
     }
 
@@ -929,6 +1023,15 @@ class MapFragment : Fragment() {
         private val DISTANCE_FORMAT = NumberFormat.getNumberInstance().apply {
             maximumFractionDigits = 1
         }
+
+        const val LAYER_UNCLUSTERED_MERCHANTS = "unclusteredMerchants"
+        const val LAYER_MERCHANTS_CATEGORY_ICONS = "unclusteredMerchantsCategoryIcons"
+        const val LAYER_EXCHANGES = "exchanges"
+        const val LAYER_EXCHANGES_CATEGORY_ICONS = "exchangesCategoryIcons"
+        const val LAYER_EVENTS = "events"
+        const val LAYER_EVENTS_CATEGORY_ICONS = "eventsCategoryIcons"
+        val EMPTY_GEOJSON = """{"type":"FeatureCollection","features":[]}"""
+        const val ICON_OFFSET_Y = -29f
     }
 
     private val _searchResults = MutableStateFlow<List<SearchAdapterItem>>(emptyList())
