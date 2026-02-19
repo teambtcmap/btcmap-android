@@ -57,6 +57,7 @@ enum class MapStyle {
     Positron,
     Bright,
     Dark,
+    CartoDarkMatter,
 }
 
 private fun mapStyleFromPrefValue(pref: String): MapStyle {
@@ -66,6 +67,7 @@ private fun mapStyleFromPrefValue(pref: String): MapStyle {
         "positron" -> MapStyle.Positron
         "bright" -> MapStyle.Bright
         "dark" -> MapStyle.Dark
+        "carto_dark_matter" -> MapStyle.CartoDarkMatter
         else -> MapStyle.Auto
     }
 }
@@ -77,6 +79,7 @@ fun MapStyle.toPrefValue(): String {
         MapStyle.Positron -> "positron"
         MapStyle.Bright -> "bright"
         MapStyle.Dark -> "dark"
+        MapStyle.CartoDarkMatter -> "carto_dark_matter"
     }
 }
 
@@ -87,6 +90,7 @@ fun MapStyle.name(context: Context): String {
         MapStyle.Positron -> context.getString(R.string.style_positron)
         MapStyle.Bright -> context.getString(R.string.style_bright)
         MapStyle.Dark -> context.getString(R.string.style_dark)
+        MapStyle.CartoDarkMatter -> context.getString(R.string.style_carto_dark_matter)
     }
 }
 
@@ -96,7 +100,7 @@ fun MapStyle.uri(context: Context): String {
             val nightMode =
                 context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
             if (nightMode) {
-                "https://static.btcmap.org/map-styles/dark.json"
+                "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
             } else {
                 "https://static.btcmap.org/map-styles/light.json"
             }
@@ -106,6 +110,7 @@ fun MapStyle.uri(context: Context): String {
         MapStyle.Positron -> "https://tiles.openfreemap.org/styles/positron"
         MapStyle.Bright -> "https://tiles.openfreemap.org/styles/bright"
         MapStyle.Dark -> "https://static.btcmap.org/map-styles/dark.json"
+        MapStyle.CartoDarkMatter -> "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
     }
 }
 

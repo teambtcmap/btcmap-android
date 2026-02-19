@@ -517,7 +517,8 @@ class MapFragment : Fragment() {
                 insetsController?.isAppearanceLightStatusBars = !nightMode
             }
 
-            MapStyle.Dark -> insetsController?.isAppearanceLightStatusBars = false
+            MapStyle.Dark,
+            MapStyle.CartoDarkMatter -> insetsController?.isAppearanceLightStatusBars = false
             else -> insetsController?.isAppearanceLightStatusBars = true
         }
     }
