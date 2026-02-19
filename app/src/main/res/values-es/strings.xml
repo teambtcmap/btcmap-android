@@ -41,6 +41,7 @@
     <string name="style_positron">Positrón</string>
     <string name="style_bright">Brillante</string>
     <string name="style_dark">Oscuro (experimental)</string>
+    <string name="style_carto_dark_matter">Carto Dark Matter</string>
     <string name="marker_background_color">Fondo del marcador</string>
     <string name="marker_icon_color">Icono del marcador</string>
     <string name="badge_background">Fondo de la insignia</string>

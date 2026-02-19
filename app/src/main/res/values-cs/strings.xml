@@ -41,6 +41,7 @@
     <string name="style_positron">Pozitron</string>
     <string name="style_bright">Světlý</string>
     <string name="style_dark">Tmavý (experimentální)</string>
+    <string name="style_carto_dark_matter">Carto Dark Matter</string>
     <string name="marker_background_color">Pozadí značky</string>
     <string name="marker_icon_color">Ikona značky</string>
     <string name="badge_background">Pozadí odznaku</string>
