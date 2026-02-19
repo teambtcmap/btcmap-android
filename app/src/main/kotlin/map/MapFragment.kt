@@ -302,19 +302,19 @@ class MapFragment : Fragment() {
                 binding.sync.isVisible = true
 
                 if (BundledPlaces.import(requireContext(), db)) {
-                    reloadData()
+                    setFilter(filter)
                 }
 
                 if (PlaceSync.run(db).rowsAffected > 0) {
-                    reloadData()
+                    setFilter(filter)
                 }
 
                 if (EventSync.run(db).rowsAffected > 0) {
-                    reloadData()
+                    setFilter(filter)
                 }
 
                 if (CommentSync.run(db).rowsAffected > 0) {
-                    reloadData()
+                    setFilter(filter)
                 }
 
                 binding.sync.isVisible = false
