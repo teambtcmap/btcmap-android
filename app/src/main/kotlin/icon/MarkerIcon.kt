@@ -64,6 +64,7 @@ private val KNOWN_ICONS = """
         electrical_services  
         emoji_food_beverage  
         engineering          
+        event                
         factory              
         fitness_center       
         flight_takeoff       

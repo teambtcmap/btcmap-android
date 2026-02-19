@@ -37,6 +37,8 @@ import bundle.BundledPlaces
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import db.db
+import db.table.event.Event
+import db.table.event.EventQueries
 import db.table.place.Place
 import db.table.place.PlaceQueries
 import place.PlaceFragment
@@ -434,7 +436,7 @@ class MapFragment : Fragment() {
     }
 
     private fun MapLibreMap.addMarkerClickListener() {
-        val layerIds = listOf("unclusteredMerchants", "unclusteredMerchantsCategoryIcons", "exchanges", "exchangesCategoryIcons")
+        val layerIds = listOf("unclusteredMerchants", "unclusteredMerchantsCategoryIcons", "exchanges", "exchangesCategoryIcons", "events", "eventsCategoryIcons")
 
         addOnMapClickListener { point ->
             val screenLocation = projection.toScreenLocation(point)
@@ -448,6 +450,21 @@ class MapFragment : Fragment() {
             val feature = features[0]
             
             try {
+                val isEvent = feature.getProperty("iconId") == null && feature.getProperty("count") == null
+                
+                if (isEvent) {
+                    val idValue = feature.getProperty("id")
+                    if (idValue != null) {
+                        val eventId = idValue.asLong
+                        val event = EventQueries.selectById(eventId, db)
+                        if (event != null) {
+                            val intent = Intent(Intent.ACTION_VIEW, event.website.toString().toUri())
+                            startActivity(intent)
+                            return@addOnMapClickListener true
+                        }
+                    }
+                }
+                
                 val idValue = feature.getProperty("id")
                 
                 if (idValue != null) {
@@ -557,6 +574,46 @@ class MapFragment : Fragment() {
                     "iconId": "${place.iconId}",
                     "requiresCompanionApp": ${place.requiresCompanionApp},
                     "comments": ${place.comments}
+                }
+            }
+        """.trimIndent()
+            )
+        }
+
+        sb.append(
+            """
+            ]
+        }
+        """.trimIndent()
+        )
+
+        return sb.toString()
+    }
+
+    private fun List<Event>.toEventsGeoJson(): String {
+        val sb = StringBuilder()
+        sb.append(
+            """
+        {
+            "type": "FeatureCollection",
+            "features": [
+        """.trimIndent()
+        )
+
+        this.forEachIndexed { index, event ->
+            if (index > 0) {
+                sb.append(",")
+            }
+            sb.append(
+                """
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [${event.lon}, ${event.lat}]
+                },
+                "properties": {
+                    "id": ${event.id}
                 }
             }
         """.trimIndent()
@@ -696,6 +753,41 @@ class MapFragment : Fragment() {
             """{"type":"FeatureCollection","features":[]}""",
         )
 
+        val eventsLayer =
+            SymbolLayer("events", eventsSource.id).apply {
+                setProperties(
+                    PropertyFactory.iconImage("btcmap-marker"),
+                    PropertyFactory.iconAnchor(Expression.literal("bottom")),
+                    PropertyFactory.iconAllowOverlap(true),
+                    PropertyFactory.iconIgnorePlacement(true)
+                )
+            }
+
+        val eventsCategoryIconsLayer =
+            SymbolLayer("eventsCategoryIcons", eventsSource.id).apply {
+                setProperties(
+                    PropertyFactory.iconImage("marker-icon-event"),
+                    PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
+                    PropertyFactory.iconOffset(
+                        arrayOf(
+                            0f,
+                            -29f
+                        )
+                    ),
+                    PropertyFactory.iconAllowOverlap(true),
+                    PropertyFactory.iconIgnorePlacement(true)
+                )
+            }
+
+        binding.map.getMapAsync { map ->
+            map.getStyle { style ->
+                style.addSource(eventsSource)
+
+                style.addLayer(eventsLayer)
+                style.addLayer(eventsCategoryIconsLayer)
+            }
+        }
+
         this.eventsSource = eventsSource
     }
 
@@ -762,6 +854,12 @@ class MapFragment : Fragment() {
     private fun showEvents() {
         merchantsSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
         exchangesSource.setGeoJson("""{"type":"FeatureCollection","features":[]}""")
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val events =
+                withContext(Dispatchers.IO) { EventQueries.selectAll(db).toEventsGeoJson() }
+            eventsSource.setGeoJson(events)
+        }
     }
 
     private fun showExchanges() {

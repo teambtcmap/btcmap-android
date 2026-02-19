@@ -53,6 +53,24 @@ object EventQueries {
         }
     }
 
+    fun selectById(id: Long, db: SQLiteDatabase): Event? {
+        val cursor = db.rawQuery(
+            """
+                SELECT ${EventProjectionFull.columns}
+                FROM ${EventSchema.NAME}
+                WHERE id = ?
+            """,
+            arrayOf(id.toString())
+        )
+
+        cursor.use {
+            if (cursor.moveToFirst()) {
+                return fromCursor(cursor)
+            }
+            return null
+        }
+    }
+
     fun deleteAll(db: SQLiteDatabase): Int {
         return db.delete(
             EventSchema.NAME,
