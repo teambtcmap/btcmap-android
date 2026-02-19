@@ -431,10 +431,6 @@ class MapFragment : Fragment() {
     }
 
     private fun MapLibreMap.addCancelSelectionOverlay() {
-        addOnMapClickListener {
-            selectPlace(null)
-            true
-        }
     }
 
     private fun MapLibreMap.addMarkerClickListener() {
@@ -445,18 +441,17 @@ class MapFragment : Fragment() {
             val features = queryRenderedFeatures(screenLocation, *layerIds.toTypedArray())
             
             if (features.isEmpty()) {
+                selectPlace(null)
                 return@addOnMapClickListener false
             }
             
             val feature = features[0]
             
             try {
-                val idField = feature.javaClass.getDeclaredField("id")
-                idField.isAccessible = true
-                val idValue = idField.get(feature)
+                val idValue = feature.getProperty("id")
                 
-                if (idValue is Number) {
-                    val placeId = idValue.toLong()
+                if (idValue != null) {
+                    val placeId = idValue.asLong
                     val place = PlaceQueries.selectById(placeId, db)
                     selectPlace(place)
                     return@addOnMapClickListener true
