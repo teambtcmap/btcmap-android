@@ -83,12 +83,12 @@ android {
     }
 }
 
-tasks.register("bundleData") {
+tasks.register<DefaultTask>("bundleData") {
+    outputs.file(File(projectDir, "src/main/assets/bundled-places.json"))
     doLast {
-        File(
-            File(projectDir, "src/main/assets"),
-            "bundled-places.json"
-        ).writeText(
+        val dir = File(projectDir, "src/main/assets")
+        dir.mkdirs()
+        File(dir, "bundled-places.json").writeText(
             URI("https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,name,comments,boosted_until").toURL()
                 .readText()
         )
