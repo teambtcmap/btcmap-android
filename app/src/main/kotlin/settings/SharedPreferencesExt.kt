@@ -114,8 +114,28 @@ fun MapStyle.uri(context: Context): String {
     }
 }
 
+fun SharedPreferences.mapStyleIsDark(): Boolean {
+    return when (mapStyle) {
+        MapStyle.Dark, MapStyle.CartoDarkMatter -> true
+        MapStyle.Auto -> {
+            false
+        }
+        else -> false
+    }
+}
+
 fun SharedPreferences.markerBackgroundColor(context: Context): Int {
-    return getInt("markerBackgroundColor", context.getPrimaryContainerColor())
+    val customColor = getInt("markerBackgroundColor", -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getPrimaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFF0e95af.toInt() else 0xFF0e95af.toInt()
 }
 
 fun SharedPreferences.setMarkerBackgroundColor(color: Int?) {
@@ -151,7 +171,17 @@ fun SharedPreferences.setBoostedMarkerBackgroundColor(color: Int?) {
 }
 
 fun SharedPreferences.markerIconColor(context: Context): Int {
-    return getInt("markerIconColor", context.getOnPrimaryContainerColor())
+    val customColor = getInt("markerIconColor", -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getOnPrimaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt() // White for both
 }
 
 fun SharedPreferences.setMarkerIconColor(color: Int?) {
@@ -168,7 +198,17 @@ fun SharedPreferences.setMarkerIconColor(color: Int?) {
 }
 
 fun SharedPreferences.badgeBackgroundColor(context: Context): Int {
-    return getInt("badgeBackgroundColor", context.getOnPrimaryContainerColor())
+    val customColor = getInt("badgeBackgroundColor", -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getOnPrimaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFF00a63e.toInt() else 0xFF00a63e.toInt()
 }
 
 fun SharedPreferences.setBadgeBackgroundColor(color: Int?) {
@@ -185,7 +225,17 @@ fun SharedPreferences.setBadgeBackgroundColor(color: Int?) {
 }
 
 fun SharedPreferences.badgeTextColor(context: Context): Int {
-    return getInt("badgeTextColor", context.getPrimaryContainerColor())
+    val customColor = getInt("badgeTextColor", -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getPrimaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
 }
 
 fun SharedPreferences.setBadgeTextColor(color: Int?) {
@@ -224,7 +274,17 @@ fun SharedPreferences.apiUrlV4(vararg pathSegments: String): HttpUrl {
 private const val KEY_BUTTON_BACKGROUND_COLOR = "buttonBackgroundColor"
 
 fun SharedPreferences.buttonBackgroundColor(context: Context): Int {
-    return getInt(KEY_BUTTON_BACKGROUND_COLOR, context.getTertiaryContainerColor())
+    val customColor = getInt(KEY_BUTTON_BACKGROUND_COLOR, -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getTertiaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFF1f2937.toInt() else 0xFF1f2937.toInt()
 }
 
 fun SharedPreferences.setButtonBackgroundColor(color: Int?) {
@@ -243,7 +303,17 @@ fun SharedPreferences.setButtonBackgroundColor(color: Int?) {
 private const val KEY_BUTTON_ICON_COLOR = "buttonIconColor"
 
 fun SharedPreferences.buttonIconColor(context: Context): Int {
-    return getInt(KEY_BUTTON_ICON_COLOR, context.getOnTertiaryContainerColor())
+    val customColor = getInt(KEY_BUTTON_ICON_COLOR, -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getOnTertiaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
 }
 
 fun SharedPreferences.setButtonIconColor(color: Int?) {
@@ -261,8 +331,24 @@ fun SharedPreferences.setButtonIconColor(color: Int?) {
 
 private const val KEY_BUTTON_BORDER_COLOR = "buttonBorderColor"
 
+var SharedPreferences.useAdaptiveColors: Boolean
+    get() = getBoolean("useAdaptiveColors", false)
+    set(value) {
+        edit { putBoolean("useAdaptiveColors", value) }
+    }
+
 fun SharedPreferences.buttonBorderColor(context: Context): Int {
-    return getInt(KEY_BUTTON_BORDER_COLOR, context.getOnTertiaryContainerColor())
+    val customColor = getInt(KEY_BUTTON_BORDER_COLOR, -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getOnTertiaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
 }
 
 fun SharedPreferences.setButtonBorderColor(color: Int?) {

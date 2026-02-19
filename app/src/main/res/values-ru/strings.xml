@@ -61,5 +61,6 @@
     <string name="button_background">Фон кнопки</string>
     <string name="button_icon">Иконка кнопки</string>
     <string name="button_border">Граница кнопки</string>
+    <string name="use_adaptive_colors">Использовать адаптивные цвета</string>
     <string name="reset">Сбросить</string>
 </resources>

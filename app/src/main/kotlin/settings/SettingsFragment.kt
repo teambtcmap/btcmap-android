@@ -33,6 +33,12 @@ class SettingsFragment : Fragment() {
 
         initMapStyleButton()
 
+        binding.useAdaptiveColors.isChecked = prefs.useAdaptiveColors
+        binding.useAdaptiveColors.setOnCheckedChangeListener { _, isChecked ->
+            prefs.useAdaptiveColors = isChecked
+            refreshAllColors()
+        }
+
         initMarkerBackgroundButton()
         initMarkerIconButton()
 
@@ -289,5 +295,29 @@ class SettingsFragment : Fragment() {
                 colorPickerPopUp.dismissDialog()
             }
         }
+    }
+
+    private fun refreshAllColors() {
+        binding.markerBackgroundColor.text =
+            "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
+        binding.markerBackgroundColor.setTextColor(prefs.markerBackgroundColor(requireContext()))
+        binding.markerIconColor.text =
+            "#${prefs.markerIconColor(requireContext()).toHexString()}"
+        binding.markerIconColor.setTextColor(prefs.markerIconColor(requireContext()))
+        binding.badgeBackgroundColor.text =
+            "#${prefs.badgeBackgroundColor(requireContext()).toHexString()}"
+        binding.badgeBackgroundColor.setTextColor(prefs.badgeBackgroundColor(requireContext()))
+        binding.badgeTextColor.text =
+            "#${prefs.badgeTextColor(requireContext()).toHexString()}"
+        binding.badgeTextColor.setTextColor(prefs.badgeTextColor(requireContext()))
+        binding.buttonBackgroundColor.text =
+            "#${prefs.buttonBackgroundColor(requireContext()).toHexString()}"
+        binding.buttonBackgroundColor.setTextColor(prefs.buttonBackgroundColor(requireContext()))
+        binding.buttonIconColor.text =
+            "#${prefs.buttonIconColor(requireContext()).toHexString()}"
+        binding.buttonIconColor.setTextColor(prefs.buttonIconColor(requireContext()))
+        binding.buttonBorderColor.text =
+            "#${prefs.buttonBorderColor(requireContext()).toHexString()}"
+        binding.buttonBorderColor.setTextColor(prefs.buttonBorderColor(requireContext()))
     }
 }

@@ -61,5 +61,6 @@
     <string name="button_background">Schaltflächen-Hintergrund</string>
     <string name="button_icon">Schaltflächen-Symbol</string>
     <string name="button_border">Schaltflächen-Rahmen</string>
+    <string name="use_adaptive_colors">Adaptive Farben verwenden</string>
     <string name="reset">Zurücksetzen</string>
 </resources>

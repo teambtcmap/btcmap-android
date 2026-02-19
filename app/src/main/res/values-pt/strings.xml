@@ -60,5 +60,6 @@
     <string name="button_background">Fundo do botão</string>
     <string name="button_icon">Ícone do botão</string>
     <string name="button_border">Borda do botão</string>
+    <string name="use_adaptive_colors">Usar cores adaptativas</string>
     <string name="reset">Redefinir</string>
 </resources>

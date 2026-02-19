@@ -61,5 +61,6 @@
     <string name="button_background">พื้นหลังปุ่ม</string>
     <string name="button_icon">ไอคอนปุ่ม</string>
     <string name="button_border">ขอบปุ่ม</string>
+    <string name="use_adaptive_colors">ใช้สีแบบปรับได้</string>
     <string name="reset">รีเซ็ต</string>
 </resources>

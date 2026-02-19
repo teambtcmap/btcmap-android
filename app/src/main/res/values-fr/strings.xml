@@ -61,5 +61,6 @@
     <string name="button_background">Button background</string>
     <string name="button_icon">Button icon</string>
     <string name="button_border">Button border</string>
+    <string name="use_adaptive_colors">Utiliser les couleurs adaptatives</string>
     <string name="reset">Reset</string>
 </resources>
