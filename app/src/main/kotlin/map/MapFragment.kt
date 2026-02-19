@@ -224,6 +224,7 @@ class MapFragment : Fragment() {
             it.uiSettings.isLogoEnabled = false
             it.uiSettings.isAttributionEnabled = false
             it.addCancelSelectionOverlay()
+            it.addMarkerClickListener()
 
             it.getStyle { style ->
                 if (style.getImage("btcmap-marker") == null) {
@@ -433,6 +434,38 @@ class MapFragment : Fragment() {
         addOnMapClickListener {
             selectPlace(null)
             true
+        }
+    }
+
+    private fun MapLibreMap.addMarkerClickListener() {
+        val layerIds = listOf("unclusteredMerchants", "unclusteredMerchantsCategoryIcons", "exchanges", "exchangesCategoryIcons")
+
+        addOnMapClickListener { point ->
+            val screenLocation = projection.toScreenLocation(point)
+            val features = queryRenderedFeatures(screenLocation, *layerIds.toTypedArray())
+            
+            if (features.isEmpty()) {
+                return@addOnMapClickListener false
+            }
+            
+            val feature = features[0]
+            
+            try {
+                val idField = feature.javaClass.getDeclaredField("id")
+                idField.isAccessible = true
+                val idValue = idField.get(feature)
+                
+                if (idValue is Number) {
+                    val placeId = idValue.toLong()
+                    val place = PlaceQueries.selectById(placeId, db)
+                    selectPlace(place)
+                    return@addOnMapClickListener true
+                }
+            } catch (e: Exception) {
+                // Ignore
+            }
+            
+            false
         }
     }
 
