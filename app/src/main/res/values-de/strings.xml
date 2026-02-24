@@ -15,9 +15,9 @@
     <string name="verify">Verifizieren oder Melden</string>
     <string name="directions">Wegbeschreibung</string>
     <string name="share">Teilen</string>
-    <string name="companion_warning">Du benötigst eine Companion-App (%1$s), um eine Zahlung zu tätigen. Diese App erfordert nach unserem besten Wissen keine persönlichen Daten. Bitte teilen Sie uns mit, wenn dies nicht der Fall ist, und wir entfernen diesen Ort.</string>
+    <string name="companion_warning">Du benötigst eine Companion-App (%1$s), um eine Zahlung zu tätigen. Diese App erfordert nach unserem besten Wissen keine persönlichen Daten. Bitte teile uns mit, wenn dies nicht der Fall ist, und wir entfernen diesen Ort.</string>
     <string name="comments_d">Kommentare (%1$d)</string>
-    <string name="add_element_comment_disclosure_1">Alle Kommentare sind anonym, aber wir erheben eine kleine Gebühr in Sats als Spam-Schutzmaßnahme</string>
+    <string name="add_element_comment_disclosure_1">Alle Kommentare sind anonym. Wir erheben eine kleine Gebühr in Sats als Spam-Schutzmaßnahme</string>
     <string name="comment">Kommentar</string>
     <string name="generate_invoice">Rechnung erstellen</string>
     <string name="add_comment">Kommentar hinzufügen</string>
@@ -27,7 +27,7 @@
     <string name="add">Hinzufügen</string>
     <string name="boost">Boost</string>
     <string name="boost_merchant">Händler boosten</string>
-    <string name="boost_description">Lass diesen Händler auf der Bitcoin-Orange Karte hervorstechen, in den Suchergebnissen leuchten und im exklusiven Boosted-Bereich entdecken!\n\nDie Gebühr wird verwendet, um das BTC Map Open-Source-Projekt zu unterstützen und dessen Weiterentwicklung fortzusetzen.</string>
+    <string name="boost_description">Lass diesen Händler in Bitcoin-Orange auf der Karte hervorstechen, in den Suchergebnissen leuchten und im exklusiven Boosted-Bereich von anderen entdecken!\n\nDie Gebühr wird verwendet, um das BTC Map Open-Source-Projekt zu unterstützen und dessen Weiterentwicklung fortzusetzen.</string>
     <string name="months_1">1 Monat</string>
     <string name="months_3">3 Monate</string>
     <string name="months_12">12 Monate</string>
