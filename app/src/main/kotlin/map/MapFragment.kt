@@ -667,7 +667,7 @@ class MapFragment : Fragment() {
             CircleLayer("merchantsClusterBackground", merchantsSource.id).apply {
                 setProperties(
                     PropertyFactory.circleColor(prefs.markerBackgroundColor(requireContext())),
-                    PropertyFactory.circleRadius(18f),
+                    PropertyFactory.circleRadius(23f),
                 )
                 val pointCount = Expression.toNumber(Expression.get("point_count"))
                 setFilter(
@@ -684,13 +684,14 @@ class MapFragment : Fragment() {
 
         val merchantsClusterCountLayer =
             SymbolLayer("merchantsClusterCount", merchantsSource.id).apply {
+                if (usingOpenFreeMap()) {
+                    setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Regular")))
+                }
+
                 setProperties(
-                    PropertyFactory.textFont(arrayOf("Noto Sans Regular")),
                     PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
-                    PropertyFactory.textSize(12f),
+                    PropertyFactory.textSize(16f),
                     PropertyFactory.textColor(Color.WHITE),
-                    PropertyFactory.textIgnorePlacement(true),
-                    PropertyFactory.textAllowOverlap(true)
                 )
             }
 
@@ -751,14 +752,14 @@ class MapFragment : Fragment() {
             GeoJsonOptions()
                 .withCluster(true)
                 .withClusterMaxZoom(14)
-                .withClusterRadius(50)
+                .withClusterRadius(30)
         )
 
         val eventsClusterBackgroundLayer by lazy {
             CircleLayer("eventsClusterBackground", eventsSource.id).apply {
                 setProperties(
                     PropertyFactory.circleColor(prefs.markerBackgroundColor(requireContext())),
-                    PropertyFactory.circleRadius(18f),
+                    PropertyFactory.circleRadius(23f),
                 )
                 val pointCount = Expression.toNumber(Expression.get("point_count"))
                 setFilter(
@@ -775,13 +776,13 @@ class MapFragment : Fragment() {
 
         val eventsClusterCountLayer =
             SymbolLayer("eventsClusterCount", eventsSource.id).apply {
+                if (usingOpenFreeMap()) {
+                    setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Regular")))
+                }
                 setProperties(
-                    PropertyFactory.textFont(arrayOf("Noto Sans Regular")),
                     PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
-                    PropertyFactory.textSize(12f),
+                    PropertyFactory.textSize(16f),
                     PropertyFactory.textColor(Color.WHITE),
-                    PropertyFactory.textIgnorePlacement(true),
-                    PropertyFactory.textAllowOverlap(true)
                 )
             }
 
@@ -845,7 +846,7 @@ class MapFragment : Fragment() {
             CircleLayer("exchangesClusterBackground", exchangesSource.id).apply {
                 setProperties(
                     PropertyFactory.circleColor(prefs.markerBackgroundColor(requireContext())),
-                    PropertyFactory.circleRadius(18f),
+                    PropertyFactory.circleRadius(23f),
                 )
                 val pointCount = Expression.toNumber(Expression.get("point_count"))
                 setFilter(
@@ -862,13 +863,13 @@ class MapFragment : Fragment() {
 
         val exchangesClusterCountLayer =
             SymbolLayer("exchangesClusterCount", exchangesSource.id).apply {
+                if (usingOpenFreeMap()) {
+                    setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Regular")))
+                }
                 setProperties(
-                    PropertyFactory.textFont(arrayOf("Noto Sans Regular")),
                     PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
-                    PropertyFactory.textSize(12f),
+                    PropertyFactory.textSize(16f),
                     PropertyFactory.textColor(Color.WHITE),
-                    PropertyFactory.textIgnorePlacement(true),
-                    PropertyFactory.textAllowOverlap(true)
                 )
             }
 
@@ -921,6 +922,17 @@ class MapFragment : Fragment() {
         }
 
         this.exchangesSource = exchangesSource
+    }
+
+    private fun usingOpenFreeMap(): Boolean {
+        val nightMode =
+            requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+
+        return when (prefs.mapStyle) {
+            MapStyle.Auto -> !nightMode
+            MapStyle.CartoDarkMatter -> false
+            else -> true
+        }
     }
 
     private fun showMerchants() {
