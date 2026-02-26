@@ -225,10 +225,10 @@ class MapFragment : Fragment() {
             }
 
             it.setStyle(Style.Builder().fromUri(prefs.mapStyle.uri(requireContext())))
-            it.uiSettings.isCompassEnabled = false
-            it.uiSettings.isRotateGesturesEnabled = false
+            it.uiSettings.setCompassMargins(dpToPx(0), dpToPx(120 + 16), dpToPx(16), dpToPx(0))
             it.uiSettings.isLogoEnabled = false
             it.uiSettings.isAttributionEnabled = false
+            it.uiSettings.isTiltGesturesEnabled = false
             it.addMarkerClickListener()
 
             it.getStyle { style ->
@@ -741,7 +741,8 @@ class MapFragment : Fragment() {
                     PropertyFactory.circleColor(prefs.badgeBackgroundColor(requireContext())),
                     PropertyFactory.circleRadius(9f),
                     PropertyFactory.circleOpacity(1f),
-                    PropertyFactory.circleTranslate(arrayOf(13f, -43f))
+                    PropertyFactory.circleTranslate(arrayOf(13f, -43f)),
+                    PropertyFactory.circleTranslateAnchor("viewport")
                 )
                 setFilter(
                     Expression.all(
@@ -767,6 +768,7 @@ class MapFragment : Fragment() {
                     PropertyFactory.textSize(11f),
                     PropertyFactory.textColor(prefs.badgeTextColor(requireContext())),
                     PropertyFactory.textTranslate(arrayOf(13f, -43f)),
+                    PropertyFactory.textTranslateAnchor("viewport"),
                     PropertyFactory.textAllowOverlap(true)
                 )
                 setFilter(
@@ -965,7 +967,8 @@ class MapFragment : Fragment() {
                     PropertyFactory.circleColor(prefs.badgeBackgroundColor(requireContext())),
                     PropertyFactory.circleRadius(9f),
                     PropertyFactory.circleOpacity(1f),
-                    PropertyFactory.circleTranslate(arrayOf(13f, -43f))
+                    PropertyFactory.circleTranslate(arrayOf(13f, -43f)),
+                    PropertyFactory.circleTranslateAnchor("viewport")
                 )
                 setFilter(
                     Expression.all(
@@ -991,6 +994,7 @@ class MapFragment : Fragment() {
                     PropertyFactory.textSize(11f),
                     PropertyFactory.textColor(prefs.badgeTextColor(requireContext())),
                     PropertyFactory.textTranslate(arrayOf(13f, -43f)),
+                    PropertyFactory.textTranslateAnchor("viewport"),
                     PropertyFactory.textAllowOverlap(true)
                 )
                 setFilter(
