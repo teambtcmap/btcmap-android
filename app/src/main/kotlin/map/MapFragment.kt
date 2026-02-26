@@ -102,7 +102,10 @@ class MapFragment : Fragment() {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
 
     private val insetsController: WindowInsetsControllerCompat? by lazy {
-        WindowCompat.getInsetsController(requireActivity().window, requireActivity().window.decorView)
+        WindowCompat.getInsetsController(
+            requireActivity().window,
+            requireActivity().window.decorView
+        )
     }
 
     private var backPressedCallback = object : OnBackPressedCallback(true) {
@@ -435,32 +438,34 @@ class MapFragment : Fragment() {
         addOnMapClickListener { point ->
             val screenLocation = projection.toScreenLocation(point)
             val features = queryRenderedFeatures(screenLocation, *layerIds.toTypedArray())
-            
+
             if (features.isEmpty()) {
                 viewLifecycleOwner.lifecycleScope.launch { selectPlace(null) }
                 return@addOnMapClickListener false
             }
-            
+
             val feature = features[0]
-            
+
             try {
-                val isEvent = feature.getProperty("iconId") == null && feature.getProperty("count") == null
-                
+                val isEvent =
+                    feature.getProperty("iconId") == null && feature.getProperty("count") == null
+
                 if (isEvent) {
                     val idValue = feature.getProperty("id")
                     if (idValue != null) {
                         val eventId = idValue.asLong
                         val event = EventQueries.selectById(eventId, db)
                         if (event != null) {
-                            val intent = Intent(Intent.ACTION_VIEW, event.website.toString().toUri())
+                            val intent =
+                                Intent(Intent.ACTION_VIEW, event.website.toString().toUri())
                             startActivity(intent)
                             return@addOnMapClickListener true
                         }
                     }
                 }
-                
+
                 val idValue = feature.getProperty("id")
-                
+
                 if (idValue != null) {
                     val placeId = idValue.asLong
                     val place = PlaceQueries.selectById(placeId, db)
@@ -470,7 +475,7 @@ class MapFragment : Fragment() {
             } catch (e: Exception) {
                 // Ignore
             }
-            
+
             false
         }
     }
@@ -495,22 +500,19 @@ class MapFragment : Fragment() {
     private suspend fun getPlaceDetailsToolbar(): Toolbar? {
         var attempts = 0
 
-        while (true) {
-            val fragmentView = placeFragment.view ?: break
-            val toolbar = fragmentView.findViewById<View>(R.id.toolbar) ?: break
-            if (toolbar.height > 0) {
-                return toolbar as Toolbar
-            }
-            
+        while (placeFragment.view == null || placeFragment.requireView()
+                .findViewById<View>(R.id.toolbar)!!.height == 0
+        ) {
             if (attempts >= 100) {
                 requireActivity().finish()
                 return null
+            } else {
+                attempts++
+                delay(10)
             }
-            attempts++
-            delay(10)
         }
 
-        return placeFragment.view?.findViewById(R.id.toolbar)
+        return placeFragment.requireView().findViewById(R.id.toolbar)!!
     }
 
     override fun onResume() {
@@ -533,6 +535,7 @@ class MapFragment : Fragment() {
 
             MapStyle.Dark,
             MapStyle.CartoDarkMatter -> insetsController?.isAppearanceLightStatusBars = false
+
             else -> insetsController?.isAppearanceLightStatusBars = true
         }
     }
@@ -968,10 +971,12 @@ class MapFragment : Fragment() {
                 eventsSource.setGeoJson(EMPTY_GEOJSON)
                 exchangesSource.setGeoJson(EMPTY_GEOJSON)
             }
+
             eventsSource -> {
                 merchantsSource.setGeoJson(EMPTY_GEOJSON)
                 exchangesSource.setGeoJson(EMPTY_GEOJSON)
             }
+
             exchangesSource -> {
                 merchantsSource.setGeoJson(EMPTY_GEOJSON)
                 eventsSource.setGeoJson(EMPTY_GEOJSON)
