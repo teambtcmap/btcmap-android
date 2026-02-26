@@ -88,6 +88,8 @@ import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import search.SearchAdapterItem
+import settings.badgeBackgroundColor
+import settings.badgeTextColor
 import java.text.NumberFormat
 
 class MapFragment : Fragment() {
@@ -733,6 +735,48 @@ class MapFragment : Fragment() {
                 setFilter(Expression.neq(Expression.get("cluster"), true))
             }
 
+        val unclusteredMerchantsCommentsLayer =
+            CircleLayer("unclusteredMerchantsComments", merchantsSource.id).apply {
+                setProperties(
+                    PropertyFactory.circleColor(prefs.badgeBackgroundColor(requireContext())),
+                    PropertyFactory.circleRadius(9f),
+                    PropertyFactory.circleOpacity(1f),
+                    PropertyFactory.circleTranslate(arrayOf(13f, -43f))
+                )
+                setFilter(
+                    Expression.all(
+                        Expression.neq(Expression.get("cluster"), true),
+                        Expression.gt(Expression.get("comments"), 0)
+                    )
+                )
+            }
+
+        val unclusteredMerchantsCommentsCountLayer =
+            SymbolLayer("unclusteredMerchantsCommentsCount", merchantsSource.id).apply {
+                if (usingOpenFreeMap()) {
+                    setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Bold")))
+                }
+                setProperties(
+                    PropertyFactory.textField(
+                        Expression.switchCase(
+                            Expression.gte(Expression.get("comments"), Expression.literal(10)),
+                            Expression.literal("9+"),
+                            Expression.toString(Expression.get("comments"))
+                        )
+                    ),
+                    PropertyFactory.textSize(11f),
+                    PropertyFactory.textColor(prefs.badgeTextColor(requireContext())),
+                    PropertyFactory.textTranslate(arrayOf(13f, -43f)),
+                    PropertyFactory.textAllowOverlap(true)
+                )
+                setFilter(
+                    Expression.all(
+                        Expression.neq(Expression.get("cluster"), true),
+                        Expression.gt(Expression.get("comments"), 0)
+                    )
+                )
+            }
+
         binding.map.getMapAsync { map ->
             map.getStyle { style ->
                 style.addSource(merchantsSource)
@@ -742,6 +786,8 @@ class MapFragment : Fragment() {
 
                 style.addLayer(unclusteredMerchantsLayer)
                 style.addLayer(unclusteredMerchantsCategoryIconsLayer)
+                style.addLayer(unclusteredMerchantsCommentsLayer)
+                style.addLayer(unclusteredMerchantsCommentsCountLayer)
             }
         }
 
@@ -913,6 +959,48 @@ class MapFragment : Fragment() {
                 )
             }
 
+        val exchangesCommentsLayer =
+            CircleLayer("exchangesComments", exchangesSource.id).apply {
+                setProperties(
+                    PropertyFactory.circleColor(prefs.badgeBackgroundColor(requireContext())),
+                    PropertyFactory.circleRadius(9f),
+                    PropertyFactory.circleOpacity(1f),
+                    PropertyFactory.circleTranslate(arrayOf(13f, -43f))
+                )
+                setFilter(
+                    Expression.all(
+                        Expression.neq(Expression.get("cluster"), true),
+                        Expression.gt(Expression.get("comments"), 0)
+                    )
+                )
+            }
+
+        val exchangesCommentsCountLayer =
+            SymbolLayer("exchangesCommentsCount", exchangesSource.id).apply {
+                if (usingOpenFreeMap()) {
+                    setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Bold")))
+                }
+                setProperties(
+                    PropertyFactory.textField(
+                        Expression.switchCase(
+                            Expression.gte(Expression.get("comments"), Expression.literal(10)),
+                            Expression.literal("9+"),
+                            Expression.toString(Expression.get("comments"))
+                        )
+                    ),
+                    PropertyFactory.textSize(11f),
+                    PropertyFactory.textColor(prefs.badgeTextColor(requireContext())),
+                    PropertyFactory.textTranslate(arrayOf(13f, -43f)),
+                    PropertyFactory.textAllowOverlap(true)
+                )
+                setFilter(
+                    Expression.all(
+                        Expression.neq(Expression.get("cluster"), true),
+                        Expression.gt(Expression.get("comments"), 0)
+                    )
+                )
+            }
+
         binding.map.getMapAsync { map ->
             map.getStyle { style ->
                 style.addSource(exchangesSource)
@@ -921,6 +1009,8 @@ class MapFragment : Fragment() {
                 style.addLayer(exchangesClusterCountLayer)
                 style.addLayer(exchangesLayer)
                 style.addLayer(exchangesCategoryIconsLayer)
+                style.addLayer(exchangesCommentsLayer)
+                style.addLayer(exchangesCommentsCountLayer)
             }
         }
 
