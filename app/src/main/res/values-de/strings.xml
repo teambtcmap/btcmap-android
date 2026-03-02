@@ -36,7 +36,7 @@
     <string name="d_sat">%1$s sats</string>
     <string name="more_details_will_appear_after_full_sync">Weitere Details erscheinen nach der vollständigen Synchronisation</string>
     <string name="map_style">Kartenstil</string>
-    <string name="style_auto">Auto</string>
+    <string name="style_auto">Automatisch</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
     <string name="style_bright">OpenFreeMap Bright</string>

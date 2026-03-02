@@ -7,7 +7,7 @@
     <string name="qr_code">QR код</string>
     <string name="copied_to_clipboard">Адрес скопирован в буфер обмена</string>
     <string name="show_my_location">Показать мое месторасположение</string>
-    <string name="search_here">Поиск</string>
+    <string name="search_here">Поиск мест</string>
     <string name="settings">Настройки</string>
     <string name="pay">Платеж</string>
     <string name="you_dont_have_a_compatible_wallet">У вас не установленно совместимых кошельков</string>
@@ -20,7 +20,7 @@
     <string name="add_element_comment_disclosure_1">Все комментарии анонимны но мы берем небольшую комиссию для защиты от спама</string>
     <string name="comment">Комментарий</string>
     <string name="generate_invoice">Сгенерировать счет</string>
-    <string name="add_comment">Добавить комментарий</string>
+    <string name="add_comment">Оставить комментарий</string>
     <string name="error">Ошибка</string>
     <string name="close">Закрыть</string>
     <string name="comments">Комментарии</string>
@@ -36,7 +36,7 @@
     <string name="d_sat">%1$s сатоши</string>
     <string name="more_details_will_appear_after_full_sync">Подробности появятся после полной синхронизации</string>
     <string name="map_style">Стиль карты</string>
-    <string name="style_auto">Auto</string>
+    <string name="style_auto">Авто</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
     <string name="style_bright">OpenFreeMap Bright</string>
@@ -60,7 +60,7 @@
     <string name="s_m">%1$s м</string>
     <string name="button_background">Фон кнопки</string>
     <string name="button_icon">Иконка кнопки</string>
-    <string name="button_border">Граница кнопки</string>
+    <string name="button_border">Обрамление кнопки</string>
     <string name="use_adaptive_colors">Использовать адаптивные цвета</string>
     <string name="reset">Сбросить</string>
 </resources>

@@ -42,30 +42,7 @@ class SettingsFragment : Fragment() {
         initMarkerBackgroundButton()
         initMarkerIconButton()
 
-        binding.boostedMarkerBackgroundColor.text =
-            "#${prefs.boostedMarkerBackgroundColor().toHexString()}"
-
-        binding.changeBoostedMarkerBackgroundColor.setOnClickListener {
-            val colorPickerPopUp = ColorPickerPopUp(context)
-            colorPickerPopUp.setShowAlpha(true)
-                .setDefaultColor(prefs.boostedMarkerBackgroundColor())
-                .setOnPickColorListener(object : OnPickColorListener {
-                    override fun onColorPicked(color: Int) {
-                        prefs.setBoostedMarkerBackgroundColor(color)
-                    }
-
-                    override fun onCancel() {
-                        colorPickerPopUp.dismissDialog() // Dismiss the dialog.
-                    }
-                })
-                .show()
-            colorPickerPopUp.negativeButton.setOnClickListener {
-                prefs.setBoostedMarkerBackgroundColor(null)
-                binding.boostedMarkerBackgroundColor.text =
-                    "#${prefs.boostedMarkerBackgroundColor().toHexString()}"
-                colorPickerPopUp.dismissDialog()
-            }
-        }
+        initBoostedMarkerBackgroundButton()
 
         binding.badgeBackgroundColor.text =
             "#${prefs.badgeBackgroundColor(requireContext()).toHexString()}"
@@ -292,6 +269,34 @@ class SettingsFragment : Fragment() {
                 binding.markerIconColor.text =
                     "#${prefs.markerIconColor(requireContext()).toHexString()}"
                 binding.markerIconColor.setTextColor(prefs.markerIconColor(requireContext()))
+                colorPickerPopUp.dismissDialog()
+            }
+        }
+    }
+
+    private fun initBoostedMarkerBackgroundButton() {
+        binding.boostedMarkerBackgroundColor.text =
+            "#${prefs.boostedMarkerBackgroundColor().toHexString()}"
+
+        binding.changeBoostedMarkerBackgroundColor.setOnClickListener {
+            val colorPickerPopUp = ColorPickerPopUp(context)
+            colorPickerPopUp.setShowAlpha(true)
+                .setDefaultColor(prefs.boostedMarkerBackgroundColor())
+                .setOnPickColorListener(object : OnPickColorListener {
+                    override fun onColorPicked(color: Int) {
+                        prefs.setBoostedMarkerBackgroundColor(color)
+                    }
+
+                    override fun onCancel() {
+                        colorPickerPopUp.dismissDialog() // Dismiss the dialog.
+                    }
+                })
+                .show()
+            colorPickerPopUp.negativeButton.setText(R.string.reset)
+            colorPickerPopUp.negativeButton.setOnClickListener {
+                prefs.setBoostedMarkerBackgroundColor(null)
+                binding.boostedMarkerBackgroundColor.text =
+                    "#${prefs.boostedMarkerBackgroundColor().toHexString()}"
                 colorPickerPopUp.dismissDialog()
             }
         }
