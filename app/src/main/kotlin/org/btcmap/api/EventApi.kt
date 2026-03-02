@@ -1,0 +1,60 @@
+package org.btcmap.api
+
+import org.btcmap.http.httpClient
+import org.btcmap.json.toJsonArray
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.Request
+import okhttp3.coroutines.executeAsync
+import org.btcmap.settings.apiUrlV4
+import org.btcmap.settings.prefs
+import java.io.InputStream
+import java.time.ZonedDateTime
+
+object EventApi {
+    private const val ENDPOINT = "events"
+
+    data class GetEventsItem(
+        val id: Long,
+        val lat: Double,
+        val lon: Double,
+        val name: String,
+        val website: HttpUrl,
+        val startsAt: ZonedDateTime,
+        val endsAt: ZonedDateTime?,
+    )
+
+    private fun InputStream.toGetEventsItems(): List<GetEventsItem> {
+        return toJsonArray().map {
+            GetEventsItem(
+                id = it.getLong("id"),
+                lat = it.getDouble("lat"),
+                lon = it.getDouble("lon"),
+                name = it.getString("name"),
+                website = it.getString("website").toHttpUrl(),
+                startsAt = ZonedDateTime.parse(it.getString("starts_at")),
+                endsAt = if (it.isNull("ends_at")) null else ZonedDateTime.parse(
+                    it.getString(
+                        "ends_at"
+                    )
+                )
+            )
+        }
+    }
+
+    // https://github.com/teambtcmap/btcmap-api/blob/master/docs/rest/v4/events.md#get-list
+    suspend fun getEvents(): List<GetEventsItem> {
+        val url = prefs.apiUrlV4(ENDPOINT)
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return withContext(Dispatchers.IO) {
+            res.body.byteStream().use { it.toGetEventsItems() }
+        }
+    }
+}
