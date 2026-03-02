@@ -6,7 +6,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainerView"
-        android:name="map.MapFragment"
+        android:name="org.btcmap.map.MapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

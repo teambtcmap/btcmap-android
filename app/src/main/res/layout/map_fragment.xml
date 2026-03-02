@@ -55,7 +55,7 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/placeFragment"
-            android:name="place.PlaceFragment"
+            android:name="org.btcmap.place.PlaceFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
@@ -69,7 +69,7 @@
         android:orientation="vertical"
         android:padding="4dp">
 
-        <view.IconButton
+        <org.btcmap.view.IconButton
             android:id="@+id/sync"
             android:layout_width="40dp"
             android:layout_height="40dp"
@@ -78,14 +78,14 @@
             android:visibility="gone"
             app:iconSrc="@drawable/icon_sync" />
 
-        <view.IconButton
+        <org.btcmap.view.IconButton
             android:id="@+id/update"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginTop="16dp"
             app:iconSrc="@drawable/icon_warning" />
 
-        <view.IconButton
+        <org.btcmap.view.IconButton
             android:id="@+id/showMerchants"
             android:layout_width="40dp"
             android:layout_height="40dp"
@@ -94,14 +94,14 @@
             app:iconSrc="@drawable/icon_store"
             app:selected="true" />
 
-        <view.IconButton
+        <org.btcmap.view.IconButton
             android:id="@+id/showEvents"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginTop="16dp"
             app:iconSrc="@drawable/icon_event" />
 
-        <view.IconButton
+        <org.btcmap.view.IconButton
             android:id="@+id/showExchanges"
             android:layout_width="40dp"
             android:layout_height="40dp"
@@ -110,7 +110,7 @@
 
     </LinearLayout>
 
-    <view.IconButton
+    <org.btcmap.view.IconButton
         android:id="@+id/fab"
         android:layout_width="56dp"
         android:layout_gravity="end|bottom"

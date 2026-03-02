@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:name="app.App"
+        android:name="org.btcmap.app.App"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/backup_rules"
         android:fullBackupContent="false"
@@ -23,7 +23,7 @@
         android:theme="@style/Theme.Material3Expressive.DynamicColors.DayNight.NoActionBar">
 
         <activity
-            android:name="activity.Activity"
+            android:name="org.btcmap.activity.Activity"
             android:exported="true"
             android:windowSoftInputMode="adjustPan">
 
