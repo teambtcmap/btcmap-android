@@ -2,10 +2,17 @@ package org.btcmap.http
 
 import okhttp3.OkHttpClient
 import okhttp3.brotli.BrotliInterceptor
+import org.btcmap.BuildConfig
 
 val httpClient by lazy {
     OkHttpClient.Builder()
         .addInterceptor(BrotliInterceptor)
+        .addInterceptor { chain ->
+            val request = chain.request().newBuilder()
+                .header("User-Agent", "BTC Map Android ${BuildConfig.VERSION_NAME}")
+                .build()
+            chain.proceed(request)
+        }
         .addInterceptor {
             var res = it.proceed(it.request())
 
