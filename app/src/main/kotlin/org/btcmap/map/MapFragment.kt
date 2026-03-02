@@ -92,7 +92,9 @@ import org.maplibre.android.style.sources.GeoJsonOptions
 import org.btcmap.search.SearchAdapterItem
 import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
+import org.btcmap.settings.boostedMarkerBackgroundColor
 import java.text.NumberFormat
+import java.time.ZonedDateTime
 
 class MapFragment : Fragment() {
 
@@ -244,6 +246,20 @@ class MapFragment : Fragment() {
 
                     style.addImage(
                         "btcmap-marker",
+                        markerDrawable,
+                    )
+                }
+
+                if (style.getImage("btcmap-marker-boosted") == null) {
+                    val markerDrawable =
+                        AppCompatResources.getDrawable(requireContext(), R.drawable.map_marker)!!
+                    DrawableCompat.setTint(
+                        markerDrawable,
+                        prefs.boostedMarkerBackgroundColor()
+                    )
+
+                    style.addImage(
+                        "btcmap-marker-boosted",
                         markerDrawable,
                     )
                 }
@@ -577,7 +593,8 @@ class MapFragment : Fragment() {
                     "count": ${place.count},
                     "iconId": "${place.iconId}",
                     "requiresCompanionApp": ${place.requiresCompanionApp},
-                    "comments": ${place.comments}
+                    "comments": ${place.comments},
+                    "boosted": ${place.boostExpires?.isAfter(ZonedDateTime.now()) ?: false}
                 }
             }
         """.trimIndent()
@@ -705,10 +722,16 @@ class MapFragment : Fragment() {
         val unclusteredMerchantsLayer =
             SymbolLayer("unclusteredMerchants", merchantsSource.id).apply {
                 setProperties(
-                    PropertyFactory.iconImage("btcmap-marker"),
+                    PropertyFactory.iconImage(
+                        Expression.switchCase(
+                            Expression.get("boosted"),
+                            Expression.literal("btcmap-marker-boosted"),
+                            Expression.literal("btcmap-marker")
+                        )
+                    ),
                     PropertyFactory.iconAnchor(Expression.literal("bottom")),
-                    PropertyFactory.iconAllowOverlap(true), // Important
-                    PropertyFactory.iconIgnorePlacement(true) // Important
+                    PropertyFactory.iconAllowOverlap(true),
+                    PropertyFactory.iconIgnorePlacement(true)
                 )
                 setFilter(
                     Expression.neq(Expression.get("cluster"), true)
