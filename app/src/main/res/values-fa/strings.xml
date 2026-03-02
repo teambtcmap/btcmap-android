@@ -19,7 +19,7 @@
     <string name="comments_d">نظرات (%1$d)</string>
     <string name="add_element_comment_disclosure_1">همه نظرات ناشناس هستند اما ما برای محافظت در برابر هرزنامه کارمزد کمی در ساتوشی دریافت می‌کنیم</string>
     <string name="comment">نظر</string>
-    <string name="generate_invoice">تولید فاکتور</string>
+    <string name="btn_continue">ادامه</string>
     <string name="add_comment">افزودن نظر</string>
     <string name="error">خطا</string>
     <string name="close">بستن</string>

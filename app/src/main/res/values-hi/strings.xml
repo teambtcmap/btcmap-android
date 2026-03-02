@@ -19,7 +19,7 @@
     <string name="comments_d">टिप्पणियाँ (%1$d)</string>
     <string name="add_element_comment_disclosure_1">सभी टिप्पणियाँ गुमनाम हैं लेकिन हम स्पैम सुरक्षा के लिए सातो में एक छोटा शुल्क लेते हैं</string>
     <string name="comment">टिप्पणी</string>
-    <string name="generate_invoice">चालान बनाएं</string>
+    <string name="btn_continue">जारी रखें</string>
     <string name="add_comment">टिप्पणी जोड़ें</string>
     <string name="error">त्रुटि</string>
     <string name="close">बंद करें</string>

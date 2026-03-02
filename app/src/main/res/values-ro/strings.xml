@@ -19,7 +19,7 @@
     <string name="comments_d">Comentarii (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Toate comentariile sunt anonime, dar colectăm o mică taxă în sats ca măsură de protecție împotriva spamului</string>
     <string name="comment">Comentariu</string>
-    <string name="generate_invoice">Generează factură</string>
+    <string name="btn_continue">Continuă</string>
     <string name="add_comment">Adaugă comentariu</string>
     <string name="error">Eroare</string>
     <string name="close">Închide</string>

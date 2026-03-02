@@ -19,7 +19,7 @@
     <string name="comments_d">Hozzászólások (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Minden hozzászólás névtelen, de spam védelemként kis díjat számítunk fel satsban</string>
     <string name="comment">Hozzászólás</string>
-    <string name="generate_invoice">Számla generálása</string>
+    <string name="btn_continue">Folytatás</string>
     <string name="add_comment">Hozzászólás hozzáadása</string>
     <string name="error">Hiba</string>
     <string name="close">Bezárás</string>

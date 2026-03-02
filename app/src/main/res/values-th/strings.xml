@@ -19,7 +19,7 @@
     <string name="comments_d">ความคิดเห็น (%1$d)</string>
     <string name="add_element_comment_disclosure_1">ความคิดเห็นทั้งหมดไม่เปิดเผยตัวตนแต่เราจะเรียกเก็บค่าธรรมเนียมเล็กน้อยเป็น sats เพื่อเป็นมาตรการป้องกันสแปม</string>
     <string name="comment">แสดงความคิดเห็น</string>
-    <string name="generate_invoice">สร้างใบแจ้งหนี้</string>
+    <string name="btn_continue">ดำเนินต่อ</string>
     <string name="add_comment">เพิ่มความคิดเห็น</string>
     <string name="error">ข้อผิดพลาด</string>
     <string name="close">ปิดหน้าต่าง</string>

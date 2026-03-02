@@ -58,7 +58,7 @@ class BoostFragment : Fragment() {
             binding.boost1m,
             binding.boost3m,
             binding.boost12m,
-            binding.generateInvoice,
+            binding.btnContinue,
         ).also { views -> views.forEach { it.isEnabled = false } }
 
         // get quote
@@ -109,7 +109,7 @@ class BoostFragment : Fragment() {
         var boostResponse: BoostApi.BoostResponse? = null
 
         // send boost request and fetch an invoice
-        binding.generateInvoice.setOnClickListener {
+        binding.btnContinue.setOnClickListener {
             val days = if (binding.boost12m.isChecked) {
                 365
             } else if (binding.boost3m.isChecked) {

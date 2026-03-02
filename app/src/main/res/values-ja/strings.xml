@@ -19,7 +19,7 @@
     <string name="comments_d">コメント (%1$d)</string>
     <string name="add_element_comment_disclosure_1">すべてのコメントは匿名のものとして、少額のsats料金を垃圾メール防止としていただいております</string>
     <string name="comment">コメント</string>
-    <string name="generate_invoice">請求書を作成</string>
+    <string name="btn_continue">続行</string>
     <string name="add_comment">コメントを追加</string>
     <string name="error">エラー</string>
     <string name="close">閉じる</string>

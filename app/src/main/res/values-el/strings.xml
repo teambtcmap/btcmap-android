@@ -19,7 +19,7 @@
     <string name="comments_d">Σχόλια (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Όλα τα σχόλια είναι ανώνυμα αλλά συλλέγουμε μια μικρή χρέωση σε sats ως μέτρο προστασίας από ανεπιθύμητα μηνύματα</string>
     <string name="comment">Σχόλιο</string>
-    <string name="generate_invoice">Δημιουργία Τιμολογίου</string>
+    <string name="btn_continue">Συνέχεια</string>
     <string name="add_comment">Προσθήκη Σχολίου</string>
     <string name="error">Σφάλμα</string>
     <string name="close">Κλείσιμο</string>

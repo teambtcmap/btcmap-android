@@ -19,7 +19,7 @@
     <string name="comments_d">Yorumlar (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Tüm yorumlar anonimdir ancak spam koruması olarak küçük bir ücret alıyoruz</string>
     <string name="comment">Yorum</string>
-    <string name="generate_invoice">Fatura oluştur</string>
+    <string name="btn_continue">Devam et</string>
     <string name="add_comment">Yorum ekle</string>
     <string name="error">Hata</string>
     <string name="close">Kapat</string>

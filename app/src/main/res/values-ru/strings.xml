@@ -9,7 +9,7 @@
     <string name="show_my_location">Показать мое месторасположение</string>
     <string name="search_here">Поиск мест</string>
     <string name="settings">Настройки</string>
-    <string name="pay">Платеж</string>
+    <string name="pay">Оплатить</string>
     <string name="you_dont_have_a_compatible_wallet">У вас не установленно совместимых кошельков</string>
     <string name="not_verified">Не проверено</string>
     <string name="verify">Редактировать</string>
@@ -17,9 +17,9 @@
     <string name="share">Поделиться</string>
     <string name="companion_warning">Вам понадобится приложение-компаньон (%1$s) для осуществления платежа. Это приложение, насколько нам известно, не требует ввода личных данных. Пожалуйста, сообщите нам, если это не так, и мы удалим это место.</string>
     <string name="comments_d">Комментарии (%1$d)</string>
-    <string name="add_element_comment_disclosure_1">Все комментарии анонимны но мы берем небольшую комиссию для защиты от спама</string>
+    <string name="add_element_comment_disclosure_1">Все комментарии анонимны но мы берем небольшую комиссию для защиты от спама.</string>
     <string name="comment">Комментарий</string>
-    <string name="generate_invoice">Сгенерировать счет</string>
+    <string name="btn_continue">Продолжить</string>
     <string name="add_comment">Оставить комментарий</string>
     <string name="error">Ошибка</string>
     <string name="close">Закрыть</string>
@@ -27,10 +27,10 @@
     <string name="add">Добавить</string>
     <string name="boost">Забустить</string>
     <string name="boost_merchant">Забустить место</string>
-    <string name="boost_description">Буст позволяет сделать место более заметным для всех пользователей\n\nКомиссия идет на поддержку проекта</string>
-    <string name="months_1">1 Месяц</string>
-    <string name="months_3">3 Месяца</string>
-    <string name="months_12">12 Месяцев</string>
+    <string name="boost_description">Буст позволяет сделать место более заметным для всех пользователей. Комиссия идет на поддержку проекта.</string>
+    <string name="months_1">1 месяц</string>
+    <string name="months_3">3 месяца</string>
+    <string name="months_12">12 месяцев</string>
     <string name="current_fee">Комиссия:</string>
     <string name="loading">загрузка</string>
     <string name="d_sat">%1$s сатоши</string>

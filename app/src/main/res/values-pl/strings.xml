@@ -19,7 +19,7 @@
     <string name="comments_d">Komentarze (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Wszystkie komentarze są anonimowe, ale pobieramy niewielką opłatę w satoshi jako środek ochrony przed spamem</string>
     <string name="comment">Komentarz</string>
-    <string name="generate_invoice">Wygeneruj fakturę</string>
+    <string name="btn_continue">Kontynuuj</string>
     <string name="add_comment">Dodaj komentarz</string>
     <string name="error">Błąd</string>
     <string name="close">Zamknij</string>

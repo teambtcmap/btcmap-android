@@ -19,7 +19,7 @@
     <string name="comments_d">মন্তব্য (%1$d)</string>
     <string name="add_element_comment_disclosure_1">সমস্ত মন্তব্য বেনামি কিন্তু আমরা স্প্যাম সুরক্ষা হিসাবে স্যাটে একটি ছোট ফি সংগ্রহ করি</string>
     <string name="comment">মন্তব্য</string>
-    <string name="generate_invoice">ইনভয়েস তৈরি করুন</string>
+    <string name="btn_continue">চালিয়ে যান</string>
     <string name="add_comment">মন্তব্য যোগ করুন</string>
     <string name="error">ত্রুটি</string>
     <string name="close">বন্ধ করুন</string>

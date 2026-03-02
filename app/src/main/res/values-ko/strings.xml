@@ -19,7 +19,7 @@
     <string name="comments_d">댓글 (%1$d)</string>
     <string name="add_element_comment_disclosure_1">모든 댓글은 익명이지만 스팸 방지를 위해 소량의 sat 수수료를 부과합니다</string>
     <string name="comment">댓글</string>
-    <string name="generate_invoice">청구서 생성</string>
+    <string name="btn_continue">계속</string>
     <string name="add_comment">댓글 추가</string>
     <string name="error">오류</string>
     <string name="close">닫기</string>

@@ -19,7 +19,7 @@
     <string name="comments_d">Kommentaar (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Alle kommentare is anoniem maar ons hef \'n klein fooi in sats as \'n spam-beskermingsmaatreel</string>
     <string name="comment">Kommentaar</string>
-    <string name="generate_invoice">Genereer Faktuur</string>
+    <string name="btn_continue">Gaan voort</string>
     <string name="add_comment">Voeg Kommentaar By</string>
     <string name="error">Fout</string>
     <string name="close">Sluit</string>

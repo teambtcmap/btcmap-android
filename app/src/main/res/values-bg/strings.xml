@@ -19,7 +19,7 @@
     <string name="comments_d">Коментари (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Всички коментари са анонимни, но ние събираме малка такса в сатоши като мярка за защита от спам</string>
     <string name="comment">Коментар</string>
-    <string name="generate_invoice">Генерирайте фактура</string>
+    <string name="btn_continue">Продължи</string>
     <string name="add_comment">Добавете коментар</string>
     <string name="error">Грешка</string>
     <string name="close">Затворете</string>

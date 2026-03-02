@@ -19,7 +19,7 @@
     <string name="comments_d">التعليقات (%1$d)</string>
     <string name="add_element_comment_disclosure_1">جميع التعليقات مجهولة لكننا نتقاضي رسماً صغيراً بالساتoshi كإجراء حماية من البريد العشوائي</string>
     <string name="comment">تعليق</string>
-    <string name="generate_invoice">إنشاء فاتورة</string>
+    <string name="btn_continue">متابعة</string>
     <string name="add_comment">إضافة تعليق</string>
     <string name="error">خطأ</string>
     <string name="close">إغلاق</string>

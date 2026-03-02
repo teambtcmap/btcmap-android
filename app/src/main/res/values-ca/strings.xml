@@ -19,7 +19,7 @@
     <string name="comments_d">Comentaris (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Tots els comentaris són anònims però cobrem una petita tarifa en sats com a mesura de protecció contra correu brossa</string>
     <string name="comment">Comentari</string>
-    <string name="generate_invoice">Genera Factura</string>
+    <string name="btn_continue">Continua</string>
     <string name="add_comment">Afegir Comentari</string>
     <string name="error">Error</string>
     <string name="close">Tanca</string>

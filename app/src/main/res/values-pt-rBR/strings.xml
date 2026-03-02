@@ -18,7 +18,7 @@
     <string name="comments_d">Comentários (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Todos os comentários são anônimos, mas cobramos uma pequena taxa em sats como medida de proteção de spam</string>
     <string name="comment">Comentar</string>
-    <string name="generate_invoice">Gerar fatura</string>
+    <string name="btn_continue">Continuar</string>
     <string name="add_comment">Adicionar comentário</string>
     <string name="error">Erro</string>
     <string name="close">Fechar</string>

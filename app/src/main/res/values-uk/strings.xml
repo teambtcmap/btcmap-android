@@ -19,7 +19,7 @@
     <string name="comments_d">Коментарі (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Всі коментарі є анонімними, але ми стягуємо невелику плату в сатоші як захист від спаму</string>
     <string name="comment">Коментар</string>
-    <string name="generate_invoice">Створити рахунок</string>
+    <string name="btn_continue">Продовжити</string>
     <string name="add_comment">Додати коментар</string>
     <string name="error">Помилка</string>
     <string name="close">Закрити</string>

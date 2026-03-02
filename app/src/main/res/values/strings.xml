@@ -19,7 +19,7 @@
     <string name="comments_d">Comments (%1$d)</string>
     <string name="add_element_comment_disclosure_1">All comments are anonymous but we collect a small fee in sats as a spam protection measure</string>
     <string name="comment">Comment</string>
-    <string name="generate_invoice">Generate Invoice</string>
+    <string name="btn_continue">Continue</string>
     <string name="add_comment">Add Comment</string>
     <string name="error">Error</string>
     <string name="close">Close</string>

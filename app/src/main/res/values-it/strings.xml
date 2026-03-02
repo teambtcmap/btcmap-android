@@ -19,7 +19,7 @@
     <string name="comments_d">Commenti (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Tutti i commenti sono anonimi ma raccogliamo una piccola tariffa in sats come misura di protezione dallo spam</string>
     <string name="comment">Commento</string>
-    <string name="generate_invoice">Genera fattura</string>
+    <string name="btn_continue">Continua</string>
     <string name="add_comment">Aggiungi commento</string>
     <string name="error">Errore</string>
     <string name="close">Chiudi</string>

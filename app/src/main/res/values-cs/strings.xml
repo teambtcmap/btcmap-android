@@ -19,7 +19,7 @@
     <string name="comments_d">Komentáře (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Všechny komentáře jsou anonymní, ale vybíráme malý poplatek v satech jako ochranu proti spamu</string>
     <string name="comment">Komentář</string>
-    <string name="generate_invoice">Vygenerovat fakturu</string>
+    <string name="btn_continue">Pokračovat</string>
     <string name="add_comment">Přidat komentář</string>
     <string name="error">Chyba</string>
     <string name="close">Zavřít</string>

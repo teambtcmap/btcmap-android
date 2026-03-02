@@ -19,7 +19,7 @@
     <string name="comments_d">Kommentarer (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Alle kommentarer er anonyme men vi samler inn et lite gebyr i sats som spam-beskyttelse</string>
     <string name="comment">Kommentar</string>
-    <string name="generate_invoice">Generer faktura</string>
+    <string name="btn_continue">Fortsett</string>
     <string name="add_comment">Legg til kommentar</string>
     <string name="error">Feil</string>
     <string name="close">Lukk</string>

@@ -19,7 +19,7 @@
     <string name="comments_d">Reacties (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Alle reacties zijn anoniem maar wij innen een kleine vergoeding in sats als spam-bescherming</string>
     <string name="comment">Reactie</string>
-    <string name="generate_invoice">Factuur genereren</string>
+    <string name="btn_continue">Doorgaan</string>
     <string name="add_comment">Reactie toevoegen</string>
     <string name="error">Fout</string>
     <string name="close">Sluiten</string>

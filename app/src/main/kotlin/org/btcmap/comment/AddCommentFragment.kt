@@ -57,7 +57,7 @@ class AddCommentFragment : Fragment() {
         }
 
         // disable invoice generation until quote is fetched
-        binding.generateInvoice.isEnabled = false
+        binding.btnContinue.isEnabled = false
 
         // get quote and enable generate invoice button on success
         viewLifecycleOwner.lifecycleScope.launch {
@@ -65,7 +65,7 @@ class AddCommentFragment : Fragment() {
                 val quote = CommentApi.getQuote()
                 withResumed {
                     binding.fee.text = getString(R.string.d_sat, quote.quoteSat.toString())
-                    binding.generateInvoice.isEnabled = true
+                    binding.btnContinue.isEnabled = true
                 }
             } catch (t: Throwable) {
                 Log.e(null, null, t)
@@ -81,7 +81,7 @@ class AddCommentFragment : Fragment() {
         }
 
         // send comment request and fetch an invoice
-        binding.generateInvoice.setOnClickListener {
+        binding.btnContinue.setOnClickListener {
             val commentText = binding.comment.text.toString().trim()
             if (commentText.isEmpty()) {
                 Toast.makeText(requireContext(), R.string.comment_cannot_be_empty, Toast.LENGTH_SHORT).show()
@@ -89,7 +89,7 @@ class AddCommentFragment : Fragment() {
             }
 
             binding.comment.isEnabled = false
-            binding.generateInvoice.isEnabled = false
+            binding.btnContinue.isEnabled = false
 
             viewLifecycleOwner.lifecycleScope.launch {
                 val addCommentResponse = try {
@@ -101,7 +101,7 @@ class AddCommentFragment : Fragment() {
                     Log.e(null, null, t)
                     withResumed {
                         binding.comment.isEnabled = true
-                        binding.generateInvoice.isEnabled = true
+                        binding.btnContinue.isEnabled = true
                         MaterialAlertDialogBuilder(requireContext())
                             .setTitle(R.string.error)
                             .setMessage(t.toString())

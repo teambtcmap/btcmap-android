@@ -19,7 +19,7 @@
     <string name="comments_d">תגובות (%1$d)</string>
     <string name="add_element_comment_disclosure_1">כל התגובות הן אנונימיות אבל אנחנו גובים עמלה קטנה בסאט כמדידת הגנה מפני ספאם</string>
     <string name="comment">תגובה</string>
-    <string name="generate_invoice">צור חשבונית</string>
+    <string name="btn_continue">המשך</string>
     <string name="add_comment">הוסף תגובה</string>
     <string name="error">שגיאה</string>
     <string name="close">סגור</string>

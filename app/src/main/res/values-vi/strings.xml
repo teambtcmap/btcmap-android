@@ -19,7 +19,7 @@
     <string name="comments_d">Bình luận (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Tất cả bình luận đều ẩn danh nhưng chúng tôi thu một khoản phí nhỏ bằng sats như một biện pháp bảo vệ chống spam</string>
     <string name="comment">Bình luận</string>
-    <string name="generate_invoice">Tạo hóa đơn</string>
+    <string name="btn_continue">Tiếp tục</string>
     <string name="add_comment">Thêm bình luận</string>
     <string name="error">Lỗi</string>
     <string name="close">Đóng</string>

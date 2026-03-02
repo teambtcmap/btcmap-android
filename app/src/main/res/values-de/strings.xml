@@ -19,7 +19,7 @@
     <string name="comments_d">Kommentare (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Alle Kommentare sind anonym. Wir erheben eine kleine Gebühr in Sats als Spam-Schutzmaßnahme</string>
     <string name="comment">Kommentar</string>
-    <string name="generate_invoice">Rechnung erstellen</string>
+    <string name="btn_continue">Weiter</string>
     <string name="add_comment">Kommentar hinzufügen</string>
     <string name="error">Fehler</string>
     <string name="close">Schließen</string>

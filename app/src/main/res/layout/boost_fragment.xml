@@ -68,13 +68,13 @@
             </RadioGroup>
 
             <Button
-                android:id="@+id/generate_invoice"
+                android:id="@+id/btn_continue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="16dp"
-                android:text="@string/generate_invoice"
+                android:text="@string/btn_continue"
                 tools:ignore="ButtonStyle" />
 
             <ImageView

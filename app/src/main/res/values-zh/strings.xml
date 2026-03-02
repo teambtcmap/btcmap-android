@@ -19,7 +19,7 @@
     <string name="comments_d">评论 (%1$d)</string>
     <string name="add_element_comment_disclosure_1">所有评论都是匿名的，但我们会收取少量 sat 作为垃圾邮件保护措施</string>
     <string name="comment">评论</string>
-    <string name="generate_invoice">生成发票</string>
+    <string name="btn_continue">继续</string>
     <string name="add_comment">添加评论</string>
     <string name="error">错误</string>
     <string name="close">关闭</string>
