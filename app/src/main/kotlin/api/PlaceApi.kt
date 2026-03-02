@@ -13,8 +13,9 @@ import settings.prefs
 import java.io.InputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-object PlaceApi {
+object  PlaceApi {
     private const val ENDPOINT = "places"
 
     data class GetPlacesItem(
@@ -102,6 +103,7 @@ object PlaceApi {
                 fields.joinToString(separator = ","),
             )
             addQueryParameter("limit", "$limit")
+            addQueryParameter("lang", Locale.getDefault().language)
             if (updatedSince != null) {
                 addQueryParameter(
                     "updated_since",
