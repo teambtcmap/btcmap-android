@@ -77,6 +77,9 @@ android {
         implementation(libs.maplibre)
         implementation(libs.qrgenerator)
         implementation(libs.colorpicker)
+        implementation(libs.coil)
+        implementation(libs.coil.network)
+        implementation(libs.coil.svg)
 
         androidTestImplementation(libs.androidx.test)
         androidTestImplementation(libs.androidx.test.runner)

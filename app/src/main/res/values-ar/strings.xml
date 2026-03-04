@@ -63,4 +63,5 @@
     <string name="button_border">حد الزر</string>
     <string name="use_adaptive_colors">استخدم الألوان التكيفية</string>
     <string name="reset">إعادة تعيين</string>
+    <string name="area_icon">أيقونة المنطقة</string>
 </resources>

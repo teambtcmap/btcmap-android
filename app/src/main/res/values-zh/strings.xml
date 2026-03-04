@@ -63,4 +63,5 @@
     <string name="button_border">按钮边框</string>
     <string name="use_adaptive_colors">使用自适应颜色</string>
     <string name="reset">重置</string>
+    <string name="area_icon">区域图标</string>
 </resources>

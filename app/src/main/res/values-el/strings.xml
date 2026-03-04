@@ -63,4 +63,5 @@
     <string name="button_border">Περίγραμμα κουμπιού</string>
     <string name="use_adaptive_colors">Χρήση προσαρμοστικών χρωμάτων</string>
     <string name="reset">Επαναφορά</string>
+    <string name="area_icon">Εικονίδιο περιοχής</string>
 </resources>

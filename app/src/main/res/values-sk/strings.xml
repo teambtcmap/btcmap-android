@@ -63,4 +63,5 @@
     <string name="button_border">Orámovanie tlačidla</string>
     <string name="use_adaptive_colors">Použiť adaptívne farby</string>
     <string name="reset">Reset</string>
+    <string name="area_icon">Ikona oblasti</string>
 </resources>

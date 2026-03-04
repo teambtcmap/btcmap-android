@@ -8,6 +8,7 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,6 +43,7 @@ import org.btcmap.db.table.event.EventQueries
 import org.btcmap.db.table.place.Place
 import org.btcmap.db.table.place.PlaceQueries
 import org.btcmap.place.PlaceFragment
+import org.btcmap.api.AreasApi
 import org.btcmap.http.httpClient
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
@@ -226,6 +228,10 @@ class MapFragment : Fragment() {
         binding.map.getMapAsync {
             it.addOnCameraIdleListener {
                 prefs.mapViewport = it.projection.visibleRegion.latLngBounds
+                val center = it.projection.visibleRegion.latLngBounds.center
+                viewLifecycleOwner.lifecycleScope.launch {
+                    loadAreas(center.latitude, center.longitude)
+                }
             }
 
             it.setStyle(Style.Builder().fromUri(prefs.mapStyle.uri(requireContext())))
@@ -397,6 +403,19 @@ class MapFragment : Fragment() {
             }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
+        areasAdapter = AreasAdapter { area ->
+            val intent = Intent(Intent.ACTION_VIEW, area.websiteUrl.toUri())
+            startActivity(intent)
+        }
+
+        binding.areas.layoutManager =
+            LinearLayoutManager(
+                requireContext(),
+                LinearLayoutManager.VERTICAL,
+                true,
+            )
+        binding.areas.adapter = areasAdapter
+
         binding.searchView.editText.doAfterTextChanged { searchString ->
             binding.map.getMapAsync { map ->
                 viewLifecycleOwner.lifecycleScope.launch {
@@ -493,7 +512,7 @@ class MapFragment : Fragment() {
                     return@addOnMapClickListener true
                 }
             } catch (e: Exception) {
-                // Ignore
+                Log.e(null, null, e)
             }
 
             false
@@ -505,9 +524,6 @@ class MapFragment : Fragment() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                     viewLifecycleOwner.lifecycleScope.launch { selectPlace(null) }
-                    binding.fab.isVisible = true
-                } else {
-                    binding.fab.isVisible = false
                 }
             }
 
@@ -1173,6 +1189,8 @@ class MapFragment : Fragment() {
     private val _searchResults = MutableStateFlow<List<SearchAdapterItem>>(emptyList())
     val searchResults = _searchResults.asStateFlow()
 
+    private lateinit var areasAdapter: AreasAdapter
+
     suspend fun search(referenceLocation: LatLng, searchString: String) {
         if (searchString.length < MIN_QUERY_LENGTH) {
             _searchResults.update { emptyList() }
@@ -1222,8 +1240,19 @@ class MapFragment : Fragment() {
         return distance[0].toDouble()
     }
 
+    private suspend fun loadAreas(lat: Double, lon: Double) {
+        try {
+            val areas = withContext(Dispatchers.IO) {
+                AreasApi.getAreas(lat, lon)
+            }
+            areasAdapter.submitList(areas)
+        } catch (_: Throwable) {
+            areasAdapter.submitList(emptyList())
+        }
+    }
+
     private fun initInsets(binding: MapFragmentBinding) {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { v, windowInsets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.fabContainer) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
             v.updateLayoutParams<ViewGroup.MarginLayoutParams> {

@@ -63,4 +63,5 @@
     <string name="button_border">Obramowanie przycisku</string>
     <string name="use_adaptive_colors">Używaj kolorów adaptacyjnych</string>
     <string name="reset">Resetuj</string>
+    <string name="area_icon">Ikona obszaru</string>
 </resources>

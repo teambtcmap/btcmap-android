@@ -63,4 +63,5 @@
     <string name="button_border">Bordo pulsante</string>
     <string name="use_adaptive_colors">Usa colori adattivi</string>
     <string name="reset">Reimposta</string>
+    <string name="area_icon">Icona area</string>
 </resources>

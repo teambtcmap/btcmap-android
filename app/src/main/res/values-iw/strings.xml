@@ -63,4 +63,5 @@
     <string name="button_border">גבול כפתור</string>
     <string name="use_adaptive_colors">השתמש בצבעים אדפטיביים</string>
     <string name="reset">אפס</string>
+    <string name="area_icon">אייקון אזור</string>
 </resources>

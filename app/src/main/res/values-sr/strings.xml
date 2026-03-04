@@ -63,4 +63,5 @@
     <string name="button_border">Оквир дугмета</string>
     <string name="use_adaptive_colors">Користи адаптивне боје</string>
     <string name="reset">Ресетуј</string>
+    <string name="area_icon">Иконица области</string>
 </resources>

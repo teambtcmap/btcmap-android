@@ -63,4 +63,5 @@
     <string name="button_border">Button border</string>
     <string name="use_adaptive_colors">Use adaptive colors</string>
     <string name="reset">Reset</string>
+    <string name="area_icon">Area icon</string>
 </resources>

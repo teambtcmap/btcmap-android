@@ -63,4 +63,5 @@
     <string name="button_border">Knapp kant</string>
     <string name="use_adaptive_colors">Använd adaptiva färger</string>
     <string name="reset">Återställ</string>
+    <string name="area_icon">Områdesikon</string>
 </resources>

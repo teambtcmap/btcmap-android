@@ -63,4 +63,5 @@
     <string name="button_border">Gomb keret</string>
     <string name="use_adaptive_colors">Használj adaptív színeket</string>
     <string name="reset">Visszaállítás</string>
+    <string name="area_icon">Terület ikon</string>
 </resources>

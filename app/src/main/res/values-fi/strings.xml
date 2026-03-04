@@ -63,4 +63,5 @@
     <string name="button_border">Painikkeen reunus</string>
     <string name="use_adaptive_colors">Käytä mukautuvia värejä</string>
     <string name="reset">Nollaa</string>
+    <string name="area_icon">Aluekuvake</string>
 </resources>

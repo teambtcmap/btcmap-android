@@ -63,4 +63,5 @@
     <string name="button_border">مرز دکمه</string>
     <string name="use_adaptive_colors">استفاده از رنگ‌های سازگار</string>
     <string name="reset">بازنشانی</string>
+    <string name="area_icon">نماد منطقه</string>
 </resources>

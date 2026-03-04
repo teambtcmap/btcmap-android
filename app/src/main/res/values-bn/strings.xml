@@ -63,4 +63,5 @@
     <string name="button_border">বোতাম সীমানা</string>
     <string name="use_adaptive_colors">অভিযোজক রঙ ব্যবহার করুন</string>
     <string name="reset">রিসেট</string>
+    <string name="area_icon">এলাকা আইকন</string>
 </resources>

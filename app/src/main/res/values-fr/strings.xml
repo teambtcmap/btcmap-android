@@ -63,4 +63,5 @@
     <string name="button_border">Bordure du bouton</string>
     <string name="use_adaptive_colors">Utiliser les couleurs adaptatives</string>
     <string name="reset">Réinitialiser</string>
+    <string name="area_icon">Icône de zone</string>
 </resources>

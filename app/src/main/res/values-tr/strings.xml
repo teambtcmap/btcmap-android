@@ -63,4 +63,5 @@
     <string name="button_border">Düğme kenarlığı</string>
     <string name="use_adaptive_colors">Uyarlanabilir renkleri kullan</string>
     <string name="reset">Sıfırla</string>
+    <string name="area_icon">Bölge simgesi</string>
 </resources>

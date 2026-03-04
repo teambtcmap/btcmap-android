@@ -63,4 +63,5 @@
     <string name="button_border">ขอบปุ่ม</string>
     <string name="use_adaptive_colors">ใช้สีแบบปรับได้</string>
     <string name="reset">รีเซ็ต</string>
+    <string name="area_icon">ไอคอนพื้นที่</string>
 </resources>

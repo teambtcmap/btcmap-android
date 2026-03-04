@@ -63,4 +63,5 @@
     <string name="button_border">Knoppie rand</string>
     <string name="use_adaptive_colors">Gebruik aanpassingskleuren</string>
     <string name="reset">Herstel</string>
+    <string name="area_icon">Gebied-ikoon</string>
 </resources>

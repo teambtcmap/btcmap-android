@@ -63,4 +63,5 @@
     <string name="button_border">Рамка на бутона</string>
     <string name="use_adaptive_colors">Използвайте адаптивни цветове</string>
     <string name="reset">Нулиране</string>
+    <string name="area_icon">Икона на област</string>
 </resources>

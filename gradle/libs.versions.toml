@@ -21,6 +21,13 @@ qrgenerator = "1.0.5"
 # Helps customize colors, when necessary
 # https://github.com/mrudultora/Colorpicker/releases
 colorpicker = "1.2.0"
+# Image loading
+# https://github.com/coil-kt/coil/releases
+coil = "3.4.0"
+# Network support
+coil-network = "3.4.0"
+# SVG support
+coil-svg = "3.4.0"
 # Some handly fragment transition extensions
 # https://developer.android.com/jetpack/androidx/releases/fragment
 fragment = "1.8.9"
@@ -39,6 +46,9 @@ okhttp-brotli = { group = "com.squareup.okhttp3", name = "okhttp-brotli", versio
 maplibre = { module = "org.maplibre.gl:android-sdk-vulkan", version.ref = "maplibre" }
 qrgenerator = { module = "com.github.androidmads:QRGenerator", version.ref = "qrgenerator" }
 colorpicker = { module = "com.github.mrudultora:Colorpicker", version.ref = "colorpicker" }
+coil = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
+coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil-network" }
+coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil-svg" }
 androidx-test = { group = "androidx.test.ext", name = "junit", version.ref = "test" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "testrunner" }
 

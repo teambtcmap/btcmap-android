@@ -110,13 +110,26 @@
 
     </LinearLayout>
 
-    <org.btcmap.view.IconButton
-        android:id="@+id/fab"
-        android:layout_width="56dp"
-        android:layout_gravity="end|bottom"
-        android:layout_height="56dp"
+    <LinearLayout
+        android:id="@+id/fabContainer"
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
         android:layout_margin="24dp"
-        android:paddingBottom="200dp"
-        app:iconSrc="@drawable/icon_my_location" />
+        android:layout_gravity="end|bottom"
+        android:layout_height="wrap_content" >
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/areas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <org.btcmap.view.IconButton
+            android:id="@+id/fab"
+            android:layout_marginTop="8dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            app:iconSrc="@drawable/icon_my_location" />
+
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

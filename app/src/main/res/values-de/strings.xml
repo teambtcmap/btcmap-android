@@ -63,4 +63,5 @@
     <string name="button_border">Schaltflächen-Rahmen</string>
     <string name="use_adaptive_colors">Adaptive Farben verwenden</string>
     <string name="reset">Zurücksetzen</string>
+    <string name="area_icon">Gebietssymbol</string>
 </resources>

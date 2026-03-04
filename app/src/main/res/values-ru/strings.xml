@@ -63,4 +63,5 @@
     <string name="button_border">Обрамление кнопки</string>
     <string name="use_adaptive_colors">Использовать адаптивные цвета</string>
     <string name="reset">Сбросить</string>
+    <string name="area_icon">Иконка области</string>
 </resources>

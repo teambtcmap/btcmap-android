@@ -63,4 +63,5 @@
     <string name="button_border">Knapp ramme</string>
     <string name="use_adaptive_colors">Bruk adaptive farger</string>
     <string name="reset">Tilbakestill</string>
+    <string name="area_icon">Områdeikon</string>
 </resources>
