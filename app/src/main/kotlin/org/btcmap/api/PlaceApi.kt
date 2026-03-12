@@ -10,10 +10,10 @@ import okhttp3.Request
 import okhttp3.coroutines.executeAsync
 import org.btcmap.settings.apiUrlV4
 import org.btcmap.settings.prefs
+import org.json.JSONObject
 import java.io.InputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 object  PlaceApi {
     private const val ENDPOINT = "places"
@@ -24,6 +24,7 @@ object  PlaceApi {
         val lon: Double,
         val icon: String,
         val name: String,
+        val localizedName: JSONObject?,
         val updatedAt: String,
         val deletedAt: String?,
         val requiredAppUrl: String?,
@@ -51,6 +52,7 @@ object  PlaceApi {
                 lon = it.getDouble("lon"),
                 icon = it.getString("icon"),
                 name = it.getString("name"),
+                localizedName = it.optJSONObject("localized_name"),
                 updatedAt = it.getString("updated_at"),
                 deletedAt = it.optString("deleted_at").ifBlank { null },
                 requiredAppUrl = it.optString("required_app_url").ifBlank { null },
@@ -79,6 +81,7 @@ object  PlaceApi {
             "lon",
             "icon",
             "name",
+            "localized_name",
             "updated_at",
             "deleted_at",
             "required_app_url",
@@ -103,7 +106,6 @@ object  PlaceApi {
                 fields.joinToString(separator = ","),
             )
             addQueryParameter("limit", "$limit")
-            addQueryParameter("lang", Locale.getDefault().language)
             if (updatedSince != null) {
                 addQueryParameter(
                     "updated_since",

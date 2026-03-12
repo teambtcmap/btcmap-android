@@ -38,6 +38,7 @@ import org.btcmap.map.getErrorColor
 import org.btcmap.map.getOnSurfaceColor
 import org.btcmap.R
 import org.btcmap.databinding.PlaceFragmentBinding
+import org.btcmap.db.table.place.getLocalizedName
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -63,7 +64,7 @@ class PlaceFragment : Fragment() {
             when (it.itemId) {
                 R.id.directions -> {
                     val place = PlaceQueries.selectById(placeId, db)
-                    val uri = "geo:${place.lat},${place.lon}?q=${place.name}".toUri()
+                    val uri = "geo:${place.lat},${place.lon}?q=${place.getLocalizedName()}".toUri()
                     val intent = Intent(Intent.ACTION_VIEW, uri)
                     requireContext().startActivity(Intent.createChooser(intent, null))
                 }
@@ -107,7 +108,7 @@ class PlaceFragment : Fragment() {
     fun setPlace(place: Place) {
         placeId = place.id
 
-        binding.toolbar.title = place.name
+        binding.toolbar.title = place.getLocalizedName()
         binding.toolbar.setSingleLine(false)
 
         binding.bundledWarning.isVisible = place.bundled

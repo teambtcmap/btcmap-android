@@ -56,6 +56,7 @@ object BundledPlaces {
             lon = this.lon,
             icon = this.icon,
             name = this.name,
+            localizedName = null,
             updatedAt = ZonedDateTime.parse("2000-01-01T00:00:00Z"),
             requiredAppUrl = null,
             boostedUntil = this.boostedUntil,

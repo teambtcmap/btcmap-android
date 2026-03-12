@@ -11,7 +11,7 @@ object PlaceQueries {
     ) {
         val sql = """
             INSERT OR REPLACE INTO ${PlaceSchema.NAME} (${Place.columns}) 
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22)
         """
 
         val stmt = db.compileStatement(sql)
@@ -29,75 +29,80 @@ object PlaceQueries {
                 } else {
                     stmt.bindString(7, row.name)
                 }
-                if (row.verifiedAt == null) {
+                if (row.localizedName == null) {
                     stmt.bindNull(8)
                 } else {
-                    stmt.bindString(8, row.verifiedAt.toString())
+                    stmt.bindString(8, row.localizedName.toString())
                 }
-                if (row.address == null) {
+                if (row.verifiedAt == null) {
                     stmt.bindNull(9)
                 } else {
-                    stmt.bindString(9, row.address)
+                    stmt.bindString(9, row.verifiedAt.toString())
                 }
-                if (row.openingHours == null) {
+                if (row.address == null) {
                     stmt.bindNull(10)
                 } else {
-                    stmt.bindString(10, row.openingHours)
+                    stmt.bindString(10, row.address)
                 }
-                if (row.phone == null) {
+                if (row.openingHours == null) {
                     stmt.bindNull(11)
                 } else {
-                    stmt.bindString(11, row.phone)
+                    stmt.bindString(11, row.openingHours)
                 }
-                if (row.website == null) {
+                if (row.phone == null) {
                     stmt.bindNull(12)
                 } else {
-                    stmt.bindString(12, row.website.toString())
+                    stmt.bindString(12, row.phone)
                 }
-                if (row.email == null) {
+                if (row.website == null) {
                     stmt.bindNull(13)
                 } else {
-                    stmt.bindString(13, row.email)
+                    stmt.bindString(13, row.website.toString())
                 }
-                if (row.twitter == null) {
+                if (row.email == null) {
                     stmt.bindNull(14)
                 } else {
-                    stmt.bindString(14, row.twitter.toString())
+                    stmt.bindString(14, row.email)
                 }
-                if (row.facebook == null) {
+                if (row.twitter == null) {
                     stmt.bindNull(15)
                 } else {
-                    stmt.bindString(15, row.facebook.toString())
+                    stmt.bindString(15, row.twitter.toString())
                 }
-                if (row.instagram == null) {
+                if (row.facebook == null) {
                     stmt.bindNull(16)
                 } else {
-                    stmt.bindString(16, row.instagram.toString())
+                    stmt.bindString(16, row.facebook.toString())
                 }
-                if (row.line == null) {
+                if (row.instagram == null) {
                     stmt.bindNull(17)
                 } else {
-                    stmt.bindString(17, row.line.toString())
+                    stmt.bindString(17, row.instagram.toString())
                 }
-                if (row.requiredAppUrl == null) {
+                if (row.line == null) {
                     stmt.bindNull(18)
                 } else {
-                    stmt.bindString(18, row.requiredAppUrl.toString())
+                    stmt.bindString(18, row.line.toString())
                 }
-                if (row.boostedUntil == null) {
+                if (row.requiredAppUrl == null) {
                     stmt.bindNull(19)
                 } else {
-                    stmt.bindString(19, row.boostedUntil.toString())
+                    stmt.bindString(19, row.requiredAppUrl.toString())
                 }
-                if (row.comments == null) {
+                if (row.boostedUntil == null) {
                     stmt.bindNull(20)
                 } else {
-                    stmt.bindLong(20, row.comments)
+                    stmt.bindString(20, row.boostedUntil.toString())
                 }
-                if (row.telegram == null) {
+                if (row.comments == null) {
                     stmt.bindNull(21)
                 } else {
-                    stmt.bindString(21, row.telegram.toString())
+                    stmt.bindLong(21, row.comments)
+                }
+                if (row.telegram == null) {
+                    stmt.bindNull(22)
+                } else {
+                    stmt.bindString(22, row.telegram.toString())
                 }
                 stmt.executeInsert()
             }

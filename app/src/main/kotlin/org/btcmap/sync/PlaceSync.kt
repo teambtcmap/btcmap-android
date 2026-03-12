@@ -58,6 +58,7 @@ object PlaceSync {
                             lon = it.lon,
                             icon = it.icon,
                             name = it.name,
+                            localizedName = it.localizedName,
                             verifiedAt = verifiedAt?.toZonedDateTime(),
                             address = it.address,
                             openingHours = it.openingHours,
