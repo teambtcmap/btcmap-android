@@ -39,6 +39,7 @@ import org.btcmap.map.getOnSurfaceColor
 import org.btcmap.R
 import org.btcmap.databinding.PlaceFragmentBinding
 import org.btcmap.db.table.place.getLocalizedName
+import org.btcmap.db.table.place.getLocalizedOpeningHours
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -269,8 +270,8 @@ class PlaceFragment : Fragment() {
         binding.email.text = place.email
         binding.email.isVisible = place.email != null
 
-        binding.openingHours.text = place.openingHours
-        binding.openingHours.isVisible = place.openingHours != null
+        binding.openingHours.text = place.getLocalizedOpeningHours()
+        binding.openingHours.isVisible = place.getLocalizedOpeningHours() != null
 
         binding.verifyOrReport.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW)

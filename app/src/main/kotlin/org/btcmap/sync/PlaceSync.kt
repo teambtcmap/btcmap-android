@@ -62,6 +62,7 @@ object PlaceSync {
                             verifiedAt = verifiedAt?.toZonedDateTime(),
                             address = it.address,
                             openingHours = it.openingHours,
+                            localizedOpeningHours = it.localizedOpeningHours,
                             phone = it.phone,
                             website = it.website?.toHttpUrlOrNull(),
                             email = it.email,

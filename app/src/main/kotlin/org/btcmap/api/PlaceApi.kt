@@ -15,7 +15,7 @@ import java.io.InputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-object  PlaceApi {
+object PlaceApi {
     private const val ENDPOINT = "places"
 
     data class GetPlacesItem(
@@ -32,6 +32,7 @@ object  PlaceApi {
         val verifiedAt: String?,
         val address: String?,
         val openingHours: String?,
+        val localizedOpeningHours: JSONObject?,
         val website: String?,
         val phone: String?,
         val email: String?,
@@ -60,6 +61,7 @@ object  PlaceApi {
                 verifiedAt = it.optString("verified_at").ifBlank { null },
                 address = it.optString("address").ifBlank { null },
                 openingHours = it.optString("opening_hours").ifBlank { null },
+                localizedOpeningHours = it.optJSONObject("localized_opening_hours"),
                 website = it.optString("website").ifBlank { null },
                 phone = it.optString("phone").ifBlank { null },
                 email = it.optString("email").ifBlank { null },
@@ -89,6 +91,7 @@ object  PlaceApi {
             "verified_at",
             "address",
             "opening_hours",
+            "localized_opening_hours",
             "website",
             "phone",
             "email",

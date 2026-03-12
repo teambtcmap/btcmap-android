@@ -21,6 +21,7 @@ data class PlaceProjectionFull(
     val verifiedAt: ZonedDateTime?,
     val address: String?,
     val openingHours: String?,
+    val localizedOpeningHours: JSONObject?,
     val phone: String?,
     val website: HttpUrl?,
     val email: String?,
@@ -52,21 +53,26 @@ data class PlaceProjectionFull(
                 verifiedAt = if (cursor.isNull(8)) null else ZonedDateTime.parse(cursor.getString(8)),
                 address = if (cursor.isNull(9)) null else cursor.getString(9),
                 openingHours = if (cursor.isNull(10)) null else cursor.getString(10),
-                phone = if (cursor.isNull(11)) null else cursor.getString(11),
-                website = if (cursor.isNull(12)) null else cursor.getString(12).toHttpUrl(),
-                email = if (cursor.isNull(13)) null else cursor.getString(13),
-                twitter = if (cursor.isNull(14)) null else cursor.getString(14).toHttpUrl(),
-                facebook = if (cursor.isNull(15)) null else cursor.getString(15).toHttpUrl(),
-                instagram = if (cursor.isNull(16)) null else cursor.getString(16).toHttpUrl(),
-                line = if (cursor.isNull(17)) null else cursor.getString(17).toHttpUrl(),
-                requiredAppUrl = if (cursor.isNull(18)) null else cursor.getString(18).toHttpUrl(),
-                boostedUntil = if (cursor.isNull(19)) null else ZonedDateTime.parse(
+                localizedOpeningHours = if (cursor.isNull(11)) null else JSONObject(
                     cursor.getString(
-                        19
+                        11
                     )
                 ),
-                comments = if (cursor.isNull(20)) null else cursor.getLong(19),
-                telegram = if (cursor.isNull(21)) null else cursor.getString(20).toHttpUrl(),
+                phone = if (cursor.isNull(12)) null else cursor.getString(12),
+                website = if (cursor.isNull(13)) null else cursor.getString(13).toHttpUrl(),
+                email = if (cursor.isNull(14)) null else cursor.getString(14),
+                twitter = if (cursor.isNull(15)) null else cursor.getString(15).toHttpUrl(),
+                facebook = if (cursor.isNull(16)) null else cursor.getString(16).toHttpUrl(),
+                instagram = if (cursor.isNull(17)) null else cursor.getString(17).toHttpUrl(),
+                line = if (cursor.isNull(18)) null else cursor.getString(18).toHttpUrl(),
+                requiredAppUrl = if (cursor.isNull(19)) null else cursor.getString(19).toHttpUrl(),
+                boostedUntil = if (cursor.isNull(20)) null else ZonedDateTime.parse(
+                    cursor.getString(
+                        20
+                    )
+                ),
+                comments = if (cursor.isNull(21)) null else cursor.getLong(21),
+                telegram = if (cursor.isNull(22)) null else cursor.getString(22).toHttpUrl(),
             )
         }
     }
@@ -74,7 +80,27 @@ data class PlaceProjectionFull(
 
 fun Place.getLocalizedName(): String? {
     val locale = Locale.getDefault().language
-    return localizedName?.getString(locale) ?: name
+    return localizedName?.optString(locale) ?: name
+}
+
+fun Place.getLocalizedOpeningHours(): String? {
+    val locale = Locale.getDefault().language
+
+    if (localizedOpeningHours != null) {
+        val localized = localizedOpeningHours.optString(locale)
+
+        if (localized.isNotBlank()) {
+            return localized
+        }
+
+        val en = localizedOpeningHours.optString("en")
+
+        if (en.isNotBlank()) {
+            return en
+        }
+    }
+
+    return openingHours
 }
 
 typealias Cluster = PlaceProjectionCluster

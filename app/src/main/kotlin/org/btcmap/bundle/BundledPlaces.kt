@@ -63,6 +63,7 @@ object BundledPlaces {
             verifiedAt = null,
             address = null,
             openingHours = null,
+            localizedOpeningHours = null,
             website = null,
             phone = null,
             email = null,

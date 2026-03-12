@@ -11,7 +11,7 @@ object PlaceQueries {
     ) {
         val sql = """
             INSERT OR REPLACE INTO ${PlaceSchema.NAME} (${Place.columns}) 
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23)
         """
 
         val stmt = db.compileStatement(sql)
@@ -49,60 +49,65 @@ object PlaceQueries {
                 } else {
                     stmt.bindString(11, row.openingHours)
                 }
-                if (row.phone == null) {
+                if (row.localizedOpeningHours == null) {
                     stmt.bindNull(12)
                 } else {
-                    stmt.bindString(12, row.phone)
+                    stmt.bindString(12, row.localizedOpeningHours.toString())
                 }
-                if (row.website == null) {
+                if (row.phone == null) {
                     stmt.bindNull(13)
                 } else {
-                    stmt.bindString(13, row.website.toString())
+                    stmt.bindString(13, row.phone)
                 }
-                if (row.email == null) {
+                if (row.website == null) {
                     stmt.bindNull(14)
                 } else {
-                    stmt.bindString(14, row.email)
+                    stmt.bindString(14, row.website.toString())
                 }
-                if (row.twitter == null) {
+                if (row.email == null) {
                     stmt.bindNull(15)
                 } else {
-                    stmt.bindString(15, row.twitter.toString())
+                    stmt.bindString(15, row.email)
                 }
-                if (row.facebook == null) {
+                if (row.twitter == null) {
                     stmt.bindNull(16)
                 } else {
-                    stmt.bindString(16, row.facebook.toString())
+                    stmt.bindString(16, row.twitter.toString())
                 }
-                if (row.instagram == null) {
+                if (row.facebook == null) {
                     stmt.bindNull(17)
                 } else {
-                    stmt.bindString(17, row.instagram.toString())
+                    stmt.bindString(17, row.facebook.toString())
                 }
-                if (row.line == null) {
+                if (row.instagram == null) {
                     stmt.bindNull(18)
                 } else {
-                    stmt.bindString(18, row.line.toString())
+                    stmt.bindString(18, row.instagram.toString())
                 }
-                if (row.requiredAppUrl == null) {
+                if (row.line == null) {
                     stmt.bindNull(19)
                 } else {
-                    stmt.bindString(19, row.requiredAppUrl.toString())
+                    stmt.bindString(19, row.line.toString())
                 }
-                if (row.boostedUntil == null) {
+                if (row.requiredAppUrl == null) {
                     stmt.bindNull(20)
                 } else {
-                    stmt.bindString(20, row.boostedUntil.toString())
+                    stmt.bindString(20, row.requiredAppUrl.toString())
                 }
-                if (row.comments == null) {
+                if (row.boostedUntil == null) {
                     stmt.bindNull(21)
                 } else {
-                    stmt.bindLong(21, row.comments)
+                    stmt.bindString(21, row.boostedUntil.toString())
                 }
-                if (row.telegram == null) {
+                if (row.comments == null) {
                     stmt.bindNull(22)
                 } else {
-                    stmt.bindString(22, row.telegram.toString())
+                    stmt.bindLong(22, row.comments)
+                }
+                if (row.telegram == null) {
+                    stmt.bindNull(23)
+                } else {
+                    stmt.bindString(23, row.telegram.toString())
                 }
                 stmt.executeInsert()
             }

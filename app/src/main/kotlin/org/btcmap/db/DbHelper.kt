@@ -23,10 +23,17 @@ class DbHelper(context: Context) :
             db.execSQL("UPDATE place SET updated_at = '2000-01-01T00:00:00Z';")
             Log.d("db", "upgraded schema v1 to v2")
         }
+
+        if (oldVersion == 2 && newVersion == 3) {
+            Log.d("db", "upgrading schema v2 to v3")
+            db.execSQL("ALTER TABLE place ADD COLUMN localized_opening_hours TEXT;")
+            db.execSQL("UPDATE place SET updated_at = '2000-01-01T00:00:00Z';")
+            Log.d("db", "upgraded schema v2 to v3")
+        }
     }
 
     companion object {
-        const val DATABASE_VERSION = 2
+        const val DATABASE_VERSION = 3
         const val DATABASE_NAME = "btcmap-2025-11-06.db"
     }
 }
