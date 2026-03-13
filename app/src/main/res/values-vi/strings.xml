@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">Sử dụng màu thích ứng</string>
     <string name="reset">Đặt lại</string>
     <string name="area_icon">Biểu tượng khu vực</string>
+    <string name="monday">Thứ Hai</string>
+    <string name="tuesday">Thứ Ba</string>
+    <string name="wednesday">Thứ Tư</string>
+    <string name="thursday">Thứ Năm</string>
+    <string name="friday">Thứ Sáu</string>
+    <string name="saturday">Thứ Bảy</string>
+    <string name="sunday">Chủ Nhật</string>
+    <string name="closed">Đóng cửa</string>
 </resources>

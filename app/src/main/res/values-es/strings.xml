@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">Usar colores adaptativos</string>
     <string name="reset">Restablecer</string>
     <string name="area_icon">Icono de área</string>
+    <string name="monday">Lunes</string>
+    <string name="tuesday">Martes</string>
+    <string name="wednesday">Miércoles</string>
+    <string name="thursday">Jueves</string>
+    <string name="friday">Viernes</string>
+    <string name="saturday">Sábado</string>
+    <string name="sunday">Domingo</string>
+    <string name="closed">Cerrado</string>
 </resources>

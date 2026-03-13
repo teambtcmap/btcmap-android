@@ -1,8 +1,10 @@
 package org.btcmap.db.table.place
 
+import android.content.Context
 import android.database.Cursor
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.btcmap.R
 import org.json.JSONObject
 import java.time.ZonedDateTime
 import java.util.Locale
@@ -83,24 +85,36 @@ fun Place.getLocalizedName(): String? {
     return localizedName?.optString(locale) ?: name
 }
 
-fun Place.getLocalizedOpeningHours(): String? {
+fun Place.getLocalizedOpeningHours(context: Context): String? {
     val locale = Locale.getDefault().language
 
-    if (localizedOpeningHours != null) {
+    val result = if (localizedOpeningHours != null) {
         val localized = localizedOpeningHours.optString(locale)
 
-        if (localized.isNotBlank()) {
-            return localized
-        }
+        localized.ifBlank {
+            val en = localizedOpeningHours.optString("en")
 
-        val en = localizedOpeningHours.optString("en")
-
-        if (en.isNotBlank()) {
-            return en
+            en.ifBlank {
+                openingHours
+            }
         }
+    } else {
+        openingHours
     }
 
-    return openingHours
+    return result?.translate(context)
+}
+
+private fun String.translate(context: Context): String {
+    return this
+        .replace("Monday", context.getString(R.string.monday), ignoreCase = true)
+        .replace("Tuesday", context.getString(R.string.tuesday), ignoreCase = true)
+        .replace("Wednesday", context.getString(R.string.wednesday), ignoreCase = true)
+        .replace("Thursday", context.getString(R.string.thursday), ignoreCase = true)
+        .replace("Friday", context.getString(R.string.friday), ignoreCase = true)
+        .replace("Saturday", context.getString(R.string.saturday), ignoreCase = true)
+        .replace("Sunday", context.getString(R.string.sunday), ignoreCase = true)
+        .replace("Closed", context.getString(R.string.closed).lowercase(), ignoreCase = true)
 }
 
 typealias Cluster = PlaceProjectionCluster

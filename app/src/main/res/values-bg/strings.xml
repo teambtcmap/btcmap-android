@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">Използвайте адаптивни цветове</string>
     <string name="reset">Нулиране</string>
     <string name="area_icon">Икона на област</string>
+    <string name="monday">Понеделник</string>
+    <string name="tuesday">Вторник</string>
+    <string name="wednesday">Сряда</string>
+    <string name="thursday">Четвъртък</string>
+    <string name="friday">Петък</string>
+    <string name="saturday">Събота</string>
+    <string name="sunday">Неделя</string>
+    <string name="closed">Затворено</string>
 </resources>

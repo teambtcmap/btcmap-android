@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">موافقت پذیر رنگوں کااستعمال کریں</string>
     <string name="reset">دوبارہ ترتیب دیں</string>
     <string name="area_icon">علاقہ کا آئیکن</string>
+    <string name="monday">پیر</string>
+    <string name="tuesday">منگل</string>
+    <string name="wednesday">بدھ</string>
+    <string name="thursday">جمعرات</string>
+    <string name="friday">جمعہ</string>
+    <string name="saturday">ہفتہ</string>
+    <string name="sunday">اتوار</string>
+    <string name="closed">بند</string>
 </resources>

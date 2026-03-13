@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">অভিযোজক রঙ ব্যবহার করুন</string>
     <string name="reset">রিসেট</string>
     <string name="area_icon">এলাকা আইকন</string>
+    <string name="monday">সোমবার</string>
+    <string name="tuesday">মঙ্গলবার</string>
+    <string name="wednesday">বুধবার</string>
+    <string name="thursday">বৃহস্পতিবার</string>
+    <string name="friday">শুক্রবার</string>
+    <string name="saturday">শনিবার</string>
+    <string name="sunday">রবিবার</string>
+    <string name="closed">বন্ধ</string>
 </resources>

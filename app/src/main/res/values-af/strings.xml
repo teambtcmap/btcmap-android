@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">Gebruik aanpassingskleuren</string>
     <string name="reset">Herstel</string>
     <string name="area_icon">Gebied-ikoon</string>
+    <string name="monday">Maandag</string>
+    <string name="tuesday">Dinsdag</string>
+    <string name="wednesday">Woensdag</string>
+    <string name="thursday">Donderdag</string>
+    <string name="friday">Vrydag</string>
+    <string name="saturday">Saterdag</string>
+    <string name="sunday">Sondag</string>
+    <string name="closed">Gesluit</string>
 </resources>

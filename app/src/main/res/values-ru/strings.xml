@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">Использовать адаптивные цвета</string>
     <string name="reset">Сбросить</string>
     <string name="area_icon">Иконка области</string>
+    <string name="monday">Понедельник</string>
+    <string name="tuesday">Вторник</string>
+    <string name="wednesday">Среда</string>
+    <string name="thursday">Четверг</string>
+    <string name="friday">Пятница</string>
+    <string name="saturday">Суббота</string>
+    <string name="sunday">Воскресенье</string>
+    <string name="closed">Закрыто</string>
 </resources>

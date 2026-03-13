@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">استفاده از رنگ‌های سازگار</string>
     <string name="reset">بازنشانی</string>
     <string name="area_icon">نماد منطقه</string>
+    <string name="monday">دوشنبه</string>
+    <string name="tuesday">سه‌شنبه</string>
+    <string name="wednesday">چهارشنبه</string>
+    <string name="thursday">پنجشنبه</string>
+    <string name="friday">جمعه</string>
+    <string name="saturday">شنبه</string>
+    <string name="sunday">یکشنبه</string>
+    <string name="closed">بسته</string>
 </resources>

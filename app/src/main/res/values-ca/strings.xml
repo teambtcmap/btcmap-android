@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">Utilitza colors adaptatius</string>
     <string name="reset">Restableix</string>
     <string name="area_icon">Icona d\'àrea</string>
+    <string name="monday">Dilluns</string>
+    <string name="tuesday">Dimarts</string>
+    <string name="wednesday">Dimecres</string>
+    <string name="thursday">Dijous</string>
+    <string name="friday">Divendres</string>
+    <string name="saturday">Dissabte</string>
+    <string name="sunday">Diumenge</string>
+    <string name="closed">Tancat</string>
 </resources>

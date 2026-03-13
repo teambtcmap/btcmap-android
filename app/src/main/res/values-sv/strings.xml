@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">Använd adaptiva färger</string>
     <string name="reset">Återställ</string>
     <string name="area_icon">Områdesikon</string>
+    <string name="monday">Måndag</string>
+    <string name="tuesday">Tisdag</string>
+    <string name="wednesday">Onsdag</string>
+    <string name="thursday">Torsdag</string>
+    <string name="friday">Fredag</string>
+    <string name="saturday">Lördag</string>
+    <string name="sunday">Söndag</string>
+    <string name="closed">Stängt</string>
 </resources>

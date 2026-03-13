@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">ใช้สีแบบปรับได้</string>
     <string name="reset">รีเซ็ต</string>
     <string name="area_icon">ไอคอนพื้นที่</string>
+    <string name="monday">วันจันทร์</string>
+    <string name="tuesday">วันอังคาร</string>
+    <string name="wednesday">วันพุธ</string>
+    <string name="thursday">วันพฤหัสบดี</string>
+    <string name="friday">วันศุกร์</string>
+    <string name="saturday">วันเสาร์</string>
+    <string name="sunday">วันอาทิตย์</string>
+    <string name="closed">ปิด</string>
 </resources>

@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">Použiť adaptívne farby</string>
     <string name="reset">Reset</string>
     <string name="area_icon">Ikona oblasti</string>
+    <string name="monday">Pondelok</string>
+    <string name="tuesday">Utorok</string>
+    <string name="wednesday">Streda</string>
+    <string name="thursday">Štvrtok</string>
+    <string name="friday">Piatok</string>
+    <string name="saturday">Sobota</string>
+    <string name="sunday">Nedeľa</string>
+    <string name="closed">Zatvorené</string>
 </resources>

@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">Adaptive Farben verwenden</string>
     <string name="reset">Zurücksetzen</string>
     <string name="area_icon">Gebietssymbol</string>
+    <string name="monday">Montag</string>
+    <string name="tuesday">Dienstag</string>
+    <string name="wednesday">Mittwoch</string>
+    <string name="thursday">Donnerstag</string>
+    <string name="friday">Freitag</string>
+    <string name="saturday">Samstag</string>
+    <string name="sunday">Sonntag</string>
+    <string name="closed">Geschlossen</string>
 </resources>

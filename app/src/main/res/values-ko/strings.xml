@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">적응형 색상 사용</string>
     <string name="reset">초기화</string>
     <string name="area_icon">영역 아이콘</string>
+    <string name="monday">월요일</string>
+    <string name="tuesday">화요일</string>
+    <string name="wednesday">수요일</string>
+    <string name="thursday">목요일</string>
+    <string name="friday">금요일</string>
+    <string name="saturday">토요일</string>
+    <string name="sunday">일요일</string>
+    <string name="closed">휴업</string>
 </resources>

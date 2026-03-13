@@ -270,8 +270,8 @@ class PlaceFragment : Fragment() {
         binding.email.text = place.email
         binding.email.isVisible = place.email != null
 
-        binding.openingHours.text = place.getLocalizedOpeningHours()
-        binding.openingHours.isVisible = place.getLocalizedOpeningHours() != null
+        binding.openingHours.text = place.getLocalizedOpeningHours(requireContext())
+        binding.openingHours.isVisible = place.getLocalizedOpeningHours(requireContext()) != null
 
         binding.verifyOrReport.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW)

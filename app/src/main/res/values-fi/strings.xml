@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">Käytä mukautuvia värejä</string>
     <string name="reset">Nollaa</string>
     <string name="area_icon">Aluekuvake</string>
+    <string name="monday">Maanantai</string>
+    <string name="tuesday">Tiistai</string>
+    <string name="wednesday">Keskiviikko</string>
+    <string name="thursday">Torstai</string>
+    <string name="friday">Perjantai</string>
+    <string name="saturday">Lauantai</string>
+    <string name="sunday">Sunnuntai</string>
+    <string name="closed">Suljettu</string>
 </resources>

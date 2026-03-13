@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">Uyarlanabilir renkleri kullan</string>
     <string name="reset">Sıfırla</string>
     <string name="area_icon">Bölge simgesi</string>
+    <string name="monday">Pazartesi</string>
+    <string name="tuesday">Salı</string>
+    <string name="wednesday">Çarşamba</string>
+    <string name="thursday">Perşembe</string>
+    <string name="friday">Cuma</string>
+    <string name="saturday">Cumartesi</string>
+    <string name="sunday">Pazar</string>
+    <string name="closed">Kapalı</string>
 </resources>

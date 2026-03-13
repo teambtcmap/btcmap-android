@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">अनुकूली रंगों का उपयोग करें</string>
     <string name="reset">रीसेट</string>
     <string name="area_icon">क्षेत्र आइकन</string>
+    <string name="monday">सोमवार</string>
+    <string name="tuesday">मंगलवार</string>
+    <string name="wednesday">बुधवार</string>
+    <string name="thursday">गुरुवार</string>
+    <string name="friday">शुक्रवार</string>
+    <string name="saturday">शनिवार</string>
+    <string name="sunday">रविवार</string>
+    <string name="closed">बंद</string>
 </resources>

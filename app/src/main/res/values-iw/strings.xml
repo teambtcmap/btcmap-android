@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">השתמש בצבעים אדפטיביים</string>
     <string name="reset">אפס</string>
     <string name="area_icon">אייקון אזור</string>
+    <string name="monday">יום שני</string>
+    <string name="tuesday">יום שלישי</string>
+    <string name="wednesday">יום רביעי</string>
+    <string name="thursday">יום חמישי</string>
+    <string name="friday">יום שישי</string>
+    <string name="saturday">יום שבת</string>
+    <string name="sunday">יום ראשון</string>
+    <string name="closed">סגור</string>
 </resources>

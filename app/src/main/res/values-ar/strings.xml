@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">استخدم الألوان التكيفية</string>
     <string name="reset">إعادة تعيين</string>
     <string name="area_icon">أيقونة المنطقة</string>
+    <string name="monday">الاثنين</string>
+    <string name="tuesday">الثلاثاء</string>
+    <string name="wednesday">الأربعاء</string>
+    <string name="thursday">الخميس</string>
+    <string name="friday">الجمعة</string>
+    <string name="saturday">السبت</string>
+    <string name="sunday">الأحد</string>
+    <string name="closed">مغلق</string>
 </resources>

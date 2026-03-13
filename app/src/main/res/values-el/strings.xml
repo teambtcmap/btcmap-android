@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">Χρήση προσαρμοστικών χρωμάτων</string>
     <string name="reset">Επαναφορά</string>
     <string name="area_icon">Εικονίδιο περιοχής</string>
+    <string name="monday">Δευτέρα</string>
+    <string name="tuesday">Τρίτη</string>
+    <string name="wednesday">Τετάρτη</string>
+    <string name="thursday">Πέμπτη</string>
+    <string name="friday">Παρασκευή</string>
+    <string name="saturday">Σάββατο</string>
+    <string name="sunday">Κυριακή</string>
+    <string name="closed">Κλειστό</string>
 </resources>

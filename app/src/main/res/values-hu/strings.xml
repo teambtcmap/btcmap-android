@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">Használj adaptív színeket</string>
     <string name="reset">Visszaállítás</string>
     <string name="area_icon">Terület ikon</string>
+    <string name="monday">Hétfő</string>
+    <string name="tuesday">Kedd</string>
+    <string name="wednesday">Szerda</string>
+    <string name="thursday">Csütörtök</string>
+    <string name="friday">Péntek</string>
+    <string name="saturday">Szombat</string>
+    <string name="sunday">Vasárnap</string>
+    <string name="closed">Zárva</string>
 </resources>

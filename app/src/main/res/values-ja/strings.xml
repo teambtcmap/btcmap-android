@@ -64,4 +64,12 @@
     <string name="use_adaptive_colors">適応色を使用</string>
     <string name="reset">リセット</string>
     <string name="area_icon">エリアアイコン</string>
+    <string name="monday">月曜日</string>
+    <string name="tuesday">火曜日</string>
+    <string name="wednesday">水曜日</string>
+    <string name="thursday">木曜日</string>
+    <string name="friday">金曜日</string>
+    <string name="saturday">土曜日</string>
+    <string name="sunday">日曜日</string>
+    <string name="closed">閉店</string>
 </resources>
