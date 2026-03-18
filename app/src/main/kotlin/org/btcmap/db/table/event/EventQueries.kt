@@ -3,11 +3,9 @@ package org.btcmap.db.table.event
 import android.database.sqlite.SQLiteDatabase
 import org.btcmap.db.table.event.EventProjectionFull.Companion.fromCursor
 
-object EventQueries {
-    fun insert(
-        rows: List<Event>,
-        db: SQLiteDatabase,
-    ) {
+class EventQueries(val db: SQLiteDatabase) {
+
+    fun insert(rows: List<Event>) {
         val sql = """
             INSERT INTO ${EventSchema.NAME} (${Event.columns}) 
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
@@ -33,7 +31,7 @@ object EventQueries {
         }
     }
 
-    fun selectAll(db: SQLiteDatabase): List<Event> {
+    fun selectAll(): List<Event> {
         val cursor = db.rawQuery(
             """
                 SELECT ${EventProjectionFull.columns}
@@ -53,7 +51,7 @@ object EventQueries {
         }
     }
 
-    fun selectById(id: Long, db: SQLiteDatabase): Event? {
+    fun selectById(id: Long): Event? {
         val cursor = db.rawQuery(
             """
                 SELECT ${EventProjectionFull.columns}
@@ -71,7 +69,7 @@ object EventQueries {
         }
     }
 
-    fun deleteAll(db: SQLiteDatabase): Int {
+    fun deleteAll(): Int {
         return db.delete(
             EventSchema.NAME,
             null,

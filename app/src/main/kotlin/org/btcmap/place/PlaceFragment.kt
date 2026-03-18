@@ -25,18 +25,16 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.recyclerview.widget.LinearLayoutManager
 import org.btcmap.boost.BoostFragment
-import org.btcmap.db.db
 import org.btcmap.db.table.place.Place
-import org.btcmap.db.table.comment.CommentQueries
 import org.btcmap.comment.AddCommentFragment
 import org.btcmap.comment.CommentsAdapter
 import org.btcmap.comment.CommentsAdapterItem
 import org.btcmap.comment.CommentsFragment
-import org.btcmap.db.table.place.PlaceQueries
 import org.btcmap.typeface.iconTypeface
 import org.btcmap.map.getErrorColor
 import org.btcmap.map.getOnSurfaceColor
 import org.btcmap.R
+import org.btcmap.app.db
 import org.btcmap.databinding.PlaceFragmentBinding
 import org.btcmap.db.table.place.getLocalizedName
 import org.btcmap.db.table.place.getLocalizedOpeningHours
@@ -64,7 +62,7 @@ class PlaceFragment : Fragment() {
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.directions -> {
-                    val place = PlaceQueries.selectById(placeId, db)
+                    val place = db().place.selectById(placeId)
                     val uri = "geo:${place.lat},${place.lon}?q=${place.getLocalizedName()}".toUri()
                     val intent = Intent(Intent.ACTION_VIEW, uri)
                     requireContext().startActivity(Intent.createChooser(intent, null))
@@ -309,7 +307,7 @@ class PlaceFragment : Fragment() {
             }
         }
 
-        val comments = CommentQueries.selectByPlaceId(place.id, db)
+        val comments = db().comment.selectByPlaceId(place.id)
         binding.commentsTitle.text = getString(R.string.comments_d, comments.size)
         binding.commentsTitle.isVisible = comments.isNotEmpty()
         binding.comments.text = getString(R.string.comments_d, comments.size)

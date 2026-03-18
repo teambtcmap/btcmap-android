@@ -4,10 +4,10 @@ import android.database.sqlite.SQLiteDatabase
 import org.btcmap.db.table.comment.CommentProjectionFull.Companion.fromCursor
 import java.time.ZonedDateTime
 
-object CommentQueries {
+class CommentQueries(private val db: SQLiteDatabase) {
+
     fun insert(
         rows: List<Comment>,
-        db: SQLiteDatabase,
     ) {
         val sql = """
             INSERT INTO ${CommentSchema.NAME} (${Comment.columns}) 
@@ -28,7 +28,7 @@ object CommentQueries {
         }
     }
 
-    fun selectByPlaceId(placeId: Long, db: SQLiteDatabase): List<Comment> {
+    fun selectByPlaceId(placeId: Long): List<Comment> {
         val cursor = db.rawQuery(
             """
                 SELECT ${Comment.columns}
@@ -50,14 +50,14 @@ object CommentQueries {
         }
     }
 
-    fun selectMaxUpdatedAt(db: SQLiteDatabase): ZonedDateTime? {
+    fun selectMaxUpdatedAt(): ZonedDateTime? {
         db.rawQuery("SELECT max(updated_at) FROM ${CommentSchema.NAME}", null).use {
             it.moveToFirst()
             return if (it.isNull(0)) null else ZonedDateTime.parse(it.getString(0))
         }
     }
 
-    fun deleteById(id: Long, db: SQLiteDatabase): Int {
+    fun deleteById(id: Long): Int {
         return db.delete(
             CommentSchema.NAME,
             "${CommentSchema.Columns.Id.sqlName} = ?1",

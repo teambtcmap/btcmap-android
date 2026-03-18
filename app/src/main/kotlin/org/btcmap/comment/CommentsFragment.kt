@@ -15,12 +15,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import org.btcmap.db.db
-import org.btcmap.db.table.comment.CommentQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
+import org.btcmap.app.db
 import org.btcmap.databinding.CommentsFragmentBinding
 import org.btcmap.sync.CommentSync
 import java.time.format.DateTimeFormatter
@@ -86,7 +85,7 @@ class CommentsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 val comments = withContext(Dispatchers.IO) {
-                    CommentQueries.selectByPlaceId(args.placeId, db)
+                    db().comment.selectByPlaceId(args.placeId)
                 }
 
                 val commentDateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
@@ -98,9 +97,9 @@ class CommentsFragment : Fragment() {
                     )
                 })
 
-                if (CommentSync.run(db).rowsAffected > 0) {
+                if (CommentSync.run(db()).rowsAffected > 0) {
                     val comments = withContext(Dispatchers.IO) {
-                        CommentQueries.selectByPlaceId(args.placeId, db)
+                        db().comment.selectByPlaceId(args.placeId)
                     }
 
                     adapter.submitList(comments.map {

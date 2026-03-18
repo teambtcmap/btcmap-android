@@ -1,13 +1,11 @@
 package org.btcmap.bundle
 
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
-import androidx.core.database.sqlite.transaction
 import org.btcmap.db.table.place.Place
-import org.btcmap.db.table.place.PlaceQueries
 import org.btcmap.json.toJsonArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.btcmap.db.Database
 import org.json.JSONObject
 import java.io.InputStream
 import java.time.ZonedDateTime
@@ -15,18 +13,18 @@ import java.time.ZonedDateTime
 object BundledPlaces {
     const val FILE_NAME = "bundled-places.json"
 
-    suspend fun import(ctx: Context, db: SQLiteDatabase): Boolean {
+    suspend fun import(ctx: Context, db: Database): Boolean {
         var hadDbWrites = false
 
         withContext(Dispatchers.IO) {
-            if (PlaceQueries.selectCount(db) > 0) {
+            if (db.place.selectCount() > 0) {
                 return@withContext
             }
             if (!ctx.resources.assets.list("")!!.contains(FILE_NAME)) {
                 return@withContext
             }
             val bundledPlaces = ctx.assets.open(FILE_NAME).use { it.toBundledPlaces() }
-            db.transaction { PlaceQueries.insert(bundledPlaces.map { it.toPlace() }, this) }
+            db.place.insert(bundledPlaces.map { it.toPlace() })
             hadDbWrites = true
         }
 

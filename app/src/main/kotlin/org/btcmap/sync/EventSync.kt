@@ -1,20 +1,18 @@
 package org.btcmap.sync
 
-import android.database.sqlite.SQLiteDatabase
 import android.util.Log
-import androidx.core.database.sqlite.transaction
 import org.btcmap.api.EventApi
 import org.btcmap.db.table.event.Event
-import org.btcmap.db.table.event.EventQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.btcmap.db.Database
 import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 object EventSync {
 
-    suspend fun run(db: SQLiteDatabase): Report {
+    suspend fun run(db: Database): Report {
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
             val events = try {
@@ -28,8 +26,8 @@ object EventSync {
             }
 
             db.transaction {
-                EventQueries.deleteAll(this)
-                EventQueries.insert(events.map {
+                db.event.deleteAll()
+                db.event.insert(events.map {
                     Event(
                         id = it.id,
                         lat = it.lat,
@@ -39,7 +37,7 @@ object EventSync {
                         startsAt = it.startsAt,
                         endsAt = it.endsAt,
                     )
-                }, this)
+                })
             }
 
             Report(

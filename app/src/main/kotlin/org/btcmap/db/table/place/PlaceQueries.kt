@@ -4,11 +4,9 @@ import android.database.sqlite.SQLiteDatabase
 import org.btcmap.db.table.place.PlaceProjectionFull.Companion.fromCursor
 import java.time.ZonedDateTime
 
-object PlaceQueries {
-    fun insert(
-        rows: List<Place>,
-        db: SQLiteDatabase,
-    ) {
+class PlaceQueries(val db: SQLiteDatabase) {
+
+    fun insert(rows: List<Place>) {
         val sql = """
             INSERT OR REPLACE INTO ${PlaceSchema.NAME} (${Place.columns}) 
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23)
@@ -114,7 +112,7 @@ object PlaceQueries {
         }
     }
 
-    fun selectById(id: Long, db: SQLiteDatabase): Place {
+    fun selectById(id: Long): Place {
         val cursor = db.rawQuery(
             """
                 SELECT ${Place.columns}
@@ -128,7 +126,7 @@ object PlaceQueries {
         return fromCursor(cursor)
     }
 
-    fun selectBySearchString(searchString: String, db: SQLiteDatabase): List<Place> {
+    fun selectBySearchString(searchString: String): List<Place> {
         val cursor = db.rawQuery(
             """
                 SELECT ${Place.columns}
@@ -149,140 +147,7 @@ object PlaceQueries {
         }
     }
 
-    fun selectClusters(
-        stepLat: Double,
-        stepLon: Double,
-        includeMerchants: Boolean,
-        includeExchanges: Boolean,
-        db: SQLiteDatabase,
-    ): List<Cluster> {
-        val where = if (includeMerchants && includeExchanges) {
-            ""
-        } else if (includeMerchants) {
-            "WHERE ${PlaceSchema.Columns.Icon} <> 'local_atm' AND ${PlaceSchema.Columns.Icon} <> 'currency_exchange'"
-        } else if (includeExchanges) {
-            "WHERE ${PlaceSchema.Columns.Icon} = 'local_atm' OR ${PlaceSchema.Columns.Icon} = 'currency_exchange'"
-        } else {
-            return emptyList()
-        }
-
-        val sql = """
-            SELECT
-                count(*),
-                ${PlaceSchema.Columns.Id},
-                avg(${PlaceSchema.Columns.Lat}) AS ${PlaceSchema.Columns.Lat},
-                avg(${PlaceSchema.Columns.Lon}) AS ${PlaceSchema.Columns.Lon},
-                ${PlaceSchema.Columns.Icon},
-                ${PlaceSchema.Columns.BoostedUntil},
-                ${PlaceSchema.Columns.RequiredAppUrl},
-                ${PlaceSchema.Columns.Comments}
-            FROM ${PlaceSchema.NAME}
-            $where
-            GROUP BY round(${PlaceSchema.Columns.Lat} / ?1) * ?1, round(${PlaceSchema.Columns.Lon} / ?2) * ?2
-            ORDER BY ${PlaceSchema.Columns.Lat} DESC
-        """
-
-        val cursor = db.rawQuery(
-            sql,
-            arrayOf(stepLat.toString(), stepLon.toString())
-        )
-
-        cursor.use {
-            val rows = mutableListOf<Cluster>()
-
-            while (cursor.moveToNext()) {
-                rows.add(
-                    Cluster(
-                        count = it.getLong(0),
-                        id = it.getLong(1),
-                        lat = it.getDouble(2),
-                        lon = it.getDouble(3),
-                        iconId = it.getString(4),
-                        boostExpires = if (it.isNull(5)) null else ZonedDateTime.parse(
-                            it.getString(
-                                5,
-                            )
-                        ),
-                        requiresCompanionApp = !it.isNull(6),
-                        comments = if (it.isNull(7)) 0 else it.getLong(7),
-                    )
-                )
-            }
-
-            return rows
-        }
-    }
-
-    fun selectWithoutClustering(
-        minLat: Double,
-        maxLat: Double,
-        minLon: Double,
-        maxLon: Double,
-        includeMerchants: Boolean,
-        includeExchanges: Boolean,
-        db: SQLiteDatabase,
-    ): List<Cluster> {
-        val where = if (includeMerchants && includeExchanges) {
-            ""
-        } else if (includeMerchants) {
-            "AND ${PlaceSchema.Columns.Icon} <> 'local_atm' AND ${PlaceSchema.Columns.Icon} <> 'currency_exchange'"
-        } else if (includeExchanges) {
-            "AND ${PlaceSchema.Columns.Icon} = 'local_atm' AND ${PlaceSchema.Columns.Icon} = 'currency_exchange'"
-        } else {
-            return emptyList()
-        }
-
-        val sql = """
-            SELECT
-                ${PlaceSchema.Columns.Id},
-                ${PlaceSchema.Columns.Lat},
-                ${PlaceSchema.Columns.Lon},
-                ${PlaceSchema.Columns.Icon},
-                ${PlaceSchema.Columns.BoostedUntil},
-                ${PlaceSchema.Columns.RequiredAppUrl},
-                ${PlaceSchema.Columns.Comments}
-            FROM ${PlaceSchema.NAME}
-            WHERE
-                ${PlaceSchema.Columns.Lat} > ?1
-                AND ${PlaceSchema.Columns.Lat} < ?2
-                AND ${PlaceSchema.Columns.Lon} > ?3
-                AND ${PlaceSchema.Columns.Lon} < ?4 
-                $where
-            ORDER BY ${PlaceSchema.Columns.Lat} DESC
-        """
-
-        val cursor = db.rawQuery(
-            sql,
-            arrayOf(minLat.toString(), maxLat.toString(), minLon.toString(), maxLon.toString())
-        )
-
-        cursor.use {
-            val rows = mutableListOf<Cluster>()
-
-            while (cursor.moveToNext()) {
-                rows.add(
-                    Cluster(
-                        count = 1,
-                        id = it.getLong(0),
-                        lat = it.getDouble(1),
-                        lon = it.getDouble(2),
-                        iconId = it.getString(3),
-                        boostExpires = if (it.isNull(4)) null else ZonedDateTime.parse(
-                            it.getString(
-                                4,
-                            )
-                        ),
-                        requiresCompanionApp = !it.isNull(5),
-                        comments = if (it.isNull(6)) 0 else it.getLong(6),
-                    )
-                )
-            }
-
-            return rows
-        }
-    }
-
-    fun selectMerchants(db: SQLiteDatabase): List<Cluster> {
+    fun selectMerchants(): List<Cluster> {
         val sql = """
             SELECT
                 ${PlaceSchema.Columns.Id},
@@ -326,7 +191,7 @@ object PlaceQueries {
         }
     }
 
-    fun selectExchanges(db: SQLiteDatabase): List<Cluster> {
+    fun selectExchanges(): List<Cluster> {
         val sql = """
             SELECT
                 ${PlaceSchema.Columns.Id},
@@ -370,7 +235,7 @@ object PlaceQueries {
         }
     }
 
-    fun selectMaxUpdatedAt(db: SQLiteDatabase): ZonedDateTime? {
+    fun selectMaxUpdatedAt(): ZonedDateTime? {
         db.rawQuery("SELECT max(${PlaceSchema.Columns.UpdatedAt}) FROM ${PlaceSchema.NAME}", null)
             .use {
                 it.moveToFirst()
@@ -378,14 +243,14 @@ object PlaceQueries {
             }
     }
 
-    fun selectCount(db: SQLiteDatabase): Long {
+    fun selectCount(): Long {
         db.rawQuery("SELECT count(*) FROM ${PlaceSchema.NAME}", null).use {
             it.moveToFirst()
             return it.getLong(0)
         }
     }
 
-    fun deleteById(id: Long, db: SQLiteDatabase): Int {
+    fun deleteById(id: Long): Int {
         return db.delete(
             PlaceSchema.NAME,
             "${PlaceSchema.Columns.Id.sqlName} = ?1",

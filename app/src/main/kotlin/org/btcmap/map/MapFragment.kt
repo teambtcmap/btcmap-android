@@ -37,11 +37,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import org.btcmap.bundle.BundledPlaces
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.btcmap.db.db
 import org.btcmap.db.table.event.Event
-import org.btcmap.db.table.event.EventQueries
 import org.btcmap.db.table.place.Place
-import org.btcmap.db.table.place.PlaceQueries
 import org.btcmap.place.PlaceFragment
 import org.btcmap.api.AreasApi
 import org.btcmap.http.httpClient
@@ -87,6 +84,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
+import org.btcmap.app.db
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
 import org.maplibre.android.style.layers.SymbolLayer
@@ -330,19 +328,19 @@ class MapFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.sync.isVisible = true
 
-                if (BundledPlaces.import(requireContext(), db)) {
+                if (BundledPlaces.import(requireContext(), db())) {
                     setFilter(filter)
                 }
 
-                if (PlaceSync.run(db).rowsAffected > 0) {
+                if (PlaceSync.run(db()).rowsAffected > 0) {
                     setFilter(filter)
                 }
 
-                if (EventSync.run(db).rowsAffected > 0) {
+                if (EventSync.run(db()).rowsAffected > 0) {
                     setFilter(filter)
                 }
 
-                if (CommentSync.run(db).rowsAffected > 0) {
+                if (CommentSync.run(db()).rowsAffected > 0) {
                     setFilter(filter)
                 }
 
@@ -370,7 +368,7 @@ class MapFragment : Fragment() {
             binding.searchView.clearText()
             binding.searchView.hide()
 
-            val place = PlaceQueries.selectById(row.placeId, db)
+            val place = db().place.selectById(row.placeId)
 
             if (place.isMerchant()) {
                 binding.showMerchants.performClick()
@@ -493,7 +491,7 @@ class MapFragment : Fragment() {
                     val idValue = feature.getProperty("id")
                     if (idValue != null) {
                         val eventId = idValue.asLong
-                        val event = EventQueries.selectById(eventId, db)
+                        val event = db().event.selectById(eventId)
                         if (event != null) {
                             val intent =
                                 Intent(Intent.ACTION_VIEW, event.website.toString().toUri())
@@ -507,7 +505,7 @@ class MapFragment : Fragment() {
 
                 if (idValue != null) {
                     val placeId = idValue.asLong
-                    val place = PlaceQueries.selectById(placeId, db)
+                    val place = db().place.selectById(placeId)
                     viewLifecycleOwner.lifecycleScope.launch { selectPlace(place) }
                     return@addOnMapClickListener true
                 }
@@ -1077,7 +1075,7 @@ class MapFragment : Fragment() {
         clearOtherSources(merchantsSource)
         viewLifecycleOwner.lifecycleScope.launch {
             val merchants =
-                withContext(Dispatchers.IO) { PlaceQueries.selectMerchants(db).toGeoJson() }
+                withContext(Dispatchers.IO) { db().place.selectMerchants().toGeoJson() }
             merchantsSource.setGeoJson(merchants)
         }
     }
@@ -1086,7 +1084,7 @@ class MapFragment : Fragment() {
         clearOtherSources(eventsSource)
         viewLifecycleOwner.lifecycleScope.launch {
             val events =
-                withContext(Dispatchers.IO) { EventQueries.selectAll(db).toEventsGeoJson() }
+                withContext(Dispatchers.IO) { db().event.selectAll().toEventsGeoJson() }
             eventsSource.setGeoJson(events)
         }
     }
@@ -1095,7 +1093,7 @@ class MapFragment : Fragment() {
         clearOtherSources(exchangesSource)
         viewLifecycleOwner.lifecycleScope.launch {
             val exchanges =
-                withContext(Dispatchers.IO) { PlaceQueries.selectExchanges(db).toGeoJson() }
+                withContext(Dispatchers.IO) { db().place.selectExchanges().toGeoJson() }
             exchangesSource.setGeoJson(exchanges)
         }
     }
@@ -1196,7 +1194,7 @@ class MapFragment : Fragment() {
             _searchResults.update { emptyList() }
         } else {
             val unsortedPlaces = withContext(Dispatchers.IO) {
-                PlaceQueries.selectBySearchString(searchString, db)
+                db().place.selectBySearchString(searchString)
             }
 
             val sortedPlaces = unsortedPlaces.sortedBy {

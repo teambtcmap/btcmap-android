@@ -1,14 +1,12 @@
 package org.btcmap.sync
 
-import android.database.sqlite.SQLiteDatabase
 import android.util.Log
-import androidx.core.database.sqlite.transaction
 import org.btcmap.api.CommentApi
 import org.btcmap.api.CommentApi.GetCommentsItem
 import org.btcmap.db.table.comment.Comment
-import org.btcmap.db.table.comment.CommentQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.btcmap.db.Database
 import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
@@ -22,11 +20,11 @@ object CommentSync {
         val rowsAffected: Long,
     )
 
-    suspend fun run(db: SQLiteDatabase): Report {
+    suspend fun run(db: Database): Report {
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
             var rowsAffected = 0L
-            var maxKnownUpdatedAt = CommentQueries.selectMaxUpdatedAt(db)
+            var maxKnownUpdatedAt = db.comment.selectMaxUpdatedAt()
 
             while (true) {
                 val delta = try {
@@ -49,10 +47,10 @@ object CommentSync {
                 val deleted = delta.filter { it.deletedAt != null }
 
                 db.transaction {
-                    CommentQueries.insert(newOrChanged.map { it.toComment() }, db)
+                    db.comment.insert(newOrChanged.map { it.toComment() })
 
                     deleted.forEach {
-                        CommentQueries.deleteById(it.id, db)
+                        db.comment.deleteById(it.id)
                     }
                 }
 

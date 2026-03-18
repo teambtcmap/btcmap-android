@@ -1,14 +1,12 @@
 package org.btcmap.sync
 
-import android.database.sqlite.SQLiteDatabase
 import android.util.Log
-import androidx.core.database.sqlite.transaction
 import org.btcmap.api.PlaceApi
 import org.btcmap.db.table.place.Place
-import org.btcmap.db.table.place.PlaceQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.btcmap.db.Database
 import org.btcmap.time.toZonedDateTime
 import java.time.Duration
 import java.time.ZoneOffset
@@ -17,11 +15,11 @@ import java.time.ZonedDateTime
 object PlaceSync {
     private const val BATCH_SIZE = 10_000L
 
-    suspend fun run(db: SQLiteDatabase): Report {
+    suspend fun run(db: Database): Report {
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
             var rowsAffected = 0L
-            var maxKnownUpdatedAt = PlaceQueries.selectMaxUpdatedAt(db)
+            var maxKnownUpdatedAt = db.place.selectMaxUpdatedAt()
             while (true) {
                 val delta = try {
                     PlaceApi.getPlaces(maxKnownUpdatedAt, BATCH_SIZE)
@@ -43,7 +41,7 @@ object PlaceSync {
                 val deleted = delta.filter { it.deletedAt != null }
 
                 db.transaction {
-                    PlaceQueries.insert(newOrChanged.map {
+                    db.place.insert(newOrChanged.map {
                         val verifiedAt = if (it.verifiedAt == null) {
                             null
                         } else {
@@ -75,12 +73,12 @@ object PlaceSync {
                             comments = it.comments,
                             telegram = it.telegram,
                         )
-                    }, db)
+                    })
 
-                    deleted.forEach { PlaceQueries.deleteById(it.id, db) }
-
-                    rowsAffected += delta.size
+                    deleted.forEach { db.place.deleteById(it.id) }
                 }
+                
+                rowsAffected += delta.size
 
                 if (delta.size < BATCH_SIZE) {
                     break
