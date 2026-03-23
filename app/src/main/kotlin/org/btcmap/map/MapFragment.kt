@@ -75,7 +75,6 @@ import org.btcmap.settings.uri
 import org.btcmap.sync.CommentSync
 import org.btcmap.sync.EventSync
 import org.btcmap.sync.PlaceSync
-import org.btcmap.db.table.PlaceProjectionCluster
 import org.btcmap.fragment.dpToPx
 import org.btcmap.icon.init
 import org.btcmap.icon.matcher
@@ -85,6 +84,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.btcmap.app.db
+import org.btcmap.db.table.Cluster
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
 import org.maplibre.android.style.layers.SymbolLayer
@@ -580,7 +580,7 @@ class MapFragment : Fragment() {
         insetsController?.isAppearanceLightStatusBars = !nightMode
     }
 
-    private fun List<PlaceProjectionCluster>.toGeoJson(): String {
+    private fun List<Cluster>.toGeoJson(): String {
         val sb = StringBuilder()
         sb.append(
             """

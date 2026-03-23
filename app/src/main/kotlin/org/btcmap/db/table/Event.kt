@@ -70,11 +70,10 @@ data class EventProjectionFull(
 }
 
 class EventQueries(private val conn: SQLiteConnection) {
-
     fun insert(rows: List<Event>) {
         val sql = """
             INSERT INTO ${EventSchema.TABLE_NAME} (${Event.columns}) 
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);
         """
 
         conn.prepare(sql).use { stmt ->
@@ -95,7 +94,7 @@ class EventQueries(private val conn: SQLiteConnection) {
         val stmt = conn.prepare(
             """
                 SELECT ${EventProjectionFull.columns}
-                FROM ${EventSchema.TABLE_NAME}
+                FROM ${EventSchema.TABLE_NAME};
             """
         )
 
@@ -115,7 +114,7 @@ class EventQueries(private val conn: SQLiteConnection) {
             """
                 SELECT ${EventProjectionFull.columns}
                 FROM ${EventSchema.TABLE_NAME}
-                WHERE id = ?1
+                WHERE id = ?1;
             """
         )
         stmt.bindLong(1, id)
@@ -129,6 +128,6 @@ class EventQueries(private val conn: SQLiteConnection) {
     }
 
     fun deleteAll() {
-        conn.prepare("DELETE FROM ${EventSchema.TABLE_NAME}").use { it.step() }
+        conn.prepare("DELETE FROM ${EventSchema.TABLE_NAME};").use { it.step() }
     }
 }

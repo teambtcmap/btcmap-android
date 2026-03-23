@@ -1,10 +1,8 @@
 package org.btcmap.db.table
 
-import android.content.Context
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
 import okhttp3.HttpUrl
-import org.btcmap.R
 import org.btcmap.db.bindHttpUrlOrNull
 import org.btcmap.db.bindJsonObjectOrNull
 import org.btcmap.db.bindLongOrNull
@@ -17,7 +15,6 @@ import org.btcmap.db.getTextOrNull
 import org.btcmap.db.getZonedDateTimeOrNull
 import org.json.JSONObject
 import java.time.ZonedDateTime
-import java.util.Locale
 
 object PlaceSchema {
     const val TABLE_NAME = "place"
@@ -142,43 +139,6 @@ data class PlaceProjectionFull(
             )
         }
     }
-}
-
-fun Place.getLocalizedName(): String? {
-    val locale = Locale.getDefault().language
-    return localizedName?.optString(locale) ?: name
-}
-
-fun Place.getLocalizedOpeningHours(context: Context): String? {
-    val locale = Locale.getDefault().language
-
-    val result = if (localizedOpeningHours != null) {
-        val localized = localizedOpeningHours.optString(locale)
-
-        localized.ifBlank {
-            val en = localizedOpeningHours.optString("en")
-
-            en.ifBlank {
-                openingHours
-            }
-        }
-    } else {
-        openingHours
-    }
-
-    return result?.translate(context)
-}
-
-private fun String.translate(context: Context): String {
-    return this
-        .replace("Monday", context.getString(R.string.monday), ignoreCase = true)
-        .replace("Tuesday", context.getString(R.string.tuesday), ignoreCase = true)
-        .replace("Wednesday", context.getString(R.string.wednesday), ignoreCase = true)
-        .replace("Thursday", context.getString(R.string.thursday), ignoreCase = true)
-        .replace("Friday", context.getString(R.string.friday), ignoreCase = true)
-        .replace("Saturday", context.getString(R.string.saturday), ignoreCase = true)
-        .replace("Sunday", context.getString(R.string.sunday), ignoreCase = true)
-        .replace("Closed", context.getString(R.string.closed).lowercase(), ignoreCase = true)
 }
 
 typealias Cluster = PlaceProjectionCluster

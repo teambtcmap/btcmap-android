@@ -36,8 +36,8 @@ import org.btcmap.map.getOnSurfaceColor
 import org.btcmap.R
 import org.btcmap.app.db
 import org.btcmap.databinding.PlaceFragmentBinding
-import org.btcmap.db.table.getLocalizedName
-import org.btcmap.db.table.getLocalizedOpeningHours
+import org.btcmap.i18n.getLocalizedName
+import org.btcmap.i18n.getLocalizedOpeningHours
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle

@@ -2,6 +2,7 @@ package org.btcmap.db.table
 
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
+import org.btcmap.db.getZonedDateTimeOrNull
 import java.time.ZonedDateTime
 
 object CommentSchema {
@@ -39,9 +40,7 @@ data class CommentProjectionFull(
     val createdAt: ZonedDateTime,
     val updatedAt: ZonedDateTime,
 ) {
-
     companion object {
-
         val columns: String
             get() {
                 return CommentSchema.Columns.entries.joinToString(",") { it.sqlName }
@@ -60,11 +59,10 @@ data class CommentProjectionFull(
 }
 
 class CommentQueries(private val conn: SQLiteConnection) {
-
     fun insert(rows: List<Comment>) {
         val sql = """
             INSERT INTO ${CommentSchema.TABLE_NAME} (${Comment.columns})
-            VALUES (?1, ?2, ?3, ?4, ?5)
+            VALUES (?1, ?2, ?3, ?4, ?5);
         """
 
         val stmt = conn.prepare(sql)
@@ -87,7 +85,7 @@ class CommentQueries(private val conn: SQLiteConnection) {
                 SELECT ${Comment.columns}
                 FROM ${CommentSchema.TABLE_NAME}
                 WHERE ${CommentSchema.Columns.PlaceId} = ?1
-                ORDER BY ${CommentSchema.Columns.CreatedAt} DESC
+                ORDER BY ${CommentSchema.Columns.CreatedAt} DESC;
             """
         )
         stmt.bindLong(1, placeId)
@@ -104,16 +102,17 @@ class CommentQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectMaxUpdatedAt(): ZonedDateTime? {
-        conn.prepare("SELECT max(updated_at) FROM ${CommentSchema.TABLE_NAME}").use {
+        conn.prepare("SELECT max(updated_at) FROM ${CommentSchema.TABLE_NAME};").use {
             it.step()
-            return if (it.isNull(0)) null else ZonedDateTime.parse(it.getText(0))
+            return it.getZonedDateTimeOrNull(0)
         }
     }
 
     fun deleteById(id: Long) {
-        conn.prepare("DELETE FROM ${CommentSchema.TABLE_NAME} WHERE ${CommentSchema.Columns.Id.sqlName} = ?1").use {
-            it.bindLong(1, id)
-            it.step()
-        }
+        conn.prepare("DELETE FROM ${CommentSchema.TABLE_NAME} WHERE ${CommentSchema.Columns.Id.sqlName} = ?1;")
+            .use {
+                it.bindLong(1, id)
+                it.step()
+            }
     }
 }
