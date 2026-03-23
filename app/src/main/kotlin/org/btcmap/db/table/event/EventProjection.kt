@@ -1,6 +1,6 @@
 package org.btcmap.db.table.event
 
-import android.database.Cursor
+import androidx.sqlite.SQLiteStatement
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.time.ZonedDateTime
@@ -22,15 +22,15 @@ data class EventProjectionFull(
                 return EventSchema.Columns.entries.joinToString(",") { it.sqlName }
             }
 
-        fun fromCursor(cursor: Cursor): EventProjectionFull {
+        fun fromStatement(stmt: SQLiteStatement): EventProjectionFull {
             return EventProjectionFull(
-                id = cursor.getLong(0),
-                lat = cursor.getDouble(1),
-                lon = cursor.getDouble(2),
-                name = cursor.getString(3),
-                website = cursor.getString(4).toHttpUrl(),
-                startsAt = ZonedDateTime.parse(cursor.getString(5)),
-                endsAt = if (cursor.isNull(6)) null else ZonedDateTime.parse(cursor.getString(6)),
+                id = stmt.getLong(0),
+                lat = stmt.getDouble(1),
+                lon = stmt.getDouble(2),
+                name = stmt.getText(3),
+                website = stmt.getText(4).toHttpUrl(),
+                startsAt = ZonedDateTime.parse(stmt.getText(5)),
+                endsAt = if (stmt.isNull(6)) null else ZonedDateTime.parse(stmt.getText(6)),
             )
         }
     }

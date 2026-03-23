@@ -1,7 +1,7 @@
 package org.btcmap.db.table.place
 
 import android.content.Context
-import android.database.Cursor
+import androidx.sqlite.SQLiteStatement
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.R
@@ -42,39 +42,31 @@ data class PlaceProjectionFull(
                 return PlaceSchema.Columns.entries.joinToString(",") { it.sqlName }
             }
 
-        fun fromCursor(cursor: Cursor): PlaceProjectionFull {
+        fun fromStatement(stmt: SQLiteStatement): PlaceProjectionFull {
             return PlaceProjectionFull(
-                id = cursor.getLong(0),
-                bundled = cursor.getInt(1) != 0,
-                updatedAt = ZonedDateTime.parse(cursor.getString(2)),
-                lat = cursor.getDouble(3),
-                lon = cursor.getDouble(4),
-                icon = cursor.getString(5),
-                name = if (cursor.isNull(6)) null else cursor.getString(6),
-                localizedName = if (cursor.isNull(7)) null else JSONObject(cursor.getString(7)),
-                verifiedAt = if (cursor.isNull(8)) null else ZonedDateTime.parse(cursor.getString(8)),
-                address = if (cursor.isNull(9)) null else cursor.getString(9),
-                openingHours = if (cursor.isNull(10)) null else cursor.getString(10),
-                localizedOpeningHours = if (cursor.isNull(11)) null else JSONObject(
-                    cursor.getString(
-                        11
-                    )
-                ),
-                phone = if (cursor.isNull(12)) null else cursor.getString(12),
-                website = if (cursor.isNull(13)) null else cursor.getString(13).toHttpUrl(),
-                email = if (cursor.isNull(14)) null else cursor.getString(14),
-                twitter = if (cursor.isNull(15)) null else cursor.getString(15).toHttpUrl(),
-                facebook = if (cursor.isNull(16)) null else cursor.getString(16).toHttpUrl(),
-                instagram = if (cursor.isNull(17)) null else cursor.getString(17).toHttpUrl(),
-                line = if (cursor.isNull(18)) null else cursor.getString(18).toHttpUrl(),
-                requiredAppUrl = if (cursor.isNull(19)) null else cursor.getString(19).toHttpUrl(),
-                boostedUntil = if (cursor.isNull(20)) null else ZonedDateTime.parse(
-                    cursor.getString(
-                        20
-                    )
-                ),
-                comments = if (cursor.isNull(21)) null else cursor.getLong(21),
-                telegram = if (cursor.isNull(22)) null else cursor.getString(22).toHttpUrl(),
+                id = stmt.getLong(0),
+                bundled = stmt.getLong(1) != 0L,
+                updatedAt = ZonedDateTime.parse(stmt.getText(2)),
+                lat = stmt.getDouble(3),
+                lon = stmt.getDouble(4),
+                icon = stmt.getText(5),
+                name = if (stmt.isNull(6)) null else stmt.getText(6),
+                localizedName = if (stmt.isNull(7)) null else JSONObject(stmt.getText(7)),
+                verifiedAt = if (stmt.isNull(8)) null else ZonedDateTime.parse(stmt.getText(8)),
+                address = if (stmt.isNull(9)) null else stmt.getText(9),
+                openingHours = if (stmt.isNull(10)) null else stmt.getText(10),
+                localizedOpeningHours = if (stmt.isNull(11)) null else JSONObject(stmt.getText(11)),
+                phone = if (stmt.isNull(12)) null else stmt.getText(12),
+                website = if (stmt.isNull(13)) null else stmt.getText(13).toHttpUrl(),
+                email = if (stmt.isNull(14)) null else stmt.getText(14),
+                twitter = if (stmt.isNull(15)) null else stmt.getText(15).toHttpUrl(),
+                facebook = if (stmt.isNull(16)) null else stmt.getText(16).toHttpUrl(),
+                instagram = if (stmt.isNull(17)) null else stmt.getText(17).toHttpUrl(),
+                line = if (stmt.isNull(18)) null else stmt.getText(18).toHttpUrl(),
+                requiredAppUrl = if (stmt.isNull(19)) null else stmt.getText(19).toHttpUrl(),
+                boostedUntil = if (stmt.isNull(20)) null else ZonedDateTime.parse(stmt.getText(20)),
+                comments = if (stmt.isNull(21)) null else stmt.getLong(21),
+                telegram = if (stmt.isNull(22)) null else stmt.getText(22).toHttpUrl(),
             )
         }
     }

@@ -1,9 +1,9 @@
 package org.btcmap.db.table.event
 
-import android.database.sqlite.SQLiteDatabase
-import org.btcmap.db.table.event.EventProjectionFull.Companion.fromCursor
+import androidx.sqlite.SQLiteConnection
+import org.btcmap.db.table.event.EventProjectionFull.Companion.fromStatement
 
-class EventQueries(val db: SQLiteDatabase) {
+class EventQueries(private val conn: SQLiteConnection) {
 
     fun insert(rows: List<Event>) {
         val sql = """
@@ -11,40 +11,39 @@ class EventQueries(val db: SQLiteDatabase) {
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
         """
 
-        val stmt = db.compileStatement(sql)
+        val stmt = conn.prepare(sql)
 
-        stmt.use {
+        stmt.use { stmt ->
             rows.forEach { row ->
                 stmt.bindLong(1, row.id)
                 stmt.bindDouble(2, row.lat)
                 stmt.bindDouble(3, row.lon)
-                stmt.bindString(4, row.name)
-                stmt.bindString(5, row.website.toString())
-                stmt.bindString(6, row.startsAt.toString())
+                stmt.bindText(4, row.name)
+                stmt.bindText(5, row.website.toString())
+                stmt.bindText(6, row.startsAt.toString())
                 if (row.endsAt == null) {
                     stmt.bindNull(7)
                 } else {
-                    stmt.bindString(7, row.endsAt.toString())
+                    stmt.bindText(7, row.endsAt.toString())
                 }
-                stmt.executeInsert()
+                stmt.step()
             }
         }
     }
 
     fun selectAll(): List<Event> {
-        val cursor = db.rawQuery(
+        val stmt = conn.prepare(
             """
                 SELECT ${EventProjectionFull.columns}
                 FROM ${EventSchema.NAME}
-            """,
-            null
+            """
         )
 
-        cursor.use {
-            val rows = mutableListOf<EventProjectionFull>()
+        stmt.use {
+            val rows = mutableListOf<Event>()
 
-            while (cursor.moveToNext()) {
-                rows.add(fromCursor(cursor))
+            while (it.step()) {
+                rows.add(fromStatement(it))
             }
 
             return rows
@@ -52,28 +51,24 @@ class EventQueries(val db: SQLiteDatabase) {
     }
 
     fun selectById(id: Long): Event? {
-        val cursor = db.rawQuery(
+        val stmt = conn.prepare(
             """
                 SELECT ${EventProjectionFull.columns}
                 FROM ${EventSchema.NAME}
-                WHERE id = ?
-            """,
-            arrayOf(id.toString())
+                WHERE id = ?1
+            """
         )
+        stmt.bindLong(1, id)
 
-        cursor.use {
-            if (cursor.moveToFirst()) {
-                return fromCursor(cursor)
+        stmt.use {
+            if (it.step()) {
+                return fromStatement(it)
             }
             return null
         }
     }
 
-    fun deleteAll(): Int {
-        return db.delete(
-            EventSchema.NAME,
-            null,
-            null,
-        )
+    fun deleteAll() {
+        conn.prepare("DELETE FROM ${EventSchema.NAME}").use { it.step() }
     }
 }

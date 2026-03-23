@@ -69,7 +69,11 @@ android {
 
     dependencies {
         implementation(libs.kotlinx.coroutines)
+
         implementation(libs.androidx.fragment)
+        implementation(libs.androidx.sqlite)
+        implementation(libs.androidx.sqlite.framework)
+        testImplementation(libs.androidx.sqlite.bundled.jvm)
 
         implementation(libs.material)
         implementation(libs.okhttp.coroutines)
