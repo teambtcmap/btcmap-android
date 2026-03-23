@@ -7,18 +7,18 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.time.ZonedDateTime
 
 object EventSchema {
-    const val NAME = "event"
+    const val TABLE_NAME = "event"
 
     override fun toString(): String {
         return """
-            CREATE TABLE $NAME (
+            CREATE TABLE $TABLE_NAME (
                 ${Columns.Id} INTEGER PRIMARY KEY NOT NULL,
                 ${Columns.Lat} REAL NOT NULL,
                 ${Columns.Lon} REAL NOT NULL,
                 ${Columns.Name} TEXT NOT NULL,
                 ${Columns.Website} TEXT NOT NULL,
                 ${Columns.StartsAt} TEXT NOT NULL,
-                ${Columns.EndsAt} TEXT
+                ${Columns.EndsAt} TEXT;
             )
         """
     }
@@ -71,26 +71,26 @@ class EventQueries(private val conn: SQLiteConnection) {
 
     fun insert(rows: List<Event>) {
         val sql = """
-            INSERT INTO ${EventSchema.NAME} (${Event.columns}) 
+            INSERT INTO ${EventSchema.TABLE_NAME} (${Event.columns}) 
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
         """
 
         val stmt = conn.prepare(sql)
 
-        stmt.use { stmt ->
+        stmt.use {
             rows.forEach { row ->
-                stmt.bindLong(1, row.id)
-                stmt.bindDouble(2, row.lat)
-                stmt.bindDouble(3, row.lon)
-                stmt.bindText(4, row.name)
-                stmt.bindText(5, row.website.toString())
-                stmt.bindText(6, row.startsAt.toString())
+                it.bindLong(1, row.id)
+                it.bindDouble(2, row.lat)
+                it.bindDouble(3, row.lon)
+                it.bindText(4, row.name)
+                it.bindText(5, row.website.toString())
+                it.bindText(6, row.startsAt.toString())
                 if (row.endsAt == null) {
-                    stmt.bindNull(7)
+                    it.bindNull(7)
                 } else {
-                    stmt.bindText(7, row.endsAt.toString())
+                    it.bindText(7, row.endsAt.toString())
                 }
-                stmt.step()
+                it.step()
             }
         }
     }
@@ -99,7 +99,7 @@ class EventQueries(private val conn: SQLiteConnection) {
         val stmt = conn.prepare(
             """
                 SELECT ${EventProjectionFull.columns}
-                FROM ${EventSchema.NAME}
+                FROM ${EventSchema.TABLE_NAME}
             """
         )
 
@@ -118,7 +118,7 @@ class EventQueries(private val conn: SQLiteConnection) {
         val stmt = conn.prepare(
             """
                 SELECT ${EventProjectionFull.columns}
-                FROM ${EventSchema.NAME}
+                FROM ${EventSchema.TABLE_NAME}
                 WHERE id = ?1
             """
         )
@@ -133,6 +133,6 @@ class EventQueries(private val conn: SQLiteConnection) {
     }
 
     fun deleteAll() {
-        conn.prepare("DELETE FROM ${EventSchema.NAME}").use { it.step() }
+        conn.prepare("DELETE FROM ${EventSchema.TABLE_NAME}").use { it.step() }
     }
 }
