@@ -84,7 +84,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.btcmap.app.db
-import org.btcmap.db.table.Cluster
+import org.btcmap.db.table.Marker
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
 import org.maplibre.android.style.layers.SymbolLayer
@@ -580,7 +580,7 @@ class MapFragment : Fragment() {
         insetsController?.isAppearanceLightStatusBars = !nightMode
     }
 
-    private fun List<Cluster>.toGeoJson(): String {
+    private fun List<Marker>.toGeoJson(): String {
         val sb = StringBuilder()
         sb.append(
             """

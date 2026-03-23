@@ -141,9 +141,9 @@ data class PlaceProjectionFull(
     }
 }
 
-typealias Cluster = PlaceProjectionCluster
+typealias Marker = PlaceProjectionMarker
 
-data class PlaceProjectionCluster(
+data class PlaceProjectionMarker(
     val count: Long,
     val id: Long,
     val lat: Double,
@@ -159,7 +159,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
     fun insert(rows: List<Place>) {
         val sql = """
             INSERT OR REPLACE INTO ${PlaceSchema.TABLE_NAME} (${Place.columns}) 
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23);
         """
 
         conn.prepare(sql).use { stmt ->
@@ -197,7 +197,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             """
                 SELECT ${Place.columns}
                 FROM ${PlaceSchema.TABLE_NAME}
-                WHERE ${PlaceSchema.Columns.Id} = ?1
+                WHERE ${PlaceSchema.Columns.Id} = ?1;
             """
         )
         stmt.bindLong(1, id)
@@ -213,7 +213,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             """
                 SELECT ${Place.columns}
                 FROM ${PlaceSchema.TABLE_NAME}
-                WHERE UPPER(${PlaceSchema.Columns.Name}) LIKE '%' || UPPER(?1) || '%'
+                WHERE UPPER(${PlaceSchema.Columns.Name}) LIKE '%' || UPPER(?1) || '%';
             """
         )
         stmt.bindText(1, searchString)
@@ -229,7 +229,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectMerchants(): List<PlaceProjectionCluster> {
+    fun selectMerchants(): List<PlaceProjectionMarker> {
         val stmt = conn.prepare(
             """
                 SELECT
@@ -243,16 +243,16 @@ class PlaceQueries(private val conn: SQLiteConnection) {
                 FROM ${PlaceSchema.TABLE_NAME}
                 WHERE
                     ${PlaceSchema.Columns.Icon} <> 'local_atm' AND ${PlaceSchema.Columns.Icon} <> 'currency_exchange'
-                ORDER BY ${PlaceSchema.Columns.Lat} DESC
+                ORDER BY ${PlaceSchema.Columns.Lat} DESC;
             """
         )
 
         stmt.use {
-            val rows = mutableListOf<PlaceProjectionCluster>()
+            val rows = mutableListOf<PlaceProjectionMarker>()
 
             while (it.step()) {
                 rows.add(
-                    PlaceProjectionCluster(
+                    PlaceProjectionMarker(
                         count = 1,
                         id = it.getLong(0),
                         lat = it.getDouble(1),
@@ -269,7 +269,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectExchanges(): List<PlaceProjectionCluster> {
+    fun selectExchanges(): List<PlaceProjectionMarker> {
         val stmt = conn.prepare(
             """
                 SELECT
@@ -283,16 +283,16 @@ class PlaceQueries(private val conn: SQLiteConnection) {
                 FROM ${PlaceSchema.TABLE_NAME}
                 WHERE
                     ${PlaceSchema.Columns.Icon} = 'local_atm' OR ${PlaceSchema.Columns.Icon} = 'currency_exchange'
-                ORDER BY ${PlaceSchema.Columns.Lat} DESC
+                ORDER BY ${PlaceSchema.Columns.Lat} DESC;
             """
         )
 
         stmt.use {
-            val rows = mutableListOf<PlaceProjectionCluster>()
+            val rows = mutableListOf<PlaceProjectionMarker>()
 
             while (it.step()) {
                 rows.add(
-                    PlaceProjectionCluster(
+                    PlaceProjectionMarker(
                         count = 1,
                         id = it.getLong(0),
                         lat = it.getDouble(1),
@@ -310,23 +310,25 @@ class PlaceQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectMaxUpdatedAt(): ZonedDateTime? {
-        conn.prepare("SELECT max(${PlaceSchema.Columns.UpdatedAt}) FROM ${PlaceSchema.TABLE_NAME}").use {
-            it.step()
-            return if (it.isNull(0)) null else ZonedDateTime.parse(it.getText(0))
-        }
+        conn.prepare("SELECT max(${PlaceSchema.Columns.UpdatedAt}) FROM ${PlaceSchema.TABLE_NAME};")
+            .use {
+                it.step()
+                return it.getZonedDateTimeOrNull(0)
+            }
     }
 
     fun selectCount(): Long {
-        conn.prepare("SELECT count(*) FROM ${PlaceSchema.TABLE_NAME}").use {
+        conn.prepare("SELECT count(*) FROM ${PlaceSchema.TABLE_NAME};").use {
             it.step()
             return it.getLong(0)
         }
     }
 
     fun deleteById(id: Long) {
-        conn.prepare("DELETE FROM ${PlaceSchema.TABLE_NAME} WHERE ${PlaceSchema.Columns.Id.sqlName} = ?1").use {
-            it.bindLong(1, id)
-            it.step()
-        }
+        conn.prepare("DELETE FROM ${PlaceSchema.TABLE_NAME} WHERE ${PlaceSchema.Columns.Id.sqlName} = ?1;")
+            .use {
+                it.bindLong(1, id)
+                it.step()
+            }
     }
 }
