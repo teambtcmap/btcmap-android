@@ -4,8 +4,17 @@ import android.content.Context
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
 import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.R
+import org.btcmap.db.bindHttpUrlOrNull
+import org.btcmap.db.bindJsonObjectOrNull
+import org.btcmap.db.bindLongOrNull
+import org.btcmap.db.bindTextOrNull
+import org.btcmap.db.bindZonedDateTimeOrNull
+import org.btcmap.db.getHttpUrlOrNull
+import org.btcmap.db.getJsonObjectOrNull
+import org.btcmap.db.getLongOrNull
+import org.btcmap.db.getTextOrNull
+import org.btcmap.db.getZonedDateTimeOrNull
 import org.json.JSONObject
 import java.time.ZonedDateTime
 import java.util.Locale
@@ -113,23 +122,23 @@ data class PlaceProjectionFull(
                 lat = stmt.getDouble(3),
                 lon = stmt.getDouble(4),
                 icon = stmt.getText(5),
-                name = if (stmt.isNull(6)) null else stmt.getText(6),
-                localizedName = if (stmt.isNull(7)) null else JSONObject(stmt.getText(7)),
-                verifiedAt = if (stmt.isNull(8)) null else ZonedDateTime.parse(stmt.getText(8)),
-                address = if (stmt.isNull(9)) null else stmt.getText(9),
-                openingHours = if (stmt.isNull(10)) null else stmt.getText(10),
-                localizedOpeningHours = if (stmt.isNull(11)) null else JSONObject(stmt.getText(11)),
-                phone = if (stmt.isNull(12)) null else stmt.getText(12),
-                website = if (stmt.isNull(13)) null else stmt.getText(13).toHttpUrl(),
-                email = if (stmt.isNull(14)) null else stmt.getText(14),
-                twitter = if (stmt.isNull(15)) null else stmt.getText(15).toHttpUrl(),
-                facebook = if (stmt.isNull(16)) null else stmt.getText(16).toHttpUrl(),
-                instagram = if (stmt.isNull(17)) null else stmt.getText(17).toHttpUrl(),
-                line = if (stmt.isNull(18)) null else stmt.getText(18).toHttpUrl(),
-                requiredAppUrl = if (stmt.isNull(19)) null else stmt.getText(19).toHttpUrl(),
-                boostedUntil = if (stmt.isNull(20)) null else ZonedDateTime.parse(stmt.getText(20)),
-                comments = if (stmt.isNull(21)) null else stmt.getLong(21),
-                telegram = if (stmt.isNull(22)) null else stmt.getText(22).toHttpUrl(),
+                name = stmt.getTextOrNull(6),
+                localizedName = stmt.getJsonObjectOrNull(7),
+                verifiedAt = stmt.getZonedDateTimeOrNull(8),
+                address = stmt.getTextOrNull(9),
+                openingHours = stmt.getTextOrNull(10),
+                localizedOpeningHours = stmt.getJsonObjectOrNull(11),
+                phone = stmt.getTextOrNull(12),
+                website = stmt.getHttpUrlOrNull(13),
+                email = stmt.getTextOrNull(14),
+                twitter = stmt.getHttpUrlOrNull(15),
+                facebook = stmt.getHttpUrlOrNull(16),
+                instagram = stmt.getHttpUrlOrNull(17),
+                line = stmt.getHttpUrlOrNull(18),
+                requiredAppUrl = stmt.getHttpUrlOrNull(19),
+                boostedUntil = stmt.getZonedDateTimeOrNull(20),
+                comments = stmt.getLongOrNull(21),
+                telegram = stmt.getHttpUrlOrNull(22),
             )
         }
     }
@@ -193,102 +202,32 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23)
         """
 
-        val stmt = conn.prepare(sql)
-
-        stmt.use {
+        conn.prepare(sql).use { stmt ->
             rows.forEach { row ->
-                it.bindLong(1, row.id)
-                it.bindLong(2, if (row.bundled) 1 else 0)
-                it.bindText(3, row.updatedAt.toString())
-                it.bindDouble(4, row.lat)
-                it.bindDouble(5, row.lon)
-                it.bindText(6, row.icon)
-                if (row.name == null) {
-                    it.bindNull(7)
-                } else {
-                    it.bindText(7, row.name)
-                }
-                if (row.localizedName == null) {
-                    it.bindNull(8)
-                } else {
-                    it.bindText(8, row.localizedName.toString())
-                }
-                if (row.verifiedAt == null) {
-                    it.bindNull(9)
-                } else {
-                    it.bindText(9, row.verifiedAt.toString())
-                }
-                if (row.address == null) {
-                    it.bindNull(10)
-                } else {
-                    it.bindText(10, row.address)
-                }
-                if (row.openingHours == null) {
-                    it.bindNull(11)
-                } else {
-                    it.bindText(11, row.openingHours)
-                }
-                if (row.localizedOpeningHours == null) {
-                    it.bindNull(12)
-                } else {
-                    it.bindText(12, row.localizedOpeningHours.toString())
-                }
-                if (row.phone == null) {
-                    it.bindNull(13)
-                } else {
-                    it.bindText(13, row.phone)
-                }
-                if (row.website == null) {
-                    it.bindNull(14)
-                } else {
-                    it.bindText(14, row.website.toString())
-                }
-                if (row.email == null) {
-                    it.bindNull(15)
-                } else {
-                    it.bindText(15, row.email)
-                }
-                if (row.twitter == null) {
-                    it.bindNull(16)
-                } else {
-                    it.bindText(16, row.twitter.toString())
-                }
-                if (row.facebook == null) {
-                    it.bindNull(17)
-                } else {
-                    it.bindText(17, row.facebook.toString())
-                }
-                if (row.instagram == null) {
-                    it.bindNull(18)
-                } else {
-                    it.bindText(18, row.instagram.toString())
-                }
-                if (row.line == null) {
-                    it.bindNull(19)
-                } else {
-                    it.bindText(19, row.line.toString())
-                }
-                if (row.requiredAppUrl == null) {
-                    it.bindNull(20)
-                } else {
-                    it.bindText(20, row.requiredAppUrl.toString())
-                }
-                if (row.boostedUntil == null) {
-                    it.bindNull(21)
-                } else {
-                    it.bindText(21, row.boostedUntil.toString())
-                }
-                if (row.comments == null) {
-                    it.bindNull(22)
-                } else {
-                    it.bindLong(22, row.comments)
-                }
-                if (row.telegram == null) {
-                    it.bindNull(23)
-                } else {
-                    it.bindText(23, row.telegram.toString())
-                }
-                it.step()
+                stmt.bindLong(1, row.id)
+                stmt.bindLong(2, if (row.bundled) 1 else 0)
+                stmt.bindText(3, row.updatedAt.toString())
+                stmt.bindDouble(4, row.lat)
+                stmt.bindDouble(5, row.lon)
+                stmt.bindText(6, row.icon)
+                stmt.bindTextOrNull(7, row.name)
+                stmt.bindJsonObjectOrNull(8, row.localizedName)
+                stmt.bindZonedDateTimeOrNull(9, row.verifiedAt)
+                stmt.bindTextOrNull(10, row.address)
+                stmt.bindTextOrNull(11, row.openingHours)
+                stmt.bindJsonObjectOrNull(12, row.localizedOpeningHours)
+                stmt.bindTextOrNull(13, row.phone)
+                stmt.bindHttpUrlOrNull(14, row.website)
+                stmt.bindTextOrNull(15, row.email)
+                stmt.bindHttpUrlOrNull(16, row.twitter)
+                stmt.bindHttpUrlOrNull(17, row.facebook)
+                stmt.bindHttpUrlOrNull(18, row.instagram)
+                stmt.bindHttpUrlOrNull(19, row.line)
+                stmt.bindHttpUrlOrNull(20, row.requiredAppUrl)
+                stmt.bindZonedDateTimeOrNull(21, row.boostedUntil)
+                stmt.bindLongOrNull(22, row.comments)
+                stmt.bindHttpUrlOrNull(23, row.telegram)
+                stmt.step()
             }
         }
     }

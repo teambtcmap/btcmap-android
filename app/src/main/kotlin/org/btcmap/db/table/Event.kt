@@ -4,6 +4,8 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.btcmap.db.bindZonedDateTimeOrNull
+import org.btcmap.db.getZonedDateTimeOrNull
 import java.time.ZonedDateTime
 
 object EventSchema {
@@ -61,7 +63,7 @@ data class EventProjectionFull(
                 name = stmt.getText(3),
                 website = stmt.getText(4).toHttpUrl(),
                 startsAt = ZonedDateTime.parse(stmt.getText(5)),
-                endsAt = if (stmt.isNull(6)) null else ZonedDateTime.parse(stmt.getText(6)),
+                endsAt = stmt.getZonedDateTimeOrNull(6),
             )
         }
     }
@@ -75,22 +77,16 @@ class EventQueries(private val conn: SQLiteConnection) {
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
         """
 
-        val stmt = conn.prepare(sql)
-
-        stmt.use {
+        conn.prepare(sql).use { stmt ->
             rows.forEach { row ->
-                it.bindLong(1, row.id)
-                it.bindDouble(2, row.lat)
-                it.bindDouble(3, row.lon)
-                it.bindText(4, row.name)
-                it.bindText(5, row.website.toString())
-                it.bindText(6, row.startsAt.toString())
-                if (row.endsAt == null) {
-                    it.bindNull(7)
-                } else {
-                    it.bindText(7, row.endsAt.toString())
-                }
-                it.step()
+                stmt.bindLong(1, row.id)
+                stmt.bindDouble(2, row.lat)
+                stmt.bindDouble(3, row.lon)
+                stmt.bindText(4, row.name)
+                stmt.bindText(5, row.website.toString())
+                stmt.bindText(6, row.startsAt.toString())
+                stmt.bindZonedDateTimeOrNull(7, row.endsAt)
+                stmt.step()
             }
         }
     }
