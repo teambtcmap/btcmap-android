@@ -37,6 +37,7 @@ sqlite = "2.6.2"
 # https://developer.android.com/jetpack/androidx/releases/test
 test = "1.3.0"
 testrunner = "1.7.0"
+junit = "4.13.2"
 
 [libraries]
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -57,6 +58,7 @@ coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", versi
 coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil-svg" }
 androidx-test = { group = "androidx.test.ext", name = "junit", version.ref = "test" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "testrunner" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

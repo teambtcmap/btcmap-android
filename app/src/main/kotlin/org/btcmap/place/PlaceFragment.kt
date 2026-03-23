@@ -62,7 +62,7 @@ class PlaceFragment : Fragment() {
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.directions -> {
-                    val place = db().place.selectById(placeId)
+                    val place = db().place.selectById(placeId) ?: return@setOnMenuItemClickListener true
                     val uri = "geo:${place.lat},${place.lon}?q=${place.getLocalizedName()}".toUri()
                     val intent = Intent(Intent.ACTION_VIEW, uri)
                     requireContext().startActivity(Intent.createChooser(intent, null))

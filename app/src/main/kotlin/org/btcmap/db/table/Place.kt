@@ -40,13 +40,13 @@ object PlaceSchema {
                 ${Columns.Twitter} TEXT,
                 ${Columns.Facebook} TEXT,
                 ${Columns.Instagram} TEXT,
-                ${Columns.Line} TEXT,                
+                ${Columns.Line} TEXT,
                 ${Columns.RequiredAppUrl} TEXT,
                 ${Columns.BoostedUntil} TEXT,
                 ${Columns.Comments} INTEGER,
-                ${Columns.Telegram} TEXT;
-            )
-        """
+                ${Columns.Telegram} TEXT
+            );
+        """.trimIndent()
     }
 
     enum class Columns(val sqlName: String) {
@@ -188,11 +188,12 @@ class PlaceQueries(private val conn: SQLiteConnection) {
                 stmt.bindLongOrNull(22, row.comments)
                 stmt.bindHttpUrlOrNull(23, row.telegram)
                 stmt.step()
+                stmt.reset()
             }
         }
     }
 
-    fun selectById(id: Long): Place {
+    fun selectById(id: Long): Place? {
         val stmt = conn.prepare(
             """
                 SELECT ${Place.columns}
@@ -203,8 +204,10 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         stmt.bindLong(1, id)
 
         stmt.use {
-            it.step()
-            return PlaceProjectionFull.fromStatement(it)
+            if (it.step()) {
+                return PlaceProjectionFull.fromStatement(it)
+            }
+            return null
         }
     }
 

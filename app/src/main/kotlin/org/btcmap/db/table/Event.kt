@@ -20,9 +20,9 @@ object EventSchema {
                 ${Columns.Name} TEXT NOT NULL,
                 ${Columns.Website} TEXT NOT NULL,
                 ${Columns.StartsAt} TEXT NOT NULL,
-                ${Columns.EndsAt} TEXT;
-            )
-        """
+                ${Columns.EndsAt} TEXT
+            );
+        """.trimIndent()
     }
 
     enum class Columns(val sqlName: String) {
@@ -86,6 +86,7 @@ class EventQueries(private val conn: SQLiteConnection) {
                 stmt.bindText(6, row.startsAt.toString())
                 stmt.bindZonedDateTimeOrNull(7, row.endsAt)
                 stmt.step()
+                stmt.reset()
             }
         }
     }

@@ -368,7 +368,7 @@ class MapFragment : Fragment() {
             binding.searchView.clearText()
             binding.searchView.hide()
 
-            val place = db().place.selectById(row.placeId)
+            val place = db().place.selectById(row.placeId) ?: return@SearchAdapter
 
             if (place.isMerchant()) {
                 binding.showMerchants.performClick()

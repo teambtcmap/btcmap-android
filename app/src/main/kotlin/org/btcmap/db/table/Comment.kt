@@ -17,7 +17,7 @@ object CommentSchema {
                 ${Columns.CreatedAt} TEXT NOT NULL,
                 ${Columns.UpdatedAt} TEXT NOT NULL
             );
-        """
+        """.trimIndent()
     }
 
     enum class Columns(val sqlName: String) {
@@ -75,6 +75,7 @@ class CommentQueries(private val conn: SQLiteConnection) {
                 it.bindText(4, row.createdAt.toString())
                 it.bindText(5, row.updatedAt.toString())
                 it.step()
+                it.reset()
             }
         }
     }

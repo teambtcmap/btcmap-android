@@ -69,12 +69,9 @@ android {
 
     dependencies {
         implementation(libs.kotlinx.coroutines)
-
         implementation(libs.androidx.fragment)
         implementation(libs.androidx.sqlite)
         implementation(libs.androidx.sqlite.framework)
-        testImplementation(libs.androidx.sqlite.bundled.jvm)
-
         implementation(libs.material)
         implementation(libs.okhttp.coroutines)
         implementation(libs.okhttp.brotli)
@@ -85,6 +82,10 @@ android {
         implementation(libs.coil.network)
         implementation(libs.coil.svg)
 
+        testImplementation(libs.androidx.sqlite.bundled.jvm)
+        testImplementation(libs.junit)
+        testImplementation(libs.androidx.test)
+        
         androidTestImplementation(libs.androidx.test)
         androidTestImplementation(libs.androidx.test.runner)
     }
