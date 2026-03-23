@@ -1,7 +1,7 @@
 package org.btcmap.bundle
 
 import android.content.Context
-import org.btcmap.db.table.place.Place
+import org.btcmap.db.table.Place
 import org.btcmap.json.toJsonArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

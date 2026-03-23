@@ -2,12 +2,12 @@ package org.btcmap.db
 
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.execSQL
-import org.btcmap.db.table.comment.CommentQueries
-import org.btcmap.db.table.comment.CommentSchema
-import org.btcmap.db.table.event.EventQueries
-import org.btcmap.db.table.event.EventSchema
-import org.btcmap.db.table.place.PlaceQueries
-import org.btcmap.db.table.place.PlaceSchema
+import org.btcmap.db.table.CommentQueries
+import org.btcmap.db.table.CommentSchema
+import org.btcmap.db.table.EventQueries
+import org.btcmap.db.table.EventSchema
+import org.btcmap.db.table.PlaceQueries
+import org.btcmap.db.table.PlaceSchema
 
 class Database(driver: SQLiteDriver, val path: String) {
 

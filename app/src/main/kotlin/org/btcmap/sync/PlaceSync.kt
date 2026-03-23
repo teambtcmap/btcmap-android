@@ -2,7 +2,7 @@ package org.btcmap.sync
 
 import android.util.Log
 import org.btcmap.api.PlaceApi
-import org.btcmap.db.table.place.Place
+import org.btcmap.db.table.Place
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull

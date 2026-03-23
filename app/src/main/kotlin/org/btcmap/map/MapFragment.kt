@@ -37,8 +37,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import org.btcmap.bundle.BundledPlaces
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.btcmap.db.table.event.Event
-import org.btcmap.db.table.place.Place
+import org.btcmap.db.table.Event
+import org.btcmap.db.table.Place
 import org.btcmap.place.PlaceFragment
 import org.btcmap.api.AreasApi
 import org.btcmap.http.httpClient
@@ -75,7 +75,7 @@ import org.btcmap.settings.uri
 import org.btcmap.sync.CommentSync
 import org.btcmap.sync.EventSync
 import org.btcmap.sync.PlaceSync
-import org.btcmap.db.table.place.PlaceProjectionCluster
+import org.btcmap.db.table.PlaceProjectionCluster
 import org.btcmap.fragment.dpToPx
 import org.btcmap.icon.init
 import org.btcmap.icon.matcher

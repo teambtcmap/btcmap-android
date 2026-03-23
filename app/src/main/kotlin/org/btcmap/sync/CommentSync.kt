@@ -3,7 +3,7 @@ package org.btcmap.sync
 import android.util.Log
 import org.btcmap.api.CommentApi
 import org.btcmap.api.CommentApi.GetCommentsItem
-import org.btcmap.db.table.comment.Comment
+import org.btcmap.db.table.Comment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.btcmap.db.Database

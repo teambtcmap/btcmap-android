@@ -2,7 +2,7 @@ package org.btcmap.sync
 
 import android.util.Log
 import org.btcmap.api.EventApi
-import org.btcmap.db.table.event.Event
+import org.btcmap.db.table.Event
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.btcmap.db.Database
