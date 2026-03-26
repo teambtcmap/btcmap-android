@@ -72,9 +72,6 @@ import org.btcmap.settings.mapViewport
 import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.prefs
 import org.btcmap.settings.uri
-import org.btcmap.sync.CommentSync
-import org.btcmap.sync.EventSync
-import org.btcmap.sync.PlaceSync
 import org.btcmap.fragment.dpToPx
 import org.btcmap.icon.init
 import org.btcmap.icon.matcher
@@ -84,6 +81,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.btcmap.app.db
+import org.btcmap.app.sync
 import org.btcmap.db.table.Marker
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
@@ -332,15 +330,15 @@ class MapFragment : Fragment() {
                     setFilter(filter)
                 }
 
-                if (PlaceSync.run(api(), db()).rowsAffected > 0) {
+                if (sync().syncPlaces().rowsAffected > 0) {
                     setFilter(filter)
                 }
 
-                if (EventSync.run(api(), db()).rowsAffected > 0) {
+                if (sync().syncEvents().rowsAffected > 0) {
                     setFilter(filter)
                 }
 
-                if (CommentSync.run(api(), db()).rowsAffected > 0) {
+                if (sync().syncComments().rowsAffected > 0) {
                     setFilter(filter)
                 }
 

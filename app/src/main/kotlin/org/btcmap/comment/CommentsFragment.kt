@@ -19,10 +19,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
-import org.btcmap.app.api
 import org.btcmap.app.db
+import org.btcmap.app.sync
 import org.btcmap.databinding.CommentsFragmentBinding
-import org.btcmap.sync.CommentSync
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -98,7 +97,7 @@ class CommentsFragment : Fragment() {
                     )
                 })
 
-                if (CommentSync.run(api(), db()).rowsAffected > 0) {
+                if (sync().syncComments().rowsAffected > 0) {
                     val comments = withContext(Dispatchers.IO) {
                         db().comment.selectByPlaceId(args.placeId)
                     }

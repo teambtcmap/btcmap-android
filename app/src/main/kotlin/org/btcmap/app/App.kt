@@ -10,11 +10,16 @@ import org.btcmap.Api
 import org.btcmap.db.Database
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.prefs
+import org.btcmap.sync.Sync
 import org.maplibre.android.MapLibre
 import org.btcmap.settings.init as settingsInit
 import org.btcmap.typeface.init as typefaceInit
 
 class App : Application() {
+    val sync: Sync by lazy {
+        Sync(api, db)
+    }
+
     val api: Api by lazy {
         Api(
             httpClient = apiHttpClient,
@@ -61,6 +66,8 @@ class App : Application() {
         MapLibre.getInstance(this)
     }
 }
+
+fun Fragment.sync(): Sync = (requireContext().applicationContext as App).sync
 
 fun Fragment.api(): Api = (requireContext().applicationContext as App).api
 
