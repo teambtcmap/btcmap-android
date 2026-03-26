@@ -24,8 +24,9 @@ import kotlinx.coroutines.launch
 import org.btcmap.R
 import java.text.NumberFormat
 import androidx.core.net.toUri
+import org.btcmap.api.Api
 import org.btcmap.api.InvoiceApi.paid
-import org.btcmap.api.BoostApi
+import org.btcmap.app.api
 import org.btcmap.databinding.BoostFragmentBinding
 
 class BoostFragment : Fragment() {
@@ -64,7 +65,7 @@ class BoostFragment : Fragment() {
         // get quote
         viewLifecycleOwner.lifecycleScope.launch {
             val quote = try {
-                BoostApi.getQuote()
+                api().getPlaceBoostQuote()
             } catch (t: Throwable) {
                 Log.e(null, null, t)
                 withResumed {
@@ -106,7 +107,7 @@ class BoostFragment : Fragment() {
             }
         }
 
-        var boostResponse: BoostApi.BoostResponse? = null
+        var boostResponse: Api.PlaceBoostResponse? = null
 
         // send boost request and fetch an invoice
         binding.btnContinue.setOnClickListener {
@@ -122,7 +123,7 @@ class BoostFragment : Fragment() {
 
             viewLifecycleOwner.lifecycleScope.launch {
                 boostResponse = try {
-                    BoostApi.boost(
+                    api().boostPlace(
                         placeId = args.placeId,
                         days = days.toLong(),
                     )

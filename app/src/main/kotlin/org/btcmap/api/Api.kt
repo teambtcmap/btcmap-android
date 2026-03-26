@@ -1,30 +1,26 @@
 package org.btcmap.api
 
-import org.btcmap.http.httpClient
-import org.btcmap.json.toJsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.coroutines.executeAsync
+import org.btcmap.json.toJsonObject
 import org.json.JSONObject
-import org.btcmap.settings.apiUrlV4
-import org.btcmap.settings.prefs
-import java.io.InputStream
 
-object BoostApi {
-    private const val ENDPOINT = "place-boosts"
+class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
 
-    data class QuoteResponse(
+    data class PlaceBoostQuoteResponse(
         val quote30dsat: Long,
         val quote90dsat: Long,
         val quote365dsat: Long,
     )
 
-    // https://github.com/teambtcmap/btcmap-api/blob/master/docs/rest/v4/place-boosts.md#get-a-boost-quote
-    suspend fun getQuote(): QuoteResponse {
-        val url = prefs.apiUrlV4(ENDPOINT, "quote")
+    suspend fun getPlaceBoostQuote(): PlaceBoostQuoteResponse {
+        val url = url.newBuilder().addPathSegments("v4/place-boosts/quote").build()
         val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
 
         if (!res.isSuccessful) {
@@ -35,7 +31,7 @@ object BoostApi {
             res.body.byteStream().use {
                 val body = it.toJsonObject()
 
-                QuoteResponse(
+                PlaceBoostQuoteResponse(
                     quote30dsat = body.getLong("quote_30d_sat"),
                     quote90dsat = body.getLong("quote_90d_sat"),
                     quote365dsat = body.getLong("quote_365d_sat"),
@@ -44,25 +40,13 @@ object BoostApi {
         }
     }
 
-    data class BoostResponse(
+    data class PlaceBoostResponse(
         val invoiceId: String,
         val invoice: String,
     )
 
-    private fun InputStream.toBoostResponse(): BoostResponse {
-        return use { stream ->
-            val body = stream.toJsonObject()
-
-            BoostResponse(
-                invoiceId = body.getString("invoice_id"),
-                invoice = body.getString("invoice"),
-            )
-        }
-    }
-
-    // https://github.com/teambtcmap/btcmap-api/blob/master/docs/rest/v4/place-boosts.md#order-boost
-    suspend fun boost(placeId: Long, days: Long): BoostResponse {
-        val url = prefs.apiUrlV4(ENDPOINT)
+    suspend fun boostPlace(placeId: Long, days: Long): PlaceBoostResponse {
+        val url = url.newBuilder().addPathSegments("place-boosts").build()
 
         val req = JSONObject().apply {
             put("place_id", placeId.toString())
@@ -79,7 +63,14 @@ object BoostApi {
         }
 
         return withContext(Dispatchers.IO) {
-            res.body.byteStream().toBoostResponse()
+            res.body.byteStream().use { stream ->
+                val body = stream.toJsonObject()
+
+                PlaceBoostResponse(
+                    invoiceId = body.getString("invoice_id"),
+                    invoice = body.getString("invoice"),
+                )
+            }
         }
     }
 }
