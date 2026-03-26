@@ -85,11 +85,11 @@ android {
 
         testImplementation(libs.androidx.sqlite.bundled.jvm)
         testImplementation(libs.junit)
-        testImplementation(libs.androidx.test)
+        testImplementation(libs.androidx.test.junit)
         testImplementation(libs.mockwebserver)
         testImplementation(libs.kotlinx.coroutines.test)
 
-        androidTestImplementation(libs.androidx.test)
+        androidTestImplementation(libs.androidx.test.junit)
         androidTestImplementation(libs.androidx.test.runner)
     }
 }
