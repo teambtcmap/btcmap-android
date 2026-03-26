@@ -1,20 +1,20 @@
 package org.btcmap.bundle
 
 import android.content.Context
-import org.btcmap.db.table.Place
-import org.btcmap.json.toJsonArray
-import com.google.gson.JsonObject
+import com.google.gson.stream.JsonReader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.btcmap.db.Database
-import java.io.InputStream
+import org.btcmap.db.table.Place
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 object BundledPlaces {
-    const val FILE_NAME = "bundled-places.json"
+    private const val FILE_NAME = "bundled-places.json"
+
+    private const val BATCH_SIZE = 10_000
 
     data class ImportResult(
         val placesImported: Long,
@@ -38,47 +38,83 @@ object BundledPlaces {
                 duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
             )
         }
-        val bundledPlaces = withContext(Dispatchers.IO) {
-            ctx.assets.open(FILE_NAME).use { it.toBundledPlaces() }
-        }
+        var placesImported = 0L
         withContext(Dispatchers.IO) {
-            db.place.insert(bundledPlaces.map { it.toPlace() })
+            db.transaction {
+                ctx.assets.open(FILE_NAME).use { stream ->
+                    stream.bufferedReader().use { reader ->
+                        val jsonReader = JsonReader(reader)
+                        jsonReader.beginArray()
+                        val batch = mutableListOf<Place>()
+                        while (jsonReader.hasNext()) {
+                            batch.add(jsonReader.readPlace())
+                            if (batch.size >= BATCH_SIZE) {
+                                db.place.insert(batch.toList())
+                                placesImported += batch.size
+                                batch.clear()
+                            }
+                        }
+                        if (batch.isNotEmpty()) {
+                            db.place.insert(batch)
+                            placesImported += batch.size
+                        }
+                        jsonReader.endArray()
+                    }
+                }
+            }
         }
         return ImportResult(
-            placesImported = bundledPlaces.size.toLong(),
+            placesImported = placesImported,
             duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
         )
     }
 
-    private fun InputStream.toBundledPlaces(): List<BundledPlace> {
-        return toJsonArray().map { it.toBundledPlace() }
-    }
-
-    private fun JsonObject.toBundledPlace(): BundledPlace {
-        return BundledPlace(
-            id = get("id").asLong,
-            lat = get("lat").asDouble,
-            lon = get("lon").asDouble,
-            icon = get("icon").asString,
-            name = get("name").asString,
-            comments = if (!has("comments") || get("comments").isJsonNull) null else get("comments").asLong,
-            boostedUntil = if (!has("boosted_until") || get("boosted_until").isJsonNull) null else ZonedDateTime.parse(
-                get("boosted_until").asString
-            ),
-        )
-    }
-
-    private fun BundledPlace.toPlace(): Place {
+    private fun JsonReader.readPlace(): Place {
+        var id = 0L
+        var lat = 0.0
+        var lon = 0.0
+        var icon = ""
+        var name = ""
+        var comments: Long? = null
+        var boostedUntil: ZonedDateTime? = null
+        beginObject()
+        while (hasNext()) {
+            when (nextName()) {
+                "id" -> id = nextLong()
+                "lat" -> lat = nextDouble()
+                "lon" -> lon = nextDouble()
+                "icon" -> icon = nextString()
+                "name" -> name = nextString()
+                "comments" -> {
+                    if (peek() == com.google.gson.stream.JsonToken.NULL) {
+                        skipValue()
+                        comments = null
+                    } else {
+                        comments = nextLong()
+                    }
+                }
+                "boosted_until" -> {
+                    if (peek() == com.google.gson.stream.JsonToken.NULL) {
+                        skipValue()
+                        boostedUntil = null
+                    } else {
+                        boostedUntil = ZonedDateTime.parse(nextString())
+                    }
+                }
+                else -> skipValue()
+            }
+        }
+        endObject()
         return Place(
-            id = this.id,
-            lat = this.lat,
-            lon = this.lon,
-            icon = this.icon,
-            name = this.name,
+            id = id,
+            lat = lat,
+            lon = lon,
+            icon = icon,
+            name = name,
             localizedName = null,
             updatedAt = ZonedDateTime.parse("2000-01-01T00:00:00Z"),
             requiredAppUrl = null,
-            boostedUntil = this.boostedUntil,
+            boostedUntil = boostedUntil,
             verifiedAt = null,
             address = null,
             openingHours = null,
@@ -91,7 +127,7 @@ object BundledPlaces {
             instagram = null,
             line = null,
             bundled = true,
-            comments = this.comments,
+            comments = comments,
             telegram = null,
         )
     }
