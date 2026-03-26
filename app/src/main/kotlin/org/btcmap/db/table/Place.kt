@@ -2,6 +2,7 @@ package org.btcmap.db.table
 
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
+import com.google.gson.JsonObject
 import okhttp3.HttpUrl
 import org.btcmap.db.bindHttpUrlOrNull
 import org.btcmap.db.bindJsonObjectOrNull
@@ -13,7 +14,6 @@ import org.btcmap.db.getJsonObjectOrNull
 import org.btcmap.db.getLongOrNull
 import org.btcmap.db.getTextOrNull
 import org.btcmap.db.getZonedDateTimeOrNull
-import org.json.JSONObject
 import java.time.ZonedDateTime
 
 object PlaceSchema {
@@ -88,11 +88,11 @@ data class PlaceProjectionFull(
     val lon: Double,
     val icon: String,
     val name: String?,
-    val localizedName: JSONObject?,
+    val localizedName: JsonObject?,
     val verifiedAt: ZonedDateTime?,
     val address: String?,
     val openingHours: String?,
-    val localizedOpeningHours: JSONObject?,
+    val localizedOpeningHours: JsonObject?,
     val phone: String?,
     val website: HttpUrl?,
     val email: String?,

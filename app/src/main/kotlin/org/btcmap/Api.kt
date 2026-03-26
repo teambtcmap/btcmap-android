@@ -1,5 +1,6 @@
 package org.btcmap
 
+import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
@@ -11,7 +12,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.coroutines.executeAsync
 import org.btcmap.json.toJsonArray
 import org.btcmap.json.toJsonObject
-import org.json.JSONObject
 import java.io.InputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -54,9 +54,9 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                 val body = it.toJsonObject()
 
                 PlaceBoostQuoteResponse(
-                    quote30dsat = body.getLong("quote_30d_sat"),
-                    quote90dsat = body.getLong("quote_90d_sat"),
-                    quote365dsat = body.getLong("quote_365d_sat"),
+                    quote30dsat = body.get("quote_30d_sat").asLong,
+                    quote90dsat = body.get("quote_90d_sat").asLong,
+                    quote365dsat = body.get("quote_365d_sat").asLong,
                 )
             }
         }
@@ -70,9 +70,9 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
     suspend fun boostPlace(placeId: Long, days: Long): PlaceBoostResponse {
         val url = url.newBuilder().addPathSegments("v4/place-boosts").build()
 
-        val req = JSONObject().apply {
-            put("place_id", placeId.toString())
-            put("days", days)
+        val req = JsonObject().apply {
+            addProperty("place_id", placeId.toString())
+            addProperty("days", days)
         }
 
         val res = httpClient.newCall(
@@ -89,8 +89,8 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                 val body = stream.toJsonObject()
 
                 PlaceBoostResponse(
-                    invoiceId = body.getString("invoice_id"),
-                    invoice = body.getString("invoice"),
+                    invoiceId = body.get("invoice_id").asString,
+                    invoice = body.get("invoice").asString,
                 )
             }
         }
@@ -108,12 +108,12 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
     private fun InputStream.toGetCommentsItems(): List<GetCommentsItem> {
         return toJsonArray().map {
             GetCommentsItem(
-                id = it.getLong("id"),
-                elementId = it.optLong("place_id"),
-                comment = it.optString("text").ifBlank { null },
-                createdAt = it.optString("created_at").ifBlank { null },
-                updatedAt = it.getString("updated_at"),
-                deletedAt = it.optString("deleted_at").ifBlank { null },
+                id = it.get("id").asLong,
+                elementId = if (!it.has("place_id") || it.get("place_id").isJsonNull) null else it.get("place_id").asLong,
+                comment = if (!it.has("text") || it.get("text").isJsonNull) null else it.get("text").asString.ifBlank { null },
+                createdAt = if (!it.has("created_at") || it.get("created_at").isJsonNull) null else it.get("created_at").asString.ifBlank { null },
+                updatedAt = it.get("updated_at").asString,
+                deletedAt = if (!it.has("deleted_at") || it.get("deleted_at").isJsonNull) null else it.get("deleted_at").asString.ifBlank { null },
             )
         }
     }
@@ -158,7 +158,7 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                 val body = it.toJsonObject()
 
                 CommentQuoteResponse(
-                    quoteSat = body.getLong("quote_sat"),
+                    quoteSat = body.get("quote_sat").asLong,
                 )
             }
         }
@@ -174,8 +174,8 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
             val body = stream.toJsonObject()
 
             AddCommentResponse(
-                invoiceId = body.getString("invoice_id"),
-                invoice = body.getString("invoice"),
+                invoiceId = body.get("invoice_id").asString,
+                invoice = body.get("invoice").asString,
             )
         }
     }
@@ -183,9 +183,9 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
     suspend fun addComment(placeId: Long, comment: String): AddCommentResponse {
         val url = url.newBuilder().addPathSegments("v4/place-comments").build()
 
-        val req = JSONObject().apply {
-            put("place_id", placeId.toString())
-            put("comment", comment)
+        val req = JsonObject().apply {
+            addProperty("place_id", placeId.toString())
+            addProperty("comment", comment)
         }
 
         val res = httpClient.newCall(
@@ -216,14 +216,14 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
     private fun InputStream.toGetEventsItems(): List<GetEventsItem> {
         return toJsonArray().map {
             GetEventsItem(
-                id = it.getLong("id"),
-                lat = it.getDouble("lat"),
-                lon = it.getDouble("lon"),
-                name = it.getString("name"),
-                website = it.getString("website").toHttpUrl(),
-                startsAt = ZonedDateTime.parse(it.getString("starts_at")),
-                endsAt = if (it.isNull("ends_at")) null else ZonedDateTime.parse(
-                    it.getString("ends_at")
+                id = it.get("id").asLong,
+                lat = it.get("lat").asDouble,
+                lon = it.get("lon").asDouble,
+                name = it.get("name").asString,
+                website = it.get("website").asString.toHttpUrl(),
+                startsAt = ZonedDateTime.parse(it.get("starts_at").asString),
+                endsAt = if (!it.has("ends_at") || it.get("ends_at").isJsonNull) null else ZonedDateTime.parse(
+                    it.get("ends_at").asString
                 )
             )
         }
@@ -245,12 +245,13 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
     private fun InputStream.toAreas(): List<GetAreasItem> {
         return toJsonArray().map {
             GetAreasItem(
-                id = it.getLong("id"),
-                name = it.getString("name"),
-                type = it.getString("type"),
-                urlAlias = it.getString("url_alias"),
-                icon = it.optString("icon").ifBlank { null },
-                websiteUrl = it.getString("website_url"),
+                id = it.get("id").asLong,
+                name = it.get("name").asString,
+                type = it.get("type").asString,
+                urlAlias = it.get("url_alias").asString,
+                icon = if (!it.has("icon") || it.get("icon").isJsonNull) null else it.get("icon").asString
+                    .ifBlank { null },
+                websiteUrl = it.get("website_url").asString,
             )
         }
     }
@@ -285,8 +286,8 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                 val body = it.toJsonObject()
 
                 Invoice(
-                    id = body.getString("id"),
-                    status = body.getString("status"),
+                    id = body.get("id").asString,
+                    status = body.get("status").asString,
                 )
             }
         }
@@ -298,7 +299,7 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         val lon: Double,
         val icon: String,
         val name: String,
-        val localizedName: JSONObject?,
+        val localizedName: JsonObject?,
         val updatedAt: String,
         val deletedAt: String?,
         val requiredAppUrl: String?,
@@ -306,7 +307,7 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         val verifiedAt: String?,
         val address: String?,
         val openingHours: String?,
-        val localizedOpeningHours: JSONObject?,
+        val localizedOpeningHours: JsonObject?,
         val website: String?,
         val phone: String?,
         val email: String?,
@@ -322,32 +323,48 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
     private fun InputStream.toGetPlacesItems(): List<GetPlacesItem> {
         return toJsonArray().map {
             GetPlacesItem(
-                id = it.getLong("id"),
-                lat = it.getDouble("lat"),
-                lon = it.getDouble("lon"),
-                icon = it.getString("icon"),
-                name = it.getString("name"),
-                localizedName = it.optJSONObject("localized_name"),
-                updatedAt = it.getString("updated_at"),
-                deletedAt = it.optString("deleted_at").ifBlank { null },
-                requiredAppUrl = it.optString("required_app_url").ifBlank { null },
-                boostedUntil = it.optString("boosted_until").ifBlank { null },
-                verifiedAt = it.optString("verified_at").ifBlank { null },
-                address = it.optString("address").ifBlank { null },
-                openingHours = it.optString("opening_hours").ifBlank { null },
-                localizedOpeningHours = it.optJSONObject("localized_opening_hours"),
-                website = it.optString("website").ifBlank { null },
-                phone = it.optString("phone").ifBlank { null },
-                email = it.optString("email").ifBlank { null },
-                twitter = it.optString("twitter").ifBlank { null },
-                facebook = it.optString("facebook").ifBlank { null },
-                instagram = it.optString("instagram").ifBlank { null },
-                line = it.optString("line").ifBlank { null },
+                id = it.get("id").asLong,
+                lat = it.get("lat").asDouble,
+                lon = it.get("lon").asDouble,
+                icon = it.get("icon").asString,
+                name = it.get("name").asString,
+                localizedName = if (!it.has("localized_name") || it.get("localized_name").isJsonNull) null else it.get("localized_name")
+                    .getAsJsonObject(),
+                updatedAt = it.get("updated_at").asString,
+                deletedAt = if (!it.has("deleted_at") || it.get("deleted_at").isJsonNull) null else it.get("deleted_at")
+                    .asString.ifBlank { null },
+                requiredAppUrl = if (!it.has("required_app_url") || it.get("required_app_url").isJsonNull) null else it.get("required_app_url")
+                    .asString.ifBlank { null },
+                boostedUntil = if (!it.has("boosted_until") || it.get("boosted_until").isJsonNull) null else it.get("boosted_until")
+                    .asString.ifBlank { null },
+                verifiedAt = if (!it.has("verified_at") || it.get("verified_at").isJsonNull) null else it.get("verified_at")
+                    .asString.ifBlank { null },
+                address = if (!it.has("address") || it.get("address").isJsonNull) null else it.get("address")
+                    .asString.ifBlank { null },
+                openingHours = if (!it.has("opening_hours") || it.get("opening_hours").isJsonNull) null else it.get("opening_hours")
+                    .asString.ifBlank { null },
+                localizedOpeningHours = if (!it.has("localized_opening_hours") || it.get("localized_opening_hours").isJsonNull) null else it.get(
+                    "localized_opening_hours"
+                ).getAsJsonObject(),
+                website = if (!it.has("website") || it.get("website").isJsonNull) null else it.get("website")
+                    .asString.ifBlank { null },
+                phone = if (!it.has("phone") || it.get("phone").isJsonNull) null else it.get("phone").asString
+                    .ifBlank { null },
+                email = if (!it.has("email") || it.get("email").isJsonNull) null else it.get("email").asString
+                    .ifBlank { null },
+                twitter = if (!it.has("twitter") || it.get("twitter").isJsonNull) null else it.get("twitter")
+                    .asString.ifBlank { null },
+                facebook = if (!it.has("facebook") || it.get("facebook").isJsonNull) null else it.get("facebook")
+                    .asString.ifBlank { null },
+                instagram = if (!it.has("instagram") || it.get("instagram").isJsonNull) null else it.get("instagram")
+                    .asString.ifBlank { null },
+                line = if (!it.has("line") || it.get("line").isJsonNull) null else it.get("line").asString
+                    .ifBlank { null },
                 bundled = false,
-                comments = it.optLong("comments", 0),
-                telegram = it.optString("telegram", "").let { telegramStr ->
-                    if (telegramStr.isBlank()) null else telegramStr.toHttpUrl()
-                },
+                comments = if (!it.has("comments") || it.get("comments").isJsonNull) null else it.get("comments")
+                    .asLong,
+                telegram = if (!it.has("telegram") || it.get("telegram").isJsonNull) null else it.get("telegram")
+                    .asString.toHttpUrl(),
             )
         }
     }

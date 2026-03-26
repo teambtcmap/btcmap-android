@@ -24,6 +24,9 @@ colorpicker = "1.2.0"
 # Image loading
 # https://github.com/coil-kt/coil/releases
 coil = "3.4.0"
+# JSON parsing
+# https://github.com/google/gson/releases
+gson = "2.13.2"
 # Network support
 coil-network = "3.4.0"
 # SVG support
@@ -57,6 +60,7 @@ colorpicker = { module = "com.github.mrudultora:Colorpicker", version.ref = "col
 coil = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil-network" }
 coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil-svg" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 androidx-test = { group = "androidx.test.ext", name = "junit", version.ref = "test" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "testrunner" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

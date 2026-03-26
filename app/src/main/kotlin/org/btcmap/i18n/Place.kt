@@ -7,19 +7,19 @@ import java.util.Locale
 
 fun Place.getLocalizedName(): String? {
     val locale = Locale.getDefault().language
-    return localizedName?.optString(locale) ?: name
+    return localizedName?.get(locale)?.asString ?: name
 }
 
 fun Place.getLocalizedOpeningHours(context: Context): String? {
     val locale = Locale.getDefault().language
 
     val result = if (localizedOpeningHours != null) {
-        val localized = localizedOpeningHours.optString(locale)
+        val localized = localizedOpeningHours.get(locale)?.asString
 
-        localized.ifBlank {
-            val en = localizedOpeningHours.optString("en")
+        localized?.ifBlank {
+            val en = localizedOpeningHours.get("en")?.asString
 
-            en.ifBlank {
+            en?.ifBlank {
                 openingHours
             }
         }

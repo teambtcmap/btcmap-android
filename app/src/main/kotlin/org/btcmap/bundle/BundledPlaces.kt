@@ -3,10 +3,10 @@ package org.btcmap.bundle
 import android.content.Context
 import org.btcmap.db.table.Place
 import org.btcmap.json.toJsonArray
+import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.btcmap.db.Database
-import org.json.JSONObject
 import java.io.InputStream
 import java.time.ZonedDateTime
 
@@ -35,15 +35,15 @@ object BundledPlaces {
         return toJsonArray().map { it.toBundledPlace() }
     }
 
-    private fun JSONObject.toBundledPlace(): BundledPlace {
+    private fun JsonObject.toBundledPlace(): BundledPlace {
         return BundledPlace(
-            id = getLong("id"),
-            lat = getDouble("lat"),
-            lon = getDouble("lon"),
-            icon = getString("icon"),
-            name = getString("name"),
-            comments = if (has("comments")) getLong("comments") else null,
-            boostedUntil = if (has("boosted_until")) ZonedDateTime.parse(getString("boosted_until")) else null,
+            id = get("id").asLong,
+            lat = get("lat").asDouble,
+            lon = get("lon").asDouble,
+            icon = get("icon").asString,
+            name = get("name").asString,
+            comments = if (!has("comments") || get("comments").isJsonNull) null else get("comments").asLong,
+            boostedUntil = if (!has("boosted_until") || get("boosted_until").isJsonNull) null else ZonedDateTime.parse(get("boosted_until").asString),
         )
     }
 

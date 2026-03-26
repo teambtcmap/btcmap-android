@@ -81,6 +81,7 @@ android {
         implementation(libs.coil)
         implementation(libs.coil.network)
         implementation(libs.coil.svg)
+        implementation(libs.gson)
 
         testImplementation(libs.androidx.sqlite.bundled.jvm)
         testImplementation(libs.junit)

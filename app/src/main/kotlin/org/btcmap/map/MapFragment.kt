@@ -52,7 +52,6 @@ import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.btcmap.app.api
 import org.btcmap.databinding.MapFragmentBinding
-import org.json.JSONObject
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.LocationComponentActivationOptions
@@ -1128,10 +1127,10 @@ class MapFragment : Fragment() {
                                 .build()
                         ).executeAsync().body.string().trim()
 
-                        val latestVer = JSONObject(latestVerJson)
-                        val latestVerCode = latestVer.getInt("code")
-                        val latestVerName = latestVer.getString("name")
-                        val latestVerUrl = latestVer.getString("url")
+                        val latestVer = com.google.gson.JsonParser.parseString(latestVerJson).asJsonObject
+                        val latestVerCode = latestVer.get("code").asInt
+                        val latestVerName = latestVer.get("name").asString
+                        val latestVerUrl = latestVer.get("url").asString
 
                         if (latestVerCode > BuildConfig.VERSION_CODE) {
                             withResumed {
