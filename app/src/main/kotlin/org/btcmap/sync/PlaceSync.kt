@@ -1,7 +1,7 @@
 package org.btcmap.sync
 
 import android.util.Log
-import org.btcmap.api.PlaceApi
+import org.btcmap.Api
 import org.btcmap.db.table.Place
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,14 +15,14 @@ import java.time.ZonedDateTime
 object PlaceSync {
     private const val BATCH_SIZE = 10_000L
 
-    suspend fun run(db: Database): Report {
+    suspend fun run(api: Api, db: Database): Report {
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
             var rowsAffected = 0L
             var maxKnownUpdatedAt = db.place.selectMaxUpdatedAt()
             while (true) {
                 val delta = try {
-                    PlaceApi.getPlaces(maxKnownUpdatedAt, BATCH_SIZE)
+                    api.getPlaces(maxKnownUpdatedAt, BATCH_SIZE)
                 } catch (t: Throwable) {
                     Log.e(null, null, t)
                     return@withContext Report(

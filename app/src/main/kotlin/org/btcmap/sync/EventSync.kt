@@ -1,7 +1,7 @@
 package org.btcmap.sync
 
 import android.util.Log
-import org.btcmap.api.EventApi
+import org.btcmap.Api
 import org.btcmap.db.table.Event
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,11 +12,11 @@ import java.time.ZonedDateTime
 
 object EventSync {
 
-    suspend fun run(db: Database): Report {
+    suspend fun run(api: Api, db: Database): Report {
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
             val events = try {
-                EventApi.getEvents()
+                api.getEvents()
             } catch (t: Throwable) {
                 Log.e(null, null, t)
                 return@withContext Report(

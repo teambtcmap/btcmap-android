@@ -17,15 +17,14 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
-import org.btcmap.api.InvoiceApi
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.btcmap.R
+import org.btcmap.paid
 import java.text.NumberFormat
 import androidx.core.net.toUri
-import org.btcmap.api.Api
-import org.btcmap.api.InvoiceApi.paid
+import org.btcmap.Api
 import org.btcmap.app.api
 import org.btcmap.databinding.BoostFragmentBinding
 
@@ -190,7 +189,7 @@ class BoostFragment : Fragment() {
                 }
 
                 val invoice = try {
-                    InvoiceApi.getInvoice(invoiceId)
+                    api().getInvoice(invoiceId)
                 } catch (_: Throwable) {
                     delay(500)
                     continue

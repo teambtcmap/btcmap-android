@@ -40,7 +40,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.btcmap.db.table.Event
 import org.btcmap.db.table.Place
 import org.btcmap.place.PlaceFragment
-import org.btcmap.api.AreasApi
 import org.btcmap.http.httpClient
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
@@ -51,6 +50,7 @@ import okhttp3.Request
 import okhttp3.coroutines.executeAsync
 import org.btcmap.BuildConfig
 import org.btcmap.R
+import org.btcmap.app.api
 import org.btcmap.databinding.MapFragmentBinding
 import org.json.JSONObject
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -332,15 +332,15 @@ class MapFragment : Fragment() {
                     setFilter(filter)
                 }
 
-                if (PlaceSync.run(db()).rowsAffected > 0) {
+                if (PlaceSync.run(api(), db()).rowsAffected > 0) {
                     setFilter(filter)
                 }
 
-                if (EventSync.run(db()).rowsAffected > 0) {
+                if (EventSync.run(api(), db()).rowsAffected > 0) {
                     setFilter(filter)
                 }
 
-                if (CommentSync.run(db()).rowsAffected > 0) {
+                if (CommentSync.run(api(), db()).rowsAffected > 0) {
                     setFilter(filter)
                 }
 
@@ -1241,7 +1241,7 @@ class MapFragment : Fragment() {
     private suspend fun loadAreas(lat: Double, lon: Double) {
         try {
             val areas = withContext(Dispatchers.IO) {
-                AreasApi.getAreas(lat, lon)
+                api().getAreas(lat, lon)
             }
             areasAdapter.submitList(areas)
         } catch (_: Throwable) {

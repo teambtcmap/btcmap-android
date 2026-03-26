@@ -6,7 +6,7 @@ import androidx.sqlite.driver.AndroidSQLiteDriver
 import okhttp3.OkHttpClient
 import okhttp3.brotli.BrotliInterceptor
 import org.btcmap.BuildConfig
-import org.btcmap.api.Api
+import org.btcmap.Api
 import org.btcmap.db.Database
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.prefs

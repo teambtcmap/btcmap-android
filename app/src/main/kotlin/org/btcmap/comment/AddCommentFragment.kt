@@ -19,12 +19,11 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.btcmap.R
+import org.btcmap.paid
 import androidx.core.net.toUri
 import androidx.lifecycle.withResumed
-import org.btcmap.api.CommentApi
-import org.btcmap.api.InvoiceApi
-import org.btcmap.api.InvoiceApi.paid
 import kotlinx.coroutines.delay
+import org.btcmap.app.api
 import org.btcmap.databinding.AddCommentFragmentBinding
 
 class AddCommentFragment : Fragment() {
@@ -62,7 +61,7 @@ class AddCommentFragment : Fragment() {
         // get quote and enable generate invoice button on success
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val quote = CommentApi.getQuote()
+                val quote = api().getCommentQuote()
                 withResumed {
                     binding.fee.text = getString(R.string.d_sat, quote.quoteSat.toString())
                     binding.btnContinue.isEnabled = true
@@ -84,7 +83,11 @@ class AddCommentFragment : Fragment() {
         binding.btnContinue.setOnClickListener {
             val commentText = binding.comment.text.toString().trim()
             if (commentText.isEmpty()) {
-                Toast.makeText(requireContext(), R.string.comment_cannot_be_empty, Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    R.string.comment_cannot_be_empty,
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
@@ -93,7 +96,7 @@ class AddCommentFragment : Fragment() {
 
             viewLifecycleOwner.lifecycleScope.launch {
                 val addCommentResponse = try {
-                    CommentApi.addComment(
+                    api().addComment(
                         placeId = args.placeId,
                         comment = commentText,
                     )
@@ -115,7 +118,7 @@ class AddCommentFragment : Fragment() {
                 launch {
                     while (true) {
                         val invoice = try {
-                            InvoiceApi.getInvoice(addCommentResponse.invoiceId)
+                            api().getInvoice(addCommentResponse.invoiceId)
                         } catch (_: Throwable) {
                             delay(500)
                             continue

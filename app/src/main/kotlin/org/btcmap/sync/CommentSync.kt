@@ -1,8 +1,8 @@
 package org.btcmap.sync
 
 import android.util.Log
-import org.btcmap.api.CommentApi
-import org.btcmap.api.CommentApi.GetCommentsItem
+import org.btcmap.Api
+import org.btcmap.Api.GetCommentsItem
 import org.btcmap.db.table.Comment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,7 +20,7 @@ object CommentSync {
         val rowsAffected: Long,
     )
 
-    suspend fun run(db: Database): Report {
+    suspend fun run(api: Api, db: Database): Report {
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
             var rowsAffected = 0L
@@ -28,7 +28,7 @@ object CommentSync {
 
             while (true) {
                 val delta = try {
-                    CommentApi.getComments(maxKnownUpdatedAt, BATCH_SIZE)
+                    api.getComments(maxKnownUpdatedAt, BATCH_SIZE)
                 } catch (t: Throwable) {
                     Log.e(null, null, t)
                     return@withContext Report(

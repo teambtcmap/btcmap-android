@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil3.load
-import org.btcmap.api.GetAreasItem
+import org.btcmap.GetAreasItem
 import org.btcmap.databinding.AreaItemBinding
 
 class AreasAdapter(
