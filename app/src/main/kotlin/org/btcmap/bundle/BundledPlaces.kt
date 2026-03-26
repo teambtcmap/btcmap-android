@@ -8,27 +8,46 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.btcmap.db.Database
 import java.io.InputStream
+import java.time.Duration
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 object BundledPlaces {
     const val FILE_NAME = "bundled-places.json"
 
-    suspend fun import(ctx: Context, db: Database): Boolean {
-        var hadDbWrites = false
+    data class ImportResult(
+        val placesImported: Long,
+        val duration: Duration,
+    )
 
-        withContext(Dispatchers.IO) {
-            if (db.place.selectCount() > 0) {
-                return@withContext
-            }
-            if (!ctx.resources.assets.list("")!!.contains(FILE_NAME)) {
-                return@withContext
-            }
-            val bundledPlaces = ctx.assets.open(FILE_NAME).use { it.toBundledPlaces() }
-            db.place.insert(bundledPlaces.map { it.toPlace() })
-            hadDbWrites = true
+    suspend fun import(ctx: Context, db: Database): ImportResult {
+        val startedAt = OffsetDateTime.now()
+        val placesInDb = withContext(Dispatchers.IO) { db.place.selectCount() }
+        if (placesInDb > 0) {
+            return ImportResult(
+                placesImported = 0,
+                duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+            )
         }
-
-        return hadDbWrites
+        val assets =
+            withContext(Dispatchers.IO) { ctx.resources.assets.list("") ?: emptyArray<String>() }
+        if (!assets.contains(FILE_NAME)) {
+            return ImportResult(
+                placesImported = 0,
+                duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+            )
+        }
+        val bundledPlaces = withContext(Dispatchers.IO) {
+            ctx.assets.open(FILE_NAME).use { it.toBundledPlaces() }
+        }
+        withContext(Dispatchers.IO) {
+            db.place.insert(bundledPlaces.map { it.toPlace() })
+        }
+        return ImportResult(
+            placesImported = bundledPlaces.size.toLong(),
+            duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+        )
     }
 
     private fun InputStream.toBundledPlaces(): List<BundledPlace> {
@@ -43,7 +62,9 @@ object BundledPlaces {
             icon = get("icon").asString,
             name = get("name").asString,
             comments = if (!has("comments") || get("comments").isJsonNull) null else get("comments").asLong,
-            boostedUntil = if (!has("boosted_until") || get("boosted_until").isJsonNull) null else ZonedDateTime.parse(get("boosted_until").asString),
+            boostedUntil = if (!has("boosted_until") || get("boosted_until").isJsonNull) null else ZonedDateTime.parse(
+                get("boosted_until").asString
+            ),
         )
     }
 

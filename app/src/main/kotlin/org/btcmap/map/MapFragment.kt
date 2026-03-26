@@ -325,7 +325,10 @@ class MapFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.sync.isVisible = true
 
-                if (BundledPlaces.import(requireContext(), db())) {
+                val importResult = BundledPlaces.import(requireContext(), db())
+                Log.d("import", importResult.toString())
+
+                if (importResult.placesImported > 0) {
                     setFilter(filter)
                 }
 
@@ -1127,7 +1130,8 @@ class MapFragment : Fragment() {
                                 .build()
                         ).executeAsync().body.string().trim()
 
-                        val latestVer = com.google.gson.JsonParser.parseString(latestVerJson).asJsonObject
+                        val latestVer =
+                            com.google.gson.JsonParser.parseString(latestVerJson).asJsonObject
                         val latestVerCode = latestVer.get("code").asInt
                         val latestVerName = latestVer.get("name").asString
                         val latestVerUrl = latestVer.get("url").asString
