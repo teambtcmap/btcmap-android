@@ -10,7 +10,7 @@ import org.btcmap.Api
 import org.btcmap.db.Database
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.prefs
-import org.btcmap.sync.Sync
+import org.btcmap.Sync
 import org.maplibre.android.MapLibre
 import org.btcmap.settings.init as settingsInit
 import org.btcmap.typeface.init as typefaceInit

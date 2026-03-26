@@ -1,14 +1,13 @@
-package org.btcmap.sync
+package org.btcmap
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import org.btcmap.Api
 import org.btcmap.db.Database
-import org.btcmap.db.table.Comment
-import org.btcmap.db.table.Event
-import org.btcmap.db.table.Place
+import org.btcmap.db.table.CommentProjectionFull
+import org.btcmap.db.table.EventProjectionFull
+import org.btcmap.db.table.PlaceProjectionFull
 import org.btcmap.time.toZonedDateTime
 import java.time.Duration
 import java.time.ZoneOffset
@@ -55,7 +54,7 @@ class Sync(val api: Api, val db: Database) {
                             it.verifiedAt + "T00:00:00Z"
                         }
 
-                        Place(
+                        PlaceProjectionFull(
                             id = it.id,
                             bundled = it.bundled,
                             updatedAt = it.updatedAt.toZonedDateTime(),
@@ -133,7 +132,7 @@ class Sync(val api: Api, val db: Database) {
 
                 db.transaction {
                     db.comment.insert(newOrChanged.map {
-                        Comment(
+                        CommentProjectionFull(
                             id = it.id,
                             placeId = it.elementId!!,
                             comment = it.comment!!,
@@ -182,7 +181,7 @@ class Sync(val api: Api, val db: Database) {
             db.transaction {
                 db.event.deleteAll()
                 db.event.insert(events.map {
-                    Event(
+                    EventProjectionFull(
                         id = it.id,
                         lat = it.lat,
                         lon = it.lon,
