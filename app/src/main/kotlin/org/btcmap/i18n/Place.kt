@@ -14,9 +14,9 @@ fun Place.getLocalizedOpeningHours(context: Context): String? {
     val locale = Locale.getDefault().language
 
     val result = if (localizedOpeningHours != null) {
-        val localized = localizedOpeningHours.get(locale)?.asString
+        val localized = localizedOpeningHours.get(locale)?.asString ?: ""
 
-        localized?.ifBlank {
+        localized.ifBlank {
             val en = localizedOpeningHours.get("en")?.asString
 
             en?.ifBlank {
