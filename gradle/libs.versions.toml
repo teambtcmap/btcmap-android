@@ -41,6 +41,7 @@ junit = "4.13.2"
 
 [libraries]
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 
 androidx-fragment = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment" }
 androidx-sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqlite" }
@@ -59,6 +60,7 @@ coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil-
 androidx-test = { group = "androidx.test.ext", name = "junit", version.ref = "test" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "testrunner" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+mockwebserver = { module = "com.squareup.okhttp3:mockwebserver3-junit4", version.ref = "okhttp" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

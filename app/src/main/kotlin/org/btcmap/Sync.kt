@@ -1,6 +1,5 @@
 package org.btcmap
 
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -30,7 +29,7 @@ class Sync(val api: Api, val db: Database) {
                 val delta = try {
                     api.getPlaces(maxKnownUpdatedAt, batchSize)
                 } catch (t: Throwable) {
-                    Log.e(null, null, t)
+                    t.printStackTrace()
                     return@withContext PlacesSyncReport(
                         duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                         rowsAffected = rowsAffected,
@@ -114,7 +113,7 @@ class Sync(val api: Api, val db: Database) {
                 val delta = try {
                     api.getComments(maxKnownUpdatedAt, batchSize)
                 } catch (t: Throwable) {
-                    Log.e(null, null, t)
+                    t.printStackTrace()
                     return@withContext CommentSyncReport(
                         duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                         rowsAffected = rowsAffected,
@@ -171,7 +170,7 @@ class Sync(val api: Api, val db: Database) {
             val events = try {
                 api.getEvents()
             } catch (t: Throwable) {
-                Log.e(null, null, t)
+                t.printStackTrace()
                 return@withContext EventSyncReport(
                     duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                     rowsAffected = 0,
