@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+- Add Carto Dark Matter map style
+- Display current country and nearby communities on the map
+- Enable map rotation
+- Display localized place names
+- Improve opening hours display and translation
+- Improve clustering
+- Make adaptive color scheme opt in, default to website colors
+- Improve payment flow
+- Add support for many new languages
+- Improve database testability and test coverage
+
 ## [1.0.0] - 2025-11-06
 
 - Add map style picker
