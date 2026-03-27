@@ -1,5 +1,3 @@
-rootProject.name = "btc-map"
-
 pluginManagement {
     repositories {
         google {
@@ -13,6 +11,7 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
@@ -25,5 +24,7 @@ dependencyResolutionManagement {
         maven("https://jitpack.io")
     }
 }
+
+rootProject.name = "BTC Map"
 
 include(":app")

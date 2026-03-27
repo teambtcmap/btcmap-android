@@ -4,16 +4,13 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-kotlin {
-    // why?
-    jvmToolchain(21)
-}
-
 android {
     namespace = "org.btcmap"
 
     compileSdk {
-        version = release(36)
+        version = release(36) {
+            minorApiLevel = 1
+        }
     }
 
     defaultConfig {
@@ -34,21 +31,9 @@ android {
 
         release {
             manifestPlaceholders["appIcon"] = "@drawable/launcher"
-
-            // https://developer.android.com/topic/performance/app-optimization/enable-app-optimization
-
-            // Enables code-related app optimization.
             isMinifyEnabled = true
-
-            // Enables resource shrinking.
             isShrinkResources = true
-
-            // Includes the default ProGuard rules file
-            proguardFiles(
-                // Default file with automatically generated optimization rules.
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-            )
-
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -66,32 +51,33 @@ android {
             isUniversalApk = true
         }
     }
+}
 
-    dependencies {
-        implementation(libs.kotlinx.coroutines)
-        implementation(libs.androidx.fragment)
-        implementation(libs.androidx.sqlite)
-        implementation(libs.androidx.sqlite.framework)
-        implementation(libs.material)
-        implementation(libs.okhttp.coroutines)
-        implementation(libs.okhttp.brotli)
-        implementation(libs.maplibre)
-        implementation(libs.qrgenerator)
-        implementation(libs.colorpicker)
-        implementation(libs.coil)
-        implementation(libs.coil.network)
-        implementation(libs.coil.svg)
-        implementation(libs.gson)
+dependencies {
+    implementation(libs.kotlin)
+    implementation(libs.kotlinx.coroutines)
+    testImplementation(libs.kotlinx.coroutines.test)
 
-        testImplementation(libs.androidx.sqlite.bundled.jvm)
-        testImplementation(libs.junit)
-        testImplementation(libs.androidx.test.junit)
-        testImplementation(libs.mockwebserver)
-        testImplementation(libs.kotlinx.coroutines.test)
+    implementation(libs.androidx.sqlite)
+    implementation(libs.androidx.sqlite.framework)
+    testImplementation(libs.androidx.sqlite.bundled.jvm)
+    implementation(libs.androidx.fragment)
+    testImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 
-        androidTestImplementation(libs.androidx.test.junit)
-        androidTestImplementation(libs.androidx.test.runner)
-    }
+    implementation(libs.material)
+    implementation(libs.okhttp.coroutines)
+    implementation(libs.okhttp.brotli)
+    testImplementation(libs.mockwebserver)
+    implementation(libs.maplibre)
+    implementation(libs.qrgenerator)
+    implementation(libs.colorpicker)
+    implementation(libs.coil)
+    implementation(libs.coil.network)
+    implementation(libs.coil.svg)
+    implementation(libs.gson)
+    testImplementation(libs.junit)
 }
 
 tasks.register<DefaultTask>("bundleData") {
