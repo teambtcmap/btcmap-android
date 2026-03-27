@@ -1242,7 +1242,7 @@ class MapFragment : Fragment() {
     private suspend fun loadAreas(lat: Double, lon: Double) {
         try {
             val areas = withContext(Dispatchers.IO) {
-                api().getAreas(lat, lon)
+                api().getAreas(lat, lon).filter { it.type == "community" || it.type == "country" }
             }
             areasAdapter.submitList(areas)
         } catch (_: Throwable) {
