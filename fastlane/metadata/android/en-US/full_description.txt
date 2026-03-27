@@ -1,9 +1,3 @@
-Main Features:
+BTC Map is a free and open-source project powered by volunteer bitcoiners and bitcoin-friendly merchants around the world.
 
-* See where you can spend your sats
-* Encourage local business to accept Bitcoin by buying their goods and services
-* Easily add new places or edit existing ones via OpenStreetMap
-* Smooth and snappy user experience even on the older and cheaper devices
-* Enjoy modern and minimalistic Material Design
-* Both light and dark themes are supported
-* This is an open source app which respects your privacy
+We use OpenStreetMap to tag places that accept bitcoin and we display those merchants in our beautiful apps.

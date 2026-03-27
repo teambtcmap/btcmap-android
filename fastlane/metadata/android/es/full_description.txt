@@ -1,0 +1,3 @@
+Usamos OpenStreetMap para etiquetar lugares que aceptan bitcoin y mostramos esos comercios en nuestras aplicaciones.
+
+Nuestras aplicaciones y los datos subyacentes son gratuitos y de código abierto.

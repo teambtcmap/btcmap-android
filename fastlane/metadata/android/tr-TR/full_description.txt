@@ -1,9 +1,3 @@
-Ana Özellikler:
+BTC Map, dünyanın dört bir yanındaki gönüllü bitcoin'ciler ve bitcoin dostu işletmeler tarafından desteklenen, ücretsiz ve açık kaynaklı bir projedir.
 
-* Bitcoinlerinizi nerede harcayabileceğinizi görün
-* Yerel işletmeleri mal ve hizmetlerini satın alarak bitcoin kabul etmeye teşvik edin
- * Açık Sokak Haritası ile kolayca yeni yerler ekleyin veya mevcut yerleri düzenleyin
- * Daha eski ve daha ucuz cihazlarda bile sorunsuz ve hızlı kullanıcı deneyimi
- * Modern ve minimalist Materyal Tasarımının keyfini çıkarın
- * Hem açık hem de koyu temalar desteklenir
- * Bu, gizliliğinize saygı duyan açık kaynaklı bir uygulamadır
+Bitcoin kabul eden yerleri işaretlemek için OpenStreetMap'i kullanıyoruz ve bu işletmeleri şık uygulamalarımızda sergiliyoruz.
