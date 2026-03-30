@@ -4,12 +4,11 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.content.res.Configuration
-import android.graphics.Color
 import androidx.core.content.edit
 import org.btcmap.R
 import org.maplibre.android.geometry.LatLngBounds
 import androidx.core.graphics.toColorInt
-import org.btcmap.app.App
+import org.btcmap.App
 import org.btcmap.map.getOnPrimaryContainerColor
 import org.btcmap.map.getOnTertiaryContainerColor
 import org.btcmap.map.getPrimaryContainerColor

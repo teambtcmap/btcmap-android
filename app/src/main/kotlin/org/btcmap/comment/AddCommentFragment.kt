@@ -23,7 +23,7 @@ import org.btcmap.paid
 import androidx.core.net.toUri
 import androidx.lifecycle.withResumed
 import kotlinx.coroutines.delay
-import org.btcmap.app.api
+import org.btcmap.api
 import org.btcmap.databinding.AddCommentFragmentBinding
 
 class AddCommentFragment : Fragment() {

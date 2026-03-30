@@ -25,7 +25,7 @@ import org.btcmap.paid
 import java.text.NumberFormat
 import androidx.core.net.toUri
 import org.btcmap.Api
-import org.btcmap.app.api
+import org.btcmap.api
 import org.btcmap.databinding.BoostFragmentBinding
 
 class BoostFragment : Fragment() {

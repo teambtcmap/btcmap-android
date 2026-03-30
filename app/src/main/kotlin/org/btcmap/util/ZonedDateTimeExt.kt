@@ -1,4 +1,4 @@
-package org.btcmap.time
+package org.btcmap.util
 
 import java.time.ZoneOffset
 import java.time.ZonedDateTime

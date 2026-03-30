@@ -1,4 +1,4 @@
-package org.btcmap.icon
+package org.btcmap.map
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -9,7 +9,7 @@ import android.graphics.Rect
 import androidx.core.graphics.createBitmap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
-import org.btcmap.typeface.iconTypeface
+import org.btcmap.util.iconTypeface
 
 private val KNOWN_ICONS = """
         account_balance      

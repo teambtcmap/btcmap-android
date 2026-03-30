@@ -10,7 +10,7 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
-import org.btcmap.typeface.iconTypeface
+import org.btcmap.util.iconTypeface
 import org.btcmap.R
 
 private const val PIN_SIZE_DP = 48f

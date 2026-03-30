@@ -107,15 +107,14 @@ override fun onDestroyView() {
 ```
 
 ### Database (SQLite)
-- Use `SQLiteDatabase` with custom `DbHelper`
-- Use `lateinit var db: SQLiteDatabase` pattern (initialized in `App.onCreate`)
-- Query classes in `db.table.*` packages (e.g., `PlaceQueries`, `CommentQueries`)
+- Use `org.btcmap.db.Database` which provides full database layer abstraction
+- All the tables are stored in org.btcmap.db.table package
+- Read table schema and available request before considering changes or additions
+- Any schema change must include a migration
 
 ### Error Handling
-- Use try-catch for network operations and file I/O
-- Silent failures acceptable for non-critical operations (e.g., version check failures)
+- Use try-catch for anything that might cause a crash
 - Always close resources in try-finally or use `.use {}`
-- Handle 429 (rate limit) with exponential backoff (see `http/Client.kt`)
 
 ### UI/Views
 - Use Material Design components
@@ -124,30 +123,25 @@ override fun onDestroyView() {
 - Use `isVisible` from AndroidX for visibility control
 
 ### Constants
-- Group constants in `companion object` at bottom of class
+- Group constants in `companion object` at the top of class
 - Use descriptive names (e.g., `MIN_QUERY_LENGTH` not `MIN_QL`)
 
 ## Project Structure
 ```
-app/src/main/kotlin/
-├── activity/        # Activity classes
-├── api/             # API interfaces (PlaceApi, CommentApi, etc.)
-├── app/             # Application class
-├── boost/           # Boost/sponsor functionality
-├── bundle/         # Bundled data
-├── comment/        # Comments feature
-├── db/             # Database helpers and queries
-├── fragment/       # Fragment extensions
-├── http/           # HTTP client setup
-├── icon/           # Marker icons
-├── json/           # JSON utilities
+app/src/main/kotlin/org/btcmap/
+├── App.kt          # Application singleton
+├── Activity.kt     # This app uses a single shared activity
+├── Api.kt          # Abstracts away all API interactions
+├── boost/          # Stuff related to place boosts
+├── bundle/         # Bundled data (only places, currently)
+├── comment/        # Place comments feature
+├── db/             # Database schema, migrations and queries
+├── i18n/           # Multilanguage support
 ├── map/            # Map functionality
 ├── place/          # Place details
 ├── search/         # Search functionality
 ├── settings/       # User preferences
-├── sync/           # Data synchronization
-├── time/           # Date/time utilities
-├── typeface/       # Custom fonts
+├── util/           # Various utilities and extension functions
 └── view/           # Custom views
 ```
 
@@ -160,7 +154,5 @@ app/src/main/kotlin/
 - **Color Picker**: Colorpicker library
 
 ## Testing
-- Instrumented tests only (require device/emulator)
-- Tests located in `app/src/androidTest/kotlin/`
-- Use `AndroidJUnit4` runner
-- Access app context via `InstrumentationRegistry.getInstrumentation().targetContext`
+- Instrumented tests are run by humans and are lower priority
+- Run unit tests (app/src/test) before reporting any task as done

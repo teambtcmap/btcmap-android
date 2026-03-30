@@ -10,8 +10,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.coroutines.executeAsync
-import org.btcmap.json.toJsonArray
-import org.btcmap.json.toJsonObject
+import org.btcmap.util.toJsonArray
+import org.btcmap.util.toJsonObject
 import java.io.InputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter

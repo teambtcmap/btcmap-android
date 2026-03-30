@@ -1,7 +1,7 @@
-package org.btcmap.typeface
+package org.btcmap.util
 
 import android.graphics.Typeface
-import org.btcmap.app.App
+import org.btcmap.App
 
 lateinit var iconTypeface: Typeface
 

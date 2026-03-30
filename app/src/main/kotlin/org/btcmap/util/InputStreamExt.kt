@@ -1,11 +1,12 @@
-package org.btcmap.json
+package org.btcmap.util
 
 import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import java.io.InputStream
 
 fun InputStream.toJsonArray(): List<JsonObject> {
     val rawJson = this.bufferedReader().use { it.readText() }
-    val jsonArray = com.google.gson.JsonParser.parseString(rawJson).asJsonArray
+    val jsonArray = JsonParser.parseString(rawJson).asJsonArray
 
     return List(jsonArray.size()) { index ->
         jsonArray.get(index).asJsonObject
@@ -14,5 +15,5 @@ fun InputStream.toJsonArray(): List<JsonObject> {
 
 fun InputStream.toJsonObject(): JsonObject {
     val rawJson = this.bufferedReader().use { it.readText() }
-    return com.google.gson.JsonParser.parseString(rawJson).asJsonObject
+    return JsonParser.parseString(rawJson).asJsonObject
 }

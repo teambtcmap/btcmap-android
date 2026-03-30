@@ -19,8 +19,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
-import org.btcmap.app.db
-import org.btcmap.app.sync
+import org.btcmap.db
+import org.btcmap.sync
 import org.btcmap.databinding.CommentsFragmentBinding
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle

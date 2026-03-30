@@ -30,11 +30,11 @@ import org.btcmap.comment.AddCommentFragment
 import org.btcmap.comment.CommentsAdapter
 import org.btcmap.comment.CommentsAdapterItem
 import org.btcmap.comment.CommentsFragment
-import org.btcmap.typeface.iconTypeface
+import org.btcmap.util.iconTypeface
 import org.btcmap.map.getErrorColor
 import org.btcmap.map.getOnSurfaceColor
 import org.btcmap.R
-import org.btcmap.app.db
+import org.btcmap.db
 import org.btcmap.databinding.PlaceFragmentBinding
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.i18n.getLocalizedOpeningHours

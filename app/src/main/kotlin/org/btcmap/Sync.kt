@@ -7,7 +7,7 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.CommentProjectionFull
 import org.btcmap.db.table.EventProjectionFull
 import org.btcmap.db.table.PlaceProjectionFull
-import org.btcmap.time.toZonedDateTime
+import org.btcmap.util.toZonedDateTime
 import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime

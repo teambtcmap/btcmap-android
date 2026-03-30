@@ -49,7 +49,7 @@ import okhttp3.Request
 import okhttp3.coroutines.executeAsync
 import org.btcmap.BuildConfig
 import org.btcmap.R
-import org.btcmap.app.api
+import org.btcmap.api
 import org.btcmap.databinding.MapFragmentBinding
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -70,17 +70,14 @@ import org.btcmap.settings.mapViewport
 import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.prefs
 import org.btcmap.settings.uri
-import org.btcmap.fragment.dpToPx
-import org.btcmap.icon.init
-import org.btcmap.icon.matcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
-import org.btcmap.app.db
-import org.btcmap.app.httpClient
-import org.btcmap.app.sync
+import org.btcmap.db
+import org.btcmap.httpClient
+import org.btcmap.sync
 import org.btcmap.db.table.Marker
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
@@ -1276,5 +1273,9 @@ class MapFragment : Fragment() {
 
             WindowInsetsCompat.CONSUMED
         }
+    }
+
+    fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
     }
 }

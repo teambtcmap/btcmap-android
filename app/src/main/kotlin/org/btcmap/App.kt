@@ -1,19 +1,16 @@
-package org.btcmap.app
+package org.btcmap
 
 import android.app.Application
 import androidx.fragment.app.Fragment
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import okhttp3.OkHttpClient
 import okhttp3.brotli.BrotliInterceptor
-import org.btcmap.BuildConfig
-import org.btcmap.Api
 import org.btcmap.db.Database
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.prefs
-import org.btcmap.Sync
 import org.maplibre.android.MapLibre
 import org.btcmap.settings.init as settingsInit
-import org.btcmap.typeface.init as typefaceInit
+import org.btcmap.util.init as typefaceInit
 
 class App : Application() {
     val sync: Sync by lazy {

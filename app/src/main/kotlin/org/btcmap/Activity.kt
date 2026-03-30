@@ -1,4 +1,4 @@
-package org.btcmap.activity
+package org.btcmap
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
