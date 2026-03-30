@@ -22,17 +22,17 @@ class App : Application() {
 
     val api: Api by lazy {
         Api(
-            httpClient = apiHttpClient,
+            httpClient = httpClient,
             url = prefs.apiUrl,
         )
     }
 
-    private val apiHttpClient by lazy {
+    val httpClient by lazy {
         OkHttpClient.Builder()
             .addInterceptor(BrotliInterceptor)
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
-                    .header("User-Agent", "BTC Map Android ${BuildConfig.VERSION_NAME}")
+                    .header("User-Agent", "BTC Map Android ${BuildConfig.VERSION_CODE}")
                     .build()
                 chain.proceed(request)
             }
@@ -70,5 +70,7 @@ class App : Application() {
 fun Fragment.sync(): Sync = (requireContext().applicationContext as App).sync
 
 fun Fragment.api(): Api = (requireContext().applicationContext as App).api
+
+fun Fragment.httpClient(): OkHttpClient = (requireContext().applicationContext as App).httpClient
 
 fun Fragment.db(): Database = (requireContext().applicationContext as App).db

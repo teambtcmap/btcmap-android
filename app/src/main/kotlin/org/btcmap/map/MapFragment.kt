@@ -40,7 +40,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.btcmap.db.table.Event
 import org.btcmap.db.table.Place
 import org.btcmap.place.PlaceFragment
-import org.btcmap.http.httpClient
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -80,6 +79,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.btcmap.app.db
+import org.btcmap.app.httpClient
 import org.btcmap.app.sync
 import org.btcmap.db.table.Marker
 import org.maplibre.android.style.expressions.Expression
@@ -1124,7 +1124,7 @@ class MapFragment : Fragment() {
 
                 launch {
                     try {
-                        val latestVerJson = httpClient.newCall(
+                        val latestVerJson = httpClient().newCall(
                             Request.Builder()
                                 .url("https://static.btcmap.org/android/latest-app-ver".toHttpUrl())
                                 .build()

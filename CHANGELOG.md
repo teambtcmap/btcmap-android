@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Make adaptive color scheme opt in, default to website colors
 - Improve payment flow
 - Add support for many new languages
-- Improve database testability and test coverage
+- Improve testability and test coverage
 
 ## [1.0.0] - 2025-11-06
 
