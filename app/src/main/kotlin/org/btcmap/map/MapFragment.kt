@@ -517,6 +517,10 @@ class MapFragment : Fragment() {
     private fun BottomSheetBehavior<*>.addSlideCallback() {
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    styleStatusBar()
+                }
+
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                     viewLifecycleOwner.lifecycleScope.launch { selectPlace(null) }
                 }
@@ -524,6 +528,7 @@ class MapFragment : Fragment() {
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 placeFragment.onSlide(slideOffset)
+                styleStatusBar()
             }
         })
     }
@@ -557,17 +562,22 @@ class MapFragment : Fragment() {
     }
 
     fun styleStatusBar() {
-        when (prefs.mapStyle) {
-            MapStyle.Auto -> {
-                val nightMode =
-                    requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-                insetsController?.isAppearanceLightStatusBars = !nightMode
+        val nightMode =
+            requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+
+        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+            insetsController?.isAppearanceLightStatusBars = !nightMode
+        } else {
+            when (prefs.mapStyle) {
+                MapStyle.Auto -> {
+                    insetsController?.isAppearanceLightStatusBars = !nightMode
+                }
+
+                MapStyle.Dark,
+                MapStyle.CartoDarkMatter -> insetsController?.isAppearanceLightStatusBars = false
+
+                else -> insetsController?.isAppearanceLightStatusBars = true
             }
-
-            MapStyle.Dark,
-            MapStyle.CartoDarkMatter -> insetsController?.isAppearanceLightStatusBars = false
-
-            else -> insetsController?.isAppearanceLightStatusBars = true
         }
     }
 
