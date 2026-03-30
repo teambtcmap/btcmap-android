@@ -7,4 +7,4 @@
 - Make adaptive color scheme opt in, default to website colors
 - Improve payment flow
 - Add support for many new languages
-- Improve database testability and test coverage
+- Improve testability and test coverage
