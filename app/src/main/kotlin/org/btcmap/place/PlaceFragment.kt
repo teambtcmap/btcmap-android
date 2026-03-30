@@ -20,6 +20,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
@@ -62,7 +63,8 @@ class PlaceFragment : Fragment() {
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.directions -> {
-                    val place = db().place.selectById(placeId) ?: return@setOnMenuItemClickListener true
+                    val place =
+                        db().place.selectById(placeId) ?: return@setOnMenuItemClickListener true
                     val uri = "geo:${place.lat},${place.lon}?q=${place.getLocalizedName()}".toUri()
                     val intent = Intent(Intent.ACTION_VIEW, uri)
                     requireContext().startActivity(Intent.createChooser(intent, null))
@@ -91,8 +93,10 @@ class PlaceFragment : Fragment() {
         binding.outdated.setTextColor(requireContext().getErrorColor())
 
         binding.companionWarning.setTextColor(requireContext().getErrorColor())
-        binding.companionWarning.compoundDrawableTintList =
-            ColorStateList.valueOf(requireContext().getErrorColor())
+        TextViewCompat.setCompoundDrawableTintList(
+            binding.companionWarning,
+            ColorStateList.valueOf(requireContext().getErrorColor()),
+        )
 
         commentsAdapter = CommentsAdapter()
         binding.commentsList.layoutManager = LinearLayoutManager(requireContext())

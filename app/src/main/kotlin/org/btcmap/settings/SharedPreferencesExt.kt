@@ -262,14 +262,6 @@ var SharedPreferences.apiUrl: HttpUrl
         }
     }
 
-fun SharedPreferences.apiUrlV4(vararg pathSegments: String): HttpUrl {
-    val builder = apiUrl.newBuilder().addPathSegment("v4")
-    pathSegments.forEach {
-        builder.addPathSegment(it)
-    }
-    return builder.build()
-}
-
 private const val KEY_BUTTON_BACKGROUND_COLOR = "buttonBackgroundColor"
 
 fun SharedPreferences.buttonBackgroundColor(context: Context): Int {
