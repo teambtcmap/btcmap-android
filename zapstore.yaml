@@ -1,0 +1,16 @@
+repository: https://github.com/teambtcmap/btcmap-android
+description: BTC Map shows all the locations globally that accept Bitcoin.
+summary: Find places to spend sats wherever you are.
+images:
+  - ./fastlane/metadata/android/en-US/images/phoneScreenshots/1.png
+  - ./fastlane/metadata/android/en-US/images/phoneScreenshots/2.png
+  - ./fastlane/metadata/android/en-US/images/phoneScreenshots/3.png
+  - ./fastlane/metadata/android/en-US/images/phoneScreenshots/4.png
+tags:
+    - bitcoin
+    - mapping
+    - map
+license: AGPL-3.0
+website: btcmap.org
+metadata_sources:
+    - fdroid
