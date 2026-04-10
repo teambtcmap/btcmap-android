@@ -354,3 +354,17 @@ fun SharedPreferences.setButtonBorderColor(color: Int?) {
         }
     }
 }
+
+private const val KEY_SAVED_PLACES = "saved_places"
+
+var SharedPreferences.savedPlaces: Set<Long>
+    get() {
+        return getStringSet(KEY_SAVED_PLACES, emptySet())!!
+            .map { it.toLong() }
+            .toSet()
+    }
+    set(value) {
+        edit {
+            putStringSet(KEY_SAVED_PLACES, value.map { it.toString() }.toSet())
+        }
+    }

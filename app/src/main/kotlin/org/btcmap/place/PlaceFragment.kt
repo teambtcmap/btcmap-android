@@ -27,6 +27,8 @@ import androidx.fragment.app.replace
 import androidx.recyclerview.widget.LinearLayoutManager
 import org.btcmap.boost.BoostFragment
 import org.btcmap.db.table.Place
+import org.btcmap.settings.savedPlaces
+import org.btcmap.settings.prefs
 import org.btcmap.comment.AddCommentFragment
 import org.btcmap.comment.CommentsAdapter
 import org.btcmap.comment.CommentsAdapterItem
@@ -84,6 +86,17 @@ class PlaceFragment : Fragment() {
                     intent.data = "https://btcmap.org/merchant/$placeId".toUri()
                     startActivity(intent)
                 }
+
+                R.id.save -> {
+                    val currentSavedPlaces = prefs.savedPlaces.toMutableSet()
+                    if (currentSavedPlaces.contains(placeId)) {
+                        currentSavedPlaces.remove(placeId)
+                    } else {
+                        currentSavedPlaces.add(placeId)
+                    }
+                    prefs.savedPlaces = currentSavedPlaces
+                    updateBookmarkIcon()
+                }
             }
 
             true
@@ -113,6 +126,8 @@ class PlaceFragment : Fragment() {
 
         binding.toolbar.title = place.getLocalizedName()
         binding.toolbar.setSingleLine(false)
+
+        updateBookmarkIcon()
 
         binding.bundledWarning.isVisible = place.bundled
 
@@ -355,5 +370,12 @@ class PlaceFragment : Fragment() {
                 child.isSingleLine = singleLine
             }
         }
+    }
+
+    private fun updateBookmarkIcon() {
+        val isBookmarked = prefs.savedPlaces.contains(placeId)
+        binding.toolbar.menu.findItem(R.id.save).setIcon(
+            if (isBookmarked) R.drawable.icon_bookmark_check else R.drawable.icon_bookmark
+        )
     }
 }

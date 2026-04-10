@@ -8,6 +8,12 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/save"
+        android:icon="@drawable/icon_bookmark"
+        android:title="@string/save"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/share"
         android:title="@string/share"
         app:showAsAction="never" />

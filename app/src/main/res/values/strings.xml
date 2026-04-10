@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">BTC Map</string>
     <string name="add_location">Add location</string>
     <string name="icon">Icon</string>
@@ -72,4 +72,5 @@
     <string name="saturday">Saturday</string>
     <string name="sunday">Sunday</string>
     <string name="closed">Closed</string>
+    <string name="save" tools:ignore="MissingTranslation">Save</string>
 </resources>
