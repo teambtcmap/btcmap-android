@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
@@ -24,11 +25,14 @@ import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withResumed
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.launch
 import org.btcmap.boost.BoostFragment
 import org.btcmap.db.table.Place
-import org.btcmap.settings.savedPlaces
 import org.btcmap.settings.prefs
+import org.btcmap.settings.authToken
 import org.btcmap.comment.AddCommentFragment
 import org.btcmap.comment.CommentsAdapter
 import org.btcmap.comment.CommentsAdapterItem
@@ -37,10 +41,13 @@ import org.btcmap.util.iconTypeface
 import org.btcmap.map.getErrorColor
 import org.btcmap.map.getOnSurfaceColor
 import org.btcmap.R
+import org.btcmap.api
 import org.btcmap.db
 import org.btcmap.databinding.PlaceFragmentBinding
+import org.btcmap.db.table.User
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.i18n.getLocalizedOpeningHours
+import org.btcmap.settings.authorized
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -88,14 +95,32 @@ class PlaceFragment : Fragment() {
                 }
 
                 R.id.save -> {
-                    val currentSavedPlaces = prefs.savedPlaces.toMutableSet()
-                    if (currentSavedPlaces.contains(placeId)) {
-                        currentSavedPlaces.remove(placeId)
+                    if (prefs.authorized) {
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            val user = api().getUser(prefs.authToken!!)
+                            if (user.savedPlaces.any { savedPlace -> savedPlace.asJsonObject["id"].asLong == placeId }) {
+                                api().removeSavedPlace(prefs.authToken!!, placeId)
+                            } else {
+                                api().addSavedPlace(prefs.authToken!!, placeId)
+                            }
+                            val updatedUser = api().getUser(prefs.authToken!!)
+                            db().transaction {
+                                db().user.delete()
+                                db().user.insert(
+                                    User(
+                                        id = updatedUser.id,
+                                        name = updatedUser.name,
+                                        roles = updatedUser.roles,
+                                        savedPlaces = updatedUser.savedPlaces,
+                                        savedAreas = updatedUser.savedAreas,
+                                    )
+                                )
+                            }
+                            updateBookmarkIcon()
+                        }
                     } else {
-                        currentSavedPlaces.add(placeId)
+                        Toast.makeText(requireContext(), "TODO auth", Toast.LENGTH_SHORT).show()
                     }
-                    prefs.savedPlaces = currentSavedPlaces
-                    updateBookmarkIcon()
                 }
             }
 
@@ -373,9 +398,18 @@ class PlaceFragment : Fragment() {
     }
 
     private fun updateBookmarkIcon() {
-        val isBookmarked = prefs.savedPlaces.contains(placeId)
-        binding.toolbar.menu.findItem(R.id.save).setIcon(
-            if (isBookmarked) R.drawable.icon_bookmark_check else R.drawable.icon_bookmark
-        )
+        if (prefs.authorized) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val user = api().getUser(prefs.authToken!!)
+                val saved = user.savedPlaces.any { it.asJsonObject["id"].asLong == placeId }
+                withResumed {
+                    binding.toolbar.menu.findItem(R.id.save).setIcon(
+                        if (saved) R.drawable.icon_bookmark_check else R.drawable.icon_bookmark
+                    )
+                }
+            }
+        } else {
+            binding.toolbar.menu.findItem(R.id.save).setIcon(R.drawable.icon_bookmark)
+        }
     }
 }

@@ -119,6 +119,7 @@ fun SharedPreferences.mapStyleIsDark(): Boolean {
         MapStyle.Auto -> {
             false
         }
+
         else -> false
     }
 }
@@ -132,7 +133,7 @@ fun SharedPreferences.markerBackgroundColor(context: Context): Int {
     }
 
     val isDark = mapStyleIsDark() ||
-        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
 
     return if (isDark) 0xFF0e95af.toInt() else 0xFF0e95af.toInt()
 }
@@ -178,7 +179,7 @@ fun SharedPreferences.markerIconColor(context: Context): Int {
     }
 
     val isDark = mapStyleIsDark() ||
-        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
 
     return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt() // White for both
 }
@@ -205,7 +206,7 @@ fun SharedPreferences.badgeBackgroundColor(context: Context): Int {
     }
 
     val isDark = mapStyleIsDark() ||
-        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
 
     return if (isDark) 0xFF00a63e.toInt() else 0xFF00a63e.toInt()
 }
@@ -232,7 +233,7 @@ fun SharedPreferences.badgeTextColor(context: Context): Int {
     }
 
     val isDark = mapStyleIsDark() ||
-        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
 
     return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
 }
@@ -273,7 +274,7 @@ fun SharedPreferences.buttonBackgroundColor(context: Context): Int {
     }
 
     val isDark = mapStyleIsDark() ||
-        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
 
     return if (isDark) 0xFF1f2937.toInt() else 0xFF1f2937.toInt()
 }
@@ -302,7 +303,7 @@ fun SharedPreferences.buttonIconColor(context: Context): Int {
     }
 
     val isDark = mapStyleIsDark() ||
-        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
 
     return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
 }
@@ -337,7 +338,7 @@ fun SharedPreferences.buttonBorderColor(context: Context): Int {
     }
 
     val isDark = mapStyleIsDark() ||
-        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
 
     return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
 }
@@ -355,16 +356,13 @@ fun SharedPreferences.setButtonBorderColor(color: Int?) {
     }
 }
 
-private const val KEY_SAVED_PLACES = "saved_places"
+private const val KEY_AUTH_TOKEN = "auth_token"
 
-var SharedPreferences.savedPlaces: Set<Long>
-    get() {
-        return getStringSet(KEY_SAVED_PLACES, emptySet())!!
-            .map { it.toLong() }
-            .toSet()
-    }
+var SharedPreferences.authToken: String?
+    get() = getString(KEY_AUTH_TOKEN, null)
     set(value) {
-        edit {
-            putStringSet(KEY_SAVED_PLACES, value.map { it.toString() }.toSet())
-        }
+        edit { putString(KEY_AUTH_TOKEN, value) }
     }
+
+val SharedPreferences.authorized: Boolean
+    get() = !getString(KEY_AUTH_TOKEN, null).isNullOrBlank()

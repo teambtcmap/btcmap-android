@@ -8,10 +8,12 @@ import org.btcmap.db.table.EventQueries
 import org.btcmap.db.table.EventSchema
 import org.btcmap.db.table.PlaceQueries
 import org.btcmap.db.table.PlaceSchema
+import org.btcmap.db.table.UserQueries
+import org.btcmap.db.table.UserSchema
 
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
-        private const val VERSION = 3
+        private const val VERSION = 4
     }
 
     val conn = driver.open(path)
@@ -19,6 +21,7 @@ class Database(driver: SQLiteDriver, val path: String) {
     val place = PlaceQueries(conn)
     val comment = CommentQueries(conn)
     val event = EventQueries(conn)
+    val user = UserQueries(conn)
 
     init {
         migrate()
@@ -32,6 +35,7 @@ class Database(driver: SQLiteDriver, val path: String) {
             conn.execSQL(PlaceSchema.toString())
             conn.execSQL(EventSchema.toString())
             conn.execSQL(CommentSchema.toString())
+            conn.execSQL(UserSchema.toString())
             conn.execSQL("PRAGMA user_version=$VERSION;")
             return
         }
@@ -46,6 +50,10 @@ class Database(driver: SQLiteDriver, val path: String) {
                 2 -> {
                     conn.execSQL("ALTER TABLE place ADD COLUMN localized_opening_hours TEXT;")
                     conn.execSQL("UPDATE place SET updated_at = '2000-01-01T00:00:00Z';")
+                }
+
+                3 -> {
+                    conn.execSQL(UserSchema.toString())
                 }
 
                 else -> throw Exception("migration is missing")

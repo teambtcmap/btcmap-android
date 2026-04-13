@@ -73,4 +73,17 @@
     <string name="sunday">Sunday</string>
     <string name="closed">Closed</string>
     <string name="save" tools:ignore="MissingTranslation">Save</string>
+    <string name="account" tools:ignore="MissingTranslation">Account</string>
+    <string name="not_logged_in" tools:ignore="MissingTranslation">Account</string>
+    <string name="logged_in_as" tools:ignore="MissingTranslation">Logged in as %1$s</string>
+    <string name="create_account" tools:ignore="MissingTranslation">Log in</string>
+    <string name="login" tools:ignore="MissingTranslation">Login</string>
+    <string name="logout" tools:ignore="MissingTranslation">Logout</string>
+    <string name="logging_in" tools:ignore="MissingTranslation">Logging in…</string>
+    <string name="logging_out" tools:ignore="MissingTranslation">Logging out…</string>
+    <string name="username" tools:ignore="MissingTranslation">Username</string>
+    <string name="password" tools:ignore="MissingTranslation">Password</string>
+    <string name="profile" tools:ignore="MissingTranslation">Profile</string>
+    <string name="saved_places" tools:ignore="MissingTranslation">Saved places</string>
+    <string name="no_saved_places" tools:ignore="MissingTranslation">No saved places</string>
 </resources>

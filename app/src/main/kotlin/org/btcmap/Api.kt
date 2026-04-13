@@ -1,6 +1,8 @@
 package org.btcmap
 
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
@@ -109,11 +111,17 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         return toJsonArray().map {
             GetCommentsItem(
                 id = it.get("id").asLong,
-                elementId = if (!it.has("place_id") || it.get("place_id").isJsonNull) null else it.get("place_id").asLong,
+                elementId = if (!it.has("place_id") || it.get("place_id").isJsonNull) null else it.get(
+                    "place_id"
+                ).asLong,
                 comment = if (!it.has("text") || it.get("text").isJsonNull) null else it.get("text").asString.ifBlank { null },
-                createdAt = if (!it.has("created_at") || it.get("created_at").isJsonNull) null else it.get("created_at").asString.ifBlank { null },
+                createdAt = if (!it.has("created_at") || it.get("created_at").isJsonNull) null else it.get(
+                    "created_at"
+                ).asString.ifBlank { null },
                 updatedAt = it.get("updated_at").asString,
-                deletedAt = if (!it.has("deleted_at") || it.get("deleted_at").isJsonNull) null else it.get("deleted_at").asString.ifBlank { null },
+                deletedAt = if (!it.has("deleted_at") || it.get("deleted_at").isJsonNull) null else it.get(
+                    "deleted_at"
+                ).asString.ifBlank { null },
             )
         }
     }
@@ -328,20 +336,32 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                 lon = it.get("lon").asDouble,
                 icon = it.get("icon").asString,
                 name = it.get("name").asString,
-                localizedName = if (!it.has("localized_name") || it.get("localized_name").isJsonNull) null else it.get("localized_name")
+                localizedName = if (!it.has("localized_name") || it.get("localized_name").isJsonNull) null else it.get(
+                    "localized_name"
+                )
                     .getAsJsonObject(),
                 updatedAt = it.get("updated_at").asString,
-                deletedAt = if (!it.has("deleted_at") || it.get("deleted_at").isJsonNull) null else it.get("deleted_at")
+                deletedAt = if (!it.has("deleted_at") || it.get("deleted_at").isJsonNull) null else it.get(
+                    "deleted_at"
+                )
                     .asString.ifBlank { null },
-                requiredAppUrl = if (!it.has("required_app_url") || it.get("required_app_url").isJsonNull) null else it.get("required_app_url")
+                requiredAppUrl = if (!it.has("required_app_url") || it.get("required_app_url").isJsonNull) null else it.get(
+                    "required_app_url"
+                )
                     .asString.ifBlank { null },
-                boostedUntil = if (!it.has("boosted_until") || it.get("boosted_until").isJsonNull) null else it.get("boosted_until")
+                boostedUntil = if (!it.has("boosted_until") || it.get("boosted_until").isJsonNull) null else it.get(
+                    "boosted_until"
+                )
                     .asString.ifBlank { null },
-                verifiedAt = if (!it.has("verified_at") || it.get("verified_at").isJsonNull) null else it.get("verified_at")
+                verifiedAt = if (!it.has("verified_at") || it.get("verified_at").isJsonNull) null else it.get(
+                    "verified_at"
+                )
                     .asString.ifBlank { null },
                 address = if (!it.has("address") || it.get("address").isJsonNull) null else it.get("address")
                     .asString.ifBlank { null },
-                openingHours = if (!it.has("opening_hours") || it.get("opening_hours").isJsonNull) null else it.get("opening_hours")
+                openingHours = if (!it.has("opening_hours") || it.get("opening_hours").isJsonNull) null else it.get(
+                    "opening_hours"
+                )
                     .asString.ifBlank { null },
                 localizedOpeningHours = if (!it.has("localized_opening_hours") || it.get("localized_opening_hours").isJsonNull) null else it.get(
                     "localized_opening_hours"
@@ -354,16 +374,24 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                     .ifBlank { null },
                 twitter = if (!it.has("twitter") || it.get("twitter").isJsonNull) null else it.get("twitter")
                     .asString.ifBlank { null },
-                facebook = if (!it.has("facebook") || it.get("facebook").isJsonNull) null else it.get("facebook")
+                facebook = if (!it.has("facebook") || it.get("facebook").isJsonNull) null else it.get(
+                    "facebook"
+                )
                     .asString.ifBlank { null },
-                instagram = if (!it.has("instagram") || it.get("instagram").isJsonNull) null else it.get("instagram")
+                instagram = if (!it.has("instagram") || it.get("instagram").isJsonNull) null else it.get(
+                    "instagram"
+                )
                     .asString.ifBlank { null },
                 line = if (!it.has("line") || it.get("line").isJsonNull) null else it.get("line").asString
                     .ifBlank { null },
                 bundled = false,
-                comments = if (!it.has("comments") || it.get("comments").isJsonNull) null else it.get("comments")
+                comments = if (!it.has("comments") || it.get("comments").isJsonNull) null else it.get(
+                    "comments"
+                )
                     .asLong,
-                telegram = if (!it.has("telegram") || it.get("telegram").isJsonNull) null else it.get("telegram")
+                telegram = if (!it.has("telegram") || it.get("telegram").isJsonNull) null else it.get(
+                    "telegram"
+                )
                     .asString.toHttpUrl(),
             )
         }
@@ -414,6 +442,139 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
 
         return withContext(Dispatchers.IO) {
             res.body.byteStream().use { it.toGetPlacesItems() }
+        }
+    }
+
+    data class User(
+        val id: Long,
+        val name: String,
+        val roles: JsonArray,
+        val savedPlaces: JsonArray,
+        val savedAreas: JsonArray,
+    )
+
+    fun JsonObject.toUser(): User {
+        return User(
+            id = this["id"].asLong,
+            name = this["name"].asString,
+            roles = this.getAsJsonArray("roles"),
+            savedPlaces = this.getAsJsonArray("saved_places"),
+            savedAreas = this.getAsJsonArray("saved_areas"),
+        )
+    }
+
+    suspend fun createUser(password: String): User {
+        val url = url.newBuilder().addPathSegments("v4/users").build()
+
+        val req = JsonObject().apply {
+            addProperty("password", password)
+        }
+
+        val res = httpClient.newCall(
+            Request.Builder()
+                .post(req.toString().toRequestBody("application/json".toMediaType()))
+                .url(url)
+                .build()
+        ).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return res.body.byteStream().use {
+            val json = it.toJsonObject()
+            User(
+                id = json["id"].asLong,
+                name = json["name"].asString,
+                roles = json.getAsJsonArray("roles"),
+                savedPlaces = JsonArray(),
+                savedAreas = JsonArray(),
+            )
+        }
+    }
+
+    suspend fun getUser(token: String): User {
+        val url = url.newBuilder().addPathSegments("v4/users/me").build()
+
+        val res = httpClient.newCall(
+            Request.Builder()
+                .url(url)
+                .header("Authorization", "Bearer $token")
+                .build()
+        ).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return res.body.byteStream().use {
+            it.toJsonObject().toUser()
+        }
+    }
+
+    data class CreateTokenResponse(
+        val token: String,
+        val user: User,
+    )
+
+    suspend fun createToken(
+        username: String,
+        password: String,
+        label: String
+    ): CreateTokenResponse {
+        val url = url.newBuilder().addPathSegments("v4/users/$username/tokens").build()
+
+        val req = JsonObject().apply {
+            addProperty("label", label)
+        }
+
+        val res = httpClient.newCall(
+            Request.Builder()
+                .post(req.toString().toRequestBody("application/json".toMediaType()))
+                .url(url)
+                .header("Authorization", "Bearer $password")
+                .build()
+        ).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return res.body.byteStream().use {
+            val body = it.toJsonObject()
+            CreateTokenResponse(
+                token = body.get("token").asString,
+                user = body.getAsJsonObject("user").toUser(),
+            )
+        }
+    }
+
+    suspend fun addSavedPlace(token: String, placeId: Long) {
+        val url = url.newBuilder().addPathSegments("v4/places/saved").build()
+        val args = JsonPrimitive(placeId)
+        val res = httpClient.newCall(
+            Request.Builder()
+                .post(args.toString().toRequestBody("application/json".toMediaType()))
+                .url(url)
+                .header("Authorization", "Bearer $token")
+                .build()
+        ).executeAsync()
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+    }
+
+    suspend fun removeSavedPlace(token: String, placeId: Long) {
+        val url = url.newBuilder().addPathSegments("v4/places/saved/$placeId").build()
+        val res = httpClient.newCall(
+            Request.Builder()
+                .delete()
+                .url(url)
+                .header("Authorization", "Bearer $token")
+                .build()
+        ).executeAsync()
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
         }
     }
 }

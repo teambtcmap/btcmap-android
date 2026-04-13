@@ -34,6 +34,39 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:id="@+id/accountButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minHeight="64dp"
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <TextView
+                    android:id="@+id/accountStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="?colorOnSurface"
+                    android:textSize="16sp"
+                    tools:text="@string/not_logged_in" />
+
+                <TextView
+                    android:id="@+id/accountSecondary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.6"
+                    android:textAppearance="?textAppearanceListItemSecondary"
+                    android:visibility="gone"
+                    tools:text="@string/logout"
+                    tools:visibility="visible" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/mapStyleButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
