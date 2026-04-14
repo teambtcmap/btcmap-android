@@ -7,6 +7,7 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.format.DateUtils
 import android.text.style.URLSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,7 +29,9 @@ import androidx.fragment.app.replace
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
+import org.btcmap.BuildConfig
 import org.btcmap.boost.BoostFragment
 import org.btcmap.db.table.Place
 import org.btcmap.settings.prefs
@@ -51,6 +54,7 @@ import org.btcmap.settings.authorized
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.util.UUID
 
 class PlaceFragment : Fragment() {
 
@@ -119,7 +123,29 @@ class PlaceFragment : Fragment() {
                             updateBookmarkIcon()
                         }
                     } else {
-                        Toast.makeText(requireContext(), "TODO auth", Toast.LENGTH_SHORT).show()
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(R.string.account)
+                            .setMessage("In order to sync saved places across devices and platforms, you need an account. We can generate a random account if you don't have one already.")
+                            .setPositiveButton(
+                                android.R.string.ok
+                            ) { _, _ ->
+                                val options =
+                                    arrayOf(
+                                        "I don't have an account",
+                                        "Log in with existing account"
+                                    )
+                                MaterialAlertDialogBuilder(requireContext())
+                                    .setTitle(R.string.account)
+                                    .setItems(options) { _, which ->
+                                        when (which) {
+                                            0 -> createNewAccount()
+                                            1 -> TODO()
+                                        }
+                                    }
+                                    .show()
+                            }
+
+                            .show()
                     }
                 }
             }
@@ -410,6 +436,42 @@ class PlaceFragment : Fragment() {
             }
         } else {
             binding.toolbar.menu.findItem(R.id.save).setIcon(R.drawable.icon_bookmark)
+        }
+    }
+
+    private fun createNewAccount() {
+        val password = UUID.randomUUID().toString()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val user = api().createUser(password)
+                val token = api().createToken(
+                    user.name,
+                    password,
+                    "BTC Map Android ${BuildConfig.VERSION_CODE}"
+                )
+                prefs.authToken = token.token
+                db().user.insert(
+                    User(
+                        id = user.id,
+                        name = user.name,
+                        roles = user.roles,
+                        savedPlaces = user.savedPlaces,
+                        savedAreas = user.savedAreas,
+                    )
+                )
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.account)
+                    .setMessage("Logged in as ${user.name}\n\nYou can visit settings to customize and backup your account")
+                    .show()
+            } catch (e: Exception) {
+                Log.e("auth", "Failed to create new account", e)
+                Toast.makeText(
+                    requireContext(),
+                    "Failed to create new account",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 }
