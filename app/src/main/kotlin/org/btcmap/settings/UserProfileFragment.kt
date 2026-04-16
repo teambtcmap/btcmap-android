@@ -10,10 +10,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.textview.MaterialTextView
 import com.google.gson.JsonArray
 import kotlinx.coroutines.launch
 import org.btcmap.R
+import org.btcmap.api
+import org.btcmap.db.table.User
+import org.btcmap.databinding.SavedPlaceItemBinding
 import org.btcmap.databinding.UserProfileFragmentBinding
 import org.btcmap.db
 
@@ -40,7 +42,12 @@ class UserProfileFragment : Fragment() {
         binding.username.text = getString(R.string.logged_in_as, user.name)
 
         binding.savedPlacesList.layoutManager = LinearLayoutManager(requireContext())
-        binding.savedPlacesList.adapter = SavedPlacesAdapter(user.savedPlaces)
+        binding.savedPlacesList.adapter = SavedPlacesAdapter(
+            places = user.savedPlaces,
+            onDeleteClick = { placeId ->
+                deleteSavedPlace(placeId)
+            }
+        )
 
         binding.noSavedPlaces.isVisible = user.savedPlaces.size() == 0
         binding.savedPlacesList.isVisible = user.savedPlaces.size() > 0
@@ -62,32 +69,75 @@ class UserProfileFragment : Fragment() {
                 db().user.delete()
                 parentFragmentManager.popBackStack()
             } catch (e: Exception) {
-                Toast.makeText(context, R.string.error, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun deleteSavedPlace(placeId: Long) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                api().removeSavedPlace(placeId)
+                refreshUserData()
+            } catch (e: Throwable) {
+                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun refreshUserData() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val user = api().getUser()
+                db().user.delete()
+                db().user.insert(
+                    User(
+                        id = user.id,
+                        name = user.name,
+                        roles = user.roles,
+                        savedPlaces = user.savedPlaces,
+                        savedAreas = user.savedAreas,
+                    )
+                )
+                binding.savedPlacesList.adapter = SavedPlacesAdapter(
+                    places = user.savedPlaces,
+                    onDeleteClick = { placeId ->
+                        deleteSavedPlace(placeId)
+                    }
+                )
+                binding.noSavedPlaces.isVisible = user.savedPlaces.size() == 0
+                binding.savedPlacesList.isVisible = user.savedPlaces.size() > 0
+            } catch (e: Throwable) {
+                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private class SavedPlacesAdapter(
         private val places: JsonArray,
+        private val onDeleteClick: (Long) -> Unit,
     ) : RecyclerView.Adapter<SavedPlacesAdapter.ViewHolder>() {
 
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val text: MaterialTextView = view as MaterialTextView
+            val binding: SavedPlaceItemBinding = SavedPlaceItemBinding.bind(view)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val text = MaterialTextView(parent.context).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                setPadding(48, 32, 48, 32)
-            }
-            return ViewHolder(text)
+            val binding = SavedPlaceItemBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false,
+            )
+            return ViewHolder(binding.root)
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            holder.text.text = places[position].asJsonObject["name"].asString
+            val place = places[position].asJsonObject
+            holder.binding.placeName.text = place["name"].asString
+            val placeId = place["id"].asLong
+            holder.binding.deleteButton.setOnClickListener {
+                onDeleteClick(placeId)
+            }
         }
 
         override fun getItemCount(): Int = places.size()

@@ -92,4 +92,5 @@
     <string name="failed_to_create_new_account" tools:ignore="MissingTranslation">Failed to create new account</string>
     <string name="logged_in_as_you_can_visit_settings_to_customize_and_backup_your_account" tools:ignore="MissingTranslation">Logged in as %1$s\n\nYou can visit settings to customize and backup your account</string>
     <string name="click_to_see_your_profile" tools:ignore="MissingTranslation">Click to see your profile</string>
+    <string name="delete" tools:ignore="MissingTranslation">Delete</string>
 </resources>
