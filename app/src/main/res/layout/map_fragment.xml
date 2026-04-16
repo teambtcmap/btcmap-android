@@ -118,6 +118,13 @@
         android:layout_gravity="end|bottom"
         android:layout_height="wrap_content" >
 
+        <org.btcmap.view.IconButton
+            android:id="@+id/activityFeed"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginBottom="8dp"
+            app:iconSrc="@drawable/icon_event" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/areas"
             android:layout_width="wrap_content"

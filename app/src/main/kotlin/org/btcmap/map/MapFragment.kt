@@ -19,6 +19,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -40,6 +41,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.btcmap.db.table.Event
 import org.btcmap.db.table.Place
 import org.btcmap.place.PlaceFragment
+import org.btcmap.activity.ActivityFeedFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -410,6 +412,21 @@ class MapFragment : Fragment() {
                 true,
             )
         binding.areas.adapter = areasAdapter
+
+        binding.activityFeed.setOnClickListener {
+            val areaIds = areasAdapter.currentList.map { it.urlAlias }
+            if (areaIds.isNotEmpty()) {
+                parentFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    replace<ActivityFeedFragment>(
+                        R.id.fragmentContainerView,
+                        null,
+                        bundleOf("area_ids" to ArrayList(areaIds))
+                    )
+                    addToBackStack(null)
+                }
+            }
+        }
 
         binding.searchView.editText.doAfterTextChanged { searchString ->
             binding.map.getMapAsync { map ->
