@@ -7,7 +7,6 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.format.DateUtils
 import android.text.style.URLSpan
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,13 +28,10 @@ import androidx.fragment.app.replace
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
-import org.btcmap.BuildConfig
 import org.btcmap.boost.BoostFragment
 import org.btcmap.db.table.Place
 import org.btcmap.settings.prefs
-import org.btcmap.settings.authToken
 import org.btcmap.comment.AddCommentFragment
 import org.btcmap.comment.CommentsAdapter
 import org.btcmap.comment.CommentsAdapterItem
@@ -45,6 +41,7 @@ import org.btcmap.map.getErrorColor
 import org.btcmap.map.getOnSurfaceColor
 import org.btcmap.R
 import org.btcmap.api
+import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.databinding.PlaceFragmentBinding
 import org.btcmap.db.table.User
@@ -54,7 +51,6 @@ import org.btcmap.settings.authorized
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.util.UUID
 
 class PlaceFragment : Fragment() {
 
@@ -100,52 +96,62 @@ class PlaceFragment : Fragment() {
 
                 R.id.save -> {
                     if (prefs.authorized) {
-                        viewLifecycleOwner.lifecycleScope.launch {
-                            val user = api().getUser(prefs.authToken!!)
-                            if (user.savedPlaces.any { savedPlace -> savedPlace.asJsonObject["id"].asLong == placeId }) {
-                                api().removeSavedPlace(prefs.authToken!!, placeId)
-                            } else {
-                                api().addSavedPlace(prefs.authToken!!, placeId)
-                            }
-                            val updatedUser = api().getUser(prefs.authToken!!)
-                            db().transaction {
-                                db().user.delete()
-                                db().user.insert(
-                                    User(
-                                        id = updatedUser.id,
-                                        name = updatedUser.name,
-                                        roles = updatedUser.roles,
-                                        savedPlaces = updatedUser.savedPlaces,
-                                        savedAreas = updatedUser.savedAreas,
+                        try {
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                val user = db().user.select()!!
+                                if (user.savedPlaces.any { savedPlace -> savedPlace.asJsonObject["id"].asLong == placeId }) {
+                                    api().removeSavedPlace(placeId)
+                                } else {
+                                    api().savePlace(placeId)
+                                }
+                                val updatedUser = api().getUser()
+                                db().transaction {
+                                    db().user.delete()
+                                    db().user.insert(
+                                        User(
+                                            id = updatedUser.id,
+                                            name = updatedUser.name,
+                                            roles = updatedUser.roles,
+                                            savedPlaces = updatedUser.savedPlaces,
+                                            savedAreas = updatedUser.savedAreas,
+                                        )
                                     )
-                                )
+                                }
+                                updateBookmarkIcon()
                             }
-                            updateBookmarkIcon()
+                        } catch (e: Throwable) {
+                            Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG).show()
                         }
                     } else {
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setTitle(R.string.account)
-                            .setMessage("In order to sync saved places across devices and platforms, you need an account. We can generate a random account if you don't have one already.")
-                            .setPositiveButton(
-                                android.R.string.ok
-                            ) { _, _ ->
-                                val options =
-                                    arrayOf(
-                                        "I don't have an account",
-                                        "Log in with existing account"
-                                    )
-                                MaterialAlertDialogBuilder(requireContext())
-                                    .setTitle(R.string.account)
-                                    .setItems(options) { _, which ->
-                                        when (which) {
-                                            0 -> createNewAccount()
-                                            1 -> TODO()
-                                        }
+                        showAuthDialog(getString(R.string.auth_to_save_place)) {
+                            try {
+                                viewLifecycleOwner.lifecycleScope.launch {
+                                    val user = db().user.select()!!
+                                    if (user.savedPlaces.any { savedPlace -> savedPlace.asJsonObject["id"].asLong == placeId }) {
+                                        api().removeSavedPlace(placeId)
+                                    } else {
+                                        api().savePlace(placeId)
                                     }
+                                    val updatedUser = api().getUser()
+                                    db().transaction {
+                                        db().user.delete()
+                                        db().user.insert(
+                                            User(
+                                                id = updatedUser.id,
+                                                name = updatedUser.name,
+                                                roles = updatedUser.roles,
+                                                savedPlaces = updatedUser.savedPlaces,
+                                                savedAreas = updatedUser.savedAreas,
+                                            )
+                                        )
+                                    }
+                                    updateBookmarkIcon()
+                                }
+                            } catch (e: Throwable) {
+                                Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG)
                                     .show()
                             }
-
-                            .show()
+                        }
                     }
                 }
             }
@@ -426,52 +432,20 @@ class PlaceFragment : Fragment() {
     private fun updateBookmarkIcon() {
         if (prefs.authorized) {
             viewLifecycleOwner.lifecycleScope.launch {
-                val user = api().getUser(prefs.authToken!!)
-                val saved = user.savedPlaces.any { it.asJsonObject["id"].asLong == placeId }
-                withResumed {
-                    binding.toolbar.menu.findItem(R.id.save).setIcon(
-                        if (saved) R.drawable.icon_bookmark_check else R.drawable.icon_bookmark
-                    )
+                try {
+                    val user = db().user.select()!!
+                    val saved = user.savedPlaces.any { it.asJsonObject["id"].asLong == placeId }
+                    withResumed {
+                        binding.toolbar.menu.findItem(R.id.save).setIcon(
+                            if (saved) R.drawable.icon_bookmark_check else R.drawable.icon_bookmark
+                        )
+                    }
+                } catch (e: Throwable) {
+                    Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG).show()
                 }
             }
         } else {
             binding.toolbar.menu.findItem(R.id.save).setIcon(R.drawable.icon_bookmark)
-        }
-    }
-
-    private fun createNewAccount() {
-        val password = UUID.randomUUID().toString()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val user = api().createUser(password)
-                val token = api().createToken(
-                    user.name,
-                    password,
-                    "BTC Map Android ${BuildConfig.VERSION_CODE}"
-                )
-                prefs.authToken = token.token
-                db().user.insert(
-                    User(
-                        id = user.id,
-                        name = user.name,
-                        roles = user.roles,
-                        savedPlaces = user.savedPlaces,
-                        savedAreas = user.savedAreas,
-                    )
-                )
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.account)
-                    .setMessage("Logged in as ${user.name}\n\nYou can visit settings to customize and backup your account")
-                    .show()
-            } catch (e: Exception) {
-                Log.e("auth", "Failed to create new account", e)
-                Toast.makeText(
-                    requireContext(),
-                    "Failed to create new account",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
         }
     }
 }

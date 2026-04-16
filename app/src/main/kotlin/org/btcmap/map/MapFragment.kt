@@ -75,8 +75,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
 import org.btcmap.db
-import org.btcmap.httpClient
 import org.btcmap.sync
 import org.btcmap.db.table.Marker
 import org.maplibre.android.style.expressions.Expression
@@ -1131,7 +1131,7 @@ class MapFragment : Fragment() {
 
                 launch {
                     try {
-                        val latestVerJson = httpClient().newCall(
+                        val latestVerJson = OkHttpClient.Builder().build().newCall(
                             Request.Builder()
                                 .url("https://static.btcmap.org/android/latest-app-ver".toHttpUrl())
                                 .build()

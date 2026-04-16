@@ -3,6 +3,7 @@ package org.btcmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.btcmap.api.Api
 import org.btcmap.db.Database
 import org.btcmap.db.table.CommentProjectionFull
 import org.btcmap.db.table.EventProjectionFull

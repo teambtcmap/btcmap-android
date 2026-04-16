@@ -1,4 +1,4 @@
-package org.btcmap
+package org.btcmap.api
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -493,13 +493,12 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         }
     }
 
-    suspend fun getUser(token: String): User {
+    suspend fun getUser(): User {
         val url = url.newBuilder().addPathSegments("v4/users/me").build()
 
         val res = httpClient.newCall(
             Request.Builder()
                 .url(url)
-                .header("Authorization", "Bearer $token")
                 .build()
         ).executeAsync()
 
@@ -517,7 +516,7 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         val user: User,
     )
 
-    suspend fun createToken(
+    suspend fun signIn(
         username: String,
         password: String,
         label: String
@@ -549,14 +548,13 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         }
     }
 
-    suspend fun addSavedPlace(token: String, placeId: Long) {
+    suspend fun savePlace(id: Long) {
         val url = url.newBuilder().addPathSegments("v4/places/saved").build()
-        val args = JsonPrimitive(placeId)
+        val args = JsonPrimitive(id)
         val res = httpClient.newCall(
             Request.Builder()
                 .post(args.toString().toRequestBody("application/json".toMediaType()))
                 .url(url)
-                .header("Authorization", "Bearer $token")
                 .build()
         ).executeAsync()
         if (!res.isSuccessful) {
@@ -564,13 +562,12 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         }
     }
 
-    suspend fun removeSavedPlace(token: String, placeId: Long) {
-        val url = url.newBuilder().addPathSegments("v4/places/saved/$placeId").build()
+    suspend fun removeSavedPlace(id: Long) {
+        val url = url.newBuilder().addPathSegments("v4/places/saved/$id").build()
         val res = httpClient.newCall(
             Request.Builder()
                 .delete()
                 .url(url)
-                .header("Authorization", "Bearer $token")
                 .build()
         ).executeAsync()
         if (!res.isSuccessful) {

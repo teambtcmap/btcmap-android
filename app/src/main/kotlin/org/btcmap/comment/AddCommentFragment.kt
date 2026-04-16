@@ -19,7 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.btcmap.R
-import org.btcmap.paid
+import org.btcmap.api.paid
 import androidx.core.net.toUri
 import androidx.lifecycle.withResumed
 import kotlinx.coroutines.delay

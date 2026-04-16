@@ -9,6 +9,8 @@ import java.time.ZonedDateTime
 import kotlinx.coroutines.test.runTest
 import mockwebserver3.MockResponse
 import mockwebserver3.junit4.MockWebServerRule
+import okhttp3.OkHttpClient
+import org.btcmap.api.Api
 import org.junit.Rule
 
 class SyncTest {
@@ -22,7 +24,7 @@ class SyncTest {
 
     private fun createApi(): Api {
         return Api(
-            httpClient = okhttp3.OkHttpClient(),
+            httpClient = OkHttpClient(),
             url = serverRule.server.url("/")
         )
     }

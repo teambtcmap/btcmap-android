@@ -1,28 +1,20 @@
 package org.btcmap.settings
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.TextInputEditText
 import com.mrudultora.colorpicker.ColorPickerPopUp
 import com.mrudultora.colorpicker.ColorPickerPopUp.OnPickColorListener
-import kotlinx.coroutines.launch
-import org.btcmap.BuildConfig
 import org.btcmap.R
-import org.btcmap.api
+import org.btcmap.auth.showAuthDialog
 import org.btcmap.databinding.SettingsFragmentBinding
 import org.btcmap.db
-import org.btcmap.db.table.User
-import java.util.UUID
 
 class SettingsFragment : Fragment() {
 
@@ -46,14 +38,16 @@ class SettingsFragment : Fragment() {
         updateAccountUi()
 
         binding.accountButton.setOnClickListener {
-            if (prefs.authToken != null) {
+            if (prefs.authorized) {
                 parentFragmentManager.commit {
                     setReorderingAllowed(true)
                     replace<UserProfileFragment>(R.id.fragmentContainerView, null)
                     addToBackStack(null)
                 }
             } else {
-                createAccount()
+                showAuthDialog("") {
+                    updateAccountUi()
+                }
             }
         }
 
@@ -356,131 +350,12 @@ class SettingsFragment : Fragment() {
         val username = db().user.select()?.name
         if (username != null) {
             binding.accountStatus.text = getString(R.string.logged_in_as, username)
-            binding.accountSecondary.text = "Click to see your profile"
+            binding.accountSecondary.text = getString(R.string.click_to_see_your_profile)
             binding.accountSecondary.visibility = View.VISIBLE
         } else {
             binding.accountStatus.text = getString(R.string.not_logged_in)
             binding.accountSecondary.text = getString(R.string.create_account)
             binding.accountSecondary.visibility = View.VISIBLE
-        }
-    }
-
-    private fun createAccount() {
-        val options = arrayOf("Generate new account", "Log in with existing account")
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.account)
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> createNewAccount()
-                    1 -> loginWithExisting()
-                }
-            }
-            .show()
-    }
-
-    private fun createNewAccount() {
-        val password = UUID.randomUUID().toString()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                binding.accountStatus.text = getString(R.string.logging_in)
-                binding.accountSecondary.visibility = View.GONE
-
-                val user = api().createUser(password)
-                val token = api().createToken(
-                    user.name,
-                    password,
-                    "BTC Map Android ${BuildConfig.VERSION_CODE}"
-                )
-
-                prefs.authToken = token.token
-                db().user.insert(
-                    User(
-                        id = user.id,
-                        name = user.name,
-                        roles = user.roles,
-                        savedPlaces = user.savedPlaces,
-                        savedAreas = user.savedAreas,
-                    )
-                )
-
-                updateAccountUi()
-            } catch (e: Exception) {
-                Log.e("auth", "failed to generate new account", e)
-                Toast.makeText(context, R.string.error, Toast.LENGTH_SHORT).show()
-                updateAccountUi()
-            }
-        }
-    }
-
-    private fun loginWithExisting() {
-        val dialogView = layoutInflater.inflate(R.layout.login_dialog, null)
-        val usernameInput = dialogView.findViewById<TextInputEditText>(R.id.usernameInput)
-        val passwordInput = dialogView.findViewById<TextInputEditText>(R.id.passwordInput)
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.login)
-            .setView(dialogView)
-            .setPositiveButton(R.string.login) { _, _ ->
-                val username = usernameInput.text.toString().trim()
-                val password = passwordInput.text.toString()
-
-                if (username.isNotEmpty() && password.isNotEmpty()) {
-                    performLogin(username, password)
-                }
-            }
-            .setNegativeButton(R.string.btn_continue, null)
-            .show()
-    }
-
-    private fun performLogin(username: String, password: String) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                binding.accountStatus.text = getString(R.string.logging_in)
-                binding.accountSecondary.visibility = View.GONE
-
-                Log.d("auth", "creating token")
-                val loginResult = api().createToken(
-                    username,
-                    password,
-                    "BTC Map Android ${BuildConfig.VERSION_CODE}"
-                )
-                Log.d("auth", "token created")
-
-                prefs.authToken = loginResult.token
-                db().user.insert(
-                    User(
-                        id = loginResult.user.id,
-                        name = loginResult.user.name,
-                        roles = loginResult.user.roles,
-                        savedPlaces = loginResult.user.savedPlaces,
-                        savedAreas = loginResult.user.savedAreas,
-                    )
-                )
-
-                updateAccountUi()
-            } catch (e: Exception) {
-                Toast.makeText(context, R.string.error, Toast.LENGTH_SHORT).show()
-                updateAccountUi()
-            }
-        }
-    }
-
-    private fun logout() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                binding.accountStatus.text = getString(R.string.logging_out)
-                binding.accountSecondary.visibility = View.GONE
-
-                prefs.authToken = null
-                db().user.delete()
-
-                updateAccountUi()
-            } catch (e: Exception) {
-                Toast.makeText(context, R.string.error, Toast.LENGTH_SHORT).show()
-                updateAccountUi()
-            }
         }
     }
 }

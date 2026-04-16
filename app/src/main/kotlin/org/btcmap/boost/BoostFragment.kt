@@ -21,10 +21,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.btcmap.R
-import org.btcmap.paid
+import org.btcmap.api.paid
 import java.text.NumberFormat
 import androidx.core.net.toUri
-import org.btcmap.Api
+import org.btcmap.api.Api
 import org.btcmap.api
 import org.btcmap.databinding.BoostFragmentBinding
 

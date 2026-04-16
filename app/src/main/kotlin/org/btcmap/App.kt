@@ -3,8 +3,8 @@ package org.btcmap
 import android.app.Application
 import androidx.fragment.app.Fragment
 import androidx.sqlite.driver.AndroidSQLiteDriver
-import okhttp3.OkHttpClient
-import okhttp3.brotli.BrotliInterceptor
+import org.btcmap.api.Api
+import org.btcmap.api.apiHttpClient
 import org.btcmap.db.Database
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.prefs
@@ -19,34 +19,9 @@ class App : Application() {
 
     val api: Api by lazy {
         Api(
-            httpClient = httpClient,
+            httpClient = apiHttpClient(),
             url = prefs.apiUrl,
         )
-    }
-
-    val httpClient by lazy {
-        OkHttpClient.Builder()
-            .addInterceptor(BrotliInterceptor)
-            .addInterceptor { chain ->
-                val request = chain.request().newBuilder()
-                    .header("User-Agent", "BTC Map Android ${BuildConfig.VERSION_CODE}")
-                    .build()
-                chain.proceed(request)
-            }
-            .addInterceptor {
-                var res = it.proceed(it.request())
-
-                var retryAttempts = 0
-
-                while (res.code == 429 && retryAttempts < 10) {
-                    res.close()
-                    Thread.sleep(retryAttempts * 1000 + (Math.random() * 1000.0).toLong())
-                    res = it.proceed(it.request())
-                    retryAttempts++
-                }
-
-                res
-            }.build()
     }
 
     val db: Database by lazy {
@@ -67,7 +42,5 @@ class App : Application() {
 fun Fragment.sync(): Sync = (requireContext().applicationContext as App).sync
 
 fun Fragment.api(): Api = (requireContext().applicationContext as App).api
-
-fun Fragment.httpClient(): OkHttpClient = (requireContext().applicationContext as App).httpClient
 
 fun Fragment.db(): Database = (requireContext().applicationContext as App).db
