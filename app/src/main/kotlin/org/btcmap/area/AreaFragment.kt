@@ -49,7 +49,7 @@ class AreaFragment : Fragment() {
                 }
                 binding.toolbar.title = area.name
                 binding.icon.isVisible = area.icon != null
-                binding.icon.load(area.icon)
+                binding.icon.load(area.iconWide ?: area.icon)
                 binding.description.isVisible = area.description != null
                 binding.description.text = area.description
                 binding.website.text = area.websiteUrl

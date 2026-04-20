@@ -300,6 +300,7 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         val type: String,
         val urlAlias: String,
         val icon: String?,
+        val iconWide: String?,
         val websiteUrl: String,
         val description: String?,
     )
@@ -321,6 +322,7 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                     type = body.get("type").asString,
                     urlAlias = body.get("url_alias").asString,
                     icon = if (!body.has("icon") || body.get("icon").isJsonNull) null else body.get("icon").asString.ifBlank { null },
+                    iconWide = if (!body.has("icon_wide") || body.get("icon_wide").isJsonNull) null else body.get("icon_wide").asString.ifBlank { null },
                     websiteUrl = body.get("website_url").asString,
                     description = if (!body.has("description") || body.get("description").isJsonNull) null else body.get("description").asString.ifBlank { null },
                 )
