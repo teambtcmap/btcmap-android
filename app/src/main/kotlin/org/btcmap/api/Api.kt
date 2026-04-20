@@ -294,6 +294,40 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         }
     }
 
+    data class GetAreaItem(
+        val id: Long,
+        val name: String,
+        val type: String,
+        val urlAlias: String,
+        val icon: String?,
+        val websiteUrl: String,
+        val description: String?,
+    )
+
+    suspend fun getArea(id: String): GetAreaItem {
+        val url = url.newBuilder().addPathSegments("v4/areas/$id").build()
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return withContext(Dispatchers.IO) {
+            res.body.byteStream().use { stream ->
+                val body = stream.toJsonObject()
+                GetAreaItem(
+                    id = body.get("id").asLong,
+                    name = body.get("name").asString,
+                    type = body.get("type").asString,
+                    urlAlias = body.get("url_alias").asString,
+                    icon = if (!body.has("icon") || body.get("icon").isJsonNull) null else body.get("icon").asString.ifBlank { null },
+                    websiteUrl = body.get("website_url").asString,
+                    description = if (!body.has("description") || body.get("description").isJsonNull) null else body.get("description").asString.ifBlank { null },
+                )
+            }
+        }
+    }
+
     private fun InputStream.toActivityFeedItems(): List<ActivityFeedItem> {
         return toJsonArray().map {
             ActivityFeedItem(

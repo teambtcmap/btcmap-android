@@ -63,6 +63,7 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonSource
+import org.btcmap.area.AreaFragment
 import org.btcmap.place.isMerchant
 import org.btcmap.search.SearchAdapter
 import org.btcmap.settings.MapStyle
@@ -401,8 +402,15 @@ class MapFragment : Fragment() {
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         areasAdapter = AreasAdapter { area ->
-            val intent = Intent(Intent.ACTION_VIEW, area.websiteUrl.toUri())
-            startActivity(intent)
+            parentFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace<AreaFragment>(
+                    R.id.fragmentContainerView,
+                    null,
+                    bundleOf("area_id" to area.id.toString())
+                )
+                addToBackStack(null)
+            }
         }
 
         binding.areas.layoutManager =
