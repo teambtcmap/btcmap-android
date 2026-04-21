@@ -11,6 +11,7 @@ import mockwebserver3.MockResponse
 import mockwebserver3.junit4.MockWebServerRule
 import okhttp3.OkHttpClient
 import org.btcmap.api.Api
+import org.btcmap.db.table.event.Event
 import org.junit.Rule
 
 class SyncTest {
@@ -352,14 +353,16 @@ class SyncTest {
 
         db.event.insert(
             listOf(
-                org.btcmap.db.table.Event(
+                Event(
                     id = 999,
+                    areaId = null,
                     lat = 40.7128,
                     lon = -74.0060,
                     name = "Old Event",
                     website = "https://example.com".toHttpUrl(),
                     startsAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-                    endsAt = null
+                    endsAt = null,
+                    cronSchedule = null,
                 )
             )
         )

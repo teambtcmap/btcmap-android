@@ -6,8 +6,8 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.api.Api
 import org.btcmap.db.Database
 import org.btcmap.db.table.CommentProjectionFull
-import org.btcmap.db.table.EventProjectionFull
 import org.btcmap.db.table.PlaceProjectionFull
+import org.btcmap.db.table.event.Event
 import org.btcmap.util.toZonedDateTime
 import java.time.Duration
 import java.time.ZoneOffset
@@ -181,14 +181,16 @@ class Sync(val api: Api, val db: Database) {
             db.transaction {
                 db.event.deleteAll()
                 db.event.insert(events.map {
-                    EventProjectionFull(
+                    Event(
                         id = it.id,
+                        areaId = it.areaId,
                         lat = it.lat,
                         lon = it.lon,
                         name = it.name,
                         website = it.website,
                         startsAt = it.startsAt,
                         endsAt = it.endsAt,
+                        cronSchedule = it.cronSchedule,
                     )
                 })
             }

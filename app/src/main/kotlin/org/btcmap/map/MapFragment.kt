@@ -38,7 +38,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import org.btcmap.bundle.BundledPlaces
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.btcmap.db.table.Event
 import org.btcmap.db.table.Place
 import org.btcmap.place.PlaceFragment
 import org.btcmap.activity.ActivityFeedFragment
@@ -82,6 +81,7 @@ import okhttp3.OkHttpClient
 import org.btcmap.db
 import org.btcmap.sync
 import org.btcmap.db.table.Marker
+import org.btcmap.db.table.event.Event
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
 import org.maplibre.android.style.layers.SymbolLayer

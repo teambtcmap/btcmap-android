@@ -1,9 +1,11 @@
 package org.btcmap.area
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -22,8 +24,12 @@ import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.db.table.User
 import org.btcmap.databinding.AreaFragmentBinding
+import org.btcmap.db.table.event.Event
 import org.btcmap.settings.authorized
 import org.btcmap.settings.prefs
+import org.btcmap.util.CronUtils
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class AreaFragment : Fragment() {
 
@@ -132,6 +138,7 @@ class AreaFragment : Fragment() {
                     .replace("http://", "")
                     .trimEnd('/')
                 updateBookmarkIcon()
+                loadUpcomingEvents()
             } catch (e: Throwable) {
                 e.printStackTrace()
             }
@@ -171,6 +178,55 @@ class AreaFragment : Fragment() {
             }
         } else {
             binding.toolbar.menu.findItem(R.id.save).setIcon(R.drawable.icon_bookmark)
+        }
+    }
+
+    private fun loadUpcomingEvents() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val events = withContext(Dispatchers.IO) {
+                    db().event.selectByAreaId(areaId.toLong())
+                }
+                val eventsWithSchedule = events.filter { it.cronSchedule != null }
+                if (eventsWithSchedule.isEmpty()) return@launch
+
+                val upcomingEvents = mutableListOf<Pair<Event, List<ZonedDateTime>>>()
+                for (event in eventsWithSchedule) {
+                    val nextDates = CronUtils.nextExecutions(event.cronSchedule!!, 5)
+                    if (nextDates.isNotEmpty()) {
+                        upcomingEvents.add(event to nextDates)
+                    }
+                }
+
+                if (upcomingEvents.isEmpty()) return@launch
+
+                val container = binding.upcomingEventsContainer
+                val dateFormatter = DateTimeFormatter.ofPattern("EEE, MMM d 'at' HH:mm")
+
+                for ((event, dates) in upcomingEvents) {
+                    val headerView = TextView(requireContext()).apply {
+                        text = event.name
+                        setTextAppearance(com.google.android.material.R.style.TextAppearance_MaterialComponents_Headline6)
+                        setPadding(0, 32, 0, 8)
+                    }
+                    container.addView(headerView)
+
+                    for (date in dates.take(5)) {
+                        val dateView = TextView(requireContext()).apply {
+                            text = date.format(dateFormatter)
+                            setTextAppearance(com.google.android.material.R.style.TextAppearance_MaterialComponents_Body1)
+                            setPadding(0, 4, 0, 4)
+                            gravity = Gravity.CENTER_VERTICAL
+                        }
+                        container.addView(dateView)
+                    }
+                }
+
+                binding.upcomingEventsHeader.isVisible = true
+                binding.upcomingEventsContainer.isVisible = true
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
         }
     }
 }

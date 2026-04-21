@@ -1,4 +1,4 @@
-package org.btcmap.db.table
+package org.btcmap.db.table.event
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -18,12 +18,14 @@ class EventQueriesTest {
         val db = createDatabase()
         val event = Event(
             id = 1L,
+            areaId = null,
             lat = 40.7128,
             lon = -74.0060,
             name = "Bitcoin Meetup",
             website = "https://example.com".toHttpUrl(),
             startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
             endsAt = ZonedDateTime.parse("2024-06-01T20:00:00Z"),
+            cronSchedule = null,
         )
 
         db.event.insert(listOf(event))
@@ -41,12 +43,14 @@ class EventQueriesTest {
         val db = createDatabase()
         val event = Event(
             id = 42L,
+            areaId = null,
             lat = 51.5074,
             lon = -0.1278,
             name = "London BTC",
             website = "https://london.btc".toHttpUrl(),
             startsAt = ZonedDateTime.parse("2024-07-01T19:00:00Z"),
             endsAt = null,
+            cronSchedule = null,
         )
 
         db.event.insert(listOf(event))
@@ -81,21 +85,25 @@ class EventQueriesTest {
         val db = createDatabase()
         val event1 = Event(
             id = 1L,
+            areaId = null,
             lat = 40.7128,
             lon = -74.0060,
             name = "Event 1",
             website = "https://example.com".toHttpUrl(),
             startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
             endsAt = null,
+            cronSchedule = null,
         )
         val event2 = Event(
             id = 2L,
+            areaId = null,
             lat = 51.5074,
             lon = -0.1278,
             name = "Event 2",
             website = "https://example.com".toHttpUrl(),
             startsAt = ZonedDateTime.parse("2024-07-01T18:00:00Z"),
             endsAt = null,
+            cronSchedule = null,
         )
 
         db.event.insert(listOf(event1, event2))

@@ -61,6 +61,25 @@
                     app:drawableTint="?attr/colorSecondary"
                     tools:text="btcmap.org/community/grand-paris" />
 
+                <TextView
+                    android:id="@+id/upcoming_events_header"
+                    style="?attr/textAppearanceHeadline6"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/upcoming_events"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <LinearLayout
+                    android:id="@+id/upcoming_events_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
             </LinearLayout>
 
         </LinearLayout>

@@ -226,18 +226,21 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
 
     data class GetEventsItem(
         val id: Long,
+        val areaId: Long?,
         val lat: Double,
         val lon: Double,
         val name: String,
         val website: HttpUrl,
         val startsAt: ZonedDateTime,
         val endsAt: ZonedDateTime?,
+        val cronSchedule: String?,
     )
 
     private fun InputStream.toGetEventsItems(): List<GetEventsItem> {
         return toJsonArray().map {
             GetEventsItem(
                 id = it.get("id").asLong,
+                areaId = if (!it.has("area_id") || it.get("area_id").isJsonNull) null else it.get("area_id").asLong,
                 lat = it.get("lat").asDouble,
                 lon = it.get("lon").asDouble,
                 name = it.get("name").asString,
@@ -245,7 +248,8 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                 startsAt = ZonedDateTime.parse(it.get("starts_at").asString),
                 endsAt = if (!it.has("ends_at") || it.get("ends_at").isJsonNull) null else ZonedDateTime.parse(
                     it.get("ends_at").asString
-                )
+                ),
+                cronSchedule = if (!it.has("cron_schedule") || it.get("cron_schedule").isJsonNull) null else it.get("cron_schedule").asString,
             )
         }
     }

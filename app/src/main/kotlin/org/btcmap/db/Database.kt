@@ -4,16 +4,15 @@ import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.execSQL
 import org.btcmap.db.table.CommentQueries
 import org.btcmap.db.table.CommentSchema
-import org.btcmap.db.table.EventQueries
-import org.btcmap.db.table.EventSchema
 import org.btcmap.db.table.PlaceQueries
 import org.btcmap.db.table.PlaceSchema
 import org.btcmap.db.table.UserQueries
 import org.btcmap.db.table.UserSchema
+import org.btcmap.db.table.event.EventQueries
 
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
-        private const val VERSION = 4
+        private const val VERSION = 5
     }
 
     val conn = driver.open(path)
@@ -33,7 +32,7 @@ class Database(driver: SQLiteDriver, val path: String) {
 
         if (version == 0) {
             conn.execSQL(PlaceSchema.toString())
-            conn.execSQL(EventSchema.toString())
+            conn.execSQL(org.btcmap.db.table.event.CREATE)
             conn.execSQL(CommentSchema.toString())
             conn.execSQL(UserSchema.toString())
             conn.execSQL("PRAGMA user_version=$VERSION;")
@@ -54,6 +53,11 @@ class Database(driver: SQLiteDriver, val path: String) {
 
                 3 -> {
                     conn.execSQL(UserSchema.toString())
+                }
+
+                4 -> {
+                    conn.execSQL("ALTER TABLE event ADD COLUMN area_id INTEGER;")
+                    conn.execSQL("ALTER TABLE event ADD COLUMN cron_schedule TEXT;")
                 }
 
                 else -> throw Exception("migration is missing")
