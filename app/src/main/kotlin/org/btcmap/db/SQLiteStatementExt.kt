@@ -34,8 +34,13 @@ fun SQLiteStatement.getTextOrNull(index: Int): String? =
 fun SQLiteStatement.getLongOrNull(index: Int): Long? =
     if (isNull(index)) null else getLong(index)
 
+fun SQLiteStatement.getZonedDateTime(index: Int): ZonedDateTime =
+    ZonedDateTime.parse(getText(index))
+
 fun SQLiteStatement.getZonedDateTimeOrNull(index: Int): ZonedDateTime? =
     if (isNull(index)) null else ZonedDateTime.parse(getText(index))
+
+fun SQLiteStatement.getHttpUrl(index: Int): HttpUrl = getText(index).toHttpUrl()
 
 fun SQLiteStatement.getHttpUrlOrNull(index: Int): HttpUrl? =
     if (isNull(index)) null else getText(index).toHttpUrl()

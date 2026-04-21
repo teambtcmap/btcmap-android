@@ -2,9 +2,10 @@ package org.btcmap.db.table.event
 
 import androidx.sqlite.SQLiteStatement
 import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.btcmap.db.getHttpUrl
 import org.btcmap.db.getLongOrNull
 import org.btcmap.db.getTextOrNull
+import org.btcmap.db.getZonedDateTime
 import org.btcmap.db.getZonedDateTimeOrNull
 import java.time.ZonedDateTime
 
@@ -31,8 +32,8 @@ data class FullProjection(
                 lat = stmt.getDouble(2),
                 lon = stmt.getDouble(3),
                 name = stmt.getText(4),
-                website = stmt.getText(5).toHttpUrl(),
-                startsAt = ZonedDateTime.parse(stmt.getText(6)),
+                website = stmt.getHttpUrl(5),
+                startsAt = stmt.getZonedDateTime(6),
                 endsAt = stmt.getZonedDateTimeOrNull(7),
                 cronSchedule = stmt.getTextOrNull(8),
             )
