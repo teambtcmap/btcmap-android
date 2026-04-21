@@ -657,4 +657,45 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
             throw Exception("Unexpected HTTP response code: ${res.code}")
         }
     }
+
+    suspend fun saveArea(id: Long): List<Long> {
+        val url = url.newBuilder().addPathSegments("v4/areas/saved").build()
+        val args = JsonPrimitive(id)
+        val res = httpClient.newCall(
+            Request.Builder()
+                .post(args.toString().toRequestBody("application/json".toMediaType()))
+                .url(url)
+                .build()
+        ).executeAsync()
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+        return withContext(Dispatchers.IO) {
+            res.body.byteStream().use { stream ->
+                val rawJson = stream.bufferedReader().use { it.readText() }
+                val jsonArray = com.google.gson.JsonParser.parseString(rawJson).asJsonArray
+                List(jsonArray.size()) { jsonArray.get(it).asLong }
+            }
+        }
+    }
+
+    suspend fun removeSavedArea(id: Long): List<Long> {
+        val url = url.newBuilder().addPathSegments("v4/areas/saved/$id").build()
+        val res = httpClient.newCall(
+            Request.Builder()
+                .delete()
+                .url(url)
+                .build()
+        ).executeAsync()
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+        return withContext(Dispatchers.IO) {
+            res.body.byteStream().use { stream ->
+                val rawJson = stream.bufferedReader().use { it.readText() }
+                val jsonArray = com.google.gson.JsonParser.parseString(rawJson).asJsonArray
+                List(jsonArray.size()) { jsonArray.get(it).asLong }
+            }
+        }
+    }
 }
