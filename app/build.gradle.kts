@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.coil.svg)
     implementation(libs.gson)
     testImplementation(libs.junit)
+    testImplementation(libs.cronutils)
 }
 
 tasks.register<DefaultTask>("bundleData") {
