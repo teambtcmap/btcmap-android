@@ -4,18 +4,26 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withResumed
 import coil3.load
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.btcmap.R
 import org.btcmap.api
+import org.btcmap.auth.showAuthDialog
+import org.btcmap.db
+import org.btcmap.db.table.User
 import org.btcmap.databinding.AreaFragmentBinding
+import org.btcmap.settings.authorized
+import org.btcmap.settings.prefs
 
 class AreaFragment : Fragment() {
 
@@ -40,6 +48,73 @@ class AreaFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
+        binding.toolbar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.save -> {
+                    if (prefs.authorized) {
+                        try {
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                val user = db().user.select()!!
+                                if (user.savedAreas.any { savedArea -> savedArea.asJsonObject["id"].asLong == areaId.toLong() }) {
+                                    api().removeSavedArea(areaId.toLong())
+                                } else {
+                                    api().saveArea(areaId.toLong())
+                                }
+                                val updatedUser = api().getUser()
+                                db().transaction {
+                                    db().user.delete()
+                                    db().user.insert(
+                                        User(
+                                            id = updatedUser.id,
+                                            name = updatedUser.name,
+                                            roles = updatedUser.roles,
+                                            savedPlaces = updatedUser.savedPlaces,
+                                            savedAreas = updatedUser.savedAreas,
+                                        )
+                                    )
+                                }
+                                updateBookmarkIcon()
+                            }
+                        } catch (e: Throwable) {
+                            Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        showAuthDialog(getString(R.string.auth_to_save_area)) {
+                            try {
+                                viewLifecycleOwner.lifecycleScope.launch {
+                                    val user = db().user.select()!!
+                                    if (user.savedAreas.any { savedArea -> savedArea.asJsonObject["id"].asLong == areaId.toLong() }) {
+                                        api().removeSavedArea(areaId.toLong())
+                                    } else {
+                                        api().saveArea(areaId.toLong())
+                                    }
+                                    val updatedUser = api().getUser()
+                                    db().transaction {
+                                        db().user.delete()
+                                        db().user.insert(
+                                            User(
+                                                id = updatedUser.id,
+                                                name = updatedUser.name,
+                                                roles = updatedUser.roles,
+                                                savedPlaces = updatedUser.savedPlaces,
+                                                savedAreas = updatedUser.savedAreas,
+                                            )
+                                        )
+                                    }
+                                    updateBookmarkIcon()
+                                }
+                            } catch (e: Throwable) {
+                                Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG)
+                                    .show()
+                            }
+                        }
+                    }
+                }
+            }
+
+            true
+        }
+
         initInsets(binding.root)
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -56,6 +131,7 @@ class AreaFragment : Fragment() {
                     .replace("https://", "")
                     .replace("http://", "")
                     .trimEnd('/')
+                updateBookmarkIcon()
             } catch (e: Throwable) {
                 e.printStackTrace()
             }
@@ -74,6 +150,27 @@ class AreaFragment : Fragment() {
                 topMargin = insets.top
             }
             WindowInsetsCompat.CONSUMED
+        }
+    }
+
+    private fun updateBookmarkIcon() {
+        if (prefs.authorized) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val user = db().user.select()!!
+                    val saved =
+                        user.savedAreas.any { it.asJsonObject["id"].asLong == areaId.toLong() }
+                    withResumed {
+                        binding.toolbar.menu.findItem(R.id.save).setIcon(
+                            if (saved) R.drawable.icon_bookmark_check else R.drawable.icon_bookmark
+                        )
+                    }
+                } catch (e: Throwable) {
+                    Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG).show()
+                }
+            }
+        } else {
+            binding.toolbar.menu.findItem(R.id.save).setIcon(R.drawable.icon_bookmark)
         }
     }
 }

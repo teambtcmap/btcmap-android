@@ -86,7 +86,10 @@
     <string name="profile" tools:ignore="MissingTranslation">Profile</string>
     <string name="saved_places" tools:ignore="MissingTranslation">Saved places</string>
     <string name="no_saved_places" tools:ignore="MissingTranslation">No saved places</string>
+    <string name="saved_areas" tools:ignore="MissingTranslation">Saved areas</string>
+    <string name="no_saved_areas" tools:ignore="MissingTranslation">No saved areas</string>
     <string name="auth_to_save_place" tools:ignore="MissingTranslation">In order to sync saved places across devices and platforms, you need an account. We can generate a random account if you don\'t have one already.</string>
+    <string name="auth_to_save_area" tools:ignore="MissingTranslation">In order to sync saved areas across devices and platforms, you need an account. We can generate a random account if you don\'t have one already.</string>
     <string name="i_don_t_have_an_account" tools:ignore="MissingTranslation">I don\'t have an account</string>
     <string name="log_in_with_existing_account" tools:ignore="MissingTranslation">Log in with existing account</string>
     <string name="failed_to_create_new_account" tools:ignore="MissingTranslation">Failed to create new account</string>

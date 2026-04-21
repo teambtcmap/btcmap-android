@@ -69,6 +69,34 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingTop="24dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp"
+                android:text="@string/saved_areas"
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?colorPrimary" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/savedAreasList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <TextView
+                android:id="@+id/noSavedAreas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="16dp"
+                android:text="@string/no_saved_areas"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/logoutButton"
                 android:layout_width="match_parent"

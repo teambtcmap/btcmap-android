@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.db.table.User
+import org.btcmap.databinding.SavedAreaItemBinding
 import org.btcmap.databinding.SavedPlaceItemBinding
 import org.btcmap.databinding.UserProfileFragmentBinding
 import org.btcmap.db
@@ -52,6 +53,17 @@ class UserProfileFragment : Fragment() {
         binding.noSavedPlaces.isVisible = user.savedPlaces.size() == 0
         binding.savedPlacesList.isVisible = user.savedPlaces.size() > 0
 
+        binding.savedAreasList.layoutManager = LinearLayoutManager(requireContext())
+        binding.savedAreasList.adapter = SavedAreasAdapter(
+            areas = user.savedAreas,
+            onDeleteClick = { areaId ->
+                deleteSavedArea(areaId)
+            }
+        )
+
+        binding.noSavedAreas.isVisible = user.savedAreas.size() == 0
+        binding.savedAreasList.isVisible = user.savedAreas.size() > 0
+
         binding.logoutButton.setOnClickListener {
             logout()
         }
@@ -85,6 +97,17 @@ class UserProfileFragment : Fragment() {
         }
     }
 
+    private fun deleteSavedArea(areaId: Long) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                api().removeSavedArea(areaId)
+                refreshUserData()
+            } catch (e: Throwable) {
+                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun refreshUserData() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
@@ -107,6 +130,15 @@ class UserProfileFragment : Fragment() {
                 )
                 binding.noSavedPlaces.isVisible = user.savedPlaces.size() == 0
                 binding.savedPlacesList.isVisible = user.savedPlaces.size() > 0
+
+                binding.savedAreasList.adapter = SavedAreasAdapter(
+                    areas = user.savedAreas,
+                    onDeleteClick = { areaId ->
+                        deleteSavedArea(areaId)
+                    }
+                )
+                binding.noSavedAreas.isVisible = user.savedAreas.size() == 0
+                binding.savedAreasList.isVisible = user.savedAreas.size() > 0
             } catch (e: Throwable) {
                 Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
             }
@@ -141,5 +173,35 @@ class UserProfileFragment : Fragment() {
         }
 
         override fun getItemCount(): Int = places.size()
+    }
+
+    private class SavedAreasAdapter(
+        private val areas: JsonArray,
+        private val onDeleteClick: (Long) -> Unit,
+    ) : RecyclerView.Adapter<SavedAreasAdapter.ViewHolder>() {
+
+        class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            val binding: SavedAreaItemBinding = SavedAreaItemBinding.bind(view)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val binding = SavedAreaItemBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false,
+            )
+            return ViewHolder(binding.root)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val area = areas[position].asJsonObject
+            holder.binding.areaName.text = area["name"].asString
+            val areaId = area["id"].asLong
+            holder.binding.deleteButton.setOnClickListener {
+                onDeleteClick(areaId)
+            }
+        }
+
+        override fun getItemCount(): Int = areas.size()
     }
 }
