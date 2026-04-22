@@ -1,4 +1,4 @@
-package org.btcmap.db.table
+package org.btcmap.db.table.comment
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.db.Database

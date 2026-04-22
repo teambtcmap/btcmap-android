@@ -5,8 +5,8 @@ import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.api.Api
 import org.btcmap.db.Database
-import org.btcmap.db.table.CommentProjectionFull
-import org.btcmap.db.table.PlaceProjectionFull
+import org.btcmap.db.table.comment.Comment
+import org.btcmap.db.table.place.FullProjection
 import org.btcmap.db.table.event.Event
 import org.btcmap.util.toZonedDateTime
 import java.time.Duration
@@ -54,7 +54,7 @@ class Sync(val api: Api, val db: Database) {
                             it.verifiedAt + "T00:00:00Z"
                         }
 
-                        PlaceProjectionFull(
+                        FullProjection(
                             id = it.id,
                             bundled = it.bundled,
                             updatedAt = it.updatedAt.toZonedDateTime(),
@@ -132,7 +132,7 @@ class Sync(val api: Api, val db: Database) {
 
                 db.transaction {
                     db.comment.insert(newOrChanged.map {
-                        CommentProjectionFull(
+                        Comment(
                             id = it.id,
                             placeId = it.elementId!!,
                             comment = it.comment!!,

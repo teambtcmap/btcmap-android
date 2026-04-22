@@ -7,12 +7,12 @@ import org.btcmap.db.bindZonedDateTimeOrNull
 
 class EventQueries(private val conn: SQLiteConnection) {
     fun insert(rows: List<Event>) {
-        val sql = """
-            INSERT INTO $TABLE (${FullProjection.COLUMNS}) 
+        conn.prepare(
+            """
+            INSERT INTO $TABLE ($ID, $AREA_ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $CRON_SCHEDULE) 
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
-        """
-
-        conn.prepare(sql).use { stmt ->
+            """
+        ).use { stmt ->
             rows.forEach { row ->
                 stmt.bindLong(1, row.id)
                 stmt.bindLongOrNull(2, row.areaId)
@@ -32,8 +32,8 @@ class EventQueries(private val conn: SQLiteConnection) {
     fun selectAll(): List<Event> {
         conn.prepare(
             """
-                SELECT ${FullProjection.COLUMNS}
-                FROM $TABLE;
+            SELECT ${FullProjection.COLUMNS}
+            FROM $TABLE;
             """
         ).use {
             val rows = mutableListOf<Event>()
@@ -47,9 +47,9 @@ class EventQueries(private val conn: SQLiteConnection) {
     fun selectById(id: Long): Event? {
         conn.prepare(
             """
-                SELECT ${FullProjection.COLUMNS}
-                FROM $TABLE
-                WHERE id = ?1;
+            SELECT ${FullProjection.COLUMNS}
+            FROM $TABLE
+            WHERE $ID = ?1;
             """
         ).use {
             it.bindLong(1, id)
@@ -65,7 +65,7 @@ class EventQueries(private val conn: SQLiteConnection) {
             """
                 SELECT ${FullProjection.COLUMNS}
                 FROM $TABLE
-                WHERE area_id = ?1;
+                WHERE $AREA_ID = ?1;
             """
         ).use {
             it.bindLong(1, areaId)

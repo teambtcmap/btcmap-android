@@ -14,7 +14,7 @@ import com.google.gson.JsonArray
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.api
-import org.btcmap.db.table.User
+import org.btcmap.db.table.user.User
 import org.btcmap.databinding.SavedAreaItemBinding
 import org.btcmap.databinding.SavedPlaceItemBinding
 import org.btcmap.databinding.UserProfileFragmentBinding

@@ -11,6 +11,7 @@ import mockwebserver3.MockResponse
 import mockwebserver3.junit4.MockWebServerRule
 import okhttp3.OkHttpClient
 import org.btcmap.api.Api
+import org.btcmap.db.table.comment.Comment
 import org.btcmap.db.table.event.Event
 import org.junit.Rule
 
@@ -275,7 +276,7 @@ class SyncTest {
 
         db.comment.insert(
             listOf(
-                org.btcmap.db.table.Comment(
+                Comment(
                     id = 1,
                     placeId = 100,
                     comment = "Old comment",

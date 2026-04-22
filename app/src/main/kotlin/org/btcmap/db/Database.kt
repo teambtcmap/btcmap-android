@@ -2,13 +2,10 @@ package org.btcmap.db
 
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.execSQL
-import org.btcmap.db.table.CommentQueries
-import org.btcmap.db.table.CommentSchema
-import org.btcmap.db.table.PlaceQueries
-import org.btcmap.db.table.PlaceSchema
-import org.btcmap.db.table.UserQueries
-import org.btcmap.db.table.UserSchema
+import org.btcmap.db.table.comment.CommentQueries
 import org.btcmap.db.table.event.EventQueries
+import org.btcmap.db.table.place.PlaceQueries
+import org.btcmap.db.table.user.UserQueries
 
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
@@ -31,10 +28,10 @@ class Database(driver: SQLiteDriver, val path: String) {
         var version = if (stmt.step()) stmt.getInt(0) else 0
 
         if (version == 0) {
-            conn.execSQL(PlaceSchema.toString())
+            conn.execSQL(org.btcmap.db.table.place.CREATE)
             conn.execSQL(org.btcmap.db.table.event.CREATE)
-            conn.execSQL(CommentSchema.toString())
-            conn.execSQL(UserSchema.toString())
+            conn.execSQL(org.btcmap.db.table.comment.CREATE)
+            conn.execSQL(org.btcmap.db.table.user.CREATE)
             conn.execSQL("PRAGMA user_version=$VERSION;")
             return
         }
@@ -52,7 +49,7 @@ class Database(driver: SQLiteDriver, val path: String) {
                 }
 
                 3 -> {
-                    conn.execSQL(UserSchema.toString())
+                    conn.execSQL(org.btcmap.db.table.user.CREATE)
                 }
 
                 4 -> {

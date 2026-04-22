@@ -22,7 +22,7 @@ import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
-import org.btcmap.db.table.User
+import org.btcmap.db.table.user.User
 import org.btcmap.databinding.AreaFragmentBinding
 import org.btcmap.db.table.event.Event
 import org.btcmap.settings.authorized

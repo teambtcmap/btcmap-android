@@ -20,12 +20,20 @@ fun SQLiteStatement.bindHttpUrlOrNull(index: Int, value: HttpUrl?) {
     if (value == null) bindNull(index) else bindText(index, value.toString())
 }
 
+fun SQLiteStatement.bindZonedDateTime(index: Int, value: ZonedDateTime) {
+    bindText(index, value.toString())
+}
+
 fun SQLiteStatement.bindZonedDateTimeOrNull(index: Int, value: ZonedDateTime?) {
     if (value == null) bindNull(index) else bindText(index, value.toString())
 }
 
 fun SQLiteStatement.bindJsonObjectOrNull(index: Int, value: JsonObject?) {
     if (value == null) bindNull(index) else bindText(index, value.toString())
+}
+
+fun SQLiteStatement.bindJsonArray(index: Int, value: JsonArray) {
+    bindText(index, value.toString())
 }
 
 fun SQLiteStatement.getTextOrNull(index: Int): String? =

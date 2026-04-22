@@ -1,4 +1,4 @@
-package org.btcmap.db.table
+package org.btcmap.db.table.place
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.db.Database
@@ -132,7 +132,7 @@ class PlaceQueriesTest {
         val results = db.place.selectMerchants()
 
         Assert.assertEquals(2, results.size)
-        Assert.assertTrue(results.all { it.iconId != "local_atm" && it.iconId != "currency_exchange" })
+        Assert.assertTrue(results.all { it.icon != "local_atm" && it.icon != "currency_exchange" })
     }
 
     @Test
@@ -145,7 +145,7 @@ class PlaceQueriesTest {
         val results = db.place.selectExchanges()
 
         Assert.assertEquals(2, results.size)
-        Assert.assertTrue(results.all { it.iconId == "local_atm" || it.iconId == "currency_exchange" })
+        Assert.assertTrue(results.all { it.icon == "local_atm" || it.icon == "currency_exchange" })
     }
 
     @Test

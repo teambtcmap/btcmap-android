@@ -11,7 +11,7 @@ import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.db
-import org.btcmap.db.table.User
+import org.btcmap.db.table.user.User
 import org.btcmap.settings.authToken
 import org.btcmap.settings.prefs
 import java.util.UUID

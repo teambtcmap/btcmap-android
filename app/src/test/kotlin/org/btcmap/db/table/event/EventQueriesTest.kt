@@ -8,7 +8,6 @@ import org.junit.Test
 import java.time.ZonedDateTime
 
 class EventQueriesTest {
-
     private fun createDatabase(): Database {
         return Database(BundledSQLiteDriver(), ":memory:")
     }

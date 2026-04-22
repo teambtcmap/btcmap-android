@@ -2,7 +2,7 @@ package org.btcmap.i18n
 
 import android.content.Context
 import org.btcmap.R
-import org.btcmap.db.table.Place
+import org.btcmap.db.table.place.Place
 import java.util.Locale
 
 fun Place.getLocalizedName(): String? {

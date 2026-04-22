@@ -30,7 +30,7 @@ import androidx.lifecycle.withResumed
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import org.btcmap.boost.BoostFragment
-import org.btcmap.db.table.Place
+import org.btcmap.db.table.place.Place
 import org.btcmap.settings.prefs
 import org.btcmap.comment.AddCommentFragment
 import org.btcmap.comment.CommentsAdapter
@@ -44,7 +44,7 @@ import org.btcmap.api
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.databinding.PlaceFragmentBinding
-import org.btcmap.db.table.User
+import org.btcmap.db.table.user.User
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.i18n.getLocalizedOpeningHours
 import org.btcmap.settings.authorized

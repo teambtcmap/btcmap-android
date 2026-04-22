@@ -5,7 +5,7 @@ import com.google.gson.stream.JsonReader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.btcmap.db.Database
-import org.btcmap.db.table.Place
+import org.btcmap.db.table.place.Place
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
