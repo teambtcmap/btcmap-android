@@ -1,11 +1,8 @@
 package org.btcmap.db.table.place
 
 import androidx.sqlite.SQLiteStatement
-import okhttp3.HttpUrl
-import org.btcmap.db.getHttpUrlOrNull
 import org.btcmap.db.getLongOrNull
-import org.btcmap.db.getZonedDateTimeOrNull
-import java.time.ZonedDateTime
+import org.btcmap.db.getTextOrNull
 
 typealias Marker = MarkerProjection
 
@@ -14,8 +11,8 @@ data class MarkerProjection(
     val lat: Double,
     val lon: Double,
     val icon: String,
-    val boostedUntil: ZonedDateTime?,
-    val requiredAppUrl: HttpUrl?,
+    val boostedUntil: String?,
+    val requiredAppUrl: String?,
     val comments: Long,
 ) {
     companion object {
@@ -27,8 +24,8 @@ data class MarkerProjection(
                 lat = stmt.getDouble(1),
                 lon = stmt.getDouble(2),
                 icon = stmt.getText(3),
-                boostedUntil = stmt.getZonedDateTimeOrNull(4),
-                requiredAppUrl = stmt.getHttpUrlOrNull(5),
+                boostedUntil = stmt.getTextOrNull(4),
+                requiredAppUrl = stmt.getTextOrNull(5),
                 comments = stmt.getLongOrNull(6) ?: 0,
             )
         }

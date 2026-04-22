@@ -91,7 +91,6 @@ import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.boostedMarkerBackgroundColor
 import java.text.NumberFormat
-import java.time.ZonedDateTime
 
 class MapFragment : Fragment() {
 
@@ -640,7 +639,7 @@ class MapFragment : Fragment() {
                     "iconId": "${place.icon}",
                     "requiresCompanionApp": ${place.requiredAppUrl != null},
                     "comments": ${place.comments},
-                    "boosted": ${place.boostedUntil?.isAfter(ZonedDateTime.now()) ?: false}
+                    "boosted": ${place.boostedUntil != null}
                 }
             }
         """.trimIndent()
