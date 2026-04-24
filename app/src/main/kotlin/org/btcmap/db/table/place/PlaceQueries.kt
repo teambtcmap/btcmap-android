@@ -99,6 +99,34 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
+    fun selectMerchantsByBounds(
+        minLat: Double,
+        maxLat: Double,
+        minLon: Double,
+        maxLon: Double,
+    ): List<Marker> {
+        conn.prepare(
+            """
+                SELECT ${MarkerProjection.COLUMNS}
+                FROM $TABLE
+                WHERE
+                    $ICON <> 'local_atm' AND $ICON <> 'currency_exchange'
+                    AND $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4
+                ORDER BY $LAT DESC;
+            """
+        ).use {
+            it.bindDouble(1, minLat)
+            it.bindDouble(2, maxLat)
+            it.bindDouble(3, minLon)
+            it.bindDouble(4, maxLon)
+            val rows = mutableListOf<Marker>()
+            while (it.step()) {
+                rows.add(MarkerProjection.fromStatement(it))
+            }
+            return rows
+        }
+    }
+
     fun selectExchanges(): List<Marker> {
         conn.prepare(
             """
@@ -109,6 +137,34 @@ class PlaceQueries(private val conn: SQLiteConnection) {
                 ORDER BY $LAT DESC;
             """
         ).use {
+            val rows = mutableListOf<Marker>()
+            while (it.step()) {
+                rows.add(MarkerProjection.fromStatement(it))
+            }
+            return rows
+        }
+    }
+
+    fun selectExchangesByBounds(
+        minLat: Double,
+        maxLat: Double,
+        minLon: Double,
+        maxLon: Double,
+    ): List<Marker> {
+        conn.prepare(
+            """
+                SELECT ${MarkerProjection.COLUMNS}
+                FROM $TABLE
+                WHERE
+                    ($ICON = 'local_atm' OR $ICON = 'currency_exchange')
+                    AND $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4
+                ORDER BY $LAT DESC;
+            """
+        ).use {
+            it.bindDouble(1, minLat)
+            it.bindDouble(2, maxLat)
+            it.bindDouble(3, minLon)
+            it.bindDouble(4, maxLon)
             val rows = mutableListOf<Marker>()
             while (it.step()) {
                 rows.add(MarkerProjection.fromStatement(it))

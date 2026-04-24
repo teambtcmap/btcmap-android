@@ -149,6 +149,75 @@ class PlaceQueriesTest {
     }
 
     @Test
+    fun selectMerchantsByBounds_returnsOnlyMerchantsWithinBounds() {
+        val db = createDatabase()
+        db.place.insert(listOf(createPlace(id = 1L, icon = "restaurant", lat = 40.7128, lon = -74.0060)))
+        db.place.insert(listOf(createPlace(id = 2L, icon = "coffee", lat = 51.5074, lon = -0.1278)))
+        db.place.insert(listOf(createPlace(id = 3L, icon = "local_atm", lat = 40.7128, lon = -74.0060)))
+        db.place.insert(listOf(createPlace(id = 4L, icon = "currency_exchange", lat = 51.5074, lon = -0.1278)))
+
+        val results = db.place.selectMerchantsByBounds(
+            minLat = 40.0,
+            maxLat = 52.0,
+            minLon = -75.0,
+            maxLon = 0.0,
+        )
+
+        Assert.assertEquals(2, results.size)
+        Assert.assertTrue(results.all { it.icon != "local_atm" && it.icon != "currency_exchange" })
+        Assert.assertTrue(results.any { it.icon == "restaurant" })
+        Assert.assertTrue(results.any { it.icon == "coffee" })
+    }
+
+    @Test
+    fun selectMerchantsByBounds_returnsEmptyWhenNoMatch() {
+        val db = createDatabase()
+        db.place.insert(listOf(createPlace(id = 1L, icon = "restaurant", lat = 40.7128, lon = -74.0060)))
+
+        val results = db.place.selectMerchantsByBounds(
+            minLat = 50.0,
+            maxLat = 60.0,
+            minLon = -80.0,
+            maxLon = -70.0,
+        )
+
+        Assert.assertTrue(results.isEmpty())
+    }
+
+    @Test
+    fun selectExchangesByBounds_returnsOnlyExchangesWithinBounds() {
+        val db = createDatabase()
+        db.place.insert(listOf(createPlace(id = 1L, icon = "restaurant", lat = 40.7128, lon = -74.0060)))
+        db.place.insert(listOf(createPlace(id = 2L, icon = "local_atm", lat = 40.7128, lon = -74.0060)))
+        db.place.insert(listOf(createPlace(id = 3L, icon = "currency_exchange", lat = 51.5074, lon = -0.1278)))
+
+        val results = db.place.selectExchangesByBounds(
+            minLat = 40.0,
+            maxLat = 52.0,
+            minLon = -75.0,
+            maxLon = 0.0,
+        )
+
+        Assert.assertEquals(2, results.size)
+        Assert.assertTrue(results.all { it.icon == "local_atm" || it.icon == "currency_exchange" })
+    }
+
+    @Test
+    fun selectExchangesByBounds_returnsEmptyWhenNoMatch() {
+        val db = createDatabase()
+        db.place.insert(listOf(createPlace(id = 1L, icon = "local_atm", lat = 40.7128, lon = -74.0060)))
+
+        val results = db.place.selectExchangesByBounds(
+            minLat = 50.0,
+            maxLat = 60.0,
+            minLon = -80.0,
+            maxLon = -70.0,
+        )
+
+        Assert.assertEquals("Results size", 0, results.size)
+    }
+
+    @Test
     fun selectMaxUpdatedAt_returnsNullWhenEmpty() {
         val db = createDatabase()
 
