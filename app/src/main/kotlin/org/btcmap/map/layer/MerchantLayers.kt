@@ -1,7 +1,8 @@
-package org.btcmap.map
+package org.btcmap.map.layer
 
 import android.graphics.Color
 import org.btcmap.map.MapFragment.Companion.ICON_OFFSET_Y
+import org.btcmap.map.matcher
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.Layer
@@ -11,14 +12,14 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 
-fun createMerchantsSourceAndLayers(
+fun createMerchantLayers(
     markerBackgroundColor: Int,
     markerBadgeBackgroundColor: Int,
     markerBadgeTextColor: Int,
     usingOpenFreeMap: Boolean,
 ): Pair<GeoJsonSource, List<Layer>> {
     val merchantsSource = GeoJsonSource(
-        "merchants_source",
+        "merchant",
         """{"type":"FeatureCollection","features":[]}""",
         GeoJsonOptions()
             .withCluster(true)
@@ -27,7 +28,7 @@ fun createMerchantsSourceAndLayers(
     )
 
     val clusterBackgroundLayer =
-        CircleLayer("merchants_cluster_background", merchantsSource.id).apply {
+        CircleLayer("merchant_cluster_background", merchantsSource.id).apply {
             setProperties(
                 PropertyFactory.circleColor(markerBackgroundColor),
                 PropertyFactory.circleRadius(23f),
@@ -45,7 +46,7 @@ fun createMerchantsSourceAndLayers(
         }
 
     val clusterCountLayer =
-        SymbolLayer("merchants_cluster_count", merchantsSource.id).apply {
+        SymbolLayer("merchant_cluster_count", merchantsSource.id).apply {
             if (usingOpenFreeMap) {
                 setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Regular")))
             }
@@ -58,7 +59,7 @@ fun createMerchantsSourceAndLayers(
         }
 
     val markerLayer =
-        SymbolLayer("merchants_marker", merchantsSource.id).apply {
+        SymbolLayer("merchant_marker", merchantsSource.id).apply {
             setProperties(
                 PropertyFactory.iconImage(
                     Expression.switchCase(
@@ -77,7 +78,7 @@ fun createMerchantsSourceAndLayers(
         }
 
     val markerIconsLayer =
-        SymbolLayer("merchants_marker_icons", merchantsSource.id).apply {
+        SymbolLayer("merchant_marker_icon", merchantsSource.id).apply {
             setProperties(
                 PropertyFactory.iconImage(
                     Expression.match(
@@ -99,7 +100,7 @@ fun createMerchantsSourceAndLayers(
         }
 
     val markerCommentCountBackground =
-        CircleLayer("merchants_marker_comment_count_background", merchantsSource.id).apply {
+        CircleLayer("merchant_marker_comment_count_background", merchantsSource.id).apply {
             setProperties(
                 PropertyFactory.circleColor(markerBadgeBackgroundColor),
                 PropertyFactory.circleRadius(9f),
@@ -116,7 +117,7 @@ fun createMerchantsSourceAndLayers(
         }
 
     val markerCommentsCount =
-        SymbolLayer("merchants_marker_comment_count", merchantsSource.id).apply {
+        SymbolLayer("merchant_marker_comment_count", merchantsSource.id).apply {
             if (usingOpenFreeMap) {
                 setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Bold")))
             }

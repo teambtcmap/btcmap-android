@@ -1,4 +1,4 @@
-package org.btcmap.map
+package org.btcmap.map.layer
 
 import android.graphics.Color
 import org.btcmap.map.MapFragment.Companion.ICON_OFFSET_Y

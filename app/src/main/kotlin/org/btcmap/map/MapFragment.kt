@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -60,8 +59,6 @@ import org.maplibre.android.location.LocationComponentOptions
 import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
-import org.maplibre.android.style.layers.CircleLayer
-import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.btcmap.area.AreaFragment
 import org.btcmap.place.isMerchant
@@ -84,10 +81,9 @@ import org.btcmap.db
 import org.btcmap.sync
 import org.btcmap.db.table.place.Marker
 import org.btcmap.db.table.event.Event
-import org.maplibre.android.style.expressions.Expression
-import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
-import org.maplibre.android.style.layers.SymbolLayer
-import org.maplibre.android.style.sources.GeoJsonOptions
+import org.btcmap.map.layer.createEventLayers
+import org.btcmap.map.layer.createExchangeLayers
+import org.btcmap.map.layer.createMerchantLayers
 import org.btcmap.search.SearchAdapterItem
 import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
@@ -216,7 +212,7 @@ class MapFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val merchantLayers = createMerchantsSourceAndLayers(
+        val merchantLayers = createMerchantLayers(
             markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
             markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
             markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
@@ -226,17 +222,25 @@ class MapFragment : Fragment() {
             markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
             usingOpenFreeMap = usingOpenFreeMap(),
         )
+        val exchangeLayers = createExchangeLayers(
+            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
+            markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
+            markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
+            usingOpenFreeMap = usingOpenFreeMap(),
+        )
         merchantsSource = merchantLayers.first
         eventsSource = eventLayers.first
+        exchangesSource = exchangeLayers.first
         binding.map.getMapAsync { map ->
             map.getStyle { style ->
                 style.addSource(merchantLayers.first)
                 merchantLayers.second.forEach { style.addLayer(it) }
                 style.addSource(eventLayers.first)
                 eventLayers.second.forEach { style.addLayer(it) }
+                style.addSource(exchangeLayers.first)
+                exchangeLayers.second.forEach { style.addLayer(it) }
             }
         }
-        initExchangesMap()
 
         initSearchBar(binding)
 
@@ -770,144 +774,6 @@ class MapFragment : Fragment() {
     private lateinit var eventsSource: GeoJsonSource
     private lateinit var exchangesSource: GeoJsonSource
 
-    private fun initExchangesMap() {
-        val exchangesSource = GeoJsonSource(
-            "exchangesSource",
-            EMPTY_GEOJSON,
-            GeoJsonOptions()
-                .withCluster(true)
-                .withClusterMaxZoom(14)
-                .withClusterRadius(50)
-        )
-
-        val exchangesClusterBackgroundLayer by lazy {
-            CircleLayer("exchangesClusterBackground", exchangesSource.id).apply {
-                setProperties(
-                    PropertyFactory.circleColor(prefs.markerBackgroundColor(requireContext())),
-                    PropertyFactory.circleRadius(23f),
-                )
-                val pointCount = Expression.toNumber(Expression.get("point_count"))
-                setFilter(
-                    Expression.all(
-                        Expression.has("point_count"),
-                        Expression.gte(
-                            pointCount,
-                            Expression.literal(1)
-                        )
-                    )
-                )
-            }
-        }
-
-        val exchangesClusterCountLayer =
-            SymbolLayer("exchangesClusterCount", exchangesSource.id).apply {
-                if (usingOpenFreeMap()) {
-                    setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Regular")))
-                }
-                setProperties(
-                    PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
-                    PropertyFactory.textSize(16f),
-                    PropertyFactory.textColor(Color.WHITE),
-                )
-            }
-
-        val exchangesLayer =
-            SymbolLayer(LAYER_EXCHANGES, exchangesSource.id).apply {
-                setProperties(
-                    PropertyFactory.iconImage("btcmap-marker"),
-                    PropertyFactory.iconAnchor(Expression.literal("bottom")),
-                    PropertyFactory.iconAllowOverlap(true),
-                    PropertyFactory.iconIgnorePlacement(true)
-                )
-                setFilter(
-                    Expression.neq(Expression.get("cluster"), true)
-                )
-            }
-
-        val exchangesCategoryIconsLayer =
-            SymbolLayer(LAYER_EXCHANGES_CATEGORY_ICONS, exchangesSource.id).apply {
-                setProperties(
-                    PropertyFactory.iconImage(
-                        Expression.match(
-                            Expression.get("iconId"),
-                            *matcher().toTypedArray()
-                        )
-                    ),
-                    PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
-                    PropertyFactory.iconOffset(
-                        arrayOf(
-                            0f,
-                            ICON_OFFSET_Y
-                        )
-                    ),
-                    PropertyFactory.iconAllowOverlap(true),
-                    PropertyFactory.iconIgnorePlacement(true)
-                )
-                setFilter(
-                    Expression.neq(Expression.get("cluster"), true)
-                )
-            }
-
-        val exchangesCommentsLayer =
-            CircleLayer("exchangesComments", exchangesSource.id).apply {
-                setProperties(
-                    PropertyFactory.circleColor(prefs.badgeBackgroundColor(requireContext())),
-                    PropertyFactory.circleRadius(9f),
-                    PropertyFactory.circleOpacity(1f),
-                    PropertyFactory.circleTranslate(arrayOf(13f, -43f)),
-                    PropertyFactory.circleTranslateAnchor("viewport")
-                )
-                setFilter(
-                    Expression.all(
-                        Expression.neq(Expression.get("cluster"), true),
-                        Expression.gt(Expression.get("comments"), 0)
-                    )
-                )
-            }
-
-        val exchangesCommentsCountLayer =
-            SymbolLayer("exchangesCommentsCount", exchangesSource.id).apply {
-                if (usingOpenFreeMap()) {
-                    setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Bold")))
-                }
-                setProperties(
-                    PropertyFactory.textField(
-                        Expression.switchCase(
-                            Expression.gte(Expression.get("comments"), Expression.literal(10)),
-                            Expression.literal("9+"),
-                            Expression.toString(Expression.get("comments"))
-                        )
-                    ),
-                    PropertyFactory.textSize(11f),
-                    PropertyFactory.textColor(prefs.badgeTextColor(requireContext())),
-                    PropertyFactory.textTranslate(arrayOf(13f, -43f)),
-                    PropertyFactory.textTranslateAnchor("viewport"),
-                    PropertyFactory.textAllowOverlap(true)
-                )
-                setFilter(
-                    Expression.all(
-                        Expression.neq(Expression.get("cluster"), true),
-                        Expression.gt(Expression.get("comments"), 0)
-                    )
-                )
-            }
-
-        binding.map.getMapAsync { map ->
-            map.getStyle { style ->
-                style.addSource(exchangesSource)
-
-                style.addLayer(exchangesClusterBackgroundLayer)
-                style.addLayer(exchangesClusterCountLayer)
-                style.addLayer(exchangesLayer)
-                style.addLayer(exchangesCategoryIconsLayer)
-                style.addLayer(exchangesCommentsLayer)
-                style.addLayer(exchangesCommentsCountLayer)
-            }
-        }
-
-        this.exchangesSource = exchangesSource
-    }
-
     private fun usingOpenFreeMap(): Boolean {
         val nightMode =
             requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
@@ -924,7 +790,10 @@ class MapFragment : Fragment() {
         binding.map.getMapAsync { map ->
             val bounds = map.projection.visibleRegion.latLngBounds
             val expandedBounds = expandBounds(bounds, CLUSTERING_SCALE_FACTOR)
-            Log.d("MapFragment", "showMerchants: bounds=$bounds, expanded=$expandedBounds, cacheBounds=${merchantsCache.bounds}")
+            Log.d(
+                "MapFragment",
+                "showMerchants: bounds=$bounds, expanded=$expandedBounds, cacheBounds=${merchantsCache.bounds}"
+            )
             viewLifecycleOwner.lifecycleScope.launch {
                 if (!merchantsCache.contains(expandedBounds)) {
                     Log.d("MapFragment", "showMerchants: cache miss, fetching")
@@ -939,7 +808,10 @@ class MapFragment : Fragment() {
                         )
                     }
                     lastDbCallTimeMs = System.currentTimeMillis() - startTime
-                    Log.d("MapFragment", "showMerchants: fetched ${newMerchants.size} merchants in ${lastDbCallTimeMs}ms")
+                    Log.d(
+                        "MapFragment",
+                        "showMerchants: fetched ${newMerchants.size} merchants in ${lastDbCallTimeMs}ms"
+                    )
                     merchantsCache = merchantsCache.add(newMerchants, expandedBounds)
                 } else {
                     Log.d("MapFragment", "showMerchants: cache hit")
@@ -1041,7 +913,8 @@ class MapFragment : Fragment() {
         }
         val viewportInfo = if (currentBounds != null) {
             val latSpanKm = currentBounds.latitudeSpan * 111
-            val lonSpanKm = currentBounds.longitudeSpan * 111 * kotlin.math.cos(Math.toRadians(currentBounds.center.latitude))
+            val lonSpanKm =
+                currentBounds.longitudeSpan * 111 * kotlin.math.cos(Math.toRadians(currentBounds.center.latitude))
             "%.1fkm x %.1fkm".format(latSpanKm, lonSpanKm)
         } else {
             "no bounds"
@@ -1049,9 +922,10 @@ class MapFragment : Fragment() {
         Log.d("MapFragment", "updateDebugStats: filter=$filter, cacheSize=$cacheSize")
         if (prefs.showDebugInfo) {
             binding.debugStats.apply {
-                text = "memcache: %d items\nmemcache bounds: %s\ndb queries: %d\nlast query: %dms".format(
-                    cacheSize, viewportInfo, dbCallCount, lastDbCallTimeMs
-                )
+                text =
+                    "memcache: %d items\nmemcache bounds: %s\ndb queries: %d\nlast query: %dms".format(
+                        cacheSize, viewportInfo, dbCallCount, lastDbCallTimeMs
+                    )
                 isVisible = true
             }
         } else {
