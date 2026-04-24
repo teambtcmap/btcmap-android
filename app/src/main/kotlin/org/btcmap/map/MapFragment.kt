@@ -54,6 +54,7 @@ import org.btcmap.api
 import org.btcmap.databinding.MapFragmentBinding
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.location.LocationComponentActivationOptions
 import org.maplibre.android.location.LocationComponentOptions
 import org.maplibre.android.location.engine.LocationEngineRequest
@@ -71,6 +72,7 @@ import org.btcmap.settings.mapStyle
 import org.btcmap.settings.mapViewport
 import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.prefs
+import org.btcmap.settings.showDebugInfo
 import org.btcmap.settings.uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -115,6 +117,13 @@ class MapFragment : Fragment() {
             onBackPressed()
         }
     }
+
+    private var initialLoadInProgress = false
+    private var dbCallCount = 0
+    private var lastDbCallTimeMs = 0L
+    private var lastMerchantsGeoJson: String? = null
+    private var lastEventsGeoJson: String? = null
+    private var lastExchangesGeoJson: String? = null
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
@@ -207,7 +216,22 @@ class MapFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        initMerchantsMap()
+        val merchantSourceAndLayers = createMerchantsSourceAndLayers(
+            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
+            markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
+            markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
+            usingOpenFreeMap = usingOpenFreeMap(),
+        )
+
+        merchantsSource = merchantSourceAndLayers.first
+
+        binding.map.getMapAsync { map ->
+            map.getStyle { style ->
+                style.addSource(merchantSourceAndLayers.first)
+                merchantSourceAndLayers.second.forEach { style.addLayer(it) }
+            }
+        }
+
         initEventsMap()
         initExchangesMap()
 
@@ -221,10 +245,18 @@ class MapFragment : Fragment() {
 
         binding.map.getMapAsync {
             it.addOnCameraIdleListener {
+                if (initialLoadInProgress) {
+                    initialLoadInProgress = false
+                }
                 prefs.mapViewport = it.projection.visibleRegion.latLngBounds
                 val center = it.projection.visibleRegion.latLngBounds.center
                 viewLifecycleOwner.lifecycleScope.launch {
                     loadAreas(center.latitude, center.longitude)
+                }
+                when (filter) {
+                    Filter.MERCHANTS -> showMerchants()
+                    Filter.EVENTS -> showEvents()
+                    Filter.EXCHANGES -> showExchanges()
                 }
             }
 
@@ -318,8 +350,6 @@ class MapFragment : Fragment() {
             }
         }
 
-        setFilter(Filter.MERCHANTS)
-
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.sync.isVisible = true
@@ -351,6 +381,8 @@ class MapFragment : Fragment() {
             viewLifecycleOwner, backPressedCallback
         )
 
+        initialLoadInProgress = true
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
                 binding.map.getMapAsync {
@@ -359,6 +391,7 @@ class MapFragment : Fragment() {
                             prefs.mapViewport, 0
                         )
                     )
+                    setFilter(Filter.MERCHANTS)
                 }
             }
         }
@@ -705,11 +738,23 @@ class MapFragment : Fragment() {
     private var filter = Filter.MERCHANTS
 
     private fun setFilter(filter: Filter) {
+        Log.d("MapFragment", "setFilter called with: $filter")
         this.filter = filter
 
         binding.showMerchants.isSelected = filter == Filter.MERCHANTS
         binding.showEvents.isSelected = filter == Filter.EVENTS
         binding.showExchanges.isSelected = filter == Filter.EXCHANGES
+
+        merchantsCache = PlaceCache()
+        exchangesCache = PlaceCache()
+        eventsCache = EventCache()
+        dbCallCount = 0
+        lastDbCallTimeMs = 0L
+
+        if (initialLoadInProgress) {
+            Log.d("MapFragment", "setFilter: skipping show due to initial load")
+            return
+        }
 
         when (filter) {
             Filter.MERCHANTS -> showMerchants()
@@ -721,150 +766,6 @@ class MapFragment : Fragment() {
     private lateinit var merchantsSource: GeoJsonSource
     private lateinit var eventsSource: GeoJsonSource
     private lateinit var exchangesSource: GeoJsonSource
-
-    private fun initMerchantsMap() {
-        val merchantsSource = GeoJsonSource(
-            "merchantsSource",
-            EMPTY_GEOJSON,
-            GeoJsonOptions()
-                .withCluster(true)
-                .withClusterMaxZoom(14)
-                .withClusterRadius(50)
-        )
-
-        val merchantsClusterBackgroundLayer by lazy {
-            CircleLayer("merchantsClusterBackground", merchantsSource.id).apply {
-                setProperties(
-                    PropertyFactory.circleColor(prefs.markerBackgroundColor(requireContext())),
-                    PropertyFactory.circleRadius(23f),
-                )
-                val pointCount = Expression.toNumber(Expression.get("point_count"))
-                setFilter(
-                    Expression.all(
-                        Expression.has("point_count"),
-                        Expression.gte(
-                            pointCount,
-                            Expression.literal(1)
-                        )
-                    )
-                )
-            }
-        }
-
-        val merchantsClusterCountLayer =
-            SymbolLayer("merchantsClusterCount", merchantsSource.id).apply {
-                if (usingOpenFreeMap()) {
-                    setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Regular")))
-                }
-
-                setProperties(
-                    PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
-                    PropertyFactory.textSize(16f),
-                    PropertyFactory.textColor(Color.WHITE),
-                )
-            }
-
-        val unclusteredMerchantsLayer =
-            SymbolLayer("unclusteredMerchants", merchantsSource.id).apply {
-                setProperties(
-                    PropertyFactory.iconImage(
-                        Expression.switchCase(
-                            Expression.get("boosted"),
-                            Expression.literal("btcmap-marker-boosted"),
-                            Expression.literal("btcmap-marker")
-                        )
-                    ),
-                    PropertyFactory.iconAnchor(Expression.literal("bottom")),
-                    PropertyFactory.iconAllowOverlap(true),
-                    PropertyFactory.iconIgnorePlacement(true)
-                )
-                setFilter(
-                    Expression.neq(Expression.get("cluster"), true)
-                )
-            }
-
-        val unclusteredMerchantsCategoryIconsLayer =
-            SymbolLayer("unclusteredMerchantsCategoryIcons", merchantsSource.id).apply {
-                setProperties(
-                    PropertyFactory.iconImage(
-                        Expression.match(
-                            Expression.get("iconId"),
-                            *matcher().toTypedArray()
-                        )
-                    ),
-                    PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
-                    PropertyFactory.iconOffset(
-                        arrayOf(
-                            0f,
-                            ICON_OFFSET_Y
-                        )
-                    ),
-                    PropertyFactory.iconAllowOverlap(true),
-                    PropertyFactory.iconIgnorePlacement(true)
-                )
-                setFilter(Expression.neq(Expression.get("cluster"), true))
-            }
-
-        val unclusteredMerchantsCommentsLayer =
-            CircleLayer("unclusteredMerchantsComments", merchantsSource.id).apply {
-                setProperties(
-                    PropertyFactory.circleColor(prefs.badgeBackgroundColor(requireContext())),
-                    PropertyFactory.circleRadius(9f),
-                    PropertyFactory.circleOpacity(1f),
-                    PropertyFactory.circleTranslate(arrayOf(13f, -43f)),
-                    PropertyFactory.circleTranslateAnchor("viewport")
-                )
-                setFilter(
-                    Expression.all(
-                        Expression.neq(Expression.get("cluster"), true),
-                        Expression.gt(Expression.get("comments"), 0)
-                    )
-                )
-            }
-
-        val unclusteredMerchantsCommentsCountLayer =
-            SymbolLayer("unclusteredMerchantsCommentsCount", merchantsSource.id).apply {
-                if (usingOpenFreeMap()) {
-                    setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Bold")))
-                }
-                setProperties(
-                    PropertyFactory.textField(
-                        Expression.switchCase(
-                            Expression.gte(Expression.get("comments"), Expression.literal(10)),
-                            Expression.literal("9+"),
-                            Expression.toString(Expression.get("comments"))
-                        )
-                    ),
-                    PropertyFactory.textSize(11f),
-                    PropertyFactory.textColor(prefs.badgeTextColor(requireContext())),
-                    PropertyFactory.textTranslate(arrayOf(13f, -43f)),
-                    PropertyFactory.textTranslateAnchor("viewport"),
-                    PropertyFactory.textAllowOverlap(true)
-                )
-                setFilter(
-                    Expression.all(
-                        Expression.neq(Expression.get("cluster"), true),
-                        Expression.gt(Expression.get("comments"), 0)
-                    )
-                )
-            }
-
-        binding.map.getMapAsync { map ->
-            map.getStyle { style ->
-                style.addSource(merchantsSource)
-
-                style.addLayer(merchantsClusterBackgroundLayer)
-                style.addLayer(merchantsClusterCountLayer)
-
-                style.addLayer(unclusteredMerchantsLayer)
-                style.addLayer(unclusteredMerchantsCategoryIconsLayer)
-                style.addLayer(unclusteredMerchantsCommentsLayer)
-                style.addLayer(unclusteredMerchantsCommentsCountLayer)
-            }
-        }
-
-        this.merchantsSource = merchantsSource
-    }
 
     private fun initEventsMap() {
         val eventsSource = GeoJsonSource(
@@ -1104,28 +1005,141 @@ class MapFragment : Fragment() {
 
     private fun showMerchants() {
         clearOtherSources(merchantsSource)
-        viewLifecycleOwner.lifecycleScope.launch {
-            val merchants =
-                withContext(Dispatchers.IO) { db().place.selectMerchants().toGeoJson() }
-            merchantsSource.setGeoJson(merchants)
+        binding.map.getMapAsync { map ->
+            val bounds = map.projection.visibleRegion.latLngBounds
+            val expandedBounds = expandBounds(bounds, CLUSTERING_SCALE_FACTOR)
+            Log.d("MapFragment", "showMerchants: bounds=$bounds, expanded=$expandedBounds, cacheBounds=${merchantsCache.bounds}")
+            viewLifecycleOwner.lifecycleScope.launch {
+                if (!merchantsCache.contains(expandedBounds)) {
+                    Log.d("MapFragment", "showMerchants: cache miss, fetching")
+                    dbCallCount++
+                    val startTime = System.currentTimeMillis()
+                    val newMerchants = withContext(Dispatchers.IO) {
+                        db().place.selectMerchantsByBounds(
+                            expandedBounds.latitudeSouth,
+                            expandedBounds.latitudeNorth,
+                            expandedBounds.longitudeWest,
+                            expandedBounds.longitudeEast,
+                        )
+                    }
+                    lastDbCallTimeMs = System.currentTimeMillis() - startTime
+                    Log.d("MapFragment", "showMerchants: fetched ${newMerchants.size} merchants in ${lastDbCallTimeMs}ms")
+                    merchantsCache = merchantsCache.add(newMerchants, expandedBounds)
+                } else {
+                    Log.d("MapFragment", "showMerchants: cache hit")
+                }
+                val geoJson = merchantsCache.features.toGeoJson()
+                if (geoJson != lastMerchantsGeoJson) {
+                    lastMerchantsGeoJson = geoJson
+                    merchantsSource.setGeoJson(geoJson)
+                }
+                updateDebugStats()
+            }
         }
     }
 
     private fun showEvents() {
         clearOtherSources(eventsSource)
-        viewLifecycleOwner.lifecycleScope.launch {
-            val events =
-                withContext(Dispatchers.IO) { db().event.selectAll().toEventsGeoJson() }
-            eventsSource.setGeoJson(events)
+        binding.map.getMapAsync { map ->
+            val bounds = map.projection.visibleRegion.latLngBounds
+            val expandedBounds = expandBounds(bounds, CLUSTERING_SCALE_FACTOR)
+            viewLifecycleOwner.lifecycleScope.launch {
+                if (!eventsCache.contains(expandedBounds)) {
+                    dbCallCount++
+                    val startTime = System.currentTimeMillis()
+                    val newEvents = withContext(Dispatchers.IO) {
+                        db().event.selectByBounds(
+                            expandedBounds.latitudeSouth,
+                            expandedBounds.latitudeNorth,
+                            expandedBounds.longitudeWest,
+                            expandedBounds.longitudeEast,
+                        )
+                    }
+                    lastDbCallTimeMs = System.currentTimeMillis() - startTime
+                    eventsCache = eventsCache.add(newEvents, expandedBounds)
+                }
+                val geoJson = eventsCache.features.toEventsGeoJson()
+                if (geoJson != lastEventsGeoJson) {
+                    lastEventsGeoJson = geoJson
+                    eventsSource.setGeoJson(geoJson)
+                }
+                updateDebugStats()
+            }
         }
     }
 
     private fun showExchanges() {
         clearOtherSources(exchangesSource)
-        viewLifecycleOwner.lifecycleScope.launch {
-            val exchanges =
-                withContext(Dispatchers.IO) { db().place.selectExchanges().toGeoJson() }
-            exchangesSource.setGeoJson(exchanges)
+        binding.map.getMapAsync { map ->
+            val bounds = map.projection.visibleRegion.latLngBounds
+            val expandedBounds = expandBounds(bounds, CLUSTERING_SCALE_FACTOR)
+            viewLifecycleOwner.lifecycleScope.launch {
+                if (!exchangesCache.contains(expandedBounds)) {
+                    dbCallCount++
+                    val startTime = System.currentTimeMillis()
+                    val newExchanges = withContext(Dispatchers.IO) {
+                        db().place.selectExchangesByBounds(
+                            expandedBounds.latitudeSouth,
+                            expandedBounds.latitudeNorth,
+                            expandedBounds.longitudeWest,
+                            expandedBounds.longitudeEast,
+                        )
+                    }
+                    lastDbCallTimeMs = System.currentTimeMillis() - startTime
+                    exchangesCache = exchangesCache.add(newExchanges, expandedBounds)
+                }
+                val geoJson = exchangesCache.features.toGeoJson()
+                if (geoJson != lastExchangesGeoJson) {
+                    lastExchangesGeoJson = geoJson
+                    exchangesSource.setGeoJson(geoJson)
+                }
+                updateDebugStats()
+            }
+        }
+    }
+
+    private fun expandBounds(bounds: LatLngBounds, scaleFactor: Double): LatLngBounds {
+        val latSpan = bounds.latitudeSpan * scaleFactor
+        val lonSpan = bounds.longitudeSpan * scaleFactor
+        val center = bounds.center
+        val latNorth = (center.latitude + latSpan / 2).coerceAtMost(90.0)
+        val latSouth = (center.latitude - latSpan / 2).coerceAtLeast(-90.0)
+        return LatLngBounds.from(
+            latNorth = latNorth,
+            lonEast = center.longitude + lonSpan / 2,
+            latSouth = latSouth,
+            lonWest = center.longitude - lonSpan / 2,
+        )
+    }
+
+    private fun updateDebugStats() {
+        val cacheSize = when (filter) {
+            Filter.MERCHANTS -> merchantsCache.features.size
+            Filter.EVENTS -> eventsCache.features.size
+            Filter.EXCHANGES -> exchangesCache.features.size
+        }
+        val currentBounds = when (filter) {
+            Filter.MERCHANTS -> merchantsCache.bounds
+            Filter.EVENTS -> eventsCache.bounds
+            Filter.EXCHANGES -> exchangesCache.bounds
+        }
+        val viewportInfo = if (currentBounds != null) {
+            val latSpanKm = currentBounds.latitudeSpan * 111
+            val lonSpanKm = currentBounds.longitudeSpan * 111 * kotlin.math.cos(Math.toRadians(currentBounds.center.latitude))
+            "%.1fkm x %.1fkm".format(latSpanKm, lonSpanKm)
+        } else {
+            "no bounds"
+        }
+        Log.d("MapFragment", "updateDebugStats: filter=$filter, cacheSize=$cacheSize")
+        if (prefs.showDebugInfo) {
+            binding.debugStats.apply {
+                text = "memcache: %d items\nmemcache bounds: %s\ndb queries: %d\nlast query: %dms".format(
+                    cacheSize, viewportInfo, dbCallCount, lastDbCallTimeMs
+                )
+                isVisible = true
+            }
+        } else {
+            binding.debugStats.isVisible = false
         }
     }
 
@@ -1201,6 +1215,7 @@ class MapFragment : Fragment() {
 
     companion object {
         private const val MIN_QUERY_LENGTH = 3
+        private const val CLUSTERING_SCALE_FACTOR = 2.0
 
         private val DISTANCE_FORMAT = NumberFormat.getNumberInstance().apply {
             maximumFractionDigits = 1
@@ -1215,6 +1230,62 @@ class MapFragment : Fragment() {
         val EMPTY_GEOJSON = """{"type":"FeatureCollection","features":[]}"""
         const val ICON_OFFSET_Y = -29f
     }
+
+    private data class PlaceCache(
+        val features: List<Marker> = emptyList(),
+        val bounds: LatLngBounds? = null,
+    ) {
+        fun contains(bounds: LatLngBounds): Boolean {
+            if (this.bounds == null) return false
+            return this.bounds.contains(bounds)
+        }
+
+        fun add(newFeatures: List<Marker>, newBounds: LatLngBounds): PlaceCache {
+            val mergedBounds = if (bounds == null) {
+                newBounds
+            } else {
+                LatLngBounds.Builder()
+                    .include(LatLng(bounds.latitudeNorth, bounds.longitudeWest))
+                    .include(LatLng(bounds.latitudeSouth, bounds.longitudeEast))
+                    .include(LatLng(newBounds.latitudeNorth, newBounds.longitudeWest))
+                    .include(LatLng(newBounds.latitudeSouth, newBounds.longitudeEast))
+                    .build()
+            }
+            val existingIds = features.map { it.id }.toSet()
+            val uniqueNewFeatures = newFeatures.filter { it.id !in existingIds }
+            return PlaceCache(features + uniqueNewFeatures, mergedBounds)
+        }
+    }
+
+    private data class EventCache(
+        val features: List<Event> = emptyList(),
+        val bounds: LatLngBounds? = null,
+    ) {
+        fun contains(bounds: LatLngBounds): Boolean {
+            if (this.bounds == null) return false
+            return this.bounds.contains(bounds)
+        }
+
+        fun add(newFeatures: List<Event>, newBounds: LatLngBounds): EventCache {
+            val mergedBounds = if (bounds == null) {
+                newBounds
+            } else {
+                LatLngBounds.Builder()
+                    .include(LatLng(bounds.latitudeNorth, bounds.longitudeWest))
+                    .include(LatLng(bounds.latitudeSouth, bounds.longitudeEast))
+                    .include(LatLng(newBounds.latitudeNorth, newBounds.longitudeWest))
+                    .include(LatLng(newBounds.latitudeSouth, newBounds.longitudeEast))
+                    .build()
+            }
+            val existingIds = features.map { it.id }.toSet()
+            val uniqueNewFeatures = newFeatures.filter { it.id !in existingIds }
+            return EventCache(features + uniqueNewFeatures, mergedBounds)
+        }
+    }
+
+    private var merchantsCache = PlaceCache()
+    private var exchangesCache = PlaceCache()
+    private var eventsCache = EventCache()
 
     private val _searchResults = MutableStateFlow<List<SearchAdapterItem>>(emptyList())
     val searchResults = _searchResults.asStateFlow()
