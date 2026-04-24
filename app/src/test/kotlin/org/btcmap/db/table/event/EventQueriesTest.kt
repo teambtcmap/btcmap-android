@@ -80,6 +80,84 @@ class EventQueriesTest {
     }
 
     @Test
+    fun insert_and_selectByBounds() {
+        val db = createDatabase()
+        val event1 = Event(
+            id = 1L,
+            areaId = null,
+            lat = 40.7128,
+            lon = -74.0060,
+            name = "NYC Event",
+            website = "https://example.com".toHttpUrl(),
+            startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
+            endsAt = null,
+            cronSchedule = null,
+        )
+        val event2 = Event(
+            id = 2L,
+            areaId = null,
+            lat = 51.5074,
+            lon = -0.1278,
+            name = "London Event",
+            website = "https://example.com".toHttpUrl(),
+            startsAt = ZonedDateTime.parse("2024-07-01T18:00:00Z"),
+            endsAt = null,
+            cronSchedule = null,
+        )
+        val event3 = Event(
+            id = 3L,
+            areaId = null,
+            lat = 34.0522,
+            lon = -118.2437,
+            name = "LA Event",
+            website = "https://example.com".toHttpUrl(),
+            startsAt = ZonedDateTime.parse("2024-08-01T18:00:00Z"),
+            endsAt = null,
+            cronSchedule = null,
+        )
+
+        db.event.insert(listOf(event1, event2, event3))
+
+        val results = db.event.selectByBounds(
+            minLat = 40.0,
+            maxLat = 52.0,
+            minLon = -75.0,
+            maxLon = 0.0,
+        )
+
+        Assert.assertEquals(2, results.size)
+        Assert.assertEquals("NYC Event", results[0].name)
+        Assert.assertEquals("London Event", results[1].name)
+    }
+
+    @Test
+    fun selectByBounds_returnsEmptyListWhenNoMatch() {
+        val db = createDatabase()
+        val event = Event(
+            id = 1L,
+            areaId = null,
+            lat = 40.7128,
+            lon = -74.0060,
+            name = "NYC Event",
+            website = "https://example.com".toHttpUrl(),
+            startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
+            endsAt = null,
+            cronSchedule = null,
+        )
+
+        db.event.insert(listOf(event))
+
+        val results = db.event.selectByBounds(
+            minLat = 50.0,
+            maxLat = 60.0,
+            minLon = -80.0,
+            maxLon = -70.0,
+        )
+
+        Assert.assertTrue(results.isEmpty())
+    }
+
+    @Test
     fun deleteAll_removesAllEvents() {
         val db = createDatabase()
         val event1 = Event(

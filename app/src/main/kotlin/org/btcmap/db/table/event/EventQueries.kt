@@ -44,6 +44,31 @@ class EventQueries(private val conn: SQLiteConnection) {
         }
     }
 
+    fun selectByBounds(
+        minLat: Double,
+        maxLat: Double,
+        minLon: Double,
+        maxLon: Double,
+    ): List<Event> {
+        conn.prepare(
+            """
+                SELECT ${FullProjection.COLUMNS}
+                FROM $TABLE
+                WHERE $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4;
+            """
+        ).use {
+            it.bindDouble(1, minLat)
+            it.bindDouble(2, maxLat)
+            it.bindDouble(3, minLon)
+            it.bindDouble(4, maxLon)
+            val rows = mutableListOf<Event>()
+            while (it.step()) {
+                rows.add(FullProjection.fromStatement(it))
+            }
+            return rows
+        }
+    }
+
     fun selectById(id: Long): Event? {
         conn.prepare(
             """
