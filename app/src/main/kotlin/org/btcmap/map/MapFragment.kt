@@ -216,23 +216,26 @@ class MapFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val merchantSourceAndLayers = createMerchantsSourceAndLayers(
+        val merchantLayers = createMerchantsSourceAndLayers(
             markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
             markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
             markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
             usingOpenFreeMap = usingOpenFreeMap(),
         )
-
-        merchantsSource = merchantSourceAndLayers.first
-
+        val eventLayers = createEventLayers(
+            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
+            usingOpenFreeMap = usingOpenFreeMap(),
+        )
+        merchantsSource = merchantLayers.first
+        eventsSource = eventLayers.first
         binding.map.getMapAsync { map ->
             map.getStyle { style ->
-                style.addSource(merchantSourceAndLayers.first)
-                merchantSourceAndLayers.second.forEach { style.addLayer(it) }
+                style.addSource(merchantLayers.first)
+                merchantLayers.second.forEach { style.addLayer(it) }
+                style.addSource(eventLayers.first)
+                eventLayers.second.forEach { style.addLayer(it) }
             }
         }
-
-        initEventsMap()
         initExchangesMap()
 
         initSearchBar(binding)
@@ -766,93 +769,6 @@ class MapFragment : Fragment() {
     private lateinit var merchantsSource: GeoJsonSource
     private lateinit var eventsSource: GeoJsonSource
     private lateinit var exchangesSource: GeoJsonSource
-
-    private fun initEventsMap() {
-        val eventsSource = GeoJsonSource(
-            "eventsSource",
-            EMPTY_GEOJSON,
-            GeoJsonOptions()
-                .withCluster(true)
-                .withClusterMaxZoom(14)
-                .withClusterRadius(30)
-        )
-
-        val eventsClusterBackgroundLayer by lazy {
-            CircleLayer("eventsClusterBackground", eventsSource.id).apply {
-                setProperties(
-                    PropertyFactory.circleColor(prefs.markerBackgroundColor(requireContext())),
-                    PropertyFactory.circleRadius(23f),
-                )
-                val pointCount = Expression.toNumber(Expression.get("point_count"))
-                setFilter(
-                    Expression.all(
-                        Expression.has("point_count"),
-                        Expression.gte(
-                            pointCount,
-                            Expression.literal(1)
-                        )
-                    )
-                )
-            }
-        }
-
-        val eventsClusterCountLayer =
-            SymbolLayer("eventsClusterCount", eventsSource.id).apply {
-                if (usingOpenFreeMap()) {
-                    setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Regular")))
-                }
-                setProperties(
-                    PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
-                    PropertyFactory.textSize(16f),
-                    PropertyFactory.textColor(Color.WHITE),
-                )
-            }
-
-        val eventsLayer =
-            SymbolLayer(LAYER_EVENTS, eventsSource.id).apply {
-                setProperties(
-                    PropertyFactory.iconImage("btcmap-marker"),
-                    PropertyFactory.iconAnchor(Expression.literal("bottom")),
-                    PropertyFactory.iconAllowOverlap(true),
-                    PropertyFactory.iconIgnorePlacement(true)
-                )
-                setFilter(
-                    Expression.neq(Expression.get("cluster"), true)
-                )
-            }
-
-        val eventsCategoryIconsLayer =
-            SymbolLayer(LAYER_EVENTS_CATEGORY_ICONS, eventsSource.id).apply {
-                setProperties(
-                    PropertyFactory.iconImage("marker-icon-event"),
-                    PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
-                    PropertyFactory.iconOffset(
-                        arrayOf(
-                            0f,
-                            ICON_OFFSET_Y
-                        )
-                    ),
-                    PropertyFactory.iconAllowOverlap(true),
-                    PropertyFactory.iconIgnorePlacement(true)
-                )
-                setFilter(
-                    Expression.neq(Expression.get("cluster"), true)
-                )
-            }
-
-        binding.map.getMapAsync { map ->
-            map.getStyle { style ->
-                style.addSource(eventsSource)
-
-                style.addLayer(eventsClusterBackgroundLayer)
-                style.addLayer(eventsClusterCountLayer)
-                style.addLayer(eventsLayer)
-                style.addLayer(eventsCategoryIconsLayer)
-            }
-        }
-
-        this.eventsSource = eventsSource
-    }
 
     private fun initExchangesMap() {
         val exchangesSource = GeoJsonSource(
