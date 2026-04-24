@@ -97,4 +97,5 @@
     <string name="click_to_see_your_profile" tools:ignore="MissingTranslation">Click to see your profile</string>
     <string name="delete" tools:ignore="MissingTranslation">Delete</string>
     <string name="upcoming_events" tools:ignore="MissingTranslation">Upcoming events</string>
+    <string name="show_debug_info" tools:ignore="MissingTranslation">Show debug info</string>
 </resources>

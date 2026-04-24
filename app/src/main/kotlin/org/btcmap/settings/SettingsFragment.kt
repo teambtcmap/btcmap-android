@@ -59,6 +59,11 @@ class SettingsFragment : Fragment() {
             refreshAllColors()
         }
 
+        binding.showDebugInfo.isChecked = prefs.showDebugInfo
+        binding.showDebugInfo.setOnCheckedChangeListener { _, isChecked ->
+            prefs.showDebugInfo = isChecked
+        }
+
         initMarkerBackgroundButton()
         initMarkerIconButton()
 

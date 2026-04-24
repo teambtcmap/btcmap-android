@@ -5,6 +5,7 @@ import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import androidx.core.content.edit
+import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.maplibre.android.geometry.LatLngBounds
 import androidx.core.graphics.toColorInt
@@ -366,3 +367,11 @@ var SharedPreferences.authToken: String?
 
 val SharedPreferences.authorized: Boolean
     get() = !getString(KEY_AUTH_TOKEN, null).isNullOrBlank()
+
+private const val KEY_SHOW_DEBUG_INFO = "show_debug_info"
+
+var SharedPreferences.showDebugInfo: Boolean
+    get() = getBoolean(KEY_SHOW_DEBUG_INFO, BuildConfig.DEBUG)
+    set(value) {
+        edit { putBoolean(KEY_SHOW_DEBUG_INFO, value) }
+    }
