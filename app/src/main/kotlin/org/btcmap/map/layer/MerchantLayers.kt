@@ -12,6 +12,8 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 
+const val MERCHANT_MARKER_LAYER_ID = "merchant_marker"
+
 fun createMerchantLayers(
     markerBackgroundColor: Int,
     markerBadgeBackgroundColor: Int,
@@ -59,7 +61,7 @@ fun createMerchantLayers(
         }
 
     val markerLayer =
-        SymbolLayer("merchant_marker", merchantsSource.id).apply {
+        SymbolLayer(MERCHANT_MARKER_LAYER_ID, merchantsSource.id).apply {
             setProperties(
                 PropertyFactory.iconImage(
                     Expression.switchCase(

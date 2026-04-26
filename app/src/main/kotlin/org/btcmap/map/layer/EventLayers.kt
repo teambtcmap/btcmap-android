@@ -11,6 +11,8 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 
+const val EVENT_MARKER_LAYER_ID = "event_marker"
+
 fun createEventLayers(
     markerBackgroundColor: Int,
     usingOpenFreeMap: Boolean,
@@ -53,7 +55,7 @@ fun createEventLayers(
         }
 
     val eventMarker =
-        SymbolLayer("event_marker", source.id).apply {
+        SymbolLayer(EVENT_MARKER_LAYER_ID, source.id).apply {
             setProperties(
                 PropertyFactory.iconImage("btcmap-marker"),
                 PropertyFactory.iconAnchor(Expression.literal("bottom")),

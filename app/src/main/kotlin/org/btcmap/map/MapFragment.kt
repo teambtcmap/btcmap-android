@@ -81,6 +81,9 @@ import org.btcmap.db
 import org.btcmap.sync
 import org.btcmap.db.table.place.Marker
 import org.btcmap.db.table.event.Event
+import org.btcmap.map.layer.EVENT_MARKER_LAYER_ID
+import org.btcmap.map.layer.EXCHANGE_MARKER_LAYER_ID
+import org.btcmap.map.layer.MERCHANT_MARKER_LAYER_ID
 import org.btcmap.map.layer.createEventLayers
 import org.btcmap.map.layer.createExchangeLayers
 import org.btcmap.map.layer.createMerchantLayers
@@ -530,12 +533,9 @@ class MapFragment : Fragment() {
 
     private fun MapLibreMap.addMarkerClickListener() {
         val layerIds = listOf(
-            LAYER_UNCLUSTERED_MERCHANTS,
-            LAYER_MERCHANTS_CATEGORY_ICONS,
-            LAYER_EXCHANGES,
-            LAYER_EXCHANGES_CATEGORY_ICONS,
-            LAYER_EVENTS,
-            LAYER_EVENTS_CATEGORY_ICONS
+            MERCHANT_MARKER_LAYER_ID,
+            EXCHANGE_MARKER_LAYER_ID,
+            EVENT_MARKER_LAYER_ID,
         )
 
         addOnMapClickListener { point ->
@@ -975,13 +975,7 @@ class MapFragment : Fragment() {
             maximumFractionDigits = 1
         }
 
-        const val LAYER_UNCLUSTERED_MERCHANTS = "unclusteredMerchants"
-        const val LAYER_MERCHANTS_CATEGORY_ICONS = "unclusteredMerchantsCategoryIcons"
-        const val LAYER_EXCHANGES = "exchanges"
-        const val LAYER_EXCHANGES_CATEGORY_ICONS = "exchangesCategoryIcons"
-        const val LAYER_EVENTS = "events"
-        const val LAYER_EVENTS_CATEGORY_ICONS = "eventsCategoryIcons"
-        val EMPTY_GEOJSON = """{"type":"FeatureCollection","features":[]}"""
+        const val EMPTY_GEOJSON = """{"type":"FeatureCollection","features":[]}"""
         const val ICON_OFFSET_Y = -29f
     }
 

@@ -12,6 +12,8 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 
+const val EXCHANGE_MARKER_LAYER_ID = "exchange_marker"
+
 fun createExchangeLayers(
     markerBackgroundColor: Int,
     markerBadgeBackgroundColor: Int,
@@ -52,7 +54,7 @@ fun createExchangeLayers(
         }
 
     val marker =
-        SymbolLayer("exchange_marker", source.id).apply {
+        SymbolLayer(EXCHANGE_MARKER_LAYER_ID, source.id).apply {
             setProperties(
                 PropertyFactory.iconImage("btcmap-marker"),
                 PropertyFactory.iconAnchor(Expression.literal("bottom")),
