@@ -179,7 +179,30 @@ class MapFragment : Fragment() {
         return binding.root
     }
 
-    private fun initSearchBar(binding: MapFragmentBinding) {
+    private suspend fun selectPlace(place: Place?) {
+        if (place != null) {
+            getPlaceDetailsToolbar()
+            placeFragment.setPlace(place)
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+        } else {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
+    }
+
+    var statusBarController: MapStatusBarController? = null
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.elementDetails)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehavior.addSlideCallback()
+
+        statusBarController = MapStatusBarController(
+            conf = resources.configuration,
+            insetsController = insetsController!!,
+            bottomSheetBehavior = bottomSheetBehavior
+        )
+        statusBarController?.onViewCreated()
+
         binding.searchBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.add_place -> {
@@ -199,50 +222,8 @@ class MapFragment : Fragment() {
 
             true
         }
-    }
 
-    private suspend fun selectPlace(place: Place?) {
-        if (place != null) {
-            getPlaceDetailsToolbar()
-            placeFragment.setPlace(place)
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-        } else {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-        }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val merchantLayers = createMerchantLayers(
-            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
-            markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
-            markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
-            usingOpenFreeMap = usingOpenFreeMap(),
-        )
-        val eventLayers = createEventLayers(
-            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
-            usingOpenFreeMap = usingOpenFreeMap(),
-        )
-        val exchangeLayers = createExchangeLayers(
-            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
-            markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
-            markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
-            usingOpenFreeMap = usingOpenFreeMap(),
-        )
-        merchantsSource = merchantLayers.first
-        eventsSource = eventLayers.first
-        exchangesSource = exchangeLayers.first
-        binding.map.getMapAsync { map ->
-            map.getStyle { style ->
-                style.addSource(merchantLayers.first)
-                merchantLayers.second.forEach { style.addLayer(it) }
-                style.addSource(eventLayers.first)
-                eventLayers.second.forEach { style.addLayer(it) }
-                style.addSource(exchangeLayers.first)
-                exchangeLayers.second.forEach { style.addLayer(it) }
-            }
-        }
-
-        initSearchBar(binding)
+        addMapDatSourceAndLayersAsync()
 
         launchUpdateChecker()
 
@@ -306,10 +287,6 @@ class MapFragment : Fragment() {
                 init(requireContext(), style)
             }
         }
-
-        bottomSheetBehavior = BottomSheetBehavior.from(binding.elementDetails)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-        bottomSheetBehavior.addSlideCallback()
 
         viewLifecycleOwner.lifecycleScope.launch {
             val elementDetailsToolbar = getPlaceDetailsToolbar() ?: return@launch
@@ -485,16 +462,44 @@ class MapFragment : Fragment() {
                 }
             }
         }
+    }
 
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            val merchants =
-//                withContext(Dispatchers.IO) { PlaceQueries.selectMerchants(db).toGeoJson() }
-//            merchantsSource.setGeoJson(merchants)
-//        }
+    private fun addMapDatSourceAndLayersAsync() {
+        val merchantLayers = createMerchantLayers(
+            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
+            markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
+            markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
+            usingOpenFreeMap = usingOpenFreeMap(),
+        )
+        val eventLayers = createEventLayers(
+            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
+            usingOpenFreeMap = usingOpenFreeMap(),
+        )
+        val exchangeLayers = createExchangeLayers(
+            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
+            markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
+            markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
+            usingOpenFreeMap = usingOpenFreeMap(),
+        )
+        merchantsSource = merchantLayers.first
+        eventsSource = eventLayers.first
+        exchangesSource = exchangeLayers.first
+        binding.map.getMapAsync { map ->
+            map.getStyle { style ->
+                style.addSource(merchantLayers.first)
+                merchantLayers.second.forEach { style.addLayer(it) }
+                style.addSource(eventLayers.first)
+                eventLayers.second.forEach { style.addLayer(it) }
+                style.addSource(exchangeLayers.first)
+                exchangeLayers.second.forEach { style.addLayer(it) }
+            }
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        statusBarController?.onDestroyView()
+        statusBarController = null
         _binding = null
     }
 
@@ -581,10 +586,6 @@ class MapFragment : Fragment() {
     private fun BottomSheetBehavior<*>.addSlideCallback() {
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
-                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    styleStatusBar()
-                }
-
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                     viewLifecycleOwner.lifecycleScope.launch { selectPlace(null) }
                 }
@@ -592,7 +593,6 @@ class MapFragment : Fragment() {
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 placeFragment.onSlide(slideOffset)
-                styleStatusBar()
             }
         })
     }
@@ -613,42 +613,6 @@ class MapFragment : Fragment() {
         }
 
         return placeFragment.requireView().findViewById(R.id.toolbar)!!
-    }
-
-    override fun onResume() {
-        super.onResume()
-        styleStatusBar()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        restoreDefaultStatusBar()
-    }
-
-    fun styleStatusBar() {
-        val nightMode =
-            requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-
-        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
-            insetsController?.isAppearanceLightStatusBars = !nightMode
-        } else {
-            when (prefs.mapStyle) {
-                MapStyle.Auto -> {
-                    insetsController?.isAppearanceLightStatusBars = !nightMode
-                }
-
-                MapStyle.Dark,
-                MapStyle.CartoDarkMatter -> insetsController?.isAppearanceLightStatusBars = false
-
-                else -> insetsController?.isAppearanceLightStatusBars = true
-            }
-        }
-    }
-
-    fun restoreDefaultStatusBar() {
-        val nightMode =
-            requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-        insetsController?.isAppearanceLightStatusBars = !nightMode
     }
 
     private fun List<Marker>.toGeoJson(): String {
