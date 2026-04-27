@@ -288,6 +288,126 @@ class PlaceQueriesTest {
         Assert.assertEquals(2, results.size)
     }
 
+    @Test
+    fun selectMerchantsByBounds_withMinVerifiedAt_returnsOnlyRecentMerchants() {
+        val db = createDatabase()
+        val now = ZonedDateTime.now()
+        db.place.insert(listOf(createPlace(
+            id = 1L,
+            icon = "restaurant",
+            verifiedAt = now.minusYears(2)
+        )))
+        db.place.insert(listOf(createPlace(
+            id = 2L,
+            icon = "coffee",
+            verifiedAt = now.minusYears(4)
+        )))
+        db.place.insert(listOf(createPlace(
+            id = 3L,
+            icon = "bank",
+            verifiedAt = now.minusYears(1)
+        )))
+
+        val results = db.place.selectMerchantsByBounds(
+            minLat = 40.0,
+            maxLat = 41.0,
+            minLon = -75.0,
+            maxLon = -73.0,
+            minVerifiedAt = now.minusYears(3)
+        )
+
+        Assert.assertEquals(2, results.size)
+        Assert.assertTrue(results.any { it.id == 1L })
+        Assert.assertTrue(results.any { it.id == 3L })
+        Assert.assertFalse(results.any { it.id == 2L })
+    }
+
+    @Test
+    fun selectMerchantsByBounds_withMinVerifiedAtNull_returnsAllMerchants() {
+        val db = createDatabase()
+        val now = ZonedDateTime.now()
+        db.place.insert(listOf(createPlace(
+            id = 1L,
+            icon = "restaurant",
+            verifiedAt = now.minusYears(5)
+        )))
+        db.place.insert(listOf(createPlace(
+            id = 2L,
+            icon = "coffee",
+            verifiedAt = now.minusYears(1)
+        )))
+
+        val results = db.place.selectMerchantsByBounds(
+            minLat = 40.0,
+            maxLat = 41.0,
+            minLon = -75.0,
+            maxLon = -73.0,
+            minVerifiedAt = null
+        )
+
+        Assert.assertEquals(2, results.size)
+    }
+
+    @Test
+    fun selectMerchantsByBounds_withMinVerifiedAt_excludesUnverified() {
+        val db = createDatabase()
+        val now = ZonedDateTime.now()
+        db.place.insert(listOf(createPlace(
+            id = 1L,
+            icon = "restaurant",
+            verifiedAt = now.minusYears(1)
+        )))
+        db.place.insert(listOf(createPlace(
+            id = 2L,
+            icon = "coffee",
+            verifiedAt = null
+        )))
+        db.place.insert(listOf(createPlace(
+            id = 3L,
+            icon = "bank",
+            verifiedAt = now.minusYears(2)
+        )))
+
+        val results = db.place.selectMerchantsByBounds(
+            minLat = 40.0,
+            maxLat = 41.0,
+            minLon = -75.0,
+            maxLon = -73.0,
+            minVerifiedAt = now.minusYears(1).minusDays(1)
+        )
+
+        Assert.assertEquals(1, results.size)
+        Assert.assertTrue(results.any { it.id == 1L })
+        Assert.assertFalse(results.any { it.id == 2L })
+        Assert.assertFalse(results.any { it.id == 3L })
+    }
+
+    @Test
+    fun selectMerchantsByBounds_withMinVerifiedAt_returnsEmptyWhenAllExcluded() {
+        val db = createDatabase()
+        val now = ZonedDateTime.now()
+        db.place.insert(listOf(createPlace(
+            id = 1L,
+            icon = "restaurant",
+            verifiedAt = now.minusYears(5)
+        )))
+        db.place.insert(listOf(createPlace(
+            id = 2L,
+            icon = "coffee",
+            verifiedAt = now.minusYears(4)
+        )))
+
+        val results = db.place.selectMerchantsByBounds(
+            minLat = 40.0,
+            maxLat = 41.0,
+            minLon = -75.0,
+            maxLon = -73.0,
+            minVerifiedAt = now.minusYears(1)
+        )
+
+        Assert.assertEquals(0, results.size)
+    }
+
     private fun createPlace(
         id: Long,
         name: String? = "Test Place",
@@ -295,6 +415,7 @@ class PlaceQueriesTest {
         updatedAt: ZonedDateTime = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
         lat: Double = 40.7128,
         lon: Double = -74.0060,
+        verifiedAt: ZonedDateTime? = null,
     ): Place {
         return Place(
             id = id,
@@ -305,7 +426,7 @@ class PlaceQueriesTest {
             icon = icon,
             name = name,
             localizedName = null,
-            verifiedAt = null,
+            verifiedAt = verifiedAt,
             address = null,
             openingHours = null,
             localizedOpeningHours = null,

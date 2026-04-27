@@ -52,6 +52,7 @@ class SettingsFragment : Fragment() {
         }
 
         initMapStyleButton()
+        initVerifiedFilterButton()
 
         binding.useAdaptiveColors.isChecked = prefs.useAdaptiveColors
         binding.useAdaptiveColors.setOnCheckedChangeListener { _, isChecked ->
@@ -229,6 +230,39 @@ class SettingsFragment : Fragment() {
                 invoke(dialog.findViewById(R.id.bright), MapStyle.Bright)
                 invoke(dialog.findViewById(R.id.dark), MapStyle.Dark)
                 invoke(dialog.findViewById(R.id.carto_dark_matter), MapStyle.CartoDarkMatter)
+            }
+        }
+    }
+
+    private fun initVerifiedFilterButton() {
+        binding.currentVerifiedFilter.text = prefs.verifiedFilter.name(requireContext())
+
+        binding.verifiedFilterButton.setOnClickListener {
+            val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.verified_filter)
+                .setView(R.layout.verified_filter_dialog).show()
+
+            val setupFilter = fun RadioButton?.(filter: VerifiedFilter) {
+                if (this == null) return
+
+                text = filter.name(requireContext())
+                isChecked = prefs.verifiedFilter == filter
+
+                setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) {
+                        prefs.verifiedFilter = filter
+                        binding.currentVerifiedFilter.text = text
+                        dialog.dismiss()
+                    }
+                }
+            }
+
+            setupFilter.apply {
+                invoke(dialog.findViewById(R.id.no_filter), VerifiedFilter.NO_FILTER)
+                invoke(dialog.findViewById(R.id.one_year), VerifiedFilter.ONE_YEAR)
+                invoke(dialog.findViewById(R.id.two_years), VerifiedFilter.TWO_YEARS)
+                invoke(dialog.findViewById(R.id.three_years), VerifiedFilter.THREE_YEARS)
+                invoke(dialog.findViewById(R.id.four_years), VerifiedFilter.FOUR_YEARS)
+                invoke(dialog.findViewById(R.id.five_years), VerifiedFilter.FIVE_YEARS)
             }
         }
     }

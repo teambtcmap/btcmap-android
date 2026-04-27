@@ -91,7 +91,9 @@ import org.btcmap.search.SearchAdapterItem
 import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.boostedMarkerBackgroundColor
+import org.btcmap.settings.verifiedFilter
 import java.text.NumberFormat
+import java.time.ZonedDateTime
 
 class MapFragment : Fragment() {
 
@@ -195,7 +197,7 @@ class MapFragment : Fragment() {
     var statusBarController: MapStatusBarController? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        bottomSheetBehavior = BottomSheetBehavior.from(binding.elementDetails)
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.placeBottomSheet)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         bottomSheetBehavior.addSlideCallback()
 
@@ -769,6 +771,7 @@ class MapFragment : Fragment() {
                             expandedBounds.latitudeNorth,
                             expandedBounds.longitudeWest,
                             expandedBounds.longitudeEast,
+                            minVerifiedAt = computeMinVerifiedAt(),
                         )
                     }
                     lastDbCallTimeMs = System.currentTimeMillis() - startTime
@@ -1126,6 +1129,11 @@ class MapFragment : Fragment() {
 
             WindowInsetsCompat.CONSUMED
         }
+    }
+
+    private fun computeMinVerifiedAt(): ZonedDateTime? {
+        val years = prefs.verifiedFilter.years ?: return null
+        return ZonedDateTime.now().minusYears(years.toLong())
     }
 
     fun dpToPx(dp: Int): Int {

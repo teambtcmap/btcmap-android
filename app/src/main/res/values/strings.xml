@@ -98,4 +98,11 @@
     <string name="delete" tools:ignore="MissingTranslation">Delete</string>
     <string name="upcoming_events" tools:ignore="MissingTranslation">Upcoming events</string>
     <string name="show_debug_info" tools:ignore="MissingTranslation">Show debug info</string>
+    <string name="verified_filter" tools:ignore="MissingTranslation">Hide outdated places</string>
+    <string name="verified_filter_no_filter" tools:ignore="MissingTranslation">Show all</string>
+    <string name="verified_filter_1_year" tools:ignore="MissingTranslation">Verified within 1 year</string>
+    <string name="verified_filter_2_years" tools:ignore="MissingTranslation">Verified within 2 years</string>
+    <string name="verified_filter_3_years" tools:ignore="MissingTranslation">Verified within 3 years</string>
+    <string name="verified_filter_4_years" tools:ignore="MissingTranslation">Verified within 4 years</string>
+    <string name="verified_filter_5_years" tools:ignore="MissingTranslation">Verified within 5 years</string>
 </resources>
