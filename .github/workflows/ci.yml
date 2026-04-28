@@ -40,6 +40,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: btcmap-preview
-          path: app/build/outputs/apk/release/btcmap-*.apk
-          retention-days: 30
+          name: preview.apk
+          path: app/build/outputs/apk/release/btcmap-*-universal.apk
