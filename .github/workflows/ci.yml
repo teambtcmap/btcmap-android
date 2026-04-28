@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - 'master'
+    paths-ignore:
+      - '**.md'
+      - '.github/workflows/ci.yml'
 
 jobs:
   build:
@@ -34,11 +37,9 @@ jobs:
       - name: Assemble APKs
         run: ./gradlew assembleRelease
 
-      - name: Create preview release
-        uses: softprops/action-gh-release@v2
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          token: "${{ secrets.GITHUB_TOKEN }}"
-          tag_name: 'preview'
-          prerelease: true
-          name: 'preview'
-          files: app/build/outputs/apk/release/btcmap-*.apk
+          name: btcmap-preview
+          path: app/build/outputs/apk/release/btcmap-*.apk
+          retention-days: 30
