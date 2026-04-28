@@ -376,57 +376,23 @@ var SharedPreferences.showDebugInfo: Boolean
         edit { putBoolean(KEY_SHOW_DEBUG_INFO, value) }
     }
 
-enum class VerifiedFilter(val years: Int?) {
-    NO_FILTER(null),
-    ONE_YEAR(1),
-    TWO_YEARS(2),
-    THREE_YEARS(3),
-    FOUR_YEARS(4),
-    FIVE_YEARS(5),
-}
+private const val KEY_VERIFIED_FILTER_YEARS = "verified_filter_years"
 
-private const val KEY_VERIFIED_FILTER = "verified_filter"
-
-var SharedPreferences.verifiedFilter: VerifiedFilter
+var SharedPreferences.verifiedFilterYears: Int
     get() {
-        return verifiedFilterFromPrefValue(getString(KEY_VERIFIED_FILTER, "3") ?: "3")
+        return getInt(KEY_VERIFIED_FILTER_YEARS, 3)
     }
     set(value) {
         edit {
-            putString(KEY_VERIFIED_FILTER, value.toPrefValue())
+            putInt(KEY_VERIFIED_FILTER_YEARS, value)
         }
     }
 
-private fun verifiedFilterFromPrefValue(pref: String): VerifiedFilter {
-    return when (pref) {
-        "no_filter" -> VerifiedFilter.NO_FILTER
-        "1" -> VerifiedFilter.ONE_YEAR
-        "2" -> VerifiedFilter.TWO_YEARS
-        "3" -> VerifiedFilter.THREE_YEARS
-        "4" -> VerifiedFilter.FOUR_YEARS
-        "5" -> VerifiedFilter.FIVE_YEARS
-        else -> VerifiedFilter.THREE_YEARS
-    }
-}
-
-fun VerifiedFilter.toPrefValue(): String {
+fun Int.toVerifiedFilterYears(context: Context): String {
     return when (this) {
-        VerifiedFilter.NO_FILTER -> "no_filter"
-        VerifiedFilter.ONE_YEAR -> "1"
-        VerifiedFilter.TWO_YEARS -> "2"
-        VerifiedFilter.THREE_YEARS -> "3"
-        VerifiedFilter.FOUR_YEARS -> "4"
-        VerifiedFilter.FIVE_YEARS -> "5"
-    }
-}
-
-fun VerifiedFilter.name(context: Context): String {
-    return when (this) {
-        VerifiedFilter.NO_FILTER -> context.getString(R.string.verified_filter_no_filter)
-        VerifiedFilter.ONE_YEAR -> context.getString(R.string.verified_filter_1_year)
-        VerifiedFilter.TWO_YEARS -> context.getString(R.string.verified_filter_2_years)
-        VerifiedFilter.THREE_YEARS -> context.getString(R.string.verified_filter_3_years)
-        VerifiedFilter.FOUR_YEARS -> context.getString(R.string.verified_filter_4_years)
-        VerifiedFilter.FIVE_YEARS -> context.getString(R.string.verified_filter_5_years)
+        1 -> context.getString(R.string.verified_filter_1_year)
+        2 -> context.getString(R.string.verified_filter_2_years)
+        3 -> context.getString(R.string.verified_filter_3_years)
+        else -> ""
     }
 }

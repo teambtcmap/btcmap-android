@@ -9,14 +9,6 @@
     android:paddingBottom="8dp">
 
     <RadioButton
-        android:id="@+id/no_filter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:text="@string/verified_filter_no_filter" />
-
-    <RadioButton
         android:id="@+id/one_year"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,21 +31,5 @@
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
         android:text="@string/verified_filter_3_years" />
-
-    <RadioButton
-        android:id="@+id/four_years"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:text="@string/verified_filter_4_years" />
-
-    <RadioButton
-        android:id="@+id/five_years"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:text="@string/verified_filter_5_years" />
 
 </RadioGroup>

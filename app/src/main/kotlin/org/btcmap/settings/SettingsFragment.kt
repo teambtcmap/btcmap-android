@@ -235,21 +235,23 @@ class SettingsFragment : Fragment() {
     }
 
     private fun initVerifiedFilterButton() {
-        binding.currentVerifiedFilter.text = prefs.verifiedFilter.name(requireContext())
+        binding.currentVerifiedFilter.text =
+            prefs.verifiedFilterYears.toVerifiedFilterYears(requireContext())
 
         binding.verifiedFilterButton.setOnClickListener {
-            val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.verified_filter)
-                .setView(R.layout.verified_filter_dialog).show()
+            val dialog =
+                MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.verified_filter)
+                    .setView(R.layout.verified_filter_dialog).show()
 
-            val setupFilter = fun RadioButton?.(filter: VerifiedFilter) {
+            val setupFilter = fun RadioButton?.(filter: Int) {
                 if (this == null) return
 
-                text = filter.name(requireContext())
-                isChecked = prefs.verifiedFilter == filter
+                text = filter.toVerifiedFilterYears(requireContext())
+                isChecked = prefs.verifiedFilterYears == filter
 
                 setOnCheckedChangeListener { _, isChecked ->
                     if (isChecked) {
-                        prefs.verifiedFilter = filter
+                        prefs.verifiedFilterYears = filter
                         binding.currentVerifiedFilter.text = text
                         dialog.dismiss()
                     }
@@ -257,12 +259,9 @@ class SettingsFragment : Fragment() {
             }
 
             setupFilter.apply {
-                invoke(dialog.findViewById(R.id.no_filter), VerifiedFilter.NO_FILTER)
-                invoke(dialog.findViewById(R.id.one_year), VerifiedFilter.ONE_YEAR)
-                invoke(dialog.findViewById(R.id.two_years), VerifiedFilter.TWO_YEARS)
-                invoke(dialog.findViewById(R.id.three_years), VerifiedFilter.THREE_YEARS)
-                invoke(dialog.findViewById(R.id.four_years), VerifiedFilter.FOUR_YEARS)
-                invoke(dialog.findViewById(R.id.five_years), VerifiedFilter.FIVE_YEARS)
+                invoke(dialog.findViewById(R.id.one_year), 1)
+                invoke(dialog.findViewById(R.id.two_years), 2)
+                invoke(dialog.findViewById(R.id.three_years), 3)
             }
         }
     }

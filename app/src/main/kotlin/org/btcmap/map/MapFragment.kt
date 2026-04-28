@@ -91,7 +91,7 @@ import org.btcmap.search.SearchAdapterItem
 import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.boostedMarkerBackgroundColor
-import org.btcmap.settings.verifiedFilter
+import org.btcmap.settings.verifiedFilterYears
 import java.text.NumberFormat
 import java.time.ZonedDateTime
 
@@ -771,7 +771,8 @@ class MapFragment : Fragment() {
                             expandedBounds.latitudeNorth,
                             expandedBounds.longitudeWest,
                             expandedBounds.longitudeEast,
-                            minVerifiedAt = computeMinVerifiedAt(),
+                            minVerifiedAt = ZonedDateTime.now()
+                                .minusYears(prefs.verifiedFilterYears.toLong()),
                         )
                     }
                     lastDbCallTimeMs = System.currentTimeMillis() - startTime
@@ -1129,11 +1130,6 @@ class MapFragment : Fragment() {
 
             WindowInsetsCompat.CONSUMED
         }
-    }
-
-    private fun computeMinVerifiedAt(): ZonedDateTime? {
-        val years = prefs.verifiedFilter.years ?: return null
-        return ZonedDateTime.now().minusYears(years.toLong())
     }
 
     fun dpToPx(dp: Int): Int {
