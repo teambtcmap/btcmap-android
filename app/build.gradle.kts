@@ -34,10 +34,40 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
-    getDefaultProguardFile("proguard-android-optimize.txt"),
-    "proguard-rules.pro",
-)
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
             signingConfig = signingConfigs.getByName("debug")
+        }
+    }
+
+    androidComponents.onVariants { variant ->
+        println("variant: ${variant.name}")
+
+        if (variant.name == "debug") {
+            for (output in variant.outputs) {
+                if (output.outputFileName.get().contains("universal")) {
+                    output.outputFileName.set("btcmap-debug.apk")
+                } else {
+                    output.enabled.set(false)
+                }
+            }
+        }
+
+        if (variant.name == "release") {
+            for (output in variant.outputs) {
+                if (output.outputFileName.get().contains("universal")) {
+                    output.outputFileName.set("btcmap-${output.versionName.get()}-universal.apk")
+                }
+
+                if (output.outputFileName.get().contains("arm64-v8a")) {
+                    output.outputFileName.set("btcmap-${output.versionName.get()}-arm.apk")
+                }
+
+                if (output.outputFileName.get().contains("x86_64")) {
+                    output.outputFileName.set("btcmap-${output.versionName.get()}-x86.apk")
+                }
+            }
         }
     }
 

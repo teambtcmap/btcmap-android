@@ -2,7 +2,7 @@
 ## Foundation
 # Android Gradle Plugin
 # https://developer.android.com/build/releases/gradle-plugin
-agp = "9.1.1"
+agp = "9.2.0"
 # This project is Kotlin-only
 # https://github.com/JetBrains/kotlin/releases
 kotlin = "2.3.20"
