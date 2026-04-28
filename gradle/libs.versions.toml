@@ -5,7 +5,7 @@
 agp = "9.2.0"
 # This project is Kotlin-only
 # https://github.com/JetBrains/kotlin/releases
-kotlin = "2.3.20"
+kotlin = "2.3.21"
 # Enables suspending functions
 # https://github.com/Kotlin/kotlinx.coroutines/releases
 coroutines = "1.10.2"
@@ -20,13 +20,13 @@ androidx-fragment = "1.8.9"
 
 # Material design components
 # https://github.com/material-components/material-components-android/releases
-material = "1.14.0-alpha10"
+material = "1.14.0-beta01"
 # Modern HTTP client
 # https://github.com/square/okhttp/blob/master/CHANGELOG.md
 okhttp = "5.3.2"
 # Map widget with vector support
 # https://github.com/maplibre/maplibre-native/releases
-maplibre = "13.0.1"
+maplibre = "13.0.2"
 # Used for displaying LN invoices
 # https://github.com/androidmads/QRGenerator/releases
 qrgenerator = "1.0.5"
@@ -38,14 +38,16 @@ colorpicker = "1.2.0"
 coil = "3.4.0"
 # JSON parsing
 # https://github.com/google/gson/releases
-gson = "2.13.2"
+gson = "2.14.0"
+# cron parser, used to infer future event dates
+# https://github.com/jmrozanec/cron-utils/releases
+cronutils = "9.2.1"
 # https://developer.android.com/jetpack/androidx/releases/test
 android-test-junit = "1.3.0"
 # https://developer.android.com/jetpack/androidx/releases/test
 android-test-runner = "1.7.0"
 # https://junit.org/junit4/
 junit = "4.13.2"
-cronutils = "9.2.0"
 
 [libraries]
 kotlin = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
