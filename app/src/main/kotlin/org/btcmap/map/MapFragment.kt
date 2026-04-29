@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -246,11 +245,6 @@ class MapFragment : Fragment() {
                 viewLifecycleOwner.lifecycleScope.launch {
                     loadAreas(center.latitude, center.longitude)
                 }
-                when (filter) {
-                    Filter.MERCHANTS -> showMerchants()
-                    Filter.EVENTS -> showEvents()
-                    Filter.EXCHANGES -> showExchanges()
-                }
             }
 
             it.setStyle(Style.Builder().fromUri(prefs.mapStyle.uri(requireContext())))
@@ -344,7 +338,6 @@ class MapFragment : Fragment() {
                 binding.sync.isVisible = true
 
                 val importResult = BundledPlaces.import(requireContext(), db())
-                Log.d("import", importResult.toString())
 
                 if (importResult.placesImported > 0) {
                     setFilter(filter)
@@ -578,7 +571,7 @@ class MapFragment : Fragment() {
                     return@addOnMapClickListener true
                 }
             } catch (e: Exception) {
-                Log.e(null, null, e)
+                e.printStackTrace()
             }
 
             false
@@ -711,7 +704,6 @@ class MapFragment : Fragment() {
     private var filter = Filter.MERCHANTS
 
     private fun setFilter(filter: Filter) {
-        Log.d("MapFragment", "setFilter called with: $filter")
         this.filter = filter
 
         binding.showMerchants.isSelected = filter == Filter.MERCHANTS
@@ -725,7 +717,6 @@ class MapFragment : Fragment() {
         lastDbCallTimeMs = 0L
 
         if (initialLoadInProgress) {
-            Log.d("MapFragment", "setFilter: skipping show due to initial load")
             return
         }
 
@@ -756,13 +747,8 @@ class MapFragment : Fragment() {
         binding.map.getMapAsync { map ->
             val bounds = map.projection.visibleRegion.latLngBounds
             val expandedBounds = expandBounds(bounds, CLUSTERING_SCALE_FACTOR)
-            Log.d(
-                "MapFragment",
-                "showMerchants: bounds=$bounds, expanded=$expandedBounds, cacheBounds=${merchantsCache.bounds}"
-            )
             viewLifecycleOwner.lifecycleScope.launch {
                 if (!merchantsCache.contains(expandedBounds)) {
-                    Log.d("MapFragment", "showMerchants: cache miss, fetching")
                     dbCallCount++
                     val startTime = System.currentTimeMillis()
                     val newMerchants = withContext(Dispatchers.IO) {
@@ -776,13 +762,7 @@ class MapFragment : Fragment() {
                         )
                     }
                     lastDbCallTimeMs = System.currentTimeMillis() - startTime
-                    Log.d(
-                        "MapFragment",
-                        "showMerchants: fetched ${newMerchants.size} merchants in ${lastDbCallTimeMs}ms"
-                    )
                     merchantsCache = merchantsCache.add(newMerchants, expandedBounds)
-                } else {
-                    Log.d("MapFragment", "showMerchants: cache hit")
                 }
                 val geoJson = merchantsCache.features.toGeoJson()
                 if (geoJson != lastMerchantsGeoJson) {
@@ -887,7 +867,6 @@ class MapFragment : Fragment() {
         } else {
             "no bounds"
         }
-        Log.d("MapFragment", "updateDebugStats: filter=$filter, cacheSize=$cacheSize")
         if (prefs.showDebugInfo) {
             binding.debugStats.apply {
                 text =
