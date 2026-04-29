@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -118,7 +119,6 @@ class MapFragment : Fragment() {
         }
     }
 
-    private var initialLoadInProgress = false
     private var dbCallCount = 0
     private var lastDbCallTimeMs = 0L
     private var lastMerchantsGeoJson: String? = null
@@ -237,9 +237,6 @@ class MapFragment : Fragment() {
 
         binding.map.getMapAsync {
             it.addOnCameraIdleListener {
-                if (initialLoadInProgress) {
-                    initialLoadInProgress = false
-                }
                 prefs.mapViewport = it.projection.visibleRegion.latLngBounds
                 val center = it.projection.visibleRegion.latLngBounds.center
                 viewLifecycleOwner.lifecycleScope.launch {
@@ -337,21 +334,28 @@ class MapFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.sync.isVisible = true
 
+                Log.d("map_fragment", "starting sync")
                 val importResult = BundledPlaces.import(requireContext(), db())
 
+                Log.d("map_fragment", "imported ${importResult.placesImported} places from assets")
                 if (importResult.placesImported > 0) {
                     setFilter(filter)
                 }
 
-                if (sync().syncPlaces().rowsAffected > 0) {
+                Log.d("map_fragment", "fetching new and updated places")
+                val syncPlacesRes = sync().syncPlaces()
+                Log.d("map_fragment", "got ${syncPlacesRes.rowsAffected} new and updated places")
+                if (syncPlacesRes.rowsAffected > 0) {
                     setFilter(filter)
                 }
 
-                if (sync().syncEvents().rowsAffected > 0) {
+                if (sync().syncEvents().rowsAffected > 0 && filter == Filter.EVENTS) {
                     setFilter(filter)
                 }
 
-                if (sync().syncComments().rowsAffected > 0) {
+                val syncCommentsRes = sync().syncComments()
+                Log.d("map_fragment", "got ${syncCommentsRes.rowsAffected} new and updated comments")
+                if (syncCommentsRes.rowsAffected > 0 && (filter == Filter.MERCHANTS || filter == Filter.EXCHANGES)) {
                     setFilter(filter)
                 }
 
@@ -362,8 +366,6 @@ class MapFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner, backPressedCallback
         )
-
-        initialLoadInProgress = true
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -715,10 +717,6 @@ class MapFragment : Fragment() {
         eventsCache = EventCache()
         dbCallCount = 0
         lastDbCallTimeMs = 0L
-
-        if (initialLoadInProgress) {
-            return
-        }
 
         when (filter) {
             Filter.MERCHANTS -> showMerchants()

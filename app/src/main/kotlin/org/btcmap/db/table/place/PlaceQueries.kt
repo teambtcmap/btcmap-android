@@ -110,7 +110,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             append("$ICON <> 'local_atm' AND $ICON <> 'currency_exchange'")
             append(" AND $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4")
             if (minVerifiedAt != null) {
-                append(" AND $VERIFIED_AT >= ?5")
+                append("AND ($BUNDLED = 1 OR $VERIFIED_AT >= ?5)")
             }
         }
         conn.prepare(
