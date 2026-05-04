@@ -22,7 +22,6 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
@@ -100,18 +99,7 @@ class MapFragment : Fragment() {
     private var _binding: MapFragmentBinding? = null
     private val binding get() = _binding!!
 
-    private val placeFragment by lazy {
-        childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment
-    }
-
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
-
-    private val insetsController: WindowInsetsControllerCompat? by lazy {
-        WindowCompat.getInsetsController(
-            requireActivity().window,
-            requireActivity().window.decorView
-        )
-    }
 
     private var backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -184,6 +172,8 @@ class MapFragment : Fragment() {
     }
 
     private suspend fun selectPlace(place: Place?) {
+        val placeFragment =
+            childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment
         if (place != null) {
             getPlaceDetailsToolbar()
             placeFragment.setPlace(place)
@@ -202,7 +192,10 @@ class MapFragment : Fragment() {
 
         statusBarController = MapStatusBarController(
             conf = resources.configuration,
-            insetsController = insetsController!!,
+            insetsController = WindowCompat.getInsetsController(
+                requireActivity().window,
+                requireActivity().window.decorView,
+            ),
             bottomSheetBehavior = bottomSheetBehavior
         )
         statusBarController?.onViewCreated()
@@ -354,7 +347,10 @@ class MapFragment : Fragment() {
                 }
 
                 val syncCommentsRes = sync().syncComments()
-                Log.d("map_fragment", "got ${syncCommentsRes.rowsAffected} new and updated comments")
+                Log.d(
+                    "map_fragment",
+                    "got ${syncCommentsRes.rowsAffected} new and updated comments"
+                )
                 if (syncCommentsRes.rowsAffected > 0 && (filter == Filter.MERCHANTS || filter == Filter.EXCHANGES)) {
                     setFilter(filter)
                 }
@@ -589,14 +585,17 @@ class MapFragment : Fragment() {
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                val placeFragment =
+                    childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment
                 placeFragment.onSlide(slideOffset)
             }
         })
     }
 
     private suspend fun getPlaceDetailsToolbar(): Toolbar? {
+        val placeFragment =
+            childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment
         var attempts = 0
-
         while (placeFragment.view == null || placeFragment.requireView()
                 .findViewById<View>(R.id.toolbar)!!.height == 0
         ) {
@@ -744,7 +743,7 @@ class MapFragment : Fragment() {
         clearOtherSources(merchantsSource)
         binding.map.getMapAsync { map ->
             val bounds = map.projection.visibleRegion.latLngBounds
-            val expandedBounds = expandBounds(bounds, CLUSTERING_SCALE_FACTOR)
+            val expandedBounds = expandBounds(bounds)
             viewLifecycleOwner.lifecycleScope.launch {
                 if (!merchantsCache.contains(expandedBounds)) {
                     dbCallCount++
@@ -776,7 +775,7 @@ class MapFragment : Fragment() {
         clearOtherSources(eventsSource)
         binding.map.getMapAsync { map ->
             val bounds = map.projection.visibleRegion.latLngBounds
-            val expandedBounds = expandBounds(bounds, CLUSTERING_SCALE_FACTOR)
+            val expandedBounds = expandBounds(bounds)
             viewLifecycleOwner.lifecycleScope.launch {
                 if (!eventsCache.contains(expandedBounds)) {
                     dbCallCount++
@@ -806,7 +805,7 @@ class MapFragment : Fragment() {
         clearOtherSources(exchangesSource)
         binding.map.getMapAsync { map ->
             val bounds = map.projection.visibleRegion.latLngBounds
-            val expandedBounds = expandBounds(bounds, CLUSTERING_SCALE_FACTOR)
+            val expandedBounds = expandBounds(bounds)
             viewLifecycleOwner.lifecycleScope.launch {
                 if (!exchangesCache.contains(expandedBounds)) {
                     dbCallCount++
@@ -832,7 +831,7 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun expandBounds(bounds: LatLngBounds, scaleFactor: Double): LatLngBounds {
+    private fun expandBounds(bounds: LatLngBounds, scaleFactor: Double = 2.0): LatLngBounds {
         val latSpan = bounds.latitudeSpan * scaleFactor
         val lonSpan = bounds.longitudeSpan * scaleFactor
         val center = bounds.center
@@ -846,6 +845,7 @@ class MapFragment : Fragment() {
         )
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateDebugStats() {
         val cacheSize = when (filter) {
             Filter.MERCHANTS -> merchantsCache.features.size
@@ -950,7 +950,6 @@ class MapFragment : Fragment() {
 
     companion object {
         private const val MIN_QUERY_LENGTH = 3
-        private const val CLUSTERING_SCALE_FACTOR = 2.0
 
         private val DISTANCE_FORMAT = NumberFormat.getNumberInstance().apply {
             maximumFractionDigits = 1
