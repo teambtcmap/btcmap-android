@@ -11,10 +11,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
@@ -34,12 +32,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withResumed
 import androidx.recyclerview.widget.LinearLayoutManager
 import org.btcmap.bundle.BundledPlaces
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.btcmap.db.table.place.Place
 import org.btcmap.place.PlaceFragment
 import org.btcmap.activity.ActivityFeedFragment
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -95,17 +91,11 @@ import java.text.NumberFormat
 import java.time.ZonedDateTime
 
 class MapFragment : Fragment() {
-
     private var _binding: MapFragmentBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
-
-    private var backPressedCallback = object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() {
-            onBackPressed()
-        }
-    }
+    var statusBarController: MapStatusBarController? = null
+    var bottomSheetController: BottomSheetController? = null
 
     private var dbCallCount = 0
     private var lastDbCallTimeMs = 0L
@@ -171,24 +161,19 @@ class MapFragment : Fragment() {
         return binding.root
     }
 
-    private suspend fun selectPlace(place: Place?) {
+    private fun selectPlace(place: Place) {
         val placeFragment =
             childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment
-        if (place != null) {
-            getPlaceDetailsToolbar()
-            placeFragment.setPlace(place)
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-        } else {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-        }
+        placeFragment.setPlace(place)
+        bottomSheetController?.halfExpand()
     }
 
-    var statusBarController: MapStatusBarController? = null
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        bottomSheetBehavior = BottomSheetBehavior.from(binding.placeBottomSheet)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-        bottomSheetBehavior.addSlideCallback()
+        bottomSheetController = BottomSheetController(
+            view = binding.placeBottomSheet,
+            viewLifecycleOwner = viewLifecycleOwner,
+            placeFragment = childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment,
+        )
 
         statusBarController = MapStatusBarController(
             conf = resources.configuration,
@@ -196,7 +181,7 @@ class MapFragment : Fragment() {
                 requireActivity().window,
                 requireActivity().window.decorView,
             ),
-            bottomSheetBehavior = bottomSheetBehavior
+            bottomSheetBehavior = bottomSheetController?.bottomSheetBehavior!!,
         )
         statusBarController?.onViewCreated()
 
@@ -277,22 +262,6 @@ class MapFragment : Fragment() {
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            val elementDetailsToolbar = getPlaceDetailsToolbar() ?: return@launch
-            bottomSheetBehavior.peekHeight = elementDetailsToolbar.height * 3
-            bottomSheetBehavior.halfExpandedRatio = 0.33f
-            bottomSheetBehavior.isFitToContents = false
-            bottomSheetBehavior.skipCollapsed = true
-
-            elementDetailsToolbar.setOnClickListener {
-                if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_HALF_EXPANDED) {
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                } else {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
-                }
-            }
-        }
-
         if (ActivityCompat.checkSelfPermission(
                 requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
@@ -358,10 +327,6 @@ class MapFragment : Fragment() {
                 binding.sync.isVisible = false
             }
         }
-
-        requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner, backPressedCallback
-        )
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -494,6 +459,7 @@ class MapFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        bottomSheetController = null
         statusBarController?.onDestroyView()
         statusBarController = null
         _binding = null
@@ -508,22 +474,6 @@ class MapFragment : Fragment() {
         )
     }
 
-    private fun onBackPressed() {
-        when (bottomSheetBehavior.state) {
-            BottomSheetBehavior.STATE_EXPANDED -> {
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-            }
-
-            BottomSheetBehavior.STATE_HALF_EXPANDED -> {
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-            }
-
-            else -> {
-                requireActivity().finish()
-            }
-        }
-    }
-
     private fun MapLibreMap.addMarkerClickListener() {
         val layerIds = listOf(
             MERCHANT_MARKER_LAYER_ID,
@@ -536,7 +486,7 @@ class MapFragment : Fragment() {
             val features = queryRenderedFeatures(screenLocation, *layerIds.toTypedArray())
 
             if (features.isEmpty()) {
-                viewLifecycleOwner.lifecycleScope.launch { selectPlace(null) }
+                bottomSheetController?.hide()
                 return@addOnMapClickListener false
             }
 
@@ -565,7 +515,9 @@ class MapFragment : Fragment() {
                 if (idValue != null) {
                     val placeId = idValue.asLong
                     val place = db().place.selectById(placeId)
-                    viewLifecycleOwner.lifecycleScope.launch { selectPlace(place) }
+                    if (place != null) {
+                        viewLifecycleOwner.lifecycleScope.launch { selectPlace(place) }
+                    }
                     return@addOnMapClickListener true
                 }
             } catch (e: Exception) {
@@ -574,41 +526,6 @@ class MapFragment : Fragment() {
 
             false
         }
-    }
-
-    private fun BottomSheetBehavior<*>.addSlideCallback() {
-        addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                    viewLifecycleOwner.lifecycleScope.launch { selectPlace(null) }
-                }
-            }
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                val placeFragment =
-                    childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment
-                placeFragment.onSlide(slideOffset)
-            }
-        })
-    }
-
-    private suspend fun getPlaceDetailsToolbar(): Toolbar? {
-        val placeFragment =
-            childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment
-        var attempts = 0
-        while (placeFragment.view == null || placeFragment.requireView()
-                .findViewById<View>(R.id.toolbar)!!.height == 0
-        ) {
-            if (attempts >= 100) {
-                requireActivity().finish()
-                return null
-            } else {
-                attempts++
-                delay(10)
-            }
-        }
-
-        return placeFragment.requireView().findViewById(R.id.toolbar)!!
     }
 
     private fun List<Marker>.toGeoJson(): String {
