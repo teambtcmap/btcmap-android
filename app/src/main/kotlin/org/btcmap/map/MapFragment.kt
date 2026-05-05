@@ -97,8 +97,6 @@ class MapFragment : Fragment() {
     var statusBarController: MapStatusBarController? = null
     var bottomSheetController: BottomSheetController? = null
 
-    private var dbCallCount = 0
-    private var lastDbCallTimeMs = 0L
     private var lastMerchantsGeoJson: String? = null
     private var lastEventsGeoJson: String? = null
     private var lastExchangesGeoJson: String? = null
@@ -631,8 +629,6 @@ class MapFragment : Fragment() {
         merchantsCache = PlaceCache()
         exchangesCache = PlaceCache()
         eventsCache = EventCache()
-        dbCallCount = 0
-        lastDbCallTimeMs = 0L
 
         when (filter) {
             Filter.MERCHANTS -> showMerchants()
@@ -663,8 +659,6 @@ class MapFragment : Fragment() {
             val expandedBounds = expandBounds(bounds)
             viewLifecycleOwner.lifecycleScope.launch {
                 if (!merchantsCache.contains(expandedBounds)) {
-                    dbCallCount++
-                    val startTime = System.currentTimeMillis()
                     val newMerchants = withContext(Dispatchers.IO) {
                         db().place.selectMerchantsByBounds(
                             expandedBounds.latitudeSouth,
@@ -675,7 +669,6 @@ class MapFragment : Fragment() {
                                 .minusYears(prefs.verifiedFilterYears.toLong()),
                         )
                     }
-                    lastDbCallTimeMs = System.currentTimeMillis() - startTime
                     merchantsCache = merchantsCache.add(newMerchants, expandedBounds)
                 }
                 val geoJson = merchantsCache.features.toGeoJson()
@@ -695,8 +688,6 @@ class MapFragment : Fragment() {
             val expandedBounds = expandBounds(bounds)
             viewLifecycleOwner.lifecycleScope.launch {
                 if (!eventsCache.contains(expandedBounds)) {
-                    dbCallCount++
-                    val startTime = System.currentTimeMillis()
                     val newEvents = withContext(Dispatchers.IO) {
                         db().event.selectByBounds(
                             expandedBounds.latitudeSouth,
@@ -705,7 +696,6 @@ class MapFragment : Fragment() {
                             expandedBounds.longitudeEast,
                         )
                     }
-                    lastDbCallTimeMs = System.currentTimeMillis() - startTime
                     eventsCache = eventsCache.add(newEvents, expandedBounds)
                 }
                 val geoJson = eventsCache.features.toEventsGeoJson()
@@ -725,8 +715,6 @@ class MapFragment : Fragment() {
             val expandedBounds = expandBounds(bounds)
             viewLifecycleOwner.lifecycleScope.launch {
                 if (!exchangesCache.contains(expandedBounds)) {
-                    dbCallCount++
-                    val startTime = System.currentTimeMillis()
                     val newExchanges = withContext(Dispatchers.IO) {
                         db().place.selectExchangesByBounds(
                             expandedBounds.latitudeSouth,
@@ -735,7 +723,6 @@ class MapFragment : Fragment() {
                             expandedBounds.longitudeEast,
                         )
                     }
-                    lastDbCallTimeMs = System.currentTimeMillis() - startTime
                     exchangesCache = exchangesCache.add(newExchanges, expandedBounds)
                 }
                 val geoJson = exchangesCache.features.toGeoJson()
@@ -786,7 +773,10 @@ class MapFragment : Fragment() {
             binding.debugStats.apply {
                 text =
                     "memcache: %d items\nmemcache bounds: %s\ndb queries: %d\nlast query: %dms".format(
-                        cacheSize, viewportInfo, dbCallCount, lastDbCallTimeMs
+                        cacheSize,
+                        viewportInfo,
+                        db().place.selectMerchantsByBoundsCallCount,
+                        db().place.selectMerchantsByBoundsLastCallDurationMs,
                     )
                 isVisible = true
             }

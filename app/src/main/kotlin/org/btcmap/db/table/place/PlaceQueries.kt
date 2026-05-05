@@ -81,23 +81,8 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectMerchants(): List<Marker> {
-        conn.prepare(
-            """
-                SELECT ${MarkerProjection.COLUMNS}
-                FROM $TABLE
-                WHERE
-                    $ICON <> 'local_atm' AND $ICON <> 'currency_exchange'
-                ORDER BY $LAT DESC;
-            """
-        ).use {
-            val rows = mutableListOf<Marker>()
-            while (it.step()) {
-                rows.add(MarkerProjection.fromStatement(it))
-            }
-            return rows
-        }
-    }
+    var selectMerchantsByBoundsCallCount = 0
+    var selectMerchantsByBoundsLastCallDurationMs = 0L
 
     fun selectMerchantsByBounds(
         minLat: Double,
@@ -106,6 +91,8 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         maxLon: Double,
         minVerifiedAt: ZonedDateTime? = null,
     ): List<Marker> {
+        val startTime = System.currentTimeMillis()
+        selectMerchantsByBoundsCallCount += 1
         val whereClause = buildString {
             append("$ICON <> 'local_atm' AND $ICON <> 'currency_exchange'")
             append(" AND $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4")
@@ -132,6 +119,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             while (it.step()) {
                 rows.add(MarkerProjection.fromStatement(it))
             }
+            selectMerchantsByBoundsLastCallDurationMs = System.currentTimeMillis() - startTime
             return rows
         }
     }

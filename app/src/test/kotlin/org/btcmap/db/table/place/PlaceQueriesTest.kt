@@ -122,20 +122,6 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectMerchants_excludesAtmAndExchange() {
-        val db = createDatabase()
-        db.place.insert(listOf(createPlace(id = 1L, icon = "restaurant")))
-        db.place.insert(listOf(createPlace(id = 2L, icon = "local_atm")))
-        db.place.insert(listOf(createPlace(id = 3L, icon = "currency_exchange")))
-        db.place.insert(listOf(createPlace(id = 4L, icon = "coffee")))
-
-        val results = db.place.selectMerchants()
-
-        Assert.assertEquals(2, results.size)
-        Assert.assertTrue(results.all { it.icon != "local_atm" && it.icon != "currency_exchange" })
-    }
-
-    @Test
     fun selectExchanges_includesOnlyAtmAndExchange() {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L, icon = "restaurant")))
@@ -272,20 +258,6 @@ class PlaceQueriesTest {
         db.place.deleteById(999L)
 
         Assert.assertEquals(1L, db.place.selectCount())
-    }
-
-    @Test
-    fun selectMerchants_withBoostedPlace() {
-        val db = createDatabase()
-        val boostedPlace = createPlace(id = 1L, icon = "restaurant")
-        val normalPlace = createPlace(id = 2L, icon = "coffee")
-
-        db.place.insert(listOf(boostedPlace))
-        db.place.insert(listOf(normalPlace))
-
-        val results = db.place.selectMerchants()
-
-        Assert.assertEquals(2, results.size)
     }
 
     @Test
