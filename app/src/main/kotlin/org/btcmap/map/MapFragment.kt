@@ -29,20 +29,14 @@ import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.withResumed
 import androidx.recyclerview.widget.LinearLayoutManager
 import org.btcmap.bundle.BundledPlaces
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.btcmap.db.table.place.Place
 import org.btcmap.place.PlaceFragment
 import org.btcmap.activity.ActivityFeedFragment
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.Request
-import okhttp3.coroutines.executeAsync
-import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.databinding.MapFragmentBinding
@@ -71,7 +65,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
 import org.btcmap.db
 import org.btcmap.sync
 import org.btcmap.db.table.place.Marker
@@ -96,6 +89,7 @@ class MapFragment : Fragment() {
 
     var statusBarController: MapStatusBarController? = null
     var bottomSheetController: BottomSheetController? = null
+    var updateNotificationController: UpdateNotificationController? = null
 
     private var lastMerchantsGeoJson: String? = null
     private var lastEventsGeoJson: String? = null
@@ -183,6 +177,12 @@ class MapFragment : Fragment() {
         )
         statusBarController?.onViewCreated()
 
+        updateNotificationController = UpdateNotificationController(
+            context = requireContext(),
+            lifecycleOwner = viewLifecycleOwner,
+            icon = binding.update,
+        )
+
         binding.searchBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.add_place -> {
@@ -204,8 +204,6 @@ class MapFragment : Fragment() {
         }
 
         addMapDatSourceAndLayersAsync()
-
-        launchUpdateChecker()
 
         binding.showMerchants.setOnClickListener { setFilter(Filter.MERCHANTS) }
         binding.showEvents.setOnClickListener { setFilter(Filter.EVENTS) }
@@ -460,6 +458,7 @@ class MapFragment : Fragment() {
         bottomSheetController = null
         statusBarController?.onDestroyView()
         statusBarController = null
+        updateNotificationController = null
         _binding = null
     }
 
@@ -800,57 +799,6 @@ class MapFragment : Fragment() {
             exchangesSource -> {
                 merchantsSource.setGeoJson(EMPTY_GEOJSON)
                 eventsSource.setGeoJson(EMPTY_GEOJSON)
-            }
-        }
-    }
-
-    private fun launchUpdateChecker() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            withResumed {
-                binding.update.isVisible = false
-
-                launch {
-                    try {
-                        val latestVerJson = OkHttpClient.Builder().build().newCall(
-                            Request.Builder()
-                                .url("https://static.btcmap.org/android/latest-app-ver".toHttpUrl())
-                                .build()
-                        ).executeAsync().body.string().trim()
-
-                        val latestVer =
-                            com.google.gson.JsonParser.parseString(latestVerJson).asJsonObject
-                        val latestVerCode = latestVer.get("code").asInt
-                        val latestVerName = latestVer.get("name").asString
-                        val latestVerUrl = latestVer.get("url").asString
-
-                        if (latestVerCode > BuildConfig.VERSION_CODE) {
-                            withResumed {
-                                binding.update.isVisible = true
-                                binding.update.iconColor(requireContext().getErrorColor())
-
-                                binding.update.setOnClickListener {
-                                    MaterialAlertDialogBuilder(requireContext())
-                                        .setTitle(R.string.update_available)
-                                        .setMessage(
-                                            getString(
-                                                R.string.update_available_description,
-                                                BuildConfig.VERSION_NAME, latestVerName
-                                            )
-                                        )
-                                        .setPositiveButton(R.string.get_apk) { _, _ ->
-                                            val intent = Intent(Intent.ACTION_VIEW)
-                                            intent.data = latestVerUrl.toUri()
-                                            startActivity(intent)
-                                        }
-                                        .setNegativeButton(R.string.ignore, null)
-                                        .show()
-                                }
-                            }
-                        }
-                    } catch (_: Throwable) {
-
-                    }
-                }
             }
         }
     }
