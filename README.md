@@ -81,7 +81,7 @@ https://www.openstreetmap.org
 
 Absolutely, you are very welcome to do that. This is a good place to start:
 
-[Tagging Instructions](https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants)
+[Tagging Instructions](https://wiki.btcmap.org/Tagging-Merchants)
 
 ### BTC Map shows a place which doesn't exist, how can I delete it?
 
