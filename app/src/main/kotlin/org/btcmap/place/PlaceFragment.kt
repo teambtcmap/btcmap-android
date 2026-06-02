@@ -204,7 +204,7 @@ class PlaceFragment : Fragment() {
         }
 
         val outdatedUri =
-            "https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Verifying-Existing-Merchants".toUri()
+            "https://wiki.btcmap.org/Verifying-Existing-Merchants".toUri()
 
         if (place.verifiedAt != null) {
             val date = DateUtils.getRelativeDateTimeString(
