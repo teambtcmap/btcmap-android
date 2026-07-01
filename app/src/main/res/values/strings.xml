@@ -102,4 +102,11 @@
     <string name="verified_filter_1_year" tools:ignore="MissingTranslation">Verified within 1 year</string>
     <string name="verified_filter_2_years" tools:ignore="MissingTranslation">Verified within 2 years</string>
     <string name="verified_filter_3_years" tools:ignore="MissingTranslation">Verified within 3 years</string>
+    <string name="activity_interval" tools:ignore="MissingTranslation">Activity interval</string>
+    <string name="activity_interval_day" tools:ignore="MissingTranslation">1d</string>
+    <string name="activity_interval_week" tools:ignore="MissingTranslation">1w</string>
+    <string name="activity_interval_month" tools:ignore="MissingTranslation">1m</string>
+    <string name="activity_interval_half_year" tools:ignore="MissingTranslation">6m</string>
+    <string name="activity_interval_year" tools:ignore="MissingTranslation">1y</string>
+    <string name="filter" tools:ignore="MissingTranslation">Filter</string>
 </resources>

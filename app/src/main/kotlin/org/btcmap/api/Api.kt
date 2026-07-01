@@ -364,10 +364,10 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         }
     }
 
-    suspend fun getActivity(areaIds: List<String>): List<ActivityFeedItem> {
+    suspend fun getActivity(areaIds: List<String>, days: Int = 7): List<ActivityFeedItem> {
         val url = url.newBuilder().addPathSegments("v4/activity").apply {
             addQueryParameter("areas", areaIds.joinToString(","))
-            addQueryParameter("days", "7")
+            addQueryParameter("days", "$days")
         }.build()
 
         val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()

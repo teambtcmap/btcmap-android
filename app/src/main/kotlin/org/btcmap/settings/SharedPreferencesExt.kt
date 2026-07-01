@@ -396,3 +396,27 @@ fun Int.toVerifiedFilterYears(context: Context): String {
         else -> ""
     }
 }
+
+enum class ActivityInterval(val days: Int) {
+    Day(1),
+    Week(7),
+    Month(30),
+    HalfYear(180),
+    Year(365);
+
+    fun name(context: Context): String = when (this) {
+        Day -> context.getString(R.string.activity_interval_day)
+        Week -> context.getString(R.string.activity_interval_week)
+        Month -> context.getString(R.string.activity_interval_month)
+        HalfYear -> context.getString(R.string.activity_interval_half_year)
+        Year -> context.getString(R.string.activity_interval_year)
+    }
+}
+
+private const val KEY_ACTIVITY_INTERVAL_DAYS = "activity_interval_days"
+
+var SharedPreferences.activityIntervalDays: Int
+    get() = getInt(KEY_ACTIVITY_INTERVAL_DAYS, ActivityInterval.Week.days)
+    set(value) {
+        edit { putInt(KEY_ACTIVITY_INTERVAL_DAYS, value) }
+    }
