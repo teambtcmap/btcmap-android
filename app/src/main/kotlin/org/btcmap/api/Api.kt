@@ -31,7 +31,6 @@ data class GetAreasItem(
     val name: String,
     val type: String,
     val urlAlias: String,
-    val icon: String?,
     val websiteUrl: String,
 )
 
@@ -249,7 +248,9 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                 endsAt = if (!it.has("ends_at") || it.get("ends_at").isJsonNull) null else ZonedDateTime.parse(
                     it.get("ends_at").asString
                 ),
-                cronSchedule = if (!it.has("cron_schedule") || it.get("cron_schedule").isJsonNull) null else it.get("cron_schedule").asString,
+                cronSchedule = if (!it.has("cron_schedule") || it.get("cron_schedule").isJsonNull) null else it.get(
+                    "cron_schedule"
+                ).asString,
             )
         }
     }
@@ -274,8 +275,6 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                 name = it.get("name").asString,
                 type = it.get("type").asString,
                 urlAlias = it.get("url_alias").asString,
-                icon = if (!it.has("icon") || it.get("icon").isJsonNull) null else it.get("icon").asString
-                    .ifBlank { null },
                 websiteUrl = it.get("website_url").asString,
             )
         }
@@ -325,10 +324,16 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                     name = body.get("name").asString,
                     type = body.get("type").asString,
                     urlAlias = body.get("url_alias").asString,
-                    icon = if (!body.has("icon") || body.get("icon").isJsonNull) null else body.get("icon").asString.ifBlank { null },
-                    iconWide = if (!body.has("icon_wide") || body.get("icon_wide").isJsonNull) null else body.get("icon_wide").asString.ifBlank { null },
+                    icon = if (!body.has("icon") || body.get("icon").isJsonNull) null else body.get(
+                        "icon"
+                    ).asString.ifBlank { null },
+                    iconWide = if (!body.has("icon_wide") || body.get("icon_wide").isJsonNull) null else body.get(
+                        "icon_wide"
+                    ).asString.ifBlank { null },
                     websiteUrl = body.get("website_url").asString,
-                    description = if (!body.has("description") || body.get("description").isJsonNull) null else body.get("description").asString.ifBlank { null },
+                    description = if (!body.has("description") || body.get("description").isJsonNull) null else body.get(
+                        "description"
+                    ).asString.ifBlank { null },
                 )
             }
         }
@@ -340,12 +345,20 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                 type = it.get("type").asString,
                 placeId = it.get("place_id").asLong,
                 placeName = it.get("place_name").asString,
-                osmUserId = if (!it.has("osm_user_id") || it.get("osm_user_id").isJsonNull) null else it.get("osm_user_id").asLong,
-                osmUserName = if (!it.has("osm_user_name") || it.get("osm_user_name").isJsonNull) null else it.get("osm_user_name").asString.ifBlank { null },
-                osmUserTip = if (!it.has("osm_user_tip") || it.get("osm_user_tip").isJsonNull) null else it.get("osm_user_tip").asString.ifBlank { null },
+                osmUserId = if (!it.has("osm_user_id") || it.get("osm_user_id").isJsonNull) null else it.get(
+                    "osm_user_id"
+                ).asLong,
+                osmUserName = if (!it.has("osm_user_name") || it.get("osm_user_name").isJsonNull) null else it.get(
+                    "osm_user_name"
+                ).asString.ifBlank { null },
+                osmUserTip = if (!it.has("osm_user_tip") || it.get("osm_user_tip").isJsonNull) null else it.get(
+                    "osm_user_tip"
+                ).asString.ifBlank { null },
                 image = if (!it.has("image") || it.get("image").isJsonNull) null else it.get("image").asString.ifBlank { null },
                 date = it.get("date").asString,
-                durationDays = if (!it.has("duration_days") || it.get("duration_days").isJsonNull) null else it.get("duration_days").asLong,
+                durationDays = if (!it.has("duration_days") || it.get("duration_days").isJsonNull) null else it.get(
+                    "duration_days"
+                ).asLong,
                 comment = if (!it.has("comment") || it.get("comment").isJsonNull) null else it.get("comment").asString.ifBlank { null },
             )
         }

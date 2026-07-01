@@ -6,10 +6,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil3.load
+import okhttp3.HttpUrl
 import org.btcmap.api.GetAreasItem
 import org.btcmap.databinding.AreaItemBinding
 
 class AreasAdapter(
+    private val apiUrl: HttpUrl,
     private val onItemClick: (GetAreasItem) -> Unit,
 ) : ListAdapter<GetAreasItem, AreasAdapter.ItemViewHolder>(DiffCallback()) {
 
@@ -23,7 +25,7 @@ class AreasAdapter(
             false,
         )
 
-        return ItemViewHolder(binding)
+        return ItemViewHolder(apiUrl, binding)
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
@@ -31,12 +33,12 @@ class AreasAdapter(
     }
 
     class ItemViewHolder(
+        private val apiUrl: HttpUrl,
         private val binding: AreaItemBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
-
         fun bind(area: GetAreasItem, onItemClick: (GetAreasItem) -> Unit) {
             binding.apply {
-                icon.load(area.icon)
+                icon.load("$apiUrl/v4/areas/${area.id}/image?type=square&w=256&h=256")
                 root.setOnClickListener { onItemClick(area) }
             }
         }

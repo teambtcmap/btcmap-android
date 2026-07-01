@@ -76,6 +76,7 @@ import org.btcmap.map.layer.createEventLayers
 import org.btcmap.map.layer.createExchangeLayers
 import org.btcmap.map.layer.createMerchantLayers
 import org.btcmap.search.SearchAdapterItem
+import org.btcmap.settings.apiUrl
 import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.boostedMarkerBackgroundColor
@@ -374,7 +375,7 @@ class MapFragment : Fragment() {
             }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
-        areasAdapter = AreasAdapter { area ->
+        areasAdapter = AreasAdapter(apiUrl = prefs.apiUrl) { area ->
             parentFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<AreaFragment>(
