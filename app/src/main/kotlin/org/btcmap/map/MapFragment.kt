@@ -58,11 +58,11 @@ import org.btcmap.settings.mapStyle
 import org.btcmap.settings.mapViewport
 import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.prefs
-import org.btcmap.settings.showDebugInfo
 import org.btcmap.settings.uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.btcmap.db
@@ -80,9 +80,8 @@ import org.btcmap.settings.apiUrl
 import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.boostedMarkerBackgroundColor
-import org.btcmap.settings.verifiedFilterYears
+import org.btcmap.util.openInBrowser
 import java.text.NumberFormat
-import java.time.ZonedDateTime
 
 class MapFragment : Fragment() {
     private var _binding: MapFragmentBinding? = null
@@ -92,9 +91,10 @@ class MapFragment : Fragment() {
     var bottomSheetController: BottomSheetController? = null
     var updateNotificationController: UpdateNotificationController? = null
 
-    private var lastMerchantsGeoJson: String? = null
     private var lastEventsGeoJson: String? = null
     private var lastExchangesGeoJson: String? = null
+
+    private var newMerchantsCache: MerchantsCache? = null
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
@@ -102,46 +102,6 @@ class MapFragment : Fragment() {
         if (it.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
             onLocationPermissionsGranted(true)
         }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun onLocationPermissionsGranted(firstTime: Boolean) {
-        binding.map.getMapAsync { map ->
-            map.getStyle { style ->
-                val locationComponentOptions =
-                    LocationComponentOptions.builder(requireContext()).pulseEnabled(true).build()
-                val locationComponentActivationOptions =
-                    buildLocationComponentActivationOptions(style, locationComponentOptions)
-                map.locationComponent.activateLocationComponent(
-                    locationComponentActivationOptions
-                )
-                map.locationComponent.isLocationComponentEnabled = true
-
-                if (firstTime) {
-                    val lastKnownLocation = map.locationComponent.lastKnownLocation
-
-                    if (lastKnownLocation != null) {
-                        map.animateCamera(
-                            CameraUpdateFactory.newLatLngZoom(
-                                LatLng(lastKnownLocation),
-                                14.0,
-                            )
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    private fun buildLocationComponentActivationOptions(
-        style: Style, locationComponentOptions: LocationComponentOptions
-    ): LocationComponentActivationOptions {
-        return LocationComponentActivationOptions.builder(requireContext(), style)
-            .locationComponentOptions(locationComponentOptions).useDefaultLocationEngine(true)
-            .locationEngineRequest(
-                LocationEngineRequest.Builder(750).setFastestInterval(750)
-                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build()
-            ).build()
     }
 
     override fun onCreateView(
@@ -152,13 +112,6 @@ class MapFragment : Fragment() {
         _binding = MapFragmentBinding.inflate(inflater, container, false)
         initInsets(binding)
         return binding.root
-    }
-
-    private fun selectPlace(place: Place) {
-        val placeFragment =
-            childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment
-        placeFragment.setPlace(place)
-        bottomSheetController?.halfExpand()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -186,21 +139,9 @@ class MapFragment : Fragment() {
 
         binding.searchBar.setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.add_place -> {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = "https://btcmap.org/add-location".toUri()
-                    startActivity(intent)
-                }
-
-                R.id.settings -> {
-                    parentFragmentManager.commit {
-                        setReorderingAllowed(true)
-                        replace<SettingsFragment>(R.id.fragmentContainerView)
-                        addToBackStack(null)
-                    }
-                }
+                R.id.add_place -> openInBrowser("https://btcmap.org/add-location".toUri())
+                R.id.settings -> navigateToSettings()
             }
-
             true
         }
 
@@ -231,8 +172,7 @@ class MapFragment : Fragment() {
                     val markerDrawable =
                         AppCompatResources.getDrawable(requireContext(), R.drawable.map_marker)!!
                     DrawableCompat.setTint(
-                        markerDrawable,
-                        prefs.markerBackgroundColor(requireContext())
+                        markerDrawable, prefs.markerBackgroundColor(requireContext())
                     )
 
                     style.addImage(
@@ -245,8 +185,7 @@ class MapFragment : Fragment() {
                     val markerDrawable =
                         AppCompatResources.getDrawable(requireContext(), R.drawable.map_marker)!!
                     DrawableCompat.setTint(
-                        markerDrawable,
-                        prefs.boostedMarkerBackgroundColor()
+                        markerDrawable, prefs.boostedMarkerBackgroundColor()
                     )
 
                     style.addImage(
@@ -314,8 +253,7 @@ class MapFragment : Fragment() {
 
                 val syncCommentsRes = sync().syncComments()
                 Log.d(
-                    "map_fragment",
-                    "got ${syncCommentsRes.rowsAffected} new and updated comments"
+                    "map_fragment", "got ${syncCommentsRes.rowsAffected} new and updated comments"
                 )
                 if (syncCommentsRes.rowsAffected > 0 && (filter == Filter.MERCHANTS || filter == Filter.EXCHANGES)) {
                     setFilter(filter)
@@ -379,20 +317,17 @@ class MapFragment : Fragment() {
             parentFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<AreaFragment>(
-                    R.id.fragmentContainerView,
-                    null,
-                    bundleOf("area_id" to area.id.toString())
+                    R.id.fragmentContainerView, null, bundleOf("area_id" to area.id.toString())
                 )
                 addToBackStack(null)
             }
         }
 
-        binding.areas.layoutManager =
-            LinearLayoutManager(
-                requireContext(),
-                LinearLayoutManager.VERTICAL,
-                true,
-            )
+        binding.areas.layoutManager = LinearLayoutManager(
+            requireContext(),
+            LinearLayoutManager.VERTICAL,
+            true,
+        )
         binding.areas.adapter = areasAdapter
 
         binding.activityFeed.setOnClickListener {
@@ -403,9 +338,7 @@ class MapFragment : Fragment() {
                 parentFragmentManager.commit {
                     setReorderingAllowed(true)
                     replace<ActivityFeedFragment>(
-                        R.id.fragmentContainerView,
-                        null,
-                        bundleOf(
+                        R.id.fragmentContainerView, null, bundleOf(
                             "area_ids" to ArrayList(areaIds),
                             "area_names" to ArrayList(areaNames),
                             "area_types" to ArrayList(areaTypes),
@@ -426,6 +359,53 @@ class MapFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun selectPlace(place: Place) {
+        val placeFragment =
+            childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment
+        placeFragment.setPlace(place)
+        bottomSheetController?.halfExpand()
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun onLocationPermissionsGranted(firstTime: Boolean) {
+        binding.map.getMapAsync { map ->
+            map.getStyle { style ->
+                val locationComponentOptions =
+                    LocationComponentOptions.builder(requireContext()).pulseEnabled(true).build()
+                val locationComponentActivationOptions =
+                    buildLocationComponentActivationOptions(style, locationComponentOptions)
+                map.locationComponent.activateLocationComponent(
+                    locationComponentActivationOptions
+                )
+                map.locationComponent.isLocationComponentEnabled = true
+
+                if (firstTime) {
+                    val lastKnownLocation = map.locationComponent.lastKnownLocation
+
+                    if (lastKnownLocation != null) {
+                        map.animateCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(lastKnownLocation),
+                                14.0,
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun buildLocationComponentActivationOptions(
+        style: Style, locationComponentOptions: LocationComponentOptions
+    ): LocationComponentActivationOptions {
+        return LocationComponentActivationOptions.builder(requireContext(), style)
+            .locationComponentOptions(locationComponentOptions).useDefaultLocationEngine(true)
+            .locationEngineRequest(
+                LocationEngineRequest.Builder(750).setFastestInterval(750)
+                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build()
+            ).build()
     }
 
     private fun addMapDatSourceAndLayersAsync() {
@@ -462,6 +442,8 @@ class MapFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        newMerchantsCache?.destroy()
+        newMerchantsCache = null
         bottomSheetController = null
         statusBarController?.onDestroyView()
         statusBarController = null
@@ -618,21 +600,20 @@ class MapFragment : Fragment() {
     }
 
     private enum class Filter {
-        MERCHANTS,
-        EVENTS,
-        EXCHANGES,
+        MERCHANTS, EVENTS, EXCHANGES,
     }
 
     private var filter = Filter.MERCHANTS
 
     private fun setFilter(filter: Filter) {
+        Log.d("map", "filter is set to $filter")
         this.filter = filter
 
         binding.showMerchants.isSelected = filter == Filter.MERCHANTS
         binding.showEvents.isSelected = filter == Filter.EVENTS
         binding.showExchanges.isSelected = filter == Filter.EXCHANGES
 
-        merchantsCache = PlaceCache()
+        Log.d("map", "cleaning memory caches")
         exchangesCache = PlaceCache()
         eventsCache = EventCache()
 
@@ -661,28 +642,14 @@ class MapFragment : Fragment() {
     private fun showMerchants() {
         clearOtherSources(merchantsSource)
         binding.map.getMapAsync { map ->
-            val bounds = map.projection.visibleRegion.latLngBounds
-            val expandedBounds = expandBounds(bounds)
+            newMerchantsCache = MerchantsCache(map, db())
             viewLifecycleOwner.lifecycleScope.launch {
-                if (!merchantsCache.contains(expandedBounds)) {
-                    val newMerchants = withContext(Dispatchers.IO) {
-                        db().place.selectMerchantsByBounds(
-                            expandedBounds.latitudeSouth,
-                            expandedBounds.latitudeNorth,
-                            expandedBounds.longitudeWest,
-                            expandedBounds.longitudeEast,
-                            minVerifiedAt = ZonedDateTime.now()
-                                .minusYears(prefs.verifiedFilterYears.toLong()),
-                        )
+                repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    newMerchantsCache?.geoJson?.collectLatest { geoJson ->
+                        Log.d("merchants_cache", "geoJson changed")
+                        merchantsSource.setGeoJson(geoJson)
                     }
-                    merchantsCache = merchantsCache.add(newMerchants, expandedBounds)
                 }
-                val geoJson = merchantsCache.features.toGeoJson()
-                if (geoJson != lastMerchantsGeoJson) {
-                    lastMerchantsGeoJson = geoJson
-                    merchantsSource.setGeoJson(geoJson)
-                }
-                updateDebugStats()
             }
         }
     }
@@ -709,7 +676,6 @@ class MapFragment : Fragment() {
                     lastEventsGeoJson = geoJson
                     eventsSource.setGeoJson(geoJson)
                 }
-                updateDebugStats()
             }
         }
     }
@@ -736,7 +702,6 @@ class MapFragment : Fragment() {
                     lastExchangesGeoJson = geoJson
                     exchangesSource.setGeoJson(geoJson)
                 }
-                updateDebugStats()
             }
         }
     }
@@ -753,42 +718,6 @@ class MapFragment : Fragment() {
             latSouth = latSouth,
             lonWest = center.longitude - lonSpan / 2,
         )
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun updateDebugStats() {
-        val cacheSize = when (filter) {
-            Filter.MERCHANTS -> merchantsCache.features.size
-            Filter.EVENTS -> eventsCache.features.size
-            Filter.EXCHANGES -> exchangesCache.features.size
-        }
-        val currentBounds = when (filter) {
-            Filter.MERCHANTS -> merchantsCache.bounds
-            Filter.EVENTS -> eventsCache.bounds
-            Filter.EXCHANGES -> exchangesCache.bounds
-        }
-        val viewportInfo = if (currentBounds != null) {
-            val latSpanKm = currentBounds.latitudeSpan * 111
-            val lonSpanKm =
-                currentBounds.longitudeSpan * 111 * kotlin.math.cos(Math.toRadians(currentBounds.center.latitude))
-            "%.1fkm x %.1fkm".format(latSpanKm, lonSpanKm)
-        } else {
-            "no bounds"
-        }
-        if (prefs.showDebugInfo) {
-            binding.debugStats.apply {
-                text =
-                    "memcache: %d items\nmemcache bounds: %s\ndb queries: %d\nlast query: %dms".format(
-                        cacheSize,
-                        viewportInfo,
-                        db().place.selectMerchantsByBoundsCallCount,
-                        db().place.selectMerchantsByBoundsLastCallDurationMs,
-                    )
-                isVisible = true
-            }
-        } else {
-            binding.debugStats.isVisible = false
-        }
     }
 
     private fun clearOtherSources(activeSource: GeoJsonSource) {
@@ -834,12 +763,10 @@ class MapFragment : Fragment() {
             val mergedBounds = if (bounds == null) {
                 newBounds
             } else {
-                LatLngBounds.Builder()
-                    .include(LatLng(bounds.latitudeNorth, bounds.longitudeWest))
+                LatLngBounds.Builder().include(LatLng(bounds.latitudeNorth, bounds.longitudeWest))
                     .include(LatLng(bounds.latitudeSouth, bounds.longitudeEast))
                     .include(LatLng(newBounds.latitudeNorth, newBounds.longitudeWest))
-                    .include(LatLng(newBounds.latitudeSouth, newBounds.longitudeEast))
-                    .build()
+                    .include(LatLng(newBounds.latitudeSouth, newBounds.longitudeEast)).build()
             }
             val existingIds = features.map { it.id }.toSet()
             val uniqueNewFeatures = newFeatures.filter { it.id !in existingIds }
@@ -860,12 +787,10 @@ class MapFragment : Fragment() {
             val mergedBounds = if (bounds == null) {
                 newBounds
             } else {
-                LatLngBounds.Builder()
-                    .include(LatLng(bounds.latitudeNorth, bounds.longitudeWest))
+                LatLngBounds.Builder().include(LatLng(bounds.latitudeNorth, bounds.longitudeWest))
                     .include(LatLng(bounds.latitudeSouth, bounds.longitudeEast))
                     .include(LatLng(newBounds.latitudeNorth, newBounds.longitudeWest))
-                    .include(LatLng(newBounds.latitudeSouth, newBounds.longitudeEast))
-                    .build()
+                    .include(LatLng(newBounds.latitudeSouth, newBounds.longitudeEast)).build()
             }
             val existingIds = features.map { it.id }.toSet()
             val uniqueNewFeatures = newFeatures.filter { it.id !in existingIds }
@@ -873,7 +798,6 @@ class MapFragment : Fragment() {
         }
     }
 
-    private var merchantsCache = PlaceCache()
     private var exchangesCache = PlaceCache()
     private var eventsCache = EventCache()
 
@@ -970,7 +894,15 @@ class MapFragment : Fragment() {
         }
     }
 
-    fun dpToPx(dp: Int): Int {
+    private fun dpToPx(dp: Int): Int {
         return (dp * resources.displayMetrics.density).toInt()
+    }
+
+    private fun navigateToSettings() {
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace<SettingsFragment>(R.id.fragmentContainerView)
+            addToBackStack(null)
+        }
     }
 }

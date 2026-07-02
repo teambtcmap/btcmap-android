@@ -30,7 +30,7 @@ class UpdateNotificationController(
                     try {
                         val latestVerJson = OkHttpClient.Builder().build().newCall(
                             Request.Builder()
-                                .url("https://static.btcmap.org/android/latest-app-ver".toHttpUrl())
+                                .url("https://static.btcmap.org/android/latest-app-ver.json".toHttpUrl())
                                 .build()
                         ).executeAsync().body.string().trim()
 
