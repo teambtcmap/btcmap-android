@@ -1,47 +1,84 @@
 package org.btcmap.map
 
-import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.btcmap.db.Database
 import org.btcmap.db.table.place.Marker
-import org.btcmap.db.table.place.MarkerProjection
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
+import java.util.concurrent.atomic.AtomicReference
 
 class MerchantsCache(
     private val map: MapLibreMap,
     private val db: Database,
 ) : MapLibreMap.OnCameraIdleListener {
-    private val merchants: MutableSet<Marker> =
-        mutableSetOf<MarkerProjection>().toHashSet()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val pendingQuery = AtomicReference<Job?>(null)
+    private val seenIds: MutableSet<Long> = mutableSetOf()
+    private val merchants: MutableSet<Marker> = mutableSetOf()
     val geoJson = MutableStateFlow(merchants.toGeoJson())
 
     init {
-        Log.d("merchants_cache", "init")
         map.addOnCameraIdleListener(this)
     }
 
     override fun onCameraIdle() {
-        Log.d("merchants_cache", "camera idle")
         val bounds = map.projection.visibleRegion.latLngBounds
-        Log.d("merchants_cache", "real map bounds: $bounds")
         val expandedBounds = expandBounds(bounds)
-        val merchantsInBounds = db.place.selectMerchantsByBounds(
-            expandedBounds.latitudeSouth,
-            expandedBounds.latitudeNorth,
-            expandedBounds.longitudeWest,
-            expandedBounds.longitudeEast,
-            minVerifiedAt = null,
-        ).toHashSet()
-        Log.d("merchants_cache", "merchants in bounds: ${merchantsInBounds.size}")
-        merchants.addAll(merchantsInBounds)
-        geoJson.update { merchants.toGeoJson() }
+
+        pendingQuery.getAndSet(
+            scope.launch {
+                val (lonRange1, lonRange2) = expandedBounds.toLonRanges()
+                val merchantsInBounds = withContext(Dispatchers.IO) {
+                    if (lonRange2 == null) {
+                        db.place.selectMerchantsByBounds(
+                            expandedBounds.latitudeSouth,
+                            expandedBounds.latitudeNorth,
+                            lonRange1.first,
+                            lonRange1.second,
+                            minVerifiedAt = null,
+                        ).toHashSet()
+                    } else {
+                        val first = db.place.selectMerchantsByBounds(
+                            expandedBounds.latitudeSouth,
+                            expandedBounds.latitudeNorth,
+                            lonRange1.first,
+                            lonRange1.second,
+                            minVerifiedAt = null,
+                        )
+                        val second = db.place.selectMerchantsByBounds(
+                            expandedBounds.latitudeSouth,
+                            expandedBounds.latitudeNorth,
+                            lonRange2.first,
+                            lonRange2.second,
+                            minVerifiedAt = null,
+                        )
+                        (first + second).toHashSet()
+                    }
+                }
+
+                val newOnes = merchantsInBounds.filter { it.id !in seenIds }
+                if (newOnes.isEmpty()) return@launch
+
+                seenIds.addAll(newOnes.map { it.id })
+                merchants.addAll(newOnes)
+
+                val next = withContext(Dispatchers.Default) { merchants.toGeoJson() }
+                geoJson.value = next
+            }
+        )?.cancel()
     }
 
     fun destroy() {
-        Log.d("merchants_cache", "destroy")
         map.removeOnCameraIdleListener(this)
+        pendingQuery.getAndSet(null)?.cancel()
+        scope.cancel()
     }
 
     private fun expandBounds(bounds: LatLngBounds, scaleFactor: Double = 2.0): LatLngBounds {
@@ -56,6 +93,22 @@ class MerchantsCache(
             latSouth = latSouth,
             lonWest = center.longitude - lonSpan / 2,
         )
+    }
+
+    private fun LatLngBounds.toLonRanges(): Pair<Pair<Double, Double>, Pair<Double, Double>?> {
+        var west = longitudeWest
+        var east = longitudeEast
+        if (west > 180.0) {
+            west -= 360.0
+        }
+        if (east > 180.0) {
+            east -= 360.0
+        }
+        return if (west <= east) {
+            Pair(west to east, null)
+        } else {
+            Pair(-180.0 to east, west to 180.0)
+        }
     }
 
     private fun Set<Marker>.toGeoJson(): String {
