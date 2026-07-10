@@ -11,9 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
@@ -62,9 +60,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import org.btcmap.db
 import org.btcmap.sync
-import org.btcmap.map.layer.createEventLayers
-import org.btcmap.map.layer.createExchangeLayers
-import org.btcmap.map.layer.createMerchantLayers
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
@@ -81,6 +76,7 @@ class MapFragment : Fragment() {
 
     private var currentCache: Any? = null
     private var mapSelectionController: MapSelectionController? = null
+    private var mapSetupController: MapSetupController? = null
 
     private lateinit var searchController: SearchController
 
@@ -135,7 +131,15 @@ class MapFragment : Fragment() {
             true
         }
 
-        addMapDatSourceAndLayersAsync()
+        mapSetupController = MapSetupController(
+            mapView = binding.map,
+            styleUri = prefs.mapStyle.uri(requireContext()),
+            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
+            markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
+            markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
+            boostedMarkerBackgroundColor = prefs.boostedMarkerBackgroundColor(),
+            usingOpenFreeMap = usingOpenFreeMap(),
+        ).also { it.install() }
 
         binding.showMerchants.setOnClickListener { setFilter(Filter.MERCHANTS) }
         binding.showEvents.setOnClickListener { setFilter(Filter.EVENTS) }
@@ -150,12 +154,6 @@ class MapFragment : Fragment() {
                 }
             }
 
-            it.setStyle(Style.Builder().fromUri(prefs.mapStyle.uri(requireContext())))
-            it.uiSettings.setCompassMargins(dpToPx(0), dpToPx(120 + 16), dpToPx(16), dpToPx(0))
-            it.uiSettings.isLogoEnabled = false
-            it.uiSettings.isAttributionEnabled = false
-            it.uiSettings.isTiltGesturesEnabled = false
-
             mapSelectionController = MapSelectionController(
                 map = it,
                 db = db(),
@@ -165,36 +163,6 @@ class MapFragment : Fragment() {
                 },
                 onNoHit = { bottomSheetController?.hide() },
             ).also { controller -> controller.install() }
-
-            it.getStyle { style ->
-                if (style.getImage("btcmap-marker") == null) {
-                    val markerDrawable =
-                        AppCompatResources.getDrawable(requireContext(), R.drawable.map_marker)!!
-                    DrawableCompat.setTint(
-                        markerDrawable, prefs.markerBackgroundColor(requireContext())
-                    )
-
-                    style.addImage(
-                        "btcmap-marker",
-                        markerDrawable,
-                    )
-                }
-
-                if (style.getImage("btcmap-marker-boosted") == null) {
-                    val markerDrawable =
-                        AppCompatResources.getDrawable(requireContext(), R.drawable.map_marker)!!
-                    DrawableCompat.setTint(
-                        markerDrawable, prefs.boostedMarkerBackgroundColor()
-                    )
-
-                    style.addImage(
-                        "btcmap-marker-boosted",
-                        markerDrawable,
-                    )
-                }
-
-                init(requireContext(), style)
-            }
         }
 
         if (ActivityCompat.checkSelfPermission(
@@ -407,42 +375,11 @@ class MapFragment : Fragment() {
             ).build()
     }
 
-    private fun addMapDatSourceAndLayersAsync() {
-        val merchantLayers = createMerchantLayers(
-            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
-            markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
-            markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
-            usingOpenFreeMap = usingOpenFreeMap(),
-        )
-        val eventLayers = createEventLayers(
-            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
-            usingOpenFreeMap = usingOpenFreeMap(),
-        )
-        val exchangeLayers = createExchangeLayers(
-            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
-            markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
-            markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
-            usingOpenFreeMap = usingOpenFreeMap(),
-        )
-        merchantsSource = merchantLayers.first
-        eventsSource = eventLayers.first
-        exchangesSource = exchangeLayers.first
-        binding.map.getMapAsync { map ->
-            map.getStyle { style ->
-                style.addSource(merchantLayers.first)
-                merchantLayers.second.forEach { style.addLayer(it) }
-                style.addSource(eventLayers.first)
-                eventLayers.second.forEach { style.addLayer(it) }
-                style.addSource(exchangeLayers.first)
-                exchangeLayers.second.forEach { style.addLayer(it) }
-            }
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         mapSelectionController?.detach()
         mapSelectionController = null
+        mapSetupController = null
         destroyCurrentCache()
         bottomSheetController = null
         statusBarController?.onDestroyView()
@@ -480,24 +417,22 @@ class MapFragment : Fragment() {
 
         this.filter = filter
 
+        val setup = mapSetupController ?: return
+
         Log.d("map", "cleaning memory caches")
         destroyCurrentCache()
-        merchantsSource.setGeoJson(EMPTY_GEOJSON)
-        eventsSource.setGeoJson(EMPTY_GEOJSON)
-        exchangesSource.setGeoJson(EMPTY_GEOJSON)
+        setup.merchantsSource.setGeoJson(EMPTY_GEOJSON)
+        setup.eventsSource.setGeoJson(EMPTY_GEOJSON)
+        setup.exchangesSource.setGeoJson(EMPTY_GEOJSON)
 
         binding.map.getMapAsync { map ->
             when (filter) {
-                Filter.MERCHANTS -> showMerchants(map, merchantsSource)
-                Filter.EVENTS -> showEvents(map, eventsSource)
-                Filter.EXCHANGES -> showExchanges(map, exchangesSource)
+                Filter.MERCHANTS -> showMerchants(map, setup.merchantsSource)
+                Filter.EVENTS -> showEvents(map, setup.eventsSource)
+                Filter.EXCHANGES -> showExchanges(map, setup.exchangesSource)
             }
         }
     }
-
-    private lateinit var merchantsSource: GeoJsonSource
-    private lateinit var eventsSource: GeoJsonSource
-    private lateinit var exchangesSource: GeoJsonSource
 
     private fun usingOpenFreeMap(): Boolean {
         val nightMode =
