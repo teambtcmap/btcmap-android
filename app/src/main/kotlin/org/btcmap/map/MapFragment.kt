@@ -42,7 +42,6 @@ import org.btcmap.api
 import org.btcmap.databinding.MapFragmentBinding
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.location.LocationComponentActivationOptions
 import org.maplibre.android.location.LocationComponentOptions
 import org.maplibre.android.location.engine.LocationEngineRequest
@@ -57,8 +56,8 @@ import org.btcmap.settings.SettingsFragment
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.mapViewport
 import org.btcmap.settings.markerBackgroundColor
-import org.btcmap.settings.prefs
 import org.btcmap.settings.uri
+import org.btcmap.settings.prefs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -67,8 +66,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.btcmap.db
 import org.btcmap.sync
-import org.btcmap.db.table.place.Marker
-import org.btcmap.db.table.event.Event
 import org.btcmap.map.layer.EVENT_MARKER_LAYER_ID
 import org.btcmap.map.layer.EXCHANGE_MARKER_LAYER_ID
 import org.btcmap.map.layer.MERCHANT_MARKER_LAYER_ID
@@ -91,10 +88,7 @@ class MapFragment : Fragment() {
     var bottomSheetController: BottomSheetController? = null
     var updateNotificationController: UpdateNotificationController? = null
 
-    private var lastEventsGeoJson: String? = null
-    private var lastExchangesGeoJson: String? = null
-
-    private var newMerchantsCache: MerchantsCache? = null
+    private var currentCache: Any? = null
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
@@ -442,8 +436,7 @@ class MapFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        newMerchantsCache?.destroy()
-        newMerchantsCache = null
+        destroyCurrentCache()
         bottomSheetController = null
         statusBarController?.onDestroyView()
         statusBarController = null
@@ -514,91 +507,6 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun List<Marker>.toGeoJson(): String {
-        val sb = StringBuilder()
-        sb.append(
-            """
-        {
-            "type": "FeatureCollection",
-            "features": [
-        """.trimIndent()
-        )
-
-        this.forEachIndexed { index, place ->
-            if (index > 0) {
-                sb.append(",")
-            }
-            sb.append(
-                """
-            {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [${place.lon}, ${place.lat}]
-                },
-                "properties": {
-                    "id": ${place.id},
-                    "count": 1,
-                    "iconId": "${place.icon}",
-                    "requiresCompanionApp": ${place.requiredAppUrl != null},
-                    "comments": ${place.comments},
-                    "boosted": ${place.boostedUntil != null}
-                }
-            }
-        """.trimIndent()
-            )
-        }
-
-        sb.append(
-            """
-            ]
-        }
-        """.trimIndent()
-        )
-
-        return sb.toString()
-    }
-
-    private fun List<Event>.toEventsGeoJson(): String {
-        val sb = StringBuilder()
-        sb.append(
-            """
-        {
-            "type": "FeatureCollection",
-            "features": [
-        """.trimIndent()
-        )
-
-        this.forEachIndexed { index, event ->
-            if (index > 0) {
-                sb.append(",")
-            }
-            sb.append(
-                """
-            {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [${event.lon}, ${event.lat}]
-                },
-                "properties": {
-                    "id": ${event.id}
-                }
-            }
-        """.trimIndent()
-            )
-        }
-
-        sb.append(
-            """
-            ]
-        }
-        """.trimIndent()
-        )
-
-        return sb.toString()
-    }
-
     private enum class Filter {
         MERCHANTS, EVENTS, EXCHANGES,
     }
@@ -614,13 +522,17 @@ class MapFragment : Fragment() {
         binding.showExchanges.isSelected = filter == Filter.EXCHANGES
 
         Log.d("map", "cleaning memory caches")
-        exchangesCache = PlaceCache()
-        eventsCache = EventCache()
+        destroyCurrentCache()
+        merchantsSource.setGeoJson(EMPTY_GEOJSON)
+        eventsSource.setGeoJson(EMPTY_GEOJSON)
+        exchangesSource.setGeoJson(EMPTY_GEOJSON)
 
-        when (filter) {
-            Filter.MERCHANTS -> showMerchants()
-            Filter.EVENTS -> showEvents()
-            Filter.EXCHANGES -> showExchanges()
+        binding.map.getMapAsync { map ->
+            when (filter) {
+                Filter.MERCHANTS -> showMerchants(map, merchantsSource)
+                Filter.EVENTS -> showEvents(map, eventsSource)
+                Filter.EXCHANGES -> showExchanges(map, exchangesSource)
+            }
         }
     }
 
@@ -639,167 +551,49 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun showMerchants() {
-        clearOtherSources(merchantsSource)
-        binding.map.getMapAsync { map ->
-            newMerchantsCache = MerchantsCache(map, db())
-            viewLifecycleOwner.lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                    newMerchantsCache?.geoJson?.collectLatest { geoJson ->
-                        Log.d("merchants_cache", "geoJson changed")
-                        merchantsSource.setGeoJson(geoJson)
-                    }
+    private fun showMerchants(map: MapLibreMap, source: GeoJsonSource) {
+        val cache = MerchantsCache(map, db())
+        currentCache = cache
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                cache.geoJson.collectLatest { geoJson ->
+                    Log.d("merchants_cache", "geoJson changed")
+                    source.setGeoJson(geoJson)
                 }
             }
         }
     }
 
-    private fun showEvents() {
-        clearOtherSources(eventsSource)
-        binding.map.getMapAsync { map ->
-            val bounds = map.projection.visibleRegion.latLngBounds
-            val expandedBounds = expandBounds(bounds)
-            viewLifecycleOwner.lifecycleScope.launch {
-                if (!eventsCache.contains(expandedBounds)) {
-                    val newEvents = withContext(Dispatchers.IO) {
-                        db().event.selectByBounds(
-                            expandedBounds.latitudeSouth,
-                            expandedBounds.latitudeNorth,
-                            expandedBounds.longitudeWest,
-                            expandedBounds.longitudeEast,
-                        )
-                    }
-                    eventsCache = eventsCache.add(newEvents, expandedBounds)
-                }
-                val geoJson = eventsCache.features.toEventsGeoJson()
-                if (geoJson != lastEventsGeoJson) {
-                    lastEventsGeoJson = geoJson
-                    eventsSource.setGeoJson(geoJson)
+    private fun showEvents(map: MapLibreMap, source: GeoJsonSource) {
+        val cache = EventsCache(map, db())
+        currentCache = cache
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                cache.geoJson.collectLatest { geoJson ->
+                    source.setGeoJson(geoJson)
                 }
             }
         }
     }
 
-    private fun showExchanges() {
-        clearOtherSources(exchangesSource)
-        binding.map.getMapAsync { map ->
-            val bounds = map.projection.visibleRegion.latLngBounds
-            val expandedBounds = expandBounds(bounds)
-            viewLifecycleOwner.lifecycleScope.launch {
-                if (!exchangesCache.contains(expandedBounds)) {
-                    val newExchanges = withContext(Dispatchers.IO) {
-                        db().place.selectExchangesByBounds(
-                            expandedBounds.latitudeSouth,
-                            expandedBounds.latitudeNorth,
-                            expandedBounds.longitudeWest,
-                            expandedBounds.longitudeEast,
-                        )
-                    }
-                    exchangesCache = exchangesCache.add(newExchanges, expandedBounds)
-                }
-                val geoJson = exchangesCache.features.toGeoJson()
-                if (geoJson != lastExchangesGeoJson) {
-                    lastExchangesGeoJson = geoJson
-                    exchangesSource.setGeoJson(geoJson)
+    private fun showExchanges(map: MapLibreMap, source: GeoJsonSource) {
+        val cache = ExchangesCache(map, db())
+        currentCache = cache
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                cache.geoJson.collectLatest { geoJson ->
+                    source.setGeoJson(geoJson)
                 }
             }
         }
     }
 
-    private fun expandBounds(bounds: LatLngBounds, scaleFactor: Double = 2.0): LatLngBounds {
-        val latSpan = bounds.latitudeSpan * scaleFactor
-        val lonSpan = bounds.longitudeSpan * scaleFactor
-        val center = bounds.center
-        val latNorth = (center.latitude + latSpan / 2).coerceAtMost(90.0)
-        val latSouth = (center.latitude - latSpan / 2).coerceAtLeast(-90.0)
-        return LatLngBounds.from(
-            latNorth = latNorth,
-            lonEast = center.longitude + lonSpan / 2,
-            latSouth = latSouth,
-            lonWest = center.longitude - lonSpan / 2,
-        )
+    private fun destroyCurrentCache() {
+        (currentCache as? MerchantsCache)?.destroy()
+        (currentCache as? ExchangesCache)?.destroy()
+        (currentCache as? EventsCache)?.destroy()
+        currentCache = null
     }
-
-    private fun clearOtherSources(activeSource: GeoJsonSource) {
-        when (activeSource) {
-            merchantsSource -> {
-                eventsSource.setGeoJson(EMPTY_GEOJSON)
-                exchangesSource.setGeoJson(EMPTY_GEOJSON)
-            }
-
-            eventsSource -> {
-                merchantsSource.setGeoJson(EMPTY_GEOJSON)
-                exchangesSource.setGeoJson(EMPTY_GEOJSON)
-            }
-
-            exchangesSource -> {
-                merchantsSource.setGeoJson(EMPTY_GEOJSON)
-                eventsSource.setGeoJson(EMPTY_GEOJSON)
-            }
-        }
-    }
-
-    companion object {
-        private const val MIN_QUERY_LENGTH = 3
-
-        private val DISTANCE_FORMAT = NumberFormat.getNumberInstance().apply {
-            maximumFractionDigits = 1
-        }
-
-        const val EMPTY_GEOJSON = """{"type":"FeatureCollection","features":[]}"""
-        const val ICON_OFFSET_Y = -29f
-    }
-
-    private data class PlaceCache(
-        val features: List<Marker> = emptyList(),
-        val bounds: LatLngBounds? = null,
-    ) {
-        fun contains(bounds: LatLngBounds): Boolean {
-            if (this.bounds == null) return false
-            return this.bounds.contains(bounds)
-        }
-
-        fun add(newFeatures: List<Marker>, newBounds: LatLngBounds): PlaceCache {
-            val mergedBounds = if (bounds == null) {
-                newBounds
-            } else {
-                LatLngBounds.Builder().include(LatLng(bounds.latitudeNorth, bounds.longitudeWest))
-                    .include(LatLng(bounds.latitudeSouth, bounds.longitudeEast))
-                    .include(LatLng(newBounds.latitudeNorth, newBounds.longitudeWest))
-                    .include(LatLng(newBounds.latitudeSouth, newBounds.longitudeEast)).build()
-            }
-            val existingIds = features.map { it.id }.toSet()
-            val uniqueNewFeatures = newFeatures.filter { it.id !in existingIds }
-            return PlaceCache(features + uniqueNewFeatures, mergedBounds)
-        }
-    }
-
-    private data class EventCache(
-        val features: List<Event> = emptyList(),
-        val bounds: LatLngBounds? = null,
-    ) {
-        fun contains(bounds: LatLngBounds): Boolean {
-            if (this.bounds == null) return false
-            return this.bounds.contains(bounds)
-        }
-
-        fun add(newFeatures: List<Event>, newBounds: LatLngBounds): EventCache {
-            val mergedBounds = if (bounds == null) {
-                newBounds
-            } else {
-                LatLngBounds.Builder().include(LatLng(bounds.latitudeNorth, bounds.longitudeWest))
-                    .include(LatLng(bounds.latitudeSouth, bounds.longitudeEast))
-                    .include(LatLng(newBounds.latitudeNorth, newBounds.longitudeWest))
-                    .include(LatLng(newBounds.latitudeSouth, newBounds.longitudeEast)).build()
-            }
-            val existingIds = features.map { it.id }.toSet()
-            val uniqueNewFeatures = newFeatures.filter { it.id !in existingIds }
-            return EventCache(features + uniqueNewFeatures, mergedBounds)
-        }
-    }
-
-    private var exchangesCache = PlaceCache()
-    private var eventsCache = EventCache()
 
     private val _searchResults = MutableStateFlow<List<SearchAdapterItem>>(emptyList())
     val searchResults = _searchResults.asStateFlow()
@@ -903,6 +697,14 @@ class MapFragment : Fragment() {
             setReorderingAllowed(true)
             replace<SettingsFragment>(R.id.fragmentContainerView)
             addToBackStack(null)
+        }
+    }
+
+    companion object {
+        private const val MIN_QUERY_LENGTH = 3
+
+        private val DISTANCE_FORMAT = NumberFormat.getNumberInstance().apply {
+            maximumFractionDigits = 1
         }
     }
 }

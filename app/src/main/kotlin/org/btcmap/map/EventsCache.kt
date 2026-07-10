@@ -9,19 +9,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.db.Database
-import org.btcmap.db.table.place.Marker
+import org.btcmap.db.table.event.Event
 import org.maplibre.android.maps.MapLibreMap
 import java.util.concurrent.atomic.AtomicReference
 
-class MerchantsCache(
+class EventsCache(
     private val map: MapLibreMap,
     private val db: Database,
 ) : MapLibreMap.OnCameraIdleListener {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val pendingQuery = AtomicReference<Job?>(null)
     private val seenIds: MutableSet<Long> = mutableSetOf()
-    private val merchants: MutableSet<Marker> = mutableSetOf()
-    val geoJson = MutableStateFlow(merchants.toMarkerGeoJson())
+    private val events: MutableSet<Event> = mutableSetOf()
+    val geoJson = MutableStateFlow(events.toEventGeoJson())
 
     init {
         map.addOnCameraIdleListener(this)
@@ -34,41 +34,38 @@ class MerchantsCache(
         pendingQuery.getAndSet(
             scope.launch {
                 val (lonRange1, lonRange2) = expandedBounds.splitAtAntimeridian()
-                val merchantsInBounds = withContext(Dispatchers.IO) {
+                val eventsInBounds = withContext(Dispatchers.IO) {
                     if (lonRange2 == null) {
-                        db.place.selectMerchantsByBounds(
+                        db.event.selectByBounds(
                             expandedBounds.latitudeSouth,
                             expandedBounds.latitudeNorth,
                             lonRange1.first,
                             lonRange1.second,
-                            minVerifiedAt = null,
                         ).toHashSet()
                     } else {
-                        val first = db.place.selectMerchantsByBounds(
+                        val first = db.event.selectByBounds(
                             expandedBounds.latitudeSouth,
                             expandedBounds.latitudeNorth,
                             lonRange1.first,
                             lonRange1.second,
-                            minVerifiedAt = null,
                         )
-                        val second = db.place.selectMerchantsByBounds(
+                        val second = db.event.selectByBounds(
                             expandedBounds.latitudeSouth,
                             expandedBounds.latitudeNorth,
                             lonRange2.first,
                             lonRange2.second,
-                            minVerifiedAt = null,
                         )
                         (first + second).toHashSet()
                     }
                 }
 
-                val newOnes = merchantsInBounds.filter { it.id !in seenIds }
+                val newOnes = eventsInBounds.filter { it.id !in seenIds }
                 if (newOnes.isEmpty()) return@launch
 
                 seenIds.addAll(newOnes.map { it.id })
-                merchants.addAll(newOnes)
+                events.addAll(newOnes)
 
-                val next = withContext(Dispatchers.Default) { merchants.toMarkerGeoJson() }
+                val next = withContext(Dispatchers.Default) { events.toEventGeoJson() }
                 geoJson.value = next
             }
         )?.cancel()

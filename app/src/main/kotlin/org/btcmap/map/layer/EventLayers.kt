@@ -1,7 +1,7 @@
 package org.btcmap.map.layer
 
 import android.graphics.Color
-import org.btcmap.map.MapFragment.Companion.ICON_OFFSET_Y
+import org.btcmap.map.ICON_OFFSET_Y
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.Layer
