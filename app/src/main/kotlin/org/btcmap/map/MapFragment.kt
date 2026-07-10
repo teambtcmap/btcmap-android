@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -59,10 +58,7 @@ import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.uri
 import org.btcmap.settings.prefs
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.btcmap.db
 import org.btcmap.sync
@@ -72,13 +68,11 @@ import org.btcmap.map.layer.MERCHANT_MARKER_LAYER_ID
 import org.btcmap.map.layer.createEventLayers
 import org.btcmap.map.layer.createExchangeLayers
 import org.btcmap.map.layer.createMerchantLayers
-import org.btcmap.search.SearchAdapterItem
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.boostedMarkerBackgroundColor
 import org.btcmap.util.openInBrowser
-import java.text.NumberFormat
 
 class MapFragment : Fragment() {
     private var _binding: MapFragmentBinding? = null
@@ -89,6 +83,8 @@ class MapFragment : Fragment() {
     var updateNotificationController: UpdateNotificationController? = null
 
     private var currentCache: Any? = null
+
+    private lateinit var searchController: SearchController
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
@@ -109,6 +105,8 @@ class MapFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        searchController = SearchController(db(), resources)
+
         bottomSheetController = BottomSheetController(
             view = binding.placeBottomSheet,
             viewLifecycleOwner = viewLifecycleOwner,
@@ -300,7 +298,7 @@ class MapFragment : Fragment() {
         binding.searchResults.layoutManager = LinearLayoutManager(requireContext())
         binding.searchResults.adapter = searchAdapter
 
-        searchResults.onEach {
+        searchController.results.onEach {
             searchAdapter.submitList(it) {
                 val layoutManager = binding.searchResults.layoutManager ?: return@submitList
                 layoutManager.scrollToPosition(0)
@@ -346,9 +344,9 @@ class MapFragment : Fragment() {
         binding.searchView.editText.doAfterTextChanged { searchString ->
             binding.map.getMapAsync { map ->
                 viewLifecycleOwner.lifecycleScope.launch {
-                    search(
+                    searchController.search(
                         referenceLocation = map.projection.visibleRegion.latLngBounds.center,
-                        searchString = searchString.toString(),
+                        query = searchString.toString(),
                     )
                 }
             }
@@ -601,59 +599,7 @@ class MapFragment : Fragment() {
         currentCache = null
     }
 
-    private val _searchResults = MutableStateFlow<List<SearchAdapterItem>>(emptyList())
-    val searchResults = _searchResults.asStateFlow()
-
     private lateinit var areasAdapter: AreasAdapter
-
-    suspend fun search(referenceLocation: LatLng, searchString: String) {
-        if (searchString.length < MIN_QUERY_LENGTH) {
-            _searchResults.update { emptyList() }
-        } else {
-            val unsortedPlaces = withContext(Dispatchers.IO) {
-                db().place.selectBySearchString(searchString)
-            }
-
-            val sortedPlaces = unsortedPlaces.sortedBy {
-                getDistanceInMeters(
-                    startLatitude = referenceLocation.latitude,
-                    startLongitude = referenceLocation.longitude,
-                    endLatitude = it.lat,
-                    endLongitude = it.lon,
-                )
-            }
-
-            _searchResults.update { sortedPlaces.map { it.toAdapterItem(referenceLocation) } }
-        }
-    }
-
-    private fun Place.toAdapterItem(referenceLocation: LatLng): SearchAdapterItem {
-        val distanceMeters = referenceLocation.distanceTo(LatLng(lat, lon))
-
-        val distanceString = if (distanceMeters < 1_000) {
-            resources.getString(R.string.s_m, DISTANCE_FORMAT.format(distanceMeters))
-        } else {
-            resources.getString(R.string.s_km, DISTANCE_FORMAT.format(distanceMeters / 1_000))
-        }
-
-        return SearchAdapterItem(
-            placeId = this.id,
-            icon = this.icon,
-            name = this.name ?: "",
-            distanceToUser = distanceString,
-        )
-    }
-
-    private fun getDistanceInMeters(
-        startLatitude: Double,
-        startLongitude: Double,
-        endLatitude: Double,
-        endLongitude: Double,
-    ): Double {
-        val distance = FloatArray(1)
-        Location.distanceBetween(startLatitude, startLongitude, endLatitude, endLongitude, distance)
-        return distance[0].toDouble()
-    }
 
     private suspend fun loadAreas(lat: Double, lon: Double) {
         try {
@@ -703,14 +649,6 @@ class MapFragment : Fragment() {
             setReorderingAllowed(true)
             replace<SettingsFragment>(R.id.fragmentContainerView)
             addToBackStack(null)
-        }
-    }
-
-    companion object {
-        private const val MIN_QUERY_LENGTH = 3
-
-        private val DISTANCE_FORMAT = NumberFormat.getNumberInstance().apply {
-            maximumFractionDigits = 1
         }
     }
 }
