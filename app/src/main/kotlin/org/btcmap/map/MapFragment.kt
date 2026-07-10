@@ -62,9 +62,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import org.btcmap.db
 import org.btcmap.sync
-import org.btcmap.map.layer.EVENT_MARKER_LAYER_ID
-import org.btcmap.map.layer.EXCHANGE_MARKER_LAYER_ID
-import org.btcmap.map.layer.MERCHANT_MARKER_LAYER_ID
 import org.btcmap.map.layer.createEventLayers
 import org.btcmap.map.layer.createExchangeLayers
 import org.btcmap.map.layer.createMerchantLayers
@@ -83,6 +80,7 @@ class MapFragment : Fragment() {
     var updateNotificationController: UpdateNotificationController? = null
 
     private var currentCache: Any? = null
+    private var mapSelectionController: MapSelectionController? = null
 
     private lateinit var searchController: SearchController
 
@@ -157,7 +155,16 @@ class MapFragment : Fragment() {
             it.uiSettings.isLogoEnabled = false
             it.uiSettings.isAttributionEnabled = false
             it.uiSettings.isTiltGesturesEnabled = false
-            it.addMarkerClickListener()
+
+            mapSelectionController = MapSelectionController(
+                map = it,
+                db = db(),
+                onOpenPlace = ::selectPlace,
+                onOpenEventWebsite = { url ->
+                    startActivity(Intent(Intent.ACTION_VIEW, url.toString().toUri()))
+                },
+                onNoHit = { bottomSheetController?.hide() },
+            ).also { controller -> controller.install() }
 
             it.getStyle { style ->
                 if (style.getImage("btcmap-marker") == null) {
@@ -434,6 +441,8 @@ class MapFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mapSelectionController?.detach()
+        mapSelectionController = null
         destroyCurrentCache()
         bottomSheetController = null
         statusBarController?.onDestroyView()
@@ -449,60 +458,6 @@ class MapFragment : Fragment() {
                 Manifest.permission.ACCESS_COARSE_LOCATION,
             )
         )
-    }
-
-    private fun MapLibreMap.addMarkerClickListener() {
-        val layerIds = listOf(
-            MERCHANT_MARKER_LAYER_ID,
-            EXCHANGE_MARKER_LAYER_ID,
-            EVENT_MARKER_LAYER_ID,
-        )
-
-        addOnMapClickListener { point ->
-            val screenLocation = projection.toScreenLocation(point)
-            val features = queryRenderedFeatures(screenLocation, *layerIds.toTypedArray())
-
-            if (features.isEmpty()) {
-                bottomSheetController?.hide()
-                return@addOnMapClickListener false
-            }
-
-            val feature = features[0]
-
-            try {
-                val isEvent =
-                    feature.getProperty("iconId") == null && feature.getProperty("count") == null
-
-                if (isEvent) {
-                    val idValue = feature.getProperty("id")
-                    if (idValue != null) {
-                        val eventId = idValue.asLong
-                        val event = db().event.selectById(eventId)
-                        if (event != null) {
-                            val intent =
-                                Intent(Intent.ACTION_VIEW, event.website.toString().toUri())
-                            startActivity(intent)
-                            return@addOnMapClickListener true
-                        }
-                    }
-                }
-
-                val idValue = feature.getProperty("id")
-
-                if (idValue != null) {
-                    val placeId = idValue.asLong
-                    val place = db().place.selectById(placeId)
-                    if (place != null) {
-                        viewLifecycleOwner.lifecycleScope.launch { selectPlace(place) }
-                    }
-                    return@addOnMapClickListener true
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-            false
-        }
     }
 
     private enum class Filter {
