@@ -1,7 +1,6 @@
 package org.btcmap.map
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -38,11 +37,7 @@ import org.btcmap.api
 import org.btcmap.databinding.MapFragmentBinding
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.location.LocationComponentActivationOptions
-import org.maplibre.android.location.LocationComponentOptions
-import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.Style
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.btcmap.area.AreaFragment
 import org.btcmap.place.isMerchant
@@ -76,6 +71,7 @@ class MapFragment : Fragment() {
     private var currentCache: Any? = null
     private var mapSelectionController: MapSelectionController? = null
     private var mapSetupController: MapSetupController? = null
+    private var locationController: LocationController? = null
 
     private lateinit var searchController: SearchController
 
@@ -83,8 +79,14 @@ class MapFragment : Fragment() {
         ActivityResultContracts.RequestMultiplePermissions(),
     ) {
         if (it.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
-            onLocationPermissionsGranted(true)
+            ensureLocationController().onPermissionGranted(requireContext(), animateToFirstKnown = true)
         }
+    }
+
+    private fun ensureLocationController(): LocationController {
+        val existing = locationController
+        if (existing != null) return existing
+        return LocationController(binding.map).also { locationController = it }
     }
 
     override fun onCreateView(
@@ -168,7 +170,7 @@ class MapFragment : Fragment() {
                 requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            onLocationPermissionsGranted(false)
+            ensureLocationController().onPermissionGranted(requireContext(), animateToFirstKnown = false)
         }
 
         binding.fab.setOnClickListener {
@@ -180,18 +182,7 @@ class MapFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            binding.map.getMapAsync { map ->
-                val lastKnownLocation = map.locationComponent.lastKnownLocation
-
-                if (lastKnownLocation != null) {
-                    map.animateCamera(
-                        CameraUpdateFactory.newLatLngZoom(
-                            LatLng(lastKnownLocation),
-                            14.0,
-                        )
-                    )
-                }
-            }
+            ensureLocationController().zoomToLastKnown()
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -327,51 +318,13 @@ class MapFragment : Fragment() {
         bottomSheetController?.halfExpand()
     }
 
-    @SuppressLint("MissingPermission")
-    private fun onLocationPermissionsGranted(firstTime: Boolean) {
-        binding.map.getMapAsync { map ->
-            map.getStyle { style ->
-                val locationComponentOptions =
-                    LocationComponentOptions.builder(requireContext()).pulseEnabled(true).build()
-                val locationComponentActivationOptions =
-                    buildLocationComponentActivationOptions(style, locationComponentOptions)
-                map.locationComponent.activateLocationComponent(
-                    locationComponentActivationOptions
-                )
-                map.locationComponent.isLocationComponentEnabled = true
-
-                if (firstTime) {
-                    val lastKnownLocation = map.locationComponent.lastKnownLocation
-
-                    if (lastKnownLocation != null) {
-                        map.animateCamera(
-                            CameraUpdateFactory.newLatLngZoom(
-                                LatLng(lastKnownLocation),
-                                14.0,
-                            )
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    private fun buildLocationComponentActivationOptions(
-        style: Style, locationComponentOptions: LocationComponentOptions
-    ): LocationComponentActivationOptions {
-        return LocationComponentActivationOptions.builder(requireContext(), style)
-            .locationComponentOptions(locationComponentOptions).useDefaultLocationEngine(true)
-            .locationEngineRequest(
-                LocationEngineRequest.Builder(750).setFastestInterval(750)
-                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build()
-            ).build()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         mapSelectionController?.detach()
         mapSelectionController = null
         mapSetupController = null
+        locationController?.destroy()
+        locationController = null
         destroyCurrentCache()
         bottomSheetController = null
         statusBarController?.onDestroyView()
@@ -416,9 +369,9 @@ class MapFragment : Fragment() {
 
         binding.map.getMapAsync { map ->
             when (filter) {
-                Filter.MERCHANTS -> showMerchants(map, setup.merchantsSource)
-                Filter.EVENTS -> showEvents(map, setup.eventsSource)
-                Filter.EXCHANGES -> showExchanges(map, setup.exchangesSource)
+                Filter.MERCHANTS -> showCache(map, setup.merchantsSource) { MerchantsCache(map, db()) }
+                Filter.EVENTS -> showCache(map, setup.eventsSource) { EventsCache(map, db()) }
+                Filter.EXCHANGES -> showCache(map, setup.exchangesSource) { ExchangesCache(map, db()) }
             }
         }
     }
@@ -434,32 +387,8 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun showMerchants(map: MapLibreMap, source: GeoJsonSource) {
-        val cache = MerchantsCache(map, db())
-        currentCache = cache
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                cache.geoJson.collectLatest { geoJson ->
-                    source.setGeoJson(geoJson)
-                }
-            }
-        }
-    }
-
-    private fun showEvents(map: MapLibreMap, source: GeoJsonSource) {
-        val cache = EventsCache(map, db())
-        currentCache = cache
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                cache.geoJson.collectLatest { geoJson ->
-                    source.setGeoJson(geoJson)
-                }
-            }
-        }
-    }
-
-    private fun showExchanges(map: MapLibreMap, source: GeoJsonSource) {
-        val cache = ExchangesCache(map, db())
+    private fun showCache(map: MapLibreMap, source: GeoJsonSource, factory: () -> ViewportCache<*>) {
+        val cache = factory()
         currentCache = cache
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {

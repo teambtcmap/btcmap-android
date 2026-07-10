@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference
 abstract class ViewportCache<T : Any>(
     private val map: MapLibreMap,
 ) : MapLibreMap.OnCameraIdleListener {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val pendingQuery = AtomicReference<Job?>(null)
     private val seenIds: MutableSet<Long> = mutableSetOf()
     private val items: MutableSet<T> = mutableSetOf()
