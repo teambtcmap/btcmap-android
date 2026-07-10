@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -199,17 +198,13 @@ class MapFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 binding.sync.isVisible = true
 
-                Log.d("map_fragment", "starting sync")
                 val importResult = BundledPlaces.import(requireContext(), db())
 
-                Log.d("map_fragment", "imported ${importResult.placesImported} places from assets")
                 if (importResult.placesImported > 0) {
                     setFilter(filter)
                 }
 
-                Log.d("map_fragment", "fetching new and updated places")
                 val syncPlacesRes = sync().syncPlaces()
-                Log.d("map_fragment", "got ${syncPlacesRes.rowsAffected} new and updated places")
                 if (syncPlacesRes.rowsAffected > 0) {
                     setFilter(filter)
                 }
@@ -219,9 +214,6 @@ class MapFragment : Fragment() {
                 }
 
                 val syncCommentsRes = sync().syncComments()
-                Log.d(
-                    "map_fragment", "got ${syncCommentsRes.rowsAffected} new and updated comments"
-                )
                 if (syncCommentsRes.rowsAffected > 0 && (filter == Filter.MERCHANTS || filter == Filter.EXCHANGES)) {
                     setFilter(filter)
                 }
@@ -404,8 +396,6 @@ class MapFragment : Fragment() {
     private var filter = Filter.MERCHANTS
 
     private fun setFilter(filter: Filter) {
-        Log.d("map", "filter is set to $filter")
-
         binding.showMerchants.isSelected = filter == Filter.MERCHANTS
         binding.showEvents.isSelected = filter == Filter.EVENTS
         binding.showExchanges.isSelected = filter == Filter.EXCHANGES
@@ -419,7 +409,6 @@ class MapFragment : Fragment() {
 
         val setup = mapSetupController ?: return
 
-        Log.d("map", "cleaning memory caches")
         destroyCurrentCache()
         setup.merchantsSource.setGeoJson(EMPTY_GEOJSON)
         setup.eventsSource.setGeoJson(EMPTY_GEOJSON)
@@ -451,7 +440,6 @@ class MapFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 cache.geoJson.collectLatest { geoJson ->
-                    Log.d("merchants_cache", "geoJson changed")
                     source.setGeoJson(geoJson)
                 }
             }
