@@ -515,11 +515,17 @@ class MapFragment : Fragment() {
 
     private fun setFilter(filter: Filter) {
         Log.d("map", "filter is set to $filter")
-        this.filter = filter
 
         binding.showMerchants.isSelected = filter == Filter.MERCHANTS
         binding.showEvents.isSelected = filter == Filter.EVENTS
         binding.showExchanges.isSelected = filter == Filter.EXCHANGES
+
+        if (filter == this.filter && currentCache != null) {
+            (currentCache as? ViewportCache<*>)?.refresh()
+            return
+        }
+
+        this.filter = filter
 
         Log.d("map", "cleaning memory caches")
         destroyCurrentCache()

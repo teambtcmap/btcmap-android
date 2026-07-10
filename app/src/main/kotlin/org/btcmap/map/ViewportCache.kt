@@ -45,6 +45,7 @@ abstract class ViewportCache<T : Any>(
                 items.addAll(newOnes)
 
                 val next = withContext(Dispatchers.Default) { items.toGeoJson() }
+                if (next == geoJson.value) return@launch
                 geoJson.value = next
             }
         )?.cancel()
@@ -55,6 +56,10 @@ abstract class ViewportCache<T : Any>(
     protected abstract fun idOf(item: T): Long
 
     protected abstract fun Set<T>.toGeoJson(): String
+
+    fun refresh() {
+        loadInBounds(map.projection.visibleRegion.latLngBounds.expand())
+    }
 
     fun destroy() {
         map.removeOnCameraIdleListener(this)
