@@ -56,7 +56,7 @@
                     android:layout_marginTop="16dp"
                     android:autoLink="web"
                     android:drawablePadding="16dp"
-                    android:gravity="center"
+                    android:gravity="start|center_vertical"
                     app:drawableStartCompat="@drawable/icon_earth"
                     app:drawableTint="?attr/colorSecondary"
                     tools:text="btcmap.org/community/grand-paris" />

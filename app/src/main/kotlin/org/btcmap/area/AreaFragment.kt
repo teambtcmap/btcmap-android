@@ -133,7 +133,7 @@ class AreaFragment : Fragment() {
                 binding.icon.load(area.iconWide ?: area.icon)
                 binding.description.isVisible = area.description != null
                 binding.description.text = area.description
-                binding.website.text = area.websiteUrl
+                binding.website.text = (if (areaId == "671") "https://btcmap.org/phuket" else area.websiteUrl)
                     .replace("https://", "")
                     .replace("http://", "")
                     .trimEnd('/')
