@@ -5,8 +5,11 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -28,6 +31,7 @@ import org.btcmap.db.table.event.Event
 import org.btcmap.settings.authorized
 import org.btcmap.settings.prefs
 import org.btcmap.util.CronUtils
+import org.btcmap.util.openInBrowser
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -204,25 +208,73 @@ class AreaFragment : Fragment() {
                 val dateFormatter = DateTimeFormatter.ofPattern("EEE, MMM d 'at' HH:mm")
 
                 for ((event, dates) in upcomingEvents) {
-                    val headerView = TextView(requireContext()).apply {
-                        text = event.name
-                        setTextAppearance(com.google.android.material.R.style.TextAppearance_MaterialComponents_Headline6)
-                        setPadding(0, 32, 0, 8)
-                    }
-                    container.addView(headerView)
-
                     for (date in dates.take(5)) {
+                        val itemBlock = LinearLayout(requireContext()).apply {
+                            orientation = LinearLayout.HORIZONTAL
+                            val itemParams = ViewGroup.MarginLayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                            )
+                            itemParams.bottomMargin = (16 * resources.displayMetrics.density).toInt()
+                            layoutParams = itemParams
+                            val pad = (16 * resources.displayMetrics.density).toInt()
+                            setPadding(pad, pad, pad, pad)
+                            gravity = Gravity.CENTER_VERTICAL
+                            background = androidx.core.content.ContextCompat.getDrawable(
+                                context,
+                                R.drawable.event_card_background,
+                            )
+                            isClickable = true
+                            isFocusable = true
+                            setOnClickListener {
+                                openInBrowser(event.website.toString().toUri())
+                            }
+                        }
+
+                        val iconView = ImageView(requireContext()).apply {
+                            setImageResource(R.drawable.icon_event)
+                            val tint = com.google.android.material.color.MaterialColors.getColor(
+                                this,
+                                com.google.android.material.R.attr.colorSecondary,
+                                0,
+                            )
+                            imageTintList = android.content.res.ColorStateList.valueOf(tint)
+                            val iconSize = (24 * resources.displayMetrics.density).toInt()
+                            val iconParams = ViewGroup.MarginLayoutParams(iconSize, iconSize)
+                            val iconEnd = (12 * resources.displayMetrics.density).toInt()
+                            iconParams.marginEnd = iconEnd
+                            layoutParams = iconParams
+                        }
+                        itemBlock.addView(iconView)
+
+                        val textBlock = LinearLayout(requireContext()).apply {
+                            orientation = LinearLayout.VERTICAL
+                            layoutParams = LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                            )
+                        }
+
+                        val nameView = TextView(requireContext()).apply {
+                            text = event.name
+                            setTextAppearance(com.google.android.material.R.style.TextAppearance_MaterialComponents_Headline6)
+                            setPadding(0, 0, 0, 4)
+                        }
+                        textBlock.addView(nameView)
+
                         val dateView = TextView(requireContext()).apply {
                             text = date.format(dateFormatter)
                             setTextAppearance(com.google.android.material.R.style.TextAppearance_MaterialComponents_Body1)
-                            setPadding(0, 4, 0, 4)
-                            gravity = Gravity.CENTER_VERTICAL
+                            setPadding(0, 4, 0, 0)
                         }
-                        container.addView(dateView)
+                        textBlock.addView(dateView)
+
+                        itemBlock.addView(textBlock)
+
+                        container.addView(itemBlock)
                     }
                 }
 
-                binding.upcomingEventsHeader.isVisible = true
                 binding.upcomingEventsContainer.isVisible = true
             } catch (e: Throwable) {
                 e.printStackTrace()
