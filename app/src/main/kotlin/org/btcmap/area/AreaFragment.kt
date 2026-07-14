@@ -32,6 +32,7 @@ import org.btcmap.settings.authorized
 import org.btcmap.settings.prefs
 import org.btcmap.util.CronUtils
 import org.btcmap.util.openInBrowser
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -191,24 +192,24 @@ class AreaFragment : Fragment() {
                 val events = withContext(Dispatchers.IO) {
                     db().event.selectByAreaId(areaId.toLong())
                 }
-                val eventsWithSchedule = events.filter { it.cronSchedule != null }
-                if (eventsWithSchedule.isEmpty()) return@launch
-
-                val upcomingEvents = mutableListOf<Pair<Event, List<ZonedDateTime>>>()
-                for (event in eventsWithSchedule) {
-                    val nextDates = CronUtils.nextExecutions(event.cronSchedule!!, 5)
-                    if (nextDates.isNotEmpty()) {
-                        upcomingEvents.add(event to nextDates)
+                val now = ZonedDateTime.now(ZoneId.systemDefault())
+                val upcomingOccurrences = events.flatMap { event ->
+                    val dates = if (event.cronSchedule != null) {
+                        CronUtils.nextExecutions(event.cronSchedule, 5, from = now)
+                    } else if (event.startsAt.isAfter(now)) {
+                        listOf(event.startsAt)
+                    } else {
+                        emptyList()
                     }
-                }
+                    dates.map { event to it }
+                }.sortedBy { it.second }
 
-                if (upcomingEvents.isEmpty()) return@launch
+                if (upcomingOccurrences.isEmpty()) return@launch
 
                 val container = binding.upcomingEventsContainer
                 val dateFormatter = DateTimeFormatter.ofPattern("EEE, MMM d 'at' HH:mm")
 
-                for ((event, dates) in upcomingEvents) {
-                    for (date in dates.take(5)) {
+                for ((event, date) in upcomingOccurrences) {
                         val itemBlock = LinearLayout(requireContext()).apply {
                             orientation = LinearLayout.HORIZONTAL
                             val itemParams = ViewGroup.MarginLayoutParams(
@@ -272,7 +273,6 @@ class AreaFragment : Fragment() {
                         itemBlock.addView(textBlock)
 
                         container.addView(itemBlock)
-                    }
                 }
 
                 binding.upcomingEventsContainer.isVisible = true
