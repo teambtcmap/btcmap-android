@@ -376,6 +376,14 @@ var SharedPreferences.showDebugInfo: Boolean
         edit { putBoolean(KEY_SHOW_DEBUG_INFO, value) }
     }
 
+private const val KEY_SHOW_ATTRIBUTION = "show_attribution"
+
+var SharedPreferences.showAttribution: Boolean
+    get() = getBoolean(KEY_SHOW_ATTRIBUTION, true)
+    set(value) {
+        edit { putBoolean(KEY_SHOW_ATTRIBUTION, value) }
+    }
+
 private const val KEY_VERIFIED_FILTER_YEARS = "verified_filter_years"
 
 var SharedPreferences.verifiedFilterYears: Int

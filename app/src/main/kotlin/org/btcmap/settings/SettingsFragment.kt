@@ -60,6 +60,11 @@ class SettingsFragment : Fragment() {
             refreshAllColors()
         }
 
+        binding.showAttribution.isChecked = prefs.showAttribution
+        binding.showAttribution.setOnCheckedChangeListener { _, isChecked ->
+            prefs.showAttribution = isChecked
+        }
+
         binding.showDebugInfo.isChecked = prefs.showDebugInfo
         binding.showDebugInfo.setOnCheckedChangeListener { _, isChecked ->
             prefs.showDebugInfo = isChecked

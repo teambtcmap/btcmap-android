@@ -153,4 +153,17 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/attribution"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="32dp"
+        android:paddingHorizontal="6dp"
+        android:paddingVertical="2dp"
+        android:textColor="@color/osm_attribution_text"
+        android:textSize="11sp"
+        android:text="@string/osm_attribution"
+        android:contentDescription="@string/osm_attribution" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

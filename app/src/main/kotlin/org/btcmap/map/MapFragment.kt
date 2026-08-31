@@ -44,6 +44,7 @@ import org.btcmap.place.isMerchant
 import org.btcmap.search.SearchAdapter
 import org.btcmap.settings.MapStyle
 import org.btcmap.settings.SettingsFragment
+import org.btcmap.settings.showAttribution
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.mapViewport
 import org.btcmap.settings.markerBackgroundColor
@@ -130,6 +131,11 @@ class MapFragment : Fragment() {
                 R.id.settings -> navigateToSettings()
             }
             true
+        }
+
+        binding.attribution.isVisible = prefs.showAttribution
+        binding.attribution.setOnClickListener {
+            openInBrowser(getString(R.string.osm_attribution_url).toUri())
         }
 
         mapSetupController = MapSetupController(

@@ -109,4 +109,7 @@
     <string name="activity_interval_half_year" tools:ignore="MissingTranslation">6m</string>
     <string name="activity_interval_year" tools:ignore="MissingTranslation">1y</string>
     <string name="filter" tools:ignore="MissingTranslation">Filter</string>
+    <string name="show_attribution" tools:ignore="MissingTranslation">Show attribution</string>
+    <string name="osm_attribution" tools:ignore="MissingTranslation">© OpenStreetMap contributors</string>
+    <string name="osm_attribution_url" tools:ignore="MissingTranslation">https://www.openstreetmap.org/about/</string>
 </resources>
