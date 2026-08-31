@@ -39,6 +39,22 @@
 ./gradlew lintRelease        # Run lint on release build
 ```
 
+## Development Environment (devtools script)
+
+The `./devtools` wrapper manages the emulator and app deployment. Default device is `emulator-5554` running the `Resizable_Experimental` AVD; debug package is `org.btcmap.debug`.
+
+```bash
+./devtools emulator start    # Boot AVD asynchronously (logs to emulator.log)
+./devtools emulator stop     # Shut down emulator and remove log
+
+./devtools app install       # Build and install debug APK
+./devtools app run           # Build, install and launch the app via monkey
+./devtools app uninstall     # Remove debug package from device
+./devtools app deploy        # Build and rsync beta APK to btcmap-api server
+```
+
+When asked to "launch", "run", or "start" the app, use `./devtools app run` (it builds, installs and launches in one step). If the emulator is not running, first run `./devtools emulator start` and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy` builds and pushes APK artifacts to the remote `btcmap-api` host — use only when explicitly asked to publish a beta build.
+
 ## Code Style Guidelines
 
 ### Naming Conventions
