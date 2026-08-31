@@ -11,7 +11,6 @@
 <p align="center">
 <a href="https://github.com/bubelov/btcmap-android/releases" alt="GitHub release"><img src="https://img.shields.io/github/release/bubelov/btcmap-android.svg" ></a>
 <a href="https://www.gnu.org/licenses/gpl-3.0" alt="License: GPLv3"><img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg"></a>
-<a href="https://github.com/bubelov/btcmap-android/actions" alt="Build Status"><img src="https://github.com/teambtcmap/btcmap-android/actions/workflows/ci.yml/badge.svg"></a>
 </p>
 
 ## Screenshots
@@ -92,3 +91,33 @@ minutes.
 
 OpenStreetMap might have outdated information about some places, you can delete the `currency:XBT`
 tag or set it to `no` in order to remove this place from BTC Map.
+
+## Verifying signatures
+
+Release APKs are signed by a long-lived release key owned by the BTC Map team.
+You can verify the signature by checking the certificate's SHA-256 fingerprint:
+
+```
+a63de0923b0c27e3de6ef4e90f3a0d81cca917f9689d2638f1b31949657f1435
+```
+
+### With apksigner
+
+The Android SDK build-tools include `apksigner`:
+
+```
+apksigner verify --print-certs path/to/app.apk
+```
+
+The `SHA-256 digest` line for `Signer #1 certificate` should match the
+fingerprint above. The certificate subject is `O=Team BTC Map`.
+
+### With keytool
+
+If you'd rather inspect the certificate from a downloaded APK directly, unzip it
+and pass the META-INF signature block to `keytool` (the exact filename under
+`META-INF/` varies between builds):
+
+```
+unzip -p app.apk META-INF/*.RSA | keytool -printcert | grep SHA256
+```

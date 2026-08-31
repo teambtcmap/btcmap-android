@@ -1,4 +1,12 @@
 import java.net.URI
+import java.util.Properties
+
+val keystoreProperties = Properties().apply {
+    val localProperties = rootProject.file("local.properties")
+    if (localProperties.exists()) {
+        load(localProperties.inputStream())
+    }
+}
 
 plugins {
     alias(libs.plugins.android.application)
@@ -23,6 +31,18 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            val keystorePath = keystoreProperties.getProperty("release.keystore.path")
+            if (!keystorePath.isNullOrBlank()) {
+                storeFile = rootProject.file(keystorePath)
+                storePassword = keystoreProperties.getProperty("release.keystore.password")
+                keyAlias = keystoreProperties.getProperty("release.key.alias")
+                keyPassword = keystoreProperties.getProperty("release.key.password")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -37,7 +57,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = signingConfigs.getByName("debug")
+            val keystorePath = keystoreProperties.getProperty("release.keystore.path")
+            signingConfig = if (!keystorePath.isNullOrBlank()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 
