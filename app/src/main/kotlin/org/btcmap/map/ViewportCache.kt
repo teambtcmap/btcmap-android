@@ -44,7 +44,8 @@ abstract class ViewportCache<T : Any>(
                 seenIds.addAll(newOnes.map { idOf(it) })
                 items.addAll(newOnes)
 
-                val next = withContext(Dispatchers.Default) { items.toGeoJson() }
+                val snapshot = items.toSet()
+                val next = withContext(Dispatchers.Default) { snapshot.toGeoJson() }
                 if (next == geoJson.value) return@launch
                 geoJson.value = next
             }
