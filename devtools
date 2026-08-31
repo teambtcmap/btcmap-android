@@ -1,0 +1,179 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+print_usage() {
+  cat <<EOF
+devtools — manage the BTC Map Android dev environment.
+
+Usage:
+  ./devtools emulator start    Boot the AVD asynchronously
+  ./devtools emulator stop     Shut the emulator down cleanly
+  ./devtools app install       Install debug build
+  ./devtools app run           Install and run debug build
+  ./devtools app uninstall     Uninstall the app
+  ./devtools app deploy        Build and deploy beta APK
+EOF
+}
+
+print_usage_emulator() {
+  cat <<EOF
+Usage: ./devtools emulator <command>
+
+Commands:
+  start    Boot the AVD asynchronously
+  stop     Shut the emulator down cleanly
+EOF
+}
+
+print_usage_app() {
+  cat <<EOF
+Usage: ./devtools emulator <command>
+
+Commands:
+  install      Install debug build
+  run          Install and run debug build
+  uninstall    Uninstall the app
+  deploy       Build and deploy beta APK
+EOF
+}
+
+# START emulator section
+
+cmd_emulator_start() {
+  # Detach from the shell so the script can exit cleanly while the
+  # emulator keeps running.
+  nohup setsid emulator -avd Resizable_Experimental -gpu host > emulator.log 2>&1 < /dev/null & disown
+}
+
+cmd_emulator_stop() {
+  adb devices | grep emulator | cut -f1 | while read line; do adb -s $line emu kill; done
+  rm emulator.log
+}
+
+cmd_emulator() {
+  local sub="${1:-help}"
+  shift || true
+  case "$sub" in
+    start)     cmd_emulator_start ;;
+    stop)      cmd_emulator_stop ;;
+    help|-h|--help) print_usage_emulator ;;
+    *) err "Unknown emulator command: $sub"; print_usage_emulator; return 1 ;;
+  esac
+}
+
+# END emulator section
+
+# START app section
+
+cmd_app_install() {
+  local device="emulator-5554"
+  local apk_path="./app/build/outputs/apk/debug/app-x86_64-debug.apk"
+
+  if ! adb devices | grep -q "^$device[[:space:]]"; then
+    echo "Error: emulator $device is not running. Start it with: ./devtools emulator start" >&2
+    return 1
+  fi
+
+  echo "Assembling debug APK..."
+  ./gradlew assembleDebug "$@"
+
+  if [ ! -f "$apk_path" ]; then
+    echo "Error: APK not found at $apk_path" >&2
+    return 1
+  fi
+
+  echo "Installing $apk_path on $device..."
+  adb -s "$device" install -r -t "$apk_path"
+}
+
+cmd_app_run() {
+  local device="emulator-5554"
+  local package="org.btcmap.debug"
+  local apk_path="./app/build/outputs/apk/debug/app-x86_64-debug.apk"
+
+  if ! adb devices | grep -q "^$device[[:space:]]"; then
+    echo "Error: emulator $device is not running. Start it with: ./devtools emulator start" >&2
+    return 1
+  fi
+
+  echo "Assembling debug APK..."
+  ./gradlew assembleDebug "$@"
+
+  if [ ! -f "$apk_path" ]; then
+    echo "Error: APK not found at $apk_path" >&2
+    return 1
+  fi
+
+  echo "Installing $apk_path on $device..."
+  adb -s "$device" install -r -t "$apk_path"
+
+  echo "Launching $package..."
+  adb -s "$device" shell monkey -p "$package" -c android.intent.category.LAUNCHER 1
+
+  echo "Process status:"
+  adb -s "$device" shell ps -A | grep btcmap || echo "(process not visible yet — give it a moment)"
+}
+
+cmd_app_uninstall() {
+  local device="emulator-5554"
+  local package="org.btcmap.debug"
+
+  if ! adb devices | grep -q "^$device[[:space:]]"; then
+    echo "Error: emulator $device is not running. Start it with: ./devtools emulator start" >&2
+    return 1
+  fi
+
+  if ! adb -s "$device" shell pm list packages "$package" 2>/dev/null \
+      | tr -d '\r' | grep -qx "package:$package"; then
+    echo "$package is not installed on $device. Nothing to do."
+    return 0
+  fi
+
+  echo "Uninstalling $package from $device..."
+  local result
+  if result=$(adb -s "$device" uninstall "$package" 2>&1); then
+    echo "$result"
+  else
+    echo "Uninstall failed: $result" >&2
+    return 1
+  fi
+}
+
+cmd_app_deploy() {
+  ./gradlew assembleDebug
+
+  APK_DIR="app/build/outputs/apk/debug"
+  DEST="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
+
+  rsync -avz --progress "$APK_DIR/app-arm64-v8a-debug.apk" "$DEST/beta.apk"
+  rsync -avz --progress "$APK_DIR/app-universal-debug.apk" "$DEST/beta-universal.apk"
+}
+
+cmd_app() {
+  local target="${1:-help}"
+  shift || true
+  case "$target" in
+    install) cmd_app_install "$@" ;;
+    run) cmd_app_run "$@" ;;
+    uninstall) cmd_app_uninstall "$@" ;;
+    deploy) cmd_app_deploy "$@" ;;
+    help|-h|--help) print_usage_app ;;
+    *) err "Unknown deploy target: $target"; print_usage_app; return 1 ;;
+  esac
+}
+
+# END app section
+
+main() {
+  local cmd="${1:-help}"
+  shift || true
+  case "$cmd" in
+    emulator) cmd_emulator "$@" ;;
+    app) cmd_app "$@" ;;
+    help|-h|--help) print_usage ;;
+    *) err "Unknown command: $cmd"; print_usage; return 1 ;;
+  esac
+}
+
+main "$@"

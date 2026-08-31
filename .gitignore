@@ -21,3 +21,5 @@ app/src/main/assets/bundled-places.json
 # Signed APK dirs
 app/fdroid
 app/play
+
+emulator.log
