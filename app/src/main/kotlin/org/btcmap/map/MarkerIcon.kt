@@ -12,8 +12,8 @@ import org.maplibre.android.style.expressions.Expression
 import org.btcmap.util.iconTypeface
 
 private val KNOWN_ICONS = """
-        account_balance      
-        adult_content        
+        18_up_rating         
+        account_balance
         agriculture          
         airport_shuttle      
         architecture         
@@ -53,12 +53,14 @@ private val KNOWN_ICONS = """
         currency_exchange    
         delete               
         dentistry            
+        destruction          
         design_services      
         diamond              
         directions_boat      
         directions_car       
         directions_walk      
         dns                  
+        dresser              
         edit                 
         electric_bolt        
         electrical_services  
@@ -66,6 +68,7 @@ private val KNOWN_ICONS = """
         engineering          
         event                
         factory              
+        favorite             
         fitness_center       
         flight_takeoff       
         footprint            
@@ -83,7 +86,7 @@ private val KNOWN_ICONS = """
         hvac                 
         icecream             
         imagesearch_roller   
-        info_outline         
+        info                 
         kayaking             
         kitesurfing          
         lan                  
@@ -170,6 +173,7 @@ private val KNOWN_ICONS = """
         volunteer_activism   
         warehouse            
         watch                
+        water_drop           
         water_pump           
         wc                   
         window               
