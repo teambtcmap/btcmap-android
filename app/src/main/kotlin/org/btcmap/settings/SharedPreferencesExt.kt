@@ -100,17 +100,17 @@ fun MapStyle.uri(context: Context): String {
             val nightMode =
                 context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
             if (nightMode) {
-                "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+                "asset://map-styles/carto-dark-matter/style.json"
             } else {
-                "https://static.btcmap.org/map-styles/light.json"
+                "asset://map-styles/light/style.json"
             }
         }
 
-        MapStyle.Liberty -> "https://tiles.openfreemap.org/styles/liberty"
-        MapStyle.Positron -> "https://tiles.openfreemap.org/styles/positron"
-        MapStyle.Bright -> "https://tiles.openfreemap.org/styles/bright"
-        MapStyle.Dark -> "https://static.btcmap.org/map-styles/dark.json"
-        MapStyle.CartoDarkMatter -> "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+        MapStyle.Liberty -> "asset://map-styles/liberty/style.json"
+        MapStyle.Positron -> "asset://map-styles/positron/style.json"
+        MapStyle.Bright -> "asset://map-styles/bright/style.json"
+        MapStyle.Dark -> "asset://map-styles/dark/style.json"
+        MapStyle.CartoDarkMatter -> "asset://map-styles/carto-dark-matter/style.json"
     }
 }
 

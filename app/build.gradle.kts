@@ -1,5 +1,6 @@
 import java.net.URI
 import java.util.Properties
+import org.gradle.api.GradleException
 
 val keystoreProperties = Properties().apply {
     val localProperties = rootProject.file("local.properties")
@@ -147,5 +148,27 @@ tasks.register<DefaultTask>("bundleData") {
             URI("https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,name,comments,boosted_until").toURL()
                 .readText()
         )
+    }
+}
+
+tasks.register<DefaultTask>("bundleMapStyles") {
+    val assetsDir = File(projectDir, "src/main/assets/map-styles")
+    outputs.dir(assetsDir)
+    doLast {
+        val script = File(projectDir, "bundle_map_styles.py")
+        if (!script.exists()) {
+            throw GradleException("Missing bundler script at $script")
+        }
+        val args = mutableListOf("python3", script.absolutePath)
+        if (project.hasProperty("force")) {
+            args += "--force"
+        }
+        val process = ProcessBuilder(args).redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        println(output)
+        val exitCode = process.waitFor()
+        if (exitCode != 0) {
+            throw GradleException("bundle_map_styles.py failed with exit code $exitCode")
+        }
     }
 }
