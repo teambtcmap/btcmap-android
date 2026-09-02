@@ -50,10 +50,11 @@ The `./devtools` wrapper manages the emulator and app deployment. Default device
 ./devtools app install       # Build and install debug APK
 ./devtools app run           # Build, install and launch the app via monkey
 ./devtools app uninstall     # Remove debug package from device
-./devtools app deploy        # Build and rsync beta APK to btcmap-api server
+./devtools app deploy-beta     # Build and rsync beta APK to btcmap-api server
+./devtools app deploy-release  # Build and rsync release APK to btcmap-api server
 ```
 
-When asked to "launch", "run", or "start" the app, use `./devtools app run` (it builds, installs and launches in one step). If the emulator is not running, first run `./devtools emulator start` and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy` builds and pushes APK artifacts to the remote `btcmap-api` host — use only when explicitly asked to publish a beta build.
+When asked to "launch", "run", or "start" the app, use `./devtools app run` (it builds, installs and launches in one step). If the emulator is not running, first run `./devtools emulator start` and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy-beta` and `./devtools app deploy-release` build and push APK artifacts to the remote `btcmap-api` host — use only when explicitly asked to publish a build.
 
 ## Code Style Guidelines
 
