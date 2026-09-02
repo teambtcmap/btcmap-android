@@ -1,8 +1,10 @@
 package org.btcmap.map
 
 import org.btcmap.db.table.place.Marker
+import java.time.ZonedDateTime
 
 fun Iterable<Marker>.toMarkerGeoJson(): String {
+    val outdatedThreshold = ZonedDateTime.now().minusYears(1)
     val sb = StringBuilder()
     sb.append(
         """
@@ -16,6 +18,7 @@ fun Iterable<Marker>.toMarkerGeoJson(): String {
         if (index > 0) {
             sb.append(",")
         }
+        val outdated = place.verifiedAt == null || place.verifiedAt.isBefore(outdatedThreshold)
         sb.append(
             """
             {
@@ -30,7 +33,8 @@ fun Iterable<Marker>.toMarkerGeoJson(): String {
                     "iconId": "${place.icon}",
                     "requiresCompanionApp": ${place.requiredAppUrl != null},
                     "comments": ${place.comments},
-                    "boosted": ${place.boostedUntil != null}
+                    "boosted": ${place.boostedUntil != null},
+                    "outdated": $outdated
                 }
             }
         """.trimIndent()

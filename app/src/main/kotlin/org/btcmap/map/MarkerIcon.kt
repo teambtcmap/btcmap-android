@@ -11,6 +11,8 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.btcmap.util.iconTypeface
 
+private val OUTDATED_ICON_COLOR = 0xFFBDBDBD.toInt()
+
 private val KNOWN_ICONS = """
         18_up_rating         
         account_balance
@@ -182,18 +184,20 @@ private val KNOWN_ICONS = """
 
 fun init(context: Context, style: Style) {
     KNOWN_ICONS.forEach { icon ->
-        val bitmap = generateIconBitmap(context, icon)
-        style.addImage("marker-icon-$icon", bitmap)
+        val white = generateIconBitmap(context, icon, textColor = Color.WHITE)
+        style.addImage("marker-icon-$icon", white)
+        val outdated = generateIconBitmap(context, icon, textColor = OUTDATED_ICON_COLOR)
+        style.addImage("marker-icon-$icon-outdated", outdated)
     }
 }
 
-fun matcher(): List<Expression> {
+fun matcher(suffix: String = ""): List<Expression> {
     return buildList {
         KNOWN_ICONS.forEach { icon ->
             add(Expression.literal(icon))
-            add(Expression.literal("marker-icon-$icon"))
+            add(Expression.literal("marker-icon-$icon$suffix"))
         }
-        add(Expression.literal("marker-icon-storefront"))
+        add(Expression.literal("marker-icon-storefront$suffix"))
     }
 }
 
@@ -201,7 +205,7 @@ private fun generateIconBitmap(
     context: Context,
     character: String,
     textSize: Float = context.dpToPx(24).toFloat(),
-    textColor: Int = Color.WHITE
+    textColor: Int = Color.WHITE,
 ): Bitmap {
     val paint = Paint().apply {
         color = textColor

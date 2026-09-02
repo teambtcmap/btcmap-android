@@ -13,6 +13,8 @@ import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 
 const val MERCHANT_MARKER_LAYER_ID = "merchant_marker"
+const val MERCHANT_MARKER_OUTDATED_LAYER_ID = "merchant_marker_outdated"
+const val MERCHANT_MARKER_ICON_LAYER_ID = "merchant_marker_icon"
 
 fun createMerchantLayers(
     markerBackgroundColor: Int,
@@ -60,32 +62,59 @@ fun createMerchantLayers(
             )
         }
 
+    val pinImageExpression = Expression.switchCase(
+        Expression.get("boosted"),
+        Expression.literal("btcmap-marker-boosted"),
+        Expression.literal("btcmap-marker")
+    )
+
     val markerLayer =
         SymbolLayer(MERCHANT_MARKER_LAYER_ID, merchantsSource.id).apply {
             setProperties(
-                PropertyFactory.iconImage(
-                    Expression.switchCase(
-                        Expression.get("boosted"),
-                        Expression.literal("btcmap-marker-boosted"),
-                        Expression.literal("btcmap-marker")
-                    )
-                ),
+                PropertyFactory.iconImage(pinImageExpression),
                 PropertyFactory.iconAnchor(Expression.literal("bottom")),
                 PropertyFactory.iconAllowOverlap(true),
                 PropertyFactory.iconIgnorePlacement(true)
             )
             setFilter(
-                Expression.neq(Expression.get("cluster"), true)
+                Expression.all(
+                    Expression.neq(Expression.get("cluster"), true),
+                    Expression.neq(Expression.get("outdated"), true)
+                )
+            )
+        }
+
+    val markerLayerOutdated =
+        SymbolLayer(MERCHANT_MARKER_OUTDATED_LAYER_ID, merchantsSource.id).apply {
+            setProperties(
+                PropertyFactory.iconImage(pinImageExpression),
+                PropertyFactory.iconAnchor(Expression.literal("bottom")),
+                PropertyFactory.iconAllowOverlap(true),
+                PropertyFactory.iconIgnorePlacement(true),
+                PropertyFactory.iconOpacity(0.85f)
+            )
+            setFilter(
+                Expression.all(
+                    Expression.neq(Expression.get("cluster"), true),
+                    Expression.eq(Expression.get("outdated"), true)
+                )
             )
         }
 
     val markerIconsLayer =
-        SymbolLayer("merchant_marker_icon", merchantsSource.id).apply {
+        SymbolLayer(MERCHANT_MARKER_ICON_LAYER_ID, merchantsSource.id).apply {
             setProperties(
                 PropertyFactory.iconImage(
-                    Expression.match(
-                        Expression.get("iconId"),
-                        *matcher().toTypedArray()
+                    Expression.switchCase(
+                        Expression.get("outdated"),
+                        Expression.match(
+                            Expression.get("iconId"),
+                            *matcher(suffix = "-outdated").toTypedArray()
+                        ),
+                        Expression.match(
+                            Expression.get("iconId"),
+                            *matcher().toTypedArray()
+                        )
                     )
                 ),
                 PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
@@ -150,6 +179,7 @@ fun createMerchantLayers(
             clusterBackgroundLayer,
             clusterCountLayer,
             markerLayer,
+            markerLayerOutdated,
             markerIconsLayer,
             markerCommentCountBackground,
             markerCommentsCount,

@@ -13,6 +13,8 @@ import org.btcmap.map.layer.EVENT_MARKER_LAYER_ID
 import org.btcmap.map.layer.EXCHANGE_MARKER_LAYER_ID
 import org.btcmap.map.layer.MERCHANT_MARKER_LAYER_ID
 import org.maplibre.android.maps.MapLibreMap
+import org.btcmap.map.layer.MERCHANT_MARKER_ICON_LAYER_ID
+import org.btcmap.map.layer.MERCHANT_MARKER_OUTDATED_LAYER_ID
 
 class MapSelectionController(
     private val map: MapLibreMap,
@@ -39,6 +41,8 @@ class MapSelectionController(
         val features = map.queryRenderedFeatures(
             screenLocation,
             MERCHANT_MARKER_LAYER_ID,
+            MERCHANT_MARKER_OUTDATED_LAYER_ID,
+            MERCHANT_MARKER_ICON_LAYER_ID,
             EXCHANGE_MARKER_LAYER_ID,
             EVENT_MARKER_LAYER_ID,
         )

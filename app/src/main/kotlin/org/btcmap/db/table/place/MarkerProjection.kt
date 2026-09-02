@@ -3,6 +3,8 @@ package org.btcmap.db.table.place
 import androidx.sqlite.SQLiteStatement
 import org.btcmap.db.getLongOrNull
 import org.btcmap.db.getTextOrNull
+import org.btcmap.db.getZonedDateTimeOrNull
+import java.time.ZonedDateTime
 
 typealias Marker = MarkerProjection
 
@@ -14,9 +16,10 @@ data class MarkerProjection(
     val boostedUntil: String?,
     val requiredAppUrl: String?,
     val comments: Long,
+    val verifiedAt: ZonedDateTime?,
 ) {
     companion object {
-        const val COLUMNS = "$ID, $LAT, $LON, $ICON, $BOOSTED_UNTIL, $REQUIRED_APP_URL, $COMMENTS"
+        const val COLUMNS = "$ID, $LAT, $LON, $ICON, $BOOSTED_UNTIL, $REQUIRED_APP_URL, $COMMENTS, $VERIFIED_AT"
 
         fun fromStatement(stmt: SQLiteStatement): MarkerProjection {
             return MarkerProjection(
@@ -27,6 +30,7 @@ data class MarkerProjection(
                 boostedUntil = stmt.getTextOrNull(4),
                 requiredAppUrl = stmt.getTextOrNull(5),
                 comments = stmt.getLongOrNull(6) ?: 0,
+                verifiedAt = stmt.getZonedDateTimeOrNull(7),
             )
         }
     }

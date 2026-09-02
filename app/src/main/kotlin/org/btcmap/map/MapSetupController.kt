@@ -54,6 +54,7 @@ class MapSetupController(
                 if (style.getImage("btcmap-marker") == null) {
                     val drawable =
                         AppCompatResources.getDrawable(mapView.context, R.drawable.map_marker)!!
+                            .mutate()
                     DrawableCompat.setTint(drawable, markerBackgroundColor)
                     style.addImage("btcmap-marker", drawable)
                 }
@@ -61,6 +62,7 @@ class MapSetupController(
                 if (style.getImage("btcmap-marker-boosted") == null) {
                     val drawable =
                         AppCompatResources.getDrawable(mapView.context, R.drawable.map_marker)!!
+                            .mutate()
                     DrawableCompat.setTint(drawable, boostedMarkerBackgroundColor)
                     style.addImage("btcmap-marker-boosted", drawable)
                 }
