@@ -48,7 +48,12 @@ data class ActivityFeedItem(
 )
 
 sealed class SearchResult {
-    data class Area(val id: Long, val name: String, val bbox: List<Double>?) : SearchResult()
+    data class Area(
+        val id: Long,
+        val name: String,
+        val bbox: List<Double>?,
+        val iconUrl: String?,
+    ) : SearchResult()
     data class Place(
         val id: Long,
         val name: String,
@@ -425,6 +430,11 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                         null
                     } else {
                         item.getAsJsonArray("bbox").map { it.asDouble }
+                    },
+                    iconUrl = if (!item.has("icon") || item.get("icon").isJsonNull) {
+                        null
+                    } else {
+                        item.get("icon").asString
                     },
                 )
                 else -> SearchResult.Place(

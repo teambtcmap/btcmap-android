@@ -6,9 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,21 +66,8 @@ class SearchController(
         val rawResults = fetchResults(query, referenceLocation) ?: return
         if (currentQuery != query) return
 
-        val areaIds = rawResults.filterIsInstance<SearchResult.Area>().map { it.id }
-        val missingIconIds = areaIds.filter { it !in areaIconCache }
-        if (missingIconIds.isNotEmpty()) {
-            val fetched = coroutineScope {
-                val deferreds = missingIconIds.map { id ->
-                    async(Dispatchers.IO) {
-                        runCatching { api.getArea(id.toString()).icon }.getOrNull()
-                    }
-                }
-                deferreds.map { it.await() }
-            }
-            if (currentQuery != query) return
-            missingIconIds.zip(fetched).forEach { (id, icon) ->
-                areaIconCache[id] = icon
-            }
+        rawResults.filterIsInstance<SearchResult.Area>().forEach { area ->
+            areaIconCache[area.id] = area.iconUrl
         }
 
         if (currentQuery != query) return
@@ -145,7 +130,7 @@ class SearchController(
                 SearchAdapterItem.Area(
                     areaId = id,
                     bbox = bbox,
-                    iconUrl = areaIconCache[id],
+                    iconUrl = iconUrl ?: areaIconCache[id],
                     icon = AREA_ICON,
                     name = name,
                     distanceToUser = meters?.let { formatDistance(it) },

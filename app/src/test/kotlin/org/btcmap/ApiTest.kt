@@ -158,7 +158,7 @@ class ApiTest {
                 """
                 {
                   "results": [
-                    { "type": "area", "id": 1, "name": "Prague", "bbox": [14.22, 49.94, 14.71, 50.18] },
+                    { "type": "area", "id": 1, "name": "Prague", "bbox": [14.22, 49.94, 14.71, 50.18], "icon": "https://example.com/cz.svg" },
                     { "type": "place", "id": 28779, "name": "Bitcoin Coffee", "lat": 50.08, "lon": 14.43, "icon": "local_cafe" }
                   ]
                 }
@@ -177,6 +177,7 @@ class ApiTest {
         Assert.assertTrue(results[0] is SearchResult.Area)
         Assert.assertEquals(1L, (results[0] as SearchResult.Area).id)
         Assert.assertEquals(listOf(14.22, 49.94, 14.71, 50.18), (results[0] as SearchResult.Area).bbox)
+        Assert.assertEquals("https://example.com/cz.svg", (results[0] as SearchResult.Area).iconUrl)
         Assert.assertTrue(results[1] is SearchResult.Place)
         Assert.assertEquals(28779L, (results[1] as SearchResult.Place).id)
         Assert.assertEquals("local_cafe", (results[1] as SearchResult.Place).icon)
