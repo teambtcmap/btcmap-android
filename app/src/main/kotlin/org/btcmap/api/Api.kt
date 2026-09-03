@@ -47,6 +47,17 @@ data class ActivityFeedItem(
     val comment: String?,
 )
 
+sealed class SearchResult {
+    data class Area(val id: Long, val name: String, val bbox: List<Double>?) : SearchResult()
+    data class Place(
+        val id: Long,
+        val name: String,
+        val icon: String,
+        val lat: Double,
+        val lon: Double,
+    ) : SearchResult()
+}
+
 class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
 
     data class PlaceBoostQuoteResponse(
@@ -398,6 +409,58 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                     status = body.get("status").asString,
                 )
             }
+        }
+    }
+
+    private fun InputStream.toSearchResults(): List<SearchResult> {
+        val body = toJsonObject()
+        val results = body.getAsJsonArray("results")
+        return List(results.size()) { index ->
+            val item = results.get(index).asJsonObject
+            when (item.get("type").asString) {
+                "area" -> SearchResult.Area(
+                    id = item.get("id").asLong,
+                    name = item.get("name").asString,
+                    bbox = if (!item.has("bbox") || item.get("bbox").isJsonNull) {
+                        null
+                    } else {
+                        item.getAsJsonArray("bbox").map { it.asDouble }
+                    },
+                )
+                else -> SearchResult.Place(
+                    id = item.get("id").asLong,
+                    name = item.get("name").asString,
+                    icon = item.get("icon").asString,
+                    lat = item.get("lat").asDouble,
+                    lon = item.get("lon").asDouble,
+                )
+            }
+        }
+    }
+
+    suspend fun search(
+        query: String,
+        lat: Double?,
+        lon: Double?,
+        limit: Long = 20,
+    ): List<SearchResult> {
+        val url = url.newBuilder().addPathSegments("v4/search/").apply {
+            addQueryParameter("q", query)
+            if (lat != null && lon != null) {
+                addQueryParameter("lat", lat.toString())
+                addQueryParameter("lon", lon.toString())
+            }
+            addQueryParameter("limit", "$limit")
+        }.build()
+
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return withContext(Dispatchers.IO) {
+            res.body.byteStream().use { it.toSearchResults() }
         }
     }
 

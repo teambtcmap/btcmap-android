@@ -2,9 +2,11 @@ package org.btcmap.search
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil3.load
 import org.btcmap.util.iconTypeface
 import org.btcmap.databinding.SearchAdapterItemBinding
 
@@ -41,6 +43,17 @@ class SearchAdapter(
                 name.text = item.name
                 distance.text = item.distanceToUser
                 root.setOnClickListener { onItemClick(item) }
+
+                val iconUrl = (item as? SearchAdapterItem.Area)?.iconUrl
+                if (iconUrl != null) {
+                    icon.isVisible = false
+                    iconImage.isVisible = true
+                    iconImage.load(iconUrl)
+                } else {
+                    iconImage.isVisible = false
+                    iconImage.setImageDrawable(null)
+                    icon.isVisible = true
+                }
             }
         }
     }

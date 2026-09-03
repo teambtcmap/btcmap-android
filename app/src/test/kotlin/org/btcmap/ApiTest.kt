@@ -5,6 +5,7 @@ import mockwebserver3.MockResponse
 import mockwebserver3.junit4.MockWebServerRule
 import okhttp3.OkHttpClient
 import org.btcmap.api.Api
+import org.btcmap.api.SearchResult
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -145,5 +146,53 @@ class ApiTest {
         serverRule.server.enqueue(response)
 
         api.removeSavedArea(123)
+    }
+
+    @Test
+    fun search_parsesMixedResults() = runTest {
+        val api = createApi()
+
+        val response = MockResponse.Builder()
+            .addHeader("Content-Type", "application/json")
+            .body(
+                """
+                {
+                  "results": [
+                    { "type": "area", "id": 1, "name": "Prague", "bbox": [14.22, 49.94, 14.71, 50.18] },
+                    { "type": "place", "id": 28779, "name": "Bitcoin Coffee", "lat": 50.08, "lon": 14.43, "icon": "local_cafe" }
+                  ]
+                }
+                """.trimIndent()
+            ).build()
+
+        serverRule.server.enqueue(response)
+
+        val results = api.search(query = "prague", lat = 50.08, lon = 14.43, limit = 20)
+
+        val request = serverRule.server.takeRequest()
+        Assert.assertEquals("GET", request.method)
+        Assert.assertTrue(request.requestLine.contains("/v4/search/"))
+        Assert.assertTrue(request.requestLine.contains("q=prague"))
+        Assert.assertEquals(2, results.size)
+        Assert.assertTrue(results[0] is SearchResult.Area)
+        Assert.assertEquals(1L, (results[0] as SearchResult.Area).id)
+        Assert.assertEquals(listOf(14.22, 49.94, 14.71, 50.18), (results[0] as SearchResult.Area).bbox)
+        Assert.assertTrue(results[1] is SearchResult.Place)
+        Assert.assertEquals(28779L, (results[1] as SearchResult.Place).id)
+        Assert.assertEquals("local_cafe", (results[1] as SearchResult.Place).icon)
+    }
+
+    @Test(expected = Exception::class)
+    fun search_failure() = runTest {
+        val api = createApi()
+
+        val response = MockResponse.Builder()
+            .addHeader("Content-Type", "application/json")
+            .status("HTTP/1.1 500 Internal Server Error")
+            .body("").build()
+
+        serverRule.server.enqueue(response)
+
+        api.search(query = "prague", lat = null, lon = null)
     }
 }

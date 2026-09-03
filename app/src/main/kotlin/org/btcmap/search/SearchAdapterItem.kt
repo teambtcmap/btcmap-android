@@ -1,8 +1,23 @@
 package org.btcmap.search
 
-data class SearchAdapterItem(
-    val placeId: Long,
-    val icon: String,
-    val name: String,
-    val distanceToUser: String?,
-)
+sealed class SearchAdapterItem {
+    abstract val icon: String
+    abstract val name: String
+    abstract val distanceToUser: String?
+
+    data class Place(
+        val placeId: Long,
+        override val icon: String,
+        override val name: String,
+        override val distanceToUser: String?,
+    ) : SearchAdapterItem()
+
+    data class Area(
+        val areaId: Long,
+        val bbox: List<Double>?,
+        val iconUrl: String?,
+        override val icon: String,
+        override val name: String,
+        override val distanceToUser: String?,
+    ) : SearchAdapterItem()
+}

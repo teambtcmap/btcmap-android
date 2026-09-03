@@ -42,6 +42,7 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.btcmap.area.AreaFragment
 import org.btcmap.place.isMerchant
 import org.btcmap.search.SearchAdapter
+import org.btcmap.search.SearchAdapterItem
 import org.btcmap.settings.MapStyle
 import org.btcmap.settings.SettingsFragment
 import org.btcmap.settings.showAttribution
@@ -52,6 +53,8 @@ import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.uri
 import org.btcmap.settings.prefs
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import org.btcmap.db
@@ -60,7 +63,9 @@ import org.btcmap.settings.apiUrl
 import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.boostedMarkerBackgroundColor
+import org.btcmap.util.isOnline
 import org.btcmap.util.openInBrowser
+import org.maplibre.android.geometry.LatLngBounds
 
 class MapFragment : Fragment() {
     private var _binding: MapFragmentBinding? = null
@@ -102,7 +107,12 @@ class MapFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        searchController = SearchController(db(), resources)
+        searchController = SearchController(
+            db = db(),
+            api = api(),
+            resources = resources,
+            isOnline = { requireContext().isOnline() },
+        )
 
         bottomSheetController = BottomSheetController(
             view = binding.placeBottomSheet,
@@ -238,26 +248,9 @@ class MapFragment : Fragment() {
             binding.searchView.clearText()
             binding.searchView.hide()
 
-            val place = db().place.selectById(row.placeId) ?: return@SearchAdapter
-
-            if (place.isMerchant()) {
-                binding.showMerchants.performClick()
-            } else {
-                binding.showExchanges.performClick()
-            }
-
-            viewLifecycleOwner.lifecycleScope.launch {
-                selectPlace(place)
-            }
-
-            binding.map.getMapAsync {
-                it.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        LatLng(
-                            place.lat, place.lon
-                        ), 16.0
-                    )
-                )
+            when (row) {
+                is SearchAdapterItem.Place -> openPlace(row)
+                is SearchAdapterItem.Area -> openArea(row)
             }
         }
 
@@ -308,11 +301,14 @@ class MapFragment : Fragment() {
         }
 
         binding.searchView.editText.doAfterTextChanged { searchString ->
-            binding.map.getMapAsync { map ->
-                viewLifecycleOwner.lifecycleScope.launch {
+            val text = searchString.toString()
+            searchDebounceJob?.cancel()
+            searchDebounceJob = viewLifecycleOwner.lifecycleScope.launch {
+                delay(SEARCH_DEBOUNCE_MS)
+                binding.map.getMapAsync { map ->
                     searchController.search(
                         referenceLocation = map.projection.visibleRegion.latLngBounds.center,
-                        query = searchString.toString(),
+                        query = text,
                     )
                 }
             }
@@ -326,8 +322,65 @@ class MapFragment : Fragment() {
         bottomSheetController?.halfExpand()
     }
 
+    private fun openPlace(row: SearchAdapterItem.Place) {
+        val place = db().place.selectById(row.placeId) ?: return
+
+        if (place.isMerchant()) {
+            binding.showMerchants.performClick()
+        } else {
+            binding.showExchanges.performClick()
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            selectPlace(place)
+        }
+
+        binding.map.getMapAsync {
+            it.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(place.lat, place.lon),
+                    16.0,
+                )
+            )
+        }
+    }
+
+    private fun openArea(row: SearchAdapterItem.Area) {
+        val bbox = row.bbox
+        if (bbox != null && bbox.size == 4) {
+            binding.map.getMapAsync { map ->
+                val bounds = LatLngBounds.from(
+                    latNorth = bbox[3],
+                    lonEast = bbox[2],
+                    latSouth = bbox[1],
+                    lonWest = bbox[0],
+                )
+                map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
+            }
+        } else {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val area = runCatching {
+                    withContext(Dispatchers.IO) { api().getArea(row.areaId.toString()) }
+                }.getOrNull()
+                if (area != null) {
+                    parentFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        replace<AreaFragment>(
+                            R.id.fragmentContainerView, null,
+                            bundleOf("area_id" to area.id.toString()),
+                        )
+                        addToBackStack(null)
+                    }
+                }
+            }
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
+        searchDebounceJob?.cancel()
+        searchDebounceJob = null
+        searchController.clear()
         mapSelectionController?.detach()
         mapSelectionController = null
         mapSetupController = null
@@ -355,6 +408,7 @@ class MapFragment : Fragment() {
     }
 
     private var filter = Filter.MERCHANTS
+    private var searchDebounceJob: Job? = null
 
     private fun setFilter(filter: Filter) {
         binding.showMerchants.isSelected = filter == Filter.MERCHANTS
@@ -473,5 +527,9 @@ class MapFragment : Fragment() {
             replace<SettingsFragment>(R.id.fragmentContainerView)
             addToBackStack(null)
         }
+    }
+
+    companion object {
+        private const val SEARCH_DEBOUNCE_MS = 300L
     }
 }
