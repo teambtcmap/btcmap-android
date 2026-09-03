@@ -18,6 +18,7 @@ class MapSetupController(
     private val markerBadgeTextColor: Int,
     private val boostedMarkerBackgroundColor: Int,
     private val usingOpenFreeMap: Boolean,
+    private val rotationEnabled: Boolean,
 ) {
     private val merchants = createMerchantLayers(
         markerBackgroundColor = markerBackgroundColor,
@@ -49,6 +50,7 @@ class MapSetupController(
             map.uiSettings.isLogoEnabled = false
             map.uiSettings.isAttributionEnabled = false
             map.uiSettings.isTiltGesturesEnabled = false
+            map.uiSettings.isRotateGesturesEnabled = rotationEnabled
 
             map.getStyle { style ->
                 if (style.getImage("btcmap-marker") == null) {

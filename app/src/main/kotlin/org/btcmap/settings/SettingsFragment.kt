@@ -65,6 +65,11 @@ class SettingsFragment : Fragment() {
             prefs.showAttribution = isChecked
         }
 
+        binding.mapRotation.isChecked = prefs.mapRotationEnabled
+        binding.mapRotation.setOnCheckedChangeListener { _, isChecked ->
+            prefs.mapRotationEnabled = isChecked
+        }
+
         binding.showDebugInfo.isChecked = prefs.showDebugInfo
         binding.showDebugInfo.setOnCheckedChangeListener { _, isChecked ->
             prefs.showDebugInfo = isChecked

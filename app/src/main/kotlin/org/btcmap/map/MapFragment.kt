@@ -47,6 +47,7 @@ import org.btcmap.settings.SettingsFragment
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.mapViewport
+import org.btcmap.settings.mapRotationEnabled
 import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.uri
 import org.btcmap.settings.prefs
@@ -146,6 +147,7 @@ class MapFragment : Fragment() {
             markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
             boostedMarkerBackgroundColor = prefs.boostedMarkerBackgroundColor(),
             usingOpenFreeMap = usingOpenFreeMap(),
+            rotationEnabled = prefs.mapRotationEnabled,
         ).also { it.install() }
 
         binding.showMerchants.setOnClickListener { setFilter(Filter.MERCHANTS) }

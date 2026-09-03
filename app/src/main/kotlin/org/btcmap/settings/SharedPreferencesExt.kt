@@ -384,6 +384,14 @@ var SharedPreferences.showAttribution: Boolean
         edit { putBoolean(KEY_SHOW_ATTRIBUTION, value) }
     }
 
+private const val KEY_MAP_ROTATION_ENABLED = "map_rotation_enabled"
+
+var SharedPreferences.mapRotationEnabled: Boolean
+    get() = getBoolean(KEY_MAP_ROTATION_ENABLED, false)
+    set(value) {
+        edit { putBoolean(KEY_MAP_ROTATION_ENABLED, value) }
+    }
+
 private const val KEY_VERIFIED_FILTER_YEARS = "verified_filter_years"
 
 var SharedPreferences.verifiedFilterYears: Int
