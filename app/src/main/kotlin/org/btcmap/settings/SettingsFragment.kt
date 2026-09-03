@@ -45,7 +45,7 @@ class SettingsFragment : Fragment() {
                     addToBackStack(null)
                 }
             } else {
-                showAuthDialog("") {
+                showAuthDialog {
                     updateAccountUi()
                 }
             }

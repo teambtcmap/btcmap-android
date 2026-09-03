@@ -16,19 +16,8 @@ import org.btcmap.db.table.user.User
 import org.btcmap.settings.authToken
 import org.btcmap.settings.prefs
 
-fun Fragment.showAuthDialog(message: String, onSuccess: () -> Unit) {
-    if (message.isBlank()) {
-        showAccountChoicesDialog(onSuccess)
-    } else {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.account)
-            .setMessage(message)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                showAccountChoicesDialog(onSuccess)
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
+fun Fragment.showAuthDialog(onSuccess: () -> Unit) {
+    showAccountChoicesDialog(onSuccess)
 }
 
 private fun Fragment.showAccountChoicesDialog(onSuccess: () -> Unit) {

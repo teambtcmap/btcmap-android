@@ -90,7 +90,7 @@ class AreaFragment : Fragment() {
                             Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG).show()
                         }
                     } else {
-                        showAuthDialog(getString(R.string.auth_to_save_area)) {
+                        showAuthDialog {
                             try {
                                 viewLifecycleOwner.lifecycleScope.launch {
                                     val user = db().user.select()!!
