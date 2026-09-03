@@ -75,6 +75,42 @@
                 android:paddingTop="24dp"
                 android:paddingEnd="16dp"
                 android:paddingBottom="8dp"
+                android:text="@string/password"
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?colorPrimary" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="8dp">
+
+                <TextView
+                    android:id="@+id/password"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textAppearanceBodyLarge" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/changePasswordButton"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/change_password"
+                    app:icon="@drawable/icon_edit"
+                    app:iconTint="?colorOnSurface" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingTop="24dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp"
                 android:text="@string/saved_places"
                 android:textAppearance="?textAppearanceLabelMedium"
                 android:textColor="?colorPrimary" />

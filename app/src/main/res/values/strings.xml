@@ -74,20 +74,29 @@
     <string name="sunday">Sunday</string>
     <string name="closed">Closed</string>
     <string name="save" tools:ignore="MissingTranslation">Save</string>
-    <string name="account" tools:ignore="MissingTranslation">Account</string>
+    <string name="account" tools:ignore="MissingTranslation">BTC Map Account</string>
     <string name="not_logged_in" tools:ignore="MissingTranslation">Account</string>
     <string name="logged_in_as" tools:ignore="MissingTranslation">Logged in as %1$s</string>
     <string name="create_account" tools:ignore="MissingTranslation">Log in</string>
+    <string name="sign_up" tools:ignore="MissingTranslation">Sign up</string>
+    <string name="new_account" tools:ignore="MissingTranslation">New account</string>
     <string name="login" tools:ignore="MissingTranslation">Login</string>
     <string name="logout" tools:ignore="MissingTranslation">Logout</string>
     <string name="logging_in" tools:ignore="MissingTranslation">Logging in…</string>
     <string name="logging_out" tools:ignore="MissingTranslation">Logging out…</string>
     <string name="username" tools:ignore="MissingTranslation">Username</string>
+    <string name="name" tools:ignore="MissingTranslation">Name</string>
     <string name="password" tools:ignore="MissingTranslation">Password</string>
+    <string name="field_required" tools:ignore="MissingTranslation">Required</string>
+    <string name="password_mask" tools:ignore="MissingTranslation">••••••••</string>
     <string name="profile" tools:ignore="MissingTranslation">Profile</string>
     <string name="change_username" tools:ignore="MissingTranslation">Change username</string>
     <string name="new_username" tools:ignore="MissingTranslation">New username</string>
     <string name="username_changed" tools:ignore="MissingTranslation">Username updated</string>
+    <string name="change_password" tools:ignore="MissingTranslation">Change password</string>
+    <string name="current_password" tools:ignore="MissingTranslation">Current password</string>
+    <string name="new_password" tools:ignore="MissingTranslation">New password</string>
+    <string name="password_changed" tools:ignore="MissingTranslation">Password updated</string>
     <string name="saved_places" tools:ignore="MissingTranslation">Saved places</string>
     <string name="no_saved_places" tools:ignore="MissingTranslation">No saved places</string>
     <string name="saved_areas" tools:ignore="MissingTranslation">Saved areas</string>
@@ -96,6 +105,8 @@
     <string name="auth_to_save_area" tools:ignore="MissingTranslation">In order to sync saved areas across devices and platforms, you need an account. We can generate a random account if you don\'t have one already.</string>
     <string name="i_don_t_have_an_account" tools:ignore="MissingTranslation">I don\'t have an account</string>
     <string name="log_in_with_existing_account" tools:ignore="MissingTranslation">Log in with existing account</string>
+    <string name="create_account_subtitle" tools:ignore="MissingTranslation">Create a new BTC Map account</string>
+    <string name="sign_in_subtitle" tools:ignore="MissingTranslation">Use your existing username and password</string>
     <string name="failed_to_create_new_account" tools:ignore="MissingTranslation">Failed to create new account</string>
     <string name="logged_in_as_you_can_visit_settings_to_customize_and_backup_your_account" tools:ignore="MissingTranslation">Logged in as %1$s\n\nYou can visit settings to customize and backup your account</string>
     <string name="click_to_see_your_profile" tools:ignore="MissingTranslation">Click to see your profile</string>

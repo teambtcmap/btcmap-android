@@ -563,11 +563,12 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         )
     }
 
-    suspend fun createUser(password: String): User {
+    suspend fun createUser(name: String?, password: String): User {
         val url = url.newBuilder().addPathSegments("v4/users").build()
 
         val req = JsonObject().apply {
             addProperty("password", password)
+            name?.takeIf { it.isNotBlank() }?.let { addProperty("name", it) }
         }
 
         val res = httpClient.newCall(
@@ -578,7 +579,14 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         ).executeAsync()
 
         if (!res.isSuccessful) {
-            throw Exception("Unexpected HTTP response code: ${res.code}")
+            val body = res.body.string()
+            val message = runCatching {
+                val json = com.google.gson.JsonParser.parseString(body).asJsonObject
+                if (json.has("message") && !json.get("message").isJsonNull) {
+                    json.get("message").asString
+                } else null
+            }.getOrNull()
+            throw Exception(message ?: "HTTP ${res.code}: ${body.ifBlank { "unexpected response" }}")
         }
 
         return res.body.byteStream().use {
@@ -638,6 +646,33 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
 
         return res.body.byteStream().use {
             it.toJsonObject().toUser()
+        }
+    }
+
+    suspend fun updatePassword(oldPassword: String, newPassword: String) {
+        val url = url.newBuilder().addPathSegments("v4/users/me/password").build()
+
+        val req = JsonObject().apply {
+            addProperty("old_password", oldPassword)
+            addProperty("new_password", newPassword)
+        }
+
+        val res = httpClient.newCall(
+            Request.Builder()
+                .put(req.toString().toRequestBody("application/json".toMediaType()))
+                .url(url)
+                .build()
+        ).executeAsync()
+
+        if (!res.isSuccessful) {
+            val body = res.body.string()
+            val message = runCatching {
+                val json = com.google.gson.JsonParser.parseString(body).asJsonObject
+                if (json.has("message") && !json.get("message").isJsonNull) {
+                    json.get("message").asString
+                } else null
+            }.getOrNull()
+            throw Exception(message ?: "HTTP ${res.code}: ${body.ifBlank { "unexpected response" }}")
         }
     }
 

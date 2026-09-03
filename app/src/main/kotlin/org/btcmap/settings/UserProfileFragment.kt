@@ -43,6 +43,7 @@ class UserProfileFragment : Fragment() {
 
         val user = db().user.select()!!
         binding.username.text = user.name
+        binding.password.text = getString(R.string.password_mask)
 
         binding.savedPlacesList.layoutManager = LinearLayoutManager(requireContext())
         binding.savedPlacesList.adapter = SavedPlacesAdapter(
@@ -72,6 +73,43 @@ class UserProfileFragment : Fragment() {
 
         binding.changeUsernameButton.setOnClickListener {
             showChangeUsernameDialog()
+        }
+
+        binding.changePasswordButton.setOnClickListener {
+            showChangePasswordDialog()
+        }
+    }
+
+    private fun showChangePasswordDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.change_password_dialog, null)
+        val currentInput = dialogView.findViewById<TextInputEditText>(R.id.currentPasswordInput)
+        val newInput = dialogView.findViewById<TextInputEditText>(R.id.newPasswordInput)
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.change_password)
+            .setView(dialogView)
+            .setPositiveButton(R.string.save) { _, _ ->
+                val current = currentInput.text.toString()
+                val new = newInput.text.toString()
+                if (current.isNotEmpty() && new.isNotEmpty()) {
+                    changePassword(current, new)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun changePassword(oldPassword: String, newPassword: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                api().updatePassword(oldPassword, newPassword)
+                Toast.makeText(context, R.string.password_changed, Toast.LENGTH_SHORT).show()
+            } catch (e: Throwable) {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.error)
+                    .setMessage(e.message)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+            }
         }
     }
 
