@@ -611,6 +611,36 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         }
     }
 
+    suspend fun updateUsername(username: String): User {
+        val url = url.newBuilder().addPathSegments("v4/users/me/username").build()
+
+        val req = JsonObject().apply {
+            addProperty("username", username)
+        }
+
+        val res = httpClient.newCall(
+            Request.Builder()
+                .put(req.toString().toRequestBody("application/json".toMediaType()))
+                .url(url)
+                .build()
+        ).executeAsync()
+
+        if (!res.isSuccessful) {
+            val body = res.body.string()
+            val message = runCatching {
+                val json = com.google.gson.JsonParser.parseString(body).asJsonObject
+                if (json.has("message") && !json.get("message").isJsonNull) {
+                    json.get("message").asString
+                } else null
+            }.getOrNull()
+            throw Exception(message ?: "HTTP ${res.code}: ${body.ifBlank { "unexpected response" }}")
+        }
+
+        return res.body.byteStream().use {
+            it.toJsonObject().toUser()
+        }
+    }
+
     data class CreateTokenResponse(
         val token: String,
         val user: User,

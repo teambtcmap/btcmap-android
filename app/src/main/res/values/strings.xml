@@ -85,6 +85,9 @@
     <string name="username" tools:ignore="MissingTranslation">Username</string>
     <string name="password" tools:ignore="MissingTranslation">Password</string>
     <string name="profile" tools:ignore="MissingTranslation">Profile</string>
+    <string name="change_username" tools:ignore="MissingTranslation">Change username</string>
+    <string name="new_username" tools:ignore="MissingTranslation">New username</string>
+    <string name="username_changed" tools:ignore="MissingTranslation">Username updated</string>
     <string name="saved_places" tools:ignore="MissingTranslation">Saved places</string>
     <string name="no_saved_places" tools:ignore="MissingTranslation">No saved places</string>
     <string name="saved_areas" tools:ignore="MissingTranslation">Saved areas</string>

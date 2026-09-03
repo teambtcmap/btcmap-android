@@ -10,6 +10,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.JsonArray
 import kotlinx.coroutines.launch
 import org.btcmap.R
@@ -40,7 +42,7 @@ class UserProfileFragment : Fragment() {
         }
 
         val user = db().user.select()!!
-        binding.username.text = getString(R.string.logged_in_as, user.name)
+        binding.username.text = user.name
 
         binding.savedPlacesList.layoutManager = LinearLayoutManager(requireContext())
         binding.savedPlacesList.adapter = SavedPlacesAdapter(
@@ -66,6 +68,53 @@ class UserProfileFragment : Fragment() {
 
         binding.logoutButton.setOnClickListener {
             logout()
+        }
+
+        binding.changeUsernameButton.setOnClickListener {
+            showChangeUsernameDialog()
+        }
+    }
+
+    private fun showChangeUsernameDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.change_username_dialog, null)
+        val usernameInput = dialogView.findViewById<TextInputEditText>(R.id.usernameInput)
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.change_username)
+            .setView(dialogView)
+            .setPositiveButton(R.string.save) { _, _ ->
+                val newName = usernameInput.text.toString().trim()
+                if (newName.isNotEmpty()) {
+                    changeUsername(newName)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun changeUsername(newName: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val user = api().updateUsername(newName)
+                val existing = db().user.select()
+                db().user.delete()
+                db().user.insert(
+                    User(
+                        id = user.id,
+                        name = user.name,
+                        roles = user.roles,
+                        savedPlaces = existing?.savedPlaces ?: user.savedPlaces,
+                        savedAreas = existing?.savedAreas ?: user.savedAreas,
+                    )
+                )
+                binding.username.text = user.name
+                Toast.makeText(context, R.string.username_changed, Toast.LENGTH_SHORT).show()
+            } catch (e: Throwable) {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.error)
+                    .setMessage(e.message)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+            }
         }
     }
 
