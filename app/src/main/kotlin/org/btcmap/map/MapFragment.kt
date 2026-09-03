@@ -200,21 +200,21 @@ class MapFragment : Fragment() {
                 val importResult = BundledPlaces.import(requireContext(), db())
 
                 if (importResult.placesImported > 0) {
-                    setFilter(filter)
+                    rebuildCurrentCache()
                 }
 
                 val syncPlacesRes = sync().syncPlaces()
                 if (syncPlacesRes.rowsAffected > 0) {
-                    setFilter(filter)
+                    rebuildCurrentCache()
                 }
 
                 if (sync().syncEvents().rowsAffected > 0 && filter == Filter.EVENTS) {
-                    setFilter(filter)
+                    rebuildCurrentCache()
                 }
 
                 val syncCommentsRes = sync().syncComments()
                 if (syncCommentsRes.rowsAffected > 0 && (filter == Filter.MERCHANTS || filter == Filter.EXCHANGES)) {
-                    setFilter(filter)
+                    rebuildCurrentCache()
                 }
 
                 binding.sync.isVisible = false
@@ -412,6 +412,14 @@ class MapFragment : Fragment() {
         (currentCache as? ExchangesCache)?.destroy()
         (currentCache as? EventsCache)?.destroy()
         currentCache = null
+    }
+
+    private fun rebuildCurrentCache() {
+        if (currentCache == null) {
+            setFilter(filter)
+            return
+        }
+        (currentCache as? ViewportCache<*>)?.forceRebuild()
     }
 
     private lateinit var areasAdapter: AreasAdapter

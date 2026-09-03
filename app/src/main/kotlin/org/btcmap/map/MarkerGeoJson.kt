@@ -18,7 +18,7 @@ fun Iterable<Marker>.toMarkerGeoJson(): String {
         if (index > 0) {
             sb.append(",")
         }
-        val outdated = place.verifiedAt == null || place.verifiedAt.isBefore(outdatedThreshold)
+        val outdated = !place.bundled && (place.verifiedAt == null || place.verifiedAt.isBefore(outdatedThreshold))
         sb.append(
             """
             {

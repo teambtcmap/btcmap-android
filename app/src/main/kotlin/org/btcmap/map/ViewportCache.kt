@@ -62,6 +62,12 @@ abstract class ViewportCache<T : Any>(
         loadInBounds(map.projection.visibleRegion.latLngBounds.expand())
     }
 
+    fun forceRebuild() {
+        seenIds.clear()
+        items.clear()
+        loadInBounds(map.projection.visibleRegion.latLngBounds.expand())
+    }
+
     fun destroy() {
         map.removeOnCameraIdleListener(this)
         pendingQuery.getAndSet(null)?.cancel()
