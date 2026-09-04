@@ -285,18 +285,16 @@ class MapFragment : Fragment() {
             val areaIds = areasAdapter.currentList.map { it.urlAlias }
             val areaNames = areasAdapter.currentList.map { it.name }
             val areaTypes = areasAdapter.currentList.map { it.type }
-            if (areaIds.isNotEmpty()) {
-                parentFragmentManager.commit {
-                    setReorderingAllowed(true)
-                    replace<ActivityFeedFragment>(
-                        R.id.fragmentContainerView, null, bundleOf(
-                            "area_ids" to ArrayList(areaIds),
-                            "area_names" to ArrayList(areaNames),
-                            "area_types" to ArrayList(areaTypes),
-                        )
+            parentFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace<ActivityFeedFragment>(
+                    R.id.fragmentContainerView, null, bundleOf(
+                        "area_ids" to ArrayList(areaIds),
+                        "area_names" to ArrayList(areaNames),
+                        "area_types" to ArrayList(areaTypes),
                     )
-                    addToBackStack(null)
-                }
+                )
+                addToBackStack(null)
             }
         }
 

@@ -122,6 +122,9 @@
     <string name="activity_interval_half_year" tools:ignore="MissingTranslation">6m</string>
     <string name="activity_interval_year" tools:ignore="MissingTranslation">1y</string>
     <string name="filter" tools:ignore="MissingTranslation">Filter</string>
+    <string name="activity_tab_local" tools:ignore="MissingTranslation">Local</string>
+    <string name="activity_tab_following" tools:ignore="MissingTranslation">Following</string>
+    <string name="activity_filter_areas" tools:ignore="MissingTranslation">Areas</string>
     <string name="show_attribution" tools:ignore="MissingTranslation">Show attribution</string>
     <string name="map_rotation" tools:ignore="MissingTranslation">Allow map rotation</string>
     <string name="osm_attribution" tools:ignore="MissingTranslation">© OpenStreetMap contributors</string>

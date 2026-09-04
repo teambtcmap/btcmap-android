@@ -432,7 +432,7 @@ enum class ActivityInterval(val days: Int) {
 private const val KEY_ACTIVITY_INTERVAL_DAYS = "activity_interval_days"
 
 var SharedPreferences.activityIntervalDays: Int
-    get() = getInt(KEY_ACTIVITY_INTERVAL_DAYS, ActivityInterval.Week.days)
+    get() = getInt(KEY_ACTIVITY_INTERVAL_DAYS, ActivityInterval.HalfYear.days)
     set(value) {
         edit { putInt(KEY_ACTIVITY_INTERVAL_DAYS, value) }
     }
