@@ -23,3 +23,6 @@ app/fdroid
 app/play
 
 emulator.log
+
+# opencode
+.opencode
