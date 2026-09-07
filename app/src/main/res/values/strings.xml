@@ -86,6 +86,7 @@
     <string name="logging_out" tools:ignore="MissingTranslation">Logging out…</string>
     <string name="username" tools:ignore="MissingTranslation">Username</string>
     <string name="name" tools:ignore="MissingTranslation">Name</string>
+    <string name="name_placeholder" tools:ignore="MissingTranslation">Satoshi Cafe</string>
     <string name="password" tools:ignore="MissingTranslation">Password</string>
     <string name="field_required" tools:ignore="MissingTranslation">Required</string>
     <string name="password_mask" tools:ignore="MissingTranslation">••••••••</string>
@@ -129,4 +130,20 @@
     <string name="map_rotation" tools:ignore="MissingTranslation">Allow map rotation</string>
     <string name="osm_attribution" tools:ignore="MissingTranslation">© OpenStreetMap contributors</string>
     <string name="osm_attribution_url" tools:ignore="MissingTranslation">https://www.openstreetmap.org/about/</string>
+    <string name="add_location_drag_to_adjust" tools:ignore="MissingTranslation">Drag the map to set the exact location</string>
+    <string name="category" tools:ignore="MissingTranslation">Category</string>
+    <string name="category_placeholder" tools:ignore="MissingTranslation">cafe</string>
+    <string name="address" tools:ignore="MissingTranslation">Address or directions</string>
+    <string name="address_placeholder" tools:ignore="MissingTranslation">1 HODL Lane, Block 21</string>
+    <string name="address_optional" tools:ignore="MissingTranslation">Address (optional)</string>
+    <string name="website" tools:ignore="MissingTranslation">Website</string>
+    <string name="website_optional" tools:ignore="MissingTranslation">Website (optional)</string>
+    <string name="website_placeholder" tools:ignore="MissingTranslation">example.com</string>
+    <string name="description" tools:ignore="MissingTranslation">Description</string>
+    <string name="description_optional" tools:ignore="MissingTranslation">Extra notes (optional)</string>
+    <string name="description_placeholder" tools:ignore="MissingTranslation">Accepts Lightning payments via Blink wallet, ATM in the back room</string>
+    <string name="submit_place" tools:ignore="MissingTranslation">Submit place</string>
+    <string name="place_submitted" tools:ignore="MissingTranslation">Place submitted for review</string>
+    <string name="zoom_in" tools:ignore="MissingTranslation">Zoom in</string>
+    <string name="zoom_out" tools:ignore="MissingTranslation">Zoom out</string>
 </resources>

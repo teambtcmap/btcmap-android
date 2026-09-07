@@ -25,47 +25,50 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import org.btcmap.bundle.BundledPlaces
-import org.btcmap.db.table.place.Place
-import org.btcmap.place.PlaceFragment
-import org.btcmap.activity.ActivityFeedFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.btcmap.R
+import org.btcmap.activity.ActivityFeedFragment
 import org.btcmap.api
-import org.btcmap.databinding.MapFragmentBinding
-import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.style.sources.GeoJsonSource
 import org.btcmap.area.AreaFragment
+import org.btcmap.auth.showAuthDialog
+import org.btcmap.bundle.BundledPlaces
+import org.btcmap.db
+import org.btcmap.db.table.place.Place
+import org.btcmap.databinding.MapFragmentBinding
+import org.btcmap.place.AddPlaceFragment
+import org.btcmap.place.PlaceFragment
 import org.btcmap.place.isMerchant
 import org.btcmap.search.SearchAdapter
 import org.btcmap.search.SearchAdapterItem
 import org.btcmap.settings.MapStyle
 import org.btcmap.settings.SettingsFragment
-import org.btcmap.settings.showAttribution
-import org.btcmap.settings.mapStyle
-import org.btcmap.settings.mapViewport
-import org.btcmap.settings.mapRotationEnabled
-import org.btcmap.settings.markerBackgroundColor
-import org.btcmap.settings.uri
-import org.btcmap.settings.prefs
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.withContext
-import org.btcmap.db
-import org.btcmap.sync
 import org.btcmap.settings.apiUrl
+import org.btcmap.settings.authorized
 import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.boostedMarkerBackgroundColor
+import org.btcmap.settings.mapRotationEnabled
+import org.btcmap.settings.mapStyle
+import org.btcmap.settings.mapViewport
+import org.btcmap.settings.markerBackgroundColor
+import org.btcmap.settings.prefs
+import org.btcmap.settings.showAttribution
+import org.btcmap.settings.uri
+import org.btcmap.sync
 import org.btcmap.util.isOnline
 import org.btcmap.util.openInBrowser
+import org.maplibre.android.camera.CameraUpdateFactory
+import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.style.sources.GeoJsonSource
 
 class MapFragment : Fragment() {
     private var _binding: MapFragmentBinding? = null
@@ -138,7 +141,7 @@ class MapFragment : Fragment() {
 
         binding.searchBar.setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.add_place -> openInBrowser("https://btcmap.org/add-location".toUri())
+                R.id.add_place -> openAddPlace()
                 R.id.settings -> navigateToSettings()
             }
             true
@@ -524,6 +527,30 @@ class MapFragment : Fragment() {
             setReorderingAllowed(true)
             replace<SettingsFragment>(R.id.fragmentContainerView)
             addToBackStack(null)
+        }
+    }
+
+    private fun openAddPlace() {
+        val navigate = {
+            binding.map.getMapAsync { map ->
+                val center = map.cameraPosition.target ?: return@getMapAsync
+                parentFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    replace<AddPlaceFragment>(
+                        R.id.fragmentContainerView, null, bundleOf(
+                            "lat" to center.latitude,
+                            "lon" to center.longitude,
+                        )
+                    )
+                    addToBackStack(null)
+                }
+            }
+            Unit
+        }
+        if (prefs.authorized) {
+            navigate()
+        } else {
+            showAuthDialog { navigate() }
         }
     }
 
