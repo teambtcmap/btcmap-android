@@ -52,10 +52,11 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp">
 
                 <Button
-                    android:id="@+id/verifyOrReport"
+                    android:id="@+id/btnVerify"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -63,10 +64,13 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                    android:text="@string/verify" />
+                    android:text="@string/btn_verify"
+                    app:icon="@drawable/icon_verified"
+                    app:iconGravity="textStart"
+                    app:iconTint="@color/verify_green" />
 
                 <Button
-                    android:id="@+id/comments"
+                    android:id="@+id/btnReport"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -74,7 +78,10 @@
                     android:layout_marginStart="8dp"
                     android:layout_marginEnd="16dp"
                     android:layout_weight="1"
-                    android:text="@string/comments" />
+                    android:text="@string/btn_report"
+                    app:icon="@drawable/icon_warning"
+                    app:iconGravity="textStart"
+                    app:iconTint="@color/report_red" />
 
             </LinearLayout>
 
@@ -91,10 +98,12 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                    android:text="@string/boost" />
+                    android:text="@string/boost"
+                    app:icon="@drawable/icon_rocket_launch"
+                    app:iconGravity="textStart" />
 
                 <Button
-                    android:id="@+id/add_comment"
+                    android:id="@+id/comments"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -102,7 +111,9 @@
                     android:layout_marginStart="8dp"
                     android:layout_marginEnd="16dp"
                     android:layout_weight="1"
-                    android:text="@string/add_comment" />
+                    android:text="@string/comments"
+                    app:icon="@drawable/icon_comment"
+                    app:iconGravity="textStart" />
 
             </LinearLayout>
 
@@ -291,6 +302,18 @@
                 android:id="@+id/comments_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/add_comment"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/comment"
+                app:icon="@drawable/icon_comment"
+                app:iconGravity="textStart" />
 
             <Space
                 android:layout_width="match_parent"

@@ -189,7 +189,8 @@ class PlaceFragment : Fragment() {
         binding.bundledWarning.isVisible = place.bundled
 
         // disable action buttons for bundled places
-        binding.verifyOrReport.isVisible = !place.bundled
+        binding.btnVerify.isVisible = !place.bundled
+        binding.btnReport.isVisible = !place.bundled
         binding.comments.isVisible = !place.bundled
         binding.boost.isVisible = !place.bundled
         binding.addComment.isVisible = !place.bundled
@@ -347,19 +348,20 @@ class PlaceFragment : Fragment() {
         binding.openingHours.text = place.getLocalizedOpeningHours(requireContext())
         binding.openingHours.isVisible = place.getLocalizedOpeningHours(requireContext()) != null
 
-        binding.verifyOrReport.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = "https://btcmap.org/verify-location?id=${place.id}".toUri()
-            startActivity(intent)
+        binding.btnVerify.setOnClickListener {
+            openReport(defaultType = "verified")
+        }
+
+        binding.btnReport.setOnClickListener {
+            openReport(defaultType = null)
         }
 
         binding.comments.setOnClickListener {
-            requireActivity().supportFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<CommentsFragment>(
-                    R.id.fragmentContainerView, null, bundleOf("place_id" to place.id)
-                )
-                addToBackStack(null)
+            val comments = db().comment.selectByPlaceId(place.id)
+            if (comments.isEmpty()) {
+                openAddComment()
+            } else {
+                openComments()
             }
         }
 
@@ -373,21 +375,17 @@ class PlaceFragment : Fragment() {
             }
         }
 
-        binding.addComment.setOnClickListener {
-            requireActivity().supportFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<AddCommentFragment>(
-                    R.id.fragmentContainerView, null, bundleOf("place_id" to place.id)
-                )
-                addToBackStack(null)
-            }
-        }
+        binding.addComment.setOnClickListener { openAddComment() }
 
         val comments = db().comment.selectByPlaceId(place.id)
         binding.commentsTitle.text = getString(R.string.comments_d, comments.size)
         binding.commentsTitle.isVisible = comments.isNotEmpty()
-        binding.comments.text = getString(R.string.comments_d, comments.size)
-        binding.comments.isEnabled = comments.isNotEmpty()
+        binding.comments.text = if (comments.isEmpty()) {
+            getString(R.string.comment)
+        } else {
+            getString(R.string.comments_d, comments.size)
+        }
+        binding.comments.isEnabled = true
         val commentDateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
         commentsAdapter.submitList(comments.map {
             CommentsAdapterItem(
@@ -395,6 +393,56 @@ class PlaceFragment : Fragment() {
                 localizedDate = it.createdAt.format(commentDateFormat),
             )
         })
+    }
+
+    private fun openReport(defaultType: String?) {
+        val placeId = placeId
+        val navigate = {
+            requireActivity().supportFragmentManager.commit {
+                setReorderingAllowed(true)
+                val args = bundleOf("place_id" to placeId).apply {
+                    if (defaultType != null) putString("default_type", defaultType)
+                }
+                replace<ReportPlaceFragment>(R.id.fragmentContainerView, null, args)
+                addToBackStack(null)
+            }
+            Unit
+        }
+        if (prefs.authorized) {
+            navigate()
+        } else {
+            showAuthDialog { navigate() }
+        }
+    }
+
+    private fun openComments() {
+        val placeId = placeId
+        requireActivity().supportFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace<CommentsFragment>(
+                R.id.fragmentContainerView, null, bundleOf("place_id" to placeId)
+            )
+            addToBackStack(null)
+        }
+    }
+
+    private fun openAddComment() {
+        val placeId = placeId
+        val navigate = {
+            requireActivity().supportFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace<AddCommentFragment>(
+                    R.id.fragmentContainerView, null, bundleOf("place_id" to placeId)
+                )
+                addToBackStack(null)
+            }
+            Unit
+        }
+        if (prefs.authorized) {
+            navigate()
+        } else {
+            showAuthDialog { navigate() }
+        }
     }
 
     fun onSlide(slideOffset: Float) {

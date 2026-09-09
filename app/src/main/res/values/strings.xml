@@ -14,6 +14,8 @@
     <string name="you_dont_have_a_compatible_wallet">You don\'t have a compatible wallet</string>
     <string name="not_verified">Not verified</string>
     <string name="verify">Verify/Report</string>
+    <string name="btn_verify" tools:ignore="MissingTranslation">Verify</string>
+    <string name="btn_report" tools:ignore="MissingTranslation">Report</string>
     <string name="directions">Directions</string>
     <string name="share">Share</string>
     <string name="companion_warning">You\'ll need a companion app (%1$s) in order to make a payment. This app doesn\'t require you to fill any personal data, to the best of our knowledge. Please let us know if it\'s not the case and we\'ll remove this place.</string>
@@ -144,6 +146,19 @@
     <string name="description_placeholder" tools:ignore="MissingTranslation">Accepts Lightning payments via Blink wallet, ATM in the back room</string>
     <string name="submit_place" tools:ignore="MissingTranslation">Submit place</string>
     <string name="place_submitted" tools:ignore="MissingTranslation">Place submitted for review</string>
+    <string name="verify_or_report" tools:ignore="MissingTranslation">Verify / Report</string>
+    <string name="verify_or_report_description" tools:ignore="MissingTranslation">Let editors know the current state of this place. Your report will be reviewed by the BTC Map community.</string>
+    <string name="report_type_verified" tools:ignore="MissingTranslation">Verified — still accepts Bitcoin</string>
+    <string name="report_type_verified_description" tools:ignore="MissingTranslation">You confirmed this place exists and currently accepts Bitcoin payments.</string>
+    <string name="report_type_refused_sats" tools:ignore="MissingTranslation">Refused Bitcoin payment</string>
+    <string name="report_type_refused_sats_description" tools:ignore="MissingTranslation">An attempt to pay with Bitcoin on-site was refused by the merchant.</string>
+    <string name="report_type_out_of_business" tools:ignore="MissingTranslation">Out of business</string>
+    <string name="report_type_out_of_business_description" tools:ignore="MissingTranslation">The place has permanently closed or is no longer operating.</string>
+    <string name="report_comment_optional" tools:ignore="MissingTranslation">Additional notes (optional)</string>
+    <string name="report_comment_placeholder" tools:ignore="MissingTranslation">Anything that helps reviewers understand the situation…</string>
+    <string name="btn_submit" tools:ignore="MissingTranslation">Submit</string>
+    <string name="report_submitted" tools:ignore="MissingTranslation">Report submitted</string>
+    <string name="report_select_type" tools:ignore="MissingTranslation">Please select a report type</string>
     <string name="zoom_in" tools:ignore="MissingTranslation">Zoom in</string>
     <string name="zoom_out" tools:ignore="MissingTranslation">Zoom out</string>
 </resources>
