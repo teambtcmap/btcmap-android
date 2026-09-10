@@ -2,15 +2,14 @@ package org.btcmap.db.table.event
 
 import androidx.sqlite.SQLiteConnection
 import org.btcmap.db.bindLongOrNull
-import org.btcmap.db.bindTextOrNull
 import org.btcmap.db.bindZonedDateTimeOrNull
 
 class EventQueries(private val conn: SQLiteConnection) {
     fun insert(rows: List<Event>) {
         conn.prepare(
             """
-            INSERT INTO $TABLE ($ID, $AREA_ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $CRON_SCHEDULE) 
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
+            INSERT INTO $TABLE ($ID, $AREA_ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8);
             """
         ).use { stmt ->
             rows.forEach { row ->
@@ -22,7 +21,6 @@ class EventQueries(private val conn: SQLiteConnection) {
                 stmt.bindText(6, row.website.toString())
                 stmt.bindText(7, row.startsAt.toString())
                 stmt.bindZonedDateTimeOrNull(8, row.endsAt)
-                stmt.bindTextOrNull(9, row.cronSchedule)
                 stmt.step()
                 stmt.reset()
             }

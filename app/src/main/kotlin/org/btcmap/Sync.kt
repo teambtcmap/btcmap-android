@@ -190,7 +190,6 @@ class Sync(val api: Api, val db: Database) {
                         website = it.website,
                         startsAt = it.startsAt,
                         endsAt = it.endsAt,
-                        cronSchedule = it.cronSchedule,
                     )
                 })
             }

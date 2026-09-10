@@ -24,7 +24,6 @@ class EventQueriesTest {
             website = "https://example.com".toHttpUrl(),
             startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
             endsAt = ZonedDateTime.parse("2024-06-01T20:00:00Z"),
-            cronSchedule = null,
         )
 
         db.event.insert(listOf(event))
@@ -49,7 +48,6 @@ class EventQueriesTest {
             website = "https://london.btc".toHttpUrl(),
             startsAt = ZonedDateTime.parse("2024-07-01T19:00:00Z"),
             endsAt = null,
-            cronSchedule = null,
         )
 
         db.event.insert(listOf(event))
@@ -91,7 +89,6 @@ class EventQueriesTest {
             website = "https://example.com".toHttpUrl(),
             startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
             endsAt = null,
-            cronSchedule = null,
         )
         val event2 = Event(
             id = 2L,
@@ -102,7 +99,6 @@ class EventQueriesTest {
             website = "https://example.com".toHttpUrl(),
             startsAt = ZonedDateTime.parse("2024-07-01T18:00:00Z"),
             endsAt = null,
-            cronSchedule = null,
         )
         val event3 = Event(
             id = 3L,
@@ -113,7 +109,6 @@ class EventQueriesTest {
             website = "https://example.com".toHttpUrl(),
             startsAt = ZonedDateTime.parse("2024-08-01T18:00:00Z"),
             endsAt = null,
-            cronSchedule = null,
         )
 
         db.event.insert(listOf(event1, event2, event3))
@@ -142,7 +137,6 @@ class EventQueriesTest {
             website = "https://example.com".toHttpUrl(),
             startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
             endsAt = null,
-            cronSchedule = null,
         )
 
         db.event.insert(listOf(event))
@@ -169,7 +163,6 @@ class EventQueriesTest {
             website = "https://example.com".toHttpUrl(),
             startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
             endsAt = null,
-            cronSchedule = null,
         )
         val event2 = Event(
             id = 2L,
@@ -180,7 +173,6 @@ class EventQueriesTest {
             website = "https://example.com".toHttpUrl(),
             startsAt = ZonedDateTime.parse("2024-07-01T18:00:00Z"),
             endsAt = null,
-            cronSchedule = null,
         )
 
         db.event.insert(listOf(event1, event2))

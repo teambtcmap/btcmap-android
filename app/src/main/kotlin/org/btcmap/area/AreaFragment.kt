@@ -30,7 +30,6 @@ import org.btcmap.databinding.AreaFragmentBinding
 import org.btcmap.db.table.event.Event
 import org.btcmap.settings.authorized
 import org.btcmap.settings.prefs
-import org.btcmap.util.CronUtils
 import org.btcmap.util.openInBrowser
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -193,16 +192,10 @@ class AreaFragment : Fragment() {
                     db().event.selectByAreaId(areaId.toLong())
                 }
                 val now = ZonedDateTime.now(ZoneId.systemDefault())
-                val upcomingOccurrences = events.flatMap { event ->
-                    val dates = if (event.cronSchedule != null) {
-                        CronUtils.nextExecutions(event.cronSchedule, 5, from = now)
-                    } else if (event.startsAt.isAfter(now)) {
-                        listOf(event.startsAt)
-                    } else {
-                        emptyList()
-                    }
-                    dates.map { event to it }
-                }.sortedBy { it.second }
+                val upcomingOccurrences = events
+                    .filter { it.startsAt.isAfter(now) }
+                    .sortedBy { it.startsAt }
+                    .map { event -> event to event.startsAt }
 
                 if (upcomingOccurrences.isEmpty()) return@launch
 

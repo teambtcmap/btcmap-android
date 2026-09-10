@@ -10,7 +10,6 @@ const val NAME = "name"
 const val WEBSITE = "website"
 const val STARTS_AT = "starts_at"
 const val ENDS_AT = "ends_at"
-const val CRON_SCHEDULE = "cron_schedule"
 
 const val CREATE = """
     CREATE TABLE $TABLE (
@@ -21,7 +20,6 @@ const val CREATE = """
         $NAME TEXT NOT NULL,
         $WEBSITE TEXT NOT NULL,
         $STARTS_AT TEXT NOT NULL,
-        $ENDS_AT TEXT,
-        $CRON_SCHEDULE TEXT
+        $ENDS_AT TEXT
     );
  """

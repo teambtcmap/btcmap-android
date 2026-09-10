@@ -249,7 +249,6 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         val website: HttpUrl,
         val startsAt: ZonedDateTime,
         val endsAt: ZonedDateTime?,
-        val cronSchedule: String?,
     )
 
     private fun InputStream.toGetEventsItems(): List<GetEventsItem> {
@@ -265,9 +264,6 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                 endsAt = if (!it.has("ends_at") || it.get("ends_at").isJsonNull) null else ZonedDateTime.parse(
                     it.get("ends_at").asString
                 ),
-                cronSchedule = if (!it.has("cron_schedule") || it.get("cron_schedule").isJsonNull) null else it.get(
-                    "cron_schedule"
-                ).asString,
             )
         }
     }

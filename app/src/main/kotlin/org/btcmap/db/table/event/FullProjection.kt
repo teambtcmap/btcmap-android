@@ -20,10 +20,9 @@ data class FullProjection(
     val website: HttpUrl,
     val startsAt: ZonedDateTime,
     val endsAt: ZonedDateTime?,
-    val cronSchedule: String?,
 ) {
     companion object {
-        const val COLUMNS = "$ID, $AREA_ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $CRON_SCHEDULE"
+        const val COLUMNS = "$ID, $AREA_ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT"
 
         fun fromStatement(stmt: SQLiteStatement): FullProjection {
             return FullProjection(
@@ -35,7 +34,6 @@ data class FullProjection(
                 website = stmt.getHttpUrl(5),
                 startsAt = stmt.getZonedDateTime(6),
                 endsAt = stmt.getZonedDateTimeOrNull(7),
-                cronSchedule = stmt.getTextOrNull(8),
             )
         }
     }

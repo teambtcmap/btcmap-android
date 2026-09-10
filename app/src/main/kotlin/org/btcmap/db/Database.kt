@@ -9,7 +9,7 @@ import org.btcmap.db.table.user.UserQueries
 
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
-        private const val VERSION = 5
+        private const val VERSION = 6
     }
 
     val conn = driver.open(path)
@@ -55,6 +55,10 @@ class Database(driver: SQLiteDriver, val path: String) {
                 4 -> {
                     conn.execSQL("ALTER TABLE event ADD COLUMN area_id INTEGER;")
                     conn.execSQL("ALTER TABLE event ADD COLUMN cron_schedule TEXT;")
+                }
+
+                5 -> {
+                    conn.execSQL("ALTER TABLE event DROP COLUMN cron_schedule;")
                 }
 
                 else -> throw Exception("migration is missing")

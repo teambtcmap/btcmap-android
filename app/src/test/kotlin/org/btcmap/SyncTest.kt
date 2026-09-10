@@ -363,7 +363,6 @@ class SyncTest {
                     website = "https://example.com".toHttpUrl(),
                     startsAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
                     endsAt = null,
-                    cronSchedule = null,
                 )
             )
         )

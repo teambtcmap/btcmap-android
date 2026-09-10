@@ -19,7 +19,6 @@ class SchemaTest {
         assertEquals("website", WEBSITE)
         assertEquals("starts_at", STARTS_AT)
         assertEquals("ends_at", ENDS_AT)
-        assertEquals("cron_schedule", CRON_SCHEDULE)
     }
 
     @Test
@@ -33,6 +32,5 @@ class SchemaTest {
         assert(CREATE.contains(WEBSITE))
         assert(CREATE.contains(STARTS_AT))
         assert(CREATE.contains(ENDS_AT))
-        assert(CREATE.contains(CRON_SCHEDULE))
     }
 }
