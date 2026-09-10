@@ -26,6 +26,17 @@ data class Invoice(
 val Invoice.paid: Boolean
     get() = status == "paid"
 
+data class GetEventsItem(
+    val id: Long,
+    val areaId: Long?,
+    val lat: Double,
+    val lon: Double,
+    val name: String,
+    val website: HttpUrl,
+    val startsAt: ZonedDateTime,
+    val endsAt: ZonedDateTime?,
+)
+
 data class GetAreasItem(
     val id: Long,
     val name: String,
@@ -33,6 +44,7 @@ data class GetAreasItem(
     val urlAlias: String,
     val websiteUrl: String,
     val upcomingEventsCount: Int,
+    val upcomingEvents: List<GetEventsItem>,
 )
 
 data class ActivityFeedItem(
@@ -240,17 +252,6 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
         }
     }
 
-    data class GetEventsItem(
-        val id: Long,
-        val areaId: Long?,
-        val lat: Double,
-        val lon: Double,
-        val name: String,
-        val website: HttpUrl,
-        val startsAt: ZonedDateTime,
-        val endsAt: ZonedDateTime?,
-    )
-
     private fun InputStream.toGetEventsItems(): List<GetEventsItem> {
         return toJsonArray().map {
             GetEventsItem(
@@ -282,18 +283,36 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
     }
 
     private fun InputStream.toAreas(): List<GetAreasItem> {
-        return toJsonArray().map {
+        return toJsonArray().map { element ->
+            val item = element.asJsonObject
+            val events = if (item.has("upcoming_events") && !item.get("upcoming_events").isJsonNull) {
+                item.getAsJsonArray("upcoming_events").map { evElement ->
+                    val ev = evElement.asJsonObject
+                    GetEventsItem(
+                        id = ev.get("id").asLong,
+                        areaId = if (!ev.has("area_id") || ev.get("area_id").isJsonNull) null else ev.get("area_id").asLong,
+                        lat = ev.get("lat").asDouble,
+                        lon = ev.get("lon").asDouble,
+                        name = ev.get("name").asString,
+                        website = ev.get("website").asString.toHttpUrl(),
+                        startsAt = ZonedDateTime.parse(ev.get("starts_at").asString),
+                        endsAt = if (!ev.has("ends_at") || ev.get("ends_at").isJsonNull) null else ZonedDateTime.parse(
+                            ev.get("ends_at").asString
+                        ),
+                    )
+                }
+            } else {
+                emptyList()
+            }
+
             GetAreasItem(
-                id = it.get("id").asLong,
-                name = it.get("name").asString,
-                type = it.get("type").asString,
-                urlAlias = it.get("url_alias").asString,
-                websiteUrl = it.get("website_url").asString,
-                upcomingEventsCount = if (!it.has("upcoming_events") || it.get("upcoming_events").isJsonNull) {
-                    0
-                } else {
-                    it.getAsJsonArray("upcoming_events").size()
-                },
+                id = item.get("id").asLong,
+                name = item.get("name").asString,
+                type = item.get("type").asString,
+                urlAlias = item.get("url_alias").asString,
+                websiteUrl = item.get("website_url").asString,
+                upcomingEventsCount = events.size,
+                upcomingEvents = events,
             )
         }
     }
@@ -354,6 +373,19 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                     ).asString.ifBlank { null },
                 )
             }
+        }
+    }
+
+    suspend fun getAreaEvents(idOrAlias: String): List<GetEventsItem> {
+        val url = url.newBuilder().addPathSegments("v4/areas/$idOrAlias/events").build()
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return withContext(Dispatchers.IO) {
+            res.body.byteStream().use { it.toGetEventsItems() }
         }
     }
 

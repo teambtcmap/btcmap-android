@@ -268,10 +268,25 @@ class MapFragment : Fragment() {
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         areasAdapter = AreasAdapter(apiUrl = prefs.apiUrl) { area ->
+            val eventArgs = ArrayList(area.upcomingEvents.map { event ->
+                bundleOf(
+                    "id" to event.id,
+                    "area_id" to event.areaId,
+                    "lat" to event.lat,
+                    "lon" to event.lon,
+                    "name" to event.name,
+                    "website" to event.website.toString(),
+                    "starts_at" to event.startsAt.toString(),
+                    "ends_at" to event.endsAt?.toString(),
+                )
+            })
             parentFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<AreaFragment>(
-                    R.id.fragmentContainerView, null, bundleOf("area_id" to area.id.toString())
+                    R.id.fragmentContainerView, null, bundleOf(
+                        "area_id" to area.id.toString(),
+                        "upcoming_events" to eventArgs,
+                    )
                 )
                 addToBackStack(null)
             }
@@ -362,16 +377,37 @@ class MapFragment : Fragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 val area = runCatching {
                     withContext(Dispatchers.IO) { api().getArea(row.areaId.toString()) }
-                }.getOrNull()
-                if (area != null) {
-                    parentFragmentManager.commit {
-                        setReorderingAllowed(true)
-                        replace<AreaFragment>(
-                            R.id.fragmentContainerView, null,
-                            bundleOf("area_id" to area.id.toString()),
-                        )
-                        addToBackStack(null)
+                }.getOrNull() ?: return@launch
+
+                val events = runCatching {
+                    withContext(Dispatchers.IO) {
+                        api().getAreaEvents(area.id.toString())
                     }
+                }.getOrDefault(emptyList())
+
+                val eventArgs = ArrayList(events.map { event ->
+                    bundleOf(
+                        "id" to event.id,
+                        "area_id" to event.areaId,
+                        "lat" to event.lat,
+                        "lon" to event.lon,
+                        "name" to event.name,
+                        "website" to event.website.toString(),
+                        "starts_at" to event.startsAt.toString(),
+                        "ends_at" to event.endsAt?.toString(),
+                    )
+                })
+
+                parentFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    replace<AreaFragment>(
+                        R.id.fragmentContainerView, null,
+                        bundleOf(
+                            "area_id" to area.id.toString(),
+                            "upcoming_events" to eventArgs,
+                        ),
+                    )
+                    addToBackStack(null)
                 }
             }
         }

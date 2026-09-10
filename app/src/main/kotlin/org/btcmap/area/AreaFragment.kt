@@ -23,14 +23,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.api
+import org.btcmap.api.GetEventsItem
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.db.table.user.User
 import org.btcmap.databinding.AreaFragmentBinding
-import org.btcmap.db.table.event.Event
 import org.btcmap.settings.authorized
 import org.btcmap.settings.prefs
 import org.btcmap.util.openInBrowser
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -39,6 +40,12 @@ class AreaFragment : Fragment() {
 
     private val areaId by lazy {
         requireArguments().getString("area_id")!!
+    }
+
+    private val upcomingEvents: List<GetEventsItem> by lazy {
+        @Suppress("DEPRECATION")
+        val raw = arguments?.getParcelableArrayList<Bundle>("upcoming_events") ?: emptyList()
+        raw.map { it.toGetEventsItem() }
     }
 
     private var _binding: AreaFragmentBinding? = null
@@ -142,7 +149,7 @@ class AreaFragment : Fragment() {
                     .replace("http://", "")
                     .trimEnd('/')
                 updateBookmarkIcon()
-                loadUpcomingEvents()
+                renderUpcomingEvents()
             } catch (e: Throwable) {
                 e.printStackTrace()
             }
@@ -185,93 +192,99 @@ class AreaFragment : Fragment() {
         }
     }
 
-    private fun loadUpcomingEvents() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val events = withContext(Dispatchers.IO) {
-                    db().event.selectByAreaId(areaId.toLong())
+    private fun renderUpcomingEvents() {
+        val now = ZonedDateTime.now(ZoneId.systemDefault())
+        val sorted = upcomingEvents
+            .filter { it.startsAt.isAfter(now) }
+            .sortedBy { it.startsAt }
+
+        if (sorted.isEmpty()) return
+
+        val container = binding.upcomingEventsContainer
+        val dateFormatter = DateTimeFormatter.ofPattern("EEE, MMM d 'at' HH:mm")
+
+        for (event in sorted) {
+            val itemBlock = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                val itemParams = ViewGroup.MarginLayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                )
+                itemParams.bottomMargin = (16 * resources.displayMetrics.density).toInt()
+                layoutParams = itemParams
+                val pad = (16 * resources.displayMetrics.density).toInt()
+                setPadding(pad, pad, pad, pad)
+                gravity = Gravity.CENTER_VERTICAL
+                background = androidx.core.content.ContextCompat.getDrawable(
+                    context,
+                    R.drawable.event_card_background,
+                )
+                isClickable = true
+                isFocusable = true
+                setOnClickListener {
+                    openInBrowser(event.website.toString().toUri())
                 }
-                val now = ZonedDateTime.now(ZoneId.systemDefault())
-                val upcomingOccurrences = events
-                    .filter { it.startsAt.isAfter(now) }
-                    .sortedBy { it.startsAt }
-                    .map { event -> event to event.startsAt }
-
-                if (upcomingOccurrences.isEmpty()) return@launch
-
-                val container = binding.upcomingEventsContainer
-                val dateFormatter = DateTimeFormatter.ofPattern("EEE, MMM d 'at' HH:mm")
-
-                for ((event, date) in upcomingOccurrences) {
-                        val itemBlock = LinearLayout(requireContext()).apply {
-                            orientation = LinearLayout.HORIZONTAL
-                            val itemParams = ViewGroup.MarginLayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT,
-                            )
-                            itemParams.bottomMargin = (16 * resources.displayMetrics.density).toInt()
-                            layoutParams = itemParams
-                            val pad = (16 * resources.displayMetrics.density).toInt()
-                            setPadding(pad, pad, pad, pad)
-                            gravity = Gravity.CENTER_VERTICAL
-                            background = androidx.core.content.ContextCompat.getDrawable(
-                                context,
-                                R.drawable.event_card_background,
-                            )
-                            isClickable = true
-                            isFocusable = true
-                            setOnClickListener {
-                                openInBrowser(event.website.toString().toUri())
-                            }
-                        }
-
-                        val iconView = ImageView(requireContext()).apply {
-                            setImageResource(R.drawable.icon_event)
-                            val tint = com.google.android.material.color.MaterialColors.getColor(
-                                this,
-                                com.google.android.material.R.attr.colorSecondary,
-                                0,
-                            )
-                            imageTintList = android.content.res.ColorStateList.valueOf(tint)
-                            val iconSize = (24 * resources.displayMetrics.density).toInt()
-                            val iconParams = ViewGroup.MarginLayoutParams(iconSize, iconSize)
-                            val iconEnd = (12 * resources.displayMetrics.density).toInt()
-                            iconParams.marginEnd = iconEnd
-                            layoutParams = iconParams
-                        }
-                        itemBlock.addView(iconView)
-
-                        val textBlock = LinearLayout(requireContext()).apply {
-                            orientation = LinearLayout.VERTICAL
-                            layoutParams = LinearLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT,
-                            )
-                        }
-
-                        val nameView = TextView(requireContext()).apply {
-                            text = event.name
-                            setTextAppearance(com.google.android.material.R.style.TextAppearance_MaterialComponents_Headline6)
-                            setPadding(0, 0, 0, 4)
-                        }
-                        textBlock.addView(nameView)
-
-                        val dateView = TextView(requireContext()).apply {
-                            text = date.format(dateFormatter)
-                            setTextAppearance(com.google.android.material.R.style.TextAppearance_MaterialComponents_Body1)
-                            setPadding(0, 4, 0, 0)
-                        }
-                        textBlock.addView(dateView)
-
-                        itemBlock.addView(textBlock)
-
-                        container.addView(itemBlock)
-                }
-
-                binding.upcomingEventsContainer.isVisible = true
-            } catch (e: Throwable) {
-                e.printStackTrace()
             }
+
+            val iconView = ImageView(requireContext()).apply {
+                setImageResource(R.drawable.icon_event)
+                val tint = com.google.android.material.color.MaterialColors.getColor(
+                    this,
+                    com.google.android.material.R.attr.colorSecondary,
+                    0,
+                )
+                imageTintList = android.content.res.ColorStateList.valueOf(tint)
+                val iconSize = (24 * resources.displayMetrics.density).toInt()
+                val iconParams = ViewGroup.MarginLayoutParams(iconSize, iconSize)
+                val iconEnd = (12 * resources.displayMetrics.density).toInt()
+                iconParams.marginEnd = iconEnd
+                layoutParams = iconParams
+            }
+            itemBlock.addView(iconView)
+
+            val textBlock = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                )
+            }
+
+            val nameView = TextView(requireContext()).apply {
+                text = event.name
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_MaterialComponents_Headline6)
+                setPadding(0, 0, 0, 4)
+            }
+            textBlock.addView(nameView)
+
+            val dateView = TextView(requireContext()).apply {
+                text = event.startsAt.format(dateFormatter)
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_MaterialComponents_Body1)
+                setPadding(0, 4, 0, 0)
+            }
+            textBlock.addView(dateView)
+
+            itemBlock.addView(textBlock)
+
+            container.addView(itemBlock)
         }
+
+        binding.upcomingEventsContainer.isVisible = true
+    }
+
+    private fun Bundle.toGetEventsItem(): GetEventsItem {
+        val areaIdRaw = getString("area_id")
+        val endsAtRaw = getString("ends_at")
+        return GetEventsItem(
+            id = getLong("id"),
+            areaId = areaIdRaw?.toLongOrNull(),
+            lat = getDouble("lat"),
+            lon = getDouble("lon"),
+            name = getString("name").orEmpty(),
+            website = getString("website").orEmpty().toHttpUrlOrNull()
+                ?: error("Missing website for event ${getLong("id")}"),
+            startsAt = ZonedDateTime.parse(getString("starts_at")!!),
+            endsAt = endsAtRaw?.let { ZonedDateTime.parse(it) },
+        )
     }
 }
