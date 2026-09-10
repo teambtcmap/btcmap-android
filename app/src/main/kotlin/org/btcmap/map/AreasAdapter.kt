@@ -2,6 +2,7 @@ package org.btcmap.map
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -39,6 +40,11 @@ class AreasAdapter(
         fun bind(area: GetAreasItem, onItemClick: (GetAreasItem) -> Unit) {
             binding.apply {
                 icon.load("$apiUrl/v4/areas/${area.id}/image?type=square&w=256&h=256")
+                val count = area.upcomingEventsCount
+                badge.isVisible = count > 0
+                if (count > 0) {
+                    badge.text = count.toString()
+                }
                 root.setOnClickListener { onItemClick(area) }
             }
         }

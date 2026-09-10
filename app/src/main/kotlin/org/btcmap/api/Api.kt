@@ -32,6 +32,7 @@ data class GetAreasItem(
     val type: String,
     val urlAlias: String,
     val websiteUrl: String,
+    val upcomingEventsCount: Int,
 )
 
 data class ActivityFeedItem(
@@ -292,6 +293,11 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
                 type = it.get("type").asString,
                 urlAlias = it.get("url_alias").asString,
                 websiteUrl = it.get("website_url").asString,
+                upcomingEventsCount = if (!it.has("upcoming_events") || it.get("upcoming_events").isJsonNull) {
+                    0
+                } else {
+                    it.getAsJsonArray("upcoming_events").size()
+                },
             )
         }
     }
