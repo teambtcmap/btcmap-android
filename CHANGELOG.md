@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+- Add in-app screens for submitting, verifying and reporting places
+- Add activity feed with Local and Following tabs
+- Show upcoming events as clickable cards and area count badges
+- Add saved places
+- Add saved areas management
+- Add native area screen
+- Rework account creation and authentication flow
+- Allow changing username from profile screen
+- Add OpenStreetMap attribution with settings toggle
+- Search places and areas via the v4/search API
+- Bundle map styles as APK assets
+- Render outdated merchants with reduced opacity and gray icons
+- Filter out outdated places by default
+- Make map rotation opt in
+- Show wide place icons when available
+- Add optional debug info display
+- Improve map loading performance
+- Improve database layer testability and observability
+- Update to Kotlin 2.4, AGP 9.4, targetSdk 37 and latest dependencies
+
 ## [1.1.0] - 2026-03-30
 
 - Add Carto Dark Matter map style
