@@ -136,7 +136,7 @@ dependencies {
     testImplementation(libs.junit)
 }
 
-tasks.register<DefaultTask>("bundleData") {
+val bundleData = tasks.register<DefaultTask>("bundleData") {
     outputs.file(File(projectDir, "src/main/assets/bundled-places.json"))
     outputs.upToDateWhen { false }
     doLast {
@@ -151,6 +151,12 @@ tasks.register<DefaultTask>("bundleData") {
             }
         val data = connection.getInputStream().bufferedReader().use { it.readText() }
         File(dir, "bundled-places.json").writeText(data)
+    }
+}
+
+tasks.configureEach {
+    if (name != "bundleData") {
+        mustRunAfter(bundleData)
     }
 }
 
