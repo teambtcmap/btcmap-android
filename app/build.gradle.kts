@@ -31,16 +31,14 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            val keystorePath = keystoreProperties.getProperty("release.keystore.path")
-                ?: error("release.keystore.path must be set in local.properties")
-            storeFile = rootProject.file(keystorePath)
-            storePassword = keystoreProperties.getProperty("release.keystore.password")
-                ?: error("release.keystore.password must be set in local.properties")
-            keyAlias = keystoreProperties.getProperty("release.key.alias")
-                ?: error("release.key.alias must be set in local.properties")
-            keyPassword = keystoreProperties.getProperty("release.key.password")
-                ?: error("release.key.password must be set in local.properties")
+        val keystorePath = keystoreProperties.getProperty("release.keystore.path")
+        if (keystorePath != null) {
+            create("release") {
+                storeFile = rootProject.file(keystorePath)
+                storePassword = keystoreProperties.getProperty("release.keystore.password")
+                keyAlias = keystoreProperties.getProperty("release.key.alias")
+                keyPassword = keystoreProperties.getProperty("release.key.password")
+            }
         }
     }
 
@@ -60,7 +58,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.findByName("release")
         }
 
         create("beta") {
@@ -68,7 +66,7 @@ android {
             applicationIdSuffix = ".beta"
             manifestPlaceholders["appIcon"] = "@drawable/launcher_debug"
             manifestPlaceholders["appName"] = "@string/app_name_beta"
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 
@@ -118,7 +116,6 @@ dependencies {
     implementation(libs.androidx.sqlite.framework)
     testImplementation(libs.androidx.sqlite.bundled.jvm)
     implementation(libs.androidx.fragment)
-    testImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.core.ktx)
     androidTestImplementation(libs.androidx.test.runner)
