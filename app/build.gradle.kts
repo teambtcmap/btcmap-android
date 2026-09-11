@@ -122,7 +122,10 @@ dependencies {
     implementation(libs.androidx.fragment)
     testImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.core.ktx)
     androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    androidTestImplementation(libs.mockwebserver)
 
     implementation(libs.material)
     implementation(libs.okhttp.coroutines)

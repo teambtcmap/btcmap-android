@@ -26,10 +26,10 @@
 ./gradlew connectedDebugAndroidTest
 
 # Run a single instrumented test class
-./gradlew connectedDebugAndroidTest --tests "ExampleInstrumentedTest"
+./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=org.btcmap.ExampleInstrumentedTest
 
 # Run a single test method
-./gradlew connectedDebugAndroidTest --tests "ExampleInstrumentedTest.useAppContext"
+./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=org.btcmap.ExampleInstrumentedTest#useAppContext
 ```
 
 ### Linting
@@ -69,7 +69,6 @@ When asked to "launch", "run", or "start" the app, use `./devtools app run` (it 
 - Source files in `app/src/main/kotlin/`
 - Package structure mirrors directory structure
 - One class per file (filename matches class name)
-- Test files mirror source structure in `app/src/androidTest/kotlin/`
 
 ### Imports
 - Grouped by:

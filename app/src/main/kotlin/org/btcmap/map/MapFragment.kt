@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.activity.ActivityFeedFragment
 import org.btcmap.api
@@ -152,14 +153,15 @@ class MapFragment : Fragment() {
             openInBrowser(getString(R.string.osm_attribution_url).toUri())
         }
 
+        val app = requireContext().applicationContext as App
         mapSetupController = MapSetupController(
             mapView = binding.map,
-            styleUri = prefs.mapStyle.uri(requireContext()),
+            styleUri = app.mapStyleUriForTesting ?: prefs.mapStyle.uri(requireContext()),
             markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
             markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
             markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
             boostedMarkerBackgroundColor = prefs.boostedMarkerBackgroundColor(),
-            usingOpenFreeMap = usingOpenFreeMap(),
+            usingOpenFreeMap = app.mapStyleUriForTesting == null && usingOpenFreeMap(),
             rotationEnabled = prefs.mapRotationEnabled,
         ).also { it.install() }
 

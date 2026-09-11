@@ -13,18 +13,29 @@ import org.btcmap.settings.init as settingsInit
 import org.btcmap.util.init as typefaceInit
 
 class App : Application() {
-    val sync: Sync by lazy {
-        Sync(api, db)
-    }
+    internal var apiForTesting: Api? = null
 
-    val api: Api by lazy {
+    internal var dbForTesting: Database? = null
+
+    internal var mapStyleUriForTesting: String? = null
+
+    val sync: Sync
+        get() = Sync(api, db)
+
+    val api: Api
+        get() = apiForTesting ?: defaultApi
+
+    private val defaultApi: Api by lazy {
         Api(
             httpClient = apiHttpClient(),
             url = prefs.apiUrl,
         )
     }
 
-    val db: Database by lazy {
+    val db: Database
+        get() = dbForTesting ?: defaultDb
+
+    private val defaultDb: Database by lazy {
         Database(
             driver = AndroidSQLiteDriver(),
             path = getDatabasePath("btcmap-2025-11-06.db").absolutePath,
