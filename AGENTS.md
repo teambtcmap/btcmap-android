@@ -181,3 +181,7 @@ app/src/main/kotlin/org/btcmap/
 ## Testing
 - Instrumented tests are run by humans and are lower priority
 - Run unit tests (app/src/test) before reporting any task as done
+
+## Changelog
+- Update `CHANGELOG.md` before committing, adding entries under the `## [Unreleased]` section
+- Only user-facing or otherwise non-trivial and important changes belong in the changelog
