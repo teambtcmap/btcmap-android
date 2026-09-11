@@ -4,7 +4,7 @@
 - **Language**: Kotlin
 - **Build System**: Gradle with Kotlin DSL
 - **Min SDK**: 29 (Android 10)
-- **Target SDK**: 36
+- **Target SDK**: 37
 - **Architecture**: Android Views with ViewBinding, SQLite database, Coroutines for async
 
 ## Build Commands
@@ -15,6 +15,7 @@
 ./gradlew assembleDebug      # Build debug APK
 ./gradlew assembleRelease    # Build release APK
 ./gradlew bundleData         # Download latest places data snapshot
+./gradlew bundleMapStyles    # Bundle MapLibre map styles as assets
 ```
 
 ### Running Tests
@@ -147,11 +148,16 @@ override fun onDestroyView() {
 app/src/main/kotlin/org/btcmap/
 ├── App.kt          # Application singleton
 ├── Activity.kt     # This app uses a single shared activity
-├── Api.kt          # Abstracts away all API interactions
+├── Sync.kt         # Background data synchronization
+├── activity/       # Activity feed feature
+├── api/            # Abstracts away all API interactions
+├── area/           # Area details and events
+├── auth/           # Authentication UI and token handling
 ├── boost/          # Stuff related to place boosts
 ├── bundle/         # Bundled data (only places, currently)
 ├── comment/        # Place comments feature
 ├── db/             # Database schema, migrations and queries
+├── http/           # HTTP interceptors (rate limiting, user agent)
 ├── i18n/           # Multilanguage support
 ├── map/            # Map functionality
 ├── place/          # Place details
@@ -163,7 +169,10 @@ app/src/main/kotlin/org/btcmap/
 
 ## Dependencies
 - **Networking**: OkHttp with coroutines extension
+- **JSON**: Gson
+- **Database**: androidx.sqlite (with framework driver)
 - **Maps**: MapLibre (Open-source Mapbox alternative)
+- **Images**: Coil
 - **UI**: Material Design Components
 - **Async**: Kotlin Coroutines
 - **QR Codes**: QRGenerator
