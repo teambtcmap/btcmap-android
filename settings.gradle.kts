@@ -13,6 +13,7 @@ pluginManagement {
 }
 
 plugins {
+    // Provides the JDK requested by gradle/gradle-daemon-jvm.properties
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
@@ -21,7 +22,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven("https://jitpack.io")
+        maven("https://jitpack.io") {
+            content {
+                includeGroup("com.github.androidmads")
+                includeGroup("com.github.mrudultora")
+            }
+        }
     }
 }
 
