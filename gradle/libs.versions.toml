@@ -13,7 +13,7 @@ coroutines = "1.11.0"
 ## Handy Android extensions
 # Abstracts away platform-dependednt SQLite API
 # https://developer.android.com/jetpack/androidx/releases/sqlite
-androidx-sqlite = "2.6.2"
+androidx-sqlite = "2.7.1"
 # Enables simplified fragment transactions
 # https://developer.android.com/jetpack/androidx/releases/fragment
 androidx-fragment = "1.8.9"
