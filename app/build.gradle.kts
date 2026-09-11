@@ -138,13 +138,19 @@ dependencies {
 
 tasks.register<DefaultTask>("bundleData") {
     outputs.file(File(projectDir, "src/main/assets/bundled-places.json"))
+    outputs.upToDateWhen { false }
     doLast {
         val dir = File(projectDir, "src/main/assets")
         dir.mkdirs()
-        File(dir, "bundled-places.json").writeText(
-            URI("https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,name,comments,boosted_until").toURL()
-                .readText()
-        )
+        val connection = URI("https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,name,comments,boosted_until")
+            .toURL()
+            .openConnection()
+            .apply {
+                connectTimeout = 30_000
+                readTimeout = 60_000
+            }
+        val data = connection.getInputStream().bufferedReader().use { it.readText() }
+        File(dir, "bundled-places.json").writeText(data)
     }
 }
 
