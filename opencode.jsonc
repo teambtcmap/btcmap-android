@@ -1,6 +1,5 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "ppq/minimax/minimax-m3",
   "references": {
     "api": {
       "path": "../btcmap-api",
