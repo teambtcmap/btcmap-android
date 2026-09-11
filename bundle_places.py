@@ -7,12 +7,11 @@ fallback when the network is unavailable.
 
 Run:
 
-    python3 bundle_places.py [--force]
+    python3 bundle_places.py
 
-Without ``--force`` an existing snapshot is left untouched.
+The latest snapshot is always fetched, replacing any existing asset.
 """
 
-import argparse
 import json
 import re
 import sys
@@ -50,14 +49,6 @@ def fetch(url: str) -> bytes:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--force", action="store_true", help="re-download the snapshot even if it exists")
-    args = parser.parse_args()
-
-    if OUTPUT_FILE.exists() and not args.force:
-        print(f"{OUTPUT_FILE} already exists; use --force to refresh.")
-        return 0
-
     raw = fetch(API_URL)
     try:
         places = json.loads(raw)

@@ -233,7 +233,7 @@ cmd_app_uninstall() {
 }
 
 cmd_app_deploy_beta() {
-  cmd_bundle_data --force
+  cmd_bundle_data
   ./gradlew assembleBeta "$@"
 
   local apk_dir="app/build/outputs/apk/beta"
@@ -247,7 +247,7 @@ cmd_app_deploy_beta() {
 }
 
 cmd_app_deploy_release() {
-  cmd_bundle_data --force
+  cmd_bundle_data
   ./gradlew assembleRelease "$@"
 
   local apk_dir="app/build/outputs/apk/release"
