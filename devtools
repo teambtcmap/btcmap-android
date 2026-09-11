@@ -191,7 +191,7 @@ cmd_app_uninstall() {
 }
 
 cmd_app_deploy_beta() {
-  ./gradlew assembleBeta "$@"
+  ./gradlew bundleData assembleBeta "$@"
 
   local apk_dir="app/build/outputs/apk/beta"
   local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
@@ -204,7 +204,7 @@ cmd_app_deploy_beta() {
 }
 
 cmd_app_deploy_release() {
-  ./gradlew assembleRelease "$@"
+  ./gradlew bundleData assembleRelease "$@"
 
   local apk_dir="app/build/outputs/apk/release"
   local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"

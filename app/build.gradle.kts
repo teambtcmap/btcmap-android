@@ -2,12 +2,11 @@ import com.google.gson.JsonParser
 import java.net.HttpURLConnection
 import java.net.URI
 import java.util.Properties
-import org.gradle.api.GradleException
 
 val keystoreProperties = Properties().apply {
     val localProperties = rootProject.file("local.properties")
     if (localProperties.exists()) {
-        load(localProperties.inputStream())
+        localProperties.inputStream().use { load(it) }
     }
 }
 
@@ -97,7 +96,13 @@ dependencies {
     implementation(libs.androidx.sqlite)
     implementation(libs.androidx.sqlite.framework)
     testImplementation(libs.androidx.sqlite.bundled.jvm)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core)
     implementation(libs.androidx.fragment)
+    implementation(libs.androidx.lifecycle)
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.viewpager2)
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.core.ktx)
     androidTestImplementation(libs.androidx.test.runner)
@@ -123,6 +128,8 @@ dependencies {
 // run bundleData explicitly to ship an offline snapshot with the APK.
 val bundleData = tasks.register<DefaultTask>("bundleData") {
     val outputFile = File(projectDir, "src/main/assets/bundled-places.json")
+    val versionCode = android.defaultConfig.versionCode
+    val outputLabel = outputFile.relativeTo(rootProject.projectDir)
     outputs.file(outputFile)
     outputs.upToDateWhen { false }
     doLast {
@@ -136,7 +143,7 @@ val bundleData = tasks.register<DefaultTask>("bundleData") {
             connection.connectTimeout = 30_000
             connection.readTimeout = 60_000
             connection.requestMethod = "GET"
-            connection.setRequestProperty("User-Agent", "BTC Map Android ${android.defaultConfig.versionCode}")
+            connection.setRequestProperty("User-Agent", "BTC Map Android $versionCode")
             connection.setRequestProperty("Accept", "application/json")
             val code = connection.responseCode
             if (code != HttpURLConnection.HTTP_OK) {
@@ -164,10 +171,21 @@ val bundleData = tasks.register<DefaultTask>("bundleData") {
             tmpFile.delete()
         }
 
-        println("Bundled ${places.asJsonArray.size()} places into ${outputFile.relativeTo(rootProject.projectDir)}")
+        println("Bundled ${places.asJsonArray.size()} places into $outputLabel")
     }
 }
 
+// bundleData writes bundled-places.json into src/main/assets, which lots of
+// other tasks treat as an input: asset merging (merge*Assets), packaging,
+// lint, etc. Because those tasks don't declare a dependency on bundleData,
+// Gradle's implicit-dependency validation fails a combined build such as
+// `./gradlew bundleData assembleRelease` (the asset directory is an
+// undeclared input/output overlap). This must be a blanket `configureEach`
+// rather than a name filter: tasks that read assets, like mergeBetaAssets,
+// don't share the assemble/bundle naming, so any narrower matcher misses them
+// and the validation failure returns. `mustRunAfter` (not `dependsOn`) is
+// deliberate: it only orders the tasks when bundleData is already in the graph,
+// so the network download still happens solely when explicitly requested.
 tasks.configureEach {
     if (name != "bundleData") {
         mustRunAfter(bundleData)
@@ -176,15 +194,16 @@ tasks.configureEach {
 
 tasks.register<DefaultTask>("bundleMapStyles") {
     val assetsDir = File(projectDir, "src/main/assets/map-styles")
+    val script = File(projectDir, "bundle_map_styles.py")
+    val force = project.hasProperty("force")
     outputs.dir(assetsDir)
     outputs.upToDateWhen { false }
     doLast {
-        val script = File(projectDir, "bundle_map_styles.py")
         if (!script.exists()) {
             throw GradleException("Missing bundler script at $script")
         }
         val args = mutableListOf("python3", script.absolutePath)
-        if (project.hasProperty("force")) {
+        if (force) {
             args += "--force"
         }
         val process = ProcessBuilder(args).redirectErrorStream(true).start()

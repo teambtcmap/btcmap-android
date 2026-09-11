@@ -14,9 +14,27 @@ coroutines = "1.11.0"
 # Abstracts away platform-dependednt SQLite API
 # https://developer.android.com/jetpack/androidx/releases/sqlite
 androidx-sqlite = "2.7.1"
+# Manages the shared activity and edge-to-edge setup
+# https://developer.android.com/jetpack/androidx/releases/activity
+androidx-activity = "1.8.1"
+# Provides AppCompat widgets and theming
+# https://developer.android.com/jetpack/androidx/releases/appcompat
+androidx-appcompat = "1.7.1"
+# Common Kotlin extensions for platform APIs
+# https://developer.android.com/jetpack/androidx/releases/core
+androidx-core = "1.16.0"
 # Enables simplified fragment transactions
 # https://developer.android.com/jetpack/androidx/releases/fragment
 androidx-fragment = "1.9.0"
+# Lifecycle-aware components and coroutine scopes
+# https://developer.android.com/jetpack/androidx/releases/lifecycle
+androidx-lifecycle = "2.9.4"
+# Displays scrollable lists
+# https://developer.android.com/jetpack/androidx/releases/recyclerview
+androidx-recyclerview = "1.2.1"
+# Enables horizontal swiping between pages
+# https://developer.android.com/jetpack/androidx/releases/viewpager2
+androidx-viewpager2 = "1.0.0"
 
 # Material design components
 # https://github.com/material-components/material-components-android/releases
@@ -57,7 +75,13 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 androidx-sqlite = { module = "androidx.sqlite:sqlite", version.ref = "androidx-sqlite" }
 androidx-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version.ref = "androidx-sqlite" }
 androidx-sqlite-bundled-jvm = { module = "androidx.sqlite:sqlite-bundled-jvm", version.ref = "androidx-sqlite" }
+androidx-activity = { group = "androidx.activity", name = "activity-ktx", version.ref = "androidx-activity" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
+androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
 androidx-fragment = { group = "androidx.fragment", name = "fragment", version.ref = "androidx-fragment" }
+androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "androidx-recyclerview" }
+androidx-viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "androidx-viewpager2" }
 
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "android-test-junit" }
 androidx-test-core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "android-test-core" }
