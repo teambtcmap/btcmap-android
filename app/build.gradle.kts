@@ -23,7 +23,7 @@ android {
     defaultConfig {
         applicationId = "org.btcmap"
         minSdk = 29
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 56
         versionName = "1.1.0"
 
