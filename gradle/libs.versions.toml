@@ -5,7 +5,7 @@
 agp = "9.4.0"
 # This project is Kotlin-only
 # https://github.com/JetBrains/kotlin/releases
-kotlin = "2.3.21"
+kotlin = "2.4.20"
 # Enables suspending functions
 # https://github.com/Kotlin/kotlinx.coroutines/releases
 coroutines = "1.10.2"
