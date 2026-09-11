@@ -31,6 +31,9 @@ android {
     }
 
     signingConfigs {
+        // Release signing is optional: without a keystore in local.properties,
+        // release and beta builds are produced unsigned, as per default and
+        // expected behaviour in Android apps.
         val keystorePath = keystoreProperties.getProperty("release.keystore.path")
         if (keystorePath != null) {
             create("release") {
@@ -108,7 +111,6 @@ androidComponents {
 }
 
 dependencies {
-    implementation(libs.kotlin)
     implementation(libs.kotlinx.coroutines)
     testImplementation(libs.kotlinx.coroutines.test)
 
@@ -136,6 +138,9 @@ dependencies {
     testImplementation(libs.junit)
 }
 
+// Downloads the bundled places snapshot into a git-ignored asset. This task is
+// intentionally not wired into assembleRelease/assembleBeta, so packaging must
+// run bundleData explicitly to ship an offline snapshot with the APK.
 val bundleData = tasks.register<DefaultTask>("bundleData") {
     outputs.file(File(projectDir, "src/main/assets/bundled-places.json"))
     outputs.upToDateWhen { false }
@@ -163,6 +168,7 @@ tasks.configureEach {
 tasks.register<DefaultTask>("bundleMapStyles") {
     val assetsDir = File(projectDir, "src/main/assets/map-styles")
     outputs.dir(assetsDir)
+    outputs.upToDateWhen { false }
     doLast {
         val script = File(projectDir, "bundle_map_styles.py")
         if (!script.exists()) {
