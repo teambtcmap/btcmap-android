@@ -40,7 +40,10 @@ class UpdateNotificationController(
                         val latestVerName = latestVer.get("name").asString
                         val latestVerUrl = latestVer.get("url").asString
 
-                        if (latestVerCode > BuildConfig.VERSION_CODE) {
+                        if (!BuildConfig.DEBUG &&
+                            BuildConfig.BUILD_TYPE != "beta" &&
+                            latestVerCode > BuildConfig.VERSION_CODE
+                        ) {
                             lifecycleOwner.withResumed {
                                 icon.isVisible = true
                                 icon.iconColor(context.getErrorColor())

@@ -1,9 +1,10 @@
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-val keystoreProperties = Properties().apply {
-    val localProperties = rootProject.file("local.properties")
-    if (localProperties.exists()) {
-        localProperties.inputStream().use { load(it) }
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) {
+        file.inputStream().use { load(it) }
     }
 }
 
@@ -20,8 +21,12 @@ android {
 
     defaultConfig {
         applicationId = "org.btcmap"
-        minSdk = 29
-        targetSdk = 37
+        minSdk {
+            version = release(29)
+        }
+        targetSdk {
+            version = release(37)
+        }
         versionCode = 56
         versionName = "1.1.0"
 
@@ -32,13 +37,13 @@ android {
         // Release signing is optional: without a keystore in local.properties,
         // release and beta builds are produced unsigned, as per default and
         // expected behaviour in Android apps.
-        val keystorePath = keystoreProperties.getProperty("release.keystore.path")
+        val keystorePath = localProperties.getProperty("release.keystore.path")
         if (keystorePath != null) {
             create("release") {
                 storeFile = rootProject.file(keystorePath)
-                storePassword = keystoreProperties.getProperty("release.keystore.password")
-                keyAlias = keystoreProperties.getProperty("release.key.alias")
-                keyPassword = keystoreProperties.getProperty("release.key.password")
+                storePassword = localProperties.getProperty("release.keystore.password")
+                keyAlias = localProperties.getProperty("release.key.alias")
+                keyPassword = localProperties.getProperty("release.key.password")
             }
         }
     }
@@ -46,6 +51,7 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
             manifestPlaceholders["appIcon"] = "@drawable/launcher_debug"
             manifestPlaceholders["appName"] = "@string/app_name"
         }
@@ -65,10 +71,15 @@ android {
         create("beta") {
             initWith(getByName("release"))
             applicationIdSuffix = ".beta"
+            versionNameSuffix = "-beta"
             manifestPlaceholders["appIcon"] = "@drawable/launcher_debug"
             manifestPlaceholders["appName"] = "@string/app_name_beta"
-            signingConfig = signingConfigs.findByName("release")
         }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {
@@ -86,13 +97,17 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+    }
+}
+
 dependencies {
     implementation(libs.kotlinx.coroutines)
-    testImplementation(libs.kotlinx.coroutines.test)
 
     implementation(libs.androidx.sqlite)
     implementation(libs.androidx.sqlite.framework)
-    testImplementation(libs.androidx.sqlite.bundled.jvm)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core)
@@ -100,16 +115,10 @@ dependencies {
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.viewpager2)
-    androidTestImplementation(libs.androidx.test.junit)
-    androidTestImplementation(libs.androidx.test.core.ktx)
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.test.espresso.core)
-    androidTestImplementation(libs.mockwebserver)
 
     implementation(libs.material)
     implementation(libs.okhttp.coroutines)
     implementation(libs.okhttp.brotli)
-    testImplementation(libs.mockwebserver)
     implementation(libs.maplibre)
     implementation(libs.qrgenerator)
     implementation(libs.colorpicker)
@@ -117,5 +126,15 @@ dependencies {
     implementation(libs.coil.network)
     implementation(libs.coil.svg)
     implementation(libs.gson)
+
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.sqlite.bundled.jvm)
+    testImplementation(libs.mockwebserver)
+
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.core.ktx)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    androidTestImplementation(libs.mockwebserver)
 }
