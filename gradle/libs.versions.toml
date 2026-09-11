@@ -35,7 +35,7 @@ qrgenerator = "1.0.5"
 colorpicker = "1.2.0"
 # Image loading
 # https://github.com/coil-kt/coil/releases
-coil = "3.4.0"
+coil = "3.6.2"
 # JSON parsing
 # https://github.com/google/gson/releases
 gson = "2.14.0"
