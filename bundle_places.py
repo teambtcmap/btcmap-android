@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Download the latest places snapshot as a bundled Android asset.
 
-Fetches every place from the BTC Map API and writes the raw JSON response to
+Fetches every place from the BTC Map API and writes it to
 ``app/src/main/assets/bundled-places.json`` so the app can offer an offline
 fallback when the network is unavailable.
+
+The output is pretty-printed and sorted by id. This keeps the diff of a
+refresh limited to the places that actually changed instead of rewriting the
+whole file.
 
 Run:
 
@@ -58,10 +62,13 @@ def main() -> int:
     if not isinstance(places, list) or not places:
         raise RuntimeError("downloaded places are empty or not a JSON array")
 
+    places.sort(key=lambda place: place["id"])
+    pretty = json.dumps(places, indent=2, ensure_ascii=False).encode("utf-8") + b"\n"
+
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     # Write atomically so a failed download never leaves a truncated asset.
     tmp_file = OUTPUT_FILE.with_name(OUTPUT_FILE.name + ".tmp")
-    tmp_file.write_bytes(raw)
+    tmp_file.write_bytes(pretty)
     tmp_file.replace(OUTPUT_FILE)
 
     print(f"Bundled {len(places)} places into {OUTPUT_FILE.relative_to(APP_DIR.parent)}")
