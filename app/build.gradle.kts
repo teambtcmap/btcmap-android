@@ -1,4 +1,4 @@
-import groovy.json.JsonSlurper
+import com.google.gson.JsonParser
 import java.net.HttpURLConnection
 import java.net.URI
 import java.util.Properties
@@ -148,11 +148,11 @@ val bundleData = tasks.register<DefaultTask>("bundleData") {
         }
 
         val places = try {
-            JsonSlurper().parseText(body)
+            JsonParser.parseString(body)
         } catch (e: Exception) {
             throw GradleException("Downloaded bundled places are not valid JSON", e)
         }
-        if (places !is List<*> || places.isEmpty()) {
+        if (!places.isJsonArray || places.asJsonArray.size() == 0) {
             throw GradleException("Downloaded bundled places are empty or not a JSON array")
         }
 
@@ -164,7 +164,7 @@ val bundleData = tasks.register<DefaultTask>("bundleData") {
             tmpFile.delete()
         }
 
-        println("Bundled ${places.size} places into ${outputFile.relativeTo(rootProject.projectDir)}")
+        println("Bundled ${places.asJsonArray.size()} places into ${outputFile.relativeTo(rootProject.projectDir)}")
     }
 }
 
