@@ -84,6 +84,10 @@ android {
         viewBinding = true
     }
 
+    androidResources {
+        generateLocaleConfig = true
+    }
+
     splits {
         abi {
             isEnable = true

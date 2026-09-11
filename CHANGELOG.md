@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Allow changing username from profile screen
 - Add OpenStreetMap attribution with settings toggle
 - Search places and areas via the v4/search API
+- Support per-app language selection on Android 13+
+- Keep forms and search results above the keyboard
 - Bundle map styles as APK assets
 - Render outdated merchants with reduced opacity and gray icons
 - Filter out outdated places by default
