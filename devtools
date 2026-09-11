@@ -66,6 +66,54 @@ cmd_emulator() {
 
 # END emulator section
 
+# START signing section
+
+android_sdk_dir() {
+  if [ -n "${ANDROID_HOME:-}" ]; then
+    echo "$ANDROID_HOME"
+    return 0
+  fi
+  if [ -n "${ANDROID_SDK_ROOT:-}" ]; then
+    echo "$ANDROID_SDK_ROOT"
+    return 0
+  fi
+  local sdk_dir
+  sdk_dir="$(sed -n 's/^sdk\.dir=//p' local.properties 2>/dev/null | head -n1)"
+  if [ -n "$sdk_dir" ]; then
+    echo "$sdk_dir"
+    return 0
+  fi
+  return 1
+}
+
+find_apksigner() {
+  local sdk_dir
+  sdk_dir="$(android_sdk_dir)" || return 1
+  local build_tools
+  build_tools="$(ls -d "$sdk_dir"/build-tools/*/ 2>/dev/null | sort -V | tail -n1)"
+  [ -n "$build_tools" ] && [ -x "${build_tools}apksigner" ] && echo "${build_tools}apksigner"
+}
+
+assert_apk_signed() {
+  local apk="$1"
+  if [ ! -f "$apk" ]; then
+    echo "Error: APK not found at $apk" >&2
+    return 1
+  fi
+  local apksigner
+  if ! apksigner="$(find_apksigner)"; then
+    echo "Error: could not locate apksigner; refusing to deploy an unsigned APK." >&2
+    return 1
+  fi
+  if ! "$apksigner" verify --print-certs "$apk" >/dev/null 2>&1; then
+    echo "Error: $apk is not signed. Add the release keystore properties to local.properties." >&2
+    return 1
+  fi
+  echo "$apk is signed."
+}
+
+# END signing section
+
 # START app section
 
 cmd_app_install() {
@@ -148,6 +196,9 @@ cmd_app_deploy_beta() {
   local apk_dir="app/build/outputs/apk/beta"
   local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
 
+  assert_apk_signed "$apk_dir/app-arm64-v8a-beta.apk"
+  assert_apk_signed "$apk_dir/app-universal-beta.apk"
+
   rsync -avz --progress "$apk_dir"/app-arm64-v8a-beta.apk "$dest/beta.apk"
   rsync -avz --progress "$apk_dir"/app-universal-beta.apk "$dest/beta-universal.apk"
 }
@@ -157,6 +208,9 @@ cmd_app_deploy_release() {
 
   local apk_dir="app/build/outputs/apk/release"
   local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
+
+  assert_apk_signed "$apk_dir/app-arm64-v8a-release.apk"
+  assert_apk_signed "$apk_dir/app-universal-release.apk"
 
   rsync -avz --progress "$apk_dir"/app-arm64-v8a-release.apk "$dest/release.apk"
   rsync -avz --progress "$apk_dir"/app-universal-release.apk "$dest/release-universal.apk"
