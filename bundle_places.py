@@ -7,7 +7,7 @@ fallback when the network is unavailable.
 
 Run:
 
-    python3 app/bundle_places.py [--force]
+    python3 bundle_places.py [--force]
 
 Without ``--force`` an existing snapshot is left untouched.
 """
@@ -24,7 +24,8 @@ API_URL = (
     "https://api.btcmap.org/v4/places"
     "?fields=id,lat,lon,icon,name,comments,boosted_until"
 )
-APP_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parent
+APP_DIR = PROJECT_ROOT / "app"
 OUTPUT_FILE = APP_DIR / "src" / "main" / "assets" / "bundled-places.json"
 
 

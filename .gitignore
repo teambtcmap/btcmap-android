@@ -24,5 +24,8 @@ app/play
 
 emulator.log
 
+# Python bytecode cache
+__pycache__/
+
 # opencode
 .opencode

@@ -135,11 +135,11 @@ assert_apk_signed() {
 # START bundle section
 
 cmd_bundle_data() {
-  python3 app/bundle_places.py "$@"
+  python3 bundle_places.py "$@"
 }
 
 cmd_bundle_map_styles() {
-  python3 app/bundle_map_styles.py "$@"
+  python3 bundle_map_styles.py "$@"
 }
 
 cmd_bundle() {

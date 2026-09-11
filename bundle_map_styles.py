@@ -12,7 +12,7 @@ when available.
 
 Run:
 
-    python3 app/bundle_map_styles.py [--force]
+    python3 bundle_map_styles.py [--force]
 
 ``--force`` re-downloads every file even if it already exists.
 """
@@ -65,7 +65,8 @@ STYLE_TO_SPRITE_BUNDLE: dict[str, str] = {
     "carto-dark-matter": "carto-sprites",
 }
 
-ASSETS_ROOT = Path(__file__).resolve().parent / "src" / "main" / "assets" / "map-styles"
+PROJECT_ROOT = Path(__file__).resolve().parent
+ASSETS_ROOT = PROJECT_ROOT / "app" / "src" / "main" / "assets" / "map-styles"
 
 
 def fetch(url: str) -> bytes:
