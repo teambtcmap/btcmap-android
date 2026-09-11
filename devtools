@@ -14,7 +14,14 @@ Usage:
   ./devtools app uninstall      Uninstall the app
   ./devtools app deploy-beta    Build and deploy beta APK
   ./devtools app deploy-release Build and deploy release APK
+  ./devtools bundle data        Download latest places snapshot
+  ./devtools bundle map-styles  Bundle MapLibre styles as assets
+  ./devtools bundle all         Run both bundlers
 EOF
+}
+
+err() {
+  echo "Error: $*" >&2
 }
 
 print_usage_emulator() {
@@ -29,7 +36,7 @@ EOF
 
 print_usage_app() {
   cat <<EOF
-Usage: ./devtools emulator <command>
+Usage: ./devtools app <command>
 
 Commands:
   install        Install debug build
@@ -37,6 +44,17 @@ Commands:
   uninstall      Uninstall the app
   deploy-beta    Build and deploy beta APK
   deploy-release Build and deploy release APK
+EOF
+}
+
+print_usage_bundle() {
+  cat <<EOF
+Usage: ./devtools bundle <command>
+
+Commands:
+  data         Download latest places snapshot
+  map-styles   Bundle MapLibre styles as assets
+  all          Run both bundlers
 EOF
 }
 
@@ -113,6 +131,30 @@ assert_apk_signed() {
 }
 
 # END signing section
+
+# START bundle section
+
+cmd_bundle_data() {
+  python3 app/bundle_places.py "$@"
+}
+
+cmd_bundle_map_styles() {
+  python3 app/bundle_map_styles.py "$@"
+}
+
+cmd_bundle() {
+  local target="${1:-help}"
+  shift || true
+  case "$target" in
+    data) cmd_bundle_data "$@" ;;
+    map-styles) cmd_bundle_map_styles "$@" ;;
+    all) cmd_bundle_data "$@"; cmd_bundle_map_styles "$@" ;;
+    help|-h|--help) print_usage_bundle ;;
+    *) err "Unknown bundle command: $target"; print_usage_bundle; return 1 ;;
+  esac
+}
+
+# END bundle section
 
 # START app section
 
@@ -191,7 +233,8 @@ cmd_app_uninstall() {
 }
 
 cmd_app_deploy_beta() {
-  ./gradlew bundleData assembleBeta "$@"
+  cmd_bundle_data --force
+  ./gradlew assembleBeta "$@"
 
   local apk_dir="app/build/outputs/apk/beta"
   local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
@@ -204,7 +247,8 @@ cmd_app_deploy_beta() {
 }
 
 cmd_app_deploy_release() {
-  ./gradlew bundleData assembleRelease "$@"
+  cmd_bundle_data --force
+  ./gradlew assembleRelease "$@"
 
   local apk_dir="app/build/outputs/apk/release"
   local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
@@ -238,6 +282,7 @@ main() {
   case "$cmd" in
     emulator) cmd_emulator "$@" ;;
     app) cmd_app "$@" ;;
+    bundle) cmd_bundle "$@" ;;
     help|-h|--help) print_usage ;;
     *) err "Unknown command: $cmd"; print_usage; return 1 ;;
   esac

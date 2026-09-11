@@ -18,9 +18,6 @@ build/
 # Gradle cache
 .gradle
 
-# App data
-app/src/main/assets/bundled-places.json
-
 # Signed APK dirs
 app/fdroid
 app/play

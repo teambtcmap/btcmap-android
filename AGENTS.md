@@ -14,9 +14,10 @@
 ./gradlew check              # Run all verification (lint + tests)
 ./gradlew assembleDebug      # Build debug APK
 ./gradlew assembleRelease    # Build release APK
-./gradlew bundleData         # Download latest places data snapshot
-./gradlew bundleMapStyles    # Bundle MapLibre map styles as assets
 ```
+
+Bundled assets (places snapshot, map styles) are managed outside Gradle via the
+`./devtools bundle` commands, see below.
 
 ### Running Tests
 ```bash
@@ -53,6 +54,10 @@ The `./devtools` wrapper manages the emulator and app deployment. Default device
 ./devtools app uninstall     # Remove debug package from device
 ./devtools app deploy-beta     # Build and rsync beta APK to btcmap-api server
 ./devtools app deploy-release  # Build and rsync release APK to btcmap-api server
+
+./devtools bundle data         # Download latest places snapshot
+./devtools bundle map-styles   # Bundle MapLibre map styles as assets
+./devtools bundle all          # Run both bundlers
 ```
 
 When asked to "launch", "run", or "start" the app, use `./devtools app run` (it builds, installs and launches in one step). If the emulator is not running, first run `./devtools emulator start` and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy-beta` and `./devtools app deploy-release` build and push APK artifacts to the remote `btcmap-api` host — use only when explicitly asked to publish a build.
