@@ -90,28 +90,6 @@ android {
     }
 }
 
-androidComponents {
-    onVariants { variant ->
-        if (variant.name == "debug") {
-            return@onVariants
-        }
-
-        for (output in variant.outputs) {
-            if (output.outputFileName.get().contains("universal")) {
-                output.outputFileName.set("btcmap-${output.versionName.get()}-universal.apk")
-            }
-
-            if (output.outputFileName.get().contains("arm64-v8a")) {
-                output.outputFileName.set("btcmap-${output.versionName.get()}-arm.apk")
-            }
-
-            if (output.outputFileName.get().contains("x86_64")) {
-                output.outputFileName.set("btcmap-${output.versionName.get()}-x86.apk")
-            }
-        }
-    }
-}
-
 dependencies {
     implementation(libs.kotlinx.coroutines)
     testImplementation(libs.kotlinx.coroutines.test)
