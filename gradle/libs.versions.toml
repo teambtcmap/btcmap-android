@@ -8,7 +8,7 @@ agp = "9.4.0"
 kotlin = "2.4.20"
 # Enables suspending functions
 # https://github.com/Kotlin/kotlinx.coroutines/releases
-coroutines = "1.10.2"
+coroutines = "1.11.0"
 
 ## Handy Android extensions
 # Abstracts away platform-dependednt SQLite API
