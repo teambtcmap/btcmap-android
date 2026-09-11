@@ -1,3 +1,5 @@
+import groovy.json.JsonSlurper
+import java.net.HttpURLConnection
 import java.net.URI
 import java.util.Properties
 import org.gradle.api.GradleException
@@ -142,20 +144,49 @@ dependencies {
 // intentionally not wired into assembleRelease/assembleBeta, so packaging must
 // run bundleData explicitly to ship an offline snapshot with the APK.
 val bundleData = tasks.register<DefaultTask>("bundleData") {
-    outputs.file(File(projectDir, "src/main/assets/bundled-places.json"))
+    val outputFile = File(projectDir, "src/main/assets/bundled-places.json")
+    outputs.file(outputFile)
     outputs.upToDateWhen { false }
     doLast {
-        val dir = File(projectDir, "src/main/assets")
-        dir.mkdirs()
-        val connection = URI("https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,name,comments,boosted_until")
+        val outputDir = outputFile.parentFile
+        outputDir.mkdirs()
+
+        val url = URI("https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,name,comments,boosted_until")
             .toURL()
-            .openConnection()
-            .apply {
-                connectTimeout = 30_000
-                readTimeout = 60_000
+        val connection = url.openConnection() as HttpURLConnection
+        val body = try {
+            connection.connectTimeout = 30_000
+            connection.readTimeout = 60_000
+            connection.requestMethod = "GET"
+            connection.setRequestProperty("User-Agent", "BTC Map Android ${android.defaultConfig.versionCode}")
+            connection.setRequestProperty("Accept", "application/json")
+            val code = connection.responseCode
+            if (code != HttpURLConnection.HTTP_OK) {
+                throw GradleException("Failed to download bundled places: HTTP $code ${connection.responseMessage}")
             }
-        val data = connection.getInputStream().bufferedReader().use { it.readText() }
-        File(dir, "bundled-places.json").writeText(data)
+            connection.inputStream.bufferedReader().use { it.readText() }
+        } finally {
+            connection.disconnect()
+        }
+
+        val places = try {
+            JsonSlurper().parseText(body)
+        } catch (e: Exception) {
+            throw GradleException("Downloaded bundled places are not valid JSON", e)
+        }
+        if (places !is List<*> || places.isEmpty()) {
+            throw GradleException("Downloaded bundled places are empty or not a JSON array")
+        }
+
+        // Write atomically so a failed download never leaves a truncated asset.
+        val tmpFile = File(outputDir, "${outputFile.name}.tmp")
+        tmpFile.writeText(body)
+        if (!tmpFile.renameTo(outputFile)) {
+            tmpFile.copyTo(outputFile, overwrite = true)
+            tmpFile.delete()
+        }
+
+        println("Bundled ${places.size} places into ${outputFile.relativeTo(rootProject.projectDir)}")
     }
 }
 
