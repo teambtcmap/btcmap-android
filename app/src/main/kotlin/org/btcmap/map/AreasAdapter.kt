@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil3.load
 import okhttp3.HttpUrl
+import java.text.NumberFormat
 import org.btcmap.api.GetAreasItem
 import org.btcmap.databinding.AreaItemBinding
 
@@ -43,7 +44,7 @@ class AreasAdapter(
                 val count = area.upcomingEventsCount
                 badge.isVisible = count > 0
                 if (count > 0) {
-                    badge.text = count.toString()
+                    badge.text = NumberFormat.getIntegerInstance().format(count)
                 }
                 root.setOnClickListener { onItemClick(area) }
             }

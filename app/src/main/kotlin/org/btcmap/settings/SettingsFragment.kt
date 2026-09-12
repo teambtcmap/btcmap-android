@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
@@ -80,8 +81,7 @@ class SettingsFragment : Fragment() {
 
         initBoostedMarkerBackgroundButton()
 
-        binding.badgeBackgroundColor.text =
-            "#${prefs.badgeBackgroundColor(requireContext()).toHexString()}"
+        binding.badgeBackgroundColor.setColorHex(prefs.badgeBackgroundColor(requireContext()))
 
         binding.changeBadgeBackgroundColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -99,14 +99,12 @@ class SettingsFragment : Fragment() {
                 .show()
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setBadgeBackgroundColor(null)
-                binding.badgeBackgroundColor.text =
-                    "#${prefs.badgeBackgroundColor(requireContext()).toHexString()}"
+                binding.badgeBackgroundColor.setColorHex(prefs.badgeBackgroundColor(requireContext()))
                 colorPickerPopUp.dismissDialog()
             }
         }
 
-        binding.badgeTextColor.text =
-            "#${prefs.badgeTextColor(requireContext()).toHexString()}"
+        binding.badgeTextColor.setColorHex(prefs.badgeTextColor(requireContext()))
 
         binding.changeBadgeTextColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -124,14 +122,12 @@ class SettingsFragment : Fragment() {
                 .show()
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setBadgeTextColor(null)
-                binding.badgeTextColor.text =
-                    "#${prefs.badgeTextColor(requireContext()).toHexString()}"
+                binding.badgeTextColor.setColorHex(prefs.badgeTextColor(requireContext()))
                 colorPickerPopUp.dismissDialog()
             }
         }
 
-        binding.buttonBackgroundColor.text =
-            "#${prefs.buttonBackgroundColor(requireContext()).toHexString()}"
+        binding.buttonBackgroundColor.setColorHex(prefs.buttonBackgroundColor(requireContext()))
 
         binding.changeButtonBackgroundColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -149,14 +145,12 @@ class SettingsFragment : Fragment() {
                 .show()
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setButtonBackgroundColor(null)
-                binding.buttonBackgroundColor.text =
-                    "#${prefs.buttonBackgroundColor(requireContext()).toHexString()}"
+                binding.buttonBackgroundColor.setColorHex(prefs.buttonBackgroundColor(requireContext()))
                 colorPickerPopUp.dismissDialog()
             }
         }
 
-        binding.buttonIconColor.text =
-            "#${prefs.buttonIconColor(requireContext()).toHexString()}"
+        binding.buttonIconColor.setColorHex(prefs.buttonIconColor(requireContext()))
 
         binding.changeButtonIconColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -174,14 +168,12 @@ class SettingsFragment : Fragment() {
                 .show()
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setButtonIconColor(null)
-                binding.buttonIconColor.text =
-                    "#${prefs.buttonIconColor(requireContext()).toHexString()}"
+                binding.buttonIconColor.setColorHex(prefs.buttonIconColor(requireContext()))
                 colorPickerPopUp.dismissDialog()
             }
         }
 
-        binding.buttonBorderColor.text =
-            "#${prefs.buttonBorderColor(requireContext()).toHexString()}"
+        binding.buttonBorderColor.setColorHex(prefs.buttonBorderColor(requireContext()))
 
         binding.changeButtonBorderColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -199,8 +191,7 @@ class SettingsFragment : Fragment() {
                 .show()
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setButtonBorderColor(null)
-                binding.buttonBorderColor.text =
-                    "#${prefs.buttonBorderColor(requireContext()).toHexString()}"
+                binding.buttonBorderColor.setColorHex(prefs.buttonBorderColor(requireContext()))
                 colorPickerPopUp.dismissDialog()
             }
         }
@@ -209,6 +200,10 @@ class SettingsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun TextView.setColorHex(color: Int) {
+        text = context.getString(R.string.color_hex, color.toHexString())
     }
 
     private fun initMapStyleButton() {
@@ -277,8 +272,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun initMarkerBackgroundButton() {
-        binding.markerBackgroundColor.text =
-            "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
+        binding.markerBackgroundColor.setColorHex(prefs.markerBackgroundColor(requireContext()))
         binding.markerBackgroundColor.setTextColor(prefs.markerBackgroundColor(requireContext()))
 
         binding.changeMarkerBackgroundColor.setOnClickListener {
@@ -299,8 +293,7 @@ class SettingsFragment : Fragment() {
             colorPickerPopUp.negativeButton.setText(R.string.reset)
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setMarkerBackgroundColor(null)
-                binding.markerBackgroundColor.text =
-                    "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
+                binding.markerBackgroundColor.setColorHex(prefs.markerBackgroundColor(requireContext()))
                 binding.markerBackgroundColor.setTextColor(
                     prefs.markerBackgroundColor(
                         requireContext()
@@ -312,8 +305,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun initMarkerIconButton() {
-        binding.markerIconColor.text =
-            "#${prefs.markerIconColor(requireContext()).toHexString()}"
+        binding.markerIconColor.setColorHex(prefs.markerIconColor(requireContext()))
         binding.markerIconColor.setTextColor(prefs.markerIconColor(requireContext()))
 
         binding.changeMarkerIconColor.setOnClickListener {
@@ -334,8 +326,7 @@ class SettingsFragment : Fragment() {
             colorPickerPopUp.negativeButton.setText(R.string.reset)
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setMarkerIconColor(null)
-                binding.markerIconColor.text =
-                    "#${prefs.markerIconColor(requireContext()).toHexString()}"
+                binding.markerIconColor.setColorHex(prefs.markerIconColor(requireContext()))
                 binding.markerIconColor.setTextColor(prefs.markerIconColor(requireContext()))
                 colorPickerPopUp.dismissDialog()
             }
@@ -343,8 +334,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun initBoostedMarkerBackgroundButton() {
-        binding.boostedMarkerBackgroundColor.text =
-            "#${prefs.boostedMarkerBackgroundColor().toHexString()}"
+        binding.boostedMarkerBackgroundColor.setColorHex(prefs.boostedMarkerBackgroundColor())
 
         binding.changeBoostedMarkerBackgroundColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -363,34 +353,26 @@ class SettingsFragment : Fragment() {
             colorPickerPopUp.negativeButton.setText(R.string.reset)
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setBoostedMarkerBackgroundColor(null)
-                binding.boostedMarkerBackgroundColor.text =
-                    "#${prefs.boostedMarkerBackgroundColor().toHexString()}"
+                binding.boostedMarkerBackgroundColor.setColorHex(prefs.boostedMarkerBackgroundColor())
                 colorPickerPopUp.dismissDialog()
             }
         }
     }
 
     private fun refreshAllColors() {
-        binding.markerBackgroundColor.text =
-            "#${prefs.markerBackgroundColor(requireContext()).toHexString()}"
+        binding.markerBackgroundColor.setColorHex(prefs.markerBackgroundColor(requireContext()))
         binding.markerBackgroundColor.setTextColor(prefs.markerBackgroundColor(requireContext()))
-        binding.markerIconColor.text =
-            "#${prefs.markerIconColor(requireContext()).toHexString()}"
+        binding.markerIconColor.setColorHex(prefs.markerIconColor(requireContext()))
         binding.markerIconColor.setTextColor(prefs.markerIconColor(requireContext()))
-        binding.badgeBackgroundColor.text =
-            "#${prefs.badgeBackgroundColor(requireContext()).toHexString()}"
+        binding.badgeBackgroundColor.setColorHex(prefs.badgeBackgroundColor(requireContext()))
         binding.badgeBackgroundColor.setTextColor(prefs.badgeBackgroundColor(requireContext()))
-        binding.badgeTextColor.text =
-            "#${prefs.badgeTextColor(requireContext()).toHexString()}"
+        binding.badgeTextColor.setColorHex(prefs.badgeTextColor(requireContext()))
         binding.badgeTextColor.setTextColor(prefs.badgeBackgroundColor(requireContext()))
-        binding.buttonBackgroundColor.text =
-            "#${prefs.buttonBackgroundColor(requireContext()).toHexString()}"
+        binding.buttonBackgroundColor.setColorHex(prefs.buttonBackgroundColor(requireContext()))
         binding.buttonBackgroundColor.setTextColor(prefs.buttonBackgroundColor(requireContext()))
-        binding.buttonIconColor.text =
-            "#${prefs.buttonIconColor(requireContext()).toHexString()}"
+        binding.buttonIconColor.setColorHex(prefs.buttonIconColor(requireContext()))
         binding.buttonIconColor.setTextColor(prefs.buttonIconColor(requireContext()))
-        binding.buttonBorderColor.text =
-            "#${prefs.buttonBorderColor(requireContext()).toHexString()}"
+        binding.buttonBorderColor.setColorHex(prefs.buttonBorderColor(requireContext()))
         binding.buttonBorderColor.setTextColor(prefs.buttonBorderColor(requireContext()))
     }
 
