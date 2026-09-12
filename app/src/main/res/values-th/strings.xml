@@ -120,6 +120,20 @@
     <string name="activity_tab_local">ท้องถิ่น</string>
     <string name="activity_tab_following">กำลังติดตาม</string>
     <string name="activity_filter_areas">พื้นที่</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="other">บูสต์เป็นเวลา %1$d วัน</item>
+    </plurals>
+    <string name="activity_by_user">โดย %1$s</string>
+    <string name="activity_just_now">เมื่อสักครู่</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="other">%1$d นาทีที่แล้ว</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="other">%1$d ชั่วโมงที่แล้ว</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="other">%1$d วันที่แล้ว</item>
+    </plurals>
     <string name="show_attribution">แสดงแหล่งที่มา</string>
     <string name="map_rotation">อนุญาตให้หมุนแผนที่</string>
     <string name="osm_attribution">© ผู้มีส่วนร่วม OpenStreetMap</string>

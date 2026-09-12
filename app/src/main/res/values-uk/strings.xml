@@ -120,6 +120,32 @@
     <string name="activity_tab_local">Поруч</string>
     <string name="activity_tab_following">Відстежувані</string>
     <string name="activity_filter_areas">Області</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">просунуто на %1$d день</item>
+        <item quantity="few">просунуто на %1$d дні</item>
+        <item quantity="many">просунуто на %1$d днів</item>
+        <item quantity="other">просунуто на %1$d дня</item>
+    </plurals>
+    <string name="activity_by_user">від %1$s</string>
+    <string name="activity_just_now">щойно</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">%1$d хвилину тому</item>
+        <item quantity="few">%1$d хвилини тому</item>
+        <item quantity="many">%1$d хвилин тому</item>
+        <item quantity="other">%1$d хвилини тому</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">%1$d годину тому</item>
+        <item quantity="few">%1$d години тому</item>
+        <item quantity="many">%1$d годин тому</item>
+        <item quantity="other">%1$d години тому</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">%1$d день тому</item>
+        <item quantity="few">%1$d дні тому</item>
+        <item quantity="many">%1$d днів тому</item>
+        <item quantity="other">%1$d дня тому</item>
+    </plurals>
     <string name="show_attribution">Показати зазначення джерела</string>
     <string name="map_rotation">Дозволити обертання карти</string>
     <string name="osm_attribution">© Учасники OpenStreetMap</string>

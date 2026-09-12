@@ -120,6 +120,28 @@
     <string name="activity_tab_local">Local</string>
     <string name="activity_tab_following">Urmărite</string>
     <string name="activity_filter_areas">Zone</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">promovat pentru %1$d zi</item>
+        <item quantity="few">promovat pentru %1$d zile</item>
+        <item quantity="other">promovat pentru %1$d de zile</item>
+    </plurals>
+    <string name="activity_by_user">de %1$s</string>
+    <string name="activity_just_now">chiar acum</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">acum %1$d minut</item>
+        <item quantity="few">acum %1$d minute</item>
+        <item quantity="other">acum %1$d de minute</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">acum %1$d oră</item>
+        <item quantity="few">acum %1$d ore</item>
+        <item quantity="other">acum %1$d de ore</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">acum %1$d zi</item>
+        <item quantity="few">acum %1$d zile</item>
+        <item quantity="other">acum %1$d de zile</item>
+    </plurals>
     <string name="show_attribution">Afișează atribuirea</string>
     <string name="map_rotation">Permite rotirea hărții</string>
     <string name="osm_attribution">© Contribuitori OpenStreetMap</string>

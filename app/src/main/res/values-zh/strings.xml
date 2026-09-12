@@ -120,6 +120,20 @@
     <string name="activity_tab_local">本地</string>
     <string name="activity_tab_following">已关注</string>
     <string name="activity_filter_areas">区域</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="other">已推广 %1$d 天</item>
+    </plurals>
+    <string name="activity_by_user">来自 %1$s</string>
+    <string name="activity_just_now">刚刚</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="other">%1$d 分钟前</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="other">%1$d 小时前</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="other">%1$d 天前</item>
+    </plurals>
     <string name="show_attribution">显示归属信息</string>
     <string name="map_rotation">允许地图旋转</string>
     <string name="osm_attribution">© OpenStreetMap 贡献者</string>

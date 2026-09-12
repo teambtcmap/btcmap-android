@@ -120,6 +120,20 @@
     <string name="activity_tab_local">ローカル</string>
     <string name="activity_tab_following">フォロー中</string>
     <string name="activity_filter_areas">エリア</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="other">%1$d日間ブースト中</item>
+    </plurals>
+    <string name="activity_by_user">%1$sによる</string>
+    <string name="activity_just_now">たった今</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="other">%1$d分前</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="other">%1$d時間前</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="other">%1$d日前</item>
+    </plurals>
     <string name="show_attribution">帰属表示を表示</string>
     <string name="map_rotation">地図の回転を許可</string>
     <string name="osm_attribution">© OpenStreetMap 貢献者</string>

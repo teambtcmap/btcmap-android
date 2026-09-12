@@ -120,6 +120,28 @@
     <string name="activity_tab_local">Local</string>
     <string name="activity_tab_following">Siguiendo</string>
     <string name="activity_filter_areas">Áreas</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">impulsado durante %1$d día</item>
+        <item quantity="many">impulsado durante %1$d días</item>
+        <item quantity="other">impulsado durante %1$d días</item>
+    </plurals>
+    <string name="activity_by_user">por %1$s</string>
+    <string name="activity_just_now">ahora mismo</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">hace %1$d min</item>
+        <item quantity="many">hace %1$d min</item>
+        <item quantity="other">hace %1$d min</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">hace %1$d hora</item>
+        <item quantity="many">hace %1$d horas</item>
+        <item quantity="other">hace %1$d horas</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">hace %1$d día</item>
+        <item quantity="many">hace %1$d días</item>
+        <item quantity="other">hace %1$d días</item>
+    </plurals>
     <string name="show_attribution">Mostrar atribución</string>
     <string name="map_rotation">Permitir rotación del mapa</string>
     <string name="osm_attribution">© Colaboradores de OpenStreetMap</string>

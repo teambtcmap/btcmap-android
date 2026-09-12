@@ -120,6 +120,24 @@
     <string name="activity_tab_local">مقامی</string>
     <string name="activity_tab_following">فالو کیے گئے</string>
     <string name="activity_filter_areas">علاقے</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">%1$d دن کے لیے بوسٹ کیا گیا</item>
+        <item quantity="other">%1$d دن کے لیے بوسٹ کیا گیا</item>
+    </plurals>
+    <string name="activity_by_user">%1$s کی طرف سے</string>
+    <string name="activity_just_now">ابھی</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">%1$d منٹ پہلے</item>
+        <item quantity="other">%1$d منٹ پہلے</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">%1$d گھنٹے پہلے</item>
+        <item quantity="other">%1$d گھنٹے پہلے</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">%1$d دن پہلے</item>
+        <item quantity="other">%1$d دن پہلے</item>
+    </plurals>
     <string name="show_attribution">انتساب دکھائیں</string>
     <string name="map_rotation">نقشے کی گردش کی اجازت دیں</string>
     <string name="osm_attribution">© OpenStreetMap تعاون کنندگان</string>

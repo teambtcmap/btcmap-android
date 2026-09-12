@@ -120,6 +120,24 @@
     <string name="activity_tab_local">محلی</string>
     <string name="activity_tab_following">دنبال‌شده‌ها</string>
     <string name="activity_filter_areas">مناطق</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">به مدت %1$d روز تقویت شد</item>
+        <item quantity="other">به مدت %1$d روز تقویت شد</item>
+    </plurals>
+    <string name="activity_by_user">توسط %1$s</string>
+    <string name="activity_just_now">همین حالا</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">%1$d دقیقه پیش</item>
+        <item quantity="other">%1$d دقیقه پیش</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">%1$d ساعت پیش</item>
+        <item quantity="other">%1$d ساعت پیش</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">%1$d روز پیش</item>
+        <item quantity="other">%1$d روز پیش</item>
+    </plurals>
     <string name="show_attribution">نمایش انتساب</string>
     <string name="map_rotation">اجازه چرخش نقشه</string>
     <string name="osm_attribution">© مشارکت‌کنندگان OpenStreetMap</string>

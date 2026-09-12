@@ -120,6 +120,20 @@
     <string name="activity_tab_local">Địa phương</string>
     <string name="activity_tab_following">Đang theo dõi</string>
     <string name="activity_filter_areas">Khu vực</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="other">được đẩy lên trong %1$d ngày</item>
+    </plurals>
+    <string name="activity_by_user">bởi %1$s</string>
+    <string name="activity_just_now">vừa xong</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="other">%1$d phút trước</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="other">%1$d giờ trước</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="other">%1$d ngày trước</item>
+    </plurals>
     <string name="show_attribution">Hiển thị ghi nguồn</string>
     <string name="map_rotation">Cho phép xoay bản đồ</string>
     <string name="osm_attribution">© Những người đóng góp OpenStreetMap</string>

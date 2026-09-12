@@ -35,7 +35,7 @@ import kotlinx.coroutines.withContext
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
-import org.btcmap.activity.ActivityFeedFragment
+import org.btcmap.feed.ActivityFeedFragment
 import org.btcmap.api
 import org.btcmap.api.GetEventsItem
 import org.btcmap.area.AreaFragment

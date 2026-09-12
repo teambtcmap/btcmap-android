@@ -120,6 +120,40 @@
     <string name="activity_tab_local">محلي</string>
     <string name="activity_tab_following">المتابَعون</string>
     <string name="activity_filter_areas">المناطق</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="zero">مُعزَّز لمدة %1$d أيام</item>
+        <item quantity="one">مُعزَّز لمدة يوم واحد</item>
+        <item quantity="two">مُعزَّز لمدة يومين</item>
+        <item quantity="few">مُعزَّز لمدة %1$d أيام</item>
+        <item quantity="many">مُعزَّز لمدة %1$d يومًا</item>
+        <item quantity="other">مُعزَّز لمدة %1$d يوم</item>
+    </plurals>
+    <string name="activity_by_user">بواسطة %1$s</string>
+    <string name="activity_just_now">الآن</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="zero">منذ %1$d دقائق</item>
+        <item quantity="one">منذ دقيقة واحدة</item>
+        <item quantity="two">منذ دقيقتين</item>
+        <item quantity="few">منذ %1$d دقائق</item>
+        <item quantity="many">منذ %1$d دقيقة</item>
+        <item quantity="other">منذ %1$d دقيقة</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="zero">منذ %1$d ساعات</item>
+        <item quantity="one">منذ ساعة واحدة</item>
+        <item quantity="two">منذ ساعتين</item>
+        <item quantity="few">منذ %1$d ساعات</item>
+        <item quantity="many">منذ %1$d ساعة</item>
+        <item quantity="other">منذ %1$d ساعة</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="zero">منذ %1$d أيام</item>
+        <item quantity="one">منذ يوم واحد</item>
+        <item quantity="two">منذ يومين</item>
+        <item quantity="few">منذ %1$d أيام</item>
+        <item quantity="many">منذ %1$d يومًا</item>
+        <item quantity="other">منذ %1$d يوم</item>
+    </plurals>
     <string name="show_attribution">إظهار الإسناد</string>
     <string name="map_rotation">السماح بتدوير الخريطة</string>
     <string name="osm_attribution">© مساهمو OpenStreetMap</string>

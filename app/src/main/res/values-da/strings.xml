@@ -120,6 +120,24 @@
     <string name="activity_tab_local">Lokalt</string>
     <string name="activity_tab_following">Følger</string>
     <string name="activity_filter_areas">Områder</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">boostet i %1$d dag</item>
+        <item quantity="other">boostet i %1$d dage</item>
+    </plurals>
+    <string name="activity_by_user">af %1$s</string>
+    <string name="activity_just_now">lige nu</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">for %1$d min siden</item>
+        <item quantity="other">for %1$d min siden</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">for %1$d time siden</item>
+        <item quantity="other">for %1$d timer siden</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">for %1$d dag siden</item>
+        <item quantity="other">for %1$d dage siden</item>
+    </plurals>
     <string name="show_attribution">Vis kildeangivelse</string>
     <string name="map_rotation">Tillad kortrotation</string>
     <string name="osm_attribution">© OpenStreetMap-bidragsydere</string>

@@ -120,6 +120,24 @@
     <string name="activity_tab_local">Helyi</string>
     <string name="activity_tab_following">Követettek</string>
     <string name="activity_filter_areas">Területek</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">%1$d napra kiemelve</item>
+        <item quantity="other">%1$d napra kiemelve</item>
+    </plurals>
+    <string name="activity_by_user">%1$s által</string>
+    <string name="activity_just_now">épp most</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">%1$d perccel ezelőtt</item>
+        <item quantity="other">%1$d perccel ezelőtt</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">%1$d órával ezelőtt</item>
+        <item quantity="other">%1$d órával ezelőtt</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">%1$d nappal ezelőtt</item>
+        <item quantity="other">%1$d nappal ezelőtt</item>
+    </plurals>
     <string name="show_attribution">Attribúció megjelenítése</string>
     <string name="map_rotation">Térkép forgatásának engedélyezése</string>
     <string name="osm_attribution">© OpenStreetMap közreműködők</string>

@@ -120,6 +120,24 @@
     <string name="activity_tab_local">Τοπικά</string>
     <string name="activity_tab_following">Ακολουθείς</string>
     <string name="activity_filter_areas">Περιοχές</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">ενισχυμένο για %1$d ημέρα</item>
+        <item quantity="other">ενισχυμένο για %1$d ημέρες</item>
+    </plurals>
+    <string name="activity_by_user">από %1$s</string>
+    <string name="activity_just_now">μόλις τώρα</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">πριν %1$d λεπτό</item>
+        <item quantity="other">πριν %1$d λεπτά</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">πριν %1$d ώρα</item>
+        <item quantity="other">πριν %1$d ώρες</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">πριν %1$d ημέρα</item>
+        <item quantity="other">πριν %1$d ημέρες</item>
+    </plurals>
     <string name="show_attribution">Εμφάνιση αναφοράς</string>
     <string name="map_rotation">Να επιτρέπεται η περιστροφή χάρτη</string>
     <string name="osm_attribution">© Συνεισφέροντες του OpenStreetMap</string>

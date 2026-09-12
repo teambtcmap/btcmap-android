@@ -120,6 +120,24 @@
     <string name="activity_tab_local">Lokalt</string>
     <string name="activity_tab_following">Följer</string>
     <string name="activity_filter_areas">Områden</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">framhävd i %1$d dag</item>
+        <item quantity="other">framhävd i %1$d dagar</item>
+    </plurals>
+    <string name="activity_by_user">av %1$s</string>
+    <string name="activity_just_now">just nu</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">för %1$d min sedan</item>
+        <item quantity="other">för %1$d min sedan</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">för %1$d timme sedan</item>
+        <item quantity="other">för %1$d timmar sedan</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">för %1$d dag sedan</item>
+        <item quantity="other">för %1$d dagar sedan</item>
+    </plurals>
     <string name="show_attribution">Visa källhänvisning</string>
     <string name="map_rotation">Tillåt kartrotation</string>
     <string name="osm_attribution">© OpenStreetMap-bidragsgivare</string>

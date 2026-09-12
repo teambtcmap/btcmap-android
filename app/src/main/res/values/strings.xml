@@ -122,6 +122,24 @@
     <string name="activity_tab_local">Local</string>
     <string name="activity_tab_following">Following</string>
     <string name="activity_filter_areas">Areas</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">boosted for %1$d day</item>
+        <item quantity="other">boosted for %1$d days</item>
+    </plurals>
+    <string name="activity_by_user">by %1$s</string>
+    <string name="activity_just_now">just now</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">%1$d min ago</item>
+        <item quantity="other">%1$d min ago</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">%1$d hour ago</item>
+        <item quantity="other">%1$d hours ago</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
     <string name="show_attribution">Show attribution</string>
     <string name="map_rotation">Allow map rotation</string>
     <string name="osm_attribution">© OpenStreetMap contributors</string>

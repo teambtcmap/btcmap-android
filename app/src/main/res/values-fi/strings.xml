@@ -120,6 +120,24 @@
     <string name="activity_tab_local">Paikallinen</string>
     <string name="activity_tab_following">Seurattavat</string>
     <string name="activity_filter_areas">Alueet</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">tehostettu %1$d päiväksi</item>
+        <item quantity="other">tehostettu %1$d päiväksi</item>
+    </plurals>
+    <string name="activity_by_user">käyttäjältä %1$s</string>
+    <string name="activity_just_now">juuri nyt</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">%1$d min sitten</item>
+        <item quantity="other">%1$d min sitten</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">%1$d tunti sitten</item>
+        <item quantity="other">%1$d tuntia sitten</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">%1$d päivä sitten</item>
+        <item quantity="other">%1$d päivää sitten</item>
+    </plurals>
     <string name="show_attribution">Näytä lähdetiedot</string>
     <string name="map_rotation">Salli kartan kierto</string>
     <string name="osm_attribution">© OpenStreetMapin tekijät</string>

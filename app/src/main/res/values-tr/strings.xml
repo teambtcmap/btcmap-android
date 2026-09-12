@@ -120,6 +120,24 @@
     <string name="activity_tab_local">Yerel</string>
     <string name="activity_tab_following">Takip edilen</string>
     <string name="activity_filter_areas">Bölgeler</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">%1$d gün öne çıkarıldı</item>
+        <item quantity="other">%1$d gün öne çıkarıldı</item>
+    </plurals>
+    <string name="activity_by_user">%1$s tarafından</string>
+    <string name="activity_just_now">az önce</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">%1$d dk önce</item>
+        <item quantity="other">%1$d dk önce</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">%1$d saat önce</item>
+        <item quantity="other">%1$d saat önce</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">%1$d gün önce</item>
+        <item quantity="other">%1$d gün önce</item>
+    </plurals>
     <string name="show_attribution">Atıfı göster</string>
     <string name="map_rotation">Harita döndürmeye izin ver</string>
     <string name="osm_attribution">© OpenStreetMap katkıda bulunanlar</string>

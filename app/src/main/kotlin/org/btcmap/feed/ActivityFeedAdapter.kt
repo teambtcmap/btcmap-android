@@ -1,5 +1,6 @@
-package org.btcmap.activity
+package org.btcmap.feed
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -39,14 +40,23 @@ class ActivityFeedAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: ActivityFeedItem, onItemClick: (ActivityFeedItem) -> Unit) {
+            val context = binding.root.context
             binding.apply {
                 placeName.text = item.placeName
                 userName.text = when (item.type) {
-                    "place_boosted" -> item.durationDays?.let { "boosted for $it days" } ?: ""
+                    "place_boosted" -> item.durationDays?.let {
+                        context.resources.getQuantityString(
+                            R.plurals.activity_boosted_for_days,
+                            it.toInt(),
+                            it.toInt(),
+                        )
+                    } ?: ""
                     "place_commented" -> item.comment ?: ""
-                    else -> item.osmUserName?.let { "by $it" } ?: ""
+                    else -> item.osmUserName?.let {
+                        context.getString(R.string.activity_by_user, it)
+                    } ?: ""
                 }
-                date.text = getRelativeTime(item.date)
+                date.text = getRelativeTime(context, item.date)
 
                 icon.setImageResource(
                     when (item.type) {
@@ -62,7 +72,7 @@ class ActivityFeedAdapter(
             }
         }
 
-        private fun getRelativeTime(dateString: String): String {
+        private fun getRelativeTime(context: Context, dateString: String): String {
             val date = ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME)
             val now = ZonedDateTime.now()
             val diffMillis = now.toInstant().toEpochMilli() - date.toInstant().toEpochMilli()
@@ -72,10 +82,22 @@ class ActivityFeedAdapter(
             val days = TimeUnit.MILLISECONDS.toDays(diffMillis)
 
             return when {
-                minutes < 1 -> "just now"
-                minutes < 60 -> "$minutes min ago"
-                hours < 24 -> "$hours hours ago"
-                days < 7 -> "$days days ago"
+                minutes < 1 -> context.getString(R.string.activity_just_now)
+                minutes < 60 -> context.resources.getQuantityString(
+                    R.plurals.activity_minutes_ago,
+                    minutes.toInt(),
+                    minutes.toInt(),
+                )
+                hours < 24 -> context.resources.getQuantityString(
+                    R.plurals.activity_hours_ago,
+                    hours.toInt(),
+                    hours.toInt(),
+                )
+                days < 7 -> context.resources.getQuantityString(
+                    R.plurals.activity_days_ago,
+                    days.toInt(),
+                    days.toInt(),
+                )
                 else -> date.format(DateTimeFormatter.ofPattern("MMM d", Locale.getDefault()))
             }
         }

@@ -120,6 +120,32 @@
     <string name="activity_tab_local">Miestne</string>
     <string name="activity_tab_following">Sledované</string>
     <string name="activity_filter_areas">Oblasti</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">podporené na %1$d deň</item>
+        <item quantity="few">podporené na %1$d dni</item>
+        <item quantity="many">podporené na %1$d dňa</item>
+        <item quantity="other">podporené na %1$d dní</item>
+    </plurals>
+    <string name="activity_by_user">od %1$s</string>
+    <string name="activity_just_now">práve teraz</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">pred %1$d minútou</item>
+        <item quantity="few">pred %1$d minútami</item>
+        <item quantity="many">pred %1$d minúty</item>
+        <item quantity="other">pred %1$d minútami</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">pred %1$d hodinou</item>
+        <item quantity="few">pred %1$d hodinami</item>
+        <item quantity="many">pred %1$d hodiny</item>
+        <item quantity="other">pred %1$d hodinami</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">pred %1$d dňom</item>
+        <item quantity="few">pred %1$d dňami</item>
+        <item quantity="many">pred %1$d dňa</item>
+        <item quantity="other">pred %1$d dní</item>
+    </plurals>
     <string name="show_attribution">Zobraziť atribúciu</string>
     <string name="map_rotation">Povoliť otáčanie mapy</string>
     <string name="osm_attribution">© Prispievatelia OpenStreetMap</string>

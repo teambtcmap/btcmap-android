@@ -120,6 +120,20 @@
     <string name="activity_tab_local">로컬</string>
     <string name="activity_tab_following">팔로잉</string>
     <string name="activity_filter_areas">지역</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="other">%1$d일 동안 부스트됨</item>
+    </plurals>
+    <string name="activity_by_user">%1$s 님</string>
+    <string name="activity_just_now">방금 전</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="other">%1$d분 전</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="other">%1$d시간 전</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="other">%1$d일 전</item>
+    </plurals>
     <string name="show_attribution">출처 표시</string>
     <string name="map_rotation">지도 회전 허용</string>
     <string name="osm_attribution">© OpenStreetMap 기여자</string>

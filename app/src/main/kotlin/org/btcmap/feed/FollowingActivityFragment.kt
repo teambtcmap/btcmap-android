@@ -1,4 +1,4 @@
-package org.btcmap.activity
+package org.btcmap.feed
 
 import androidx.fragment.app.Fragment
 import com.google.gson.JsonObject

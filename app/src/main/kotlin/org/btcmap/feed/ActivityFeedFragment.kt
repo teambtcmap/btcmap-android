@@ -1,4 +1,4 @@
-package org.btcmap.activity
+package org.btcmap.feed
 
 import android.os.Bundle
 import android.view.LayoutInflater

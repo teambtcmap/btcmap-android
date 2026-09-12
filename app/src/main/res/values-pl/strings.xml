@@ -120,6 +120,32 @@
     <string name="activity_tab_local">Lokalne</string>
     <string name="activity_tab_following">Obserwowane</string>
     <string name="activity_filter_areas">Obszary</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">wyróżnione na %1$d dzień</item>
+        <item quantity="few">wyróżnione na %1$d dni</item>
+        <item quantity="many">wyróżnione na %1$d dni</item>
+        <item quantity="other">wyróżnione na %1$d dni</item>
+    </plurals>
+    <string name="activity_by_user">przez %1$s</string>
+    <string name="activity_just_now">przed chwilą</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">%1$d minutę temu</item>
+        <item quantity="few">%1$d minuty temu</item>
+        <item quantity="many">%1$d minut temu</item>
+        <item quantity="other">%1$d minuty temu</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">%1$d godzinę temu</item>
+        <item quantity="few">%1$d godziny temu</item>
+        <item quantity="many">%1$d godzin temu</item>
+        <item quantity="other">%1$d godziny temu</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">%1$d dzień temu</item>
+        <item quantity="few">%1$d dni temu</item>
+        <item quantity="many">%1$d dni temu</item>
+        <item quantity="other">%1$d dni temu</item>
+    </plurals>
     <string name="show_attribution">Pokaż atrybucję</string>
     <string name="map_rotation">Zezwól na obrót mapy</string>
     <string name="osm_attribution">© Współtwórcy OpenStreetMap</string>

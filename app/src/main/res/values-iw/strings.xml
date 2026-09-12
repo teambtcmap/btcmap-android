@@ -120,6 +120,28 @@
     <string name="activity_tab_local">מקומי</string>
     <string name="activity_tab_following">נעקבים</string>
     <string name="activity_filter_areas">אזורים</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">מוגבר ליום אחד</item>
+        <item quantity="two">מוגבר ליומיים</item>
+        <item quantity="other">מוגבר ל-%1$d ימים</item>
+    </plurals>
+    <string name="activity_by_user">על ידי %1$s</string>
+    <string name="activity_just_now">ממש עכשיו</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">לפני דקה</item>
+        <item quantity="two">לפני שתי דקות</item>
+        <item quantity="other">לפני %1$d דקות</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">לפני שעה</item>
+        <item quantity="two">לפני שעתיים</item>
+        <item quantity="other">לפני %1$d שעות</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">לפני יום</item>
+        <item quantity="two">לפני יומיים</item>
+        <item quantity="other">לפני %1$d ימים</item>
+    </plurals>
     <string name="show_attribution">הצגת ייחוס</string>
     <string name="map_rotation">אפשר סיבוב מפה</string>
     <string name="osm_attribution">© תורמי OpenStreetMap</string>

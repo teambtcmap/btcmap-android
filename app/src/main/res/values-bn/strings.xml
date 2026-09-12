@@ -120,6 +120,24 @@
     <string name="activity_tab_local">স্থানীয়</string>
     <string name="activity_tab_following">অনুসরণ করছেন</string>
     <string name="activity_filter_areas">এলাকা</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">%1$d দিনের জন্য বুস্ট করা হয়েছে</item>
+        <item quantity="other">%1$d দিনের জন্য বুস্ট করা হয়েছে</item>
+    </plurals>
+    <string name="activity_by_user">%1$s দ্বারা</string>
+    <string name="activity_just_now">এখনই</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">%1$d মিনিট আগে</item>
+        <item quantity="other">%1$d মিনিট আগে</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">%1$d ঘন্টা আগে</item>
+        <item quantity="other">%1$d ঘন্টা আগে</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">%1$d দিন আগে</item>
+        <item quantity="other">%1$d দিন আগে</item>
+    </plurals>
     <string name="show_attribution">অ্যাট্রিবিউশন দেখান</string>
     <string name="map_rotation">মানচিত্র ঘোরানোর অনুমতি দিন</string>
     <string name="osm_attribution">© OpenStreetMap অবদানকারীরা</string>

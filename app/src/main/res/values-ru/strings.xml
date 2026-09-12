@@ -120,6 +120,32 @@
     <string name="activity_tab_local">Рядом</string>
     <string name="activity_tab_following">Отслеживаемые</string>
     <string name="activity_filter_areas">Области</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">продвинуто на %1$d день</item>
+        <item quantity="few">продвинуто на %1$d дня</item>
+        <item quantity="many">продвинуто на %1$d дней</item>
+        <item quantity="other">продвинуто на %1$d дня</item>
+    </plurals>
+    <string name="activity_by_user">от %1$s</string>
+    <string name="activity_just_now">только что</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">%1$d минуту назад</item>
+        <item quantity="few">%1$d минуты назад</item>
+        <item quantity="many">%1$d минут назад</item>
+        <item quantity="other">%1$d минуты назад</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">%1$d час назад</item>
+        <item quantity="few">%1$d часа назад</item>
+        <item quantity="many">%1$d часов назад</item>
+        <item quantity="other">%1$d часа назад</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">%1$d день назад</item>
+        <item quantity="few">%1$d дня назад</item>
+        <item quantity="many">%1$d дней назад</item>
+        <item quantity="other">%1$d дня назад</item>
+    </plurals>
     <string name="show_attribution">Показать атрибуцию</string>
     <string name="map_rotation">Разрешить вращение карты</string>
     <string name="osm_attribution">© Участники OpenStreetMap</string>

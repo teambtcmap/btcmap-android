@@ -120,6 +120,24 @@
     <string name="activity_tab_local">Наблизо</string>
     <string name="activity_tab_following">Следвани</string>
     <string name="activity_filter_areas">Райони</string>
+    <plurals name="activity_boosted_for_days">
+        <item quantity="one">повишено за %1$d ден</item>
+        <item quantity="other">повишено за %1$d дни</item>
+    </plurals>
+    <string name="activity_by_user">от %1$s</string>
+    <string name="activity_just_now">току-що</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">преди %1$d мин</item>
+        <item quantity="other">преди %1$d мин</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">преди %1$d час</item>
+        <item quantity="other">преди %1$d часа</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">преди %1$d ден</item>
+        <item quantity="other">преди %1$d дни</item>
+    </plurals>
     <string name="show_attribution">Показване на признание</string>
     <string name="map_rotation">Разрешаване на завъртане на картата</string>
     <string name="osm_attribution">© Сътрудници на OpenStreetMap</string>
