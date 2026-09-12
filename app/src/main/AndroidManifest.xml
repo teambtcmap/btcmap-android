@@ -21,6 +21,8 @@
     <application
         android:name="org.btcmap.App"
         android:allowBackup="false"
+        android:dataExtractionRules="@xml/backup_rules"
+        android:fullBackupContent="false"
         android:icon="${appIcon}"
         android:label="${appName}"
         android:supportsRtl="true"
