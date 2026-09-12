@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
@@ -76,7 +75,7 @@ class CommentsFragment : Fragment() {
                 replace<AddCommentFragment>(
                     R.id.fragmentContainerView,
                     null,
-                    bundleOf("place_id" to args.placeId)
+                    Bundle().apply { putLong("place_id", args.placeId) }
                 )
                 addToBackStack(null)
             }

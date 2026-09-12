@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -38,6 +37,7 @@ import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.activity.ActivityFeedFragment
 import org.btcmap.api
+import org.btcmap.api.GetEventsItem
 import org.btcmap.area.AreaFragment
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.bundle.BundledPlaces
@@ -273,25 +273,14 @@ class MapFragment : Fragment() {
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         areasAdapter = AreasAdapter(apiUrl = prefs.apiUrl) { area ->
-            val eventArgs = ArrayList(area.upcomingEvents.map { event ->
-                bundleOf(
-                    "id" to event.id,
-                    "area_id" to event.areaId,
-                    "lat" to event.lat,
-                    "lon" to event.lon,
-                    "name" to event.name,
-                    "website" to event.website.toString(),
-                    "starts_at" to event.startsAt.toString(),
-                    "ends_at" to event.endsAt?.toString(),
-                )
-            })
+            val eventArgs = ArrayList(area.upcomingEvents.map { it.toBundle() })
             parentFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<AreaFragment>(
-                    R.id.fragmentContainerView, null, bundleOf(
-                        "area_id" to area.id.toString(),
-                        "upcoming_events" to eventArgs,
-                    )
+                    R.id.fragmentContainerView, null, Bundle().apply {
+                        putString("area_id", area.id.toString())
+                        putParcelableArrayList("upcoming_events", eventArgs)
+                    }
                 )
                 addToBackStack(null)
             }
@@ -311,11 +300,11 @@ class MapFragment : Fragment() {
             parentFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<ActivityFeedFragment>(
-                    R.id.fragmentContainerView, null, bundleOf(
-                        "area_ids" to ArrayList(areaIds),
-                        "area_names" to ArrayList(areaNames),
-                        "area_types" to ArrayList(areaTypes),
-                    )
+                    R.id.fragmentContainerView, null, Bundle().apply {
+                        putStringArrayList("area_ids", ArrayList(areaIds))
+                        putStringArrayList("area_names", ArrayList(areaNames))
+                        putStringArrayList("area_types", ArrayList(areaTypes))
+                    }
                 )
                 addToBackStack(null)
             }
@@ -424,27 +413,16 @@ class MapFragment : Fragment() {
                     }
                 }.getOrDefault(emptyList())
 
-                val eventArgs = ArrayList(events.map { event ->
-                    bundleOf(
-                        "id" to event.id,
-                        "area_id" to event.areaId,
-                        "lat" to event.lat,
-                        "lon" to event.lon,
-                        "name" to event.name,
-                        "website" to event.website.toString(),
-                        "starts_at" to event.startsAt.toString(),
-                        "ends_at" to event.endsAt?.toString(),
-                    )
-                })
+                val eventArgs = ArrayList(events.map { it.toBundle() })
 
                 parentFragmentManager.commit {
                     setReorderingAllowed(true)
                     replace<AreaFragment>(
                         R.id.fragmentContainerView, null,
-                        bundleOf(
-                            "area_id" to area.id.toString(),
-                            "upcoming_events" to eventArgs,
-                        ),
+                        Bundle().apply {
+                            putString("area_id", area.id.toString())
+                            putParcelableArrayList("upcoming_events", eventArgs)
+                        },
                     )
                     addToBackStack(null)
                 }
@@ -613,10 +591,10 @@ class MapFragment : Fragment() {
                 parentFragmentManager.commit {
                     setReorderingAllowed(true)
                     replace<AddPlaceFragment>(
-                        R.id.fragmentContainerView, null, bundleOf(
-                            "lat" to center.latitude,
-                            "lon" to center.longitude,
-                        )
+                        R.id.fragmentContainerView, null, Bundle().apply {
+                            putDouble("lat", center.latitude)
+                            putDouble("lon", center.longitude)
+                        }
                     )
                     addToBackStack(null)
                 }
@@ -628,6 +606,17 @@ class MapFragment : Fragment() {
         } else {
             showAuthDialog { navigate() }
         }
+    }
+
+    private fun GetEventsItem.toBundle(): Bundle = Bundle().apply {
+        putLong("id", id)
+        putString("area_id", areaId?.toString())
+        putDouble("lat", lat)
+        putDouble("lon", lon)
+        putString("name", name)
+        putString("website", website.toString())
+        putString("starts_at", startsAt.toString())
+        putString("ends_at", endsAt?.toString())
     }
 
     companion object {

@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Improve map loading performance
 - Improve database layer testability and observability
 - Update to Kotlin 2.4, AGP 9.4, targetSdk 37 and latest dependencies
+- Update Gradle to 9.7.1 and AndroidX libraries to latest stable releases
 - Skip in-app update prompts on debug and beta builds
 
 ## [1.1.0] - 2026-03-30

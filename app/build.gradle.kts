@@ -96,6 +96,10 @@ android {
             isUniversalApk = true
         }
     }
+
+    lint {
+        disable += "LogNotTimber"
+    }
 }
 
 kotlin {

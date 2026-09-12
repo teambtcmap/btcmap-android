@@ -1,6 +1,6 @@
 package org.btcmap.activity
 
-import androidx.core.os.bundleOf
+import android.os.Bundle
 import androidx.fragment.app.Fragment
 
 class LocalActivityFragment : BaseActivityFeedTab() {
@@ -10,12 +10,12 @@ class LocalActivityFragment : BaseActivityFeedTab() {
     companion object {
         fun create(areas: List<Area>): Fragment {
             return LocalActivityFragment().apply {
-                arguments = bundleOf(
-                    ARG_SHOW_AREA_CHIPS to true,
-                    ARG_INITIAL_AREA_IDS to ArrayList(areas.map { it.id }),
-                    ARG_INITIAL_AREA_NAMES to ArrayList(areas.map { it.name }),
-                    ARG_INITIAL_AREA_TYPES to ArrayList(areas.map { it.type }),
-                )
+                arguments = Bundle().apply {
+                    putBoolean(ARG_SHOW_AREA_CHIPS, true)
+                    putStringArrayList(ARG_INITIAL_AREA_IDS, ArrayList(areas.map { it.id }))
+                    putStringArrayList(ARG_INITIAL_AREA_NAMES, ArrayList(areas.map { it.name }))
+                    putStringArrayList(ARG_INITIAL_AREA_TYPES, ArrayList(areas.map { it.type }))
+                }
             }
         }
 

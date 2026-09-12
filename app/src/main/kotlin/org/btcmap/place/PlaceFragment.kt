@@ -16,7 +16,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.core.net.toUri
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -369,7 +368,9 @@ class PlaceFragment : Fragment() {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<BoostFragment>(
-                    R.id.fragmentContainerView, null, bundleOf("place_id" to place.id)
+                    R.id.fragmentContainerView, null, Bundle().apply {
+                        putLong("place_id", place.id)
+                    }
                 )
                 addToBackStack(null)
             }
@@ -400,7 +401,8 @@ class PlaceFragment : Fragment() {
         val navigate = {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
-                val args = bundleOf("place_id" to placeId).apply {
+                val args = Bundle().apply {
+                    putLong("place_id", placeId)
                     if (defaultType != null) putString("default_type", defaultType)
                 }
                 replace<ReportPlaceFragment>(R.id.fragmentContainerView, null, args)
@@ -420,7 +422,7 @@ class PlaceFragment : Fragment() {
         requireActivity().supportFragmentManager.commit {
             setReorderingAllowed(true)
             replace<CommentsFragment>(
-                R.id.fragmentContainerView, null, bundleOf("place_id" to placeId)
+                R.id.fragmentContainerView, null, Bundle().apply { putLong("place_id", placeId) }
             )
             addToBackStack(null)
         }
@@ -432,7 +434,7 @@ class PlaceFragment : Fragment() {
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<AddCommentFragment>(
-                    R.id.fragmentContainerView, null, bundleOf("place_id" to placeId)
+                    R.id.fragmentContainerView, null, Bundle().apply { putLong("place_id", placeId) }
                 )
                 addToBackStack(null)
             }

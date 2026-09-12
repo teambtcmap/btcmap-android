@@ -16,25 +16,25 @@ coroutines = "1.11.0"
 androidx-sqlite = "2.7.1"
 # Manages the shared activity and edge-to-edge setup
 # https://developer.android.com/jetpack/androidx/releases/activity
-androidx-activity = "1.8.1"
+androidx-activity = "1.13.0"
 # Provides AppCompat widgets and theming
 # https://developer.android.com/jetpack/androidx/releases/appcompat
-androidx-appcompat = "1.7.1"
+androidx-appcompat = "1.8.0"
 # Common Kotlin extensions for platform APIs
 # https://developer.android.com/jetpack/androidx/releases/core
-androidx-core = "1.16.0"
+androidx-core = "1.19.0"
 # Enables simplified fragment transactions
 # https://developer.android.com/jetpack/androidx/releases/fragment
 androidx-fragment = "1.9.0"
 # Lifecycle-aware components and coroutine scopes
 # https://developer.android.com/jetpack/androidx/releases/lifecycle
-androidx-lifecycle = "2.9.4"
+androidx-lifecycle = "2.11.0"
 # Displays scrollable lists
 # https://developer.android.com/jetpack/androidx/releases/recyclerview
-androidx-recyclerview = "1.2.1"
+androidx-recyclerview = "1.4.0"
 # Enables horizontal swiping between pages
 # https://developer.android.com/jetpack/androidx/releases/viewpager2
-androidx-viewpager2 = "1.0.0"
+androidx-viewpager2 = "1.1.0"
 
 # Material design components
 # https://github.com/material-components/material-components-android/releases
