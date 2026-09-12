@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="app_name">BTC Map</string>
     <string name="add_location">Add location</string>
     <string name="icon">Icon</string>
@@ -11,8 +11,8 @@
     <string name="pay">Pay</string>
     <string name="you_dont_have_a_compatible_wallet">You don\'t have a compatible wallet</string>
     <string name="not_verified">Not verified</string>
-    <string name="btn_verify" tools:ignore="MissingTranslation">Verify</string>
-    <string name="btn_report" tools:ignore="MissingTranslation">Report</string>
+    <string name="btn_verify">Verify</string>
+    <string name="btn_report">Report</string>
     <string name="directions">Directions</string>
     <string name="share">Share</string>
     <string name="companion_warning">You\'ll need a companion app (%1$s) in order to make a payment. This app doesn\'t require you to fill any personal data, to the best of our knowledge. Please let us know if it\'s not the case and we\'ll remove this place.</string>
@@ -73,83 +73,83 @@
     <string name="saturday">Saturday</string>
     <string name="sunday">Sunday</string>
     <string name="closed">Closed</string>
-    <string name="save" tools:ignore="MissingTranslation">Save</string>
-    <string name="account" tools:ignore="MissingTranslation">BTC Map Account</string>
-    <string name="not_logged_in" tools:ignore="MissingTranslation">Account</string>
-    <string name="logged_in_as" tools:ignore="MissingTranslation">Logged in as %1$s</string>
-    <string name="create_account" tools:ignore="MissingTranslation">Log in</string>
-    <string name="sign_up" tools:ignore="MissingTranslation">Sign up</string>
-    <string name="new_account" tools:ignore="MissingTranslation">New account</string>
-    <string name="login" tools:ignore="MissingTranslation">Login</string>
-    <string name="logout" tools:ignore="MissingTranslation">Logout</string>
-    <string name="username" tools:ignore="MissingTranslation">Username</string>
-    <string name="name" tools:ignore="MissingTranslation">Name</string>
-    <string name="name_placeholder" tools:ignore="MissingTranslation">Satoshi Cafe</string>
-    <string name="password" tools:ignore="MissingTranslation">Password</string>
-    <string name="field_required" tools:ignore="MissingTranslation">Required</string>
-    <string name="password_mask" tools:ignore="MissingTranslation">••••••••</string>
-    <string name="profile" tools:ignore="MissingTranslation">Profile</string>
-    <string name="change_username" tools:ignore="MissingTranslation">Change username</string>
-    <string name="new_username" tools:ignore="MissingTranslation">New username</string>
-    <string name="username_changed" tools:ignore="MissingTranslation">Username updated</string>
-    <string name="change_password" tools:ignore="MissingTranslation">Change password</string>
-    <string name="current_password" tools:ignore="MissingTranslation">Current password</string>
-    <string name="new_password" tools:ignore="MissingTranslation">New password</string>
-    <string name="password_changed" tools:ignore="MissingTranslation">Password updated</string>
-    <string name="saved_places" tools:ignore="MissingTranslation">Saved places</string>
-    <string name="no_saved_places" tools:ignore="MissingTranslation">No saved places</string>
-    <string name="saved_areas" tools:ignore="MissingTranslation">Saved areas</string>
-    <string name="no_saved_areas" tools:ignore="MissingTranslation">No saved areas</string>
-    <string name="i_don_t_have_an_account" tools:ignore="MissingTranslation">I don\'t have an account</string>
-    <string name="log_in_with_existing_account" tools:ignore="MissingTranslation">Log in with existing account</string>
-    <string name="create_account_subtitle" tools:ignore="MissingTranslation">Create a new BTC Map account</string>
-    <string name="sign_in_subtitle" tools:ignore="MissingTranslation">Use your existing username and password</string>
-    <string name="failed_to_create_new_account" tools:ignore="MissingTranslation">Failed to create new account</string>
-    <string name="click_to_see_your_profile" tools:ignore="MissingTranslation">Click to see your profile</string>
-    <string name="delete" tools:ignore="MissingTranslation">Delete</string>
-    <string name="show_debug_info" tools:ignore="MissingTranslation">Show debug info</string>
-    <string name="verified_filter" tools:ignore="MissingTranslation">Only show places</string>
-    <string name="verified_filter_1_year" tools:ignore="MissingTranslation">Verified within 1 year</string>
-    <string name="verified_filter_2_years" tools:ignore="MissingTranslation">Verified within 2 years</string>
-    <string name="verified_filter_3_years" tools:ignore="MissingTranslation">Verified within 3 years</string>
-    <string name="activity_interval" tools:ignore="MissingTranslation">Activity interval</string>
-    <string name="activity_interval_day" tools:ignore="MissingTranslation">1d</string>
-    <string name="activity_interval_week" tools:ignore="MissingTranslation">1w</string>
-    <string name="activity_interval_month" tools:ignore="MissingTranslation">1m</string>
-    <string name="activity_interval_half_year" tools:ignore="MissingTranslation">6m</string>
-    <string name="activity_interval_year" tools:ignore="MissingTranslation">1y</string>
-    <string name="filter" tools:ignore="MissingTranslation">Filter</string>
-    <string name="activity_tab_local" tools:ignore="MissingTranslation">Local</string>
-    <string name="activity_tab_following" tools:ignore="MissingTranslation">Following</string>
-    <string name="activity_filter_areas" tools:ignore="MissingTranslation">Areas</string>
-    <string name="show_attribution" tools:ignore="MissingTranslation">Show attribution</string>
-    <string name="map_rotation" tools:ignore="MissingTranslation">Allow map rotation</string>
-    <string name="osm_attribution" tools:ignore="MissingTranslation">© OpenStreetMap contributors</string>
-    <string name="osm_attribution_url" tools:ignore="MissingTranslation">https://www.openstreetmap.org/about/</string>
-    <string name="add_location_drag_to_adjust" tools:ignore="MissingTranslation">Drag the map to set the exact location</string>
-    <string name="category" tools:ignore="MissingTranslation">Category</string>
-    <string name="category_placeholder" tools:ignore="MissingTranslation">cafe</string>
-    <string name="address" tools:ignore="MissingTranslation">Address or directions</string>
-    <string name="address_placeholder" tools:ignore="MissingTranslation">1 HODL Lane, Block 21</string>
-    <string name="website_optional" tools:ignore="MissingTranslation">Website (optional)</string>
-    <string name="website_placeholder" tools:ignore="MissingTranslation">example.com</string>
-    <string name="description_optional" tools:ignore="MissingTranslation">Extra notes (optional)</string>
-    <string name="description_placeholder" tools:ignore="MissingTranslation">Accepts Lightning payments via Blink wallet, ATM in the back room</string>
-    <string name="submit_place" tools:ignore="MissingTranslation">Submit place</string>
-    <string name="place_submitted" tools:ignore="MissingTranslation">Place submitted for review</string>
-    <string name="verify_or_report" tools:ignore="MissingTranslation">Verify / Report</string>
-    <string name="verify_or_report_description" tools:ignore="MissingTranslation">Let editors know the current state of this place. Your report will be reviewed by the BTC Map community.</string>
-    <string name="report_type_verified" tools:ignore="MissingTranslation">Verified — still accepts Bitcoin</string>
-    <string name="report_type_verified_description" tools:ignore="MissingTranslation">You confirmed this place exists and currently accepts Bitcoin payments.</string>
-    <string name="report_type_refused_sats" tools:ignore="MissingTranslation">Refused Bitcoin payment</string>
-    <string name="report_type_refused_sats_description" tools:ignore="MissingTranslation">An attempt to pay with Bitcoin on-site was refused by the merchant.</string>
-    <string name="report_type_out_of_business" tools:ignore="MissingTranslation">Out of business</string>
-    <string name="report_type_out_of_business_description" tools:ignore="MissingTranslation">The place has permanently closed or is no longer operating.</string>
-    <string name="report_comment_optional" tools:ignore="MissingTranslation">Additional notes (optional)</string>
-    <string name="report_comment_placeholder" tools:ignore="MissingTranslation">Anything that helps reviewers understand the situation…</string>
-    <string name="btn_submit" tools:ignore="MissingTranslation">Submit</string>
-    <string name="report_submitted" tools:ignore="MissingTranslation">Report submitted</string>
-    <string name="report_select_type" tools:ignore="MissingTranslation">Please select a report type</string>
-    <string name="zoom_in" tools:ignore="MissingTranslation">Zoom in</string>
-    <string name="zoom_out" tools:ignore="MissingTranslation">Zoom out</string>
+    <string name="save">Save</string>
+    <string name="account">BTC Map Account</string>
+    <string name="not_logged_in">Account</string>
+    <string name="logged_in_as">Logged in as %1$s</string>
+    <string name="create_account">Log in</string>
+    <string name="sign_up">Sign up</string>
+    <string name="new_account">New account</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+    <string name="username">Username</string>
+    <string name="name">Name</string>
+    <string name="name_placeholder">Satoshi Cafe</string>
+    <string name="password">Password</string>
+    <string name="field_required">Required</string>
+    <string name="password_mask" translatable="false">••••••••</string>
+    <string name="profile">Profile</string>
+    <string name="change_username">Change username</string>
+    <string name="new_username">New username</string>
+    <string name="username_changed">Username updated</string>
+    <string name="change_password">Change password</string>
+    <string name="current_password">Current password</string>
+    <string name="new_password">New password</string>
+    <string name="password_changed">Password updated</string>
+    <string name="saved_places">Saved places</string>
+    <string name="no_saved_places">No saved places</string>
+    <string name="saved_areas">Saved areas</string>
+    <string name="no_saved_areas">No saved areas</string>
+    <string name="i_don_t_have_an_account">I don\'t have an account</string>
+    <string name="log_in_with_existing_account">Log in with existing account</string>
+    <string name="create_account_subtitle">Create a new BTC Map account</string>
+    <string name="sign_in_subtitle">Use your existing username and password</string>
+    <string name="failed_to_create_new_account">Failed to create new account</string>
+    <string name="click_to_see_your_profile">Click to see your profile</string>
+    <string name="delete">Delete</string>
+    <string name="show_debug_info">Show debug info</string>
+    <string name="verified_filter">Only show places</string>
+    <string name="verified_filter_1_year">Verified within 1 year</string>
+    <string name="verified_filter_2_years">Verified within 2 years</string>
+    <string name="verified_filter_3_years">Verified within 3 years</string>
+    <string name="activity_interval">Activity interval</string>
+    <string name="activity_interval_day">1d</string>
+    <string name="activity_interval_week">1w</string>
+    <string name="activity_interval_month">1m</string>
+    <string name="activity_interval_half_year">6m</string>
+    <string name="activity_interval_year">1y</string>
+    <string name="filter">Filter</string>
+    <string name="activity_tab_local">Local</string>
+    <string name="activity_tab_following">Following</string>
+    <string name="activity_filter_areas">Areas</string>
+    <string name="show_attribution">Show attribution</string>
+    <string name="map_rotation">Allow map rotation</string>
+    <string name="osm_attribution">© OpenStreetMap contributors</string>
+    <string name="osm_attribution_url" translatable="false">https://www.openstreetmap.org/about/</string>
+    <string name="add_location_drag_to_adjust">Drag the map to set the exact location</string>
+    <string name="category">Category</string>
+    <string name="category_placeholder">cafe</string>
+    <string name="address">Address or directions</string>
+    <string name="address_placeholder">1 HODL Lane, Block 21</string>
+    <string name="website_optional">Website (optional)</string>
+    <string name="website_placeholder">example.com</string>
+    <string name="description_optional">Extra notes (optional)</string>
+    <string name="description_placeholder">Accepts Lightning payments via Blink wallet, ATM in the back room</string>
+    <string name="submit_place">Submit place</string>
+    <string name="place_submitted">Place submitted for review</string>
+    <string name="verify_or_report">Verify / Report</string>
+    <string name="verify_or_report_description">Let editors know the current state of this place. Your report will be reviewed by the BTC Map community.</string>
+    <string name="report_type_verified">Verified — still accepts Bitcoin</string>
+    <string name="report_type_verified_description">You confirmed this place exists and currently accepts Bitcoin payments.</string>
+    <string name="report_type_refused_sats">Refused Bitcoin payment</string>
+    <string name="report_type_refused_sats_description">An attempt to pay with Bitcoin on-site was refused by the merchant.</string>
+    <string name="report_type_out_of_business">Out of business</string>
+    <string name="report_type_out_of_business_description">The place has permanently closed or is no longer operating.</string>
+    <string name="report_comment_optional">Additional notes (optional)</string>
+    <string name="report_comment_placeholder">Anything that helps reviewers understand the situation…</string>
+    <string name="btn_submit">Submit</string>
+    <string name="report_submitted">Report submitted</string>
+    <string name="report_select_type">Please select a report type</string>
+    <string name="zoom_in">Zoom in</string>
+    <string name="zoom_out">Zoom out</string>
 </resources>

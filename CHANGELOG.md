@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Translate the account, add-place and verify/report screens into all supported languages
 - Open btcmap.org merchant links directly in the app
 - Add in-app screens for submitting, verifying and reporting places
 - Add activity feed with Local and Following tabs
