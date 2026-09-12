@@ -2,13 +2,11 @@ package org.btcmap
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.api.Api
+import org.btcmap.api.toPlace
 import org.btcmap.db.Database
 import org.btcmap.db.table.comment.Comment
-import org.btcmap.db.table.place.FullProjection
 import org.btcmap.db.table.event.Event
-import org.btcmap.util.toZonedDateTime
 import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
@@ -47,39 +45,7 @@ class Sync(val api: Api, val db: Database) {
                 val deleted = delta.filter { it.deletedAt != null }
 
                 db.transaction {
-                    db.place.insert(newOrChanged.map {
-                        val verifiedAt = if (it.verifiedAt == null) {
-                            null
-                        } else {
-                            it.verifiedAt + "T00:00:00Z"
-                        }
-
-                        FullProjection(
-                            id = it.id,
-                            bundled = it.bundled,
-                            updatedAt = it.updatedAt.toZonedDateTime(),
-                            lat = it.lat,
-                            lon = it.lon,
-                            icon = it.icon,
-                            name = it.name,
-                            localizedName = it.localizedName,
-                            verifiedAt = verifiedAt?.toZonedDateTime(),
-                            address = it.address,
-                            openingHours = it.openingHours,
-                            localizedOpeningHours = it.localizedOpeningHours,
-                            phone = it.phone,
-                            website = it.website?.toHttpUrlOrNull(),
-                            email = it.email,
-                            twitter = it.twitter?.toHttpUrlOrNull(),
-                            facebook = it.facebook?.toHttpUrlOrNull(),
-                            instagram = it.instagram?.toHttpUrlOrNull(),
-                            line = it.line?.toHttpUrlOrNull(),
-                            requiredAppUrl = it.requiredAppUrl?.toHttpUrlOrNull(),
-                            boostedUntil = it.boostedUntil?.toZonedDateTime(),
-                            comments = it.comments,
-                            telegram = it.telegram,
-                        )
-                    })
+                    db.place.insert(newOrChanged.map { it.toPlace() })
 
                     deleted.forEach { db.place.deleteById(it.id) }
                 }

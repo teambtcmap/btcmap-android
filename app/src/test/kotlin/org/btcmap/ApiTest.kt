@@ -183,6 +183,48 @@ class ApiTest {
         Assert.assertEquals("local_cafe", (results[1] as SearchResult.Place).icon)
     }
 
+    @Test
+    fun getPlaceCoordinates_success() = runTest {
+        val api = createApi()
+
+        val response = MockResponse.Builder()
+            .addHeader("Content-Type", "application/json")
+            .body(
+                """
+                {
+                    "id": 5005,
+                    "lat": 47.55,
+                    "lon": 8.72
+                }
+                """.trimIndent()
+            ).build()
+
+        serverRule.server.enqueue(response)
+
+        val coordinates = api.getPlaceCoordinates(5005)
+
+        val request = serverRule.server.takeRequest()
+        Assert.assertEquals("GET", request.method)
+        Assert.assertTrue(request.requestLine.contains("/v4/places/5005"))
+        Assert.assertNotNull(coordinates)
+        Assert.assertEquals(47.55, coordinates!!.lat, 0.0)
+        Assert.assertEquals(8.72, coordinates.lon, 0.0)
+    }
+
+    @Test(expected = Exception::class)
+    fun getPlaceCoordinates_failure() = runTest {
+        val api = createApi()
+
+        val response = MockResponse.Builder()
+            .addHeader("Content-Type", "application/json")
+            .status("HTTP/1.1 404 Not Found")
+            .body("").build()
+
+        serverRule.server.enqueue(response)
+
+        api.getPlaceCoordinates(5005)
+    }
+
     @Test(expected = Exception::class)
     fun search_failure() = runTest {
         val api = createApi()

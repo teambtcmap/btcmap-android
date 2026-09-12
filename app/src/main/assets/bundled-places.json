@@ -52310,10 +52310,10 @@
   },
   {
     "id": 18125,
-    "lat": 44.4440649,
-    "lon": 26.0628382,
+    "lat": 44.4441821,
+    "lon": 26.0625262,
     "icon": "local_atm",
-    "name": "ATM Bitcoin Romania"
+    "name": "Bitcoin Romania"
   },
   {
     "id": 18126,
@@ -60398,13 +60398,6 @@
     "id": 19574,
     "lat": -26.060837,
     "lon": 27.8360509,
-    "icon": "local_atm",
-    "name": "Bitcoin ATM - Shitcoins.club"
-  },
-  {
-    "id": 19575,
-    "lat": 46.5462888,
-    "lon": 15.6191717,
     "icon": "local_atm",
     "name": "Bitcoin ATM - Shitcoins.club"
   },
@@ -87712,8 +87705,8 @@
   },
   {
     "id": 24175,
-    "lat": -22.8259223,
-    "lon": -45.6582991,
+    "lat": -22.8257443,
+    "lon": -45.6582218,
     "icon": "storefront",
     "name": "Amore home"
   },
@@ -93837,8 +93830,8 @@
   },
   {
     "id": 25215,
-    "lat": -22.8259431,
-    "lon": -45.6583995,
+    "lat": -22.8257473,
+    "lon": -45.658113,
     "icon": "pets",
     "name": "Aumi Boutique Pet"
   },
@@ -106518,7 +106511,7 @@
     "lat": -17.8476522,
     "lon": 25.8566792,
     "icon": "local_cafe",
-    "name": "Munali Cafe"
+    "name": "Cafe Au Lait"
   },
   {
     "id": 27483,
@@ -126562,13 +126555,6 @@
     "name": "JP's Pastry"
   },
   {
-    "id": 30799,
-    "lat": 29.6650878,
-    "lon": -95.0684146,
-    "icon": "local_florist",
-    "name": "Garden of Eden Floral & Tea Room"
-  },
-  {
     "id": 30800,
     "lat": 31.2817458,
     "lon": -86.2567962,
@@ -128660,8 +128646,8 @@
   },
   {
     "id": 31136,
-    "lat": 46.981959,
-    "lon": 8.6198376,
+    "lat": 46.9819461,
+    "lon": 8.619864,
     "icon": "restaurant",
     "name": "Buongustaio"
   },
@@ -137673,7 +137659,8 @@
     "lat": -26.212872,
     "lon": 27.8812495,
     "icon": "storefront",
-    "name": "Kelokitso Community Farm"
+    "name": "Kelokitso Community Farm",
+    "boosted_until": "2027-09-11T14:59:31.613830028Z"
   },
   {
     "id": 32465,
@@ -190403,8 +190390,8 @@
   },
   {
     "id": 40116,
-    "lat": -22.8259312,
-    "lon": -45.6583277,
+    "lat": -22.8258867,
+    "lon": -45.65817,
     "icon": "storefront",
     "name": "Empório Trem de MInas"
   },
@@ -207437,7 +207424,8 @@
     "lat": -33.4979844,
     "lon": 22.5201952,
     "icon": "local_grocery_store",
-    "name": "Rasal MD Cafe"
+    "name": "Rasal MD Cafe",
+    "comments": 1
   },
   {
     "id": 42602,
@@ -208631,5 +208619,97 @@
     "lon": 32.8863401,
     "icon": "storefront",
     "name": "Chichava Surf Shorts"
+  },
+  {
+    "id": 42774,
+    "lat": 43.1676758,
+    "lon": -89.329781,
+    "icon": "car_repair",
+    "name": "D & D Towing and Repair"
+  },
+  {
+    "id": 42775,
+    "lat": 33.4666828,
+    "lon": -82.5007724,
+    "icon": "medical_services",
+    "name": "True Results Diagnostics"
+  },
+  {
+    "id": 42776,
+    "lat": 41.696667,
+    "lon": -72.9050376,
+    "icon": "restaurant",
+    "name": "Cravings an American Eatery"
+  },
+  {
+    "id": 42777,
+    "lat": 39.50713945,
+    "lon": -119.8591523,
+    "icon": "local_cafe",
+    "name": "Walden's Coffeehouse",
+    "comments": 1
+  },
+  {
+    "id": 42778,
+    "lat": 38.9223643,
+    "lon": -77.0423766,
+    "icon": "restaurant",
+    "name": "Sorso"
+  },
+  {
+    "id": 42779,
+    "lat": 25.8681154,
+    "lon": -80.3173131,
+    "icon": "storefront",
+    "name": "Almighty Kicks"
+  },
+  {
+    "id": 42780,
+    "lat": 42.0951431,
+    "lon": -85.2351825,
+    "icon": "pets",
+    "name": "Critchlow Alligator Sanctuary"
+  },
+  {
+    "id": 42781,
+    "lat": 39.9400874,
+    "lon": -83.0397507,
+    "icon": "car_repair",
+    "name": "Brown's Alignment & Service Center"
+  },
+  {
+    "id": 42782,
+    "lat": 35.0308458,
+    "lon": -85.185811,
+    "icon": "medical_services",
+    "name": "BrainWerx"
+  },
+  {
+    "id": 42783,
+    "lat": -22.8257854,
+    "lon": -45.658418,
+    "icon": "icecream",
+    "name": "Senhora Sobremesa - Shopping Villarejo"
+  },
+  {
+    "id": 42784,
+    "lat": 33.8537905,
+    "lon": -118.196634,
+    "icon": "local_cafe",
+    "name": "Black Ring Coffee Roasters"
+  },
+  {
+    "id": 42785,
+    "lat": 33.7742697,
+    "lon": -118.1933211,
+    "icon": "local_cafe",
+    "name": "Confidential Coffee"
+  },
+  {
+    "id": 42786,
+    "lat": 33.832520200000005,
+    "lon": -118.12595915,
+    "icon": "local_cafe",
+    "name": "eco coffee"
   }
 ]

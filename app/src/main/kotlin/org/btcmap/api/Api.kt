@@ -78,6 +78,31 @@ sealed class SearchResult {
 
 class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
 
+    private val placeFields = listOf(
+        "lat",
+        "lon",
+        "icon",
+        "name",
+        "localized_name",
+        "updated_at",
+        "deleted_at",
+        "required_app_url",
+        "boosted_until",
+        "verified_at",
+        "address",
+        "opening_hours",
+        "localized_opening_hours",
+        "website",
+        "phone",
+        "email",
+        "twitter",
+        "facebook",
+        "instagram",
+        "line",
+        "comments",
+        "telegram",
+    )
+
     data class PlaceBoostQuoteResponse(
         val quote30dsat: Long,
         val quote90dsat: Long,
@@ -536,102 +561,79 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
     )
 
     private fun InputStream.toGetPlacesItems(): List<GetPlacesItem> {
-        return toJsonArray().map {
-            GetPlacesItem(
-                id = it.get("id").asLong,
-                lat = it.get("lat").asDouble,
-                lon = it.get("lon").asDouble,
-                icon = it.get("icon").asString,
-                name = it.get("name").asString,
-                localizedName = if (!it.has("localized_name") || it.get("localized_name").isJsonNull) null else it.get(
-                    "localized_name"
-                )
-                    .getAsJsonObject(),
-                updatedAt = it.get("updated_at").asString,
-                deletedAt = if (!it.has("deleted_at") || it.get("deleted_at").isJsonNull) null else it.get(
-                    "deleted_at"
-                )
-                    .asString.ifBlank { null },
-                requiredAppUrl = if (!it.has("required_app_url") || it.get("required_app_url").isJsonNull) null else it.get(
-                    "required_app_url"
-                )
-                    .asString.ifBlank { null },
-                boostedUntil = if (!it.has("boosted_until") || it.get("boosted_until").isJsonNull) null else it.get(
-                    "boosted_until"
-                )
-                    .asString.ifBlank { null },
-                verifiedAt = if (!it.has("verified_at") || it.get("verified_at").isJsonNull) null else it.get(
-                    "verified_at"
-                )
-                    .asString.ifBlank { null },
-                address = if (!it.has("address") || it.get("address").isJsonNull) null else it.get("address")
-                    .asString.ifBlank { null },
-                openingHours = if (!it.has("opening_hours") || it.get("opening_hours").isJsonNull) null else it.get(
-                    "opening_hours"
-                )
-                    .asString.ifBlank { null },
-                localizedOpeningHours = if (!it.has("localized_opening_hours") || it.get("localized_opening_hours").isJsonNull) null else it.get(
-                    "localized_opening_hours"
-                ).getAsJsonObject(),
-                website = if (!it.has("website") || it.get("website").isJsonNull) null else it.get("website")
-                    .asString.ifBlank { null },
-                phone = if (!it.has("phone") || it.get("phone").isJsonNull) null else it.get("phone").asString
-                    .ifBlank { null },
-                email = if (!it.has("email") || it.get("email").isJsonNull) null else it.get("email").asString
-                    .ifBlank { null },
-                twitter = if (!it.has("twitter") || it.get("twitter").isJsonNull) null else it.get("twitter")
-                    .asString.ifBlank { null },
-                facebook = if (!it.has("facebook") || it.get("facebook").isJsonNull) null else it.get(
-                    "facebook"
-                )
-                    .asString.ifBlank { null },
-                instagram = if (!it.has("instagram") || it.get("instagram").isJsonNull) null else it.get(
-                    "instagram"
-                )
-                    .asString.ifBlank { null },
-                line = if (!it.has("line") || it.get("line").isJsonNull) null else it.get("line").asString
-                    .ifBlank { null },
-                bundled = false,
-                comments = if (!it.has("comments") || it.get("comments").isJsonNull) null else it.get(
-                    "comments"
-                )
-                    .asLong,
-                telegram = if (!it.has("telegram") || it.get("telegram").isJsonNull) null else it.get(
-                    "telegram"
-                )
-                    .asString.toHttpUrl(),
+        return toJsonArray().map { it.toGetPlacesItem() }
+    }
+
+    private fun JsonObject.toGetPlacesItem(): GetPlacesItem {
+        return GetPlacesItem(
+            id = get("id").asLong,
+            lat = get("lat").asDouble,
+            lon = get("lon").asDouble,
+            icon = get("icon").asString,
+            name = get("name").asString,
+            localizedName = if (!has("localized_name") || get("localized_name").isJsonNull) null else get(
+                "localized_name"
             )
-        }
+                .getAsJsonObject(),
+            updatedAt = get("updated_at").asString,
+            deletedAt = if (!has("deleted_at") || get("deleted_at").isJsonNull) null else get(
+                "deleted_at"
+            )
+                .asString.ifBlank { null },
+            requiredAppUrl = if (!has("required_app_url") || get("required_app_url").isJsonNull) null else get(
+                "required_app_url"
+            )
+                .asString.ifBlank { null },
+            boostedUntil = if (!has("boosted_until") || get("boosted_until").isJsonNull) null else get(
+                "boosted_until"
+            )
+                .asString.ifBlank { null },
+            verifiedAt = if (!has("verified_at") || get("verified_at").isJsonNull) null else get(
+                "verified_at"
+            )
+                .asString.ifBlank { null },
+            address = if (!has("address") || get("address").isJsonNull) null else get("address")
+                .asString.ifBlank { null },
+            openingHours = if (!has("opening_hours") || get("opening_hours").isJsonNull) null else get(
+                "opening_hours"
+            )
+                .asString.ifBlank { null },
+            localizedOpeningHours = if (!has("localized_opening_hours") || get("localized_opening_hours").isJsonNull) null else get(
+                "localized_opening_hours"
+            ).getAsJsonObject(),
+            website = if (!has("website") || get("website").isJsonNull) null else get("website")
+                .asString.ifBlank { null },
+            phone = if (!has("phone") || get("phone").isJsonNull) null else get("phone").asString
+                .ifBlank { null },
+            email = if (!has("email") || get("email").isJsonNull) null else get("email").asString
+                .ifBlank { null },
+            twitter = if (!has("twitter") || get("twitter").isJsonNull) null else get("twitter")
+                .asString.ifBlank { null },
+            facebook = if (!has("facebook") || get("facebook").isJsonNull) null else get(
+                "facebook"
+            )
+                .asString.ifBlank { null },
+            instagram = if (!has("instagram") || get("instagram").isJsonNull) null else get(
+                "instagram"
+            )
+                .asString.ifBlank { null },
+            line = if (!has("line") || get("line").isJsonNull) null else get("line").asString
+                .ifBlank { null },
+            bundled = false,
+            comments = if (!has("comments") || get("comments").isJsonNull) null else get(
+                "comments"
+            )
+                .asLong,
+            telegram = if (!has("telegram") || get("telegram").isJsonNull) null else get(
+                "telegram"
+            )
+                .asString.toHttpUrl(),
+        )
     }
 
     suspend fun getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPlacesItem> {
-        val fields = listOf(
-            "lat",
-            "lon",
-            "icon",
-            "name",
-            "localized_name",
-            "updated_at",
-            "deleted_at",
-            "required_app_url",
-            "boosted_until",
-            "verified_at",
-            "address",
-            "opening_hours",
-            "localized_opening_hours",
-            "website",
-            "phone",
-            "email",
-            "twitter",
-            "facebook",
-            "instagram",
-            "line",
-            "comments",
-            "telegram",
-        )
-
         val url = url.newBuilder().addPathSegments("v4/places").apply {
-            addQueryParameter("fields", fields.joinToString(separator = ","))
+            addQueryParameter("fields", placeFields.joinToString(separator = ","))
             addQueryParameter("limit", "$limit")
             if (updatedSince != null) {
                 addQueryParameter(
@@ -649,6 +651,33 @@ class Api(private val httpClient: OkHttpClient, private val url: HttpUrl) {
 
         return withContext(Dispatchers.IO) {
             res.body.byteStream().use { it.toGetPlacesItems() }
+        }
+    }
+
+    data class PlaceCoordinates(
+        val lat: Double,
+        val lon: Double,
+    )
+
+    suspend fun getPlaceCoordinates(id: Long): PlaceCoordinates? {
+        val url = url.newBuilder().addPathSegments("v4/places/$id").apply {
+            addQueryParameter("fields", "lat,lon")
+        }.build()
+
+        val res = httpClient.newCall(Request.Builder().url(url).build()).executeAsync()
+
+        if (!res.isSuccessful) {
+            throw Exception("Unexpected HTTP response code: ${res.code}")
+        }
+
+        return withContext(Dispatchers.IO) {
+            res.body.byteStream().use {
+                val body = it.toJsonObject()
+                PlaceCoordinates(
+                    lat = body.get("lat").asDouble,
+                    lon = body.get("lon").asDouble,
+                )
+            }
         }
     }
 

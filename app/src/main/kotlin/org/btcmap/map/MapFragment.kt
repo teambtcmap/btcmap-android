@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.activity.ActivityFeedFragment
@@ -239,12 +240,14 @@ class MapFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
                 binding.map.getMapAsync {
-                    it.moveCamera(
-                        CameraUpdateFactory.newLatLngBounds(
-                            prefs.mapViewport, 0
+                    if (restoreMapViewport) {
+                        it.moveCamera(
+                            CameraUpdateFactory.newLatLngBounds(
+                                prefs.mapViewport, 0
+                            )
                         )
-                    )
-                    setFilter(Filter.MERCHANTS)
+                        setFilter(Filter.MERCHANTS)
+                    }
                 }
             }
         }
@@ -331,6 +334,11 @@ class MapFragment : Fragment() {
                 }
             }
         }
+
+        val deepLinkPlaceId = (activity as? Activity)?.consumeDeepLinkPlaceId()
+        if (deepLinkPlaceId != null) {
+            openPlaceById(deepLinkPlaceId)
+        }
     }
 
     private fun selectPlace(place: Place) {
@@ -353,10 +361,39 @@ class MapFragment : Fragment() {
             selectPlace(place)
         }
 
+        moveTo(place.lat, place.lon)
+    }
+
+    fun openPlaceById(placeId: Long) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val place = withContext(Dispatchers.IO) { db().place.selectById(placeId) }
+
+            if (place != null) {
+                if (place.isMerchant()) {
+                    binding.showMerchants.performClick()
+                } else {
+                    binding.showExchanges.performClick()
+                }
+
+                selectPlace(place)
+                moveTo(place.lat, place.lon)
+                return@launch
+            }
+
+            val coordinates = runCatching {
+                withContext(Dispatchers.IO) { api().getPlaceCoordinates(placeId) }
+            }.getOrNull() ?: return@launch
+
+            moveTo(coordinates.lat, coordinates.lon)
+        }
+    }
+
+    private fun moveTo(lat: Double, lon: Double) {
+        restoreMapViewport = false
         binding.map.getMapAsync {
             it.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
-                    LatLng(place.lat, place.lon),
+                    LatLng(lat, lon),
                     16.0,
                 )
             )
@@ -448,6 +485,7 @@ class MapFragment : Fragment() {
 
     private var filter = Filter.MERCHANTS
     private var searchDebounceJob: Job? = null
+    private var restoreMapViewport = true
 
     private fun setFilter(filter: Filter) {
         binding.showMerchants.isSelected = filter == Filter.MERCHANTS
