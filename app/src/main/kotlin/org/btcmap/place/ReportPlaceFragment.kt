@@ -13,6 +13,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.api
+import org.btcmap.api.reportPlace
 import org.btcmap.databinding.ReportPlaceFragmentBinding
 
 class ReportPlaceFragment : Fragment() {

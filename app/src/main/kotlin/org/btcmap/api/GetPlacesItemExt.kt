@@ -4,10 +4,10 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.db.table.place.FullProjection
 import org.btcmap.util.toZonedDateTime
 
-fun Api.GetPlacesItem.toPlace(): FullProjection {
+fun GetPlacesItem.toPlace(): FullProjection {
     return FullProjection(
         id = id,
-        bundled = bundled,
+        bundled = false,
         updatedAt = updatedAt.toZonedDateTime(),
         lat = lat,
         lon = lon,
@@ -28,6 +28,6 @@ fun Api.GetPlacesItem.toPlace(): FullProjection {
         requiredAppUrl = requiredAppUrl?.toHttpUrlOrNull(),
         boostedUntil = boostedUntil?.toZonedDateTime(),
         comments = comments,
-        telegram = telegram,
+        telegram = telegram?.toHttpUrlOrNull(),
     )
 }

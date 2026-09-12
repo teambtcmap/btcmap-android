@@ -11,6 +11,8 @@ import kotlinx.coroutines.launch
 import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.btcmap.api
+import org.btcmap.api.createUser
+import org.btcmap.api.signIn
 import org.btcmap.db
 import org.btcmap.db.table.user.User
 import org.btcmap.settings.authToken

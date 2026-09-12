@@ -16,6 +16,11 @@ import com.google.gson.JsonArray
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.api
+import org.btcmap.api.getUser
+import org.btcmap.api.removeSavedArea
+import org.btcmap.api.removeSavedPlace
+import org.btcmap.api.updatePassword
+import org.btcmap.api.updateUsername
 import org.btcmap.db.table.user.User
 import org.btcmap.databinding.SavedAreaItemBinding
 import org.btcmap.databinding.SavedPlaceItemBinding

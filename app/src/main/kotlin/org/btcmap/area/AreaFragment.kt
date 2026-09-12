@@ -24,6 +24,10 @@ import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.api.GetEventsItem
+import org.btcmap.api.getArea
+import org.btcmap.api.getUser
+import org.btcmap.api.removeSavedArea
+import org.btcmap.api.saveArea
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.db.table.user.User

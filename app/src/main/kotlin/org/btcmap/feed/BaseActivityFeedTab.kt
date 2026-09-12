@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.api
+import org.btcmap.api.getActivity
 import org.btcmap.databinding.ActivityFeedFilterDialogBinding
 import org.btcmap.databinding.ActivityFeedTabBinding
 import org.btcmap.place.PlaceFragment

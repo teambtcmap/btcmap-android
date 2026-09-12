@@ -3,6 +3,9 @@ package org.btcmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.btcmap.api.Api
+import org.btcmap.api.getComments
+import org.btcmap.api.getEvents
+import org.btcmap.api.getPlaces
 import org.btcmap.api.toPlace
 import org.btcmap.db.Database
 import org.btcmap.db.table.comment.Comment

@@ -38,6 +38,10 @@ import org.btcmap.R
 import org.btcmap.feed.ActivityFeedFragment
 import org.btcmap.api
 import org.btcmap.api.GetEventsItem
+import org.btcmap.api.getArea
+import org.btcmap.api.getAreaEvents
+import org.btcmap.api.getAreas
+import org.btcmap.api.getPlaceCoordinates
 import org.btcmap.area.AreaFragment
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.bundle.BundledPlaces

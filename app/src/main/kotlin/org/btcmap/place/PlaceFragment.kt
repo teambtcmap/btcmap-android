@@ -40,6 +40,9 @@ import org.btcmap.map.getErrorColor
 import org.btcmap.map.getOnSurfaceColor
 import org.btcmap.R
 import org.btcmap.api
+import org.btcmap.api.getUser
+import org.btcmap.api.removeSavedPlace
+import org.btcmap.api.savePlace
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.databinding.PlaceFragmentBinding

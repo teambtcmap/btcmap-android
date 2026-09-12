@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.api.Api
 import org.btcmap.api.SearchResult
+import org.btcmap.api.search
 import org.btcmap.db.Database
 import org.btcmap.db.table.place.Place
 import org.maplibre.android.geometry.LatLng

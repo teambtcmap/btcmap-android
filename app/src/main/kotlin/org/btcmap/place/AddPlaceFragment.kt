@@ -13,6 +13,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.api
+import org.btcmap.api.submitPlace
 import org.btcmap.databinding.AddPlaceFragmentBinding
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.markerBackgroundColor

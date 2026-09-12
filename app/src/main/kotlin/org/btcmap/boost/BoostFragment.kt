@@ -21,10 +21,13 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.btcmap.R
+import org.btcmap.api.PlaceBoostResponse
+import org.btcmap.api.boostPlace
+import org.btcmap.api.getInvoice
+import org.btcmap.api.getPlaceBoostQuote
 import org.btcmap.api.paid
 import java.text.NumberFormat
 import androidx.core.net.toUri
-import org.btcmap.api.Api
 import org.btcmap.api
 import org.btcmap.databinding.BoostFragmentBinding
 
@@ -106,7 +109,7 @@ class BoostFragment : Fragment() {
             }
         }
 
-        var boostResponse: Api.PlaceBoostResponse? = null
+        var boostResponse: PlaceBoostResponse? = null
 
         // send boost request and fetch an invoice
         binding.btnContinue.setOnClickListener {
