@@ -6,13 +6,11 @@
     <string name="icon">Ikon</string>
     <string name="qr_code">QR-kode</string>
     <string name="copied_to_clipboard">Kopieret til udklipsholder</string>
-    <string name="show_my_location">Vis min placering</string>
     <string name="search_here">Søg her</string>
     <string name="settings">Indstillinger</string>
     <string name="pay">Betaling</string>
     <string name="you_dont_have_a_compatible_wallet">Du har ikke en kompatibel tegnebog</string>
     <string name="not_verified">Ikke verificeret</string>
-    <string name="verify">Verificer/Rapporter</string>
     <string name="directions">Vejledning</string>
     <string name="share">Del</string>
     <string name="companion_warning">Du vil have brug for en ledsager-app (%1$s) for at foretage en betaling. Denne app kræver ikke, at du udfylder personlige data, så vidt vi ved. Giv os besked, hvis det ikke er tilfældet, så fjerner vi dette sted.</string>

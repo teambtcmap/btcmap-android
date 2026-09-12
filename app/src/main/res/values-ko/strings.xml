@@ -6,13 +6,11 @@
     <string name="icon">아이콘</string>
     <string name="qr_code">QR 코드</string>
     <string name="copied_to_clipboard">클립보드에 복사됨</string>
-    <string name="show_my_location">내 위치 표시</string>
     <string name="search_here">여기서 검색</string>
     <string name="settings">설정</string>
     <string name="pay">결제</string>
     <string name="you_dont_have_a_compatible_wallet">호환 가능한 지갑이 없습니다</string>
     <string name="not_verified">미확인</string>
-    <string name="verify">확인 또는 신고</string>
     <string name="directions">길안내</string>
     <string name="share">공유</string>
     <string name="companion_warning">결제를 하려면 동반 앱(%1$s)이 필요합니다. 이 앱은 우리가 아는 한 개인 정보를 입력하도록 요구하지 않습니다. 그렇지 않다면 알려주시면 이 장소를 삭제하겠습니다.</string>

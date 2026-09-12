@@ -6,13 +6,11 @@
     <string name="icon">آئیکن</string>
     <string name="qr_code">QR کوڈ</string>
     <string name="copied_to_clipboard">کلپ بورڈ پر کاپی ہوگیا</string>
-    <string name="show_my_location">میرا مقام دکھائیں</string>
     <string name="search_here">یہاں تلاش کریں</string>
     <string name="settings">ترتیبات</string>
     <string name="pay">ادائیگی کریں</string>
     <string name="you_dont_have_a_compatible_wallet">آپ کے پاس مطابقت والا بٹویلیٹ نہیں ہے</string>
     <string name="not_verified">تصدیق شدہ نہیں</string>
-    <string name="verify">تصدیق/رپورٹ</string>
     <string name="directions">سمتیں</string>
     <string name="share">شیئر کریں</string>
     <string name="companion_warning">آپ کو ادائیگی کے لیے ایک ساتھی ایپ (%1$s) کی ضرورت ہوگی۔ اس ایپ کو ہمارے علم کے مطابق آپ کو کوئی ذاتی ڈیٹا بھرنے کی ضرورت نہیں ہے۔ براہ کرم ہمیں بتائیں اگر ایسا نہیں ہے اور ہم اس مقام کو ہٹا دیں گے۔</string>

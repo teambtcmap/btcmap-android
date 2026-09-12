@@ -6,13 +6,11 @@
     <string name="icon">Εικονίδιο</string>
     <string name="qr_code">Κωδικός QR</string>
     <string name="copied_to_clipboard">Έγινε αντιγραφή στο πρόχειρο</string>
-    <string name="show_my_location">Εμφάνιση της τοποθεσίας μου</string>
     <string name="search_here">Αναζητήστε εδώ</string>
     <string name="settings">Ρυθμίσεις</string>
     <string name="pay">Πληρωμή</string>
     <string name="you_dont_have_a_compatible_wallet">Δεν διαθέτετε συμβατό πορτοφόλι</string>
     <string name="not_verified">Μη επαληθευμένο</string>
-    <string name="verify">Επιβεβαίωση ή Αναφορά</string>
     <string name="directions">Οδηγίες</string>
     <string name="share">Κοινοποίηση</string>
     <string name="companion_warning">Θα χρειαστείτε μια συνοδευτική εφαρμογή (%1$s) για να κάνετε μια πληρωμή. Αυτή η εφαρμογή δεν απαιτεί να συμπληρώσετε προσωπικά δεδομένα, σύμφωνα με τη γνώση μας. Ενημερώστε μας αν δεν ισχύει και θα αφαιρέσουμε αυτό το μέρος.</string>

@@ -6,13 +6,11 @@
     <string name="icon">图标</string>
     <string name="qr_code">二维码</string>
     <string name="copied_to_clipboard">已复制到剪贴板</string>
-    <string name="show_my_location">显示我的位置</string>
     <string name="search_here">在此搜索</string>
     <string name="settings">设置</string>
     <string name="pay">支付</string>
     <string name="you_dont_have_a_compatible_wallet">您没有兼容的钱包</string>
     <string name="not_verified">未验证</string>
-    <string name="verify">验证或举报</string>
     <string name="directions">方向</string>
     <string name="share">分享</string>
     <string name="companion_warning">您需要一个配套应用（%1$s）来进行支付。据我们所知，此应用不需要您填写任何个人资料。如果情况并非如此，请告诉我们，我们将删除此地点。</string>

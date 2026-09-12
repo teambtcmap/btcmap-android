@@ -6,13 +6,11 @@
     <string name="icon">Symbol</string>
     <string name="qr_code">QR Code</string>
     <string name="copied_to_clipboard">In die Zwischenablage kopiert</string>
-    <string name="show_my_location">Zeige meinen Standort</string>
     <string name="search_here">Hier suchen</string>
     <string name="settings">Einstellungen</string>
     <string name="pay">Bezahlen</string>
     <string name="you_dont_have_a_compatible_wallet">Du hast keine kompatible Wallet</string>
     <string name="not_verified">Nicht verifiziert</string>
-    <string name="verify">Verifizieren oder Melden</string>
     <string name="directions">Wegbeschreibung</string>
     <string name="share">Teilen</string>
     <string name="companion_warning">Du benötigst eine Companion-App (%1$s), um eine Zahlung zu tätigen. Diese App erfordert nach unserem besten Wissen keine persönlichen Daten. Bitte teile uns mit, wenn dies nicht der Fall ist, und wir entfernen diesen Ort.</string>

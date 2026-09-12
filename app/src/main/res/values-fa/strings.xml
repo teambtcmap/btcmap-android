@@ -6,13 +6,11 @@
     <string name="icon">آیکون</string>
     <string name="qr_code">کد QR</string>
     <string name="copied_to_clipboard">در کلیپ‌بورد کپی شد</string>
-    <string name="show_my_location">نمایش مکان من</string>
     <string name="search_here">اینجا جستجو کنید</string>
     <string name="settings">تنظیمات</string>
     <string name="pay">پرداخت</string>
     <string name="you_dont_have_a_compatible_wallet">شما کیف پول سازگار ندارید</string>
     <string name="not_verified">تایید نشده</string>
-    <string name="verify">تایید یا گزارش</string>
     <string name="directions">مسیرها</string>
     <string name="share">اشتراک‌گذاری</string>
     <string name="companion_warning">شما برای پرداخت به یک برنامه همراه (%1$s) نیاز دارید. این برنامه به اطلاعات شخصی شما نیاز ندارد، بهترین اطلاع ما. لطفاً اگر اینطور نیست به ما اطلاع دهید و ما این مکان را حذف می‌کنیم.</string>

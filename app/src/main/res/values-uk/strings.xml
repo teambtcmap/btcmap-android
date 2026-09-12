@@ -6,13 +6,11 @@
     <string name="icon">Іконка</string>
     <string name="qr_code">QR-код</string>
     <string name="copied_to_clipboard">Скопійовано в буфер обміну</string>
-    <string name="show_my_location">Показати моє місце</string>
     <string name="search_here">Шукати тут</string>
     <string name="settings">Налаштування</string>
     <string name="pay">Сплатити</string>
     <string name="you_dont_have_a_compatible_wallet">У вас немає сумісного гаманця</string>
     <string name="not_verified">Не підтверджено</string>
-    <string name="verify">Підтвердити або Повідомити</string>
     <string name="directions">Напрямки</string>
     <string name="share">Поділитися</string>
     <string name="companion_warning">Вам знадобиться супровідний додаток (%1$s) для здійснення платежу. Цей додаток не вимагає від вас введення персональних даних, наскільки нам відомо. Будь ласка, повідомте нас, якщо це не так, і ми видалимо це місце.</string>

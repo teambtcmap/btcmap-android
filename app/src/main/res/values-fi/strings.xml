@@ -6,13 +6,11 @@
     <string name="icon">Kuvake</string>
     <string name="qr_code">QR-koodi</string>
     <string name="copied_to_clipboard">Kopioitu leikepöydälle</string>
-    <string name="show_my_location">Näytä sijaintini</string>
     <string name="search_here">Hae täältä</string>
     <string name="settings">Asetukset</string>
     <string name="pay">Maksa</string>
     <string name="you_dont_have_a_compatible_wallet">Sinulla ei ole yhteensopivaa lompakkoa</string>
     <string name="not_verified">Vahvistamaton</string>
-    <string name="verify">Vahvista tai ilmoita</string>
     <string name="directions">Reittiohjeet</string>
     <string name="share">Jaa</string>
     <string name="companion_warning">Tarvitset maksuun kumppanisovelluksen (%1$s). Tämä sovellus ei vaadi henkilötietojen täyttämistä parhaan tietomme mukaan. Ilmoita meille, jos näin ei ole, niin poistamme tämän paikan.</string>

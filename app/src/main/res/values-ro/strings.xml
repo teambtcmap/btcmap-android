@@ -6,13 +6,11 @@
     <string name="icon">Pictogramă</string>
     <string name="qr_code">Cod QR</string>
     <string name="copied_to_clipboard">Copiat în clipboard</string>
-    <string name="show_my_location">Arată locația mea</string>
     <string name="search_here">Caută aici</string>
     <string name="settings">Setări</string>
     <string name="pay">Plătește</string>
     <string name="you_dont_have_a_compatible_wallet">Nu ai un portofel compatibil</string>
     <string name="not_verified">Neverificat</string>
-    <string name="verify">Verifică sau Raportează</string>
     <string name="directions">Direcții</string>
     <string name="share">Distribuie</string>
     <string name="companion_warning">Vei avea nevoie de o aplicație companion (%1$s) pentru a face o plată. Această aplicație nu necesită să completezi date personale, conform cunoștințelor noastre. Te rugăm să ne anunți dacă nu este cazul și vom elimina acest loc.</string>

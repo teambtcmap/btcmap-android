@@ -6,13 +6,11 @@
     <string name="icon">Icoon</string>
     <string name="qr_code">QR-code</string>
     <string name="copied_to_clipboard">Gekopieerd naar klembord</string>
-    <string name="show_my_location">Toon mijn locatie</string>
     <string name="search_here">Hier zoeken</string>
     <string name="settings">Instellingen</string>
     <string name="pay">Betaling</string>
     <string name="you_dont_have_a_compatible_wallet">Je hebt geen compatibele wallet</string>
     <string name="not_verified">Niet geverifieerd</string>
-    <string name="verify">Verifieer of Rapporteer</string>
     <string name="directions">Routebeschrijving</string>
     <string name="share">Delen</string>
     <string name="companion_warning">Je hebt een companion app (%1$s) nodig om een betaling te doen. Deze app vereist geen persoonlijke gegevens van je, voor zover wij weten. Laat ons weten als dit niet het geval is en wij verwijderen deze locatie.</string>

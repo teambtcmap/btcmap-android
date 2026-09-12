@@ -6,13 +6,11 @@
     <string name="icon">Иконица</string>
     <string name="qr_code">QR код</string>
     <string name="copied_to_clipboard">Копирано у међумеморију</string>
-    <string name="show_my_location">Прикажи моју локацију</string>
     <string name="search_here">Претражи овде</string>
     <string name="settings">Подешавања</string>
     <string name="pay">Плати</string>
     <string name="you_dont_have_a_compatible_wallet">Немате компатибилан новчаник</string>
     <string name="not_verified">Није верификовано</string>
-    <string name="verify">Верификуј или Пријави</string>
     <string name="directions">Смернице</string>
     <string name="share">Дели</string>
     <string name="companion_warning">Требаће вам пратећа апликација (%1$s) да бисте извршили плаћање. Ова апликација не захтева да унесете личне податке, по нашем најбољем сазнању. Молимо вас да нас обавестите ако то није случај и уклонићемо ово место.</string>

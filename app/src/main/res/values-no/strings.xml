@@ -6,13 +6,11 @@
     <string name="icon">Ikon</string>
     <string name="qr_code">QR-kode</string>
     <string name="copied_to_clipboard">Kopiert til utklippstavlen</string>
-    <string name="show_my_location">Vis min plassering</string>
     <string name="search_here">Søk her</string>
     <string name="settings">Innstillinger</string>
     <string name="pay">Betal</string>
     <string name="you_dont_have_a_compatible_wallet">Du har ikke en kompatibel lommebok</string>
     <string name="not_verified">Ikke verifisert</string>
-    <string name="verify">Verifiser eller rapporter</string>
     <string name="directions">Veibeskrivelse</string>
     <string name="share">Del</string>
     <string name="companion_warning">Du trenger en følgeapp (%1$s) for å foreta en betaling. Denne appen krever ikke at du fyller ut personopplysninger, så langt vi vet. Vennligst gi beskjed hvis det ikke er tilfelle så fjerner vi dette stedet.</string>

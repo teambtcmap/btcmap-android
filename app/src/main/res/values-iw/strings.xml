@@ -6,13 +6,11 @@
     <string name="icon">אייקון</string>
     <string name="qr_code">קוד QR</string>
     <string name="copied_to_clipboard">הועתק ללוח</string>
-    <string name="show_my_location">הראה את המיקום שלי</string>
     <string name="search_here">חפש כאן</string>
     <string name="settings">הגדרות</string>
     <string name="pay">שלם</string>
     <string name="you_dont_have_a_compatible_wallet">אין לך ארנק מתאים</string>
     <string name="not_verified">לא מאומת</string>
-    <string name="verify">אמת או דווח</string>
     <string name="directions">הוראות</string>
     <string name="share">שתף</string>
     <string name="companion_warning">תזדקק לאפליקציית לווי (%1$s) כדי לבצע תשלום. אפליקציה זו אינה דורשת ממך למלא נתונים אישיים, על פי הידע הטוב ביותר שלנו. אנא הודע לנו אם זה לא המקרה ואנחנו נסיר את המקום הזה.</string>

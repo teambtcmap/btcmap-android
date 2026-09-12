@@ -6,13 +6,11 @@
     <string name="icon">Icono</string>
     <string name="qr_code">Código QR</string>
     <string name="copied_to_clipboard">Copiado al portapapeles</string>
-    <string name="show_my_location">Mostrar mi ubicación</string>
     <string name="search_here">Buscar aquí</string>
     <string name="settings">Ajustes</string>
     <string name="pay">Pagar</string>
     <string name="you_dont_have_a_compatible_wallet">No tienes una cartera compatible</string>
     <string name="not_verified">Sin verificar</string>
-    <string name="verify">Verificar o informar</string>
     <string name="directions">Direcciones</string>
     <string name="share">Compartir</string>
     <string name="companion_warning">Necesitarás una aplicación complementaria (%1$s) para realizar un pago. Esta aplicación no requiere que proporciones datos personales, según nuestro conocimiento. Por favor, avísanos si no es así y eliminaremos este lugar.</string>

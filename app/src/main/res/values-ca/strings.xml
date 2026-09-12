@@ -6,13 +6,11 @@
     <string name="icon">Icona</string>
     <string name="qr_code">Codi QR</string>
     <string name="copied_to_clipboard">Copiat al porta-retalls</string>
-    <string name="show_my_location">Mostra la meva ubicació</string>
     <string name="search_here">Cerca aquí</string>
     <string name="settings">Configuració</string>
     <string name="pay">Paga</string>
     <string name="you_dont_have_a_compatible_wallet">No tens un portafolis compatible</string>
     <string name="not_verified">No verificat</string>
-    <string name="verify">Verifica o Reporta</string>
     <string name="directions">Direccions</string>
     <string name="share">Comparteix</string>
     <string name="companion_warning">Necessitaràs una aplicació companyona (%1$s) per fer un pagament. Aquesta aplicació no requereix que omplis cap dada personal, segons el nostre coneixement. Si us plau, fes-nos saber si no és el cas i eliminarem aquest lloc.</string>

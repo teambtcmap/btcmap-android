@@ -6,13 +6,11 @@
     <string name="icon">Simge</string>
     <string name="qr_code">QR kod</string>
     <string name="copied_to_clipboard">Panoya kopyalandı</string>
-    <string name="show_my_location">Konumumu göster</string>
     <string name="search_here">Burada ara</string>
     <string name="settings">Ayarlar</string>
     <string name="pay">Öde</string>
     <string name="you_dont_have_a_compatible_wallet">Uyumlu bir cüzdanınız yok</string>
     <string name="not_verified">Doğrulanmadı</string>
-    <string name="verify">Doğrula veya Raporla</string>
     <string name="directions">Yol tarifi</string>
     <string name="share">Paylaş</string>
     <string name="companion_warning">Ödeme yapmak için bir eşlik uygulamasına (%1$s) ihtiyacınız olacak. Bu uygulama, bildiğimiz kadarıyla kişisel verilerinizi girmenizi gerektirmez. Durumun böyle olmadığını bize bildirin, bu yeri kaldıracağız.</string>

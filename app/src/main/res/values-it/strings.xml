@@ -6,13 +6,11 @@
     <string name="icon">Icona</string>
     <string name="qr_code">Codice QR</string>
     <string name="copied_to_clipboard">Copiato negli appunti</string>
-    <string name="show_my_location">Mostra la mia posizione</string>
     <string name="search_here">Cerca qui</string>
     <string name="settings">Impostazioni</string>
     <string name="pay">Paga</string>
     <string name="you_dont_have_a_compatible_wallet">Non hai un portafoglio compatibile</string>
     <string name="not_verified">Non verificato</string>
-    <string name="verify">Verifica o Segnala</string>
     <string name="directions">Indicazioni</string>
     <string name="share">Condividi</string>
     <string name="companion_warning">Avrai bisogno di un\'app companion (%1$s) per effettuare un pagamento. Questa app non richiede di inserire dati personali, per quanto ne sappiamo. Per favore, faccelo sapere se non è il caso e rimuoveremo questo luogo.</string>

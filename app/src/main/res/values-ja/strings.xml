@@ -6,13 +6,11 @@
     <string name="icon">アイコン</string>
     <string name="qr_code">QRコード</string>
     <string name="copied_to_clipboard">クリップボードにコピーしました</string>
-    <string name="show_my_location">現在地を表示</string>
     <string name="search_here">ここで検索</string>
     <string name="settings">設定</string>
     <string name="pay">支払い</string>
     <string name="you_dont_have_a_compatible_wallet">互換性のあるウォレットがありません</string>
     <string name="not_verified">未検証</string>
-    <string name="verify">検証または報告</string>
     <string name="directions">道案内</string>
     <string name="share">共有</string>
     <string name="companion_warning">支払いを行うには、仲間アプリ（%1$s）が必要です。このアプリが個人情報を入力させることは、私たちの知識に従ってありません。もしそうではない場合は、教えてください、私たちはこの場所を削除します。</string>

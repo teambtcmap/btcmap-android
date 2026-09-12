@@ -5,13 +5,11 @@
     <string name="icon">Ícone</string>
     <string name="qr_code">QR Code</string>
     <string name="copied_to_clipboard">Copiar</string>
-    <string name="show_my_location">Mostrar minha localização</string>
     <string name="search_here">Pesquise aqui</string>
     <string name="settings">Configurações</string>
     <string name="pay">Pagar</string>
     <string name="you_dont_have_a_compatible_wallet">Você não possui uma carteira compatível</string>
     <string name="not_verified">Não verificado</string>
-    <string name="verify">Verificar ou reportar</string>
     <string name="directions">Direções</string>
     <string name="share">Compartilhar</string>
     <string name="companion_warning">É necessário usar o app externo (%1$s) para fazer o pagamento. Este app não exige que você informe dados pessoais, até onde sabemos. Se não for o caso, por favor informe-nos para removermos este local.</string>

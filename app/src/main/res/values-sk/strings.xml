@@ -6,13 +6,11 @@
     <string name="icon">Ikona</string>
     <string name="qr_code">QR kód</string>
     <string name="copied_to_clipboard">Skopírované</string>
-    <string name="show_my_location">Ukáž moju polohu</string>
     <string name="search_here">Hľadať tu</string>
     <string name="settings">Nastavenia</string>
     <string name="pay">Zaplatiť</string>
     <string name="you_dont_have_a_compatible_wallet">Nemáš kompatibilnú peňaženku</string>
     <string name="not_verified">Neoverené</string>
-    <string name="verify">Over alebo Nahlás</string>
     <string name="directions">Smery</string>
     <string name="share">Zdieľať</string>
     <string name="companion_warning">Na uskutočnenie platby budeš potrebovať doplnkovú aplikáciu (%1$s). Táto aplikácia nevyžaduje, aby si vyplnil osobné údaje (podľa našich najlepších vedomostí). Ak to tak nie je, daj nám vedieť a my toto miesto odstránime.</string>

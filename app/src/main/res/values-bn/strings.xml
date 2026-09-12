@@ -6,13 +6,11 @@
     <string name="icon">আইকন</string>
     <string name="qr_code">QR কোড</string>
     <string name="copied_to_clipboard">ক্লিপবোর্ডে কপি হয়েছে</string>
-    <string name="show_my_location">আমার অবস্থান দেখান</string>
     <string name="search_here">এখানে খুঁজুন</string>
     <string name="settings">সেটিংস</string>
     <string name="pay">পেমেন্ট</string>
     <string name="you_dont_have_a_compatible_wallet">আপনার কাছে সামঞ্জস্যপূর্ণ ওয়ালেট নেই</string>
     <string name="not_verified">যাচাই করা হয়নি</string>
-    <string name="verify">যাচাই/রিপোর্ট</string>
     <string name="directions">দিকনির্দেশনা</string>
     <string name="share">শেয়ার করুন</string>
     <string name="companion_warning">আপনাকে পেমেন্ট করতে একটি সহচর অ্যাপ (%1$s) প্রয়োজন হবে। এই অ্যাপটি আমাদের জ্ঞানের সর্বোত্তম পরিসরে আপনার কোনো ব্যক্তিগত তথ্য পূরণ করতে বাধ্য করে না। অনুগ্রহ করে আমাদের জানান যদি এটি না হয় এবং আমরা এই স্থানটি সরিয়ে দেব।</string>

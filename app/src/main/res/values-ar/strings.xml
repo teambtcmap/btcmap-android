@@ -6,13 +6,11 @@
     <string name="icon">أيقونة</string>
     <string name="qr_code">رمز QR</string>
     <string name="copied_to_clipboard">تم النسخ إلى الحافظة</string>
-    <string name="show_my_location">إظهار موقعي</string>
     <string name="search_here">ابحث هنا</string>
     <string name="settings">الإعدادات</string>
     <string name="pay">ادفع</string>
     <string name="you_dont_have_a_compatible_wallet">ليس لديك محفظة متوافقة</string>
     <string name="not_verified">غير موثق</string>
-    <string name="verify">وثّق/أبلغ</string>
     <string name="directions">الاتجاهات</string>
     <string name="share">مشاركة</string>
     <string name="companion_warning">ستحتاج إلى تطبيق مرافق (%1$s) لإجراء الدفعة. لا يتطلب هذا التطبيق منك ملء أي بيانات شخصية، وفقاً لمعرفتنا. يرجى إخبارنا إذا لم يكن الأمر كذلك وسنقوم بإزالة هذا الموقع.</string>

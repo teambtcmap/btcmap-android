@@ -6,13 +6,11 @@
     <string name="icon">Ikoon</string>
     <string name="qr_code">QR-kode</string>
     <string name="copied_to_clipboard">Gekopieer na knipbord</string>
-    <string name="show_my_location">Wys my ligging</string>
     <string name="search_here">Soek hier</string>
     <string name="settings">Instellings</string>
     <string name="pay">Betaal</string>
     <string name="you_dont_have_a_compatible_wallet">U het nie \'n verenigbare beursie nie</string>
     <string name="not_verified">Nie geverifieer nie</string>
-    <string name="verify">Verifieer/Rapporteer</string>
     <string name="directions">Rigte</string>
     <string name="share">Deel</string>
     <string name="companion_warning">U benodig \'n metgesel-toepassing (%1$s) om \'n betaling te maak. Hierdie toepassing vereis nie dat u enige persoonlike data invul nie, na die beste van ons kennis. Laat ons asseblief weet as dit nie die geval nie is nie en ons sal hierdie plek verwyder.</string>

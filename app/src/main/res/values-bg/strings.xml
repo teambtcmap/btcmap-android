@@ -6,13 +6,11 @@
     <string name="icon">Икона</string>
     <string name="qr_code">QR код</string>
     <string name="copied_to_clipboard">Копирано</string>
-    <string name="show_my_location">Покажи локацията ми</string>
     <string name="search_here">Потърсете тук</string>
     <string name="settings">Настройки</string>
     <string name="pay">Плати</string>
     <string name="you_dont_have_a_compatible_wallet">Нямате съвместим портфейл</string>
     <string name="not_verified">Неудостоверен</string>
-    <string name="verify">Удостоверете или Докладвайте</string>
     <string name="directions">Посоки</string>
     <string name="share">Споделете</string>
     <string name="companion_warning">Ще ви трябва придружаващо приложение (%1$s), за да извършите плащане. Това приложение не изисква от вас да попълвате лични данни, според най-доброто ни знание. Моля, уведомете ни, ако това не е така и ние ще премахнем това място.</string>

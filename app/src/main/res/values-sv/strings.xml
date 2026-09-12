@@ -6,13 +6,11 @@
     <string name="icon">Ikon</string>
     <string name="qr_code">QR-kod</string>
     <string name="copied_to_clipboard">Kopierat till urklipp</string>
-    <string name="show_my_location">Visa min plats</string>
     <string name="search_here">Sök här</string>
     <string name="settings">Inställningar</string>
     <string name="pay">Betala</string>
     <string name="you_dont_have_a_compatible_wallet">Du har ingen kompatibel plånbok</string>
     <string name="not_verified">Inte verifierad</string>
-    <string name="verify">Verifiera eller Rapportera</string>
     <string name="directions">Vägbeskrivning</string>
     <string name="share">Dela</string>
     <string name="companion_warning">Du behöver en följeslagarapp (%1$s) för att göra en betalning. Denna app kräver inte att du fyller i personuppgifter, såvitt vi vet. Vänligen meddela oss om så inte är fallet så tar vi bort denna plats.</string>

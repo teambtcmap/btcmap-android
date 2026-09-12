@@ -6,13 +6,11 @@
     <string name="icon">Biểu tượng</string>
     <string name="qr_code">Mã QR</string>
     <string name="copied_to_clipboard">Đã sao chép vào bảng nhớ tạm</string>
-    <string name="show_my_location">Hiển thị vị trí của tôi</string>
     <string name="search_here">Tìm kiếm ở đây</string>
     <string name="settings">Cài đặt</string>
     <string name="pay">Thanh toán</string>
     <string name="you_dont_have_a_compatible_wallet">Bạn không có ví tương thích</string>
     <string name="not_verified">Chưa được xác minh</string>
-    <string name="verify">Xác minh/Báo cáo</string>
     <string name="directions">Chỉ đường</string>
     <string name="share">Chia sẻ</string>
     <string name="companion_warning">Bạn sẽ cần một ứng dụng đồng hành (%1$s) để thực hiện thanh toán. Ứng dụng này không yêu cầu bạn cung cấp bất kỳ dữ liệu cá nhân nào, theo hiểu biết của chúng tôi. Vui lòng cho chúng tôi biết nếu điều đó không đúng và chúng tôi sẽ xóa địa điểm này.</string>

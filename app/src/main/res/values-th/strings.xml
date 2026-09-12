@@ -6,13 +6,11 @@
     <string name="icon">ไอคอน</string>
     <string name="qr_code">คิวอาร์โค้ด</string>
     <string name="copied_to_clipboard">คัดลอกไปที่คลิปบอร์ดแล้ว</string>
-    <string name="show_my_location">แสดงตำแหน่งของฉัน</string>
     <string name="search_here">ค้นหาที่นี่</string>
     <string name="settings">การตั้งค่า</string>
     <string name="pay">จ่าย</string>
     <string name="you_dont_have_a_compatible_wallet">คุณไม่มีกระเป๋าเงินที่เข้ากันได้</string>
     <string name="not_verified">ไม่ได้รับการยืนยัน</string>
-    <string name="verify">ตรวจสอบหรือรายงาน</string>
     <string name="directions">ทิศทาง</string>
     <string name="share">แบ่งปัน</string>
     <string name="companion_warning">คุณจำเป็นต้องมีแอปเสริม (%1$s) เพื่อทำการชำระเงิน แอปนี้ไม่ต้องการข้อมูลส่วนบุคคลจากคุณ ตามความรู้ของเรา โปรดแจ้งให้เราทราบหากไม่ใช่กรณีนี้และเราจะลบสถานที่นี้</string>

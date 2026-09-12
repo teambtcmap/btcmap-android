@@ -6,13 +6,11 @@
     <string name="icon">Иконка</string>
     <string name="qr_code">QR код</string>
     <string name="copied_to_clipboard">Адрес скопирован в буфер обмена</string>
-    <string name="show_my_location">Показать мое месторасположение</string>
     <string name="search_here">Поиск мест</string>
     <string name="settings">Настройки</string>
     <string name="pay">Оплатить</string>
     <string name="you_dont_have_a_compatible_wallet">У вас не установленно совместимых кошельков</string>
     <string name="not_verified">Не проверено</string>
-    <string name="verify">Редактировать</string>
     <string name="directions">Построить маршрут</string>
     <string name="share">Поделиться</string>
     <string name="companion_warning">Вам понадобится приложение-компаньон (%1$s) для осуществления платежа. Это приложение, насколько нам известно, не требует ввода личных данных. Пожалуйста, сообщите нам, если это не так, и мы удалим это место.</string>

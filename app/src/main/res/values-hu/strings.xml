@@ -6,13 +6,11 @@
     <string name="icon">Ikon</string>
     <string name="qr_code">QR kód</string>
     <string name="copied_to_clipboard">Másolva a vágólapra</string>
-    <string name="show_my_location">Mutasd a helyemet</string>
     <string name="search_here">Keresés itt</string>
     <string name="settings">Beállítások</string>
     <string name="pay">Fizetés</string>
     <string name="you_dont_have_a_compatible_wallet">Nincs kompatibilis tárcád</string>
     <string name="not_verified">Nem ellenőrzött</string>
-    <string name="verify">Ellenőrzés vagy jelentés</string>
     <string name="directions">Útvonalak</string>
     <string name="share">Megosztás</string>
     <string name="companion_warning">Fizetéshez kísérő alkalmazásra (%1$s) lesz szükséged. Ez az alkalmazás a tudomásunk szerint nem igényel személyes adatok megadását. Kérlek, jelezd nekünk, ha ez nem igaz, és eltávolítjuk ezt a helyet.</string>
