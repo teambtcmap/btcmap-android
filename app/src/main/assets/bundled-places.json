@@ -18512,13 +18512,6 @@
     "name": "Mr. Štefánik BARBIER"
   },
   {
-    "id": 5090,
-    "lat": 41.6390017,
-    "lon": 41.6118214,
-    "icon": "currency_exchange",
-    "name": "BitSwap"
-  },
-  {
     "id": 5091,
     "lat": 56.9583466,
     "lon": 24.1216032,
@@ -87743,7 +87736,7 @@
     "lat": 10.242787,
     "lon": -67.5839734,
     "icon": "computer",
-    "name": "Insotel Computacion"
+    "name": "Insotel Computación"
   },
   {
     "id": 24181,
@@ -202096,7 +202089,7 @@
     "lat": -21.5316154,
     "lon": -64.7331583,
     "icon": "wine_bar",
-    "name": "David Seleccion de Vinos"
+    "name": "David Selección de Vinos"
   },
   {
     "id": 41833,
@@ -208711,5 +208704,12 @@
     "lon": -118.12595915,
     "icon": "local_cafe",
     "name": "eco coffee"
+  },
+  {
+    "id": 42787,
+    "lat": 32.7259074,
+    "lon": -86.7745266,
+    "icon": "car_repair",
+    "name": "Ken's Diesel Repair"
   }
 ]
