@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Tighten place details bottom sheet header and action button spacing
 - Show server-provided error messages and avoid retrying paid actions on rate limits
 - Localize the activity feed into all supported languages
 - Translate the account, add-place and verify/report screens into all supported languages

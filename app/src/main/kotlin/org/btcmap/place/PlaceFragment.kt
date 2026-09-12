@@ -10,7 +10,6 @@ import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateInterpolator
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -450,12 +449,11 @@ class PlaceFragment : Fragment() {
         }
     }
 
-    fun onSlide(slideOffset: Float) {
+    fun onSlide(bottomSheetTop: Int) {
         ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { appBar, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val interpolator = AccelerateInterpolator()
             appBar.updateLayoutParams<LinearLayout.LayoutParams> {
-                topMargin = (insets.top * interpolator.getInterpolation(slideOffset)).toInt()
+                topMargin = (insets.top - bottomSheetTop).coerceIn(0, insets.top)
             }
             WindowInsetsCompat.CONSUMED
         }

@@ -51,7 +51,7 @@ class BottomSheetController(
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                placeFragment.onSlide(slideOffset)
+                placeFragment.onSlide(bottomSheet.top)
             }
         })
         placeFragment.requireActivity().onBackPressedDispatcher.addCallback(

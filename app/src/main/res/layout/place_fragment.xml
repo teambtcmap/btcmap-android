@@ -52,12 +52,11 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp">
+                android:layout_height="wrap_content">
 
                 <Button
                     android:id="@+id/btnVerify"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    style="@style/Button.Outlined.NoTopInset"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -71,7 +70,7 @@
 
                 <Button
                     android:id="@+id/btnReport"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    style="@style/Button.Outlined.NoTopInset"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -91,9 +90,11 @@
 
                 <Button
                     android:id="@+id/boost"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    style="@style/Button.Outlined.NoTopInset"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:insetBottom="0dp"
+                    android:minHeight="36dp"
                     android:layout_gravity="center"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="8dp"
@@ -104,9 +105,11 @@
 
                 <Button
                     android:id="@+id/comments"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    style="@style/Button.Outlined.NoTopInset"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:insetBottom="0dp"
+                    android:minHeight="36dp"
                     android:layout_gravity="center"
                     android:layout_marginStart="8dp"
                     android:layout_marginEnd="16dp"
@@ -305,7 +308,7 @@
 
             <Button
                 android:id="@+id/add_comment"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Button.Outlined.NoTopInset"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
