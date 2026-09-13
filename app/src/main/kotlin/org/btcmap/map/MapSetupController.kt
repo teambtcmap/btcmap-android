@@ -73,7 +73,7 @@ class MapSetupController(
                     style.addImage("btcmap-marker-boosted", drawable)
                 }
 
-                init(mapView.context, style)
+                ensureEventMarkerImage(mapView.context, style)
 
                 style.addSource(merchants.first)
                 merchants.second.forEach { style.addLayer(it) }
@@ -95,6 +95,15 @@ class MapSetupController(
             boostedMarkerBackgroundColor = boostedMarkerBackgroundColor,
             markerBadgeBackgroundColor = markerBadgeBackgroundColor,
             markerBadgeTextColor = markerBadgeTextColor,
+        )
+    }
+
+    fun ensureExchangeMarkers(markers: Set<Marker>) {
+        val style = style ?: return
+        ensureExchangeMarkerImages(
+            context = mapView.context,
+            style = style,
+            markers = markers,
         )
     }
 

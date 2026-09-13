@@ -1,8 +1,8 @@
 package org.btcmap.map.layer
 
 import android.graphics.Color
+import org.btcmap.map.EXCHANGE_MARKER_ICON_PREFIX
 import org.btcmap.map.ICON_OFFSET_Y
-import org.btcmap.map.matcher
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.Layer
@@ -70,9 +70,9 @@ fun createExchangeLayers(
         SymbolLayer("exchange_marker_icon", source.id).apply {
             setProperties(
                 PropertyFactory.iconImage(
-                    Expression.match(
+                    Expression.concat(
+                        Expression.literal(EXCHANGE_MARKER_ICON_PREFIX),
                         Expression.get("iconId"),
-                        *matcher().toTypedArray()
                     )
                 ),
                 PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),

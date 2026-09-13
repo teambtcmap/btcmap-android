@@ -1,6 +1,7 @@
 package org.btcmap.map.layer
 
 import android.graphics.Color
+import org.btcmap.map.EVENT_MARKER_ICON_NAME
 import org.btcmap.map.ICON_OFFSET_Y
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
@@ -70,7 +71,7 @@ fun createEventLayers(
     val eventIcon =
         SymbolLayer("event_icon", source.id).apply {
             setProperties(
-                PropertyFactory.iconImage("marker-icon-event"),
+                PropertyFactory.iconImage(EVENT_MARKER_ICON_NAME),
                 PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
                 PropertyFactory.iconOffset(
                     arrayOf(

@@ -14,187 +14,30 @@ import androidx.core.graphics.drawable.DrawableCompat
 import org.btcmap.R
 import org.btcmap.db.table.place.Marker
 import org.maplibre.android.maps.Style
-import org.maplibre.android.style.expressions.Expression
 import org.btcmap.util.iconTypeface
 
 private val OUTDATED_ICON_COLOR = 0xFFBDBDBD.toInt()
 
-private val KNOWN_ICONS = """
-        18_up_rating         
-        account_balance
-        agriculture          
-        airport_shuttle      
-        architecture         
-        attach_money         
-        attractions          
-        bakery_dining        
-        balance              
-        beach_access         
-        bedroom_baby         
-        build                
-        business             
-        cake                 
-        camping              
-        car_rental           
-        car_repair           
-        card_giftcard        
-        carpenter            
-        casino               
-        castle               
-        celebration          
-        cell_tower           
-        chair                
-        chalet               
-        checkroom            
-        child_care           
-        church               
-        cleaning_services    
-        coffee               
-        colorize             
-        commute              
-        computer             
-        construction         
-        content_cut          
-        cooking              
-        cottage              
-        cruelty_free         
-        currency_exchange    
-        delete               
-        dentistry            
-        destruction          
-        design_services      
-        diamond              
-        directions_boat      
-        directions_car       
-        directions_walk      
-        dns                  
-        dresser              
-        edit                 
-        electric_bolt        
-        electrical_services  
-        emoji_food_beverage  
-        engineering          
-        event                
-        factory              
-        favorite             
-        fitness_center       
-        flight_takeoff       
-        footprint            
-        games                
-        gate                 
-        golf_course          
-        grass                
-        grid_view            
-        group                
-        groups               
-        hardware             
-        hive                 
-        home                 
-        hotel                
-        hvac                 
-        icecream             
-        imagesearch_roller   
-        info                 
-        kayaking             
-        kitesurfing          
-        lan                  
-        liquor               
-        local_atm            
-        local_bar            
-        local_cafe           
-        local_car_wash       
-        local_florist        
-        local_gas_station    
-        local_grocery_store  
-        local_hospital       
-        local_laundry_service
-        local_mall           
-        local_movies         
-        local_parking        
-        local_pharmacy       
-        local_pizza          
-        local_police         
-        local_post_office    
-        local_printshop      
-        local_taxi           
-        lock                 
-        luggage              
-        lunch_dining         
-        mail                 
-        medical_services     
-        menu_book            
-        mic                  
-        minor_crash          
-        museum               
-        music_note           
-        nature_people        
-        newspaper            
-        nightlife            
-        outdoor_grill        
-        palette              
-        panorama             
-        paragliding          
-        park                 
-        pedal_bike           
-        pets                 
-        photo_camera         
-        piano                
-        plumbing             
-        pool                 
-        potted_plant         
-        public               
-        question_mark        
-        radar                
-        raven                
-        restaurant           
-        roofing              
-        sailing              
-        sauna                
-        school               
-        science              
-        scuba_diving         
-        shopping_cart        
-        smartphone           
-        smoking_rooms        
-        spa                  
-        sports               
-        sports_bar           
-        sports_handball      
-        sports_hockey        
-        sports_martial_arts  
-        sports_score         
-        sports_soccer        
-        stadium              
-        storefront           
-        surfing              
-        surgical             
-        tapas                
-        tour                 
-        toys                 
-        translate            
-        trip_origin          
-        two_wheeler          
-        vaping_rooms         
-        videocam             
-        videogame_asset      
-        visibility           
-        volunteer_activism   
-        warehouse            
-        watch                
-        water_drop           
-        water_pump           
-        wc                   
-        window               
-        wine_bar
-    """.trimIndent().lines().map { it.trim() }
+private const val FALLBACK_ICON = "storefront"
+private const val SINGLE_GLYPH_MAX_WIDTH_RATIO = 1.5f
+private const val GLYPH_MEASURE_TEXT_SIZE = 100f
 
-fun init(context: Context, style: Style) {
-    KNOWN_ICONS.forEach { icon ->
-        val white = generateIconBitmap(context, icon, textColor = Color.WHITE)
-        style.addImage("marker-icon-$icon", white)
-        val outdated = generateIconBitmap(context, icon, textColor = OUTDATED_ICON_COLOR)
-        style.addImage("marker-icon-$icon-outdated", outdated)
+private val resolvedGlyphs = mutableMapOf<String, String>()
+
+private fun resolveGlyph(character: String): String {
+    if (character.isEmpty()) return FALLBACK_ICON
+
+    return resolvedGlyphs.getOrPut(character) {
+        if (isRenderableIcon(character)) character else FALLBACK_ICON
     }
+}
+
+internal fun isRenderableIcon(character: String): Boolean {
+    val paint = Paint().apply {
+        textSize = GLYPH_MEASURE_TEXT_SIZE
+        typeface = iconTypeface
+    }
+    return paint.measureText(character) < GLYPH_MEASURE_TEXT_SIZE * SINGLE_GLYPH_MAX_WIDTH_RATIO
 }
 
 fun ensureMerchantMarkerImages(
@@ -216,7 +59,7 @@ fun ensureMerchantMarkerImages(
         val outdated = marker.isOutdated()
         val boosted = marker.isBoosted()
         val pin = if (boosted && !outdated) boostedPin else normalPin
-        val glyph = if (marker.icon in KNOWN_ICONS) marker.icon else "storefront"
+        val glyph = resolveGlyph(marker.icon)
         val textColor = if (outdated) OUTDATED_ICON_COLOR else Color.WHITE
         val comments = marker.comments.takeIf { it > 0 }
 
@@ -231,6 +74,28 @@ fun ensureMerchantMarkerImages(
         )
         style.addImage(name, bitmap)
         merchantMarkerMasks[name] = AlphaMask.from(bitmap)
+    }
+}
+
+fun ensureExchangeMarkerImages(
+    context: Context,
+    style: Style,
+    markers: Set<Marker>,
+) {
+    markers.forEach { marker ->
+        val name = exchangeMarkerIconImageName(marker.icon)
+        if (style.getImage(name) != null) return@forEach
+
+        style.addImage(name, generateIconBitmap(context, resolveGlyph(marker.icon)))
+    }
+}
+
+fun ensureEventMarkerImage(context: Context, style: Style) {
+    if (style.getImage(EVENT_MARKER_ICON_NAME) == null) {
+        style.addImage(
+            EVENT_MARKER_ICON_NAME,
+            generateIconBitmap(context, resolveGlyph(EVENT_ICON)),
+        )
     }
 }
 
@@ -272,16 +137,6 @@ class AlphaMask(
 }
 
 private const val ALPHA_THRESHOLD = 40
-
-fun matcher(suffix: String = ""): List<Expression> {
-    return buildList {
-        KNOWN_ICONS.forEach { icon ->
-            add(Expression.literal(icon))
-            add(Expression.literal("marker-icon-$icon$suffix"))
-        }
-        add(Expression.literal("marker-icon-storefront$suffix"))
-    }
-}
 
 private fun tintedPin(context: Context, color: Int): Drawable {
     return AppCompatResources.getDrawable(context, R.drawable.map_marker)!!.mutate().apply {

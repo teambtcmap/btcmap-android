@@ -517,6 +517,9 @@ class MapFragment : Fragment() {
                 if (cache is MerchantsCache) {
                     mapSetupController?.ensureMerchantMarkers(cache.lastMarkers)
                 }
+                if (cache is ExchangesCache) {
+                    mapSetupController?.ensureExchangeMarkers(cache.lastMarkers)
+                }
                 source.setGeoJson(geoJson)
             }
             }

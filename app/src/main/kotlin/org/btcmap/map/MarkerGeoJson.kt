@@ -5,6 +5,9 @@ import java.time.ZonedDateTime
 
 private const val OUTDATED_AFTER_YEARS = 1L
 const val MAX_COMMENT_BADGE = 9L
+const val EXCHANGE_MARKER_ICON_PREFIX = "marker-icon-"
+const val EVENT_MARKER_ICON_NAME = "marker-icon-event"
+const val EVENT_ICON = "event"
 
 fun Marker.isOutdated(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
     return !bundled && (verifiedAt == null || verifiedAt.isBefore(now.minusYears(OUTDATED_AFTER_YEARS)))
@@ -40,6 +43,10 @@ fun merchantMarkerImageName(
         else -> "-b$comments"
     }
     return "merchant-marker-$iconId$variant$badge"
+}
+
+fun exchangeMarkerIconImageName(iconId: String): String {
+    return "$EXCHANGE_MARKER_ICON_PREFIX$iconId"
 }
 
 fun Iterable<Marker>.toMarkerGeoJson(now: ZonedDateTime = ZonedDateTime.now()): String {
