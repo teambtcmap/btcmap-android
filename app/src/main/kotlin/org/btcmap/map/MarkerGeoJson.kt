@@ -10,11 +10,15 @@ fun Marker.isOutdated(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
     return !bundled && (verifiedAt == null || verifiedAt.isBefore(now.minusYears(OUTDATED_AFTER_YEARS)))
 }
 
-fun Marker.markerImageName(): String {
+fun Marker.isBoosted(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
+    return boostedUntil?.isAfter(now) == true
+}
+
+fun Marker.markerImageName(now: ZonedDateTime = ZonedDateTime.now()): String {
     return merchantMarkerImageName(
         iconId = icon,
-        boosted = boostedUntil != null,
-        outdated = isOutdated(),
+        boosted = isBoosted(now),
+        outdated = isOutdated(now),
         comments = comments,
     )
 }
@@ -38,8 +42,7 @@ fun merchantMarkerImageName(
     return "merchant-marker-$iconId$variant$badge"
 }
 
-fun Iterable<Marker>.toMarkerGeoJson(): String {
-    val now = ZonedDateTime.now()
+fun Iterable<Marker>.toMarkerGeoJson(now: ZonedDateTime = ZonedDateTime.now()): String {
     val sb = StringBuilder()
     sb.append(
         """
@@ -67,7 +70,7 @@ fun Iterable<Marker>.toMarkerGeoJson(): String {
                     "iconId": "${place.icon}",
                     "requiresCompanionApp": ${place.requiredAppUrl != null},
                     "comments": ${place.comments},
-                    "boosted": ${place.boostedUntil != null},
+                    "boosted": ${place.isBoosted(now)},
                     "outdated": ${place.isOutdated(now)},
                     "sortKey": ${-place.lat}
                 }

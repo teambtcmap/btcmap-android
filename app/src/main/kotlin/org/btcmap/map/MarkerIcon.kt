@@ -214,7 +214,7 @@ fun ensureMerchantMarkerImages(
         if (style.getImage(name) != null) return@forEach
 
         val outdated = marker.isOutdated()
-        val boosted = marker.boostedUntil != null
+        val boosted = marker.isBoosted()
         val pin = if (boosted && !outdated) boostedPin else normalPin
         val glyph = if (marker.icon in KNOWN_ICONS) marker.icon else "storefront"
         val textColor = if (outdated) OUTDATED_ICON_COLOR else Color.WHITE
