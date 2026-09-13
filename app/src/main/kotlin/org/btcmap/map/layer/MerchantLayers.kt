@@ -1,25 +1,19 @@
 package org.btcmap.map.layer
 
 import android.graphics.Color
-import org.btcmap.map.ICON_OFFSET_Y
-import org.btcmap.map.matcher
+import org.btcmap.map.MAX_COMMENT_BADGE
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.Layer
-import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 
 const val MERCHANT_MARKER_LAYER_ID = "merchant_marker"
-const val MERCHANT_MARKER_OUTDATED_LAYER_ID = "merchant_marker_outdated"
-const val MERCHANT_MARKER_ICON_LAYER_ID = "merchant_marker_icon"
 
 fun createMerchantLayers(
     markerBackgroundColor: Int,
-    markerBadgeBackgroundColor: Int,
-    markerBadgeTextColor: Int,
     usingOpenFreeMap: Boolean,
 ): Pair<GeoJsonSource, List<Layer>> {
     val merchantsSource = GeoJsonSource(
@@ -62,116 +56,50 @@ fun createMerchantLayers(
             )
         }
 
-    val pinImageExpression = Expression.switchCase(
-        Expression.get("boosted"),
-        Expression.literal("btcmap-marker-boosted"),
-        Expression.literal("btcmap-marker")
+    val markerImageExpression = Expression.concat(
+        Expression.literal("merchant-marker-"),
+        Expression.get("iconId"),
+        Expression.switchCase(
+            Expression.get("outdated"),
+            Expression.literal("-outdated"),
+            Expression.get("boosted"),
+            Expression.literal("-boosted"),
+            Expression.literal("")
+        ),
+        Expression.switchCase(
+            Expression.gt(Expression.get("comments"), Expression.literal(0)),
+            Expression.concat(
+                Expression.literal("-b"),
+                Expression.switchCase(
+                    Expression.gt(
+                        Expression.get("comments"),
+                        Expression.literal(MAX_COMMENT_BADGE)
+                    ),
+                    Expression.literal("9p"),
+                    Expression.toString(Expression.get("comments"))
+                )
+            ),
+            Expression.literal("")
+        )
     )
 
     val markerLayer =
         SymbolLayer(MERCHANT_MARKER_LAYER_ID, merchantsSource.id).apply {
             setProperties(
-                PropertyFactory.iconImage(pinImageExpression),
-                PropertyFactory.iconAnchor(Expression.literal("bottom")),
-                PropertyFactory.iconAllowOverlap(true),
-                PropertyFactory.iconIgnorePlacement(true)
-            )
-            setFilter(
-                Expression.all(
-                    Expression.neq(Expression.get("cluster"), true),
-                    Expression.neq(Expression.get("outdated"), true)
-                )
-            )
-        }
-
-    val markerLayerOutdated =
-        SymbolLayer(MERCHANT_MARKER_OUTDATED_LAYER_ID, merchantsSource.id).apply {
-            setProperties(
-                PropertyFactory.iconImage(pinImageExpression),
+                PropertyFactory.iconImage(markerImageExpression),
                 PropertyFactory.iconAnchor(Expression.literal("bottom")),
                 PropertyFactory.iconAllowOverlap(true),
                 PropertyFactory.iconIgnorePlacement(true),
-                PropertyFactory.iconOpacity(0.85f)
-            )
-            setFilter(
-                Expression.all(
-                    Expression.neq(Expression.get("cluster"), true),
-                    Expression.eq(Expression.get("outdated"), true)
-                )
-            )
-        }
-
-    val markerIconsLayer =
-        SymbolLayer(MERCHANT_MARKER_ICON_LAYER_ID, merchantsSource.id).apply {
-            setProperties(
-                PropertyFactory.iconImage(
+                PropertyFactory.symbolSortKey(Expression.get("sortKey")),
+                PropertyFactory.iconOpacity(
                     Expression.switchCase(
                         Expression.get("outdated"),
-                        Expression.match(
-                            Expression.get("iconId"),
-                            *matcher(suffix = "-outdated").toTypedArray()
-                        ),
-                        Expression.match(
-                            Expression.get("iconId"),
-                            *matcher().toTypedArray()
-                        )
+                        Expression.literal(0.85f),
+                        Expression.literal(1f)
                     )
-                ),
-                PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
-                PropertyFactory.iconOffset(
-                    arrayOf(
-                        0f,
-                        ICON_OFFSET_Y
-                    )
-                ),
-                PropertyFactory.iconAllowOverlap(true),
-                PropertyFactory.iconIgnorePlacement(true)
+                )
             )
             setFilter(Expression.neq(Expression.get("cluster"), true))
-        }
-
-    val markerCommentCountBackground =
-        CircleLayer("merchant_marker_comment_count_background", merchantsSource.id).apply {
-            setProperties(
-                PropertyFactory.circleColor(markerBadgeBackgroundColor),
-                PropertyFactory.circleRadius(9f),
-                PropertyFactory.circleOpacity(1f),
-                PropertyFactory.circleTranslate(arrayOf(13f, -43f)),
-                PropertyFactory.circleTranslateAnchor("viewport")
-            )
-            setFilter(
-                Expression.all(
-                    Expression.neq(Expression.get("cluster"), true),
-                    Expression.gt(Expression.get("comments"), 0)
-                )
-            )
-        }
-
-    val markerCommentsCount =
-        SymbolLayer("merchant_marker_comment_count", merchantsSource.id).apply {
-            if (usingOpenFreeMap) {
-                setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Bold")))
-            }
-            setProperties(
-                PropertyFactory.textField(
-                    Expression.switchCase(
-                        Expression.gte(Expression.get("comments"), Expression.literal(10)),
-                        Expression.literal("9+"),
-                        Expression.toString(Expression.get("comments"))
-                    )
-                ),
-                PropertyFactory.textSize(11f),
-                PropertyFactory.textColor(markerBadgeTextColor),
-                PropertyFactory.textTranslate(arrayOf(13f, -43f)),
-                PropertyFactory.textTranslateAnchor("viewport"),
-                PropertyFactory.textAllowOverlap(true)
-            )
-            setFilter(
-                Expression.all(
-                    Expression.neq(Expression.get("cluster"), true),
-                    Expression.gt(Expression.get("comments"), 0)
-                )
-            )
         }
 
     return Pair(
@@ -179,10 +107,6 @@ fun createMerchantLayers(
             clusterBackgroundLayer,
             clusterCountLayer,
             markerLayer,
-            markerLayerOutdated,
-            markerIconsLayer,
-            markerCommentCountBackground,
-            markerCommentsCount,
         )
     )
 }

@@ -513,9 +513,12 @@ class MapFragment : Fragment() {
         currentCache = cache
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                cache.geoJson.collectLatest { geoJson ->
-                    source.setGeoJson(geoJson)
+            cache.geoJson.collectLatest { geoJson ->
+                if (cache is MerchantsCache) {
+                    mapSetupController?.ensureMerchantMarkers(cache.lastMarkers)
                 }
+                source.setGeoJson(geoJson)
+            }
             }
         }
     }

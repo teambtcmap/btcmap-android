@@ -19,9 +19,7 @@ import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.place.Place
-import org.btcmap.map.layer.MERCHANT_MARKER_ICON_LAYER_ID
 import org.btcmap.map.layer.MERCHANT_MARKER_LAYER_ID
-import org.btcmap.map.layer.MERCHANT_MARKER_OUTDATED_LAYER_ID
 import org.btcmap.place.PlaceFragment
 import org.btcmap.settings.mapViewport
 import org.btcmap.util.ApiRule
@@ -121,8 +119,6 @@ class MapPlaceSelectionTest {
         return map.queryRenderedFeatures(
             rect,
             MERCHANT_MARKER_LAYER_ID,
-            MERCHANT_MARKER_OUTDATED_LAYER_ID,
-            MERCHANT_MARKER_ICON_LAYER_ID,
         ).mapNotNull { it.getProperty("id")?.asLong }.toSet()
     }
 

@@ -1,5 +1,6 @@
 package org.btcmap.map
 
+import android.graphics.PointF
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -12,9 +13,10 @@ import org.btcmap.db.table.place.Place
 import org.btcmap.map.layer.EVENT_MARKER_LAYER_ID
 import org.btcmap.map.layer.EXCHANGE_MARKER_LAYER_ID
 import org.btcmap.map.layer.MERCHANT_MARKER_LAYER_ID
+import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
-import org.btcmap.map.layer.MERCHANT_MARKER_ICON_LAYER_ID
-import org.btcmap.map.layer.MERCHANT_MARKER_OUTDATED_LAYER_ID
+import org.maplibre.geojson.Feature
+import org.maplibre.geojson.Point
 
 class MapSelectionController(
     private val map: MapLibreMap,
@@ -36,23 +38,21 @@ class MapSelectionController(
         scope.cancel()
     }
 
-    private fun handleClick(point: org.maplibre.android.geometry.LatLng): Boolean {
+    private fun handleClick(point: LatLng): Boolean {
         val screenLocation = map.projection.toScreenLocation(point)
         val features = map.queryRenderedFeatures(
             screenLocation,
             MERCHANT_MARKER_LAYER_ID,
-            MERCHANT_MARKER_OUTDATED_LAYER_ID,
-            MERCHANT_MARKER_ICON_LAYER_ID,
             EXCHANGE_MARKER_LAYER_ID,
             EVENT_MARKER_LAYER_ID,
         )
 
-        if (features.isEmpty()) {
+        val feature = features.firstOrNull { isOpaqueHit(it, screenLocation) }
+
+        if (feature == null) {
             onNoHit()
             return false
         }
-
-        val feature = features[0]
 
         try {
             val isEvent =
@@ -83,5 +83,23 @@ class MapSelectionController(
             e.printStackTrace()
             return false
         }
+    }
+
+    private fun isOpaqueHit(feature: Feature, screenLocation: PointF): Boolean {
+        val iconId = feature.getStringProperty("iconId") ?: return true
+        val name = merchantMarkerImageName(
+            iconId = iconId,
+            boosted = feature.getBooleanProperty("boosted") == true,
+            outdated = feature.getBooleanProperty("outdated") == true,
+            comments = feature.getNumberProperty("comments")?.toLong() ?: 0,
+        )
+        val mask = merchantMarkerMask(name) ?: return true
+        val geometry = feature.geometry() as? Point ?: return true
+        val anchor = map.projection.toScreenLocation(
+            LatLng(geometry.latitude(), geometry.longitude())
+        )
+        val x = (screenLocation.x - (anchor.x - mask.width / 2f)).toInt()
+        val y = (screenLocation.y - (anchor.y - mask.height)).toInt()
+        return mask.isOpaque(x, y)
     }
 }

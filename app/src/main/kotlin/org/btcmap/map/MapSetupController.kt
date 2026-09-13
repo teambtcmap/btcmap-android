@@ -3,6 +3,7 @@ package org.btcmap.map
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.DrawableCompat
 import org.btcmap.R
+import org.btcmap.db.table.place.Marker
 import org.btcmap.map.layer.createEventLayers
 import org.btcmap.map.layer.createExchangeLayers
 import org.btcmap.map.layer.createMerchantLayers
@@ -20,10 +21,10 @@ class MapSetupController(
     private val usingOpenFreeMap: Boolean,
     private val rotationEnabled: Boolean,
 ) {
+    private var style: Style? = null
+
     private val merchants = createMerchantLayers(
         markerBackgroundColor = markerBackgroundColor,
-        markerBadgeBackgroundColor = markerBadgeBackgroundColor,
-        markerBadgeTextColor = markerBadgeTextColor,
         usingOpenFreeMap = usingOpenFreeMap,
     )
 
@@ -44,6 +45,7 @@ class MapSetupController(
     val exchangesSource: GeoJsonSource = exchanges.first
 
     fun install() {
+        clearMerchantMarkerMasks()
         mapView.getMapAsync { map ->
             map.setStyle(Style.Builder().fromUri(styleUri))
             map.uiSettings.setCompassMargins(0, dpToPx(120 + 16), dpToPx(16), 0)
@@ -53,6 +55,8 @@ class MapSetupController(
             map.uiSettings.isRotateGesturesEnabled = rotationEnabled
 
             map.getStyle { style ->
+                this.style = style
+
                 if (style.getImage("btcmap-marker") == null) {
                     val drawable =
                         AppCompatResources.getDrawable(mapView.context, R.drawable.map_marker)!!
@@ -79,6 +83,19 @@ class MapSetupController(
                 exchanges.second.forEach { style.addLayer(it) }
             }
         }
+    }
+
+    fun ensureMerchantMarkers(markers: Set<Marker>) {
+        val style = style ?: return
+        ensureMerchantMarkerImages(
+            context = mapView.context,
+            style = style,
+            markers = markers,
+            markerBackgroundColor = markerBackgroundColor,
+            boostedMarkerBackgroundColor = boostedMarkerBackgroundColor,
+            markerBadgeBackgroundColor = markerBadgeBackgroundColor,
+            markerBadgeTextColor = markerBadgeTextColor,
+        )
     }
 
     private fun dpToPx(dp: Int): Int {

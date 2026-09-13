@@ -9,6 +9,11 @@ class MerchantsCache(
     map: MapLibreMap,
     private val db: Database,
 ) : ViewportCache<Marker>(map) {
+
+    @Volatile
+    var lastMarkers: Set<Marker> = emptySet()
+        private set
+
     override suspend fun fetch(bounds: LatLngBounds): Set<Marker> {
         val (lonRange1, lonRange2) = bounds.splitAtAntimeridian()
         return if (lonRange2 == null) {
@@ -38,7 +43,10 @@ class MerchantsCache(
         }
     }
 
-    override fun Set<Marker>.toGeoJson(): String = toMarkerGeoJson()
+    override fun Set<Marker>.toGeoJson(): String {
+        lastMarkers = this
+        return toMarkerGeoJson()
+    }
 
     override fun idOf(item: Marker): Long = item.id
 }

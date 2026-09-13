@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Draw and select overlapping map markers by depth and ignore taps on transparent marker areas
 - Allow posting paid place comments without signing in
 - Tighten place details bottom sheet header and action button spacing
 - Show server-provided error messages and avoid retrying paid actions on rate limits
