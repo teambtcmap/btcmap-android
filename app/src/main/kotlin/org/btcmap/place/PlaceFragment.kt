@@ -450,14 +450,12 @@ class PlaceFragment : Fragment() {
     }
 
     fun onSlide(bottomSheetTop: Int) {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { appBar, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            appBar.updateLayoutParams<LinearLayout.LayoutParams> {
-                topMargin = (insets.top - bottomSheetTop).coerceIn(0, insets.top)
-            }
-            WindowInsetsCompat.CONSUMED
+        val toolbar = _binding?.toolbar ?: return
+        val statusBarTop = ViewCompat.getRootWindowInsets(toolbar)
+            ?.getInsets(WindowInsetsCompat.Type.statusBars())?.top ?: 0
+        toolbar.updateLayoutParams<LinearLayout.LayoutParams> {
+            topMargin = (statusBarTop - bottomSheetTop).coerceIn(0, statusBarTop)
         }
-        binding.toolbar.requestApplyInsets()
     }
 
     private fun TextView.styleAsLink() {

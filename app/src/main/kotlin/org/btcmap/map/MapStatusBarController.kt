@@ -1,7 +1,6 @@
 package org.btcmap.map
 
 import android.content.res.Configuration
-import android.util.Log
 import android.view.View
 import androidx.core.view.WindowInsetsControllerCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -19,9 +18,7 @@ class MapStatusBarController(
             syncStatusBar(bottomSheetBehavior.state)
         }
 
-        override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            syncStatusBar(bottomSheetBehavior.state)
-        }
+        override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
     }
 
     fun onViewCreated() {
@@ -35,7 +32,6 @@ class MapStatusBarController(
     }
 
     private fun syncStatusBar(bottomSheetState: Int) {
-        Log.d("map_status_bar", "syncing")
         val nightMode =
             conf.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 
