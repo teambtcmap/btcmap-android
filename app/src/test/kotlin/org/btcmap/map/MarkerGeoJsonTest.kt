@@ -43,7 +43,7 @@ class MarkerGeoJsonTest {
         val json = listOf(marker(boostedUntil = ZonedDateTime.parse("2026-05-31T23:59:59Z")))
             .toMarkerGeoJson(now)
 
-        Assert.assertTrue(json.contains("\"boosted\": false"))
+        Assert.assertTrue(json.contains("\"boosted\":false"))
     }
 
     private fun marker(boostedUntil: ZonedDateTime?): Marker {

@@ -4,6 +4,7 @@ import org.btcmap.db.table.place.Marker
 import java.time.ZonedDateTime
 
 private const val OUTDATED_AFTER_YEARS = 1L
+private const val ESTIMATED_BYTES_PER_FEATURE = 320
 const val MAX_COMMENT_BADGE = 9L
 const val EXCHANGE_MARKER_ICON_PREFIX = "marker-icon-"
 const val EVENT_MARKER_ICON_NAME = "marker-icon-event"
@@ -50,48 +51,36 @@ fun exchangeMarkerIconImageName(iconId: String): String {
 }
 
 fun Iterable<Marker>.toMarkerGeoJson(now: ZonedDateTime = ZonedDateTime.now()): String {
-    val sb = StringBuilder()
-    sb.append(
-        """
-        {
-            "type": "FeatureCollection",
-            "features": [
-        """.trimIndent()
-    )
+    val sizeHint = if (this is Collection<*>) size else 0
+    val sb = StringBuilder(sizeHint * ESTIMATED_BYTES_PER_FEATURE + 64)
 
-    this.forEachIndexed { index, place ->
-        if (index > 0) {
-            sb.append(",")
-        }
-        sb.append(
-            """
-            {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [${place.lon}, ${place.lat}]
-                },
-                "properties": {
-                    "id": ${place.id},
-                    "count": 1,
-                    "iconId": "${place.icon}",
-                    "requiresCompanionApp": ${place.requiredAppUrl != null},
-                    "comments": ${place.comments},
-                    "boosted": ${place.isBoosted(now)},
-                    "outdated": ${place.isOutdated(now)},
-                    "sortKey": ${-place.lat}
-                }
-            }
-        """.trimIndent()
-        )
+    sb.append("{\"type\":\"FeatureCollection\",\"features\":[")
+
+    forEachIndexed { index, place ->
+        if (index > 0) sb.append(',')
+
+        sb.append("{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[")
+        sb.append(place.lon)
+        sb.append(',')
+        sb.append(place.lat)
+        sb.append("]},\"properties\":{\"id\":")
+        sb.append(place.id)
+        sb.append(",\"count\":1,\"iconId\":\"")
+        sb.append(place.icon)
+        sb.append("\",\"requiresCompanionApp\":")
+        sb.append(place.requiredAppUrl != null)
+        sb.append(",\"comments\":")
+        sb.append(place.comments)
+        sb.append(",\"boosted\":")
+        sb.append(place.isBoosted(now))
+        sb.append(",\"outdated\":")
+        sb.append(place.isOutdated(now))
+        sb.append(",\"sortKey\":")
+        sb.append(-place.lat)
+        sb.append("}}")
     }
 
-    sb.append(
-        """
-            ]
-        }
-        """.trimIndent()
-    )
+    sb.append("]}")
 
     return sb.toString()
 }

@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Speed up marker rendering for large areas by generating marker images and GeoJSON off the main thread
 - Render any place icon present in the bundled font without a hardcoded list
 - Stop showing places as boosted after their boost expires
 - Draw and select overlapping map markers by depth and ignore taps on transparent marker areas

@@ -11,10 +11,14 @@ import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.DrawableCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.db.table.place.Marker
-import org.maplibre.android.maps.Style
 import org.btcmap.util.iconTypeface
+import org.maplibre.android.maps.Style
+import java.time.ZonedDateTime
+import java.util.concurrent.ConcurrentHashMap
 
 private val OUTDATED_ICON_COLOR = 0xFFBDBDBD.toInt()
 
@@ -22,7 +26,7 @@ private const val FALLBACK_ICON = "storefront"
 private const val SINGLE_GLYPH_MAX_WIDTH_RATIO = 1.5f
 private const val GLYPH_MEASURE_TEXT_SIZE = 100f
 
-private val resolvedGlyphs = mutableMapOf<String, String>()
+private val resolvedGlyphs = ConcurrentHashMap<String, String>()
 
 private fun resolveGlyph(character: String): String {
     if (character.isEmpty()) return FALLBACK_ICON
@@ -40,7 +44,7 @@ internal fun isRenderableIcon(character: String): Boolean {
     return paint.measureText(character) < GLYPH_MEASURE_TEXT_SIZE * SINGLE_GLYPH_MAX_WIDTH_RATIO
 }
 
-fun ensureMerchantMarkerImages(
+suspend fun ensureMerchantMarkerImages(
     context: Context,
     style: Style,
     markers: Set<Marker>,
@@ -49,44 +53,72 @@ fun ensureMerchantMarkerImages(
     markerBadgeBackgroundColor: Int,
     markerBadgeTextColor: Int,
 ) {
+    val known = merchantMarkerMasks.keys.toHashSet()
     val normalPin = tintedPin(context, markerBackgroundColor)
     val boostedPin = tintedPin(context, boostedMarkerBackgroundColor)
 
-    markers.forEach { marker ->
-        val name = marker.markerImageName()
-        if (style.getImage(name) != null) return@forEach
+    val pending = withContext(Dispatchers.Default) {
+        val now = ZonedDateTime.now()
+        val result = mutableMapOf<String, Pair<Bitmap, AlphaMask>>()
 
-        val outdated = marker.isOutdated()
-        val boosted = marker.isBoosted()
-        val pin = if (boosted && !outdated) boostedPin else normalPin
-        val glyph = resolveGlyph(marker.icon)
-        val textColor = if (outdated) OUTDATED_ICON_COLOR else Color.WHITE
-        val comments = marker.comments.takeIf { it > 0 }
+        markers.forEach { marker ->
+            val name = marker.markerImageName(now)
+            if (name in known || name in result) return@forEach
 
-        val bitmap = compositeMarker(
-            context = context,
-            pin = pin,
-            character = glyph,
-            textColor = textColor,
-            comments = comments,
-            badgeBackgroundColor = markerBadgeBackgroundColor,
-            badgeTextColor = markerBadgeTextColor,
-        )
-        style.addImage(name, bitmap)
-        merchantMarkerMasks[name] = AlphaMask.from(bitmap)
+            val outdated = marker.isOutdated(now)
+            val boosted = marker.isBoosted(now)
+            val pin = if (boosted && !outdated) boostedPin else normalPin
+            val glyph = resolveGlyph(marker.icon)
+            val textColor = if (outdated) OUTDATED_ICON_COLOR else Color.WHITE
+            val comments = marker.comments.takeIf { it > 0 }
+
+            val bitmap = compositeMarker(
+                context = context,
+                pin = pin,
+                character = glyph,
+                textColor = textColor,
+                comments = comments,
+                badgeBackgroundColor = markerBadgeBackgroundColor,
+                badgeTextColor = markerBadgeTextColor,
+            )
+            result[name] = bitmap to AlphaMask.from(bitmap)
+        }
+
+        result
+    }
+
+    withContext(Dispatchers.Main) {
+        pending.forEach { (name, image) ->
+            if (merchantMarkerMasks.containsKey(name)) return@forEach
+            style.addImage(name, image.first)
+            merchantMarkerMasks[name] = image.second
+        }
     }
 }
 
-fun ensureExchangeMarkerImages(
+suspend fun ensureExchangeMarkerImages(
     context: Context,
     style: Style,
     markers: Set<Marker>,
 ) {
-    markers.forEach { marker ->
-        val name = exchangeMarkerIconImageName(marker.icon)
-        if (style.getImage(name) != null) return@forEach
+    val known = exchangeMarkerImageNames.toHashSet()
 
-        style.addImage(name, generateIconBitmap(context, resolveGlyph(marker.icon)))
+    val pending = withContext(Dispatchers.Default) {
+        val result = mutableMapOf<String, Bitmap>()
+        markers.forEach { marker ->
+            val name = exchangeMarkerIconImageName(marker.icon)
+            if (name in known || name in result) return@forEach
+            result[name] = generateIconBitmap(context, resolveGlyph(marker.icon))
+        }
+        result
+    }
+
+    withContext(Dispatchers.Main) {
+        pending.forEach { (name, bitmap) ->
+            if (name in exchangeMarkerImageNames) return@forEach
+            style.addImage(name, bitmap)
+            exchangeMarkerImageNames += name
+        }
     }
 }
 
@@ -100,9 +132,11 @@ fun ensureEventMarkerImage(context: Context, style: Style) {
 }
 
 private val merchantMarkerMasks = mutableMapOf<String, AlphaMask>()
+private val exchangeMarkerImageNames = mutableSetOf<String>()
 
-fun clearMerchantMarkerMasks() {
+fun clearMarkerImages() {
     merchantMarkerMasks.clear()
+    exchangeMarkerImageNames.clear()
 }
 
 fun merchantMarkerMask(name: String): AlphaMask? = merchantMarkerMasks[name]

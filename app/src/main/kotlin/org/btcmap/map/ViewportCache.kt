@@ -17,6 +17,7 @@ abstract class ViewportCache<T : Any>(
 ) : MapLibreMap.OnCameraIdleListener {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val pendingQuery = AtomicReference<Job?>(null)
+    private val lock = Any()
     private val seenIds: MutableSet<Long> = mutableSetOf()
     private val items: MutableSet<T> = mutableSetOf()
     val geoJson: MutableStateFlow<String>
@@ -38,14 +39,19 @@ abstract class ViewportCache<T : Any>(
                     fetch(expandedBounds)
                 }
 
-                val newOnes = fetched.filter { idOf(it) !in seenIds }
-                if (newOnes.isEmpty()) return@launch
+                val next = withContext(Dispatchers.Default) {
+                    val snapshot = synchronized(lock) {
+                        val newOnes = fetched.filter { idOf(it) !in seenIds }
+                        if (newOnes.isEmpty()) return@synchronized null
 
-                seenIds.addAll(newOnes.map { idOf(it) })
-                items.addAll(newOnes)
+                        seenIds.addAll(newOnes.map { idOf(it) })
+                        items.addAll(newOnes)
+                        items.toSet()
+                    } ?: return@withContext null
 
-                val snapshot = items.toSet()
-                val next = withContext(Dispatchers.Default) { snapshot.toGeoJson() }
+                    snapshot.toGeoJson()
+                } ?: return@launch
+
                 if (next == geoJson.value) return@launch
                 geoJson.value = next
             }
@@ -63,8 +69,10 @@ abstract class ViewportCache<T : Any>(
     }
 
     fun forceRebuild() {
-        seenIds.clear()
-        items.clear()
+        synchronized(lock) {
+            seenIds.clear()
+            items.clear()
+        }
         loadInBounds(map.projection.visibleRegion.latLngBounds.expand())
     }
 

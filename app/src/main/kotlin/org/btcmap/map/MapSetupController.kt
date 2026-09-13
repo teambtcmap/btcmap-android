@@ -45,7 +45,7 @@ class MapSetupController(
     val exchangesSource: GeoJsonSource = exchanges.first
 
     fun install() {
-        clearMerchantMarkerMasks()
+        clearMarkerImages()
         mapView.getMapAsync { map ->
             map.setStyle(Style.Builder().fromUri(styleUri))
             map.uiSettings.setCompassMargins(0, dpToPx(120 + 16), dpToPx(16), 0)
@@ -85,7 +85,7 @@ class MapSetupController(
         }
     }
 
-    fun ensureMerchantMarkers(markers: Set<Marker>) {
+    suspend fun ensureMerchantMarkers(markers: Set<Marker>) {
         val style = style ?: return
         ensureMerchantMarkerImages(
             context = mapView.context,
@@ -98,7 +98,7 @@ class MapSetupController(
         )
     }
 
-    fun ensureExchangeMarkers(markers: Set<Marker>) {
+    suspend fun ensureExchangeMarkers(markers: Set<Marker>) {
         val style = style ?: return
         ensureExchangeMarkerImages(
             context = mapView.context,
