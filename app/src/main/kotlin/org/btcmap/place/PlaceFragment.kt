@@ -431,21 +431,12 @@ class PlaceFragment : Fragment() {
     }
 
     private fun openAddComment() {
-        val placeId = placeId
-        val navigate = {
-            requireActivity().supportFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<AddCommentFragment>(
-                    R.id.fragmentContainerView, null, Bundle().apply { putLong("place_id", placeId) }
-                )
-                addToBackStack(null)
-            }
-            Unit
-        }
-        if (prefs.authorized) {
-            navigate()
-        } else {
-            showAuthDialog { navigate() }
+        requireActivity().supportFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace<AddCommentFragment>(
+                R.id.fragmentContainerView, null, Bundle().apply { putLong("place_id", placeId) }
+            )
+            addToBackStack(null)
         }
     }
 
