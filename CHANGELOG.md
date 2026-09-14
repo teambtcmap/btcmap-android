@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Show a loading indicator on the area screen and return to the map with an error dialog when the area fails to load
 - Show a retryable error instead of the empty state when the activity feed fails to load
 - Fix a crash when tapping a map marker and its place or event can't be loaded
+- Keep the area list on screen when refreshing nearby areas fails
 - Speed up marker rendering for large areas by generating marker images and GeoJSON off the main thread
 - Render any place icon present in the bundled font without a hardcoded list
 - Stop showing places as boosted after their boost expires
