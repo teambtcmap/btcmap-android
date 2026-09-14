@@ -107,8 +107,7 @@ class AreaFragment : Fragment() {
                 binding.icon.isVisible = headerImage != null
                 binding.icon.load(headerImage)
                 updateToolbarContentColor()
-                binding.description.isVisible = area.description != null
-                binding.description.text = area.description
+                renderDescription(area.description)
                 binding.website.text = (if (areaId == "671") "https://btcmap.org/phuket" else area.websiteUrl)
                     .replace("https://", "")
                     .replace("http://", "")
@@ -158,6 +157,35 @@ class AreaFragment : Fragment() {
                 parentFragmentManager.popBackStack()
             }
             .show()
+    }
+
+    private fun renderDescription(description: String?) {
+        binding.description.isVisible = description != null
+
+        val paragraphs = description
+            ?.split(PARAGRAPH_SEPARATOR)
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            .orEmpty()
+
+        if (paragraphs.size <= 1) {
+            binding.description.text = description
+            binding.descriptionExpand.isVisible = false
+            return
+        }
+
+        var expanded = false
+        binding.description.text = paragraphs.first()
+        binding.descriptionExpand.isVisible = true
+        binding.descriptionExpand.setText(R.string.read_more)
+        binding.descriptionExpand.setOnClickListener {
+            expanded = !expanded
+            binding.description.text =
+                if (expanded) paragraphs.joinToString("\n\n") else paragraphs.first()
+            binding.descriptionExpand.setText(
+                if (expanded) R.string.collapse else R.string.read_more
+            )
+        }
     }
 
     override fun onStart() {
@@ -364,6 +392,10 @@ class AreaFragment : Fragment() {
         val density = resources.displayMetrics.density
         val container = binding.issuesContainer
 
+        val topMarginDp = if (binding.upcomingEventsContainer.isVisible) 8 else 24
+        (binding.issuesTitle.layoutParams as ViewGroup.MarginLayoutParams).topMargin =
+            (topMarginDp * density).toInt()
+
         for (row in rows) {
             val issue = row.issue
             val itemBlock = LinearLayout(requireContext()).apply {
@@ -488,5 +520,7 @@ class AreaFragment : Fragment() {
 
     companion object {
         private const val PLACE_ISSUES_LIMIT = 50L
+
+        private val PARAGRAPH_SEPARATOR = Regex("\n\\s*\n")
     }
 }

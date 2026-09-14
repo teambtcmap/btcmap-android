@@ -68,6 +68,8 @@
     <string name="use_adaptive_colors">Use adaptive colors</string>
     <string name="reset">Reset</string>
     <string name="area_icon">Area icon</string>
+    <string name="read_more">Read more</string>
+    <string name="collapse">Collapse</string>
     <string name="events">Events</string>
     <string name="issues_d">Issues (%1$d)</string>
     <string name="issues_d_of_d">Issues (%1$d of %2$d)</string>

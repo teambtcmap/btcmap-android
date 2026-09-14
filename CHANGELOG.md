@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Collapse long area descriptions to the first paragraph with a read more toggle
+- Show how many place issues are displayed when the list is truncated
 - Show place issues with their place icons on the area screen below upcoming events and open the OSM editor when tapped
 - Extend the area header image behind the status bar and toolbar
 - Fix crashes when toggling or loading saved places and areas
