@@ -26,6 +26,7 @@ import org.btcmap.databinding.SavedAreaItemBinding
 import org.btcmap.databinding.SavedPlaceItemBinding
 import org.btcmap.databinding.UserProfileFragmentBinding
 import org.btcmap.db
+import org.btcmap.util.showError
 
 class UserProfileFragment : Fragment() {
 
@@ -173,7 +174,7 @@ class UserProfileFragment : Fragment() {
                 db().user.delete()
                 parentFragmentManager.popBackStack()
             } catch (e: Exception) {
-                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                showError(e)
             }
         }
     }
@@ -184,7 +185,7 @@ class UserProfileFragment : Fragment() {
                 api().removeSavedPlace(placeId)
                 refreshUserData()
             } catch (e: Throwable) {
-                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                showError(e)
             }
         }
     }
@@ -195,7 +196,7 @@ class UserProfileFragment : Fragment() {
                 api().removeSavedArea(areaId)
                 refreshUserData()
             } catch (e: Throwable) {
-                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                showError(e)
             }
         }
     }
@@ -232,7 +233,7 @@ class UserProfileFragment : Fragment() {
                 binding.noSavedAreas.isVisible = user.savedAreas.size() == 0
                 binding.savedAreasList.isVisible = user.savedAreas.size() > 0
             } catch (e: Throwable) {
-                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                showError(e)
             }
         }
     }
