@@ -2,7 +2,9 @@ package org.btcmap.util
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import org.btcmap.R
 
 fun Fragment.openInBrowser(uri: Uri) {
     startActivity(
@@ -11,4 +13,12 @@ fun Fragment.openInBrowser(uri: Uri) {
             uri,
         )
     )
+}
+
+fun Fragment.showError(throwable: Throwable) {
+    Toast.makeText(
+        requireContext(),
+        throwable.message?.takeIf { it.isNotBlank() } ?: getString(R.string.error),
+        Toast.LENGTH_LONG,
+    ).show()
 }

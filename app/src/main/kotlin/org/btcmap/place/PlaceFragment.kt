@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
@@ -35,6 +34,7 @@ import org.btcmap.comment.CommentsAdapter
 import org.btcmap.comment.CommentsAdapterItem
 import org.btcmap.comment.CommentsFragment
 import org.btcmap.util.iconTypeface
+import org.btcmap.util.showError
 import org.btcmap.map.getErrorColor
 import org.btcmap.map.getOnSurfaceColor
 import org.btcmap.R
@@ -97,8 +97,8 @@ class PlaceFragment : Fragment() {
 
                 R.id.save -> {
                     if (prefs.authorized) {
-                        try {
-                            viewLifecycleOwner.lifecycleScope.launch {
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            try {
                                 val user = db().user.select()!!
                                 if (user.savedPlaces.any { savedPlace -> savedPlace.asJsonObject["id"].asLong == placeId }) {
                                     api().removeSavedPlace(placeId)
@@ -119,14 +119,14 @@ class PlaceFragment : Fragment() {
                                     )
                                 }
                                 updateBookmarkIcon()
+                            } catch (e: Throwable) {
+                                showError(e)
                             }
-                        } catch (e: Throwable) {
-                            Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG).show()
                         }
                     } else {
                         showAuthDialog {
-                            try {
-                                viewLifecycleOwner.lifecycleScope.launch {
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                try {
                                     val user = db().user.select()!!
                                     if (user.savedPlaces.any { savedPlace -> savedPlace.asJsonObject["id"].asLong == placeId }) {
                                         api().removeSavedPlace(placeId)
@@ -147,10 +147,9 @@ class PlaceFragment : Fragment() {
                                         )
                                     }
                                     updateBookmarkIcon()
+                                } catch (e: Throwable) {
+                                    showError(e)
                                 }
-                            } catch (e: Throwable) {
-                                Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG)
-                                    .show()
                             }
                         }
                     }
@@ -481,7 +480,7 @@ class PlaceFragment : Fragment() {
                         )
                     }
                 } catch (e: Throwable) {
-                    Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG).show()
+                    showError(e)
                 }
             }
         } else {

@@ -1,18 +1,17 @@
-package org.btcmap.area
+package org.btcmap.place
 
-import android.os.Bundle
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import mockwebserver3.Dispatcher
-import mockwebserver3.MockResponse
-import mockwebserver3.RecordedRequest
+import com.google.gson.JsonArray
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
+import org.btcmap.db.table.place.Place
+import org.btcmap.db.table.user.User
 import org.btcmap.settings.authToken
 import org.btcmap.util.ApiRule
 import org.btcmap.util.DatabaseRule
@@ -21,9 +20,10 @@ import org.btcmap.util.assertNoUncaughtException
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.ZonedDateTime
 
 @RunWith(AndroidJUnit4::class)
-class AreaSaveErrorHandlingTest {
+class PlaceSaveErrorHandlingTest {
 
     @JvmField
     @Rule
@@ -42,44 +42,37 @@ class AreaSaveErrorHandlingTest {
     @Test
     fun load_whenUserMissingFromDatabase_doesNotLeakUncaughtException() {
         preferencesRule.prefs.authToken = "test-token"
-        apiRule.server.dispatcher = object : Dispatcher() {
-            override fun dispatch(request: RecordedRequest): MockResponse {
-                val body =
-                    if (request.url.encodedPath.startsWith("/v4/areas")) AREA_JSON else "[]"
-                return jsonResponse(body)
-            }
-        }
 
-        withAreaFragment { }
+        withPlaceFragment { }
     }
 
     @Test
-    fun save_whenUserMissingFromDatabase_doesNotLeakUncaughtException() {
+    fun save_whenApiFails_doesNotLeakUncaughtException() {
         preferencesRule.prefs.authToken = "test-token"
+        databaseRule.db.user.insert(user())
 
-        withAreaFragment { activity ->
+        withPlaceFragment { activity ->
             val fragment = activity.supportFragmentManager
-                .findFragmentByTag(AREA_TAG) as AreaFragment
+                .findFragmentByTag(PLACE_TAG) as PlaceFragment
             val toolbar = fragment.requireView().findViewById<Toolbar>(R.id.toolbar)
             toolbar.menu.performIdentifierAction(R.id.save, 0)
         }
     }
 
-    private fun withAreaFragment(action: (Activity) -> Unit) {
+    private fun withPlaceFragment(action: (Activity) -> Unit) {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
                 assertNoUncaughtException(
-                    "Exception escaped the area screen's coroutine to the uncaught handler",
+                    "Exception escaped the place screen's coroutine to the uncaught handler",
                 ) {
                     scenario.onActivity { activity ->
-                        val area = AreaFragment().apply {
-                            arguments = Bundle().apply { putString("area_id", "1") }
-                        }
+                        val place = PlaceFragment()
                         activity.supportFragmentManager.commitNow {
                             setReorderingAllowed(true)
-                            replace(R.id.fragmentContainerView, area, AREA_TAG)
+                            replace(R.id.fragmentContainerView, place, PLACE_TAG)
                         }
+                        place.setPlace(placeRow())
                         action(activity)
                     }
                 }
@@ -89,29 +82,46 @@ class AreaSaveErrorHandlingTest {
         }
     }
 
+    private fun placeRow(): Place {
+        return Place(
+            id = 1,
+            bundled = false,
+            updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+            lat = 0.0,
+            lon = 0.0,
+            icon = "storefront",
+            name = "Test Merchant",
+            localizedName = null,
+            verifiedAt = null,
+            address = null,
+            openingHours = null,
+            localizedOpeningHours = null,
+            phone = null,
+            website = null,
+            email = null,
+            twitter = null,
+            facebook = null,
+            instagram = null,
+            line = null,
+            requiredAppUrl = null,
+            boostedUntil = null,
+            comments = null,
+            telegram = null,
+        )
+    }
+
+    private fun user(): User {
+        return User(
+            id = 1,
+            name = "tester",
+            roles = JsonArray(),
+            savedPlaces = JsonArray(),
+            savedAreas = JsonArray(),
+        )
+    }
+
     companion object {
-        private const val AREA_TAG = "area"
+        private const val PLACE_TAG = "place"
         private const val OFFLINE_STYLE_URI = "asset://map-styles/test/style.json"
-
-        private const val AREA_JSON = """
-            {
-                "id": 1,
-                "name": "Grand Paris",
-                "type": "community",
-                "url_alias": "grand-paris",
-                "icon": null,
-                "icon_wide": null,
-                "website_url": "https://btcmap.org/community/grand-paris",
-                "description": null
-            }
-        """
-
-        private fun jsonResponse(body: String): MockResponse {
-            return MockResponse.Builder()
-                .code(200)
-                .addHeader("Content-Type", "application/json")
-                .body(body)
-                .build()
-        }
     }
 }

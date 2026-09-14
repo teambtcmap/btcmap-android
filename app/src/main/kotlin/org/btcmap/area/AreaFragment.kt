@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -35,6 +34,7 @@ import org.btcmap.databinding.AreaFragmentBinding
 import org.btcmap.settings.authorized
 import org.btcmap.settings.prefs
 import org.btcmap.util.openInBrowser
+import org.btcmap.util.showError
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -96,11 +96,7 @@ class AreaFragment : Fragment() {
                                 }
                                 updateBookmarkIcon()
                             } catch (e: Throwable) {
-                                Toast.makeText(
-                                    requireContext(),
-                                    e.message?.takeIf { it.isNotBlank() } ?: getString(R.string.error),
-                                    Toast.LENGTH_LONG,
-                                ).show()
+                                showError(e)
                             }
                         }
                     } else {
@@ -128,11 +124,7 @@ class AreaFragment : Fragment() {
                                     }
                                     updateBookmarkIcon()
                                 } catch (e: Throwable) {
-                                    Toast.makeText(
-                                        requireContext(),
-                                        e.message?.takeIf { it.isNotBlank() } ?: getString(R.string.error),
-                                        Toast.LENGTH_LONG,
-                                    ).show()
+                                    showError(e)
                                 }
                             }
                         }
@@ -195,7 +187,7 @@ class AreaFragment : Fragment() {
                         )
                     }
                 } catch (e: Throwable) {
-                    Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG).show()
+                    showError(e)
                 }
             }
         } else {
