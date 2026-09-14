@@ -34,6 +34,7 @@ private val placeFields = listOf(
     "line",
     "comments",
     "telegram",
+    "osm_id",
 )
 
 data class GetPlacesItem(
@@ -60,6 +61,7 @@ data class GetPlacesItem(
     val line: String?,
     val comments: Long?,
     val telegram: String?,
+    val osmId: String?,
 )
 
 data class PlaceCoordinates(
@@ -175,6 +177,8 @@ private fun JsonObject.toGetPlacesItem(): GetPlacesItem {
         telegram = if (!has("telegram") || get("telegram").isJsonNull) null else get(
             "telegram"
         )
+            .asString.ifBlank { null },
+        osmId = if (!has("osm_id") || get("osm_id").isJsonNull) null else get("osm_id")
             .asString.ifBlank { null },
     )
 }

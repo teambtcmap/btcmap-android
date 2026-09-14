@@ -48,6 +48,7 @@ class PlaceApiTest : ApiTestBase() {
         Assert.assertEquals("https://line.me/cafe", place.line)
         Assert.assertEquals(3L, place.comments)
         Assert.assertEquals("https://t.me/cafe", place.telegram)
+        Assert.assertEquals("node:42", place.osmId)
     }
 
     @Test
@@ -107,6 +108,7 @@ class PlaceApiTest : ApiTestBase() {
         Assert.assertNull(place.line)
         Assert.assertNull(place.comments)
         Assert.assertNull(place.telegram)
+        Assert.assertNull(place.osmId)
     }
 
     @Test
@@ -211,7 +213,8 @@ class PlaceApiTest : ApiTestBase() {
                     "instagram": "https://ig.com/cafe",
                     "line": "https://line.me/cafe",
                     "comments": 3,
-                    "telegram": "https://t.me/cafe"
+                    "telegram": "https://t.me/cafe",
+                    "osm_id": "node:42"
                 }
             ]
         """

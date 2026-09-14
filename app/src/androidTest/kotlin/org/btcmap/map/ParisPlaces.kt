@@ -57,6 +57,7 @@ object ParisPlaces {
             boostedUntil = null,
             comments = null,
             telegram = null,
+            osmId = null,
         )
     }
 }

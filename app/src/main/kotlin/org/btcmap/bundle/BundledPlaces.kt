@@ -129,6 +129,7 @@ object BundledPlaces {
             bundled = true,
             comments = comments,
             telegram = null,
+            osmId = null,
         )
     }
 }

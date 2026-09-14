@@ -25,6 +25,7 @@ const val REQUIRED_APP_URL = "required_app_url"
 const val BOOSTED_UNTIL = "boosted_until"
 const val COMMENTS = "comments"
 const val TELEGRAM = "telegram"
+const val OSM_ID = "osm_id"
 
 const val CREATE = """
     CREATE TABLE $TABLE (
@@ -50,6 +51,7 @@ const val CREATE = """
         $REQUIRED_APP_URL TEXT,
         $BOOSTED_UNTIL TEXT,
         $COMMENTS INTEGER,
-        $TELEGRAM TEXT
+        $TELEGRAM TEXT,
+        $OSM_ID TEXT
     );
 """

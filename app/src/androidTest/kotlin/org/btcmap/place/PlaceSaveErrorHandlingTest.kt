@@ -107,6 +107,7 @@ class PlaceSaveErrorHandlingTest {
             boostedUntil = null,
             comments = null,
             telegram = null,
+            osmId = null,
         )
     }
 

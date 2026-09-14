@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show place issues with their place icons on the area screen below upcoming events and open the OSM editor when tapped
+- Extend the area header image behind the status bar and toolbar
 - Fix crashes when toggling or loading saved places and areas
 - Fix crashes when navigating away while a screen or action is still loading
 - Show a loading indicator on the area screen and return to the map with an error dialog when the area fails to load

@@ -33,6 +33,7 @@ class GetPlacesItemExtTest {
             line = "https://line.me/cafe",
             comments = 3L,
             telegram = "https://t.me/cafe",
+            osmId = "node:42",
         )
 
         val place = item.toPlace()
@@ -50,6 +51,7 @@ class GetPlacesItemExtTest {
         Assert.assertEquals("https://app.example".toHttpUrl(), place.requiredAppUrl)
         Assert.assertEquals("https://t.me/cafe".toHttpUrl(), place.telegram)
         Assert.assertEquals(3L, place.comments)
+        Assert.assertEquals("node:42", place.osmId)
     }
 
     @Test
@@ -78,6 +80,7 @@ class GetPlacesItemExtTest {
             line = null,
             comments = null,
             telegram = null,
+            osmId = null,
         )
 
         val place = item.toPlace()
@@ -93,5 +96,6 @@ class GetPlacesItemExtTest {
         Assert.assertNull(place.requiredAppUrl)
         Assert.assertNull(place.telegram)
         Assert.assertNull(place.comments)
+        Assert.assertNull(place.osmId)
     }
 }

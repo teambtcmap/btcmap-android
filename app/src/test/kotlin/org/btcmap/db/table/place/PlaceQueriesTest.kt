@@ -53,6 +53,7 @@ class PlaceQueriesTest {
             boostedUntil = null,
             comments = null,
             telegram = null,
+            osmId = null,
         )
 
         db.place.insert(listOf(place))
@@ -72,6 +73,31 @@ class PlaceQueriesTest {
         val result = db.place.selectById(999L)
 
         Assert.assertNull(result)
+    }
+
+    @Test
+    fun selectByOsmId_returnsMatchingPlace() {
+        val db = createDatabase()
+        db.place.insert(
+            listOf(
+                createPlace(id = 1L, name = "Coffee Shop").copy(osmId = "node:1"),
+                createPlace(id = 2L, name = "Bar").copy(osmId = "way:2"),
+            )
+        )
+
+        val result = db.place.selectByOsmId("way:2")
+
+        Assert.assertNotNull(result)
+        Assert.assertEquals(2L, result!!.id)
+        Assert.assertEquals("Bar", result.name)
+    }
+
+    @Test
+    fun selectByOsmId_returnsNullWhenNotFound() {
+        val db = createDatabase()
+        db.place.insert(listOf(createPlace(id = 1L).copy(osmId = "node:1")))
+
+        Assert.assertNull(db.place.selectByOsmId("node:999"))
     }
 
     @Test
@@ -413,6 +439,7 @@ class PlaceQueriesTest {
             boostedUntil = null,
             comments = null,
             telegram = null,
+            osmId = null,
         )
     }
 }

@@ -37,9 +37,10 @@ data class FullProjection(
     val boostedUntil: ZonedDateTime?,
     val comments: Long?,
     val telegram: HttpUrl?,
+    val osmId: String?,
 ) {
     companion object {
-        const val COLUMNS = "$ID, $BUNDLED, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $LOCALIZED_OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM"
+        const val COLUMNS = "$ID, $BUNDLED, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $LOCALIZED_OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM, $OSM_ID"
 
         fun fromStatement(stmt: SQLiteStatement): FullProjection {
             return FullProjection(
@@ -66,6 +67,7 @@ data class FullProjection(
                 boostedUntil = stmt.getZonedDateTimeOrNull(20),
                 comments = stmt.getLongOrNull(21),
                 telegram = stmt.getHttpUrlOrNull(22),
+                osmId = stmt.getTextOrNull(23),
             )
         }
     }

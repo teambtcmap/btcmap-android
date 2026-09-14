@@ -14,8 +14,8 @@ class PlaceQueries(private val conn: SQLiteConnection) {
     fun insert(rows: List<Place>) {
         conn.prepare(
             """
-            INSERT OR REPLACE INTO $TABLE ($ID, $BUNDLED, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $LOCALIZED_OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23);
+            INSERT OR REPLACE INTO $TABLE ($ID, $BUNDLED, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $LOCALIZED_OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM, $OSM_ID)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24);
             """
         ).use { stmt ->
             rows.forEach { row ->
@@ -42,6 +42,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
                 stmt.bindZonedDateTimeOrNull(21, row.boostedUntil)
                 stmt.bindLongOrNull(22, row.comments)
                 stmt.bindHttpUrlOrNull(23, row.telegram)
+                stmt.bindTextOrNull(24, row.osmId)
                 stmt.step()
                 stmt.reset()
             }
@@ -57,6 +58,22 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             """
         ).use {
             it.bindLong(1, id)
+            if (it.step()) {
+                return FullProjection.fromStatement(it)
+            }
+            return null
+        }
+    }
+
+    fun selectByOsmId(osmId: String): Place? {
+        conn.prepare(
+            """
+                SELECT ${FullProjection.COLUMNS}
+                FROM $TABLE
+                WHERE $OSM_ID = ?1;
+            """
+        ).use {
+            it.bindText(1, osmId)
             if (it.step()) {
                 return FullProjection.fromStatement(it)
             }

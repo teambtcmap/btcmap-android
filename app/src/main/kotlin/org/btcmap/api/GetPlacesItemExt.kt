@@ -29,5 +29,6 @@ fun GetPlacesItem.toPlace(): FullProjection {
         boostedUntil = boostedUntil?.toZonedDateTime(),
         comments = comments,
         telegram = telegram?.toHttpUrlOrNull(),
+        osmId = osmId,
     )
 }
