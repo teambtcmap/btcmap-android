@@ -127,7 +127,9 @@ class MapPlaceSelectionTest {
             val point = map.projection.toScreenLocation(LatLng(place.lat, place.lon))
             val location = IntArray(2)
             view.getLocationOnScreen(location)
-            floatArrayOf(location[0] + point.x, location[1] + point.y)
+            // Markers are anchored at the pin tip, so tap the body above it.
+            val pinCenterOffset = MARKER_PIN_HEIGHT_DP / 2f * view.resources.displayMetrics.density
+            floatArrayOf(location[0] + point.x, location[1] + point.y - pinCenterOffset)
         }
 
         onView(allOf(withId(R.id.map), isDisplayed())).perform(
@@ -147,5 +149,6 @@ class MapPlaceSelectionTest {
 
     companion object {
         private const val OFFLINE_STYLE_URI = "asset://map-styles/test/style.json"
+        private const val MARKER_PIN_HEIGHT_DP = 48f
     }
 }
