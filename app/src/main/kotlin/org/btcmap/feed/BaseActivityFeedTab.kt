@@ -156,20 +156,12 @@ abstract class BaseActivityFeedTab : Fragment() {
 
         val ids = loadAreaIds()
         if (ids == null) {
-            adapter.submitList(emptyList())
-            binding.loading.visibility = View.GONE
-            binding.emptyView.visibility = View.VISIBLE
-            binding.emptyView.text = emptyMessage()
-            binding.list.visibility = View.GONE
+            showEmptyState(adapter)
             return
         }
 
         if (ids.isEmpty()) {
-            adapter.submitList(emptyList())
-            binding.loading.visibility = View.GONE
-            binding.emptyView.visibility = View.VISIBLE
-            binding.emptyView.text = emptyMessage()
-            binding.list.visibility = View.GONE
+            showEmptyState(adapter)
             return
         }
 
@@ -184,24 +176,37 @@ abstract class BaseActivityFeedTab : Fragment() {
                 }
                 binding.loading.visibility = View.GONE
                 if (items.isEmpty()) {
-                    binding.emptyView.visibility = View.VISIBLE
-                    binding.emptyView.text = emptyMessage()
-                    binding.list.visibility = View.GONE
+                    showEmptyState(adapter)
                 } else {
                     binding.list.visibility = View.VISIBLE
                     binding.emptyView.visibility = View.GONE
+                    binding.emptyView.setOnClickListener(null)
+                    adapter.submitList(items)
                 }
-                adapter.submitList(items)
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
-                e.printStackTrace()
-                binding.loading.visibility = View.GONE
-                binding.emptyView.visibility = View.VISIBLE
-                binding.emptyView.text = emptyMessage()
-                binding.list.visibility = View.GONE
-                adapter.submitList(emptyList())
+                showErrorState(adapter)
             }
         }
+    }
+
+    private fun showEmptyState(adapter: ActivityFeedAdapter) {
+        adapter.submitList(emptyList())
+        binding.loading.visibility = View.GONE
+        binding.emptyView.visibility = View.VISIBLE
+        binding.emptyView.text = emptyMessage()
+        binding.emptyView.setOnClickListener(null)
+        binding.list.visibility = View.GONE
+    }
+
+    private fun showErrorState(adapter: ActivityFeedAdapter) {
+        adapter.submitList(emptyList())
+        binding.loading.visibility = View.GONE
+        binding.emptyView.visibility = View.VISIBLE
+        binding.emptyView.text =
+            "${getString(R.string.failed_to_load)}\n\n${getString(R.string.tap_to_retry)}"
+        binding.emptyView.setOnClickListener { loadActivity() }
+        binding.list.visibility = View.GONE
     }
 
     override fun onDestroyView() {

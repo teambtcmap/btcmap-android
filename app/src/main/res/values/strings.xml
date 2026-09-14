@@ -23,6 +23,8 @@
     <string name="btn_continue">Continue</string>
     <string name="add_comment">Add Comment</string>
     <string name="error">Error</string>
+    <string name="failed_to_load">Failed to load</string>
+    <string name="tap_to_retry">Tap to retry</string>
     <string name="close">Close</string>
     <string name="comments">Comments</string>
     <string name="add">Add</string>
