@@ -73,8 +73,8 @@ class AreaFragment : Fragment() {
             when (it.itemId) {
                 R.id.save -> {
                     if (prefs.authorized) {
-                        try {
-                            viewLifecycleOwner.lifecycleScope.launch {
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            try {
                                 val user = db().user.select()!!
                                 if (user.savedAreas.any { savedArea -> savedArea.asJsonObject["id"].asLong == areaId.toLong() }) {
                                     api().removeSavedArea(areaId.toLong())
@@ -95,14 +95,18 @@ class AreaFragment : Fragment() {
                                     )
                                 }
                                 updateBookmarkIcon()
+                            } catch (e: Throwable) {
+                                Toast.makeText(
+                                    requireContext(),
+                                    e.message?.takeIf { it.isNotBlank() } ?: getString(R.string.error),
+                                    Toast.LENGTH_LONG,
+                                ).show()
                             }
-                        } catch (e: Throwable) {
-                            Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG).show()
                         }
                     } else {
                         showAuthDialog {
-                            try {
-                                viewLifecycleOwner.lifecycleScope.launch {
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                try {
                                     val user = db().user.select()!!
                                     if (user.savedAreas.any { savedArea -> savedArea.asJsonObject["id"].asLong == areaId.toLong() }) {
                                         api().removeSavedArea(areaId.toLong())
@@ -123,10 +127,13 @@ class AreaFragment : Fragment() {
                                         )
                                     }
                                     updateBookmarkIcon()
+                                } catch (e: Throwable) {
+                                    Toast.makeText(
+                                        requireContext(),
+                                        e.message?.takeIf { it.isNotBlank() } ?: getString(R.string.error),
+                                        Toast.LENGTH_LONG,
+                                    ).show()
                                 }
-                            } catch (e: Throwable) {
-                                Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG)
-                                    .show()
                             }
                         }
                     }
