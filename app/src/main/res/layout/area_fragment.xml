@@ -15,66 +15,80 @@
         app:navigationIcon="?attr/homeAsUpIndicator"
         tools:title="Grand Paris" />
 
-    <androidx.core.widget.NestedScrollView
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <ImageView
-                android:id="@+id/icon"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter"
-                android:contentDescription="@string/area_icon"
-                tools:background="#f79413" />
+            android:layout_height="match_parent"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/description"
-                    style="?attr/textAppearanceBody1"
+                <ImageView
+                    android:id="@+id/icon"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textColor="?attr/colorOnSurface"
-                    tools:text="Grand Paris area covering the greater Paris metropolitan region." />
-
-                <TextView
-                    android:id="@+id/website"
-                    style="?attr/textAppearanceBody1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:autoLink="web"
-                    android:drawablePadding="16dp"
-                    android:gravity="start|center_vertical"
-                    app:drawableStartCompat="@drawable/icon_earth"
-                    app:drawableTint="?attr/colorSecondary"
-                    tools:text="btcmap.org/community/grand-paris" />
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@string/area_icon"
+                    tools:background="#f79413" />
 
                 <LinearLayout
-                    android:id="@+id/upcoming_events_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="64dp"
                     android:orientation="vertical"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/description"
+                        style="?attr/textAppearanceBody1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textColor="?attr/colorOnSurface"
+                        tools:text="Grand Paris area covering the greater Paris metropolitan region." />
+
+                    <TextView
+                        android:id="@+id/website"
+                        style="?attr/textAppearanceBody1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:autoLink="web"
+                        android:drawablePadding="16dp"
+                        android:gravity="start|center_vertical"
+                        app:drawableStartCompat="@drawable/icon_earth"
+                        app:drawableTint="?attr/colorSecondary"
+                        tools:text="btcmap.org/community/grand-paris" />
+
+                    <LinearLayout
+                        android:id="@+id/upcoming_events_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginBottom="64dp"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
-        </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
 
-    </androidx.core.widget.NestedScrollView>
+        <ProgressBar
+            android:id="@+id/loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+    </FrameLayout>
 
 </LinearLayout>

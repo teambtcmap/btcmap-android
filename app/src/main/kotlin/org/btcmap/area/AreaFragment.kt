@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import coil3.load
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -156,11 +157,27 @@ class AreaFragment : Fragment() {
                     .trimEnd('/')
                 updateBookmarkIcon()
                 renderUpcomingEvents()
+                binding.loading.isVisible = false
+                binding.content.isVisible = true
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
-                e.printStackTrace()
+                binding.loading.isVisible = false
+                showLoadError(e)
             }
         }
+    }
+
+    private fun showLoadError(throwable: Throwable) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.error)
+            .setMessage(throwable.message?.takeIf { it.isNotBlank() } ?: getString(R.string.error))
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                parentFragmentManager.popBackStack()
+            }
+            .setOnCancelListener {
+                parentFragmentManager.popBackStack()
+            }
+            .show()
     }
 
     override fun onDestroyView() {

@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Fix crashes when toggling or loading saved places and areas
 - Fix crashes when navigating away while a screen or action is still loading
+- Show a loading indicator on the area screen and return to the map with an error dialog when the area fails to load
 - Speed up marker rendering for large areas by generating marker images and GeoJSON off the main thread
 - Render any place icon present in the bundled font without a hardcoded list
 - Stop showing places as boosted after their boost expires
