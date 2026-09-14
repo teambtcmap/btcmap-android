@@ -70,6 +70,7 @@ import org.btcmap.settings.uri
 import org.btcmap.sync
 import org.btcmap.util.isOnline
 import org.btcmap.util.openInBrowser
+import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
@@ -549,7 +550,8 @@ class MapFragment : Fragment() {
                 api().getAreas(lat, lon).filter { it.type == "community" || it.type == "country" }
             }
             areasAdapter.submitList(areas)
-        } catch (_: Throwable) {
+        } catch (e: Throwable) {
+            e.rethrowIfCancellation()
             areasAdapter.submitList(emptyList())
         }
     }

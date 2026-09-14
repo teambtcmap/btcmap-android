@@ -10,6 +10,7 @@ import org.btcmap.api.toPlace
 import org.btcmap.db.Database
 import org.btcmap.db.table.comment.Comment
 import org.btcmap.db.table.event.Event
+import org.btcmap.util.rethrowIfCancellation
 import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
@@ -31,6 +32,7 @@ class Sync(val api: Api, val db: Database) {
                 val delta = try {
                     api.getPlaces(maxKnownUpdatedAt, batchSize)
                 } catch (t: Throwable) {
+                    t.rethrowIfCancellation()
                     t.printStackTrace()
                     return@withContext PlacesSyncReport(
                         duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
@@ -83,6 +85,7 @@ class Sync(val api: Api, val db: Database) {
                 val delta = try {
                     api.getComments(maxKnownUpdatedAt, batchSize)
                 } catch (t: Throwable) {
+                    t.rethrowIfCancellation()
                     t.printStackTrace()
                     return@withContext CommentSyncReport(
                         duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
@@ -140,6 +143,7 @@ class Sync(val api: Api, val db: Database) {
             val events = try {
                 api.getEvents()
             } catch (t: Throwable) {
+                t.rethrowIfCancellation()
                 t.printStackTrace()
                 return@withContext EventSyncReport(
                     duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),

@@ -15,6 +15,7 @@ import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.api.reportPlace
 import org.btcmap.databinding.ReportPlaceFragmentBinding
+import org.btcmap.util.rethrowIfCancellation
 
 class ReportPlaceFragment : Fragment() {
 
@@ -100,6 +101,7 @@ class ReportPlaceFragment : Fragment() {
                     parentFragmentManager.popBackStack()
                 }
             } catch (t: Throwable) {
+                t.rethrowIfCancellation()
                 Log.e(null, null, t)
                 withResumed {
                     binding.reportType.isEnabled = true

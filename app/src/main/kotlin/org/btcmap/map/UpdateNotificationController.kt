@@ -16,6 +16,7 @@ import okhttp3.coroutines.executeAsync
 import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.btcmap.view.IconButton
+import org.btcmap.util.rethrowIfCancellation
 
 class UpdateNotificationController(
     private val context: Context,
@@ -67,7 +68,8 @@ class UpdateNotificationController(
                                 }
                             }
                         }
-                    } catch (_: Throwable) {
+                    } catch (e: Throwable) {
+                        e.rethrowIfCancellation()
 
                     }
                 }

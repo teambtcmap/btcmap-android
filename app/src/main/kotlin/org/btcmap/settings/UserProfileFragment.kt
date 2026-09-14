@@ -26,6 +26,7 @@ import org.btcmap.databinding.SavedAreaItemBinding
 import org.btcmap.databinding.SavedPlaceItemBinding
 import org.btcmap.databinding.UserProfileFragmentBinding
 import org.btcmap.db
+import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
 
 class UserProfileFragment : Fragment() {
@@ -110,6 +111,7 @@ class UserProfileFragment : Fragment() {
                 api().updatePassword(oldPassword, newPassword)
                 Toast.makeText(context, R.string.password_changed, Toast.LENGTH_SHORT).show()
             } catch (e: Throwable) {
+                e.rethrowIfCancellation()
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.error)
                     .setMessage(e.message)
@@ -153,6 +155,7 @@ class UserProfileFragment : Fragment() {
                 binding.username.text = user.name
                 Toast.makeText(context, R.string.username_changed, Toast.LENGTH_SHORT).show()
             } catch (e: Throwable) {
+                e.rethrowIfCancellation()
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.error)
                     .setMessage(e.message)
@@ -174,6 +177,7 @@ class UserProfileFragment : Fragment() {
                 db().user.delete()
                 parentFragmentManager.popBackStack()
             } catch (e: Exception) {
+                e.rethrowIfCancellation()
                 showError(e)
             }
         }
@@ -185,6 +189,7 @@ class UserProfileFragment : Fragment() {
                 api().removeSavedPlace(placeId)
                 refreshUserData()
             } catch (e: Throwable) {
+                e.rethrowIfCancellation()
                 showError(e)
             }
         }
@@ -196,6 +201,7 @@ class UserProfileFragment : Fragment() {
                 api().removeSavedArea(areaId)
                 refreshUserData()
             } catch (e: Throwable) {
+                e.rethrowIfCancellation()
                 showError(e)
             }
         }
@@ -233,6 +239,7 @@ class UserProfileFragment : Fragment() {
                 binding.noSavedAreas.isVisible = user.savedAreas.size() == 0
                 binding.savedAreasList.isVisible = user.savedAreas.size() > 0
             } catch (e: Throwable) {
+                e.rethrowIfCancellation()
                 showError(e)
             }
         }

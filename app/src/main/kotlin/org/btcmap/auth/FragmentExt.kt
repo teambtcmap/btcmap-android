@@ -17,6 +17,7 @@ import org.btcmap.db
 import org.btcmap.db.table.user.User
 import org.btcmap.settings.authToken
 import org.btcmap.settings.prefs
+import org.btcmap.util.rethrowIfCancellation
 
 fun Fragment.showAuthDialog(onSuccess: () -> Unit) {
     showAccountChoicesDialog(onSuccess)
@@ -104,6 +105,7 @@ private fun Fragment.signUp(username: String, password: String, onComplete: () -
             ).show()
             onComplete()
         } catch (e: Exception) {
+            e.rethrowIfCancellation()
             Log.e("auth", "Failed to create new account", e)
             val message = e.message?.takeIf { it.isNotBlank() }
                 ?: getString(R.string.failed_to_create_new_account)
@@ -172,6 +174,7 @@ private fun Fragment.signIn(username: String, password: String, onComplete: () -
             )
             onComplete()
         } catch (e: Throwable) {
+            e.rethrowIfCancellation()
             Log.e("auth", "Sign in failed", e)
             val message = e.message?.takeIf { it.isNotBlank() }
                 ?: getString(R.string.failed_to_create_new_account)

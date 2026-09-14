@@ -19,6 +19,7 @@ import org.btcmap.settings.mapStyle
 import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.prefs
 import org.btcmap.settings.uri
+import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
@@ -163,6 +164,7 @@ class AddPlaceFragment : Fragment() {
                     parentFragmentManager.popBackStack()
                 }
             } catch (t: Throwable) {
+                t.rethrowIfCancellation()
                 Log.e(null, null, t)
                 withResumed {
                     binding.btnSubmit.isEnabled = true

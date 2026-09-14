@@ -35,6 +35,7 @@ import org.btcmap.settings.authorized
 import org.btcmap.settings.prefs
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.showError
+import org.btcmap.util.rethrowIfCancellation
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -96,6 +97,7 @@ class AreaFragment : Fragment() {
                                 }
                                 updateBookmarkIcon()
                             } catch (e: Throwable) {
+                                e.rethrowIfCancellation()
                                 showError(e)
                             }
                         }
@@ -124,6 +126,7 @@ class AreaFragment : Fragment() {
                                     }
                                     updateBookmarkIcon()
                                 } catch (e: Throwable) {
+                                    e.rethrowIfCancellation()
                                     showError(e)
                                 }
                             }
@@ -154,6 +157,7 @@ class AreaFragment : Fragment() {
                 updateBookmarkIcon()
                 renderUpcomingEvents()
             } catch (e: Throwable) {
+                e.rethrowIfCancellation()
                 e.printStackTrace()
             }
         }
@@ -187,6 +191,7 @@ class AreaFragment : Fragment() {
                         )
                     }
                 } catch (e: Throwable) {
+                    e.rethrowIfCancellation()
                     showError(e)
                 }
             }

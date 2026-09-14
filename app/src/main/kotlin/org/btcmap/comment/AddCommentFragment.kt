@@ -28,6 +28,7 @@ import org.btcmap.api.addComment
 import org.btcmap.api.getCommentQuote
 import org.btcmap.api.getInvoice
 import org.btcmap.databinding.AddCommentFragmentBinding
+import org.btcmap.util.rethrowIfCancellation
 
 class AddCommentFragment : Fragment() {
 
@@ -70,6 +71,7 @@ class AddCommentFragment : Fragment() {
                     binding.btnContinue.isEnabled = true
                 }
             } catch (t: Throwable) {
+                t.rethrowIfCancellation()
                 Log.e(null, null, t)
                 withResumed {
                     parentFragmentManager.popBackStack()
@@ -104,6 +106,7 @@ class AddCommentFragment : Fragment() {
                         comment = commentText,
                     )
                 } catch (t: Throwable) {
+                    t.rethrowIfCancellation()
                     Log.e(null, null, t)
                     withResumed {
                         binding.comment.isEnabled = true
@@ -122,7 +125,8 @@ class AddCommentFragment : Fragment() {
                     while (true) {
                         val invoice = try {
                             api().getInvoice(addCommentResponse.invoiceId)
-                        } catch (_: Throwable) {
+                        } catch (e: Throwable) {
+                            e.rethrowIfCancellation()
                             delay(500)
                             continue
                         }

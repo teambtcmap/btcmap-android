@@ -24,6 +24,7 @@ import org.btcmap.place.PlaceFragment
 import org.btcmap.settings.ActivityInterval
 import org.btcmap.settings.activityIntervalDays
 import org.btcmap.settings.prefs
+import org.btcmap.util.rethrowIfCancellation
 
 /**
  * Common scaffolding for an Activity Feed tab: list of items, filter chips
@@ -192,6 +193,7 @@ abstract class BaseActivityFeedTab : Fragment() {
                 }
                 adapter.submitList(items)
             } catch (e: Throwable) {
+                e.rethrowIfCancellation()
                 e.printStackTrace()
                 binding.loading.visibility = View.GONE
                 binding.emptyView.visibility = View.VISIBLE

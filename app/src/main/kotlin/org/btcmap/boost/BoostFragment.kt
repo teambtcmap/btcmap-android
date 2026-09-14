@@ -30,6 +30,7 @@ import java.text.NumberFormat
 import androidx.core.net.toUri
 import org.btcmap.api
 import org.btcmap.databinding.BoostFragmentBinding
+import org.btcmap.util.rethrowIfCancellation
 
 class BoostFragment : Fragment() {
 
@@ -69,6 +70,7 @@ class BoostFragment : Fragment() {
             val quote = try {
                 api().getPlaceBoostQuote()
             } catch (t: Throwable) {
+                t.rethrowIfCancellation()
                 Log.e(null, null, t)
                 withResumed {
                     parentFragmentManager.popBackStack()
@@ -130,6 +132,7 @@ class BoostFragment : Fragment() {
                         days = days.toLong(),
                     )
                 } catch (t: Throwable) {
+                    t.rethrowIfCancellation()
                     withResumed {
                         MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.error)
                             .setMessage(t.toString()).setPositiveButton(R.string.close, null).show()
@@ -193,7 +196,8 @@ class BoostFragment : Fragment() {
 
                 val invoice = try {
                     api().getInvoice(invoiceId)
-                } catch (_: Throwable) {
+                } catch (e: Throwable) {
+                    e.rethrowIfCancellation()
                     delay(500)
                     continue
                 }

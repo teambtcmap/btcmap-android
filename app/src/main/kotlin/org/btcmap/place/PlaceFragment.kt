@@ -49,6 +49,7 @@ import org.btcmap.db.table.user.User
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.i18n.getLocalizedOpeningHours
 import org.btcmap.settings.authorized
+import org.btcmap.util.rethrowIfCancellation
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -120,6 +121,7 @@ class PlaceFragment : Fragment() {
                                 }
                                 updateBookmarkIcon()
                             } catch (e: Throwable) {
+                                e.rethrowIfCancellation()
                                 showError(e)
                             }
                         }
@@ -148,6 +150,7 @@ class PlaceFragment : Fragment() {
                                     }
                                     updateBookmarkIcon()
                                 } catch (e: Throwable) {
+                                    e.rethrowIfCancellation()
                                     showError(e)
                                 }
                             }
@@ -480,6 +483,7 @@ class PlaceFragment : Fragment() {
                         )
                     }
                 } catch (e: Throwable) {
+                    e.rethrowIfCancellation()
                     showError(e)
                 }
             }
