@@ -70,6 +70,7 @@
     <string name="area_icon">Area icon</string>
     <string name="events">Events</string>
     <string name="issues_d">Issues (%1$d)</string>
+    <string name="issues_d_of_d">Issues (%1$d of %2$d)</string>
     <string name="issue_outdated">Outdated, needs verification</string>
     <string name="issue_outdated_soon">Will be outdated soon</string>
     <string name="issue_missing_icon">Missing icon</string>

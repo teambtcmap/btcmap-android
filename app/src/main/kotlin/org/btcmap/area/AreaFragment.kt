@@ -339,7 +339,7 @@ class AreaFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val (rows, totalIssues) = withContext(Dispatchers.IO) {
-                    val response = api().getPlaceIssues(id)
+                    val response = api().getPlaceIssues(id, PLACE_ISSUES_LIMIT)
                     val rows = response.requestedIssues.map { issue ->
                         IssueRow(
                             issue = issue,
@@ -443,7 +443,11 @@ class AreaFragment : Fragment() {
             container.addView(itemBlock)
         }
 
-        binding.issuesTitle.text = getString(R.string.issues_d, totalIssues)
+        binding.issuesTitle.text = if (rows.size < totalIssues) {
+            getString(R.string.issues_d_of_d, rows.size, totalIssues)
+        } else {
+            getString(R.string.issues_d, totalIssues)
+        }
         binding.issuesTitle.isVisible = true
         binding.issuesContainer.isVisible = true
     }
@@ -480,5 +484,9 @@ class AreaFragment : Fragment() {
             startsAt = ZonedDateTime.parse(getString("starts_at")!!),
             endsAt = endsAtRaw?.let { ZonedDateTime.parse(it) },
         )
+    }
+
+    companion object {
+        private const val PLACE_ISSUES_LIMIT = 50L
     }
 }
