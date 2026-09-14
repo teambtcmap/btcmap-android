@@ -54,6 +54,8 @@ class PlaceFragment : Fragment() {
 
     private var placeId = 0L
 
+    private var placeName = ""
+
     private lateinit var commentsAdapter: CommentsAdapter
 
     private var _binding: PlaceFragmentBinding? = null
@@ -116,7 +118,7 @@ class PlaceFragment : Fragment() {
         val toggle = {
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
-                    toggleSavedPlace(placeId)
+                    toggleSavedPlace(placeId, placeName)
                     updateBookmarkIcon()
                 } catch (e: Throwable) {
                     e.rethrowIfCancellation()
@@ -140,6 +142,7 @@ class PlaceFragment : Fragment() {
 
     fun setPlace(place: Place) {
         placeId = place.id
+        placeName = place.getLocalizedName().orEmpty()
 
         binding.toolbar.title = place.getLocalizedName()
         binding.toolbar.setSingleLine(false)

@@ -69,6 +69,8 @@ class AreaFragment : Fragment() {
 
     private var appBarCollapsed = false
 
+    private var areaName = ""
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -99,6 +101,7 @@ class AreaFragment : Fragment() {
                 val area = withContext(Dispatchers.IO) {
                     api().getArea(areaId)
                 }
+                areaName = area.name
                 binding.toolbar.title = area.name
                 val headerImage = area.iconWide ?: area.icon
                 binding.icon.isVisible = headerImage != null
@@ -127,7 +130,7 @@ class AreaFragment : Fragment() {
         val toggle = {
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
-                    toggleSavedArea(areaId.toLong())
+                    toggleSavedArea(areaId.toLong(), areaName)
                     updateBookmarkIcon()
                 } catch (e: Throwable) {
                     e.rethrowIfCancellation()

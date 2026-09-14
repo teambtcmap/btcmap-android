@@ -165,26 +165,28 @@ class PlaceApiTest : ApiTestBase() {
     }
 
     @Test
-    fun savePlace_postsId() = runTest {
-        enqueueJson("")
+    fun savePlace_postsIdAndReturnsUpdatedList() = runTest {
+        enqueueJson("[123,456]")
 
-        api().savePlace(123)
+        val result = api().savePlace(123)
 
         val request = takeRequest()
         Assert.assertEquals("POST", request.method)
         Assert.assertEquals("/v4/places/saved", request.url.encodedPath)
         Assert.assertEquals("123", request.jsonBody())
+        Assert.assertEquals(listOf(123L, 456L), result)
     }
 
     @Test
-    fun removeSavedPlace_deletes() = runTest {
-        enqueueJson("")
+    fun removeSavedPlace_deletesAndReturnsUpdatedList() = runTest {
+        enqueueJson("[456]")
 
-        api().removeSavedPlace(123)
+        val result = api().removeSavedPlace(123)
 
         val request = takeRequest()
         Assert.assertEquals("DELETE", request.method)
         Assert.assertEquals("/v4/places/saved/123", request.url.encodedPath)
+        Assert.assertEquals(listOf(456L), result)
     }
 
     private companion object {

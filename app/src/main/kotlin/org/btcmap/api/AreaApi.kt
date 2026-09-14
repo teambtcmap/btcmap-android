@@ -97,7 +97,7 @@ private fun InputStream.toAreas(): List<GetAreasItem> {
     }
 }
 
-private fun InputStream.toJsonLongArray(): List<Long> {
+internal fun InputStream.toJsonLongArray(): List<Long> {
     val rawJson = bufferedReader().use { it.readText() }
     val jsonArray = JsonParser.parseString(rawJson).asJsonArray
 

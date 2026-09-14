@@ -98,17 +98,17 @@ suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
     }
 }
 
-suspend fun Api.savePlace(id: Long) {
+suspend fun Api.savePlace(id: Long): List<Long> {
     val url = url.newBuilder().addPathSegments("v4/places/saved").build()
     val body = JsonPrimitive(id).toString().toRequestBody("application/json".toMediaType())
 
-    call(Request.Builder().post(body).url(url).build()) { }
+    return call(Request.Builder().post(body).url(url).build()) { it.toJsonLongArray() }
 }
 
-suspend fun Api.removeSavedPlace(id: Long) {
+suspend fun Api.removeSavedPlace(id: Long): List<Long> {
     val url = url.newBuilder().addPathSegments("v4/places/saved/$id").build()
 
-    call(Request.Builder().delete().url(url).build()) { }
+    return call(Request.Builder().delete().url(url).build()) { it.toJsonLongArray() }
 }
 
 private fun InputStream.toGetPlacesItems(): List<GetPlacesItem> {
