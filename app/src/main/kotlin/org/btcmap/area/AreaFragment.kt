@@ -100,8 +100,9 @@ class AreaFragment : Fragment() {
                     api().getArea(areaId)
                 }
                 binding.toolbar.title = area.name
-                binding.icon.isVisible = area.icon != null
-                binding.icon.load(area.iconWide ?: area.icon)
+                val headerImage = area.iconWide ?: area.icon
+                binding.icon.isVisible = headerImage != null
+                binding.icon.load(headerImage)
                 updateToolbarContentColor()
                 binding.description.isVisible = area.description != null
                 binding.description.text = area.description
