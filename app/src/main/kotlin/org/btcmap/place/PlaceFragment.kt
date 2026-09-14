@@ -38,16 +38,12 @@ import org.btcmap.util.showError
 import org.btcmap.map.getErrorColor
 import org.btcmap.map.getOnSurfaceColor
 import org.btcmap.R
-import org.btcmap.api
-import org.btcmap.api.getUser
-import org.btcmap.api.removeSavedPlace
-import org.btcmap.api.savePlace
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.databinding.PlaceFragmentBinding
-import org.btcmap.db.table.user.User
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.i18n.getLocalizedOpeningHours
+import org.btcmap.saved.toggleSavedPlace
 import org.btcmap.settings.authorized
 import org.btcmap.util.rethrowIfCancellation
 import java.time.ZonedDateTime
@@ -96,67 +92,7 @@ class PlaceFragment : Fragment() {
                     startActivity(intent)
                 }
 
-                R.id.save -> {
-                    if (prefs.authorized) {
-                        viewLifecycleOwner.lifecycleScope.launch {
-                            try {
-                                val user = db().user.select()!!
-                                if (user.savedPlaces.any { savedPlace -> savedPlace.asJsonObject["id"].asLong == placeId }) {
-                                    api().removeSavedPlace(placeId)
-                                } else {
-                                    api().savePlace(placeId)
-                                }
-                                val updatedUser = api().getUser()
-                                db().transaction {
-                                    db().user.delete()
-                                    db().user.insert(
-                                        User(
-                                            id = updatedUser.id,
-                                            name = updatedUser.name,
-                                            roles = updatedUser.roles,
-                                            savedPlaces = updatedUser.savedPlaces,
-                                            savedAreas = updatedUser.savedAreas,
-                                        )
-                                    )
-                                }
-                                updateBookmarkIcon()
-                            } catch (e: Throwable) {
-                                e.rethrowIfCancellation()
-                                showError(e)
-                            }
-                        }
-                    } else {
-                        showAuthDialog {
-                            viewLifecycleOwner.lifecycleScope.launch {
-                                try {
-                                    val user = db().user.select()!!
-                                    if (user.savedPlaces.any { savedPlace -> savedPlace.asJsonObject["id"].asLong == placeId }) {
-                                        api().removeSavedPlace(placeId)
-                                    } else {
-                                        api().savePlace(placeId)
-                                    }
-                                    val updatedUser = api().getUser()
-                                    db().transaction {
-                                        db().user.delete()
-                                        db().user.insert(
-                                            User(
-                                                id = updatedUser.id,
-                                                name = updatedUser.name,
-                                                roles = updatedUser.roles,
-                                                savedPlaces = updatedUser.savedPlaces,
-                                                savedAreas = updatedUser.savedAreas,
-                                            )
-                                        )
-                                    }
-                                    updateBookmarkIcon()
-                                } catch (e: Throwable) {
-                                    e.rethrowIfCancellation()
-                                    showError(e)
-                                }
-                            }
-                        }
-                    }
-                }
+                R.id.save -> onSaveClicked()
             }
 
             true
@@ -174,6 +110,27 @@ class PlaceFragment : Fragment() {
         commentsAdapter = CommentsAdapter()
         binding.commentsList.layoutManager = LinearLayoutManager(requireContext())
         binding.commentsList.adapter = commentsAdapter
+    }
+
+    private fun onSaveClicked() {
+        val toggle = {
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    toggleSavedPlace(placeId)
+                    updateBookmarkIcon()
+                } catch (e: Throwable) {
+                    e.rethrowIfCancellation()
+                    showError(e)
+                }
+            }
+            Unit
+        }
+
+        if (prefs.authorized) {
+            toggle()
+        } else {
+            showAuthDialog { toggle() }
+        }
     }
 
     override fun onDestroyView() {
