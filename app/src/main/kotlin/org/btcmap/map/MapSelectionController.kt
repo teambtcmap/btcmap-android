@@ -1,6 +1,7 @@
 package org.btcmap.map
 
 import android.graphics.PointF
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -13,10 +14,13 @@ import org.btcmap.db.table.place.Place
 import org.btcmap.map.layer.EVENT_MARKER_LAYER_ID
 import org.btcmap.map.layer.EXCHANGE_MARKER_LAYER_ID
 import org.btcmap.map.layer.MERCHANT_MARKER_LAYER_ID
+import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.Point
+
+private const val TAG = "MapSelectionController"
 
 class MapSelectionController(
     private val map: MapLibreMap,
@@ -54,7 +58,7 @@ class MapSelectionController(
             return false
         }
 
-        try {
+        return try {
             val isEvent =
                 feature.getProperty("iconId") == null && feature.getProperty("count") == null
 
@@ -62,10 +66,15 @@ class MapSelectionController(
                 val idValue = feature.getProperty("id") ?: return false
                 val eventId = idValue.asLong
                 scope.launch {
-                    val event = withContext(Dispatchers.IO) {
-                        db.event.selectById(eventId)
-                    } ?: return@launch
-                    onOpenEventWebsite(event.website)
+                    try {
+                        val event = withContext(Dispatchers.IO) {
+                            db.event.selectById(eventId)
+                        } ?: return@launch
+                        onOpenEventWebsite(event.website)
+                    } catch (e: Throwable) {
+                        e.rethrowIfCancellation()
+                        Log.e(TAG, "Failed to open event $eventId", e)
+                    }
                 }
                 return true
             }
@@ -73,15 +82,20 @@ class MapSelectionController(
             val idValue = feature.getProperty("id") ?: return false
             val placeId = idValue.asLong
             scope.launch {
-                val place = withContext(Dispatchers.IO) {
-                    db.place.selectById(placeId)
-                } ?: return@launch
-                onOpenPlace(place)
+                try {
+                    val place = withContext(Dispatchers.IO) {
+                        db.place.selectById(placeId)
+                    } ?: return@launch
+                    onOpenPlace(place)
+                } catch (e: Throwable) {
+                    e.rethrowIfCancellation()
+                    Log.e(TAG, "Failed to open place $placeId", e)
+                }
             }
             return true
         } catch (e: Exception) {
-            e.printStackTrace()
-            return false
+            Log.e(TAG, "Failed to read tapped marker", e)
+            false
         }
     }
 
