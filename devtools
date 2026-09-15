@@ -12,7 +12,7 @@ Usage:
   ./devtools app install        Install debug build
   ./devtools app run            Install and run debug build
   ./devtools app uninstall      Uninstall the app
-  ./devtools app deploy-beta    Build and deploy beta APK
+  ./devtools app deploy-beta    Build and deploy beta APK and update manifest
   ./devtools app deploy-release Build and deploy release APK
   ./devtools bundle data        Download latest places snapshot
   ./devtools bundle map-styles  Bundle MapLibre styles as assets
@@ -42,7 +42,7 @@ Commands:
   install        Install debug build
   run            Install and run debug build
   uninstall      Uninstall the app
-  deploy-beta    Build and deploy beta APK
+  deploy-beta    Build and deploy beta APK and update manifest
   deploy-release Build and deploy release APK
 EOF
 }
@@ -237,12 +237,35 @@ cmd_app_deploy_beta() {
 
   local apk_dir="app/build/outputs/apk/beta"
   local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
+  local manifest_dest="btcmap-api:/srv/http/static.btcmap.org/android/latest-app-beta-ver.json"
+  local build_config="app/build/generated/source/buildConfig/beta/org/btcmap/BuildConfig.java"
 
   assert_apk_signed "$apk_dir/app-arm64-v8a-beta.apk"
   assert_apk_signed "$apk_dir/app-universal-beta.apk"
 
+  local version_code version_name
+  version_code="$(sed -n 's/.*VERSION_CODE = \([0-9]*\);.*/\1/p' "$build_config" | head -n1)"
+  version_name="$(sed -n 's/.*VERSION_NAME = "\(.*\)";.*/\1/p' "$build_config" | head -n1)"
+  if [ -z "$version_code" ] || [ -z "$version_name" ]; then
+    echo "Error: could not read version info from $build_config" >&2
+    return 1
+  fi
+
+  local manifest
+  manifest="$(mktemp)"
+  cat > "$manifest" <<JSON
+{
+  "code": $version_code,
+  "name": "$version_name",
+  "url": "https://static.btcmap.org/android/apk/beta.apk"
+}
+JSON
+  chmod 644 "$manifest"
+
   rsync -avz --progress "$apk_dir"/app-arm64-v8a-beta.apk "$dest/beta.apk"
   rsync -avz --progress "$apk_dir"/app-universal-beta.apk "$dest/beta-universal.apk"
+  rsync -avz --progress --chmod=F644 "$manifest" "$manifest_dest"
+  rm -f "$manifest"
 }
 
 cmd_app_deploy_release() {

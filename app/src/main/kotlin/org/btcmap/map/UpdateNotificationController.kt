@@ -31,9 +31,9 @@ class UpdateNotificationController(
                     try {
                         val latestVerJson = OkHttpClient.Builder().build().newCall(
                             Request.Builder()
-                                .url("https://static.btcmap.org/android/latest-app-ver.json".toHttpUrl())
+                                .url(manifestUrl().toHttpUrl())
                                 .build()
-                        ).executeAsync().body.string().trim()
+                        ).executeAsync().use { it.body.string().trim() }
 
                         val latestVer =
                             com.google.gson.JsonParser.parseString(latestVerJson).asJsonObject
@@ -42,7 +42,6 @@ class UpdateNotificationController(
                         val latestVerUrl = latestVer.get("url").asString
 
                         if (!BuildConfig.DEBUG &&
-                            BuildConfig.BUILD_TYPE != "beta" &&
                             latestVerCode > BuildConfig.VERSION_CODE
                         ) {
                             lifecycleOwner.withResumed {
@@ -53,10 +52,17 @@ class UpdateNotificationController(
                                     MaterialAlertDialogBuilder(context)
                                         .setTitle(R.string.update_available)
                                         .setMessage(
-                                            context.getString(
-                                                R.string.update_available_description,
-                                                BuildConfig.VERSION_NAME, latestVerName
-                                            )
+                                            if (isBeta) {
+                                                context.getString(
+                                                    R.string.update_available_description_beta,
+                                                    BuildConfig.VERSION_CODE, latestVerCode
+                                                )
+                                            } else {
+                                                context.getString(
+                                                    R.string.update_available_description,
+                                                    BuildConfig.VERSION_NAME, latestVerName
+                                                )
+                                            }
                                         )
                                         .setPositiveButton(R.string.get_apk) { _, _ ->
                                             val intent = Intent(Intent.ACTION_VIEW)
@@ -74,6 +80,17 @@ class UpdateNotificationController(
                     }
                 }
             }
+        }
+    }
+
+    private val isBeta: Boolean
+        get() = BuildConfig.BUILD_TYPE == "beta"
+
+    private fun manifestUrl(): String {
+        return if (isBeta) {
+            "https://static.btcmap.org/android/latest-app-beta-ver.json"
+        } else {
+            "https://static.btcmap.org/android/latest-app-ver.json"
         }
     }
 }
