@@ -167,4 +167,17 @@
     <string name="report_select_type">Моля, изберете тип на доклада</string>
     <string name="zoom_in">Приближи</string>
     <string name="zoom_out">Отдалечи</string>
+    <string name="failed_to_load">Неуспешно зареждане</string>
+    <string name="tap_to_retry">Докоснете, за да опитате отново</string>
+    <string name="read_more">Прочетете още</string>
+    <string name="collapse">Свиване</string>
+    <string name="events">Събития</string>
+    <string name="issues_d">Проблеми (%1$d)</string>
+    <string name="issues_d_of_d">Проблеми (%1$d от %2$d)</string>
+    <string name="issue_outdated">Остаряло, нуждае се от проверка</string>
+    <string name="issue_outdated_soon">Скоро ще остарее</string>
+    <string name="issue_missing_icon">Липсваща икона</string>
+    <string name="issue_invalid_tag_value">Невалидна стойност за %1$s</string>
+    <string name="issue_misspelled_tag_name">Неправилно изписан етикет: %1$s</string>
+    <string name="issue_unknown">Неизвестен проблем</string>
 </resources>

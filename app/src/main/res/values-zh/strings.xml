@@ -163,4 +163,17 @@
     <string name="report_select_type">请选择报告类型</string>
     <string name="zoom_in">放大</string>
     <string name="zoom_out">缩小</string>
+    <string name="failed_to_load">加载失败</string>
+    <string name="tap_to_retry">点按以重试</string>
+    <string name="read_more">阅读更多</string>
+    <string name="collapse">收起</string>
+    <string name="events">活动</string>
+    <string name="issues_d">问题 (%1$d)</string>
+    <string name="issues_d_of_d">问题 (%1$d / %2$d)</string>
+    <string name="issue_outdated">已过时，需要验证</string>
+    <string name="issue_outdated_soon">即将过时</string>
+    <string name="issue_missing_icon">缺少图标</string>
+    <string name="issue_invalid_tag_value">%1$s 的值无效</string>
+    <string name="issue_misspelled_tag_name">标签名称拼写错误：%1$s</string>
+    <string name="issue_unknown">未知问题</string>
 </resources>

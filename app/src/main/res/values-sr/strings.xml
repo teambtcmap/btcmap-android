@@ -171,4 +171,17 @@
     <string name="report_select_type">Изаберите тип пријаве</string>
     <string name="zoom_in">Увећај</string>
     <string name="zoom_out">Умањи</string>
+    <string name="failed_to_load">Учитавање није успело</string>
+    <string name="tap_to_retry">Додирните да покушате поново</string>
+    <string name="read_more">Прочитај више</string>
+    <string name="collapse">Скупи</string>
+    <string name="events">Догађаји</string>
+    <string name="issues_d">Проблеми (%1$d)</string>
+    <string name="issues_d_of_d">Проблеми (%1$d од %2$d)</string>
+    <string name="issue_outdated">Застарело, потребна верификација</string>
+    <string name="issue_outdated_soon">Ускоро ће застарети</string>
+    <string name="issue_missing_icon">Недостаје иконица</string>
+    <string name="issue_invalid_tag_value">Неважећа вредност за %1$s</string>
+    <string name="issue_misspelled_tag_name">Погрешно написан назив ознаке: %1$s</string>
+    <string name="issue_unknown">Непознат проблем</string>
 </resources>

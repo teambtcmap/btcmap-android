@@ -163,4 +163,17 @@
     <string name="report_select_type">Vui lòng chọn loại báo cáo</string>
     <string name="zoom_in">Phóng to</string>
     <string name="zoom_out">Thu nhỏ</string>
+    <string name="failed_to_load">Không tải được</string>
+    <string name="tap_to_retry">Nhấn để thử lại</string>
+    <string name="read_more">Đọc thêm</string>
+    <string name="collapse">Thu gọn</string>
+    <string name="events">Sự kiện</string>
+    <string name="issues_d">Vấn đề (%1$d)</string>
+    <string name="issues_d_of_d">Vấn đề (%1$d trong %2$d)</string>
+    <string name="issue_outdated">Đã cũ, cần xác minh</string>
+    <string name="issue_outdated_soon">Sắp trở nên cũ</string>
+    <string name="issue_missing_icon">Thiếu biểu tượng</string>
+    <string name="issue_invalid_tag_value">Giá trị không hợp lệ cho %1$s</string>
+    <string name="issue_misspelled_tag_name">Tên thẻ viết sai chính tả: %1$s</string>
+    <string name="issue_unknown">Vấn đề không xác định</string>
 </resources>

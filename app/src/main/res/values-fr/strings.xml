@@ -171,4 +171,17 @@
     <string name="report_select_type">Veuillez sélectionner un type de signalement</string>
     <string name="zoom_in">Zoom avant</string>
     <string name="zoom_out">Zoom arrière</string>
+    <string name="failed_to_load">Échec du chargement</string>
+    <string name="tap_to_retry">Touchez pour réessayer</string>
+    <string name="read_more">Lire la suite</string>
+    <string name="collapse">Réduire</string>
+    <string name="events">Événements</string>
+    <string name="issues_d">Problèmes (%1$d)</string>
+    <string name="issues_d_of_d">Problèmes (%1$d sur %2$d)</string>
+    <string name="issue_outdated">Obsolète, vérification nécessaire</string>
+    <string name="issue_outdated_soon">Bientôt obsolète</string>
+    <string name="issue_missing_icon">Icône manquante</string>
+    <string name="issue_invalid_tag_value">Valeur non valide pour %1$s</string>
+    <string name="issue_misspelled_tag_name">Nom de balise mal orthographié : %1$s</string>
+    <string name="issue_unknown">Problème inconnu</string>
 </resources>

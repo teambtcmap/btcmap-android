@@ -167,4 +167,17 @@
     <string name="report_select_type">Kérjük, válasszon bejelentéstípust</string>
     <string name="zoom_in">Nagyítás</string>
     <string name="zoom_out">Kicsinyítés</string>
+    <string name="failed_to_load">Nem sikerült betölteni</string>
+    <string name="tap_to_retry">Koppints az újrapróbáláshoz</string>
+    <string name="read_more">Tovább</string>
+    <string name="collapse">Összecsukás</string>
+    <string name="events">Események</string>
+    <string name="issues_d">Problémák (%1$d)</string>
+    <string name="issues_d_of_d">Problémák (%1$d / %2$d)</string>
+    <string name="issue_outdated">Elavult, ellenőrzés szükséges</string>
+    <string name="issue_outdated_soon">Hamarosan elavul</string>
+    <string name="issue_missing_icon">Hiányzó ikon</string>
+    <string name="issue_invalid_tag_value">Érvénytelen érték: %1$s</string>
+    <string name="issue_misspelled_tag_name">Elgépelt címkenév: %1$s</string>
+    <string name="issue_unknown">Ismeretlen probléma</string>
 </resources>

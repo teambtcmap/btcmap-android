@@ -167,4 +167,17 @@
     <string name="report_select_type">Επίλεξε έναν τύπο αναφοράς</string>
     <string name="zoom_in">Μεγέθυνση</string>
     <string name="zoom_out">Σμίκρυνση</string>
+    <string name="failed_to_load">Αποτυχία φόρτωσης</string>
+    <string name="tap_to_retry">Πατήστε για επανάληψη</string>
+    <string name="read_more">Διαβάστε περισσότερα</string>
+    <string name="collapse">Σύμπτυξη</string>
+    <string name="events">Εκδηλώσεις</string>
+    <string name="issues_d">Προβλήματα (%1$d)</string>
+    <string name="issues_d_of_d">Προβλήματα (%1$d από %2$d)</string>
+    <string name="issue_outdated">Παρωχημένο, χρειάζεται επαλήθευση</string>
+    <string name="issue_outdated_soon">Θα γίνει σύντομα παρωχημένο</string>
+    <string name="issue_missing_icon">Λείπει εικονίδιο</string>
+    <string name="issue_invalid_tag_value">Μη έγκυρη τιμή για %1$s</string>
+    <string name="issue_misspelled_tag_name">Λανθασμένο όνομα ετικέτας: %1$s</string>
+    <string name="issue_unknown">Άγνωστο πρόβλημα</string>
 </resources>

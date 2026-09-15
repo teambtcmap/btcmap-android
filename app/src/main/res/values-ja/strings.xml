@@ -163,4 +163,17 @@
     <string name="report_select_type">報告の種類を選択してください</string>
     <string name="zoom_in">拡大</string>
     <string name="zoom_out">縮小</string>
+    <string name="failed_to_load">読み込みに失敗しました</string>
+    <string name="tap_to_retry">タップして再試行</string>
+    <string name="read_more">もっと見る</string>
+    <string name="collapse">折りたたむ</string>
+    <string name="events">イベント</string>
+    <string name="issues_d">問題 (%1$d)</string>
+    <string name="issues_d_of_d">問題 (%1$d / %2$d)</string>
+    <string name="issue_outdated">古い情報です。確認が必要です</string>
+    <string name="issue_outdated_soon">まもなく古くなります</string>
+    <string name="issue_missing_icon">アイコンがありません</string>
+    <string name="issue_invalid_tag_value">%1$s の値が無効です</string>
+    <string name="issue_misspelled_tag_name">タグ名の綴りが間違っています: %1$s</string>
+    <string name="issue_unknown">不明な問題</string>
 </resources>

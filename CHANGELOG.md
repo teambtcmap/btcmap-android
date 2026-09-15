@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Localize area names and descriptions to the device language
 - Collapse long area descriptions to the first paragraph with a read more toggle
 - Show how many place issues are displayed when the list is truncated
 - Show place issues with their place icons on the area screen below upcoming events and open the OSM editor when tapped
@@ -23,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Allow posting paid place comments without signing in
 - Tighten place details bottom sheet header and action button spacing
 - Show server-provided error messages and avoid retrying paid actions on rate limits
+- Localize the area screen strings into all supported languages
 - Localize the activity feed into all supported languages
 - Translate the account, add-place and verify/report screens into all supported languages
 - Open btcmap.org merchant links directly in the app

@@ -163,4 +163,17 @@
     <string name="report_select_type">โปรดเลือกประเภทรายงาน</string>
     <string name="zoom_in">ซูมเข้า</string>
     <string name="zoom_out">ซูมออก</string>
+    <string name="failed_to_load">โหลดไม่สำเร็จ</string>
+    <string name="tap_to_retry">แตะเพื่อลองใหม่</string>
+    <string name="read_more">อ่านเพิ่มเติม</string>
+    <string name="collapse">ย่อ</string>
+    <string name="events">กิจกรรม</string>
+    <string name="issues_d">ปัญหา (%1$d)</string>
+    <string name="issues_d_of_d">ปัญหา (%1$d จาก %2$d)</string>
+    <string name="issue_outdated">ล้าสมัย ต้องตรวจสอบ</string>
+    <string name="issue_outdated_soon">จะล้าสมัยในไม่ช้า</string>
+    <string name="issue_missing_icon">ไม่มีไอคอน</string>
+    <string name="issue_invalid_tag_value">ค่าไม่ถูกต้องสำหรับ %1$s</string>
+    <string name="issue_misspelled_tag_name">ชื่อแท็กสะกดผิด: %1$s</string>
+    <string name="issue_unknown">ปัญหาที่ไม่รู้จัก</string>
 </resources>

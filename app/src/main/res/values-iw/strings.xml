@@ -171,4 +171,17 @@
     <string name="report_select_type">אנא בחרו סוג דיווח</string>
     <string name="zoom_in">הגדלה</string>
     <string name="zoom_out">הקטנה</string>
+    <string name="failed_to_load">הטעינה נכשלה</string>
+    <string name="tap_to_retry">הקש כדי לנסות שוב</string>
+    <string name="read_more">קרא עוד</string>
+    <string name="collapse">כווץ</string>
+    <string name="events">אירועים</string>
+    <string name="issues_d">בעיות (%1$d)</string>
+    <string name="issues_d_of_d">בעיות (%1$d מתוך %2$d)</string>
+    <string name="issue_outdated">מיושן, דורש אימות</string>
+    <string name="issue_outdated_soon">יתיישן בקרוב</string>
+    <string name="issue_missing_icon">חסר סמל</string>
+    <string name="issue_invalid_tag_value">ערך לא חוקי עבור %1$s</string>
+    <string name="issue_misspelled_tag_name">שם תג שגוי: %1$s</string>
+    <string name="issue_unknown">בעיה לא ידועה</string>
 </resources>

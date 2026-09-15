@@ -175,4 +175,17 @@
     <string name="report_select_type">Vyberte typ hlásenia</string>
     <string name="zoom_in">Priblížiť</string>
     <string name="zoom_out">Oddialiť</string>
+    <string name="failed_to_load">Nepodarilo sa načítať</string>
+    <string name="tap_to_retry">Klepnutím skúste znova</string>
+    <string name="read_more">Čítať viac</string>
+    <string name="collapse">Zbaliť</string>
+    <string name="events">Udalosti</string>
+    <string name="issues_d">Problémy (%1$d)</string>
+    <string name="issues_d_of_d">Problémy (%1$d z %2$d)</string>
+    <string name="issue_outdated">Zastarané, vyžaduje overenie</string>
+    <string name="issue_outdated_soon">Čoskoro bude zastarané</string>
+    <string name="issue_missing_icon">Chýbajúca ikona</string>
+    <string name="issue_invalid_tag_value">Neplatná hodnota pre %1$s</string>
+    <string name="issue_misspelled_tag_name">Nesprávne napísaný názov značky: %1$s</string>
+    <string name="issue_unknown">Neznámy problém</string>
 </resources>

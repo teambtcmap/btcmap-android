@@ -167,4 +167,17 @@
     <string name="report_select_type">Välj en rapporttyp</string>
     <string name="zoom_in">Zooma in</string>
     <string name="zoom_out">Zooma ut</string>
+    <string name="failed_to_load">Kunde inte läsas in</string>
+    <string name="tap_to_retry">Tryck för att försöka igen</string>
+    <string name="read_more">Läs mer</string>
+    <string name="collapse">Fäll ihop</string>
+    <string name="events">Evenemang</string>
+    <string name="issues_d">Problem (%1$d)</string>
+    <string name="issues_d_of_d">Problem (%1$d av %2$d)</string>
+    <string name="issue_outdated">Föråldrat, kräver verifiering</string>
+    <string name="issue_outdated_soon">Blir snart föråldrat</string>
+    <string name="issue_missing_icon">Saknad ikon</string>
+    <string name="issue_invalid_tag_value">Ogiltigt värde för %1$s</string>
+    <string name="issue_misspelled_tag_name">Felstavat taggnamn: %1$s</string>
+    <string name="issue_unknown">Okänt problem</string>
 </resources>

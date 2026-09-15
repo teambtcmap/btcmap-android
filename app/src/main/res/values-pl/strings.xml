@@ -175,4 +175,17 @@
     <string name="report_select_type">Wybierz typ zgłoszenia</string>
     <string name="zoom_in">Powiększ</string>
     <string name="zoom_out">Pomniejsz</string>
+    <string name="failed_to_load">Nie udało się załadować</string>
+    <string name="tap_to_retry">Dotknij, aby ponowić</string>
+    <string name="read_more">Czytaj więcej</string>
+    <string name="collapse">Zwiń</string>
+    <string name="events">Wydarzenia</string>
+    <string name="issues_d">Problemy (%1$d)</string>
+    <string name="issues_d_of_d">Problemy (%1$d z %2$d)</string>
+    <string name="issue_outdated">Nieaktualne, wymaga weryfikacji</string>
+    <string name="issue_outdated_soon">Wkrótce stanie się nieaktualne</string>
+    <string name="issue_missing_icon">Brak ikony</string>
+    <string name="issue_invalid_tag_value">Nieprawidłowa wartość dla %1$s</string>
+    <string name="issue_misspelled_tag_name">Błędnie zapisana nazwa tagu: %1$s</string>
+    <string name="issue_unknown">Nieznany problem</string>
 </resources>

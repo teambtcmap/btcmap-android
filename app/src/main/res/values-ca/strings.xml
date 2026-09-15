@@ -171,4 +171,17 @@
     <string name="report_select_type">Selecciona un tipus d\'informe</string>
     <string name="zoom_in">Amplia</string>
     <string name="zoom_out">Redueix</string>
+    <string name="failed_to_load">No s\'ha pogut carregar</string>
+    <string name="tap_to_retry">Toca per tornar-ho a provar</string>
+    <string name="read_more">Llegeix més</string>
+    <string name="collapse">Replega</string>
+    <string name="events">Esdeveniments</string>
+    <string name="issues_d">Problemes (%1$d)</string>
+    <string name="issues_d_of_d">Problemes (%1$d de %2$d)</string>
+    <string name="issue_outdated">Desactualitzat, necessita verificació</string>
+    <string name="issue_outdated_soon">Aviat quedarà desactualitzat</string>
+    <string name="issue_missing_icon">Falta la icona</string>
+    <string name="issue_invalid_tag_value">Valor no vàlid per a %1$s</string>
+    <string name="issue_misspelled_tag_name">Nom d\'etiqueta mal escrit: %1$s</string>
+    <string name="issue_unknown">Problema desconegut</string>
 </resources>

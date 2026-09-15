@@ -3,6 +3,7 @@ package org.btcmap.api
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
+import java.util.Locale
 
 class AreaApiTest : ApiTestBase() {
     @Test
@@ -92,6 +93,34 @@ class AreaApiTest : ApiTestBase() {
         Assert.assertNull(area.icon)
         Assert.assertNull(area.iconWide)
         Assert.assertNull(area.description)
+    }
+
+    @Test
+    fun getArea_sendsCurrentLocaleLanguage() = runTest {
+        val previous = Locale.getDefault()
+        Locale.setDefault(Locale.GERMAN)
+        try {
+            enqueueJson(
+                """
+                {
+                    "id": 7,
+                    "name": "Grand Paris",
+                    "type": "community",
+                    "url_alias": "grand-paris",
+                    "website_url": "https://btcmap.org/community/grand-paris",
+                    "description": "Großraum Paris"
+                }
+                """.trimIndent()
+            )
+
+            val area = api().getArea("grand-paris")
+
+            val request = takeRequest()
+            Assert.assertEquals("de", request.url.queryParameter("lang"))
+            Assert.assertEquals("Großraum Paris", area.description)
+        } finally {
+            Locale.setDefault(previous)
+        }
     }
 
     @Test

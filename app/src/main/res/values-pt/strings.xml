@@ -171,4 +171,17 @@
     <string name="report_select_type">Selecione um tipo de relatório</string>
     <string name="zoom_in">Aproximar</string>
     <string name="zoom_out">Afastar</string>
+    <string name="failed_to_load">Falha ao carregar</string>
+    <string name="tap_to_retry">Toque para tentar novamente</string>
+    <string name="read_more">Ler mais</string>
+    <string name="collapse">Recolher</string>
+    <string name="events">Eventos</string>
+    <string name="issues_d">Problemas (%1$d)</string>
+    <string name="issues_d_of_d">Problemas (%1$d de %2$d)</string>
+    <string name="issue_outdated">Desatualizado, precisa de verificação</string>
+    <string name="issue_outdated_soon">Ficará desatualizado em breve</string>
+    <string name="issue_missing_icon">Ícone ausente</string>
+    <string name="issue_invalid_tag_value">Valor inválido para %1$s</string>
+    <string name="issue_misspelled_tag_name">Nome da etiqueta escrito incorretamente: %1$s</string>
+    <string name="issue_unknown">Problema desconhecido</string>
 </resources>

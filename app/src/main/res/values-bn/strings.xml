@@ -167,4 +167,17 @@
     <string name="report_select_type">অনুগ্রহ করে একটি রিপোর্টের ধরন নির্বাচন করুন</string>
     <string name="zoom_in">জুম ইন</string>
     <string name="zoom_out">জুম আউট</string>
+    <string name="failed_to_load">লোড করা যায়নি</string>
+    <string name="tap_to_retry">আবার চেষ্টা করতে ট্যাপ করুন</string>
+    <string name="read_more">আরও পড়ুন</string>
+    <string name="collapse">গুটিয়ে নিন</string>
+    <string name="events">ইভেন্ট</string>
+    <string name="issues_d">সমস্যা (%1$d)</string>
+    <string name="issues_d_of_d">সমস্যা (%1$d এর %2$d)</string>
+    <string name="issue_outdated">পুরোনো, যাচাইকরণ প্রয়োজন</string>
+    <string name="issue_outdated_soon">শীঘ্রই পুরোনো হয়ে যাবে</string>
+    <string name="issue_missing_icon">আইকন নেই</string>
+    <string name="issue_invalid_tag_value">%1$s এর জন্য অবৈধ মান</string>
+    <string name="issue_misspelled_tag_name">ভুল বানানের ট্যাগ নাম: %1$s</string>
+    <string name="issue_unknown">অজানা সমস্যা</string>
 </resources>

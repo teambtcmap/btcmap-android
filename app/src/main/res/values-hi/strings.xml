@@ -167,4 +167,17 @@
     <string name="report_select_type">कृपया रिपोर्ट का प्रकार चुनें</string>
     <string name="zoom_in">ज़ूम इन</string>
     <string name="zoom_out">ज़ूम आउट</string>
+    <string name="failed_to_load">लोड नहीं हो सका</string>
+    <string name="tap_to_retry">पुनः प्रयास करने के लिए टैप करें</string>
+    <string name="read_more">और पढ़ें</string>
+    <string name="collapse">संक्षिप्त करें</string>
+    <string name="events">इवेंट</string>
+    <string name="issues_d">समस्याएँ (%1$d)</string>
+    <string name="issues_d_of_d">समस्याएँ (%1$d में से %2$d)</string>
+    <string name="issue_outdated">पुराना, सत्यापन आवश्यक</string>
+    <string name="issue_outdated_soon">जल्द ही पुराना हो जाएगा</string>
+    <string name="issue_missing_icon">आइकन गुम है</string>
+    <string name="issue_invalid_tag_value">%1$s के लिए अमान्य मान</string>
+    <string name="issue_misspelled_tag_name">गलत वर्तनी वाला टैग नाम: %1$s</string>
+    <string name="issue_unknown">अज्ञात समस्या</string>
 </resources>

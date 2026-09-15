@@ -8,6 +8,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
+import java.util.Locale
 
 data class GetAreasItem(
     val id: Long,
@@ -39,8 +40,13 @@ suspend fun Api.getAreas(lat: Double, lon: Double): List<GetAreasItem> {
     return call(Request.Builder().url(url).build()) { it.toAreas() }
 }
 
-suspend fun Api.getArea(id: String): GetAreaItem {
-    val url = url.newBuilder().addPathSegments("v4/areas/$id").build()
+suspend fun Api.getArea(
+    id: String,
+    lang: String = Locale.getDefault().language,
+): GetAreaItem {
+    val url = url.newBuilder().addPathSegments("v4/areas/$id").apply {
+        if (lang.isNotBlank()) addQueryParameter("lang", lang)
+    }.build()
 
     return call(Request.Builder().url(url).build()) { stream ->
         val body = stream.toJsonObject()

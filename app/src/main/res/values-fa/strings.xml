@@ -167,4 +167,17 @@
     <string name="report_select_type">لطفاً یک نوع گزارش انتخاب کنید</string>
     <string name="zoom_in">بزرگ‌نمایی</string>
     <string name="zoom_out">کوچک‌نمایی</string>
+    <string name="failed_to_load">بارگذاری ناموفق بود</string>
+    <string name="tap_to_retry">برای تلاش مجدد ضربه بزنید</string>
+    <string name="read_more">بیشتر بخوانید</string>
+    <string name="collapse">جمع کردن</string>
+    <string name="events">رویدادها</string>
+    <string name="issues_d">مشکلات (%1$d)</string>
+    <string name="issues_d_of_d">مشکلات (%1$d از %2$d)</string>
+    <string name="issue_outdated">قدیمی، نیاز به بررسی دارد</string>
+    <string name="issue_outdated_soon">به‌زودی قدیمی می‌شود</string>
+    <string name="issue_missing_icon">نماد موجود نیست</string>
+    <string name="issue_invalid_tag_value">مقدار نامعتبر برای %1$s</string>
+    <string name="issue_misspelled_tag_name">نام برچسب اشتباه نوشته شده: %1$s</string>
+    <string name="issue_unknown">مشکل ناشناخته</string>
 </resources>
