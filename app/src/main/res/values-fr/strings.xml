@@ -184,4 +184,5 @@
     <string name="issue_invalid_tag_value">Valeur non valide pour %1$s</string>
     <string name="issue_misspelled_tag_name">Nom de balise mal orthographié : %1$s</string>
     <string name="issue_unknown">Problème inconnu</string>
+    <string name="how_to_help">Comment aider ?</string>
 </resources>

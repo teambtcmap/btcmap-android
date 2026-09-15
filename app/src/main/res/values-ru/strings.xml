@@ -188,4 +188,5 @@
     <string name="issue_invalid_tag_value">Недопустимое значение для %1$s</string>
     <string name="issue_misspelled_tag_name">Неправильно написано имя тега: %1$s</string>
     <string name="issue_unknown">Неизвестная проблема</string>
+    <string name="how_to_help">Как я могу помочь?</string>
 </resources>

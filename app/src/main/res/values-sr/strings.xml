@@ -184,4 +184,5 @@
     <string name="issue_invalid_tag_value">Неважећа вредност за %1$s</string>
     <string name="issue_misspelled_tag_name">Погрешно написан назив ознаке: %1$s</string>
     <string name="issue_unknown">Непознат проблем</string>
+    <string name="how_to_help">Како могу да помогнем?</string>
 </resources>

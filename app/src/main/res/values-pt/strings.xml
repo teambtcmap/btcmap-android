@@ -184,4 +184,5 @@
     <string name="issue_invalid_tag_value">Valor inválido para %1$s</string>
     <string name="issue_misspelled_tag_name">Nome da etiqueta escrito incorretamente: %1$s</string>
     <string name="issue_unknown">Problema desconhecido</string>
+    <string name="how_to_help">Como ajudar?</string>
 </resources>

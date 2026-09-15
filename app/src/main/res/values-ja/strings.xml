@@ -176,4 +176,5 @@
     <string name="issue_invalid_tag_value">%1$s の値が無効です</string>
     <string name="issue_misspelled_tag_name">タグ名の綴りが間違っています: %1$s</string>
     <string name="issue_unknown">不明な問題</string>
+    <string name="how_to_help">協力するには？</string>
 </resources>

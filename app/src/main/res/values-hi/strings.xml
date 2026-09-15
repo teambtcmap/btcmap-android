@@ -180,4 +180,5 @@
     <string name="issue_invalid_tag_value">%1$s के लिए अमान्य मान</string>
     <string name="issue_misspelled_tag_name">गलत वर्तनी वाला टैग नाम: %1$s</string>
     <string name="issue_unknown">अज्ञात समस्या</string>
+    <string name="how_to_help">मैं कैसे मदद कर सकता हूँ?</string>
 </resources>

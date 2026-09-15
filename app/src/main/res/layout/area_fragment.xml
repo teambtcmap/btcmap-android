@@ -117,17 +117,41 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
-            <TextView
-                android:id="@+id/issues_title"
-                style="?attr/textAppearanceTitleMedium"
+            <LinearLayout
+                android:id="@+id/issues_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="16dp"
-                android:textColor="?attr/colorOnSurfaceVariant"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:visibility="gone"
-                tools:text="Issues (5)"
-                tools:visibility="visible" />
+                tools:visibility="visible">
+
+                <TextView
+                    android:id="@+id/issues_title"
+                    style="?attr/textAppearanceTitleMedium"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    tools:text="Issues (5)" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/issues_help"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:insetLeft="0dp"
+                    android:insetRight="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minWidth="0dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="0dp"
+                    android:text="@string/how_to_help" />
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/issues_container"

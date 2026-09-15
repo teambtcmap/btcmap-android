@@ -93,6 +93,10 @@ class AreaFragment : Fragment() {
             true
         }
 
+        binding.issuesHelp.setOnClickListener {
+            openInBrowser(JOIN_US_URL.toUri())
+        }
+
         initInsets()
         initCollapsingToolbar()
 
@@ -393,7 +397,7 @@ class AreaFragment : Fragment() {
         val container = binding.issuesContainer
 
         val topMarginDp = if (binding.upcomingEventsContainer.isVisible) 8 else 24
-        (binding.issuesTitle.layoutParams as ViewGroup.MarginLayoutParams).topMargin =
+        (binding.issuesHeader.layoutParams as ViewGroup.MarginLayoutParams).topMargin =
             (topMarginDp * density).toInt()
 
         for (row in rows) {
@@ -480,7 +484,7 @@ class AreaFragment : Fragment() {
         } else {
             getString(R.string.issues_d, totalIssues)
         }
-        binding.issuesTitle.isVisible = true
+        binding.issuesHeader.isVisible = true
         binding.issuesContainer.isVisible = true
     }
 
@@ -520,6 +524,8 @@ class AreaFragment : Fragment() {
 
     companion object {
         private const val PLACE_ISSUES_LIMIT = 50L
+
+        private const val JOIN_US_URL = "https://btcmap.org/join-us"
 
         private val PARAGRAPH_SEPARATOR = Regex("\n\\s*\n")
     }

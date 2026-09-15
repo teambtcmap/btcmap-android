@@ -180,4 +180,5 @@
     <string name="issue_invalid_tag_value">%1$s এর জন্য অবৈধ মান</string>
     <string name="issue_misspelled_tag_name">ভুল বানানের ট্যাগ নাম: %1$s</string>
     <string name="issue_unknown">অজানা সমস্যা</string>
+    <string name="how_to_help">কীভাবে সাহায্য করব?</string>
 </resources>

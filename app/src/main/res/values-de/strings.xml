@@ -180,4 +180,5 @@
     <string name="issue_invalid_tag_value">Ungültiger Wert für %1$s</string>
     <string name="issue_misspelled_tag_name">Falsch geschriebener Tag-Name: %1$s</string>
     <string name="issue_unknown">Unbekanntes Problem</string>
+    <string name="how_to_help">Wie kann ich helfen?</string>
 </resources>

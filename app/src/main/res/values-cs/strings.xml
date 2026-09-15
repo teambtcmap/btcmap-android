@@ -188,4 +188,5 @@
     <string name="issue_invalid_tag_value">Neplatná hodnota pro %1$s</string>
     <string name="issue_misspelled_tag_name">Špatně napsaný název značky: %1$s</string>
     <string name="issue_unknown">Neznámý problém</string>
+    <string name="how_to_help">Jak mohu pomoci?</string>
 </resources>

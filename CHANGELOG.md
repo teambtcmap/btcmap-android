@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Allow posting paid place comments without signing in
 - Tighten place details bottom sheet header and action button spacing
 - Show server-provided error messages and avoid retrying paid actions on rate limits
+- Add a "How to help?" link to the area issues section
 - Localize the area screen strings into all supported languages
 - Localize the activity feed into all supported languages
 - Translate the account, add-place and verify/report screens into all supported languages

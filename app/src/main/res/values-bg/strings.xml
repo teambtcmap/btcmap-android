@@ -180,4 +180,5 @@
     <string name="issue_invalid_tag_value">Невалидна стойност за %1$s</string>
     <string name="issue_misspelled_tag_name">Неправилно изписан етикет: %1$s</string>
     <string name="issue_unknown">Неизвестен проблем</string>
+    <string name="how_to_help">Как да помогна?</string>
 </resources>

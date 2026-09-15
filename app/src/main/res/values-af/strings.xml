@@ -180,4 +180,5 @@
     <string name="issue_invalid_tag_value">Ongeldige waarde vir %1$s</string>
     <string name="issue_misspelled_tag_name">Verkeerd gespelde etiketnaam: %1$s</string>
     <string name="issue_unknown">Onbekende probleem</string>
+    <string name="how_to_help">Hoe kan ek help?</string>
 </resources>

@@ -184,4 +184,5 @@
     <string name="issue_invalid_tag_value">ערך לא חוקי עבור %1$s</string>
     <string name="issue_misspelled_tag_name">שם תג שגוי: %1$s</string>
     <string name="issue_unknown">בעיה לא ידועה</string>
+    <string name="how_to_help">איך אפשר לעזור?</string>
 </resources>

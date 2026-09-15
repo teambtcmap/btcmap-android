@@ -180,4 +180,5 @@
     <string name="issue_invalid_tag_value">مقدار نامعتبر برای %1$s</string>
     <string name="issue_misspelled_tag_name">نام برچسب اشتباه نوشته شده: %1$s</string>
     <string name="issue_unknown">مشکل ناشناخته</string>
+    <string name="how_to_help">چگونه می‌توانم کمک کنم؟</string>
 </resources>

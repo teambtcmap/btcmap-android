@@ -176,4 +176,5 @@
     <string name="issue_invalid_tag_value">Giá trị không hợp lệ cho %1$s</string>
     <string name="issue_misspelled_tag_name">Tên thẻ viết sai chính tả: %1$s</string>
     <string name="issue_unknown">Vấn đề không xác định</string>
+    <string name="how_to_help">Làm sao để giúp?</string>
 </resources>

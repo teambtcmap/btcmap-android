@@ -79,6 +79,7 @@
     <string name="issue_invalid_tag_value">Invalid value for %1$s</string>
     <string name="issue_misspelled_tag_name">Misspelled tag name: %1$s</string>
     <string name="issue_unknown">Unknown issue</string>
+    <string name="how_to_help">How to help?</string>
     <string name="monday">Monday</string>
     <string name="tuesday">Tuesday</string>
     <string name="wednesday">Wednesday</string>

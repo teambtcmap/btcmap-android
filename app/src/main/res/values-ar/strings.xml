@@ -196,4 +196,5 @@
     <string name="issue_invalid_tag_value">قيمة غير صالحة لـ %1$s</string>
     <string name="issue_misspelled_tag_name">اسم وسم مكتوب خطأً: %1$s</string>
     <string name="issue_unknown">مشكلة غير معروفة</string>
+    <string name="how_to_help">كيف يمكنني المساعدة؟</string>
 </resources>

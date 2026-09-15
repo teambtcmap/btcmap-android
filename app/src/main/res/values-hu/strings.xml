@@ -180,4 +180,5 @@
     <string name="issue_invalid_tag_value">Érvénytelen érték: %1$s</string>
     <string name="issue_misspelled_tag_name">Elgépelt címkenév: %1$s</string>
     <string name="issue_unknown">Ismeretlen probléma</string>
+    <string name="how_to_help">Hogyan segíthetek?</string>
 </resources>

@@ -180,4 +180,5 @@
     <string name="issue_invalid_tag_value">%1$s için geçersiz değer</string>
     <string name="issue_misspelled_tag_name">Yanlış yazılmış etiket adı: %1$s</string>
     <string name="issue_unknown">Bilinmeyen sorun</string>
+    <string name="how_to_help">Nasıl yardımcı olabilirim?</string>
 </resources>

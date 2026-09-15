@@ -176,4 +176,5 @@
     <string name="issue_invalid_tag_value">%1$s에 대한 잘못된 값</string>
     <string name="issue_misspelled_tag_name">철자가 틀린 태그 이름: %1$s</string>
     <string name="issue_unknown">알 수 없는 문제</string>
+    <string name="how_to_help">어떻게 도울 수 있나요?</string>
 </resources>

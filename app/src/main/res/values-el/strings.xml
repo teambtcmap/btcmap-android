@@ -180,4 +180,5 @@
     <string name="issue_invalid_tag_value">Μη έγκυρη τιμή για %1$s</string>
     <string name="issue_misspelled_tag_name">Λανθασμένο όνομα ετικέτας: %1$s</string>
     <string name="issue_unknown">Άγνωστο πρόβλημα</string>
+    <string name="how_to_help">Πώς μπορώ να βοηθήσω;</string>
 </resources>
