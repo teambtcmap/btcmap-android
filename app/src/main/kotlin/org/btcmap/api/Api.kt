@@ -70,11 +70,19 @@ class Api(
         return response.use { res ->
             withContext(Dispatchers.IO) {
                 if (!res.isSuccessful) {
+                    val exception = res.toApiException()
+
                     if (res.code == 401 && clearSessionOnUnauthorized) {
-                        onUnauthorized()
+                        try {
+                            onUnauthorized()
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            exception.addSuppressed(e)
+                        }
                     }
 
-                    throw res.toApiException()
+                    throw exception
                 }
 
                 res.body.byteStream().use { stream ->

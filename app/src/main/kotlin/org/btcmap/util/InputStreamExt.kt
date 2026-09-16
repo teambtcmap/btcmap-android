@@ -17,3 +17,10 @@ fun InputStream.toJsonObject(): JsonObject {
     val rawJson = this.bufferedReader().use { it.readText() }
     return JsonParser.parseString(rawJson).asJsonObject
 }
+
+fun InputStream.toJsonLongArray(): List<Long> {
+    val rawJson = this.bufferedReader().use { it.readText() }
+    val jsonArray = JsonParser.parseString(rawJson).asJsonArray
+
+    return List(jsonArray.size()) { jsonArray.get(it).asLong }
+}

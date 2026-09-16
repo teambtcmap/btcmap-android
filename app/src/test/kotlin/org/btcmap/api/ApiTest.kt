@@ -110,6 +110,25 @@ class ApiTest : ApiTestBase() {
     }
 
     @Test
+    fun call_stillThrowsApiExceptionWhenOnUnauthorizedFails() = runTest {
+        enqueueJson("""{"message":"Authentication required"}""", code = 401)
+
+        val api = Api(
+            httpClient = OkHttpClient(),
+            baseUrl = { server.url("/") },
+            onUnauthorized = { throw IllegalStateException("failed to clear session") },
+        )
+
+        try {
+            api.call(Request.Builder().url(server.url("/x")).build()) { it.bufferedReader().readText() }
+            Assert.fail("Expected ApiException")
+        } catch (e: ApiException) {
+            Assert.assertEquals(401, e.code)
+            Assert.assertTrue(e.suppressed.any { it is IllegalStateException })
+        }
+    }
+
+    @Test
     fun call_wrapsConnectionFailureInTransportException() = runTest {
         val url = server.url("/x")
         server.close()

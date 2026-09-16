@@ -1,9 +1,9 @@
 package org.btcmap.api
 
-import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
 import okhttp3.Request
 import org.btcmap.util.toJsonArray
+import org.btcmap.util.toJsonLongArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
 import java.util.Locale
@@ -90,11 +90,4 @@ private fun InputStream.toAreas(): List<GetAreasItem> {
             upcomingEvents = events,
         )
     }
-}
-
-internal fun InputStream.toJsonLongArray(): List<Long> {
-    val rawJson = bufferedReader().use { it.readText() }
-    val jsonArray = JsonParser.parseString(rawJson).asJsonArray
-
-    return List(jsonArray.size()) { jsonArray.get(it).asLong }
 }

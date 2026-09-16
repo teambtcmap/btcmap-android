@@ -4,6 +4,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import okhttp3.Request
 import org.btcmap.util.toJsonArray
+import org.btcmap.util.toJsonLongArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
 import java.time.ZonedDateTime
