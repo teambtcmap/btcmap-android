@@ -1,6 +1,6 @@
 package org.btcmap.api
 
-import com.google.gson.JsonObject
+import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -40,17 +40,17 @@ class Api(
     internal val url: HttpUrl
         get() = baseUrl()
 
-    internal fun pathBuilder(vararg segments: String): HttpUrl.Builder {
+    internal fun buildUrl(
+        vararg segments: String,
+        configure: HttpUrl.Builder.() -> Unit = {},
+    ): HttpUrl {
         return url.newBuilder().apply {
             segments.forEach { addPathSegment(it) }
-        }
+            configure()
+        }.build()
     }
 
-    internal fun buildUrl(vararg segments: String): HttpUrl {
-        return pathBuilder(*segments).build()
-    }
-
-    internal fun jsonBody(body: JsonObject): RequestBody {
+    internal fun jsonBody(body: JsonElement): RequestBody {
         return body.toString().toRequestBody("application/json".toMediaType())
     }
 

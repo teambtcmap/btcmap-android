@@ -2,9 +2,7 @@ package org.btcmap.api
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
@@ -70,7 +68,7 @@ data class PlaceCoordinates(
 )
 
 suspend fun Api.getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPlacesItem> {
-    val url = pathBuilder("v4", "places").apply {
+    val url = buildUrl("v4", "places") {
         addQueryParameter("fields", placeFields.joinToString(separator = ","))
         addQueryParameter("limit", "$limit")
         addQueryParameter("include_deleted", "true")
@@ -80,15 +78,15 @@ suspend fun Api.getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPl
                 updatedSince.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
             )
         }
-    }.build()
+    }
 
     return call(Request.Builder().url(url).build()) { it.toGetPlacesItems() }
 }
 
 suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
-    val url = pathBuilder("v4", "places", "$id").apply {
+    val url = buildUrl("v4", "places", "$id") {
         addQueryParameter("fields", "lat,lon")
-    }.build()
+    }
 
     return call(Request.Builder().url(url).build()) { stream ->
         val body = stream.toJsonObject()
@@ -101,7 +99,7 @@ suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
 
 suspend fun Api.savePlace(id: Long): List<Long> {
     val url = buildUrl("v4", "places", "saved")
-    val body = JsonPrimitive(id).toString().toRequestBody("application/json".toMediaType())
+    val body = jsonBody(JsonPrimitive(id))
 
     return call(Request.Builder().post(body).url(url).build()) { it.toJsonLongArray() }
 }

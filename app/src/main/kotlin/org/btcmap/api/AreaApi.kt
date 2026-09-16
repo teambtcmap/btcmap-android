@@ -2,9 +2,7 @@ package org.btcmap.api
 
 import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
@@ -32,10 +30,10 @@ data class GetAreaItem(
 )
 
 suspend fun Api.getAreas(lat: Double, lon: Double): List<GetAreasItem> {
-    val url = pathBuilder("v4", "areas").apply {
+    val url = buildUrl("v4", "areas") {
         addQueryParameter("lat", lat.toString())
         addQueryParameter("lon", lon.toString())
-    }.build()
+    }
 
     return call(Request.Builder().url(url).build()) { it.toAreas() }
 }
@@ -44,9 +42,9 @@ suspend fun Api.getArea(
     id: String,
     lang: String = Locale.getDefault().language,
 ): GetAreaItem {
-    val url = pathBuilder("v4", "areas", id).apply {
+    val url = buildUrl("v4", "areas", id) {
         if (lang.isNotBlank()) addQueryParameter("lang", lang)
-    }.build()
+    }
 
     return call(Request.Builder().url(url).build()) { stream ->
         val body = stream.toJsonObject()
@@ -65,7 +63,7 @@ suspend fun Api.getArea(
 
 suspend fun Api.saveArea(id: Long): List<Long> {
     val url = buildUrl("v4", "areas", "saved")
-    val body = JsonPrimitive(id).toString().toRequestBody("application/json".toMediaType())
+    val body = jsonBody(JsonPrimitive(id))
 
     return call(Request.Builder().post(body).url(url).build()) { it.toJsonLongArray() }
 }

@@ -22,10 +22,10 @@ suspend fun Api.getActivity(areaIds: List<String>, days: Int = 7): List<Activity
         return emptyList()
     }
 
-    val url = pathBuilder("v4", "activity").apply {
+    val url = buildUrl("v4", "activity") {
         addQueryParameter("areas", areaIds.joinToString(","))
         addQueryParameter("days", "$days")
-    }.build()
+    }
 
     return call(Request.Builder().url(url).build()) { it.toActivityFeedItems() }
 }

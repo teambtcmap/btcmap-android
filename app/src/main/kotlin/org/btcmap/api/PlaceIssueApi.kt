@@ -17,10 +17,10 @@ data class GetPlaceIssuesResponse(
 )
 
 suspend fun Api.getPlaceIssues(areaId: Long, limit: Long = 50): GetPlaceIssuesResponse {
-    val url = pathBuilder("v4", "place-issues").apply {
+    val url = buildUrl("v4", "place-issues") {
         addQueryParameter("area_id", areaId.toString())
         addQueryParameter("limit", limit.toString())
-    }.build()
+    }
 
     return call(Request.Builder().url(url).build()) { it.toGetPlaceIssuesResponse() }
 }

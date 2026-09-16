@@ -27,7 +27,7 @@ data class AddCommentResponse(
 )
 
 suspend fun Api.getComments(updatedSince: ZonedDateTime?, limit: Long): List<GetCommentsItem> {
-    val url = pathBuilder("v4", "place-comments").apply {
+    val url = buildUrl("v4", "place-comments") {
         addQueryParameter("limit", "$limit")
         addQueryParameter("include_deleted", "true")
         if (updatedSince != null) {
@@ -36,7 +36,7 @@ suspend fun Api.getComments(updatedSince: ZonedDateTime?, limit: Long): List<Get
                 updatedSince.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
             )
         }
-    }.build()
+    }
 
     return call(Request.Builder().url(url).build()) { it.toGetCommentsItems() }
 }

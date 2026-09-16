@@ -27,14 +27,14 @@ suspend fun Api.search(
     lon: Double?,
     limit: Long = 20,
 ): List<SearchResult> {
-    val url = pathBuilder("v4", "search").apply {
+    val url = buildUrl("v4", "search") {
         addQueryParameter("q", query)
         if (lat != null && lon != null) {
             addQueryParameter("lat", lat.toString())
             addQueryParameter("lon", lon.toString())
         }
         addQueryParameter("limit", "$limit")
-    }.build()
+    }
 
     return call(Request.Builder().url(url).build()) { it.toSearchResults() }
 }
