@@ -11,17 +11,18 @@ import androidx.fragment.app.FragmentManager
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.databinding.ActivityBinding
 import org.btcmap.map.MapFragment
-import org.btcmap.util.deepLinkPlaceId
+import org.btcmap.util.DeepLink
+import org.btcmap.util.deepLink
 
 class Activity : AppCompatActivity() {
 
     private lateinit var binding: ActivityBinding
 
-    private var pendingDeepLinkPlaceId: Long? = null
+    private var pendingDeepLink: DeepLink? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pendingDeepLinkPlaceId = intent.deepLinkPlaceId()
+        pendingDeepLink = intent.deepLink()
         enableEdgeToEdge() // TODO remove once min api is 35
         window.isNavigationBarContrastEnforced = false // remove nav bar scrim for 3 button mode
         binding = ActivityBinding.inflate(layoutInflater)
@@ -39,18 +40,18 @@ class Activity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        pendingDeepLinkPlaceId = intent.deepLinkPlaceId()
+        pendingDeepLink = intent.deepLink()
         deliverDeepLink()
     }
 
-    internal fun consumeDeepLinkPlaceId(): Long? {
-        val placeId = pendingDeepLinkPlaceId
-        pendingDeepLinkPlaceId = null
-        return placeId
+    internal fun consumeDeepLink(): DeepLink? {
+        val deepLink = pendingDeepLink
+        pendingDeepLink = null
+        return deepLink
     }
 
     private fun deliverDeepLink() {
-        val placeId = pendingDeepLinkPlaceId ?: return
+        val deepLink = pendingDeepLink ?: return
 
         var fragment = supportFragmentManager
             .findFragmentById(R.id.fragmentContainerView) as? MapFragment
@@ -66,11 +67,15 @@ class Activity : AppCompatActivity() {
 
         if (fragment == null || !fragment.isAdded || fragment.view == null) return
 
-        pendingDeepLinkPlaceId = null
-        fragment.openPlaceById(placeId)
+        pendingDeepLink = null
+
+        when (deepLink) {
+            is DeepLink.Place -> fragment.openPlaceById(deepLink.id)
+            is DeepLink.Event -> fragment.openEventById(deepLink.id)
+        }
     }
 
-    private fun Intent.deepLinkPlaceId(): Long? {
-        return dataString?.toHttpUrlOrNull()?.deepLinkPlaceId()
+    private fun Intent.deepLink(): DeepLink? {
+        return dataString?.toHttpUrlOrNull()?.deepLink()
     }
 }

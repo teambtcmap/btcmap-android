@@ -5,6 +5,7 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
 import org.btcmap.util.toJsonArray
+import org.btcmap.util.toJsonObject
 import java.io.InputStream
 import java.time.ZonedDateTime
 
@@ -23,6 +24,12 @@ suspend fun Api.getEvents(): List<GetEventsItem> {
     val url = url.newBuilder().addPathSegments("v4/events").build()
 
     return call(Request.Builder().url(url).build()) { it.toGetEventsItems() }
+}
+
+suspend fun Api.getEvent(id: Long): GetEventsItem {
+    val url = url.newBuilder().addPathSegments("v4/events/$id").build()
+
+    return call(Request.Builder().url(url).build()) { it.toJsonObject().toGetEventsItem() }
 }
 
 suspend fun Api.getAreaEvents(idOrAlias: String): List<GetEventsItem> {

@@ -6,54 +6,77 @@ import org.junit.Test
 
 class DeepLinkTest {
     @Test
-    fun merchantUrl_returnsPlaceId() {
+    fun merchantUrl_returnsPlaceDeepLink() {
         Assert.assertEquals(
-            6556L,
-            "https://btcmap.org/merchant/6556".toHttpUrl().deepLinkPlaceId(),
+            DeepLink.Place(6556L),
+            "https://btcmap.org/merchant/6556".toHttpUrl().deepLink(),
         )
     }
 
     @Test
-    fun merchantUrlWithTrailingSlash_returnsPlaceId() {
+    fun merchantUrlWithTrailingSlash_returnsPlaceDeepLink() {
         Assert.assertEquals(
-            6556L,
-            "https://btcmap.org/merchant/6556/".toHttpUrl().deepLinkPlaceId(),
+            DeepLink.Place(6556L),
+            "https://btcmap.org/merchant/6556/".toHttpUrl().deepLink(),
         )
     }
 
     @Test
-    fun httpScheme_returnsPlaceId() {
+    fun httpScheme_returnsPlaceDeepLink() {
         Assert.assertEquals(
-            6556L,
-            "http://btcmap.org/merchant/6556".toHttpUrl().deepLinkPlaceId(),
+            DeepLink.Place(6556L),
+            "http://btcmap.org/merchant/6556".toHttpUrl().deepLink(),
         )
     }
 
     @Test
-    fun nonMerchantPath_returnsNull() {
+    fun eventUrl_returnsEventDeepLink() {
+        Assert.assertEquals(
+            DeepLink.Event(42L),
+            "https://btcmap.org/event/42".toHttpUrl().deepLink(),
+        )
+    }
+
+    @Test
+    fun eventUrlWithTrailingSlash_returnsEventDeepLink() {
+        Assert.assertEquals(
+            DeepLink.Event(42L),
+            "https://btcmap.org/event/42/".toHttpUrl().deepLink(),
+        )
+    }
+
+    @Test
+    fun nonDeepLinkPath_returnsNull() {
         Assert.assertNull(
-            "https://btcmap.org/community/prague".toHttpUrl().deepLinkPlaceId(),
+            "https://btcmap.org/community/prague".toHttpUrl().deepLink(),
         )
     }
 
     @Test
-    fun nonNumericPlaceId_returnsNull() {
+    fun nonNumericMerchantId_returnsNull() {
         Assert.assertNull(
-            "https://btcmap.org/merchant/abc".toHttpUrl().deepLinkPlaceId(),
+            "https://btcmap.org/merchant/abc".toHttpUrl().deepLink(),
+        )
+    }
+
+    @Test
+    fun nonNumericEventId_returnsNull() {
+        Assert.assertNull(
+            "https://btcmap.org/event/abc".toHttpUrl().deepLink(),
         )
     }
 
     @Test
     fun otherHost_returnsNull() {
         Assert.assertNull(
-            "https://example.com/merchant/6556".toHttpUrl().deepLinkPlaceId(),
+            "https://example.com/merchant/6556".toHttpUrl().deepLink(),
         )
     }
 
     @Test
     fun nestedPath_returnsNull() {
         Assert.assertNull(
-            "https://btcmap.org/merchant/6556/extra".toHttpUrl().deepLinkPlaceId(),
+            "https://btcmap.org/merchant/6556/extra".toHttpUrl().deepLink(),
         )
     }
 }

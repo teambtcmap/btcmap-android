@@ -40,12 +40,12 @@ import org.btcmap.api
 import org.btcmap.api.getArea
 import org.btcmap.api.getAreaEvents
 import org.btcmap.api.getAreas
+import org.btcmap.api.getEvent
 import org.btcmap.api.getPlaceCoordinates
 import org.btcmap.area.AreaFragment
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db
-import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.MapFragmentBinding
 import org.btcmap.event.EventFragment
@@ -70,6 +70,7 @@ import org.btcmap.settings.prefs
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.uri
 import org.btcmap.sync
+import org.btcmap.util.DeepLink
 import org.btcmap.util.isOnline
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
@@ -179,6 +180,7 @@ class MapFragment : Fragment() {
 
         binding.map.getMapAsync {
             it.addOnCameraIdleListener {
+                if (_binding == null) return@addOnCameraIdleListener
                 prefs.mapViewport = it.projection.visibleRegion.latLngBounds
                 val center = it.projection.visibleRegion.latLngBounds.center
                 viewLifecycleOwner.lifecycleScope.launch {
@@ -190,7 +192,7 @@ class MapFragment : Fragment() {
                 map = it,
                 db = db(),
                 onOpenPlace = ::selectPlace,
-                onOpenEvent = ::openEvent,
+                onOpenEvent = { openEvent(it.toBundle()) },
                 onNoHit = { bottomSheetController?.hide() },
             ).also { controller -> controller.install() }
         }
@@ -245,6 +247,7 @@ class MapFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
                 binding.map.getMapAsync {
+                    if (_binding == null) return@getMapAsync
                     if (restoreMapViewport) {
                         it.moveCamera(
                             CameraUpdateFactory.newLatLngBounds(
@@ -329,9 +332,11 @@ class MapFragment : Fragment() {
             }
         }
 
-        val deepLinkPlaceId = (activity as? Activity)?.consumeDeepLinkPlaceId()
-        if (deepLinkPlaceId != null) {
-            openPlaceById(deepLinkPlaceId)
+        val deepLink = (activity as? Activity)?.consumeDeepLink()
+        when (deepLink) {
+            is DeepLink.Place -> openPlaceById(deepLink.id)
+            is DeepLink.Event -> openEventById(deepLink.id)
+            null -> {}
         }
     }
 
@@ -342,11 +347,27 @@ class MapFragment : Fragment() {
         bottomSheetController?.halfExpand()
     }
 
-    private fun openEvent(event: Event) {
+    private fun openEvent(bundle: Bundle) {
         parentFragmentManager.commit {
             setReorderingAllowed(true)
-            replace<EventFragment>(R.id.fragmentContainerView, null, event.toBundle())
+            replace<EventFragment>(R.id.fragmentContainerView, null, bundle)
             addToBackStack(null)
+        }
+    }
+
+    fun openEventById(eventId: Long) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val bundle = withContext(Dispatchers.IO) {
+                    db().event.selectById(eventId)?.toBundle()
+                        ?: runCatching { api().getEvent(eventId) }.getOrNull()?.toBundle()
+                } ?: return@launch
+
+                openEvent(bundle)
+            } catch (e: Throwable) {
+                e.rethrowIfCancellation()
+                Log.e(TAG, "Failed to open event $eventId", e)
+            }
         }
     }
 

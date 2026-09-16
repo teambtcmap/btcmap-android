@@ -39,7 +39,38 @@ class EventApiTest : ApiTestBase() {
         Assert.assertEquals(2, events.size)
     }
 
+    @Test
+    fun getEvent_parsesSingleEvent() = runTest {
+        enqueueJson(EVENT)
+
+        val event = api().getEvent(1)
+
+        val request = takeRequest()
+        Assert.assertEquals("GET", request.method)
+        Assert.assertEquals("/v4/events/1", request.url.encodedPath)
+        Assert.assertEquals(1L, event.id)
+        Assert.assertEquals(1L, event.areaId)
+        Assert.assertEquals(7.88, event.lat, 0.0)
+        Assert.assertEquals(98.38, event.lon, 0.0)
+        Assert.assertEquals("Phuket Bitcoin Meetup", event.name)
+        Assert.assertEquals("https://meetup.example/1", event.website.toString())
+        Assert.assertNotNull(event.endsAt)
+    }
+
     private companion object {
+        const val EVENT = """
+            {
+                "id": 1,
+                "area_id": 1,
+                "lat": 7.88,
+                "lon": 98.38,
+                "name": "Phuket Bitcoin Meetup",
+                "website": "https://meetup.example/1",
+                "starts_at": "2025-08-29T19:00:00+07:00",
+                "ends_at": "2025-08-29T22:00:00+07:00"
+            }
+        """
+
         const val EVENTS = """
             [
                 {
