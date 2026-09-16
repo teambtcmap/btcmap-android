@@ -16,7 +16,10 @@ import java.io.InputStream
 
 class ApiException(val code: Int, message: String) : Exception(message)
 
-class ApiParseException(message: String) : Exception(message)
+class ApiParseException(
+    message: String,
+    cause: Throwable? = null,
+) : Exception(message, cause)
 
 class Api(
     internal val httpClient: OkHttpClient,

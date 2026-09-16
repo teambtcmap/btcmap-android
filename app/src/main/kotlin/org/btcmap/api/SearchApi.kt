@@ -49,7 +49,7 @@ private fun InputStream.toSearchResults(): List<SearchResult> {
             "area" -> SearchResult.Area(
                 id = item.long("id"),
                 name = item.string("name"),
-                bbox = item.arrayOrNull("bbox")?.map { it.asDouble },
+                bbox = item.doubleArrayOrNull("bbox"),
                 iconUrl = item.stringOrNull("icon"),
             )
 

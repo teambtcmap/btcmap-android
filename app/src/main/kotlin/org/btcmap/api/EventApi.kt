@@ -8,6 +8,7 @@ import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
 import java.time.ZonedDateTime
+import java.time.format.DateTimeParseException
 
 data class GetEventsItem(
     val id: Long,
@@ -46,9 +47,17 @@ internal fun JsonObject.toGetEventsItem(): GetEventsItem {
         lon = double("lon"),
         name = string("name"),
         website = nonBlankStringOrNull("website")?.toHttpUrlOrNull(),
-        startsAt = ZonedDateTime.parse(string("starts_at")),
-        endsAt = stringOrNull("ends_at")?.let { ZonedDateTime.parse(it) },
+        startsAt = string("starts_at").toApiZonedDateTime("starts_at"),
+        endsAt = stringOrNull("ends_at")?.toApiZonedDateTime("ends_at"),
     )
+}
+
+private fun String.toApiZonedDateTime(field: String): ZonedDateTime {
+    return try {
+        ZonedDateTime.parse(this)
+    } catch (e: DateTimeParseException) {
+        throw ApiParseException("Field '$field' is not a valid ISO 8601 datetime", e)
+    }
 }
 
 private fun InputStream.toGetEventsItems(): List<GetEventsItem> {

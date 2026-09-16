@@ -98,6 +98,24 @@ class EventApiTest : ApiTestBase() {
         Assert.assertNotNull(event.endsAt)
     }
 
+    @Test
+    fun getEvents_invalidDateThrowsParseException() = runTest {
+        enqueueJson(
+            """
+            [
+                {"id":1,"lat":1.0,"lon":2.0,"name":"Bad","starts_at":"not-a-date"}
+            ]
+            """.trimIndent()
+        )
+
+        try {
+            api().getEvents()
+            Assert.fail("Expected ApiParseException")
+        } catch (e: ApiParseException) {
+            Assert.assertEquals("Field 'starts_at' is not a valid ISO 8601 datetime", e.message)
+        }
+    }
+
     private companion object {
         const val EVENT = """
             {
