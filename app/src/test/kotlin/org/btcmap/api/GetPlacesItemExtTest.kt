@@ -55,6 +55,38 @@ class GetPlacesItemExtTest {
     }
 
     @Test
+    fun toPlace_acceptsFullRfc3339VerifiedAt() {
+        val item = GetPlacesItem(
+            id = 1,
+            lat = 0.0,
+            lon = 0.0,
+            icon = "store",
+            name = "Cafe",
+            localizedName = null,
+            updatedAt = "2026-01-02T03:04:05Z",
+            deletedAt = null,
+            requiredAppUrl = null,
+            boostedUntil = null,
+            verifiedAt = "2026-01-15T00:00:00Z",
+            address = null,
+            openingHours = null,
+            localizedOpeningHours = null,
+            website = null,
+            phone = null,
+            email = null,
+            twitter = null,
+            facebook = null,
+            instagram = null,
+            line = null,
+            comments = null,
+            telegram = null,
+            osmId = null,
+        )
+
+        Assert.assertEquals(ZonedDateTime.parse("2026-01-15T00:00:00Z"), item.toPlace().verifiedAt)
+    }
+
+    @Test
     fun toPlace_keepsOptionalFieldsNull() {
         val item = GetPlacesItem(
             id = 1,

@@ -3,6 +3,10 @@ package org.btcmap.api
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.db.table.place.FullProjection
 import org.btcmap.util.toZonedDateTime
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
+import java.time.format.DateTimeParseException
 
 fun GetPlacesItem.toPlace(): FullProjection {
     return FullProjection(
@@ -14,7 +18,7 @@ fun GetPlacesItem.toPlace(): FullProjection {
         icon = icon,
         name = name,
         localizedName = localizedName,
-        verifiedAt = verifiedAt?.let { (it + "T00:00:00Z").toZonedDateTime() },
+        verifiedAt = verifiedAt?.toVerifiedAt(),
         address = address,
         openingHours = openingHours,
         localizedOpeningHours = localizedOpeningHours,
@@ -31,4 +35,12 @@ fun GetPlacesItem.toPlace(): FullProjection {
         telegram = telegram?.toHttpUrlOrNull(),
         osmId = osmId,
     )
+}
+
+private fun String.toVerifiedAt(): ZonedDateTime {
+    return try {
+        LocalDate.parse(this).atStartOfDay(ZoneOffset.UTC)
+    } catch (e: DateTimeParseException) {
+        ZonedDateTime.parse(this)
+    }
 }
