@@ -88,7 +88,7 @@ class MapSelectionErrorHandlingTest {
                     map = map!!,
                     db = db,
                     onOpenPlace = { },
-                    onOpenEventWebsite = { },
+                    onOpenEvent = { },
                     onNoHit = { },
                 )
                 val handleClick = MapSelectionController::class.java

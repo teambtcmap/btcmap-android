@@ -254,8 +254,8 @@ class MapFragment : Fragment() {
                                 prefs.mapViewport, 0
                             )
                         )
-                        setFilter(Filter.MERCHANTS)
                     }
+                    setFilter(filter)
                 }
             }
         }

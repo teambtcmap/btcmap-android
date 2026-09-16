@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep the selected map filter when returning to the map from other screens
 - Show a dedicated event screen with a map, a directions action and a link to the event website instead of opening the website directly
 - Open btcmap.org event links directly in the app
 - Fix event links opening a duplicate event screen that required two back presses to dismiss
