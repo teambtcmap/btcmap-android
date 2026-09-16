@@ -81,14 +81,33 @@ private fun Fragment.createNewAccount(onComplete: () -> Unit) {
 
 private fun Fragment.signUp(username: String, password: String, onComplete: () -> Unit) {
     viewLifecycleOwner.lifecycleScope.launch {
-        try {
-            val user = api().createUser(name = username, password = password)
-            val token = api().signIn(
+        val user = try {
+            api().createUser(name = username, password = password)
+        } catch (e: Throwable) {
+            e.rethrowIfCancellation()
+            val message = e.message?.takeIf { it.isNotBlank() }
+                ?: getString(R.string.failed_to_create_new_account)
+            showAuthError("Failed to create new account", message, e)
+            return@launch
+        }
+
+        val token = try {
+            api().signIn(
                 username = user.name,
                 password = password,
                 label = "BTC Map Android ${BuildConfig.VERSION_CODE}",
             )
-            prefs.authToken = token.token
+        } catch (e: Throwable) {
+            e.rethrowIfCancellation()
+            showAuthError(
+                "Failed to sign in after creating account",
+                getString(R.string.account_created_sign_in_failed),
+                e,
+            )
+            return@launch
+        }
+
+        try {
             db().user.insert(
                 User(
                     id = user.id,
@@ -98,22 +117,18 @@ private fun Fragment.signUp(username: String, password: String, onComplete: () -
                     savedAreas = user.savedAreas,
                 )
             )
+            prefs.authToken = token.token
             Toast.makeText(
                 requireContext(),
                 getString(R.string.logged_in_as, user.name),
                 Toast.LENGTH_SHORT,
             ).show()
             onComplete()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             e.rethrowIfCancellation()
-            Log.e("auth", "Failed to create new account", e)
             val message = e.message?.takeIf { it.isNotBlank() }
-                ?: getString(R.string.failed_to_create_new_account)
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.error)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, null)
-                .show()
+                ?: getString(R.string.failed_to_sign_in)
+            showAuthError("Failed to store signed-in account", message, e)
         }
     }
 }
@@ -162,7 +177,6 @@ private fun Fragment.signIn(username: String, password: String, onComplete: () -
                 password,
                 "BTC Map Android ${BuildConfig.VERSION_CODE}"
             )
-            prefs.authToken = signInRes.token
             db().user.insert(
                 User(
                     id = signInRes.user.id,
@@ -172,17 +186,22 @@ private fun Fragment.signIn(username: String, password: String, onComplete: () -
                     savedAreas = signInRes.user.savedAreas,
                 )
             )
+            prefs.authToken = signInRes.token
             onComplete()
         } catch (e: Throwable) {
             e.rethrowIfCancellation()
-            Log.e("auth", "Sign in failed", e)
             val message = e.message?.takeIf { it.isNotBlank() }
                 ?: getString(R.string.failed_to_sign_in)
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.error)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, null)
-                .show()
+            showAuthError("Sign in failed", message, e)
         }
     }
+}
+
+private fun Fragment.showAuthError(logMessage: String, message: String, e: Throwable) {
+    Log.e("auth", logMessage, e)
+    MaterialAlertDialogBuilder(requireContext())
+        .setTitle(R.string.error)
+        .setMessage(message)
+        .setPositiveButton(android.R.string.ok, null)
+        .show()
 }

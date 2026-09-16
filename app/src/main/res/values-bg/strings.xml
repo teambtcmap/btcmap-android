@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Използвайте съществуващото си потребителско име и парола</string>
     <string name="failed_to_create_new_account">Неуспешно създаване на нов акаунт</string>
     <string name="failed_to_sign_in">Неуспешно влизане</string>
+    <string name="account_created_sign_in_failed">Акаунтът ви е създаден, но влизането е неуспешно. Моля, влезте.</string>
     <string name="click_to_see_your_profile">Натиснете, за да видите профила си</string>
     <string name="delete">Изтрий</string>
     <string name="show_debug_info">Показване на информация за отстраняване на грешки</string>

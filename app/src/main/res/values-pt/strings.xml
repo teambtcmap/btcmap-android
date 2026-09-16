@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Use o seu nome de utilizador e palavra-passe existentes</string>
     <string name="failed_to_create_new_account">Falha ao criar nova conta</string>
     <string name="failed_to_sign_in">Falha ao iniciar sessão</string>
+    <string name="account_created_sign_in_failed">A tua conta foi criada, mas o início de sessão falhou. Tenta iniciar sessão.</string>
     <string name="click_to_see_your_profile">Toque para ver o seu perfil</string>
     <string name="delete">Eliminar</string>
     <string name="show_debug_info">Mostrar informações de depuração</string>

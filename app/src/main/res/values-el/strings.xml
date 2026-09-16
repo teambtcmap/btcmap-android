@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Χρησιμοποίησε το υπάρχον όνομα χρήστη και τον κωδικό πρόσβασής σου</string>
     <string name="failed_to_create_new_account">Αποτυχία δημιουργίας νέου λογαριασμού</string>
     <string name="failed_to_sign_in">Αποτυχία σύνδεσης</string>
+    <string name="account_created_sign_in_failed">Ο λογαριασμός σας δημιουργήθηκε, αλλά η σύνδεση απέτυχε. Παρακαλώ συνδεθείτε.</string>
     <string name="click_to_see_your_profile">Πάτησε για να δεις το προφίλ σου</string>
     <string name="delete">Διαγραφή</string>
     <string name="show_debug_info">Εμφάνιση πληροφοριών εντοπισμού σφαλμάτων</string>

@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Usa tu nombre de usuario y contraseña existentes</string>
     <string name="failed_to_create_new_account">No se pudo crear la cuenta nueva</string>
     <string name="failed_to_sign_in">No se pudo iniciar sesión</string>
+    <string name="account_created_sign_in_failed">Tu cuenta se creó, pero el inicio de sesión falló. Inténtalo de nuevo.</string>
     <string name="click_to_see_your_profile">Toca para ver tu perfil</string>
     <string name="delete">Eliminar</string>
     <string name="show_debug_info">Mostrar información de depuración</string>

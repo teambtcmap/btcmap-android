@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">השתמשו בשם המשתמש והסיסמה הקיימים שלכם</string>
     <string name="failed_to_create_new_account">יצירת החשבון החדש נכשלה</string>
     <string name="failed_to_sign_in">ההתחברות נכשלה</string>
+    <string name="account_created_sign_in_failed">החשבון שלך נוצר, אך ההתחברות נכשלה. אנא התחבר.</string>
     <string name="click_to_see_your_profile">הקישו כדי לראות את הפרופיל שלכם</string>
     <string name="delete">מחיקה</string>
     <string name="show_debug_info">הצגת פרטי ניפוי באגים</string>

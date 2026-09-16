@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Gebruik je bestaande gebruikersnaam en wachtwoord</string>
     <string name="failed_to_create_new_account">Nieuw account aanmaken mislukt</string>
     <string name="failed_to_sign_in">Inloggen mislukt</string>
+    <string name="account_created_sign_in_failed">Je account is aangemaakt, maar inloggen is mislukt. Probeer opnieuw in te loggen.</string>
     <string name="click_to_see_your_profile">Tik om je profiel te bekijken</string>
     <string name="delete">Verwijderen</string>
     <string name="show_debug_info">Foutopsporingsinformatie tonen</string>

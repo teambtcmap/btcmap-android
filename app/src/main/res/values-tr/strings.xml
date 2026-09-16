@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Mevcut kullanıcı adınızı ve parolanızı kullanın</string>
     <string name="failed_to_create_new_account">Yeni hesap oluşturulamadı</string>
     <string name="failed_to_sign_in">Giriş yapılamadı</string>
+    <string name="account_created_sign_in_failed">Hesabınız oluşturuldu ancak giriş yapılamadı. Lütfen giriş yapmayı deneyin.</string>
     <string name="click_to_see_your_profile">Profilinizi görmek için dokunun</string>
     <string name="delete">Sil</string>
     <string name="show_debug_info">Hata ayıklama bilgilerini göster</string>

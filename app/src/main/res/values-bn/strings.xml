@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">আপনার বিদ্যমান ব্যবহারকারীর নাম ও পাসওয়ার্ড ব্যবহার করুন</string>
     <string name="failed_to_create_new_account">নতুন অ্যাকাউন্ট তৈরি করা যায়নি</string>
     <string name="failed_to_sign_in">সাইন ইন করা যায়নি</string>
+    <string name="account_created_sign_in_failed">আপনার অ্যাকাউন্ট তৈরি হয়েছে, কিন্তু সাইন ইন করা যায়নি। অনুগ্রহ করে সাইন ইন করুন।</string>
     <string name="click_to_see_your_profile">আপনার প্রোফাইল দেখতে ক্লিক করুন</string>
     <string name="delete">মুছুন</string>
     <string name="show_debug_info">ডিবাগ তথ্য দেখান</string>

@@ -48,7 +48,12 @@ class UserProfileFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        val user = db().user.select()!!
+        val user = db().user.select()
+        if (user == null) {
+            prefs.authToken = null
+            parentFragmentManager.popBackStack()
+            return
+        }
         binding.username.text = user.name
         binding.password.text = getString(R.string.password_mask)
 
@@ -142,7 +147,6 @@ class UserProfileFragment : Fragment() {
             try {
                 val user = api().updateUsername(newName)
                 val existing = db().user.select()
-                db().user.delete()
                 db().user.insert(
                     User(
                         id = user.id,

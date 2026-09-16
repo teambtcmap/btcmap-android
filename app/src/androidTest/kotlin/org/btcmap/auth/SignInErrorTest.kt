@@ -138,8 +138,8 @@ class SignInErrorTest {
 
         private val delegate = AndroidSQLiteDriver()
 
-        override fun open(path: String): SQLiteConnection {
-            val connection = delegate.open(path)
+        override fun open(fileName: String): SQLiteConnection {
+            val connection = delegate.open(fileName)
             return object : SQLiteConnection {
                 override fun prepare(sql: String): SQLiteStatement {
                     if (failing) throw RuntimeException()

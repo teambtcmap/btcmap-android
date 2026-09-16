@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Használja meglévő felhasználónevét és jelszavát</string>
     <string name="failed_to_create_new_account">Nem sikerült létrehozni az új fiókot</string>
     <string name="failed_to_sign_in">Nem sikerült bejelentkezni</string>
+    <string name="account_created_sign_in_failed">A fiókod létrejött, de a bejelentkezés nem sikerült. Kérjük, jelentkezz be.</string>
     <string name="click_to_see_your_profile">Koppintson a profilja megtekintéséhez</string>
     <string name="delete">Törlés</string>
     <string name="show_debug_info">Hibakeresési információk megjelenítése</string>

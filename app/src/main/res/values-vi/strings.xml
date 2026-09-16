@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Sử dụng tên người dùng và mật khẩu hiện có của bạn</string>
     <string name="failed_to_create_new_account">Không thể tạo tài khoản mới</string>
     <string name="failed_to_sign_in">Không thể đăng nhập</string>
+    <string name="account_created_sign_in_failed">Tài khoản của bạn đã được tạo, nhưng đăng nhập không thành công. Vui lòng đăng nhập.</string>
     <string name="click_to_see_your_profile">Nhấn để xem hồ sơ của bạn</string>
     <string name="delete">Xóa</string>
     <string name="show_debug_info">Hiển thị thông tin gỡ lỗi</string>

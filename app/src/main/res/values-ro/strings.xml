@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Folosește numele de utilizator și parola existente</string>
     <string name="failed_to_create_new_account">Crearea contului nou a eșuat</string>
     <string name="failed_to_sign_in">Autentificarea a eșuat</string>
+    <string name="account_created_sign_in_failed">Contul tău a fost creat, dar autentificarea a eșuat. Te rugăm să te autentifici.</string>
     <string name="click_to_see_your_profile">Atinge pentru a-ți vedea profilul</string>
     <string name="delete">Șterge</string>
     <string name="show_debug_info">Afișează informații de depanare</string>

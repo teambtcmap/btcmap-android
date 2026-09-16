@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">既存のユーザー名とパスワードを使用</string>
     <string name="failed_to_create_new_account">新しいアカウントの作成に失敗しました</string>
     <string name="failed_to_sign_in">サインインに失敗しました</string>
+    <string name="account_created_sign_in_failed">アカウントは作成されましたが、サインインに失敗しました。サインインしてください。</string>
     <string name="click_to_see_your_profile">タップしてプロフィールを表示</string>
     <string name="delete">削除</string>
     <string name="show_debug_info">デバッグ情報を表示</string>

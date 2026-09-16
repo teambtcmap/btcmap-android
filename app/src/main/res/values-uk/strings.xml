@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Використайте наявні ім\'я користувача та пароль</string>
     <string name="failed_to_create_new_account">Не вдалося створити новий обліковий запис</string>
     <string name="failed_to_sign_in">Не вдалося увійти</string>
+    <string name="account_created_sign_in_failed">Ваш обліковий запис створено, але вхід не вдався. Будь ласка, увійдіть.</string>
     <string name="click_to_see_your_profile">Натисніть, щоб переглянути профіль</string>
     <string name="delete">Видалити</string>
     <string name="show_debug_info">Показати налагоджувальну інформацію</string>

@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">使用现有的用户名和密码</string>
     <string name="failed_to_create_new_account">创建新账户失败</string>
     <string name="failed_to_sign_in">登录失败</string>
+    <string name="account_created_sign_in_failed">您的账户已创建，但登录失败。请尝试登录。</string>
     <string name="click_to_see_your_profile">点按查看您的个人资料</string>
     <string name="delete">删除</string>
     <string name="show_debug_info">显示调试信息</string>

@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Bruk ditt eksisterende brukernavn og passord</string>
     <string name="failed_to_create_new_account">Kunne ikke opprette ny konto</string>
     <string name="failed_to_sign_in">Kunne ikke logge inn</string>
+    <string name="account_created_sign_in_failed">Kontoen din ble opprettet, men pålogging mislyktes. Prøv å logge inn.</string>
     <string name="click_to_see_your_profile">Trykk for å se profilen din</string>
     <string name="delete">Slett</string>
     <string name="show_debug_info">Vis feilsøkingsinformasjon</string>

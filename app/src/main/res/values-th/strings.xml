@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">ใช้ชื่อผู้ใช้และรหัสผ่านที่มีอยู่ของคุณ</string>
     <string name="failed_to_create_new_account">สร้างบัญชีใหม่ไม่สำเร็จ</string>
     <string name="failed_to_sign_in">ลงชื่อเข้าใช้ไม่สำเร็จ</string>
+    <string name="account_created_sign_in_failed">สร้างบัญชีของคุณแล้ว แต่การลงชื่อเข้าใช้ล้มเหลว โปรดลองลงชื่อเข้าใช้อีกครั้ง</string>
     <string name="click_to_see_your_profile">แตะเพื่อดูโปรไฟล์ของคุณ</string>
     <string name="delete">ลบ</string>
     <string name="show_debug_info">แสดงข้อมูลดีบัก</string>

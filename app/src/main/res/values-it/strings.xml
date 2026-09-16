@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Usa il tuo nome utente e la tua password esistenti</string>
     <string name="failed_to_create_new_account">Impossibile creare il nuovo account</string>
     <string name="failed_to_sign_in">Impossibile accedere</string>
+    <string name="account_created_sign_in_failed">Il tuo account è stato creato, ma l\'accesso non è riuscito. Prova ad accedere.</string>
     <string name="click_to_see_your_profile">Tocca per vedere il tuo profilo</string>
     <string name="delete">Elimina</string>
     <string name="show_debug_info">Mostra informazioni di debug</string>

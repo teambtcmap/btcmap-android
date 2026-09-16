@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Utilisez votre nom d\'utilisateur et votre mot de passe existants</string>
     <string name="failed_to_create_new_account">Échec de la création du nouveau compte</string>
     <string name="failed_to_sign_in">Échec de la connexion</string>
+    <string name="account_created_sign_in_failed">Votre compte a été créé, mais la connexion a échoué. Veuillez vous connecter.</string>
     <string name="click_to_see_your_profile">Appuyez pour voir votre profil</string>
     <string name="delete">Supprimer</string>
     <string name="show_debug_info">Afficher les informations de débogage</string>

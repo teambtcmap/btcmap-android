@@ -105,6 +105,7 @@
     <string name="sign_in_subtitle">Použijte své stávající uživatelské jméno a heslo</string>
     <string name="failed_to_create_new_account">Nepodařilo se vytvořit nový účet</string>
     <string name="failed_to_sign_in">Nepodařilo se přihlásit</string>
+    <string name="account_created_sign_in_failed">Váš účet byl vytvořen, ale přihlášení se nezdařilo. Zkuste se přihlásit.</string>
     <string name="click_to_see_your_profile">Kliknutím zobrazíte svůj profil</string>
     <string name="delete">Smazat</string>
     <string name="show_debug_info">Zobrazit ladicí informace</string>
