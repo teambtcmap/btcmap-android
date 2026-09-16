@@ -21,6 +21,11 @@ suspend fun Fragment.toggleSavedArea(areaId: Long, areaName: String) {
     db().user.insert(user.copy(savedAreas = savedAreas))
 }
 
+suspend fun Fragment.isAreaSaved(areaId: Long): Boolean {
+    val user = db().user.select() ?: return false
+    return user.savedAreas.any { it.asJsonObject["id"].asLong == areaId }
+}
+
 suspend fun Fragment.toggleSavedPlace(placeId: Long, placeName: String) {
     val user = requireNotNull(db().user.select()) { "user is not signed in" }
     val saved = user.savedPlaces.any { it.asJsonObject["id"].asLong == placeId }

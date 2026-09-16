@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Load an area's upcoming events from the API instead of a stale snapshot so newly added events show up immediately
+- Fix text clipping in the upcoming event and place issue cards on the area screen
+- Disable the area screen save action until the area has finished loading
+- Localize event dates on the area screen
 - Keep the selected map filter when returning to the map from other screens
 - Show a dedicated event screen with a map, a directions action and a link to the event website instead of opening the website directly
 - Open btcmap.org event links directly in the app

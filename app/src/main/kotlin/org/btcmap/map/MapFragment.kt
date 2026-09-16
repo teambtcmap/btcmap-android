@@ -37,11 +37,10 @@ import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.feed.ActivityFeedFragment
 import org.btcmap.api
-import org.btcmap.api.getArea
-import org.btcmap.api.getAreaEvents
 import org.btcmap.api.getAreas
 import org.btcmap.api.getEvent
 import org.btcmap.api.getPlaceCoordinates
+import org.btcmap.area.ARG_AREA_ID
 import org.btcmap.area.AreaFragment
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.bundle.BundledPlaces
@@ -281,17 +280,7 @@ class MapFragment : Fragment() {
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         areasAdapter = AreasAdapter(apiUrl = prefs.apiUrl) { area ->
-            val eventArgs = ArrayList(area.upcomingEvents.map { it.toBundle() })
-            parentFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<AreaFragment>(
-                    R.id.fragmentContainerView, null, Bundle().apply {
-                        putString("area_id", area.id.toString())
-                        putParcelableArrayList("upcoming_events", eventArgs)
-                    }
-                )
-                addToBackStack(null)
-            }
+            openArea(area.id)
         }
 
         binding.areas.layoutManager = LinearLayoutManager(
@@ -441,31 +430,18 @@ class MapFragment : Fragment() {
                 map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
             }
         } else {
-            viewLifecycleOwner.lifecycleScope.launch {
-                val area = runCatching {
-                    withContext(Dispatchers.IO) { api().getArea(row.areaId.toString()) }
-                }.getOrNull() ?: return@launch
+            openArea(row.areaId)
+        }
+    }
 
-                val events = runCatching {
-                    withContext(Dispatchers.IO) {
-                        api().getAreaEvents(area.id.toString())
-                    }
-                }.getOrDefault(emptyList())
-
-                val eventArgs = ArrayList(events.map { it.toBundle() })
-
-                parentFragmentManager.commit {
-                    setReorderingAllowed(true)
-                    replace<AreaFragment>(
-                        R.id.fragmentContainerView, null,
-                        Bundle().apply {
-                            putString("area_id", area.id.toString())
-                            putParcelableArrayList("upcoming_events", eventArgs)
-                        },
-                    )
-                    addToBackStack(null)
-                }
-            }
+    private fun openArea(areaId: Long) {
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace<AreaFragment>(
+                R.id.fragmentContainerView, null,
+                Bundle().apply { putString(ARG_AREA_ID, areaId.toString()) },
+            )
+            addToBackStack(null)
         }
     }
 

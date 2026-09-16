@@ -28,8 +28,10 @@
                 android:foreground="@drawable/area_header_scrim"
                 android:scaleType="centerCrop"
                 android:contentDescription="@string/area_icon"
+                android:visibility="gone"
                 app:layout_collapseMode="parallax"
-                tools:background="#f79413" />
+                tools:background="#f79413"
+                tools:visibility="visible" />
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
