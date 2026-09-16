@@ -18,6 +18,7 @@ class PlaceApiTest : ApiTestBase() {
         Assert.assertEquals("GET", request.method)
         Assert.assertEquals("/v4/places", request.url.encodedPath)
         Assert.assertEquals("10", request.url.queryParameter("limit"))
+        Assert.assertEquals("true", request.url.queryParameter("include_deleted"))
         Assert.assertEquals(
             updatedSince.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
             request.url.queryParameter("updated_since"),

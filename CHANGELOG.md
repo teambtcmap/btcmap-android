@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Remove deleted comments from the local cache during sync
 - Load an area's upcoming events from the API instead of a stale snapshot so newly added events show up immediately
 - Fix text clipping in the upcoming event and place issue cards on the area screen
 - Disable the area screen save action until the area has finished loading

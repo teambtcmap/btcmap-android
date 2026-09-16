@@ -39,7 +39,6 @@ class ActivityApiTest : ApiTestBase() {
                 {
                     "type": "place_added",
                     "place_id": 1,
-                    "place_name": "New",
                     "osm_user_id": null,
                     "osm_user_name": "  ",
                     "osm_user_tip": null,
@@ -54,6 +53,7 @@ class ActivityApiTest : ApiTestBase() {
 
         val item = api().getActivity(areaIds = listOf("1"), days = 7).single()
 
+        Assert.assertNull(item.placeName)
         Assert.assertNull(item.osmUserId)
         Assert.assertNull(item.osmUserName)
         Assert.assertNull(item.osmUserTip)

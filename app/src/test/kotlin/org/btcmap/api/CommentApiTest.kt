@@ -18,6 +18,7 @@ class CommentApiTest : ApiTestBase() {
         Assert.assertEquals("GET", request.method)
         Assert.assertEquals("/v4/place-comments", request.url.encodedPath)
         Assert.assertEquals("100", request.url.queryParameter("limit"))
+        Assert.assertEquals("true", request.url.queryParameter("include_deleted"))
         Assert.assertEquals(
             updatedSince.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
             request.url.queryParameter("updated_since"),

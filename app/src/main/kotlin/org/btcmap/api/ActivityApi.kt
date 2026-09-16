@@ -7,7 +7,7 @@ import java.io.InputStream
 data class ActivityFeedItem(
     val type: String,
     val placeId: Long,
-    val placeName: String,
+    val placeName: String?,
     val osmUserId: Long?,
     val osmUserName: String?,
     val osmUserTip: String?,
@@ -31,7 +31,7 @@ private fun InputStream.toActivityFeedItems(): List<ActivityFeedItem> {
         ActivityFeedItem(
             type = it.get("type").asString,
             placeId = it.get("place_id").asLong,
-            placeName = it.get("place_name").asString,
+            placeName = if (!it.has("place_name") || it.get("place_name").isJsonNull) null else it.get("place_name").asString.ifBlank { null },
             osmUserId = if (!it.has("osm_user_id") || it.get("osm_user_id").isJsonNull) null else it.get(
                 "osm_user_id"
             ).asLong,

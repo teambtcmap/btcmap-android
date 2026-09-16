@@ -31,6 +31,7 @@ data class AddCommentResponse(
 suspend fun Api.getComments(updatedSince: ZonedDateTime?, limit: Long): List<GetCommentsItem> {
     val url = url.newBuilder().addPathSegments("v4/place-comments").apply {
         addQueryParameter("limit", "$limit")
+        addQueryParameter("include_deleted", "true")
         if (updatedSince != null) {
             addQueryParameter(
                 "updated_since",

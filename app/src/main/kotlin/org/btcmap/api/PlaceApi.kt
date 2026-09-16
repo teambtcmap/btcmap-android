@@ -73,6 +73,7 @@ suspend fun Api.getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPl
     val url = url.newBuilder().addPathSegments("v4/places").apply {
         addQueryParameter("fields", placeFields.joinToString(separator = ","))
         addQueryParameter("limit", "$limit")
+        addQueryParameter("include_deleted", "true")
         if (updatedSince != null) {
             addQueryParameter(
                 "updated_since",

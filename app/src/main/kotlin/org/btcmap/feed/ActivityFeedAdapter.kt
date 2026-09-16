@@ -42,7 +42,7 @@ class ActivityFeedAdapter(
         fun bind(item: ActivityFeedItem, onItemClick: (ActivityFeedItem) -> Unit) {
             val context = binding.root.context
             binding.apply {
-                placeName.text = item.placeName
+                placeName.text = item.placeName.orEmpty()
                 userName.text = when (item.type) {
                     "place_boosted" -> item.durationDays?.let {
                         context.resources.getQuantityString(
