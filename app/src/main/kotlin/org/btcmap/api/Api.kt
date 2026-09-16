@@ -14,7 +14,11 @@ import okhttp3.Response
 import okhttp3.coroutines.executeAsync
 import java.io.InputStream
 
-class ApiException(val code: Int, message: String) : Exception(message)
+class ApiException(
+    val code: Int,
+    message: String,
+    val errorCode: String? = null,
+) : Exception(message)
 
 class ApiParseException(
     message: String,
@@ -58,7 +62,15 @@ class Api(
                     throw res.toApiException()
                 }
 
-                res.body.byteStream().use(parse)
+                res.body.byteStream().use { stream ->
+                    try {
+                        parse(stream)
+                    } catch (e: ApiParseException) {
+                        throw e
+                    } catch (e: RuntimeException) {
+                        throw ApiParseException("Failed to parse response from ${request.url}", e)
+                    }
+                }
             }
         }
     }
@@ -66,10 +78,17 @@ class Api(
     private fun Response.toApiException(): ApiException {
         val body = runCatching { body.string() }.getOrDefault("")
 
-        val message = runCatching {
-            JsonParser.parseString(body).asJsonObject.nonBlankStringOrNull("message")
+        val errorBody = runCatching {
+            JsonParser.parseString(body).asJsonObject
         }.getOrNull()
 
-        return ApiException(code, message ?: "HTTP $code: ${body.ifBlank { "unexpected response" }}")
+        val message = errorBody?.nonBlankStringOrNull("message")
+        val errorCode = errorBody?.nonBlankStringOrNull("code")
+
+        return ApiException(
+            code = code,
+            message = message ?: "HTTP $code: ${body.ifBlank { "unexpected response" }}",
+            errorCode = errorCode,
+        )
     }
 }

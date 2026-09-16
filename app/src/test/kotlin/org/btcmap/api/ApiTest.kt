@@ -3,6 +3,7 @@ package org.btcmap.api
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.btcmap.util.toJsonObject
 import org.junit.Assert
 import org.junit.Test
 
@@ -28,6 +29,32 @@ class ApiTest : ApiTestBase() {
         } catch (e: ApiException) {
             Assert.assertEquals(400, e.code)
             Assert.assertEquals("place is closed", e.message)
+        }
+    }
+
+    @Test
+    fun call_malformedJsonThrowsParseException() = runTest {
+        enqueueJson("not json")
+
+        try {
+            api().call(Request.Builder().url(server.url("/x")).build()) { it.toJsonObject() }
+            Assert.fail("Expected ApiParseException")
+        } catch (e: ApiParseException) {
+            Assert.assertNotNull(e.cause)
+        }
+    }
+
+    @Test
+    fun call_failureIncludesServerErrorCode() = runTest {
+        enqueueJson("""{"code":"invalid_input","message":"days out of range"}""", code = 400)
+
+        try {
+            api().call(Request.Builder().url(server.url("/x")).build()) { it.bufferedReader().readText() }
+            Assert.fail("Expected ApiException")
+        } catch (e: ApiException) {
+            Assert.assertEquals(400, e.code)
+            Assert.assertEquals("invalid_input", e.errorCode)
+            Assert.assertEquals("days out of range", e.message)
         }
     }
 
