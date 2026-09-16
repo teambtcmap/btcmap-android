@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">BTC Map コメント支払いリクエスト</string>
     <string name="update_available">アップデート利用可能</string>
     <string name="update_available_description">このアプリをストアからインストールした場合は、これは無視して、ストアにアップデートを管理させることができます。直接APKからインストールした場合は、「APKを取得」ボタンをタップしてアップデートしてください。\n\n現在のバージョン: %1$s\n最新バージョン: %2$s</string>
+    <string name="update_available_description_beta">新しいベータビルドが利用可能です。BTC Mapのベータテストにご参加いただきありがとうございます。バグに気づいた場合や機能の提案がある場合は、お問い合わせください。\n\n現在のバージョンコード: %1$d\n最新のバージョンコード: %2$d</string>
     <string name="get_apk">APKを取得</string>
     <string name="ignore">無視</string>
     <string name="view_on_btcmap">btcmap.orgで見る</string>

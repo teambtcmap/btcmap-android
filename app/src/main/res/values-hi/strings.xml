@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">BTC Map टिप्पणी भुगतान अनुरोध</string>
     <string name="update_available">अपडेट उपलब्ध</string>
     <string name="update_available_description">यदि आपने इस ऐप को स्टोर से इंस्टॉल किया है, तो आप इसे अनदेखा कर सकते हैं और अपने स्टोर को अपडेट प्रबंधित करने दें। यदि आपने सीधे APK के माध्यम से इंस्टॉल किया है, तो अपडेट करने के लिए \"APK प्राप्त करें\" बटन दबाएं।\n\nवर्तमान संस्करण: %1$s\nनवीनतम संस्करण: %2$s</string>
+    <string name="update_available_description_beta">एक नया बीटा बिल्ड उपलब्ध है। BTC Map बीटा परीक्षण में भाग लेने के लिए धन्यवाद। यदि आपको कोई बग दिखे या कोई सुविधा सुझाव हो तो कृपया हमसे संपर्क करें।\n\nवर्तमान संस्करण कोड: %1$d\nनवीनतम संस्करण कोड: %2$d</string>
     <string name="get_apk">APK प्राप्त करें</string>
     <string name="ignore">अनदेखा करें</string>
     <string name="view_on_btcmap">btcmap.org पर देखें</string>

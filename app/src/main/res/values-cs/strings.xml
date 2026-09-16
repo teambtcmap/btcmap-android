@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">Požadavek na platbu komentáře na BTC Map</string>
     <string name="update_available">Aktualizace k dispozici</string>
     <string name="update_available_description">Pokud jste tuto aplikaci nainstalovali z obchodu, můžete to ignorovat a nechat obchod spravovat aktualizace. Pokud jste nainstalovali přímo přes APK, stiskněte tlačítko \"Získat APK\" pro aktualizaci.\n\nAktuální verze: %1$s\nNejnovější verze: %2$s</string>
+    <string name="update_available_description_beta">Je k dispozici nová beta verze. Děkujeme, že se účastníte beta testování BTC Map. Pokud narazíte na chybu nebo máte návrhy na funkce, kontaktujte nás.\n\nKód aktuální verze: %1$d\nKód nejnovější verze: %2$d</string>
     <string name="get_apk">Získat APK</string>
     <string name="ignore">Ignorovat</string>
     <string name="view_on_btcmap">Zobrazit na btcmap.org</string>

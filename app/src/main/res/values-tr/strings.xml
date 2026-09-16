@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">BTC Map Yorum Ödeme Talebi</string>
     <string name="update_available">Güncelleme mevcut</string>
     <string name="update_available_description">Bu uygulamayı bir mağazadan yüklediyseniz, bunu göz ardı edebilir ve güncellemeleri mağazanızın yönetmesine izin verebilirsiniz. Doğrudan APK ile yüklediyseniz, güncellemek için \"APK al\" düğmesine basın.\n\nMevcut sürüm: %1$s\nEn son sürüm: %2$s</string>
+    <string name="update_available_description_beta">Yeni bir beta sürümü mevcut. BTC Map beta testine katıldığınız için teşekkürler. Bir hata fark ederseniz veya özellik önerileriniz varsa lütfen bizimle iletişime geçin.\n\nMevcut sürüm kodu: %1$d\nEn son sürüm kodu: %2$d</string>
     <string name="get_apk">APK al</string>
     <string name="ignore">Göz ardı et</string>
     <string name="view_on_btcmap">btcmap.org\'da görüntüle</string>

@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">Cerere de plată comentariu BTC Map</string>
     <string name="update_available">Actualizare disponibilă</string>
     <string name="update_available_description">Dacă ai instalat această aplicație dintr-un magazin, poți ignora acest lucru și lăsa magazinul să gestioneze actualizările. Dacă ai instalat prin APK direct, apasă butonul \"Obține APK\" pentru a actualiza.\n\nVersiunea curentă: %1$s\nCea mai recentă versiune: %2$s</string>
+    <string name="update_available_description_beta">O nouă versiune beta este disponibilă. Îți mulțumim pentru participarea la testarea beta BTC Map. Te rugăm să ne contactezi dacă observi o eroare sau ai sugestii de funcționalități.\n\nCodul versiunii curente: %1$d\nCodul celei mai recente versiuni: %2$d</string>
     <string name="get_apk">Obține APK</string>
     <string name="ignore">Ignoră</string>
     <string name="view_on_btcmap">Vezi pe btcmap.org</string>

@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">BTC Map reactie betalingsverzoek</string>
     <string name="update_available">Update beschikbaar</string>
     <string name="update_available_description">Als je deze app uit een winkel hebt geïnstalleerd, kun je dit negeren en je winkel de updates laten beheren. Als je via een directe APK hebt geïnstalleerd, druk op de \"APK ophalen\" knop om bij te werken.\n\nHuidige versie: %1$s\nNieuwste versie: %2$s</string>
+    <string name="update_available_description_beta">Er is een nieuwe bèta-build beschikbaar. Bedankt voor je deelname aan de BTC Map-bètatest. Neem contact met ons op als je een bug opmerkt of suggesties voor functies hebt.\n\nHuidige versiecode: %1$d\nNieuwste versiecode: %2$d</string>
     <string name="get_apk">APK ophalen</string>
     <string name="ignore">Negeren</string>
     <string name="view_on_btcmap">Bekijk op btcmap.org</string>

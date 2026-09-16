@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">Захтев за плаћање коментара BTC Map</string>
     <string name="update_available">Доступна је ажурирање</string>
     <string name="update_available_description">Ако сте инсталирали ову апликацију из продавнице, можете игнорисати ово и пустити продавницу да управља ажуриранима. Ако сте инсталирали путем директног APK, притисните дугме \"Преузми APK\" да бисте ажурирали.\n\nТренутна верзија: %1$s\nНајновија верзија: %2$s</string>
+    <string name="update_available_description_beta">Доступна је нова бета верзија. Хвала што учествујете у бета тестирању BTC Map-а. Контактирајте нас ако приметите грешку или имате предлоге за функције.\n\nКод тренутне верзије: %1$d\nКод најновије верзије: %2$d</string>
     <string name="get_apk">Преузми APK</string>
     <string name="ignore">Игнориши</string>
     <string name="view_on_btcmap">Погледај на btcmap.org</string>

@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">Richiesta di pagamento commento BTC Map</string>
     <string name="update_available">Aggiornamento disponibile</string>
     <string name="update_available_description">Se hai installato questa app da un negozio, puoi ignorarlo e lasciare che il tuo negozio gestisca gli aggiornamenti. Se hai installato tramite un APK diretto, premi il pulsante \"Ottieni APK\" per aggiornare.\n\nVersione attuale: %1$s\nUltima versione: %2$s</string>
+    <string name="update_available_description_beta">È disponibile una nuova build beta. Grazie per partecipare ai test beta di BTC Map. Contattaci se noti un bug o hai suggerimenti sulle funzionalità.\n\nCodice versione attuale: %1$d\nCodice ultima versione: %2$d</string>
     <string name="get_apk">Ottieni APK</string>
     <string name="ignore">Ignora</string>
     <string name="view_on_btcmap">Visualizza su btcmap.org</string>

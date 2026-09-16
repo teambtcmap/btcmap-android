@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">Αίτημα Πληρωμής Σχολίου BTC Map</string>
     <string name="update_available">Διαθέσιμη ενημέρωση</string>
     <string name="update_available_description">Εάν εγκαταστήσατε αυτήν την εφαρμογή από ένα κατάστημα, μπορείτε να το αγνοήσετε και να αφήσετε το κατάστημα να διαχειρίζεται τις ενημερώσεις. Εάν εγκαταστήσατε μέσω απευθείας APK, πατήστε το κουμπί \"Λήψη APK\" για ενημέρωση.\n\nΤρέχουσα έκδοση: %1$s\nΝεότερη έκδοση: %2$s</string>
+    <string name="update_available_description_beta">Διατίθεται νέα έκδοση beta. Ευχαριστούμε που συμμετέχετε στη δοκιμή beta του BTC Map. Επικοινωνήστε μαζί μας αν εντοπίσετε κάποιο σφάλμα ή έχετε προτάσεις λειτουργιών.\n\nΚωδικός τρέχουσας έκδοσης: %1$d\nΚωδικός νεότερης έκδοσης: %2$d</string>
     <string name="get_apk">Λήψη APK</string>
     <string name="ignore">Αγνόηση</string>
     <string name="view_on_btcmap">Προβολή στο btcmap.org</string>

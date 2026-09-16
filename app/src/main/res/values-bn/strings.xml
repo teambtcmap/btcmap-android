@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">BTC Map মন্তব্য পেমেন্ট অনুরোধ</string>
     <string name="update_available">আপডেট পাওয়া যাচ্ছে</string>
     <string name="update_available_description">যদি আপনি এই অ্যাপটি কোনো স্টোর থেকে ইনস্টল করে থাকেন, তাহলে আপনি এটি উপেক্ষা করতে পারেন এবং আপনার স্টোরকে আপডেট পরিচালনা করতে দিতে পারেন। যদি আপনি সরাসরি APK ইনস্টল করে থাকেন, আপডেট করতে \"APK পান\" বোতাম টিপুন।\n\nবর্তমান সংস্করণ: %1$s\nসর্বশেষ সংস্করণ: %2$s</string>
+    <string name="update_available_description_beta">একটি নতুন বিটা বিল্ড উপলব্ধ। BTC Map বিটা পরীক্ষায় অংশগ্রহণের জন্য ধন্যবাদ। আপনি যদি কোনো বাগ লক্ষ্য করেন বা কোনো বৈশিষ্ট্যের পরামর্শ থাকে তাহলে আমাদের সাথে যোগাযোগ করুন।\n\nবর্তমান সংস্করণ কোড: %1$d\nসর্বশেষ সংস্করণ কোড: %2$d</string>
     <string name="get_apk">APK পান</string>
     <string name="ignore">উপেক্ষা করুন</string>
     <string name="view_on_btcmap">btcmap.org এ দেখুন</string>

@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">BTC Map -kommenttimaksupyyntö</string>
     <string name="update_available">Päivitys saatavilla</string>
     <string name="update_available_description">Jos asensit tämän sovelluksen kaupasta, voit ohittaa tämän ja antaa kauppojen hallita päivityksiä. Jos asensit suoraan APK:n kautta, paina \"Hae APK\" -painiketta päivittääksesi.\n\nNykyinen versio: %1$s\nUusin versio: %2$s</string>
+    <string name="update_available_description_beta">Uusi betaversio on saatavilla. Kiitos, että osallistut BTC Mapin betatestaukseen. Ota meihin yhteyttä, jos huomaat virheen tai sinulla on ominaisuusehdotuksia.\n\nNykyinen versionumero: %1$d\nUusin versionumero: %2$d</string>
     <string name="get_apk">Hae APK</string>
     <string name="ignore">Ohita</string>
     <string name="view_on_btcmap">Näytä btcmap.orgissa</string>

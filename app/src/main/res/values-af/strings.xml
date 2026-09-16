@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">BTC Map Kommentaar Betalingsversoek</string>
     <string name="update_available">Opdatering beskikbaar</string>
     <string name="update_available_description">As u hierdie toepassing vanaf \'n winkellêer geïnstalleer het, kan u dit ignoreer en u winkel laat opdaterings bestuur. As u direk via \'n APK geïnstalleer het, druk die \"Kry APK\"-knoppie om op te dateer.\n\nHuidige weergawe: %1$s\nNuutste weergawe: %2$s</string>
+    <string name="update_available_description_beta">\'n Nuwe betatoetsweergawe is beskikbaar. Dankie dat u aan BTC Map se betatoetsing deelneem. Kontak ons asseblief as u \'n fout opmerk of enige kenmerkvoorstelle het.\n\nHuidige weergawekode: %1$d\nNuutste weergawekode: %2$d</string>
     <string name="get_apk">Kry APK</string>
     <string name="ignore">Ignoreer</string>
     <string name="view_on_btcmap">Sien op btcmap.org</string>

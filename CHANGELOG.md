@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Translate the beta update description into all supported languages
 - Fix a crash when an API request fails instead of showing the error message
 - Fix a rejected sign-in attempt clearing the currently signed-in account
 - Allow long-running API requests so large place syncs no longer time out

@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">BTC Map kommentar betalningsbegäran</string>
     <string name="update_available">Uppdatering tillgänglig</string>
     <string name="update_available_description">Om du installerade denna app från en butik kan du ignorera detta och låta din butik hantera uppdateringar. Om du installerade via en direkt APK, tryck på \"Hämta APK\"-knappen för att uppdatera.\n\nNuvarande version: %1$s\nSenaste version: %2$s</string>
+    <string name="update_available_description_beta">En ny betaversion är tillgänglig. Tack för att du deltar i BTC Maps betatestning. Kontakta oss om du upptäcker en bugg eller har förslag på funktioner.\n\nAktuell versionskod: %1$d\nSenaste versionskod: %2$d</string>
     <string name="get_apk">Hämta APK</string>
     <string name="ignore">Ignorera</string>
     <string name="view_on_btcmap">Visa på btcmap.org</string>

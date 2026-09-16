@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">Yêu cầu thanh toán bình luận BTC Map</string>
     <string name="update_available">Cập nhật có sẵn</string>
     <string name="update_available_description">Nếu bạn đã cài đặt ứng dụng này từ cửa hàng, bạn có thể bỏ qua và để cửa hàng quản lý cập nhật. Nếu bạn đã cài đặt qua APK trực tiếp, nhấn nút \"Tải APK\" để cập nhật.\n\nPhiên bản hiện tại: %1$s\nPhiên bản mới nhất: %2$s</string>
+    <string name="update_available_description_beta">Có bản beta mới. Cảm ơn bạn đã tham gia thử nghiệm beta BTC Map. Vui lòng liên hệ với chúng tôi nếu bạn phát hiện lỗi hoặc có đề xuất tính năng.\n\nMã phiên bản hiện tại: %1$d\nMã phiên bản mới nhất: %2$d</string>
     <string name="get_apk">Tải APK</string>
     <string name="ignore">Bỏ qua</string>
     <string name="view_on_btcmap">Xem trên btcmap.org</string>

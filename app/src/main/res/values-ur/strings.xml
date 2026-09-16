@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">BTC Map تبصرہ ادائیگی کی درخواست</string>
     <string name="update_available">اپڈیٹ دستیاب</string>
     <string name="update_available_description">اگر آپ نے یہ ایپ اسٹور سے انسٹال کی ہے، تو آپ اسے نظرانداز کر سکتے ہیں اور اپنے اسٹور کو اپڈیٹس کا انتظام کرنے دے سکتے ہیں۔ اگر آپ نے براہ راست APK انسٹال کی ہے، تو اپڈیٹ کے لیے \"APK حاصل کریں\" بٹن دبائیں۔\n\nموجودہ ورژن: %1$s\n最新 ورژن: %2$s</string>
+    <string name="update_available_description_beta">ایک نئی بیٹا بلڈ دستیاب ہے۔ BTC Map بیٹا ٹیسٹنگ میں شرکت کرنے کا شکریہ۔ اگر آپ کو کوئی بگ نظر آئے یا کوئی فیچر تجویز ہو تو براہ کرم ہم سے رابطہ کریں۔\n\nموجودہ ورژن کوڈ: %1$d\nتازہ ترین ورژن کوڈ: %2$d</string>
     <string name="get_apk">APK حاصل کریں</string>
     <string name="ignore">نظرانداز کریں</string>
     <string name="view_on_btcmap">btcmap.org پر دیکھیں</string>

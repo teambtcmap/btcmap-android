@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">BTC Map 评论付款请求</string>
     <string name="update_available">有可用更新</string>
     <string name="update_available_description">如果您从商店安装了此应用，可以忽略此提示并让您的商店管理更新。如果您通过直接下载 APK 安装，请按"获取 APK"按钮进行更新。\n\n当前版本：%1$s\n最新版本：%2$s</string>
+    <string name="update_available_description_beta">有新的测试版可用。感谢您参与 BTC Map 测试。如果您发现错误或有任何功能建议，请联系我们。\n\n当前版本代码：%1$d\n最新版本代码：%2$d</string>
     <string name="get_apk">获取 APK</string>
     <string name="ignore">忽略</string>
     <string name="view_on_btcmap">在 btcmap.org 上查看</string>

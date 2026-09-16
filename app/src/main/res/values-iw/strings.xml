@@ -53,6 +53,7 @@
     <string name="btc_map_comment_payment_request">בקשת תשלום תגובה BTC Map</string>
     <string name="update_available">עדכון זמין</string>
     <string name="update_available_description">אם התקנת את האפליקציה הזו מחנות, אתה יכול להתעלם מזה ולתת לחנות לנהל עדכונים. אם התקנת דרך APK ישירות, לחץ על כפתור \"קבל APK\" כדי לעדכן.\n\nגרסה נוכחית: %1$s\nגרסה אחרונה: %2$s</string>
+    <string name="update_available_description_beta">גרסת בטא חדשה זמינה. תודה על השתתפותך בבדיקות הבטא של BTC Map. אנא צור קשר אם אתה מבחין בבאג או שיש לך הצעות לתכונות.\n\nקוד הגרסה הנוכחית: %1$d\nקוד הגרסה האחרונה: %2$d</string>
     <string name="get_apk">קבל APK</string>
     <string name="ignore">התעלם</string>
     <string name="view_on_btcmap">צפה ב-btcmap.org</string>
