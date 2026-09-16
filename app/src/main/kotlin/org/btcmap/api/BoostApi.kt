@@ -24,9 +24,9 @@ suspend fun Api.getPlaceBoostQuote(): PlaceBoostQuoteResponse {
         val body = stream.toJsonObject()
 
         PlaceBoostQuoteResponse(
-            quote30dsat = body.get("quote_30d_sat").asLong,
-            quote90dsat = body.get("quote_90d_sat").asLong,
-            quote365dsat = body.get("quote_365d_sat").asLong,
+            quote30dsat = body.long("quote_30d_sat"),
+            quote90dsat = body.long("quote_90d_sat"),
+            quote365dsat = body.long("quote_365d_sat"),
         )
     }
 }
@@ -48,8 +48,8 @@ suspend fun Api.boostPlace(placeId: Long, days: Long): PlaceBoostResponse {
         val body = stream.toJsonObject()
 
         PlaceBoostResponse(
-            invoiceId = body.get("invoice_id").asString,
-            invoice = body.get("invoice").asString,
+            invoiceId = body.string("invoice_id"),
+            invoice = body.string("invoice"),
         )
     }
 }

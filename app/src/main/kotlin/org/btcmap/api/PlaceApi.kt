@@ -93,8 +93,8 @@ suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
     return call(Request.Builder().url(url).build()) { stream ->
         val body = stream.toJsonObject()
         PlaceCoordinates(
-            lat = body.get("lat").asDouble,
-            lon = body.get("lon").asDouble,
+            lat = body.double("lat"),
+            lon = body.double("lon"),
         )
     }
 }
@@ -118,68 +118,29 @@ private fun InputStream.toGetPlacesItems(): List<GetPlacesItem> {
 
 private fun JsonObject.toGetPlacesItem(): GetPlacesItem {
     return GetPlacesItem(
-        id = get("id").asLong,
-        lat = get("lat").asDouble,
-        lon = get("lon").asDouble,
-        icon = get("icon").asString,
-        name = get("name").asString,
-        localizedName = if (!has("localized_name") || get("localized_name").isJsonNull) null else get(
-            "localized_name"
-        )
-            .getAsJsonObject(),
-        updatedAt = get("updated_at").asString,
-        deletedAt = if (!has("deleted_at") || get("deleted_at").isJsonNull) null else get(
-            "deleted_at"
-        )
-            .asString.ifBlank { null },
-        requiredAppUrl = if (!has("required_app_url") || get("required_app_url").isJsonNull) null else get(
-            "required_app_url"
-        )
-            .asString.ifBlank { null },
-        boostedUntil = if (!has("boosted_until") || get("boosted_until").isJsonNull) null else get(
-            "boosted_until"
-        )
-            .asString.ifBlank { null },
-        verifiedAt = if (!has("verified_at") || get("verified_at").isJsonNull) null else get(
-            "verified_at"
-        )
-            .asString.ifBlank { null },
-        address = if (!has("address") || get("address").isJsonNull) null else get("address")
-            .asString.ifBlank { null },
-        openingHours = if (!has("opening_hours") || get("opening_hours").isJsonNull) null else get(
-            "opening_hours"
-        )
-            .asString.ifBlank { null },
-        localizedOpeningHours = if (!has("localized_opening_hours") || get("localized_opening_hours").isJsonNull) null else get(
-            "localized_opening_hours"
-        ).getAsJsonObject(),
-        website = if (!has("website") || get("website").isJsonNull) null else get("website")
-            .asString.ifBlank { null },
-        phone = if (!has("phone") || get("phone").isJsonNull) null else get("phone").asString
-            .ifBlank { null },
-        email = if (!has("email") || get("email").isJsonNull) null else get("email").asString
-            .ifBlank { null },
-        twitter = if (!has("twitter") || get("twitter").isJsonNull) null else get("twitter")
-            .asString.ifBlank { null },
-        facebook = if (!has("facebook") || get("facebook").isJsonNull) null else get(
-            "facebook"
-        )
-            .asString.ifBlank { null },
-        instagram = if (!has("instagram") || get("instagram").isJsonNull) null else get(
-            "instagram"
-        )
-            .asString.ifBlank { null },
-        line = if (!has("line") || get("line").isJsonNull) null else get("line").asString
-            .ifBlank { null },
-        comments = if (!has("comments") || get("comments").isJsonNull) null else get(
-            "comments"
-        )
-            .asLong,
-        telegram = if (!has("telegram") || get("telegram").isJsonNull) null else get(
-            "telegram"
-        )
-            .asString.ifBlank { null },
-        osmId = if (!has("osm_id") || get("osm_id").isJsonNull) null else get("osm_id")
-            .asString.ifBlank { null },
+        id = long("id"),
+        lat = double("lat"),
+        lon = double("lon"),
+        icon = string("icon"),
+        name = string("name"),
+        localizedName = objectOrNull("localized_name"),
+        updatedAt = string("updated_at"),
+        deletedAt = nonBlankStringOrNull("deleted_at"),
+        requiredAppUrl = nonBlankStringOrNull("required_app_url"),
+        boostedUntil = nonBlankStringOrNull("boosted_until"),
+        verifiedAt = nonBlankStringOrNull("verified_at"),
+        address = nonBlankStringOrNull("address"),
+        openingHours = nonBlankStringOrNull("opening_hours"),
+        localizedOpeningHours = objectOrNull("localized_opening_hours"),
+        website = nonBlankStringOrNull("website"),
+        phone = nonBlankStringOrNull("phone"),
+        email = nonBlankStringOrNull("email"),
+        twitter = nonBlankStringOrNull("twitter"),
+        facebook = nonBlankStringOrNull("facebook"),
+        instagram = nonBlankStringOrNull("instagram"),
+        line = nonBlankStringOrNull("line"),
+        comments = longOrNull("comments"),
+        telegram = nonBlankStringOrNull("telegram"),
+        osmId = nonBlankStringOrNull("osm_id"),
     )
 }

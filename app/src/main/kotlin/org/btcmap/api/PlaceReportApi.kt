@@ -34,8 +34,8 @@ suspend fun Api.reportPlace(placeId: Long, type: String, comment: String?): Repo
         val body = stream.toJsonObject()
 
         ReportPlaceResponse(
-            id = body.get("id").asLong,
-            origin = body.get("origin").asString,
+            id = body.long("id"),
+            origin = body.string("origin"),
         )
     }
 }

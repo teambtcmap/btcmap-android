@@ -32,11 +32,7 @@ class Api(
         val body = runCatching { body.string() }.getOrDefault("")
 
         val message = runCatching {
-            JsonParser.parseString(body).asJsonObject
-                .get("message")
-                ?.takeIf { !it.isJsonNull }
-                ?.asString
-                ?.takeIf { it.isNotBlank() }
+            JsonParser.parseString(body).asJsonObject.nonBlankStringOrNull("message")
         }.getOrNull()
 
         return ApiException(code, message ?: "HTTP $code: ${body.ifBlank { "unexpected response" }}")

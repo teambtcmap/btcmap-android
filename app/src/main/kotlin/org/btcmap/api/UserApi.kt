@@ -37,9 +37,9 @@ suspend fun Api.createUser(name: String?, password: String): User {
         val json = stream.toJsonObject()
 
         User(
-            id = json["id"].asLong,
-            name = json["name"].asString,
-            roles = json.getAsJsonArray("roles"),
+            id = json.long("id"),
+            name = json.string("name"),
+            roles = json.arrayOrNull("roles") ?: JsonArray(),
             savedPlaces = JsonArray(),
             savedAreas = JsonArray(),
         )
@@ -108,18 +108,18 @@ suspend fun Api.signIn(
         val body = stream.toJsonObject()
 
         CreateTokenResponse(
-            token = body.get("token").asString,
-            user = body.getAsJsonObject("user").toUser(),
+            token = body.string("token"),
+            user = body.obj("user").toUser(),
         )
     }
 }
 
 private fun JsonObject.toUser(): User {
     return User(
-        id = this["id"].asLong,
-        name = this["name"].asString,
-        roles = this.getAsJsonArray("roles"),
-        savedPlaces = this.getAsJsonArray("saved_places"),
-        savedAreas = this.getAsJsonArray("saved_areas"),
+        id = long("id"),
+        name = string("name"),
+        roles = arrayOrNull("roles") ?: JsonArray(),
+        savedPlaces = arrayOrNull("saved_places") ?: JsonArray(),
+        savedAreas = arrayOrNull("saved_areas") ?: JsonArray(),
     )
 }

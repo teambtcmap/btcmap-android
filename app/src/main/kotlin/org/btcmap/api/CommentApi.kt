@@ -50,7 +50,7 @@ suspend fun Api.getCommentQuote(): CommentQuoteResponse {
         val body = stream.toJsonObject()
 
         CommentQuoteResponse(
-            quoteSat = body.get("quote_sat").asLong,
+            quoteSat = body.long("quote_sat"),
         )
     }
 }
@@ -74,18 +74,12 @@ suspend fun Api.addComment(placeId: Long, comment: String): AddCommentResponse {
 private fun InputStream.toGetCommentsItems(): List<GetCommentsItem> {
     return toJsonArray().map {
         GetCommentsItem(
-            id = it.get("id").asLong,
-            elementId = if (!it.has("place_id") || it.get("place_id").isJsonNull) null else it.get(
-                "place_id"
-            ).asLong,
-            comment = if (!it.has("text") || it.get("text").isJsonNull) null else it.get("text").asString.ifBlank { null },
-            createdAt = if (!it.has("created_at") || it.get("created_at").isJsonNull) null else it.get(
-                "created_at"
-            ).asString.ifBlank { null },
-            updatedAt = it.get("updated_at").asString,
-            deletedAt = if (!it.has("deleted_at") || it.get("deleted_at").isJsonNull) null else it.get(
-                "deleted_at"
-            ).asString.ifBlank { null },
+            id = it.long("id"),
+            elementId = it.longOrNull("place_id"),
+            comment = it.nonBlankStringOrNull("text"),
+            createdAt = it.nonBlankStringOrNull("created_at"),
+            updatedAt = it.string("updated_at"),
+            deletedAt = it.nonBlankStringOrNull("deleted_at"),
         )
     }
 }
@@ -94,7 +88,7 @@ private fun InputStream.toAddCommentResponse(): AddCommentResponse {
     val body = toJsonObject()
 
     return AddCommentResponse(
-        invoiceId = body.get("invoice_id").asString,
-        invoice = body.get("invoice").asString,
+        invoiceId = body.string("invoice_id"),
+        invoice = body.string("invoice"),
     )
 }

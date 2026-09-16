@@ -51,20 +51,14 @@ suspend fun Api.getArea(
     return call(Request.Builder().url(url).build()) { stream ->
         val body = stream.toJsonObject()
         GetAreaItem(
-            id = body.get("id").asLong,
-            name = body.get("name").asString,
-            type = body.get("type").asString,
-            urlAlias = body.get("url_alias").asString,
-            icon = if (!body.has("icon") || body.get("icon").isJsonNull) null else body.get(
-                "icon"
-            ).asString.ifBlank { null },
-            iconWide = if (!body.has("icon_wide") || body.get("icon_wide").isJsonNull) null else body.get(
-                "icon_wide"
-            ).asString.ifBlank { null },
-            websiteUrl = body.get("website_url").asString,
-            description = if (!body.has("description") || body.get("description").isJsonNull) null else body.get(
-                "description"
-            ).asString.ifBlank { null },
+            id = body.long("id"),
+            name = body.string("name"),
+            type = body.string("type"),
+            urlAlias = body.string("url_alias"),
+            icon = body.nonBlankStringOrNull("icon"),
+            iconWide = body.nonBlankStringOrNull("icon_wide"),
+            websiteUrl = body.string("website_url"),
+            description = body.nonBlankStringOrNull("description"),
         )
     }
 }
@@ -83,20 +77,17 @@ suspend fun Api.removeSavedArea(id: Long): List<Long> {
 }
 
 private fun InputStream.toAreas(): List<GetAreasItem> {
-    return toJsonArray().map { element ->
-        val item = element.asJsonObject
-        val events = if (item.has("upcoming_events") && !item.get("upcoming_events").isJsonNull) {
-            item.getAsJsonArray("upcoming_events").map { it.asJsonObject.toGetEventsItem() }
-        } else {
-            emptyList()
-        }
+    return toJsonArray().map { item ->
+        val events = item.arrayOrNull("upcoming_events")
+            ?.map { it.asJsonObject.toGetEventsItem() }
+            ?: emptyList()
 
         GetAreasItem(
-            id = item.get("id").asLong,
-            name = item.get("name").asString,
-            type = item.get("type").asString,
-            urlAlias = item.get("url_alias").asString,
-            websiteUrl = item.get("website_url").asString,
+            id = item.long("id"),
+            name = item.string("name"),
+            type = item.string("type"),
+            urlAlias = item.string("url_alias"),
+            websiteUrl = item.string("website_url"),
             upcomingEventsCount = events.size,
             upcomingEvents = events,
         )

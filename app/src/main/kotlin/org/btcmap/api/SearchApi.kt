@@ -41,32 +41,24 @@ suspend fun Api.search(
 
 private fun InputStream.toSearchResults(): List<SearchResult> {
     val body = toJsonObject()
-    val results = body.getAsJsonArray("results") ?: return emptyList()
+    val results = body.arrayOrNull("results") ?: return emptyList()
 
     return results.mapNotNull { element ->
         val item = element.asJsonObject
-        when (item.get("type").asString) {
+        when (item.string("type")) {
             "area" -> SearchResult.Area(
-                id = item.get("id").asLong,
-                name = item.get("name").asString,
-                bbox = if (!item.has("bbox") || item.get("bbox").isJsonNull) {
-                    null
-                } else {
-                    item.getAsJsonArray("bbox").map { it.asDouble }
-                },
-                iconUrl = if (!item.has("icon") || item.get("icon").isJsonNull) {
-                    null
-                } else {
-                    item.get("icon").asString
-                },
+                id = item.long("id"),
+                name = item.string("name"),
+                bbox = item.arrayOrNull("bbox")?.map { it.asDouble },
+                iconUrl = item.stringOrNull("icon"),
             )
 
             "place" -> SearchResult.Place(
-                id = item.get("id").asLong,
-                name = item.get("name").asString,
-                icon = item.get("icon").asString,
-                lat = item.get("lat").asDouble,
-                lon = item.get("lon").asDouble,
+                id = item.long("id"),
+                name = item.string("name"),
+                icon = item.string("icon"),
+                lat = item.double("lat"),
+                lon = item.double("lon"),
             )
 
             else -> null

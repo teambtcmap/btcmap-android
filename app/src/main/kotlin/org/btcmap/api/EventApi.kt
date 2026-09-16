@@ -40,20 +40,14 @@ suspend fun Api.getAreaEvents(idOrAlias: String): List<GetEventsItem> {
 
 internal fun JsonObject.toGetEventsItem(): GetEventsItem {
     return GetEventsItem(
-        id = get("id").asLong,
-        areaId = if (!has("area_id") || get("area_id").isJsonNull) null else get("area_id").asLong,
-        lat = get("lat").asDouble,
-        lon = get("lon").asDouble,
-        name = get("name").asString,
-        website = if (!has("website") || get("website").isJsonNull) {
-            null
-        } else {
-            get("website").asString.ifBlank { null }?.toHttpUrlOrNull()
-        },
-        startsAt = ZonedDateTime.parse(get("starts_at").asString),
-        endsAt = if (!has("ends_at") || get("ends_at").isJsonNull) null else ZonedDateTime.parse(
-            get("ends_at").asString
-        ),
+        id = long("id"),
+        areaId = longOrNull("area_id"),
+        lat = double("lat"),
+        lon = double("lon"),
+        name = string("name"),
+        website = nonBlankStringOrNull("website")?.toHttpUrlOrNull(),
+        startsAt = ZonedDateTime.parse(string("starts_at")),
+        endsAt = stringOrNull("ends_at")?.let { ZonedDateTime.parse(it) },
     )
 }
 

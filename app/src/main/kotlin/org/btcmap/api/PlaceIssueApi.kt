@@ -28,18 +28,18 @@ suspend fun Api.getPlaceIssues(areaId: Long, limit: Long = 50): GetPlaceIssuesRe
 private fun InputStream.toGetPlaceIssuesResponse(): GetPlaceIssuesResponse {
     val body = toJsonObject()
 
-    val issues = body.getAsJsonArray("requested_issues")?.map { element ->
+    val issues = body.arrayOrNull("requested_issues")?.map { element ->
         val item = element.asJsonObject
         GetPlaceIssuesItem(
-            elementOsmType = item.get("element_osm_type").asString,
-            elementOsmId = item.get("element_osm_id").asLong,
-            elementName = item.get("element_name").asString,
-            issueCode = item.get("issue_code").asString,
+            elementOsmType = item.string("element_osm_type"),
+            elementOsmId = item.long("element_osm_id"),
+            elementName = item.string("element_name"),
+            issueCode = item.string("issue_code"),
         )
     } ?: emptyList()
 
     return GetPlaceIssuesResponse(
-        totalIssues = body.get("total_issues").asInt,
+        totalIssues = body.int("total_issues"),
         requestedIssues = issues,
     )
 }

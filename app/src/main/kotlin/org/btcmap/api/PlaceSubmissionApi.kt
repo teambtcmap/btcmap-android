@@ -44,6 +44,6 @@ suspend fun Api.submitPlace(
     ) { stream ->
         val body = stream.toJsonObject()
 
-        SubmitPlaceResponse(id = body.get("id").asLong)
+        SubmitPlaceResponse(id = body.long("id"))
     }
 }

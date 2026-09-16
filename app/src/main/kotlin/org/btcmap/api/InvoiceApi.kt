@@ -18,8 +18,8 @@ suspend fun Api.getInvoice(id: String): Invoice {
         val body = stream.toJsonObject()
 
         Invoice(
-            id = body.get("id").asString,
-            status = body.get("status").asString,
+            id = body.string("id"),
+            status = body.string("status"),
         )
     }
 }
