@@ -1,6 +1,7 @@
 package org.btcmap.api
 
 import okhttp3.Request
+import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import java.io.InputStream
 
@@ -27,7 +28,7 @@ suspend fun Api.getActivity(areaIds: List<String>, days: Int = 7): List<Activity
         addQueryParameter("days", "$days")
     }
 
-    return call(Request.Builder().url(url).build()) { it.toActivityFeedItems() }
+    return call(Request.Builder().withoutAuth().url(url).build()) { it.toActivityFeedItems() }
 }
 
 private fun InputStream.toActivityFeedItems(): List<ActivityFeedItem> {

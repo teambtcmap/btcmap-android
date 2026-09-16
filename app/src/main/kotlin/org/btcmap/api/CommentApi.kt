@@ -2,6 +2,7 @@ package org.btcmap.api
 
 import com.google.gson.JsonObject
 import okhttp3.Request
+import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
@@ -38,13 +39,13 @@ suspend fun Api.getComments(updatedSince: ZonedDateTime?, limit: Long): List<Get
         }
     }
 
-    return call(Request.Builder().url(url).build()) { it.toGetCommentsItems() }
+    return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetCommentsItems() }
 }
 
 suspend fun Api.getCommentQuote(): CommentQuoteResponse {
     val url = buildUrl("v4", "place-comments", "quote")
 
-    return call(Request.Builder().url(url).build()) { stream ->
+    return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
         val body = stream.toJsonObject()
 
         CommentQuoteResponse(
@@ -65,6 +66,7 @@ suspend fun Api.addComment(placeId: Long, comment: String): AddCommentResponse {
         Request.Builder()
             .post(jsonBody(req))
             .url(url)
+            .withoutAuth()
             .build()
     ) { it.toAddCommentResponse() }
 }

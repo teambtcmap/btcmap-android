@@ -2,6 +2,7 @@ package org.btcmap.api
 
 import com.google.gson.JsonPrimitive
 import okhttp3.Request
+import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonLongArray
 import org.btcmap.util.toJsonObject
@@ -35,7 +36,7 @@ suspend fun Api.getAreas(lat: Double, lon: Double): List<GetAreasItem> {
         addQueryParameter("lon", lon.toString())
     }
 
-    return call(Request.Builder().url(url).build()) { it.toAreas() }
+    return call(Request.Builder().withoutAuth().url(url).build()) { it.toAreas() }
 }
 
 suspend fun Api.getArea(
@@ -46,7 +47,7 @@ suspend fun Api.getArea(
         if (lang.isNotBlank()) addQueryParameter("lang", lang)
     }
 
-    return call(Request.Builder().url(url).build()) { stream ->
+    return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
         val body = stream.toJsonObject()
         GetAreaItem(
             id = body.long("id"),

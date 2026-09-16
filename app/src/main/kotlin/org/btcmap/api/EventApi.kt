@@ -4,6 +4,7 @@ import com.google.gson.JsonObject
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request
+import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
@@ -24,19 +25,19 @@ data class GetEventsItem(
 suspend fun Api.getEvents(): List<GetEventsItem> {
     val url = buildUrl("v4", "events")
 
-    return call(Request.Builder().url(url).build()) { it.toGetEventsItems() }
+    return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetEventsItems() }
 }
 
 suspend fun Api.getEvent(id: Long): GetEventsItem {
     val url = buildUrl("v4", "events", "$id")
 
-    return call(Request.Builder().url(url).build()) { it.toJsonObject().toGetEventsItem() }
+    return call(Request.Builder().withoutAuth().url(url).build()) { it.toJsonObject().toGetEventsItem() }
 }
 
 suspend fun Api.getAreaEvents(idOrAlias: String): List<GetEventsItem> {
     val url = buildUrl("v4", "areas", idOrAlias, "events")
 
-    return call(Request.Builder().url(url).build()) { it.toGetEventsItems() }
+    return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetEventsItems() }
 }
 
 internal fun JsonObject.toGetEventsItem(): GetEventsItem {

@@ -73,4 +73,21 @@ class TokenSettingInterceptorTest {
 
         Assert.assertEquals("Bearer password", server().takeRequest().headers["Authorization"])
     }
+
+    @Test
+    fun skipsPublicRequests() {
+        server().enqueue(okResponse())
+
+        client { "stored-token" }
+            .newCall(
+                Request.Builder()
+                    .url(server().url("/x"))
+                    .withoutAuth()
+                    .build()
+            )
+            .execute()
+            .close()
+
+        Assert.assertNull(server().takeRequest().headers["Authorization"])
+    }
 }

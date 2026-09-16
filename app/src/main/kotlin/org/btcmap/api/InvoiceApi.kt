@@ -1,6 +1,7 @@
 package org.btcmap.api
 
 import okhttp3.Request
+import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonObject
 
 data class Invoice(
@@ -14,7 +15,7 @@ val Invoice.paid: Boolean
 suspend fun Api.getInvoice(id: String): Invoice {
     val url = buildUrl("v4", "invoices", id)
 
-    return call(Request.Builder().url(url).build()) { stream ->
+    return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
         val body = stream.toJsonObject()
 
         Invoice(

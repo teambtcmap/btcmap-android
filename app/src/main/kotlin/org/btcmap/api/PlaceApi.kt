@@ -3,6 +3,7 @@ package org.btcmap.api
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import okhttp3.Request
+import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonLongArray
 import org.btcmap.util.toJsonObject
@@ -81,7 +82,7 @@ suspend fun Api.getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPl
         }
     }
 
-    return call(Request.Builder().url(url).build()) { it.toGetPlacesItems() }
+    return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetPlacesItems() }
 }
 
 suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
@@ -89,7 +90,7 @@ suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
         addQueryParameter("fields", "lat,lon")
     }
 
-    return call(Request.Builder().url(url).build()) { stream ->
+    return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
         val body = stream.toJsonObject()
         PlaceCoordinates(
             lat = body.double("lat"),

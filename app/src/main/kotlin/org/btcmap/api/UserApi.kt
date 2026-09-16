@@ -2,6 +2,7 @@ package org.btcmap.api
 
 import com.google.gson.JsonObject
 import okhttp3.Request
+import org.btcmap.auth.withoutAuth
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.util.toJsonObject
 
@@ -30,6 +31,7 @@ suspend fun Api.createUser(name: String?, password: String): User {
         Request.Builder()
             .post(jsonBody(req))
             .url(url)
+            .withoutAuth()
             .build()
     ) { stream ->
         stream.toJsonObject().toUser()

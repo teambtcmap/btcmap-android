@@ -1,6 +1,7 @@
 package org.btcmap.api
 
 import okhttp3.Request
+import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
 
@@ -22,7 +23,7 @@ suspend fun Api.getPlaceIssues(areaId: Long, limit: Long = 50): GetPlaceIssuesRe
         addQueryParameter("limit", limit.toString())
     }
 
-    return call(Request.Builder().url(url).build()) { it.toGetPlaceIssuesResponse() }
+    return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetPlaceIssuesResponse() }
 }
 
 private fun InputStream.toGetPlaceIssuesResponse(): GetPlaceIssuesResponse {

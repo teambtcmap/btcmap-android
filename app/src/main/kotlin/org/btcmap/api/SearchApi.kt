@@ -1,6 +1,7 @@
 package org.btcmap.api
 
 import okhttp3.Request
+import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
 
@@ -36,7 +37,7 @@ suspend fun Api.search(
         addQueryParameter("limit", "$limit")
     }
 
-    return call(Request.Builder().url(url).build()) { it.toSearchResults() }
+    return call(Request.Builder().withoutAuth().url(url).build()) { it.toSearchResults() }
 }
 
 private fun InputStream.toSearchResults(): List<SearchResult> {

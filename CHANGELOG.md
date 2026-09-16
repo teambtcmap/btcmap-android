@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show the logged-in confirmation when signing in to an existing account, not just after creating one
+- Only send the stored session token to API endpoints that require authentication
+- Reopen the sign-in screen with the username filled in when account creation succeeds but the automatic sign-in fails
 - Translate the beta update description into all supported languages
 - Fix a crash when an API request fails instead of showing the error message
 - Fix a rejected sign-in attempt clearing the currently signed-in account
@@ -15,7 +18,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Show a sign-in specific error message when signing in fails instead of an account creation error
 - Fix a crash when opening the profile screen without a cached account
 - Keep the cached account when changing the username is interrupted
-- Tell the user their account was created when sign-up succeeds but the automatic sign-in fails
 - Keep events without a usable website instead of dropping them, and hide the website link for those
 - Ignore unknown search result types returned by the API instead of failing to parse the response
 - Fix place and comment sync skipping entries when more than one batch shares the same update timestamp

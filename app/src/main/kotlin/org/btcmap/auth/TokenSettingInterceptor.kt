@@ -13,6 +13,10 @@ class TokenSettingInterceptor(
             return chain.proceed(request)
         }
 
+        if (request.tag(PublicRequest::class.java) != null) {
+            return chain.proceed(request)
+        }
+
         val token = token()?.takeIf { it.isNotBlank() }
             ?: return chain.proceed(request)
 

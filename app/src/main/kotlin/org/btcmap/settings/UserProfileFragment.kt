@@ -12,7 +12,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.api.getUser
@@ -48,12 +50,30 @@ class UserProfileFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        val user = db().user.select()
-        if (user == null) {
-            prefs.authToken = null
-            parentFragmentManager.popBackStack()
-            return
+        binding.logoutButton.setOnClickListener {
+            logout()
         }
+
+        binding.changeUsernameButton.setOnClickListener {
+            showChangeUsernameDialog()
+        }
+
+        binding.changePasswordButton.setOnClickListener {
+            showChangePasswordDialog()
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val user = withContext(Dispatchers.IO) { db().user.select() }
+            if (user == null) {
+                prefs.authToken = null
+                parentFragmentManager.popBackStack()
+                return@launch
+            }
+            bindUser(user)
+        }
+    }
+
+    private fun bindUser(user: User) {
         binding.username.text = user.name
         binding.password.text = getString(R.string.password_mask)
 
@@ -78,18 +98,6 @@ class UserProfileFragment : Fragment() {
 
         binding.noSavedAreas.isVisible = user.savedAreas.isEmpty()
         binding.savedAreasList.isVisible = user.savedAreas.isNotEmpty()
-
-        binding.logoutButton.setOnClickListener {
-            logout()
-        }
-
-        binding.changeUsernameButton.setOnClickListener {
-            showChangeUsernameDialog()
-        }
-
-        binding.changePasswordButton.setOnClickListener {
-            showChangePasswordDialog()
-        }
     }
 
     private fun showChangePasswordDialog() {
@@ -146,16 +154,18 @@ class UserProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val user = api().updateUsername(newName)
-                val existing = db().user.select()
-                db().user.insert(
-                    User(
-                        id = user.id,
-                        name = user.name,
-                        roles = user.roles,
-                        savedPlaces = existing?.savedPlaces ?: user.savedPlaces,
-                        savedAreas = existing?.savedAreas ?: user.savedAreas,
+                withContext(Dispatchers.IO) {
+                    val existing = db().user.select()
+                    db().user.insert(
+                        User(
+                            id = user.id,
+                            name = user.name,
+                            roles = user.roles,
+                            savedPlaces = existing?.savedPlaces ?: user.savedPlaces,
+                            savedAreas = existing?.savedAreas ?: user.savedAreas,
+                        )
                     )
-                )
+                }
                 binding.username.text = user.name
                 Toast.makeText(context, R.string.username_changed, Toast.LENGTH_SHORT).show()
             } catch (e: Throwable) {
@@ -177,8 +187,10 @@ class UserProfileFragment : Fragment() {
     private fun logout() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                prefs.authToken = null
-                db().user.delete()
+                withContext(Dispatchers.IO) {
+                    prefs.authToken = null
+                    db().user.delete()
+                }
                 parentFragmentManager.popBackStack()
             } catch (e: Exception) {
                 e.rethrowIfCancellation()
@@ -215,16 +227,18 @@ class UserProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val user = api().getUser()
-                db().user.delete()
-                db().user.insert(
-                    User(
-                        id = user.id,
-                        name = user.name,
-                        roles = user.roles,
-                        savedPlaces = user.savedPlaces,
-                        savedAreas = user.savedAreas,
+                withContext(Dispatchers.IO) {
+                    db().user.delete()
+                    db().user.insert(
+                        User(
+                            id = user.id,
+                            name = user.name,
+                            roles = user.roles,
+                            savedPlaces = user.savedPlaces,
+                            savedAreas = user.savedAreas,
+                        )
                     )
-                )
+                }
                 binding.savedPlacesList.adapter = SavedPlacesAdapter(
                     places = user.savedPlaces,
                     onDeleteClick = { placeId ->

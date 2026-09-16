@@ -7,10 +7,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.btcmap.api
+import org.btcmap.api.CreateTokenResponse
 import org.btcmap.api.createUser
 import org.btcmap.api.signIn
 import org.btcmap.db
@@ -91,7 +94,7 @@ private fun Fragment.signUp(username: String, password: String, onComplete: () -
             return@launch
         }
 
-        val token = try {
+        val signIn = try {
             api().signIn(
                 username = user.name,
                 password = password,
@@ -99,44 +102,28 @@ private fun Fragment.signUp(username: String, password: String, onComplete: () -
             )
         } catch (e: Throwable) {
             e.rethrowIfCancellation()
-            showAuthError(
-                "Failed to sign in after creating account",
+            Toast.makeText(
+                requireContext(),
                 getString(R.string.account_created_sign_in_failed),
-                e,
-            )
+                Toast.LENGTH_LONG,
+            ).show()
+            showSignInDialog(onComplete, prefilledUsername = user.name)
             return@launch
         }
 
-        try {
-            db().user.insert(
-                User(
-                    id = user.id,
-                    name = user.name,
-                    roles = user.roles,
-                    savedPlaces = user.savedPlaces,
-                    savedAreas = user.savedAreas,
-                )
-            )
-            prefs.authToken = token.token
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.logged_in_as, user.name),
-                Toast.LENGTH_SHORT,
-            ).show()
-            onComplete()
-        } catch (e: Throwable) {
-            e.rethrowIfCancellation()
-            val message = e.message?.takeIf { it.isNotBlank() }
-                ?: getString(R.string.failed_to_sign_in)
-            showAuthError("Failed to store signed-in account", message, e)
-        }
+        completeSignIn(signIn, onComplete)
     }
 }
 
-private fun Fragment.showSignInDialog(onComplete: () -> Unit) {
+private fun Fragment.showSignInDialog(
+    onComplete: () -> Unit,
+    prefilledUsername: String? = null,
+) {
     val dialogView = layoutInflater.inflate(R.layout.account_dialog, null)
     val usernameInput = dialogView.findViewById<TextInputEditText>(R.id.usernameInput)
     val passwordInput = dialogView.findViewById<TextInputEditText>(R.id.passwordInput)
+
+    prefilledUsername?.let { usernameInput.setText(it) }
 
     val dialog = MaterialAlertDialogBuilder(requireContext())
         .setTitle(R.string.login)
@@ -171,29 +158,49 @@ private fun Fragment.showSignInDialog(onComplete: () -> Unit) {
 
 private fun Fragment.signIn(username: String, password: String, onComplete: () -> Unit) {
     viewLifecycleOwner.lifecycleScope.launch {
-        try {
-            val signInRes = api().signIn(
+        val signIn = try {
+            api().signIn(
                 username,
                 password,
                 "BTC Map Android ${BuildConfig.VERSION_CODE}"
             )
-            db().user.insert(
-                User(
-                    id = signInRes.user.id,
-                    name = signInRes.user.name,
-                    roles = signInRes.user.roles,
-                    savedPlaces = signInRes.user.savedPlaces,
-                    savedAreas = signInRes.user.savedAreas,
-                )
-            )
-            prefs.authToken = signInRes.token
-            onComplete()
         } catch (e: Throwable) {
             e.rethrowIfCancellation()
             val message = e.message?.takeIf { it.isNotBlank() }
                 ?: getString(R.string.failed_to_sign_in)
             showAuthError("Sign in failed", message, e)
+            return@launch
         }
+
+        completeSignIn(signIn, onComplete)
+    }
+}
+
+private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onComplete: () -> Unit) {
+    try {
+        withContext(Dispatchers.IO) {
+            db().user.insert(
+                User(
+                    id = response.user.id,
+                    name = response.user.name,
+                    roles = response.user.roles,
+                    savedPlaces = response.user.savedPlaces,
+                    savedAreas = response.user.savedAreas,
+                )
+            )
+            prefs.authToken = response.token
+        }
+        Toast.makeText(
+            requireContext(),
+            getString(R.string.logged_in_as, response.user.name),
+            Toast.LENGTH_SHORT,
+        ).show()
+        onComplete()
+    } catch (e: Throwable) {
+        e.rethrowIfCancellation()
+        val message = e.message?.takeIf { it.isNotBlank() }
+            ?: getString(R.string.failed_to_sign_in)
+        showAuthError("Failed to store signed-in account", message, e)
     }
 }
 

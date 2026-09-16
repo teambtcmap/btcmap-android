@@ -2,6 +2,7 @@ package org.btcmap.api
 
 import com.google.gson.JsonObject
 import okhttp3.Request
+import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonObject
 
 data class PlaceBoostQuoteResponse(
@@ -18,7 +19,7 @@ data class PlaceBoostResponse(
 suspend fun Api.getPlaceBoostQuote(): PlaceBoostQuoteResponse {
     val url = buildUrl("v4", "place-boosts", "quote")
 
-    return call(Request.Builder().url(url).build()) { stream ->
+    return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
         val body = stream.toJsonObject()
 
         PlaceBoostQuoteResponse(
@@ -41,6 +42,7 @@ suspend fun Api.boostPlace(placeId: Long, days: Long): PlaceBoostResponse {
         Request.Builder()
             .post(jsonBody(req))
             .url(url)
+            .withoutAuth()
             .build()
     ) { stream ->
         val body = stream.toJsonObject()
