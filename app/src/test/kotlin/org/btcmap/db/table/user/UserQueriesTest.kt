@@ -1,7 +1,6 @@
 package org.btcmap.db.table.user
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.google.gson.JsonArray
 import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
@@ -23,6 +22,25 @@ class UserQueriesTest {
         Assert.assertNotNull(result)
         Assert.assertEquals(1L, result!!.id)
         Assert.assertEquals("Test User", result.name)
+    }
+
+    @Test
+    fun insert_and_select_roundTripsRolesAndSavedItems() {
+        val db = createDatabase()
+        val user = createUser(
+            id = 1L,
+            name = "Test User",
+            roles = listOf("user", "admin"),
+            savedPlaces = listOf(SavedItem(id = 10L, name = "Bitcoin Cafe")),
+            savedAreas = listOf(SavedItem(id = 20L, name = "Grand Paris")),
+        )
+
+        db.user.insert(user)
+        val result = db.user.select()!!
+
+        Assert.assertEquals(listOf("user", "admin"), result.roles)
+        Assert.assertEquals(listOf(SavedItem(10L, "Bitcoin Cafe")), result.savedPlaces)
+        Assert.assertEquals(listOf(SavedItem(20L, "Grand Paris")), result.savedAreas)
     }
 
     @Test
@@ -73,9 +91,9 @@ class UserQueriesTest {
     private fun createUser(
         id: Long,
         name: String,
-        roles: JsonArray = JsonArray(),
-        savedPlaces: JsonArray = JsonArray(),
-        savedAreas: JsonArray = JsonArray(),
+        roles: List<String> = emptyList(),
+        savedPlaces: List<SavedItem> = emptyList(),
+        savedAreas: List<SavedItem> = emptyList(),
     ): User {
         return User(
             id = id,

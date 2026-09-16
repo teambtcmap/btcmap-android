@@ -12,8 +12,6 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
 import mockwebserver3.RecordedRequest
@@ -21,6 +19,7 @@ import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.Database
+import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
 import org.btcmap.util.ApiRule
 import org.btcmap.util.DatabaseRule
@@ -102,16 +101,12 @@ class UserProfileErrorHandlingTest {
     }
 
     private fun user(): User {
-        val place = JsonObject().apply {
-            addProperty("id", 1L)
-            addProperty("name", "Test Place")
-        }
         return User(
             id = 1,
             name = "tester",
-            roles = JsonArray(),
-            savedPlaces = JsonArray().apply { add(place) },
-            savedAreas = JsonArray(),
+            roles = emptyList(),
+            savedPlaces = listOf(SavedItem(id = 1L, name = "Test Place")),
+            savedAreas = emptyList(),
         )
     }
 

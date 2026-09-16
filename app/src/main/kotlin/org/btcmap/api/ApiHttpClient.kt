@@ -7,9 +7,13 @@ import org.btcmap.http.RateLimitingInterceptor
 import org.btcmap.http.UserAgentSettingInterceptor
 import org.btcmap.settings.authToken
 import org.btcmap.settings.prefs
+import java.util.concurrent.TimeUnit
 
 fun apiHttpClient(): OkHttpClient {
     return OkHttpClient.Builder()
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(BrotliInterceptor)
         .addInterceptor(UserAgentSettingInterceptor)
         .addInterceptor(TokenSettingInterceptor { prefs.authToken })

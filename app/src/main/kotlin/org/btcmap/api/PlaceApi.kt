@@ -86,7 +86,7 @@ suspend fun Api.getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPl
 }
 
 suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
-    val url = url.newBuilder().addPathSegments("v4/places/$id").apply {
+    val url = buildUrl("v4", "places", "$id").newBuilder().apply {
         addQueryParameter("fields", "lat,lon")
     }.build()
 
@@ -107,7 +107,7 @@ suspend fun Api.savePlace(id: Long): List<Long> {
 }
 
 suspend fun Api.removeSavedPlace(id: Long): List<Long> {
-    val url = url.newBuilder().addPathSegments("v4/places/saved/$id").build()
+    val url = buildUrl("v4", "places", "saved", "$id")
 
     return call(Request.Builder().delete().url(url).build()) { it.toJsonLongArray() }
 }

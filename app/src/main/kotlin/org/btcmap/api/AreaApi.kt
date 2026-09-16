@@ -44,7 +44,7 @@ suspend fun Api.getArea(
     id: String,
     lang: String = Locale.getDefault().language,
 ): GetAreaItem {
-    val url = url.newBuilder().addPathSegments("v4/areas/$id").apply {
+    val url = buildUrl("v4", "areas", id).newBuilder().apply {
         if (lang.isNotBlank()) addQueryParameter("lang", lang)
     }.build()
 
@@ -71,7 +71,7 @@ suspend fun Api.saveArea(id: Long): List<Long> {
 }
 
 suspend fun Api.removeSavedArea(id: Long): List<Long> {
-    val url = url.newBuilder().addPathSegments("v4/areas/saved/$id").build()
+    val url = buildUrl("v4", "areas", "saved", "$id")
 
     return call(Request.Builder().delete().url(url).build()) { it.toJsonLongArray() }
 }

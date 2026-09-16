@@ -9,12 +9,11 @@ import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
 import mockwebserver3.RecordedRequest
 import org.btcmap.R
+import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
 import org.btcmap.settings.authToken
 import org.btcmap.util.assertNoUncaughtException
@@ -196,27 +195,17 @@ class AreaBookmarkTest : AreaScreenTest() {
     private fun savedAreaIds(): List<Long> {
         return databaseRule.db.user.select()
             ?.savedAreas
-            ?.map { it.asJsonObject["id"].asLong }
+            ?.map { it.id }
             .orEmpty()
     }
 
     private fun user(savedAreaIds: List<Long>): User {
-        val areas = JsonArray()
-        savedAreaIds.forEach { id ->
-            areas.add(
-                JsonObject().apply {
-                    addProperty("id", id)
-                    addProperty("name", "Grand Paris")
-                }
-            )
-        }
-
         return User(
             id = 1,
             name = "tester",
-            roles = JsonArray(),
-            savedPlaces = JsonArray(),
-            savedAreas = areas,
+            roles = emptyList(),
+            savedPlaces = emptyList(),
+            savedAreas = savedAreaIds.map { SavedItem(id = it, name = "Grand Paris") },
         )
     }
 }

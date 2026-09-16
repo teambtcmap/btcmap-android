@@ -1,7 +1,6 @@
 package org.btcmap.feed
 
 import androidx.fragment.app.Fragment
-import com.google.gson.JsonObject
 import org.btcmap.db
 
 class FollowingActivityFragment : BaseActivityFeedTab() {
@@ -18,13 +17,7 @@ class FollowingActivityFragment : BaseActivityFeedTab() {
 
     private fun savedAreaIds(): List<String> {
         val user = db().user.select() ?: return emptyList()
-        val out = mutableListOf<String>()
-        for (el in user.savedAreas) {
-            val obj = el as? JsonObject ?: continue
-            val id = obj.get("id")?.takeIf { !it.isJsonNull }?.asLong ?: continue
-            out.add(id.toString())
-        }
-        return out
+        return user.savedAreas.map { it.id.toString() }
     }
 
     override fun loadAreaIds(): List<String>? {

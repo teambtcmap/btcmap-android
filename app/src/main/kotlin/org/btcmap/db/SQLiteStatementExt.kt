@@ -1,7 +1,6 @@
 package org.btcmap.db
 
 import androidx.sqlite.SQLiteStatement
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import okhttp3.HttpUrl
@@ -32,10 +31,6 @@ fun SQLiteStatement.bindJsonObjectOrNull(index: Int, value: JsonObject?) {
     if (value == null) bindNull(index) else bindText(index, value.toString())
 }
 
-fun SQLiteStatement.bindJsonArray(index: Int, value: JsonArray) {
-    bindText(index, value.toString())
-}
-
 fun SQLiteStatement.getTextOrNull(index: Int): String? =
     if (isNull(index)) null else getText(index)
 
@@ -55,6 +50,3 @@ fun SQLiteStatement.getHttpUrlOrNull(index: Int): HttpUrl? =
 
 fun SQLiteStatement.getJsonObjectOrNull(index: Int): JsonObject? =
     if (isNull(index)) null else JsonParser.parseString(getText(index)).asJsonObject
-
-fun SQLiteStatement.getJsonArray(index: Int): JsonArray =
-    JsonParser.parseString(getText(index)).asJsonArray

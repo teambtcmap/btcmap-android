@@ -64,7 +64,7 @@ class ApiTest : ApiTestBase() {
         var unauthorized = false
         val api = Api(
             httpClient = OkHttpClient(),
-            url = server.url("/"),
+            baseUrl = { server.url("/") },
             onUnauthorized = { unauthorized = true },
         )
 
@@ -85,7 +85,7 @@ class ApiTest : ApiTestBase() {
         var unauthorized = false
         val api = Api(
             httpClient = OkHttpClient(),
-            url = server.url("/"),
+            baseUrl = { server.url("/") },
             onUnauthorized = { unauthorized = true },
         )
 

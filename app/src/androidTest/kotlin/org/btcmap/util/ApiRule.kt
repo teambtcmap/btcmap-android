@@ -19,7 +19,7 @@ class ApiRule : TestRule {
     val server = MockWebServer()
 
     val api: Api
-        get() = Api(OkHttpClient(), server.url("/"))
+        get() = Api(OkHttpClient(), { server.url("/") })
 
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {

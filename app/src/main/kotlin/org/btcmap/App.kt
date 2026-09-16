@@ -31,7 +31,7 @@ class App : Application() {
     private val defaultApi: Api by lazy {
         Api(
             httpClient = apiHttpClient(),
-            url = prefs.apiUrl,
+            baseUrl = { prefs.apiUrl },
             onUnauthorized = {
                 withContext(Dispatchers.IO) {
                     runCatching {

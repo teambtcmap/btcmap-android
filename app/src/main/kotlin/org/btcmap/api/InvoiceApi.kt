@@ -12,7 +12,7 @@ val Invoice.paid: Boolean
     get() = status == "paid"
 
 suspend fun Api.getInvoice(id: String): Invoice {
-    val url = url.newBuilder().addPathSegments("v4/invoices/$id").build()
+    val url = buildUrl("v4", "invoices", id)
 
     return call(Request.Builder().url(url).build()) { stream ->
         val body = stream.toJsonObject()

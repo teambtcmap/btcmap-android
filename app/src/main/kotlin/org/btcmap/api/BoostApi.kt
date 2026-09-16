@@ -1,9 +1,7 @@
 package org.btcmap.api
 
 import com.google.gson.JsonObject
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.btcmap.util.toJsonObject
 
 data class PlaceBoostQuoteResponse(
@@ -41,7 +39,7 @@ suspend fun Api.boostPlace(placeId: Long, days: Long): PlaceBoostResponse {
 
     return call(
         Request.Builder()
-            .post(req.toString().toRequestBody("application/json".toMediaType()))
+            .post(jsonBody(req))
             .url(url)
             .build()
     ) { stream ->

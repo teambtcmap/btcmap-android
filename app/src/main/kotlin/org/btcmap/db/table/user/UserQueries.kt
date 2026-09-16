@@ -1,7 +1,6 @@
 package org.btcmap.db.table.user
 
 import androidx.sqlite.SQLiteConnection
-import org.btcmap.db.bindJsonArray
 
 class UserQueries(private val conn: SQLiteConnection) {
 
@@ -14,9 +13,9 @@ class UserQueries(private val conn: SQLiteConnection) {
         ).use { stmt ->
             stmt.bindLong(1, row.id)
             stmt.bindText(2, row.name)
-            stmt.bindJsonArray(3, row.roles)
-            stmt.bindJsonArray(4, row.savedPlaces)
-            stmt.bindJsonArray(5, row.savedAreas)
+            stmt.bindText(3, UserJson.rolesToJson(row.roles))
+            stmt.bindText(4, UserJson.savedItemsToJson(row.savedPlaces))
+            stmt.bindText(5, UserJson.savedItemsToJson(row.savedAreas))
             stmt.step()
         }
     }

@@ -436,7 +436,7 @@ class PlaceFragment : Fragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     val user = db().user.select()!!
-                    val saved = user.savedPlaces.any { it.asJsonObject["id"].asLong == placeId }
+                    val saved = user.savedPlaces.any { it.id == placeId }
                     withResumed {
                         binding.toolbar.menu.findItem(R.id.save).setIcon(
                             if (saved) R.drawable.icon_bookmark_check else R.drawable.icon_bookmark

@@ -18,7 +18,7 @@ abstract class ApiTestBase {
     protected fun api(): Api {
         return Api(
             httpClient = OkHttpClient(),
-            url = server.url("/"),
+            baseUrl = { server.url("/") },
         )
     }
 

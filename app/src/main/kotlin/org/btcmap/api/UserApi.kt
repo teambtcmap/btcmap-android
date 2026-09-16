@@ -1,18 +1,16 @@
 package org.btcmap.api
 
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
+import org.btcmap.db.table.user.SavedItem
 import org.btcmap.util.toJsonObject
 
 data class User(
     val id: Long,
     val name: String,
-    val roles: JsonArray,
-    val savedPlaces: JsonArray,
-    val savedAreas: JsonArray,
+    val roles: List<String>,
+    val savedPlaces: List<SavedItem>,
+    val savedAreas: List<SavedItem>,
 )
 
 data class CreateTokenResponse(
@@ -30,19 +28,11 @@ suspend fun Api.createUser(name: String?, password: String): User {
 
     return call(
         Request.Builder()
-            .post(req.toString().toRequestBody("application/json".toMediaType()))
+            .post(jsonBody(req))
             .url(url)
             .build()
     ) { stream ->
-        val json = stream.toJsonObject()
-
-        User(
-            id = json.long("id"),
-            name = json.string("name"),
-            roles = json.arrayOrNull("roles") ?: JsonArray(),
-            savedPlaces = JsonArray(),
-            savedAreas = JsonArray(),
-        )
+        stream.toJsonObject().toUser()
     }
 }
 
@@ -63,7 +53,7 @@ suspend fun Api.updateUsername(username: String): User {
 
     return call(
         Request.Builder()
-            .put(req.toString().toRequestBody("application/json".toMediaType()))
+            .put(jsonBody(req))
             .url(url)
             .build()
     ) { stream ->
@@ -81,7 +71,7 @@ suspend fun Api.updatePassword(oldPassword: String, newPassword: String) {
 
     call(
         Request.Builder()
-            .put(req.toString().toRequestBody("application/json".toMediaType()))
+            .put(jsonBody(req))
             .url(url)
             .build()
     ) { }
@@ -92,18 +82,19 @@ suspend fun Api.signIn(
     password: String,
     label: String,
 ): CreateTokenResponse {
-    val url = url.newBuilder().addPathSegments("v4/users/$username/tokens").build()
+    val url = buildUrl("v4", "users", username, "tokens")
 
     val req = JsonObject().apply {
         addProperty("label", label)
     }
 
     return call(
-        Request.Builder()
-            .post(req.toString().toRequestBody("application/json".toMediaType()))
+        request = Request.Builder()
+            .post(jsonBody(req))
             .url(url)
             .header("Authorization", "Bearer $password")
-            .build()
+            .build(),
+        clearSessionOnUnauthorized = false,
     ) { stream ->
         val body = stream.toJsonObject()
 
@@ -118,8 +109,15 @@ private fun JsonObject.toUser(): User {
     return User(
         id = long("id"),
         name = string("name"),
-        roles = arrayOrNull("roles") ?: JsonArray(),
-        savedPlaces = arrayOrNull("saved_places") ?: JsonArray(),
-        savedAreas = arrayOrNull("saved_areas") ?: JsonArray(),
+        roles = arrayOrNull("roles")?.map { it.asString } ?: emptyList(),
+        savedPlaces = arrayOrNull("saved_places")?.map { it.asJsonObject.toSavedItem() } ?: emptyList(),
+        savedAreas = arrayOrNull("saved_areas")?.map { it.asJsonObject.toSavedItem() } ?: emptyList(),
+    )
+}
+
+private fun JsonObject.toSavedItem(): SavedItem {
+    return SavedItem(
+        id = long("id"),
+        name = string("name"),
     )
 }

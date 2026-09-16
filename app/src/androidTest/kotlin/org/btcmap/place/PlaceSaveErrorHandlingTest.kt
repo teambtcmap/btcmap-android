@@ -6,7 +6,6 @@ import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.gson.JsonArray
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
@@ -115,9 +114,9 @@ class PlaceSaveErrorHandlingTest {
         return User(
             id = 1,
             name = "tester",
-            roles = JsonArray(),
-            savedPlaces = JsonArray(),
-            savedAreas = JsonArray(),
+            roles = emptyList(),
+            savedPlaces = emptyList(),
+            savedAreas = emptyList(),
         )
     }
 

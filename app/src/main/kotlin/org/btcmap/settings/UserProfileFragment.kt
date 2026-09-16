@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import com.google.gson.JsonArray
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.api
@@ -21,6 +20,7 @@ import org.btcmap.api.removeSavedArea
 import org.btcmap.api.removeSavedPlace
 import org.btcmap.api.updatePassword
 import org.btcmap.api.updateUsername
+import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
 import org.btcmap.databinding.SavedAreaItemBinding
 import org.btcmap.databinding.SavedPlaceItemBinding
@@ -60,8 +60,8 @@ class UserProfileFragment : Fragment() {
             }
         )
 
-        binding.noSavedPlaces.isVisible = user.savedPlaces.size() == 0
-        binding.savedPlacesList.isVisible = user.savedPlaces.size() > 0
+        binding.noSavedPlaces.isVisible = user.savedPlaces.isEmpty()
+        binding.savedPlacesList.isVisible = user.savedPlaces.isNotEmpty()
 
         binding.savedAreasList.layoutManager = LinearLayoutManager(requireContext())
         binding.savedAreasList.adapter = SavedAreasAdapter(
@@ -71,8 +71,8 @@ class UserProfileFragment : Fragment() {
             }
         )
 
-        binding.noSavedAreas.isVisible = user.savedAreas.size() == 0
-        binding.savedAreasList.isVisible = user.savedAreas.size() > 0
+        binding.noSavedAreas.isVisible = user.savedAreas.isEmpty()
+        binding.savedAreasList.isVisible = user.savedAreas.isNotEmpty()
 
         binding.logoutButton.setOnClickListener {
             logout()
@@ -227,8 +227,8 @@ class UserProfileFragment : Fragment() {
                         deleteSavedPlace(placeId)
                     }
                 )
-                binding.noSavedPlaces.isVisible = user.savedPlaces.size() == 0
-                binding.savedPlacesList.isVisible = user.savedPlaces.size() > 0
+                binding.noSavedPlaces.isVisible = user.savedPlaces.isEmpty()
+                binding.savedPlacesList.isVisible = user.savedPlaces.isNotEmpty()
 
                 binding.savedAreasList.adapter = SavedAreasAdapter(
                     areas = user.savedAreas,
@@ -236,8 +236,8 @@ class UserProfileFragment : Fragment() {
                         deleteSavedArea(areaId)
                     }
                 )
-                binding.noSavedAreas.isVisible = user.savedAreas.size() == 0
-                binding.savedAreasList.isVisible = user.savedAreas.size() > 0
+                binding.noSavedAreas.isVisible = user.savedAreas.isEmpty()
+                binding.savedAreasList.isVisible = user.savedAreas.isNotEmpty()
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
@@ -246,7 +246,7 @@ class UserProfileFragment : Fragment() {
     }
 
     private class SavedPlacesAdapter(
-        private val places: JsonArray,
+        private val places: List<SavedItem>,
         private val onDeleteClick: (Long) -> Unit,
     ) : RecyclerView.Adapter<SavedPlacesAdapter.ViewHolder>() {
 
@@ -264,19 +264,18 @@ class UserProfileFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val place = places[position].asJsonObject
-            holder.binding.placeName.text = place["name"].asString
-            val placeId = place["id"].asLong
+            val place = places[position]
+            holder.binding.placeName.text = place.name
             holder.binding.deleteButton.setOnClickListener {
-                onDeleteClick(placeId)
+                onDeleteClick(place.id)
             }
         }
 
-        override fun getItemCount(): Int = places.size()
+        override fun getItemCount(): Int = places.size
     }
 
     private class SavedAreasAdapter(
-        private val areas: JsonArray,
+        private val areas: List<SavedItem>,
         private val onDeleteClick: (Long) -> Unit,
     ) : RecyclerView.Adapter<SavedAreasAdapter.ViewHolder>() {
 
@@ -294,14 +293,13 @@ class UserProfileFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val area = areas[position].asJsonObject
-            holder.binding.areaName.text = area["name"].asString
-            val areaId = area["id"].asLong
+            val area = areas[position]
+            holder.binding.areaName.text = area.name
             holder.binding.deleteButton.setOnClickListener {
-                onDeleteClick(areaId)
+                onDeleteClick(area.id)
             }
         }
 
-        override fun getItemCount(): Int = areas.size()
+        override fun getItemCount(): Int = areas.size
     }
 }

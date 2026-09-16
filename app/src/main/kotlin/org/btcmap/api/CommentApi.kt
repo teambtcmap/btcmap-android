@@ -1,9 +1,7 @@
 package org.btcmap.api
 
 import com.google.gson.JsonObject
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
@@ -12,9 +10,9 @@ import java.time.format.DateTimeFormatter
 
 data class GetCommentsItem(
     val id: Long,
-    val elementId: Long?,
-    val comment: String?,
-    val createdAt: String?,
+    val elementId: Long,
+    val comment: String,
+    val createdAt: String,
     val updatedAt: String,
     val deletedAt: String?,
 )
@@ -65,7 +63,7 @@ suspend fun Api.addComment(placeId: Long, comment: String): AddCommentResponse {
 
     return call(
         Request.Builder()
-            .post(req.toString().toRequestBody("application/json".toMediaType()))
+            .post(jsonBody(req))
             .url(url)
             .build()
     ) { it.toAddCommentResponse() }
@@ -75,9 +73,9 @@ private fun InputStream.toGetCommentsItems(): List<GetCommentsItem> {
     return toJsonArray().map {
         GetCommentsItem(
             id = it.long("id"),
-            elementId = it.longOrNull("place_id"),
-            comment = it.nonBlankStringOrNull("text"),
-            createdAt = it.nonBlankStringOrNull("created_at"),
+            elementId = it.long("place_id"),
+            comment = it.string("text"),
+            createdAt = it.string("created_at"),
             updatedAt = it.string("updated_at"),
             deletedAt = it.nonBlankStringOrNull("deleted_at"),
         )

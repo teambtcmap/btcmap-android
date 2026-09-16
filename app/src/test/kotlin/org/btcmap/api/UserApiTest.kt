@@ -1,6 +1,7 @@
 package org.btcmap.api
 
 import kotlinx.coroutines.test.runTest
+import okhttp3.OkHttpClient
 import org.junit.Assert
 import org.junit.Test
 
@@ -20,9 +21,9 @@ class UserApiTest : ApiTestBase() {
         )
         Assert.assertEquals(124L, user.id)
         Assert.assertEquals("Satoshi", user.name)
-        Assert.assertEquals(1, user.roles.size())
-        Assert.assertEquals(0, user.savedPlaces.size())
-        Assert.assertEquals(0, user.savedAreas.size())
+        Assert.assertEquals(listOf("user"), user.roles)
+        Assert.assertEquals(0, user.savedPlaces.size)
+        Assert.assertEquals(0, user.savedAreas.size)
     }
 
     @Test
@@ -54,8 +55,10 @@ class UserApiTest : ApiTestBase() {
         val request = takeRequest()
         Assert.assertEquals("GET", request.method)
         Assert.assertEquals("/v4/users/me", request.url.encodedPath)
-        Assert.assertEquals(1, user.savedPlaces.size())
-        Assert.assertEquals(1, user.savedAreas.size())
+        Assert.assertEquals(1, user.savedPlaces.size)
+        Assert.assertEquals(1, user.savedAreas.size)
+        Assert.assertEquals(1L, user.savedPlaces.single().id)
+        Assert.assertEquals("Bitcoin Cafe", user.savedPlaces.single().name)
     }
 
     @Test
@@ -122,5 +125,26 @@ class UserApiTest : ApiTestBase() {
         Assert.assertEquals("""{"label":"device"}""", request.jsonBody())
         Assert.assertEquals("token-1", response.token)
         Assert.assertEquals("satoshi", response.user.name)
+    }
+
+    @Test
+    fun signIn_doesNotClearSessionOnUnauthorized() = runTest {
+        enqueueJson("""{"message":"Invalid credentials"}""", code = 401)
+
+        var unauthorized = false
+        val api = Api(
+            httpClient = OkHttpClient(),
+            baseUrl = { server.url("/") },
+            onUnauthorized = { unauthorized = true },
+        )
+
+        try {
+            api.signIn(username = "satoshi", password = "wrong", label = "device")
+            Assert.fail("Expected ApiException")
+        } catch (e: ApiException) {
+            Assert.assertEquals(401, e.code)
+        }
+
+        Assert.assertFalse(unauthorized)
     }
 }

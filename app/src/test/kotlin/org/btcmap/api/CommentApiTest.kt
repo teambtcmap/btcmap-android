@@ -35,15 +35,15 @@ class CommentApiTest : ApiTestBase() {
     }
 
     @Test
-    fun getComments_omitsUpdatedSinceAndParsesBlankFieldsAsNull() = runTest {
+    fun getComments_omitsUpdatedSinceAndParsesFields() = runTest {
         enqueueJson(
             """
             [
                 {
                     "id": 1,
-                    "place_id": null,
-                    "text": "  ",
-                    "created_at": null,
+                    "place_id": 100,
+                    "text": "Nice spot",
+                    "created_at": "2026-01-01T10:00:00Z",
                     "updated_at": "2026-01-02T10:00:00Z",
                     "deleted_at": null
                 }
@@ -55,9 +55,9 @@ class CommentApiTest : ApiTestBase() {
 
         val request = takeRequest()
         Assert.assertNull(request.url.queryParameter("updated_since"))
-        Assert.assertNull(comment.elementId)
-        Assert.assertNull(comment.comment)
-        Assert.assertNull(comment.createdAt)
+        Assert.assertEquals(100L, comment.elementId)
+        Assert.assertEquals("Nice spot", comment.comment)
+        Assert.assertEquals("2026-01-01T10:00:00Z", comment.createdAt)
         Assert.assertNull(comment.deletedAt)
     }
 

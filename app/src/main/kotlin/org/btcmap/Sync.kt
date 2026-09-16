@@ -133,9 +133,9 @@ class Sync(val api: Api, val db: Database) {
                     db.comment.insert(newOrChanged.map {
                         Comment(
                             id = it.id,
-                            placeId = it.elementId!!,
-                            comment = it.comment!!,
-                            createdAt = ZonedDateTime.parse(it.createdAt!!),
+                            placeId = it.elementId,
+                            comment = it.comment,
+                            createdAt = ZonedDateTime.parse(it.createdAt),
                             updatedAt = ZonedDateTime.parse(it.updatedAt),
                         )
                     })

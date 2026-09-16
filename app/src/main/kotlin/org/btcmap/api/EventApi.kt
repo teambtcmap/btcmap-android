@@ -27,13 +27,13 @@ suspend fun Api.getEvents(): List<GetEventsItem> {
 }
 
 suspend fun Api.getEvent(id: Long): GetEventsItem {
-    val url = url.newBuilder().addPathSegments("v4/events/$id").build()
+    val url = buildUrl("v4", "events", "$id")
 
     return call(Request.Builder().url(url).build()) { it.toJsonObject().toGetEventsItem() }
 }
 
 suspend fun Api.getAreaEvents(idOrAlias: String): List<GetEventsItem> {
-    val url = url.newBuilder().addPathSegments("v4/areas/$idOrAlias/events").build()
+    val url = buildUrl("v4", "areas", idOrAlias, "events")
 
     return call(Request.Builder().url(url).build()) { it.toGetEventsItems() }
 }

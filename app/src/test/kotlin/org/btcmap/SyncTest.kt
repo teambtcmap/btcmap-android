@@ -29,7 +29,7 @@ class SyncTest {
     private fun createApi(): Api {
         return Api(
             httpClient = OkHttpClient(),
-            url = serverRule.server.url("/")
+            baseUrl = { serverRule.server.url("/") }
         )
     }
 
