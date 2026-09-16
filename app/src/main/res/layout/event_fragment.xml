@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:menu="@menu/event"
+            app:navigationIcon="?attr/homeAsUpIndicator" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <FrameLayout
+            android:id="@+id/mapWrapper"
+            android:layout_width="match_parent"
+            android:layout_height="240dp">
+
+            <org.maplibre.android.maps.MapView
+                android:id="@+id/map"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|top"
+                android:layout_margin="8dp"
+                android:orientation="vertical">
+
+                <org.btcmap.view.IconButton
+                    android:id="@+id/zoomIn"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription="@string/zoom_in"
+                    app:iconSrc="@drawable/icon_add" />
+
+                <org.btcmap.view.IconButton
+                    android:id="@+id/zoomOut"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:contentDescription="@string/zoom_out"
+                    app:iconSrc="@drawable/icon_remove" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="24dp">
+
+                <TextView
+                    android:id="@+id/name"
+                    style="?attr/textAppearanceHeadline6"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="8dp"
+                    tools:text="Bitcoin Meetup" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="16dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/icon_schedule"
+                        app:tint="?colorSecondary" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/startDate"
+                            style="?attr/textAppearanceSubtitle1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            tools:text="Sep 25, 2026, 7:00 PM - 10:00 PM" />
+
+                        <TextView
+                            android:id="@+id/endDate"
+                            style="?attr/textAppearanceSubtitle1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            tools:text="Sep 26, 2026, 1:00 AM" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/website"
+                    style="?attr/textAppearanceSubtitle1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autoLink="web"
+                    android:drawablePadding="20dp"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="16dp"
+                    app:drawableStartCompat="@drawable/icon_earth"
+                    app:drawableTint="?colorSecondary"
+                    tools:text="https://btcmap.org" />
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

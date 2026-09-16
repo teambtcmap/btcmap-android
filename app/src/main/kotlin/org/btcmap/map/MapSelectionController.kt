@@ -8,8 +8,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl
 import org.btcmap.db.Database
+import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
 import org.btcmap.map.layer.EVENT_MARKER_LAYER_ID
 import org.btcmap.map.layer.EXCHANGE_MARKER_LAYER_ID
@@ -26,7 +26,7 @@ class MapSelectionController(
     private val map: MapLibreMap,
     private val db: Database,
     private val onOpenPlace: suspend (Place) -> Unit,
-    private val onOpenEventWebsite: (HttpUrl) -> Unit,
+    private val onOpenEvent: (Event) -> Unit,
     private val onNoHit: () -> Unit,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -70,7 +70,7 @@ class MapSelectionController(
                         val event = withContext(Dispatchers.IO) {
                             db.event.selectById(eventId)
                         } ?: return@launch
-                        onOpenEventWebsite(event.website)
+                        onOpenEvent(event)
                     } catch (e: Throwable) {
                         e.rethrowIfCancellation()
                         Log.e(TAG, "Failed to open event $eventId", e)

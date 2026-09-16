@@ -1,7 +1,6 @@
 package org.btcmap.map
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
@@ -38,7 +37,6 @@ import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.feed.ActivityFeedFragment
 import org.btcmap.api
-import org.btcmap.api.GetEventsItem
 import org.btcmap.api.getArea
 import org.btcmap.api.getAreaEvents
 import org.btcmap.api.getAreas
@@ -47,8 +45,11 @@ import org.btcmap.area.AreaFragment
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db
+import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.MapFragmentBinding
+import org.btcmap.event.EventFragment
+import org.btcmap.event.toBundle
 import org.btcmap.place.AddPlaceFragment
 import org.btcmap.place.PlaceFragment
 import org.btcmap.place.isMerchant
@@ -189,9 +190,7 @@ class MapFragment : Fragment() {
                 map = it,
                 db = db(),
                 onOpenPlace = ::selectPlace,
-                onOpenEventWebsite = { url ->
-                    startActivity(Intent(Intent.ACTION_VIEW, url.toString().toUri()))
-                },
+                onOpenEvent = ::openEvent,
                 onNoHit = { bottomSheetController?.hide() },
             ).also { controller -> controller.install() }
         }
@@ -341,6 +340,14 @@ class MapFragment : Fragment() {
             childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment
         placeFragment.setPlace(place)
         bottomSheetController?.halfExpand()
+    }
+
+    private fun openEvent(event: Event) {
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace<EventFragment>(R.id.fragmentContainerView, null, event.toBundle())
+            addToBackStack(null)
+        }
     }
 
     private fun openPlace(row: SearchAdapterItem.Place) {
@@ -619,17 +626,6 @@ class MapFragment : Fragment() {
         } else {
             showAuthDialog { navigate() }
         }
-    }
-
-    private fun GetEventsItem.toBundle(): Bundle = Bundle().apply {
-        putLong("id", id)
-        putString("area_id", areaId?.toString())
-        putDouble("lat", lat)
-        putDouble("lon", lon)
-        putString("name", name)
-        putString("website", website.toString())
-        putString("starts_at", startsAt.toString())
-        putString("ends_at", endsAt?.toString())
     }
 
     companion object {

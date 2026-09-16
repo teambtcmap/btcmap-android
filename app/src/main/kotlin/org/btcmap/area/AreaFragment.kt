@@ -19,6 +19,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import coil3.load
@@ -38,6 +40,8 @@ import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.AreaFragmentBinding
+import org.btcmap.event.EventFragment
+import org.btcmap.event.toBundle
 import org.btcmap.saved.toggleSavedArea
 import org.btcmap.settings.authorized
 import org.btcmap.settings.prefs
@@ -309,7 +313,13 @@ class AreaFragment : Fragment() {
                 isClickable = true
                 isFocusable = true
                 setOnClickListener {
-                    openInBrowser(event.website.toString().toUri())
+                    parentFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        replace<EventFragment>(
+                            R.id.fragmentContainerView, null, event.toBundle()
+                        )
+                        addToBackStack(null)
+                    }
                 }
             }
 

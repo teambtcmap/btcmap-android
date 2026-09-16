@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show a dedicated event screen with a map, a directions action and a link to the event website instead of opening the website directly
 - Localize area names and descriptions to the device language
 - Collapse long area descriptions to the first paragraph with a read more toggle
 - Show how many place issues are displayed when the list is truncated
