@@ -22,7 +22,9 @@ class Activity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pendingDeepLink = intent.deepLink()
+        // Only handle the launching link on a fresh start: on recreation the restored
+        // back stack already contains the target screen, and re-delivering causes duplicates.
+        pendingDeepLink = if (savedInstanceState == null) intent.deepLink() else null
         enableEdgeToEdge() // TODO remove once min api is 35
         window.isNavigationBarContrastEnforced = false // remove nav bar scrim for 3 button mode
         binding = ActivityBinding.inflate(layoutInflater)

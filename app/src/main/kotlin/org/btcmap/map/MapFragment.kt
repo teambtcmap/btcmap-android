@@ -348,6 +348,11 @@ class MapFragment : Fragment() {
     }
 
     private fun openEvent(bundle: Bundle) {
+        parentFragmentManager.executePendingTransactions()
+
+        val current = parentFragmentManager.findFragmentById(R.id.fragmentContainerView)
+        if (current is EventFragment && current.eventId == bundle.getLong("id")) return
+
         parentFragmentManager.commit {
             setReorderingAllowed(true)
             replace<EventFragment>(R.id.fragmentContainerView, null, bundle)

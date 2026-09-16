@@ -86,6 +86,8 @@ class EventFragment : Fragment() {
     private var _binding: EventFragmentBinding? = null
     private val binding get() = _binding!!
 
+    val eventId: Long get() = event.id
+
     private var map: MapLibreMap? = null
 
     override fun onCreateView(
