@@ -27,7 +27,7 @@ suspend fun Api.search(
     lon: Double?,
     limit: Long = 20,
 ): List<SearchResult> {
-    val url = url.newBuilder().addPathSegments("v4/search/").apply {
+    val url = pathBuilder("v4", "search").apply {
         addQueryParameter("q", query)
         if (lat != null && lon != null) {
             addQueryParameter("lat", lat.toString())

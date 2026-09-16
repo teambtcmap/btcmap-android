@@ -17,7 +17,7 @@ suspend fun Api.submitPlace(
     website: String?,
     description: String?,
 ): SubmitPlaceResponse {
-    val url = url.newBuilder().addPathSegments("v4/place-submissions").build()
+    val url = buildUrl("v4", "place-submissions")
 
     val req = JsonObject().apply {
         addProperty("lat", lat)

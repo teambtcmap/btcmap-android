@@ -29,10 +29,14 @@ class Api(
     internal val url: HttpUrl
         get() = baseUrl()
 
-    internal fun buildUrl(vararg segments: String): HttpUrl {
+    internal fun pathBuilder(vararg segments: String): HttpUrl.Builder {
         return url.newBuilder().apply {
             segments.forEach { addPathSegment(it) }
-        }.build()
+        }
+    }
+
+    internal fun buildUrl(vararg segments: String): HttpUrl {
+        return pathBuilder(*segments).build()
     }
 
     internal fun jsonBody(body: JsonObject): RequestBody {
@@ -45,15 +49,15 @@ class Api(
         parse: (InputStream) -> T,
     ): T {
         return httpClient.newCall(request).executeAsync().use { res ->
-            if (!res.isSuccessful) {
-                if (res.code == 401 && clearSessionOnUnauthorized) {
-                    onUnauthorized()
+            withContext(Dispatchers.IO) {
+                if (!res.isSuccessful) {
+                    if (res.code == 401 && clearSessionOnUnauthorized) {
+                        onUnauthorized()
+                    }
+
+                    throw res.toApiException()
                 }
 
-                throw res.toApiException()
-            }
-
-            withContext(Dispatchers.IO) {
                 res.body.byteStream().use(parse)
             }
         }

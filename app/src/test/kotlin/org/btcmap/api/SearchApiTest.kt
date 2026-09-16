@@ -13,7 +13,7 @@ class SearchApiTest : ApiTestBase() {
 
         val request = takeRequest()
         Assert.assertEquals("GET", request.method)
-        Assert.assertEquals("/v4/search/", request.url.encodedPath)
+        Assert.assertEquals("/v4/search", request.url.encodedPath)
         Assert.assertEquals("prague", request.url.queryParameter("q"))
         Assert.assertEquals("50.08", request.url.queryParameter("lat"))
         Assert.assertEquals("14.43", request.url.queryParameter("lon"))

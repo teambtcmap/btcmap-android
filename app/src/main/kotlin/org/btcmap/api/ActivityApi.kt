@@ -22,7 +22,7 @@ suspend fun Api.getActivity(areaIds: List<String>, days: Int = 7): List<Activity
         return emptyList()
     }
 
-    val url = url.newBuilder().addPathSegments("v4/activity").apply {
+    val url = pathBuilder("v4", "activity").apply {
         addQueryParameter("areas", areaIds.joinToString(","))
         addQueryParameter("days", "$days")
     }.build()

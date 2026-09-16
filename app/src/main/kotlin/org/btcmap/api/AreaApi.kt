@@ -32,7 +32,7 @@ data class GetAreaItem(
 )
 
 suspend fun Api.getAreas(lat: Double, lon: Double): List<GetAreasItem> {
-    val url = url.newBuilder().addPathSegments("v4/areas").apply {
+    val url = pathBuilder("v4", "areas").apply {
         addQueryParameter("lat", lat.toString())
         addQueryParameter("lon", lon.toString())
     }.build()
@@ -44,7 +44,7 @@ suspend fun Api.getArea(
     id: String,
     lang: String = Locale.getDefault().language,
 ): GetAreaItem {
-    val url = buildUrl("v4", "areas", id).newBuilder().apply {
+    val url = pathBuilder("v4", "areas", id).apply {
         if (lang.isNotBlank()) addQueryParameter("lang", lang)
     }.build()
 
@@ -64,7 +64,7 @@ suspend fun Api.getArea(
 }
 
 suspend fun Api.saveArea(id: Long): List<Long> {
-    val url = url.newBuilder().addPathSegments("v4/areas/saved").build()
+    val url = buildUrl("v4", "areas", "saved")
     val body = JsonPrimitive(id).toString().toRequestBody("application/json".toMediaType())
 
     return call(Request.Builder().post(body).url(url).build()) { it.toJsonLongArray() }

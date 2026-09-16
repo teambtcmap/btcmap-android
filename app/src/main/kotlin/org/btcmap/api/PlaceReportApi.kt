@@ -10,7 +10,7 @@ data class ReportPlaceResponse(
 )
 
 suspend fun Api.reportPlace(placeId: Long, type: String, comment: String?): ReportPlaceResponse {
-    val url = url.newBuilder().addPathSegments("v4/place-reports").build()
+    val url = buildUrl("v4", "place-reports")
 
     val req = JsonObject().apply {
         addProperty("place_id", placeId)

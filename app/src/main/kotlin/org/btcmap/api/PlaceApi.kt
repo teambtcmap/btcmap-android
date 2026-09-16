@@ -70,7 +70,7 @@ data class PlaceCoordinates(
 )
 
 suspend fun Api.getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPlacesItem> {
-    val url = url.newBuilder().addPathSegments("v4/places").apply {
+    val url = pathBuilder("v4", "places").apply {
         addQueryParameter("fields", placeFields.joinToString(separator = ","))
         addQueryParameter("limit", "$limit")
         addQueryParameter("include_deleted", "true")
@@ -86,7 +86,7 @@ suspend fun Api.getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPl
 }
 
 suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
-    val url = buildUrl("v4", "places", "$id").newBuilder().apply {
+    val url = pathBuilder("v4", "places", "$id").apply {
         addQueryParameter("fields", "lat,lon")
     }.build()
 
@@ -100,7 +100,7 @@ suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
 }
 
 suspend fun Api.savePlace(id: Long): List<Long> {
-    val url = url.newBuilder().addPathSegments("v4/places/saved").build()
+    val url = buildUrl("v4", "places", "saved")
     val body = JsonPrimitive(id).toString().toRequestBody("application/json".toMediaType())
 
     return call(Request.Builder().post(body).url(url).build()) { it.toJsonLongArray() }

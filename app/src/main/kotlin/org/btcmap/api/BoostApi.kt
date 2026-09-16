@@ -16,7 +16,7 @@ data class PlaceBoostResponse(
 )
 
 suspend fun Api.getPlaceBoostQuote(): PlaceBoostQuoteResponse {
-    val url = url.newBuilder().addPathSegments("v4/place-boosts/quote").build()
+    val url = buildUrl("v4", "place-boosts", "quote")
 
     return call(Request.Builder().url(url).build()) { stream ->
         val body = stream.toJsonObject()
@@ -30,7 +30,7 @@ suspend fun Api.getPlaceBoostQuote(): PlaceBoostQuoteResponse {
 }
 
 suspend fun Api.boostPlace(placeId: Long, days: Long): PlaceBoostResponse {
-    val url = url.newBuilder().addPathSegments("v4/place-boosts").build()
+    val url = buildUrl("v4", "place-boosts")
 
     val req = JsonObject().apply {
         addProperty("place_id", placeId.toString())

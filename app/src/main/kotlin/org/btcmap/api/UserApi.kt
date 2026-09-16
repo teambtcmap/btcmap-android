@@ -19,7 +19,7 @@ data class CreateTokenResponse(
 )
 
 suspend fun Api.createUser(name: String?, password: String): User {
-    val url = url.newBuilder().addPathSegments("v4/users").build()
+    val url = buildUrl("v4", "users")
 
     val req = JsonObject().apply {
         addProperty("password", password)
@@ -37,7 +37,7 @@ suspend fun Api.createUser(name: String?, password: String): User {
 }
 
 suspend fun Api.getUser(): User {
-    val url = url.newBuilder().addPathSegments("v4/users/me").build()
+    val url = buildUrl("v4", "users", "me")
 
     return call(Request.Builder().url(url).build()) { stream ->
         stream.toJsonObject().toUser()
@@ -45,7 +45,7 @@ suspend fun Api.getUser(): User {
 }
 
 suspend fun Api.updateUsername(username: String): User {
-    val url = url.newBuilder().addPathSegments("v4/users/me/username").build()
+    val url = buildUrl("v4", "users", "me", "username")
 
     val req = JsonObject().apply {
         addProperty("username", username)
@@ -62,7 +62,7 @@ suspend fun Api.updateUsername(username: String): User {
 }
 
 suspend fun Api.updatePassword(oldPassword: String, newPassword: String) {
-    val url = url.newBuilder().addPathSegments("v4/users/me/password").build()
+    val url = buildUrl("v4", "users", "me", "password")
 
     val req = JsonObject().apply {
         addProperty("old_password", oldPassword)

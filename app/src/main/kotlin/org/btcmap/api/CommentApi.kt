@@ -27,7 +27,7 @@ data class AddCommentResponse(
 )
 
 suspend fun Api.getComments(updatedSince: ZonedDateTime?, limit: Long): List<GetCommentsItem> {
-    val url = url.newBuilder().addPathSegments("v4/place-comments").apply {
+    val url = pathBuilder("v4", "place-comments").apply {
         addQueryParameter("limit", "$limit")
         addQueryParameter("include_deleted", "true")
         if (updatedSince != null) {
@@ -42,7 +42,7 @@ suspend fun Api.getComments(updatedSince: ZonedDateTime?, limit: Long): List<Get
 }
 
 suspend fun Api.getCommentQuote(): CommentQuoteResponse {
-    val url = url.newBuilder().addPathSegments("v4/place-comments/quote").build()
+    val url = buildUrl("v4", "place-comments", "quote")
 
     return call(Request.Builder().url(url).build()) { stream ->
         val body = stream.toJsonObject()
@@ -54,7 +54,7 @@ suspend fun Api.getCommentQuote(): CommentQuoteResponse {
 }
 
 suspend fun Api.addComment(placeId: Long, comment: String): AddCommentResponse {
-    val url = url.newBuilder().addPathSegments("v4/place-comments").build()
+    val url = buildUrl("v4", "place-comments")
 
     val req = JsonObject().apply {
         addProperty("place_id", placeId.toString())

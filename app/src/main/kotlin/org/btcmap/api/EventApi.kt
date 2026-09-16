@@ -22,7 +22,7 @@ data class GetEventsItem(
 )
 
 suspend fun Api.getEvents(): List<GetEventsItem> {
-    val url = url.newBuilder().addPathSegments("v4/events").build()
+    val url = buildUrl("v4", "events")
 
     return call(Request.Builder().url(url).build()) { it.toGetEventsItems() }
 }
