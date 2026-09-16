@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep events without a usable website instead of dropping them, and hide the website link for those
+- Ignore unknown search result types returned by the API instead of failing to parse the response
+- Fix place and comment sync skipping entries when more than one batch shares the same update timestamp
 - Remove deleted comments from the local cache during sync
 - Load an area's upcoming events from the API instead of a stale snapshot so newly added events show up immediately
 - Fix text clipping in the upcoming event and place issue cards on the area screen

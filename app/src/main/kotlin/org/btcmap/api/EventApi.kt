@@ -2,7 +2,7 @@ package org.btcmap.api
 
 import com.google.gson.JsonObject
 import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
@@ -15,7 +15,7 @@ data class GetEventsItem(
     val lat: Double,
     val lon: Double,
     val name: String,
-    val website: HttpUrl,
+    val website: HttpUrl?,
     val startsAt: ZonedDateTime,
     val endsAt: ZonedDateTime?,
 )
@@ -45,7 +45,11 @@ internal fun JsonObject.toGetEventsItem(): GetEventsItem {
         lat = get("lat").asDouble,
         lon = get("lon").asDouble,
         name = get("name").asString,
-        website = get("website").asString.toHttpUrl(),
+        website = if (!has("website") || get("website").isJsonNull) {
+            null
+        } else {
+            get("website").asString.ifBlank { null }?.toHttpUrlOrNull()
+        },
         startsAt = ZonedDateTime.parse(get("starts_at").asString),
         endsAt = if (!has("ends_at") || get("ends_at").isJsonNull) null else ZonedDateTime.parse(
             get("ends_at").asString

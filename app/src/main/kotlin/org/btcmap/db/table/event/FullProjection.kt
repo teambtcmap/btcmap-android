@@ -2,7 +2,7 @@ package org.btcmap.db.table.event
 
 import androidx.sqlite.SQLiteStatement
 import okhttp3.HttpUrl
-import org.btcmap.db.getHttpUrl
+import org.btcmap.db.getHttpUrlOrNull
 import org.btcmap.db.getLongOrNull
 import org.btcmap.db.getTextOrNull
 import org.btcmap.db.getZonedDateTime
@@ -17,7 +17,7 @@ data class FullProjection(
     val lat: Double,
     val lon: Double,
     val name: String,
-    val website: HttpUrl,
+    val website: HttpUrl?,
     val startsAt: ZonedDateTime,
     val endsAt: ZonedDateTime?,
 ) {
@@ -31,7 +31,7 @@ data class FullProjection(
                 lat = stmt.getDouble(2),
                 lon = stmt.getDouble(3),
                 name = stmt.getText(4),
-                website = stmt.getHttpUrl(5),
+                website = stmt.getHttpUrlOrNull(5),
                 startsAt = stmt.getZonedDateTime(6),
                 endsAt = stmt.getZonedDateTimeOrNull(7),
             )

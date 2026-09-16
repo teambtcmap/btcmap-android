@@ -9,7 +9,7 @@ import org.btcmap.db.table.user.UserQueries
 
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
-        private const val VERSION = 7
+        private const val VERSION = 8
     }
 
     val conn = driver.open(path)
@@ -26,6 +26,7 @@ class Database(driver: SQLiteDriver, val path: String) {
     private fun migrate() {
         val stmt = conn.prepare("SELECT user_version FROM pragma_user_version;")
         var version = if (stmt.step()) stmt.getInt(0) else 0
+        stmt.reset()
 
         if (version == 0) {
             conn.execSQL(org.btcmap.db.table.place.CREATE)
@@ -64,6 +65,19 @@ class Database(driver: SQLiteDriver, val path: String) {
                 6 -> {
                     conn.execSQL("ALTER TABLE place ADD COLUMN osm_id TEXT;")
                     conn.execSQL("UPDATE place SET updated_at = '2000-01-01T00:00:00Z';")
+                }
+
+                7 -> {
+                    conn.execSQL("ALTER TABLE event RENAME TO event_old;")
+                    conn.execSQL(org.btcmap.db.table.event.CREATE)
+                    conn.execSQL(
+                        """
+                        INSERT INTO event (id, area_id, lat, lon, name, website, starts_at, ends_at)
+                        SELECT id, area_id, lat, lon, name, website, starts_at, ends_at
+                        FROM event_old;
+                        """
+                    )
+                    conn.execSQL("DROP TABLE event_old;")
                 }
 
                 else -> throw Exception("migration is missing")

@@ -7,7 +7,9 @@ import org.junit.Assert
 import org.junit.Test
 import java.time.ZonedDateTime
 import kotlinx.coroutines.test.runTest
+import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
+import mockwebserver3.RecordedRequest
 import mockwebserver3.junit4.MockWebServerRule
 import okhttp3.OkHttpClient
 import org.btcmap.api.Api
@@ -311,6 +313,51 @@ class SyncTest {
         Assert.assertEquals(1L, report.rowsAffected)
         val comments = db.comment.selectByPlaceId(100)
         Assert.assertTrue(comments.isEmpty())
+    }
+
+    @Test
+    fun syncComments_widensBatchWhenAllRowsShareTimestamp() = runTest {
+        val db = createDatabase()
+        val api = createApi()
+
+        data class Row(val id: Long, val updatedAt: String)
+        val tieTimestamp = "2024-01-01T00:00:00Z"
+        val nextTimestamp = "2024-01-02T00:00:00Z"
+        val rows = (1L..1500L).map { Row(it, tieTimestamp) } + Row(1501L, nextTimestamp)
+        val requestedLimits = java.util.Collections.synchronizedList(mutableListOf<String>())
+
+        serverRule.server.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                val limit = request.url.queryParameter("limit")!!.toLong()
+                requestedLimits += limit.toString()
+                val since = request.url.queryParameter("updated_since")
+                    ?.let { ZonedDateTime.parse(it) }
+                val page = rows
+                    .filter { since == null || ZonedDateTime.parse(it.updatedAt) > since }
+                    .sortedWith(compareBy({ it.updatedAt }, { it.id }))
+                    .take(limit.toInt())
+                val body = buildString {
+                    append("[")
+                    page.forEachIndexed { index, row ->
+                        if (index > 0) append(",")
+                        append(
+                            """{"id":${row.id},"place_id":100,"text":"c","created_at":"${row.updatedAt}","updated_at":"${row.updatedAt}","deleted_at":null}"""
+                        )
+                    }
+                    append("]")
+                }
+                return MockResponse.Builder()
+                    .addHeader("Content-Type", "application/json")
+                    .body(body)
+                    .build()
+            }
+        }
+
+        val report = Sync(api, db).syncComments()
+
+        Assert.assertEquals(listOf("1000", "2000"), requestedLimits.toList())
+        Assert.assertEquals(1501L, report.rowsAffected)
+        Assert.assertEquals(1501, db.comment.selectByPlaceId(100).size)
     }
 
     @Test

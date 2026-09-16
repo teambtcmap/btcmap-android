@@ -10,7 +10,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.R
 import org.btcmap.api.GetEventsItem
 import org.btcmap.databinding.EventFragmentBinding
@@ -51,7 +51,7 @@ fun Event.toBundle(): Bundle = Bundle().apply {
     putDouble(ARG_LAT, lat)
     putDouble(ARG_LON, lon)
     putString(ARG_NAME, name)
-    putString(ARG_WEBSITE, website.toString())
+    putString(ARG_WEBSITE, website?.toString())
     putString(ARG_STARTS_AT, startsAt.toString())
     putString(ARG_ENDS_AT, endsAt?.toString())
 }
@@ -62,7 +62,7 @@ fun GetEventsItem.toBundle(): Bundle = Bundle().apply {
     putDouble(ARG_LAT, lat)
     putDouble(ARG_LON, lon)
     putString(ARG_NAME, name)
-    putString(ARG_WEBSITE, website.toString())
+    putString(ARG_WEBSITE, website?.toString())
     putString(ARG_STARTS_AT, startsAt.toString())
     putString(ARG_ENDS_AT, endsAt?.toString())
 }
@@ -77,7 +77,7 @@ class EventFragment : Fragment() {
             lat = args.getDouble(ARG_LAT),
             lon = args.getDouble(ARG_LON),
             name = args.getString(ARG_NAME).orEmpty(),
-            website = args.getString(ARG_WEBSITE).orEmpty().toHttpUrl(),
+            website = args.getString(ARG_WEBSITE)?.toHttpUrlOrNull(),
             startsAt = ZonedDateTime.parse(requireNotNull(args.getString(ARG_STARTS_AT))),
             endsAt = args.getString(ARG_ENDS_AT)?.let { ZonedDateTime.parse(it) },
         )
@@ -163,7 +163,8 @@ class EventFragment : Fragment() {
             }
         }
 
-        binding.website.text = event.website.toString()
+        binding.website.isVisible = event.website != null
+        binding.website.text = event.website?.toString()
     }
 
     private fun openDirections() {

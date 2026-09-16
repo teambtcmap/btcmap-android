@@ -22,12 +22,13 @@ class Sync(val api: Api, val db: Database) {
     )
 
     suspend fun syncPlaces(): PlacesSyncReport {
-        val batchSize = 10_000L
+        val baseBatchSize = 10_000L
 
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
             var rowsAffected = 0L
             var maxKnownUpdatedAt = db.place.selectMaxUpdatedAt()
+            var batchSize = baseBatchSize
             while (true) {
                 val delta = try {
                     api.getPlaces(maxKnownUpdatedAt, batchSize)
@@ -42,9 +43,23 @@ class Sync(val api: Api, val db: Database) {
 
                 if (delta.isEmpty()) {
                     break
-                } else {
-                    maxKnownUpdatedAt = ZonedDateTime.parse(delta.maxBy { it.updatedAt }.updatedAt)
                 }
+
+                val maxUpdatedAt = delta.maxBy { ZonedDateTime.parse(it.updatedAt) }.updatedAt
+
+                // The server filters with `updated_at > updated_since` and orders
+                // by `updated_at`. A full batch whose rows all share one timestamp
+                // may be truncating a larger group with that same timestamp, and
+                // advancing the cursor to it would silently skip the rest of the
+                // group. Keep the cursor and widen the request until the batch
+                // either isn't full or spans more than one timestamp.
+                if (delta.size.toLong() == batchSize && delta.all { it.updatedAt == maxUpdatedAt }) {
+                    batchSize *= 2
+                    continue
+                }
+
+                maxKnownUpdatedAt = ZonedDateTime.parse(maxUpdatedAt)
+                val reachedTip = delta.size < batchSize
 
                 val newOrChanged = delta.filter { it.deletedAt == null }
                 val deleted = delta.filter { it.deletedAt != null }
@@ -57,9 +72,10 @@ class Sync(val api: Api, val db: Database) {
 
                 rowsAffected += delta.size
 
-                if (delta.size < batchSize) {
+                if (reachedTip) {
                     break
                 }
+                batchSize = baseBatchSize
             }
             PlacesSyncReport(
                 duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
@@ -74,12 +90,13 @@ class Sync(val api: Api, val db: Database) {
     )
 
     suspend fun syncComments(): CommentSyncReport {
-        val batchSize = 1_000L
+        val baseBatchSize = 1_000L
 
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
             var rowsAffected = 0L
             var maxKnownUpdatedAt = db.comment.selectMaxUpdatedAt()
+            var batchSize = baseBatchSize
 
             while (true) {
                 val delta = try {
@@ -95,9 +112,19 @@ class Sync(val api: Api, val db: Database) {
 
                 if (delta.isEmpty()) {
                     break
-                } else {
-                    maxKnownUpdatedAt = ZonedDateTime.parse(delta.maxBy { it.updatedAt }.updatedAt)
                 }
+
+                val maxUpdatedAt = delta.maxBy { ZonedDateTime.parse(it.updatedAt) }.updatedAt
+
+                // See syncPlaces for why a full single-timestamp batch must not
+                // advance the cursor.
+                if (delta.size.toLong() == batchSize && delta.all { it.updatedAt == maxUpdatedAt }) {
+                    batchSize *= 2
+                    continue
+                }
+
+                maxKnownUpdatedAt = ZonedDateTime.parse(maxUpdatedAt)
+                val reachedTip = delta.size < batchSize
 
                 val newOrChanged = delta.filter { it.deletedAt == null }
                 val deleted = delta.filter { it.deletedAt != null }
@@ -120,9 +147,10 @@ class Sync(val api: Api, val db: Database) {
 
                 rowsAffected += delta.size
 
-                if (delta.size < batchSize) {
+                if (reachedTip) {
                     break
                 }
+                batchSize = baseBatchSize
             }
 
             CommentSyncReport(

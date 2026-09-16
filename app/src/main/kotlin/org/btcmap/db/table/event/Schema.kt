@@ -18,7 +18,7 @@ const val CREATE = """
         $LAT REAL NOT NULL,
         $LON REAL NOT NULL,
         $NAME TEXT NOT NULL,
-        $WEBSITE TEXT NOT NULL,
+        $WEBSITE TEXT,
         $STARTS_AT TEXT NOT NULL,
         $ENDS_AT TEXT
     );

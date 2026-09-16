@@ -60,6 +60,25 @@ class EventQueriesTest {
     }
 
     @Test
+    fun insert_and_selectEventWithoutWebsite() {
+        val db = createDatabase()
+        val event = Event(
+            id = 1L,
+            areaId = null,
+            lat = 40.7128,
+            lon = -74.0060,
+            name = "No Website",
+            website = null,
+            startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
+            endsAt = null,
+        )
+
+        db.event.insert(listOf(event))
+
+        Assert.assertNull(db.event.selectById(1L)!!.website)
+    }
+
+    @Test
     fun selectById_returnsNullWhenNotFound() {
         val db = createDatabase()
 

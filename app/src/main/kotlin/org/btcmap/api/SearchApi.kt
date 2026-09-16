@@ -41,10 +41,10 @@ suspend fun Api.search(
 
 private fun InputStream.toSearchResults(): List<SearchResult> {
     val body = toJsonObject()
-    val results = body.getAsJsonArray("results")
+    val results = body.getAsJsonArray("results") ?: return emptyList()
 
-    return List(results.size()) { index ->
-        val item = results.get(index).asJsonObject
+    return results.mapNotNull { element ->
+        val item = element.asJsonObject
         when (item.get("type").asString) {
             "area" -> SearchResult.Area(
                 id = item.get("id").asLong,
@@ -61,13 +61,15 @@ private fun InputStream.toSearchResults(): List<SearchResult> {
                 },
             )
 
-            else -> SearchResult.Place(
+            "place" -> SearchResult.Place(
                 id = item.get("id").asLong,
                 name = item.get("name").asString,
                 icon = item.get("icon").asString,
                 lat = item.get("lat").asDouble,
                 lon = item.get("lon").asDouble,
             )
+
+            else -> null
         }
     }
 }

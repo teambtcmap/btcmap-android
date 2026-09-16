@@ -36,6 +36,32 @@ class SearchApiTest : ApiTestBase() {
     }
 
     @Test
+    fun search_skipsUnknownResultTypes() = runTest {
+        enqueueJson(
+            """
+            {
+                "results": [
+                    {"type": "future_type", "id": 1, "name": "Mystery"},
+                    {
+                        "type": "place",
+                        "id": 2,
+                        "name": "Bitcoin Coffee",
+                        "lat": 50.08,
+                        "lon": 14.43,
+                        "icon": "local_cafe"
+                    }
+                ]
+            }
+            """.trimIndent()
+        )
+
+        val results = api().search(query = "prague", lat = null, lon = null)
+
+        Assert.assertEquals(1, results.size)
+        Assert.assertEquals(2L, (results[0] as SearchResult.Place).id)
+    }
+
+    @Test
     fun search_withoutCoordinatesOmitsLatLon() = runTest {
         enqueueJson("""{"results":[]}""")
 

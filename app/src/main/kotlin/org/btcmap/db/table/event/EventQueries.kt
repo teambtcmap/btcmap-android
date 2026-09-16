@@ -1,6 +1,7 @@
 package org.btcmap.db.table.event
 
 import androidx.sqlite.SQLiteConnection
+import org.btcmap.db.bindHttpUrlOrNull
 import org.btcmap.db.bindLongOrNull
 import org.btcmap.db.bindZonedDateTimeOrNull
 
@@ -18,7 +19,7 @@ class EventQueries(private val conn: SQLiteConnection) {
                 stmt.bindDouble(3, row.lat)
                 stmt.bindDouble(4, row.lon)
                 stmt.bindText(5, row.name)
-                stmt.bindText(6, row.website.toString())
+                stmt.bindHttpUrlOrNull(6, row.website)
                 stmt.bindText(7, row.startsAt.toString())
                 stmt.bindZonedDateTimeOrNull(8, row.endsAt)
                 stmt.step()

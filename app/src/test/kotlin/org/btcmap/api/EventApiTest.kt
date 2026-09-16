@@ -28,6 +28,47 @@ class EventApiTest : ApiTestBase() {
     }
 
     @Test
+    fun getEvents_keepsEventsWithMissingOrInvalidWebsite() = runTest {
+        enqueueJson(
+            """
+            [
+                {
+                    "id": 1,
+                    "lat": 7.88,
+                    "lon": 98.38,
+                    "name": "Broken",
+                    "website": "not a url",
+                    "starts_at": "2025-08-29T19:00:00+07:00"
+                },
+                {
+                    "id": 2,
+                    "lat": 35.1,
+                    "lon": 129.03,
+                    "name": "None",
+                    "website": null,
+                    "starts_at": "2025-12-05T00:00:00+09:00"
+                },
+                {
+                    "id": 3,
+                    "lat": 35.2,
+                    "lon": 129.04,
+                    "name": "Fine",
+                    "website": "https://satsnfacts.xyz/",
+                    "starts_at": "2025-12-05T00:00:00+09:00"
+                }
+            ]
+            """.trimIndent()
+        )
+
+        val events = api().getEvents()
+
+        Assert.assertEquals(3, events.size)
+        Assert.assertNull(events[0].website)
+        Assert.assertNull(events[1].website)
+        Assert.assertEquals("https://satsnfacts.xyz/", events[2].website.toString())
+    }
+
+    @Test
     fun getAreaEvents_usesIdOrAlias() = runTest {
         enqueueJson(EVENTS)
 
