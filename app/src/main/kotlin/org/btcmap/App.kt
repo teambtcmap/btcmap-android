@@ -3,7 +3,10 @@ package org.btcmap
 import android.app.Application
 import androidx.fragment.app.Fragment
 import androidx.sqlite.driver.AndroidSQLiteDriver
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.api.Api
 import org.btcmap.api.apiHttpClient
@@ -21,6 +24,8 @@ class App : Application() {
     internal var dbForTesting: Database? = null
 
     internal var mapStyleUriForTesting: String? = null
+
+    private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     val sync: Sync
         get() = Sync(api, db)
@@ -58,6 +63,10 @@ class App : Application() {
         settingsInit(this)
         typefaceInit(this)
         MapLibre.getInstance(this)
+
+        // Decrypt the stored session token up front so later reads from the main
+        // thread hit the in-memory cache instead of the keystore.
+        ioScope.launch { runCatching { prefs.authToken } }
     }
 }
 

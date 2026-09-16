@@ -10,6 +10,7 @@ import org.btcmap.R
 import org.maplibre.android.geometry.LatLngBounds
 import androidx.core.graphics.toColorInt
 import org.btcmap.App
+import org.btcmap.auth.TokenCipher
 import org.btcmap.map.getOnPrimaryContainerColor
 import org.btcmap.map.getOnTertiaryContainerColor
 import org.btcmap.map.getPrimaryContainerColor
@@ -360,13 +361,29 @@ fun SharedPreferences.setButtonBorderColor(color: Int?) {
 private const val KEY_AUTH_TOKEN = "auth_token"
 
 var SharedPreferences.authToken: String?
-    get() = getString(KEY_AUTH_TOKEN, null)
+    get() {
+        val stored = getString(KEY_AUTH_TOKEN, null) ?: return null
+
+        if (!stored.startsWith(TokenCipher.ENCODED_PREFIX)) {
+            // Upgrade a token stored in plaintext by an older app version. If the
+            // keystore is unavailable the token is still returned unencrypted
+            // rather than breaking the session.
+            runCatching {
+                edit { putString(KEY_AUTH_TOKEN, TokenCipher.encrypt(stored)) }
+            }
+            return stored
+        }
+
+        return TokenCipher.decrypt(stored)
+    }
     set(value) {
-        edit { putString(KEY_AUTH_TOKEN, value) }
+        edit {
+            putString(KEY_AUTH_TOKEN, value?.let(TokenCipher::encrypt))
+        }
     }
 
 val SharedPreferences.authorized: Boolean
-    get() = !getString(KEY_AUTH_TOKEN, null).isNullOrBlank()
+    get() = !authToken.isNullOrBlank()
 
 private const val KEY_SHOW_DEBUG_INFO = "show_debug_info"
 
