@@ -52,6 +52,8 @@ class Activity : AppCompatActivity() {
 
     private fun deliverDeepLink() {
         val deepLink = pendingDeepLink ?: return
+        // Take ownership right away so restoring MapFragment below doesn't deliver it a second time.
+        pendingDeepLink = null
 
         var fragment = supportFragmentManager
             .findFragmentById(R.id.fragmentContainerView) as? MapFragment
@@ -65,9 +67,10 @@ class Activity : AppCompatActivity() {
                 .findFragmentById(R.id.fragmentContainerView) as? MapFragment
         }
 
-        if (fragment == null || !fragment.isAdded || fragment.view == null) return
-
-        pendingDeepLink = null
+        if (fragment == null || !fragment.isAdded || fragment.view == null) {
+            pendingDeepLink = deepLink
+            return
+        }
 
         when (deepLink) {
             is DeepLink.Place -> fragment.openPlaceById(deepLink.id)

@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Show a dedicated event screen with a map, a directions action and a link to the event website instead of opening the website directly
 - Open btcmap.org event links directly in the app
+- Fix event links opening a duplicate event screen that required two back presses to dismiss
 - Fix a crash when the map finishes loading after navigating away from it
 - Localize area names and descriptions to the device language
 - Collapse long area descriptions to the first paragraph with a read more toggle
