@@ -5,13 +5,14 @@ import okhttp3.brotli.BrotliInterceptor
 import org.btcmap.auth.TokenSettingInterceptor
 import org.btcmap.http.RateLimitingInterceptor
 import org.btcmap.http.UserAgentSettingInterceptor
+import org.btcmap.settings.authToken
 import org.btcmap.settings.prefs
 
 fun apiHttpClient(): OkHttpClient {
     return OkHttpClient.Builder()
         .addInterceptor(BrotliInterceptor)
         .addInterceptor(UserAgentSettingInterceptor)
-        .addInterceptor(TokenSettingInterceptor(prefs))
+        .addInterceptor(TokenSettingInterceptor { prefs.authToken })
         .addInterceptor(RateLimitingInterceptor)
         .build()
 }

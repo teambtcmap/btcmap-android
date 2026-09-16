@@ -15,10 +15,15 @@ class ApiException(val code: Int, message: String) : Exception(message)
 class Api(
     internal val httpClient: OkHttpClient,
     internal val url: HttpUrl,
+    private val onUnauthorized: suspend () -> Unit = {},
 ) {
     internal suspend fun <T> call(request: Request, parse: (InputStream) -> T): T {
         return httpClient.newCall(request).executeAsync().use { res ->
             if (!res.isSuccessful) {
+                if (res.code == 401) {
+                    onUnauthorized()
+                }
+
                 throw res.toApiException()
             }
 

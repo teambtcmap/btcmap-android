@@ -62,6 +62,14 @@ class ActivityApiTest : ApiTestBase() {
         Assert.assertNull(item.comment)
     }
 
+    @Test
+    fun getActivity_returnsEmptyWithoutRequestWhenNoAreas() = runTest {
+        val items = api().getActivity(areaIds = emptyList(), days = 7)
+
+        Assert.assertTrue(items.isEmpty())
+        Assert.assertEquals(0, server.requestCount)
+    }
+
     private companion object {
         const val ACTIVITY = """
             [

@@ -18,6 +18,10 @@ data class ActivityFeedItem(
 )
 
 suspend fun Api.getActivity(areaIds: List<String>, days: Int = 7): List<ActivityFeedItem> {
+    if (areaIds.isEmpty()) {
+        return emptyList()
+    }
+
     val url = url.newBuilder().addPathSegments("v4/activity").apply {
         addQueryParameter("areas", areaIds.joinToString(","))
         addQueryParameter("days", "$days")

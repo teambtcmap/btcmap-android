@@ -3,10 +3,13 @@ package org.btcmap
 import android.app.Application
 import androidx.fragment.app.Fragment
 import androidx.sqlite.driver.AndroidSQLiteDriver
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.btcmap.api.Api
 import org.btcmap.api.apiHttpClient
 import org.btcmap.db.Database
 import org.btcmap.settings.apiUrl
+import org.btcmap.settings.authToken
 import org.btcmap.settings.prefs
 import org.maplibre.android.MapLibre
 import org.btcmap.settings.init as settingsInit
@@ -29,6 +32,14 @@ class App : Application() {
         Api(
             httpClient = apiHttpClient(),
             url = prefs.apiUrl,
+            onUnauthorized = {
+                withContext(Dispatchers.IO) {
+                    runCatching {
+                        prefs.authToken = null
+                        db.user.delete()
+                    }
+                }
+            },
         )
     }
 

@@ -1,6 +1,7 @@
 package org.btcmap.api
 
 import kotlinx.coroutines.test.runTest
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.junit.Assert
 import org.junit.Test
@@ -54,5 +55,47 @@ class ApiTest : ApiTestBase() {
             Assert.assertEquals(503, e.code)
             Assert.assertEquals("HTTP 503: unexpected response", e.message)
         }
+    }
+
+    @Test
+    fun call_invokesOnUnauthorizedOn401() = runTest {
+        enqueueJson("""{"message":"Authentication required"}""", code = 401)
+
+        var unauthorized = false
+        val api = Api(
+            httpClient = OkHttpClient(),
+            url = server.url("/"),
+            onUnauthorized = { unauthorized = true },
+        )
+
+        try {
+            api.call(Request.Builder().url(server.url("/x")).build()) { it.bufferedReader().readText() }
+            Assert.fail("Expected ApiException")
+        } catch (e: ApiException) {
+            Assert.assertEquals(401, e.code)
+        }
+
+        Assert.assertTrue(unauthorized)
+    }
+
+    @Test
+    fun call_doesNotInvokeOnUnauthorizedOnOtherErrors() = runTest {
+        enqueueJson("""{"message":"boom"}""", code = 500)
+
+        var unauthorized = false
+        val api = Api(
+            httpClient = OkHttpClient(),
+            url = server.url("/"),
+            onUnauthorized = { unauthorized = true },
+        )
+
+        try {
+            api.call(Request.Builder().url(server.url("/x")).build()) { it.bufferedReader().readText() }
+            Assert.fail("Expected ApiException")
+        } catch (e: ApiException) {
+            Assert.assertEquals(500, e.code)
+        }
+
+        Assert.assertFalse(unauthorized)
     }
 }

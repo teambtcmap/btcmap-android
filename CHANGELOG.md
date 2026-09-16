@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Sign out and clear the cached account automatically when the server rejects the stored session token
+- Fix sign-in being sent with a stale stored token instead of the entered credentials
 - Keep events without a usable website instead of dropping them, and hide the website link for those
 - Ignore unknown search result types returned by the API instead of failing to parse the response
 - Fix place and comment sync skipping entries when more than one batch shares the same update timestamp
