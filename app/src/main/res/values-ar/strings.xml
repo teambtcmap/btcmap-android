@@ -104,6 +104,7 @@
     <string name="create_account_subtitle">أنشئ حساب BTC Map جديدًا</string>
     <string name="sign_in_subtitle">استخدم اسم المستخدم وكلمة المرور الحاليين</string>
     <string name="failed_to_create_new_account">فشل إنشاء حساب جديد</string>
+    <string name="failed_to_sign_in">فشل تسجيل الدخول</string>
     <string name="click_to_see_your_profile">انقر لعرض ملفك الشخصي</string>
     <string name="delete">حذف</string>
     <string name="show_debug_info">عرض معلومات التصحيح</string>

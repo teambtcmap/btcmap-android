@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Allow long-running API requests so large place syncs no longer time out
 - Sign out and clear the cached account automatically when the server rejects the stored session token
 - Fix sign-in being sent with a stale stored token instead of the entered credentials
+- Show a sign-in specific error message when signing in fails instead of an account creation error
 - Keep events without a usable website instead of dropping them, and hide the website link for those
 - Ignore unknown search result types returned by the API instead of failing to parse the response
 - Fix place and comment sync skipping entries when more than one batch shares the same update timestamp

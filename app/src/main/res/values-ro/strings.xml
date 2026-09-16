@@ -104,6 +104,7 @@
     <string name="create_account_subtitle">Creează un cont BTC Map nou</string>
     <string name="sign_in_subtitle">Folosește numele de utilizator și parola existente</string>
     <string name="failed_to_create_new_account">Crearea contului nou a eșuat</string>
+    <string name="failed_to_sign_in">Autentificarea a eșuat</string>
     <string name="click_to_see_your_profile">Atinge pentru a-ți vedea profilul</string>
     <string name="delete">Șterge</string>
     <string name="show_debug_info">Afișează informații de depanare</string>

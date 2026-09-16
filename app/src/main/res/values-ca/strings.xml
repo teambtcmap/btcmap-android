@@ -104,6 +104,7 @@
     <string name="create_account_subtitle">Crea un compte nou de BTC Map</string>
     <string name="sign_in_subtitle">Utilitza el nom d\'usuari i la contrasenya existents</string>
     <string name="failed_to_create_new_account">No s\'ha pogut crear el compte nou</string>
+    <string name="failed_to_sign_in">No s\'ha pogut iniciar sessió</string>
     <string name="click_to_see_your_profile">Fes clic per veure el teu perfil</string>
     <string name="delete">Elimina</string>
     <string name="show_debug_info">Mostra la informació de depuració</string>

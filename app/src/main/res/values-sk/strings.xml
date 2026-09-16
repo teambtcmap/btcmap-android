@@ -104,6 +104,7 @@
     <string name="create_account_subtitle">Vytvoriť nový účet BTC Map</string>
     <string name="sign_in_subtitle">Použite svoje existujúce používateľské meno a heslo</string>
     <string name="failed_to_create_new_account">Nepodarilo sa vytvoriť nový účet</string>
+    <string name="failed_to_sign_in">Nepodarilo sa prihlásiť</string>
     <string name="click_to_see_your_profile">Kliknutím zobrazíte svoj profil</string>
     <string name="delete">Odstrániť</string>
     <string name="show_debug_info">Zobraziť informácie o ladení</string>

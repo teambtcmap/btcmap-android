@@ -104,6 +104,7 @@
     <string name="create_account_subtitle">Een nieuw BTC Map-account aanmaken</string>
     <string name="sign_in_subtitle">Gebruik je bestaande gebruikersnaam en wachtwoord</string>
     <string name="failed_to_create_new_account">Nieuw account aanmaken mislukt</string>
+    <string name="failed_to_sign_in">Inloggen mislukt</string>
     <string name="click_to_see_your_profile">Tik om je profiel te bekijken</string>
     <string name="delete">Verwijderen</string>
     <string name="show_debug_info">Foutopsporingsinformatie tonen</string>

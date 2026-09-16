@@ -104,6 +104,7 @@
     <string name="create_account_subtitle">Skep \'n nuwe BTC Map-rekening</string>
     <string name="sign_in_subtitle">Gebruik jou bestaande gebruikersnaam en wagwoord</string>
     <string name="failed_to_create_new_account">Kon nie nuwe rekening skep nie</string>
+    <string name="failed_to_sign_in">Kon nie aanmeld nie</string>
     <string name="click_to_see_your_profile">Klik om jou profiel te sien</string>
     <string name="delete">Verwyder</string>
     <string name="show_debug_info">Wys ontfoutingsinligting</string>

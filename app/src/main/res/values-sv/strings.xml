@@ -104,6 +104,7 @@
     <string name="create_account_subtitle">Skapa ett nytt BTC Map-konto</string>
     <string name="sign_in_subtitle">Använd ditt befintliga användarnamn och lösenord</string>
     <string name="failed_to_create_new_account">Det gick inte att skapa ett nytt konto</string>
+    <string name="failed_to_sign_in">Det gick inte att logga in</string>
     <string name="click_to_see_your_profile">Tryck för att se din profil</string>
     <string name="delete">Ta bort</string>
     <string name="show_debug_info">Visa felsökningsinformation</string>

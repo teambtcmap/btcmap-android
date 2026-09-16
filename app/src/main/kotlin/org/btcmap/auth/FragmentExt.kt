@@ -177,7 +177,7 @@ private fun Fragment.signIn(username: String, password: String, onComplete: () -
             e.rethrowIfCancellation()
             Log.e("auth", "Sign in failed", e)
             val message = e.message?.takeIf { it.isNotBlank() }
-                ?: getString(R.string.failed_to_create_new_account)
+                ?: getString(R.string.failed_to_sign_in)
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.error)
                 .setMessage(message)

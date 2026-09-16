@@ -104,6 +104,7 @@
     <string name="create_account_subtitle">Направите нови BTC Map налог</string>
     <string name="sign_in_subtitle">Користите постојеће корисничко име и лозинку</string>
     <string name="failed_to_create_new_account">Прављење новог налога није успело</string>
+    <string name="failed_to_sign_in">Пријављивање није успело</string>
     <string name="click_to_see_your_profile">Додирните да видите свој профил</string>
     <string name="delete">Избриши</string>
     <string name="show_debug_info">Прикажи информације за отклањање грешака</string>

@@ -104,6 +104,7 @@
     <string name="create_account_subtitle">Luo uusi BTC Map -tili</string>
     <string name="sign_in_subtitle">Käytä nykyistä käyttäjänimeäsi ja salasanaasi</string>
     <string name="failed_to_create_new_account">Uuden tilin luominen epäonnistui</string>
+    <string name="failed_to_sign_in">Kirjautuminen epäonnistui</string>
     <string name="click_to_see_your_profile">Näytä profiilisi napauttamalla</string>
     <string name="delete">Poista</string>
     <string name="show_debug_info">Näytä virheenkorjaustiedot</string>

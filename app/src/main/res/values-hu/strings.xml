@@ -104,6 +104,7 @@
     <string name="create_account_subtitle">Új BTC Map-fiók létrehozása</string>
     <string name="sign_in_subtitle">Használja meglévő felhasználónevét és jelszavát</string>
     <string name="failed_to_create_new_account">Nem sikerült létrehozni az új fiókot</string>
+    <string name="failed_to_sign_in">Nem sikerült bejelentkezni</string>
     <string name="click_to_see_your_profile">Koppintson a profilja megtekintéséhez</string>
     <string name="delete">Törlés</string>
     <string name="show_debug_info">Hibakeresési információk megjelenítése</string>

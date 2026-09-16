@@ -104,6 +104,7 @@
     <string name="create_account_subtitle">नया BTC Map खाता बनाएं</string>
     <string name="sign_in_subtitle">अपने मौजूदा उपयोगकर्ता नाम और पासवर्ड का उपयोग करें</string>
     <string name="failed_to_create_new_account">नया खाता बनाने में विफल</string>
+    <string name="failed_to_sign_in">साइन इन करने में विफल</string>
     <string name="click_to_see_your_profile">अपनी प्रोफ़ाइल देखने के लिए टैप करें</string>
     <string name="delete">हटाएं</string>
     <string name="show_debug_info">डिबग जानकारी दिखाएं</string>

@@ -104,6 +104,7 @@
     <string name="create_account_subtitle">Yeni bir BTC Map hesabı oluştur</string>
     <string name="sign_in_subtitle">Mevcut kullanıcı adınızı ve parolanızı kullanın</string>
     <string name="failed_to_create_new_account">Yeni hesap oluşturulamadı</string>
+    <string name="failed_to_sign_in">Giriş yapılamadı</string>
     <string name="click_to_see_your_profile">Profilinizi görmek için dokunun</string>
     <string name="delete">Sil</string>
     <string name="show_debug_info">Hata ayıklama bilgilerini göster</string>

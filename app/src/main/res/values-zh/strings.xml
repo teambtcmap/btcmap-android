@@ -104,6 +104,7 @@
     <string name="create_account_subtitle">创建新的 BTC Map 账户</string>
     <string name="sign_in_subtitle">使用现有的用户名和密码</string>
     <string name="failed_to_create_new_account">创建新账户失败</string>
+    <string name="failed_to_sign_in">登录失败</string>
     <string name="click_to_see_your_profile">点按查看您的个人资料</string>
     <string name="delete">删除</string>
     <string name="show_debug_info">显示调试信息</string>
