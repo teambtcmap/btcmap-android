@@ -1,11 +1,15 @@
 package org.btcmap.api
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
+import mockwebserver3.MockResponse
+import mockwebserver3.SocketEffect
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.btcmap.util.toJsonObject
 import org.junit.Assert
 import org.junit.Test
+import java.io.IOException
 
 class ApiTest : ApiTestBase() {
     @Test
@@ -106,6 +110,54 @@ class ApiTest : ApiTestBase() {
     }
 
     @Test
+    fun call_wrapsConnectionFailureInTransportException() = runTest {
+        val url = server.url("/x")
+        server.close()
+
+        val api = Api(httpClient = OkHttpClient(), baseUrl = { url })
+
+        try {
+            api.call(Request.Builder().url(url).build()) { it.bufferedReader().readText() }
+            Assert.fail("Expected ApiTransportException")
+        } catch (e: ApiTransportException) {
+            Assert.assertTrue(e.cause is IOException)
+        }
+    }
+
+    @Test
+    fun call_wrapsTruncatedBodyInTransportException() = runTest {
+        server.enqueue(
+            MockResponse.Builder()
+                .code(200)
+                .addHeader("Content-Type", "application/json")
+                .body("""{"value":42}""")
+                .onResponseBody(SocketEffect.CloseStream())
+                .build()
+        )
+
+        try {
+            api().call(Request.Builder().url(server.url("/x")).build()) { it.toJsonObject() }
+            Assert.fail("Expected ApiTransportException")
+        } catch (e: ApiTransportException) {
+            Assert.assertTrue("cause chain: ${e.causeChain()}", e.causeChain().any { it is IOException })
+        }
+    }
+
+    @Test
+    fun call_propagatesCancellationUntouched() = runTest {
+        enqueueJson("""{"value":42}""")
+
+        try {
+            api().call(Request.Builder().url(server.url("/x")).build()) {
+                throw CancellationException("cancelled")
+            }
+            Assert.fail("Expected CancellationException")
+        } catch (e: CancellationException) {
+            Assert.assertEquals("cancelled", e.message)
+        }
+    }
+
+    @Test
     fun call_doesNotInvokeOnUnauthorizedOnOtherErrors() = runTest {
         enqueueJson("""{"message":"boom"}""", code = 500)
 
@@ -125,4 +177,7 @@ class ApiTest : ApiTestBase() {
 
         Assert.assertFalse(unauthorized)
     }
+
+    private fun Throwable.causeChain(): List<Throwable> =
+        generateSequence(this) { it.cause }.toList()
 }

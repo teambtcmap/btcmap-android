@@ -2,6 +2,7 @@ package org.btcmap.api
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
@@ -12,6 +13,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okhttp3.coroutines.executeAsync
+import java.io.IOException
 import java.io.InputStream
 
 class ApiException(
@@ -21,6 +23,11 @@ class ApiException(
 ) : Exception(message)
 
 class ApiParseException(
+    message: String,
+    cause: Throwable? = null,
+) : Exception(message, cause)
+
+class ApiTransportException(
     message: String,
     cause: Throwable? = null,
 ) : Exception(message, cause)
@@ -52,7 +59,15 @@ class Api(
         clearSessionOnUnauthorized: Boolean = true,
         parse: (InputStream) -> T,
     ): T {
-        return httpClient.newCall(request).executeAsync().use { res ->
+        val response = try {
+            httpClient.newCall(request).executeAsync()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            throw ApiTransportException("Failed to reach ${request.url}", e)
+        }
+
+        return response.use { res ->
             withContext(Dispatchers.IO) {
                 if (!res.isSuccessful) {
                     if (res.code == 401 && clearSessionOnUnauthorized) {
@@ -65,8 +80,12 @@ class Api(
                 res.body.byteStream().use { stream ->
                     try {
                         parse(stream)
+                    } catch (e: CancellationException) {
+                        throw e
                     } catch (e: ApiParseException) {
                         throw e
+                    } catch (e: IOException) {
+                        throw ApiTransportException("Failed to read response from ${request.url}", e)
                     } catch (e: RuntimeException) {
                         throw ApiParseException("Failed to parse response from ${request.url}", e)
                     }
