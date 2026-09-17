@@ -31,6 +31,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 APP_DIR = PROJECT_ROOT / "app"
 OUTPUT_FILE = APP_DIR / "src" / "main" / "assets" / "bundled-places.json"
 
+REQUIRED_FIELDS = ("id", "lat", "lon", "icon")
+
 
 def user_agent() -> str:
     try:
@@ -52,6 +54,20 @@ def fetch(url: str) -> bytes:
         return resp.read()
 
 
+def validate(places: list) -> None:
+    """Fail with a clear message instead of a traceback on an unexpected shape."""
+    if not isinstance(places, list):
+        raise RuntimeError("downloaded places are not a JSON array")
+    if not places:
+        raise RuntimeError("downloaded places are empty")
+    for index, place in enumerate(places):
+        if not isinstance(place, dict):
+            raise RuntimeError(f"place at index {index} is not a JSON object")
+        for field in REQUIRED_FIELDS:
+            if field not in place:
+                raise RuntimeError(f"place at index {index} is missing '{field}'")
+
+
 def main() -> int:
     raw = fetch(API_URL)
     try:
@@ -59,17 +75,20 @@ def main() -> int:
     except json.JSONDecodeError as exc:
         raise RuntimeError("downloaded places are not valid JSON") from exc
 
-    if not isinstance(places, list) or not places:
-        raise RuntimeError("downloaded places are empty or not a JSON array")
-
+    validate(places)
     places.sort(key=lambda place: place["id"])
     pretty = json.dumps(places, indent=2, ensure_ascii=False).encode("utf-8") + b"\n"
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    # Write atomically so a failed download never leaves a truncated asset.
+    # Write atomically so a failed download never leaves a truncated asset, and
+    # remove the temporary file if the write or rename fails.
     tmp_file = OUTPUT_FILE.with_name(OUTPUT_FILE.name + ".tmp")
-    tmp_file.write_bytes(pretty)
-    tmp_file.replace(OUTPUT_FILE)
+    try:
+        tmp_file.write_bytes(pretty)
+        tmp_file.replace(OUTPUT_FILE)
+    except BaseException:
+        tmp_file.unlink(missing_ok=True)
+        raise
 
     print(f"Bundled {len(places)} places into {OUTPUT_FILE.relative_to(APP_DIR.parent)}")
     return 0

@@ -15,8 +15,8 @@ Usage:
   ./devtools app deploy-beta    Build and deploy beta APK and update manifest
   ./devtools app deploy-release Build and deploy release APK
   ./devtools bundle data        Download latest places snapshot
-  ./devtools bundle map-styles  Bundle MapLibre styles as assets
-  ./devtools bundle all         Run both bundlers
+  ./devtools bundle map-styles  Bundle MapLibre styles as assets (--force re-downloads)
+  ./devtools bundle all         Run both bundlers (--force applies to map-styles)
 EOF
 }
 
@@ -52,9 +52,9 @@ print_usage_bundle() {
 Usage: ./devtools bundle <command>
 
 Commands:
-  data         Download latest places snapshot
-  map-styles   Bundle MapLibre styles as assets
-  all          Run both bundlers
+  data         Download latest places snapshot (always refreshes)
+  map-styles   Bundle MapLibre styles as assets (--force re-downloads)
+  all          Run both bundlers (--force applies to map-styles)
 EOF
 }
 

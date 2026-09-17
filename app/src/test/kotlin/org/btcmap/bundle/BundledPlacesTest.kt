@@ -68,4 +68,23 @@ class BundledPlacesTest {
         Assert.assertNull(place.comments)
         Assert.assertNull(place.boostedUntil)
     }
+
+    @Test
+    fun readBundledPlace_rejectsMissingRequiredFields() {
+        val cases = mapOf(
+            "id" to """{"lat":0.0,"lon":0.0,"icon":"store"}""",
+            "lat" to """{"id":1,"lon":0.0,"icon":"store"}""",
+            "lon" to """{"id":1,"lat":0.0,"icon":"store"}""",
+            "icon" to """{"id":1,"lat":0.0,"lon":0.0}""",
+        )
+
+        cases.forEach { (field, json) ->
+            try {
+                reader(json).readBundledPlace()
+                Assert.fail("expected missing '$field' to be rejected")
+            } catch (e: IllegalArgumentException) {
+                Assert.assertTrue(e.message.orEmpty().contains(field))
+            }
+        }
+    }
 }

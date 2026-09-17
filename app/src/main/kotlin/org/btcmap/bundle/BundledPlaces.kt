@@ -16,8 +16,15 @@ import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 /**
- * Sentinel timestamp for seeded rows. Every row returned by the API carries a
- * later `updated_at`, so the first delta sync replaces the whole snapshot.
+ * Sentinel timestamp for seeded rows.
+ *
+ * The bundled snapshot intentionally carries only a minimal field set so the
+ * map shows places immediately while the full data is downloaded. Every row
+ * returned by the API carries a later `updated_at`, so the first delta sync
+ * pulls the whole snapshot again and replaces each seeded row with the full
+ * live record, progressively enriching it. The low constant is a deliberate
+ * guarantee of that gradual override and eventual consistency, not an
+ * accident: a seeded row can never shadow or outrank live data.
  */
 private val SEEDED_UPDATED_AT = ZonedDateTime.parse("2000-01-01T00:00:00Z")
 
@@ -38,15 +45,22 @@ object BundledPlaces {
 
         // Seeding is intentionally a one-shot, fresh-install operation: any
         // place already stored means the snapshot was imported or live data was
-        // synced. Re-importing a newer asset later is deliberately avoided so a
-        // stale bundle can never overwrite rows that sync has since refreshed.
-        val placesInDb = withContext(Dispatchers.IO) { db.place.selectCount() }
-        if (placesInDb > 0) {
-            return ImportResult(placesImported = 0, duration = elapsedSince(startedAt))
-        }
-
+        // synced. It only needs to happen once, because the minimal snapshot is
+        // meant to keep the user busy until sync replaces it: see
+        // SEEDED_UPDATED_AT for why every seeded row is enriched and eventually
+        // overridden by live data. Re-importing a newer asset later is
+        // deliberately avoided so a stale bundle can never overwrite rows that
+        // sync has since refreshed.
         var placesImported = 0L
         try {
+            // The count read is inside the try as well: a database failure must
+            // not escape and take down the calling screen, for the same reason a
+            // missing or malformed asset must not.
+            val placesInDb = withContext(Dispatchers.IO) { db.place.selectCount() }
+            if (placesInDb > 0) {
+                return ImportResult(placesImported = 0, duration = elapsedSince(startedAt))
+            }
+
             // The whole parse runs inside one transaction so a malformed asset
             // rolls back to an empty table and is retried on the next launch,
             // instead of leaving a partial seed that the count check above would
@@ -95,10 +109,10 @@ object BundledPlaces {
 }
 
 internal fun JsonReader.readBundledPlace(): Place {
-    var id = 0L
-    var lat = 0.0
-    var lon = 0.0
-    var icon = ""
+    var id: Long? = null
+    var lat: Double? = null
+    var lon: Double? = null
+    var icon: String? = null
     var name: String? = null
     var comments: Long? = null
     var boostedUntil: ZonedDateTime? = null
@@ -135,11 +149,14 @@ internal fun JsonReader.readBundledPlace(): Place {
         }
     }
     endObject()
+    // Required fields must be present: defaulting them would silently seed a
+    // bogus place (for example id 0 at Null Island) if the snapshot format ever
+    // changes, instead of failing loudly and rolling the import back.
     return Place(
-        id = id,
-        lat = lat,
-        lon = lon,
-        icon = icon,
+        id = requireNotNull(id) { "bundled place is missing 'id'" },
+        lat = requireNotNull(lat) { "bundled place $id is missing 'lat'" },
+        lon = requireNotNull(lon) { "bundled place $id is missing 'lon'" },
+        icon = requireNotNull(icon) { "bundled place $id is missing 'icon'" },
         name = name,
         localizedName = null,
         updatedAt = SEEDED_UPDATED_AT,

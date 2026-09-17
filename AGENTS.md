@@ -74,6 +74,22 @@ The `./devtools` wrapper manages the emulator and app deployment. Default device
 
 When asked to "launch", "run", or "start" the app, use `./devtools app run` (it builds, installs and launches in one step). Assume the emulator is already running; if it is not, start it yourself with `./devtools emulator start` and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy-beta` and `./devtools app deploy-release` build and push APK artifacts to the remote `btcmap-api` host — use only when explicitly asked to publish a build.
 
+## Bundled Assets
+
+Places and map styles are committed as assets and refreshed manually with
+`./devtools bundle`. This is intentional:
+
+- Never propose adding CI (GitHub Actions or any other pipeline) to this
+  repository, including build, test or lint workflows.
+- Never propose automating the bundled-asset refresh, adding freshness or
+  staleness checks, or treating an out-of-date snapshot as a defect. Refreshing
+  the snapshot is a deliberate manual step; the snapshot is only a first-launch
+  offline fallback.
+- Seeded places carry a sentinel `updated_at` of 2000-01-01 so the first sync
+  enriches and replaces every seeded row with the full live record. Showing the
+  minimal snapshot immediately keeps the user occupied while the full data
+  downloads; eventual consistency with live data is by design.
+
 ## Code Style Guidelines
 
 - Source files in `app/src/main/kotlin/`, one class per file (filename matches class name); packages mirror directories
