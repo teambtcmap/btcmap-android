@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter
 
 data class GetCommentsItem(
     val id: Long,
-    val elementId: Long,
+    val placeId: Long,
     val comment: String,
     val createdAt: String,
     val updatedAt: String,
@@ -75,7 +75,7 @@ private fun InputStream.toGetCommentsItems(): List<GetCommentsItem> {
     return toJsonArray().map {
         GetCommentsItem(
             id = it.long("id"),
-            elementId = it.long("place_id"),
+            placeId = it.long("place_id"),
             comment = it.string("text"),
             createdAt = it.string("created_at"),
             updatedAt = it.string("updated_at"),

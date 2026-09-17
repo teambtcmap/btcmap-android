@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.api.PlaceBoostQuoteResponse
@@ -15,7 +14,9 @@ import org.btcmap.api.getPlaceBoostQuote
 import org.btcmap.databinding.BoostFragmentBinding
 import org.btcmap.payment.InvoicePaymentController
 import org.btcmap.payment.InvoicePaymentState
+import org.btcmap.payment.InvoicePaymentViewModel
 import org.btcmap.payment.PaymentInvoice
+import org.btcmap.payment.invoicePaymentViewModel
 import org.btcmap.payment.observeInvoicePayment
 import java.text.NumberFormat
 
@@ -28,11 +29,8 @@ class BoostFragment : Fragment() {
     private var _binding: BoostFragmentBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: BoostViewModel by lazy {
-        ViewModelProvider(
-            this,
-            BoostViewModel.Factory { api().getPlaceBoostQuote() },
-        )[BoostViewModel::class.java]
+    private val viewModel: InvoicePaymentViewModel<PlaceBoostQuoteResponse> by lazy {
+        invoicePaymentViewModel { api().getPlaceBoostQuote() }
     }
 
     override fun onCreateView(

@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show comment dates in the device's time zone instead of the time zone returned by the API
+- Show an empty state on the comments screen instead of a blank list
 - Fix the map crashing on launch when the bundled offline places snapshot is missing or malformed
 - Reject out-of-range coordinates in the bundled offline places snapshot instead of seeding markers that can never be reached
 - Keep seeding the offline places snapshot when a place carries an unreadable boost time

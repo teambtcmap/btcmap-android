@@ -40,7 +40,7 @@ class CommentsAdapter :
             oldItem: CommentsAdapterItem,
             newItem: CommentsAdapterItem,
         ): Boolean {
-            return newItem == oldItem
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(

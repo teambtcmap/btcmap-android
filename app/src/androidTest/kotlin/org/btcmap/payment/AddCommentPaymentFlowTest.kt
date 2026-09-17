@@ -16,6 +16,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
 import org.btcmap.R
+import org.btcmap.comment.AddCommentFragment
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
@@ -125,6 +126,29 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
                     view.findViewById<Button>(R.id.btn_continue).isEnabled
             }
             onView(withText(R.string.close)).inRoot(isDialog()).perform(click())
+        }
+    }
+
+    @Test
+    fun invoice_survivesRotation() {
+        val dispatcher = commentDispatcher()
+        apiRule.server.dispatcher = dispatcher
+
+        withComment { scenario, fragment ->
+            waitUntilOnMain {
+                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+            }
+            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
+            onView(withId(R.id.btn_continue)).perform(click())
+            waitUntil { dispatcher.orderRequests.get() == 1 }
+            waitUntilOnMain { fragment.requireView().findViewById<View>(R.id.qr).isVisible }
+
+            scenario.recreate()
+
+            val recreated = restoredFragment(scenario, COMMENT_TAG) as AddCommentFragment
+            waitUntilOnMain { recreated.requireView().findViewById<View>(R.id.qr).isVisible }
+            Assert.assertEquals("quote must not be refetched", 1, dispatcher.quoteRequests.get())
+            Assert.assertEquals("order must not be replaced", 1, dispatcher.orderRequests.get())
         }
     }
 }

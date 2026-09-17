@@ -27,7 +27,7 @@ class CommentApiTest : ApiTestBase() {
         Assert.assertEquals(2, comments.size)
         val comment = comments[0]
         Assert.assertEquals(1L, comment.id)
-        Assert.assertEquals(100L, comment.elementId)
+        Assert.assertEquals(100L, comment.placeId)
         Assert.assertEquals("Great coffee!", comment.comment)
         Assert.assertEquals("2026-01-01T10:00:00Z", comment.createdAt)
         Assert.assertEquals("2026-01-02T10:00:00Z", comment.updatedAt)
@@ -55,7 +55,7 @@ class CommentApiTest : ApiTestBase() {
 
         val request = takeRequest()
         Assert.assertNull(request.url.queryParameter("updated_since"))
-        Assert.assertEquals(100L, comment.elementId)
+        Assert.assertEquals(100L, comment.placeId)
         Assert.assertEquals("Nice spot", comment.comment)
         Assert.assertEquals("2026-01-01T10:00:00Z", comment.createdAt)
         Assert.assertNull(comment.deletedAt)

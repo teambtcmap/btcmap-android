@@ -31,14 +31,14 @@
             android:layout_height="wrap_content"
             android:paddingStart="0dp"
             android:paddingEnd="16dp"
-            tools:text="Not verified" />
+            tools:text="Great coffee, friendly staff" />
 
         <TextView
             android:id="@+id/date"
             style="?textAppearanceCaption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="Severity: 5" />
+            tools:text="Sep 17, 2026" />
 
     </LinearLayout>
 

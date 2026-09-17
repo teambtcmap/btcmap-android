@@ -32,6 +32,18 @@ class InvoicePaymentViewModelTest {
     }
 
     @Test
+    fun factory_createsAViewModelThatLoadsTheQuote() = runTest(mainDispatcherRule.dispatcher) {
+        val model = InvoicePaymentViewModel.Factory { "quote" }
+            .create(InvoicePaymentViewModel::class.java)
+
+        model.loadQuote()
+        advanceUntilIdle()
+
+        Assert.assertEquals("quote", model.state.value.quote)
+        Assert.assertTrue(model.state.value.actionsEnabled)
+    }
+
+    @Test
     fun loadQuote_publishesQuoteAndEnablesActions() = runTest(mainDispatcherRule.dispatcher) {
         val model = viewModel()
 

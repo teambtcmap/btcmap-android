@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
@@ -18,11 +19,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
+import org.btcmap.databinding.CommentsFragmentBinding
 import org.btcmap.db
 import org.btcmap.sync
-import org.btcmap.databinding.CommentsFragmentBinding
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 class CommentsFragment : Fragment() {
 
@@ -83,33 +82,25 @@ class CommentsFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                val comments = withContext(Dispatchers.IO) {
-                    db().comment.selectByPlaceId(args.placeId)
-                }
+                renderComments(adapter)
 
-                val commentDateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-
-                adapter.submitList(comments.map {
-                    CommentsAdapterItem(
-                        comment = it.comment,
-                        localizedDate = it.createdAt.format(commentDateFormat),
-                    )
-                })
-
+                // Syncing on every resume also retries a sync that failed while
+                // the screen was in the background. It stays cheap because
+                // syncComments only fetches the delta since the stored cursor.
                 if (sync().syncComments().rowsAffected > 0) {
-                    val comments = withContext(Dispatchers.IO) {
-                        db().comment.selectByPlaceId(args.placeId)
-                    }
-
-                    adapter.submitList(comments.map {
-                        CommentsAdapterItem(
-                            comment = it.comment,
-                            localizedDate = it.createdAt.format(commentDateFormat),
-                        )
-                    })
+                    renderComments(adapter)
                 }
             }
         }
+    }
+
+    private suspend fun renderComments(adapter: CommentsAdapter) {
+        val items = withContext(Dispatchers.IO) {
+            db().comment.selectByPlaceId(args.placeId).map { it.toAdapterItem() }
+        }
+
+        adapter.submitList(items)
+        binding.empty.isVisible = items.isEmpty()
     }
 
     override fun onDestroyView() {

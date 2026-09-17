@@ -1,6 +1,7 @@
 package org.btcmap.payment
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -54,7 +55,7 @@ internal data class InvoicePaymentState<TQuote : Any>(
  * placed once an invoice exists, so a repeated tap cannot trigger a second
  * charge.
  */
-internal open class InvoicePaymentViewModel<TQuote : Any>(
+internal class InvoicePaymentViewModel<TQuote : Any>(
     private val quoteLoader: suspend () -> TQuote,
 ) : ViewModel() {
 
@@ -101,5 +102,17 @@ internal open class InvoicePaymentViewModel<TQuote : Any>(
                 _state.update { it.copy(ordering = false) }
             }
         }
+    }
+
+    /**
+     * Creates an [InvoicePaymentViewModel] for the quote type a feature loads.
+     * Replaces the per-feature factory boilerplate.
+     */
+    class Factory<TQuote : Any>(
+        private val quoteLoader: suspend () -> TQuote,
+    ) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T =
+            InvoicePaymentViewModel(quoteLoader) as T
     }
 }

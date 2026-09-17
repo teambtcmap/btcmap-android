@@ -33,7 +33,7 @@ import org.btcmap.db.table.place.Place
 import org.btcmap.settings.prefs
 import org.btcmap.comment.AddCommentFragment
 import org.btcmap.comment.CommentsAdapter
-import org.btcmap.comment.CommentsAdapterItem
+import org.btcmap.comment.toAdapterItem
 import org.btcmap.comment.CommentsFragment
 import org.btcmap.util.iconTypeface
 import org.btcmap.util.showError
@@ -50,8 +50,6 @@ import org.btcmap.saved.toggleSavedPlace
 import org.btcmap.settings.authorized
 import org.btcmap.util.rethrowIfCancellation
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 class PlaceFragment : Fragment() {
 
@@ -383,13 +381,7 @@ class PlaceFragment : Fragment() {
             getString(R.string.comments_d, comments.size)
         }
         binding.comments.isEnabled = true
-        val commentDateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-        commentsAdapter.submitList(comments.map {
-            CommentsAdapterItem(
-                comment = it.comment,
-                localizedDate = it.createdAt.format(commentDateFormat),
-            )
-        })
+        commentsAdapter.submitList(comments.map { it.toAdapterItem() })
     }
 
     private fun openReport(defaultType: String?) {

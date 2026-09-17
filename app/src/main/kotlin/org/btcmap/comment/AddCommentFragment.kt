@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.api.CommentQuoteResponse
@@ -15,8 +14,11 @@ import org.btcmap.api.getCommentQuote
 import org.btcmap.databinding.AddCommentFragmentBinding
 import org.btcmap.payment.InvoicePaymentController
 import org.btcmap.payment.InvoicePaymentState
+import org.btcmap.payment.InvoicePaymentViewModel
 import org.btcmap.payment.PaymentInvoice
+import org.btcmap.payment.invoicePaymentViewModel
 import org.btcmap.payment.observeInvoicePayment
+import java.text.NumberFormat
 
 class AddCommentFragment : Fragment() {
 
@@ -31,11 +33,8 @@ class AddCommentFragment : Fragment() {
     private var _binding: AddCommentFragmentBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: CommentViewModel by lazy {
-        ViewModelProvider(
-            this,
-            CommentViewModel.Factory { api().getCommentQuote() },
-        )[CommentViewModel::class.java]
+    private val viewModel: InvoicePaymentViewModel<CommentQuoteResponse> by lazy {
+        invoicePaymentViewModel { api().getCommentQuote() }
     }
 
     override fun onCreateView(
@@ -103,7 +102,8 @@ class AddCommentFragment : Fragment() {
         payment: InvoicePaymentController,
     ) {
         state.quote?.let { quote ->
-            binding.fee.text = getString(R.string.d_sat, quote.quoteSat.toString())
+            val fee = NumberFormat.getNumberInstance().format(quote.quoteSat)
+            binding.fee.text = getString(R.string.d_sat, fee)
         }
 
         // The field stays usable while the quote loads, but is locked while the

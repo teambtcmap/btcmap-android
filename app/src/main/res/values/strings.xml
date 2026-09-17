@@ -27,6 +27,7 @@
     <string name="tap_to_retry">Tap to retry</string>
     <string name="close">Close</string>
     <string name="comments">Comments</string>
+    <string name="no_comments_yet" tools:ignore="MissingTranslation">No comments yet</string>
     <string name="add">Add</string>
     <string name="boost">Boost</string>
     <string name="boost_merchant">Boost Merchant</string>
