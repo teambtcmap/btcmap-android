@@ -21,11 +21,18 @@ internal object TokenCipher {
     private const val IV_SIZE_BYTES = 12
     private const val GCM_TAG_LENGTH_BITS = 128
 
+    /**
+     * Caches the last decrypt result. Keeping the ciphertext and its plaintext in
+     * one immutable value stops concurrent readers from observing a stale token,
+     * and caching a failed decrypt (null plaintext) avoids retrying the keystore.
+     */
     @Volatile
-    private var cachedCiphertext: String? = null
+    private var cache: Cache? = null
 
-    @Volatile
-    private var cachedPlaintext: String? = null
+    private data class Cache(
+        val encoded: String,
+        val plaintext: String?,
+    )
 
     private val keyStore: KeyStore by lazy {
         KeyStore.getInstance(KEYSTORE).apply { load(null) }
@@ -59,9 +66,7 @@ internal object TokenCipher {
     }
 
     fun decrypt(encoded: String): String? {
-        if (encoded == cachedCiphertext) {
-            return cachedPlaintext
-        }
+        cache?.let { if (it.encoded == encoded) return it.plaintext }
 
         val plaintext = try {
             val payload = Base64.decode(encoded.removePrefix(ENCODED_PREFIX), Base64.NO_WRAP)
@@ -73,11 +78,10 @@ internal object TokenCipher {
             String(cipher.doFinal(ciphertext), Charsets.UTF_8)
         } catch (e: Exception) {
             Log.w(TAG, "Failed to decrypt stored token", e)
-            return null
+            null
         }
 
-        cachedCiphertext = encoded
-        cachedPlaintext = plaintext
+        cache = Cache(encoded, plaintext)
         return plaintext
     }
 }

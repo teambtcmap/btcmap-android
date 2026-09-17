@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 - Encrypt the stored session token with the Android Keystore instead of keeping it in plaintext
+- Fix the stored session token being read as stale or missing when several requests run at once
+- Sign out cleanly when the stored session token can no longer be decrypted instead of retrying the keystore on every request
 - Show a progress indicator while signing in or creating an account
 - Show actionable sign-in errors instead of exposing internal server or network details
 - Show the logged-in confirmation when signing in to an existing account, not just after creating one

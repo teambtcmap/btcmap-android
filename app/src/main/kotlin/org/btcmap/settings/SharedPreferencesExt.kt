@@ -374,7 +374,21 @@ var SharedPreferences.authToken: String?
             return stored
         }
 
-        return TokenCipher.decrypt(stored)
+        val plaintext = TokenCipher.decrypt(stored)
+
+        if (plaintext == null) {
+            // The keystore entry that encrypted the token is gone, so it can never
+            // be recovered. Drop it and fall back to a signed-out state instead of
+            // retrying the keystore on every request; a following 401 also clears
+            // the cached user. Re-read first so a concurrent sign-in is not lost.
+            if (getString(KEY_AUTH_TOKEN, null) == stored) {
+                runCatching {
+                    edit { remove(KEY_AUTH_TOKEN) }
+                }
+            }
+        }
+
+        return plaintext
     }
     set(value) {
         edit {
