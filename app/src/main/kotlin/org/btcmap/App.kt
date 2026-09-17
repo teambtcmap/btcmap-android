@@ -51,8 +51,7 @@ class App : Application() {
         withContext(Dispatchers.IO) {
             runCatching {
                 if (requestToken != null && prefs.authToken == requestToken) {
-                    prefs.authToken = null
-                    db.user.delete()
+                    prefs.clearSession(db)
                 }
             }
         }
@@ -83,8 +82,8 @@ class App : Application() {
         typefaceInit(this)
         MapLibre.getInstance(this)
 
-        // Decrypt the stored session token up front so later reads from the main
-        // thread hit the in-memory cache instead of the keystore.
+        // Load the settings from the database up front so later reads from the
+        // main thread hit the in-memory cache.
         ioScope.launch { runCatching { prefs.authToken } }
     }
 }

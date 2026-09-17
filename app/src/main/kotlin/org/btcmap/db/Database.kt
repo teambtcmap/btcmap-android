@@ -5,11 +5,12 @@ import androidx.sqlite.execSQL
 import org.btcmap.db.table.comment.CommentQueries
 import org.btcmap.db.table.event.EventQueries
 import org.btcmap.db.table.place.PlaceQueries
+import org.btcmap.db.table.preference.PreferenceQueries
 import org.btcmap.db.table.user.UserQueries
 
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
-        private const val VERSION = 8
+        private const val VERSION = 9
     }
 
     val conn = driver.open(path)
@@ -18,6 +19,7 @@ class Database(driver: SQLiteDriver, val path: String) {
     val comment = CommentQueries(conn)
     val event = EventQueries(conn)
     val user = UserQueries(conn)
+    val preference = PreferenceQueries(conn)
 
     init {
         migrate()
@@ -33,6 +35,7 @@ class Database(driver: SQLiteDriver, val path: String) {
             conn.execSQL(org.btcmap.db.table.event.CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(org.btcmap.db.table.user.CREATE)
+            conn.execSQL(org.btcmap.db.table.preference.CREATE)
             conn.execSQL("PRAGMA user_version=$VERSION;")
             return
         }
@@ -78,6 +81,10 @@ class Database(driver: SQLiteDriver, val path: String) {
                         """
                     )
                     conn.execSQL("DROP TABLE event_old;")
+                }
+
+                8 -> {
+                    conn.execSQL(org.btcmap.db.table.preference.CREATE)
                 }
 
                 else -> throw Exception("migration is missing")

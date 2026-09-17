@@ -4,6 +4,7 @@ import androidx.core.graphics.toColorInt
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.R
+import org.btcmap.util.DatabaseRule
 import org.btcmap.util.PreferencesRule
 import org.junit.Assert
 import org.junit.Rule
@@ -12,6 +13,10 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class SettingsPersistenceTest {
+
+    @JvmField
+    @Rule
+    val databaseRule = DatabaseRule()
 
     @JvmField
     @Rule

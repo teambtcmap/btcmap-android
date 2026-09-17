@@ -1,8 +1,8 @@
 package org.btcmap.util
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.test.core.app.ApplicationProvider
+import org.btcmap.settings.Settings
 import org.btcmap.settings.prefs as appPrefs
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -12,18 +12,25 @@ class PreferencesRule : TestRule {
 
     val context: Context = ApplicationProvider.getApplicationContext()
 
-    val prefs: SharedPreferences = appPrefs
+    val prefs: Settings = appPrefs
 
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
             override fun evaluate() {
-                prefs.edit().clear().commit()
+                clear()
                 try {
                     base.evaluate()
                 } finally {
-                    prefs.edit().clear().commit()
+                    clear()
                 }
             }
         }
+    }
+
+    private fun clear() {
+        // Drop the settings published by older app versions too, so a one-off
+        // import does not leak values from a previous run into the test.
+        context.getSharedPreferences("settings", Context.MODE_PRIVATE).edit().clear().commit()
+        appPrefs.clearForTesting()
     }
 }

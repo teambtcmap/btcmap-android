@@ -67,13 +67,10 @@ class UserProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val user = withContext(Dispatchers.IO) { db().user.select() }
             if (user == null) {
-                // Only drop the session when the token is actually readable. A token
-                // that is merely unreadable right now (keystore unavailable) must be
-                // kept so it can recover instead of being signed out.
+                // With no cached account there is no usable session, so clear any
+                // leftover stored token instead of leaving it behind.
                 withContext(Dispatchers.IO) {
-                    if (prefs.authToken != null) {
-                        prefs.authToken = null
-                    }
+                    prefs.clearSession(db())
                 }
                 parentFragmentManager.popBackStack()
                 return@launch
@@ -199,8 +196,7 @@ class UserProfileFragment : Fragment() {
             try {
                 val token = withContext(Dispatchers.IO) { prefs.authToken }
                 withContext(Dispatchers.IO) {
-                    prefs.authToken = null
-                    db().user.delete()
+                    prefs.clearSession(db())
                 }
                 parentFragmentManager.popBackStack()
 

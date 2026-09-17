@@ -1,0 +1,357 @@
+package org.btcmap.settings
+
+import android.content.Context
+import android.content.res.Configuration
+import androidx.core.graphics.toColorInt
+import org.btcmap.App
+import org.btcmap.BuildConfig
+import org.btcmap.R
+import org.btcmap.map.getOnPrimaryContainerColor
+import org.btcmap.map.getOnTertiaryContainerColor
+import org.btcmap.map.getPrimaryContainerColor
+import org.btcmap.map.getTertiaryContainerColor
+import org.maplibre.android.geometry.LatLngBounds
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
+
+lateinit var prefs: Settings
+    private set
+
+fun init(app: App) {
+    prefs = Settings(
+        dbProvider = { app.db },
+        legacy = app.getSharedPreferences("settings", Context.MODE_PRIVATE),
+    )
+}
+
+var Settings.mapViewport: LatLngBounds
+    get() {
+        return LatLngBounds.from(
+            latNorth = getFloat("latNorth", 12.116667f + 0.04f).toDouble(),
+            lonEast = getFloat("lonEast", -68.93333f + 0.04f + 0.03f).toDouble(),
+            latSouth = getFloat("latSouth", 12.116667f - 0.04f).toDouble(),
+            lonWest = getFloat("lonWest", -68.93333f - 0.04f + 0.03f).toDouble(),
+        )
+    }
+    set(value) {
+        putFloat("latNorth", value.latitudeNorth.toFloat())
+        putFloat("lonEast", value.longitudeEast.toFloat())
+        putFloat("latSouth", value.latitudeSouth.toFloat())
+        putFloat("lonWest", value.longitudeWest.toFloat())
+    }
+
+var Settings.mapStyle: MapStyle
+    get() {
+        return mapStyleFromPrefValue(getString("mapStyle", "auto") ?: "auto")
+    }
+    set(value) {
+        putString("mapStyle", value.toPrefValue())
+    }
+
+enum class MapStyle {
+    Auto,
+    Liberty,
+    Positron,
+    Bright,
+    Dark,
+    CartoDarkMatter,
+}
+
+private fun mapStyleFromPrefValue(pref: String): MapStyle {
+    return when (pref) {
+        "auto" -> MapStyle.Auto
+        "liberty" -> MapStyle.Liberty
+        "positron" -> MapStyle.Positron
+        "bright" -> MapStyle.Bright
+        "dark" -> MapStyle.Dark
+        "carto_dark_matter" -> MapStyle.CartoDarkMatter
+        else -> MapStyle.Auto
+    }
+}
+
+fun MapStyle.toPrefValue(): String {
+    return when (this) {
+        MapStyle.Auto -> "auto"
+        MapStyle.Liberty -> "liberty"
+        MapStyle.Positron -> "positron"
+        MapStyle.Bright -> "bright"
+        MapStyle.Dark -> "dark"
+        MapStyle.CartoDarkMatter -> "carto_dark_matter"
+    }
+}
+
+fun MapStyle.name(context: Context): String {
+    return when (this) {
+        MapStyle.Auto -> context.getString(R.string.style_auto)
+        MapStyle.Liberty -> context.getString(R.string.style_liberty)
+        MapStyle.Positron -> context.getString(R.string.style_positron)
+        MapStyle.Bright -> context.getString(R.string.style_bright)
+        MapStyle.Dark -> context.getString(R.string.style_dark)
+        MapStyle.CartoDarkMatter -> context.getString(R.string.style_carto_dark_matter)
+    }
+}
+
+fun MapStyle.uri(context: Context): String {
+    return when (this) {
+        MapStyle.Auto -> {
+            val nightMode =
+                context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+            if (nightMode) {
+                "asset://map-styles/carto-dark-matter/style.json"
+            } else {
+                "asset://map-styles/light/style.json"
+            }
+        }
+
+        MapStyle.Liberty -> "asset://map-styles/liberty/style.json"
+        MapStyle.Positron -> "asset://map-styles/positron/style.json"
+        MapStyle.Bright -> "asset://map-styles/bright/style.json"
+        MapStyle.Dark -> "asset://map-styles/dark/style.json"
+        MapStyle.CartoDarkMatter -> "asset://map-styles/carto-dark-matter/style.json"
+    }
+}
+
+fun Settings.mapStyleIsDark(): Boolean {
+    return when (mapStyle) {
+        MapStyle.Dark, MapStyle.CartoDarkMatter -> true
+        MapStyle.Auto -> {
+            false
+        }
+
+        else -> false
+    }
+}
+
+fun Settings.markerBackgroundColor(context: Context): Int {
+    val customColor = getInt("markerBackgroundColor", -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getPrimaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFF0e95af.toInt() else 0xFF0e95af.toInt()
+}
+
+fun Settings.setMarkerBackgroundColor(color: Int?) {
+    putInt("markerBackgroundColor", color)
+}
+
+private const val KEY_BOOSTED_MARKER_BACKGROUND_COLOR = "boostedMarkerBackgroundColor"
+
+fun Settings.boostedMarkerBackgroundColor(): Int {
+    return getInt(KEY_BOOSTED_MARKER_BACKGROUND_COLOR, "#f7931a".toColorInt())
+}
+
+fun Settings.setBoostedMarkerBackgroundColor(color: Int?) {
+    putInt(KEY_BOOSTED_MARKER_BACKGROUND_COLOR, color)
+}
+
+fun Settings.markerIconColor(context: Context): Int {
+    val customColor = getInt("markerIconColor", -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getOnPrimaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt() // White for both
+}
+
+fun Settings.setMarkerIconColor(color: Int?) {
+    putInt("markerIconColor", color)
+}
+
+fun Settings.badgeBackgroundColor(context: Context): Int {
+    val customColor = getInt("badgeBackgroundColor", -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getOnPrimaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFF00a63e.toInt() else 0xFF00a63e.toInt()
+}
+
+fun Settings.setBadgeBackgroundColor(color: Int?) {
+    putInt("badgeBackgroundColor", color)
+}
+
+fun Settings.badgeTextColor(context: Context): Int {
+    val customColor = getInt("badgeTextColor", -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getPrimaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
+}
+
+fun Settings.setBadgeTextColor(color: Int?) {
+    putInt("badgeTextColor", color)
+}
+
+private const val KEY_API_URL = "apiUrl"
+
+var Settings.apiUrl: HttpUrl
+    get() {
+        return getString(KEY_API_URL, "https://api.btcmap.org")!!.toHttpUrl()
+    }
+    set(value) {
+        putString(KEY_API_URL, value.toString())
+    }
+
+private const val KEY_BUTTON_BACKGROUND_COLOR = "buttonBackgroundColor"
+
+fun Settings.buttonBackgroundColor(context: Context): Int {
+    val customColor = getInt(KEY_BUTTON_BACKGROUND_COLOR, -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getTertiaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFF1f2937.toInt() else 0xFF1f2937.toInt()
+}
+
+fun Settings.setButtonBackgroundColor(color: Int?) {
+    putInt(KEY_BUTTON_BACKGROUND_COLOR, color)
+}
+
+private const val KEY_BUTTON_ICON_COLOR = "buttonIconColor"
+
+fun Settings.buttonIconColor(context: Context): Int {
+    val customColor = getInt(KEY_BUTTON_ICON_COLOR, -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getOnTertiaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
+}
+
+fun Settings.setButtonIconColor(color: Int?) {
+    putInt(KEY_BUTTON_ICON_COLOR, color)
+}
+
+private const val KEY_BUTTON_BORDER_COLOR = "buttonBorderColor"
+
+var Settings.useAdaptiveColors: Boolean
+    get() = getBoolean("useAdaptiveColors", false)
+    set(value) {
+        putBoolean("useAdaptiveColors", value)
+    }
+
+fun Settings.buttonBorderColor(context: Context): Int {
+    val customColor = getInt(KEY_BUTTON_BORDER_COLOR, -1)
+    if (customColor != -1) return customColor
+
+    if (useAdaptiveColors) {
+        return context.getOnTertiaryContainerColor()
+    }
+
+    val isDark = mapStyleIsDark() ||
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+
+    return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
+}
+
+fun Settings.setButtonBorderColor(color: Int?) {
+    putInt(KEY_BUTTON_BORDER_COLOR, color)
+}
+
+var Settings.authToken: String?
+    get() = getString(KEY_AUTH_TOKEN, null)
+    set(value) {
+        putStringNow(KEY_AUTH_TOKEN, value)
+    }
+
+val Settings.authorized: Boolean
+    get() = !authToken.isNullOrBlank()
+
+private const val KEY_SHOW_DEBUG_INFO = "show_debug_info"
+
+var Settings.showDebugInfo: Boolean
+    get() = getBoolean(KEY_SHOW_DEBUG_INFO, BuildConfig.DEBUG)
+    set(value) {
+        putBoolean(KEY_SHOW_DEBUG_INFO, value)
+    }
+
+private const val KEY_SHOW_ATTRIBUTION = "show_attribution"
+
+var Settings.showAttribution: Boolean
+    get() = getBoolean(KEY_SHOW_ATTRIBUTION, true)
+    set(value) {
+        putBoolean(KEY_SHOW_ATTRIBUTION, value)
+    }
+
+private const val KEY_MAP_ROTATION_ENABLED = "map_rotation_enabled"
+
+var Settings.mapRotationEnabled: Boolean
+    get() = getBoolean(KEY_MAP_ROTATION_ENABLED, false)
+    set(value) {
+        putBoolean(KEY_MAP_ROTATION_ENABLED, value)
+    }
+
+private const val KEY_VERIFIED_FILTER_YEARS = "verified_filter_years"
+
+var Settings.verifiedFilterYears: Int
+    get() {
+        return getInt(KEY_VERIFIED_FILTER_YEARS, 3)
+    }
+    set(value) {
+        putInt(KEY_VERIFIED_FILTER_YEARS, value)
+    }
+
+fun Int.toVerifiedFilterYears(context: Context): String {
+    return when (this) {
+        1 -> context.getString(R.string.verified_filter_1_year)
+        2 -> context.getString(R.string.verified_filter_2_years)
+        3 -> context.getString(R.string.verified_filter_3_years)
+        else -> ""
+    }
+}
+
+enum class ActivityInterval(val days: Int) {
+    Day(1),
+    Week(7),
+    Month(30),
+    HalfYear(180),
+    Year(365);
+
+    fun name(context: Context): String = when (this) {
+        Day -> context.getString(R.string.activity_interval_day)
+        Week -> context.getString(R.string.activity_interval_week)
+        Month -> context.getString(R.string.activity_interval_month)
+        HalfYear -> context.getString(R.string.activity_interval_half_year)
+        Year -> context.getString(R.string.activity_interval_year)
+    }
+}
+
+private const val KEY_ACTIVITY_INTERVAL_DAYS = "activity_interval_days"
+
+var Settings.activityIntervalDays: Int
+    get() = getInt(KEY_ACTIVITY_INTERVAL_DAYS, ActivityInterval.HalfYear.days)
+    set(value) {
+        putInt(KEY_ACTIVITY_INTERVAL_DAYS, value)
+    }

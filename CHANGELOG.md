@@ -10,17 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Reject a sign-in response that does not carry a session token instead of storing an empty one
 - Fix the "following" activity feed showing as signed in after the stored session was lost
 - Revoke the session token on the server when signing out, so it can no longer be reused
-- Keep a stored session when the keystore fails temporarily during decryption instead of discarding a recoverable token
-- Stop treating a temporarily unavailable keystore as signed out
 - Only send the stored session token to the configured API host
 - Dismiss sign-in dialogs when leaving the screen instead of leaking the activity window
 - Avoid exposing internal server or network details in the profile password and username dialogs
-- Fix a failed sign-in rollback discarding a session that was stored in the meantime
-- Restore the previously signed-in session when storing a new one fails instead of signing the account out
-- Encrypt the stored session token with the Android Keystore instead of keeping it in plaintext
 - Fix the stored session token being read as stale or missing when several requests run at once
-- Sign out cleanly when the stored session token can no longer be decrypted instead of retrying the keystore on every request
-- Keep the stored session when the keystore is only temporarily unavailable instead of signing out and deleting the token
 - Fix a late rejected request from an old session signing out an account that was signed in again in the meantime
 - Never leave an account only partly signed in when the session token cannot be saved
 - Show a progress indicator while signing in or creating an account
@@ -97,6 +90,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Update Gradle to 9.7.1 and AndroidX libraries to latest stable releases
 - Skip in-app update prompts on debug builds
 - Show an in-app update notification on beta builds
+- Move settings and the stored session into the database so signing in and out updates the token and cached account atomically
 
 ## [1.1.0] - 2026-03-30
 

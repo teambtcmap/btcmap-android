@@ -10,8 +10,6 @@ import org.btcmap.api.CreateTokenResponse
 import org.btcmap.api.User
 import org.btcmap.db.Database
 import org.btcmap.settings.authToken
-import org.btcmap.settings.getStoredAuthToken
-import org.btcmap.settings.restoreStoredAuthTokenIf
 import org.btcmap.util.DatabaseRule
 import org.btcmap.util.PreferencesRule
 import org.btcmap.db.table.user.User as DbUser
@@ -60,24 +58,6 @@ class SignedInSessionStoreTest {
     }
 
     @Test
-    fun keepsExistingSessionWhenTokenCannotBeStored() = runBlocking {
-        // A previous session is already stored and the new token cannot be
-        // encrypted. Nothing was written for the new sign-in, so the previous
-        // session must survive instead of being signed out.
-        prefs.authToken = "old-token"
-        databaseRule.db.user.insert(dbUser(id = 99, name = "stale"))
-
-        val error = withUnavailableKeystore {
-            runCatching { storeSignedInSession(databaseRule.db, prefs, response("new-token")) }
-                .exceptionOrNull()
-        }
-
-        Assert.assertNotNull(error)
-        Assert.assertEquals("old-token", prefs.authToken)
-        Assert.assertEquals(99L, databaseRule.db.user.select()!!.id)
-    }
-
-    @Test
     fun rollsBackTokenWhenCachedUserCannotBeStored() = runBlocking {
         val db = Database(FailingUserInsertDriver(), ":memory:")
 
@@ -108,48 +88,6 @@ class SignedInSessionStoreTest {
         Assert.assertEquals(99L, db.user.select()!!.id)
     }
 
-    @Test
-    fun rollbackRestoresPreviousToken() = runBlocking {
-        prefs.authToken = "old-token"
-        val previous = prefs.getStoredAuthToken()
-        prefs.authToken = "new-token"
-        val current = prefs.getStoredAuthToken()
-
-        Assert.assertTrue(prefs.restoreStoredAuthTokenIf(current = current, previous = previous))
-        Assert.assertEquals("old-token", prefs.authToken)
-        Assert.assertEquals(previous, prefs.getStoredAuthToken())
-    }
-
-    @Test
-    fun rollbackDoesNotReplaceNewerToken() = runBlocking {
-        // Simulate a concurrent sign-in that replaced the token between the write
-        // and the rollback of a failed one: the newer token must be kept.
-        prefs.authToken = "old-token"
-        val previous = prefs.getStoredAuthToken()
-        prefs.authToken = "failed-token"
-        val failed = prefs.getStoredAuthToken()
-        prefs.authToken = "newer-token"
-
-        Assert.assertFalse(prefs.restoreStoredAuthTokenIf(current = failed, previous = previous))
-        Assert.assertEquals("newer-token", prefs.authToken)
-    }
-
-    @Test
-    fun rollbackWorksWhenKeystoreIsUnavailable() = runBlocking {
-        prefs.authToken = "old-token"
-        val previous = prefs.getStoredAuthToken()
-        prefs.authToken = "new-token"
-        val current = prefs.getStoredAuthToken()
-
-        withUnavailableKeystore {
-            // Raw compare-and-set must not depend on being able to decrypt, so a
-            // temporarily unavailable keystore cannot strand a new token.
-            Assert.assertTrue(prefs.restoreStoredAuthTokenIf(current = current, previous = previous))
-        }
-
-        Assert.assertEquals("old-token", prefs.authToken)
-    }
-
     private fun response(token: String) = CreateTokenResponse(
         token = token,
         user = User(
@@ -168,9 +106,6 @@ class SignedInSessionStoreTest {
         savedPlaces = emptyList(),
         savedAreas = emptyList(),
     )
-
-    private inline fun <T> withUnavailableKeystore(block: () -> T): T =
-        TokenCipher.withKeyProvider({ throw IllegalStateException("keystore unavailable") }, block)
 
     /**
      * Fails the [failOnUserInsert]-th cached-user insert (1-based), then delegates

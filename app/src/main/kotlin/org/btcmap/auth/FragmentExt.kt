@@ -1,7 +1,6 @@
 package org.btcmap.auth
 
 import android.content.DialogInterface
-import android.content.SharedPreferences
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -26,10 +25,8 @@ import org.btcmap.api.signIn
 import org.btcmap.db
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.User
-import org.btcmap.settings.authToken
-import org.btcmap.settings.getStoredAuthToken
+import org.btcmap.settings.Settings
 import org.btcmap.settings.prefs
-import org.btcmap.settings.restoreStoredAuthTokenIf
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.userFacingMessage
 
@@ -223,55 +220,27 @@ private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onCom
 }
 
 /**
- * Persists a successful sign-in, keeping the previous session intact when the
- * new one cannot be fully stored. The token is written before the cached user
- * so a token encryption failure leaves the previous session untouched, and a
- * failure after the token is written restores the previous token and cached
- * user instead of leaving a session that is only partly stored.
+ * Persists a successful sign-in. The token and the cached user are written in a
+ * single database transaction, so a failure can never leave the account only
+ * partly stored and the previous session is kept intact.
  */
 internal suspend fun storeSignedInSession(
     db: Database,
-    prefs: SharedPreferences,
+    prefs: Settings,
     response: CreateTokenResponse,
 ) {
     withContext(Dispatchers.IO) {
-        // Capture the raw stored token so the rollback compares and restores the
-        // exact bytes even if the keystore becomes temporarily unreadable.
-        val previousToken = prefs.getStoredAuthToken()
-        val previousUser = db.user.select()
-
-        prefs.authToken = response.token
-        val currentToken = prefs.getStoredAuthToken()
-
-        try {
-            db.transaction {
-                // Clear any cached account before inserting the new one. The user
-                // table is keyed by the server user id and select() has no
-                // ordering, so signing in as a different account would otherwise
-                // leave the previous row behind and select() could return the
-                // stale account.
-                db.user.delete()
-                db.user.insert(
-                    User(
-                        id = response.user.id,
-                        name = response.user.name,
-                        roles = response.user.roles,
-                        savedPlaces = response.user.savedPlaces,
-                        savedAreas = response.user.savedAreas,
-                    )
-                )
-            }
-        } catch (e: Throwable) {
-            // Restore the previous session, but only while this call's token is
-            // still the stored one, so a concurrent sign-in that finished first
-            // is not signed out again.
-            if (prefs.restoreStoredAuthTokenIf(current = currentToken, previous = previousToken)) {
-                runCatching {
-                    if (previousUser == null) db.user.delete() else db.user.insert(previousUser)
-                }
-            }
-            throw e
-        }
+        prefs.replaceSession(
+            db = db,
+            token = response.token,
+            user = User(
+                id = response.user.id,
+                name = response.user.name,
+                roles = response.user.roles,
+                savedPlaces = response.user.savedPlaces,
+                savedAreas = response.user.savedAreas,
+            ),
+        )
     }
 }
 

@@ -132,8 +132,8 @@ class ApiTest : ApiTestBase() {
 
     @Test
     fun call_doesNotInvokeOnUnauthorizedWithoutAuthorizationHeader() = runTest {
-        // A request sent without the stored token (e.g. because the keystore was
-        // temporarily unavailable) must not clear a still-valid session.
+        // A request sent without the stored token (for example while signed
+        // out) must not clear a still-valid session.
         enqueueJson("""{"message":"Authentication required"}""", code = 401)
 
         var unauthorized = false

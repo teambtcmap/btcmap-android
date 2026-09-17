@@ -63,4 +63,21 @@ class DatabaseMigrationTest {
         )
         Assert.assertNull(db.event.selectById(2L)!!.website)
     }
+
+    @Test
+    fun migration8_createsPreferenceTable() {
+        val file = Files.createTempFile("btcmap-migration", ".db").toFile()
+        file.deleteOnExit()
+        val driver = BundledSQLiteDriver()
+
+        val conn = driver.open(file.absolutePath)
+        conn.execSQL("PRAGMA user_version=8;")
+        conn.close()
+
+        val db = Database(driver, file.absolutePath)
+
+        db.preference.upsert("mapStyle", "dark")
+
+        Assert.assertEquals("dark", db.preference.select("mapStyle"))
+    }
 }
