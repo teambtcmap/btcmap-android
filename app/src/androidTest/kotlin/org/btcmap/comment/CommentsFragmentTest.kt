@@ -276,6 +276,51 @@ class CommentsFragmentTest {
         }
     }
 
+    /**
+     * The empty state must stay hidden on the way back from a paid add screen
+     * too, not only on the first load, or it flashes "no comments yet" while
+     * the paid comment is still being published.
+     */
+    @Test
+    fun emptyStateStaysHiddenWhileThePaidCommentIsPublished() {
+        val dispatcher = NeverPublishDispatcher()
+        apiRule.server.dispatcher = dispatcher
+
+        launchComments { scenario, fragment ->
+            lateinit var activity: Activity
+            scenario.onActivity { activity = it }
+
+            waitUntilOnMain {
+                fragment.requireView().findViewById<View>(R.id.empty).isVisible
+            }
+            waitUntil { dispatcher.commentsRequests.get() >= 1 }
+
+            onView(withId(R.id.fab)).perform(click())
+            waitUntilOnMain {
+                activity.supportFragmentManager
+                    .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
+            }
+            waitUntilOnMain {
+                activity.findViewById<Button>(R.id.btn_continue)?.isEnabled == true
+            }
+
+            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
+            onView(withId(R.id.btn_continue)).perform(click())
+
+            waitUntil { dispatcher.orderRequests.get() == 1 }
+            waitUntilOnMain {
+                activity.supportFragmentManager
+                    .findFragmentById(R.id.fragmentContainerView) is CommentsFragment
+            }
+
+            // Let the retry run a couple of times. The comment is never
+            // published, so the list is still genuinely empty; the empty state
+            // must not be shown while the retry is still looking for it.
+            waitUntil { dispatcher.commentsAfterPost.get() >= 2 }
+            onView(withId(R.id.empty)).check(matches(not(isDisplayed())))
+        }
+    }
+
     private fun quoteDispatcher(): Dispatcher = object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse =
             when (request.url.encodedPath) {
@@ -390,6 +435,46 @@ class CommentsFragmentTest {
                         commentsAfterPost.getAndIncrement() == 0 ->
                             jsonResponse(HIDDEN_AND_UNRELATED_COMMENTS_JSON)
                         else -> jsonResponse(POSTED_COMMENT_JSON)
+                    }
+                }
+
+                path.startsWith("/v4/invoices/") -> {
+                    val index = invoiceRequests.getAndIncrement()
+                    val status = if (index == 0) "unpaid" else "paid"
+                    jsonResponse("""{"id":"c1","status":"$status"}""")
+                }
+
+                else -> jsonResponse("[]")
+            }
+        }
+    }
+
+    /** Serves the comments but never publishes the paid one. */
+    private class NeverPublishDispatcher : Dispatcher() {
+        val posted = AtomicBoolean(false)
+        val orderRequests = AtomicInteger()
+        val commentsRequests = AtomicInteger()
+        val invoiceRequests = AtomicInteger()
+        val commentsAfterPost = AtomicInteger()
+
+        override fun dispatch(request: RecordedRequest): MockResponse {
+            val path = request.url.encodedPath
+            return when {
+                path == "/v4/place-comments/quote" -> jsonResponse("""{"quote_sat":1000}""")
+
+                path == "/v4/place-comments" && request.method == "POST" -> {
+                    posted.set(true)
+                    orderRequests.incrementAndGet()
+                    jsonResponse("""{"invoice_id":"c1","invoice":"lnbc-c"}""")
+                }
+
+                path == "/v4/place-comments" -> {
+                    commentsRequests.incrementAndGet()
+                    if (posted.get()) {
+                        commentsAfterPost.incrementAndGet()
+                        jsonResponse(HIDDEN_COMMENT_JSON)
+                    } else {
+                        jsonResponse("[]")
                     }
                 }
 

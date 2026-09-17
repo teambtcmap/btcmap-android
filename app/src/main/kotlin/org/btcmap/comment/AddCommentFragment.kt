@@ -33,6 +33,13 @@ class AddCommentFragment : Fragment() {
     private var _binding: AddCommentFragmentBinding? = null
     private val binding get() = _binding!!
 
+    /**
+     * True once the payment has been reported. Polling restarts on every
+     * resume, so without this a view recreation while the invoice is already
+     * paid would report the payment and pop the back stack a second time.
+     */
+    private var paymentReported = false
+
     private val viewModel: InvoicePaymentViewModel<CommentQuoteResponse> by lazy {
         invoicePaymentViewModel { api().getCommentQuote() }
     }
@@ -65,13 +72,16 @@ class AddCommentFragment : Fragment() {
             viewModel = viewModel,
             onState = { render(it, payment) },
             onPaid = {
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.your_comment_has_been_posted),
-                    Toast.LENGTH_LONG,
-                ).show()
-                parentFragmentManager.setFragmentResult(REQUEST_KEY, Bundle())
-                parentFragmentManager.popBackStack()
+                if (!paymentReported) {
+                    paymentReported = true
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.your_comment_has_been_posted),
+                        Toast.LENGTH_LONG,
+                    ).show()
+                    parentFragmentManager.setFragmentResult(REQUEST_KEY, Bundle())
+                    parentFragmentManager.popBackStack()
+                }
             },
         )
 

@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.btcmap.R
 import org.btcmap.databinding.CommentsFragmentBinding
 import org.btcmap.db
@@ -49,7 +50,8 @@ class CommentsFragment : Fragment() {
      * Ids of the comments the user saw before opening the add screen. The retry
      * uses them to tell whether the paid comment is already in the list, so a
      * sync that stored it while the add screen was open does not trigger a
-     * pointless retry. Null when the add screen was not opened from here.
+     * pointless retry. Null when the add screen was not opened from here, or
+     * when the list had not rendered yet and the ids would be meaningless.
      */
     private var prePostCommentIds: Set<Long>? = null
 
@@ -57,8 +59,14 @@ class CommentsFragment : Fragment() {
     private var renderedIds: Set<Long> = emptySet()
 
     /**
-     * False until the first sync of this screen finishes. The empty state is
-     * held back until then so it cannot flash while the first sync is running.
+     * True once [renderComments] has populated [renderedIds]. Until then the
+     * ids are not a trustworthy baseline for the post-payment retry.
+     */
+    private var renderedAtLeastOnce = false
+
+    /**
+     * False until the current sync finishes. The empty state is held back until
+     * then so it cannot flash while the sync is running.
      */
     private var initialSyncDone = false
 
@@ -78,6 +86,9 @@ class CommentsFragment : Fragment() {
         // resume below consumes it.
         postPaymentSync =
             savedInstanceState?.getBoolean(STATE_POST_PAYMENT_SYNC) ?: postPaymentSync
+        savedInstanceState?.getLongArray(STATE_PRE_POST_COMMENT_IDS)?.let {
+            prePostCommentIds = it.toSet()
+        }
 
         binding.topAppBar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
@@ -101,7 +112,10 @@ class CommentsFragment : Fragment() {
         binding.fab.setOnClickListener {
             // Snapshot what the user has seen before the add screen can store
             // anything, so the retry knows which comments are genuinely new.
-            prePostCommentIds = renderedIds
+            // Before the first render the ids are unknown, and an empty set
+            // would misread every stored comment as new, so leave the baseline
+            // null and let the retry run its full window instead.
+            prePostCommentIds = if (renderedAtLeastOnce) renderedIds else null
 
             parentFragmentManager.commit {
                 setReorderingAllowed(true)
@@ -128,6 +142,10 @@ class CommentsFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                // Hold the empty state back until this resume's sync finishes,
+                // not just the first one, so it cannot flash while the list is
+                // still being fetched (for example right after a payment).
+                initialSyncDone = false
                 val rendered = renderComments(adapter)
 
                 if (postPaymentSync) {
@@ -156,6 +174,7 @@ class CommentsFragment : Fragment() {
 
         adapter.submitList(items)
         renderedIds = items.map { it.id }.toSet()
+        renderedAtLeastOnce = true
         binding.empty.isVisible = initialSyncDone && items.isEmpty()
         return items
     }
@@ -165,7 +184,7 @@ class CommentsFragment : Fragment() {
     }
 
     /**
-     * Retries the delta sync shortly after a payment.
+     * Retries the delta sync after a payment until the paid comment shows up.
      *
      * The invoice can be reported as paid before the server has flipped the new
      * comment to visible, and because the list only syncs on resume, a single
@@ -176,6 +195,9 @@ class CommentsFragment : Fragment() {
      * up as an id that was not shown before the post flow started. Waiting for
      * that specific signal (rather than for any stored row) means an unrelated
      * comment syncing in the meantime cannot end the retries.
+     *
+     * Retries back off and stop after a bounded window so a comment the server
+     * never publishes cannot poll forever.
      */
     private suspend fun syncCommentsWithRetry(
         adapter: CommentsAdapter,
@@ -183,7 +205,8 @@ class CommentsFragment : Fragment() {
     ) {
         // Fall back to the currently shown ids when the add screen was not
         // opened from the list, for example after a process recreation that
-        // lost the snapshot taken when the add button was tapped.
+        // lost the snapshot taken when the add button was tapped. Nothing is
+        // then known to be new, and the retry below simply runs its window.
         val baseline = prePostCommentIds ?: rendered.map { it.id }.toSet()
         prePostCommentIds = null
 
@@ -194,15 +217,18 @@ class CommentsFragment : Fragment() {
             return
         }
 
-        repeat(POST_PAYMENT_SYNC_ATTEMPTS) { attempt ->
-            sync().syncComments()
+        withTimeoutOrNull(POST_PAYMENT_SYNC_TIMEOUT_MS) {
+            var delayMs = POST_PAYMENT_SYNC_INITIAL_DELAY_MS
 
-            if (renderComments(adapter).any { it.id !in baseline }) {
-                return
-            }
+            while (true) {
+                sync().syncComments()
 
-            if (attempt < POST_PAYMENT_SYNC_ATTEMPTS - 1) {
-                delay(POST_PAYMENT_SYNC_DELAY_MS)
+                if (renderComments(adapter).any { it.id !in baseline }) {
+                    return@withTimeoutOrNull
+                }
+
+                delay(delayMs)
+                delayMs = (delayMs * 2).coerceAtMost(POST_PAYMENT_SYNC_MAX_DELAY_MS)
             }
         }
     }
@@ -210,6 +236,9 @@ class CommentsFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean(STATE_POST_PAYMENT_SYNC, postPaymentSync)
+        prePostCommentIds?.let {
+            outState.putLongArray(STATE_PRE_POST_COMMENT_IDS, it.toLongArray())
+        }
     }
 
     override fun onDestroyView() {
@@ -218,8 +247,10 @@ class CommentsFragment : Fragment() {
     }
 
     private companion object {
-        const val POST_PAYMENT_SYNC_ATTEMPTS = 6
-        const val POST_PAYMENT_SYNC_DELAY_MS = 500L
+        const val POST_PAYMENT_SYNC_TIMEOUT_MS = 10_000L
+        const val POST_PAYMENT_SYNC_INITIAL_DELAY_MS = 500L
+        const val POST_PAYMENT_SYNC_MAX_DELAY_MS = 2_000L
         const val STATE_POST_PAYMENT_SYNC = "post_payment_sync"
+        const val STATE_PRE_POST_COMMENT_IDS = "pre_post_comment_ids"
     }
 }

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep looking for a freshly paid comment for longer and with backoff instead of a few fixed retries
+- Hold the comments empty state back after returning from a payment too, so it cannot flash "no comments yet"
+- Keep the post-payment comment retry working when the screen is recreated or the add button is tapped before the list rendered
+- Stop the comments add button from being tappable before the quote has loaded
+- Stop a paid comment from popping the comments screen twice when the add screen view is recreated
 - Skip the post-payment comment sync retry when the paid comment is already in the list
 - Keep retrying the comment sync after a payment even when another comment syncs in the meantime
 - Stop a paid comment from re-triggering the post-payment sync when the comments screen is opened again later
