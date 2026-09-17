@@ -1,7 +1,6 @@
 package org.btcmap.bundle
 
 import android.content.Context
-import android.util.Log
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import kotlinx.coroutines.Dispatchers
@@ -10,9 +9,8 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.place.Place
 import org.btcmap.util.rethrowIfCancellation
 import java.io.FileNotFoundException
+import java.io.InputStream
 import java.time.Duration
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 /**
@@ -29,19 +27,31 @@ import java.time.ZonedDateTime
 private val SEEDED_UPDATED_AT = ZonedDateTime.parse("2000-01-01T00:00:00Z")
 
 object BundledPlaces {
-    private const val TAG = "BundledPlaces"
-
     private const val FILE_NAME = "bundled-places.json"
 
-    private const val BATCH_SIZE = 10_000
+    internal const val BATCH_SIZE = 10_000
 
     data class ImportResult(
         val placesImported: Long,
         val duration: Duration,
     )
 
-    suspend fun import(ctx: Context, db: Database): ImportResult {
-        val startedAt = OffsetDateTime.now()
+    suspend fun import(ctx: Context, db: Database): ImportResult =
+        importFrom(db) { ctx.assets.open(FILE_NAME) }
+
+    /**
+     * Seeds [db] from the snapshot produced by [openStream], unless it already
+     * holds places.
+     *
+     * Kept separate from [import] so the seeding logic — the one-shot guard, the
+     * transactional import and the failure handling — is testable without an
+     * Android [Context] or a real asset.
+     */
+    internal suspend fun importFrom(
+        db: Database,
+        openStream: () -> InputStream,
+    ): ImportResult {
+        val startedAt = System.nanoTime()
 
         // Seeding is intentionally a one-shot, fresh-install operation: any
         // place already stored means the snapshot was imported or live data was
@@ -56,6 +66,14 @@ object BundledPlaces {
             // The count read is inside the try as well: a database failure must
             // not escape and take down the calling screen, for the same reason a
             // missing or malformed asset must not.
+            //
+            // The guard is a cheap optimisation to avoid re-parsing the snapshot
+            // on every resume, not a concurrency primitive: the count check and
+            // the import below are not one atomic unit, so two callers racing
+            // here could both observe an empty table and import twice. Only
+            // MapFragment calls this, on the main lifecycle, so that is not
+            // reachable today; even if it were, INSERT OR REPLACE makes a double
+            // import idempotent rather than corrupting data.
             val placesInDb = withContext(Dispatchers.IO) { db.place.selectCount() }
             if (placesInDb > 0) {
                 return ImportResult(placesImported = 0, duration = elapsedSince(startedAt))
@@ -64,20 +82,22 @@ object BundledPlaces {
             // The whole parse runs inside one transaction so a malformed asset
             // rolls back to an empty table and is retried on the next launch,
             // instead of leaving a partial seed that the count check above would
-            // then treat as complete.
+            // then treat as complete. Holding the transaction for the entire
+            // parse briefly blocks other writers; that is acceptable because
+            // this is a fresh-install path and the snapshot is inserted once.
             withContext(Dispatchers.IO) {
-                ctx.assets.open(FILE_NAME).use { stream ->
+                openStream().use { stream ->
                     stream.bufferedReader().use { reader ->
                         val jsonReader = JsonReader(reader)
                         db.transaction {
                             jsonReader.beginArray()
-                            val batch = mutableListOf<Place>()
+                            var batch = mutableListOf<Place>()
                             while (jsonReader.hasNext()) {
                                 batch.add(jsonReader.readBundledPlace())
                                 if (batch.size >= BATCH_SIZE) {
-                                    db.place.insert(batch.toList())
+                                    db.place.insert(batch)
                                     placesImported += batch.size
-                                    batch.clear()
+                                    batch = mutableListOf()
                                 }
                             }
                             if (batch.isNotEmpty()) {
@@ -89,23 +109,20 @@ object BundledPlaces {
                     }
                 }
             }
-        } catch (e: FileNotFoundException) {
+        } catch (_: FileNotFoundException) {
             // The snapshot asset is optional; a missing file is not an error.
-            Log.i(TAG, "No bundled places asset, skipping seed")
             return ImportResult(placesImported = 0, duration = elapsedSince(startedAt))
         } catch (t: Throwable) {
             t.rethrowIfCancellation()
-            Log.e(TAG, "Failed to import bundled places", t)
             return ImportResult(placesImported = 0, duration = elapsedSince(startedAt))
         }
 
         val duration = elapsedSince(startedAt)
-        Log.i(TAG, "Imported $placesImported bundled places in $duration")
         return ImportResult(placesImported = placesImported, duration = duration)
     }
 
-    private fun elapsedSince(startedAt: OffsetDateTime): Duration =
-        Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC))
+    private fun elapsedSince(startedAtNanos: Long): Duration =
+        Duration.ofNanos(System.nanoTime() - startedAtNanos)
 }
 
 internal fun JsonReader.readBundledPlace(): Place {
@@ -151,12 +168,15 @@ internal fun JsonReader.readBundledPlace(): Place {
     endObject()
     // Required fields must be present: defaulting them would silently seed a
     // bogus place (for example id 0 at Null Island) if the snapshot format ever
-    // changes, instead of failing loudly and rolling the import back.
+    // changes, instead of failing loudly and rolling the import back. The id is
+    // resolved first so the messages for the remaining fields can name the place
+    // and the missing-id message never interpolates a null id.
+    val placeId = requireNotNull(id) { "bundled place is missing 'id'" }
     return Place(
-        id = requireNotNull(id) { "bundled place is missing 'id'" },
-        lat = requireNotNull(lat) { "bundled place $id is missing 'lat'" },
-        lon = requireNotNull(lon) { "bundled place $id is missing 'lon'" },
-        icon = requireNotNull(icon) { "bundled place $id is missing 'icon'" },
+        id = placeId,
+        lat = requireNotNull(lat) { "bundled place $placeId is missing 'lat'" },
+        lon = requireNotNull(lon) { "bundled place $placeId is missing 'lon'" },
+        icon = requireNotNull(icon) { "bundled place $placeId is missing 'icon'" },
         name = name,
         localizedName = null,
         updatedAt = SEEDED_UPDATED_AT,

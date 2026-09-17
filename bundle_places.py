@@ -2,8 +2,12 @@
 """Download the latest places snapshot as a bundled Android asset.
 
 Fetches every place from the BTC Map API and writes it to
-``app/src/main/assets/bundled-places.json`` so the app can offer an offline
-fallback when the network is unavailable.
+``app/src/main/assets/bundled-places.json``. The snapshot is a minimal
+first-launch seed: the map renders places immediately, while the regular sync
+pulls the full records on top. Seeded rows carry a sentinel ``updated_at``, so
+every one of them is enriched and replaced as soon as live data is available.
+The snapshot is not a substitute for the live sync and is deliberately not
+re-imported once the app has any places.
 
 The output is pretty-printed and sorted by id. This keeps the diff of a
 refresh limited to the places that actually changed instead of rewriting the
@@ -54,8 +58,18 @@ def fetch(url: str) -> bytes:
         return resp.read()
 
 
+def _is_number(value: object) -> bool:
+    # bool is a subclass of int, but a boolean coordinate or id is a bug.
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
 def validate(places: list) -> None:
-    """Fail with a clear message instead of a traceback on an unexpected shape."""
+    """Reject an unexpected shape with a clear message instead of a traceback.
+
+    Field presence, types and coordinate ranges are checked here so a bad
+    download fails at bundling time, rather than on-device where a malformed
+    snapshot forces the importer to roll back the whole seed.
+    """
     if not isinstance(places, list):
         raise RuntimeError("downloaded places are not a JSON array")
     if not places:
@@ -66,6 +80,37 @@ def validate(places: list) -> None:
         for field in REQUIRED_FIELDS:
             if field not in place:
                 raise RuntimeError(f"place at index {index} is missing '{field}'")
+
+        place_id = place["id"]
+        if not isinstance(place_id, int) or isinstance(place_id, bool):
+            raise RuntimeError(f"place at index {index} has a non-integer 'id'")
+
+        lat = place["lat"]
+        lon = place["lon"]
+        if not _is_number(lat):
+            raise RuntimeError(f"place {place_id} has a non-numeric 'lat'")
+        if not _is_number(lon):
+            raise RuntimeError(f"place {place_id} has a non-numeric 'lon'")
+        if not -90 <= lat <= 90:
+            raise RuntimeError(f"place {place_id} has a 'lat' outside [-90, 90]")
+        if not -180 <= lon <= 180:
+            raise RuntimeError(f"place {place_id} has a 'lon' outside [-180, 180]")
+
+        icon = place["icon"]
+        if not isinstance(icon, str) or not icon:
+            raise RuntimeError(f"place {place_id} has a non-string or empty 'icon'")
+
+        name = place.get("name")
+        if name is not None and not isinstance(name, str):
+            raise RuntimeError(f"place {place_id} has a non-string 'name'")
+
+        comments = place.get("comments")
+        if comments is not None and (not isinstance(comments, int) or isinstance(comments, bool)):
+            raise RuntimeError(f"place {place_id} has a non-integer 'comments'")
+
+        boosted_until = place.get("boosted_until")
+        if boosted_until is not None and not isinstance(boosted_until, str):
+            raise RuntimeError(f"place {place_id} has a non-string 'boosted_until'")
 
 
 def main() -> int:
