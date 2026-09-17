@@ -186,6 +186,12 @@ app/src/main/kotlin/org/btcmap/
 ## Testing
 - Instrumented tests are run by humans and are lower priority
 - Run unit tests (app/src/test) before reporting any task as done
+- Some instrumented tests are flaky on the emulator and fail independently of
+  the change under test. Ignore failures from MapLibre-based map
+  rendering/interaction tests (e.g. `MapPlaceSelectionTest`) and other
+  timing-dependent render tests: a native crash or a render-timeout assertion is
+  an environment issue, not a code regression. Confirm by re-running the test,
+  and do not try to fix these flaky tests unless explicitly asked.
 
 ## Changelog
 - Update `CHANGELOG.md` before committing, adding entries under the `## [Unreleased]` section

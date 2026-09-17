@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep what was typed in the change-password form when the device is rotated
+- Clear a corrected field's error in the account and change-password forms
+- Fix the legacy settings import being permanently skipped when reading the old values fails
+- Stop saving a session from blocking other settings reads on the main thread
 - Confirm the password and require at least 8 characters when creating an account
 - Confirm the new password and require at least 8 characters when changing the password
 - Fix the map not releasing its native resources when the map screen is closed

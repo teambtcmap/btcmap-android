@@ -25,8 +25,7 @@ import org.btcmap.api.toDbUser
 import org.btcmap.api.updatePassword
 import org.btcmap.api.updateUsername
 import org.btcmap.app
-import org.btcmap.auth.AuthValidation
-import org.btcmap.auth.ChangePasswordError
+import org.btcmap.auth.ChangePasswordDialogFragment
 import org.btcmap.db
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
@@ -111,47 +110,9 @@ class UserProfileFragment : Fragment() {
     }
 
     private fun showChangePasswordDialog() {
-        val dialogView = layoutInflater.inflate(R.layout.change_password_dialog, null)
-        val currentInput = dialogView.findViewById<TextInputEditText>(R.id.currentPasswordInput)
-        val newInput = dialogView.findViewById<TextInputEditText>(R.id.newPasswordInput)
-        val confirmationInput = dialogView.findViewById<TextInputEditText>(R.id.confirmPasswordInput)
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.change_password)
-            .setView(dialogView)
-            .setPositiveButton(R.string.save, null)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
-
-        dialog.setOnShowListener {
-            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-                val current = currentInput.text.toString()
-                val new = newInput.text.toString()
-                val confirmation = confirmationInput.text.toString()
-
-                val errors = AuthValidation.changePassword(current, new, confirmation)
-                if (errors.isNotEmpty()) {
-                    if (ChangePasswordError.CurrentRequired in errors) {
-                        currentInput.error = getString(R.string.field_required)
-                    }
-                    when {
-                        ChangePasswordError.NewRequired in errors ->
-                            newInput.error = getString(R.string.field_required)
-
-                        ChangePasswordError.NewTooShort in errors ->
-                            newInput.error = getString(R.string.password_min_length)
-                    }
-                    if (ChangePasswordError.ConfirmationMismatch in errors) {
-                        confirmationInput.error = getString(R.string.passwords_do_not_match)
-                    }
-                    return@setOnClickListener
-                }
-
-                dialog.dismiss()
-                changePassword(current, new)
-            }
-        }
-
-        dialog.show()
+        val fragment = ChangePasswordDialogFragment.newInstance()
+        fragment.onSubmit = { current, new -> changePassword(current, new) }
+        fragment.show(childFragmentManager, ChangePasswordDialogFragment.TAG)
     }
 
     private fun changePassword(oldPassword: String, newPassword: String) {
@@ -159,7 +120,7 @@ class UserProfileFragment : Fragment() {
             try {
                 api().updatePassword(oldPassword, newPassword)
                 Toast.makeText(context, R.string.password_changed, Toast.LENGTH_SHORT).show()
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 e.rethrowIfCancellation()
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.error)

@@ -164,7 +164,7 @@ private suspend fun <T> Fragment.runAuthRequest(
     } catch (e: TimeoutCancellationException) {
         reportAuthError(logMessage, e, fallbackMessage, showErrorDialog)
         return null
-    } catch (e: Throwable) {
+    } catch (e: Exception) {
         e.rethrowIfCancellation()
         reportAuthError(logMessage, e, fallbackMessage, showErrorDialog)
         return null
@@ -189,7 +189,7 @@ private fun Fragment.reportAuthError(
 private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onComplete: () -> Unit) {
     try {
         storeSignedInSession(db = db(), prefs = prefs, response = response)
-    } catch (e: Throwable) {
+    } catch (e: Exception) {
         e.rethrowIfCancellation()
         showAuthError(
             logMessage = "Failed to store signed-in account",
@@ -213,7 +213,7 @@ private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onCom
 
     try {
         onComplete()
-    } catch (e: Throwable) {
+    } catch (e: Exception) {
         e.rethrowIfCancellation()
         Log.e(AUTH_TAG, "Signed-in callback failed", e)
     }

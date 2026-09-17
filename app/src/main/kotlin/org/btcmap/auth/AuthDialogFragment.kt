@@ -92,6 +92,12 @@ internal class AuthDialogFragment : DialogFragment() {
         passwordInput: TextInputEditText,
         confirmationInput: TextInputEditText?,
     ) {
+        // Clear errors from the previous attempt first, so a corrected field
+        // does not keep showing an error that no longer applies.
+        usernameInput.error = null
+        passwordInput.error = null
+        confirmationInput?.error = null
+
         if (AuthError.UsernameRequired in errors) {
             usernameInput.error = getString(R.string.field_required)
         }

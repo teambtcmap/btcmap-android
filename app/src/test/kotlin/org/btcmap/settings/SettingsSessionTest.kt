@@ -188,6 +188,20 @@ class SettingsSessionTest {
     }
 
     @Test
+    fun importLegacy_retriesWhenLegacyValuesCannotBeRead() {
+        val db = createDatabase()
+
+        // A transient failure while reading the legacy values must not mark the
+        // migration as done, or it would be skipped forever.
+        createSettings(db, legacyValues = { throw IllegalStateException("boom") }).preload()
+
+        val retrying = createSettings(db, legacyValues = { mapOf("mapStyle" to "dark") })
+        retrying.preload()
+
+        Assert.assertEquals("dark", retrying.getString("mapStyle", null))
+    }
+
+    @Test
     fun importLegacy_clearsUnusableEncryptedToken() {
         val db = createDatabase()
         val cleared = mutableSetOf<String>()

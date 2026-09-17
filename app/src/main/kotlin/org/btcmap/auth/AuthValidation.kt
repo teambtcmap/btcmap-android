@@ -3,12 +3,11 @@ package org.btcmap.auth
 /**
  * Client-side checks for the sign-in, sign-up and change-password forms.
  *
- * The API's REST endpoints (`POST /v4/users`, `PUT /v4/users/me/password`) only
- * require non-empty passwords; the 12-character minimum in
- * `service::auth::MIN_PASSWORD_LENGTH` is enforced by the RPC handlers instead.
- * This app applies its own stricter minimum to discourage weak passwords. It is
- * checked only when a password is set (sign-up and change-password), so accounts
- * created before the rule existed can still sign in.
+ * The REST endpoints this app uses (`POST /v4/users`,
+ * `PUT /v4/users/me/password`) perform no password-length validation, so this
+ * app applies its own minimum to discourage weak passwords. It is checked only
+ * when a password is set (sign-up and change-password), so accounts created
+ * before the rule existed can still sign in.
  */
 internal enum class AuthError {
     UsernameRequired,
