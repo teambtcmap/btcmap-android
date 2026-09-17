@@ -72,6 +72,7 @@ class MapPlaceSelectionTest {
             lateinit var mapFragment: MapFragment
             lateinit var mapView: MapView
             var map: MapLibreMap? = null
+            var mapFinishedLoading = false
             var renderedIds: Set<Long> = emptySet()
 
             scenario.onActivity {
@@ -79,11 +80,19 @@ class MapPlaceSelectionTest {
                 mapFragment = it.supportFragmentManager
                     .findFragmentById(R.id.fragmentContainerView) as MapFragment
                 mapView = mapFragment.requireView().findViewById(R.id.map)
+                mapView.addOnDidFinishLoadingMapListener { mapFinishedLoading = true }
                 mapView.getMapAsync { m -> map = m }
             }
 
             waitUntilOnMain {
+                // queryRenderedFeatures crashes in native code until the renderer
+                // has actually started, so wait for the map to finish loading.
+                if (!mapFinishedLoading) return@waitUntilOnMain false
                 val currentMap = map ?: return@waitUntilOnMain false
+                val style = currentMap.style ?: return@waitUntilOnMain false
+                if (style.getLayer(MERCHANT_MARKER_LAYER_ID) == null) {
+                    return@waitUntilOnMain false
+                }
                 renderedIds = renderedPlaceIds(currentMap, mapView)
                 renderedIds.size == ParisPlaces.places.size
             }

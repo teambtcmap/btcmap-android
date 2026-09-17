@@ -86,6 +86,9 @@
     <string name="name">Nazwa</string>
     <string name="name_placeholder">Kawiarnia Satoshi</string>
     <string name="password">Hasło</string>
+    <string name="password_min_length">Co najmniej 8 znaków</string>
+    <string name="confirm_password">Potwierdź hasło</string>
+    <string name="passwords_do_not_match">Hasła nie są takie same</string>
     <string name="field_required">Wymagane</string>
     <string name="profile">Profil</string>
     <string name="change_username">Zmień nazwę użytkownika</string>

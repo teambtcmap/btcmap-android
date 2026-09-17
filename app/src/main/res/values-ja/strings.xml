@@ -86,6 +86,9 @@
     <string name="name">名前</string>
     <string name="name_placeholder">Satoshi Cafe</string>
     <string name="password">パスワード</string>
+    <string name="password_min_length">8文字以上</string>
+    <string name="confirm_password">パスワードの確認</string>
+    <string name="passwords_do_not_match">パスワードが一致しません</string>
     <string name="field_required">必須</string>
     <string name="profile">プロフィール</string>
     <string name="change_username">ユーザー名を変更</string>

@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Confirm the password and require at least 8 characters when creating an account
+- Confirm the new password and require at least 8 characters when changing the password
+- Fix the map not releasing its native resources when the map screen is closed
+- Keep what was typed in the sign-in or sign-up form when the device is rotated
+- Let a slow sign-in or sign-up be cancelled and time it out instead of leaving the spinner stuck
+- Read the signed-in session from memory so the app never opens the database on the main thread
 - Fix signing out dropping an account that was signed in again in the meantime
 - Clear a leftover session on the settings screen when the cached account is missing
 - Document that the session token is intentionally stored unencrypted in the private app database

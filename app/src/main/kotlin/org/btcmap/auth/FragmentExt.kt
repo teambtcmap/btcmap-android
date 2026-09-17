@@ -1,6 +1,6 @@
 package org.btcmap.auth
 
-import android.content.DialogInterface
+import android.os.Build
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -12,10 +12,12 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.btcmap.api
@@ -29,8 +31,13 @@ import org.btcmap.settings.Settings
 import org.btcmap.settings.prefs
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.userFacingMessage
+import kotlin.coroutines.coroutineContext
 
-fun Fragment.showAuthDialog(onSuccess: () -> Unit) {
+/**
+ * Shows the account chooser and, once the user picks an option, the sign-in or
+ * sign-up form. [onComplete] runs after the session has been stored.
+ */
+fun Fragment.showAuthDialog(onComplete: () -> Unit) {
     if (!isAdded) return
 
     val dialogView = layoutInflater.inflate(R.layout.account_choices_dialog, null)
@@ -42,162 +49,140 @@ fun Fragment.showAuthDialog(onSuccess: () -> Unit) {
 
     dialogView.findViewById<View>(R.id.createAccountOption).setOnClickListener {
         dialog.dismiss()
-        createNewAccount(onSuccess)
+        showCredentials(AuthMode.SignUp, onComplete)
     }
     dialogView.findViewById<View>(R.id.signInOption).setOnClickListener {
         dialog.dismiss()
-        showSignInDialog(onSuccess)
+        showCredentials(AuthMode.SignIn, onComplete)
     }
 
     dialog.show()
     dismissOnViewDestroyed(dialog)
-}
-
-private fun Fragment.createNewAccount(onComplete: () -> Unit) {
-    showCredentialsDialog(
-        title = R.string.new_account,
-        positiveButton = R.string.sign_up,
-    ) { username, password ->
-        signUp(username, password, onComplete)
-    }
 }
 
 private fun Fragment.showSignInDialog(
     onComplete: () -> Unit,
     prefilledUsername: String? = null,
 ) {
-    showCredentialsDialog(
-        title = R.string.login,
-        positiveButton = R.string.login,
-        prefilledUsername = prefilledUsername,
-    ) { username, password ->
-        signIn(username, password, onComplete)
-    }
-}
-
-private fun Fragment.showCredentialsDialog(
-    @StringRes title: Int,
-    @StringRes positiveButton: Int,
-    prefilledUsername: String? = null,
-    onSubmit: (username: String, password: String) -> Unit,
-) {
     if (!isAdded) return
 
-    val dialogView = layoutInflater.inflate(R.layout.account_dialog, null)
-    val usernameInput = dialogView.findViewById<TextInputEditText>(R.id.usernameInput)
-    val passwordInput = dialogView.findViewById<TextInputEditText>(R.id.passwordInput)
+    showCredentials(AuthMode.SignIn, onComplete, prefilledUsername)
+}
 
-    prefilledUsername?.let { usernameInput.setText(it) }
+private fun Fragment.showCredentials(
+    mode: AuthMode,
+    onComplete: () -> Unit,
+    prefilledUsername: String? = null,
+) {
+    val fragment = AuthDialogFragment.newCredentials(mode, prefilledUsername)
+    fragment.onSubmit = authSubmitHandler(onComplete)
+    fragment.show(childFragmentManager, AuthDialogFragment.TAG)
+}
 
-    val dialog = MaterialAlertDialogBuilder(requireContext())
-        .setTitle(title)
-        .setView(dialogView)
-        .setPositiveButton(positiveButton, null)
-        .setNegativeButton(android.R.string.cancel, null)
-        .create()
-
-    dialog.setOnShowListener {
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-            val username = usernameInput.text.toString().trim()
-            val password = passwordInput.text.toString()
-
-            var valid = true
-            if (username.isEmpty()) {
-                usernameInput.error = getString(R.string.field_required)
-                valid = false
-            }
-            if (password.isEmpty()) {
-                passwordInput.error = getString(R.string.field_required)
-                valid = false
-            }
-            if (!valid) return@setOnClickListener
-
-            dialog.dismiss()
-            onSubmit(username, password)
+private fun Fragment.authSubmitHandler(
+    onComplete: () -> Unit,
+): (mode: AuthMode, username: String, password: String) -> Unit =
+    { mode, username, password ->
+        when (mode) {
+            AuthMode.SignIn -> signIn(username, password, onComplete)
+            AuthMode.SignUp -> signUp(username, password, onComplete)
         }
     }
-
-    dialog.show()
-    dismissOnViewDestroyed(dialog)
-}
 
 private fun Fragment.signUp(username: String, password: String, onComplete: () -> Unit) {
     viewLifecycleOwner.lifecycleScope.launch {
-        val progress = showProgressDialog(R.string.loading)
+        val user = runAuthRequest(
+            logMessage = "Failed to create new account",
+            fallbackMessage = getString(R.string.failed_to_create_new_account),
+        ) {
+            api().createUser(name = username, password = password)
+        } ?: return@launch
 
-        try {
-            val user = try {
-                api().createUser(name = username, password = password)
-            } catch (e: Throwable) {
-                e.rethrowIfCancellation()
-                // Dismiss before showing the error so the two windows do not
-                // overlap. The finally block dismisses again, which is a no-op.
-                progress.dismiss()
-                showAuthError(
-                    logMessage = "Failed to create new account",
-                    e = e,
-                    fallbackMessage = getString(R.string.failed_to_create_new_account),
-                )
-                return@launch
-            }
-
-            val response = try {
-                api().signIn(
-                    username = user.name,
-                    password = password,
-                    label = tokenLabel(),
-                )
-            } catch (e: Throwable) {
-                e.rethrowIfCancellation()
-                // Dismiss before showing the sign-in dialog so the two windows do
-                // not overlap. The finally block dismisses again, which is a no-op.
-                progress.dismiss()
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.account_created_sign_in_failed),
-                    Toast.LENGTH_LONG,
-                ).show()
-                showSignInDialog(onComplete, prefilledUsername = user.name)
-                return@launch
-            }
-
-            progress.dismiss()
-            completeSignIn(response, onComplete)
-        } finally {
-            progress.dismiss()
+        // The account exists now. If signing in fails, fall back to the sign-in
+        // form instead of surfacing a second error dialog: the caller is told
+        // what happened with a toast.
+        val response = runAuthRequest(
+            logMessage = "Failed to sign in after creating a new account",
+            fallbackMessage = getString(R.string.failed_to_sign_in),
+            showErrorDialog = false,
+        ) {
+            api().signIn(
+                username = user.name,
+                password = password,
+                label = tokenLabel(),
+            )
         }
+
+        if (response == null) {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.account_created_sign_in_failed),
+                Toast.LENGTH_LONG,
+            ).show()
+            showSignInDialog(onComplete, prefilledUsername = user.name)
+            return@launch
+        }
+
+        completeSignIn(response, onComplete)
     }
 }
 
 private fun Fragment.signIn(username: String, password: String, onComplete: () -> Unit) {
     viewLifecycleOwner.lifecycleScope.launch {
-        val progress = showProgressDialog(R.string.loading)
+        val response = runAuthRequest(
+            logMessage = "Sign in failed",
+            fallbackMessage = getString(R.string.failed_to_sign_in),
+        ) {
+            api().signIn(
+                username = username,
+                password = password,
+                label = tokenLabel(),
+            )
+        } ?: return@launch
 
-        try {
-            val response = try {
-                api().signIn(
-                    username = username,
-                    password = password,
-                    label = tokenLabel(),
-                )
-            } catch (e: Throwable) {
-                e.rethrowIfCancellation()
-                // Dismiss before showing the error so the two windows do not
-                // overlap. The finally block dismisses again, which is a no-op.
-                progress.dismiss()
-                showAuthError(
-                    logMessage = "Sign in failed",
-                    e = e,
-                    fallbackMessage = getString(R.string.failed_to_sign_in),
-                )
-                return@launch
-            }
+        completeSignIn(response, onComplete)
+    }
+}
 
-            progress.dismiss()
-            completeSignIn(response, onComplete)
-        } finally {
-            progress.dismiss()
-        }
+/**
+ * Runs [request] behind a cancelable progress dialog, with a timeout so a slow
+ * server cannot trap the user behind a spinner. Returns null on failure, after
+ * reporting it (with a dialog when [showErrorDialog] is true, otherwise only in
+ * the log).
+ */
+private suspend fun <T> Fragment.runAuthRequest(
+    logMessage: String,
+    fallbackMessage: String,
+    showErrorDialog: Boolean = true,
+    request: suspend () -> T,
+): T? {
+    val context = coroutineContext
+    val progress = showProgressDialog(R.string.loading) { context.cancel() }
+
+    try {
+        return withTimeout(AUTH_TIMEOUT_MS) { request() }
+    } catch (e: TimeoutCancellationException) {
+        reportAuthError(logMessage, e, fallbackMessage, showErrorDialog)
+        return null
+    } catch (e: Throwable) {
+        e.rethrowIfCancellation()
+        reportAuthError(logMessage, e, fallbackMessage, showErrorDialog)
+        return null
+    } finally {
+        progress.dismiss()
+    }
+}
+
+private fun Fragment.reportAuthError(
+    logMessage: String,
+    e: Throwable,
+    fallbackMessage: String,
+    showDialog: Boolean,
+) {
+    if (showDialog) {
+        showAuthError(logMessage, e, fallbackMessage)
+    } else {
+        Log.e(AUTH_TAG, logMessage, e)
     }
 }
 
@@ -253,13 +238,17 @@ internal suspend fun storeSignedInSession(
     }
 }
 
-private fun Fragment.showProgressDialog(@StringRes message: Int): AlertDialog {
+private fun Fragment.showProgressDialog(
+    @StringRes message: Int,
+    onCancel: () -> Unit,
+): AlertDialog {
     val dialogView = layoutInflater.inflate(R.layout.account_progress_dialog, null)
     dialogView.findViewById<TextView>(R.id.progressMessage).setText(message)
 
     return MaterialAlertDialogBuilder(requireContext())
         .setView(dialogView)
-        .setCancelable(false)
+        .setCancelable(true)
+        .setOnCancelListener { onCancel() }
         .create()
         .also {
             it.show()
@@ -299,6 +288,19 @@ private fun Fragment.dismissOnViewDestroyed(dialog: AlertDialog) {
     }
 }
 
-private fun tokenLabel() = "BTC Map Android ${BuildConfig.VERSION_CODE}"
+private fun tokenLabel(): String = buildString {
+    append("BTC Map Android ")
+    append(BuildConfig.VERSION_CODE)
+    val device = listOf(Build.MANUFACTURER, Build.MODEL)
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .joinToString(" ")
+    if (device.isNotEmpty()) {
+        append(' ')
+        append(device)
+    }
+}
+
+private const val AUTH_TIMEOUT_MS = 30_000L
 
 private const val AUTH_TAG = "auth"

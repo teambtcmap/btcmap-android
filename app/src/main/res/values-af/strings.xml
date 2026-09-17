@@ -86,6 +86,9 @@
     <string name="name">Naam</string>
     <string name="name_placeholder">Satoshi-kafee</string>
     <string name="password">Wagwoord</string>
+    <string name="password_min_length">Ten minste 8 karakters</string>
+    <string name="confirm_password">Bevestig wagwoord</string>
+    <string name="passwords_do_not_match">Wagwoorde stem nie ooreen nie</string>
     <string name="field_required">Vereis</string>
     <string name="profile">Profiel</string>
     <string name="change_username">Verander gebruikersnaam</string>

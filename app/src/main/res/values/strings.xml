@@ -102,6 +102,9 @@
     <string name="name">Name</string>
     <string name="name_placeholder">Satoshi Cafe</string>
     <string name="password">Password</string>
+    <string name="password_min_length">At least 8 characters</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="passwords_do_not_match">Passwords don\'t match</string>
     <string name="field_required">Required</string>
     <string name="password_mask" translatable="false">••••••••</string>
     <string name="profile">Profile</string>

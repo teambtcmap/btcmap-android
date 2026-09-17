@@ -43,6 +43,7 @@ private const val LEGACY_ENCRYPTED_PREFIX = "enc:v1:"
 class Settings(
     private val dbProvider: () -> Database,
     private val legacyValues: () -> Map<String, Any?>,
+    private val clearLegacyValues: (Set<String>) -> Unit = {},
 ) {
     private val lock = Any()
     private val cache = HashMap<String, String>()
@@ -50,6 +51,16 @@ class Settings(
 
     @Volatile
     private var boundDb: Database? = null
+
+    /**
+     * In-memory copy of the stored session token, kept in sync by the session
+     * methods and by [ensureLoaded]. It is read by [authToken]/[authorized] on
+     * the main thread, so unlike the other settings it must never trigger a
+     * database load.
+     */
+    @Volatile
+    internal var sessionToken: String? = null
+        private set
 
     /**
      * Returns the database the cache is loaded from, loading it first when it has
@@ -63,19 +74,31 @@ class Settings(
             importLegacy(db)
             cache.clear()
             cache.putAll(db.preference.selectAll())
+            sessionToken = cache[KEY_AUTH_TOKEN]
             boundDb = db
             return db
         }
     }
 
     /**
+     * Loads the settings into the in-memory cache. Call this off the main thread
+     * (for example from `Application.onCreate`) so the first settings read does
+     * not open the database on the UI thread.
+     */
+    internal fun preload() {
+        ensureLoaded()
+    }
+
+    /**
      * Copies the settings written by older app versions into the database once,
-     * so an upgrade keeps the user's configuration and session.
+     * so an upgrade keeps the user's configuration and session. The imported
+     * legacy values are then removed so no copy is left behind.
      */
     private fun importLegacy(db: Database) {
         if (db.preference.select(KEY_LEGACY_IMPORTED) != null) return
 
         val values = runCatching { legacyValues() }.getOrNull().orEmpty()
+        val imported = mutableSetOf<String>()
         db.transaction {
             for ((key, value) in values) {
                 val text = when (value) {
@@ -88,12 +111,16 @@ class Settings(
                     // session. Drop the cached account too instead of leaving it
                     // behind while signed out.
                     db.user.delete()
-                    continue
+                } else {
+                    db.preference.upsert(key, text)
                 }
-                db.preference.upsert(key, text)
+                imported += key
             }
             db.preference.upsert(KEY_LEGACY_IMPORTED, "true")
         }
+        // Only remove the keys that were read, including the unusable encrypted
+        // token, so unsupported legacy values are not silently dropped.
+        clearLegacyValues(imported)
     }
 
     internal fun getString(key: String, default: String?): String? {
@@ -158,6 +185,7 @@ class Settings(
                 if (user != null) db.user.insert(user)
             }
             if (token == null) cache.remove(KEY_AUTH_TOKEN) else cache[KEY_AUTH_TOKEN] = token
+            sessionToken = token
         }
     }
 
@@ -173,6 +201,7 @@ class Settings(
                 db.user.delete()
             }
             cache.remove(KEY_AUTH_TOKEN)
+            sessionToken = null
         }
     }
 
@@ -196,6 +225,7 @@ class Settings(
                 db.user.delete()
             }
             cache.remove(KEY_AUTH_TOKEN)
+            sessionToken = null
             return true
         }
     }
@@ -217,6 +247,7 @@ class Settings(
                 db.preference.upsert(KEY_AUTH_TOKEN, token)
                 cache[KEY_AUTH_TOKEN] = token
             }
+            sessionToken = token
         }
     }
 
@@ -224,7 +255,10 @@ class Settings(
     internal fun clearForTesting() {
         ensureLoaded()
         dbProvider().preference.deleteAll()
-        synchronized(lock) { cache.clear() }
+        synchronized(lock) {
+            cache.clear()
+            sessionToken = null
+        }
         boundDb = null
     }
 }

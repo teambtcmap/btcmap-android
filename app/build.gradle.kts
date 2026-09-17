@@ -33,6 +33,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    testOptions {
+        // Espresso interacts with the real UI; leaving window and transition
+        // animations enabled makes dialog interactions flaky.
+        animationsDisabled = true
+    }
+
     signingConfigs {
         // Release signing is optional: without a keystore in local.properties,
         // release and beta builds are produced unsigned, as per default and

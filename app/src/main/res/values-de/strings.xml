@@ -86,6 +86,9 @@
     <string name="name">Name</string>
     <string name="name_placeholder">Satoshi-Café</string>
     <string name="password">Passwort</string>
+    <string name="password_min_length">Mindestens 8 Zeichen</string>
+    <string name="confirm_password">Passwort bestätigen</string>
+    <string name="passwords_do_not_match">Passwörter stimmen nicht überein</string>
     <string name="field_required">Erforderlich</string>
     <string name="profile">Profil</string>
     <string name="change_username">Benutzername ändern</string>

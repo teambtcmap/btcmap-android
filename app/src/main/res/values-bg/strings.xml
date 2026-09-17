@@ -86,6 +86,9 @@
     <string name="name">Име</string>
     <string name="name_placeholder">Кафене Satoshi</string>
     <string name="password">Парола</string>
+    <string name="password_min_length">Поне 8 символа</string>
+    <string name="confirm_password">Потвърдете паролата</string>
+    <string name="passwords_do_not_match">Паролите не съвпадат</string>
     <string name="field_required">Задължително</string>
     <string name="profile">Профил</string>
     <string name="change_username">Промяна на потребителско име</string>

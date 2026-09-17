@@ -86,6 +86,9 @@
     <string name="name">নাম</string>
     <string name="name_placeholder">সাতোশি ক্যাফে</string>
     <string name="password">পাসওয়ার্ড</string>
+    <string name="password_min_length">কমপক্ষে 8 অক্ষর</string>
+    <string name="confirm_password">পাসওয়ার্ড নিশ্চিত করুন</string>
+    <string name="passwords_do_not_match">পাসওয়ার্ড মিলছে না</string>
     <string name="field_required">আবশ্যক</string>
     <string name="profile">প্রোফাইল</string>
     <string name="change_username">ব্যবহারকারীর নাম পরিবর্তন করুন</string>

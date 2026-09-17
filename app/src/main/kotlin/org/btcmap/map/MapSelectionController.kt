@@ -43,6 +43,14 @@ class MapSelectionController(
     }
 
     private fun handleClick(point: LatLng): Boolean {
+        // queryRenderedFeatures crashes in native code while the style is still
+        // loading, so ignore taps that arrive before it is ready.
+        val style = map.style
+        if (style == null || !style.isFullyLoaded) {
+            onNoHit()
+            return false
+        }
+
         val screenLocation = map.projection.toScreenLocation(point)
         val features = map.queryRenderedFeatures(
             screenLocation,

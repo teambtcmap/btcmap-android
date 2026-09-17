@@ -25,6 +25,8 @@ import org.btcmap.api.toDbUser
 import org.btcmap.api.updatePassword
 import org.btcmap.api.updateUsername
 import org.btcmap.app
+import org.btcmap.auth.AuthValidation
+import org.btcmap.auth.ChangePasswordError
 import org.btcmap.db
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
@@ -112,6 +114,7 @@ class UserProfileFragment : Fragment() {
         val dialogView = layoutInflater.inflate(R.layout.change_password_dialog, null)
         val currentInput = dialogView.findViewById<TextInputEditText>(R.id.currentPasswordInput)
         val newInput = dialogView.findViewById<TextInputEditText>(R.id.newPasswordInput)
+        val confirmationInput = dialogView.findViewById<TextInputEditText>(R.id.confirmPasswordInput)
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.change_password)
             .setView(dialogView)
@@ -123,17 +126,25 @@ class UserProfileFragment : Fragment() {
             dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
                 val current = currentInput.text.toString()
                 val new = newInput.text.toString()
+                val confirmation = confirmationInput.text.toString()
 
-                var valid = true
-                if (current.isEmpty()) {
-                    currentInput.error = getString(R.string.field_required)
-                    valid = false
+                val errors = AuthValidation.changePassword(current, new, confirmation)
+                if (errors.isNotEmpty()) {
+                    if (ChangePasswordError.CurrentRequired in errors) {
+                        currentInput.error = getString(R.string.field_required)
+                    }
+                    when {
+                        ChangePasswordError.NewRequired in errors ->
+                            newInput.error = getString(R.string.field_required)
+
+                        ChangePasswordError.NewTooShort in errors ->
+                            newInput.error = getString(R.string.password_min_length)
+                    }
+                    if (ChangePasswordError.ConfirmationMismatch in errors) {
+                        confirmationInput.error = getString(R.string.passwords_do_not_match)
+                    }
+                    return@setOnClickListener
                 }
-                if (new.isEmpty()) {
-                    newInput.error = getString(R.string.field_required)
-                    valid = false
-                }
-                if (!valid) return@setOnClickListener
 
                 dialog.dismiss()
                 changePassword(current, new)

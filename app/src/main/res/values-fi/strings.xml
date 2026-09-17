@@ -86,6 +86,9 @@
     <string name="name">Nimi</string>
     <string name="name_placeholder">Satoshi-kahvila</string>
     <string name="password">Salasana</string>
+    <string name="password_min_length">Vähintään 8 merkkiä</string>
+    <string name="confirm_password">Vahvista salasana</string>
+    <string name="passwords_do_not_match">Salasanat eivät täsmää</string>
     <string name="field_required">Pakollinen</string>
     <string name="profile">Profiili</string>
     <string name="change_username">Vaihda käyttäjänimi</string>

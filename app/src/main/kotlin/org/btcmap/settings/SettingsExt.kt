@@ -2,6 +2,7 @@ package org.btcmap.settings
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.core.content.edit
 import androidx.core.graphics.toColorInt
 import org.btcmap.App
 import org.btcmap.BuildConfig
@@ -13,14 +14,19 @@ import org.btcmap.map.getTertiaryContainerColor
 import org.maplibre.android.geometry.LatLngBounds
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 lateinit var prefs: Settings
     private set
 
 fun init(app: App) {
+    val legacyPrefs = app.getSharedPreferences("settings", Context.MODE_PRIVATE)
     prefs = Settings(
         dbProvider = { app.db },
-        legacyValues = { app.getSharedPreferences("settings", Context.MODE_PRIVATE).all },
+        legacyValues = { legacyPrefs.all },
+        clearLegacyValues = { keys ->
+            legacyPrefs.edit { keys.forEach { remove(it) } }
+        },
     )
 }
 
@@ -206,10 +212,17 @@ fun Settings.setBadgeTextColor(color: Int?) {
 
 private const val KEY_API_URL = "apiUrl"
 
+private const val DEFAULT_API_URL = "https://api.btcmap.org"
+
+/**
+ * The configured API base URL. A stored value that cannot be parsed falls back
+ * to the public API instead of throwing, so a malformed preference cannot take
+ * down every request. `TokenSettingInterceptor` therefore never has to guess.
+ */
 var Settings.apiUrl: HttpUrl
-    get() {
-        return getString(KEY_API_URL, "https://api.btcmap.org")!!.toHttpUrl()
-    }
+    get() = (getString(KEY_API_URL, null) ?: DEFAULT_API_URL)
+        .toHttpUrlOrNull()
+        ?: DEFAULT_API_URL.toHttpUrl()
     set(value) {
         putString(KEY_API_URL, value.toString())
     }
@@ -284,10 +297,12 @@ fun Settings.setButtonBorderColor(color: Int?) {
  * The stored session token, or null when signed out. It is written only through
  * [Settings.replaceSession], [Settings.clearSession] and
  * [Settings.clearSessionIfTokenMatches], which keep it consistent with the
- * cached account and serialize against concurrent session changes.
+ * cached account and serialize against concurrent session changes. It is read
+ * from the in-memory session cache and never touches the database, so it is safe
+ * to call from the main thread.
  */
 val Settings.authToken: String?
-    get() = getString(KEY_AUTH_TOKEN, null)
+    get() = sessionToken
 
 val Settings.authorized: Boolean
     get() = !authToken.isNullOrBlank()

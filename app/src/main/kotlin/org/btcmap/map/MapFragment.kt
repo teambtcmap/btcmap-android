@@ -119,6 +119,12 @@ class MapFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        // The MapView owns native resources and must receive its lifecycle
+        // callbacks; without onDestroy in particular, reopening the map leaves a
+        // dead renderer behind and later queries can crash natively.
+        binding.map.onCreate(savedInstanceState)
+
         searchController = SearchController(
             db = db(),
             api = api(),
@@ -445,6 +451,36 @@ class MapFragment : Fragment() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        _binding?.map?.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        _binding?.map?.onResume()
+    }
+
+    override fun onPause() {
+        _binding?.map?.onPause()
+        super.onPause()
+    }
+
+    override fun onStop() {
+        _binding?.map?.onStop()
+        super.onStop()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        _binding?.map?.onLowMemory()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        _binding?.map?.onSaveInstanceState(outState)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         searchDebounceJob?.cancel()
@@ -460,6 +496,7 @@ class MapFragment : Fragment() {
         statusBarController?.onDestroyView()
         statusBarController = null
         updateNotificationController = null
+        _binding?.map?.onDestroy()
         _binding = null
     }
 

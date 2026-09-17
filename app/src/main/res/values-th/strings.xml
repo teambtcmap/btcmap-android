@@ -86,6 +86,9 @@
     <string name="name">ชื่อ</string>
     <string name="name_placeholder">คาเฟ่ Satoshi</string>
     <string name="password">รหัสผ่าน</string>
+    <string name="password_min_length">อย่างน้อย 8 ตัวอักษร</string>
+    <string name="confirm_password">ยืนยันรหัสผ่าน</string>
+    <string name="passwords_do_not_match">รหัสผ่านไม่ตรงกัน</string>
     <string name="field_required">จำเป็น</string>
     <string name="profile">โปรไฟล์</string>
     <string name="change_username">เปลี่ยนชื่อผู้ใช้</string>

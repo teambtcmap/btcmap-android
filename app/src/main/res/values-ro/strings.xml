@@ -86,6 +86,9 @@
     <string name="name">Nume</string>
     <string name="name_placeholder">Cafeneaua Satoshi</string>
     <string name="password">Parolă</string>
+    <string name="password_min_length">Cel puțin 8 caractere</string>
+    <string name="confirm_password">Confirmă parola</string>
+    <string name="passwords_do_not_match">Parolele nu se potrivesc</string>
     <string name="field_required">Obligatoriu</string>
     <string name="profile">Profil</string>
     <string name="change_username">Schimbă numele de utilizator</string>

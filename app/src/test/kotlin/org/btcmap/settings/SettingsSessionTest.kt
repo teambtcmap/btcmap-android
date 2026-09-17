@@ -15,9 +15,14 @@ class SettingsSessionTest {
 
     private fun createSettings(
         db: Database,
+        clearLegacyValues: (Set<String>) -> Unit = {},
         legacyValues: () -> Map<String, Any?> = { emptyMap() },
     ): Settings {
-        return Settings(dbProvider = { db }, legacyValues = legacyValues)
+        return Settings(
+            dbProvider = { db },
+            legacyValues = legacyValues,
+            clearLegacyValues = clearLegacyValues,
+        )
     }
 
     private fun user(
@@ -123,6 +128,19 @@ class SettingsSessionTest {
     }
 
     @Test
+    fun authToken_doesNotLoadFromDatabase() {
+        // The main-thread session reads must never open the database, so a
+        // provider that would fail proves the getter stays in memory.
+        val settings = Settings(
+            dbProvider = { throw AssertionError("database must not be read") },
+            legacyValues = { emptyMap() },
+        )
+
+        Assert.assertNull(settings.authToken)
+        Assert.assertFalse(settings.authorized)
+    }
+
+    @Test
     fun importLegacy_keepsPlaintextTokenAndUser() {
         val db = createDatabase()
         db.user.insert(user(1, "satoshi"))
@@ -130,10 +148,11 @@ class SettingsSessionTest {
         val settings = createSettings(db) {
             mapOf("auth_token" to "token-1", "mapStyle" to "dark")
         }
+        settings.preload()
 
         Assert.assertEquals("token-1", settings.authToken)
-        Assert.assertEquals("dark", settings.getString("mapStyle", null))
         Assert.assertNotNull(db.user.select())
+        Assert.assertEquals("dark", settings.getString("mapStyle", null))
     }
 
     @Test
@@ -146,9 +165,40 @@ class SettingsSessionTest {
         val settings = createSettings(db) {
             mapOf("auth_token" to "enc:v1:garbage", "mapStyle" to "dark")
         }
+        settings.preload()
 
         Assert.assertNull(settings.authToken)
         Assert.assertNull(db.user.select())
         Assert.assertEquals("dark", settings.getString("mapStyle", null))
+    }
+
+    @Test
+    fun importLegacy_clearsImportedLegacyValues() {
+        val db = createDatabase()
+        val cleared = mutableSetOf<String>()
+
+        val settings = createSettings(
+            db = db,
+            legacyValues = { mapOf("auth_token" to "token-1", "mapStyle" to "dark") },
+            clearLegacyValues = { cleared += it },
+        )
+        settings.preload()
+
+        Assert.assertEquals(setOf("auth_token", "mapStyle"), cleared)
+    }
+
+    @Test
+    fun importLegacy_clearsUnusableEncryptedToken() {
+        val db = createDatabase()
+        val cleared = mutableSetOf<String>()
+
+        val settings = createSettings(
+            db = db,
+            legacyValues = { mapOf("auth_token" to "enc:v1:garbage") },
+            clearLegacyValues = { cleared += it },
+        )
+        settings.preload()
+
+        Assert.assertEquals(setOf("auth_token"), cleared)
     }
 }

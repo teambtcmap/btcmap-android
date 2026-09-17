@@ -86,6 +86,9 @@
     <string name="name">Navn</string>
     <string name="name_placeholder">Satoshi Cafe</string>
     <string name="password">Adgangskode</string>
+    <string name="password_min_length">Mindst 8 tegn</string>
+    <string name="confirm_password">Bekræft adgangskode</string>
+    <string name="passwords_do_not_match">Adgangskoderne er ikke ens</string>
     <string name="field_required">Påkrævet</string>
     <string name="profile">Profil</string>
     <string name="change_username">Skift brugernavn</string>

@@ -13,14 +13,15 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/current_password"
-        app:endIconMode="password_toggle">
+        android:hint="@string/username">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/currentPasswordInput"
+            android:id="@+id/usernameInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword"
+            android:autofillHints="username"
+            android:imeOptions="actionNext"
+            android:inputType="text"
             android:maxLines="1" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -28,15 +29,17 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint="@string/new_password"
+        android:layout_marginTop="16dp"
+        android:hint="@string/password"
         app:endIconMode="password_toggle"
         app:helperText="@string/password_min_length">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/newPasswordInput"
+            android:id="@+id/passwordInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:autofillHints="newPassword"
+            android:imeOptions="actionNext"
             android:inputType="textPassword"
             android:maxLines="1" />
 
@@ -45,7 +48,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:hint="@string/confirm_password"
         app:endIconMode="password_toggle">
 
@@ -53,6 +56,7 @@
             android:id="@+id/confirmPasswordInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
             android:inputType="textPassword"
             android:maxLines="1" />
 

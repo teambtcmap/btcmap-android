@@ -86,6 +86,9 @@
     <string name="name">名称</string>
     <string name="name_placeholder">Satoshi 咖啡馆</string>
     <string name="password">密码</string>
+    <string name="password_min_length">至少 8 个字符</string>
+    <string name="confirm_password">确认密码</string>
+    <string name="passwords_do_not_match">密码不一致</string>
     <string name="field_required">必填</string>
     <string name="profile">个人资料</string>
     <string name="change_username">更改用户名</string>

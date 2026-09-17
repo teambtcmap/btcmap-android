@@ -86,6 +86,9 @@
     <string name="name">نام</string>
     <string name="name_placeholder">کافه ساتوشی</string>
     <string name="password">رمز عبور</string>
+    <string name="password_min_length">حداقل 8 کاراکتر</string>
+    <string name="confirm_password">تأیید رمز عبور</string>
+    <string name="passwords_do_not_match">رمزهای عبور مطابقت ندارند</string>
     <string name="field_required">الزامی</string>
     <string name="profile">پروفایل</string>
     <string name="change_username">تغییر نام کاربری</string>

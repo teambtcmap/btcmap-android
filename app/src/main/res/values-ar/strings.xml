@@ -86,6 +86,9 @@
     <string name="name">الاسم</string>
     <string name="name_placeholder">مقهى Satoshi</string>
     <string name="password">كلمة المرور</string>
+    <string name="password_min_length">8 أحرف على الأقل</string>
+    <string name="confirm_password">تأكيد كلمة المرور</string>
+    <string name="passwords_do_not_match">كلمتا المرور غير متطابقتين</string>
     <string name="field_required">مطلوب</string>
     <string name="profile">الملف الشخصي</string>
     <string name="change_username">تغيير اسم المستخدم</string>

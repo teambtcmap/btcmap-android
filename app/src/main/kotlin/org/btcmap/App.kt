@@ -13,7 +13,6 @@ import org.btcmap.api.apiHttpClient
 import org.btcmap.api.signOut
 import org.btcmap.db.Database
 import org.btcmap.settings.apiUrl
-import org.btcmap.settings.authToken
 import org.btcmap.settings.prefs
 import org.maplibre.android.MapLibre
 import org.btcmap.settings.init as settingsInit
@@ -84,8 +83,9 @@ class App : Application() {
         MapLibre.getInstance(this)
 
         // Load the settings from the database up front so later reads from the
-        // main thread hit the in-memory cache.
-        ioScope.launch { runCatching { prefs.authToken } }
+        // main thread hit the in-memory cache. The session token is part of the
+        // cache, so this also makes it available without touching the database.
+        ioScope.launch { runCatching { prefs.preload() } }
     }
 }
 
