@@ -94,6 +94,17 @@ class Database(driver: SQLiteDriver, val path: String) {
         }
     }
 
+    /**
+     * Runs [block] in a database transaction, rolling back if it throws.
+     *
+     * The raw `BEGIN`/`COMMIT` statements are mapped by the framework driver to
+     * its real transaction machinery (see `SQLiteSession.executeSpecial`), so the
+     * session pins a pooled connection for the duration of the block. This makes
+     * concurrent transactions from different threads safe: each owns its own
+     * connection and a write on another thread is a separate transaction that
+     * cannot be rolled back by this one. Do not replace them with plain
+     * statements or assume the connection is thread-confined.
+     */
     fun transaction(block: () -> Unit) {
         conn.execSQL("BEGIN TRANSACTION;")
         try {

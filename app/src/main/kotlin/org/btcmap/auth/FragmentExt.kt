@@ -126,6 +126,9 @@ private fun Fragment.signUp(username: String, password: String, onComplete: () -
                 api().createUser(name = username, password = password)
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
+                // Dismiss before showing the error so the two windows do not
+                // overlap. The finally block dismisses again, which is a no-op.
+                progress.dismiss()
                 showAuthError(
                     logMessage = "Failed to create new account",
                     e = e,
@@ -154,6 +157,7 @@ private fun Fragment.signUp(username: String, password: String, onComplete: () -
                 return@launch
             }
 
+            progress.dismiss()
             completeSignIn(response, onComplete)
         } finally {
             progress.dismiss()
@@ -174,6 +178,9 @@ private fun Fragment.signIn(username: String, password: String, onComplete: () -
                 )
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
+                // Dismiss before showing the error so the two windows do not
+                // overlap. The finally block dismisses again, which is a no-op.
+                progress.dismiss()
                 showAuthError(
                     logMessage = "Sign in failed",
                     e = e,
@@ -182,6 +189,7 @@ private fun Fragment.signIn(username: String, password: String, onComplete: () -
                 return@launch
             }
 
+            progress.dismiss()
             completeSignIn(response, onComplete)
         } finally {
             progress.dismiss()
@@ -202,6 +210,9 @@ private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onCom
         return
     }
 
+    // The session is durable now. If the view was destroyed in the meantime the
+    // coroutine is cancelled before the callback runs, so [onComplete] may be
+    // skipped; the account is still signed in and the next screen sees it.
     val toastContext = context
     if (toastContext != null) {
         Toast.makeText(

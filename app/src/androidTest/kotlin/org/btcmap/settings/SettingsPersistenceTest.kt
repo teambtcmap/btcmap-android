@@ -69,12 +69,12 @@ class SettingsPersistenceTest {
         Assert.assertNull(prefs.authToken)
         Assert.assertFalse(prefs.authorized)
 
-        prefs.authToken = "secret-token"
+        prefs.setAuthTokenForTesting("secret-token")
 
         Assert.assertEquals("secret-token", prefs.authToken)
         Assert.assertTrue(prefs.authorized)
 
-        prefs.authToken = null
+        prefs.setAuthTokenForTesting(null)
 
         Assert.assertFalse(prefs.authorized)
     }

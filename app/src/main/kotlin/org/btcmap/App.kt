@@ -43,15 +43,16 @@ class App : Application() {
     }
 
     /**
-     * Clears the stored session after the server rejected a token. Only clears
-     * when the rejected token is still the one in storage: a late 401 from a
-     * request that raced a fresh sign-in must not sign the user out again.
+     * Clears the stored session after the server rejected a token. The clear is
+     * atomic with the token comparison inside [Settings.clearSessionIfTokenMatches],
+     * so a late 401 from a request that raced a fresh sign-in cannot sign the
+     * user out again.
      */
     internal suspend fun handleUnauthorized(requestToken: String?) {
         withContext(Dispatchers.IO) {
             runCatching {
-                if (requestToken != null && prefs.authToken == requestToken) {
-                    prefs.clearSession(db)
+                if (requestToken != null) {
+                    prefs.clearSessionIfTokenMatches(db, requestToken)
                 }
             }
         }

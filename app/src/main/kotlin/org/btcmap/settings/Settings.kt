@@ -1,6 +1,5 @@
 package org.btcmap.settings
 
-import android.content.SharedPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,11 +27,12 @@ private const val LEGACY_ENCRYPTED_PREFIX = "enc:v1:"
  * the cache is loaded from the database on first access and every write updates
  * the cache synchronously while persisting in the background. Callers that need
  * the write to be durable before continuing (sign-in and sign-out) use
- * [replaceSession] and [clearSession], which write within a transaction.
+ * [replaceSession], [clearSession] and [clearSessionIfTokenMatches], which write
+ * within a transaction while holding the lock.
  */
 class Settings(
     private val dbProvider: () -> Database,
-    private val legacy: SharedPreferences,
+    private val legacyValues: () -> Map<String, Any?>,
 ) {
     private val lock = Any()
     private val cache = HashMap<String, String>()
@@ -65,7 +65,7 @@ class Settings(
     private fun importLegacy(db: Database) {
         if (db.preference.select(KEY_LEGACY_IMPORTED) != null) return
 
-        val values = runCatching { legacy.all }.getOrNull().orEmpty()
+        val values = runCatching { legacyValues() }.getOrNull().orEmpty()
         db.transaction {
             for ((key, value) in values) {
                 val text = when (value) {
@@ -73,7 +73,13 @@ class Settings(
                     is Boolean, is Int, is Long, is Float -> value.toString()
                     else -> continue
                 }
-                if (key == KEY_AUTH_TOKEN && text.startsWith(LEGACY_ENCRYPTED_PREFIX)) continue
+                if (key == KEY_AUTH_TOKEN && text.startsWith(LEGACY_ENCRYPTED_PREFIX)) {
+                    // The token can no longer be decrypted, so there is no usable
+                    // session. Drop the cached account too instead of leaving it
+                    // behind while signed out.
+                    db.user.delete()
+                    continue
+                }
                 db.preference.upsert(key, text)
             }
             db.preference.upsert(KEY_LEGACY_IMPORTED, "true")
@@ -108,20 +114,6 @@ class Settings(
         }
     }
 
-    /**
-     * Writes [key] synchronously and updates the cache. Used for values that must
-     * be ordered with a following transaction (the session token), so a queued
-     * background write can never resurrect a value that was just cleared. Runs
-     * synchronously, so call it off the main thread.
-     */
-    internal fun putStringNow(key: String, value: String?) {
-        val db = ensureLoaded()
-        synchronized(lock) {
-            if (value == null) cache.remove(key) else cache[key] = value
-        }
-        if (value == null) db.preference.delete(key) else db.preference.upsert(key, value)
-    }
-
     internal fun putInt(key: String, value: Int?) {
         putString(key, value?.toString())
     }
@@ -136,21 +128,25 @@ class Settings(
 
     /**
      * Atomically stores [token] together with [user], so a session can never be
-     * left half written. Passing a null [token] clears the session. Runs
-     * synchronously, so call it off the main thread.
+     * left half written. Passing a null [token] clears the session.
+     *
+     * The transaction and the cache update are performed under [lock], which is
+     * also held by [clearSessionIfTokenMatches], so a rejected token from an
+     * older session can never clear the session stored here. Runs synchronously,
+     * so call it off the main thread.
      */
     internal fun replaceSession(db: Database, token: String?, user: User?) {
-        db.transaction {
-            if (token == null) {
-                db.preference.delete(KEY_AUTH_TOKEN)
-            } else {
-                db.preference.upsert(KEY_AUTH_TOKEN, token)
-            }
-            db.user.delete()
-            if (user != null) db.user.insert(user)
-        }
-
+        ensureLoaded()
         synchronized(lock) {
+            db.transaction {
+                if (token == null) {
+                    db.preference.delete(KEY_AUTH_TOKEN)
+                } else {
+                    db.preference.upsert(KEY_AUTH_TOKEN, token)
+                }
+                db.user.delete()
+                if (user != null) db.user.insert(user)
+            }
             if (token == null) cache.remove(KEY_AUTH_TOKEN) else cache[KEY_AUTH_TOKEN] = token
         }
     }
@@ -160,11 +156,58 @@ class Settings(
      * synchronously, so call it off the main thread.
      */
     internal fun clearSession(db: Database) {
-        db.transaction {
-            db.preference.delete(KEY_AUTH_TOKEN)
-            db.user.delete()
+        ensureLoaded()
+        synchronized(lock) {
+            db.transaction {
+                db.preference.delete(KEY_AUTH_TOKEN)
+                db.user.delete()
+            }
+            cache.remove(KEY_AUTH_TOKEN)
         }
-        synchronized(lock) { cache.remove(KEY_AUTH_TOKEN) }
+    }
+
+    /**
+     * Clears the stored session token and cached user only while the stored
+     * token still equals [expected]. The comparison and the clear run under the
+     * same lock as [replaceSession], so a late rejected request from an old
+     * session can never sign out an account that was signed in again in the
+     * meantime.
+     *
+     * Returns true when the session was cleared. Runs synchronously, so call it
+     * off the main thread.
+     */
+    internal fun clearSessionIfTokenMatches(db: Database, expected: String): Boolean {
+        ensureLoaded()
+        synchronized(lock) {
+            if (cache[KEY_AUTH_TOKEN] != expected) return false
+
+            db.transaction {
+                db.preference.delete(KEY_AUTH_TOKEN)
+                db.user.delete()
+            }
+            cache.remove(KEY_AUTH_TOKEN)
+            return true
+        }
+    }
+
+    /**
+     * Stores [token] without touching the cached user, keeping the in-memory
+     * cache and the database in sync. Only for tests that need to set up a
+     * particular session state; production code must use [replaceSession] so the
+     * token and the cached account stay consistent.
+     */
+    internal fun setAuthTokenForTesting(token: String?) {
+        ensureLoaded()
+        val db = dbProvider()
+        synchronized(lock) {
+            if (token == null) {
+                db.preference.delete(KEY_AUTH_TOKEN)
+                cache.remove(KEY_AUTH_TOKEN)
+            } else {
+                db.preference.upsert(KEY_AUTH_TOKEN, token)
+                cache[KEY_AUTH_TOKEN] = token
+            }
+        }
     }
 
     /** Drops the cached values and stored settings, reloading them on next use. */
@@ -172,5 +215,6 @@ class Settings(
         ensureLoaded()
         dbProvider().preference.deleteAll()
         synchronized(lock) { cache.clear() }
+        boundDb = null
     }
 }

@@ -75,7 +75,7 @@ class SignedInSessionStoreTest {
         // Both the token and the cached user of the previous session must come
         // back when storing the new cached user fails, instead of the user being
         // silently signed out.
-        prefs.authToken = "old-token"
+        prefs.setAuthTokenForTesting("old-token")
         val db = Database(FailingUserInsertDriver(failOnUserInsert = 2), ":memory:")
         db.user.insert(dbUser(id = 99, name = "stale"))
 

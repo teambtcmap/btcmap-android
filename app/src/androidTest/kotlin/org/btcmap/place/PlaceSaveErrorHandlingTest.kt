@@ -40,14 +40,14 @@ class PlaceSaveErrorHandlingTest {
 
     @Test
     fun load_whenUserMissingFromDatabase_doesNotLeakUncaughtException() {
-        preferencesRule.prefs.authToken = "test-token"
+        preferencesRule.prefs.setAuthTokenForTesting("test-token")
 
         withPlaceFragment { }
     }
 
     @Test
     fun save_whenApiFails_doesNotLeakUncaughtException() {
-        preferencesRule.prefs.authToken = "test-token"
+        preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user())
 
         withPlaceFragment { activity ->

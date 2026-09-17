@@ -41,7 +41,7 @@ class UserLogoutTest {
 
     @Test
     fun logout_clearsLocalSessionAndRevokesTokenServerSide() {
-        prefs.authToken = "token-1"
+        prefs.setAuthTokenForTesting("token-1")
         databaseRule.db.user.insert(
             User(
                 id = 1,

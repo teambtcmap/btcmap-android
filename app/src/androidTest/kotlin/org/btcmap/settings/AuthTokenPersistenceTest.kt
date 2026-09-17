@@ -23,7 +23,7 @@ class AuthTokenPersistenceTest {
 
     @Test
     fun storesTokenInTheDatabase() {
-        prefs.authToken = "secret-token"
+        prefs.setAuthTokenForTesting("secret-token")
 
         Assert.assertEquals("secret-token", prefs.authToken)
         Assert.assertEquals("secret-token", databaseRule.db.preference.select(KEY_AUTH_TOKEN))
@@ -32,7 +32,7 @@ class AuthTokenPersistenceTest {
 
     @Test
     fun clearingTokenSignsOut() {
-        prefs.authToken = "secret-token"
+        prefs.setAuthTokenForTesting("secret-token")
 
         prefs.clearSession(databaseRule.db)
 

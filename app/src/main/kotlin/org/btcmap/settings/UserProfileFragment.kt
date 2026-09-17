@@ -1,5 +1,6 @@
 package org.btcmap.settings
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -110,18 +111,35 @@ class UserProfileFragment : Fragment() {
         val dialogView = layoutInflater.inflate(R.layout.change_password_dialog, null)
         val currentInput = dialogView.findViewById<TextInputEditText>(R.id.currentPasswordInput)
         val newInput = dialogView.findViewById<TextInputEditText>(R.id.newPasswordInput)
-        MaterialAlertDialogBuilder(requireContext())
+        val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.change_password)
             .setView(dialogView)
-            .setPositiveButton(R.string.save) { _, _ ->
+            .setPositiveButton(R.string.save, null)
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
                 val current = currentInput.text.toString()
                 val new = newInput.text.toString()
-                if (current.isNotEmpty() && new.isNotEmpty()) {
-                    changePassword(current, new)
+
+                var valid = true
+                if (current.isEmpty()) {
+                    currentInput.error = getString(R.string.field_required)
+                    valid = false
                 }
+                if (new.isEmpty()) {
+                    newInput.error = getString(R.string.field_required)
+                    valid = false
+                }
+                if (!valid) return@setOnClickListener
+
+                dialog.dismiss()
+                changePassword(current, new)
             }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        }
+
+        dialog.show()
     }
 
     private fun changePassword(oldPassword: String, newPassword: String) {
@@ -143,17 +161,27 @@ class UserProfileFragment : Fragment() {
     private fun showChangeUsernameDialog() {
         val dialogView = layoutInflater.inflate(R.layout.change_username_dialog, null)
         val usernameInput = dialogView.findViewById<TextInputEditText>(R.id.usernameInput)
-        MaterialAlertDialogBuilder(requireContext())
+        val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.change_username)
             .setView(dialogView)
-            .setPositiveButton(R.string.save) { _, _ ->
-                val newName = usernameInput.text.toString().trim()
-                if (newName.isNotEmpty()) {
-                    changeUsername(newName)
-                }
-            }
+            .setPositiveButton(R.string.save, null)
             .setNegativeButton(android.R.string.cancel, null)
-            .show()
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                val newName = usernameInput.text.toString().trim()
+                if (newName.isEmpty()) {
+                    usernameInput.error = getString(R.string.field_required)
+                    return@setOnClickListener
+                }
+
+                dialog.dismiss()
+                changeUsername(newName)
+            }
+        }
+
+        dialog.show()
     }
 
     private fun changeUsername(newName: String) {

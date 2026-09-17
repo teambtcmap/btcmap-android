@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show a required-field error when saving a blank username or password in the profile instead of silently doing nothing
+- Clear the cached account when an outdated encrypted session token is dropped during an upgrade
+- Read the account status on the settings screen off the main thread
 - Fix signing in as a different account leaving the previously cached account behind
 - Reject a sign-in response that does not carry a session token instead of storing an empty one
 - Fix the "following" activity feed showing as signed in after the stored session was lost

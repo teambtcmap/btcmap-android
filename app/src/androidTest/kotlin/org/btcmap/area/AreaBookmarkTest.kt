@@ -29,7 +29,7 @@ class AreaBookmarkTest : AreaScreenTest() {
 
     @Test
     fun save_whenAuthorized_postsToApiAndPersistsArea() {
-        preferencesRule.prefs.authToken = "test-token"
+        preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user(savedAreaIds = emptyList()))
         val posted = AtomicBoolean(false)
         apiRule.server.dispatcher = object : Dispatcher() {
@@ -60,7 +60,7 @@ class AreaBookmarkTest : AreaScreenTest() {
 
     @Test
     fun save_whenAlreadySaved_deletesFromApiAndPersistsChange() {
-        preferencesRule.prefs.authToken = "test-token"
+        preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user(savedAreaIds = listOf(1)))
         val deleted = AtomicBoolean(false)
         apiRule.server.dispatcher = object : Dispatcher() {
@@ -118,7 +118,7 @@ class AreaBookmarkTest : AreaScreenTest() {
 
     @Test
     fun load_whenUserMissingFromDatabase_doesNotLeakUncaughtException() {
-        preferencesRule.prefs.authToken = "test-token"
+        preferencesRule.prefs.setAuthTokenForTesting("test-token")
         apiRule.server.dispatcher = areaDispatcher()
 
         assertNoUncaughtException(
@@ -135,7 +135,7 @@ class AreaBookmarkTest : AreaScreenTest() {
 
     @Test
     fun save_whenUserMissingFromDatabase_doesNotLeakUncaughtException() {
-        preferencesRule.prefs.authToken = "test-token"
+        preferencesRule.prefs.setAuthTokenForTesting("test-token")
         apiRule.server.dispatcher = areaDispatcher()
 
         assertNoUncaughtException(
@@ -153,7 +153,7 @@ class AreaBookmarkTest : AreaScreenTest() {
 
     @Test
     fun save_whenApiFails_doesNotLeakUncaughtException() {
-        preferencesRule.prefs.authToken = "test-token"
+        preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user(savedAreaIds = emptyList()))
         val attempted = AtomicBoolean(false)
         apiRule.server.dispatcher = object : Dispatcher() {

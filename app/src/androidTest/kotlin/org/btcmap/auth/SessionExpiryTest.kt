@@ -55,7 +55,7 @@ class SessionExpiryTest {
     @Test
     fun rejectedToken_clearsStoredTokenAndCachedUser() {
         prefs.apiUrl = server.url("/")
-        prefs.authToken = "stale-token"
+        prefs.setAuthTokenForTesting("stale-token")
         databaseRule.db.user.insert(signedInUser())
 
         server.enqueue(
@@ -84,7 +84,7 @@ class SessionExpiryTest {
 
     @Test
     fun staleRejectedToken_doesNotClearNewerSession() {
-        prefs.authToken = "new-token"
+        prefs.setAuthTokenForTesting("new-token")
         databaseRule.db.user.insert(signedInUser())
 
         // A 401 from a request that raced a fresh sign-in must not sign out the
@@ -97,7 +97,7 @@ class SessionExpiryTest {
 
     @Test
     fun matchingRejectedToken_clearsSession() {
-        prefs.authToken = "same-token"
+        prefs.setAuthTokenForTesting("same-token")
         databaseRule.db.user.insert(signedInUser())
 
         runBlocking { app.handleUnauthorized("same-token") }

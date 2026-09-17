@@ -20,7 +20,7 @@ lateinit var prefs: Settings
 fun init(app: App) {
     prefs = Settings(
         dbProvider = { app.db },
-        legacy = app.getSharedPreferences("settings", Context.MODE_PRIVATE),
+        legacyValues = { app.getSharedPreferences("settings", Context.MODE_PRIVATE).all },
     )
 }
 
@@ -280,11 +280,14 @@ fun Settings.setButtonBorderColor(color: Int?) {
     putInt(KEY_BUTTON_BORDER_COLOR, color)
 }
 
-var Settings.authToken: String?
+/**
+ * The stored session token, or null when signed out. It is written only through
+ * [Settings.replaceSession], [Settings.clearSession] and
+ * [Settings.clearSessionIfTokenMatches], which keep it consistent with the
+ * cached account and serialize against concurrent session changes.
+ */
+val Settings.authToken: String?
     get() = getString(KEY_AUTH_TOKEN, null)
-    set(value) {
-        putStringNow(KEY_AUTH_TOKEN, value)
-    }
 
 val Settings.authorized: Boolean
     get() = !authToken.isNullOrBlank()

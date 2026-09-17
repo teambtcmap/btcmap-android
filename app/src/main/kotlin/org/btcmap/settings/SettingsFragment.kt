@@ -9,9 +9,13 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mrudultora.colorpicker.ColorPickerPopUp
 import com.mrudultora.colorpicker.ColorPickerPopUp.OnPickColorListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.databinding.SettingsFragmentBinding
@@ -377,14 +381,24 @@ class SettingsFragment : Fragment() {
     }
 
     private fun updateAccountUi() {
-        val username = db().user.select()?.name
-        if (username != null) {
-            binding.accountStatus.text = getString(R.string.logged_in_as, username)
-            binding.accountSecondary.text = getString(R.string.click_to_see_your_profile)
-            binding.accountSecondary.visibility = View.VISIBLE
-        } else {
-            binding.accountStatus.text = getString(R.string.not_logged_in)
-            binding.accountSecondary.text = getString(R.string.create_account)
+        viewLifecycleOwner.lifecycleScope.launch {
+            // Read the cached account off the main thread and only report it as
+            // signed in when a usable session token is actually stored.
+            val username = withContext(Dispatchers.IO) {
+                if (!prefs.authorized) {
+                    null
+                } else {
+                    db().user.select()?.name
+                }
+            }
+
+            if (username != null) {
+                binding.accountStatus.text = getString(R.string.logged_in_as, username)
+                binding.accountSecondary.text = getString(R.string.click_to_see_your_profile)
+            } else {
+                binding.accountStatus.text = getString(R.string.not_logged_in)
+                binding.accountSecondary.text = getString(R.string.create_account)
+            }
             binding.accountSecondary.visibility = View.VISIBLE
         }
     }
