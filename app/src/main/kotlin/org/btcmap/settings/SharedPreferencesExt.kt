@@ -374,21 +374,27 @@ var SharedPreferences.authToken: String?
             return stored
         }
 
-        val plaintext = TokenCipher.decrypt(stored)
+        return when (val result = TokenCipher.decrypt(stored)) {
+            is TokenCipher.DecryptResult.Success -> result.plaintext
 
-        if (plaintext == null) {
-            // The keystore entry that encrypted the token is gone, so it can never
-            // be recovered. Drop it and fall back to a signed-out state instead of
-            // retrying the keystore on every request; a following 401 also clears
-            // the cached user. Re-read first so a concurrent sign-in is not lost.
-            if (getString(KEY_AUTH_TOKEN, null) == stored) {
-                runCatching {
-                    edit { remove(KEY_AUTH_TOKEN) }
+            TokenCipher.DecryptResult.Unrecoverable -> {
+                // The keystore entry that encrypted the token is gone, so it can
+                // never be recovered. Drop it and fall back to a signed-out state
+                // instead of retrying the keystore on every request; a following
+                // 401 also clears the cached user. Re-read first so a concurrent
+                // sign-in is not lost.
+                if (getString(KEY_AUTH_TOKEN, null) == stored) {
+                    runCatching {
+                        edit { remove(KEY_AUTH_TOKEN) }
+                    }
                 }
+                null
             }
-        }
 
-        return plaintext
+            // The keystore is temporarily unavailable: keep the ciphertext so a
+            // later request can recover the session.
+            TokenCipher.DecryptResult.Unavailable -> null
+        }
     }
     set(value) {
         edit {

@@ -13,12 +13,15 @@ import java.util.concurrent.atomic.AtomicReference
 @RunWith(AndroidJUnit4::class)
 class TokenCipherTest {
 
+    private fun plaintextOf(encoded: String): String? =
+        (TokenCipher.decrypt(encoded) as? TokenCipher.DecryptResult.Success)?.plaintext
+
     @Test
     fun roundTripsPlaintext() {
         val encoded = TokenCipher.encrypt("satoshi-token")
 
         Assert.assertTrue(encoded.startsWith(TokenCipher.ENCODED_PREFIX))
-        Assert.assertEquals("satoshi-token", TokenCipher.decrypt(encoded))
+        Assert.assertEquals("satoshi-token", plaintextOf(encoded))
     }
 
     @Test
@@ -39,12 +42,15 @@ class TokenCipherTest {
             .apply { this[size - 1] = (this[size - 1].toInt() xor 0xFF).toByte() }
         val tampered = TokenCipher.ENCODED_PREFIX + Base64.encodeToString(payload, Base64.NO_WRAP)
 
-        Assert.assertNull(TokenCipher.decrypt(tampered))
+        Assert.assertEquals(TokenCipher.DecryptResult.Unrecoverable, TokenCipher.decrypt(tampered))
     }
 
     @Test
     fun rejectsUndecodableCiphertext() {
-        Assert.assertNull(TokenCipher.decrypt(TokenCipher.ENCODED_PREFIX + "not base64"))
+        Assert.assertEquals(
+            TokenCipher.DecryptResult.Unrecoverable,
+            TokenCipher.decrypt(TokenCipher.ENCODED_PREFIX + "not base64"),
+        )
     }
 
     @Test
@@ -52,7 +58,7 @@ class TokenCipherTest {
         val payload = ByteArray(4)
         val encoded = TokenCipher.ENCODED_PREFIX + Base64.encodeToString(payload, Base64.NO_WRAP)
 
-        Assert.assertNull(TokenCipher.decrypt(encoded))
+        Assert.assertEquals(TokenCipher.DecryptResult.Unrecoverable, TokenCipher.decrypt(encoded))
     }
 
     @Test
@@ -74,7 +80,7 @@ class TokenCipherTest {
                     try {
                         start.await()
                         repeat(iterations) {
-                            val actual = TokenCipher.decrypt(encoded)
+                            val actual = plaintextOf(encoded)
                             if (actual != expected) {
                                 throw AssertionError("Expected $expected but got $actual")
                             }

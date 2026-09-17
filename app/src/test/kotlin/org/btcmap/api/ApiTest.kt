@@ -100,7 +100,7 @@ class ApiTest : ApiTestBase() {
         )
 
         try {
-            api.call(Request.Builder().url(server.url("/x")).build()) { it.bufferedReader().readText() }
+            api.call(authorizedRequest()) { it.bufferedReader().readText() }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(401, e.code)
@@ -108,6 +108,34 @@ class ApiTest : ApiTestBase() {
 
         Assert.assertTrue(unauthorized)
     }
+
+    @Test
+    fun call_doesNotInvokeOnUnauthorizedWithoutAuthorizationHeader() = runTest {
+        // A request sent without the stored token (e.g. because the keystore was
+        // temporarily unavailable) must not clear a still-valid session.
+        enqueueJson("""{"message":"Authentication required"}""", code = 401)
+
+        var unauthorized = false
+        val api = Api(
+            httpClient = OkHttpClient(),
+            baseUrl = { server.url("/") },
+            onUnauthorized = { unauthorized = true },
+        )
+
+        try {
+            api.call(Request.Builder().url(server.url("/x")).build()) { it.bufferedReader().readText() }
+            Assert.fail("Expected ApiException")
+        } catch (e: ApiException) {
+            Assert.assertEquals(401, e.code)
+        }
+
+        Assert.assertFalse(unauthorized)
+    }
+
+    private fun authorizedRequest() = Request.Builder()
+        .url(server.url("/x"))
+        .header("Authorization", "Bearer stale-token")
+        .build()
 
     @Test
     fun call_stillThrowsApiExceptionWhenOnUnauthorizedFails() = runTest {
@@ -120,7 +148,7 @@ class ApiTest : ApiTestBase() {
         )
 
         try {
-            api.call(Request.Builder().url(server.url("/x")).build()) { it.bufferedReader().readText() }
+            api.call(authorizedRequest()) { it.bufferedReader().readText() }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(401, e.code)

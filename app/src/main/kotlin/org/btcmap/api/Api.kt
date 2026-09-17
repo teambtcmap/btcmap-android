@@ -72,7 +72,12 @@ class Api(
                 if (!res.isSuccessful) {
                     val exception = res.toApiException()
 
-                    if (res.code == 401 && clearSessionOnUnauthorized) {
+                    // A 401 only invalidates the session when the request actually
+                    // carried the stored token. A request sent without one (e.g. the
+                    // token could not be read because the keystore was unavailable)
+                    // must not clear a still-valid session.
+                    val authorized = res.request.header("Authorization") != null
+                    if (res.code == 401 && clearSessionOnUnauthorized && authorized) {
                         try {
                             onUnauthorized()
                         } catch (e: CancellationException) {

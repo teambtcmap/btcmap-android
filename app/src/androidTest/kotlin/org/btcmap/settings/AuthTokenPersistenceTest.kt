@@ -68,6 +68,22 @@ class AuthTokenPersistenceTest {
     }
 
     @Test
+    fun keepsEncryptedTokenWhenKeystoreIsTemporarilyUnavailable() {
+        prefs.authToken = "secret-token"
+        val stored = prefs.getString(KEY_AUTH_TOKEN, null)
+
+        withUnavailableKeystore {
+            // The token cannot be read, but it must not be discarded.
+            Assert.assertNull(prefs.authToken)
+            Assert.assertEquals(stored, prefs.getString(KEY_AUTH_TOKEN, null))
+        }
+
+        // Once the keystore recovers the same session is readable again, proving
+        // the transient failure was not cached.
+        Assert.assertEquals("secret-token", prefs.authToken)
+    }
+
+    @Test
     fun storingTokenFailsWhenKeystoreIsUnavailable() {
         withUnavailableKeystore {
             val error = runCatching { prefs.authToken = "secret-token" }.exceptionOrNull()
