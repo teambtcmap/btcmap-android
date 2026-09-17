@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Dismiss sign-in dialogs when leaving the screen instead of leaking the activity window
 - Avoid exposing internal server or network details in the profile password and username dialogs
 - Fix a failed sign-in rollback discarding a session that was stored in the meantime
+- Restore the previously signed-in session when storing a new one fails instead of signing the account out
 - Encrypt the stored session token with the Android Keystore instead of keeping it in plaintext
 - Fix the stored session token being read as stale or missing when several requests run at once
 - Sign out cleanly when the stored session token can no longer be decrypted instead of retrying the keystore on every request

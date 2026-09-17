@@ -4,7 +4,7 @@ import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class TokenSettingInterceptor(
+internal class TokenSettingInterceptor(
     private val token: () -> String?,
     private val apiUrl: () -> HttpUrl,
 ) : Interceptor {
@@ -21,7 +21,10 @@ class TokenSettingInterceptor(
 
         // Never attach the session token to a host other than the configured API.
         val api = apiUrl()
-        if (request.url.host != api.host || request.url.port != api.port) {
+        if (request.url.scheme != api.scheme ||
+            request.url.host != api.host ||
+            request.url.port != api.port
+        ) {
             return chain.proceed(request)
         }
 

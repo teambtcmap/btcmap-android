@@ -125,32 +125,24 @@ class TokenCipherTest {
     @Test
     fun treatsPermanentlyInvalidatedKeyAsUnrecoverable() {
         val encoded = TokenCipher.encrypt("satoshi-token")
-        val original = TokenCipher.keyProvider
 
-        TokenCipher.keyProvider = { throw KeyPermanentlyInvalidatedException() }
-        try {
+        TokenCipher.withKeyProvider({ throw KeyPermanentlyInvalidatedException() }) {
             Assert.assertEquals(
                 TokenCipher.DecryptResult.Unrecoverable,
                 TokenCipher.decrypt(encoded),
             )
-        } finally {
-            TokenCipher.keyProvider = original
         }
     }
 
     @Test
     fun treatsUnavailableKeyProviderAsUnavailable() {
         val encoded = TokenCipher.encrypt("satoshi-token")
-        val original = TokenCipher.keyProvider
 
-        TokenCipher.keyProvider = { throw KeyStoreException("keystore unavailable") }
-        try {
+        TokenCipher.withKeyProvider({ throw KeyStoreException("keystore unavailable") }) {
             Assert.assertEquals(
                 TokenCipher.DecryptResult.Unavailable,
                 TokenCipher.decrypt(encoded),
             )
-        } finally {
-            TokenCipher.keyProvider = original
         }
 
         // A transient failure must not be cached, so the token recovers afterwards.

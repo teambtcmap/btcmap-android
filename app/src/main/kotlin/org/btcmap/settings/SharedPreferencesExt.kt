@@ -358,7 +358,7 @@ fun SharedPreferences.setButtonBorderColor(color: Int?) {
     }
 }
 
-private const val KEY_AUTH_TOKEN = "auth_token"
+internal const val KEY_AUTH_TOKEN = "auth_token"
 
 var SharedPreferences.authToken: String?
     get() {
@@ -369,7 +369,9 @@ var SharedPreferences.authToken: String?
             // keystore is unavailable the token is still returned unencrypted
             // rather than breaking the session.
             runCatching {
-                edit { putString(KEY_AUTH_TOKEN, TokenCipher.encrypt(stored)) }
+                val encoded = TokenCipher.encrypt(stored)
+                edit { putString(KEY_AUTH_TOKEN, encoded) }
+                TokenCipher.rememberDecrypted(encoded, stored)
             }
             return stored
         }
@@ -400,11 +402,56 @@ var SharedPreferences.authToken: String?
         if (value == null) {
             // Do not keep the decrypted token in memory after signing out.
             TokenCipher.clearCache()
-        }
-        edit {
-            putString(KEY_AUTH_TOKEN, value?.let(TokenCipher::encrypt))
+            edit { remove(KEY_AUTH_TOKEN) }
+        } else {
+            val encoded = TokenCipher.encrypt(value)
+            edit { putString(KEY_AUTH_TOKEN, encoded) }
+            // Prime the cache so the freshly signed-in token is not read back
+            // from the keystore on the next access, including from the main thread.
+            TokenCipher.rememberDecrypted(encoded, value)
         }
     }
+
+/**
+ * Raw stored token value. Used by session rollback, which must compare and
+ * restore the exact stored bytes without depending on the keystore being
+ * readable.
+ */
+internal fun SharedPreferences.getStoredAuthToken(): String? = getString(KEY_AUTH_TOKEN, null)
+
+/**
+ * Replaces the raw stored token and drops the decrypt cache, which still holds
+ * the plaintext of the value that was just replaced.
+ */
+internal fun SharedPreferences.setStoredAuthToken(encoded: String?) {
+    TokenCipher.clearCache()
+    edit {
+        if (encoded == null) remove(KEY_AUTH_TOKEN) else putString(KEY_AUTH_TOKEN, encoded)
+    }
+}
+
+/**
+ * Restores the raw stored token to [previous] only while it is still [current],
+ * reporting whether it changed. A concurrent sign-in that stored a newer value
+ * wins, and comparing raw bytes means a temporarily unreadable keystore cannot
+ * cause a recoverable token to be discarded.
+ */
+internal fun SharedPreferences.restoreStoredAuthTokenIf(
+    current: String?,
+    previous: String?,
+): Boolean {
+    return runCatching {
+        if (getStoredAuthToken() == current) {
+            setStoredAuthToken(previous)
+            true
+        } else {
+            // A concurrent sign-in stored a newer token; do not retain the plaintext
+            // of the failed one in the cache.
+            current?.let(TokenCipher::clearCacheIf)
+            false
+        }
+    }.getOrDefault(false)
+}
 
 val SharedPreferences.authorized: Boolean
     get() {

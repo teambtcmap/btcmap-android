@@ -123,4 +123,20 @@ class TokenSettingInterceptorTest {
 
         Assert.assertNull(server().takeRequest().headers["Authorization"])
     }
+
+    @Test
+    fun skipsSameHostOnDifferentScheme() {
+        server().enqueue(okResponse())
+
+        val base = server().url("/")
+        client(
+            token = { "stored-token" },
+            apiUrl = { base.newBuilder().scheme("https").build() },
+        )
+            .newCall(Request.Builder().url(server().url("/x")).build())
+            .execute()
+            .close()
+
+        Assert.assertNull(server().takeRequest().headers["Authorization"])
+    }
 }

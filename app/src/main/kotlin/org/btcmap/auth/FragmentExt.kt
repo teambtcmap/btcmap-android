@@ -27,7 +27,9 @@ import org.btcmap.db
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.User
 import org.btcmap.settings.authToken
+import org.btcmap.settings.getStoredAuthToken
 import org.btcmap.settings.prefs
+import org.btcmap.settings.restoreStoredAuthTokenIf
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.userFacingMessage
 
@@ -143,7 +145,6 @@ private fun Fragment.signUp(username: String, password: String, onComplete: () -
                 )
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
-                progress.dismiss()
                 Toast.makeText(
                     requireContext(),
                     getString(R.string.account_created_sign_in_failed),
@@ -201,11 +202,14 @@ private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onCom
         return
     }
 
-    Toast.makeText(
-        requireContext(),
-        getString(R.string.logged_in_as, response.user.name),
-        Toast.LENGTH_SHORT,
-    ).show()
+    val toastContext = context
+    if (toastContext != null) {
+        Toast.makeText(
+            toastContext,
+            getString(R.string.logged_in_as, response.user.name),
+            Toast.LENGTH_SHORT,
+        ).show()
+    }
 
     try {
         onComplete()
@@ -216,10 +220,11 @@ private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onCom
 }
 
 /**
- * Persists a successful sign-in. The token is written before the cached user so
- * a token encryption failure leaves the previous session untouched, and a
- * failure after the token is written rolls the token back instead of leaving a
- * session that is only partly stored.
+ * Persists a successful sign-in, keeping the previous session intact when the
+ * new one cannot be fully stored. The token is written before the cached user
+ * so a token encryption failure leaves the previous session untouched, and a
+ * failure after the token is written restores the previous token and cached
+ * user instead of leaving a session that is only partly stored.
  */
 internal suspend fun storeSignedInSession(
     db: Database,
@@ -227,7 +232,13 @@ internal suspend fun storeSignedInSession(
     response: CreateTokenResponse,
 ) {
     withContext(Dispatchers.IO) {
+        // Capture the raw stored token so the rollback compares and restores the
+        // exact bytes even if the keystore becomes temporarily unreadable.
+        val previousToken = prefs.getStoredAuthToken()
+        val previousUser = db.user.select()
+
         prefs.authToken = response.token
+        val currentToken = prefs.getStoredAuthToken()
 
         try {
             db.user.insert(
@@ -240,22 +251,16 @@ internal suspend fun storeSignedInSession(
                 )
             )
         } catch (e: Throwable) {
-            // Roll back only the token this call stored, so a concurrent sign-in
-            // that finished first is not signed out again.
-            prefs.clearAuthTokenIf(response.token)
-            runCatching { db.user.delete() }
+            // Restore the previous session, but only while this call's token is
+            // still the stored one, so a concurrent sign-in that finished first
+            // is not signed out again.
+            if (prefs.restoreStoredAuthTokenIf(current = currentToken, previous = previousToken)) {
+                runCatching {
+                    if (previousUser == null) db.user.delete() else db.user.insert(previousUser)
+                }
+            }
             throw e
         }
-    }
-}
-
-/**
- * Clears the stored token only while it is still [expected], so a failed
- * sign-in does not discard a newer token written in the meantime.
- */
-internal fun SharedPreferences.clearAuthTokenIf(expected: String) {
-    runCatching {
-        if (authToken == expected) authToken = null
     }
 }
 

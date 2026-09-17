@@ -60,15 +60,49 @@ internal object TokenCipher {
     }
 
     /**
-     * Supplies the AES key. Production reads it from the Android keystore; tests
-     * can replace it to simulate an unavailable keystore.
+     * Stand-in for the keystore key, set only while [withKeyProvider] runs. It is
+     * null in production so the real keystore key is always used.
      */
     @Volatile
-    internal var keyProvider: () -> SecretKey = { defaultKey }
+    internal var keyProviderOverride: (() -> SecretKey)? = null
+
+    private val productionKeyProvider: () -> SecretKey = { defaultKey }
+
+    /**
+     * Runs [block] with [provider] standing in for the keystore key so tests can
+     * simulate a missing or invalidated key. The override is always cleared
+     * afterwards so it cannot leak into another test or a later request.
+     */
+    internal inline fun <T> withKeyProvider(noinline provider: () -> SecretKey, block: () -> T): T {
+        check(keyProviderOverride == null) { "A key provider override is already active" }
+        keyProviderOverride = provider
+        return try {
+            block()
+        } finally {
+            keyProviderOverride = null
+        }
+    }
+
+    private fun key(): SecretKey = (keyProviderOverride ?: productionKeyProvider)()
 
     /** Drops the cached plaintext so it is not retained after signing out. */
     fun clearCache() {
         cache = null
+    }
+
+    /** Drops the cache only while it still holds [encoded], leaving a newer value intact. */
+    internal fun clearCacheIf(encoded: String) {
+        if (cache?.encoded == encoded) {
+            cache = null
+        }
+    }
+
+    /**
+     * Seeds the cache after a token was encrypted so the next read does not hit
+     * the keystore again, keeping main-thread reads off the crypto path.
+     */
+    internal fun rememberDecrypted(encoded: String, plaintext: String) {
+        cache = Cache(encoded, DecryptResult.Success(plaintext))
     }
 
     private fun generateKey(): SecretKey {
@@ -87,7 +121,7 @@ internal object TokenCipher {
 
     fun encrypt(plaintext: String): String {
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.ENCRYPT_MODE, keyProvider())
+        cipher.init(Cipher.ENCRYPT_MODE, key())
         val encrypted = cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
         val payload = cipher.iv + encrypted
         return ENCODED_PREFIX + Base64.encodeToString(payload, Base64.NO_WRAP)
@@ -110,7 +144,7 @@ internal object TokenCipher {
 
     private fun tryDecrypt(encoded: String): DecryptResult {
         val key = try {
-            keyProvider()
+            key()
         } catch (e: Exception) {
             if (e.hasPermanentKeyInvalidationCause()) {
                 Log.w(TAG, "Stored token key was permanently invalidated", e)

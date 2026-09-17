@@ -72,6 +72,9 @@ class AuthTokenPersistenceTest {
         prefs.authToken = "secret-token"
         val stored = prefs.getString(KEY_AUTH_TOKEN, null)
 
+        // Force a cold read so the keystore, not the encrypt cache, is consulted.
+        TokenCipher.clearCache()
+
         withUnavailableKeystore {
             // The token cannot be read, but it must not be discarded and the user
             // must not be shown as signed out while it can still recover.
@@ -86,6 +89,18 @@ class AuthTokenPersistenceTest {
     }
 
     @Test
+    fun keepsStoredTokenReadableFromCacheWhenKeystoreBecomesUnavailable() {
+        prefs.authToken = "secret-token"
+
+        withUnavailableKeystore {
+            // The freshly stored token is cached, so a transient keystore failure
+            // must not flap the UI into a signed-out state or force a re-sign-in.
+            Assert.assertEquals("secret-token", prefs.authToken)
+            Assert.assertTrue(prefs.authorized)
+        }
+    }
+
+    @Test
     fun storingTokenFailsWhenKeystoreIsUnavailable() {
         withUnavailableKeystore {
             val error = runCatching { prefs.authToken = "secret-token" }.exceptionOrNull()
@@ -96,13 +111,7 @@ class AuthTokenPersistenceTest {
     }
 
     private fun withUnavailableKeystore(block: () -> Unit) {
-        val original = TokenCipher.keyProvider
-        TokenCipher.keyProvider = { throw IllegalStateException("keystore unavailable") }
-        try {
-            block()
-        } finally {
-            TokenCipher.keyProvider = original
-        }
+        TokenCipher.withKeyProvider({ throw IllegalStateException("keystore unavailable") }, block)
     }
 
     companion object {
