@@ -64,7 +64,6 @@ class AddCommentFragment : Fragment() {
 
         observeInvoicePayment(
             viewModel = viewModel,
-            logTag = TAG,
             onState = { render(it, payment) },
             onPaid = {
                 Toast.makeText(
@@ -123,9 +122,5 @@ class AddCommentFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private companion object {
-        const val TAG = "AddCommentFragment"
     }
 }

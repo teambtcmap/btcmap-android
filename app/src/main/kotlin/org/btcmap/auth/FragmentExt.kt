@@ -2,7 +2,6 @@ package org.btcmap.auth
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
@@ -117,7 +116,6 @@ private fun Fragment.signUp(
 ) {
     viewLifecycleOwner.lifecycleScope.launch {
         val user = runAuthRequest(
-            logMessage = "Failed to create new account",
             fallbackMessage = getString(R.string.failed_to_create_new_account),
         ) {
             api().createUser(name = username, password = password)
@@ -127,7 +125,6 @@ private fun Fragment.signUp(
         // form instead of surfacing a second error dialog: the caller is told
         // what happened with a toast.
         val response = runAuthRequest(
-            logMessage = "Failed to sign in after creating a new account",
             fallbackMessage = getString(R.string.failed_to_sign_in),
             showErrorDialog = false,
         ) {
@@ -166,7 +163,6 @@ private fun Fragment.signIn(
 ) {
     viewLifecycleOwner.lifecycleScope.launch {
         val response = runAuthRequest(
-            logMessage = "Sign in failed",
             fallbackMessage = getString(R.string.failed_to_sign_in),
         ) {
             api().signIn(
@@ -183,11 +179,9 @@ private fun Fragment.signIn(
 /**
  * Runs [request] behind a cancelable progress dialog, with a timeout so a slow
  * server cannot trap the user behind a spinner. Returns null on failure, after
- * reporting it (with a dialog when [showErrorDialog] is true, otherwise only in
- * the log).
+ * reporting it with a dialog when [showErrorDialog] is true.
  */
 private suspend fun <T> Fragment.runAuthRequest(
-    logMessage: String,
     fallbackMessage: String,
     showErrorDialog: Boolean = true,
     request: suspend () -> T,
@@ -198,11 +192,11 @@ private suspend fun <T> Fragment.runAuthRequest(
     try {
         return withTimeout(AUTH_TIMEOUT_MS) { request() }
     } catch (e: TimeoutCancellationException) {
-        reportAuthError(logMessage, e, fallbackMessage, showErrorDialog)
+        reportAuthError(e, fallbackMessage, showErrorDialog)
         return null
     } catch (e: Exception) {
         e.rethrowIfCancellation()
-        reportAuthError(logMessage, e, fallbackMessage, showErrorDialog)
+        reportAuthError(e, fallbackMessage, showErrorDialog)
         return null
     } finally {
         progress.dismiss()
@@ -210,15 +204,12 @@ private suspend fun <T> Fragment.runAuthRequest(
 }
 
 private fun Fragment.reportAuthError(
-    logMessage: String,
     e: Throwable,
     fallbackMessage: String,
     showDialog: Boolean,
 ) {
     if (showDialog) {
-        showAuthError(logMessage, e, fallbackMessage)
-    } else {
-        Log.e(AUTH_TAG, logMessage, e)
+        showAuthError(e, fallbackMessage)
     }
 }
 
@@ -232,7 +223,6 @@ private suspend fun Fragment.completeSignIn(
     } catch (e: Exception) {
         e.rethrowIfCancellation()
         showAuthError(
-            logMessage = "Failed to store signed-in account",
             e = e,
             fallbackMessage = getString(R.string.failed_to_sign_in),
         )
@@ -255,7 +245,6 @@ private suspend fun Fragment.completeSignIn(
         onAuthenticated(extras)
     } catch (e: Exception) {
         e.rethrowIfCancellation()
-        Log.e(AUTH_TAG, "Signed-in callback failed", e)
     }
 }
 
@@ -296,9 +285,7 @@ private fun Fragment.showProgressDialog(
         }
 }
 
-private fun Fragment.showAuthError(logMessage: String, e: Throwable, fallbackMessage: String) {
-    Log.e(AUTH_TAG, logMessage, e)
-
+private fun Fragment.showAuthError(e: Throwable, fallbackMessage: String) {
     if (!isAdded) return
 
     val dialog = MaterialAlertDialogBuilder(requireContext())
@@ -342,5 +329,3 @@ private fun tokenLabel(): String = buildString {
 }
 
 private const val AUTH_TIMEOUT_MS = 30_000L
-
-private const val AUTH_TAG = "auth"

@@ -1,6 +1,5 @@
 package org.btcmap.payment
 
-import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -24,7 +23,6 @@ import org.btcmap.util.userFacingMessage
  */
 internal fun <TQuote : Any> Fragment.observeInvoicePayment(
     viewModel: InvoicePaymentViewModel<TQuote>,
-    logTag: String,
     onState: (InvoicePaymentState<TQuote>) -> Unit,
     onPaid: () -> Unit,
 ) {
@@ -47,13 +45,13 @@ internal fun <TQuote : Any> Fragment.observeInvoicePayment(
             }
 
             launch {
-                viewModel.events.collect { event -> showError(logTag, event) }
+                viewModel.events.collect { event -> showError(event) }
             }
         }
     }
 }
 
-private fun Fragment.showError(logTag: String, event: PaymentEvent) {
+private fun Fragment.showError(event: PaymentEvent) {
     val error = when (event) {
         is PaymentEvent.QuoteFailed -> {
             // Without a quote there is nothing this screen can show.
@@ -63,8 +61,6 @@ private fun Fragment.showError(logTag: String, event: PaymentEvent) {
 
         is PaymentEvent.OrderFailed -> event.error
     }
-
-    Log.e(logTag, "Payment failed", error)
 
     MaterialAlertDialogBuilder(requireContext())
         .setTitle(R.string.error)

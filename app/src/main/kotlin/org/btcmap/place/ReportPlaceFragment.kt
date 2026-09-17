@@ -1,7 +1,6 @@
 package org.btcmap.place
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -102,7 +101,6 @@ class ReportPlaceFragment : Fragment() {
                 }
             } catch (t: Throwable) {
                 t.rethrowIfCancellation()
-                Log.e(null, null, t)
                 withResumed {
                     binding.reportType.isEnabled = true
                     binding.comment.isEnabled = true

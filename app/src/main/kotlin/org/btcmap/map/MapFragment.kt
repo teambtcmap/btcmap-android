@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -381,7 +380,6 @@ class MapFragment : Fragment() {
                 openEvent(bundle)
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
-                Log.e(TAG, "Failed to open event $eventId", e)
             }
         }
     }
@@ -617,7 +615,6 @@ class MapFragment : Fragment() {
             areasAdapter.submitList(areas)
         } catch (e: Throwable) {
             e.rethrowIfCancellation()
-            Log.e(TAG, "Failed to load areas", e)
         }
     }
 
@@ -686,7 +683,6 @@ class MapFragment : Fragment() {
     }
 
     companion object {
-        private const val TAG = "MapFragment"
         private const val SEARCH_DEBOUNCE_MS = 300L
     }
 }

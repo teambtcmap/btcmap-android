@@ -1,7 +1,6 @@
 package org.btcmap.place
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -165,7 +164,6 @@ class AddPlaceFragment : Fragment() {
                 }
             } catch (t: Throwable) {
                 t.rethrowIfCancellation()
-                Log.e(null, null, t)
                 withResumed {
                     binding.btnSubmit.isEnabled = true
                     binding.name.isEnabled = true

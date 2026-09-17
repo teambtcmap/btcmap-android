@@ -1,7 +1,6 @@
 package org.btcmap
 
 import android.app.Application
-import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import kotlinx.coroutines.CoroutineScope
@@ -19,8 +18,6 @@ import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.MapLibre
 import org.btcmap.settings.init as settingsInit
 import org.btcmap.util.init as typefaceInit
-
-private const val TAG = "App"
 
 class App : Application() {
     internal var apiForTesting: Api? = null
@@ -58,7 +55,6 @@ class App : Application() {
                     prefs.clearSessionIfTokenMatches(db, requestToken)
                 } catch (t: Throwable) {
                     t.rethrowIfCancellation()
-                    Log.e(TAG, "Failed to clear rejected session", t)
                 }
             }
         }
@@ -75,7 +71,6 @@ class App : Application() {
                 api.signOut(token)
             } catch (t: Throwable) {
                 t.rethrowIfCancellation()
-                Log.w(TAG, "Failed to revoke token", t)
             }
         }
     }
@@ -104,7 +99,6 @@ class App : Application() {
                 prefs.preload()
             } catch (t: Throwable) {
                 t.rethrowIfCancellation()
-                Log.e(TAG, "Failed to preload settings", t)
             }
         }
     }

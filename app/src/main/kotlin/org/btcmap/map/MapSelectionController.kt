@@ -1,7 +1,6 @@
 package org.btcmap.map
 
 import android.graphics.PointF
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -19,8 +18,6 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.Point
-
-private const val TAG = "MapSelectionController"
 
 class MapSelectionController(
     private val map: MapLibreMap,
@@ -81,7 +78,6 @@ class MapSelectionController(
                         onOpenEvent(event)
                     } catch (e: Throwable) {
                         e.rethrowIfCancellation()
-                        Log.e(TAG, "Failed to open event $eventId", e)
                     }
                 }
                 return true
@@ -97,12 +93,10 @@ class MapSelectionController(
                     onOpenPlace(place)
                 } catch (e: Throwable) {
                     e.rethrowIfCancellation()
-                    Log.e(TAG, "Failed to open place $placeId", e)
                 }
             }
             return true
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to read tapped marker", e)
             false
         }
     }

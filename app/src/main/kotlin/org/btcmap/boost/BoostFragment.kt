@@ -61,7 +61,6 @@ class BoostFragment : Fragment() {
 
         observeInvoicePayment(
             viewModel = viewModel,
-            logTag = TAG,
             onState = { render(it, payment) },
             onPaid = { parentFragmentManager.popBackStack() },
         )
@@ -118,9 +117,5 @@ class BoostFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private companion object {
-        const val TAG = "BoostFragment"
     }
 }
