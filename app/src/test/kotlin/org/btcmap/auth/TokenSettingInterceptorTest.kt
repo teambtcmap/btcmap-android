@@ -2,6 +2,8 @@ package org.btcmap.auth
 
 import mockwebserver3.MockResponse
 import mockwebserver3.junit4.MockWebServerRule
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.junit.Assert
@@ -15,8 +17,11 @@ class TokenSettingInterceptorTest {
 
     private fun server() = serverRule.server
 
-    private fun client(token: () -> String?) = OkHttpClient.Builder()
-        .addInterceptor(TokenSettingInterceptor(token))
+    private fun client(
+        apiUrl: () -> HttpUrl = { server().url("/") },
+        token: () -> String?,
+    ) = OkHttpClient.Builder()
+        .addInterceptor(TokenSettingInterceptor(token, apiUrl))
         .build()
 
     private fun okResponse() = MockResponse.Builder().body("ok").build()
@@ -85,6 +90,34 @@ class TokenSettingInterceptorTest {
                     .withoutAuth()
                     .build()
             )
+            .execute()
+            .close()
+
+        Assert.assertNull(server().takeRequest().headers["Authorization"])
+    }
+
+    @Test
+    fun skipsForeignHost() {
+        server().enqueue(okResponse())
+
+        client(token = { "stored-token" }, apiUrl = { "https://api.btcmap.org".toHttpUrl() })
+            .newCall(Request.Builder().url(server().url("/x")).build())
+            .execute()
+            .close()
+
+        Assert.assertNull(server().takeRequest().headers["Authorization"])
+    }
+
+    @Test
+    fun skipsSameHostOnDifferentPort() {
+        server().enqueue(okResponse())
+
+        val base = server().url("/")
+        client(
+            token = { "stored-token" },
+            apiUrl = { base.newBuilder().port(base.port + 1).build() },
+        )
+            .newCall(Request.Builder().url(server().url("/x")).build())
             .execute()
             .close()
 

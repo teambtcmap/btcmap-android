@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
@@ -18,7 +20,6 @@ import kotlinx.coroutines.withContext
 import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.btcmap.api
-import org.btcmap.api.ApiException
 import org.btcmap.api.CreateTokenResponse
 import org.btcmap.api.createUser
 import org.btcmap.api.signIn
@@ -28,6 +29,7 @@ import org.btcmap.db.table.user.User
 import org.btcmap.settings.authToken
 import org.btcmap.settings.prefs
 import org.btcmap.util.rethrowIfCancellation
+import org.btcmap.util.userFacingMessage
 
 fun Fragment.showAuthDialog(onSuccess: () -> Unit) {
     val dialogView = layoutInflater.inflate(R.layout.account_choices_dialog, null)
@@ -47,6 +49,7 @@ fun Fragment.showAuthDialog(onSuccess: () -> Unit) {
     }
 
     dialog.show()
+    dismissOnViewDestroyed(dialog)
 }
 
 private fun Fragment.createNewAccount(onComplete: () -> Unit) {
@@ -112,6 +115,7 @@ private fun Fragment.showCredentialsDialog(
     }
 
     dialog.show()
+    dismissOnViewDestroyed(dialog)
 }
 
 private fun Fragment.signUp(username: String, password: String, onComplete: () -> Unit) {
@@ -123,7 +127,6 @@ private fun Fragment.signUp(username: String, password: String, onComplete: () -
                 api().createUser(name = username, password = password)
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
-                progress.dismiss()
                 showAuthError(
                     logMessage = "Failed to create new account",
                     e = e,
@@ -150,7 +153,6 @@ private fun Fragment.signUp(username: String, password: String, onComplete: () -
                 return@launch
             }
 
-            progress.dismiss()
             completeSignIn(response, onComplete)
         } finally {
             progress.dismiss()
@@ -171,7 +173,6 @@ private fun Fragment.signIn(username: String, password: String, onComplete: () -
                 )
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
-                progress.dismiss()
                 showAuthError(
                     logMessage = "Sign in failed",
                     e = e,
@@ -180,7 +181,6 @@ private fun Fragment.signIn(username: String, password: String, onComplete: () -
                 return@launch
             }
 
-            progress.dismiss()
             completeSignIn(response, onComplete)
         } finally {
             progress.dismiss()
@@ -217,8 +217,9 @@ private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onCom
 
 /**
  * Persists a successful sign-in. The token is written before the cached user so
- * a token encryption failure leaves nothing behind, and any failure rolls back
- * both halves instead of leaving a session that is only partly stored.
+ * a token encryption failure leaves the previous session untouched, and a
+ * failure after the token is written rolls the token back instead of leaving a
+ * session that is only partly stored.
  */
 internal suspend fun storeSignedInSession(
     db: Database,
@@ -226,8 +227,9 @@ internal suspend fun storeSignedInSession(
     response: CreateTokenResponse,
 ) {
     withContext(Dispatchers.IO) {
+        prefs.authToken = response.token
+
         try {
-            prefs.authToken = response.token
             db.user.insert(
                 User(
                     id = response.user.id,
@@ -238,10 +240,22 @@ internal suspend fun storeSignedInSession(
                 )
             )
         } catch (e: Throwable) {
-            runCatching { prefs.authToken = null }
+            // Roll back only the token this call stored, so a concurrent sign-in
+            // that finished first is not signed out again.
+            prefs.clearAuthTokenIf(response.token)
             runCatching { db.user.delete() }
             throw e
         }
+    }
+}
+
+/**
+ * Clears the stored token only while it is still [expected], so a failed
+ * sign-in does not discard a newer token written in the meantime.
+ */
+internal fun SharedPreferences.clearAuthTokenIf(expected: String) {
+    runCatching {
+        if (authToken == expected) authToken = null
     }
 }
 
@@ -253,25 +267,42 @@ private fun Fragment.showProgressDialog(@StringRes message: Int): AlertDialog {
         .setView(dialogView)
         .setCancelable(false)
         .create()
-        .also { it.show() }
+        .also {
+            it.show()
+            dismissOnViewDestroyed(it)
+        }
 }
 
 private fun Fragment.showAuthError(logMessage: String, e: Throwable, fallbackMessage: String) {
     Log.e("auth", logMessage, e)
 
-    // Only surfaced server messages for client errors are user-actionable;
-    // transport, parse and server-side failures fall back to a generic message.
-    val message = (e as? ApiException)
-        ?.takeIf { it.code in 400..499 }
-        ?.message
-        ?.takeIf { it.isNotBlank() }
-        ?: fallbackMessage
+    if (!isAdded) return
 
-    MaterialAlertDialogBuilder(requireContext())
+    val dialog = MaterialAlertDialogBuilder(requireContext())
         .setTitle(R.string.error)
-        .setMessage(message)
+        .setMessage(e.userFacingMessage(fallbackMessage))
         .setPositiveButton(android.R.string.ok, null)
-        .show()
+        .create()
+
+    dialog.show()
+    dismissOnViewDestroyed(dialog)
+}
+
+/**
+ * Dismisses [dialog] when the fragment's view is destroyed so a dialog that is
+ * still showing during a configuration change does not leak the activity window.
+ */
+private fun Fragment.dismissOnViewDestroyed(dialog: AlertDialog) {
+    val owner = viewLifecycleOwner
+    val observer = object : DefaultLifecycleObserver {
+        override fun onDestroy(owner: LifecycleOwner) {
+            dialog.dismiss()
+        }
+    }
+    owner.lifecycle.addObserver(observer)
+    dialog.setOnDismissListener {
+        owner.lifecycle.removeObserver(observer)
+    }
 }
 
 private fun tokenLabel() = "BTC Map Android ${BuildConfig.VERSION_CODE}"

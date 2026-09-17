@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Revoke the session token on the server when signing out, so it can no longer be reused
+- Keep a stored session when the keystore fails temporarily during decryption instead of discarding a recoverable token
+- Stop treating a temporarily unavailable keystore as signed out
+- Only send the stored session token to the configured API host
+- Dismiss sign-in dialogs when leaving the screen instead of leaking the activity window
+- Avoid exposing internal server or network details in the profile password and username dialogs
+- Fix a failed sign-in rollback discarding a session that was stored in the meantime
 - Encrypt the stored session token with the Android Keystore instead of keeping it in plaintext
 - Fix the stored session token being read as stale or missing when several requests run at once
 - Sign out cleanly when the stored session token can no longer be decrypted instead of retrying the keystore on every request

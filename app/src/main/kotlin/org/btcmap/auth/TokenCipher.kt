@@ -5,8 +5,12 @@ import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.util.Log
+import java.security.InvalidAlgorithmParameterException
 import java.security.KeyStore
+import javax.crypto.AEADBadTagException
+import javax.crypto.BadPaddingException
 import javax.crypto.Cipher
+import javax.crypto.IllegalBlockSizeException
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
@@ -21,6 +25,7 @@ internal object TokenCipher {
     private const val TRANSFORMATION = "AES/GCM/NoPadding"
     private const val IV_SIZE_BYTES = 12
     private const val GCM_TAG_LENGTH_BITS = 128
+    private const val GCM_TAG_LENGTH_BYTES = GCM_TAG_LENGTH_BITS / 8
 
     internal sealed interface DecryptResult {
         data class Success(val plaintext: String) : DecryptResult
@@ -58,7 +63,13 @@ internal object TokenCipher {
      * Supplies the AES key. Production reads it from the Android keystore; tests
      * can replace it to simulate an unavailable keystore.
      */
+    @Volatile
     internal var keyProvider: () -> SecretKey = { defaultKey }
+
+    /** Drops the cached plaintext so it is not retained after signing out. */
+    fun clearCache() {
+        cache = null
+    }
 
     private fun generateKey(): SecretKey {
         val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEYSTORE)
@@ -109,21 +120,62 @@ internal object TokenCipher {
             return DecryptResult.Unavailable
         }
 
-        return try {
+        val iv: ByteArray
+        val ciphertext: ByteArray
+        try {
             val payload = Base64.decode(encoded.removePrefix(ENCODED_PREFIX), Base64.NO_WRAP)
-            val iv = payload.copyOfRange(0, IV_SIZE_BYTES)
-            val ciphertext = payload.copyOfRange(IV_SIZE_BYTES, payload.size)
+            if (payload.size < IV_SIZE_BYTES + GCM_TAG_LENGTH_BYTES) {
+                Log.w(TAG, "Stored token payload is too short; discarding")
+                return DecryptResult.Unrecoverable
+            }
+            iv = payload.copyOfRange(0, IV_SIZE_BYTES)
+            ciphertext = payload.copyOfRange(IV_SIZE_BYTES, payload.size)
+        } catch (e: Exception) {
+            Log.w(TAG, "Stored token cannot be decoded; discarding", e)
+            return DecryptResult.Unrecoverable
+        }
 
+        return try {
             val cipher = Cipher.getInstance(TRANSFORMATION)
             cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv))
 
             DecryptResult.Success(String(cipher.doFinal(ciphertext), Charsets.UTF_8))
         } catch (e: Exception) {
-            // A key was obtained, so the stored value is corrupt, tampered with, or
-            // was encrypted by a key that no longer exists. It cannot be recovered.
-            Log.w(TAG, "Stored token cannot be decrypted; discarding", e)
-            DecryptResult.Unrecoverable
+            classifyDecryptFailure(e).also { result ->
+                // The key was obtained, so corruption can never be recovered, while
+                // a keystore failure at this point may still be temporary. Android
+                // keystore usually surfaces the latter from the cipher operation
+                // rather than from the key lookup, so this classification is what
+                // keeps a valid token from being discarded.
+                if (result == DecryptResult.Unrecoverable) {
+                    Log.w(TAG, "Stored token cannot be decrypted; discarding", e)
+                } else {
+                    Log.w(TAG, "Keystore unavailable; keeping the stored token", e)
+                }
+            }
         }
+    }
+
+    /**
+     * Classifies a failure raised while decrypting with a key that was already
+     * obtained. Only outcomes that can never change (corrupt payload or a
+     * permanently invalidated key) are unrecoverable; every other crypto or
+     * keystore failure may be temporary and must keep the stored token.
+     */
+    internal fun classifyDecryptFailure(e: Throwable): DecryptResult {
+        var cause: Throwable? = e
+        while (cause != null) {
+            when (cause) {
+                is KeyPermanentlyInvalidatedException,
+                is AEADBadTagException,
+                is BadPaddingException,
+                is IllegalBlockSizeException,
+                is InvalidAlgorithmParameterException,
+                -> return DecryptResult.Unrecoverable
+            }
+            cause = cause.cause
+        }
+        return DecryptResult.Unavailable
     }
 
     private fun Exception.hasPermanentKeyInvalidationCause(): Boolean {

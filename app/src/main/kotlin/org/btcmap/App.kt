@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.api.Api
 import org.btcmap.api.apiHttpClient
+import org.btcmap.api.signOut
 import org.btcmap.db.Database
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authToken
@@ -57,6 +58,15 @@ class App : Application() {
         }
     }
 
+    /**
+     * Best-effort server-side revocation of a signed-out token. Local sign-out
+     * must not depend on it, so failures are ignored and callers do not wait:
+     * the token is already cleared on the device by the time this runs.
+     */
+    internal fun revokeToken(token: String) {
+        ioScope.launch { runCatching { api.signOut(token) } }
+    }
+
     val db: Database
         get() = dbForTesting ?: defaultDb
 
@@ -84,3 +94,5 @@ fun Fragment.sync(): Sync = (requireContext().applicationContext as App).sync
 fun Fragment.api(): Api = (requireContext().applicationContext as App).api
 
 fun Fragment.db(): Database = (requireContext().applicationContext as App).db
+
+fun Fragment.app(): App = requireContext().applicationContext as App

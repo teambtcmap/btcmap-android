@@ -73,8 +73,10 @@ class AuthTokenPersistenceTest {
         val stored = prefs.getString(KEY_AUTH_TOKEN, null)
 
         withUnavailableKeystore {
-            // The token cannot be read, but it must not be discarded.
+            // The token cannot be read, but it must not be discarded and the user
+            // must not be shown as signed out while it can still recover.
             Assert.assertNull(prefs.authToken)
+            Assert.assertTrue(prefs.authorized)
             Assert.assertEquals(stored, prefs.getString(KEY_AUTH_TOKEN, null))
         }
 

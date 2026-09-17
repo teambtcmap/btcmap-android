@@ -147,4 +147,41 @@ class UserApiTest : ApiTestBase() {
 
         Assert.assertFalse(unauthorized)
     }
+
+    @Test
+    fun signOut_postsRpcRequestWithExplicitToken() = runTest {
+        enqueueJson("""{"jsonrpc":"2.0","result":{"id":1},"id":1}""")
+
+        api().signOut("token-1")
+
+        val request = takeRequest()
+        Assert.assertEquals("POST", request.method)
+        Assert.assertEquals("/rpc", request.url.encodedPath)
+        Assert.assertEquals("Bearer token-1", request.headers["Authorization"])
+
+        val body = request.jsonBody()
+        Assert.assertTrue(body, body.contains("\"jsonrpc\":\"2.0\""))
+        Assert.assertTrue(body, body.contains("\"method\":\"signout\""))
+    }
+
+    @Test
+    fun signOut_doesNotClearSessionOnUnauthorized() = runTest {
+        enqueueJson("""{"error":{"code":1,"message":"Invalid bearer token"}}""", code = 401)
+
+        var unauthorized = false
+        val api = Api(
+            httpClient = OkHttpClient(),
+            baseUrl = { server.url("/") },
+            onUnauthorized = { unauthorized = true },
+        )
+
+        try {
+            api.signOut("stale-token")
+            Assert.fail("Expected ApiException")
+        } catch (e: ApiException) {
+            Assert.assertEquals(401, e.code)
+        }
+
+        Assert.assertFalse(unauthorized)
+    }
 }

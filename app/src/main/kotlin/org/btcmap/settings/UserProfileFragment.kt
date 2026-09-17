@@ -22,6 +22,7 @@ import org.btcmap.api.removeSavedArea
 import org.btcmap.api.removeSavedPlace
 import org.btcmap.api.updatePassword
 import org.btcmap.api.updateUsername
+import org.btcmap.app
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
 import org.btcmap.databinding.SavedAreaItemBinding
@@ -30,6 +31,7 @@ import org.btcmap.databinding.UserProfileFragmentBinding
 import org.btcmap.db
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
+import org.btcmap.util.userFacingMessage
 
 class UserProfileFragment : Fragment() {
 
@@ -65,7 +67,14 @@ class UserProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val user = withContext(Dispatchers.IO) { db().user.select() }
             if (user == null) {
-                prefs.authToken = null
+                // Only drop the session when the token is actually readable. A token
+                // that is merely unreadable right now (keystore unavailable) must be
+                // kept so it can recover instead of being signed out.
+                withContext(Dispatchers.IO) {
+                    if (prefs.authToken != null) {
+                        prefs.authToken = null
+                    }
+                }
                 parentFragmentManager.popBackStack()
                 return@launch
             }
@@ -127,7 +136,7 @@ class UserProfileFragment : Fragment() {
                 e.rethrowIfCancellation()
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.error)
-                    .setMessage(e.message)
+                    .setMessage(e.userFacingMessage(getString(R.string.error)))
                     .setPositiveButton(android.R.string.ok, null)
                     .show()
             }
@@ -172,7 +181,7 @@ class UserProfileFragment : Fragment() {
                 e.rethrowIfCancellation()
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.error)
-                    .setMessage(e.message)
+                    .setMessage(e.userFacingMessage(getString(R.string.error)))
                     .setPositiveButton(android.R.string.ok, null)
                     .show()
             }
@@ -185,13 +194,19 @@ class UserProfileFragment : Fragment() {
     }
 
     private fun logout() {
+        val application = app()
         viewLifecycleOwner.lifecycleScope.launch {
             try {
+                val token = withContext(Dispatchers.IO) { prefs.authToken }
                 withContext(Dispatchers.IO) {
                     prefs.authToken = null
                     db().user.delete()
                 }
                 parentFragmentManager.popBackStack()
+
+                // Revoke the token server-side. This is best-effort and runs on the
+                // app scope so it also completes if it outlives this screen.
+                token?.takeIf { it.isNotBlank() }?.let { application.revokeToken(it) }
             } catch (e: Exception) {
                 e.rethrowIfCancellation()
                 showError(e)

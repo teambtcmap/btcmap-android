@@ -1,14 +1,21 @@
 package org.btcmap.auth
 
+import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.util.Base64
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.security.InvalidAlgorithmParameterException
+import java.security.KeyStoreException
+import java.security.ProviderException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
+import javax.crypto.AEADBadTagException
+import javax.crypto.BadPaddingException
+import javax.crypto.IllegalBlockSizeException
 
 @RunWith(AndroidJUnit4::class)
 class TokenCipherTest {
@@ -59,6 +66,95 @@ class TokenCipherTest {
         val encoded = TokenCipher.ENCODED_PREFIX + Base64.encodeToString(payload, Base64.NO_WRAP)
 
         Assert.assertEquals(TokenCipher.DecryptResult.Unrecoverable, TokenCipher.decrypt(encoded))
+    }
+
+    @Test
+    fun rejectsPayloadShorterThanIvAndTag() {
+        // The smallest valid payload is a 12-byte IV plus a 16-byte GCM tag.
+        val payload = ByteArray(12 + 16 - 1)
+        val encoded = TokenCipher.ENCODED_PREFIX + Base64.encodeToString(payload, Base64.NO_WRAP)
+
+        Assert.assertEquals(TokenCipher.DecryptResult.Unrecoverable, TokenCipher.decrypt(encoded))
+    }
+
+    @Test
+    fun classifiesCorruptCiphertextAsUnrecoverable() {
+        Assert.assertEquals(
+            TokenCipher.DecryptResult.Unrecoverable,
+            TokenCipher.classifyDecryptFailure(AEADBadTagException()),
+        )
+        Assert.assertEquals(
+            TokenCipher.DecryptResult.Unrecoverable,
+            TokenCipher.classifyDecryptFailure(BadPaddingException()),
+        )
+        Assert.assertEquals(
+            TokenCipher.DecryptResult.Unrecoverable,
+            TokenCipher.classifyDecryptFailure(IllegalBlockSizeException()),
+        )
+        Assert.assertEquals(
+            TokenCipher.DecryptResult.Unrecoverable,
+            TokenCipher.classifyDecryptFailure(InvalidAlgorithmParameterException()),
+        )
+        Assert.assertEquals(
+            TokenCipher.DecryptResult.Unrecoverable,
+            TokenCipher.classifyDecryptFailure(KeyPermanentlyInvalidatedException()),
+        )
+        // Corruption can also arrive wrapped by the crypto provider.
+        Assert.assertEquals(
+            TokenCipher.DecryptResult.Unrecoverable,
+            TokenCipher.classifyDecryptFailure(RuntimeException(AEADBadTagException())),
+        )
+    }
+
+    @Test
+    fun classifiesTransientKeystoreFailuresAsUnavailable() {
+        Assert.assertEquals(
+            TokenCipher.DecryptResult.Unavailable,
+            TokenCipher.classifyDecryptFailure(KeyStoreException("keystore unavailable")),
+        )
+        Assert.assertEquals(
+            TokenCipher.DecryptResult.Unavailable,
+            TokenCipher.classifyDecryptFailure(IllegalStateException("keystore busy")),
+        )
+        Assert.assertEquals(
+            TokenCipher.DecryptResult.Unavailable,
+            TokenCipher.classifyDecryptFailure(ProviderException(KeyStoreException())),
+        )
+    }
+
+    @Test
+    fun treatsPermanentlyInvalidatedKeyAsUnrecoverable() {
+        val encoded = TokenCipher.encrypt("satoshi-token")
+        val original = TokenCipher.keyProvider
+
+        TokenCipher.keyProvider = { throw KeyPermanentlyInvalidatedException() }
+        try {
+            Assert.assertEquals(
+                TokenCipher.DecryptResult.Unrecoverable,
+                TokenCipher.decrypt(encoded),
+            )
+        } finally {
+            TokenCipher.keyProvider = original
+        }
+    }
+
+    @Test
+    fun treatsUnavailableKeyProviderAsUnavailable() {
+        val encoded = TokenCipher.encrypt("satoshi-token")
+        val original = TokenCipher.keyProvider
+
+        TokenCipher.keyProvider = { throw KeyStoreException("keystore unavailable") }
+        try {
+            Assert.assertEquals(
+                TokenCipher.DecryptResult.Unavailable,
+                TokenCipher.decrypt(encoded),
+            )
+        } finally {
+            TokenCipher.keyProvider = original
+        }
+
+        // A transient failure must not be cached, so the token recovers afterwards.
+        Assert.assertEquals("satoshi-token", plaintextOf(encoded))
     }
 
     @Test

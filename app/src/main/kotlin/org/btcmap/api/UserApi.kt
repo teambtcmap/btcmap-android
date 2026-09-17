@@ -107,6 +107,33 @@ suspend fun Api.signIn(
     }
 }
 
+/**
+ * Revokes the given session token server-side. The token is passed explicitly
+ * because the caller clears the stored token before this best-effort call runs.
+ * Sign-out is JSON-RPC (`signout`), which is the only endpoint that revokes a
+ * token; it returns HTTP 200 even for logical errors, so the response body is
+ * intentionally ignored.
+ */
+suspend fun Api.signOut(token: String) {
+    val url = buildUrl("rpc")
+
+    val req = JsonObject().apply {
+        addProperty("jsonrpc", "2.0")
+        addProperty("method", "signout")
+        add("params", JsonObject())
+        addProperty("id", 1)
+    }
+
+    call(
+        request = Request.Builder()
+            .post(jsonBody(req))
+            .header("Authorization", "Bearer $token")
+            .url(url)
+            .build(),
+        clearSessionOnUnauthorized = false,
+    ) { }
+}
+
 private fun JsonObject.toUser(): User {
     return User(
         id = long("id"),

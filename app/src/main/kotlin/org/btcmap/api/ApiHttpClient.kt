@@ -5,6 +5,7 @@ import okhttp3.brotli.BrotliInterceptor
 import org.btcmap.auth.TokenSettingInterceptor
 import org.btcmap.http.RateLimitingInterceptor
 import org.btcmap.http.UserAgentSettingInterceptor
+import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authToken
 import org.btcmap.settings.prefs
 import java.util.concurrent.TimeUnit
@@ -16,7 +17,7 @@ fun apiHttpClient(): OkHttpClient {
         .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(BrotliInterceptor)
         .addInterceptor(UserAgentSettingInterceptor)
-        .addInterceptor(TokenSettingInterceptor { prefs.authToken })
+        .addInterceptor(TokenSettingInterceptor(token = { prefs.authToken }, apiUrl = { prefs.apiUrl }))
         .addInterceptor(RateLimitingInterceptor)
         .build()
 }

@@ -25,7 +25,9 @@ import androidx.fragment.app.replace
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.btcmap.boost.BoostFragment
 import org.btcmap.db.table.place.Place
 import org.btcmap.settings.prefs
@@ -435,8 +437,8 @@ class PlaceFragment : Fragment() {
         if (prefs.authorized) {
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
-                    val user = db().user.select()!!
-                    val saved = user.savedPlaces.any { it.id == placeId }
+                    val user = withContext(Dispatchers.IO) { db().user.select() }
+                    val saved = user?.savedPlaces?.any { it.id == placeId } == true
                     withResumed {
                         binding.toolbar.menu.findItem(R.id.save).setIcon(
                             if (saved) R.drawable.icon_bookmark_check else R.drawable.icon_bookmark

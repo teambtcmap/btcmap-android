@@ -1,10 +1,12 @@
 package org.btcmap.auth
 
+import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.Response
 
 class TokenSettingInterceptor(
     private val token: () -> String?,
+    private val apiUrl: () -> HttpUrl,
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
@@ -14,6 +16,12 @@ class TokenSettingInterceptor(
         }
 
         if (request.tag(PublicRequest::class.java) != null) {
+            return chain.proceed(request)
+        }
+
+        // Never attach the session token to a host other than the configured API.
+        val api = apiUrl()
+        if (request.url.host != api.host || request.url.port != api.port) {
             return chain.proceed(request)
         }
 

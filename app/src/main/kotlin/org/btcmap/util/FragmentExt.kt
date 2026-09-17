@@ -18,7 +18,7 @@ fun Fragment.openInBrowser(uri: Uri) {
 fun Fragment.showError(throwable: Throwable) {
     Toast.makeText(
         requireContext(),
-        throwable.message?.takeIf { it.isNotBlank() } ?: getString(R.string.error),
+        throwable.userFacingMessage(getString(R.string.error)),
         Toast.LENGTH_LONG,
     ).show()
 }

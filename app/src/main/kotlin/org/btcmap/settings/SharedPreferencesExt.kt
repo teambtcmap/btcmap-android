@@ -397,13 +397,25 @@ var SharedPreferences.authToken: String?
         }
     }
     set(value) {
+        if (value == null) {
+            // Do not keep the decrypted token in memory after signing out.
+            TokenCipher.clearCache()
+        }
         edit {
             putString(KEY_AUTH_TOKEN, value?.let(TokenCipher::encrypt))
         }
     }
 
 val SharedPreferences.authorized: Boolean
-    get() = !authToken.isNullOrBlank()
+    get() {
+        if (!authToken.isNullOrBlank()) return true
+
+        // A null token does not necessarily mean "signed out": the keystore may be
+        // temporarily unavailable while the encrypted token is still stored. Keep
+        // reporting a session in that case so the UI does not force a re-sign-in
+        // that would overwrite a token that can still recover.
+        return getString(KEY_AUTH_TOKEN, null) != null
+    }
 
 private const val KEY_SHOW_DEBUG_INFO = "show_debug_info"
 
