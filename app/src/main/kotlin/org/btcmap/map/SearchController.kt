@@ -21,6 +21,7 @@ import org.btcmap.db.table.place.Place
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.btcmap.search.SearchAdapterItem
+import org.btcmap.util.rethrowIfCancellation
 import java.text.NumberFormat
 
 class SearchController(
@@ -83,7 +84,7 @@ class SearchController(
             emitLocalPlaces(query, referenceLocation)
             return null
         }
-        val apiResult = runCatching {
+        val results = try {
             withContext(Dispatchers.IO) {
                 api.search(
                     query = query,
@@ -92,9 +93,12 @@ class SearchController(
                     limit = 20,
                 )
             }
+        } catch (t: Throwable) {
+            t.rethrowIfCancellation()
+            null
         }
         return when {
-            apiResult.isSuccess -> apiResult.getOrThrow()
+            results != null -> results
             currentQuery == query -> {
                 emitLocalPlaces(query, referenceLocation)
                 null

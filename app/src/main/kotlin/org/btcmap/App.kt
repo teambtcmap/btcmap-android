@@ -1,6 +1,7 @@
 package org.btcmap
 
 import android.app.Application
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import kotlinx.coroutines.CoroutineScope
@@ -14,9 +15,12 @@ import org.btcmap.api.signOut
 import org.btcmap.db.Database
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.prefs
+import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.MapLibre
 import org.btcmap.settings.init as settingsInit
 import org.btcmap.util.init as typefaceInit
+
+private const val TAG = "App"
 
 class App : Application() {
     internal var apiForTesting: Api? = null
@@ -49,9 +53,12 @@ class App : Application() {
      */
     internal suspend fun handleUnauthorized(requestToken: String?) {
         withContext(Dispatchers.IO) {
-            runCatching {
-                if (requestToken != null) {
+            if (requestToken != null) {
+                try {
                     prefs.clearSessionIfTokenMatches(db, requestToken)
+                } catch (t: Throwable) {
+                    t.rethrowIfCancellation()
+                    Log.e(TAG, "Failed to clear rejected session", t)
                 }
             }
         }
@@ -63,7 +70,14 @@ class App : Application() {
      * the token is already cleared on the device by the time this runs.
      */
     internal fun revokeToken(token: String) {
-        ioScope.launch { runCatching { api.signOut(token) } }
+        ioScope.launch {
+            try {
+                api.signOut(token)
+            } catch (t: Throwable) {
+                t.rethrowIfCancellation()
+                Log.w(TAG, "Failed to revoke token", t)
+            }
+        }
     }
 
     val db: Database
@@ -85,7 +99,14 @@ class App : Application() {
         // Load the settings from the database up front so later reads from the
         // main thread hit the in-memory cache. The session token is part of the
         // cache, so this also makes it available without touching the database.
-        ioScope.launch { runCatching { prefs.preload() } }
+        ioScope.launch {
+            try {
+                prefs.preload()
+            } catch (t: Throwable) {
+                t.rethrowIfCancellation()
+                Log.e(TAG, "Failed to preload settings", t)
+            }
+        }
     }
 }
 

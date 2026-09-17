@@ -66,9 +66,12 @@ class SessionExpiryTest {
                 .build()
         )
 
-        val error = runCatching {
+        val error = try {
             runBlocking { app.api.getUser() }
-        }.exceptionOrNull()
+            null
+        } catch (t: Throwable) {
+            t
+        }
 
         Assert.assertTrue("Expected ApiException but got $error", error is ApiException)
         Assert.assertEquals(401, (error as ApiException).code)

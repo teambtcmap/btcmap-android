@@ -365,8 +365,17 @@ class MapFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val bundle = withContext(Dispatchers.IO) {
-                    db().event.selectById(eventId)?.toBundle()
-                        ?: runCatching { api().getEvent(eventId) }.getOrNull()?.toBundle()
+                    val local = db().event.selectById(eventId)?.toBundle()
+                    if (local != null) {
+                        local
+                    } else {
+                        try {
+                            api().getEvent(eventId)?.toBundle()
+                        } catch (t: Throwable) {
+                            t.rethrowIfCancellation()
+                            null
+                        }
+                    }
                 } ?: return@launch
 
                 openEvent(bundle)
@@ -409,9 +418,12 @@ class MapFragment : Fragment() {
                 return@launch
             }
 
-            val coordinates = runCatching {
+            val coordinates = try {
                 withContext(Dispatchers.IO) { api().getPlaceCoordinates(placeId) }
-            }.getOrNull() ?: return@launch
+            } catch (t: Throwable) {
+                t.rethrowIfCancellation()
+                null
+            } ?: return@launch
 
             moveTo(coordinates.lat, coordinates.lon)
         }

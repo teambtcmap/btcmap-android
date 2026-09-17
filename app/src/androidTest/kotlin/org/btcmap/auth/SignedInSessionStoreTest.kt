@@ -61,9 +61,12 @@ class SignedInSessionStoreTest {
     fun rollsBackTokenWhenCachedUserCannotBeStored() = runBlocking {
         val db = Database(FailingUserInsertDriver(), ":memory:")
 
-        val error = runCatching {
+        val error = try {
             storeSignedInSession(db, prefs, response("token-1"))
-        }.exceptionOrNull()
+            null
+        } catch (t: Throwable) {
+            t
+        }
 
         Assert.assertNotNull(error)
         Assert.assertNull(prefs.authToken)
@@ -79,9 +82,12 @@ class SignedInSessionStoreTest {
         val db = Database(FailingUserInsertDriver(failOnUserInsert = 2), ":memory:")
         db.user.insert(dbUser(id = 99, name = "stale"))
 
-        val error = runCatching {
+        val error = try {
             storeSignedInSession(db, prefs, response("new-token"))
-        }.exceptionOrNull()
+            null
+        } catch (t: Throwable) {
+            t
+        }
 
         Assert.assertNotNull(error)
         Assert.assertEquals("old-token", prefs.authToken)

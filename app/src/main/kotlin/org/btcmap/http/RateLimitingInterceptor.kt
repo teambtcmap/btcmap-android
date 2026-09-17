@@ -4,6 +4,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import kotlin.random.Random
 
 object RateLimitingInterceptor : Interceptor {
@@ -39,8 +40,10 @@ internal fun Response.retryAfterMillis(): Long? {
 
     value.toLongOrNull()?.let { return it * 1000 }
 
-    return runCatching {
+    return try {
         val date = ZonedDateTime.parse(value, DateTimeFormatter.RFC_1123_DATE_TIME)
         (date.toEpochSecond() - ZonedDateTime.now().toEpochSecond()).coerceAtLeast(0) * 1000
-    }.getOrNull()
+    } catch (e: DateTimeParseException) {
+        null
+    }
 }

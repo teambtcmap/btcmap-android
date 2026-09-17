@@ -110,11 +110,17 @@ class Api(
         removePrefix("Bearer ").takeIf { it.isNotBlank() }
 
     private fun Response.toApiException(): ApiException {
-        val body = runCatching { body.string() }.getOrDefault("")
+        val body = try {
+            body.string()
+        } catch (e: IOException) {
+            ""
+        }
 
-        val errorBody = runCatching {
+        val errorBody = try {
             JsonParser.parseString(body).asJsonObject
-        }.getOrNull()
+        } catch (e: RuntimeException) {
+            null
+        }
 
         val message = errorBody?.nonBlankStringOrNull("message")
         val errorCode = errorBody?.nonBlankStringOrNull("code")

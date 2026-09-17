@@ -99,17 +99,23 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
             release.countDown()
 
             waitUntil {
-                runCatching {
+                try {
                     onView(withText("boom")).inRoot(isDialog())
                         .check(matches(isDisplayed()))
-                }.isSuccess
+                    true
+                } catch (t: Throwable) {
+                    false
+                }
             }
 
             waitUntil {
-                runCatching {
+                try {
                     onView(withText(android.R.string.ok)).inRoot(isDialog())
                         .check(matches(isDisplayed()))
-                }.isSuccess
+                    true
+                } catch (t: Throwable) {
+                    false
+                }
             }
             onView(withText(android.R.string.ok)).inRoot(isDialog()).perform(click())
 

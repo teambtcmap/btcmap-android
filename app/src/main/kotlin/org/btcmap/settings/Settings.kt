@@ -113,7 +113,11 @@ class Settings(
         // migration is retried on a later start instead of being permanently
         // skipped. (Within this process the cache is already bound, so the
         // retry happens when a new Settings instance loads the database.)
-        val values = runCatching { legacyValues() }.getOrNull() ?: return
+        val values = try {
+            legacyValues()
+        } catch (e: Exception) {
+            return
+        }
         val imported = mutableSetOf<String>()
         db.transaction {
             for ((key, value) in values) {

@@ -106,10 +106,13 @@ class SignInErrorTest {
                 onView(withId(android.R.id.button1)).inRoot(isDialog()).perform(click())
 
                 waitUntil {
-                    runCatching {
+                    try {
                         onView(withText(R.string.failed_to_sign_in)).inRoot(isDialog())
                             .check(matches(isDisplayed()))
-                    }.isSuccess
+                        true
+                    } catch (t: Throwable) {
+                        false
+                    }
                 }
 
                 onView(withText(R.string.failed_to_sign_in)).inRoot(isDialog())

@@ -107,10 +107,13 @@ class AreaBookmarkTest : AreaScreenTest() {
             scenario.onActivity { save(area) }
 
             waitUntil {
-                runCatching {
+                try {
                     onView(withText(R.string.account)).inRoot(isDialog())
                         .check(matches(isDisplayed()))
-                }.isSuccess
+                    true
+                } catch (t: Throwable) {
+                    false
+                }
             }
             Assert.assertFalse(saving.get())
         }

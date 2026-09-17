@@ -113,7 +113,11 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
 
     private fun mode(): AuthMode {
         val name = requireArguments().getString(ARG_MODE) ?: AuthMode.SignIn.name
-        return runCatching { AuthMode.valueOf(name) }.getOrDefault(AuthMode.SignIn)
+        return try {
+            AuthMode.valueOf(name)
+        } catch (e: IllegalArgumentException) {
+            AuthMode.SignIn
+        }
     }
 
     companion object {

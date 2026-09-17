@@ -24,7 +24,7 @@ Bundled assets (places snapshot, map styles) are managed outside Gradle via the
 # Run all unit tests
 ./gradlew testDebugUnitTest
 
-# Run all instrumented tests (requires emulator/device)
+# Run all instrumented tests
 ./gradlew connectedDebugAndroidTest
 
 # Run a single instrumented test class
@@ -33,6 +33,18 @@ Bundled assets (places snapshot, map styles) are managed outside Gradle via the
 # Run a single test method
 ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=org.btcmap.ExampleInstrumentedTest#useAppContext
 ```
+
+Instrumented tests run against `emulator-5554`. Treat the emulator as always
+available: if `adb devices` does not list it, start it yourself with
+`./devtools emulator start` (do not ask the user) and wait for boot to finish
+(`adb -s emulator-5554 shell getprop sys.boot_completed` returns `1`) before
+running the tests.
+
+`-Pandroid.testInstrumentationRunnerArguments.class` does not reliably run a
+comma-separated list: only the first class is executed. To target several
+classes, run one `connectedDebugAndroidTest` invocation per class (Gradle reuses
+the already-installed APKs, so each run is quick), or run the whole suite with a
+plain `./gradlew connectedDebugAndroidTest`.
 
 ### Linting
 ```bash
@@ -60,7 +72,7 @@ The `./devtools` wrapper manages the emulator and app deployment. Default device
 ./devtools bundle all          # Run both bundlers
 ```
 
-When asked to "launch", "run", or "start" the app, use `./devtools app run` (it builds, installs and launches in one step). If the emulator is not running, first run `./devtools emulator start` and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy-beta` and `./devtools app deploy-release` build and push APK artifacts to the remote `btcmap-api` host — use only when explicitly asked to publish a build.
+When asked to "launch", "run", or "start" the app, use `./devtools app run` (it builds, installs and launches in one step). Assume the emulator is already running; if it is not, start it yourself with `./devtools emulator start` and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy-beta` and `./devtools app deploy-release` build and push APK artifacts to the remote `btcmap-api` host — use only when explicitly asked to publish a build.
 
 ## Code Style Guidelines
 
@@ -82,8 +94,11 @@ When asked to "launch", "run", or "start" the app, use `./devtools app run` (it 
 - **Color Picker**: Colorpicker library
 
 ## Testing
-- Instrumented tests are run by humans and are lower priority
-- Run unit tests (app/src/test) before reporting any task as done
+- Run both unit tests (app/src/test) and the instrumented tests relevant to the
+  change before reporting any task as done; do not treat instrumented tests as
+  optional or lower priority
+- Assume `emulator-5554` is running. If it is not, start it with
+  `./devtools emulator start` and wait for boot before running the tests
 - Some instrumented tests are flaky on the emulator and fail independently of
   the change under test. Ignore failures from MapLibre-based map
   rendering/interaction tests (e.g. `MapPlaceSelectionTest`) and other

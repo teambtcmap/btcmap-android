@@ -116,10 +116,13 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
             onView(withId(R.id.btn_continue)).perform(click())
 
             waitUntil {
-                runCatching {
+                try {
                     onView(withText("boom")).inRoot(isDialog())
                         .check(matches(isDisplayed()))
-                }.isSuccess
+                    true
+                } catch (t: Throwable) {
+                    false
+                }
             }
             waitUntilOnMain {
                 fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
@@ -140,10 +143,13 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
             scenario.onActivity { activity = it }
 
             waitUntil {
-                runCatching {
+                try {
                     onView(withText("boom")).inRoot(isDialog())
                         .check(matches(isDisplayed()))
-                }.isSuccess
+                    true
+                } catch (t: Throwable) {
+                    false
+                }
             }
             waitUntilOnMain {
                 activity.supportFragmentManager.findFragmentByTag(BOOST_TAG) == null

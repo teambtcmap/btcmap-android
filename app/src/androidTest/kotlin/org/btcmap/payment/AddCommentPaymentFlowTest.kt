@@ -111,10 +111,13 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
             onView(withId(R.id.btn_continue)).perform(click())
 
             waitUntil {
-                runCatching {
+                try {
                     onView(withText("boom")).inRoot(isDialog())
                         .check(matches(isDisplayed()))
-                }.isSuccess
+                    true
+                } catch (t: Throwable) {
+                    false
+                }
             }
             waitUntilOnMain {
                 val view = fragment.requireView()

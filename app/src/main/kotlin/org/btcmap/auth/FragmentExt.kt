@@ -64,8 +64,11 @@ fun Fragment.registerAuthResultListener(onAuthenticated: (extras: Bundle) -> Uni
     ) { _, result ->
         val modeName = result.getString(AuthDialogFragment.MODE)
             ?: return@setFragmentResultListener
-        val mode = runCatching { AuthMode.valueOf(modeName) }.getOrNull()
-            ?: return@setFragmentResultListener
+        val mode = try {
+            AuthMode.valueOf(modeName)
+        } catch (e: IllegalArgumentException) {
+            null
+        } ?: return@setFragmentResultListener
         val username = result.getString(AuthDialogFragment.USERNAME).orEmpty()
         val password = result.getString(AuthDialogFragment.PASSWORD).orEmpty()
         val extras = result.getBundle(AuthDialogFragment.EXTRAS) ?: Bundle()

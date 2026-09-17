@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Fix the map crashing on launch when the bundled offline places snapshot is missing or malformed
 - Keep the merchant boost quote and the boost or comment invoice when the device is rotated
 - Stop a second merchant boost from being ordered (and paid) after an invoice was already shown
 - Stop polling for a boost or comment payment while the app is in the background

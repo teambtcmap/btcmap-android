@@ -1,5 +1,6 @@
 package org.btcmap.payment
 
+import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -54,7 +55,9 @@ internal class InvoicePaymentController(
 
     private fun openWallet(invoice: String) {
         val intent = Intent(Intent.ACTION_VIEW, "lightning:$invoice".toUri())
-        runCatching { fragment.startActivity(intent) }.onFailure {
+        try {
+            fragment.startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
             Toast.makeText(
                 fragment.requireContext(),
                 R.string.you_dont_have_a_compatible_wallet,
