@@ -251,6 +251,19 @@ class PlaceQueriesTest {
     }
 
     @Test
+    fun selectMaxUpdatedAt_comparesByInstantNotByText() {
+        val db = createDatabase()
+        // ZonedDateTime.toString() drops a zero fraction, so the earlier
+        // "2024-01-01T10:00Z" sorts after "2024-01-01T10:00:00.500Z" as text.
+        db.place.insert(listOf(createPlace(id = 1L, updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"))))
+        db.place.insert(listOf(createPlace(id = 2L, updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00.500Z"))))
+
+        val result = db.place.selectMaxUpdatedAt()
+
+        Assert.assertEquals(ZonedDateTime.parse("2024-01-01T10:00:00.500Z"), result)
+    }
+
+    @Test
     fun selectCount_returnsCorrectCount() {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L)))

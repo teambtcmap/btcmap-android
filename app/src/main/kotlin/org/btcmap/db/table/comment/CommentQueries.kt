@@ -36,7 +36,7 @@ class CommentQueries(private val conn: SQLiteConnection) {
             SELECT ${FullProjection.COLUMNS}
             FROM $TABLE
             WHERE $PLACE_ID = ?1
-            ORDER BY $CREATED_AT DESC;
+            ORDER BY julianday($CREATED_AT) DESC;
             """
         ).use {
             it.bindLong(1, placeId)
@@ -49,8 +49,20 @@ class CommentQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectMaxUpdatedAt(): ZonedDateTime? {
-        conn.prepare("SELECT max($UPDATED_AT) FROM $TABLE;").use {
-            it.step()
+        // julianday, not plain max(): timestamps are stored as text and
+        // ZonedDateTime.toString() is not fixed-width (it drops a zero second
+        // and a zero fraction), so text ordering is not chronological.
+        conn.prepare(
+            """
+            SELECT $UPDATED_AT
+            FROM $TABLE
+            ORDER BY julianday($UPDATED_AT) DESC
+            LIMIT 1;
+            """
+        ).use {
+            if (!it.step()) {
+                return null
+            }
             return it.getZonedDateTimeOrNull(0)
         }
     }

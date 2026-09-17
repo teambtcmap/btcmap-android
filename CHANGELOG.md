@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep retrying the comment sync after a payment even when another comment syncs in the meantime
+- Stop a paid comment from re-triggering the post-payment sync when the comments screen is opened again later
+- Fix the comments screen add button ignoring right-to-left layout insets
 - Fix the comments screen missing a freshly paid comment when the server publishes it a moment after the payment is confirmed
 - Read a merchant's comments off the main thread so opening a place does not block on the database
 - Fix a comment delta sync crashing when the server returns a comment that is already stored

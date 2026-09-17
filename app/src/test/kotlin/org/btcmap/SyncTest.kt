@@ -249,7 +249,6 @@ class SyncTest {
         val report = sync.syncComments()
 
         Assert.assertEquals(1L, report.rowsAffected)
-        Assert.assertEquals(1L, report.upserted)
         val comments = db.comment.selectByPlaceId(100)
         Assert.assertEquals(1, comments.size)
         Assert.assertEquals("Great coffee!", comments[0].comment)
@@ -270,7 +269,6 @@ class SyncTest {
         val report = sync.syncComments()
 
         Assert.assertEquals(0L, report.rowsAffected)
-        Assert.assertEquals(0L, report.upserted)
     }
 
     @Test
@@ -313,7 +311,6 @@ class SyncTest {
         val report = sync.syncComments()
 
         Assert.assertEquals(1L, report.rowsAffected)
-        Assert.assertEquals(0L, report.upserted)
         val comments = db.comment.selectByPlaceId(100)
         Assert.assertTrue(comments.isEmpty())
     }
@@ -350,12 +347,10 @@ class SyncTest {
 
         val hidden = sync.syncComments()
         Assert.assertEquals(1L, hidden.rowsAffected)
-        Assert.assertEquals("a hidden comment must not count as stored", 0L, hidden.upserted)
-        Assert.assertTrue(db.comment.selectByPlaceId(100).isEmpty())
+        Assert.assertTrue("a hidden comment must not be stored", db.comment.selectByPlaceId(100).isEmpty())
 
         val published = sync.syncComments()
         Assert.assertEquals(1L, published.rowsAffected)
-        Assert.assertEquals(1L, published.upserted)
         Assert.assertEquals("gm", db.comment.selectByPlaceId(100).single().comment)
     }
 
@@ -402,6 +397,87 @@ class SyncTest {
         Assert.assertEquals(listOf("1000", "2000"), requestedLimits.toList())
         Assert.assertEquals(1501L, report.rowsAffected)
         Assert.assertEquals(1501, db.comment.selectByPlaceId(100).size)
+    }
+
+    @Test
+    fun nextUpdatedAtCursor_advancesToMaxWhenPageIsNotFull() {
+        val cursor = nextUpdatedAtCursor(
+            listOf("2024-01-01T00:00:00Z", "2024-01-02T00:00:00Z"),
+            pageSize = 10,
+        )
+
+        Assert.assertEquals(ZonedDateTime.parse("2024-01-02T00:00:00Z"), cursor)
+    }
+
+    @Test
+    fun nextUpdatedAtCursor_stopsBeforeTheNewestGroupWhenPageIsFull() {
+        // A full page can be cut off inside the newest timestamp group, so the
+        // cursor may only advance to the timestamp before it.
+        val cursor = nextUpdatedAtCursor(
+            listOf(
+                "2024-01-01T00:00:00Z",
+                "2024-01-02T00:00:00Z",
+                "2024-01-02T00:00:00Z",
+            ),
+            pageSize = 3,
+        )
+
+        Assert.assertEquals(ZonedDateTime.parse("2024-01-01T00:00:00Z"), cursor)
+    }
+
+    @Test
+    fun nextUpdatedAtCursor_signalsWhenTheWholePageSharesOneTimestamp() {
+        val cursor = nextUpdatedAtCursor(
+            listOf("2024-01-01T00:00:00Z", "2024-01-01T00:00:00Z"),
+            pageSize = 2,
+        )
+
+        Assert.assertNull(cursor)
+    }
+
+    @Test
+    fun syncComments_readsATieGroupSplitAcrossPages() = runTest {
+        val db = createDatabase()
+        val api = createApi()
+
+        val olderTimestamp = "2024-01-01T00:00:00Z"
+        val tieTimestamp = "2024-01-02T00:00:00Z"
+        // The first page ends in the middle of the tieTimestamp group.
+        val rows = (1L..900L).map { SyncRow(it, olderTimestamp) } +
+            (901L..1600L).map { SyncRow(it, tieTimestamp) }
+        serverRule.server.dispatcher = pagedCommentDispatcher(rows)
+
+        val sync = Sync(api, db)
+        val report = sync.syncComments()
+
+        Assert.assertEquals(1600, db.comment.selectByPlaceId(100).size)
+        Assert.assertTrue("affected at least every row", report.rowsAffected >= 1600)
+
+        // The cursor must be left on the tie group, so the next sync is a no-op
+        // instead of re-reading or skipping rows.
+        Assert.assertEquals(0L, sync.syncComments().rowsAffected)
+        Assert.assertEquals(1600, db.comment.selectByPlaceId(100).size)
+    }
+
+    @Test
+    fun syncPlaces_readsATieGroupSplitAcrossPages() = runTest {
+        val db = createDatabase()
+        val api = createApi()
+
+        val olderTimestamp = "2024-01-01T00:00:00Z"
+        val tieTimestamp = "2024-01-02T00:00:00Z"
+        // The base place page is 10_000, so the split needs more than that.
+        val rows = (1L..9000L).map { SyncRow(it, olderTimestamp) } +
+            (9001L..16000L).map { SyncRow(it, tieTimestamp) }
+        serverRule.server.dispatcher = pagedPlaceDispatcher(rows)
+
+        val sync = Sync(api, db)
+        val report = sync.syncPlaces()
+
+        Assert.assertEquals(16000L, db.place.selectCount())
+        Assert.assertTrue("affected at least every row", report.rowsAffected >= 16000)
+        Assert.assertEquals(0L, sync.syncPlaces().rowsAffected)
+        Assert.assertEquals(16000L, db.place.selectCount())
     }
 
     @Test
@@ -470,5 +546,43 @@ class SyncTest {
         Assert.assertEquals(0L, report.rowsAffected)
         val events = db.event.selectAll()
         Assert.assertTrue(events.isEmpty())
+    }
+
+    private data class SyncRow(
+        val id: Long,
+        val updatedAt: String,
+    )
+
+    /**
+     * Serves [rows] the way the API does: ordered by `(updated_at, id)` and cut
+     * with `limit`, only returning rows newer than `updated_since`.
+     */
+    private fun pagedCommentDispatcher(rows: List<SyncRow>): Dispatcher =
+        pagedDispatcher(rows) { row ->
+            """{"id":${row.id},"place_id":100,"text":"c","created_at":"${row.updatedAt}","updated_at":"${row.updatedAt}","deleted_at":null}"""
+        }
+
+    private fun pagedPlaceDispatcher(rows: List<SyncRow>): Dispatcher =
+        pagedDispatcher(rows) { row ->
+            """{"id":${row.id},"lat":40.7128,"lon":-74.006,"icon":"coffee","name":"p","localized_name":null,"updated_at":"${row.updatedAt}","deleted_at":null,"required_app_url":null,"boosted_until":null,"verified_at":null,"address":null,"opening_hours":null,"localized_opening_hours":null,"website":null,"phone":null,"email":null,"twitter":null,"facebook":null,"instagram":null,"line":null,"comments":0,"telegram":null,"osm_id":null}"""
+        }
+
+    private fun pagedDispatcher(
+        rows: List<SyncRow>,
+        render: (SyncRow) -> String,
+    ): Dispatcher = object : Dispatcher() {
+        override fun dispatch(request: RecordedRequest): MockResponse {
+            val limit = request.url.queryParameter("limit")!!.toLong()
+            val since = request.url.queryParameter("updated_since")
+                ?.let { ZonedDateTime.parse(it) }
+            val page = rows
+                .filter { since == null || ZonedDateTime.parse(it.updatedAt) > since }
+                .sortedWith(compareBy({ it.updatedAt }, { it.id }))
+                .take(limit.toInt())
+            return MockResponse.Builder()
+                .addHeader("Content-Type", "application/json")
+                .body(page.joinToString(prefix = "[", postfix = "]", transform = render))
+                .build()
+        }
     }
 }

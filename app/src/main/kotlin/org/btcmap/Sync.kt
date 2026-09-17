@@ -45,20 +45,13 @@ class Sync(val api: Api, val db: Database) {
                     break
                 }
 
-                val maxUpdatedAt = delta.maxBy { ZonedDateTime.parse(it.updatedAt) }.updatedAt
-
-                // The server filters with `updated_at > updated_since` and orders
-                // by `updated_at`. A full batch whose rows all share one timestamp
-                // may be truncating a larger group with that same timestamp, and
-                // advancing the cursor to it would silently skip the rest of the
-                // group. Keep the cursor and widen the request until the batch
-                // either isn't full or spans more than one timestamp.
-                if (delta.size.toLong() == batchSize && delta.all { it.updatedAt == maxUpdatedAt }) {
+                val cursor = nextUpdatedAtCursor(delta.map { it.updatedAt }, batchSize)
+                if (cursor == null) {
                     batchSize *= 2
                     continue
                 }
 
-                maxKnownUpdatedAt = ZonedDateTime.parse(maxUpdatedAt)
+                maxKnownUpdatedAt = cursor
                 val reachedTip = delta.size < batchSize
 
                 val newOrChanged = delta.filter { it.deletedAt == null }
@@ -87,12 +80,6 @@ class Sync(val api: Api, val db: Database) {
     data class CommentSyncReport(
         val duration: Duration,
         val rowsAffected: Long,
-        /**
-         * Rows that were actually stored (inserted or replaced). [rowsAffected]
-         * also counts comments the server deleted, which are dropped instead of
-         * stored and so do not change what the list shows.
-         */
-        val upserted: Long,
     )
 
     suspend fun syncComments(): CommentSyncReport {
@@ -101,7 +88,6 @@ class Sync(val api: Api, val db: Database) {
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
             var rowsAffected = 0L
-            var upserted = 0L
             var maxKnownUpdatedAt = db.comment.selectMaxUpdatedAt()
             var batchSize = baseBatchSize
 
@@ -114,7 +100,6 @@ class Sync(val api: Api, val db: Database) {
                     return@withContext CommentSyncReport(
                         duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                         rowsAffected = rowsAffected,
-                        upserted = upserted,
                     )
                 }
 
@@ -122,16 +107,13 @@ class Sync(val api: Api, val db: Database) {
                     break
                 }
 
-                val maxUpdatedAt = delta.maxBy { ZonedDateTime.parse(it.updatedAt) }.updatedAt
-
-                // See syncPlaces for why a full single-timestamp batch must not
-                // advance the cursor.
-                if (delta.size.toLong() == batchSize && delta.all { it.updatedAt == maxUpdatedAt }) {
+                val cursor = nextUpdatedAtCursor(delta.map { it.updatedAt }, batchSize)
+                if (cursor == null) {
                     batchSize *= 2
                     continue
                 }
 
-                maxKnownUpdatedAt = ZonedDateTime.parse(maxUpdatedAt)
+                maxKnownUpdatedAt = cursor
                 val reachedTip = delta.size < batchSize
 
                 val newOrChanged = delta.filter { it.deletedAt == null }
@@ -154,7 +136,6 @@ class Sync(val api: Api, val db: Database) {
                 }
 
                 rowsAffected += delta.size
-                upserted += newOrChanged.size
 
                 if (reachedTip) {
                     break
@@ -165,7 +146,6 @@ class Sync(val api: Api, val db: Database) {
             CommentSyncReport(
                 duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                 rowsAffected = rowsAffected,
-                upserted = upserted,
             )
         }
     }
@@ -211,4 +191,26 @@ class Sync(val api: Api, val db: Database) {
             )
         }
     }
+}
+
+/**
+ * Returns the new `updated_at` cursor after reading a page, or null when the
+ * page is full and every row shares one timestamp.
+ *
+ * The server filters with `updated_at > updated_since` and orders by
+ * `updated_at`, so a full page can be cut off in the middle of the newest
+ * timestamp group. Advancing the cursor to that group's timestamp would skip
+ * the rest of the group on the next request. Only a timestamp that is
+ * certainly complete is safe: on a full page that is the second-newest
+ * distinct timestamp, since re-reading the newest group is harmless (the
+ * insert replaces the rows). When every row shares one timestamp there is no
+ * such timestamp, and the caller must widen the request instead.
+ */
+internal fun nextUpdatedAtCursor(timestamps: List<String>, pageSize: Long): ZonedDateTime? {
+    if (timestamps.size.toLong() < pageSize) {
+        return timestamps.maxOf { ZonedDateTime.parse(it) }
+    }
+
+    val distinct = timestamps.map { ZonedDateTime.parse(it) }.distinct().sorted()
+    return distinct.getOrNull(distinct.size - 2)
 }

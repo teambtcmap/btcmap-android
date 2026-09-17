@@ -66,11 +66,11 @@ class CommentsFragment : Fragment() {
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val margin = (resources.displayMetrics.density * 24).toInt()
 
             v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                rightMargin = insets.right + (resources.displayMetrics.density * 24).toInt()
-                bottomMargin = insets.bottom + (resources.displayMetrics.density * 24).toInt()
-                leftMargin = insets.left
+                marginEnd = insets.right + margin
+                bottomMargin = insets.bottom + margin
             }
 
             WindowInsetsCompat.CONSUMED
@@ -95,6 +95,9 @@ class CommentsFragment : Fragment() {
             viewLifecycleOwner,
         ) { _, _ ->
             postPaymentSync = true
+            // The result is kept by the FragmentManager until cleared, so a
+            // later visit to this screen would otherwise retry again.
+            parentFragmentManager.clearFragmentResult(AddCommentFragment.REQUEST_KEY)
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -115,13 +118,14 @@ class CommentsFragment : Fragment() {
         }
     }
 
-    private suspend fun renderComments(adapter: CommentsAdapter) {
+    private suspend fun renderComments(adapter: CommentsAdapter): List<CommentsAdapterItem> {
         val items = withContext(Dispatchers.IO) {
             db().comment.selectByPlaceId(args.placeId).map { it.toAdapterItem() }
         }
 
         adapter.submitList(items)
         binding.empty.isVisible = items.isEmpty()
+        return items
     }
 
     private suspend fun syncComments(adapter: CommentsAdapter) {
@@ -139,16 +143,18 @@ class CommentsFragment : Fragment() {
      * leaves and re-enters the screen.
      */
     private suspend fun syncCommentsWithRetry(adapter: CommentsAdapter) {
+        // A hidden comment is dropped instead of stored, so the paid comment
+        // shows up as a comment id that was not in the list before. Waiting for
+        // that specific signal (rather than for any stored row) means an
+        // unrelated comment syncing in the meantime cannot end the retries.
+        val knownIds = withContext(Dispatchers.IO) {
+            db().comment.selectByPlaceId(args.placeId).map { it.id }.toSet()
+        }
+
         repeat(POST_PAYMENT_SYNC_ATTEMPTS) { attempt ->
-            val report = sync().syncComments()
+            sync().syncComments()
 
-            if (report.rowsAffected > 0) {
-                renderComments(adapter)
-            }
-
-            // upserted, not rowsAffected: a comment that is still hidden counts
-            // as affected but is dropped, so it must not stop the retries.
-            if (report.upserted > 0) {
+            if (renderComments(adapter).any { it.id !in knownIds }) {
                 return
             }
 

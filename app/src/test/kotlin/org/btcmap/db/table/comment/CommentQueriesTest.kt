@@ -148,6 +148,59 @@ class CommentQueriesTest {
     }
 
     @Test
+    fun selectMaxUpdatedAt_comparesByInstantNotByText() {
+        val db = createDatabase()
+        // ZonedDateTime.toString() drops a zero fraction, so the earlier
+        // "2024-01-01T10:00Z" sorts after "2024-01-01T10:00:00.500Z" as text.
+        val earlier = Comment(
+            id = 1L,
+            placeId = 1L,
+            comment = "Earlier",
+            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+        )
+        val later = Comment(
+            id = 2L,
+            placeId = 1L,
+            comment = "Later",
+            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
+            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
+        )
+
+        db.comment.insert(listOf(earlier, later))
+
+        Assert.assertEquals(
+            ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
+            db.comment.selectMaxUpdatedAt(),
+        )
+    }
+
+    @Test
+    fun selectByPlaceId_ordersByInstantNotByText() {
+        val db = createDatabase()
+        val earlier = Comment(
+            id = 1L,
+            placeId = 1L,
+            comment = "Earlier",
+            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+        )
+        val later = Comment(
+            id = 2L,
+            placeId = 1L,
+            comment = "Later",
+            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
+            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
+        )
+
+        db.comment.insert(listOf(earlier, later))
+        val results = db.comment.selectByPlaceId(1L)
+
+        Assert.assertEquals("Later", results[0].comment)
+        Assert.assertEquals("Earlier", results[1].comment)
+    }
+
+    @Test
     fun deleteById_removesComment() {
         val db = createDatabase()
         val comment = Comment(

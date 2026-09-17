@@ -188,8 +188,19 @@ class PlaceQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectMaxUpdatedAt(): ZonedDateTime? {
-        conn.prepare("SELECT max($UPDATED_AT) FROM $TABLE;").use {
-            it.step()
+        // See CommentQueries.selectMaxUpdatedAt: text ordering of
+        // ZonedDateTime.toString() values is not chronological.
+        conn.prepare(
+            """
+            SELECT $UPDATED_AT
+            FROM $TABLE
+            ORDER BY julianday($UPDATED_AT) DESC
+            LIMIT 1;
+            """
+        ).use {
+            if (!it.step()) {
+                return null
+            }
             return it.getZonedDateTimeOrNull(0)
         }
     }

@@ -224,6 +224,58 @@ class CommentsFragmentTest {
         }
     }
 
+    /**
+     * The old retry stopped as soon as any visible comment was stored. An
+     * unrelated comment syncing in the meantime must not end the retries before
+     * the paid comment is published.
+     */
+    @Test
+    fun postedCommentAppearsEvenWhenAnotherCommentSyncsFirst() {
+        val dispatcher = UnrelatedCommentDispatcher()
+        apiRule.server.dispatcher = dispatcher
+
+        launchComments { scenario, fragment ->
+            lateinit var activity: Activity
+            scenario.onActivity { activity = it }
+
+            waitUntilOnMain {
+                fragment.requireView().findViewById<View>(R.id.empty).isVisible
+            }
+            waitUntil { dispatcher.commentsRequests.get() >= 1 }
+
+            onView(withId(R.id.fab)).perform(click())
+            waitUntilOnMain {
+                activity.supportFragmentManager
+                    .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
+            }
+            waitUntilOnMain {
+                activity.findViewById<Button>(R.id.btn_continue)?.isEnabled == true
+            }
+
+            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
+            onView(withId(R.id.btn_continue)).perform(click())
+
+            waitUntil { dispatcher.orderRequests.get() == 1 }
+            waitUntilOnMain {
+                activity.supportFragmentManager
+                    .findFragmentById(R.id.fragmentContainerView) is CommentsFragment
+            }
+
+            waitUntil {
+                try {
+                    onView(withText("gm")).check(matches(isDisplayed()))
+                    true
+                } catch (t: Throwable) {
+                    false
+                }
+            }
+            Assert.assertTrue(
+                "the list must have kept retrying past the unrelated comment",
+                dispatcher.commentsAfterPost.get() >= 2,
+            )
+        }
+    }
+
     private fun quoteDispatcher(): Dispatcher = object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse =
             when (request.url.encodedPath) {
@@ -308,6 +360,50 @@ class CommentsFragmentTest {
         }
     }
 
+    /**
+     * Like [DelayedPublishDispatcher], but the first sync after the order also
+     * brings a visible comment for another place. The old retry stopped on any
+     * stored comment and would have left the paid comment hidden.
+     */
+    private class UnrelatedCommentDispatcher : Dispatcher() {
+        val posted = AtomicBoolean(false)
+        val orderRequests = AtomicInteger()
+        val commentsRequests = AtomicInteger()
+        val invoiceRequests = AtomicInteger()
+        val commentsAfterPost = AtomicInteger()
+
+        override fun dispatch(request: RecordedRequest): MockResponse {
+            val path = request.url.encodedPath
+            return when {
+                path == "/v4/place-comments/quote" -> jsonResponse("""{"quote_sat":1000}""")
+
+                path == "/v4/place-comments" && request.method == "POST" -> {
+                    posted.set(true)
+                    orderRequests.incrementAndGet()
+                    jsonResponse("""{"invoice_id":"c1","invoice":"lnbc-c"}""")
+                }
+
+                path == "/v4/place-comments" -> {
+                    commentsRequests.incrementAndGet()
+                    when {
+                        !posted.get() -> jsonResponse("[]")
+                        commentsAfterPost.getAndIncrement() == 0 ->
+                            jsonResponse(HIDDEN_AND_UNRELATED_COMMENTS_JSON)
+                        else -> jsonResponse(POSTED_COMMENT_JSON)
+                    }
+                }
+
+                path.startsWith("/v4/invoices/") -> {
+                    val index = invoiceRequests.getAndIncrement()
+                    val status = if (index == 0) "unpaid" else "paid"
+                    jsonResponse("""{"id":"c1","status":"$status"}""")
+                }
+
+                else -> jsonResponse("[]")
+            }
+        }
+    }
+
     private companion object {
         const val COMMENTS_TAG = "comments"
 
@@ -316,6 +412,10 @@ class CommentsFragmentTest {
 
         const val HIDDEN_COMMENT_JSON =
             """[{"id":9,"place_id":1,"text":"gm","created_at":"2024-06-03T10:00:00Z","updated_at":"2024-06-03T10:00:00Z","deleted_at":"2024-06-03T10:00:00Z"}]"""
+
+        const val HIDDEN_AND_UNRELATED_COMMENTS_JSON =
+            """[{"id":9,"place_id":1,"text":"gm","created_at":"2024-06-03T10:00:00Z","updated_at":"2024-06-03T10:00:00Z","deleted_at":"2024-06-03T10:00:00Z"},""" +
+                """{"id":100,"place_id":999,"text":"other","created_at":"2024-06-03T10:00:00Z","updated_at":"2024-06-03T10:00:00Z","deleted_at":null}]"""
 
         fun jsonResponse(body: String, code: Int = 200): MockResponse =
             MockResponse.Builder()
