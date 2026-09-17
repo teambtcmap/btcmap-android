@@ -25,7 +25,8 @@ import org.btcmap.api.toDbUser
 import org.btcmap.api.updatePassword
 import org.btcmap.api.updateUsername
 import org.btcmap.app
-import org.btcmap.auth.ChangePasswordDialogFragment
+import org.btcmap.auth.registerChangePasswordResultListener
+import org.btcmap.auth.showChangePasswordDialog
 import org.btcmap.db
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
@@ -67,6 +68,8 @@ class UserProfileFragment : Fragment() {
             showChangePasswordDialog()
         }
 
+        registerChangePasswordResultListener { current, new -> changePassword(current, new) }
+
         viewLifecycleOwner.lifecycleScope.launch {
             val user = withContext(Dispatchers.IO) { db().user.select() }
             if (user == null) {
@@ -107,12 +110,6 @@ class UserProfileFragment : Fragment() {
 
         binding.noSavedAreas.isVisible = user.savedAreas.isEmpty()
         binding.savedAreasList.isVisible = user.savedAreas.isNotEmpty()
-    }
-
-    private fun showChangePasswordDialog() {
-        val fragment = ChangePasswordDialogFragment.newInstance()
-        fragment.onSubmit = { current, new -> changePassword(current, new) }
-        fragment.show(childFragmentManager, ChangePasswordDialogFragment.TAG)
     }
 
     private fun changePassword(oldPassword: String, newPassword: String) {

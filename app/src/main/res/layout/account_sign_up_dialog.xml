@@ -41,7 +41,8 @@
             android:autofillHints="newPassword"
             android:imeOptions="actionNext"
             android:inputType="textPassword"
-            android:maxLines="1" />
+            android:maxLines="1"
+            android:saveEnabled="false" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -58,7 +59,8 @@
             android:layout_height="wrap_content"
             android:imeOptions="actionDone"
             android:inputType="textPassword"
-            android:maxLines="1" />
+            android:maxLines="1"
+            android:saveEnabled="false" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

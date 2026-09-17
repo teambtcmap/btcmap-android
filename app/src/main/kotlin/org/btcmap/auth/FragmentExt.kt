@@ -1,8 +1,8 @@
 package org.btcmap.auth
 
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
@@ -35,61 +35,83 @@ import kotlin.coroutines.coroutineContext
 
 /**
  * Shows the account chooser and, once the user picks an option, the sign-in or
- * sign-up form. [onComplete] runs after the session has been stored.
+ * sign-up form.
+ *
+ * The submitted credentials are delivered to [registerAuthResultListener], not
+ * through a callback held by a dialog fragment, so a form that is still open
+ * when the device is rotated can still be submitted. [extras] is passed through
+ * unchanged and returned to the listener, so the caller can resume the action
+ * that needed an account.
  */
-fun Fragment.showAuthDialog(onComplete: () -> Unit) {
+fun Fragment.showAuthDialog(extras: Bundle? = null) {
     if (!isAdded) return
 
-    val dialogView = layoutInflater.inflate(R.layout.account_choices_dialog, null)
-    val dialog = MaterialAlertDialogBuilder(requireContext())
-        .setTitle(R.string.account)
-        .setView(dialogView)
-        .setNegativeButton(android.R.string.cancel, null)
-        .create()
-
-    dialogView.findViewById<View>(R.id.createAccountOption).setOnClickListener {
-        dialog.dismiss()
-        showCredentials(AuthMode.SignUp, onComplete)
-    }
-    dialogView.findViewById<View>(R.id.signInOption).setOnClickListener {
-        dialog.dismiss()
-        showCredentials(AuthMode.SignIn, onComplete)
-    }
-
-    dialog.show()
-    dismissOnViewDestroyed(dialog)
+    AuthChooserDialogFragment.newInstance(extras)
+        .show(childFragmentManager, AuthChooserDialogFragment.TAG)
 }
 
-private fun Fragment.showSignInDialog(
-    onComplete: () -> Unit,
-    prefilledUsername: String? = null,
-) {
-    if (!isAdded) return
+/**
+ * Registers the receiver of submitted sign-in/sign-up forms.
+ *
+ * Call this from `onViewCreated` so a fragment recreated after a configuration
+ * change also receives a form submitted afterwards. [onAuthenticated] runs only
+ * once the session has been stored, with the [extras] given to [showAuthDialog].
+ */
+fun Fragment.registerAuthResultListener(onAuthenticated: (extras: Bundle) -> Unit) {
+    childFragmentManager.setFragmentResultListener(
+        AuthDialogFragment.REQUEST_KEY,
+        viewLifecycleOwner,
+    ) { _, result ->
+        val modeName = result.getString(AuthDialogFragment.MODE)
+            ?: return@setFragmentResultListener
+        val mode = runCatching { AuthMode.valueOf(modeName) }.getOrNull()
+            ?: return@setFragmentResultListener
+        val username = result.getString(AuthDialogFragment.USERNAME).orEmpty()
+        val password = result.getString(AuthDialogFragment.PASSWORD).orEmpty()
+        val extras = result.getBundle(AuthDialogFragment.EXTRAS) ?: Bundle()
 
-    showCredentials(AuthMode.SignIn, onComplete, prefilledUsername)
-}
-
-private fun Fragment.showCredentials(
-    mode: AuthMode,
-    onComplete: () -> Unit,
-    prefilledUsername: String? = null,
-) {
-    val fragment = AuthDialogFragment.newCredentials(mode, prefilledUsername)
-    fragment.onSubmit = authSubmitHandler(onComplete)
-    fragment.show(childFragmentManager, AuthDialogFragment.TAG)
-}
-
-private fun Fragment.authSubmitHandler(
-    onComplete: () -> Unit,
-): (mode: AuthMode, username: String, password: String) -> Unit =
-    { mode, username, password ->
         when (mode) {
-            AuthMode.SignIn -> signIn(username, password, onComplete)
-            AuthMode.SignUp -> signUp(username, password, onComplete)
+            AuthMode.SignIn -> signIn(username, password, extras, onAuthenticated)
+            AuthMode.SignUp -> signUp(username, password, extras, onAuthenticated)
         }
     }
+}
 
-private fun Fragment.signUp(username: String, password: String, onComplete: () -> Unit) {
+/**
+ * Shows the change-password form. The submitted passwords are delivered to
+ * [registerChangePasswordResultListener].
+ */
+fun Fragment.showChangePasswordDialog() {
+    if (!isAdded) return
+
+    ChangePasswordDialogFragment.newInstance()
+        .show(childFragmentManager, ChangePasswordDialogFragment.TAG)
+}
+
+/**
+ * Registers the receiver of a submitted change-password form. Call this from
+ * `onViewCreated` so the listener is re-established after a configuration
+ * change. [onSubmit] receives the entered current and new password.
+ */
+fun Fragment.registerChangePasswordResultListener(
+    onSubmit: (current: String, new: String) -> Unit,
+) {
+    childFragmentManager.setFragmentResultListener(
+        ChangePasswordDialogFragment.REQUEST_KEY,
+        viewLifecycleOwner,
+    ) { _, result ->
+        val current = result.getString(ChangePasswordDialogFragment.CURRENT_PASSWORD).orEmpty()
+        val new = result.getString(ChangePasswordDialogFragment.NEW_PASSWORD).orEmpty()
+        onSubmit(current, new)
+    }
+}
+
+private fun Fragment.signUp(
+    username: String,
+    password: String,
+    extras: Bundle,
+    onAuthenticated: (extras: Bundle) -> Unit,
+) {
     viewLifecycleOwner.lifecycleScope.launch {
         val user = runAuthRequest(
             logMessage = "Failed to create new account",
@@ -119,15 +141,26 @@ private fun Fragment.signUp(username: String, password: String, onComplete: () -
                 getString(R.string.account_created_sign_in_failed),
                 Toast.LENGTH_LONG,
             ).show()
-            showSignInDialog(onComplete, prefilledUsername = user.name)
+            if (isAdded) {
+                AuthDialogFragment.newCredentials(
+                    mode = AuthMode.SignIn,
+                    extras = extras,
+                    prefilledUsername = user.name,
+                ).show(childFragmentManager, AuthDialogFragment.TAG)
+            }
             return@launch
         }
 
-        completeSignIn(response, onComplete)
+        completeSignIn(response, extras, onAuthenticated)
     }
 }
 
-private fun Fragment.signIn(username: String, password: String, onComplete: () -> Unit) {
+private fun Fragment.signIn(
+    username: String,
+    password: String,
+    extras: Bundle,
+    onAuthenticated: (extras: Bundle) -> Unit,
+) {
     viewLifecycleOwner.lifecycleScope.launch {
         val response = runAuthRequest(
             logMessage = "Sign in failed",
@@ -140,7 +173,7 @@ private fun Fragment.signIn(username: String, password: String, onComplete: () -
             )
         } ?: return@launch
 
-        completeSignIn(response, onComplete)
+        completeSignIn(response, extras, onAuthenticated)
     }
 }
 
@@ -186,7 +219,11 @@ private fun Fragment.reportAuthError(
     }
 }
 
-private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onComplete: () -> Unit) {
+private suspend fun Fragment.completeSignIn(
+    response: CreateTokenResponse,
+    extras: Bundle,
+    onAuthenticated: (extras: Bundle) -> Unit,
+) {
     try {
         storeSignedInSession(db = db(), prefs = prefs, response = response)
     } catch (e: Exception) {
@@ -200,8 +237,8 @@ private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onCom
     }
 
     // The session is durable now. If the view was destroyed in the meantime the
-    // coroutine is cancelled before the callback runs, so [onComplete] may be
-    // skipped; the account is still signed in and the next screen sees it.
+    // coroutine is cancelled before the callback runs, so [onAuthenticated] may
+    // be skipped; the account is still signed in and the next screen sees it.
     val toastContext = context
     if (toastContext != null) {
         Toast.makeText(
@@ -212,7 +249,7 @@ private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onCom
     }
 
     try {
-        onComplete()
+        onAuthenticated(extras)
     } catch (e: Exception) {
         e.rethrowIfCancellation()
         Log.e(AUTH_TAG, "Signed-in callback failed", e)

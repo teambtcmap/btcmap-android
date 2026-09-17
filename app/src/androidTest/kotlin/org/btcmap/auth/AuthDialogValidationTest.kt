@@ -68,7 +68,7 @@ class AuthDialogValidationTest {
                         setReorderingAllowed(true)
                         replace(R.id.fragmentContainerView, host, HOST_TAG)
                     }
-                    host.showAuthDialog { }
+                    host.showAuthDialog()
                 }
 
                 // Sign-up form, submitted empty: both fields report an error.
@@ -103,6 +103,11 @@ class AuthDialogValidationTest {
             savedInstanceState: Bundle?,
         ): View {
             return FrameLayout(requireContext())
+        }
+
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+            registerAuthResultListener { }
         }
     }
 

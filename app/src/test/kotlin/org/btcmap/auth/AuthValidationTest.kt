@@ -86,21 +86,21 @@ class AuthValidationTest {
     fun changePassword_requiresCurrentPassword() {
         val errors = AuthValidation.changePassword("", "new-password", "new-password")
 
-        Assert.assertEquals(listOf(ChangePasswordError.CurrentRequired), errors)
+        Assert.assertEquals(listOf(AuthError.CurrentPasswordRequired), errors)
     }
 
     @Test
     fun changePassword_requiresNewPassword() {
         val errors = AuthValidation.changePassword("old-password", "", "")
 
-        Assert.assertEquals(listOf(ChangePasswordError.NewRequired), errors)
+        Assert.assertEquals(listOf(AuthError.PasswordRequired), errors)
     }
 
     @Test
     fun changePassword_rejectsTooShortNewPassword() {
         val errors = AuthValidation.changePassword("old-password", "short", "short")
 
-        Assert.assertEquals(listOf(ChangePasswordError.NewTooShort), errors)
+        Assert.assertEquals(listOf(AuthError.PasswordTooShort), errors)
     }
 
     @Test
@@ -108,6 +108,6 @@ class AuthValidationTest {
         val errors =
             AuthValidation.changePassword("old-password", "new-password", "different")
 
-        Assert.assertEquals(listOf(ChangePasswordError.ConfirmationMismatch), errors)
+        Assert.assertEquals(listOf(AuthError.PasswordsDoNotMatch), errors)
     }
 }

@@ -42,6 +42,7 @@ import org.btcmap.api.getEvent
 import org.btcmap.api.getPlaceCoordinates
 import org.btcmap.area.ARG_AREA_ID
 import org.btcmap.area.AreaFragment
+import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db
@@ -120,6 +121,11 @@ class MapFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Registered here, not when the dialog is shown, so a form that was open
+        // when the device rotated still reaches this (recreated) fragment.
+        registerAuthResultListener { navigateToAddPlace() }
+
         // The MapView owns native resources and must receive its lifecycle
         // callbacks; without onDestroy in particular, reopening the map leaves a
         // dead renderer behind and later queries can crash natively.
@@ -644,26 +650,26 @@ class MapFragment : Fragment() {
     }
 
     private fun openAddPlace() {
-        val navigate = {
-            binding.map.getMapAsync { map ->
-                val center = map.cameraPosition.target ?: return@getMapAsync
-                parentFragmentManager.commit {
-                    setReorderingAllowed(true)
-                    replace<AddPlaceFragment>(
-                        R.id.fragmentContainerView, null, Bundle().apply {
-                            putDouble("lat", center.latitude)
-                            putDouble("lon", center.longitude)
-                        }
-                    )
-                    addToBackStack(null)
-                }
-            }
-            Unit
-        }
         if (prefs.authorized) {
-            navigate()
+            navigateToAddPlace()
         } else {
-            showAuthDialog { navigate() }
+            showAuthDialog()
+        }
+    }
+
+    private fun navigateToAddPlace() {
+        binding.map.getMapAsync { map ->
+            val center = map.cameraPosition.target ?: return@getMapAsync
+            parentFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace<AddPlaceFragment>(
+                    R.id.fragmentContainerView, null, Bundle().apply {
+                        putDouble("lat", center.latitude)
+                        putDouble("lon", center.longitude)
+                    }
+                )
+                addToBackStack(null)
+            }
         }
     }
 

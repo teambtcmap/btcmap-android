@@ -40,6 +40,7 @@ import org.btcmap.util.showError
 import org.btcmap.map.getErrorColor
 import org.btcmap.map.getOnSurfaceColor
 import org.btcmap.R
+import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.databinding.PlaceFragmentBinding
@@ -53,6 +54,16 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 class PlaceFragment : Fragment() {
+
+    companion object {
+        private const val EXTRA_AUTH_ACTION = "auth-action"
+        private const val EXTRA_PLACE_ID = "auth-place-id"
+        private const val EXTRA_PLACE_NAME = "auth-place-name"
+        private const val EXTRA_REPORT_TYPE = "auth-report-type"
+
+        private const val AUTH_ACTION_TOGGLE_SAVED = "toggle-saved"
+        private const val AUTH_ACTION_OPEN_REPORT = "open-report"
+    }
 
     private var placeId = 0L
 
@@ -71,6 +82,22 @@ class PlaceFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        // Registered here, not when the dialog is shown, so a form that was open
+        // when the device rotated still reaches this (recreated) fragment.
+        registerAuthResultListener { extras ->
+            when (extras.getString(EXTRA_AUTH_ACTION)) {
+                AUTH_ACTION_TOGGLE_SAVED -> toggleSavedPlaceNow(
+                    placeId = extras.getLong(EXTRA_PLACE_ID, placeId),
+                    placeName = extras.getString(EXTRA_PLACE_NAME) ?: placeName,
+                )
+
+                AUTH_ACTION_OPEN_REPORT -> navigateToReport(
+                    placeId = extras.getLong(EXTRA_PLACE_ID, placeId),
+                    defaultType = extras.getString(EXTRA_REPORT_TYPE),
+                )
+            }
+        }
+
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.directions -> {
@@ -117,23 +144,26 @@ class PlaceFragment : Fragment() {
     }
 
     private fun onSaveClicked() {
-        val toggle = {
-            viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    toggleSavedPlace(placeId, placeName)
-                    updateBookmarkIcon()
-                } catch (e: Throwable) {
-                    e.rethrowIfCancellation()
-                    showError(e)
-                }
-            }
-            Unit
-        }
-
         if (prefs.authorized) {
-            toggle()
+            toggleSavedPlaceNow(placeId, placeName)
         } else {
-            showAuthDialog { toggle() }
+            showAuthDialog(Bundle().apply {
+                putString(EXTRA_AUTH_ACTION, AUTH_ACTION_TOGGLE_SAVED)
+                putLong(EXTRA_PLACE_ID, placeId)
+                putString(EXTRA_PLACE_NAME, placeName)
+            })
+        }
+    }
+
+    private fun toggleSavedPlaceNow(placeId: Long, placeName: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                toggleSavedPlace(placeId, placeName)
+                updateBookmarkIcon()
+            } catch (e: Throwable) {
+                e.rethrowIfCancellation()
+                showError(e)
+            }
         }
     }
 
@@ -363,23 +393,26 @@ class PlaceFragment : Fragment() {
     }
 
     private fun openReport(defaultType: String?) {
-        val placeId = placeId
-        val navigate = {
-            requireActivity().supportFragmentManager.commit {
-                setReorderingAllowed(true)
-                val args = Bundle().apply {
-                    putLong("place_id", placeId)
-                    if (defaultType != null) putString("default_type", defaultType)
-                }
-                replace<ReportPlaceFragment>(R.id.fragmentContainerView, null, args)
-                addToBackStack(null)
-            }
-            Unit
-        }
         if (prefs.authorized) {
-            navigate()
+            navigateToReport(placeId, defaultType)
         } else {
-            showAuthDialog { navigate() }
+            showAuthDialog(Bundle().apply {
+                putString(EXTRA_AUTH_ACTION, AUTH_ACTION_OPEN_REPORT)
+                putLong(EXTRA_PLACE_ID, placeId)
+                if (defaultType != null) putString(EXTRA_REPORT_TYPE, defaultType)
+            })
+        }
+    }
+
+    private fun navigateToReport(placeId: Long, defaultType: String?) {
+        requireActivity().supportFragmentManager.commit {
+            setReorderingAllowed(true)
+            val args = Bundle().apply {
+                putLong("place_id", placeId)
+                if (defaultType != null) putString("default_type", defaultType)
+            }
+            replace<ReportPlaceFragment>(R.id.fragmentContainerView, null, args)
+            addToBackStack(null)
         }
     }
 

@@ -37,6 +37,7 @@ import org.btcmap.api.GetPlaceIssuesItem
 import org.btcmap.api.getArea
 import org.btcmap.api.getAreaEvents
 import org.btcmap.api.getPlaceIssues
+import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.db.table.place.Place
@@ -90,6 +91,17 @@ class AreaFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Registered here, not when the dialog is shown, so a form that was open
+        // when the device rotated still reaches this (recreated) fragment.
+        registerAuthResultListener { extras ->
+            if (extras.getString(EXTRA_AUTH_ACTION) == AUTH_ACTION_TOGGLE_SAVED) {
+                toggleSavedAreaNow(
+                    areaId = extras.getLong(EXTRA_AREA_ID, areaId),
+                    areaName = extras.getString(EXTRA_AREA_NAME) ?: areaName,
+                )
+            }
+        }
 
         binding.toolbar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
@@ -170,23 +182,26 @@ class AreaFragment : Fragment() {
     }
 
     private fun onSaveClicked() {
-        val toggle = {
-            viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    toggleSavedArea(areaId, areaName)
-                    updateBookmarkIcon()
-                } catch (e: Throwable) {
-                    e.rethrowIfCancellation()
-                    showError(e)
-                }
-            }
-            Unit
-        }
-
         if (prefs.authorized) {
-            toggle()
+            toggleSavedAreaNow(areaId, areaName)
         } else {
-            showAuthDialog { toggle() }
+            showAuthDialog(Bundle().apply {
+                putString(EXTRA_AUTH_ACTION, AUTH_ACTION_TOGGLE_SAVED)
+                putLong(EXTRA_AREA_ID, areaId)
+                putString(EXTRA_AREA_NAME, areaName)
+            })
+        }
+    }
+
+    private fun toggleSavedAreaNow(areaId: Long, areaName: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                toggleSavedArea(areaId, areaName)
+                updateBookmarkIcon()
+            } catch (e: Throwable) {
+                e.rethrowIfCancellation()
+                showError(e)
+            }
         }
     }
 
@@ -449,5 +464,11 @@ class AreaFragment : Fragment() {
         private const val ISSUE_FALLBACK_ICON = "warning"
 
         private const val JOIN_US_URL = "https://btcmap.org/join-us"
+
+        private const val EXTRA_AUTH_ACTION = "auth-action"
+        private const val EXTRA_AREA_ID = "auth-area-id"
+        private const val EXTRA_AREA_NAME = "auth-area-name"
+
+        private const val AUTH_ACTION_TOGGLE_SAVED = "toggle-saved"
     }
 }

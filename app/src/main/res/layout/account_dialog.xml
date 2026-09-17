@@ -40,7 +40,8 @@
             android:autofillHints="password"
             android:imeOptions="actionDone"
             android:inputType="textPassword"
-            android:maxLines="1" />
+            android:maxLines="1"
+            android:saveEnabled="false" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

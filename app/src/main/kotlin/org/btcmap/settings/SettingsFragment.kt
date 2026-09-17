@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
+import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.databinding.SettingsFragmentBinding
 import org.btcmap.db
@@ -41,6 +42,7 @@ class SettingsFragment : Fragment() {
         }
 
         updateAccountUi()
+        registerAuthResultListener { updateAccountUi() }
 
         binding.accountButton.setOnClickListener {
             if (prefs.authorized) {
@@ -50,9 +52,7 @@ class SettingsFragment : Fragment() {
                     addToBackStack(null)
                 }
             } else {
-                showAuthDialog {
-                    updateAccountUi()
-                }
+                showAuthDialog()
             }
         }
 

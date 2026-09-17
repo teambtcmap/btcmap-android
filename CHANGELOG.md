@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Fix the sign-in, sign-up and change-password forms doing nothing when submitted after the device was rotated
+- Keep the account chooser open when the device is rotated
+- Submit the account and change-password forms from the keyboard
 - Keep what was typed in the change-password form when the device is rotated
 - Clear a corrected field's error in the account and change-password forms
 - Fix the legacy settings import being permanently skipped when reading the old values fails

@@ -11,6 +11,7 @@ package org.btcmap.auth
  */
 internal enum class AuthError {
     UsernameRequired,
+    CurrentPasswordRequired,
     PasswordRequired,
     PasswordTooShort,
     PasswordsDoNotMatch,
@@ -38,21 +39,14 @@ internal object AuthValidation {
         current: String,
         new: String,
         confirmation: String,
-    ): List<ChangePasswordError> = buildList {
-        if (current.isEmpty()) add(ChangePasswordError.CurrentRequired)
+    ): List<AuthError> = buildList {
+        if (current.isEmpty()) add(AuthError.CurrentPasswordRequired)
         when {
-            new.isEmpty() -> add(ChangePasswordError.NewRequired)
-            new.characterCount() < MIN_PASSWORD_LENGTH -> add(ChangePasswordError.NewTooShort)
+            new.isEmpty() -> add(AuthError.PasswordRequired)
+            new.characterCount() < MIN_PASSWORD_LENGTH -> add(AuthError.PasswordTooShort)
         }
-        if (new != confirmation) add(ChangePasswordError.ConfirmationMismatch)
+        if (new != confirmation) add(AuthError.PasswordsDoNotMatch)
     }
 
     private fun String.characterCount(): Int = codePointCount(0, length)
-}
-
-internal enum class ChangePasswordError {
-    CurrentRequired,
-    NewRequired,
-    NewTooShort,
-    ConfirmationMismatch,
 }
