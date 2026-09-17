@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep the merchant boost quote and the boost or comment invoice when the device is rotated
+- Stop a second merchant boost from being ordered (and paid) after an invoice was already shown
+- Stop polling for a boost or comment payment while the app is in the background
+- Show actionable boost and comment payment errors instead of internal server or network details
 - Fix the sign-in, sign-up and change-password forms doing nothing when submitted after the device was rotated
 - Keep the account chooser open when the device is rotated
 - Submit the account and change-password forms from the keyboard

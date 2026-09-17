@@ -27,4 +27,27 @@ class InvoiceApiTest : ApiTestBase() {
 
         Assert.assertFalse(invoice.paid)
     }
+
+    @Test
+    fun awaitPaidInvoice_pollsUntilPaid() = runTest {
+        enqueueJson("""{"id":"inv-1","status":"unpaid"}""")
+        enqueueJson("""{"id":"inv-1","status":"unpaid"}""")
+        enqueueJson("""{"id":"inv-1","status":"paid"}""")
+
+        val invoice = api().awaitPaidInvoice("inv-1")
+
+        Assert.assertTrue(invoice.paid)
+        Assert.assertEquals(3, server.requestCount)
+    }
+
+    @Test
+    fun awaitPaidInvoice_retriesTransientFailures() = runTest {
+        enqueueJson("""{"message":"boom"}""", code = 500)
+        enqueueJson("""{"id":"inv-1","status":"paid"}""")
+
+        val invoice = api().awaitPaidInvoice("inv-1")
+
+        Assert.assertTrue(invoice.paid)
+        Assert.assertEquals(2, server.requestCount)
+    }
 }

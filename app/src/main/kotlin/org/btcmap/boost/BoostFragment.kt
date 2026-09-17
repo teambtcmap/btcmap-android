@@ -1,36 +1,23 @@
 package org.btcmap.boost
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidmads.library.qrgenearator.QRGContents
-import androidmads.library.qrgenearator.QRGEncoder
-import androidx.core.view.isVisible
+import android.widget.RadioButton
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.withResumed
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import androidx.lifecycle.ViewModelProvider
 import org.btcmap.R
-import org.btcmap.api.PlaceBoostResponse
-import org.btcmap.api.boostPlace
-import org.btcmap.api.getInvoice
-import org.btcmap.api.getPlaceBoostQuote
-import org.btcmap.api.paid
-import java.text.NumberFormat
-import androidx.core.net.toUri
 import org.btcmap.api
+import org.btcmap.api.PlaceBoostQuoteResponse
+import org.btcmap.api.boostPlace
+import org.btcmap.api.getPlaceBoostQuote
 import org.btcmap.databinding.BoostFragmentBinding
-import org.btcmap.util.rethrowIfCancellation
+import org.btcmap.payment.InvoicePaymentController
+import org.btcmap.payment.InvoicePaymentState
+import org.btcmap.payment.PaymentInvoice
+import org.btcmap.payment.observeInvoicePayment
+import java.text.NumberFormat
 
 class BoostFragment : Fragment() {
 
@@ -40,6 +27,13 @@ class BoostFragment : Fragment() {
 
     private var _binding: BoostFragmentBinding? = null
     private val binding get() = _binding!!
+
+    private val viewModel: BoostViewModel by lazy {
+        ViewModelProvider(
+            this,
+            BoostViewModel.Factory { api().getPlaceBoostQuote() },
+        )[BoostViewModel::class.java]
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,162 +51,76 @@ class BoostFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        // disable some views until quote is fetched
-        val tempDisabledViews = arrayOf(
-            binding.boost1m,
-            binding.boost3m,
-            binding.boost12m,
-            binding.btnContinue,
-        ).also { views -> views.forEach { it.isEnabled = false } }
+        val payment = InvoicePaymentController(
+            fragment = this,
+            qr = binding.qr,
+            payButton = binding.payInvoice,
+            copyButton = binding.copyInvoice,
+            paymentRequestLabel = getString(R.string.btc_map_boost_payment_request),
+        )
 
-        // get quote
-        viewLifecycleOwner.lifecycleScope.launch {
-            val quote = try {
-                api().getPlaceBoostQuote()
-            } catch (t: Throwable) {
-                t.rethrowIfCancellation()
-                Log.e(null, null, t)
-                withResumed {
-                    parentFragmentManager.popBackStack()
-                    MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.error)
-                        .setMessage(t.toString())
-                        .setPositiveButton(android.R.string.ok, null)
-                        .show()
-                }
-                return@launch
-            }
+        observeInvoicePayment(
+            viewModel = viewModel,
+            logTag = TAG,
+            onState = { render(it, payment) },
+            onPaid = { parentFragmentManager.popBackStack() },
+        )
 
-            withResumed {
-                tempDisabledViews.forEach { it.isEnabled = true }
-
-                binding.boost1m.append(" - ")
-                binding.boost1m.append(
-                    getString(
-                        R.string.d_sat,
-                        NumberFormat.getNumberInstance().format(quote.quote30dsat),
-                    )
-                )
-
-                binding.boost3m.append(" - ")
-                binding.boost3m.append(
-                    getString(
-                        R.string.d_sat,
-                        NumberFormat.getNumberInstance().format(quote.quote90dsat),
-                    )
-                )
-
-                binding.boost12m.append(" - ")
-                binding.boost12m.append(
-                    getString(
-                        R.string.d_sat,
-                        NumberFormat.getNumberInstance().format(quote.quote365dsat),
-                    )
-                )
-            }
-        }
-
-        var boostResponse: PlaceBoostResponse? = null
-
-        // send boost request and fetch an invoice
         binding.btnContinue.setOnClickListener {
-            val days = if (binding.boost12m.isChecked) {
-                365
-            } else if (binding.boost3m.isChecked) {
-                90
-            } else {
-                30
-            }
-
-            tempDisabledViews.forEach { it.isEnabled = false }
-
-            viewLifecycleOwner.lifecycleScope.launch {
-                boostResponse = try {
-                    api().boostPlace(
-                        placeId = args.placeId,
-                        days = days.toLong(),
-                    )
-                } catch (t: Throwable) {
-                    t.rethrowIfCancellation()
-                    withResumed {
-                        MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.error)
-                            .setMessage(t.toString()).setPositiveButton(R.string.close, null).show()
-                    }
-                    return@launch
-                } finally {
-                    withResumed {
-                        tempDisabledViews.forEach { it.isEnabled = true }
-                    }
-                }
-
-                withResumed {
-                    val qrEncoder =
-                        QRGEncoder(boostResponse.invoice, null, QRGContents.Type.TEXT, 1000)
-                    qrEncoder.colorBlack = Color.BLACK
-                    qrEncoder.colorWhite = Color.WHITE
-                    val bitmap = qrEncoder.getBitmap(0)
-                    binding.qr.isVisible = true
-                    binding.qr.setImageBitmap(bitmap)
-                    binding.payInvoice.isVisible = true
-                    binding.copyInvoice.isVisible = true
-                }
+            val days = selectedDays()
+            viewModel.order {
+                val response = api().boostPlace(placeId = args.placeId, days = days)
+                PaymentInvoice(id = response.invoiceId, bolt11 = response.invoice)
             }
         }
 
-        binding.payInvoice.setOnClickListener {
-            val invoice = boostResponse?.invoice ?: return@setOnClickListener
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = "lightning:$invoice".toUri()
-            runCatching {
-                startActivity(intent)
-            }.onFailure {
-                Toast.makeText(
-                    requireContext(),
-                    R.string.you_dont_have_a_compatible_wallet,
-                    Toast.LENGTH_LONG,
-                ).show()
-            }
+        viewModel.loadQuote()
+    }
+
+    private fun render(
+        state: InvoicePaymentState<PlaceBoostQuoteResponse>,
+        payment: InvoicePaymentController,
+    ) {
+        state.quote?.let { quote ->
+            setDurationPrice(binding.boost1m, R.string.months_1, quote.quote30dsat)
+            setDurationPrice(binding.boost3m, R.string.months_3, quote.quote90dsat)
+            setDurationPrice(binding.boost12m, R.string.months_12, quote.quote365dsat)
         }
 
-        binding.copyInvoice.setOnClickListener {
-            val invoice = boostResponse?.invoice ?: return@setOnClickListener
-            val clipManager =
-                requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clipLabel = getString(R.string.btc_map_boost_payment_request)
-            val clipText = invoice
-            clipManager.setPrimaryClip(ClipData.newPlainText(clipLabel, clipText))
-            Toast.makeText(requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT)
-                .show()
+        // The options and continue button are locked until the quote is loaded,
+        // while an order is in flight, and once an invoice exists, so a second
+        // boost cannot be ordered (and charged) by tapping continue again.
+        val enabled = state.actionsEnabled
+        binding.boost1m.isEnabled = enabled
+        binding.boost3m.isEnabled = enabled
+        binding.boost12m.isEnabled = enabled
+        binding.btnContinue.isEnabled = enabled
+
+        val invoice = state.invoice
+        if (invoice == null) {
+            payment.hide()
+        } else {
+            payment.show(invoice)
         }
+    }
 
-        // once invoice is fetched, start polling it's status, till we know it's paid
-        viewLifecycleOwner.lifecycleScope.launch {
-            while (true) {
-                val invoiceId = boostResponse?.invoiceId
+    private fun setDurationPrice(button: RadioButton, labelRes: Int, priceSat: Long) {
+        val price = getString(R.string.d_sat, NumberFormat.getNumberInstance().format(priceSat))
+        button.text = getString(R.string.duration_with_price, getString(labelRes), price)
+    }
 
-                if (invoiceId == null) {
-                    delay(50)
-                    continue
-                }
-
-                val invoice = try {
-                    api().getInvoice(invoiceId)
-                } catch (e: Throwable) {
-                    e.rethrowIfCancellation()
-                    delay(500)
-                    continue
-                }
-
-                if (invoice.paid) {
-                    withResumed { parentFragmentManager.popBackStack() }
-                } else {
-                    delay(500)
-                }
-            }
-        }
+    private fun selectedDays(): Long = when {
+        binding.boost12m.isChecked -> 365L
+        binding.boost3m.isChecked -> 90L
+        else -> 30L
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private companion object {
+        const val TAG = "BoostFragment"
     }
 }
