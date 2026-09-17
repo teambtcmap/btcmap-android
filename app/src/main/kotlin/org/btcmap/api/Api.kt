@@ -35,7 +35,7 @@ class ApiTransportException(
 class Api(
     internal val httpClient: OkHttpClient,
     private val baseUrl: () -> HttpUrl,
-    private val onUnauthorized: suspend () -> Unit = {},
+    private val onUnauthorized: suspend (requestToken: String?) -> Unit = {},
 ) {
     internal val url: HttpUrl
         get() = baseUrl()
@@ -76,10 +76,10 @@ class Api(
                     // carried the stored token. A request sent without one (e.g. the
                     // token could not be read because the keystore was unavailable)
                     // must not clear a still-valid session.
-                    val authorized = res.request.header("Authorization") != null
-                    if (res.code == 401 && clearSessionOnUnauthorized && authorized) {
+                    val authorization = res.request.header("Authorization")
+                    if (res.code == 401 && clearSessionOnUnauthorized && authorization != null) {
                         try {
-                            onUnauthorized()
+                            onUnauthorized(authorization.toBearerToken())
                         } catch (e: CancellationException) {
                             throw e
                         } catch (e: Exception) {
@@ -106,6 +106,9 @@ class Api(
             }
         }
     }
+
+    private fun String.toBearerToken(): String? =
+        removePrefix("Bearer ").takeIf { it.isNotBlank() }
 
     private fun Response.toApiException(): ApiException {
         val body = runCatching { body.string() }.getOrDefault("")

@@ -37,15 +37,24 @@ class App : Application() {
         Api(
             httpClient = apiHttpClient(),
             baseUrl = { prefs.apiUrl },
-            onUnauthorized = {
-                withContext(Dispatchers.IO) {
-                    runCatching {
-                        prefs.authToken = null
-                        db.user.delete()
-                    }
-                }
-            },
+            onUnauthorized = { handleUnauthorized(it) },
         )
+    }
+
+    /**
+     * Clears the stored session after the server rejected a token. Only clears
+     * when the rejected token is still the one in storage: a late 401 from a
+     * request that raced a fresh sign-in must not sign the user out again.
+     */
+    internal suspend fun handleUnauthorized(requestToken: String?) {
+        withContext(Dispatchers.IO) {
+            runCatching {
+                if (requestToken != null && prefs.authToken == requestToken) {
+                    prefs.authToken = null
+                    db.user.delete()
+                }
+            }
+        }
     }
 
     val db: Database

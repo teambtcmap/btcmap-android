@@ -1,6 +1,7 @@
 package org.btcmap.auth
 
 import android.content.DialogInterface
+import android.content.SharedPreferences
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -22,6 +23,7 @@ import org.btcmap.api.CreateTokenResponse
 import org.btcmap.api.createUser
 import org.btcmap.api.signIn
 import org.btcmap.db
+import org.btcmap.db.Database
 import org.btcmap.db.table.user.User
 import org.btcmap.settings.authToken
 import org.btcmap.settings.prefs
@@ -188,18 +190,7 @@ private fun Fragment.signIn(username: String, password: String, onComplete: () -
 
 private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onComplete: () -> Unit) {
     try {
-        withContext(Dispatchers.IO) {
-            db().user.insert(
-                User(
-                    id = response.user.id,
-                    name = response.user.name,
-                    roles = response.user.roles,
-                    savedPlaces = response.user.savedPlaces,
-                    savedAreas = response.user.savedAreas,
-                )
-            )
-            prefs.authToken = response.token
-        }
+        storeSignedInSession(db = db(), prefs = prefs, response = response)
     } catch (e: Throwable) {
         e.rethrowIfCancellation()
         showAuthError(
@@ -221,6 +212,36 @@ private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onCom
     } catch (e: Throwable) {
         e.rethrowIfCancellation()
         Log.e("auth", "Signed-in callback failed", e)
+    }
+}
+
+/**
+ * Persists a successful sign-in. The token is written before the cached user so
+ * a token encryption failure leaves nothing behind, and any failure rolls back
+ * both halves instead of leaving a session that is only partly stored.
+ */
+internal suspend fun storeSignedInSession(
+    db: Database,
+    prefs: SharedPreferences,
+    response: CreateTokenResponse,
+) {
+    withContext(Dispatchers.IO) {
+        try {
+            prefs.authToken = response.token
+            db.user.insert(
+                User(
+                    id = response.user.id,
+                    name = response.user.name,
+                    roles = response.user.roles,
+                    savedPlaces = response.user.savedPlaces,
+                    savedAreas = response.user.savedAreas,
+                )
+            )
+        } catch (e: Throwable) {
+            runCatching { prefs.authToken = null }
+            runCatching { db.user.delete() }
+            throw e
+        }
     }
 }
 

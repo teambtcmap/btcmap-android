@@ -82,6 +82,30 @@ class SessionExpiryTest {
         Assert.assertNull(databaseRule.db.user.select())
     }
 
+    @Test
+    fun staleRejectedToken_doesNotClearNewerSession() {
+        prefs.authToken = "new-token"
+        databaseRule.db.user.insert(signedInUser())
+
+        // A 401 from a request that raced a fresh sign-in must not sign out the
+        // session that is currently stored.
+        runBlocking { app.handleUnauthorized("old-token") }
+
+        Assert.assertEquals("new-token", prefs.authToken)
+        Assert.assertNotNull(databaseRule.db.user.select())
+    }
+
+    @Test
+    fun matchingRejectedToken_clearsSession() {
+        prefs.authToken = "same-token"
+        databaseRule.db.user.insert(signedInUser())
+
+        runBlocking { app.handleUnauthorized("same-token") }
+
+        Assert.assertNull(prefs.authToken)
+        Assert.assertNull(databaseRule.db.user.select())
+    }
+
     private fun signedInUser() = User(
         id = 1,
         name = "satoshi",

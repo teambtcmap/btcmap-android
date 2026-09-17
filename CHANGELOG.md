@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Fix the stored session token being read as stale or missing when several requests run at once
 - Sign out cleanly when the stored session token can no longer be decrypted instead of retrying the keystore on every request
 - Keep the stored session when the keystore is only temporarily unavailable instead of signing out and deleting the token
+- Fix a late rejected request from an old session signing out an account that was signed in again in the meantime
+- Never leave an account only partly signed in when the session token cannot be saved
 - Show a progress indicator while signing in or creating an account
 - Show actionable sign-in errors instead of exposing internal server or network details
 - Show the logged-in confirmation when signing in to an existing account, not just after creating one
