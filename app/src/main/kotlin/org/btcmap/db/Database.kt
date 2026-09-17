@@ -10,7 +10,7 @@ import org.btcmap.db.table.user.UserQueries
 
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
-        private const val VERSION = 9
+        private const val VERSION = 10
     }
 
     val conn = driver.open(path)
@@ -36,6 +36,8 @@ class Database(driver: SQLiteDriver, val path: String) {
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(org.btcmap.db.table.user.CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
             conn.execSQL("PRAGMA user_version=$VERSION;")
             return
         }
@@ -85,6 +87,11 @@ class Database(driver: SQLiteDriver, val path: String) {
 
                 8 -> {
                     conn.execSQL(org.btcmap.db.table.preference.CREATE)
+                }
+
+                9 -> {
+                    conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
+                    conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
                 }
 
                 else -> throw Exception("migration is missing")

@@ -33,12 +33,11 @@ class Sync(val api: Api, val db: Database) {
                 val delta = try {
                     api.getPlaces(maxKnownUpdatedAt, batchSize)
                 } catch (t: Throwable) {
+                    // A failed delta must not crash the caller; leave the cursor
+                    // where it is so the next sync retries the same page.
                     t.rethrowIfCancellation()
                     t.printStackTrace()
-                    return@withContext PlacesSyncReport(
-                        duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
-                        rowsAffected = rowsAffected,
-                    )
+                    break
                 }
 
                 if (delta.isEmpty()) {
@@ -57,10 +56,19 @@ class Sync(val api: Api, val db: Database) {
                 val newOrChanged = delta.filter { it.deletedAt == null }
                 val deleted = delta.filter { it.deletedAt != null }
 
-                db.transaction {
-                    db.place.insert(newOrChanged.map { it.toPlace() })
+                try {
+                    // Guard the whole apply step, not just the request: a
+                    // malformed row or a database failure here must not escape
+                    // and take down the lifecycle coroutine that called sync.
+                    db.transaction {
+                        db.place.insert(newOrChanged.map { it.toPlace() })
 
-                    deleted.forEach { db.place.deleteById(it.id) }
+                        deleted.forEach { db.place.deleteById(it.id) }
+                    }
+                } catch (t: Throwable) {
+                    t.rethrowIfCancellation()
+                    t.printStackTrace()
+                    break
                 }
 
                 rowsAffected += delta.size
@@ -95,12 +103,11 @@ class Sync(val api: Api, val db: Database) {
                 val delta = try {
                     api.getComments(maxKnownUpdatedAt, batchSize)
                 } catch (t: Throwable) {
+                    // A failed delta must not crash the caller; leave the cursor
+                    // where it is so the next sync retries the same page.
                     t.rethrowIfCancellation()
                     t.printStackTrace()
-                    return@withContext CommentSyncReport(
-                        duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
-                        rowsAffected = rowsAffected,
-                    )
+                    break
                 }
 
                 if (delta.isEmpty()) {
@@ -119,20 +126,30 @@ class Sync(val api: Api, val db: Database) {
                 val newOrChanged = delta.filter { it.deletedAt == null }
                 val deleted = delta.filter { it.deletedAt != null }
 
-                db.transaction {
-                    db.comment.insert(newOrChanged.map {
-                        Comment(
-                            id = it.id,
-                            placeId = it.placeId,
-                            comment = it.comment,
-                            createdAt = ZonedDateTime.parse(it.createdAt),
-                            updatedAt = ZonedDateTime.parse(it.updatedAt),
-                        )
-                    })
+                try {
+                    // Guard the whole apply step, not just the request: a
+                    // malformed timestamp or a database failure here must not
+                    // escape and take down the lifecycle coroutine that called
+                    // sync.
+                    db.transaction {
+                        db.comment.insert(newOrChanged.map {
+                            Comment(
+                                id = it.id,
+                                placeId = it.placeId,
+                                comment = it.comment,
+                                createdAt = ZonedDateTime.parse(it.createdAt),
+                                updatedAt = ZonedDateTime.parse(it.updatedAt),
+                            )
+                        })
 
-                    deleted.forEach {
-                        db.comment.deleteById(it.id)
+                        deleted.forEach {
+                            db.comment.deleteById(it.id)
+                        }
                     }
+                } catch (t: Throwable) {
+                    t.rethrowIfCancellation()
+                    t.printStackTrace()
+                    break
                 }
 
                 rowsAffected += delta.size

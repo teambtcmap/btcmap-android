@@ -45,6 +45,23 @@ class CommentsFragment : Fragment() {
      */
     private var postPaymentSync = false
 
+    /**
+     * Ids of the comments the user saw before opening the add screen. The retry
+     * uses them to tell whether the paid comment is already in the list, so a
+     * sync that stored it while the add screen was open does not trigger a
+     * pointless retry. Null when the add screen was not opened from here.
+     */
+    private var prePostCommentIds: Set<Long>? = null
+
+    /** Ids shown by the last [renderComments] call. */
+    private var renderedIds: Set<Long> = emptySet()
+
+    /**
+     * False until the first sync of this screen finishes. The empty state is
+     * held back until then so it cannot flash while the first sync is running.
+     */
+    private var initialSyncDone = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -56,6 +73,11 @@ class CommentsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Restored so a pending retry survives a process recreation before the
+        // resume below consumes it.
+        postPaymentSync =
+            savedInstanceState?.getBoolean(STATE_POST_PAYMENT_SYNC) ?: postPaymentSync
 
         binding.topAppBar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
@@ -77,6 +99,10 @@ class CommentsFragment : Fragment() {
         }
 
         binding.fab.setOnClickListener {
+            // Snapshot what the user has seen before the add screen can store
+            // anything, so the retry knows which comments are genuinely new.
+            prePostCommentIds = renderedIds
+
             parentFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<AddCommentFragment>(
@@ -102,18 +128,23 @@ class CommentsFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                renderComments(adapter)
+                val rendered = renderComments(adapter)
 
                 if (postPaymentSync) {
                     postPaymentSync = false
-                    syncCommentsWithRetry(adapter)
+                    syncCommentsWithRetry(adapter, rendered)
                 } else {
                     // Syncing on every resume also retries a sync that failed
                     // while the screen was in the background. It stays cheap
                     // because syncComments only fetches the delta since the
                     // stored cursor.
-                    syncComments(adapter)
+                    syncComments()
                 }
+
+                // The list is now as fresh as the sync could make it; from here
+                // on an empty list really means there are no comments.
+                initialSyncDone = true
+                renderComments(adapter)
             }
         }
     }
@@ -124,14 +155,13 @@ class CommentsFragment : Fragment() {
         }
 
         adapter.submitList(items)
-        binding.empty.isVisible = items.isEmpty()
+        renderedIds = items.map { it.id }.toSet()
+        binding.empty.isVisible = initialSyncDone && items.isEmpty()
         return items
     }
 
-    private suspend fun syncComments(adapter: CommentsAdapter) {
-        if (sync().syncComments().rowsAffected > 0) {
-            renderComments(adapter)
-        }
+    private suspend fun syncComments() {
+        sync().syncComments()
     }
 
     /**
@@ -141,20 +171,33 @@ class CommentsFragment : Fragment() {
      * comment to visible, and because the list only syncs on resume, a single
      * request in that window would leave the comment hidden until the user
      * leaves and re-enters the screen.
+     *
+     * A hidden comment is dropped instead of stored, so the paid comment shows
+     * up as an id that was not shown before the post flow started. Waiting for
+     * that specific signal (rather than for any stored row) means an unrelated
+     * comment syncing in the meantime cannot end the retries.
      */
-    private suspend fun syncCommentsWithRetry(adapter: CommentsAdapter) {
-        // A hidden comment is dropped instead of stored, so the paid comment
-        // shows up as a comment id that was not in the list before. Waiting for
-        // that specific signal (rather than for any stored row) means an
-        // unrelated comment syncing in the meantime cannot end the retries.
-        val knownIds = withContext(Dispatchers.IO) {
-            db().comment.selectByPlaceId(args.placeId).map { it.id }.toSet()
+    private suspend fun syncCommentsWithRetry(
+        adapter: CommentsAdapter,
+        rendered: List<CommentsAdapterItem>,
+    ) {
+        // Fall back to the currently shown ids when the add screen was not
+        // opened from the list, for example after a process recreation that
+        // lost the snapshot taken when the add button was tapped.
+        val baseline = prePostCommentIds ?: rendered.map { it.id }.toSet()
+        prePostCommentIds = null
+
+        // A sync while the add screen was open may already have stored the paid
+        // comment; then the list already has it and there is nothing to wait
+        // for.
+        if (rendered.any { it.id !in baseline }) {
+            return
         }
 
         repeat(POST_PAYMENT_SYNC_ATTEMPTS) { attempt ->
             sync().syncComments()
 
-            if (renderComments(adapter).any { it.id !in knownIds }) {
+            if (renderComments(adapter).any { it.id !in baseline }) {
                 return
             }
 
@@ -162,6 +205,11 @@ class CommentsFragment : Fragment() {
                 delay(POST_PAYMENT_SYNC_DELAY_MS)
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(STATE_POST_PAYMENT_SYNC, postPaymentSync)
     }
 
     override fun onDestroyView() {
@@ -172,5 +220,6 @@ class CommentsFragment : Fragment() {
     private companion object {
         const val POST_PAYMENT_SYNC_ATTEMPTS = 6
         const val POST_PAYMENT_SYNC_DELAY_MS = 500L
+        const val STATE_POST_PAYMENT_SYNC = "post_payment_sync"
     }
 }

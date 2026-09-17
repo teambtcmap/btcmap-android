@@ -17,6 +17,9 @@ class DatabaseMigrationTest {
         val driver = BundledSQLiteDriver()
 
         val conn = driver.open(file.absolutePath)
+        // A real database at this version already has every table created at
+        // version 0; the later migrations assume the ones they touch are there.
+        conn.execSQL(org.btcmap.db.table.comment.CREATE)
         conn.execSQL(
             """
             CREATE TABLE event (
@@ -71,6 +74,9 @@ class DatabaseMigrationTest {
         val driver = BundledSQLiteDriver()
 
         val conn = driver.open(file.absolutePath)
+        // A real database at this version already has every table created at
+        // version 0; migration 9 creates indexes on the comment table.
+        conn.execSQL(org.btcmap.db.table.comment.CREATE)
         conn.execSQL("PRAGMA user_version=8;")
         conn.close()
 
@@ -79,5 +85,29 @@ class DatabaseMigrationTest {
         db.preference.upsert("mapStyle", "dark")
 
         Assert.assertEquals("dark", db.preference.select("mapStyle"))
+    }
+
+    @Test
+    fun migration9_createsCommentIndexes() {
+        val file = Files.createTempFile("btcmap-migration", ".db").toFile()
+        file.deleteOnExit()
+        val driver = BundledSQLiteDriver()
+
+        val conn = driver.open(file.absolutePath)
+        conn.execSQL(org.btcmap.db.table.comment.CREATE)
+        conn.execSQL("PRAGMA user_version=9;")
+        conn.close()
+
+        val db = Database(driver, file.absolutePath)
+
+        val indexes = mutableSetOf<String>()
+        db.conn.prepare("SELECT name FROM pragma_index_list('comment');").use {
+            while (it.step()) {
+                indexes.add(it.getText(0))
+            }
+        }
+
+        Assert.assertTrue(indexes.contains("comment_place_id_created_at"))
+        Assert.assertTrue(indexes.contains("comment_updated_at"))
     }
 }

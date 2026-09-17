@@ -36,7 +36,7 @@ class CommentQueries(private val conn: SQLiteConnection) {
             SELECT ${FullProjection.COLUMNS}
             FROM $TABLE
             WHERE $PLACE_ID = ?1
-            ORDER BY julianday($CREATED_AT) DESC;
+            ORDER BY julianday($CREATED_AT) DESC, $ID DESC;
             """
         ).use {
             it.bindLong(1, placeId)

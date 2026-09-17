@@ -14,7 +14,7 @@
         android:layout_height="24dp"
         android:layout_gravity="center"
         android:layout_marginHorizontal="18dp"
-        android:contentDescription="@string/icon"
+        android:contentDescription="@null"
         android:src="@drawable/icon_person"
         app:tint="?attr/colorOnSurfaceVariant" />
 

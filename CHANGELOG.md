@@ -6,13 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Skip the post-payment comment sync retry when the paid comment is already in the list
 - Keep retrying the comment sync after a payment even when another comment syncs in the meantime
 - Stop a paid comment from re-triggering the post-payment sync when the comments screen is opened again later
 - Fix the comments screen add button ignoring right-to-left layout insets
 - Fix the comments screen missing a freshly paid comment when the server publishes it a moment after the payment is confirmed
 - Read a merchant's comments off the main thread so opening a place does not block on the database
 - Fix a comment delta sync crashing when the server returns a comment that is already stored
+- Stop the comments screen from flashing "no comments yet" before the first sync finishes
 - Show comment dates in the device's time zone instead of the time zone returned by the API
+- Show comment dates in the device's current language without restarting the app
+- Show a place's comments in a stable order when several share a timestamp
+- Speed up loading a place's comments and the comment sync cursor on large databases
+- Keep the app running when the comment or place sync reads a malformed row or hits a database error
 - Show an empty state on the comments screen instead of a blank list
 - Fix the map crashing on launch when the bundled offline places snapshot is missing or malformed
 - Reject out-of-range coordinates in the bundled offline places snapshot instead of seeding markers that can never be reached

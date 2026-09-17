@@ -115,6 +115,33 @@ class CommentQueriesTest {
     }
 
     @Test
+    fun selectByPlaceId_breaksCreatedAtTiesByIdDesc() {
+        val db = createDatabase()
+        val sameTime = ZonedDateTime.parse("2024-01-01T10:00:00Z")
+        val lowerId = Comment(
+            id = 1L,
+            placeId = 1L,
+            comment = "Lower id",
+            createdAt = sameTime,
+            updatedAt = sameTime,
+        )
+        val higherId = Comment(
+            id = 2L,
+            placeId = 1L,
+            comment = "Higher id",
+            createdAt = sameTime,
+            updatedAt = sameTime,
+        )
+
+        // Inserted ascending: without the id tie-break the query would return
+        // them in insertion order and this would come back 1, 2.
+        db.comment.insert(listOf(lowerId, higherId))
+        val results = db.comment.selectByPlaceId(1L)
+
+        Assert.assertEquals(listOf("Higher id", "Lower id"), results.map { it.comment })
+    }
+
+    @Test
     fun selectMaxUpdatedAt_returnsNullWhenEmpty() {
         val db = createDatabase()
 
