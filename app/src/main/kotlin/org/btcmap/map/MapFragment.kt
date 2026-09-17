@@ -439,7 +439,7 @@ class MapFragment : Fragment() {
             setReorderingAllowed(true)
             replace<AreaFragment>(
                 R.id.fragmentContainerView, null,
-                Bundle().apply { putString(ARG_AREA_ID, areaId.toString()) },
+                Bundle().apply { putLong(ARG_AREA_ID, areaId) },
             )
             addToBackStack(null)
         }

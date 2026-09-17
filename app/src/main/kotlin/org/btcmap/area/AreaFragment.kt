@@ -60,7 +60,9 @@ import java.time.format.FormatStyle
 class AreaFragment : Fragment() {
 
     private val areaId by lazy {
-        requireArguments().getString(ARG_AREA_ID)!!
+        val arguments = requireArguments()
+        require(arguments.containsKey(ARG_AREA_ID)) { "Missing $ARG_AREA_ID argument" }
+        arguments.getLong(ARG_AREA_ID)
     }
 
     private var _binding: AreaFragmentBinding? = null
@@ -116,7 +118,7 @@ class AreaFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val area = withContext(Dispatchers.IO) {
-                    api().getArea(areaId)
+                    api().getArea(areaId.toString())
                 }
                 renderArea(area)
                 binding.loading.isVisible = false
@@ -147,7 +149,7 @@ class AreaFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val events = withContext(Dispatchers.IO) {
-                    api().getAreaEvents(areaId)
+                    api().getAreaEvents(areaId.toString())
                 }
                 renderUpcomingEvents(events)
             } catch (e: Throwable) {
@@ -171,7 +173,7 @@ class AreaFragment : Fragment() {
         val toggle = {
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
-                    toggleSavedArea(areaId.toLong(), areaName)
+                    toggleSavedArea(areaId, areaName)
                     updateBookmarkIcon()
                 } catch (e: Throwable) {
                     e.rethrowIfCancellation()
@@ -297,7 +299,7 @@ class AreaFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val saved = withContext(Dispatchers.IO) { isAreaSaved(areaId.toLong()) }
+                val saved = withContext(Dispatchers.IO) { isAreaSaved(areaId) }
                 withResumed {
                     binding.toolbar.menu.findItem(R.id.save).apply {
                         setIcon(
@@ -360,9 +362,7 @@ class AreaFragment : Fragment() {
     )
 
     private suspend fun fetchPlaceIssues(): Pair<List<IssueRow>, Int> {
-        val id = areaId.toLongOrNull() ?: return emptyList<IssueRow>() to 0
-
-        val response = api().getPlaceIssues(id, PLACE_ISSUES_LIMIT)
+        val response = api().getPlaceIssues(areaId, PLACE_ISSUES_LIMIT)
         val rows = response.requestedIssues.map { issue ->
             IssueRow(
                 issue = issue,

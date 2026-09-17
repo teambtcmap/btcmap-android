@@ -41,7 +41,7 @@ abstract class AreaScreenTest {
     protected val app = ApplicationProvider.getApplicationContext<App>()
 
     protected fun withArea(
-        areaId: String = "1",
+        areaId: Long = 1,
         addToBackStack: Boolean = false,
         block: (ActivityScenario<Activity>, AreaFragment) -> Unit,
     ) {
@@ -51,7 +51,7 @@ abstract class AreaScreenTest {
                 lateinit var fragment: AreaFragment
                 scenario.onActivity { activity ->
                     fragment = AreaFragment().apply {
-                        arguments = Bundle().apply { putString(ARG_AREA_ID, areaId) }
+                        arguments = Bundle().apply { putLong(ARG_AREA_ID, areaId) }
                     }
                     activity.supportFragmentManager.commit {
                         setReorderingAllowed(true)
