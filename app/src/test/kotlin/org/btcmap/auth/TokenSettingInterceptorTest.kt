@@ -1,6 +1,7 @@
 package org.btcmap.auth
 
 import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
 import mockwebserver3.junit4.MockWebServerRule
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -138,5 +139,31 @@ class TokenSettingInterceptorTest {
             .close()
 
         Assert.assertNull(server().takeRequest().headers["Authorization"])
+    }
+
+    @Test
+    fun dropsTokenWhenRedirectedToAnotherHost() {
+        val other = MockWebServer()
+        other.start()
+        try {
+            // The API answers with a redirect to a different host. The token was
+            // attached for the API host only, so it must not follow the redirect.
+            server().enqueue(
+                MockResponse.Builder()
+                    .code(302)
+                    .addHeader("Location", other.url("/x").toString())
+                    .build()
+            )
+            other.enqueue(okResponse())
+
+            client { "stored-token" }
+                .newCall(Request.Builder().url(server().url("/x")).build())
+                .execute()
+                .close()
+
+            Assert.assertNull(other.takeRequest().headers["Authorization"])
+        } finally {
+            other.close()
+        }
     }
 }

@@ -128,6 +128,31 @@ class UserApiTest : ApiTestBase() {
     }
 
     @Test
+    fun signIn_rejectsBlankToken() = runTest {
+        enqueueJson(
+            """
+            {
+                "token": "",
+                "user": {
+                    "id": 1,
+                    "name": "satoshi",
+                    "roles": ["user"],
+                    "saved_places": [],
+                    "saved_areas": []
+                }
+            }
+            """.trimIndent()
+        )
+
+        try {
+            api().signIn(username = "satoshi", password = "pw", label = "device")
+            Assert.fail("Expected ApiParseException")
+        } catch (e: ApiParseException) {
+            Assert.assertTrue(e.message!!.contains("token"))
+        }
+    }
+
+    @Test
     fun signIn_doesNotClearSessionOnUnauthorized() = runTest {
         enqueueJson("""{"message":"Invalid credentials"}""", code = 401)
 

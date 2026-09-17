@@ -45,6 +45,21 @@ class SignedInSessionStoreTest {
     }
 
     @Test
+    fun replacesCachedUserWhenSigningInAsDifferentAccount() = runBlocking {
+        // A stale row from an earlier session must not survive a sign-in as a
+        // different account: the table is keyed by user id and select() has no
+        // ordering, so a leftover row could otherwise be shown instead.
+        databaseRule.db.user.insert(dbUser(id = 99, name = "stale"))
+
+        storeSignedInSession(databaseRule.db, prefs, response("token-1"))
+
+        val user = databaseRule.db.user.select()
+        Assert.assertNotNull(user)
+        Assert.assertEquals(1L, user!!.id)
+        Assert.assertEquals("satoshi", user.name)
+    }
+
+    @Test
     fun keepsExistingSessionWhenTokenCannotBeStored() = runBlocking {
         // A previous session is already stored and the new token cannot be
         // encrypted. Nothing was written for the new sign-in, so the previous

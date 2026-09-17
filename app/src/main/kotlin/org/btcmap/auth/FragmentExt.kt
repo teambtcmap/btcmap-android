@@ -145,6 +145,9 @@ private fun Fragment.signUp(username: String, password: String, onComplete: () -
                 )
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
+                // Dismiss before showing the sign-in dialog so the two windows do
+                // not overlap. The finally block dismisses again, which is a no-op.
+                progress.dismiss()
                 Toast.makeText(
                     requireContext(),
                     getString(R.string.account_created_sign_in_failed),
@@ -215,7 +218,7 @@ private suspend fun Fragment.completeSignIn(response: CreateTokenResponse, onCom
         onComplete()
     } catch (e: Throwable) {
         e.rethrowIfCancellation()
-        Log.e("auth", "Signed-in callback failed", e)
+        Log.e(AUTH_TAG, "Signed-in callback failed", e)
     }
 }
 
@@ -241,15 +244,23 @@ internal suspend fun storeSignedInSession(
         val currentToken = prefs.getStoredAuthToken()
 
         try {
-            db.user.insert(
-                User(
-                    id = response.user.id,
-                    name = response.user.name,
-                    roles = response.user.roles,
-                    savedPlaces = response.user.savedPlaces,
-                    savedAreas = response.user.savedAreas,
+            db.transaction {
+                // Clear any cached account before inserting the new one. The user
+                // table is keyed by the server user id and select() has no
+                // ordering, so signing in as a different account would otherwise
+                // leave the previous row behind and select() could return the
+                // stale account.
+                db.user.delete()
+                db.user.insert(
+                    User(
+                        id = response.user.id,
+                        name = response.user.name,
+                        roles = response.user.roles,
+                        savedPlaces = response.user.savedPlaces,
+                        savedAreas = response.user.savedAreas,
+                    )
                 )
-            )
+            }
         } catch (e: Throwable) {
             // Restore the previous session, but only while this call's token is
             // still the stored one, so a concurrent sign-in that finished first
@@ -279,7 +290,7 @@ private fun Fragment.showProgressDialog(@StringRes message: Int): AlertDialog {
 }
 
 private fun Fragment.showAuthError(logMessage: String, e: Throwable, fallbackMessage: String) {
-    Log.e("auth", logMessage, e)
+    Log.e(AUTH_TAG, logMessage, e)
 
     if (!isAdded) return
 
@@ -311,3 +322,5 @@ private fun Fragment.dismissOnViewDestroyed(dialog: AlertDialog) {
 }
 
 private fun tokenLabel() = "BTC Map Android ${BuildConfig.VERSION_CODE}"
+
+private const val AUTH_TAG = "auth"

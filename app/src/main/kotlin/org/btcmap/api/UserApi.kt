@@ -100,8 +100,13 @@ suspend fun Api.signIn(
     ) { stream ->
         val body = stream.toJsonObject()
 
+        val token = body.string("token")
+        if (token.isBlank()) {
+            throw ApiParseException("Sign-in response is missing a token")
+        }
+
         CreateTokenResponse(
-            token = body.string("token"),
+            token = token,
             user = body.obj("user").toUser(),
         )
     }

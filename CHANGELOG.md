@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Fix signing in as a different account leaving the previously cached account behind
+- Reject a sign-in response that does not carry a session token instead of storing an empty one
+- Fix the "following" activity feed showing as signed in after the stored session was lost
 - Revoke the session token on the server when signing out, so it can no longer be reused
 - Keep a stored session when the keystore fails temporarily during decryption instead of discarding a recoverable token
 - Stop treating a temporarily unavailable keystore as signed out

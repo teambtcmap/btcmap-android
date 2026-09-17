@@ -66,20 +66,34 @@ internal object TokenCipher {
     @Volatile
     internal var keyProviderOverride: (() -> SecretKey)? = null
 
+    @PublishedApi
+    internal val keyProviderLock = Any()
+
     private val productionKeyProvider: () -> SecretKey = { defaultKey }
 
     /**
      * Runs [block] with [provider] standing in for the keystore key so tests can
      * simulate a missing or invalidated key. The override is always cleared
      * afterwards so it cannot leak into another test or a later request.
+     *
+     * Serialized on [keyProviderLock] because the override is process-global:
+     * two concurrent callers would otherwise clobber each other instead of
+     * failing fast.
      */
     internal inline fun <T> withKeyProvider(noinline provider: () -> SecretKey, block: () -> T): T {
-        check(keyProviderOverride == null) { "A key provider override is already active" }
-        keyProviderOverride = provider
+        // Guard only the state transition: the monitor must not span [block],
+        // which may suspend. Holding it here still makes the check-and-set
+        // atomic so two concurrent callers cannot both install an override.
+        synchronized(keyProviderLock) {
+            check(keyProviderOverride == null) { "A key provider override is already active" }
+            keyProviderOverride = provider
+        }
         return try {
             block()
         } finally {
-            keyProviderOverride = null
+            synchronized(keyProviderLock) {
+                keyProviderOverride = null
+            }
         }
     }
 
@@ -122,8 +136,15 @@ internal object TokenCipher {
     fun encrypt(plaintext: String): String {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, key())
+        val iv = cipher.iv
+        // The payload stores the IV without its length, so a provider that returns
+        // a non-standard IV size would produce tokens this class could never
+        // decrypt. Fail loudly at write time instead of silently corrupting.
+        check(iv.size == IV_SIZE_BYTES) {
+            "Unsupported GCM IV size ${iv.size} (expected $IV_SIZE_BYTES)"
+        }
         val encrypted = cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
-        val payload = cipher.iv + encrypted
+        val payload = iv + encrypted
         return ENCODED_PREFIX + Base64.encodeToString(payload, Base64.NO_WRAP)
     }
 
