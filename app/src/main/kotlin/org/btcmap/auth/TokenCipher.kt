@@ -38,10 +38,16 @@ internal object TokenCipher {
         KeyStore.getInstance(KEYSTORE).apply { load(null) }
     }
 
-    private val key: SecretKey by lazy {
+    private val defaultKey: SecretKey by lazy {
         (keyStore.getEntry(KEY_ALIAS, null) as? KeyStore.SecretKeyEntry)?.secretKey
             ?: generateKey()
     }
+
+    /**
+     * Supplies the AES key. Production reads it from the Android keystore; tests
+     * can replace it to simulate an unavailable keystore.
+     */
+    internal var keyProvider: () -> SecretKey = { defaultKey }
 
     private fun generateKey(): SecretKey {
         val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEYSTORE)
@@ -59,7 +65,7 @@ internal object TokenCipher {
 
     fun encrypt(plaintext: String): String {
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.ENCRYPT_MODE, key)
+        cipher.init(Cipher.ENCRYPT_MODE, keyProvider())
         val encrypted = cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
         val payload = cipher.iv + encrypted
         return ENCODED_PREFIX + Base64.encodeToString(payload, Base64.NO_WRAP)
@@ -74,7 +80,7 @@ internal object TokenCipher {
             val ciphertext = payload.copyOfRange(IV_SIZE_BYTES, payload.size)
 
             val cipher = Cipher.getInstance(TRANSFORMATION)
-            cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv))
+            cipher.init(Cipher.DECRYPT_MODE, keyProvider(), GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv))
             String(cipher.doFinal(ciphertext), Charsets.UTF_8)
         } catch (e: Exception) {
             Log.w(TAG, "Failed to decrypt stored token", e)

@@ -11,7 +11,6 @@ import androidx.sqlite.driver.AndroidSQLiteDriver
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
 import mockwebserver3.RecordedRequest
@@ -25,6 +24,7 @@ import org.btcmap.util.ApiRule
 import org.btcmap.util.DatabaseRule
 import org.btcmap.util.PreferencesRule
 import org.btcmap.util.assertNoUncaughtException
+import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -80,15 +80,20 @@ class UserProfileErrorHandlingTest {
                         replace(R.id.fragmentContainerView, profile, PROFILE_TAG)
                     }
                 }
-                InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+                lateinit var list: RecyclerView
+                scenario.onActivity {
+                    list = profile.requireView()
+                        .findViewById(R.id.savedPlacesList)
+                }
+                waitUntilOnMain {
+                    (list.adapter?.itemCount ?: 0) > 0 && list.getChildAt(0) != null
+                }
 
                 assertNoUncaughtException(
                     "Exception escaped the user profile screen's coroutine to the uncaught handler",
                 ) {
                     scenario.onActivity {
                         driver.failing = true
-                        val list = profile.requireView()
-                            .findViewById<RecyclerView>(R.id.savedPlacesList)
                         val delete = list.getChildAt(0).findViewById<View>(R.id.deleteButton)
                         Assert.assertNotNull(delete)
                         delete.performClick()

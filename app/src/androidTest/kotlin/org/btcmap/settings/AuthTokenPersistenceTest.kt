@@ -54,6 +54,39 @@ class AuthTokenPersistenceTest {
         Assert.assertFalse(prefs.authorized)
     }
 
+    @Test
+    fun keepsLegacyPlaintextTokenWhenKeystoreIsUnavailable() {
+        withUnavailableKeystore {
+            prefs.edit().putString(KEY_AUTH_TOKEN, "legacy-token").commit()
+
+            // The session must survive: the token is returned as-is and left in
+            // place rather than being dropped when it cannot be encrypted.
+            Assert.assertEquals("legacy-token", prefs.authToken)
+            Assert.assertEquals("legacy-token", prefs.getString(KEY_AUTH_TOKEN, null))
+            Assert.assertTrue(prefs.authorized)
+        }
+    }
+
+    @Test
+    fun storingTokenFailsWhenKeystoreIsUnavailable() {
+        withUnavailableKeystore {
+            val error = runCatching { prefs.authToken = "secret-token" }.exceptionOrNull()
+
+            Assert.assertNotNull(error)
+            Assert.assertNull(prefs.getString(KEY_AUTH_TOKEN, null))
+        }
+    }
+
+    private fun withUnavailableKeystore(block: () -> Unit) {
+        val original = TokenCipher.keyProvider
+        TokenCipher.keyProvider = { throw IllegalStateException("keystore unavailable") }
+        try {
+            block()
+        } finally {
+            TokenCipher.keyProvider = original
+        }
+    }
+
     companion object {
         private const val KEY_AUTH_TOKEN = "auth_token"
     }
