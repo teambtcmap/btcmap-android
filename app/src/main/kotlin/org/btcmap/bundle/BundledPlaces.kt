@@ -12,6 +12,7 @@ import java.io.FileNotFoundException
 import java.io.InputStream
 import java.time.Duration
 import java.time.ZonedDateTime
+import java.time.format.DateTimeParseException
 
 /**
  * Sentinel timestamp for seeded rows.
@@ -112,8 +113,11 @@ object BundledPlaces {
         } catch (_: FileNotFoundException) {
             // The snapshot asset is optional; a missing file is not an error.
             return ImportResult(placesImported = 0, duration = elapsedSince(startedAt))
-        } catch (t: Throwable) {
-            t.rethrowIfCancellation()
+        } catch (e: Exception) {
+            // Only recoverable failures are swallowed: an Error must keep
+            // propagating instead of being reported as a successful empty seed
+            // that lets the caller continue into the sync.
+            e.rethrowIfCancellation()
             return ImportResult(placesImported = 0, duration = elapsedSince(startedAt))
         }
 
@@ -159,7 +163,7 @@ internal fun JsonReader.readBundledPlace(): Place {
                     skipValue()
                     boostedUntil = null
                 } else {
-                    boostedUntil = ZonedDateTime.parse(nextString())
+                    boostedUntil = nextString().toZonedDateTimeOrNull()
                 }
             }
             else -> skipValue()
@@ -172,11 +176,21 @@ internal fun JsonReader.readBundledPlace(): Place {
     // resolved first so the messages for the remaining fields can name the place
     // and the missing-id message never interpolates a null id.
     val placeId = requireNotNull(id) { "bundled place is missing 'id'" }
+    val placeLat = requireNotNull(lat) { "bundled place $placeId is missing 'lat'" }
+    val placeLon = requireNotNull(lon) { "bundled place $placeId is missing 'lon'" }
+    val placeIcon = requireNotNull(icon) { "bundled place $placeId is missing 'icon'" }
+    // Coordinates are range-checked here as well as by the bundler: the asset is
+    // committed to the repository and could be edited directly, and a bogus
+    // coordinate would otherwise seed a marker that can never be reached. NaN is
+    // rejected too, because it fails the range check.
+    require(placeLat in -90.0..90.0) { "bundled place $placeId has 'lat' outside [-90, 90]" }
+    require(placeLon in -180.0..180.0) { "bundled place $placeId has 'lon' outside [-180, 180]" }
+    require(placeIcon.isNotEmpty()) { "bundled place $placeId has an empty 'icon'" }
     return Place(
         id = placeId,
-        lat = requireNotNull(lat) { "bundled place $placeId is missing 'lat'" },
-        lon = requireNotNull(lon) { "bundled place $placeId is missing 'lon'" },
-        icon = requireNotNull(icon) { "bundled place $placeId is missing 'icon'" },
+        lat = placeLat,
+        lon = placeLon,
+        icon = placeIcon,
         name = name,
         localizedName = null,
         updatedAt = SEEDED_UPDATED_AT,
@@ -199,3 +213,17 @@ internal fun JsonReader.readBundledPlace(): Place {
         osmId = null,
     )
 }
+
+/**
+ * Parses an optional bundled timestamp, returning null when it is unparseable.
+ *
+ * Only `boosted_until` is optional like this, and it merely affects how a
+ * seeded marker is drawn. A bad value must not roll back the whole snapshot and
+ * leave the map empty, so it degrades to null exactly like a missing field.
+ */
+private fun String.toZonedDateTimeOrNull(): ZonedDateTime? =
+    try {
+        ZonedDateTime.parse(this)
+    } catch (_: DateTimeParseException) {
+        null
+    }

@@ -155,6 +155,45 @@ class BundledPlacesTest {
         }
     }
 
+    @Test
+    fun readBundledPlace_rejectsCoordinatesOutOfRange() {
+        val cases = listOf(
+            """{"id":1,"lat":90.1,"lon":0.0,"icon":"store"}""",
+            """{"id":1,"lat":-90.1,"lon":0.0,"icon":"store"}""",
+            """{"id":1,"lat":0.0,"lon":180.1,"icon":"store"}""",
+            """{"id":1,"lat":0.0,"lon":-180.1,"icon":"store"}""",
+        )
+
+        cases.forEach { json ->
+            try {
+                reader(json).readBundledPlace()
+                Assert.fail("expected out-of-range coordinates in $json to be rejected")
+            } catch (e: IllegalArgumentException) {
+                Assert.assertTrue(e.message.orEmpty().contains("outside"))
+            }
+        }
+    }
+
+    @Test
+    fun readBundledPlace_rejectsEmptyIcon() {
+        try {
+            reader("""{"id":1,"lat":0.0,"lon":0.0,"icon":""}""").readBundledPlace()
+            Assert.fail("expected an empty 'icon' to be rejected")
+        } catch (e: IllegalArgumentException) {
+            Assert.assertTrue(e.message.orEmpty().contains("icon"))
+        }
+    }
+
+    @Test
+    fun readBundledPlace_treatsUnparseableBoostedUntilAsMissing() {
+        val json = """{"id":1,"lat":0.0,"lon":0.0,"icon":"store","boosted_until":"not-a-date"}"""
+
+        val place = reader(json).readBundledPlace()
+
+        Assert.assertNull(place.boostedUntil)
+        Assert.assertNotNull(place.id)
+    }
+
     // --- seeding ----------------------------------------------------------------
 
     @Test
@@ -309,5 +348,17 @@ class BundledPlacesTest {
 
         Assert.assertEquals(2L, result.placesImported)
         Assert.assertEquals(2L, db.place.selectCount())
+    }
+
+    @Test
+    fun importFrom_badBoostedUntilDoesNotDiscardTheSeed() = runTest {
+        val db = createDatabase()
+        val json = """[{"id":1,"lat":1.0,"lon":2.0,"icon":"store","boosted_until":"not-a-date"}]"""
+
+        val result = BundledPlaces.importFrom(db) { json.byteInputStream() }
+
+        Assert.assertEquals(1L, result.placesImported)
+        Assert.assertEquals(1L, db.place.selectCount())
+        Assert.assertNull(db.place.selectById(1L)!!.boostedUntil)
     }
 }
