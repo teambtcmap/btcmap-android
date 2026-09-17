@@ -7,6 +7,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.util.Locale
 
 class CommentExtTest {
 
@@ -18,8 +19,13 @@ class CommentExtTest {
         updatedAt = ZonedDateTime.parse(createdAt),
     )
 
-    private fun expectedDate(createdAt: String, zone: ZoneId): String =
+    private fun expectedDate(
+        createdAt: String,
+        zone: ZoneId,
+        locale: Locale = Locale.getDefault(Locale.Category.FORMAT),
+    ): String =
         DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+            .withLocale(locale)
             .format(ZonedDateTime.parse(createdAt).withZoneSameInstant(zone))
 
     @Test
@@ -79,5 +85,22 @@ class CommentExtTest {
         val item = comment(createdAt).toAdapterItem(ZoneId.of("UTC"))
 
         Assert.assertEquals(expectedDate(createdAt, ZoneId.of("UTC")), item.localizedDate)
+    }
+
+    /**
+     * The formatter is rebuilt per call so it follows the locale it is given
+     * (the device locale in production) instead of the one active at startup.
+     */
+    @Test
+    fun toAdapterItem_formatsTheDateInTheGivenLocale() {
+        val createdAt = "2024-06-01T10:00:00Z"
+        val utc = ZoneId.of("UTC")
+
+        val us = comment(createdAt).toAdapterItem(utc, Locale.US)
+        val germany = comment(createdAt).toAdapterItem(utc, Locale.GERMANY)
+
+        Assert.assertEquals(expectedDate(createdAt, utc, Locale.US), us.localizedDate)
+        Assert.assertEquals(expectedDate(createdAt, utc, Locale.GERMANY), germany.localizedDate)
+        Assert.assertNotEquals(us.localizedDate, germany.localizedDate)
     }
 }

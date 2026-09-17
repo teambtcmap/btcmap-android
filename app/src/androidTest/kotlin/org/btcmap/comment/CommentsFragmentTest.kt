@@ -329,11 +329,19 @@ class CommentsFragmentTest {
             }
     }
 
-    private class CommentsDispatcher : Dispatcher() {
+    /**
+     * Serves the quote and the order, records the requests, and reports the
+     * invoice paid from the second poll on. Subclasses supply the
+     * `/v4/place-comments` GET response through [commentsResponse].
+     */
+    private abstract class PaymentDispatcher : Dispatcher() {
         val posted = AtomicBoolean(false)
         val orderRequests = AtomicInteger()
         val commentsRequests = AtomicInteger()
         val invoiceRequests = AtomicInteger()
+        val commentsAfterPost = AtomicInteger()
+
+        protected abstract fun commentsResponse(): MockResponse
 
         override fun dispatch(request: RecordedRequest): MockResponse {
             val path = request.url.encodedPath
@@ -348,7 +356,7 @@ class CommentsFragmentTest {
 
                 path == "/v4/place-comments" -> {
                     commentsRequests.incrementAndGet()
-                    if (posted.get()) jsonResponse(POSTED_COMMENT_JSON) else jsonResponse("[]")
+                    commentsResponse()
                 }
 
                 path.startsWith("/v4/invoices/") -> {
@@ -362,46 +370,22 @@ class CommentsFragmentTest {
         }
     }
 
+    /** Serves the posted comment as soon as the order exists. */
+    private class CommentsDispatcher : PaymentDispatcher() {
+        override fun commentsResponse(): MockResponse =
+            if (posted.get()) jsonResponse(POSTED_COMMENT_JSON) else jsonResponse("[]")
+    }
+
     /**
      * Like [CommentsDispatcher], but the first sync after the order still sees
      * the comment hidden, as happens when an invoice is reported as paid a
      * moment before the server publishes the comment.
      */
-    private class DelayedPublishDispatcher : Dispatcher() {
-        val posted = AtomicBoolean(false)
-        val orderRequests = AtomicInteger()
-        val commentsRequests = AtomicInteger()
-        val invoiceRequests = AtomicInteger()
-        val commentsAfterPost = AtomicInteger()
-
-        override fun dispatch(request: RecordedRequest): MockResponse {
-            val path = request.url.encodedPath
-            return when {
-                path == "/v4/place-comments/quote" -> jsonResponse("""{"quote_sat":1000}""")
-
-                path == "/v4/place-comments" && request.method == "POST" -> {
-                    posted.set(true)
-                    orderRequests.incrementAndGet()
-                    jsonResponse("""{"invoice_id":"c1","invoice":"lnbc-c"}""")
-                }
-
-                path == "/v4/place-comments" -> {
-                    commentsRequests.incrementAndGet()
-                    when {
-                        !posted.get() -> jsonResponse("[]")
-                        commentsAfterPost.getAndIncrement() == 0 -> jsonResponse(HIDDEN_COMMENT_JSON)
-                        else -> jsonResponse(POSTED_COMMENT_JSON)
-                    }
-                }
-
-                path.startsWith("/v4/invoices/") -> {
-                    val index = invoiceRequests.getAndIncrement()
-                    val status = if (index == 0) "unpaid" else "paid"
-                    jsonResponse("""{"id":"c1","status":"$status"}""")
-                }
-
-                else -> jsonResponse("[]")
-            }
+    private class DelayedPublishDispatcher : PaymentDispatcher() {
+        override fun commentsResponse(): MockResponse = when {
+            !posted.get() -> jsonResponse("[]")
+            commentsAfterPost.getAndIncrement() == 0 -> jsonResponse(HIDDEN_COMMENT_JSON)
+            else -> jsonResponse(POSTED_COMMENT_JSON)
         }
     }
 
@@ -410,81 +394,22 @@ class CommentsFragmentTest {
      * brings a visible comment for another place. The old retry stopped on any
      * stored comment and would have left the paid comment hidden.
      */
-    private class UnrelatedCommentDispatcher : Dispatcher() {
-        val posted = AtomicBoolean(false)
-        val orderRequests = AtomicInteger()
-        val commentsRequests = AtomicInteger()
-        val invoiceRequests = AtomicInteger()
-        val commentsAfterPost = AtomicInteger()
-
-        override fun dispatch(request: RecordedRequest): MockResponse {
-            val path = request.url.encodedPath
-            return when {
-                path == "/v4/place-comments/quote" -> jsonResponse("""{"quote_sat":1000}""")
-
-                path == "/v4/place-comments" && request.method == "POST" -> {
-                    posted.set(true)
-                    orderRequests.incrementAndGet()
-                    jsonResponse("""{"invoice_id":"c1","invoice":"lnbc-c"}""")
-                }
-
-                path == "/v4/place-comments" -> {
-                    commentsRequests.incrementAndGet()
-                    when {
-                        !posted.get() -> jsonResponse("[]")
-                        commentsAfterPost.getAndIncrement() == 0 ->
-                            jsonResponse(HIDDEN_AND_UNRELATED_COMMENTS_JSON)
-                        else -> jsonResponse(POSTED_COMMENT_JSON)
-                    }
-                }
-
-                path.startsWith("/v4/invoices/") -> {
-                    val index = invoiceRequests.getAndIncrement()
-                    val status = if (index == 0) "unpaid" else "paid"
-                    jsonResponse("""{"id":"c1","status":"$status"}""")
-                }
-
-                else -> jsonResponse("[]")
-            }
+    private class UnrelatedCommentDispatcher : PaymentDispatcher() {
+        override fun commentsResponse(): MockResponse = when {
+            !posted.get() -> jsonResponse("[]")
+            commentsAfterPost.getAndIncrement() == 0 ->
+                jsonResponse(HIDDEN_AND_UNRELATED_COMMENTS_JSON)
+            else -> jsonResponse(POSTED_COMMENT_JSON)
         }
     }
 
     /** Serves the comments but never publishes the paid one. */
-    private class NeverPublishDispatcher : Dispatcher() {
-        val posted = AtomicBoolean(false)
-        val orderRequests = AtomicInteger()
-        val commentsRequests = AtomicInteger()
-        val invoiceRequests = AtomicInteger()
-        val commentsAfterPost = AtomicInteger()
-
-        override fun dispatch(request: RecordedRequest): MockResponse {
-            val path = request.url.encodedPath
-            return when {
-                path == "/v4/place-comments/quote" -> jsonResponse("""{"quote_sat":1000}""")
-
-                path == "/v4/place-comments" && request.method == "POST" -> {
-                    posted.set(true)
-                    orderRequests.incrementAndGet()
-                    jsonResponse("""{"invoice_id":"c1","invoice":"lnbc-c"}""")
-                }
-
-                path == "/v4/place-comments" -> {
-                    commentsRequests.incrementAndGet()
-                    if (posted.get()) {
-                        commentsAfterPost.incrementAndGet()
-                        jsonResponse(HIDDEN_COMMENT_JSON)
-                    } else {
-                        jsonResponse("[]")
-                    }
-                }
-
-                path.startsWith("/v4/invoices/") -> {
-                    val index = invoiceRequests.getAndIncrement()
-                    val status = if (index == 0) "unpaid" else "paid"
-                    jsonResponse("""{"id":"c1","status":"$status"}""")
-                }
-
-                else -> jsonResponse("[]")
+    private class NeverPublishDispatcher : PaymentDispatcher() {
+        override fun commentsResponse(): MockResponse = when {
+            !posted.get() -> jsonResponse("[]")
+            else -> {
+                commentsAfterPost.incrementAndGet()
+                jsonResponse(HIDDEN_COMMENT_JSON)
             }
         }
     }

@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Stop the comments screen from claiming there are no comments when the sync fails
+- Keep the comments add button clear of a physical left inset under right-to-left layouts
 - Keep looking for a freshly paid comment for longer and with backoff instead of a few fixed retries
 - Hold the comments empty state back after returning from a payment too, so it cannot flash "no comments yet"
 - Keep the post-payment comment retry working when the screen is recreated or the add button is tapped before the list rendered

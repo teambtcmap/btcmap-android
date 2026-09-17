@@ -88,6 +88,12 @@ class Sync(val api: Api, val db: Database) {
     data class CommentSyncReport(
         val duration: Duration,
         val rowsAffected: Long,
+        /**
+         * True when the sync could not read the delta or apply it, for example
+         * on a network or database failure. [rowsAffected] alone cannot tell
+         * that apart from a successful sync that changed nothing.
+         */
+        val failed: Boolean,
     )
 
     suspend fun syncComments(): CommentSyncReport {
@@ -96,6 +102,7 @@ class Sync(val api: Api, val db: Database) {
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
             var rowsAffected = 0L
+            var failed = false
             var maxKnownUpdatedAt = db.comment.selectMaxUpdatedAt()
             var batchSize = baseBatchSize
 
@@ -107,6 +114,7 @@ class Sync(val api: Api, val db: Database) {
                     // where it is so the next sync retries the same page.
                     t.rethrowIfCancellation()
                     t.printStackTrace()
+                    failed = true
                     break
                 }
 
@@ -149,6 +157,7 @@ class Sync(val api: Api, val db: Database) {
                 } catch (t: Throwable) {
                     t.rethrowIfCancellation()
                     t.printStackTrace()
+                    failed = true
                     break
                 }
 
@@ -163,6 +172,7 @@ class Sync(val api: Api, val db: Database) {
             CommentSyncReport(
                 duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                 rowsAffected = rowsAffected,
+                failed = failed,
             )
         }
     }

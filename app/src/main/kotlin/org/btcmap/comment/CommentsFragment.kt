@@ -100,9 +100,17 @@ class CommentsFragment : Fragment() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             val margin = (resources.displayMetrics.density * 24).toInt()
+            // The insets are physical while marginEnd follows the layout
+            // direction, so under RTL the button's end margin must clear the
+            // physical left inset, not the right one.
+            val endInset = if (v.layoutDirection == View.LAYOUT_DIRECTION_RTL) {
+                insets.left
+            } else {
+                insets.right
+            }
 
             v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                marginEnd = insets.right + margin
+                marginEnd = endInset + margin
                 bottomMargin = insets.bottom + margin
             }
 
@@ -148,7 +156,7 @@ class CommentsFragment : Fragment() {
                 initialSyncDone = false
                 val rendered = renderComments(adapter)
 
-                if (postPaymentSync) {
+                val synced = if (postPaymentSync) {
                     postPaymentSync = false
                     syncCommentsWithRetry(adapter, rendered)
                 } else {
@@ -159,9 +167,10 @@ class CommentsFragment : Fragment() {
                     syncComments()
                 }
 
-                // The list is now as fresh as the sync could make it; from here
-                // on an empty list really means there are no comments.
-                initialSyncDone = true
+                // Only claim the list is empty once a sync actually completed;
+                // after a failure an empty list does not mean there are no
+                // comments, and asserting it would be misleading.
+                initialSyncDone = synced
                 renderComments(adapter)
             }
         }
@@ -179,8 +188,9 @@ class CommentsFragment : Fragment() {
         return items
     }
 
-    private suspend fun syncComments() {
-        sync().syncComments()
+    /** Returns whether the sync completed, as opposed to failing. */
+    private suspend fun syncComments(): Boolean {
+        return !sync().syncComments().failed
     }
 
     /**
@@ -202,7 +212,7 @@ class CommentsFragment : Fragment() {
     private suspend fun syncCommentsWithRetry(
         adapter: CommentsAdapter,
         rendered: List<CommentsAdapterItem>,
-    ) {
+    ): Boolean {
         // Fall back to the currently shown ids when the add screen was not
         // opened from the list, for example after a process recreation that
         // lost the snapshot taken when the add button was tapped. Nothing is
@@ -214,14 +224,19 @@ class CommentsFragment : Fragment() {
         // comment; then the list already has it and there is nothing to wait
         // for.
         if (rendered.any { it.id !in baseline }) {
-            return
+            return true
         }
+
+        // Remember the last attempt's outcome so the caller can tell a window
+        // that ended because the comment was never published from one where the
+        // server could not be reached.
+        var lastSyncSucceeded = true
 
         withTimeoutOrNull(POST_PAYMENT_SYNC_TIMEOUT_MS) {
             var delayMs = POST_PAYMENT_SYNC_INITIAL_DELAY_MS
 
             while (true) {
-                sync().syncComments()
+                lastSyncSucceeded = !sync().syncComments().failed
 
                 if (renderComments(adapter).any { it.id !in baseline }) {
                     return@withTimeoutOrNull
@@ -231,6 +246,8 @@ class CommentsFragment : Fragment() {
                 delayMs = (delayMs * 2).coerceAtMost(POST_PAYMENT_SYNC_MAX_DELAY_MS)
             }
         }
+
+        return lastSyncSucceeded
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -243,6 +260,11 @@ class CommentsFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // These ids describe the view that was showing. Clearing them means a
+        // tap before the recreated view renders again cannot snapshot a stale
+        // baseline. The pending post-payment flags are deliberately kept.
+        renderedIds = emptySet()
+        renderedAtLeastOnce = false
         _binding = null
     }
 
