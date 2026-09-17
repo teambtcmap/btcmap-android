@@ -388,7 +388,13 @@ class SettingsFragment : Fragment() {
                 if (!prefs.authorized) {
                     null
                 } else {
-                    db().user.select()?.name
+                    db().user.select()?.name ?: run {
+                        // A token without a cached account is not a usable
+                        // session, so clear it instead of leaving the account
+                        // button pointing at a profile that will be dropped.
+                        prefs.clearSession(db())
+                        null
+                    }
                 }
             }
 

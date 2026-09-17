@@ -7,9 +7,9 @@ import org.btcmap.api.removeSavedArea
 import org.btcmap.api.removeSavedPlace
 import org.btcmap.api.saveArea
 import org.btcmap.api.savePlace
+import org.btcmap.api.toDbUser
 import org.btcmap.db
 import org.btcmap.db.table.user.SavedItem
-import org.btcmap.db.table.user.User
 
 suspend fun Fragment.toggleSavedArea(areaId: Long, areaName: String) {
     val user = requireNotNull(db().user.select()) { "user is not signed in" }
@@ -59,14 +59,6 @@ private suspend fun Fragment.refreshUser() {
 
     db().transaction {
         db().user.delete()
-        db().user.insert(
-            User(
-                id = updated.id,
-                name = updated.name,
-                roles = updated.roles,
-                savedPlaces = updated.savedPlaces,
-                savedAreas = updated.savedAreas,
-            )
-        )
+        db().user.insert(updated.toDbUser())
     }
 }

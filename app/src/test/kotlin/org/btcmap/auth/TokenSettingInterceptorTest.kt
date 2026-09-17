@@ -142,6 +142,21 @@ class TokenSettingInterceptorTest {
     }
 
     @Test
+    fun skipsTokenWhenConfiguredApiUrlIsMalformed() {
+        server().enqueue(okResponse())
+
+        client(
+            token = { "stored-token" },
+            apiUrl = { throw IllegalArgumentException("malformed URL") },
+        )
+            .newCall(Request.Builder().url(server().url("/x")).build())
+            .execute()
+            .close()
+
+        Assert.assertNull(server().takeRequest().headers["Authorization"])
+    }
+
+    @Test
     fun dropsTokenWhenRedirectedToAnotherHost() {
         val other = MockWebServer()
         other.start()

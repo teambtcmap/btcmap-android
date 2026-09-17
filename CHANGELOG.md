@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Fix signing out dropping an account that was signed in again in the meantime
+- Clear a leftover session on the settings screen when the cached account is missing
+- Document that the session token is intentionally stored unencrypted in the private app database
 - Show a required-field error when saving a blank username or password in the profile instead of silently doing nothing
 - Clear the cached account when an outdated encrypted session token is dropped during an upgrade
 - Read the account status on the settings screen off the main thread

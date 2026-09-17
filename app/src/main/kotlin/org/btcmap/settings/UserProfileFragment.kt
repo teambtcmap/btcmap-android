@@ -21,15 +21,16 @@ import org.btcmap.api
 import org.btcmap.api.getUser
 import org.btcmap.api.removeSavedArea
 import org.btcmap.api.removeSavedPlace
+import org.btcmap.api.toDbUser
 import org.btcmap.api.updatePassword
 import org.btcmap.api.updateUsername
 import org.btcmap.app
+import org.btcmap.db
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
 import org.btcmap.databinding.SavedAreaItemBinding
 import org.btcmap.databinding.SavedPlaceItemBinding
 import org.btcmap.databinding.UserProfileFragmentBinding
-import org.btcmap.db
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
 import org.btcmap.util.userFacingMessage
@@ -189,16 +190,17 @@ class UserProfileFragment : Fragment() {
             try {
                 val user = api().updateUsername(newName)
                 withContext(Dispatchers.IO) {
-                    val existing = db().user.select()
-                    db().user.insert(
-                        User(
-                            id = user.id,
-                            name = user.name,
-                            roles = user.roles,
-                            savedPlaces = existing?.savedPlaces ?: user.savedPlaces,
-                            savedAreas = existing?.savedAreas ?: user.savedAreas,
+                    val database = db()
+                    val existing = database.user.select()
+                    database.transaction {
+                        database.user.delete()
+                        database.user.insert(
+                            user.toDbUser().copy(
+                                savedPlaces = existing?.savedPlaces ?: user.savedPlaces,
+                                savedAreas = existing?.savedAreas ?: user.savedAreas,
+                            )
                         )
-                    )
+                    }
                 }
                 binding.username.text = user.name
                 Toast.makeText(context, R.string.username_changed, Toast.LENGTH_SHORT).show()
@@ -223,14 +225,25 @@ class UserProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val token = withContext(Dispatchers.IO) { prefs.authToken }
-                withContext(Dispatchers.IO) {
-                    prefs.clearSession(db())
+                // Clear only the session this screen saw: a sign-in that raced
+                // this logout committed a new token, which must not be dropped.
+                val cleared = withContext(Dispatchers.IO) {
+                    val stored = token?.takeIf { it.isNotBlank() }
+                    if (stored == null) {
+                        prefs.clearSession(db())
+                        false
+                    } else {
+                        prefs.clearSessionIfTokenMatches(db(), stored)
+                    }
                 }
                 parentFragmentManager.popBackStack()
 
-                // Revoke the token server-side. This is best-effort and runs on the
-                // app scope so it also completes if it outlives this screen.
-                token?.takeIf { it.isNotBlank() }?.let { application.revokeToken(it) }
+                // Revoke the token server-side, but only the one that was just
+                // cleared. This is best-effort and runs on the app scope so it
+                // also completes if it outlives this screen.
+                if (cleared) {
+                    token?.let { application.revokeToken(it) }
+                }
             } catch (e: Exception) {
                 e.rethrowIfCancellation()
                 showError(e)
@@ -267,16 +280,11 @@ class UserProfileFragment : Fragment() {
             try {
                 val user = api().getUser()
                 withContext(Dispatchers.IO) {
-                    db().user.delete()
-                    db().user.insert(
-                        User(
-                            id = user.id,
-                            name = user.name,
-                            roles = user.roles,
-                            savedPlaces = user.savedPlaces,
-                            savedAreas = user.savedAreas,
-                        )
-                    )
+                    val database = db()
+                    database.transaction {
+                        database.user.delete()
+                        database.user.insert(user.toDbUser())
+                    }
                 }
                 binding.savedPlacesList.adapter = SavedPlacesAdapter(
                     places = user.savedPlaces,

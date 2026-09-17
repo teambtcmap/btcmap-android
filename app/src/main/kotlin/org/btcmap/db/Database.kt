@@ -110,8 +110,10 @@ class Database(driver: SQLiteDriver, val path: String) {
         try {
             block()
             conn.execSQL("COMMIT;")
-        } catch (e: Exception) {
-            conn.execSQL("ROLLBACK;")
+        } catch (e: Throwable) {
+            // Roll back on any failure, including an Error, and never let a
+            // failed rollback mask the original exception.
+            runCatching { conn.execSQL("ROLLBACK;") }
             throw e
         }
     }

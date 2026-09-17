@@ -7,6 +7,16 @@ import kotlinx.coroutines.launch
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.User
 
+/**
+ * Key of the session token in the app database.
+ *
+ * The token is stored in plaintext on purpose. The database is private to the
+ * app (or readable on a rooted device), Android Keystore encryption was dropped
+ * for reliability, and backups are disabled (`allowBackup="false"` plus the
+ * `res/xml/backup_rules.xml` that excludes every domain), so the token is not
+ * copied off the device. Never log it, and send it only to the configured API
+ * host (see `TokenSettingInterceptor`).
+ */
 internal const val KEY_AUTH_TOKEN = "auth_token"
 
 private const val KEY_LEGACY_IMPORTED = "legacy_prefs_imported"

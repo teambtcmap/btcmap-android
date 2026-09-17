@@ -20,7 +20,10 @@ internal class TokenSettingInterceptor(
         }
 
         // Never attach the session token to a host other than the configured API.
-        val api = apiUrl()
+        // A malformed stored URL is treated like a foreign host: the request
+        // proceeds without the token instead of failing inside the interceptor.
+        val api = runCatching { apiUrl() }.getOrNull()
+            ?: return chain.proceed(request)
         if (request.url.scheme != api.scheme ||
             request.url.host != api.host ||
             request.url.port != api.port

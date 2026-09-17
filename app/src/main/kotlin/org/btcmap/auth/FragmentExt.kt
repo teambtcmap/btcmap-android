@@ -22,15 +22,17 @@ import org.btcmap.api
 import org.btcmap.api.CreateTokenResponse
 import org.btcmap.api.createUser
 import org.btcmap.api.signIn
+import org.btcmap.api.toDbUser
 import org.btcmap.db
 import org.btcmap.db.Database
-import org.btcmap.db.table.user.User
 import org.btcmap.settings.Settings
 import org.btcmap.settings.prefs
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.userFacingMessage
 
 fun Fragment.showAuthDialog(onSuccess: () -> Unit) {
+    if (!isAdded) return
+
     val dialogView = layoutInflater.inflate(R.layout.account_choices_dialog, null)
     val dialog = MaterialAlertDialogBuilder(requireContext())
         .setTitle(R.string.account)
@@ -79,6 +81,8 @@ private fun Fragment.showCredentialsDialog(
     prefilledUsername: String? = null,
     onSubmit: (username: String, password: String) -> Unit,
 ) {
+    if (!isAdded) return
+
     val dialogView = layoutInflater.inflate(R.layout.account_dialog, null)
     val usernameInput = dialogView.findViewById<TextInputEditText>(R.id.usernameInput)
     val passwordInput = dialogView.findViewById<TextInputEditText>(R.id.passwordInput)
@@ -244,13 +248,7 @@ internal suspend fun storeSignedInSession(
         prefs.replaceSession(
             db = db,
             token = response.token,
-            user = User(
-                id = response.user.id,
-                name = response.user.name,
-                roles = response.user.roles,
-                savedPlaces = response.user.savedPlaces,
-                savedAreas = response.user.savedAreas,
-            ),
+            user = response.user.toDbUser(),
         )
     }
 }
