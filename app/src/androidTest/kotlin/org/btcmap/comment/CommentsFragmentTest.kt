@@ -321,6 +321,61 @@ class CommentsFragmentTest {
         }
     }
 
+    /**
+     * The retry runs for several seconds, so a configuration change during it
+     * must not lose it. The flags are saved and the recreated view retries with
+     * the same baseline instead of falling back to a single sync.
+     */
+    @Test
+    fun postPaymentRetrySurvivesRecreation() {
+        val dispatcher = PublishAfterDispatcher(visibleAfter = 5)
+        apiRule.server.dispatcher = dispatcher
+
+        launchComments { scenario, fragment ->
+            lateinit var activity: Activity
+            scenario.onActivity { activity = it }
+
+            waitUntilOnMain {
+                fragment.requireView().findViewById<View>(R.id.empty).isVisible
+            }
+            waitUntil { dispatcher.commentsRequests.get() >= 1 }
+
+            onView(withId(R.id.fab)).perform(click())
+            waitUntilOnMain {
+                activity.supportFragmentManager
+                    .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
+            }
+            waitUntilOnMain {
+                activity.findViewById<Button>(R.id.btn_continue)?.isEnabled == true
+            }
+
+            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
+            onView(withId(R.id.btn_continue)).perform(click())
+
+            waitUntil { dispatcher.orderRequests.get() == 1 }
+            waitUntilOnMain {
+                activity.supportFragmentManager
+                    .findFragmentById(R.id.fragmentContainerView) is CommentsFragment
+            }
+
+            // Recreate the screen while the retry is still looking for the
+            // comment. A single sync after this would not reach the publish
+            // threshold, so only a resumed retry can make the comment appear.
+            waitUntil { dispatcher.commentsAfterPost.get() >= 1 }
+            scenario.recreate()
+
+            waitUntil {
+                try {
+                    onView(withText("gm")).check(matches(isDisplayed()))
+                    true
+                } catch (t: Throwable) {
+                    false
+                }
+            }
+            onView(withId(R.id.empty)).check(matches(not(isDisplayed())))
+        }
+    }
+
     private fun quoteDispatcher(): Dispatcher = object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse =
             when (request.url.encodedPath) {
@@ -399,6 +454,22 @@ class CommentsFragmentTest {
             !posted.get() -> jsonResponse("[]")
             commentsAfterPost.getAndIncrement() == 0 ->
                 jsonResponse(HIDDEN_AND_UNRELATED_COMMENTS_JSON)
+            else -> jsonResponse(POSTED_COMMENT_JSON)
+        }
+    }
+
+    /**
+     * Keeps the paid comment hidden for a number of post-order syncs, then
+     * publishes it. Lets a test tell a retry that keeps going from a single
+     * sync, since one sync cannot cross a threshold above one.
+     */
+    private class PublishAfterDispatcher(
+        private val visibleAfter: Int,
+    ) : PaymentDispatcher() {
+        override fun commentsResponse(): MockResponse = when {
+            !posted.get() -> jsonResponse("[]")
+            commentsAfterPost.getAndIncrement() < visibleAfter ->
+                jsonResponse(HIDDEN_COMMENT_JSON)
             else -> jsonResponse(POSTED_COMMENT_JSON)
         }
     }

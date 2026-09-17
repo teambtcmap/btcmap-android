@@ -59,6 +59,13 @@ class CommentsFragment : Fragment() {
     private var renderedIds: Set<Long> = emptySet()
 
     /**
+     * Items handed to the adapter by the last [renderComments] call. Resumes and
+     * the post-payment retry re-read the same rows repeatedly, so the adapter is
+     * only updated when the list actually changed.
+     */
+    private var lastSubmittedItems: List<CommentsAdapterItem>? = null
+
+    /**
      * True once [renderComments] has populated [renderedIds]. Until then the
      * ids are not a trustworthy baseline for the post-payment retry.
      */
@@ -130,22 +137,26 @@ class CommentsFragment : Fragment() {
                 replace<AddCommentFragment>(
                     R.id.fragmentContainerView,
                     null,
-                    Bundle().apply { putLong("place_id", args.placeId) }
+                    Bundle().apply {
+                        putLong("place_id", args.placeId)
+                        putBoolean(AddCommentFragment.ARG_NOTIFY_ON_POSTED, true)
+                    }
                 )
                 addToBackStack(null)
             }
         }
 
         // The add screen sets this right before popping back once a comment was
-        // paid for, so the next resume retries the sync below.
+        // paid for, so the next resume retries the sync below. The add screen is
+        // told to set it only when it was opened from here, so a comment posted
+        // straight from the place screen cannot leave a stale result behind for
+        // a later visit. The FragmentManager clears the result once this view
+        // has received it.
         parentFragmentManager.setFragmentResultListener(
             AddCommentFragment.REQUEST_KEY,
             viewLifecycleOwner,
         ) { _, _ ->
             postPaymentSync = true
-            // The result is kept by the FragmentManager until cleared, so a
-            // later visit to this screen would otherwise retry again.
-            parentFragmentManager.clearFragmentResult(AddCommentFragment.REQUEST_KEY)
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -157,8 +168,16 @@ class CommentsFragment : Fragment() {
                 val rendered = renderComments(adapter)
 
                 val synced = if (postPaymentSync) {
+                    // The flags are cleared only once the retry returns
+                    // normally. A cancellation (leaving the screen, a
+                    // configuration change) keeps them, and they are saved in
+                    // the instance state, so the recreated view retries with
+                    // the original baseline instead of giving up after a
+                    // single sync.
+                    val result = syncCommentsWithRetry(adapter, rendered)
                     postPaymentSync = false
-                    syncCommentsWithRetry(adapter, rendered)
+                    prePostCommentIds = null
+                    result
                 } else {
                     // Syncing on every resume also retries a sync that failed
                     // while the screen was in the background. It stays cheap
@@ -178,10 +197,14 @@ class CommentsFragment : Fragment() {
 
     private suspend fun renderComments(adapter: CommentsAdapter): List<CommentsAdapterItem> {
         val items = withContext(Dispatchers.IO) {
-            db().comment.selectByPlaceId(args.placeId).map { it.toAdapterItem() }
+            val formatter = commentDateFormatter()
+            db().comment.selectByPlaceId(args.placeId).map { it.toAdapterItem(formatter) }
         }
 
-        adapter.submitList(items)
+        if (items != lastSubmittedItems) {
+            adapter.submitList(items)
+            lastSubmittedItems = items
+        }
         renderedIds = items.map { it.id }.toSet()
         renderedAtLeastOnce = true
         binding.empty.isVisible = initialSyncDone && items.isEmpty()
@@ -203,8 +226,10 @@ class CommentsFragment : Fragment() {
      *
      * A hidden comment is dropped instead of stored, so the paid comment shows
      * up as an id that was not shown before the post flow started. Waiting for
-     * that specific signal (rather than for any stored row) means an unrelated
-     * comment syncing in the meantime cannot end the retries.
+     * a new id for this place means an unrelated comment for another place
+     * cannot end the retries. A different comment for the same place published
+     * first would look like the expected signal, though: the paid comment's id
+     * is assigned by the server, so the two cannot be told apart.
      *
      * Retries back off and stop after a bounded window so a comment the server
      * never publishes cannot poll forever.
@@ -218,7 +243,6 @@ class CommentsFragment : Fragment() {
         // lost the snapshot taken when the add button was tapped. Nothing is
         // then known to be new, and the retry below simply runs its window.
         val baseline = prePostCommentIds ?: rendered.map { it.id }.toSet()
-        prePostCommentIds = null
 
         // A sync while the add screen was open may already have stored the paid
         // comment; then the list already has it and there is nothing to wait
@@ -265,6 +289,7 @@ class CommentsFragment : Fragment() {
         // baseline. The pending post-payment flags are deliberately kept.
         renderedIds = emptySet()
         renderedAtLeastOnce = false
+        lastSubmittedItems = null
         _binding = null
     }
 

@@ -18,10 +18,11 @@ const val CREATE = """
     );
  """
 
-// Serves selectByPlaceId: the leading column filters the place, and the
-// expression matches the ORDER BY so the rows come back without a sort.
+// Serves selectByPlaceId: the leading column filters the place and the rest
+// matches the ORDER BY (including the id tie-break) so the rows come back
+// without a sort.
 const val CREATE_INDEX_PLACE_ID_CREATED_AT =
-    "CREATE INDEX comment_place_id_created_at ON $TABLE($PLACE_ID, julianday($CREATED_AT) DESC);"
+    "CREATE INDEX comment_place_id_created_at ON $TABLE($PLACE_ID, julianday($CREATED_AT) DESC, $ID DESC);"
 
 // Serves selectMaxUpdatedAt: the expression index lets SQLite read the newest
 // row directly instead of scanning and sorting the whole table.

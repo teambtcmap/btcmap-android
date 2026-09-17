@@ -22,6 +22,7 @@ import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.atomic.AtomicBoolean
 
 @RunWith(AndroidJUnit4::class)
 class AddCommentPaymentFlowTest : PaymentScreenTest() {
@@ -94,6 +95,44 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
             waitUntilOnMain {
                 activity.supportFragmentManager.findFragmentByTag(COMMENT_TAG) == null
             }
+        }
+    }
+
+    /**
+     * The place screen opens this screen directly and does not listen for the
+     * posted result. Setting one anyway would leave a stale result behind for a
+     * later comments visit to consume as a fresh payment.
+     */
+    @Test
+    fun postedComment_setsNoResultWhenNotRequested() {
+        val dispatcher = commentDispatcher(invoiceStatuses = listOf("unpaid", "paid"))
+        apiRule.server.dispatcher = dispatcher
+
+        withComment(addToBackStack = true) { scenario, fragment ->
+            lateinit var activity: Activity
+            scenario.onActivity { activity = it }
+
+            val resultReceived = AtomicBoolean(false)
+            scenario.onActivity {
+                it.supportFragmentManager.setFragmentResultListener(
+                    AddCommentFragment.REQUEST_KEY,
+                    it,
+                ) { _, _ -> resultReceived.set(true) }
+            }
+
+            waitUntilOnMain {
+                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+            }
+            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
+            onView(withId(R.id.btn_continue)).perform(click())
+
+            waitUntilOnMain {
+                activity.supportFragmentManager.findFragmentByTag(COMMENT_TAG) == null
+            }
+            Assert.assertFalse(
+                "an add screen opened directly must not set the retry result",
+                resultReceived.get(),
+            )
         }
     }
 

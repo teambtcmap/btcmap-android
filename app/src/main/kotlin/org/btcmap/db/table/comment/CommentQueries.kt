@@ -8,6 +8,8 @@ import kotlin.use
 
 class CommentQueries(private val conn: SQLiteConnection) {
     fun insert(rows: List<Comment>) {
+        if (rows.isEmpty()) return
+
         // OR REPLACE, not a plain INSERT: a comment can be returned by the delta
         // sync more than once (the server bumps updated_at when deleted_at
         // changes), and a plain insert would abort the whole sync transaction

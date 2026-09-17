@@ -10,7 +10,7 @@ import org.btcmap.db.table.user.UserQueries
 
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
-        private const val VERSION = 10
+        private const val VERSION = 11
     }
 
     val conn = driver.open(path)
@@ -92,6 +92,14 @@ class Database(driver: SQLiteDriver, val path: String) {
                 9 -> {
                     conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
                     conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
+                }
+
+                10 -> {
+                    // Recreate the place index with the id tie-break added to
+                    // the sort key; the version 9 index omitted it, forcing
+                    // SQLite to sort each place's comments in a temp B-tree.
+                    conn.execSQL("DROP INDEX IF EXISTS comment_place_id_created_at;")
+                    conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
                 }
 
                 else -> throw Exception("migration is missing")

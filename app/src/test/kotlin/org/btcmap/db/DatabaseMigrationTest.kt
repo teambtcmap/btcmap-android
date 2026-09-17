@@ -110,4 +110,35 @@ class DatabaseMigrationTest {
         Assert.assertTrue(indexes.contains("comment_place_id_created_at"))
         Assert.assertTrue(indexes.contains("comment_updated_at"))
     }
+
+    @Test
+    fun migration10_recreatesThePlaceIdIndexWithTheIdTieBreak() {
+        val file = Files.createTempFile("btcmap-migration", ".db").toFile()
+        file.deleteOnExit()
+        val driver = BundledSQLiteDriver()
+
+        val conn = driver.open(file.absolutePath)
+        conn.execSQL(org.btcmap.db.table.comment.CREATE)
+        // The version 9 index, before the id tie-break was added to the sort.
+        conn.execSQL(
+            "CREATE INDEX comment_place_id_created_at " +
+                "ON comment(place_id, julianday(created_at) DESC);"
+        )
+        conn.execSQL("PRAGMA user_version=10;")
+        conn.close()
+
+        val db = Database(driver, file.absolutePath)
+
+        val columns = mutableListOf<String?>()
+        db.conn.prepare(
+            "SELECT name FROM pragma_index_info('comment_place_id_created_at') ORDER BY seqno;"
+        ).use {
+            while (it.step()) {
+                columns.add(it.getTextOrNull(0))
+            }
+        }
+
+        // place_id, the julianday(created_at) expression (null name), id.
+        Assert.assertEquals(listOf("place_id", null, "id"), columns)
+    }
 }
