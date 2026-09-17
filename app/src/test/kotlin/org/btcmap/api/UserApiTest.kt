@@ -149,19 +149,15 @@ class UserApiTest : ApiTestBase() {
     }
 
     @Test
-    fun signOut_postsRpcRequestWithExplicitToken() = runTest {
-        enqueueJson("""{"jsonrpc":"2.0","result":{"id":1},"id":1}""")
+    fun signOut_postsToRestEndpointWithExplicitToken() = runTest {
+        enqueueJson("""{"id":42,"label":"device","revoked_at":"2026-09-17T12:34:56.789Z"}""")
 
         api().signOut("token-1")
 
         val request = takeRequest()
         Assert.assertEquals("POST", request.method)
-        Assert.assertEquals("/rpc", request.url.encodedPath)
+        Assert.assertEquals("/v4/auth/signout", request.url.encodedPath)
         Assert.assertEquals("Bearer token-1", request.headers["Authorization"])
-
-        val body = request.jsonBody()
-        Assert.assertTrue(body, body.contains("\"jsonrpc\":\"2.0\""))
-        Assert.assertTrue(body, body.contains("\"method\":\"signout\""))
     }
 
     @Test

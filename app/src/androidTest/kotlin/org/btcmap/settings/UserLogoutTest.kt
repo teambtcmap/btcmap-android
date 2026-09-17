@@ -81,30 +81,27 @@ class UserLogoutTest {
                 Assert.assertNull(databaseRule.db.user.select())
                 Assert.assertNull(prefs.authToken)
 
-                val rpc = waitForRpcRequest()
-                Assert.assertEquals("POST", rpc.method)
-                Assert.assertEquals("/rpc", rpc.url.encodedPath)
-                Assert.assertEquals("Bearer token-1", rpc.headers["Authorization"])
-                Assert.assertTrue(
-                    rpc.body?.utf8().orEmpty().contains("\"method\":\"signout\""),
-                )
+                val request = waitForSignOutRequest()
+                Assert.assertEquals("POST", request.method)
+                Assert.assertEquals("/v4/auth/signout", request.url.encodedPath)
+                Assert.assertEquals("Bearer token-1", request.headers["Authorization"])
             }
         } finally {
             app.mapStyleUriForTesting = null
         }
     }
 
-    private fun waitForRpcRequest(): RecordedRequest {
+    private fun waitForSignOutRequest(): RecordedRequest {
         val deadline = System.currentTimeMillis() + 15_000
         while (System.currentTimeMillis() < deadline) {
             if (apiRule.server.requestCount > 0) {
                 val request = apiRule.server.takeRequest()
-                if (request.url.encodedPath == "/rpc") return request
+                if (request.url.encodedPath == "/v4/auth/signout") return request
             } else {
                 Thread.sleep(50)
             }
         }
-        throw AssertionError("Expected a sign-out request to /rpc")
+        throw AssertionError("Expected a sign-out request to /v4/auth/signout")
     }
 
     companion object {
