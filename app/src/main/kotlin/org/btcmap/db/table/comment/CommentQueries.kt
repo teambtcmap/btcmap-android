@@ -8,9 +8,13 @@ import kotlin.use
 
 class CommentQueries(private val conn: SQLiteConnection) {
     fun insert(rows: List<Comment>) {
+        // OR REPLACE, not a plain INSERT: a comment can be returned by the delta
+        // sync more than once (the server bumps updated_at when deleted_at
+        // changes), and a plain insert would abort the whole sync transaction
+        // with a primary-key conflict.
         conn.prepare(
             """
-            INSERT INTO $TABLE ($ID, $PLACE_ID, $COMMENT, $CREATED_AT, $UPDATED_AT)
+            INSERT OR REPLACE INTO $TABLE ($ID, $PLACE_ID, $COMMENT, $CREATED_AT, $UPDATED_AT)
             VALUES (?1, ?2, ?3, ?4, ?5);
             """
         ).use {

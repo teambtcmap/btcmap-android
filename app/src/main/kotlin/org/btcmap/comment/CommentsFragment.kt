@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
@@ -35,6 +36,14 @@ class CommentsFragment : Fragment() {
 
     private var _binding: CommentsFragmentBinding? = null
     private val binding get() = _binding!!
+
+    /**
+     * Set when the add screen reports that a comment was paid for. The next
+     * resume then retries the sync for a few seconds instead of doing a single
+     * request, because the server can report the invoice as paid just before it
+     * flips the comment to visible.
+     */
+    private var postPaymentSync = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,7 +68,6 @@ class CommentsFragment : Fragment() {
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
             v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.top
                 rightMargin = insets.right + (resources.displayMetrics.density * 24).toInt()
                 bottomMargin = insets.bottom + (resources.displayMetrics.density * 24).toInt()
                 leftMargin = insets.left
@@ -80,15 +88,28 @@ class CommentsFragment : Fragment() {
             }
         }
 
+        // The add screen sets this right before popping back once a comment was
+        // paid for, so the next resume retries the sync below.
+        parentFragmentManager.setFragmentResultListener(
+            AddCommentFragment.REQUEST_KEY,
+            viewLifecycleOwner,
+        ) { _, _ ->
+            postPaymentSync = true
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 renderComments(adapter)
 
-                // Syncing on every resume also retries a sync that failed while
-                // the screen was in the background. It stays cheap because
-                // syncComments only fetches the delta since the stored cursor.
-                if (sync().syncComments().rowsAffected > 0) {
-                    renderComments(adapter)
+                if (postPaymentSync) {
+                    postPaymentSync = false
+                    syncCommentsWithRetry(adapter)
+                } else {
+                    // Syncing on every resume also retries a sync that failed
+                    // while the screen was in the background. It stays cheap
+                    // because syncComments only fetches the delta since the
+                    // stored cursor.
+                    syncComments(adapter)
                 }
             }
         }
@@ -103,8 +124,47 @@ class CommentsFragment : Fragment() {
         binding.empty.isVisible = items.isEmpty()
     }
 
+    private suspend fun syncComments(adapter: CommentsAdapter) {
+        if (sync().syncComments().rowsAffected > 0) {
+            renderComments(adapter)
+        }
+    }
+
+    /**
+     * Retries the delta sync shortly after a payment.
+     *
+     * The invoice can be reported as paid before the server has flipped the new
+     * comment to visible, and because the list only syncs on resume, a single
+     * request in that window would leave the comment hidden until the user
+     * leaves and re-enters the screen.
+     */
+    private suspend fun syncCommentsWithRetry(adapter: CommentsAdapter) {
+        repeat(POST_PAYMENT_SYNC_ATTEMPTS) { attempt ->
+            val report = sync().syncComments()
+
+            if (report.rowsAffected > 0) {
+                renderComments(adapter)
+            }
+
+            // upserted, not rowsAffected: a comment that is still hidden counts
+            // as affected but is dropped, so it must not stop the retries.
+            if (report.upserted > 0) {
+                return
+            }
+
+            if (attempt < POST_PAYMENT_SYNC_ATTEMPTS - 1) {
+                delay(POST_PAYMENT_SYNC_DELAY_MS)
+            }
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private companion object {
+        const val POST_PAYMENT_SYNC_ATTEMPTS = 6
+        const val POST_PAYMENT_SYNC_DELAY_MS = 500L
     }
 }

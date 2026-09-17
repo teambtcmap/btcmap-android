@@ -53,4 +53,31 @@ class CommentExtTest {
 
         Assert.assertNotEquals(utcDate, tokyoDate)
     }
+
+    /**
+     * A comment posted shortly after midnight UTC lands on the previous day for
+     * a user west of UTC; the zone must be applied in both directions.
+     */
+    @Test
+    fun toAdapterItem_formatsTheDateInAZoneWestOfUtc() {
+        val createdAt = "2024-06-01T00:30:00Z"
+        val losAngeles = ZoneId.of("America/Los_Angeles")
+
+        val item = comment(createdAt).toAdapterItem(losAngeles)
+
+        Assert.assertEquals(expectedDate(createdAt, losAngeles), item.localizedDate)
+        Assert.assertNotEquals(
+            comment(createdAt).toAdapterItem(ZoneId.of("UTC")).localizedDate,
+            item.localizedDate,
+        )
+    }
+
+    @Test
+    fun toAdapterItem_keepsTheDateWhenNoConversionIsNeeded() {
+        val createdAt = "2024-06-01T10:00:00Z"
+
+        val item = comment(createdAt).toAdapterItem(ZoneId.of("UTC"))
+
+        Assert.assertEquals(expectedDate(createdAt, ZoneId.of("UTC")), item.localizedDate)
+    }
 }

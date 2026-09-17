@@ -33,6 +33,54 @@ class CommentQueriesTest {
     }
 
     @Test
+    fun insert_replacesAnExistingComment() {
+        val db = createDatabase()
+        val original = Comment(
+            id = 1L,
+            placeId = 100L,
+            comment = "First",
+            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+        )
+        val edited = Comment(
+            id = 1L,
+            placeId = 100L,
+            comment = "Edited",
+            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            updatedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z"),
+        )
+
+        db.comment.insert(listOf(original))
+        db.comment.insert(listOf(edited))
+
+        val results = db.comment.selectByPlaceId(100L)
+        Assert.assertEquals(1, results.size)
+        Assert.assertEquals("Edited", results[0].comment)
+        Assert.assertEquals(ZonedDateTime.parse("2024-01-02T10:00:00Z"), results[0].updatedAt)
+    }
+
+    @Test
+    fun insert_isIdempotentWhenARowIsFetchedTwice() {
+        // The delta sync can hand out the same comment again, for example when
+        // it was hidden on the first fetch and published on the next.
+        val db = createDatabase()
+        val comment = Comment(
+            id = 5L,
+            placeId = 100L,
+            comment = "gm",
+            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            updatedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z"),
+        )
+
+        db.comment.insert(listOf(comment))
+        db.comment.insert(listOf(comment))
+
+        val results = db.comment.selectByPlaceId(100L)
+        Assert.assertEquals(1, results.size)
+        Assert.assertEquals("gm", results[0].comment)
+    }
+
+    @Test
     fun selectByPlaceId_returnsEmptyListWhenNoComments() {
         val db = createDatabase()
 

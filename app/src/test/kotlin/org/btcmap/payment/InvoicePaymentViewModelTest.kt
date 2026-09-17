@@ -1,5 +1,6 @@
 package org.btcmap.payment
 
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -41,6 +42,15 @@ class InvoicePaymentViewModelTest {
 
         Assert.assertEquals("quote", model.state.value.quote)
         Assert.assertTrue(model.state.value.actionsEnabled)
+    }
+
+    @Test
+    fun factory_rejectsAnUnrelatedViewModelClass() {
+        val factory = InvoicePaymentViewModel.Factory { "quote" }
+
+        Assert.assertThrows(IllegalArgumentException::class.java) {
+            factory.create(UnrelatedViewModel::class.java)
+        }
     }
 
     @Test
@@ -164,3 +174,5 @@ class InvoicePaymentViewModelTest {
         Assert.assertEquals(2, calls)
     }
 }
+
+private class UnrelatedViewModel : ViewModel()

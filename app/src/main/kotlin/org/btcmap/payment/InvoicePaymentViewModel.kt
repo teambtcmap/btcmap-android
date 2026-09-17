@@ -111,8 +111,12 @@ internal class InvoicePaymentViewModel<TQuote : Any>(
     class Factory<TQuote : Any>(
         private val quoteLoader: suspend () -> TQuote,
     ) : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T =
-            InvoicePaymentViewModel(quoteLoader) as T
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            require(modelClass.isAssignableFrom(InvoicePaymentViewModel::class.java)) {
+                "Unknown ViewModel class: ${modelClass.name}"
+            }
+            @Suppress("UNCHECKED_CAST")
+            return InvoicePaymentViewModel(quoteLoader) as T
+        }
     }
 }

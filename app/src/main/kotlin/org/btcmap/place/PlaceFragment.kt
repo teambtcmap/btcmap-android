@@ -26,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.boost.BoostFragment
@@ -68,6 +69,8 @@ class PlaceFragment : Fragment() {
     private var placeName = ""
 
     private lateinit var commentsAdapter: CommentsAdapter
+
+    private var commentsJob: Job? = null
 
     private var _binding: PlaceFragmentBinding? = null
     private val binding get() = _binding!!
@@ -350,11 +353,16 @@ class PlaceFragment : Fragment() {
         }
 
         binding.comments.setOnClickListener {
-            val comments = db().comment.selectByPlaceId(place.id)
-            if (comments.isEmpty()) {
-                openAddComment()
-            } else {
-                openComments()
+            viewLifecycleOwner.lifecycleScope.launch {
+                val hasComments = withContext(Dispatchers.IO) {
+                    db().comment.selectByPlaceId(place.id).isNotEmpty()
+                }
+
+                if (hasComments) {
+                    openComments()
+                } else {
+                    openAddComment()
+                }
             }
         }
 
@@ -372,16 +380,35 @@ class PlaceFragment : Fragment() {
 
         binding.addComment.setOnClickListener { openAddComment() }
 
-        val comments = db().comment.selectByPlaceId(place.id)
-        binding.commentsTitle.text = getString(R.string.comments_d, comments.size)
-        binding.commentsTitle.isVisible = comments.isNotEmpty()
-        binding.comments.text = if (comments.isEmpty()) {
-            getString(R.string.comment)
-        } else {
-            getString(R.string.comments_d, comments.size)
-        }
         binding.comments.isEnabled = true
-        commentsAdapter.submitList(comments.map { it.toAdapterItem() })
+        renderComments(place.id)
+    }
+
+    /**
+     * Loads this place's comments off the main thread and shows them in the
+     * preview list and the comments button.
+     *
+     * Comments are synced globally, so the local table can be much larger than
+     * one place's comments; reading it on the UI thread would block the frame.
+     */
+    private fun renderComments(placeId: Long) {
+        commentsJob?.cancel()
+        commentsJob = viewLifecycleOwner.lifecycleScope.launch {
+            val comments = withContext(Dispatchers.IO) {
+                db().comment.selectByPlaceId(placeId)
+            }
+
+            val binding = _binding ?: return@launch
+
+            binding.commentsTitle.text = getString(R.string.comments_d, comments.size)
+            binding.commentsTitle.isVisible = comments.isNotEmpty()
+            binding.comments.text = if (comments.isEmpty()) {
+                getString(R.string.comment)
+            } else {
+                getString(R.string.comments_d, comments.size)
+            }
+            commentsAdapter.submitList(comments.map { it.toAdapterItem() })
+        }
     }
 
     private fun openReport(defaultType: String?) {

@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Fix the comments screen missing a freshly paid comment when the server publishes it a moment after the payment is confirmed
+- Read a merchant's comments off the main thread so opening a place does not block on the database
+- Fix a comment delta sync crashing when the server returns a comment that is already stored
 - Show comment dates in the device's time zone instead of the time zone returned by the API
 - Show an empty state on the comments screen instead of a blank list
 - Fix the map crashing on launch when the bundled offline places snapshot is missing or malformed

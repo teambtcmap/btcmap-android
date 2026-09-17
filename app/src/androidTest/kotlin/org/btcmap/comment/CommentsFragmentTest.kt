@@ -28,6 +28,7 @@ import org.btcmap.util.DatabaseRule
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
 import org.hamcrest.Matchers.not
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -170,6 +171,59 @@ class CommentsFragmentTest {
         }
     }
 
+    /**
+     * The server can report the invoice as paid just before it publishes the
+     * comment, so the list would sync once and still see the comment hidden.
+     * The post-payment retry must pick it up without leaving the screen.
+     */
+    @Test
+    fun postedCommentAppearsWhenTheServerPublishesItLate() {
+        val dispatcher = DelayedPublishDispatcher()
+        apiRule.server.dispatcher = dispatcher
+
+        launchComments { scenario, fragment ->
+            lateinit var activity: Activity
+            scenario.onActivity { activity = it }
+
+            waitUntilOnMain {
+                fragment.requireView().findViewById<View>(R.id.empty).isVisible
+            }
+            waitUntil { dispatcher.commentsRequests.get() >= 1 }
+
+            onView(withId(R.id.fab)).perform(click())
+            waitUntilOnMain {
+                activity.supportFragmentManager
+                    .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
+            }
+            waitUntilOnMain {
+                activity.findViewById<Button>(R.id.btn_continue)?.isEnabled == true
+            }
+
+            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
+            onView(withId(R.id.btn_continue)).perform(click())
+
+            waitUntil { dispatcher.orderRequests.get() == 1 }
+            waitUntilOnMain {
+                activity.supportFragmentManager
+                    .findFragmentById(R.id.fragmentContainerView) is CommentsFragment
+            }
+
+            waitUntil {
+                try {
+                    onView(withText("gm")).check(matches(isDisplayed()))
+                    true
+                } catch (t: Throwable) {
+                    false
+                }
+            }
+            Assert.assertTrue(
+                "the list must have retried the sync",
+                dispatcher.commentsAfterPost.get() >= 2,
+            )
+            onView(withId(R.id.empty)).check(matches(not(isDisplayed())))
+        }
+    }
+
     private fun quoteDispatcher(): Dispatcher = object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse =
             when (request.url.encodedPath) {
@@ -211,11 +265,57 @@ class CommentsFragmentTest {
         }
     }
 
+    /**
+     * Like [CommentsDispatcher], but the first sync after the order still sees
+     * the comment hidden, as happens when an invoice is reported as paid a
+     * moment before the server publishes the comment.
+     */
+    private class DelayedPublishDispatcher : Dispatcher() {
+        val posted = AtomicBoolean(false)
+        val orderRequests = AtomicInteger()
+        val commentsRequests = AtomicInteger()
+        val invoiceRequests = AtomicInteger()
+        val commentsAfterPost = AtomicInteger()
+
+        override fun dispatch(request: RecordedRequest): MockResponse {
+            val path = request.url.encodedPath
+            return when {
+                path == "/v4/place-comments/quote" -> jsonResponse("""{"quote_sat":1000}""")
+
+                path == "/v4/place-comments" && request.method == "POST" -> {
+                    posted.set(true)
+                    orderRequests.incrementAndGet()
+                    jsonResponse("""{"invoice_id":"c1","invoice":"lnbc-c"}""")
+                }
+
+                path == "/v4/place-comments" -> {
+                    commentsRequests.incrementAndGet()
+                    when {
+                        !posted.get() -> jsonResponse("[]")
+                        commentsAfterPost.getAndIncrement() == 0 -> jsonResponse(HIDDEN_COMMENT_JSON)
+                        else -> jsonResponse(POSTED_COMMENT_JSON)
+                    }
+                }
+
+                path.startsWith("/v4/invoices/") -> {
+                    val index = invoiceRequests.getAndIncrement()
+                    val status = if (index == 0) "unpaid" else "paid"
+                    jsonResponse("""{"id":"c1","status":"$status"}""")
+                }
+
+                else -> jsonResponse("[]")
+            }
+        }
+    }
+
     private companion object {
         const val COMMENTS_TAG = "comments"
 
         const val POSTED_COMMENT_JSON =
             """[{"id":9,"place_id":1,"text":"gm","created_at":"2024-06-03T10:00:00Z","updated_at":"2024-06-03T10:00:00Z","deleted_at":null}]"""
+
+        const val HIDDEN_COMMENT_JSON =
+            """[{"id":9,"place_id":1,"text":"gm","created_at":"2024-06-03T10:00:00Z","updated_at":"2024-06-03T10:00:00Z","deleted_at":"2024-06-03T10:00:00Z"}]"""
 
         fun jsonResponse(body: String, code: Int = 200): MockResponse =
             MockResponse.Builder()

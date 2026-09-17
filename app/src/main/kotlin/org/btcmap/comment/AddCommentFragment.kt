@@ -70,6 +70,7 @@ class AddCommentFragment : Fragment() {
                     getString(R.string.your_comment_has_been_posted),
                     Toast.LENGTH_LONG,
                 ).show()
+                parentFragmentManager.setFragmentResult(REQUEST_KEY, Bundle())
                 parentFragmentManager.popBackStack()
             },
         )
@@ -122,5 +123,13 @@ class AddCommentFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        /**
+         * Fragment result set right before this screen closes once the comment
+         * was paid for; `CommentsFragment` listens for it to retry its sync.
+         */
+        const val REQUEST_KEY = "org.btcmap.comment.posted"
     }
 }

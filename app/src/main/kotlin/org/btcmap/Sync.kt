@@ -87,6 +87,12 @@ class Sync(val api: Api, val db: Database) {
     data class CommentSyncReport(
         val duration: Duration,
         val rowsAffected: Long,
+        /**
+         * Rows that were actually stored (inserted or replaced). [rowsAffected]
+         * also counts comments the server deleted, which are dropped instead of
+         * stored and so do not change what the list shows.
+         */
+        val upserted: Long,
     )
 
     suspend fun syncComments(): CommentSyncReport {
@@ -95,6 +101,7 @@ class Sync(val api: Api, val db: Database) {
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
             var rowsAffected = 0L
+            var upserted = 0L
             var maxKnownUpdatedAt = db.comment.selectMaxUpdatedAt()
             var batchSize = baseBatchSize
 
@@ -107,6 +114,7 @@ class Sync(val api: Api, val db: Database) {
                     return@withContext CommentSyncReport(
                         duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                         rowsAffected = rowsAffected,
+                        upserted = upserted,
                     )
                 }
 
@@ -146,6 +154,7 @@ class Sync(val api: Api, val db: Database) {
                 }
 
                 rowsAffected += delta.size
+                upserted += newOrChanged.size
 
                 if (reachedTip) {
                     break
@@ -156,6 +165,7 @@ class Sync(val api: Api, val db: Database) {
             CommentSyncReport(
                 duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                 rowsAffected = rowsAffected,
+                upserted = upserted,
             )
         }
     }

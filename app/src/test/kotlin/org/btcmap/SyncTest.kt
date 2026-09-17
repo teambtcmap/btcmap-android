@@ -249,6 +249,7 @@ class SyncTest {
         val report = sync.syncComments()
 
         Assert.assertEquals(1L, report.rowsAffected)
+        Assert.assertEquals(1L, report.upserted)
         val comments = db.comment.selectByPlaceId(100)
         Assert.assertEquals(1, comments.size)
         Assert.assertEquals("Great coffee!", comments[0].comment)
@@ -269,6 +270,7 @@ class SyncTest {
         val report = sync.syncComments()
 
         Assert.assertEquals(0L, report.rowsAffected)
+        Assert.assertEquals(0L, report.upserted)
     }
 
     @Test
@@ -311,8 +313,50 @@ class SyncTest {
         val report = sync.syncComments()
 
         Assert.assertEquals(1L, report.rowsAffected)
+        Assert.assertEquals(0L, report.upserted)
         val comments = db.comment.selectByPlaceId(100)
         Assert.assertTrue(comments.isEmpty())
+    }
+
+    @Test
+    fun syncComments_storesACommentOnceItIsPublished() = runTest {
+        val db = createDatabase()
+        val api = createApi()
+
+        fun response(deletedAt: String, updatedAt: String): MockResponse =
+            MockResponse.Builder()
+                .addHeader("Content-Type", "application/json")
+                .body(
+                    """
+                    [
+                        {
+                            "id": 1,
+                            "place_id": 100,
+                            "text": "gm",
+                            "created_at": "2024-01-01T10:00:00Z",
+                            "updated_at": "$updatedAt",
+                            "deleted_at": $deletedAt
+                        }
+                    ]
+                    """.trimIndent()
+                ).build()
+
+        // First the server hands out the comment while it is still hidden, then
+        // the same id once the payment published it.
+        serverRule.server.enqueue(response("\"2024-01-01T10:05:00Z\"", "2024-01-01T10:05:00Z"))
+        serverRule.server.enqueue(response("null", "2024-01-01T10:10:00Z"))
+
+        val sync = Sync(api, db)
+
+        val hidden = sync.syncComments()
+        Assert.assertEquals(1L, hidden.rowsAffected)
+        Assert.assertEquals("a hidden comment must not count as stored", 0L, hidden.upserted)
+        Assert.assertTrue(db.comment.selectByPlaceId(100).isEmpty())
+
+        val published = sync.syncComments()
+        Assert.assertEquals(1L, published.rowsAffected)
+        Assert.assertEquals(1L, published.upserted)
+        Assert.assertEquals("gm", db.comment.selectByPlaceId(100).single().comment)
     }
 
     @Test
