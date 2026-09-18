@@ -8,7 +8,7 @@ import org.btcmap.db.table.comment.CommentQueries
 import org.btcmap.db.table.event.EventQueries
 import org.btcmap.db.table.place.PlaceQueries
 import org.btcmap.db.table.preference.PreferenceQueries
-import org.btcmap.db.table.user.UserQueries
+import org.btcmap.db.table.user.UserStore
 import java.io.File
 
 class Database(driver: SQLiteDriver, val path: String) {
@@ -35,8 +35,8 @@ class Database(driver: SQLiteDriver, val path: String) {
     val place = PlaceQueries(conn)
     val comment = CommentQueries(conn)
     val event = EventQueries(conn)
-    val user = UserQueries(conn)
     val preference = PreferenceQueries(conn)
+    val user = UserStore(preference)
 
     init {
         // [initialize] discards any pre-existing database that is not already at
@@ -90,7 +90,6 @@ class Database(driver: SQLiteDriver, val path: String) {
         conn.execSQL(org.btcmap.db.table.place.CREATE)
         conn.execSQL(org.btcmap.db.table.event.CREATE)
         conn.execSQL(org.btcmap.db.table.comment.CREATE)
-        conn.execSQL(org.btcmap.db.table.user.CREATE)
         conn.execSQL(org.btcmap.db.table.preference.CREATE)
         conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
         conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)

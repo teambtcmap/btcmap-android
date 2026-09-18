@@ -6,7 +6,7 @@ import org.junit.Test
 class SchemaTest {
     @Test
     fun name() {
-        assertEquals("preference", TABLE)
+        assertEquals("pref", TABLE)
     }
 
     @Test

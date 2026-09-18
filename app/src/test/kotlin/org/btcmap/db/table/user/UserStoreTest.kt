@@ -5,7 +5,7 @@ import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
 
-class UserQueriesTest {
+class UserStoreTest {
 
     private fun createDatabase(): Database {
         return Database(BundledSQLiteDriver(), ":memory:")
@@ -44,7 +44,7 @@ class UserQueriesTest {
     }
 
     @Test
-    fun select_returnsNullWhenEmpty() {
+    fun select_returnsNullWhenAbsent() {
         val db = createDatabase()
 
         val result = db.user.select()
@@ -53,7 +53,7 @@ class UserQueriesTest {
     }
 
     @Test
-    fun insert_replaceUpdatesExistingUser() {
+    fun insert_replacesExistingUser() {
         val db = createDatabase()
         val user1 = createUser(id = 1L, name = "Original Name")
         val user2 = createUser(id = 1L, name = "Updated Name")
@@ -80,7 +80,7 @@ class UserQueriesTest {
     }
 
     @Test
-    fun delete_doesNothingWhenEmpty() {
+    fun delete_doesNothingWhenAbsent() {
         val db = createDatabase()
 
         db.user.delete()

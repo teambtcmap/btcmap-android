@@ -52,6 +52,19 @@ class DbStatsReaderTest {
     }
 
     @Test
+    fun readTables_ignoresAndroidMetadata() {
+        withConnection { conn ->
+            // AndroidSQLiteDriver creates android_metadata to store the locale.
+            conn.execSQL("CREATE TABLE android_metadata (locale TEXT);")
+            conn.execSQL("CREATE TABLE place (id INTEGER PRIMARY KEY);")
+
+            val tables = DbStatsReader(conn).readTables()
+
+            Assert.assertEquals(listOf("place"), tables.map { it.name })
+        }
+    }
+
+    @Test
     fun readTables_omitsCountSplitForTablesWithoutTrackingFields() {
         withConnection { conn ->
             conn.execSQL("CREATE TABLE user (id INTEGER PRIMARY KEY, name TEXT);")

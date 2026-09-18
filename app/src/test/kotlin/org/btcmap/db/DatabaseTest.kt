@@ -17,7 +17,7 @@ class DatabaseTest {
         try {
             Assert.assertEquals(Database.VERSION, userVersion(db.conn))
             Assert.assertEquals(
-                listOf("comment", "event", "place", "preference", "user"),
+                listOf("comment", "event", "place", "pref"),
                 tables(db.conn),
             )
         } finally {

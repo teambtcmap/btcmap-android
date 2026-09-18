@@ -13,6 +13,7 @@ import org.btcmap.settings.authToken
 import org.btcmap.util.DatabaseRule
 import org.btcmap.util.PreferencesRule
 import org.btcmap.db.table.user.User as DbUser
+import org.btcmap.db.table.user.UserStore
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -114,8 +115,10 @@ class SignedInSessionStoreTest {
     )
 
     /**
-     * Fails the [failOnUserInsert]-th cached-user insert (1-based), then delegates
-     * normally, so a rollback that re-inserts the previous user can succeed.
+     * Fails the [failOnUserInsert]-th cached-user write (1-based), then delegates
+     * normally, so a rollback that restores the previous user can succeed. The
+     * user is stored as a preference under [UserStore.KEY], so the failing write
+     * is identified by the bound key rather than the SQL text alone.
      */
     private class FailingUserInsertDriver(
         private val failOnUserInsert: Int = 1,
@@ -127,16 +130,30 @@ class SignedInSessionStoreTest {
             val connection = delegate.open(fileName)
             return object : SQLiteConnection {
                 override fun prepare(sql: String): SQLiteStatement {
-                    val isUserInsert =
-                        sql.contains("INSERT INTO user", ignoreCase = true) ||
-                            sql.contains("INSERT OR REPLACE INTO user", ignoreCase = true)
-                    if (isUserInsert) {
-                        userInsertIndex++
-                        if (userInsertIndex == failOnUserInsert) {
-                            throw RuntimeException("user insert failed")
+                    val statement = connection.prepare(sql)
+                    if (!sql.contains("INSERT OR REPLACE INTO pref", ignoreCase = true)) {
+                        return statement
+                    }
+                    return object : SQLiteStatement by statement {
+                        private var isUser = false
+                        private var counted = false
+
+                        override fun bindText(index: Int, value: String) {
+                            if (index == 1 && value == UserStore.KEY) isUser = true
+                            statement.bindText(index, value)
+                        }
+
+                        override fun step(): Boolean {
+                            if (isUser && !counted) {
+                                counted = true
+                                userInsertIndex++
+                                if (userInsertIndex == failOnUserInsert) {
+                                    throw RuntimeException("user insert failed")
+                                }
+                            }
+                            return statement.step()
                         }
                     }
-                    return connection.prepare(sql)
                 }
 
                 override fun close() {

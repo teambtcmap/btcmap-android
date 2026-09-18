@@ -1,6 +1,6 @@
 package org.btcmap.db.table.preference
 
-const val TABLE = "preference"
+const val TABLE = "pref"
 
 const val KEY = "pref_key"
 const val VALUE = "pref_value"

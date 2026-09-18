@@ -13,6 +13,7 @@ class DbStatsReader(private val conn: SQLiteConnection) {
             """
             SELECT name FROM sqlite_master
             WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+                AND name != 'android_metadata'
             ORDER BY name;
             """
         ).use {
