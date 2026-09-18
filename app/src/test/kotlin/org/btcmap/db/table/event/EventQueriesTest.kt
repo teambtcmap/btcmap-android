@@ -280,6 +280,34 @@ class EventQueriesTest {
         Assert.assertEquals(3, results.size)
     }
 
+    @Test
+    fun insert_keepsTombstoneButHidesItFromSelects() {
+        val db = createDatabase()
+        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        db.event.insert(
+            listOf(
+                event(id = 1L, name = "Bitcoin Meetup", updatedAt = "2024-01-02T10:00:00Z")
+                    .copy(deletedAt = deletedAt)
+            )
+        )
+
+        Assert.assertNull(db.event.selectById(1L))
+        Assert.assertTrue(db.event.selectAll().isEmpty())
+        Assert.assertTrue(db.event.selectByBounds(40.0, 41.0, -75.0, -73.0).isEmpty())
+        Assert.assertTrue(db.event.selectBySearchString("Bitcoin").isEmpty())
+
+        // The tombstone must still advance the delta cursor and stay on disk.
+        Assert.assertEquals(deletedAt, db.event.selectMaxUpdatedAt())
+        Assert.assertEquals(1L, physicalRowCount(db, "event"))
+    }
+
+    private fun physicalRowCount(db: Database, table: String): Long {
+        db.conn.prepare("SELECT count(*) FROM $table;").use {
+            it.step()
+            return it.getLong(0)
+        }
+    }
+
     private fun event(
         id: Long,
         name: String = "Event $id",

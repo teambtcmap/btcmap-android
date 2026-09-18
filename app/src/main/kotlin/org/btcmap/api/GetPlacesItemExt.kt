@@ -34,6 +34,7 @@ fun GetPlacesItem.toPlace(): FullProjection {
         comments = comments,
         telegram = telegram?.toHttpUrlOrNull(),
         osmId = osmId,
+        deletedAt = deletedAt?.toZonedDateTime(),
     )
 }
 

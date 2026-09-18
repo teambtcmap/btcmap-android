@@ -261,4 +261,34 @@ class CommentQueriesTest {
 
         Assert.assertEquals(1, db.comment.selectByPlaceId(100L).size)
     }
+
+    @Test
+    fun insert_keepsTombstoneButHidesItFromSelects() {
+        val db = createDatabase()
+        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        db.comment.insert(
+            listOf(
+                Comment(
+                    id = 1L,
+                    placeId = 100L,
+                    comment = "gone",
+                    createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+                    updatedAt = deletedAt,
+                    deletedAt = deletedAt,
+                )
+            )
+        )
+
+        Assert.assertTrue(db.comment.selectByPlaceId(100L).isEmpty())
+        // The tombstone must still advance the delta cursor and stay on disk.
+        Assert.assertEquals(deletedAt, db.comment.selectMaxUpdatedAt())
+        Assert.assertEquals(1L, physicalRowCount(db, "comment"))
+    }
+
+    private fun physicalRowCount(db: Database, table: String): Long {
+        db.conn.prepare("SELECT count(*) FROM $table;").use {
+            it.step()
+            return it.getLong(0)
+        }
+    }
 }

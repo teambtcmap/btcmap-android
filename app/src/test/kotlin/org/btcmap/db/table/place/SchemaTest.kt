@@ -34,6 +34,7 @@ class SchemaTest {
         assertEquals("boosted_until", BOOSTED_UNTIL)
         assertEquals("comments", COMMENTS)
         assertEquals("telegram", TELEGRAM)
+        assertEquals("deleted_at", DELETED_AT)
     }
 
     @Test
@@ -62,5 +63,6 @@ class SchemaTest {
         assert(CREATE.contains(BOOSTED_UNTIL))
         assert(CREATE.contains(COMMENTS))
         assert(CREATE.contains(TELEGRAM))
+        assert(CREATE.contains(DELETED_AT))
     }
 }

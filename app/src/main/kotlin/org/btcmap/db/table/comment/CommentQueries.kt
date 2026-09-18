@@ -2,6 +2,7 @@ package org.btcmap.db.table.comment
 
 import androidx.sqlite.SQLiteConnection
 import org.btcmap.db.bindZonedDateTime
+import org.btcmap.db.bindZonedDateTimeOrNull
 import org.btcmap.db.getZonedDateTimeOrNull
 import java.time.ZonedDateTime
 import kotlin.use
@@ -16,8 +17,8 @@ class CommentQueries(private val conn: SQLiteConnection) {
         // with a primary-key conflict.
         conn.prepare(
             """
-            INSERT OR REPLACE INTO $TABLE ($ID, $PLACE_ID, $COMMENT, $CREATED_AT, $UPDATED_AT)
-            VALUES (?1, ?2, ?3, ?4, ?5);
+            INSERT OR REPLACE INTO $TABLE ($ID, $PLACE_ID, $COMMENT, $CREATED_AT, $UPDATED_AT, $DELETED_AT)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6);
             """
         ).use {
             rows.forEach { row ->
@@ -26,6 +27,7 @@ class CommentQueries(private val conn: SQLiteConnection) {
                 it.bindText(3, row.comment)
                 it.bindZonedDateTime(4, row.createdAt)
                 it.bindZonedDateTime(5, row.updatedAt)
+                it.bindZonedDateTimeOrNull(6, row.deletedAt)
                 it.step()
                 it.reset()
             }
@@ -38,6 +40,7 @@ class CommentQueries(private val conn: SQLiteConnection) {
             SELECT ${FullProjection.COLUMNS}
             FROM $TABLE
             WHERE $PLACE_ID = ?1
+                AND $DELETED_AT IS NULL
             ORDER BY julianday($CREATED_AT) DESC, $ID DESC;
             """
         ).use {

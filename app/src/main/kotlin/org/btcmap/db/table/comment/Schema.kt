@@ -7,6 +7,7 @@ const val PLACE_ID = "place_id"
 const val COMMENT = "comment"
 const val CREATED_AT = "created_at"
 const val UPDATED_AT = "updated_at"
+const val DELETED_AT = "deleted_at"
 
 const val CREATE = """
     CREATE TABLE $TABLE (
@@ -14,7 +15,8 @@ const val CREATE = """
         $PLACE_ID INTEGER NOT NULL,
         $COMMENT TEXT NOT NULL,
         $CREATED_AT TEXT NOT NULL,
-        $UPDATED_AT TEXT NOT NULL
+        $UPDATED_AT TEXT NOT NULL,
+        $DELETED_AT TEXT
     );
  """
 

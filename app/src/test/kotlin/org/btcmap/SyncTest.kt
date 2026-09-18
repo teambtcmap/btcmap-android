@@ -146,6 +146,9 @@ class SyncTest {
 
         Assert.assertEquals(1L, report.rowsAffected)
         Assert.assertNull(db.place.selectById(1L))
+        Assert.assertEquals(0L, db.place.selectCount())
+        // The tombstone is retained on disk but hidden from normal reads.
+        Assert.assertEquals(1L, physicalRowCount(db, "place"))
     }
 
     @Test
@@ -313,6 +316,8 @@ class SyncTest {
         Assert.assertEquals(1L, report.rowsAffected)
         val comments = db.comment.selectByPlaceId(100)
         Assert.assertTrue(comments.isEmpty())
+        // The tombstone is retained on disk but hidden from normal reads.
+        Assert.assertEquals(1L, physicalRowCount(db, "comment"))
     }
 
     @Test
@@ -604,6 +609,8 @@ class SyncTest {
 
         Assert.assertEquals(1L, report.rowsAffected)
         Assert.assertTrue(db.event.selectAll().isEmpty())
+        // The tombstone is retained on disk but hidden from normal reads.
+        Assert.assertEquals(1L, physicalRowCount(db, "event"))
     }
 
     @Test
@@ -669,6 +676,13 @@ class SyncTest {
                 .addHeader("Content-Type", "application/json")
                 .body(page.joinToString(prefix = "[", postfix = "]", transform = render))
                 .build()
+        }
+    }
+
+    private fun physicalRowCount(db: Database, table: String): Long {
+        db.conn.prepare("SELECT count(*) FROM $table;").use {
+            it.step()
+            return it.getLong(0)
         }
     }
 }

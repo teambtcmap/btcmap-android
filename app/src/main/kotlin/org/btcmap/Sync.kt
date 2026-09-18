@@ -11,6 +11,7 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.comment.Comment
 import org.btcmap.db.table.event.Event
 import org.btcmap.util.rethrowIfCancellation
+import org.btcmap.util.toZonedDateTime
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneOffset
@@ -54,17 +55,15 @@ class Sync(val api: Api, val db: Database) {
                 maxKnownUpdatedAt = cursor
                 val reachedTip = delta.size < batchSize
 
-                val newOrChanged = delta.filter { it.deletedAt == null }
-                val deleted = delta.filter { it.deletedAt != null }
-
                 try {
                     // Guard the whole apply step, not just the request: a
                     // malformed row or a database failure here must not escape
                     // and take down the lifecycle coroutine that called sync.
                     db.transaction {
-                        db.place.insert(newOrChanged.map { it.toPlace() })
-
-                        deleted.forEach { db.place.deleteById(it.id) }
+                        // Tombstones are kept as well: a deleted place still
+                        // carries its last-known data, which stays available
+                        // offline, and its updated_at keeps the cursor moving.
+                        db.place.insert(delta.map { it.toPlace() })
                     }
                 } catch (t: Throwable) {
                     t.rethrowIfCancellation()
@@ -132,28 +131,25 @@ class Sync(val api: Api, val db: Database) {
                 maxKnownUpdatedAt = cursor
                 val reachedTip = delta.size < batchSize
 
-                val newOrChanged = delta.filter { it.deletedAt == null }
-                val deleted = delta.filter { it.deletedAt != null }
-
                 try {
                     // Guard the whole apply step, not just the request: a
                     // malformed timestamp or a database failure here must not
                     // escape and take down the lifecycle coroutine that called
                     // sync.
                     db.transaction {
-                        db.comment.insert(newOrChanged.map {
+                        // Deleted comments are kept as tombstones too, so a
+                        // hidden comment that is published later replaces the
+                        // tombstone in place.
+                        db.comment.insert(delta.map {
                             Comment(
                                 id = it.id,
                                 placeId = it.placeId,
                                 comment = it.comment,
                                 createdAt = ZonedDateTime.parse(it.createdAt),
                                 updatedAt = ZonedDateTime.parse(it.updatedAt),
+                                deletedAt = it.deletedAt?.toZonedDateTime(),
                             )
                         })
-
-                        deleted.forEach {
-                            db.comment.deleteById(it.id)
-                        }
                     }
                 } catch (t: Throwable) {
                     t.rethrowIfCancellation()
@@ -217,15 +213,13 @@ class Sync(val api: Api, val db: Database) {
                 maxKnownUpdatedAt = cursor
                 val reachedTip = delta.size < batchSize
 
-                val newOrChanged = delta.filter { it.deletedAt == null }
-                val deleted = delta.filter { it.deletedAt != null }
-
                 try {
                     // Guard the whole apply step, not just the request: a
                     // malformed row or a database failure here must not escape
                     // and take down the lifecycle coroutine that called sync.
                     db.transaction {
-                        db.event.insert(newOrChanged.map {
+                        // Event tombstones are kept like the other tables'.
+                        db.event.insert(delta.map {
                             Event(
                                 id = it.id,
                                 areaId = it.areaId,
@@ -236,10 +230,9 @@ class Sync(val api: Api, val db: Database) {
                                 startsAt = it.startsAt,
                                 endsAt = it.endsAt,
                                 updatedAt = ZonedDateTime.parse(it.updatedAt),
+                                deletedAt = it.deletedAt?.toZonedDateTime(),
                             )
                         })
-
-                        deleted.forEach { db.event.deleteById(it.id) }
                     }
                 } catch (t: Throwable) {
                     t.rethrowIfCancellation()

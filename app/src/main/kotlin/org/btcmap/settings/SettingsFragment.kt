@@ -21,6 +21,7 @@ import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.databinding.SettingsFragmentBinding
 import org.btcmap.db
+import org.btcmap.dbstats.DbStatsFragment
 
 class SettingsFragment : Fragment() {
 
@@ -78,6 +79,14 @@ class SettingsFragment : Fragment() {
         binding.showDebugInfo.isChecked = prefs.showDebugInfo
         binding.showDebugInfo.setOnCheckedChangeListener { _, isChecked ->
             prefs.showDebugInfo = isChecked
+        }
+
+        binding.dbStatsButton.setOnClickListener {
+            parentFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace<DbStatsFragment>(R.id.fragmentContainerView, null)
+                addToBackStack(null)
+            }
         }
 
         initMarkerBackgroundButton()

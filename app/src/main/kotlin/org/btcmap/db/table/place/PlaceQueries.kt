@@ -14,8 +14,8 @@ class PlaceQueries(private val conn: SQLiteConnection) {
     fun insert(rows: List<Place>) {
         conn.prepare(
             """
-            INSERT OR REPLACE INTO $TABLE ($ID, $BUNDLED, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $LOCALIZED_OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM, $OSM_ID)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24);
+            INSERT OR REPLACE INTO $TABLE ($ID, $BUNDLED, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $LOCALIZED_OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM, $OSM_ID, $DELETED_AT)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25);
             """
         ).use { stmt ->
             rows.forEach { row ->
@@ -43,6 +43,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
                 stmt.bindLongOrNull(22, row.comments)
                 stmt.bindHttpUrlOrNull(23, row.telegram)
                 stmt.bindTextOrNull(24, row.osmId)
+                stmt.bindZonedDateTimeOrNull(25, row.deletedAt)
                 stmt.step()
                 stmt.reset()
             }
@@ -54,7 +55,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             """
                 SELECT ${FullProjection.COLUMNS}
                 FROM $TABLE
-                WHERE $ID = ?1;
+                WHERE $ID = ?1 AND $DELETED_AT IS NULL;
             """
         ).use {
             it.bindLong(1, id)
@@ -70,7 +71,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             """
                 SELECT ${FullProjection.COLUMNS}
                 FROM $TABLE
-                WHERE $OSM_ID = ?1;
+                WHERE $OSM_ID = ?1 AND $DELETED_AT IS NULL;
             """
         ).use {
             it.bindText(1, osmId)
@@ -86,7 +87,8 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             """
                 SELECT ${FullProjection.COLUMNS}
                 FROM $TABLE
-                WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%';
+                WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%'
+                    AND $DELETED_AT IS NULL;
             """
         ).use {
             it.bindText(1, searchString)
@@ -112,6 +114,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         selectMerchantsByBoundsCallCount += 1
         val whereClause = buildString {
             append("$ICON <> 'local_atm' AND $ICON <> 'currency_exchange'")
+            append(" AND $DELETED_AT IS NULL")
             append(" AND $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4")
             if (minVerifiedAt != null) {
                 append("AND ($BUNDLED = 1 OR $VERIFIED_AT >= ?5)")
@@ -147,7 +150,8 @@ class PlaceQueries(private val conn: SQLiteConnection) {
                 SELECT ${MarkerProjection.COLUMNS}
                 FROM $TABLE
                 WHERE
-                    $ICON = 'local_atm' OR $ICON = 'currency_exchange'
+                    ($ICON = 'local_atm' OR $ICON = 'currency_exchange')
+                    AND $DELETED_AT IS NULL
                 ORDER BY $LAT DESC;
             """
         ).use {
@@ -172,6 +176,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
                 WHERE
                     ($ICON = 'local_atm' OR $ICON = 'currency_exchange')
                     AND $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4
+                    AND $DELETED_AT IS NULL
                 ORDER BY $LAT DESC;
             """
         ).use {
@@ -206,7 +211,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectCount(): Long {
-        conn.prepare("SELECT count(*) FROM $TABLE;").use {
+        conn.prepare("SELECT count(*) FROM $TABLE WHERE $DELETED_AT IS NULL;").use {
             it.step()
             return it.getLong(0)
         }

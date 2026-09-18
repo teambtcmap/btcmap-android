@@ -419,6 +419,39 @@ class PlaceQueriesTest {
         Assert.assertEquals(0, results.size)
     }
 
+    @Test
+    fun insert_keepsTombstoneButHidesItFromReads() {
+        val db = createDatabase()
+        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        db.place.insert(listOf(createPlace(id = 1L, icon = "coffee")))
+        db.place.insert(
+            listOf(
+                createPlace(id = 1L, icon = "coffee", updatedAt = deletedAt)
+                    .copy(deletedAt = deletedAt)
+            )
+        )
+
+        Assert.assertNull(db.place.selectById(1L))
+        Assert.assertNull(db.place.selectByOsmId("node:1"))
+        Assert.assertEquals(0L, db.place.selectCount())
+        Assert.assertTrue(db.place.selectBySearchString("Test").isEmpty())
+        Assert.assertTrue(
+            db.place.selectMerchantsByBounds(40.0, 41.0, -75.0, -73.0).isEmpty()
+        )
+        Assert.assertTrue(db.place.selectExchanges().isEmpty())
+
+        // The tombstone must still advance the delta cursor and stay on disk.
+        Assert.assertEquals(deletedAt, db.place.selectMaxUpdatedAt())
+        Assert.assertEquals(1L, physicalRowCount(db, "place"))
+    }
+
+    private fun physicalRowCount(db: Database, table: String): Long {
+        db.conn.prepare("SELECT count(*) FROM $table;").use {
+            it.step()
+            return it.getLong(0)
+        }
+    }
+
     private fun createPlace(
         id: Long,
         name: String? = "Test Place",

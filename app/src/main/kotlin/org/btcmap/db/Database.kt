@@ -10,7 +10,7 @@ import org.btcmap.db.table.user.UserQueries
 
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
-        private const val VERSION = 12
+        private const val VERSION = 13
     }
 
     val conn = driver.open(path)
@@ -128,6 +128,21 @@ class Database(driver: SQLiteDriver, val path: String) {
                         "ALTER TABLE event ADD COLUMN " +
                             "${org.btcmap.db.table.event.UPDATED_AT} TEXT NOT NULL " +
                             "DEFAULT '2000-01-01T00:00:00Z';"
+                    )
+                }
+
+                12 -> {
+                    // Deleted places/comments/events are kept as tombstones so
+                    // their last-known data stays available offline instead of
+                    // being dropped. Existing rows are all live (null).
+                    conn.execSQL(
+                        "ALTER TABLE place ADD COLUMN ${org.btcmap.db.table.place.DELETED_AT} TEXT;"
+                    )
+                    conn.execSQL(
+                        "ALTER TABLE event ADD COLUMN ${org.btcmap.db.table.event.DELETED_AT} TEXT;"
+                    )
+                    conn.execSQL(
+                        "ALTER TABLE comment ADD COLUMN ${org.btcmap.db.table.comment.DELETED_AT} TEXT;"
                     )
                 }
 

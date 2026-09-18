@@ -26,6 +26,7 @@ const val BOOSTED_UNTIL = "boosted_until"
 const val COMMENTS = "comments"
 const val TELEGRAM = "telegram"
 const val OSM_ID = "osm_id"
+const val DELETED_AT = "deleted_at"
 
 const val CREATE = """
     CREATE TABLE $TABLE (
@@ -52,6 +53,7 @@ const val CREATE = """
         $BOOSTED_UNTIL TEXT,
         $COMMENTS INTEGER,
         $TELEGRAM TEXT,
-        $OSM_ID TEXT
+        $OSM_ID TEXT,
+        $DELETED_AT TEXT
     );
 """

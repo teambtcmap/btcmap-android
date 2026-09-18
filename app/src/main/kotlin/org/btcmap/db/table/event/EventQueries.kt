@@ -18,8 +18,8 @@ class EventQueries(private val conn: SQLiteConnection) {
         // the whole sync transaction with a primary-key conflict.
         conn.prepare(
             """
-            INSERT OR REPLACE INTO $TABLE ($ID, $AREA_ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $UPDATED_AT)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
+            INSERT OR REPLACE INTO $TABLE ($ID, $AREA_ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $UPDATED_AT, $DELETED_AT)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);
             """
         ).use { stmt ->
             rows.forEach { row ->
@@ -32,6 +32,7 @@ class EventQueries(private val conn: SQLiteConnection) {
                 stmt.bindText(7, row.startsAt.toString())
                 stmt.bindZonedDateTimeOrNull(8, row.endsAt)
                 stmt.bindZonedDateTime(9, row.updatedAt)
+                stmt.bindZonedDateTimeOrNull(10, row.deletedAt)
                 stmt.step()
                 stmt.reset()
             }
@@ -42,7 +43,8 @@ class EventQueries(private val conn: SQLiteConnection) {
         conn.prepare(
             """
             SELECT ${FullProjection.COLUMNS}
-            FROM $TABLE;
+            FROM $TABLE
+            WHERE $DELETED_AT IS NULL;
             """
         ).use {
             val rows = mutableListOf<Event>()
@@ -63,7 +65,8 @@ class EventQueries(private val conn: SQLiteConnection) {
             """
                 SELECT ${FullProjection.COLUMNS}
                 FROM $TABLE
-                WHERE $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4;
+                WHERE $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4
+                    AND $DELETED_AT IS NULL;
             """
         ).use {
             it.bindDouble(1, minLat)
@@ -83,7 +86,7 @@ class EventQueries(private val conn: SQLiteConnection) {
             """
             SELECT ${FullProjection.COLUMNS}
             FROM $TABLE
-            WHERE $ID = ?1;
+            WHERE $ID = ?1 AND $DELETED_AT IS NULL;
             """
         ).use {
             it.bindLong(1, id)
@@ -99,7 +102,7 @@ class EventQueries(private val conn: SQLiteConnection) {
             """
                 SELECT ${FullProjection.COLUMNS}
                 FROM $TABLE
-                WHERE $AREA_ID = ?1;
+                WHERE $AREA_ID = ?1 AND $DELETED_AT IS NULL;
             """
         ).use {
             it.bindLong(1, areaId)
@@ -116,7 +119,8 @@ class EventQueries(private val conn: SQLiteConnection) {
             """
                 SELECT ${FullProjection.COLUMNS}
                 FROM $TABLE
-                WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%';
+                WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%'
+                    AND $DELETED_AT IS NULL;
             """
         ).use {
             it.bindText(1, searchString)

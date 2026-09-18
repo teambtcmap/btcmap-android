@@ -11,6 +11,7 @@ const val WEBSITE = "website"
 const val STARTS_AT = "starts_at"
 const val ENDS_AT = "ends_at"
 const val UPDATED_AT = "updated_at"
+const val DELETED_AT = "deleted_at"
 
 const val CREATE = """
     CREATE TABLE $TABLE (
@@ -22,6 +23,7 @@ const val CREATE = """
         $WEBSITE TEXT,
         $STARTS_AT TEXT NOT NULL,
         $ENDS_AT TEXT,
-        $UPDATED_AT TEXT NOT NULL
+        $UPDATED_AT TEXT NOT NULL,
+        $DELETED_AT TEXT
     );
  """

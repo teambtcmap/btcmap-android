@@ -20,6 +20,7 @@ class SchemaTest {
         assertEquals("starts_at", STARTS_AT)
         assertEquals("ends_at", ENDS_AT)
         assertEquals("updated_at", UPDATED_AT)
+        assertEquals("deleted_at", DELETED_AT)
     }
 
     @Test
@@ -34,5 +35,6 @@ class SchemaTest {
         assert(CREATE.contains(STARTS_AT))
         assert(CREATE.contains(ENDS_AT))
         assert(CREATE.contains(UPDATED_AT))
+        assert(CREATE.contains(DELETED_AT))
     }
 }
