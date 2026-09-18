@@ -114,6 +114,45 @@ class AreaQueriesTest {
     }
 
     @Test
+    fun selectBySearchString_matchesNameSubstring() {
+        val db = createDatabase()
+        db.area.insert(listOf(area(1L, name = "Grand Paris"), area(2L, name = "Berlin")))
+
+        val results = db.area.selectBySearchString("paris")
+
+        Assert.assertEquals(1, results.size)
+        Assert.assertEquals("Grand Paris", results[0].name)
+    }
+
+    @Test
+    fun selectBySearchString_isCaseInsensitive() {
+        val db = createDatabase()
+        db.area.insert(listOf(area(1L, name = "Grand Paris")))
+
+        Assert.assertEquals(1, db.area.selectBySearchString("paris").size)
+        Assert.assertEquals(1, db.area.selectBySearchString("PARIS").size)
+        Assert.assertEquals(1, db.area.selectBySearchString("PaRiS").size)
+    }
+
+    @Test
+    fun selectBySearchString_returnsEmptyWhenNoMatch() {
+        val db = createDatabase()
+        db.area.insert(listOf(area(1L, name = "Grand Paris")))
+
+        Assert.assertTrue(db.area.selectBySearchString("berlin").isEmpty())
+    }
+
+    @Test
+    fun selectBySearchString_hidesTombstones() {
+        val db = createDatabase()
+        db.area.insert(
+            listOf(area(1L, name = "Grand Paris", deletedAt = ZonedDateTime.parse("2024-02-01T00:00:00Z")))
+        )
+
+        Assert.assertTrue(db.area.selectBySearchString("paris").isEmpty())
+    }
+
+    @Test
     fun selectMaxUpdatedAt_returnsLatestEvenWithTombstones() {
         val db = createDatabase()
         db.area.insert(

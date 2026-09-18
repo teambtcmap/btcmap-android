@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Add a database stats screen in settings showing database files, sizes, per-table visible/deleted row counts and upcoming events
 - Sync events incrementally instead of re-downloading the whole list on every map visit
 - Show matching events in the map search
+- Search places, areas and events from the local cache by name, so search is instant and works offline instead of querying the server
 - Stop the comments screen from claiming there are no comments when the sync fails
 - Keep the comments add button clear of a physical left inset under right-to-left layouts
 - Keep looking for a freshly paid comment for longer and with backoff instead of a few fixed retries

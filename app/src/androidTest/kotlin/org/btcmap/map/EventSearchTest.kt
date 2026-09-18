@@ -13,6 +13,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
+import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
 import org.btcmap.event.EventFragment
@@ -157,32 +158,46 @@ class EventSearchTest {
     }
 
     @Test
-    fun onlineSearch_returnsEventFromServer() {
-        apiRule.server.dispatcher = object : Dispatcher() {
-            override fun dispatch(request: RecordedRequest): MockResponse {
-                return MockResponse.Builder()
-                    .code(200)
-                    .addHeader("Content-Type", "application/json")
-                    .body(
-                        """
-                        {"results":[{"type":"event","id":42,"name":"Bitcoin Meetup","lat":48.8566,"lon":2.3522}]}
-                        """.trimIndent()
-                    )
-                    .build()
-            }
-        }
-        val controller = searchController(isOnline = true)
+    fun offlineSearch_returnsMatchingArea() {
+        databaseRule.db.area.insert(listOf(area(id = 1L, name = "Paris Bitcoin")))
+        val controller = searchController()
         try {
-            controller.search(reference, "bitcoin")
+            controller.search(reference, "paris")
 
-            waitUntil { controller.results.value.any { it is SearchAdapterItem.Event } }
+            waitUntil { controller.results.value.isNotEmpty() }
 
-            val item = controller.results.value
-                .filterIsInstance<SearchAdapterItem.Event>()
-                .single()
-            Assert.assertEquals(42L, item.eventId)
-            Assert.assertEquals("Bitcoin Meetup", item.name)
-            Assert.assertEquals(EVENT_ICON, item.icon)
+            val item = controller.results.value.single()
+            Assert.assertTrue(item is SearchAdapterItem.Area)
+            item as SearchAdapterItem.Area
+            Assert.assertEquals(1L, item.areaId)
+            Assert.assertEquals("Paris Bitcoin", item.name)
+            Assert.assertEquals(listOf(2.22, 48.81, 2.47, 48.91), item.bbox)
+            Assert.assertEquals("https://static.example/icon.png", item.iconUrl)
+            Assert.assertNotNull(item.distanceToUser)
+        } finally {
+            controller.dispose()
+        }
+    }
+
+    @Test
+    fun offlineSearch_ranksExactNameMatchAboveSubstring() {
+        // The exact match is farther away; ranking must still float it first.
+        databaseRule.db.place.insert(
+            listOf(
+                place(id = 1L, name = "Paris", lat = 48.90, lon = 2.3522),
+                place(id = 2L, name = "Paris Cafe", lat = 48.8567, lon = 2.3522),
+            )
+        )
+        val controller = searchController()
+        try {
+            controller.search(reference, "paris")
+
+            waitUntil { controller.results.value.size == 2 }
+
+            Assert.assertEquals(
+                listOf("Paris", "Paris Cafe"),
+                controller.results.value.map { it.name },
+            )
         } finally {
             controller.dispose()
         }
@@ -262,12 +277,28 @@ class EventSearchTest {
         }
     }
 
-    private fun searchController(isOnline: Boolean = false): SearchController {
+    private fun searchController(): SearchController {
         return SearchController(
             db = databaseRule.db,
-            api = apiRule.api,
             resources = app.resources,
-            isOnline = { isOnline },
+        )
+    }
+
+    private fun area(id: Long, name: String): Area {
+        return Area(
+            id = id,
+            name = name,
+            type = "community",
+            urlAlias = "grand-paris",
+            icon = "https://static.example/icon.png",
+            iconWide = null,
+            websiteUrl = "https://btcmap.org/community/grand-paris",
+            description = null,
+            bboxWest = 2.22,
+            bboxSouth = 48.81,
+            bboxEast = 2.47,
+            bboxNorth = 48.91,
+            geoJson = null,
         )
     }
 

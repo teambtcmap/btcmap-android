@@ -60,6 +60,24 @@ class AreaQueries(private val conn: SQLiteConnection) {
         }
     }
 
+    fun selectBySearchString(searchString: String): List<Area> {
+        conn.prepare(
+            """
+            SELECT ${FullProjection.COLUMNS}
+            FROM $TABLE
+            WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%'
+                AND $DELETED_AT IS NULL;
+            """
+        ).use {
+            it.bindText(1, searchString)
+            val rows = mutableListOf<Area>()
+            while (it.step()) {
+                rows.add(FullProjection.fromStatement(it))
+            }
+            return rows
+        }
+    }
+
     fun selectAll(): List<Area> {
         conn.prepare(
             """

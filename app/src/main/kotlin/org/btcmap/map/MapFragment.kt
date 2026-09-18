@@ -70,7 +70,6 @@ import org.btcmap.settings.showAttribution
 import org.btcmap.settings.uri
 import org.btcmap.sync
 import org.btcmap.util.DeepLink
-import org.btcmap.util.isOnline
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -132,9 +131,7 @@ class MapFragment : Fragment() {
 
         searchController = SearchController(
             db = db(),
-            api = api(),
             resources = resources,
-            isOnline = { requireContext().isOnline() },
         )
 
         bottomSheetController = BottomSheetController(
