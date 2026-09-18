@@ -17,6 +17,7 @@ import org.btcmap.api.Api
 import org.btcmap.api.SearchResult
 import org.btcmap.api.search
 import org.btcmap.db.Database
+import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
@@ -81,7 +82,7 @@ class SearchController(
         referenceLocation: LatLng,
     ): List<SearchResult>? {
         if (!isOnline()) {
-            emitLocalPlaces(query, referenceLocation)
+            emitLocalResults(query, referenceLocation)
             return null
         }
         val results = try {
@@ -100,24 +101,27 @@ class SearchController(
         return when {
             results != null -> results
             currentQuery == query -> {
-                emitLocalPlaces(query, referenceLocation)
+                emitLocalResults(query, referenceLocation)
                 null
             }
             else -> null
         }
     }
 
-    private suspend fun emitLocalPlaces(query: String, referenceLocation: LatLng) {
-        val unsortedPlaces = withContext(Dispatchers.IO) {
-            db.place.selectBySearchString(query)
-        }
-        val sortedPlaces = unsortedPlaces.sortedBy {
-            distanceInMeters(
-                start = referenceLocation,
-                end = LatLng(it.lat, it.lon),
+    private suspend fun emitLocalResults(query: String, referenceLocation: LatLng) {
+        val matches = withContext(Dispatchers.IO) {
+            fun match(lat: Double, lon: Double, item: SearchAdapterItem) = LocalMatch(
+                distance = distanceInMeters(referenceLocation, LatLng(lat, lon)),
+                item = item,
             )
+
+            db.place.selectBySearchString(query).map {
+                match(it.lat, it.lon, it.toAdapterItem(referenceLocation))
+            } + db.event.selectBySearchString(query).map {
+                match(it.lat, it.lon, it.toAdapterItem(referenceLocation))
+            }
         }
-        _results.value = sortedPlaces.map { it.toAdapterItem(referenceLocation) }
+        _results.value = matches.sortedBy { it.distance }.map { it.item }
     }
 
     private fun SearchResult.toAdapterItem(referenceLocation: LatLng): SearchAdapterItem {
@@ -164,6 +168,16 @@ class SearchController(
         )
     }
 
+    private fun Event.toAdapterItem(referenceLocation: LatLng): SearchAdapterItem {
+        val meters = referenceLocation.distanceTo(LatLng(lat, lon))
+        return SearchAdapterItem.Event(
+            eventId = id,
+            icon = EVENT_ICON,
+            name = name,
+            distanceToUser = formatDistance(meters),
+        )
+    }
+
     private fun formatDistance(meters: Double): String {
         return if (meters < 1_000) {
             resources.getString(R.string.s_m, DISTANCE_FORMAT.format(meters))
@@ -181,6 +195,11 @@ class SearchController(
         )
         return result[0].toDouble()
     }
+
+    private data class LocalMatch(
+        val distance: Double,
+        val item: SearchAdapterItem,
+    )
 
     companion object {
         private const val MIN_QUERY_LENGTH = 3

@@ -277,6 +277,7 @@ class MapFragment : Fragment() {
             when (row) {
                 is SearchAdapterItem.Place -> openPlace(row)
                 is SearchAdapterItem.Area -> openArea(row)
+                is SearchAdapterItem.Event -> openEventById(row.eventId)
             }
         }
 

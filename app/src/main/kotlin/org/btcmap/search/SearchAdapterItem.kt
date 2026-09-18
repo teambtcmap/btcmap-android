@@ -20,4 +20,11 @@ sealed class SearchAdapterItem {
         override val name: String,
         override val distanceToUser: String?,
     ) : SearchAdapterItem()
+
+    data class Event(
+        val eventId: Long,
+        override val icon: String,
+        override val name: String,
+        override val distanceToUser: String?,
+    ) : SearchAdapterItem()
 }
