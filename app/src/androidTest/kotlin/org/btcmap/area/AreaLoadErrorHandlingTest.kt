@@ -203,6 +203,7 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
             bboxSouth = null,
             bboxEast = null,
             bboxNorth = null,
+            geoJson = null,
             updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
         )
     }

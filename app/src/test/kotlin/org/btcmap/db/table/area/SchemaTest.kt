@@ -23,6 +23,7 @@ class SchemaTest {
         assertEquals("bbox_south", BBOX_SOUTH)
         assertEquals("bbox_east", BBOX_EAST)
         assertEquals("bbox_north", BBOX_NORTH)
+        assertEquals("geo_json", GEO_JSON)
         assertEquals("updated_at", UPDATED_AT)
         assertEquals("deleted_at", DELETED_AT)
     }
@@ -42,6 +43,7 @@ class SchemaTest {
         assert(CREATE.contains(BBOX_SOUTH))
         assert(CREATE.contains(BBOX_EAST))
         assert(CREATE.contains(BBOX_NORTH))
+        assert(CREATE.contains(GEO_JSON))
         assert(CREATE.contains(UPDATED_AT))
         assert(CREATE.contains(DELETED_AT))
     }

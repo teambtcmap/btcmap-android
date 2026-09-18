@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 - Cache areas locally and sync them incrementally, so the area screen renders from the cache before the network refresh completes instead of failing when offline
+- Cache each area's full GeoJSON polygon locally alongside its bounding box
+- Upgrade an existing local database in place on schema changes instead of deleting and re-downloading it
 - Reset the local database on upgrade: the app now uses a fresh `btcmap.db`, discards any stale pre-1.0 database with that name instead of migrating it, and deletes the `btcmap-*.db` files abandoned by earlier versions
 - Keep deleted merchants, comments and events in the local database as tombstones instead of dropping them
 - Add a database stats screen in settings showing database files, sizes, per-table visible/deleted row counts and upcoming events

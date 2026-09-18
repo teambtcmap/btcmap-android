@@ -51,12 +51,14 @@ data class GetAreasDeltaItem(
     val bboxSouth: Double?,
     val bboxEast: Double?,
     val bboxNorth: Double?,
+    // Raw GeoJSON object as serialized JSON text, or null when absent.
+    val geoJson: String?,
     val updatedAt: String,
     val deletedAt: String?,
 )
 
 private const val AREA_DELTA_FIELDS =
-    "id,name,type,url_alias,icon,icon_wide,website_url,description,bbox,updated_at,deleted_at"
+    "id,name,type,url_alias,icon,icon_wide,website_url,description,bbox,geo_json,updated_at,deleted_at"
 
 suspend fun Api.getAreas(lat: Double, lon: Double): List<GetAreasItem> {
     val url = buildUrl("v4", "areas") {
@@ -135,6 +137,7 @@ private fun JsonObject.toGetAreasDeltaItem(): GetAreasDeltaItem {
         bboxSouth = bbox?.get(1),
         bboxEast = bbox?.get(2),
         bboxNorth = bbox?.get(3),
+        geoJson = objectOrNull("geo_json")?.toString(),
         updatedAt = string("updated_at"),
         deletedAt = nonBlankStringOrNull("deleted_at"),
     )

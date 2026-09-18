@@ -15,15 +15,22 @@ import java.io.File
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
         /**
-         * Schema version stamped onto databases created by this app.
+         * Schema version stamped onto fresh databases created by this app.
          *
-         * It is deliberately far above the single-digit user_version of the
-         * throwaway database that used the `btcmap.db` name early in the
+         * Databases below [FIRST_OWN_VERSION] are discarded rather than
+         * migrated; databases at or above it are migrated in place. The
+         * boundary is deliberately far above the single-digit user_version of
+         * the throwaway database that used the `btcmap.db` name early in the
          * project's history, so the stale file can be told apart from ours by
-         * the pragma alone (see [initialize]). Fresh databases are created at
-         * this version; there is no migration chain by design.
+         * the pragma alone (see [initialize]).
          */
-        const val VERSION = 101
+        const val VERSION = 102
+
+        /**
+         * The first version this app is responsible for upgrading. Anything
+         * below it is the abandoned pre-1.0 `btcmap.db` and is deleted.
+         */
+        private const val FIRST_OWN_VERSION = 100
 
         private const val MEMORY_PATH = ":memory:"
         private const val USER_VERSION_QUERY = "SELECT user_version FROM pragma_user_version;"
@@ -41,13 +48,16 @@ class Database(driver: SQLiteDriver, val path: String) {
     val user = UserStore(preference)
 
     init {
-        // [initialize] discards any pre-existing database that is not already at
-        // [VERSION] or newer, so a version of 0 here means the file was just
-        // created and the schema has to be created. A creation interrupted before
-        // the version was stamped also reads as 0 and is deleted and retried on
-        // the next open.
-        if (readUserVersion(conn) == 0) {
+        // [initialize] discards only foreign databases, so a version of 0 here
+        // means the file was just created (or a creation was interrupted before
+        // the version was stamped, in which case it was deleted and retried) and
+        // the schema has to be built. A database at an older own version is
+        // upgraded in place by [migrate].
+        val version = readUserVersion(conn)
+        if (version == 0) {
             createSchema(conn)
+        } else if (version < VERSION) {
+            transaction { migrate(conn, version) }
         }
     }
 
@@ -57,14 +67,15 @@ class Database(driver: SQLiteDriver, val path: String) {
      *
      * The `btcmap.db` name was once used for a database with unrelated tables,
      * so rather than migrating it we discard any file whose user_version is
-     * below [VERSION] (including a missing version, which reads as 0). Its
-     * sidecar files are removed too. An unreadable file cannot be one of ours
-     * either, so it is discarded as well.
+     * below [FIRST_OWN_VERSION] (including a missing version, which reads as 0).
+     * Its sidecar files are removed too. An unreadable file cannot be one of
+     * ours either, so it is discarded as well. Databases at or above
+     * [FIRST_OWN_VERSION] are kept and migrated.
      */
     private fun initialize(driver: SQLiteDriver, path: String): SQLiteConnection {
         if (path != MEMORY_PATH) {
             val file = File(path)
-            if (file.exists() && readUserVersion(driver, path) < VERSION) {
+            if (file.exists() && readUserVersion(driver, path) < FIRST_OWN_VERSION) {
                 file.delete()
                 SIDECAR_SUFFIXES.forEach { suffix -> File("$path$suffix").delete() }
             }
@@ -97,6 +108,69 @@ class Database(driver: SQLiteDriver, val path: String) {
         conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
         conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
         conn.execSQL("PRAGMA user_version=$VERSION;")
+    }
+
+    /**
+     * Upgrades a database from its [from] version to [VERSION] in place.
+     *
+     * Each step advances the version by exactly one and must produce the schema
+     * of that version, so historical statements are inlined where a shared
+     * `CREATE` has since grown columns. A missing step is a programming error
+     * and aborts rather than leaving a half-upgraded database behind; the
+     * caller's next launch re-reads the version it stopped at.
+     */
+    private fun migrate(conn: SQLiteConnection, from: Int) {
+        var version = from
+        while (version < VERSION) {
+            when (version) {
+                100 -> {
+                    // Areas are now cached locally. Inline the schema as of
+                    // version 101 rather than area.CREATE: each migration must
+                    // produce the schema of its own version, and area.CREATE
+                    // has since grown the geo_json column added below.
+                    conn.execSQL(
+                        """
+                        CREATE TABLE area (
+                            id INTEGER PRIMARY KEY NOT NULL,
+                            name TEXT NOT NULL,
+                            type TEXT NOT NULL,
+                            url_alias TEXT NOT NULL,
+                            icon TEXT,
+                            icon_wide TEXT,
+                            website_url TEXT NOT NULL,
+                            description TEXT,
+                            bbox_west REAL,
+                            bbox_south REAL,
+                            bbox_east REAL,
+                            bbox_north REAL,
+                            updated_at TEXT NOT NULL,
+                            deleted_at TEXT
+                        );
+                        """
+                    )
+                }
+
+                101 -> {
+                    // Areas cache their full GeoJSON geometry, not just bbox.
+                    // Reset updated_at to the sentinel so the next area sync
+                    // re-reads every row and fills the new column: the cursor is
+                    // just max(updated_at), and the existing rows would otherwise
+                    // stay unenriched until they changed on the server.
+                    conn.execSQL(
+                        "ALTER TABLE ${org.btcmap.db.table.area.TABLE} " +
+                            "ADD COLUMN ${org.btcmap.db.table.area.GEO_JSON} TEXT;"
+                    )
+                    conn.execSQL(
+                        "UPDATE ${org.btcmap.db.table.area.TABLE} " +
+                            "SET ${org.btcmap.db.table.area.UPDATED_AT} = '2000-01-01T00:00:00Z';"
+                    )
+                }
+
+                else -> throw Exception("migration is missing for version $version")
+            }
+
+            conn.execSQL("PRAGMA user_version=${++version};")
+        }
     }
 
     /**

@@ -7,6 +7,27 @@ import org.junit.Assert
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
+import java.time.ZonedDateTime
+
+/** The `area` table as it shipped in schema version 101, without `geo_json`. */
+private const val VERSION_101_AREA_CREATE = """
+    CREATE TABLE area (
+        id INTEGER PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        url_alias TEXT NOT NULL,
+        icon TEXT,
+        icon_wide TEXT,
+        website_url TEXT NOT NULL,
+        description TEXT,
+        bbox_west REAL,
+        bbox_south REAL,
+        bbox_east REAL,
+        bbox_north REAL,
+        updated_at TEXT NOT NULL,
+        deleted_at TEXT
+    );
+"""
 
 class DatabaseTest {
 
@@ -44,26 +65,51 @@ class DatabaseTest {
     }
 
     @Test
-    fun version100Database_isDiscardedAndRecreatedWithTheAreaTable() {
+    fun version100Database_isMigratedWithTheAreaTable() {
         val path = existingPath()
-        // Reproduces the last release before areas were cached: version 100,
-        // the then-current tables, and a row worth preserving if a migration
-        // ever existed.
+        // Reproduces the last schema before areas were cached: version 100 with
+        // the then-current tables, and a row worth preserving.
         createVersion100Database(path)
 
         val db = Database(BundledSQLiteDriver(), path)
 
         try {
-            // The upgrade is a discard and recreate, not a migration: the old
-            // data is gone and the new schema, including `area`, is built from
-            // scratch. If someone adds a table without bumping VERSION, this
-            // database is not discarded and the assertion on `area` fails.
+            // Our own databases are upgraded in place, not discarded: the
+            // existing place survives and the area table is added by migration.
+            // If someone bumps VERSION without adding a step, this database is
+            // not discarded and the assertion on `area` fails.
             Assert.assertEquals(Database.VERSION, userVersion(db.conn))
             Assert.assertEquals(
                 listOf("area", "comment", "event", "place", "pref"),
                 tables(db.conn),
             )
-            Assert.assertEquals(0L, db.place.selectCount())
+            Assert.assertEquals(1L, db.place.selectCount())
+            Assert.assertEquals(0L, db.area.selectCount())
+        } finally {
+            db.conn.close()
+        }
+    }
+
+    @Test
+    fun version101Database_isMigratedWithGeoJson() {
+        val path = existingPath()
+        // Reproduces the last schema before geo_json was cached: version 101
+        // with the area table, but no geo_json column on it.
+        createVersion101Database(path)
+
+        val db = Database(BundledSQLiteDriver(), path)
+
+        try {
+            // The migration adds the column in place, keeping existing rows, and
+            // rewinds each row's updated_at to the sentinel so the next sync
+            // re-reads it and fills geo_json.
+            Assert.assertEquals(Database.VERSION, userVersion(db.conn))
+            Assert.assertTrue(areaColumns(db.conn).contains("geo_json"))
+            Assert.assertEquals(1L, db.area.selectCount())
+            Assert.assertEquals(
+                ZonedDateTime.parse("2000-01-01T00:00:00Z"),
+                db.area.selectMaxUpdatedAt(),
+            )
         } finally {
             db.conn.close()
         }
@@ -144,8 +190,8 @@ class DatabaseTest {
     }
 
     /**
-     * The schema as of the last release before areas were cached: version 100
-     * with place, event, comment and pref, but no `area`.
+     * The schema as of the last own version before areas were cached: version
+     * 100 with place, event, comment and pref, but no `area`.
      */
     private fun createVersion100Database(path: String) {
         val conn = BundledSQLiteDriver().open(path)
@@ -169,6 +215,40 @@ class DatabaseTest {
             it.step()
             return it.getInt(0)
         }
+    }
+
+    /**
+     * The schema as of the last release before geo_json was cached: version 101
+     * with place, event, comment, area and pref. The area table predates the
+     * geo_json column.
+     */
+    private fun createVersion101Database(path: String) {
+        val conn = BundledSQLiteDriver().open(path)
+        try {
+            conn.execSQL(org.btcmap.db.table.place.CREATE)
+            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE)
+            conn.execSQL(VERSION_101_AREA_CREATE)
+            conn.execSQL(org.btcmap.db.table.preference.CREATE)
+            conn.execSQL(
+                "INSERT INTO area (id, name, type, url_alias, website_url, updated_at) " +
+                    "VALUES (1, 'Grand Paris', 'community', 'grand-paris', " +
+                    "'https://btcmap.org/community/grand-paris', '2024-01-01T00:00:00Z');"
+            )
+            conn.execSQL("PRAGMA user_version=101;")
+        } finally {
+            conn.close()
+        }
+    }
+
+    private fun areaColumns(conn: SQLiteConnection): List<String> {
+        val names = mutableListOf<String>()
+        conn.prepare("SELECT name FROM pragma_table_info('area');").use {
+            while (it.step()) {
+                names.add(it.getText(0))
+            }
+        }
+        return names
     }
 
     private fun hasTable(conn: SQLiteConnection, name: String): Boolean =

@@ -302,8 +302,8 @@ class Sync(val api: Api, val db: Database) {
                     // and take down the lifecycle coroutine that called sync.
                     db.transaction {
                         // Area tombstones are kept like the other tables'. Raw
-                        // tags and geometry are never synced; bbox is the only
-                        // geometry the server exposes.
+                        // tags are never synced; bbox and the full geo_json
+                        // polygon are the geometry the server exposes.
                         db.area.insert(delta.map {
                             Area(
                                 id = it.id,
@@ -318,6 +318,7 @@ class Sync(val api: Api, val db: Database) {
                                 bboxSouth = it.bboxSouth,
                                 bboxEast = it.bboxEast,
                                 bboxNorth = it.bboxNorth,
+                                geoJson = it.geoJson,
                                 updatedAt = ZonedDateTime.parse(it.updatedAt),
                                 deletedAt = it.deletedAt?.toZonedDateTime(),
                             )

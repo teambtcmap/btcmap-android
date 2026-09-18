@@ -658,6 +658,7 @@ class SyncTest {
                             "website_url": "https://btcmap.org/community/grand-paris",
                             "description": "Greater Paris",
                             "bbox": [2.22, 48.81, 2.47, 48.91],
+                            "geo_json": {"type":"Point","coordinates":[2.22,48.81]},
                             "updated_at": "2024-01-01T10:00:00Z",
                             "deleted_at": null
                         }
@@ -676,12 +677,19 @@ class SyncTest {
         Assert.assertTrue(
             request.url.queryParameter("fields")!!.contains("bbox"),
         )
+        Assert.assertTrue(
+            request.url.queryParameter("fields")!!.contains("geo_json"),
+        )
 
         Assert.assertEquals(1L, report.rowsAffected)
         val area = db.area.selectById(7L)!!
         Assert.assertEquals("Grand Paris", area.name)
         Assert.assertEquals("Greater Paris", area.description)
         Assert.assertEquals(2.22, area.bboxWest!!, 0.0001)
+        Assert.assertEquals(
+            """{"type":"Point","coordinates":[2.22,48.81]}""",
+            area.geoJson,
+        )
         Assert.assertEquals(ZonedDateTime.parse("2024-01-01T10:00:00Z"), area.updatedAt)
     }
 
@@ -778,6 +786,7 @@ class SyncTest {
             bboxSouth = null,
             bboxEast = null,
             bboxNorth = null,
+            geoJson = null,
             updatedAt = ZonedDateTime.parse(updatedAt),
         )
     }
@@ -808,7 +817,7 @@ class SyncTest {
 
     private fun pagedAreaDispatcher(rows: List<SyncRow>): Dispatcher =
         pagedDispatcher(rows) { row ->
-            """{"id":${row.id},"name":"a","type":"community","url_alias":"a","icon":null,"icon_wide":null,"website_url":"https://x","description":null,"bbox":null,"updated_at":"${row.updatedAt}","deleted_at":null}"""
+            """{"id":${row.id},"name":"a","type":"community","url_alias":"a","icon":null,"icon_wide":null,"website_url":"https://x","description":null,"bbox":null,"geo_json":null,"updated_at":"${row.updatedAt}","deleted_at":null}"""
         }
 
     private fun pagedDispatcher(

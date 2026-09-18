@@ -26,6 +26,9 @@ data class FullProjection(
     val bboxSouth: Double?,
     val bboxEast: Double?,
     val bboxNorth: Double?,
+    // Full GeoJSON geometry as returned by the server, or null when the area
+    // has none. Stored verbatim; large polygons dominate the table size.
+    val geoJson: String?,
     // Defaults to the epoch for callers that build an area for display only.
     // Sync writes the server's value; selectMaxUpdatedAt reads it back as the
     // delta cursor, and an epoch value simply means "sync from the beginning".
@@ -35,7 +38,7 @@ data class FullProjection(
     companion object {
         const val COLUMNS =
             "$ID, $NAME, $TYPE, $URL_ALIAS, $ICON, $ICON_WIDE, $WEBSITE_URL, $DESCRIPTION, " +
-                "$BBOX_WEST, $BBOX_SOUTH, $BBOX_EAST, $BBOX_NORTH, $UPDATED_AT, $DELETED_AT"
+                "$BBOX_WEST, $BBOX_SOUTH, $BBOX_EAST, $BBOX_NORTH, $GEO_JSON, $UPDATED_AT, $DELETED_AT"
 
         fun fromStatement(stmt: SQLiteStatement): FullProjection {
             return FullProjection(
@@ -51,8 +54,9 @@ data class FullProjection(
                 bboxSouth = stmt.getDoubleOrNull(9),
                 bboxEast = stmt.getDoubleOrNull(10),
                 bboxNorth = stmt.getDoubleOrNull(11),
-                updatedAt = stmt.getZonedDateTime(12),
-                deletedAt = stmt.getZonedDateTimeOrNull(13),
+                geoJson = stmt.getTextOrNull(12),
+                updatedAt = stmt.getZonedDateTime(13),
+                deletedAt = stmt.getZonedDateTimeOrNull(14),
             )
         }
     }

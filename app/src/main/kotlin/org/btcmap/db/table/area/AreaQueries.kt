@@ -18,8 +18,8 @@ class AreaQueries(private val conn: SQLiteConnection) {
         // the whole sync transaction with a primary-key conflict.
         conn.prepare(
             """
-            INSERT OR REPLACE INTO $TABLE ($ID, $NAME, $TYPE, $URL_ALIAS, $ICON, $ICON_WIDE, $WEBSITE_URL, $DESCRIPTION, $BBOX_WEST, $BBOX_SOUTH, $BBOX_EAST, $BBOX_NORTH, $UPDATED_AT, $DELETED_AT)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14);
+            INSERT OR REPLACE INTO $TABLE ($ID, $NAME, $TYPE, $URL_ALIAS, $ICON, $ICON_WIDE, $WEBSITE_URL, $DESCRIPTION, $BBOX_WEST, $BBOX_SOUTH, $BBOX_EAST, $BBOX_NORTH, $GEO_JSON, $UPDATED_AT, $DELETED_AT)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15);
             """
         ).use { stmt ->
             rows.forEach { row ->
@@ -35,8 +35,9 @@ class AreaQueries(private val conn: SQLiteConnection) {
                 stmt.bindDoubleOrNull(10, row.bboxSouth)
                 stmt.bindDoubleOrNull(11, row.bboxEast)
                 stmt.bindDoubleOrNull(12, row.bboxNorth)
-                stmt.bindZonedDateTime(13, row.updatedAt)
-                stmt.bindZonedDateTimeOrNull(14, row.deletedAt)
+                stmt.bindTextOrNull(13, row.geoJson)
+                stmt.bindZonedDateTime(14, row.updatedAt)
+                stmt.bindZonedDateTimeOrNull(15, row.deletedAt)
                 stmt.step()
                 stmt.reset()
             }

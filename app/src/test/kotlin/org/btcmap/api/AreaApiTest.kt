@@ -134,7 +134,7 @@ class AreaApiTest : ApiTestBase() {
         Assert.assertEquals("GET", request.method)
         Assert.assertEquals("/v4/areas", request.url.encodedPath)
         Assert.assertEquals(
-            "id,name,type,url_alias,icon,icon_wide,website_url,description,bbox,updated_at,deleted_at",
+            "id,name,type,url_alias,icon,icon_wide,website_url,description,bbox,geo_json,updated_at,deleted_at",
             request.url.queryParameter("fields"),
         )
         Assert.assertEquals(
@@ -152,6 +152,10 @@ class AreaApiTest : ApiTestBase() {
         Assert.assertEquals("Greater Paris", area.description)
         Assert.assertEquals(2.22, area.bboxWest!!, 0.0001)
         Assert.assertEquals(48.91, area.bboxNorth!!, 0.0001)
+        Assert.assertEquals(
+            """{"type":"Polygon","coordinates":[[[2.22,48.81],[2.47,48.81],[2.47,48.91],[2.22,48.81]]]}""",
+            area.geoJson,
+        )
         Assert.assertEquals("2025-06-11T00:00:00Z", area.updatedAt)
         Assert.assertEquals("2025-06-12T00:00:00Z", area.deletedAt)
     }
@@ -168,6 +172,7 @@ class AreaApiTest : ApiTestBase() {
         Assert.assertNull(area.deletedAt)
         Assert.assertNull(area.bboxWest)
         Assert.assertNull(area.bboxNorth)
+        Assert.assertNull(area.geoJson)
     }
 
     @Test
@@ -242,6 +247,7 @@ class AreaApiTest : ApiTestBase() {
                     "website_url": "https://btcmap.org/community/grand-paris",
                     "description": "Greater Paris",
                     "bbox": [2.22, 48.81, 2.47, 48.91],
+                    "geo_json": {"type":"Polygon","coordinates":[[[2.22,48.81],[2.47,48.81],[2.47,48.91],[2.22,48.81]]]},
                     "updated_at": "2025-06-11T00:00:00Z",
                     "deleted_at": "2025-06-12T00:00:00Z"
                 }

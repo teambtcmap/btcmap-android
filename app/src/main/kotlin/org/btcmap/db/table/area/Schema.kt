@@ -14,6 +14,7 @@ const val BBOX_WEST = "bbox_west"
 const val BBOX_SOUTH = "bbox_south"
 const val BBOX_EAST = "bbox_east"
 const val BBOX_NORTH = "bbox_north"
+const val GEO_JSON = "geo_json"
 const val UPDATED_AT = "updated_at"
 const val DELETED_AT = "deleted_at"
 
@@ -31,6 +32,7 @@ const val CREATE = """
         $BBOX_SOUTH REAL,
         $BBOX_EAST REAL,
         $BBOX_NORTH REAL,
+        $GEO_JSON TEXT,
         $UPDATED_AT TEXT NOT NULL,
         $DELETED_AT TEXT
     );

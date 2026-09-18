@@ -16,6 +16,7 @@ class AreaQueriesTest {
         name: String = "Grand Paris",
         updatedAt: String = "2024-01-01T00:00:00Z",
         deletedAt: ZonedDateTime? = null,
+        geoJson: String? = null,
     ): Area {
         return Area(
             id = id,
@@ -30,6 +31,7 @@ class AreaQueriesTest {
             bboxSouth = 48.81,
             bboxEast = 2.47,
             bboxNorth = 48.91,
+            geoJson = geoJson,
             updatedAt = ZonedDateTime.parse(updatedAt),
             deletedAt = deletedAt,
         )
@@ -52,6 +54,17 @@ class AreaQueriesTest {
     }
 
     @Test
+    fun insert_and_selectGeoJson() {
+        val db = createDatabase()
+        val polygon = """{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[2.22,48.81],[2.47,48.81],[2.47,48.91],[2.22,48.81]]]}}"""
+
+        db.area.insert(listOf(area(7L, geoJson = polygon)))
+
+        val result = db.area.selectById(7L)!!
+        Assert.assertEquals(polygon, result.geoJson)
+    }
+
+    @Test
     fun insert_handlesNullOptionalFields() {
         val db = createDatabase()
         val row = area(7L).copy(
@@ -62,6 +75,7 @@ class AreaQueriesTest {
             bboxSouth = null,
             bboxEast = null,
             bboxNorth = null,
+            geoJson = null,
         )
 
         db.area.insert(listOf(row))
@@ -70,6 +84,7 @@ class AreaQueriesTest {
         Assert.assertNull(result.icon)
         Assert.assertNull(result.description)
         Assert.assertNull(result.bboxWest)
+        Assert.assertNull(result.geoJson)
     }
 
     @Test
