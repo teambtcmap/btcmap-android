@@ -11,6 +11,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
 import org.btcmap.R
+import org.btcmap.db.Database
 import org.btcmap.db.table.place.Place
 import org.btcmap.settings.SettingsFragment
 import org.btcmap.util.DatabaseRule
@@ -70,11 +71,13 @@ class DbStatsFragmentTest {
                     event.detail.contains("future:"),
                 )
                 Assert.assertTrue(
-                    "expected a Databases section, entries were ${entries.map { it.title }}",
+                    "expected a Database section, entries were ${entries.map { it.title }}",
                     adapter.currentList.any {
-                        it is DbStatsItem.Header && it.title == "Databases"
+                        it is DbStatsItem.Header && it.title == "Database"
                     },
                 )
+                val version = entries.first { it.title == "Version" }
+                Assert.assertEquals(Database.VERSION.toString(), version.detail)
             }
         }
     }

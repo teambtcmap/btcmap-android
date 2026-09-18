@@ -9,6 +9,22 @@ import org.junit.Test
 class DbStatsReaderTest {
 
     @Test
+    fun readUserVersion_readsTheStoredSchemaVersion() {
+        withConnection { conn ->
+            conn.execSQL("PRAGMA user_version=42;")
+
+            Assert.assertEquals(42, DbStatsReader(conn).readUserVersion())
+        }
+    }
+
+    @Test
+    fun readUserVersion_defaultsToZeroForANewDatabase() {
+        withConnection { conn ->
+            Assert.assertEquals(0, DbStatsReader(conn).readUserVersion())
+        }
+    }
+
+    @Test
     fun readTables_listsTablesOrderedByName() {
         withConnection { conn ->
             conn.execSQL("CREATE TABLE place (id INTEGER PRIMARY KEY);")

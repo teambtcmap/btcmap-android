@@ -12,12 +12,15 @@ import org.btcmap.api.Api
 import org.btcmap.api.apiHttpClient
 import org.btcmap.api.signOut
 import org.btcmap.db.Database
+import org.btcmap.db.LegacyDatabases
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.prefs
 import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.MapLibre
 import org.btcmap.settings.init as settingsInit
 import org.btcmap.util.init as typefaceInit
+
+private const val DATABASE_NAME = "btcmap.db"
 
 class App : Application() {
     internal var apiForTesting: Api? = null
@@ -81,7 +84,7 @@ class App : Application() {
     private val defaultDb: Database by lazy {
         Database(
             driver = AndroidSQLiteDriver(),
-            path = getDatabasePath("btcmap-2025-11-06.db").absolutePath,
+            path = getDatabasePath(DATABASE_NAME).absolutePath,
         )
     }
 
@@ -91,11 +94,14 @@ class App : Application() {
         typefaceInit(this)
         MapLibre.getInstance(this)
 
-        // Load the settings from the database up front so later reads from the
-        // main thread hit the in-memory cache. The session token is part of the
+        // Delete the databases abandoned by earlier versions and load the
+        // settings from the database up front so later reads from the main
+        // thread hit the in-memory cache. The session token is part of the
         // cache, so this also makes it available without touching the database.
         ioScope.launch {
             try {
+                val path = getDatabasePath(DATABASE_NAME)
+                path.parentFile?.let { LegacyDatabases.delete(it, path) }
                 prefs.preload()
             } catch (t: Throwable) {
                 t.rethrowIfCancellation()

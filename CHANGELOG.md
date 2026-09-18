@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Reset the local database on upgrade: the app now uses a fresh `btcmap.db`, discards any stale pre-1.0 database with that name instead of migrating it, and deletes the `btcmap-*.db` files abandoned by earlier versions
 - Keep deleted merchants, comments and events in the local database as tombstones instead of dropping them
 - Add a database stats screen in settings showing database files, sizes, per-table visible/deleted row counts and upcoming events
 - Sync events incrementally instead of re-downloading the whole list on every map visit

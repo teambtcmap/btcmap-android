@@ -1,19 +1,36 @@
 package org.btcmap.db
 
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.execSQL
+import kotlin.use
 import org.btcmap.db.table.comment.CommentQueries
 import org.btcmap.db.table.event.EventQueries
 import org.btcmap.db.table.place.PlaceQueries
 import org.btcmap.db.table.preference.PreferenceQueries
 import org.btcmap.db.table.user.UserQueries
+import java.io.File
 
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
-        private const val VERSION = 13
+        /**
+         * Schema version stamped onto databases created by this app.
+         *
+         * It is deliberately far above the single-digit user_version of the
+         * throwaway database that used the `btcmap.db` name early in the
+         * project's history, so the stale file can be told apart from ours by
+         * the pragma alone (see [initialize]). Fresh databases are created at
+         * this version; there is no migration chain by design.
+         */
+        const val VERSION = 100
+
+        private const val MEMORY_PATH = ":memory:"
+        private const val USER_VERSION_QUERY = "SELECT user_version FROM pragma_user_version;"
+
+        private val SIDECAR_SUFFIXES = listOf("-wal", "-shm", "-journal")
     }
 
-    val conn = driver.open(path)
+    val conn = initialize(driver, path)
 
     val place = PlaceQueries(conn)
     val comment = CommentQueries(conn)
@@ -22,135 +39,62 @@ class Database(driver: SQLiteDriver, val path: String) {
     val preference = PreferenceQueries(conn)
 
     init {
-        migrate()
+        // [initialize] discards any pre-existing database that is not already at
+        // [VERSION] or newer, so a version of 0 here means the file was just
+        // created and the schema has to be created. A creation interrupted before
+        // the version was stamped also reads as 0 and is deleted and retried on
+        // the next open.
+        if (readUserVersion(conn) == 0) {
+            createSchema(conn)
+        }
     }
 
-    private fun migrate() {
-        val stmt = conn.prepare("SELECT user_version FROM pragma_user_version;")
-        var version = if (stmt.step()) stmt.getInt(0) else 0
-        stmt.reset()
-
-        if (version == 0) {
-            conn.execSQL(org.btcmap.db.table.place.CREATE)
-            conn.execSQL(org.btcmap.db.table.event.CREATE)
-            conn.execSQL(org.btcmap.db.table.comment.CREATE)
-            conn.execSQL(org.btcmap.db.table.user.CREATE)
-            conn.execSQL(org.btcmap.db.table.preference.CREATE)
-            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
-            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
-            conn.execSQL("PRAGMA user_version=$VERSION;")
-            return
-        }
-
-        while (version < VERSION) {
-            when (version) {
-                1 -> {
-                    conn.execSQL("ALTER TABLE place ADD COLUMN localized_name TEXT;")
-                    conn.execSQL("UPDATE place SET updated_at = '2000-01-01T00:00:00Z';")
-                }
-
-                2 -> {
-                    conn.execSQL("ALTER TABLE place ADD COLUMN localized_opening_hours TEXT;")
-                    conn.execSQL("UPDATE place SET updated_at = '2000-01-01T00:00:00Z';")
-                }
-
-                3 -> {
-                    conn.execSQL(org.btcmap.db.table.user.CREATE)
-                }
-
-                4 -> {
-                    conn.execSQL("ALTER TABLE event ADD COLUMN area_id INTEGER;")
-                    conn.execSQL("ALTER TABLE event ADD COLUMN cron_schedule TEXT;")
-                }
-
-                5 -> {
-                    conn.execSQL("ALTER TABLE event DROP COLUMN cron_schedule;")
-                }
-
-                6 -> {
-                    conn.execSQL("ALTER TABLE place ADD COLUMN osm_id TEXT;")
-                    conn.execSQL("UPDATE place SET updated_at = '2000-01-01T00:00:00Z';")
-                }
-
-                7 -> {
-                    conn.execSQL("ALTER TABLE event RENAME TO event_old;")
-                    // Inlined historical schema rather than event.CREATE:
-                    // migrations must keep producing the schema of their own
-                    // version, and the shared CREATE has since grown columns
-                    // (updated_at) added by later migrations.
-                    conn.execSQL(
-                        """
-                        CREATE TABLE event (
-                            id INTEGER PRIMARY KEY NOT NULL,
-                            area_id INTEGER,
-                            lat REAL NOT NULL,
-                            lon REAL NOT NULL,
-                            name TEXT NOT NULL,
-                            website TEXT,
-                            starts_at TEXT NOT NULL,
-                            ends_at TEXT
-                        );
-                        """
-                    )
-                    conn.execSQL(
-                        """
-                        INSERT INTO event (id, area_id, lat, lon, name, website, starts_at, ends_at)
-                        SELECT id, area_id, lat, lon, name, website, starts_at, ends_at
-                        FROM event_old;
-                        """
-                    )
-                    conn.execSQL("DROP TABLE event_old;")
-                }
-
-                8 -> {
-                    conn.execSQL(org.btcmap.db.table.preference.CREATE)
-                }
-
-                9 -> {
-                    conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
-                    conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
-                }
-
-                10 -> {
-                    // Recreate the place index with the id tie-break added to
-                    // the sort key; the version 9 index omitted it, forcing
-                    // SQLite to sort each place's comments in a temp B-tree.
-                    conn.execSQL("DROP INDEX IF EXISTS comment_place_id_created_at;")
-                    conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
-                }
-
-                11 -> {
-                    // Event sync used to replace the whole table on every run;
-                    // it is now incremental and needs updated_at as its cursor.
-                    // Backfill the sentinel so the first delta re-reads every
-                    // event and replaces the seeded value with the real one.
-                    conn.execSQL(
-                        "ALTER TABLE event ADD COLUMN " +
-                            "${org.btcmap.db.table.event.UPDATED_AT} TEXT NOT NULL " +
-                            "DEFAULT '2000-01-01T00:00:00Z';"
-                    )
-                }
-
-                12 -> {
-                    // Deleted places/comments/events are kept as tombstones so
-                    // their last-known data stays available offline instead of
-                    // being dropped. Existing rows are all live (null).
-                    conn.execSQL(
-                        "ALTER TABLE place ADD COLUMN ${org.btcmap.db.table.place.DELETED_AT} TEXT;"
-                    )
-                    conn.execSQL(
-                        "ALTER TABLE event ADD COLUMN ${org.btcmap.db.table.event.DELETED_AT} TEXT;"
-                    )
-                    conn.execSQL(
-                        "ALTER TABLE comment ADD COLUMN ${org.btcmap.db.table.comment.DELETED_AT} TEXT;"
-                    )
-                }
-
-                else -> throw Exception("migration is missing")
+    /**
+     * Opens [path], first removing a database left behind by an older app that
+     * used a different schema.
+     *
+     * The `btcmap.db` name was once used for a database with unrelated tables,
+     * so rather than migrating it we discard any file whose user_version is
+     * below [VERSION] (including a missing version, which reads as 0). Its
+     * sidecar files are removed too. An unreadable file cannot be one of ours
+     * either, so it is discarded as well.
+     */
+    private fun initialize(driver: SQLiteDriver, path: String): SQLiteConnection {
+        if (path != MEMORY_PATH) {
+            val file = File(path)
+            if (file.exists() && readUserVersion(driver, path) < VERSION) {
+                file.delete()
+                SIDECAR_SUFFIXES.forEach { suffix -> File("$path$suffix").delete() }
             }
-
-            conn.execSQL("PRAGMA user_version=${++version};")
         }
+        return driver.open(path)
+    }
+
+    private fun readUserVersion(driver: SQLiteDriver, path: String): Int {
+        return try {
+            driver.open(path).use { readUserVersion(it) }
+        } catch (_: Exception) {
+            // Treat an unreadable file as stale rather than letting it block
+            // every launch.
+            -1
+        }
+    }
+
+    private fun readUserVersion(conn: SQLiteConnection): Int {
+        conn.prepare(USER_VERSION_QUERY).use {
+            return if (it.step()) it.getInt(0) else 0
+        }
+    }
+
+    private fun createSchema(conn: SQLiteConnection) {
+        conn.execSQL(org.btcmap.db.table.place.CREATE)
+        conn.execSQL(org.btcmap.db.table.event.CREATE)
+        conn.execSQL(org.btcmap.db.table.comment.CREATE)
+        conn.execSQL(org.btcmap.db.table.user.CREATE)
+        conn.execSQL(org.btcmap.db.table.preference.CREATE)
+        conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
+        conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
+        conn.execSQL("PRAGMA user_version=$VERSION;")
     }
 
     /**

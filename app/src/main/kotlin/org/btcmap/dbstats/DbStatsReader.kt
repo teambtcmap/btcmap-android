@@ -24,6 +24,13 @@ class DbStatsReader(private val conn: SQLiteConnection) {
         return tableNames.map(::readTable)
     }
 
+    /** The schema version stored in the database's `user_version` pragma. */
+    fun readUserVersion(): Int {
+        conn.prepare("SELECT user_version FROM pragma_user_version;").use {
+            return if (it.step()) it.getInt(0) else 0
+        }
+    }
+
     private fun readTable(name: String): TableStats {
         val columns = mutableSetOf<String>()
         conn.prepare("SELECT name FROM pragma_table_info('$name');").use {

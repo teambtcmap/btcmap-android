@@ -16,7 +16,6 @@ import org.btcmap.databinding.DbStatsFragmentBinding
 import org.btcmap.db
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
-import java.io.File
 import java.text.NumberFormat
 
 class DbStatsFragment : Fragment() {
@@ -43,15 +42,19 @@ class DbStatsFragment : Fragment() {
         binding.statsList.adapter = adapter
 
         val database = db()
+        val reader = DbStatsReader(database.conn)
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val databases = withContext(Dispatchers.IO) {
-                    readDatabaseFiles(database.path)
+                val file = withContext(Dispatchers.IO) {
+                    DatabaseFile.read(database.path)
+                }
+                val version = withContext(Dispatchers.IO) {
+                    reader.readUserVersion()
                 }
                 val tables = withContext(Dispatchers.IO) {
-                    DbStatsReader(database.conn).readTables()
+                    reader.readTables()
                 }
-                adapter.submitList(buildItems(databases, tables))
+                adapter.submitList(buildItems(file, version, tables))
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
@@ -65,25 +68,24 @@ class DbStatsFragment : Fragment() {
     }
 
     private fun buildItems(
-        databases: List<DatabaseFile>,
+        file: DatabaseFile?,
+        version: Int,
         tables: List<TableStats>,
     ): List<DbStatsItem> {
         val items = mutableListOf<DbStatsItem>()
 
-        items.add(DbStatsItem.Header(getString(R.string.db_stats_databases)))
-        if (databases.isEmpty()) {
-            items.add(DbStatsItem.Entry(getString(R.string.db_stats_no_databases), ""))
-        } else {
-            databases.forEach { database ->
-                val detail = buildString {
-                    append(Formatter.formatFileSize(requireContext(), database.sizeBytes))
-                    if (database.isCurrent) {
-                        append(" · ")
-                        append(getString(R.string.db_stats_current))
-                    }
-                }
-                items.add(DbStatsItem.Entry(database.name, detail))
-            }
+        items.add(DbStatsItem.Header(getString(R.string.db_stats_database)))
+        file?.let {
+            items.add(DbStatsItem.Entry(getString(R.string.db_stats_file_name), it.name))
+        }
+        items.add(DbStatsItem.Entry(getString(R.string.db_stats_version), version.toString()))
+        file?.let {
+            items.add(
+                DbStatsItem.Entry(
+                    getString(R.string.db_stats_size),
+                    Formatter.formatFileSize(requireContext(), it.sizeBytes),
+                )
+            )
         }
 
         items.add(DbStatsItem.Header(getString(R.string.db_stats_tables)))
@@ -112,19 +114,5 @@ class DbStatsFragment : Fragment() {
             lines.add(getString(R.string.db_stats_max_updated_at, it))
         }
         return lines.joinToString("\n")
-    }
-
-    private fun readDatabaseFiles(currentPath: String): List<DatabaseFile> {
-        val current = File(currentPath)
-        val dir = current.parentFile ?: return emptyList()
-        return dir.listFiles()
-            .orEmpty()
-            .filter { it.isFile && SIDECAR_SUFFIXES.none { suffix -> it.name.endsWith(suffix) } }
-            .sortedBy { it.name }
-            .map { DatabaseFile(it.name, it.length(), it.name == current.name) }
-    }
-
-    private companion object {
-        val SIDECAR_SUFFIXES = listOf("-journal", "-wal", "-shm")
     }
 }

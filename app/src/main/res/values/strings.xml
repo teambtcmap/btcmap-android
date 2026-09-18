@@ -133,9 +133,10 @@
     <string name="show_debug_info">Show debug info</string>
     <string name="database_stats" translatable="false">Database stats</string>
     <string name="database_stats_secondary" translatable="false">Database files and table sizes</string>
-    <string name="db_stats_databases" translatable="false">Databases</string>
-    <string name="db_stats_no_databases" translatable="false">No databases found</string>
-    <string name="db_stats_current" translatable="false">current</string>
+    <string name="db_stats_database" translatable="false">Database</string>
+    <string name="db_stats_version" translatable="false">Version</string>
+    <string name="db_stats_file_name" translatable="false">File name</string>
+    <string name="db_stats_size" translatable="false">Size</string>
     <string name="db_stats_tables" translatable="false">Tables</string>
     <string name="db_stats_rows" translatable="false">rows: %1$s</string>
     <string name="db_stats_visible_rows" translatable="false">visible: %1$s</string>
