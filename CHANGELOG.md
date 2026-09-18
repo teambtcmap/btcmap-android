@@ -143,6 +143,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Skip in-app update prompts on debug builds
 - Show an in-app update notification on beta builds
 - Move settings and the stored session into the database so signing in and out updates the token and cached account atomically
+- Fade the map sync icon in and out and spin it while a sync is running
+- Update the map sync icon artwork
 
 ## [1.1.0] - 2026-03-30
 

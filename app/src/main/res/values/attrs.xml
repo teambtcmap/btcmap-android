@@ -7,5 +7,6 @@
         <attr name="borderColor" format="color" />
         <attr name="borderWidth" format="dimension" />
         <attr name="selected" format="boolean" />
+        <attr name="spin" format="boolean" />
     </declare-styleable>
 </resources>

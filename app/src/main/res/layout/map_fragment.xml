@@ -92,7 +92,8 @@
             android:layout_marginTop="16dp"
             android:alpha="0.3"
             android:visibility="gone"
-            app:iconSrc="@drawable/icon_sync" />
+            app:iconSrc="@drawable/icon_sync"
+            app:spin="true" />
 
         <org.btcmap.view.IconButton
             android:id="@+id/update"

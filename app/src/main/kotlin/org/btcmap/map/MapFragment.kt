@@ -228,7 +228,7 @@ class MapFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                binding.sync.isVisible = true
+                binding.sync.setVisibleAnimated(true)
 
                 val importResult = BundledPlaces.import(requireContext(), db())
 
@@ -250,7 +250,7 @@ class MapFragment : Fragment() {
                     rebuildCurrentCache()
                 }
 
-                binding.sync.isVisible = false
+                binding.sync.setVisibleAnimated(false)
             }
         }
 
