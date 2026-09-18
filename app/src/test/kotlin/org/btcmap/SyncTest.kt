@@ -496,8 +496,9 @@ class SyncTest {
                         "lon": -74.0060,
                         "name": "Bitcoin Conference",
                         "website": "https://example.com",
-                        "starts_at": "2024-06-01T09:00:00Z",
-                        "ends_at": "2024-06-03T18:00:00Z"
+                        "starts_at": "2099-06-01T09:00:00Z",
+                        "ends_at": "2099-06-03T18:00:00Z",
+                        "updated_at": "2024-05-01T10:00:00Z"
                     }
                 ]
             """.trimIndent()
@@ -508,14 +509,21 @@ class SyncTest {
         val sync = Sync(api, db)
         val report = sync.syncEvents()
 
+        val request = serverRule.server.takeRequest()
+        Assert.assertEquals("/v4/events", request.url.encodedPath)
+        Assert.assertEquals("1000", request.url.queryParameter("limit"))
+        Assert.assertEquals("true", request.url.queryParameter("include_deleted"))
+        Assert.assertEquals("1970-01-01T00:00:00Z", request.url.queryParameter("updated_since"))
+
         Assert.assertEquals(1L, report.rowsAffected)
         val events = db.event.selectAll()
         Assert.assertEquals(1, events.size)
         Assert.assertEquals("Bitcoin Conference", events[0].name)
+        Assert.assertEquals(ZonedDateTime.parse("2024-05-01T10:00:00Z"), events[0].updatedAt)
     }
 
     @Test
-    fun syncEvents_emptyResponse() = runTest {
+    fun syncEvents_emptyResponseKeepsExistingEvents() = runTest {
         val db = createDatabase()
         val api = createApi()
 
@@ -528,8 +536,9 @@ class SyncTest {
                     lon = -74.0060,
                     name = "Old Event",
                     website = "https://example.com".toHttpUrl(),
-                    startsAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+                    startsAt = ZonedDateTime.parse("2099-01-01T10:00:00Z"),
                     endsAt = null,
+                    updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
                 )
             )
         )
@@ -543,9 +552,81 @@ class SyncTest {
         val sync = Sync(api, db)
         val report = sync.syncEvents()
 
+        // Delta sync must not wipe the local table when the change log is
+        // empty; that was the old full-replace behavior.
         Assert.assertEquals(0L, report.rowsAffected)
-        val events = db.event.selectAll()
-        Assert.assertTrue(events.isEmpty())
+        Assert.assertEquals(1, db.event.selectAll().size)
+    }
+
+    @Test
+    fun syncEvents_withDeletedEvent() = runTest {
+        val db = createDatabase()
+        val api = createApi()
+
+        db.event.insert(
+            listOf(
+                Event(
+                    id = 1L,
+                    areaId = null,
+                    lat = 40.7128,
+                    lon = -74.0060,
+                    name = "Old Event",
+                    website = null,
+                    startsAt = ZonedDateTime.parse("2099-01-01T10:00:00Z"),
+                    endsAt = null,
+                    updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+                )
+            )
+        )
+
+        val response = MockResponse.Builder()
+            .addHeader("Content-Type", "application/json")
+            .body(
+                """
+                [
+                    {
+                        "id": 1,
+                        "lat": 40.7128,
+                        "lon": -74.0060,
+                        "name": "Old Event",
+                        "website": null,
+                        "starts_at": "2099-01-01T10:00:00Z",
+                        "updated_at": "2024-01-02T10:00:00Z",
+                        "deleted_at": "2024-01-02T10:00:00Z"
+                    }
+                ]
+                """.trimIndent()
+            ).build()
+
+        serverRule.server.enqueue(response)
+
+        val report = Sync(api, db).syncEvents()
+
+        Assert.assertEquals(1L, report.rowsAffected)
+        Assert.assertTrue(db.event.selectAll().isEmpty())
+    }
+
+    @Test
+    fun syncEvents_readsATieGroupSplitAcrossPages() = runTest {
+        val db = createDatabase()
+        val api = createApi()
+
+        val olderTimestamp = "2024-01-01T00:00:00Z"
+        val tieTimestamp = "2024-01-02T00:00:00Z"
+        // The base event page is 1_000. The tie group (1_500 rows) is split
+        // across the first page and needs the window widened to finish.
+        val rows = listOf(SyncRow(1L, olderTimestamp)) + (2L..1501L).map { SyncRow(it, tieTimestamp) }
+        serverRule.server.dispatcher = pagedEventDispatcher(rows)
+
+        val sync = Sync(api, db)
+        val report = sync.syncEvents()
+
+        Assert.assertEquals(1501, db.event.selectAll().size)
+        Assert.assertTrue("affected at least every row", report.rowsAffected >= 1501)
+
+        // The cursor must be left on the tie group, so the next sync is a no-op.
+        Assert.assertEquals(0L, sync.syncEvents().rowsAffected)
+        Assert.assertEquals(1501, db.event.selectAll().size)
     }
 
     private data class SyncRow(
@@ -565,6 +646,11 @@ class SyncTest {
     private fun pagedPlaceDispatcher(rows: List<SyncRow>): Dispatcher =
         pagedDispatcher(rows) { row ->
             """{"id":${row.id},"lat":40.7128,"lon":-74.006,"icon":"coffee","name":"p","localized_name":null,"updated_at":"${row.updatedAt}","deleted_at":null,"required_app_url":null,"boosted_until":null,"verified_at":null,"address":null,"opening_hours":null,"localized_opening_hours":null,"website":null,"phone":null,"email":null,"twitter":null,"facebook":null,"instagram":null,"line":null,"comments":0,"telegram":null,"osm_id":null}"""
+        }
+
+    private fun pagedEventDispatcher(rows: List<SyncRow>): Dispatcher =
+        pagedDispatcher(rows) { row ->
+            """{"id":${row.id},"lat":0.0,"lon":0.0,"name":"e","website":null,"starts_at":"2099-01-01T00:00:00Z","updated_at":"${row.updatedAt}"}"""
         }
 
     private fun pagedDispatcher(

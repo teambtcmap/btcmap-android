@@ -24,6 +24,7 @@ import org.maplibre.android.geometry.LatLngBounds
 import org.btcmap.search.SearchAdapterItem
 import org.btcmap.util.rethrowIfCancellation
 import java.text.NumberFormat
+import java.time.ZonedDateTime
 
 class SearchController(
     private val db: Database,
@@ -109,6 +110,7 @@ class SearchController(
     }
 
     private suspend fun emitLocalResults(query: String, referenceLocation: LatLng) {
+        val now = ZonedDateTime.now()
         val matches = withContext(Dispatchers.IO) {
             fun match(lat: Double, lon: Double, item: SearchAdapterItem) = LocalMatch(
                 distance = distanceInMeters(referenceLocation, LatLng(lat, lon)),
@@ -117,9 +119,11 @@ class SearchController(
 
             db.place.selectBySearchString(query).map {
                 match(it.lat, it.lon, it.toAdapterItem(referenceLocation))
-            } + db.event.selectBySearchString(query).map {
-                match(it.lat, it.lon, it.toAdapterItem(referenceLocation))
-            }
+            } + db.event.selectBySearchString(query)
+                .filter { it.isUpcomingOrUndated(now) }
+                .map {
+                    match(it.lat, it.lon, it.toAdapterItem(referenceLocation))
+                }
         }
         _results.value = matches.sortedBy { it.distance }.map { it.item }
     }

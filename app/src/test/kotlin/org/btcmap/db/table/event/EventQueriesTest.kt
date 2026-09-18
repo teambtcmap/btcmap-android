@@ -171,35 +171,62 @@ class EventQueriesTest {
     }
 
     @Test
-    fun deleteAll_removesAllEvents() {
+    fun insert_storesUpdatedAt() {
         val db = createDatabase()
-        val event1 = Event(
-            id = 1L,
-            areaId = null,
-            lat = 40.7128,
-            lon = -74.0060,
-            name = "Event 1",
-            website = "https://example.com".toHttpUrl(),
-            startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
-            endsAt = null,
+        val event = event(id = 1L, updatedAt = "2024-05-01T10:00:00Z")
+
+        db.event.insert(listOf(event))
+
+        Assert.assertEquals(
+            ZonedDateTime.parse("2024-05-01T10:00:00Z"),
+            db.event.selectById(1L)!!.updatedAt,
         )
-        val event2 = Event(
-            id = 2L,
-            areaId = null,
-            lat = 51.5074,
-            lon = -0.1278,
-            name = "Event 2",
-            website = "https://example.com".toHttpUrl(),
-            startsAt = ZonedDateTime.parse("2024-07-01T18:00:00Z"),
-            endsAt = null,
+    }
+
+    @Test
+    fun insert_replacesAnExistingEvent() {
+        val db = createDatabase()
+        db.event.insert(listOf(event(id = 1L, name = "first")))
+        db.event.insert(listOf(event(id = 1L, name = "second")))
+
+        Assert.assertEquals(1, db.event.selectAll().size)
+        Assert.assertEquals("second", db.event.selectById(1L)!!.name)
+    }
+
+    @Test
+    fun selectMaxUpdatedAt_returnsNullWhenEmpty() {
+        val db = createDatabase()
+
+        Assert.assertNull(db.event.selectMaxUpdatedAt())
+    }
+
+    @Test
+    fun selectMaxUpdatedAt_returnsNewestByInstantNotText() {
+        val db = createDatabase()
+        db.event.insert(
+            listOf(
+                event(id = 1L, updatedAt = "2024-01-01T10:00:00Z"),
+                event(id = 2L, updatedAt = "2024-01-01T10:00:00.500Z"),
+            )
         )
 
-        db.event.insert(listOf(event1, event2))
-        Assert.assertEquals(2, db.event.selectAll().size)
+        // "10:00:00Z" sorts after "10:00:00.500Z" as text but is earlier by
+        // instant, so a plain max() would pick the wrong cursor.
+        Assert.assertEquals(
+            ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
+            db.event.selectMaxUpdatedAt(),
+        )
+    }
 
-        db.event.deleteAll()
+    @Test
+    fun deleteById_removesOnlyThatEvent() {
+        val db = createDatabase()
+        db.event.insert(listOf(event(id = 1L), event(id = 2L)))
 
-        Assert.assertTrue(db.event.selectAll().isEmpty())
+        db.event.deleteById(1L)
+
+        Assert.assertNull(db.event.selectById(1L))
+        Assert.assertNotNull(db.event.selectById(2L))
     }
 
     @Test
@@ -251,6 +278,24 @@ class EventQueriesTest {
         val results = db.event.selectBySearchString("meetup")
 
         Assert.assertEquals(3, results.size)
+    }
+
+    private fun event(
+        id: Long,
+        name: String = "Event $id",
+        updatedAt: String = "2024-01-01T00:00:00Z",
+    ): Event {
+        return Event(
+            id = id,
+            areaId = null,
+            lat = 40.7128,
+            lon = -74.0060,
+            name = name,
+            website = null,
+            startsAt = ZonedDateTime.parse("2099-06-01T18:00:00Z"),
+            endsAt = null,
+            updatedAt = ZonedDateTime.parse(updatedAt),
+        )
     }
 
     private fun insertEvent(

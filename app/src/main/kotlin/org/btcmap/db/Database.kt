@@ -10,7 +10,7 @@ import org.btcmap.db.table.user.UserQueries
 
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
-        private const val VERSION = 11
+        private const val VERSION = 12
     }
 
     val conn = driver.open(path)
@@ -74,7 +74,24 @@ class Database(driver: SQLiteDriver, val path: String) {
 
                 7 -> {
                     conn.execSQL("ALTER TABLE event RENAME TO event_old;")
-                    conn.execSQL(org.btcmap.db.table.event.CREATE)
+                    // Inlined historical schema rather than event.CREATE:
+                    // migrations must keep producing the schema of their own
+                    // version, and the shared CREATE has since grown columns
+                    // (updated_at) added by later migrations.
+                    conn.execSQL(
+                        """
+                        CREATE TABLE event (
+                            id INTEGER PRIMARY KEY NOT NULL,
+                            area_id INTEGER,
+                            lat REAL NOT NULL,
+                            lon REAL NOT NULL,
+                            name TEXT NOT NULL,
+                            website TEXT,
+                            starts_at TEXT NOT NULL,
+                            ends_at TEXT
+                        );
+                        """
+                    )
                     conn.execSQL(
                         """
                         INSERT INTO event (id, area_id, lat, lon, name, website, starts_at, ends_at)
@@ -100,6 +117,18 @@ class Database(driver: SQLiteDriver, val path: String) {
                     // SQLite to sort each place's comments in a temp B-tree.
                     conn.execSQL("DROP INDEX IF EXISTS comment_place_id_created_at;")
                     conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
+                }
+
+                11 -> {
+                    // Event sync used to replace the whole table on every run;
+                    // it is now incremental and needs updated_at as its cursor.
+                    // Backfill the sentinel so the first delta re-reads every
+                    // event and replaces the seeded value with the real one.
+                    conn.execSQL(
+                        "ALTER TABLE event ADD COLUMN " +
+                            "${org.btcmap.db.table.event.UPDATED_AT} TEXT NOT NULL " +
+                            "DEFAULT '2000-01-01T00:00:00Z';"
+                    )
                 }
 
                 else -> throw Exception("migration is missing")

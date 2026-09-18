@@ -12,6 +12,7 @@ import org.btcmap.db.table.comment.Comment
 import org.btcmap.db.table.event.Event
 import org.btcmap.util.rethrowIfCancellation
 import java.time.Duration
+import java.time.Instant
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
@@ -183,38 +184,80 @@ class Sync(val api: Api, val db: Database) {
     )
 
     suspend fun syncEvents(): EventSyncReport {
+        val baseBatchSize = 1_000L
+
         return withContext(Dispatchers.IO) {
             val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
-            val events = try {
-                api.getEvents()
-            } catch (t: Throwable) {
-                t.rethrowIfCancellation()
-                t.printStackTrace()
-                return@withContext EventSyncReport(
-                    duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
-                    rowsAffected = 0,
-                )
-            }
+            var rowsAffected = 0L
+            var maxKnownUpdatedAt =
+                db.event.selectMaxUpdatedAt() ?: ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC)
+            var batchSize = baseBatchSize
 
-            db.transaction {
-                db.event.deleteAll()
-                db.event.insert(events.map {
-                    Event(
-                        id = it.id,
-                        areaId = it.areaId,
-                        lat = it.lat,
-                        lon = it.lon,
-                        name = it.name,
-                        website = it.website,
-                        startsAt = it.startsAt,
-                        endsAt = it.endsAt,
-                    )
-                })
+            while (true) {
+                val delta = try {
+                    api.getEvents(maxKnownUpdatedAt, batchSize)
+                } catch (t: Throwable) {
+                    // A failed delta must not crash the caller; leave the cursor
+                    // where it is so the next sync retries the same page.
+                    t.rethrowIfCancellation()
+                    t.printStackTrace()
+                    break
+                }
+
+                if (delta.isEmpty()) {
+                    break
+                }
+
+                val cursor = nextUpdatedAtCursor(delta.map { it.updatedAt }, batchSize)
+                if (cursor == null) {
+                    batchSize *= 2
+                    continue
+                }
+
+                maxKnownUpdatedAt = cursor
+                val reachedTip = delta.size < batchSize
+
+                val newOrChanged = delta.filter { it.deletedAt == null }
+                val deleted = delta.filter { it.deletedAt != null }
+
+                try {
+                    // Guard the whole apply step, not just the request: a
+                    // malformed row or a database failure here must not escape
+                    // and take down the lifecycle coroutine that called sync.
+                    db.transaction {
+                        db.event.insert(newOrChanged.map {
+                            Event(
+                                id = it.id,
+                                areaId = it.areaId,
+                                lat = it.lat,
+                                lon = it.lon,
+                                name = it.name,
+                                website = it.website,
+                                startsAt = it.startsAt,
+                                endsAt = it.endsAt,
+                                updatedAt = ZonedDateTime.parse(it.updatedAt),
+                            )
+                        })
+
+                        deleted.forEach { db.event.deleteById(it.id) }
+                    }
+                } catch (t: Throwable) {
+                    t.rethrowIfCancellation()
+                    t.printStackTrace()
+                    break
+                }
+
+                rowsAffected += delta.size
+
+                if (reachedTip) {
+                    break
+                }
+                batchSize = baseBatchSize
             }
 
             EventSyncReport(
                 duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
-                rowsAffected = events.size.toLong(),
+                rowsAffected = rowsAffected,
             )
         }
     }

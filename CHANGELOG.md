@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Sync events incrementally instead of re-downloading the whole list on every map visit
 - Show matching events in the map search
 - Stop the comments screen from claiming there are no comments when the sync fails
 - Keep the comments add button clear of a physical left inset under right-to-left layouts

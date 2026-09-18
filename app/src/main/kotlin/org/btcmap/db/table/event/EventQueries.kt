@@ -3,14 +3,23 @@ package org.btcmap.db.table.event
 import androidx.sqlite.SQLiteConnection
 import org.btcmap.db.bindHttpUrlOrNull
 import org.btcmap.db.bindLongOrNull
+import org.btcmap.db.bindZonedDateTime
 import org.btcmap.db.bindZonedDateTimeOrNull
+import org.btcmap.db.getZonedDateTimeOrNull
+import java.time.ZonedDateTime
 
 class EventQueries(private val conn: SQLiteConnection) {
     fun insert(rows: List<Event>) {
+        if (rows.isEmpty()) return
+
+        // OR REPLACE, not a plain INSERT: the delta sync can return the same
+        // event more than once (a soft delete bumps updated_at, and a page can
+        // be re-read while widening the window), so a plain insert would abort
+        // the whole sync transaction with a primary-key conflict.
         conn.prepare(
             """
-            INSERT INTO $TABLE ($ID, $AREA_ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8);
+            INSERT OR REPLACE INTO $TABLE ($ID, $AREA_ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $UPDATED_AT)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
             """
         ).use { stmt ->
             rows.forEach { row ->
@@ -22,6 +31,7 @@ class EventQueries(private val conn: SQLiteConnection) {
                 stmt.bindHttpUrlOrNull(6, row.website)
                 stmt.bindText(7, row.startsAt.toString())
                 stmt.bindZonedDateTimeOrNull(8, row.endsAt)
+                stmt.bindZonedDateTime(9, row.updatedAt)
                 stmt.step()
                 stmt.reset()
             }
@@ -118,7 +128,30 @@ class EventQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun deleteAll() {
-        conn.prepare("DELETE FROM $TABLE;").use { it.step() }
+    fun selectMaxUpdatedAt(): ZonedDateTime? {
+        // julianday, not plain max(): timestamps are stored as text and
+        // ZonedDateTime.toString() is not fixed-width (it drops a zero second
+        // and a zero fraction), so text ordering is not chronological.
+        conn.prepare(
+            """
+            SELECT $UPDATED_AT
+            FROM $TABLE
+            ORDER BY julianday($UPDATED_AT) DESC
+            LIMIT 1;
+            """
+        ).use {
+            if (!it.step()) {
+                return null
+            }
+            return it.getZonedDateTimeOrNull(0)
+        }
+    }
+
+    fun deleteById(id: Long) {
+        conn.prepare("DELETE FROM $TABLE WHERE $ID = ?1;")
+            .use {
+                it.bindLong(1, id)
+                it.step()
+            }
     }
 }

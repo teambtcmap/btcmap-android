@@ -9,6 +9,7 @@ import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 data class GetEventsItem(
@@ -22,10 +23,38 @@ data class GetEventsItem(
     val endsAt: ZonedDateTime?,
 )
 
-suspend fun Api.getEvents(): List<GetEventsItem> {
-    val url = buildUrl("v4", "events")
+/**
+ * A row of the incremental `GET /v4/events` change log. Unlike [GetEventsItem]
+ * (used by the single and per-area endpoints, which omit them), a delta row
+ * always carries [updatedAt] and may carry [deletedAt] as a tombstone.
+ */
+data class GetEventsDeltaItem(
+    val id: Long,
+    val areaId: Long?,
+    val lat: Double,
+    val lon: Double,
+    val name: String,
+    val website: HttpUrl?,
+    val startsAt: ZonedDateTime,
+    val endsAt: ZonedDateTime?,
+    val updatedAt: String,
+    val deletedAt: String?,
+)
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetEventsItems() }
+suspend fun Api.getEvents(updatedSince: ZonedDateTime, limit: Long): List<GetEventsDeltaItem> {
+    val url = buildUrl("v4", "events") {
+        // Always send updated_since: without it the endpoint falls back to the
+        // legacy full snapshot, which omits updated_at and so cannot seed a
+        // cursor for the next sync.
+        addQueryParameter(
+            "updated_since",
+            updatedSince.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+        )
+        addQueryParameter("limit", "$limit")
+        addQueryParameter("include_deleted", "true")
+    }
+
+    return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetEventsDeltaItems() }
 }
 
 suspend fun Api.getEvent(id: Long): GetEventsItem {
@@ -53,6 +82,22 @@ internal fun JsonObject.toGetEventsItem(): GetEventsItem {
     )
 }
 
+private fun JsonObject.toGetEventsDeltaItem(): GetEventsDeltaItem {
+    val item = toGetEventsItem()
+    return GetEventsDeltaItem(
+        id = item.id,
+        areaId = item.areaId,
+        lat = item.lat,
+        lon = item.lon,
+        name = item.name,
+        website = item.website,
+        startsAt = item.startsAt,
+        endsAt = item.endsAt,
+        updatedAt = string("updated_at"),
+        deletedAt = nonBlankStringOrNull("deleted_at"),
+    )
+}
+
 private fun String.toApiZonedDateTime(field: String): ZonedDateTime {
     return try {
         ZonedDateTime.parse(this)
@@ -63,4 +108,8 @@ private fun String.toApiZonedDateTime(field: String): ZonedDateTime {
 
 private fun InputStream.toGetEventsItems(): List<GetEventsItem> {
     return toJsonArray().map { it.toGetEventsItem() }
+}
+
+private fun InputStream.toGetEventsDeltaItems(): List<GetEventsDeltaItem> {
+    return toJsonArray().map { it.toGetEventsDeltaItem() }
 }

@@ -4,9 +4,10 @@ import androidx.sqlite.SQLiteStatement
 import okhttp3.HttpUrl
 import org.btcmap.db.getHttpUrlOrNull
 import org.btcmap.db.getLongOrNull
-import org.btcmap.db.getTextOrNull
 import org.btcmap.db.getZonedDateTime
 import org.btcmap.db.getZonedDateTimeOrNull
+import java.time.Instant
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 typealias Event = FullProjection
@@ -20,9 +21,13 @@ data class FullProjection(
     val website: HttpUrl?,
     val startsAt: ZonedDateTime,
     val endsAt: ZonedDateTime?,
+    // Defaults to the epoch for callers that build an event for display only.
+    // Sync writes the server's value; selectMaxUpdatedAt reads it back as the
+    // delta cursor, and an epoch value simply means "sync from the beginning".
+    val updatedAt: ZonedDateTime = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
 ) {
     companion object {
-        const val COLUMNS = "$ID, $AREA_ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT"
+        const val COLUMNS = "$ID, $AREA_ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $UPDATED_AT"
 
         fun fromStatement(stmt: SQLiteStatement): FullProjection {
             return FullProjection(
@@ -34,6 +39,7 @@ data class FullProjection(
                 website = stmt.getHttpUrlOrNull(5),
                 startsAt = stmt.getZonedDateTime(6),
                 endsAt = stmt.getZonedDateTimeOrNull(7),
+                updatedAt = stmt.getZonedDateTime(8),
             )
         }
     }

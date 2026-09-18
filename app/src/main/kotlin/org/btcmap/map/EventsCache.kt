@@ -4,12 +4,14 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
+import java.time.ZonedDateTime
 
 class EventsCache(
     map: MapLibreMap,
     private val db: Database,
 ) : ViewportCache<Event>(map) {
     override suspend fun fetch(bounds: LatLngBounds): Set<Event> {
+        val now = ZonedDateTime.now()
         val (lonRange1, lonRange2) = bounds.splitAtAntimeridian()
         return if (lonRange2 == null) {
             db.event.selectByBounds(
@@ -17,7 +19,7 @@ class EventsCache(
                 bounds.latitudeNorth,
                 lonRange1.first,
                 lonRange1.second,
-            ).toHashSet()
+            ).filter { it.isUpcomingOrUndated(now) }.toHashSet()
         } else {
             val first = db.event.selectByBounds(
                 bounds.latitudeSouth,
@@ -31,7 +33,7 @@ class EventsCache(
                 lonRange2.first,
                 lonRange2.second,
             )
-            (first + second).toHashSet()
+            (first + second).filter { it.isUpcomingOrUndated(now) }.toHashSet()
         }
     }
 
