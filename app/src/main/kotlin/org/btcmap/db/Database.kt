@@ -4,6 +4,7 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.execSQL
 import kotlin.use
+import org.btcmap.db.table.area.AreaQueries
 import org.btcmap.db.table.comment.CommentQueries
 import org.btcmap.db.table.event.EventQueries
 import org.btcmap.db.table.place.PlaceQueries
@@ -22,7 +23,7 @@ class Database(driver: SQLiteDriver, val path: String) {
          * the pragma alone (see [initialize]). Fresh databases are created at
          * this version; there is no migration chain by design.
          */
-        const val VERSION = 100
+        const val VERSION = 101
 
         private const val MEMORY_PATH = ":memory:"
         private const val USER_VERSION_QUERY = "SELECT user_version FROM pragma_user_version;"
@@ -35,6 +36,7 @@ class Database(driver: SQLiteDriver, val path: String) {
     val place = PlaceQueries(conn)
     val comment = CommentQueries(conn)
     val event = EventQueries(conn)
+    val area = AreaQueries(conn)
     val preference = PreferenceQueries(conn)
     val user = UserStore(preference)
 
@@ -90,6 +92,7 @@ class Database(driver: SQLiteDriver, val path: String) {
         conn.execSQL(org.btcmap.db.table.place.CREATE)
         conn.execSQL(org.btcmap.db.table.event.CREATE)
         conn.execSQL(org.btcmap.db.table.comment.CREATE)
+        conn.execSQL(org.btcmap.db.table.area.CREATE)
         conn.execSQL(org.btcmap.db.table.preference.CREATE)
         conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
         conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)

@@ -16,11 +16,13 @@ import mockwebserver3.MockResponse
 import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.R
+import org.btcmap.db.table.area.Area
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.ZonedDateTime
 import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4::class)
@@ -126,6 +128,32 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
     }
 
     @Test
+    fun loadFailure_showsCachedAreaInsteadOfError() {
+        databaseRule.db.area.insert(listOf(cachedArea()))
+        apiRule.server.dispatcher = areaDispatcher(
+            areaBody = """{"message":"boom"}""",
+            areaCode = 500,
+        )
+
+        withArea { scenario, area ->
+            waitUntilOnMain {
+                !area.requireView().findViewById<View>(R.id.loading).isVisible
+            }
+
+            scenario.onActivity {
+                Assert.assertTrue(
+                    "Cached area should keep content visible",
+                    area.requireView().findViewById<View>(R.id.content).isVisible,
+                )
+                Assert.assertEquals(
+                    "Grand Paris",
+                    area.requireView().findViewById<Toolbar>(R.id.toolbar).title,
+                )
+            }
+        }
+    }
+
+    @Test
     fun eventsFailure_keepsContentVisible() {
         apiRule.server.dispatcher = areaDispatcher(
             eventsBody = """{"message":"boom"}""",
@@ -159,5 +187,23 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
                 area.requireView().findViewById<View>(R.id.content).isVisible,
             )
         }
+    }
+
+    private fun cachedArea(): Area {
+        return Area(
+            id = 1,
+            name = "Grand Paris",
+            type = "community",
+            urlAlias = "grand-paris",
+            icon = null,
+            iconWide = null,
+            websiteUrl = "https://btcmap.org/community/grand-paris",
+            description = null,
+            bboxWest = null,
+            bboxSouth = null,
+            bboxEast = null,
+            bboxNorth = null,
+            updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+        )
     }
 }

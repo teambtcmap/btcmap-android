@@ -17,7 +17,7 @@ class DatabaseTest {
         try {
             Assert.assertEquals(Database.VERSION, userVersion(db.conn))
             Assert.assertEquals(
-                listOf("comment", "event", "place", "pref"),
+                listOf("area", "comment", "event", "place", "pref"),
                 tables(db.conn),
             )
         } finally {
@@ -38,6 +38,32 @@ class DatabaseTest {
             Assert.assertFalse(hasTable(db.conn, "stale"))
             Assert.assertTrue(hasTable(db.conn, "place"))
             Assert.assertEquals(Database.VERSION, userVersion(db.conn))
+        } finally {
+            db.conn.close()
+        }
+    }
+
+    @Test
+    fun version100Database_isDiscardedAndRecreatedWithTheAreaTable() {
+        val path = existingPath()
+        // Reproduces the last release before areas were cached: version 100,
+        // the then-current tables, and a row worth preserving if a migration
+        // ever existed.
+        createVersion100Database(path)
+
+        val db = Database(BundledSQLiteDriver(), path)
+
+        try {
+            // The upgrade is a discard and recreate, not a migration: the old
+            // data is gone and the new schema, including `area`, is built from
+            // scratch. If someone adds a table without bumping VERSION, this
+            // database is not discarded and the assertion on `area` fails.
+            Assert.assertEquals(Database.VERSION, userVersion(db.conn))
+            Assert.assertEquals(
+                listOf("area", "comment", "event", "place", "pref"),
+                tables(db.conn),
+            )
+            Assert.assertEquals(0L, db.place.selectCount())
         } finally {
             db.conn.close()
         }
@@ -112,6 +138,27 @@ class DatabaseTest {
             if (version != null) {
                 conn.execSQL("PRAGMA user_version=$version;")
             }
+        } finally {
+            conn.close()
+        }
+    }
+
+    /**
+     * The schema as of the last release before areas were cached: version 100
+     * with place, event, comment and pref, but no `area`.
+     */
+    private fun createVersion100Database(path: String) {
+        val conn = BundledSQLiteDriver().open(path)
+        try {
+            conn.execSQL(org.btcmap.db.table.place.CREATE)
+            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE)
+            conn.execSQL(org.btcmap.db.table.preference.CREATE)
+            conn.execSQL(
+                "INSERT INTO place (id, bundled, updated_at, lat, lon, icon) " +
+                    "VALUES (1, 0, '2024-01-01T00:00:00Z', 0.0, 0.0, 'coffee');"
+            )
+            conn.execSQL("PRAGMA user_version=100;")
         } finally {
             conn.close()
         }

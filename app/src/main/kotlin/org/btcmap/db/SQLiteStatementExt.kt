@@ -15,6 +15,10 @@ fun SQLiteStatement.bindLongOrNull(index: Int, value: Long?) {
     if (value == null) bindNull(index) else bindLong(index, value)
 }
 
+fun SQLiteStatement.bindDoubleOrNull(index: Int, value: Double?) {
+    if (value == null) bindNull(index) else bindDouble(index, value)
+}
+
 fun SQLiteStatement.bindHttpUrlOrNull(index: Int, value: HttpUrl?) {
     if (value == null) bindNull(index) else bindText(index, value.toString())
 }
@@ -36,6 +40,9 @@ fun SQLiteStatement.getTextOrNull(index: Int): String? =
 
 fun SQLiteStatement.getLongOrNull(index: Int): Long? =
     if (isNull(index)) null else getLong(index)
+
+fun SQLiteStatement.getDoubleOrNull(index: Int): Double? =
+    if (isNull(index)) null else getDouble(index)
 
 fun SQLiteStatement.getZonedDateTime(index: Int): ZonedDateTime =
     ZonedDateTime.parse(getText(index))

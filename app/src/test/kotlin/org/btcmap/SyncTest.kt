@@ -13,6 +13,7 @@ import mockwebserver3.RecordedRequest
 import mockwebserver3.junit4.MockWebServerRule
 import okhttp3.OkHttpClient
 import org.btcmap.api.Api
+import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.comment.Comment
 import org.btcmap.db.table.event.Event
 import org.junit.Rule
@@ -636,6 +637,151 @@ class SyncTest {
         Assert.assertEquals(1501, db.event.selectAll().size)
     }
 
+    @Test
+    fun syncAreas_success() = runTest {
+        val db = createDatabase()
+        val api = createApi()
+
+        serverRule.server.enqueue(
+            MockResponse.Builder()
+                .addHeader("Content-Type", "application/json")
+                .body(
+                    """
+                    [
+                        {
+                            "id": 7,
+                            "name": "Grand Paris",
+                            "type": "community",
+                            "url_alias": "grand-paris",
+                            "icon": "https://static.example/icon.png",
+                            "icon_wide": null,
+                            "website_url": "https://btcmap.org/community/grand-paris",
+                            "description": "Greater Paris",
+                            "bbox": [2.22, 48.81, 2.47, 48.91],
+                            "updated_at": "2024-01-01T10:00:00Z",
+                            "deleted_at": null
+                        }
+                    ]
+                    """.trimIndent()
+                ).build()
+        )
+
+        val report = Sync(api, db).syncAreas()
+
+        val request = serverRule.server.takeRequest()
+        Assert.assertEquals("/v4/areas", request.url.encodedPath)
+        Assert.assertEquals("1000", request.url.queryParameter("limit"))
+        Assert.assertEquals("true", request.url.queryParameter("include_deleted"))
+        Assert.assertEquals("1970-01-01T00:00:00Z", request.url.queryParameter("updated_since"))
+        Assert.assertTrue(
+            request.url.queryParameter("fields")!!.contains("bbox"),
+        )
+
+        Assert.assertEquals(1L, report.rowsAffected)
+        val area = db.area.selectById(7L)!!
+        Assert.assertEquals("Grand Paris", area.name)
+        Assert.assertEquals("Greater Paris", area.description)
+        Assert.assertEquals(2.22, area.bboxWest!!, 0.0001)
+        Assert.assertEquals(ZonedDateTime.parse("2024-01-01T10:00:00Z"), area.updatedAt)
+    }
+
+    @Test
+    fun syncAreas_emptyResponseKeepsExistingAreas() = runTest {
+        val db = createDatabase()
+        val api = createApi()
+
+        db.area.insert(listOf(area(999L, updatedAt = "2024-01-01T10:00:00Z")))
+
+        serverRule.server.enqueue(
+            MockResponse.Builder()
+                .addHeader("Content-Type", "application/json")
+                .body("[]").build()
+        )
+
+        val report = Sync(api, db).syncAreas()
+
+        Assert.assertEquals(0L, report.rowsAffected)
+        Assert.assertEquals(1, db.area.selectAll().size)
+    }
+
+    @Test
+    fun syncAreas_withDeletedArea() = runTest {
+        val db = createDatabase()
+        val api = createApi()
+
+        db.area.insert(listOf(area(1L, updatedAt = "2024-01-01T10:00:00Z")))
+
+        serverRule.server.enqueue(
+            MockResponse.Builder()
+                .addHeader("Content-Type", "application/json")
+                .body(
+                    """
+                    [
+                        {
+                            "id": 1,
+                            "name": "Grand Paris",
+                            "type": "community",
+                            "url_alias": "grand-paris",
+                            "icon": null,
+                            "icon_wide": null,
+                            "website_url": "https://btcmap.org/community/grand-paris",
+                            "description": null,
+                            "bbox": null,
+                            "updated_at": "2024-01-02T10:00:00Z",
+                            "deleted_at": "2024-01-02T10:00:00Z"
+                        }
+                    ]
+                    """.trimIndent()
+                ).build()
+        )
+
+        val report = Sync(api, db).syncAreas()
+
+        Assert.assertEquals(1L, report.rowsAffected)
+        Assert.assertNull(db.area.selectById(1L))
+        // The tombstone is retained on disk but hidden from normal reads.
+        Assert.assertEquals(1L, physicalRowCount(db, "area"))
+    }
+
+    @Test
+    fun syncAreas_readsATieGroupSplitAcrossPages() = runTest {
+        val db = createDatabase()
+        val api = createApi()
+
+        val olderTimestamp = "2024-01-01T00:00:00Z"
+        val tieTimestamp = "2024-01-02T00:00:00Z"
+        val rows = listOf(SyncRow(1L, olderTimestamp)) + (2L..1501L).map { SyncRow(it, tieTimestamp) }
+        serverRule.server.dispatcher = pagedAreaDispatcher(rows)
+
+        val sync = Sync(api, db)
+        val report = sync.syncAreas()
+
+        Assert.assertEquals(1501, db.area.selectAll().size)
+        Assert.assertTrue("affected at least every row", report.rowsAffected >= 1501)
+
+        // The cursor must be left on the tie group, so the next sync is a no-op.
+        Assert.assertEquals(0L, sync.syncAreas().rowsAffected)
+        Assert.assertEquals(1501, db.area.selectAll().size)
+    }
+
+    private fun area(id: Long, updatedAt: String): Area {
+        return Area(
+            id = id,
+            name = "Grand Paris",
+            type = "community",
+            urlAlias = "grand-paris",
+            icon = null,
+            iconWide = null,
+            websiteUrl = "https://btcmap.org/community/grand-paris",
+            description = null,
+            bboxWest = null,
+            bboxSouth = null,
+            bboxEast = null,
+            bboxNorth = null,
+            updatedAt = ZonedDateTime.parse(updatedAt),
+        )
+    }
+
     private data class SyncRow(
         val id: Long,
         val updatedAt: String,
@@ -658,6 +804,11 @@ class SyncTest {
     private fun pagedEventDispatcher(rows: List<SyncRow>): Dispatcher =
         pagedDispatcher(rows) { row ->
             """{"id":${row.id},"lat":0.0,"lon":0.0,"name":"e","website":null,"starts_at":"2099-01-01T00:00:00Z","updated_at":"${row.updatedAt}"}"""
+        }
+
+    private fun pagedAreaDispatcher(rows: List<SyncRow>): Dispatcher =
+        pagedDispatcher(rows) { row ->
+            """{"id":${row.id},"name":"a","type":"community","url_alias":"a","icon":null,"icon_wide":null,"website_url":"https://x","description":null,"bbox":null,"updated_at":"${row.updatedAt}","deleted_at":null}"""
         }
 
     private fun pagedDispatcher(

@@ -250,6 +250,10 @@ class MapFragment : Fragment() {
                     rebuildCurrentCache()
                 }
 
+                // Areas are cached for the area screen; the map's area chips
+                // stay live and are refreshed from the camera-idle listener.
+                sync().syncAreas()
+
                 binding.sync.setVisibleAnimated(false)
             }
         }

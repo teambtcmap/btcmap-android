@@ -1,0 +1,124 @@
+package org.btcmap.db.table.area
+
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import org.btcmap.db.Database
+import org.junit.Assert
+import org.junit.Test
+import java.time.ZonedDateTime
+
+class AreaQueriesTest {
+    private fun createDatabase(): Database {
+        return Database(BundledSQLiteDriver(), ":memory:")
+    }
+
+    private fun area(
+        id: Long,
+        name: String = "Grand Paris",
+        updatedAt: String = "2024-01-01T00:00:00Z",
+        deletedAt: ZonedDateTime? = null,
+    ): Area {
+        return Area(
+            id = id,
+            name = name,
+            type = "community",
+            urlAlias = "grand-paris",
+            icon = "https://static.example/icon.png",
+            iconWide = "https://static.example/wide.png",
+            websiteUrl = "https://btcmap.org/community/grand-paris",
+            description = "Greater Paris",
+            bboxWest = 2.22,
+            bboxSouth = 48.81,
+            bboxEast = 2.47,
+            bboxNorth = 48.91,
+            updatedAt = ZonedDateTime.parse(updatedAt),
+            deletedAt = deletedAt,
+        )
+    }
+
+    @Test
+    fun insert_and_selectById() {
+        val db = createDatabase()
+
+        db.area.insert(listOf(area(7L)))
+
+        val result = db.area.selectById(7L)!!
+        Assert.assertEquals("Grand Paris", result.name)
+        Assert.assertEquals("community", result.type)
+        Assert.assertEquals("grand-paris", result.urlAlias)
+        Assert.assertEquals("https://static.example/icon.png", result.icon)
+        Assert.assertEquals("Greater Paris", result.description)
+        Assert.assertEquals(2.22, result.bboxWest!!, 0.0001)
+        Assert.assertEquals(48.91, result.bboxNorth!!, 0.0001)
+    }
+
+    @Test
+    fun insert_handlesNullOptionalFields() {
+        val db = createDatabase()
+        val row = area(7L).copy(
+            icon = null,
+            iconWide = null,
+            description = null,
+            bboxWest = null,
+            bboxSouth = null,
+            bboxEast = null,
+            bboxNorth = null,
+        )
+
+        db.area.insert(listOf(row))
+
+        val result = db.area.selectById(7L)!!
+        Assert.assertNull(result.icon)
+        Assert.assertNull(result.description)
+        Assert.assertNull(result.bboxWest)
+    }
+
+    @Test
+    fun insert_replacesExistingRow() {
+        val db = createDatabase()
+
+        db.area.insert(listOf(area(7L, name = "Old")))
+        db.area.insert(listOf(area(7L, name = "New")))
+
+        Assert.assertEquals(1L, db.area.selectCount())
+        Assert.assertEquals("New", db.area.selectById(7L)!!.name)
+    }
+
+    @Test
+    fun selectById_hidesTombstones() {
+        val db = createDatabase()
+        db.area.insert(listOf(area(7L, deletedAt = ZonedDateTime.parse("2024-02-01T00:00:00Z"))))
+
+        Assert.assertNull(db.area.selectById(7L))
+        Assert.assertTrue(db.area.selectAll().isEmpty())
+        Assert.assertEquals(0L, db.area.selectCount())
+        // The row is still stored, so the delta cursor still points at it.
+        Assert.assertEquals(
+            ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+            db.area.selectMaxUpdatedAt(),
+        )
+    }
+
+    @Test
+    fun selectMaxUpdatedAt_returnsLatestEvenWithTombstones() {
+        val db = createDatabase()
+        db.area.insert(
+            listOf(
+                area(1L, updatedAt = "2024-01-01T00:00:00Z"),
+                area(2L, updatedAt = "2024-03-01T00:00:00Z"),
+                area(3L, updatedAt = "2024-02-01T00:00:00Z"),
+            ),
+        )
+
+        Assert.assertEquals(
+            ZonedDateTime.parse("2024-03-01T00:00:00Z"),
+            db.area.selectMaxUpdatedAt(),
+        )
+    }
+
+    @Test
+    fun selectMaxUpdatedAt_isNullWhenEmpty() {
+        val db = createDatabase()
+
+        Assert.assertNull(db.area.selectMaxUpdatedAt())
+    }
+}

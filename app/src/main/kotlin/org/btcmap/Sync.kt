@@ -3,11 +3,13 @@ package org.btcmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.btcmap.api.Api
+import org.btcmap.api.getAreas
 import org.btcmap.api.getComments
 import org.btcmap.api.getEvents
 import org.btcmap.api.getPlaces
 import org.btcmap.api.toPlace
 import org.btcmap.db.Database
+import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.comment.Comment
 import org.btcmap.db.table.event.Event
 import org.btcmap.util.rethrowIfCancellation
@@ -249,6 +251,93 @@ class Sync(val api: Api, val db: Database) {
             }
 
             EventSyncReport(
+                duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+                rowsAffected = rowsAffected,
+            )
+        }
+    }
+
+    data class AreaSyncReport(
+        val duration: Duration,
+        val rowsAffected: Long,
+    )
+
+    suspend fun syncAreas(): AreaSyncReport {
+        val baseBatchSize = 1_000L
+
+        return withContext(Dispatchers.IO) {
+            val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
+            var rowsAffected = 0L
+            var maxKnownUpdatedAt =
+                db.area.selectMaxUpdatedAt() ?: ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC)
+            var batchSize = baseBatchSize
+
+            while (true) {
+                val delta = try {
+                    api.getAreas(maxKnownUpdatedAt, batchSize)
+                } catch (t: Throwable) {
+                    // A failed delta must not crash the caller; leave the cursor
+                    // where it is so the next sync retries the same page.
+                    t.rethrowIfCancellation()
+                    t.printStackTrace()
+                    break
+                }
+
+                if (delta.isEmpty()) {
+                    break
+                }
+
+                val cursor = nextUpdatedAtCursor(delta.map { it.updatedAt }, batchSize)
+                if (cursor == null) {
+                    batchSize *= 2
+                    continue
+                }
+
+                maxKnownUpdatedAt = cursor
+                val reachedTip = delta.size < batchSize
+
+                try {
+                    // Guard the whole apply step, not just the request: a
+                    // malformed row or a database failure here must not escape
+                    // and take down the lifecycle coroutine that called sync.
+                    db.transaction {
+                        // Area tombstones are kept like the other tables'. Raw
+                        // tags and geometry are never synced; bbox is the only
+                        // geometry the server exposes.
+                        db.area.insert(delta.map {
+                            Area(
+                                id = it.id,
+                                name = it.name,
+                                type = it.type,
+                                urlAlias = it.urlAlias,
+                                icon = it.icon,
+                                iconWide = it.iconWide,
+                                websiteUrl = it.websiteUrl,
+                                description = it.description,
+                                bboxWest = it.bboxWest,
+                                bboxSouth = it.bboxSouth,
+                                bboxEast = it.bboxEast,
+                                bboxNorth = it.bboxNorth,
+                                updatedAt = ZonedDateTime.parse(it.updatedAt),
+                                deletedAt = it.deletedAt?.toZonedDateTime(),
+                            )
+                        })
+                    }
+                } catch (t: Throwable) {
+                    t.rethrowIfCancellation()
+                    t.printStackTrace()
+                    break
+                }
+
+                rowsAffected += delta.size
+
+                if (reachedTip) {
+                    break
+                }
+                batchSize = baseBatchSize
+            }
+
+            AreaSyncReport(
                 duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
                 rowsAffected = rowsAffected,
             )

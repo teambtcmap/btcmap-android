@@ -40,6 +40,7 @@ import org.btcmap.api.getPlaceIssues
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
+import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.AreaFragmentBinding
 import org.btcmap.databinding.ItemAreaCardBinding
@@ -128,6 +129,16 @@ class AreaFragment : Fragment() {
 
     private fun loadArea() {
         viewLifecycleOwner.lifecycleScope.launch {
+            // Render the cached area first so the screen is usable offline and
+            // does not flash empty while the request is in flight. The server
+            // response still wins when it arrives, since it is localized.
+            val cached = withContext(Dispatchers.IO) { db().area.selectById(areaId) }
+            if (cached != null) {
+                renderArea(cached.toGetAreaItem())
+                binding.loading.isVisible = false
+                binding.content.isVisible = true
+            }
+
             try {
                 val area = withContext(Dispatchers.IO) {
                     api().getArea(areaId.toString())
@@ -138,10 +149,25 @@ class AreaFragment : Fragment() {
                 loadSecondarySections()
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
-                binding.loading.isVisible = false
-                showLoadError(e)
+                if (cached == null) {
+                    binding.loading.isVisible = false
+                    showLoadError(e)
+                }
             }
         }
+    }
+
+    private fun Area.toGetAreaItem(): GetAreaItem {
+        return GetAreaItem(
+            id = id,
+            name = name,
+            type = type,
+            urlAlias = urlAlias,
+            icon = icon,
+            iconWide = iconWide,
+            websiteUrl = websiteUrl,
+            description = description,
+        )
     }
 
     private fun renderArea(area: GetAreaItem) {
