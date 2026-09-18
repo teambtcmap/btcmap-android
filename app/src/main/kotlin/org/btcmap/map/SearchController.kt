@@ -155,6 +155,16 @@ class SearchController(
                     distanceToUser = formatDistance(meters),
                 )
             }
+
+            is SearchResult.Event -> {
+                val meters = distanceInMeters(referenceLocation, LatLng(lat, lon))
+                SearchAdapterItem.Event(
+                    eventId = id,
+                    icon = EVENT_ICON,
+                    name = name,
+                    distanceToUser = formatDistance(meters),
+                )
+            }
         }
     }
 

@@ -19,7 +19,7 @@ class SearchApiTest : ApiTestBase() {
         Assert.assertEquals("14.43", request.url.queryParameter("lon"))
         Assert.assertEquals("5", request.url.queryParameter("limit"))
 
-        Assert.assertEquals(2, results.size)
+        Assert.assertEquals(3, results.size)
 
         val area = results[0] as SearchResult.Area
         Assert.assertEquals(1L, area.id)
@@ -33,6 +33,12 @@ class SearchApiTest : ApiTestBase() {
         Assert.assertEquals("local_cafe", place.icon)
         Assert.assertEquals(50.08, place.lat, 0.0)
         Assert.assertEquals(14.43, place.lon, 0.0)
+
+        val event = results[2] as SearchResult.Event
+        Assert.assertEquals(42L, event.id)
+        Assert.assertEquals("Bitcoin Meetup", event.name)
+        Assert.assertEquals(50.09, event.lat, 0.0)
+        Assert.assertEquals(14.44, event.lon, 0.0)
     }
 
     @Test
@@ -117,6 +123,13 @@ class SearchApiTest : ApiTestBase() {
                         "lat": 50.08,
                         "lon": 14.43,
                         "icon": "local_cafe"
+                    },
+                    {
+                        "type": "event",
+                        "id": 42,
+                        "name": "Bitcoin Meetup",
+                        "lat": 50.09,
+                        "lon": 14.44
                     }
                 ]
             }

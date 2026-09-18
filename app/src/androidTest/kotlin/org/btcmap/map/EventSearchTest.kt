@@ -157,6 +157,38 @@ class EventSearchTest {
     }
 
     @Test
+    fun onlineSearch_returnsEventFromServer() {
+        apiRule.server.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                return MockResponse.Builder()
+                    .code(200)
+                    .addHeader("Content-Type", "application/json")
+                    .body(
+                        """
+                        {"results":[{"type":"event","id":42,"name":"Bitcoin Meetup","lat":48.8566,"lon":2.3522}]}
+                        """.trimIndent()
+                    )
+                    .build()
+            }
+        }
+        val controller = searchController(isOnline = true)
+        try {
+            controller.search(reference, "bitcoin")
+
+            waitUntil { controller.results.value.any { it is SearchAdapterItem.Event } }
+
+            val item = controller.results.value
+                .filterIsInstance<SearchAdapterItem.Event>()
+                .single()
+            Assert.assertEquals(42L, item.eventId)
+            Assert.assertEquals("Bitcoin Meetup", item.name)
+            Assert.assertEquals(EVENT_ICON, item.icon)
+        } finally {
+            controller.dispose()
+        }
+    }
+
+    @Test
     fun tappingEventResult_opensEventFragment() {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
@@ -230,12 +262,12 @@ class EventSearchTest {
         }
     }
 
-    private fun searchController(): SearchController {
+    private fun searchController(isOnline: Boolean = false): SearchController {
         return SearchController(
             db = databaseRule.db,
             api = apiRule.api,
             resources = app.resources,
-            isOnline = { false },
+            isOnline = { isOnline },
         )
     }
 

@@ -20,6 +20,13 @@ sealed class SearchResult {
         val lat: Double,
         val lon: Double,
     ) : SearchResult()
+
+    data class Event(
+        val id: Long,
+        val name: String,
+        val lat: Double,
+        val lon: Double,
+    ) : SearchResult()
 }
 
 suspend fun Api.search(
@@ -58,6 +65,13 @@ private fun InputStream.toSearchResults(): List<SearchResult> {
                 id = item.long("id"),
                 name = item.string("name"),
                 icon = item.string("icon"),
+                lat = item.double("lat"),
+                lon = item.double("lon"),
+            )
+
+            "event" -> SearchResult.Event(
+                id = item.long("id"),
+                name = item.string("name"),
                 lat = item.double("lat"),
                 lon = item.double("lon"),
             )
