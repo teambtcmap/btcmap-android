@@ -101,6 +101,23 @@ class EventQueries(private val conn: SQLiteConnection) {
         }
     }
 
+    fun selectBySearchString(searchString: String): List<Event> {
+        conn.prepare(
+            """
+                SELECT ${FullProjection.COLUMNS}
+                FROM $TABLE
+                WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%';
+            """
+        ).use {
+            it.bindText(1, searchString)
+            val rows = mutableListOf<Event>()
+            while (it.step()) {
+                rows.add(FullProjection.fromStatement(it))
+            }
+            return rows
+        }
+    }
+
     fun deleteAll() {
         conn.prepare("DELETE FROM $TABLE;").use { it.step() }
     }

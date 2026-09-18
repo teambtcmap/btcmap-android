@@ -201,4 +201,77 @@ class EventQueriesTest {
 
         Assert.assertTrue(db.event.selectAll().isEmpty())
     }
+
+    @Test
+    fun selectBySearchString_matchesNameSubstring() {
+        val db = createDatabase()
+        insertEvent(db, id = 1L, name = "Bitcoin Meetup")
+        insertEvent(db, id = 2L, name = "Ethereum Meetup")
+
+        val results = db.event.selectBySearchString("bitcoin")
+
+        Assert.assertEquals(1, results.size)
+        Assert.assertEquals("Bitcoin Meetup", results[0].name)
+    }
+
+    @Test
+    fun selectBySearchString_isCaseInsensitive() {
+        val db = createDatabase()
+        insertEvent(db, id = 1L, name = "Bitcoin Meetup")
+
+        Assert.assertEquals(1, db.event.selectBySearchString("bitcoin").size)
+        Assert.assertEquals(1, db.event.selectBySearchString("BITCOIN").size)
+        Assert.assertEquals(1, db.event.selectBySearchString("BiTcOiN").size)
+    }
+
+    @Test
+    fun selectBySearchString_returnsEmptyListWhenNoMatch() {
+        val db = createDatabase()
+        insertEvent(db, id = 1L, name = "Bitcoin Meetup")
+
+        Assert.assertTrue(db.event.selectBySearchString("lightning").isEmpty())
+    }
+
+    @Test
+    fun selectBySearchString_doesNotMatchWebsite() {
+        val db = createDatabase()
+        insertEvent(db, id = 1L, name = "London BTC", website = "https://bitcoin.example.com")
+
+        Assert.assertTrue(db.event.selectBySearchString("bitcoin").isEmpty())
+    }
+
+    @Test
+    fun selectBySearchString_returnsAllMatchesWithoutLimit() {
+        val db = createDatabase()
+        insertEvent(db, id = 1L, name = "Bitcoin Meetup Berlin")
+        insertEvent(db, id = 2L, name = "Bitcoin Meetup Lisbon")
+        insertEvent(db, id = 3L, name = "Bitcoin Meetup Paris")
+        insertEvent(db, id = 4L, name = "Ethereum Conference")
+
+        val results = db.event.selectBySearchString("meetup")
+
+        Assert.assertEquals(3, results.size)
+    }
+
+    private fun insertEvent(
+        db: Database,
+        id: Long,
+        name: String,
+        website: String? = null,
+    ) {
+        db.event.insert(
+            listOf(
+                Event(
+                    id = id,
+                    areaId = null,
+                    lat = 40.7128,
+                    lon = -74.0060,
+                    name = name,
+                    website = website?.toHttpUrl(),
+                    startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
+                    endsAt = null,
+                )
+            )
+        )
+    }
 }
