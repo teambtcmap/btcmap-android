@@ -30,6 +30,7 @@ class AreaBookmarkTest : AreaScreenTest() {
     @Test
     fun save_whenAuthorized_postsToApiAndPersistsArea() {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
+        databaseRule.db.area.insert(listOf(area()))
         databaseRule.db.user.insert(user(savedAreaIds = emptyList()))
         val posted = AtomicBoolean(false)
         apiRule.server.dispatcher = object : Dispatcher() {
@@ -41,9 +42,8 @@ class AreaBookmarkTest : AreaScreenTest() {
                         jsonResponse("[1]")
                     }
 
-                    path.endsWith("/events") -> jsonResponse(EMPTY_EVENTS_JSON)
                     path.startsWith("/v4/place-issues") -> jsonResponse(EMPTY_ISSUES_JSON)
-                    else -> jsonResponse(areaJson())
+                    else -> jsonResponse("[]")
                 }
             }
         }
@@ -61,6 +61,7 @@ class AreaBookmarkTest : AreaScreenTest() {
     @Test
     fun save_whenAlreadySaved_deletesFromApiAndPersistsChange() {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
+        databaseRule.db.area.insert(listOf(area()))
         databaseRule.db.user.insert(user(savedAreaIds = listOf(1)))
         val deleted = AtomicBoolean(false)
         apiRule.server.dispatcher = object : Dispatcher() {
@@ -72,9 +73,8 @@ class AreaBookmarkTest : AreaScreenTest() {
                         jsonResponse("[]")
                     }
 
-                    path.endsWith("/events") -> jsonResponse(EMPTY_EVENTS_JSON)
                     path.startsWith("/v4/place-issues") -> jsonResponse(EMPTY_ISSUES_JSON)
-                    else -> jsonResponse(areaJson())
+                    else -> jsonResponse("[]")
                 }
             }
         }
@@ -91,6 +91,7 @@ class AreaBookmarkTest : AreaScreenTest() {
 
     @Test
     fun save_whenUnauthorized_showsAuthDialogAndDoesNotCallApi() {
+        databaseRule.db.area.insert(listOf(area()))
         val saving = AtomicBoolean(false)
         apiRule.server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
@@ -122,6 +123,7 @@ class AreaBookmarkTest : AreaScreenTest() {
     @Test
     fun load_whenUserMissingFromDatabase_doesNotLeakUncaughtException() {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
+        databaseRule.db.area.insert(listOf(area()))
         apiRule.server.dispatcher = areaDispatcher()
 
         assertNoUncaughtException(
@@ -139,6 +141,7 @@ class AreaBookmarkTest : AreaScreenTest() {
     @Test
     fun save_whenUserMissingFromDatabase_doesNotLeakUncaughtException() {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
+        databaseRule.db.area.insert(listOf(area()))
         apiRule.server.dispatcher = areaDispatcher()
 
         assertNoUncaughtException(
@@ -157,6 +160,7 @@ class AreaBookmarkTest : AreaScreenTest() {
     @Test
     fun save_whenApiFails_doesNotLeakUncaughtException() {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
+        databaseRule.db.area.insert(listOf(area()))
         databaseRule.db.user.insert(user(savedAreaIds = emptyList()))
         val attempted = AtomicBoolean(false)
         apiRule.server.dispatcher = object : Dispatcher() {
@@ -168,9 +172,8 @@ class AreaBookmarkTest : AreaScreenTest() {
                         jsonResponse("""{"message":"boom"}""", code = 500)
                     }
 
-                    path.endsWith("/events") -> jsonResponse(EMPTY_EVENTS_JSON)
                     path.startsWith("/v4/place-issues") -> jsonResponse(EMPTY_ISSUES_JSON)
-                    else -> jsonResponse(areaJson())
+                    else -> jsonResponse("[]")
                 }
             }
         }

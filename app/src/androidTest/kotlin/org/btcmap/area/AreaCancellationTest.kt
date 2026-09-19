@@ -15,18 +15,19 @@ import java.util.concurrent.CountDownLatch
 class AreaCancellationTest : AreaScreenTest() {
 
     @Test
-    fun destroyingViewDuringLoad_doesNotRunErrorHandling() {
+    fun destroyingViewDuringIssuesLoad_doesNotRunErrorHandling() {
+        databaseRule.db.area.insert(listOf(area()))
         val release = CountDownLatch(1)
         apiRule.server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 val path = request.url.encodedPath
-                if (path == "/v4/areas/1") {
-                    release.await()
-                }
                 return when {
-                    path.endsWith("/events") -> jsonResponse(EMPTY_EVENTS_JSON)
-                    path.startsWith("/v4/place-issues") -> jsonResponse(EMPTY_ISSUES_JSON)
-                    else -> jsonResponse(areaJson())
+                    path.startsWith("/v4/place-issues") -> {
+                        release.await()
+                        jsonResponse(EMPTY_ISSUES_JSON)
+                    }
+
+                    else -> jsonResponse("[]")
                 }
             }
         }

@@ -7,9 +7,6 @@ import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import mockwebserver3.Dispatcher
-import mockwebserver3.MockResponse
-import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.db.table.place.Place
@@ -19,16 +16,14 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.ZonedDateTime
-import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4::class)
 class AreaContentTest : AreaScreenTest() {
 
     @Test
     fun loadSuccess_showsTitleDescriptionAndWebsite() {
-        apiRule.server.dispatcher = areaDispatcher(
-            areaBody = areaJson(description = "Greater Paris"),
-        )
+        apiRule.server.dispatcher = areaDispatcher()
+        databaseRule.db.area.insert(listOf(area(description = "Greater Paris")))
 
         withArea { scenario, area ->
             waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
@@ -54,9 +49,8 @@ class AreaContentTest : AreaScreenTest() {
 
     @Test
     fun singleParagraphDescription_hidesReadMoreToggle() {
-        apiRule.server.dispatcher = areaDispatcher(
-            areaBody = areaJson(description = "Greater Paris"),
-        )
+        apiRule.server.dispatcher = areaDispatcher()
+        databaseRule.db.area.insert(listOf(area(description = "Greater Paris")))
 
         withArea { _, area ->
             waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
@@ -69,8 +63,9 @@ class AreaContentTest : AreaScreenTest() {
 
     @Test
     fun multiParagraphDescription_canBeExpandedAndCollapsed() {
-        apiRule.server.dispatcher = areaDispatcher(
-            areaBody = areaJson(description = "First paragraph.\n\nSecond paragraph."),
+        apiRule.server.dispatcher = areaDispatcher()
+        databaseRule.db.area.insert(
+            listOf(area(description = "First paragraph.\n\nSecond paragraph.")),
         )
 
         withArea { scenario, area ->
@@ -99,11 +94,13 @@ class AreaContentTest : AreaScreenTest() {
 
     @Test
     fun upcomingEvents_areSortedAscendingAndPastEventsHidden() {
-        apiRule.server.dispatcher = areaDispatcher(
-            eventsBody = eventsJson(
-                eventJson(id = 1, name = "Past", startsAt = "2020-01-01T10:00:00Z"),
-                eventJson(id = 2, name = "Later", startsAt = "2999-01-02T10:00:00Z"),
-                eventJson(id = 3, name = "Sooner", startsAt = "2999-01-01T10:00:00Z"),
+        apiRule.server.dispatcher = areaDispatcher()
+        databaseRule.db.area.insert(listOf(area()))
+        databaseRule.db.event.insert(
+            listOf(
+                event(id = 1, name = "Past", startsAt = "2020-01-01T10:00:00Z"),
+                event(id = 2, name = "Later", startsAt = "2999-01-02T10:00:00Z"),
+                event(id = 3, name = "Sooner", startsAt = "2999-01-01T10:00:00Z"),
             ),
         )
 
@@ -127,7 +124,8 @@ class AreaContentTest : AreaScreenTest() {
 
     @Test
     fun noUpcomingEvents_hidesEventsSection() {
-        apiRule.server.dispatcher = areaDispatcher(eventsBody = EMPTY_EVENTS_JSON)
+        apiRule.server.dispatcher = areaDispatcher()
+        databaseRule.db.area.insert(listOf(area()))
 
         withArea { _, area ->
             waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
@@ -139,10 +137,10 @@ class AreaContentTest : AreaScreenTest() {
 
     @Test
     fun clickingUpcomingEvent_opensEventScreen() {
-        apiRule.server.dispatcher = areaDispatcher(
-            eventsBody = eventsJson(
-                eventJson(id = 5, name = "Meetup", startsAt = "2999-01-01T10:00:00Z"),
-            ),
+        apiRule.server.dispatcher = areaDispatcher()
+        databaseRule.db.area.insert(listOf(area()))
+        databaseRule.db.event.insert(
+            listOf(event(id = 5, name = "Meetup", startsAt = "2999-01-01T10:00:00Z")),
         )
 
         withArea { scenario, area ->
@@ -171,6 +169,7 @@ class AreaContentTest : AreaScreenTest() {
                 issueJson("way", 456789123, "Satoshi's Pub", "outdated"),
             ),
         )
+        databaseRule.db.area.insert(listOf(area()))
         databaseRule.db.place.insert(listOf(place(osmId = "node:987654321", icon = "local_atm")))
 
         withArea { scenario, area ->
@@ -207,6 +206,7 @@ class AreaContentTest : AreaScreenTest() {
                 issueJson("node", 1, "Shop", "not_verified"),
             ),
         )
+        databaseRule.db.area.insert(listOf(area()))
 
         withArea { scenario, area ->
             waitUntilOnMain { area.issuesContainer().childCount == 1 }
@@ -234,6 +234,7 @@ class AreaContentTest : AreaScreenTest() {
                 issueJson("node", 2, "Other", "brand_new_code"),
             ),
         )
+        databaseRule.db.area.insert(listOf(area()))
 
         withArea { scenario, area ->
             waitUntilOnMain { area.issuesContainer().childCount == 2 }
@@ -256,6 +257,7 @@ class AreaContentTest : AreaScreenTest() {
     @Test
     fun noPlaceIssues_hidesIssuesSection() {
         apiRule.server.dispatcher = areaDispatcher(issuesBody = EMPTY_ISSUES_JSON)
+        databaseRule.db.area.insert(listOf(area()))
 
         withArea { _, area ->
             waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
@@ -267,7 +269,8 @@ class AreaContentTest : AreaScreenTest() {
 
     @Test
     fun headerImage_isHiddenWhenAreaHasNoIcon() {
-        apiRule.server.dispatcher = areaDispatcher(areaBody = areaJson(icon = null))
+        apiRule.server.dispatcher = areaDispatcher()
+        databaseRule.db.area.insert(listOf(area(icon = null)))
 
         withArea { _, area ->
             waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
@@ -278,8 +281,9 @@ class AreaContentTest : AreaScreenTest() {
 
     @Test
     fun headerImage_isShownWhenAreaHasIcon() {
-        apiRule.server.dispatcher = areaDispatcher(
-            areaBody = areaJson(icon = "https://example.com/icon.png"),
+        apiRule.server.dispatcher = areaDispatcher()
+        databaseRule.db.area.insert(
+            listOf(area(icon = "https://example.com/icon.png")),
         )
 
         withArea { _, area ->
@@ -290,37 +294,6 @@ class AreaContentTest : AreaScreenTest() {
             Assert.assertTrue(area.view().findViewById<View>(R.id.icon).isVisible)
         }
     }
-
-    @Test
-    fun saveMenu_isDisabledUntilAreaLoads() {
-        val release = CountDownLatch(1)
-        apiRule.server.dispatcher = object : Dispatcher() {
-            override fun dispatch(request: RecordedRequest): MockResponse {
-                val path = request.url.encodedPath
-                return when {
-                    path == "/v4/areas/1" -> {
-                        release.await()
-                        jsonResponse(areaJson())
-                    }
-
-                    path.endsWith("/events") -> jsonResponse(EMPTY_EVENTS_JSON)
-                    path.startsWith("/v4/place-issues") -> jsonResponse(EMPTY_ISSUES_JSON)
-                    else -> jsonResponse("[]")
-                }
-            }
-        }
-
-        withArea { _, area ->
-            Assert.assertFalse(saveMenuItem(area).isEnabled)
-
-            release.countDown()
-
-            waitUntilOnMain { saveMenuItem(area).isEnabled }
-        }
-    }
-
-    private fun saveMenuItem(area: AreaFragment) =
-        area.view().findViewById<Toolbar>(R.id.toolbar).menu.findItem(R.id.save)
 
     private fun AreaFragment.view(): View = requireView()
 

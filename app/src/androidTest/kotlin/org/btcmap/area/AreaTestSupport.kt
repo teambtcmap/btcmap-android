@@ -8,19 +8,21 @@ import androidx.test.core.app.ApplicationProvider
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
 import mockwebserver3.RecordedRequest
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
+import org.btcmap.db.table.area.Area
+import org.btcmap.db.table.event.Event
 import org.btcmap.util.ApiRule
 import org.btcmap.util.DatabaseRule
 import org.btcmap.util.PreferencesRule
 import org.junit.Rule
+import java.time.ZonedDateTime
 
 internal const val AREA_TAG = "area"
 
 internal const val OFFLINE_STYLE_URI = "asset://map-styles/test/style.json"
-
-internal const val EMPTY_EVENTS_JSON = "[]"
 
 internal const val EMPTY_ISSUES_JSON = """{"total_issues":0,"requested_issues":[]}"""
 
@@ -69,20 +71,14 @@ abstract class AreaScreenTest {
 }
 
 internal fun areaDispatcher(
-    areaBody: String = areaJson(),
-    eventsBody: String = EMPTY_EVENTS_JSON,
     issuesBody: String = EMPTY_ISSUES_JSON,
-    areaCode: Int = 200,
-    eventsCode: Int = 200,
     issuesCode: Int = 200,
 ): Dispatcher {
     return object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse {
             val path = request.url.encodedPath
             return when {
-                path.endsWith("/events") -> jsonResponse(eventsBody, eventsCode)
                 path.startsWith("/v4/place-issues") -> jsonResponse(issuesBody, issuesCode)
-                path.startsWith("/v4/areas") -> jsonResponse(areaBody, areaCode)
                 else -> jsonResponse("[]")
             }
         }
@@ -97,49 +93,79 @@ internal fun jsonResponse(body: String, code: Int = 200): MockResponse {
         .build()
 }
 
-internal fun areaJson(
-    id: Long = 1,
-    name: String = "Grand Paris",
-    icon: String? = null,
-    iconWide: String? = null,
-    description: String? = null,
-): String {
+// The area's GeoJSON is a square around the Paris coordinates [event] uses by
+// default, so a seeded event is linked to the seeded area the same way the
+// server links them (bbox pre-filter plus point-in-polygon).
+private const val AREA_BBOX_WEST = 2.0
+private const val AREA_BBOX_SOUTH = 48.0
+private const val AREA_BBOX_EAST = 3.0
+private const val AREA_BBOX_NORTH = 49.0
+
+internal fun areaPolygon(): String {
     return """
         {
-            "id": $id,
-            "name": "$name",
-            "type": "community",
-            "url_alias": "grand-paris",
-            "icon": ${jsonStringOrNull(icon)},
-            "icon_wide": ${jsonStringOrNull(iconWide)},
-            "website_url": "https://btcmap.org/community/grand-paris",
-            "description": ${jsonStringOrNull(description)}
+            "type": "Polygon",
+            "coordinates": [[
+                [$AREA_BBOX_WEST, $AREA_BBOX_SOUTH],
+                [$AREA_BBOX_EAST, $AREA_BBOX_SOUTH],
+                [$AREA_BBOX_EAST, $AREA_BBOX_NORTH],
+                [$AREA_BBOX_WEST, $AREA_BBOX_NORTH],
+                [$AREA_BBOX_WEST, $AREA_BBOX_SOUTH]
+            ]]
         }
     """.trimIndent()
 }
 
-internal fun eventsJson(vararg events: String): String {
-    return events.joinToString(prefix = "[", postfix = "]", separator = ",")
+internal fun area(
+    id: Long = 1,
+    name: String = "Grand Paris",
+    description: String? = null,
+    icon: String? = null,
+    iconWide: String? = null,
+    websiteUrl: String = "https://btcmap.org/community/grand-paris",
+    bboxWest: Double? = AREA_BBOX_WEST,
+    bboxSouth: Double? = AREA_BBOX_SOUTH,
+    bboxEast: Double? = AREA_BBOX_EAST,
+    bboxNorth: Double? = AREA_BBOX_NORTH,
+    geoJson: String? = areaPolygon(),
+): Area {
+    return Area(
+        id = id,
+        name = name,
+        type = "community",
+        urlAlias = "grand-paris",
+        icon = icon,
+        iconWide = iconWide,
+        websiteUrl = websiteUrl,
+        description = description,
+        bboxWest = bboxWest,
+        bboxSouth = bboxSouth,
+        bboxEast = bboxEast,
+        bboxNorth = bboxNorth,
+        geoJson = geoJson,
+        updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+    )
 }
 
-internal fun eventJson(
+internal fun event(
     id: Long,
     name: String,
     startsAt: String,
+    lat: Double = 48.8566,
+    lon: Double = 2.3522,
     endsAt: String? = null,
-): String {
-    return """
-        {
-            "id": $id,
-            "area_id": 1,
-            "lat": 48.8566,
-            "lon": 2.3522,
-            "name": "$name",
-            "website": "https://example.com/events/$id",
-            "starts_at": "$startsAt",
-            "ends_at": ${jsonStringOrNull(endsAt)}
-        }
-    """.trimIndent()
+): Event {
+    return Event(
+        id = id,
+        areaId = null,
+        lat = lat,
+        lon = lon,
+        name = name,
+        website = "https://example.com/events/$id".toHttpUrlOrNull(),
+        startsAt = ZonedDateTime.parse(startsAt),
+        endsAt = endsAt?.let { ZonedDateTime.parse(it) },
+        updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+    )
 }
 
 internal fun issuesJson(total: Int, vararg issues: String): String {
@@ -165,8 +191,4 @@ internal fun issueJson(
             "issue_code": "$code"
         }
     """.trimIndent()
-}
-
-private fun jsonStringOrNull(value: String?): String {
-    return if (value == null) "null" else "\"${value.replace("\"", "\\\"")}\""
 }

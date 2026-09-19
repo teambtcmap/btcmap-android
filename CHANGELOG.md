@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Read the map's community and country chips from the local cache instead of querying the server on every map move, so they appear instantly and work offline
 - Show a country's chip before its communities on the map
-- Cache areas locally and sync them incrementally, so the area screen renders from the cache before the network refresh completes instead of failing when offline
+- Cache areas locally and sync them incrementally, so the area screen reads from the cache instead of the server and works offline
 - Cache each area's full GeoJSON polygon locally alongside its bounding box
 - Upgrade an existing local database in place on schema changes instead of deleting and re-downloading it
 - Reset the local database on upgrade: the app now uses a fresh `btcmap.db`, discards any stale pre-1.0 database with that name instead of migrating it, and deletes the `btcmap-*.db` files abandoned by earlier versions
@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Sync events incrementally instead of re-downloading the whole list on every map visit
 - Show matching events in the map search
 - Search places, areas and events from the local cache by name, so search is instant and works offline instead of querying the server
+- Read an area's events from the local cache instead of querying the server, so they appear instantly and work offline
 - Stop the comments screen from claiming there are no comments when the sync fails
 - Keep the comments add button clear of a physical left inset under right-to-left layouts
 - Keep looking for a freshly paid comment for longer and with backoff instead of a few fixed retries

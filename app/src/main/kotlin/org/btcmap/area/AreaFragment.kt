@@ -34,13 +34,13 @@ import org.btcmap.api
 import org.btcmap.api.GetAreaItem
 import org.btcmap.api.GetEventsItem
 import org.btcmap.api.GetPlaceIssuesItem
-import org.btcmap.api.getArea
-import org.btcmap.api.getAreaEvents
 import org.btcmap.api.getPlaceIssues
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.db.table.area.Area
+import org.btcmap.db.table.area.geoJsonGeometry
+import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.AreaFragmentBinding
 import org.btcmap.databinding.ItemAreaCardBinding
@@ -129,31 +129,22 @@ class AreaFragment : Fragment() {
 
     private fun loadArea() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // Render the cached area first so the screen is usable offline and
-            // does not flash empty while the request is in flight. The server
-            // response still wins when it arrives, since it is localized.
-            val cached = withContext(Dispatchers.IO) { db().area.selectById(areaId) }
-            if (cached != null) {
-                renderArea(cached.toGetAreaItem())
+            // The area is read from the local cache: the screen is only opened
+            // from a map chip or a search result, both of which come from the
+            // area sync, so the row is present and the screen works offline.
+            val area = withContext(Dispatchers.IO) { db().area.selectById(areaId) }
+            if (area == null) {
                 binding.loading.isVisible = false
-                binding.content.isVisible = true
+                showLoadError(IllegalStateException())
+                return@launch
             }
 
-            try {
-                val area = withContext(Dispatchers.IO) {
-                    api().getArea(areaId.toString())
-                }
-                renderArea(area)
-                binding.loading.isVisible = false
-                binding.content.isVisible = true
-                loadSecondarySections()
-            } catch (e: Throwable) {
-                e.rethrowIfCancellation()
-                if (cached == null) {
-                    binding.loading.isVisible = false
-                    showLoadError(e)
-                }
-            }
+            renderArea(area.toGetAreaItem())
+            binding.loading.isVisible = false
+            binding.content.isVisible = true
+
+            loadEvents()
+            loadPlaceIssues()
         }
     }
 
@@ -183,28 +174,68 @@ class AreaFragment : Fragment() {
         updateBookmarkIcon()
     }
 
-    private fun loadSecondarySections() {
+    private fun loadEvents() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val events = withContext(Dispatchers.IO) {
-                    api().getAreaEvents(areaId.toString())
-                }
+                val events = withContext(Dispatchers.IO) { fetchAreaEvents() }
                 renderUpcomingEvents(events)
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
             }
+        }
+    }
 
+    private fun loadPlaceIssues() {
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val (rows, totalIssues) = withContext(Dispatchers.IO) {
                     fetchPlaceIssues()
                 }
                 renderPlaceIssues(rows, totalIssues)
             } catch (e: Throwable) {
+                // The issues list is secondary: when it cannot be fetched
+                // (typically offline) leave the section hidden rather than
+                // interrupting the area screen, which is fully usable offline.
                 e.rethrowIfCancellation()
-                showError(e)
             }
         }
+    }
+
+    /**
+     * Reads the area's upcoming events from the local cache instead of calling
+     * `GET /v4/areas/{id}/events`.
+     *
+     * The v4 events payload does not carry `area_id`, so the association cannot
+     * be looked up by column. The server links an event to an area by
+     * pre-filtering on the area's bbox and then running a point-in-polygon test
+     * against its GeoJSON; the same rule is applied here to the cached area
+     * geometry, mirroring [org.btcmap.map.MapAreasController].
+     */
+    private fun fetchAreaEvents(): List<GetEventsItem> {
+        val area = db().area.selectById(areaId) ?: return emptyList()
+        val west = area.bboxWest ?: return emptyList()
+        val south = area.bboxSouth ?: return emptyList()
+        val east = area.bboxEast ?: return emptyList()
+        val north = area.bboxNorth ?: return emptyList()
+
+        val geometry = area.geoJsonGeometry()
+        return db().event.selectByBounds(south, north, west, east)
+            .filter { geometry.contains(it.lat, it.lon) }
+            .map { it.toGetEventsItem() }
+    }
+
+    private fun Event.toGetEventsItem(): GetEventsItem {
+        return GetEventsItem(
+            id = id,
+            areaId = areaId,
+            lat = lat,
+            lon = lon,
+            name = name,
+            website = website,
+            startsAt = startsAt,
+            endsAt = endsAt,
+        )
     }
 
     private fun onSaveClicked() {
