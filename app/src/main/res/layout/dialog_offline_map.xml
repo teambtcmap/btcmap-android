@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="24dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="24dp">
+
+    <TextView
+        android:id="@+id/description"
+        style="?attr/textAppearanceBody1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        tools:text="Download the map of Grand Paris for offline use." />
+
+    <TextView
+        android:id="@+id/style"
+        style="?attr/textAppearanceBody2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        tools:text="Map style: OpenFreeMap Liberty" />
+
+    <TextView
+        android:id="@+id/zoom"
+        style="?attr/textAppearanceBody1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textColor="?attr/colorOnSurface"
+        tools:text="Maximum zoom: 13" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/zoom_slider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:value="13"
+        tools:valueFrom="8"
+        tools:valueTo="16" />
+
+    <TextView
+        android:id="@+id/estimate"
+        style="?attr/textAppearanceBody1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="?attr/colorOnSurface"
+        tools:text="Estimated size: ~148 MB" />
+
+    <TextView
+        android:id="@+id/estimate_note"
+        style="?attr/textAppearanceBody2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/offline_map_estimate_note"
+        android:textColor="?attr/colorOnSurfaceVariant" />
+
+</LinearLayout>

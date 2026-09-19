@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Download a community's or country's map tiles for offline browsing from the area screen, choosing the maximum zoom against an estimated size
 - Show a spinner on an area chip or search result while its icon loads instead of a blank placeholder
 - Preload an area's header image in the background while its map chip or search result is visible, so opening the area screen shows the image without waiting for the network
 - Read the map's community and country chips from the local cache instead of querying the server on every map move, so they appear instantly and work offline

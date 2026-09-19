@@ -17,6 +17,7 @@ import org.btcmap.api.signOut
 import org.btcmap.db.Database
 import org.btcmap.db.LegacyDatabases
 import org.btcmap.imagestats.ImageStatsEventListener
+import org.btcmap.offline.OfflineMaps
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.prefs
 import org.btcmap.util.rethrowIfCancellation
@@ -85,6 +86,12 @@ class App : Application(), SingletonImageLoader.Factory {
     val db: Database
         get() = dbForTesting ?: defaultDb
 
+    /**
+     * Owns MapLibre's offline regions. App-scoped so a download started on the
+     * area screen keeps running after that screen is closed.
+     */
+    internal val offlineMaps: OfflineMaps by lazy { OfflineMaps(this) }
+
     private val defaultDb: Database by lazy {
         Database(
             driver = AndroidSQLiteDriver(),
@@ -98,6 +105,10 @@ class App : Application(), SingletonImageLoader.Factory {
         typefaceInit(this)
         MapLibre.getInstance(this)
 
+        // OfflineManager must be created on the UI thread; touching the lazy
+        // here does that before the background refresh below uses it.
+        offlineMaps
+
         // Delete the databases abandoned by earlier versions and load the
         // settings from the database up front so later reads from the main
         // thread hit the in-memory cache. The session token is part of the
@@ -107,6 +118,9 @@ class App : Application(), SingletonImageLoader.Factory {
                 val path = getDatabasePath(DATABASE_NAME)
                 path.parentFile?.let { LegacyDatabases.delete(it, path) }
                 prefs.preload()
+                // Re-attach to packs left incomplete by a previous run and
+                // resume them.
+                offlineMaps.refresh()
             } catch (t: Throwable) {
                 t.rethrowIfCancellation()
             }
@@ -132,3 +146,6 @@ fun Fragment.api(): Api = (requireContext().applicationContext as App).api
 fun Fragment.db(): Database = (requireContext().applicationContext as App).db
 
 fun Fragment.app(): App = requireContext().applicationContext as App
+
+internal fun Fragment.offlineMaps(): OfflineMaps =
+    (requireContext().applicationContext as App).offlineMaps

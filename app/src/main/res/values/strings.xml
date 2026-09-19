@@ -195,6 +195,22 @@
     </plurals>
     <string name="show_attribution">Show attribution</string>
     <string name="map_rotation">Allow map rotation</string>
+    <string name="offline_map" tools:ignore="MissingTranslation">Offline map</string>
+    <string name="offline_map_download" tools:ignore="MissingTranslation">Download map</string>
+    <string name="offline_map_download_again" tools:ignore="MissingTranslation">Download again</string>
+    <string name="offline_map_description" tools:ignore="MissingTranslation">Download the map of %1$s for offline use, so it stays available without a connection.</string>
+    <string name="offline_map_max_zoom" tools:ignore="MissingTranslation">Maximum zoom: %1$d</string>
+    <string name="offline_map_estimated_size" tools:ignore="MissingTranslation">Estimated size: ~%1$s</string>
+    <string name="offline_map_too_large" tools:ignore="MissingTranslation">Too large to download offline (estimated %1$s).</string>
+    <string name="offline_map_estimate_note" tools:ignore="MissingTranslation">This is only an estimate. The actual size depends on how much map data the area contains.</string>
+    <string name="offline_map_style" tools:ignore="MissingTranslation">Map style: %1$s</string>
+    <string name="offline_map_status_downloading" tools:ignore="MissingTranslation">Downloading… %1$s</string>
+    <string name="offline_map_status_downloading_progress" tools:ignore="MissingTranslation">Downloading… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded" tools:ignore="MissingTranslation">Downloaded · %1$s · zoom %2$d–%3$d</string>
+    <string name="offline_map_status_failed" tools:ignore="MissingTranslation">Download failed: %1$s</string>
+    <string name="offline_map_style_mismatch" tools:ignore="MissingTranslation">Downloaded for a different map style. Download again to use it with the current style.</string>
+    <string name="offline_map_delete_title" tools:ignore="MissingTranslation">Delete offline map?</string>
+    <string name="offline_map_delete_message" tools:ignore="MissingTranslation">The downloaded tiles for this area will be removed from this device.</string>
     <string name="osm_attribution">© OpenStreetMap contributors</string>
     <string name="osm_attribution_url" translatable="false">https://www.openstreetmap.org/about/</string>
     <string name="add_location_drag_to_adjust">Drag the map to set the exact location</string>

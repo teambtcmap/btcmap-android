@@ -100,9 +100,7 @@ fun MapStyle.name(context: Context): String {
 fun MapStyle.uri(context: Context): String {
     return when (this) {
         MapStyle.Auto -> {
-            val nightMode =
-                context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-            if (nightMode) {
+            if (isNightMode(context)) {
                 "asset://map-styles/carto-dark-matter/style.json"
             } else {
                 "asset://map-styles/light/style.json"
@@ -116,6 +114,44 @@ fun MapStyle.uri(context: Context): String {
         MapStyle.CartoDarkMatter -> "asset://map-styles/carto-dark-matter/style.json"
     }
 }
+
+/**
+ * The hosted style URL to hand to MapLibre's offline manager.
+ *
+ * Offline regions can only be created from an http(s) style: the native
+ * downloader cannot resolve the bundled `asset://` styles. These URLs are the
+ * ones `bundle_map_styles.py` generates the bundled copies from, so they
+ * reference the same tiles, glyphs and sprites and the downloaded resources
+ * also serve the bundled style at render time.
+ */
+fun MapStyle.offlineStyleUrl(context: Context): String {
+    return when (this) {
+        MapStyle.Auto -> if (isNightMode(context)) {
+            CARTO_DARK_MATTER_STYLE_URL
+        } else {
+            LIGHT_STYLE_URL
+        }
+
+        MapStyle.Liberty -> LIBERTY_STYLE_URL
+        MapStyle.Positron -> POSITRON_STYLE_URL
+        MapStyle.Bright -> BRIGHT_STYLE_URL
+        MapStyle.Dark -> DARK_STYLE_URL
+        MapStyle.CartoDarkMatter -> CARTO_DARK_MATTER_STYLE_URL
+    }
+}
+
+private fun isNightMode(context: Context): Boolean {
+    return context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+        Configuration.UI_MODE_NIGHT_YES
+}
+
+private const val LIGHT_STYLE_URL = "https://static.btcmap.org/map-styles/light.json"
+private const val DARK_STYLE_URL = "https://static.btcmap.org/map-styles/dark.json"
+private const val LIBERTY_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
+private const val POSITRON_STYLE_URL = "https://tiles.openfreemap.org/styles/positron"
+private const val BRIGHT_STYLE_URL = "https://tiles.openfreemap.org/styles/bright"
+private const val CARTO_DARK_MATTER_STYLE_URL =
+    "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
 
 fun Settings.mapStyleIsDark(): Boolean {
     return when (mapStyle) {
