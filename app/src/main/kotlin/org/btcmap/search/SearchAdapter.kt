@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil3.load
+import org.btcmap.area.preloadAreaHeader
 import org.btcmap.util.iconTypeface
 import org.btcmap.databinding.SearchAdapterItemBinding
 
@@ -37,23 +38,53 @@ class SearchAdapter(
         binding.root,
     ) {
 
+        // Identifies the area currently bound to the holder. Coil delivers its
+        // result asynchronously, so a result for a recycled binding must not
+        // hide the spinner the new binding just showed.
+        private var boundAreaId: Long? = null
+
         fun bind(item: SearchAdapterItem, onItemClick: (SearchAdapterItem) -> Unit) {
+            val area = item as? SearchAdapterItem.Area
+            boundAreaId = area?.areaId
+
             binding.apply {
                 icon.text = item.icon
                 name.text = item.name
                 distance.text = item.distanceToUser
                 root.setOnClickListener { onItemClick(item) }
 
-                val iconUrl = (item as? SearchAdapterItem.Area)?.iconUrl
-                if (iconUrl != null) {
+                if (area?.iconUrl != null) {
+                    loading.isVisible = true
                     icon.isVisible = false
                     iconImage.isVisible = true
-                    iconImage.load(iconUrl)
+                    iconImage.load(area.iconUrl) {
+                        listener(
+                            onSuccess = { _, _ -> hideLoading(area.areaId) },
+                            onError = { _, _ -> hideLoading(area.areaId) },
+                        )
+                    }
                 } else {
+                    loading.isVisible = false
                     iconImage.isVisible = false
                     iconImage.setImageDrawable(null)
                     icon.isVisible = true
                 }
+
+                // Tapping an area row can open the area screen straight away,
+                // so warm its header while the row is on screen even when the
+                // row falls back to the placeholder icon.
+                root.context.preloadAreaHeader(area?.headerImageUrl)
+            }
+        }
+
+        /**
+         * Hides the spinner once the row's image has loaded or failed, so a
+         * failed load leaves the plain placeholder rather than a spinner that
+         * never stops.
+         */
+        private fun hideLoading(areaId: Long) {
+            if (boundAreaId == areaId) {
+                binding.loading.isVisible = false
             }
         }
     }

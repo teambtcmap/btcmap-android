@@ -110,18 +110,70 @@ class MapAreasCacheTest {
         }
     }
 
+    @Test
+    fun chip_exposesTheHeaderImageTheAreaScreenLoads() {
+        val base = apiRule.server.url("/").toString()
+        databaseRule.db.area.insert(
+            listOf(
+                area(id = 7L, icon = "${base}square.jpg"),
+                area(
+                    id = 1L,
+                    name = "France",
+                    type = "country",
+                    icon = "${base}square.jpg",
+                    iconWide = "${base}wide.jpg",
+                ),
+            ),
+        )
+
+        preferencesRule.prefs.mapViewport = ParisPlaces.bounds
+        app.mapStyleUriForTesting = OFFLINE_STYLE_URI
+        try {
+            ActivityScenario.launch(Activity::class.java).use { scenario ->
+                lateinit var areasList: RecyclerView
+
+                scenario.onActivity { activity ->
+                    val mapFragment = activity.supportFragmentManager
+                        .findFragmentById(R.id.fragmentContainerView) as MapFragment
+                    areasList = mapFragment.requireView().findViewById(R.id.areas)
+                }
+
+                waitUntilOnMain { (areasList.adapter?.itemCount ?: 0) >= 2 }
+
+                scenario.onActivity {
+                    val areas = (areasList.adapter as AreasAdapter).currentList
+                    // The chip carries the same image the area screen shows, so
+                    // it can warm Coil's cache for it: the wide icon when there
+                    // is one, the square icon otherwise.
+                    Assert.assertEquals(
+                        "${base}wide.jpg",
+                        areas.first { it.id == 1L }.headerImageUrl,
+                    )
+                    Assert.assertEquals(
+                        "${base}square.jpg",
+                        areas.first { it.id == 7L }.headerImageUrl,
+                    )
+                }
+            }
+        } finally {
+            app.mapStyleUriForTesting = null
+        }
+    }
+
     private fun area(
         id: Long = 7L,
         name: String = "Grand Paris",
         type: String = "community",
+        icon: String? = null,
+        iconWide: String? = null,
     ): Area {
         return Area(
             id = id,
             name = name,
             type = type,
             urlAlias = "grand-paris",
-            icon = null,
-            iconWide = null,
+            icon = icon,
+            iconWide = iconWide,
             websiteUrl = "https://btcmap.org/community/grand-paris",
             description = null,
             bboxWest = 2.3,

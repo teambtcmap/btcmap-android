@@ -39,6 +39,14 @@
             tools:src="@drawable/icon_event"
             tools:visibility="visible" />
 
+        <ProgressBar
+            android:id="@+id/loading"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="?attr/colorPrimary"
+            android:visibility="gone" />
+
     </FrameLayout>
 
     <LinearLayout

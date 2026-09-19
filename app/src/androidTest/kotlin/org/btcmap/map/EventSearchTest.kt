@@ -173,6 +173,7 @@ class EventSearchTest {
             Assert.assertEquals("Paris Bitcoin", item.name)
             Assert.assertEquals(listOf(2.22, 48.81, 2.47, 48.91), item.bbox)
             Assert.assertEquals("https://static.example/icon.png", item.iconUrl)
+            Assert.assertEquals("https://static.example/icon.png", item.headerImageUrl)
             Assert.assertNotNull(item.distanceToUser)
         } finally {
             controller.dispose()

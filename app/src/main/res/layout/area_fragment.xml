@@ -24,7 +24,7 @@
             <ImageView
                 android:id="@+id/icon"
                 android:layout_width="match_parent"
-                android:layout_height="192dp"
+                android:layout_height="@dimen/area_header_height"
                 android:foreground="@drawable/area_header_scrim"
                 android:scaleType="centerCrop"
                 android:contentDescription="@string/area_icon"

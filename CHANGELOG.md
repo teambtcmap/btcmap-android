@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show a spinner on an area chip or search result while its icon loads instead of a blank placeholder
+- Preload an area's header image in the background while its map chip or search result is visible, so opening the area screen shows the image without waiting for the network
 - Read the map's community and country chips from the local cache instead of querying the server on every map move, so they appear instantly and work offline
 - Show a country's chip before its communities on the map
 - Cache areas locally and sync them incrementally, so the area screen reads from the cache instead of the server and works offline

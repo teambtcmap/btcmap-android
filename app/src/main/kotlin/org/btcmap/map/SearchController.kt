@@ -77,6 +77,7 @@ class SearchController(
                         areaId = area.id,
                         bbox = bbox,
                         iconUrl = area.icon,
+                        headerImageUrl = area.iconWide ?: area.icon,
                         icon = AREA_ICON,
                         name = area.name,
                         distanceToUser = distanceToUser,

@@ -16,6 +16,7 @@ sealed class SearchAdapterItem {
         val areaId: Long,
         val bbox: List<Double>?,
         val iconUrl: String?,
+        val headerImageUrl: String?,
         override val icon: String,
         override val name: String,
         override val distanceToUser: String?,

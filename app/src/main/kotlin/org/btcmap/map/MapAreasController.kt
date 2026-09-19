@@ -97,6 +97,7 @@ class MapAreasController(
                 type = area.type,
                 urlAlias = area.urlAlias,
                 upcomingEventsCount = counts[area.id] ?: 0,
+                headerImageUrl = area.iconWide ?: area.icon,
             )
         }.sortedBy { if (it.type == COUNTRY_TYPE) 0 else 1 }
     }

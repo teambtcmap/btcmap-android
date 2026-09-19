@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <!-- The area screen's header image height. Shared with the map chips, which
+         preload the header at this size so it is already decoded in memory when
+         the area screen opens. -->
+    <dimen name="area_header_height">192dp</dimen>
+</resources>

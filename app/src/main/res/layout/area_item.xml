@@ -15,6 +15,13 @@
         android:scaleType="centerCrop"
         app:shapeAppearanceOverlay="@style/CircleImageView" />
 
+    <ProgressBar
+        android:id="@+id/loading"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        android:indeterminateTint="#ffffff" />
+
     <TextView
         android:id="@+id/badge"
         android:layout_width="wrap_content"
