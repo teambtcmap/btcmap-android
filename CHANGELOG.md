@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Reset the local database on upgrade: the app now uses a fresh `btcmap.db`, discards any stale pre-1.0 database with that name instead of migrating it, and deletes the `btcmap-*.db` files abandoned by earlier versions
 - Keep deleted merchants, comments and events in the local database as tombstones instead of dropping them
 - Add a database stats screen in settings showing database files, sizes, per-table visible/deleted row counts and upcoming events
+- Add an image cache stats screen in settings showing Coil's memory and disk cache usage and lifetime load counts by source (memory, disk, network), cache hit rate, errors and average load time
 - Sync events incrementally instead of re-downloading the whole list on every map visit
 - Show matching events in the map search
 - Search places, areas and events from the local cache by name, so search is instant and works offline instead of querying the server

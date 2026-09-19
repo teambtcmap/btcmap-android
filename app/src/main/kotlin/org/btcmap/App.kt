@@ -1,8 +1,11 @@
 package org.btcmap
 
 import android.app.Application
+import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.sqlite.driver.AndroidSQLiteDriver
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -13,6 +16,7 @@ import org.btcmap.api.apiHttpClient
 import org.btcmap.api.signOut
 import org.btcmap.db.Database
 import org.btcmap.db.LegacyDatabases
+import org.btcmap.imagestats.ImageStatsEventListener
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.prefs
 import org.btcmap.util.rethrowIfCancellation
@@ -22,7 +26,7 @@ import org.btcmap.util.init as typefaceInit
 
 private const val DATABASE_NAME = "btcmap.db"
 
-class App : Application() {
+class App : Application(), SingletonImageLoader.Factory {
     internal var apiForTesting: Api? = null
 
     internal var dbForTesting: Database? = null
@@ -107,6 +111,17 @@ class App : Application() {
                 t.rethrowIfCancellation()
             }
         }
+    }
+
+    /**
+     * Builds Coil's singleton loader with a listener that records load counts
+     * for the image stats screen. Everything else keeps Coil's defaults,
+     * including the memory and disk caches.
+     */
+    override fun newImageLoader(context: Context): ImageLoader {
+        return ImageLoader.Builder(context)
+            .eventListenerFactory(ImageStatsEventListener.Factory)
+            .build()
     }
 }
 

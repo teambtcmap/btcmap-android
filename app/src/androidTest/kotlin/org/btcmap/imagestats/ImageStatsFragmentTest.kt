@@ -1,4 +1,4 @@
-package org.btcmap.dbstats
+package org.btcmap.imagestats
 
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
@@ -11,34 +11,30 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
 import org.btcmap.R
-import org.btcmap.db.Database
-import org.btcmap.db.table.place.Place
 import org.btcmap.settings.SettingsFragment
 import org.btcmap.stats.StatsAdapter
-import org.btcmap.util.DatabaseRule
 import org.btcmap.util.PreferencesRule
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.time.ZonedDateTime
 
 @RunWith(AndroidJUnit4::class)
-class DbStatsFragmentTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
+class ImageStatsFragmentTest {
 
     @JvmField
     @Rule
     val preferencesRule = PreferencesRule()
 
-    @Test
-    fun showsRowCountsForEachTable() {
-        databaseRule.db.place.insert(listOf(place(1L), place(2L)))
+    @Before
+    fun setUp() {
+        ImageLoadStats.reset()
+    }
 
+    @Test
+    fun showsCacheSectionsAndLoadCounters() {
         launchFragment { scenario, fragment ->
             lateinit var list: RecyclerView
             scenario.onActivity {
@@ -47,30 +43,32 @@ class DbStatsFragmentTest {
 
             waitUntilOnMain {
                 val adapter = list.adapter as? StatsAdapter ?: return@waitUntilOnMain false
-                adapter.currentList.any { it.title == "place" }
+                adapter.currentList.any { it.title == "Memory cache" }
             }
 
             scenario.onActivity {
                 val adapter = list.adapter as StatsAdapter
                 val sections = adapter.currentList.associateBy { it.title }
+                val titles = adapter.currentList.map { it.title }
+                Assert.assertTrue("missing memory section, was $titles", "Memory cache" in sections)
+                Assert.assertTrue("missing disk section, was $titles", "Disk cache" in sections)
+                Assert.assertTrue("missing loads section, was $titles", "Loads" in sections)
 
-                val place = sections.getValue("place").entries.associate { it.label to it.value }
-                Assert.assertEquals("2", place["Rows"])
-                Assert.assertEquals("2", place["Visible"])
-                Assert.assertEquals("0", place["Deleted"])
+                val loads = sections.getValue("Loads").entries.associate { it.label to it.value }
+                Assert.assertEquals("0", loads["Requests"])
+                Assert.assertEquals("0", loads["Errors"])
+                Assert.assertEquals("0", loads["Cancels"])
 
-                val event = sections.getValue("event")
+                val memorySize = sections.getValue("Memory cache").entries
+                    .first { it.label == "Size" }.value
                 Assert.assertTrue(
-                    "event section should report a Future count, was ${event.entries}",
-                    event.entries.any { it.label == "Future" },
+                    "missing memory size, was $memorySize",
+                    memorySize.contains(" of "),
                 )
-
                 Assert.assertTrue(
-                    "expected a Database section, sections were ${adapter.currentList.map { it.title }}",
-                    "Database" in sections,
+                    "missing cache location",
+                    sections.getValue("Disk cache").entries.any { it.label == "Location" },
                 )
-                val version = sections.getValue("Database").entries.first { it.label == "Version" }
-                Assert.assertEquals(Database.VERSION.toString(), version.value)
             }
         }
     }
@@ -88,23 +86,23 @@ class DbStatsFragmentTest {
                 activity.supportFragmentManager.executePendingTransactions()
             }
 
-            onView(withId(R.id.dbStatsButton)).perform(scrollTo(), click())
+            onView(withId(R.id.imageStatsButton)).perform(scrollTo(), click())
 
             waitUntilOnMain {
                 activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is DbStatsFragment
+                    .findFragmentById(R.id.fragmentContainerView) is ImageStatsFragment
             }
         }
     }
 
-    private fun launchFragment(block: (ActivityScenario<Activity>, DbStatsFragment) -> Unit) {
+    private fun launchFragment(block: (ActivityScenario<Activity>, ImageStatsFragment) -> Unit) {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
-            lateinit var fragment: DbStatsFragment
+            lateinit var fragment: ImageStatsFragment
             scenario.onActivity { activity ->
-                fragment = DbStatsFragment()
+                fragment = ImageStatsFragment()
                 activity.supportFragmentManager.commit {
                     setReorderingAllowed(true)
-                    replace(R.id.fragmentContainerView, fragment, DB_STATS_TAG)
+                    replace(R.id.fragmentContainerView, fragment, IMAGE_STATS_TAG)
                 }
                 activity.supportFragmentManager.executePendingTransactions()
             }
@@ -112,36 +110,7 @@ class DbStatsFragmentTest {
         }
     }
 
-    private fun place(id: Long): Place {
-        return Place(
-            id = id,
-            bundled = false,
-            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-            lat = 40.7128,
-            lon = -74.0060,
-            icon = "coffee",
-            name = "Place $id",
-            localizedName = null,
-            verifiedAt = null,
-            address = null,
-            openingHours = null,
-            localizedOpeningHours = null,
-            phone = null,
-            website = null,
-            email = null,
-            twitter = null,
-            facebook = null,
-            instagram = null,
-            line = null,
-            requiredAppUrl = null,
-            boostedUntil = null,
-            comments = null,
-            telegram = null,
-            osmId = null,
-        )
-    }
-
     private companion object {
-        const val DB_STATS_TAG = "db-stats"
+        const val IMAGE_STATS_TAG = "image-stats"
     }
 }

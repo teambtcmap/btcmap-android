@@ -14,6 +14,9 @@ import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.databinding.DbStatsFragmentBinding
 import org.btcmap.db
+import org.btcmap.stats.StatsAdapter
+import org.btcmap.stats.StatsEntry
+import org.btcmap.stats.StatsSection
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
 import java.text.NumberFormat
@@ -38,7 +41,7 @@ class DbStatsFragment : Fragment() {
         }
 
         binding.statsList.layoutManager = LinearLayoutManager(requireContext())
-        val adapter = DbStatsAdapter()
+        val adapter = StatsAdapter()
         binding.statsList.adapter = adapter
 
         val database = db()
@@ -54,7 +57,7 @@ class DbStatsFragment : Fragment() {
                 val tables = withContext(Dispatchers.IO) {
                     reader.readTables()
                 }
-                adapter.submitList(buildItems(file, version, tables))
+                adapter.submitList(buildSections(file, version, tables))
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
@@ -67,52 +70,63 @@ class DbStatsFragment : Fragment() {
         _binding = null
     }
 
-    private fun buildItems(
+    private fun buildSections(
         file: DatabaseFile?,
         version: Int,
         tables: List<TableStats>,
-    ): List<DbStatsItem> {
-        val items = mutableListOf<DbStatsItem>()
+    ): List<StatsSection> {
+        val sections = mutableListOf<StatsSection>()
 
-        items.add(DbStatsItem.Header(getString(R.string.db_stats_database)))
-        file?.let {
-            items.add(DbStatsItem.Entry(getString(R.string.db_stats_file_name), it.name))
-        }
-        items.add(DbStatsItem.Entry(getString(R.string.db_stats_version), version.toString()))
-        file?.let {
-            items.add(
-                DbStatsItem.Entry(
-                    getString(R.string.db_stats_size),
-                    Formatter.formatFileSize(requireContext(), it.sizeBytes),
+        sections.add(
+            StatsSection(
+                title = getString(R.string.db_stats_database),
+                icon = "database",
+                entries = buildList {
+                    file?.let {
+                        add(StatsEntry(getString(R.string.db_stats_file_name), it.name))
+                    }
+                    add(StatsEntry(getString(R.string.db_stats_version), version.toString()))
+                    file?.let {
+                        add(
+                            StatsEntry(
+                                getString(R.string.db_stats_size),
+                                Formatter.formatFileSize(requireContext(), it.sizeBytes),
+                            )
+                        )
+                    }
+                },
+            )
+        )
+
+        tables.forEach { table ->
+            sections.add(
+                StatsSection(
+                    title = table.name,
+                    icon = "table",
+                    entries = tableEntries(table),
                 )
             )
         }
 
-        items.add(DbStatsItem.Header(getString(R.string.db_stats_tables)))
-        tables.forEach { table ->
-            items.add(DbStatsItem.Entry(table.name, tableDetail(table)))
-        }
-
-        return items
+        return sections
     }
 
-    private fun tableDetail(table: TableStats): String {
+    private fun tableEntries(table: TableStats): List<StatsEntry> {
         val formatter = NumberFormat.getIntegerInstance()
-        val lines = mutableListOf(
-            getString(R.string.db_stats_rows, formatter.format(table.rowCount)),
-        )
-        table.visibleRowCount?.let {
-            lines.add(getString(R.string.db_stats_visible_rows, formatter.format(it)))
+        return buildList {
+            add(StatsEntry(getString(R.string.db_stats_rows), formatter.format(table.rowCount)))
+            table.visibleRowCount?.let {
+                add(StatsEntry(getString(R.string.db_stats_visible_rows), formatter.format(it)))
+            }
+            table.deletedRowCount?.let {
+                add(StatsEntry(getString(R.string.db_stats_deleted_rows), formatter.format(it)))
+            }
+            table.futureRowCount?.let {
+                add(StatsEntry(getString(R.string.db_stats_future_rows), formatter.format(it)))
+            }
+            table.maxUpdatedAt?.let {
+                add(StatsEntry(getString(R.string.db_stats_max_updated_at), it))
+            }
         }
-        table.deletedRowCount?.let {
-            lines.add(getString(R.string.db_stats_deleted_rows, formatter.format(it)))
-        }
-        table.futureRowCount?.let {
-            lines.add(getString(R.string.db_stats_future_rows, formatter.format(it)))
-        }
-        table.maxUpdatedAt?.let {
-            lines.add(getString(R.string.db_stats_max_updated_at, it))
-        }
-        return lines.joinToString("\n")
     }
 }

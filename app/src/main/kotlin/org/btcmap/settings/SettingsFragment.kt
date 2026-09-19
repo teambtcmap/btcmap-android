@@ -22,6 +22,7 @@ import org.btcmap.auth.showAuthDialog
 import org.btcmap.databinding.SettingsFragmentBinding
 import org.btcmap.db
 import org.btcmap.dbstats.DbStatsFragment
+import org.btcmap.imagestats.ImageStatsFragment
 
 class SettingsFragment : Fragment() {
 
@@ -85,6 +86,14 @@ class SettingsFragment : Fragment() {
             parentFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<DbStatsFragment>(R.id.fragmentContainerView, null)
+                addToBackStack(null)
+            }
+        }
+
+        binding.imageStatsButton.setOnClickListener {
+            parentFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace<ImageStatsFragment>(R.id.fragmentContainerView, null)
                 addToBackStack(null)
             }
         }
