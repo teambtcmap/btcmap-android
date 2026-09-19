@@ -125,3 +125,14 @@ Places and map styles are committed as assets and refreshed manually with
 ## Changelog
 - Update `CHANGELOG.md` before committing, adding entries under the `## [Unreleased]` section
 - Only user-facing or otherwise non-trivial and important changes belong in the changelog
+
+## Version Code
+- Bump `versionCode` in `app/build.gradle.kts` with every commit made directly on
+  `master` that changes the app: increase it by one and note the new value in the
+  commit message (e.g. "Bump the version code to 66")
+- Don't bump it for changes that don't affect the shipped app, such as
+  documentation, `AGENTS.md` or other metadata
+- Do not bump `versionCode` on a feature branch that is not expected to land on
+  `master` immediately; the branch can be committed to freely and the bump added
+  when its work is merged into `master`
+- `versionName` is independent of `versionCode` and is not bumped per commit
