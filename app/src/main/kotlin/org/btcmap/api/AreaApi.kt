@@ -12,16 +12,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-data class GetAreasItem(
-    val id: Long,
-    val name: String,
-    val type: String,
-    val urlAlias: String,
-    val websiteUrl: String,
-    val upcomingEventsCount: Int,
-    val upcomingEvents: List<GetEventsItem>,
-)
-
 data class GetAreaItem(
     val id: Long,
     val name: String,
@@ -34,9 +24,9 @@ data class GetAreaItem(
 )
 
 /**
- * A row of the incremental `GET /v4/areas` change log. Unlike [GetAreasItem]
- * (the coordinate search shape, which carries upcoming events), a delta row
- * always carries [updatedAt] and may carry [deletedAt] as a tombstone.
+ * A row of the incremental `GET /v4/areas` change log. Unlike the single-area
+ * endpoint, a delta row always carries [updatedAt] and may carry [deletedAt] as
+ * a tombstone.
  */
 data class GetAreasDeltaItem(
     val id: Long,
@@ -59,15 +49,6 @@ data class GetAreasDeltaItem(
 
 private const val AREA_DELTA_FIELDS =
     "id,name,type,url_alias,icon,icon_wide,website_url,description,bbox,geo_json,updated_at,deleted_at"
-
-suspend fun Api.getAreas(lat: Double, lon: Double): List<GetAreasItem> {
-    val url = buildUrl("v4", "areas") {
-        addQueryParameter("lat", lat.toString())
-        addQueryParameter("lon", lon.toString())
-    }
-
-    return call(Request.Builder().withoutAuth().url(url).build()) { it.toAreas() }
-}
 
 suspend fun Api.getAreas(updatedSince: ZonedDateTime, limit: Long): List<GetAreasDeltaItem> {
     val url = buildUrl("v4", "areas") {
@@ -145,22 +126,4 @@ private fun JsonObject.toGetAreasDeltaItem(): GetAreasDeltaItem {
 
 private fun InputStream.toGetAreasDeltaItems(): List<GetAreasDeltaItem> {
     return toJsonArray().map { it.toGetAreasDeltaItem() }
-}
-
-private fun InputStream.toAreas(): List<GetAreasItem> {
-    return toJsonArray().map { item ->
-        val events = item.arrayOrNull("upcoming_events")
-            ?.map { it.asJsonObject.toGetEventsItem() }
-            ?: emptyList()
-
-        GetAreasItem(
-            id = item.long("id"),
-            name = item.string("name"),
-            type = item.string("type"),
-            urlAlias = item.string("url_alias"),
-            websiteUrl = item.string("website_url"),
-            upcomingEventsCount = events.size,
-            upcomingEvents = events,
-        )
-    }
 }

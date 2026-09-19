@@ -153,6 +153,46 @@ class AreaQueriesTest {
     }
 
     @Test
+    fun selectByBbox_returnsOnlyOverlappingVisibleAreas() {
+        val db = createDatabase()
+        db.area.insert(
+            listOf(
+                area(1L, name = "Paris"),
+                area(2L, name = "Berlin").copy(
+                    bboxWest = 13.0,
+                    bboxSouth = 52.3,
+                    bboxEast = 13.8,
+                    bboxNorth = 52.7,
+                ),
+                area(3L, name = "Gone", deletedAt = ZonedDateTime.parse("2024-02-01T00:00:00Z")),
+            ),
+        )
+
+        val results = db.area.selectByBbox(west = 2.3, south = 48.85, east = 2.4, north = 48.88)
+
+        Assert.assertEquals(listOf("Paris"), results.map { it.name })
+    }
+
+    @Test
+    fun selectByBbox_skipsRowsWithoutBbox() {
+        val db = createDatabase()
+        db.area.insert(
+            listOf(
+                area(1L, name = "No bbox").copy(
+                    bboxWest = null,
+                    bboxSouth = null,
+                    bboxEast = null,
+                    bboxNorth = null,
+                ),
+            ),
+        )
+
+        Assert.assertTrue(
+            db.area.selectByBbox(west = -1.0, south = -1.0, east = 1.0, north = 1.0).isEmpty()
+        )
+    }
+
+    @Test
     fun selectMaxUpdatedAt_returnsLatestEvenWithTombstones() {
         val db = createDatabase()
         db.area.insert(

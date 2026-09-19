@@ -9,13 +9,12 @@ import androidx.recyclerview.widget.RecyclerView
 import coil3.load
 import okhttp3.HttpUrl
 import java.text.NumberFormat
-import org.btcmap.api.GetAreasItem
 import org.btcmap.databinding.AreaItemBinding
 
 class AreasAdapter(
     private val apiUrl: HttpUrl,
-    private val onItemClick: (GetAreasItem) -> Unit,
-) : ListAdapter<GetAreasItem, AreasAdapter.ItemViewHolder>(DiffCallback()) {
+    private val onItemClick: (MapArea) -> Unit,
+) : ListAdapter<MapArea, AreasAdapter.ItemViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -38,7 +37,7 @@ class AreasAdapter(
         private val apiUrl: HttpUrl,
         private val binding: AreaItemBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(area: GetAreasItem, onItemClick: (GetAreasItem) -> Unit) {
+        fun bind(area: MapArea, onItemClick: (MapArea) -> Unit) {
             binding.apply {
                 icon.load("$apiUrl/v4/areas/${area.id}/image?type=square&w=256&h=256")
                 val count = area.upcomingEventsCount
@@ -51,13 +50,13 @@ class AreasAdapter(
         }
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<GetAreasItem>() {
+    class DiffCallback : DiffUtil.ItemCallback<MapArea>() {
 
-        override fun areItemsTheSame(oldItem: GetAreasItem, newItem: GetAreasItem): Boolean {
+        override fun areItemsTheSame(oldItem: MapArea, newItem: MapArea): Boolean {
             return newItem.id == oldItem.id
         }
 
-        override fun areContentsTheSame(oldItem: GetAreasItem, newItem: GetAreasItem): Boolean {
+        override fun areContentsTheSame(oldItem: MapArea, newItem: MapArea): Boolean {
             return newItem == oldItem
         }
     }

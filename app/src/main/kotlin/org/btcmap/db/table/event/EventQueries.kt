@@ -97,23 +97,6 @@ class EventQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectByAreaId(areaId: Long): List<Event> {
-        conn.prepare(
-            """
-                SELECT ${FullProjection.COLUMNS}
-                FROM $TABLE
-                WHERE $AREA_ID = ?1 AND $DELETED_AT IS NULL;
-            """
-        ).use {
-            it.bindLong(1, areaId)
-            val rows = mutableListOf<Event>()
-            while (it.step()) {
-                rows.add(FullProjection.fromStatement(it))
-            }
-            return rows
-        }
-    }
-
     fun selectBySearchString(searchString: String): List<Event> {
         conn.prepare(
             """

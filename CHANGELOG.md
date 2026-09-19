@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Read the map's community and country chips from the local cache instead of querying the server on every map move, so they appear instantly and work offline
+- Show a country's chip before its communities on the map
 - Cache areas locally and sync them incrementally, so the area screen renders from the cache before the network refresh completes instead of failing when offline
 - Cache each area's full GeoJSON polygon locally alongside its bounding box
 - Upgrade an existing local database in place on schema changes instead of deleting and re-downloading it

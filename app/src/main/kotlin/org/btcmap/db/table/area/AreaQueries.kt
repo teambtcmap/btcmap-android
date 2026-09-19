@@ -94,6 +94,42 @@ class AreaQueries(private val conn: SQLiteConnection) {
         }
     }
 
+    /**
+     * Areas whose bounding box overlaps the given one, used as a cheap
+     * pre-filter before the precise point-in-polygon test. Mirrors the server's
+     * `select_by_bbox`: strict inequalities and rows without a bbox are skipped,
+     * so the caller has to expand the query box a little to catch areas whose
+     * bbox does not contain the point but whose polygon does.
+     */
+    fun selectByBbox(
+        west: Double,
+        south: Double,
+        east: Double,
+        north: Double,
+    ): List<Area> {
+        conn.prepare(
+            """
+            SELECT ${FullProjection.COLUMNS}
+            FROM $TABLE
+            WHERE $DELETED_AT IS NULL
+                AND $BBOX_WEST < ?3
+                AND $BBOX_EAST > ?1
+                AND $BBOX_SOUTH < ?4
+                AND $BBOX_NORTH > ?2;
+            """
+        ).use {
+            it.bindDouble(1, west)
+            it.bindDouble(2, south)
+            it.bindDouble(3, east)
+            it.bindDouble(4, north)
+            val rows = mutableListOf<Area>()
+            while (it.step()) {
+                rows.add(FullProjection.fromStatement(it))
+            }
+            return rows
+        }
+    }
+
     fun selectMaxUpdatedAt(): ZonedDateTime? {
         // See CommentQueries.selectMaxUpdatedAt: text ordering of
         // ZonedDateTime.toString() values is not chronological.

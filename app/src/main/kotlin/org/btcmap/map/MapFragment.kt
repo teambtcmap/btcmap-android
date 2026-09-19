@@ -36,7 +36,6 @@ import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.feed.ActivityFeedFragment
 import org.btcmap.api
-import org.btcmap.api.getAreas
 import org.btcmap.api.getEvent
 import org.btcmap.api.getPlaceCoordinates
 import org.btcmap.area.ARG_AREA_ID
@@ -92,6 +91,7 @@ class MapFragment : Fragment() {
     private var locationController: LocationController? = null
 
     private lateinit var searchController: SearchController
+    private lateinit var mapAreasController: MapAreasController
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
@@ -133,6 +133,8 @@ class MapFragment : Fragment() {
             db = db(),
             resources = resources,
         )
+
+        mapAreasController = MapAreasController(db = db())
 
         bottomSheetController = BottomSheetController(
             view = binding.placeBottomSheet,
@@ -190,9 +192,7 @@ class MapFragment : Fragment() {
                 if (_binding == null) return@addOnCameraIdleListener
                 prefs.mapViewport = it.projection.visibleRegion.latLngBounds
                 val center = it.projection.visibleRegion.latLngBounds.center
-                viewLifecycleOwner.lifecycleScope.launch {
-                    loadAreas(center.latitude, center.longitude)
-                }
+                mapAreasController.load(center.latitude, center.longitude)
             }
 
             mapSelectionController = MapSelectionController(
@@ -247,9 +247,12 @@ class MapFragment : Fragment() {
                     rebuildCurrentCache()
                 }
 
-                // Areas are cached for the area screen; the map's area chips
-                // stay live and are refreshed from the camera-idle listener.
-                sync().syncAreas()
+                // Area chips are read from the local cache, so a sync that
+                // changed something has to re-run the lookup for the current
+                // map position.
+                if (sync().syncAreas().rowsAffected > 0) {
+                    mapAreasController.reload()
+                }
 
                 binding.sync.setVisibleAnimated(false)
             }
@@ -296,12 +299,20 @@ class MapFragment : Fragment() {
             openArea(area.id)
         }
 
+        // Top-down, so the first item in the adapter (a country before its
+        // communities) is the top chip in the bottom-anchored stack.
         binding.areas.layoutManager = LinearLayoutManager(
             requireContext(),
             LinearLayoutManager.VERTICAL,
-            true,
+            false,
         )
         binding.areas.adapter = areasAdapter
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mapAreasController.areas.collect { areasAdapter.submitList(it) }
+            }
+        }
 
         binding.activityFeed.setOnClickListener {
             val areaIds = areasAdapter.currentList.map { it.urlAlias }
@@ -504,6 +515,7 @@ class MapFragment : Fragment() {
         searchDebounceJob?.cancel()
         searchDebounceJob = null
         searchController.clear()
+        mapAreasController.dispose()
         mapSelectionController?.detach()
         mapSelectionController = null
         mapSetupController = null
@@ -608,17 +620,6 @@ class MapFragment : Fragment() {
     }
 
     private lateinit var areasAdapter: AreasAdapter
-
-    private suspend fun loadAreas(lat: Double, lon: Double) {
-        try {
-            val areas = withContext(Dispatchers.IO) {
-                api().getAreas(lat, lon).filter { it.type == "community" || it.type == "country" }
-            }
-            areasAdapter.submitList(areas)
-        } catch (e: Throwable) {
-            e.rethrowIfCancellation()
-        }
-    }
 
     private fun initInsets(binding: MapFragmentBinding) {
         ViewCompat.setOnApplyWindowInsetsListener(binding.fabContainer) { v, windowInsets ->
