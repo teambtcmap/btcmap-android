@@ -43,6 +43,7 @@ import org.btcmap.area.AreaFragment
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.bundle.BundledAreas
+import org.btcmap.bundle.BundledComments
 import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db
 import org.btcmap.db.table.place.Place
@@ -242,6 +243,10 @@ class MapFragment : Fragment() {
                 if (sync().syncEvents().rowsAffected > 0 && filter == Filter.EVENTS) {
                     rebuildCurrentCache()
                 }
+
+                // Comments are seeded before the sync too, so the first comments
+                // sync is a delta and a place's comments work offline.
+                BundledComments.import(requireContext(), db())
 
                 val syncCommentsRes = sync().syncComments()
                 if (syncCommentsRes.rowsAffected > 0 && (filter == Filter.MERCHANTS || filter == Filter.EXCHANGES)) {

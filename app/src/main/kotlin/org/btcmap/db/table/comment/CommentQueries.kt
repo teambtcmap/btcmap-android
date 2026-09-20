@@ -72,6 +72,20 @@ class CommentQueries(private val conn: SQLiteConnection) {
         }
     }
 
+    /**
+     * Total rows, tombstones included.
+     *
+     * The bundled seed guard uses this: a table that holds only deleted
+     * comments is still already populated, and re-seeding it would resurrect
+     * comments that were deleted after the snapshot was built.
+     */
+    fun selectCount(): Long {
+        conn.prepare("SELECT count(*) FROM $TABLE;").use {
+            it.step()
+            return it.getLong(0)
+        }
+    }
+
     fun deleteById(id: Long) {
         conn.prepare("DELETE FROM $TABLE WHERE $ID = ?1;")
             .use {
