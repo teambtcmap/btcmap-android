@@ -14,9 +14,9 @@ Usage:
   ./devtools app uninstall      Uninstall the app
   ./devtools app deploy-beta    Build and deploy beta APK and update manifest
   ./devtools app deploy-release Build and deploy release APK
-  ./devtools bundle data        Download latest places snapshot
+  ./devtools bundle data        Download latest places and areas snapshots
   ./devtools bundle map-styles  Bundle MapLibre styles as assets (--force re-downloads)
-  ./devtools bundle all         Run both bundlers (--force applies to map-styles)
+  ./devtools bundle all         Run all bundlers (--force applies to map-styles)
 EOF
 }
 
@@ -52,9 +52,9 @@ print_usage_bundle() {
 Usage: ./devtools bundle <command>
 
 Commands:
-  data         Download latest places snapshot (always refreshes)
+  data         Download latest places and areas snapshots (always refreshes)
   map-styles   Bundle MapLibre styles as assets (--force re-downloads)
-  all          Run both bundlers (--force applies to map-styles)
+  all          Run all bundlers (--force applies to map-styles)
 EOF
 }
 
@@ -136,6 +136,7 @@ assert_apk_signed() {
 
 cmd_bundle_data() {
   python3 bundle_places.py "$@"
+  python3 bundle_areas.py "$@"
 }
 
 cmd_bundle_map_styles() {

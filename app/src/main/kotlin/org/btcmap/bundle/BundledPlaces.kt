@@ -2,9 +2,7 @@ package org.btcmap.bundle
 
 import android.content.Context
 import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.google.gson.stream.JsonReader
-import com.google.gson.stream.JsonToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
@@ -238,60 +236,6 @@ internal fun JsonReader.readBundledPlace(): Place {
         osmId = osmId,
     )
 }
-
-/**
- * Reads the current value as a string, mapping `null` to a null result.
- *
- * A missing value is already handled by [when] falling through to `skipValue`,
- * so this only has to special-case an explicit JSON `null`.
- */
-private fun JsonReader.nextStringOrNull(): String? {
-    if (peek() == JsonToken.NULL) {
-        skipValue()
-        return null
-    }
-    return nextString()
-}
-
-/** Reads the current value as a long, mapping an explicit `null` to a null result. */
-private fun JsonReader.nextLongOrNull(): Long? {
-    if (peek() == JsonToken.NULL) {
-        skipValue()
-        return null
-    }
-    return nextLong()
-}
-
-/**
- * Reads the current value as a JSON object, mapping `null` or a non-object to
- * null.
- *
- * A non-object is degraded rather than rejected, like the other display-only
- * fields: a bad localized name must not roll back the whole snapshot and leave
- * the map empty.
- */
-private fun JsonReader.nextJsonObjectOrNull(): JsonObject? {
-    if (peek() == JsonToken.NULL) {
-        skipValue()
-        return null
-    }
-    return JsonParser.parseReader(this).takeIf { it.isJsonObject }?.asJsonObject
-}
-
-/**
- * Parses an optional bundled timestamp, returning null when it is unparseable.
- *
- * Only display-only timestamps are optional like this, and a bad value merely
- * affects how the place is drawn. A malformed value must not roll back the
- * whole snapshot and leave the map empty, so it degrades to null exactly like a
- * missing field.
- */
-private fun String.toZonedDateTimeOrNull(): ZonedDateTime? =
-    try {
-        ZonedDateTime.parse(this)
-    } catch (_: DateTimeParseException) {
-        null
-    }
 
 private fun String.toVerifiedAtOrNull(): ZonedDateTime? =
     try {

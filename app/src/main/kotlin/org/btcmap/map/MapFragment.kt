@@ -42,6 +42,7 @@ import org.btcmap.area.ARG_AREA_ID
 import org.btcmap.area.AreaFragment
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
+import org.btcmap.bundle.BundledAreas
 import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db
 import org.btcmap.db.table.place.Place
@@ -247,10 +248,16 @@ class MapFragment : Fragment() {
                     rebuildCurrentCache()
                 }
 
-                // Area chips are read from the local cache, so a sync that
-                // changed something has to re-run the lookup for the current
-                // map position.
-                if (sync().syncAreas().rowsAffected > 0) {
+                // Areas are seeded before the sync so the first areas sync is a
+                // delta like places, and the chips (and their polygons) work
+                // offline immediately.
+                val bundledAreasRes = BundledAreas.import(requireContext(), db())
+
+                // Area chips are read from the local cache, so a seed or a sync
+                // that changed something has to re-run the lookup for the
+                // current map position.
+                val syncAreasRes = sync().syncAreas()
+                if (bundledAreasRes.areasImported > 0 || syncAreasRes.rowsAffected > 0) {
                     mapAreasController.reload()
                 }
 

@@ -67,17 +67,17 @@ The `./devtools` wrapper manages the emulator and app deployment. Default device
 ./devtools app deploy-beta     # Build and rsync beta APK to btcmap-api server
 ./devtools app deploy-release  # Build and rsync release APK to btcmap-api server
 
-./devtools bundle data         # Download latest places snapshot
+./devtools bundle data         # Download latest places and areas snapshots
 ./devtools bundle map-styles   # Bundle MapLibre map styles as assets
-./devtools bundle all          # Run both bundlers
+./devtools bundle all          # Run all bundlers
 ```
 
 When asked to "launch", "run", or "start" the app, use `./devtools app run` (it builds, installs and launches in one step). Assume the emulator is already running; if it is not, start it yourself with `./devtools emulator start` and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy-beta` and `./devtools app deploy-release` build and push APK artifacts to the remote `btcmap-api` host — use only when explicitly asked to publish a build.
 
 ## Bundled Assets
 
-Places and map styles are committed as assets and refreshed manually with
-`./devtools bundle`. This is intentional:
+Places, areas and map styles are committed as assets and refreshed manually
+with `./devtools bundle`. This is intentional:
 
 - Never propose adding CI (GitHub Actions or any other pipeline) to this
   repository, including build, test or lint workflows.
@@ -85,11 +85,14 @@ Places and map styles are committed as assets and refreshed manually with
   staleness checks, or treating an out-of-date snapshot as a defect. Refreshing
   the snapshot is a deliberate manual step; the snapshot is only a first-launch
   offline fallback.
-- The snapshot carries the full field set the app syncs, including each place's
-  real `updated_at`, so a seeded row is a complete record and the first sync
-  only fetches the delta since the snapshot was built. The app is fully usable
-  offline on first launch (or while the server is down), and a place that never
-  changes is never re-downloaded.
+- The places and areas snapshots carry the full field set the app syncs,
+  including each row's real `updated_at` and each area's full `geo_json`
+  polygon, so a seeded row is a complete record and the first sync only fetches
+  the delta since the snapshot was built. The app is fully usable offline on
+  first launch (or while the server is down), and a row that never changes is
+  never re-downloaded. Bundling the polygons with the areas snapshot is what
+  keeps the community and country chips working offline without a separate
+  multi-megabyte geometry download.
 
 ## Code Style Guidelines
 
