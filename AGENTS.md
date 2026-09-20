@@ -67,7 +67,7 @@ The `./devtools` wrapper manages the emulator and app deployment. Default device
 ./devtools app deploy-beta     # Build and rsync beta APK to btcmap-api server
 ./devtools app deploy-release  # Build and rsync release APK to btcmap-api server
 
-./devtools bundle data         # Download latest places, areas and comments snapshots
+./devtools bundle data         # Download latest places, areas, comments and events snapshots
 ./devtools bundle map-styles   # Bundle MapLibre map styles as assets
 ./devtools bundle all          # Run all bundlers
 ```
@@ -76,8 +76,8 @@ When asked to "launch", "run", or "start" the app, use `./devtools app run` (it 
 
 ## Bundled Assets
 
-Places, areas, comments and map styles are committed as assets and refreshed
-manually with `./devtools bundle`. This is intentional:
+Places, areas, comments, events and map styles are committed as assets and
+refreshed manually with `./devtools bundle`. This is intentional:
 
 - Never propose adding CI (GitHub Actions or any other pipeline) to this
   repository, including build, test or lint workflows.
@@ -85,14 +85,16 @@ manually with `./devtools bundle`. This is intentional:
   staleness checks, or treating an out-of-date snapshot as a defect. Refreshing
   the snapshot is a deliberate manual step; the snapshot is only a first-launch
   offline fallback.
-- The places, areas and comments snapshots carry the full field set the app
-  syncs, including each row's real `updated_at` and each area's full `geo_json`
-  polygon, so a seeded row is a complete record and the first sync only fetches
-  the delta since the snapshot was built. The app is fully usable offline on
-  first launch (or while the server is down), and a row that never changes is
-  never re-downloaded. Bundling the polygons with the areas snapshot is what
-  keeps the community and country chips working offline without a separate
-  multi-megabyte geometry download.
+- The places, areas, comments and events snapshots carry the full field set the
+  app syncs, including each row's real `updated_at` and each area's full
+  `geo_json` polygon, so a seeded row is a complete record and the first sync
+  only fetches the delta since the snapshot was built. The app is fully usable
+  offline on first launch (or while the server is down), and a row that never
+  changes is never re-downloaded. Bundling the polygons with the areas snapshot
+  is what keeps the community and country chips working offline without a
+  separate multi-megabyte geometry download. The events snapshot must send
+  `updated_since`, because the endpoint's no-cursor fallback omits
+  `updated_at` and so cannot seed a delta cursor.
 
 ## Code Style Guidelines
 

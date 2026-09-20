@@ -44,6 +44,7 @@ import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.bundle.BundledAreas
 import org.btcmap.bundle.BundledComments
+import org.btcmap.bundle.BundledEvents
 import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db
 import org.btcmap.db.table.place.Place
@@ -240,7 +241,14 @@ class MapFragment : Fragment() {
                     rebuildCurrentCache()
                 }
 
-                if (sync().syncEvents().rowsAffected > 0 && filter == Filter.EVENTS) {
+                // Events are seeded before the sync too, so the first events
+                // sync is a delta and events are searchable offline.
+                val bundledEventsRes = BundledEvents.import(requireContext(), db())
+
+                val syncEventsRes = sync().syncEvents()
+                if ((bundledEventsRes.eventsImported > 0 || syncEventsRes.rowsAffected > 0) &&
+                    filter == Filter.EVENTS
+                ) {
                     rebuildCurrentCache()
                 }
 

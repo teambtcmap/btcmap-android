@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Seed the local database from a full bundled places snapshot, including every synced field and each place's real update time, so a fresh install is fully usable offline and the first sync only downloads the changes made since the snapshot instead of every place
 - Bundle the areas snapshot too, with the full polygons, so community and country chips work offline on first launch and the first areas sync downloads only what changed instead of every polygon
 - Bundle the place-comments snapshot too, so a place's comments are readable offline and the first comments sync downloads only what changed
+- Bundle the events snapshot too, so events are searchable offline and the first events sync downloads only what changed
 - Download a community's or country's map tiles for offline browsing from the area screen, choosing the maximum zoom against an estimated size
 - Show a spinner on an area chip or search result while its icon loads instead of a blank placeholder
 - Preload an area's header image in the background while its map chip or search result is visible, so opening the area screen shows the image without waiting for the network
