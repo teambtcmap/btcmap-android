@@ -1,10 +1,15 @@
 package org.btcmap.bundle
 
 import android.content.Context
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.btcmap.api.toVerifiedAt
 import org.btcmap.db.Database
 import org.btcmap.db.table.place.Place
 import org.btcmap.util.rethrowIfCancellation
@@ -15,18 +20,24 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
 
 /**
- * Sentinel timestamp for seeded rows.
+ * Seeds the places table from the bundled snapshot produced by the bundler.
  *
- * The bundled snapshot intentionally carries only a minimal field set so the
- * map shows places immediately while the full data is downloaded. Every row
- * returned by the API carries a later `updated_at`, so the first delta sync
- * pulls the whole snapshot again and replaces each seeded row with the full
- * live record, progressively enriching it. The low constant is a deliberate
- * guarantee of that gradual override and eventual consistency, not an
- * accident: a seeded row can never shadow or outrank live data.
+ * The snapshot carries the full field set the app syncs, including each place's
+ * real `updated_at`, so a seeded row is a complete record rather than a
+ * placeholder. The first sync therefore only fetches the changes made since the
+ * snapshot was generated: `syncPlaces` pages from the newest stored
+ * `updated_at`, which the seed already provides, and asks the server for the
+ * delta. The map stays fully usable offline, or while the server is
+ * unreachable and the delta cannot be fetched, because every field a place
+ * screen reads is already present.
+ *
+ * Seeded rows are stored with `bundled = false` for the same reason: the
+ * "more details will appear after full sync" state and the actions it disables
+ * exist only for the partial rows the old minimal snapshot used to seed, and
+ * those no longer exist. An unchanged place is never fetched again, so a flag
+ * that stayed set until a live sync would otherwise leave every place
+ * permanently read-only.
  */
-private val SEEDED_UPDATED_AT = ZonedDateTime.parse("2000-01-01T00:00:00Z")
-
 object BundledPlaces {
     private const val FILE_NAME = "bundled-places.json"
 
@@ -56,12 +67,8 @@ object BundledPlaces {
 
         // Seeding is intentionally a one-shot, fresh-install operation: any
         // place already stored means the snapshot was imported or live data was
-        // synced. It only needs to happen once, because the minimal snapshot is
-        // meant to keep the user busy until sync replaces it: see
-        // SEEDED_UPDATED_AT for why every seeded row is enriched and eventually
-        // overridden by live data. Re-importing a newer asset later is
-        // deliberately avoided so a stale bundle can never overwrite rows that
-        // sync has since refreshed.
+        // synced. Re-importing a newer asset later is deliberately avoided so a
+        // stale bundle can never overwrite rows that sync has since refreshed.
         var placesImported = 0L
         try {
             // The count read is inside the try as well: a database failure must
@@ -135,8 +142,24 @@ internal fun JsonReader.readBundledPlace(): Place {
     var lon: Double? = null
     var icon: String? = null
     var name: String? = null
-    var comments: Long? = null
+    var localizedName: JsonObject? = null
+    var updatedAt: ZonedDateTime? = null
+    var verifiedAt: ZonedDateTime? = null
+    var address: String? = null
+    var openingHours: String? = null
+    var localizedOpeningHours: JsonObject? = null
+    var phone: String? = null
+    var website: HttpUrl? = null
+    var email: String? = null
+    var twitter: HttpUrl? = null
+    var facebook: HttpUrl? = null
+    var instagram: HttpUrl? = null
+    var line: HttpUrl? = null
+    var requiredAppUrl: HttpUrl? = null
     var boostedUntil: ZonedDateTime? = null
+    var comments: Long? = null
+    var telegram: HttpUrl? = null
+    var osmId: String? = null
     beginObject()
     while (hasNext()) {
         when (nextName()) {
@@ -144,28 +167,25 @@ internal fun JsonReader.readBundledPlace(): Place {
             "lat" -> lat = nextDouble()
             "lon" -> lon = nextDouble()
             "icon" -> icon = nextString()
-            "name" -> name = if (peek() == JsonToken.NULL) {
-                skipValue()
-                null
-            } else {
-                nextString()
-            }
-            "comments" -> {
-                if (peek() == JsonToken.NULL) {
-                    skipValue()
-                    comments = null
-                } else {
-                    comments = nextLong()
-                }
-            }
-            "boosted_until" -> {
-                if (peek() == JsonToken.NULL) {
-                    skipValue()
-                    boostedUntil = null
-                } else {
-                    boostedUntil = nextString().toZonedDateTimeOrNull()
-                }
-            }
+            "name" -> name = nextStringOrNull()
+            "localized_name" -> localizedName = nextJsonObjectOrNull()
+            "updated_at" -> updatedAt = nextStringOrNull()?.toZonedDateTimeOrNull()
+            "verified_at" -> verifiedAt = nextStringOrNull()?.toVerifiedAtOrNull()
+            "address" -> address = nextStringOrNull()
+            "opening_hours" -> openingHours = nextStringOrNull()
+            "localized_opening_hours" -> localizedOpeningHours = nextJsonObjectOrNull()
+            "phone" -> phone = nextStringOrNull()
+            "website" -> website = nextStringOrNull()?.toHttpUrlOrNull()
+            "email" -> email = nextStringOrNull()
+            "twitter" -> twitter = nextStringOrNull()?.toHttpUrlOrNull()
+            "facebook" -> facebook = nextStringOrNull()?.toHttpUrlOrNull()
+            "instagram" -> instagram = nextStringOrNull()?.toHttpUrlOrNull()
+            "line" -> line = nextStringOrNull()?.toHttpUrlOrNull()
+            "required_app_url" -> requiredAppUrl = nextStringOrNull()?.toHttpUrlOrNull()
+            "boosted_until" -> boostedUntil = nextStringOrNull()?.toZonedDateTimeOrNull()
+            "comments" -> comments = nextLongOrNull()
+            "telegram" -> telegram = nextStringOrNull()?.toHttpUrlOrNull()
+            "osm_id" -> osmId = nextStringOrNull()
             else -> skipValue()
         }
     }
@@ -179,6 +199,11 @@ internal fun JsonReader.readBundledPlace(): Place {
     val placeLat = requireNotNull(lat) { "bundled place $placeId is missing 'lat'" }
     val placeLon = requireNotNull(lon) { "bundled place $placeId is missing 'lon'" }
     val placeIcon = requireNotNull(icon) { "bundled place $placeId is missing 'icon'" }
+    // `updated_at` drives the delta sync cursor, so a malformed one must fail
+    // the seed rather than silently reset the cursor to an arbitrary value.
+    val placeUpdatedAt = requireNotNull(updatedAt) {
+        "bundled place $placeId is missing a parseable 'updated_at'"
+    }
     // Coordinates are range-checked here as well as by the bundler: the asset is
     // committed to the repository and could be edited directly, and a bogus
     // coordinate would otherwise seed a marker that can never be reached. NaN is
@@ -188,42 +213,89 @@ internal fun JsonReader.readBundledPlace(): Place {
     require(placeIcon.isNotEmpty()) { "bundled place $placeId has an empty 'icon'" }
     return Place(
         id = placeId,
+        bundled = false,
+        updatedAt = placeUpdatedAt,
         lat = placeLat,
         lon = placeLon,
         icon = placeIcon,
         name = name,
-        localizedName = null,
-        updatedAt = SEEDED_UPDATED_AT,
-        requiredAppUrl = null,
+        localizedName = localizedName,
+        verifiedAt = verifiedAt,
+        address = address,
+        openingHours = openingHours,
+        localizedOpeningHours = localizedOpeningHours,
+        phone = phone,
+        website = website,
+        email = email,
+        twitter = twitter,
+        facebook = facebook,
+        instagram = instagram,
+        line = line,
+        requiredAppUrl = requiredAppUrl,
         boostedUntil = boostedUntil,
-        verifiedAt = null,
-        address = null,
-        openingHours = null,
-        localizedOpeningHours = null,
-        website = null,
-        phone = null,
-        email = null,
-        twitter = null,
-        facebook = null,
-        instagram = null,
-        line = null,
-        bundled = true,
         comments = comments,
-        telegram = null,
-        osmId = null,
+        telegram = telegram,
+        osmId = osmId,
     )
+}
+
+/**
+ * Reads the current value as a string, mapping `null` to a null result.
+ *
+ * A missing value is already handled by [when] falling through to `skipValue`,
+ * so this only has to special-case an explicit JSON `null`.
+ */
+private fun JsonReader.nextStringOrNull(): String? {
+    if (peek() == JsonToken.NULL) {
+        skipValue()
+        return null
+    }
+    return nextString()
+}
+
+/** Reads the current value as a long, mapping an explicit `null` to a null result. */
+private fun JsonReader.nextLongOrNull(): Long? {
+    if (peek() == JsonToken.NULL) {
+        skipValue()
+        return null
+    }
+    return nextLong()
+}
+
+/**
+ * Reads the current value as a JSON object, mapping `null` or a non-object to
+ * null.
+ *
+ * A non-object is degraded rather than rejected, like the other display-only
+ * fields: a bad localized name must not roll back the whole snapshot and leave
+ * the map empty.
+ */
+private fun JsonReader.nextJsonObjectOrNull(): JsonObject? {
+    if (peek() == JsonToken.NULL) {
+        skipValue()
+        return null
+    }
+    return JsonParser.parseReader(this).takeIf { it.isJsonObject }?.asJsonObject
 }
 
 /**
  * Parses an optional bundled timestamp, returning null when it is unparseable.
  *
- * Only `boosted_until` is optional like this, and it merely affects how a
- * seeded marker is drawn. A bad value must not roll back the whole snapshot and
- * leave the map empty, so it degrades to null exactly like a missing field.
+ * Only display-only timestamps are optional like this, and a bad value merely
+ * affects how the place is drawn. A malformed value must not roll back the
+ * whole snapshot and leave the map empty, so it degrades to null exactly like a
+ * missing field.
  */
 private fun String.toZonedDateTimeOrNull(): ZonedDateTime? =
     try {
         ZonedDateTime.parse(this)
+    } catch (_: DateTimeParseException) {
+        null
+    }
+
+private fun String.toVerifiedAtOrNull(): ZonedDateTime? =
+    try {
+        toVerifiedAt()
     } catch (_: DateTimeParseException) {
         null
     }

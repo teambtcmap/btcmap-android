@@ -2,12 +2,15 @@
 """Download the latest places snapshot as a bundled Android asset.
 
 Fetches every place from the BTC Map API and writes it to
-``app/src/main/assets/bundled-places.json``. The snapshot is a minimal
-first-launch seed: the map renders places immediately, while the regular sync
-pulls the full records on top. Seeded rows carry a sentinel ``updated_at``, so
-every one of them is enriched and replaced as soon as live data is available.
-The snapshot is not a substitute for the live sync and is deliberately not
-re-imported once the app has any places.
+``app/src/main/assets/bundled-places.json``. The snapshot carries the full field
+set the app syncs, including each place's real ``updated_at``, so a seeded row
+is a complete record rather than a placeholder. The first sync therefore only
+has to fetch the delta since the snapshot was generated, and the map stays fully
+usable offline or while the server is unreachable.
+
+``deleted_at`` is deliberately not requested: asking for it also makes the API
+return soft-deleted tombstones, which the bundle does not need because a place
+that was deleted before the snapshot was built is simply absent from it.
 
 The output is pretty-printed and sorted by id. This keeps the diff of a
 refresh limited to the places that actually changed instead of rewriting the
@@ -20,6 +23,7 @@ Run:
 The latest snapshot is always fetched, replacing any existing asset.
 """
 
+import datetime
 import json
 import re
 import sys
@@ -27,15 +31,61 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-API_URL = (
-    "https://api.btcmap.org/v4/places"
-    "?fields=id,lat,lon,icon,name,comments,boosted_until"
+# The full field set the app syncs, minus ``deleted_at`` (see the module
+# docstring). Keep this in sync with ``placeFields`` in PlaceApi.kt and with
+# ``readBundledPlace`` in BundledPlaces.kt.
+FIELDS = (
+    "lat",
+    "lon",
+    "icon",
+    "name",
+    "localized_name",
+    "updated_at",
+    "required_app_url",
+    "boosted_until",
+    "verified_at",
+    "address",
+    "opening_hours",
+    "localized_opening_hours",
+    "website",
+    "phone",
+    "email",
+    "twitter",
+    "facebook",
+    "instagram",
+    "line",
+    "comments",
+    "telegram",
+    "osm_id",
 )
+
+API_URL = "https://api.btcmap.org/v4/places?fields=" + ",".join(FIELDS)
 PROJECT_ROOT = Path(__file__).resolve().parent
 APP_DIR = PROJECT_ROOT / "app"
 OUTPUT_FILE = APP_DIR / "src" / "main" / "assets" / "bundled-places.json"
 
-REQUIRED_FIELDS = ("id", "lat", "lon", "icon")
+REQUIRED_FIELDS = ("id", "lat", "lon", "icon", "updated_at")
+
+# Fields stored as free text or URLs by the app, all optional.
+OPTIONAL_STRING_FIELDS = (
+    "name",
+    "required_app_url",
+    "boosted_until",
+    "verified_at",
+    "address",
+    "opening_hours",
+    "website",
+    "phone",
+    "email",
+    "twitter",
+    "facebook",
+    "instagram",
+    "line",
+    "telegram",
+    "osm_id",
+)
+
+OPTIONAL_OBJECT_FIELDS = ("localized_name", "localized_opening_hours")
 
 
 def user_agent() -> str:
@@ -61,6 +111,16 @@ def fetch(url: str) -> bytes:
 def _is_number(value: object) -> bool:
     # bool is a subclass of int, but a boolean coordinate or id is a bug.
     return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _is_timestamp(value: object) -> bool:
+    if not isinstance(value, str) or not value:
+        return False
+    try:
+        datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return True
 
 
 def validate(places: list) -> None:
@@ -100,17 +160,30 @@ def validate(places: list) -> None:
         if not isinstance(icon, str) or not icon:
             raise RuntimeError(f"place {place_id} has a non-string or empty 'icon'")
 
-        name = place.get("name")
-        if name is not None and not isinstance(name, str):
-            raise RuntimeError(f"place {place_id} has a non-string 'name'")
+        # The seed's whole point is the delta sync, which pages from the newest
+        # stored ``updated_at``: an unparseable one would corrupt that cursor.
+        if not _is_timestamp(place["updated_at"]):
+            raise RuntimeError(f"place {place_id} has an invalid 'updated_at'")
+
+        for field in OPTIONAL_STRING_FIELDS:
+            value = place.get(field)
+            if value is not None and not isinstance(value, str):
+                raise RuntimeError(f"place {place_id} has a non-string '{field}'")
+
+        for field in OPTIONAL_OBJECT_FIELDS:
+            value = place.get(field)
+            if value is not None and not isinstance(value, dict):
+                raise RuntimeError(f"place {place_id} has a non-object '{field}'")
 
         comments = place.get("comments")
         if comments is not None and (not isinstance(comments, int) or isinstance(comments, bool)):
             raise RuntimeError(f"place {place_id} has a non-integer 'comments'")
 
-        boosted_until = place.get("boosted_until")
-        if boosted_until is not None and not isinstance(boosted_until, str):
-            raise RuntimeError(f"place {place_id} has a non-string 'boosted_until'")
+        # URL fields are only type-checked, not required to be absolute: the
+        # API does return values like "www.example.com" or even "yes", and the
+        # app already maps those to null with HttpUrl.toHttpUrlOrNull(). The
+        # importer has to tolerate them, so the bundler must not reject the
+        # whole snapshot over data the app would silently drop anyway.
 
 
 def main() -> int:

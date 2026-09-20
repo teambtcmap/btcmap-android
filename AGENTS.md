@@ -85,10 +85,11 @@ Places and map styles are committed as assets and refreshed manually with
   staleness checks, or treating an out-of-date snapshot as a defect. Refreshing
   the snapshot is a deliberate manual step; the snapshot is only a first-launch
   offline fallback.
-- Seeded places carry a sentinel `updated_at` of 2000-01-01 so the first sync
-  enriches and replaces every seeded row with the full live record. Showing the
-  minimal snapshot immediately keeps the user occupied while the full data
-  downloads; eventual consistency with live data is by design.
+- The snapshot carries the full field set the app syncs, including each place's
+  real `updated_at`, so a seeded row is a complete record and the first sync
+  only fetches the delta since the snapshot was built. The app is fully usable
+  offline on first launch (or while the server is down), and a place that never
+  changes is never re-downloaded.
 
 ## Code Style Guidelines
 
@@ -121,6 +122,11 @@ Places and map styles are committed as assets and refreshed manually with
   timing-dependent render tests: a native crash or a render-timeout assertion is
   an environment issue, not a code regression. Confirm by re-running the test,
   and do not try to fix these flaky tests unless explicitly asked.
+
+## Commits
+- Never create a commit unless the user explicitly asks for one. Implement the
+  change and leave it in the working tree for review; the changelog and version
+  code rules below apply only once a commit is actually requested.
 
 ## Changelog
 - Update `CHANGELOG.md` before committing, adding entries under the `## [Unreleased]` section

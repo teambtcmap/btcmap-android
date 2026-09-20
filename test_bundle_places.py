@@ -12,7 +12,13 @@ import bundle_places
 
 
 def place(**overrides):
-    base = {"id": 1, "lat": 1.5, "lon": 2.5, "icon": "store"}
+    base = {
+        "id": 1,
+        "lat": 1.5,
+        "lon": 2.5,
+        "icon": "store",
+        "updated_at": "2026-01-01T00:00:00Z",
+    }
     base.update(overrides)
     return base
 
@@ -24,6 +30,31 @@ class ValidateTest(unittest.TestCase):
             place(id=2, lat=-90, lon=180, name=None, comments=3, boosted_until=None),
             place(id=3, name="Cafe", comments=0, boosted_until="2026-02-01T00:00:00Z"),
             place(id=4, lat=90, lon=-180),
+        ])
+
+    def test_accepts_full_field_set(self):
+        bundle_places.validate([
+            place(
+                name="Cafe",
+                localized_name={"en": "Cafe", "de": "Café"},
+                updated_at="2026-01-01T00:00:00Z",
+                required_app_url="https://example.com",
+                boosted_until="2026-02-01T00:00:00Z",
+                verified_at="2026-01-01",
+                address="1 Main St",
+                opening_hours="Mo-Fr 08:00-18:00",
+                localized_opening_hours={"en": "Mo-Fr 08:00-18:00"},
+                website="https://example.com",
+                phone="+1234567890",
+                email="a@example.com",
+                twitter="https://x.com/example",
+                facebook="https://facebook.com/example",
+                instagram="https://instagram.com/example",
+                line="https://line.me/example",
+                comments=2,
+                telegram="https://t.me/example",
+                osm_id="node:1",
+            ),
         ])
 
     def test_rejects_non_list(self):
@@ -97,6 +128,36 @@ class ValidateTest(unittest.TestCase):
     def test_rejects_non_string_boosted_until(self):
         with self.assertRaises(RuntimeError):
             bundle_places.validate([place(boosted_until=5)])
+
+    def test_rejects_invalid_updated_at(self):
+        for value in (None, "", "not-a-date", 5):
+            with self.subTest(updated_at=value):
+                with self.assertRaises(RuntimeError):
+                    bundle_places.validate([place(updated_at=value)])
+
+    def test_rejects_non_string_optional_scalar_field(self):
+        for field in bundle_places.OPTIONAL_STRING_FIELDS:
+            with self.subTest(field=field):
+                with self.assertRaises(RuntimeError):
+                    bundle_places.validate([place(**{field: 5})])
+
+    def test_rejects_non_object_localized_field(self):
+        for field in bundle_places.OPTIONAL_OBJECT_FIELDS:
+            with self.subTest(field=field):
+                with self.assertRaises(RuntimeError):
+                    bundle_places.validate([place(**{field: "en"})])
+
+    def test_accepts_relative_or_malformed_urls(self):
+        # The app degrades these to null with HttpUrl.toHttpUrlOrNull(), so the
+        # bundler must accept the values the live API actually returns.
+        bundle_places.validate([
+            place(website="www.example.com", required_app_url="yes", telegram="https:///example"),
+        ])
+
+    def test_accepts_null_optional_fields(self):
+        bundle_places.validate([
+            place(**{field: None for field in bundle_places.OPTIONAL_STRING_FIELDS}),
+        ])
 
 
 if __name__ == "__main__":

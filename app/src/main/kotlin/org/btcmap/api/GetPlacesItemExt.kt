@@ -38,7 +38,7 @@ fun GetPlacesItem.toPlace(): FullProjection {
     )
 }
 
-private fun String.toVerifiedAt(): ZonedDateTime {
+internal fun String.toVerifiedAt(): ZonedDateTime {
     return try {
         LocalDate.parse(this).atStartOfDay(ZoneOffset.UTC)
     } catch (e: DateTimeParseException) {

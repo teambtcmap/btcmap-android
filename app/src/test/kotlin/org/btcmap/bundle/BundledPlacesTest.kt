@@ -1,6 +1,7 @@
 package org.btcmap.bundle
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.google.gson.JsonParser
 import com.google.gson.stream.JsonReader
 import kotlinx.coroutines.test.runTest
 import org.btcmap.db.Database
@@ -49,7 +50,7 @@ class BundledPlacesTest {
         append('[')
         for (id in 1..count) {
             if (id > 1) append(',')
-            append("""{"id":$id,"lat":1.0,"lon":2.0,"icon":"store"}""")
+            append("""{"id":$id,"lat":1.0,"lon":2.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}""")
         }
         append(']')
     }
@@ -67,6 +68,7 @@ class BundledPlacesTest {
               "name": "Cafe",
               "comments": 7,
               "boosted_until": "2026-02-01T00:00:00Z",
+              "updated_at": "2026-03-01T12:00:00Z",
               "unknown": "ignored"
             }
         """.trimIndent()
@@ -80,8 +82,66 @@ class BundledPlacesTest {
         Assert.assertEquals("Cafe", place.name)
         Assert.assertEquals(7L, place.comments)
         Assert.assertEquals(ZonedDateTime.parse("2026-02-01T00:00:00Z"), place.boostedUntil)
-        Assert.assertTrue(place.bundled)
-        Assert.assertEquals(ZonedDateTime.parse("2000-01-01T00:00:00Z"), place.updatedAt)
+        Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), place.updatedAt)
+        // The snapshot carries complete records now, so a seeded place is a
+        // normal place: nothing about it is pending a full sync.
+        Assert.assertFalse(place.bundled)
+    }
+
+    @Test
+    fun readBundledPlace_parsesEverySyncedField() {
+        val json = """
+            {
+              "id": 7,
+              "lat": 1.0,
+              "lon": 2.0,
+              "icon": "store",
+              "name": "Shop",
+              "localized_name": {"en": "Shop", "de": "Laden"},
+              "updated_at": "2026-03-01T12:00:00Z",
+              "verified_at": "2026-01-15",
+              "address": "1 Main St",
+              "opening_hours": "Mo-Fr 08:00-18:00",
+              "localized_opening_hours": {"en": "Mo-Fr 08:00-18:00"},
+              "phone": "+1234567890",
+              "website": "https://example.com",
+              "email": "a@example.com",
+              "twitter": "https://x.com/example",
+              "facebook": "https://facebook.com/example",
+              "instagram": "https://instagram.com/example",
+              "line": "https://line.me/example",
+              "required_app_url": "https://example.com/app",
+              "boosted_until": "2026-02-01T00:00:00Z",
+              "comments": 3,
+              "telegram": "https://t.me/example",
+              "osm_id": "node:1"
+            }
+        """.trimIndent()
+
+        val place = reader(json).readBundledPlace()
+
+        Assert.assertEquals(JsonParser.parseString("""{"en":"Shop","de":"Laden"}"""), place.localizedName)
+        Assert.assertEquals(
+            ZonedDateTime.parse("2026-01-15T00:00:00Z"),
+            place.verifiedAt,
+        )
+        Assert.assertEquals("1 Main St", place.address)
+        Assert.assertEquals("Mo-Fr 08:00-18:00", place.openingHours)
+        Assert.assertEquals(
+            JsonParser.parseString("""{"en":"Mo-Fr 08:00-18:00"}"""),
+            place.localizedOpeningHours,
+        )
+        Assert.assertEquals("+1234567890", place.phone)
+        Assert.assertEquals("https://example.com/", place.website.toString())
+        Assert.assertEquals("a@example.com", place.email)
+        Assert.assertEquals("https://x.com/example", place.twitter.toString())
+        Assert.assertEquals("https://facebook.com/example", place.facebook.toString())
+        Assert.assertEquals("https://instagram.com/example", place.instagram.toString())
+        Assert.assertEquals("https://line.me/example", place.line.toString())
+        Assert.assertEquals("https://example.com/app", place.requiredAppUrl.toString())
+        Assert.assertEquals("https://t.me/example", place.telegram.toString())
+        Assert.assertEquals("node:1", place.osmId)
+        Assert.assertNull(place.deletedAt)
     }
 
     @Test
@@ -93,36 +153,83 @@ class BundledPlacesTest {
               "lon": 0.0,
               "icon": "store",
               "name": null,
+              "localized_name": null,
+              "updated_at": "2026-03-01T12:00:00Z",
+              "verified_at": null,
+              "address": null,
+              "opening_hours": null,
+              "localized_opening_hours": null,
+              "phone": null,
+              "website": null,
+              "email": null,
+              "twitter": null,
+              "facebook": null,
+              "instagram": null,
+              "line": null,
+              "required_app_url": null,
+              "boosted_until": null,
               "comments": null,
-              "boosted_until": null
+              "telegram": null,
+              "osm_id": null
             }
         """.trimIndent()
 
         val place = reader(json).readBundledPlace()
 
         Assert.assertNull(place.name)
+        Assert.assertNull(place.localizedName)
+        Assert.assertNull(place.verifiedAt)
+        Assert.assertNull(place.address)
+        Assert.assertNull(place.website)
         Assert.assertNull(place.comments)
         Assert.assertNull(place.boostedUntil)
     }
 
     @Test
     fun readBundledPlace_acceptsMissingOptionalFields() {
-        val json = """{"id":1,"lat":0.0,"lon":0.0,"icon":"store"}"""
+        val json =
+            """{"id":1,"lat":0.0,"lon":0.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}"""
 
         val place = reader(json).readBundledPlace()
 
         Assert.assertNull(place.name)
         Assert.assertNull(place.comments)
         Assert.assertNull(place.boostedUntil)
+        Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), place.updatedAt)
+    }
+
+    @Test
+    fun readBundledPlace_degradedOptionalValuesBecomeNull() {
+        val json = """
+            {
+              "id": 1,
+              "lat": 0.0,
+              "lon": 0.0,
+              "icon": "store",
+              "updated_at": "2026-03-01T12:00:00Z",
+              "verified_at": "not-a-date",
+              "boosted_until": "not-a-date",
+              "localized_name": "not-an-object",
+              "website": "not a url"
+            }
+        """.trimIndent()
+
+        val place = reader(json).readBundledPlace()
+
+        Assert.assertNull(place.verifiedAt)
+        Assert.assertNull(place.boostedUntil)
+        Assert.assertNull(place.localizedName)
+        Assert.assertNull(place.website)
     }
 
     @Test
     fun readBundledPlace_rejectsMissingRequiredFields() {
         val cases = mapOf(
-            "id" to """{"lat":0.0,"lon":0.0,"icon":"store"}""",
-            "lat" to """{"id":1,"lon":0.0,"icon":"store"}""",
-            "lon" to """{"id":1,"lat":0.0,"icon":"store"}""",
-            "icon" to """{"id":1,"lat":0.0,"lon":0.0}""",
+            "id" to """{"lat":0.0,"lon":0.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}""",
+            "lat" to """{"id":1,"lon":0.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}""",
+            "lon" to """{"id":1,"lat":0.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}""",
+            "icon" to """{"id":1,"lat":0.0,"lon":0.0,"updated_at":"2026-03-01T12:00:00Z"}""",
+            "updated_at" to """{"id":1,"lat":0.0,"lon":0.0,"icon":"store"}""",
         )
 
         cases.forEach { (field, json) ->
@@ -132,6 +239,18 @@ class BundledPlacesTest {
             } catch (e: IllegalArgumentException) {
                 Assert.assertTrue(e.message.orEmpty().contains(field))
             }
+        }
+    }
+
+    @Test
+    fun readBundledPlace_rejectsUnparseableUpdatedAt() {
+        val json = """{"id":1,"lat":0.0,"lon":0.0,"icon":"store","updated_at":"not-a-date"}"""
+
+        try {
+            reader(json).readBundledPlace()
+            Assert.fail("expected an unparseable 'updated_at' to be rejected")
+        } catch (e: IllegalArgumentException) {
+            Assert.assertTrue(e.message.orEmpty().contains("updated_at"))
         }
     }
 
@@ -158,10 +277,10 @@ class BundledPlacesTest {
     @Test
     fun readBundledPlace_rejectsCoordinatesOutOfRange() {
         val cases = listOf(
-            """{"id":1,"lat":90.1,"lon":0.0,"icon":"store"}""",
-            """{"id":1,"lat":-90.1,"lon":0.0,"icon":"store"}""",
-            """{"id":1,"lat":0.0,"lon":180.1,"icon":"store"}""",
-            """{"id":1,"lat":0.0,"lon":-180.1,"icon":"store"}""",
+            """{"id":1,"lat":90.1,"lon":0.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}""",
+            """{"id":1,"lat":-90.1,"lon":0.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}""",
+            """{"id":1,"lat":0.0,"lon":180.1,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}""",
+            """{"id":1,"lat":0.0,"lon":-180.1,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}""",
         )
 
         cases.forEach { json ->
@@ -177,7 +296,7 @@ class BundledPlacesTest {
     @Test
     fun readBundledPlace_rejectsEmptyIcon() {
         try {
-            reader("""{"id":1,"lat":0.0,"lon":0.0,"icon":""}""").readBundledPlace()
+            reader("""{"id":1,"lat":0.0,"lon":0.0,"icon":"","updated_at":"2026-03-01T12:00:00Z"}""").readBundledPlace()
             Assert.fail("expected an empty 'icon' to be rejected")
         } catch (e: IllegalArgumentException) {
             Assert.assertTrue(e.message.orEmpty().contains("icon"))
@@ -186,7 +305,7 @@ class BundledPlacesTest {
 
     @Test
     fun readBundledPlace_treatsUnparseableBoostedUntilAsMissing() {
-        val json = """{"id":1,"lat":0.0,"lon":0.0,"icon":"store","boosted_until":"not-a-date"}"""
+        val json = """{"id":1,"lat":0.0,"lon":0.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z","boosted_until":"not-a-date"}"""
 
         val place = reader(json).readBundledPlace()
 
@@ -201,8 +320,8 @@ class BundledPlacesTest {
         val db = createDatabase()
         val json = """
             [
-              {"id":1,"lat":1.0,"lon":2.0,"icon":"store","name":"One","comments":3,"boosted_until":"2026-02-01T00:00:00Z"},
-              {"id":2,"lat":3.0,"lon":4.0,"icon":"cafe","name":null,"comments":null,"boosted_until":null}
+              {"id":1,"lat":1.0,"lon":2.0,"icon":"store","name":"One","comments":3,"boosted_until":"2026-02-01T00:00:00Z","updated_at":"2026-03-01T12:00:00Z"},
+              {"id":2,"lat":3.0,"lon":4.0,"icon":"cafe","name":null,"comments":null,"boosted_until":null,"updated_at":"2026-04-01T12:00:00Z"}
             ]
         """.trimIndent()
 
@@ -221,15 +340,18 @@ class BundledPlacesTest {
         Assert.assertEquals("One", first.name)
         Assert.assertEquals(3L, first.comments)
         Assert.assertEquals(ZonedDateTime.parse("2026-02-01T00:00:00Z"), first.boostedUntil)
-        Assert.assertTrue(first.bundled)
-        Assert.assertEquals(ZonedDateTime.parse("2000-01-01T00:00:00Z"), first.updatedAt)
+        Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), first.updatedAt)
+        // A seeded row is a complete record now, so it is not flagged as
+        // pending a full sync.
+        Assert.assertFalse(first.bundled)
 
         val second = db.place.selectById(2L)
         Assert.assertNotNull(second)
         Assert.assertNull(second!!.name)
         Assert.assertNull(second.comments)
         Assert.assertNull(second.boostedUntil)
-        Assert.assertTrue(second.bundled)
+        Assert.assertEquals(ZonedDateTime.parse("2026-04-01T12:00:00Z"), second.updatedAt)
+        Assert.assertFalse(second.bundled)
     }
 
     @Test
@@ -317,7 +439,7 @@ class BundledPlacesTest {
     fun importFrom_malformedAssetRollsBackTheWholeSeed() = runTest {
         val db = createDatabase()
         // The first entry is valid, the second is missing its required icon.
-        val json = """[{"id":1,"lat":1.0,"lon":2.0,"icon":"store"},{"id":2,"lat":3.0,"lon":4.0}]"""
+        val json = """[{"id":1,"lat":1.0,"lon":2.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z"},{"id":2,"lat":3.0,"lon":4.0}]"""
 
         val result = BundledPlaces.importFrom(db) { json.byteInputStream() }
 
@@ -353,7 +475,7 @@ class BundledPlacesTest {
     @Test
     fun importFrom_badBoostedUntilDoesNotDiscardTheSeed() = runTest {
         val db = createDatabase()
-        val json = """[{"id":1,"lat":1.0,"lon":2.0,"icon":"store","boosted_until":"not-a-date"}]"""
+        val json = """[{"id":1,"lat":1.0,"lon":2.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z","boosted_until":"not-a-date"}]"""
 
         val result = BundledPlaces.importFrom(db) { json.byteInputStream() }
 
