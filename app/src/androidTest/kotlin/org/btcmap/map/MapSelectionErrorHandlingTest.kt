@@ -15,9 +15,7 @@ import org.btcmap.R
 import org.btcmap.db.Database
 import org.btcmap.map.layer.MERCHANT_MARKER_LAYER_ID
 import org.btcmap.settings.mapViewport
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.btcmap.util.assertNoUncaughtException
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
@@ -29,19 +27,7 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 
 @RunWith(AndroidJUnit4::class)
-class MapSelectionErrorHandlingTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class MapSelectionErrorHandlingTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 

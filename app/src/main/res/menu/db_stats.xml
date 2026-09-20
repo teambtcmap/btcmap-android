@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/sync"
+        android:icon="@drawable/icon_sync"
+        android:title="@string/sync"
+        app:showAsAction="always" />
+
+</menu>

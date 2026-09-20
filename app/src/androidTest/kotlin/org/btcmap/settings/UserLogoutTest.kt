@@ -11,9 +11,7 @@ import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.user.User
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.junit.Assert
 import org.junit.Rule
@@ -21,19 +19,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class UserLogoutTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class UserLogoutTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 

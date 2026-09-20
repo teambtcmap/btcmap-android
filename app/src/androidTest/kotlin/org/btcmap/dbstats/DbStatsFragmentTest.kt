@@ -4,19 +4,22 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
+import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.Database
 import org.btcmap.db.table.place.Place
 import org.btcmap.settings.SettingsFragment
 import org.btcmap.stats.StatsAdapter
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
+import org.btcmap.util.TestSyncController
+import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
 import org.junit.Rule
@@ -25,15 +28,9 @@ import org.junit.runner.RunWith
 import java.time.ZonedDateTime
 
 @RunWith(AndroidJUnit4::class)
-class DbStatsFragmentTest {
+class DbStatsFragmentTest : AppTestCase() {
 
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+    private val app = ApplicationProvider.getApplicationContext<App>()
 
     @Test
     fun showsRowCountsForEachTable() {
@@ -71,7 +68,26 @@ class DbStatsFragmentTest {
                 )
                 val version = sections.getValue("Database").entries.first { it.label == "Version" }
                 Assert.assertEquals(Database.VERSION.toString(), version.value)
+
+                Assert.assertTrue(
+                    "expected a Sync section, sections were ${adapter.currentList.map { it.title }}",
+                    "Sync" in sections,
+                )
+                val syncState = sections.getValue("Sync").entries.first { it.label == "State" }
+                // The app-scoped sync is disabled for tests, so it reports Idle.
+                Assert.assertEquals("Idle", syncState.value)
             }
+        }
+    }
+
+    @Test
+    fun syncButton_startsTheSync() {
+        val controller = app.syncControllerForTesting as TestSyncController
+
+        launchFragment { _, _ ->
+            val before = controller.startedCount
+            onView(withId(R.id.sync)).perform(click())
+            waitUntil { controller.startedCount > before }
         }
     }
 

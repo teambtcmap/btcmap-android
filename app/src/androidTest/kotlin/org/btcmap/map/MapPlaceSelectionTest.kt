@@ -22,9 +22,7 @@ import org.btcmap.db.table.place.Place
 import org.btcmap.map.layer.MERCHANT_MARKER_LAYER_ID
 import org.btcmap.place.PlaceFragment
 import org.btcmap.settings.mapViewport
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
 import org.hamcrest.Matchers.allOf
@@ -37,19 +35,7 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 
 @RunWith(AndroidJUnit4::class)
-class MapPlaceSelectionTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class MapPlaceSelectionTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 

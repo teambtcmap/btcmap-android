@@ -14,6 +14,10 @@ import kotlinx.coroutines.withContext
 import org.btcmap.api.Api
 import org.btcmap.api.apiHttpClient
 import org.btcmap.api.signOut
+import org.btcmap.bundle.BundledAreas
+import org.btcmap.bundle.BundledComments
+import org.btcmap.bundle.BundledEvents
+import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db.Database
 import org.btcmap.db.LegacyDatabases
 import org.btcmap.imagestats.ImageStatsEventListener
@@ -38,6 +42,29 @@ class App : Application(), SingletonImageLoader.Factory {
 
     val sync: Sync
         get() = Sync(api, db)
+
+    /**
+     * The sync manager the screens observe. The app-scoped default seeds the
+     * database from the bundled snapshots, which is the only Android-specific
+     * part of the sync: [SyncManager] itself only sees the seed results.
+     *
+     * Read through a getter so the `*ForTesting` overrides above still apply
+     * whenever the manager is built.
+     */
+    internal val syncController: SyncController
+        get() = syncControllerForTesting ?: defaultSyncManager
+
+    internal var syncControllerForTesting: SyncController? = null
+
+    private val defaultSyncManager: SyncManager by lazy {
+        SyncManager(
+            sync = { sync },
+            seedPlaces = { BundledPlaces.import(this, db).placesImported },
+            seedEvents = { BundledEvents.import(this, db).eventsImported },
+            seedComments = { BundledComments.import(this, db).commentsImported },
+            seedAreas = { BundledAreas.import(this, db).areasImported },
+        )
+    }
 
     val api: Api
         get() = apiForTesting ?: defaultApi
@@ -139,13 +166,14 @@ class App : Application(), SingletonImageLoader.Factory {
     }
 }
 
-fun Fragment.sync(): Sync = (requireContext().applicationContext as App).sync
-
 fun Fragment.api(): Api = (requireContext().applicationContext as App).api
 
 fun Fragment.db(): Database = (requireContext().applicationContext as App).db
 
 fun Fragment.app(): App = requireContext().applicationContext as App
+
+internal fun Fragment.syncController(): SyncController =
+    (requireContext().applicationContext as App).syncController
 
 internal fun Fragment.offlineMaps(): OfflineMaps =
     (requireContext().applicationContext as App).offlineMaps

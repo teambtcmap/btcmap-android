@@ -10,9 +10,7 @@ import org.btcmap.R
 import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.event.Event
 import org.btcmap.settings.mapViewport
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
 import org.junit.Rule
@@ -21,19 +19,7 @@ import org.junit.runner.RunWith
 import java.time.ZonedDateTime
 
 @RunWith(AndroidJUnit4::class)
-class MapAreasCacheTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class MapAreasCacheTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 

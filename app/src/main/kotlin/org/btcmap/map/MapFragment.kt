@@ -34,6 +34,8 @@ import kotlinx.coroutines.withContext
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
+import org.btcmap.SyncEvent
+import org.btcmap.SyncState
 import org.btcmap.feed.ActivityFeedFragment
 import org.btcmap.api
 import org.btcmap.api.getEvent
@@ -42,10 +44,6 @@ import org.btcmap.area.ARG_AREA_ID
 import org.btcmap.area.AreaFragment
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
-import org.btcmap.bundle.BundledAreas
-import org.btcmap.bundle.BundledComments
-import org.btcmap.bundle.BundledEvents
-import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db
 import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.MapFragmentBinding
@@ -70,7 +68,7 @@ import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.prefs
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.uri
-import org.btcmap.sync
+import org.btcmap.syncController
 import org.btcmap.util.DeepLink
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
@@ -228,53 +226,29 @@ class MapFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                binding.sync.setVisibleAnimated(true)
+                // The sync is app-scoped: starting it here only kicks it off, and
+                // it keeps running after this screen is closed. Each resume starts
+                // a fresh one unless the previous run is still going.
+                syncController().start()
 
-                val importResult = BundledPlaces.import(requireContext(), db())
-
-                if (importResult.placesImported > 0) {
-                    rebuildCurrentCache()
+                launch {
+                    syncController().state.collect { state ->
+                        binding.sync.setVisibleAnimated(state != SyncState.Idle)
+                    }
                 }
 
-                val syncPlacesRes = sync().syncPlaces()
-                if (syncPlacesRes.rowsAffected > 0) {
-                    rebuildCurrentCache()
+                syncController().events.collect { event ->
+                    when (event) {
+                        SyncEvent.PlacesChanged -> rebuildCurrentCache()
+                        SyncEvent.EventsChanged ->
+                            if (filter == Filter.EVENTS) rebuildCurrentCache()
+                        SyncEvent.CommentsChanged ->
+                            if (filter == Filter.MERCHANTS || filter == Filter.EXCHANGES) {
+                                rebuildCurrentCache()
+                            }
+                        SyncEvent.AreasChanged -> mapAreasController.reload()
+                    }
                 }
-
-                // Events are seeded before the sync too, so the first events
-                // sync is a delta and events are searchable offline.
-                val bundledEventsRes = BundledEvents.import(requireContext(), db())
-
-                val syncEventsRes = sync().syncEvents()
-                if ((bundledEventsRes.eventsImported > 0 || syncEventsRes.rowsAffected > 0) &&
-                    filter == Filter.EVENTS
-                ) {
-                    rebuildCurrentCache()
-                }
-
-                // Comments are seeded before the sync too, so the first comments
-                // sync is a delta and a place's comments work offline.
-                BundledComments.import(requireContext(), db())
-
-                val syncCommentsRes = sync().syncComments()
-                if (syncCommentsRes.rowsAffected > 0 && (filter == Filter.MERCHANTS || filter == Filter.EXCHANGES)) {
-                    rebuildCurrentCache()
-                }
-
-                // Areas are seeded before the sync so the first areas sync is a
-                // delta like places, and the chips (and their polygons) work
-                // offline immediately.
-                val bundledAreasRes = BundledAreas.import(requireContext(), db())
-
-                // Area chips are read from the local cache, so a seed or a sync
-                // that changed something has to re-run the lookup for the
-                // current map position.
-                val syncAreasRes = sync().syncAreas()
-                if (bundledAreasRes.areasImported > 0 || syncAreasRes.rowsAffected > 0) {
-                    mapAreasController.reload()
-                }
-
-                binding.sync.setVisibleAnimated(false)
             }
         }
 

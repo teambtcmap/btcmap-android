@@ -14,9 +14,7 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
@@ -26,19 +24,7 @@ import org.junit.runner.RunWith
 import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(AndroidJUnit4::class)
-class ActivityFeedErrorHandlingTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class ActivityFeedErrorHandlingTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 

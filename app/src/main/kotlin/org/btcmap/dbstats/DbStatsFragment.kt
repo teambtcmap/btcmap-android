@@ -6,17 +6,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
+import org.btcmap.SyncState
 import org.btcmap.databinding.DbStatsFragmentBinding
 import org.btcmap.db
 import org.btcmap.stats.StatsAdapter
 import org.btcmap.stats.StatsEntry
 import org.btcmap.stats.StatsSection
+import org.btcmap.syncController
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
 import java.text.NumberFormat
@@ -40,12 +46,29 @@ class DbStatsFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
+        val sync = syncController()
+        binding.topAppBar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.sync -> {
+                    // Kicks off the app-scoped full sync; the card above follows
+                    // it and the item stays disabled until it finishes.
+                    sync.start()
+                    true
+                }
+                else -> false
+            }
+        }
+
         binding.statsList.layoutManager = LinearLayoutManager(requireContext())
         val adapter = StatsAdapter()
         binding.statsList.adapter = adapter
 
         val database = db()
         val reader = DbStatsReader(database.conn)
+        // The database stats are read once, but the sync card has to follow the
+        // controller, so the two are combined for the adapter.
+        val baseSections = MutableStateFlow<List<StatsSection>>(emptyList())
+
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val file = withContext(Dispatchers.IO) {
@@ -57,10 +80,30 @@ class DbStatsFragment : Fragment() {
                 val tables = withContext(Dispatchers.IO) {
                     reader.readTables()
                 }
-                adapter.submitList(buildSections(file, version, tables))
+                baseSections.value = buildSections(file, version, tables)
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                combine(baseSections, sync.state) { base, state ->
+                    buildList {
+                        add(syncSection(state))
+                        addAll(base)
+                    }
+                }.collect { adapter.submitList(it) }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                sync.state.collect { state ->
+                    binding.topAppBar.menu.findItem(R.id.sync)?.isEnabled =
+                        state == SyncState.Idle
+                }
             }
         }
     }
@@ -110,6 +153,30 @@ class DbStatsFragment : Fragment() {
 
         return sections
     }
+
+    private fun syncSection(state: SyncState): StatsSection = StatsSection(
+        title = getString(R.string.db_stats_sync),
+        icon = "sync",
+        entries = listOf(
+            StatsEntry(
+                getString(R.string.db_stats_sync_state),
+                getString(state.labelRes),
+            ),
+        ),
+    )
+
+    private val SyncState.labelRes: Int
+        get() = when (this) {
+            SyncState.Idle -> R.string.db_stats_sync_state_idle
+            SyncState.UnbundlingPlaces -> R.string.db_stats_sync_state_unbundling_places
+            SyncState.SyncingPlaces -> R.string.db_stats_sync_state_syncing_places
+            SyncState.UnbundlingEvents -> R.string.db_stats_sync_state_unbundling_events
+            SyncState.SyncingEvents -> R.string.db_stats_sync_state_syncing_events
+            SyncState.UnbundlingComments -> R.string.db_stats_sync_state_unbundling_comments
+            SyncState.SyncingComments -> R.string.db_stats_sync_state_syncing_comments
+            SyncState.UnbundlingAreas -> R.string.db_stats_sync_state_unbundling_areas
+            SyncState.SyncingAreas -> R.string.db_stats_sync_state_syncing_areas
+        }
 
     private fun tableEntries(table: TableStats): List<StatsEntry> {
         val formatter = NumberFormat.getIntegerInstance()

@@ -11,8 +11,7 @@ import org.btcmap.api.getUser
 import org.btcmap.db.table.user.User
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authToken
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.junit.After
 import org.junit.Assert
@@ -26,15 +25,7 @@ import org.junit.runner.RunWith
  * the `onUnauthorized` handler that clears the stored token and cached user.
  */
 @RunWith(AndroidJUnit4::class)
-class SessionExpiryTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class SessionExpiryTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 
@@ -45,6 +36,10 @@ class SessionExpiryTest {
     @Before
     fun startServer() {
         server.start()
+        // This test exercises the real app API, whose onUnauthorized handler
+        // clears the session. Drop the mock API installed by AppTestCase so
+        // app.api falls back to the default API, which reads prefs.apiUrl.
+        app.apiForTesting = null
     }
 
     @After

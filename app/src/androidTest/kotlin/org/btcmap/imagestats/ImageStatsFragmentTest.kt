@@ -13,7 +13,7 @@ import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.settings.SettingsFragment
 import org.btcmap.stats.StatsAdapter
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
 import org.junit.Before
@@ -22,11 +22,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class ImageStatsFragmentTest {
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class ImageStatsFragmentTest : AppTestCase() {
 
     @Before
     fun setUp() {

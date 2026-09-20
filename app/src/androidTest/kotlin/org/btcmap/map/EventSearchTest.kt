@@ -19,9 +19,7 @@ import org.btcmap.db.table.place.Place
 import org.btcmap.event.EventFragment
 import org.btcmap.search.SearchAdapter
 import org.btcmap.search.SearchAdapterItem
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
@@ -32,19 +30,7 @@ import org.maplibre.android.geometry.LatLng
 import java.time.ZonedDateTime
 
 @RunWith(AndroidJUnit4::class)
-class EventSearchTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class EventSearchTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 

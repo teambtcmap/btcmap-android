@@ -24,9 +24,7 @@ import com.google.android.material.textfield.TextInputLayout
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 import org.junit.Rule
@@ -39,19 +37,7 @@ import org.junit.runner.RunWith
  * made), which makes this a pure UI test.
  */
 @RunWith(AndroidJUnit4::class)
-class AuthDialogValidationTest {
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class AuthDialogValidationTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
     private val context: Context = ApplicationProvider.getApplicationContext()

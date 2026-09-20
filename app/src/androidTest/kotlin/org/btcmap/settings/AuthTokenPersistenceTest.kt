@@ -1,23 +1,14 @@
 package org.btcmap.settings
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.btcmap.util.AppTestCase
 
 @RunWith(AndroidJUnit4::class)
-class AuthTokenPersistenceTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class AuthTokenPersistenceTest : AppTestCase() {
 
     private val prefs get() = preferencesRule.prefs
 

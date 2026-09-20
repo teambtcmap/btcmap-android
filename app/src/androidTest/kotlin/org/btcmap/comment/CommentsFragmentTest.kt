@@ -23,8 +23,7 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.db.table.comment.Comment
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
+import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
 import org.hamcrest.Matchers.not
@@ -37,15 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(AndroidJUnit4::class)
-class CommentsFragmentTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
+class CommentsFragmentTest : AppTestCase() {
 
     private val placeId = 1L
 

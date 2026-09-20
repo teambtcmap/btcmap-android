@@ -23,7 +23,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.btcmap.R
 import org.btcmap.databinding.CommentsFragmentBinding
 import org.btcmap.db
-import org.btcmap.sync
+import org.btcmap.syncController
 
 class CommentsFragment : Fragment() {
 
@@ -213,7 +213,7 @@ class CommentsFragment : Fragment() {
 
     /** Returns whether the sync completed, as opposed to failing. */
     private suspend fun syncComments(): Boolean {
-        return !sync().syncComments().failed
+        return !syncController().syncComments().failed
     }
 
     /**
@@ -260,7 +260,7 @@ class CommentsFragment : Fragment() {
             var delayMs = POST_PAYMENT_SYNC_INITIAL_DELAY_MS
 
             while (true) {
-                lastSyncSucceeded = !sync().syncComments().failed
+                lastSyncSucceeded = !syncController().syncComments().failed
 
                 if (renderComments(adapter).any { it.id !in baseline }) {
                     return@withTimeoutOrNull

@@ -8,9 +8,7 @@ import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.settings.SettingsFragment
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
 import org.btcmap.view.IconButton
 import org.junit.Assert
@@ -20,19 +18,7 @@ import org.junit.runner.RunWith
 import org.maplibre.android.maps.MapView
 
 @RunWith(AndroidJUnit4::class)
-class MapFilterTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class MapFilterTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 

@@ -17,9 +17,7 @@ import org.btcmap.comment.AddCommentFragment
 import org.btcmap.comment.CommentsFragment
 import org.btcmap.db.table.comment.Comment
 import org.btcmap.db.table.place.Place
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Rule
 import org.junit.Test
@@ -27,19 +25,7 @@ import org.junit.runner.RunWith
 import java.time.ZonedDateTime
 
 @RunWith(AndroidJUnit4::class)
-class PlaceCommentsTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class PlaceCommentsTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 

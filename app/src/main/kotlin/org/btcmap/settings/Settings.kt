@@ -284,11 +284,17 @@ class Settings(
     /** Drops the cached values and stored settings, reloading them on next use. */
     internal fun clearForTesting() {
         ensureLoaded()
-        dbProvider().preference.deleteAll()
-        synchronized(lock) {
-            cache.clear()
-            sessionToken = null
+        try {
+            dbProvider().preference.deleteAll()
+        } finally {
+            // The in-memory state is dropped even when the database cannot be
+            // reached, so a test that deliberately breaks the database still
+            // starts its next case from a clean cache.
+            synchronized(lock) {
+                cache.clear()
+                sessionToken = null
+            }
+            boundDb = null
         }
-        boundDb = null
     }
 }

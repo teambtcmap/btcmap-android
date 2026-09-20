@@ -20,13 +20,24 @@ Bundled assets (places snapshot, map styles) are managed outside Gradle via the
 `./devtools bundle` commands, see below.
 
 ### Running Tests
+
+Unit tests are the default. Run only the tests for the code you touched rather
+than the whole suite, and always run a test you newly added to confirm it passes:
+
 ```bash
+# Run a specific unit test class
+./gradlew testDebugUnitTest --tests 'org.btcmap.SyncManagerTest'
+
 # Run all unit tests
 ./gradlew testDebugUnitTest
+```
 
-# Run all instrumented tests
-./gradlew connectedDebugAndroidTest
+Instrumented tests are **opt-in**: do not run `connectedDebugAndroidTest` on
+your own to verify a change, and never run the whole instrumented suite unless
+the user explicitly asks for it. When asked, target the single class or method
+under discussion:
 
+```bash
 # Run a single instrumented test class
 ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=org.btcmap.ExampleInstrumentedTest
 
@@ -34,17 +45,16 @@ Bundled assets (places snapshot, map styles) are managed outside Gradle via the
 ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=org.btcmap.ExampleInstrumentedTest#useAppContext
 ```
 
-Instrumented tests run against `emulator-5554`. Treat the emulator as always
-available: if `adb devices` does not list it, start it yourself with
-`./devtools emulator start` (do not ask the user) and wait for boot to finish
-(`adb -s emulator-5554 shell getprop sys.boot_completed` returns `1`) before
-running the tests.
+Instrumented tests run against `emulator-5554`. Only when the user asks to run
+them: treat the emulator as always available, and if `adb devices` does not list
+it, start it yourself with `./devtools emulator start` (do not ask the user) and
+wait for boot to finish (`adb -s emulator-5554 shell getprop sys.boot_completed`
+returns `1`) before running the tests.
 
 `-Pandroid.testInstrumentationRunnerArguments.class` does not reliably run a
 comma-separated list: only the first class is executed. To target several
 classes, run one `connectedDebugAndroidTest` invocation per class (Gradle reuses
-the already-installed APKs, so each run is quick), or run the whole suite with a
-plain `./gradlew connectedDebugAndroidTest`.
+the already-installed APKs, so each run is quick).
 
 ### Linting
 ```bash
@@ -116,17 +126,15 @@ refreshed manually with `./devtools bundle`. This is intentional:
 - **Color Picker**: Colorpicker library
 
 ## Testing
-- Run both unit tests (app/src/test) and the instrumented tests relevant to the
-  change before reporting any task as done; do not treat instrumented tests as
-  optional or lower priority
-- Assume `emulator-5554` is running. If it is not, start it with
-  `./devtools emulator start` and wait for boot before running the tests
-- Some instrumented tests are flaky on the emulator and fail independently of
-  the change under test. Ignore failures from MapLibre-based map
-  rendering/interaction tests (e.g. `MapPlaceSelectionTest`) and other
-  timing-dependent render tests: a native crash or a render-timeout assertion is
-  an environment issue, not a code regression. Confirm by re-running the test,
-  and do not try to fix these flaky tests unless explicitly asked.
+- Unit tests (app/src/test) are the default. Run the tests for the code you
+  changed, and run any test you newly added; do not run the whole unit suite
+  unless asked
+- Do not run instrumented tests (`connectedDebugAndroidTest`) unless the user
+  explicitly asks for them. Never run the full instrumented suite to verify a
+  change on your own
+- When instrumented tests are run and a MapLibre-based or timing-dependent test
+  fails (e.g. `MapPlaceSelectionTest`), treat it as an environment issue, not a
+  code regression, and do not try to fix it unless explicitly asked
 
 ## Commits
 - Never create a commit unless the user explicitly asks for one. Implement the

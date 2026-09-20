@@ -20,9 +20,7 @@ import org.btcmap.R
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.btcmap.util.assertNoUncaughtException
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
@@ -31,19 +29,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class UserProfileErrorHandlingTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class UserProfileErrorHandlingTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 

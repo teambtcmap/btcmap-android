@@ -13,9 +13,7 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.btcmap.util.assertNoUncaughtException
 import org.btcmap.util.waitUntil
 import org.junit.Rule
@@ -24,19 +22,7 @@ import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4::class)
-class ActivityFeedCancellationTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+class ActivityFeedCancellationTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 

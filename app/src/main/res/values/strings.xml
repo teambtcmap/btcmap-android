@@ -130,6 +130,7 @@
     <string name="account_created_sign_in_failed">Your account was created, but sign-in failed. Please sign in.</string>
     <string name="click_to_see_your_profile">Click to see your profile</string>
     <string name="delete">Delete</string>
+    <string name="sync" translatable="false">Sync</string>
     <string name="show_debug_info">Show debug info</string>
     <string name="database_stats" translatable="false">Database</string>
     <string name="database_stats_secondary" translatable="false">Database metadata and table management</string>
@@ -142,6 +143,17 @@
     <string name="db_stats_deleted_rows" translatable="false">Deleted</string>
     <string name="db_stats_future_rows" translatable="false">Future</string>
     <string name="db_stats_max_updated_at" translatable="false">Max updated at</string>
+    <string name="db_stats_sync" translatable="false">Sync</string>
+    <string name="db_stats_sync_state" translatable="false">State</string>
+    <string name="db_stats_sync_state_idle" translatable="false">Idle</string>
+    <string name="db_stats_sync_state_unbundling_places" translatable="false">Importing bundled places</string>
+    <string name="db_stats_sync_state_syncing_places" translatable="false">Syncing places</string>
+    <string name="db_stats_sync_state_unbundling_events" translatable="false">Importing bundled events</string>
+    <string name="db_stats_sync_state_syncing_events" translatable="false">Syncing events</string>
+    <string name="db_stats_sync_state_unbundling_comments" translatable="false">Importing bundled comments</string>
+    <string name="db_stats_sync_state_syncing_comments" translatable="false">Syncing comments</string>
+    <string name="db_stats_sync_state_unbundling_areas" translatable="false">Importing bundled areas</string>
+    <string name="db_stats_sync_state_syncing_areas" translatable="false">Syncing areas</string>
     <string name="image_stats" translatable="false">Image cache</string>
     <string name="image_stats_secondary" translatable="false">Memory and disk caches metadata plus load stats</string>
     <string name="image_stats_memory_cache" translatable="false">Memory cache</string>

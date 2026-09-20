@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.NoMatchingRootException
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isDialog
@@ -113,7 +112,7 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
             listOf(event(id = 1, name = "Meetup", startsAt = "2999-01-01T10:00:00Z")),
         )
 
-        withArea { _, area ->
+        withArea { scenario, area ->
             waitUntilOnMain {
                 !area.requireView().findViewById<View>(R.id.loading).isVisible
             }
@@ -127,15 +126,15 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
                 area.requireView().findViewById<View>(R.id.content).isVisible,
             )
             // The issues failure must not interrupt the cached screen with an
-            // error dialog: there is no dialog root to match.
-            val dialogShown = try {
-                onView(withText(android.R.string.ok)).inRoot(isDialog())
-                    .check(matches(isDisplayed()))
-                true
-            } catch (e: NoMatchingRootException) {
-                false
+            // error dialog. Espresso's root picker always waits its hard-coded
+            // 60s before reporting a missing root, so assert on the window
+            // focus directly: a shown dialog takes the focus from the activity.
+            scenario.onActivity { activity ->
+                Assert.assertTrue(
+                    "issues failure must not show an error dialog",
+                    activity.window.decorView.hasWindowFocus(),
+                )
             }
-            Assert.assertFalse("issues failure must not show an error dialog", dialogShown)
         }
     }
 }

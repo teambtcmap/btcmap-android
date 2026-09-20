@@ -14,9 +14,7 @@ import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.boost.BoostFragment
 import org.btcmap.comment.AddCommentFragment
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.junit.Rule
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -113,19 +111,7 @@ internal fun commentDispatcher(
     invoiceStatuses = invoiceStatuses,
 )
 
-abstract class PaymentScreenTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+abstract class PaymentScreenTest : AppTestCase() {
 
     protected val app = ApplicationProvider.getApplicationContext<App>()
 

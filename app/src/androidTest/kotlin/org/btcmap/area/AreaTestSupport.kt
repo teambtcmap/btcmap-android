@@ -14,9 +14,7 @@ import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.event.Event
-import org.btcmap.util.ApiRule
-import org.btcmap.util.DatabaseRule
-import org.btcmap.util.PreferencesRule
+import org.btcmap.util.AppTestCase
 import org.junit.Rule
 import java.time.ZonedDateTime
 
@@ -26,19 +24,7 @@ internal const val OFFLINE_STYLE_URI = "asset://map-styles/test/style.json"
 
 internal const val EMPTY_ISSUES_JSON = """{"total_issues":0,"requested_issues":[]}"""
 
-abstract class AreaScreenTest {
-
-    @JvmField
-    @Rule
-    val databaseRule = DatabaseRule()
-
-    @JvmField
-    @Rule
-    val apiRule = ApiRule()
-
-    @JvmField
-    @Rule
-    val preferencesRule = PreferencesRule()
+abstract class AreaScreenTest : AppTestCase() {
 
     protected val app = ApplicationProvider.getApplicationContext<App>()
 
