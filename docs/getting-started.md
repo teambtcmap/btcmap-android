@@ -5,19 +5,59 @@ accepts bitcoin.
 
 ## Install the app
 
-BTC Map runs on **Android 10 and newer**. Pick whichever source you prefer:
+BTC Map runs on **Android 10 and newer**. Every official download is listed on
+[btcmap.org/apps](https://btcmap.org/apps); pick whichever source you prefer:
 
 - **F-Droid** — install from the
-  [BTC Map page on F-Droid](https://f-droid.org/packages/org.btcmap/). Updates
-  are managed by the store.
-- **GitHub releases** — download an APK from the
-  [releases page](https://github.com/bubelov/btcmap-android/releases) and open
-  it. You may need to allow installing apps from your browser or file manager.
-- **Direct APK** — if you installed this way, the app can tell you when a newer
-  build is available and offer a **Get APK** button.
+  [BTC Map page on F-Droid](https://f-droid.org/packages/org.btcmap/). The store
+  manages updates for you.
+- **Zapstore** — install from
+  [zapstore.dev/apps/org.btcmap](https://zapstore.dev/apps/org.btcmap).
+- **Direct APK** — download the APK and open it:
+  - [Latest release](https://static.btcmap.org/android/apk/latest.apk) —
+    the stable build, also linked as **APK** on
+    [btcmap.org/apps](https://btcmap.org/apps).
+  - [Latest beta](https://static.btcmap.org/android/apk/beta.apk) — the
+    pre-release build, also linked as **APK (Beta)**. See
+    [Trying the beta](#trying-the-beta) below.
+
+  When installing a direct APK you may need to allow your browser or file
+  manager to install unknown apps. If you install this way, the app also
+  notifies you when a newer build is available and offers a **Get APK** button.
+- **GitHub releases** — browse every published build on the
+  [releases page](https://github.com/teambtcmap/btcmap-android/releases).
 
 Release APKs are signed by the BTC Map team. You can check the signature as
 described in the [README](../README.md#verifying-signatures).
+
+## Trying the beta
+
+The stable release is the safe choice for everyday use. If you would like to
+help shape BTC Map, the beta build is for you: it gets new features and fixes
+before the stable release, and we depend on beta testers to catch problems
+early. There is no sign-up, invite or waiting list — just install it.
+
+- **Download it at**
+  [static.btcmap.org/android/apk/beta.apk](https://static.btcmap.org/android/apk/beta.apk),
+  or use the **APK (Beta)** link on
+  [btcmap.org/apps](https://btcmap.org/apps).
+- **It sits next to the stable app; it does not replace it.** The beta is a
+  separate app with its own Android application id (`org.btcmap.beta`, versus
+  `org.btcmap` for the stable release), so both can be installed at the same
+  time. You can keep using the stable app for everyday navigation and open the
+  beta whenever you want to try what is coming next.
+- **It is easy to tell apart.** The beta is named **BTC Map Beta** and uses a
+  distinct app icon.
+- **Each app updates on its own.** Installing, updating or uninstalling one has
+  no effect on the other, and removing the beta leaves your stable app and its
+  data untouched.
+- **What we ask of testers.** Use it like you normally would, and when something
+  looks wrong or you have an idea, tell us. Report bugs or suggestions on
+  [GitHub](https://github.com/teambtcmap/btcmap-android/issues) or say hello in
+  our [Matrix room](https://matrix.to/#/#btcmap:matrix.org).
+
+Both builds are signed with the same release key, so you can verify either one
+as described in the [README](../README.md#verifying-signatures).
 
 ## First launch
 
