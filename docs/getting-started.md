@@ -1,7 +1,8 @@
 # Getting started
 
-This guide takes you from installing BTC Map to finding your first place that
-accepts bitcoin.
+This guide takes you from installing BTC Map to exploring the bitcoin world
+around you — places to spend sats, local communities, and the meetups and
+conferences happening near you.
 
 ## Install the app
 
@@ -13,6 +14,12 @@ BTC Map runs on **Android 10 and newer**. Every official download is listed on
   manages updates for you.
 - **Zapstore** — install from
   [zapstore.dev/apps/org.btcmap](https://zapstore.dev/apps/org.btcmap).
+- **Obtainium** — install and update BTC Map straight from its release page.
+  First install [Obtainium](https://obtainium.imranr.dev/), then add BTC Map's
+  [GitHub releases page](https://github.com/teambtcmap/btcmap-android/releases)
+  as a source; Obtainium checks it and notifies you when a new release is out.
+  To follow the beta instead, add the direct APK URL
+  `https://static.btcmap.org/android/apk/beta.apk` as the source.
 - **Direct APK** — download the APK and open it:
   - [Latest release](https://static.btcmap.org/android/apk/latest.apk) —
     the stable build, also linked as **APK** on
@@ -27,8 +34,12 @@ BTC Map runs on **Android 10 and newer**. Every official download is listed on
 - **GitHub releases** — browse every published build on the
   [releases page](https://github.com/teambtcmap/btcmap-android/releases).
 
-Release APKs are signed by the BTC Map team. You can check the signature as
-described in the [README](../README.md#verifying-signatures).
+The APKs distributed directly by the BTC Map team — the direct downloads and
+GitHub releases — are signed with the team's release key, and you can check the
+signature as described in the
+[README](../README.md#verifying-signatures). Builds installed from F-Droid are
+signed by F-Droid with its own key instead, so that fingerprint does not apply
+to them.
 
 ## Trying the beta
 
@@ -56,8 +67,9 @@ early. There is no sign-up, invite or waiting list — just install it.
   [GitHub](https://github.com/teambtcmap/btcmap-android/issues) or say hello in
   our [Matrix room](https://matrix.to/#/#btcmap:matrix.org).
 
-Both builds are signed with the same release key, so you can verify either one
-as described in the [README](../README.md#verifying-signatures).
+The stable and beta APKs from the direct downloads above share the same release
+key, so you can verify either one as described in the
+[README](../README.md#verifying-signatures).
 
 ## First launch
 
