@@ -22,6 +22,12 @@
 <img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="204">
 </div>
 
+## Documentation
+
+User guides live in [`docs/`](docs/index.md), starting with
+[Getting started](docs/getting-started.md) and standalone pages for each
+feature.
+
 ## Support BTC Map
 
 [btcmap.org/support-us](https://btcmap.org/support-us)
