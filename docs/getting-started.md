@@ -79,8 +79,13 @@ usable immediately, even before the first sync finishes or while you are
 offline.
 
 The app then syncs in the background to bring the data up to date. A small
-progress indicator appears while a sync is running; it is normal for this to
-happen on the first launch or after a while without a connection.
+spinning indicator appears at the bottom left while this is happening; it is
+normal on the first launch or after a while without a connection.
+
+Tap any marker to open that place's details in a card along the bottom of the
+screen.
+
+![BTC Map on first launch: the map is centred on the default location in Willemstad, Curaçao, showing individual place pins and the opened place card for Santa Anna Curacao](images/first-launch.png)
 
 ## Permissions
 
