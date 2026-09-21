@@ -87,6 +87,18 @@ screen.
 
 ![BTC Map on first launch: the map is centred on the default location in Willemstad, Curaçao, showing individual place pins and the opened place card for Santa Anna Curacao](images/first-launch.png)
 
+With the card dismissed, the map shows the controls for browsing what is around
+you:
+
+- The three buttons along the bottom left switch what the map shows:
+  **places**, **events** and **exchanges** (bitcoin ATMs and currency
+  exchanges).
+- The chips on the right list the **areas** covering the current view: the
+  country at the top, then any local communities below it. Tapping one opens
+  that area's page.
+
+![The BTC Map map with no place selected: the places, events and exchanges filter buttons sit at the bottom left, and the Curaçao country chip with a community chip sits on the right](images/map-controls.png)
+
 ## Permissions
 
 - **Network** — required to sync data and load map tiles and images.
