@@ -138,6 +138,9 @@
     <string name="db_stats_version" translatable="false">Version</string>
     <string name="db_stats_file_name" translatable="false">File name</string>
     <string name="db_stats_size" translatable="false">Size</string>
+    <string name="db_stats_table" translatable="false">%1$s table</string>
+    <string name="db_stats_bundle" translatable="false">%1$s bundle</string>
+    <string name="db_stats_location" translatable="false">Location</string>
     <string name="db_stats_rows" translatable="false">Rows</string>
     <string name="db_stats_visible_rows" translatable="false">Visible</string>
     <string name="db_stats_deleted_rows" translatable="false">Deleted</string>

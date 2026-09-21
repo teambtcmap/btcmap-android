@@ -21,7 +21,7 @@ import java.time.ZonedDateTime
  * while the server is unreachable, instead of showing nothing.
  */
 object BundledComments {
-    private const val FILE_NAME = "bundled-comments.json"
+    internal const val FILE_NAME = "bundled-comments.json"
 
     internal const val BATCH_SIZE = 1_000
 

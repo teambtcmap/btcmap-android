@@ -25,7 +25,7 @@ import java.time.ZonedDateTime
  * first.
  */
 object BundledAreas {
-    private const val FILE_NAME = "bundled-areas.json"
+    internal const val FILE_NAME = "bundled-areas.json"
 
     internal const val BATCH_SIZE = 1_000
 

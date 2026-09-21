@@ -24,7 +24,7 @@ import java.time.ZonedDateTime
  * fresh.
  */
 object BundledEvents {
-    private const val FILE_NAME = "bundled-events.json"
+    internal const val FILE_NAME = "bundled-events.json"
 
     internal const val BATCH_SIZE = 1_000
 

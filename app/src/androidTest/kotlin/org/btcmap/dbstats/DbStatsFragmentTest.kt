@@ -44,19 +44,19 @@ class DbStatsFragmentTest : AppTestCase() {
 
             waitUntilOnMain {
                 val adapter = list.adapter as? StatsAdapter ?: return@waitUntilOnMain false
-                adapter.currentList.any { it.title == "place" }
+                adapter.currentList.any { it.title == "place table" }
             }
 
             scenario.onActivity {
                 val adapter = list.adapter as StatsAdapter
                 val sections = adapter.currentList.associateBy { it.title }
 
-                val place = sections.getValue("place").entries.associate { it.label to it.value }
+                val place = sections.getValue("place table").entries.associate { it.label to it.value }
                 Assert.assertEquals("2", place["Rows"])
                 Assert.assertEquals("2", place["Visible"])
                 Assert.assertEquals("0", place["Deleted"])
 
-                val event = sections.getValue("event")
+                val event = sections.getValue("event table")
                 Assert.assertTrue(
                     "event section should report a Future count, was ${event.entries}",
                     event.entries.any { it.label == "Future" },

@@ -17,6 +17,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.SyncState
+import org.btcmap.bundle.BundledAreas
+import org.btcmap.bundle.BundledComments
+import org.btcmap.bundle.BundledEvents
+import org.btcmap.bundle.BundledPlaces
 import org.btcmap.databinding.DbStatsFragmentBinding
 import org.btcmap.db
 import org.btcmap.settings.apiUrl
@@ -67,6 +71,7 @@ class DbStatsFragment : Fragment() {
 
         val database = db()
         val reader = DbStatsReader(database.conn)
+        val context = requireContext()
         // The database stats are read once, but the sync card has to follow the
         // controller, so the two are combined for the adapter.
         val baseSections = MutableStateFlow<List<StatsSection>>(emptyList())
@@ -82,7 +87,15 @@ class DbStatsFragment : Fragment() {
                 val tables = withContext(Dispatchers.IO) {
                     reader.readTables()
                 }
-                baseSections.value = buildSections(file, version, tables)
+                val bundles = withContext(Dispatchers.IO) {
+                    BUNDLES.mapNotNull { (table, fileName) ->
+                        BundleReader.read(
+                            location = "assets/$fileName",
+                            openStream = { context.assets.open(fileName) },
+                        )?.let { table to it }
+                    }.toMap()
+                }
+                baseSections.value = buildSections(file, version, tables, bundles)
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
@@ -119,6 +132,7 @@ class DbStatsFragment : Fragment() {
         file: DatabaseFile?,
         version: Int,
         tables: List<TableStats>,
+        bundles: Map<String, BundleStats>,
     ): List<StatsSection> {
         val sections = mutableListOf<StatsSection>()
 
@@ -143,17 +157,58 @@ class DbStatsFragment : Fragment() {
             )
         )
 
-        tables.forEach { table ->
-            sections.add(
-                StatsSection(
-                    title = table.name,
-                    icon = "table",
-                    entries = tableEntries(table),
+        // Table cards are shown in a fixed, meaningful order rather than
+        // alphabetically. Any table not listed here follows the known ones.
+        tables
+            .sortedBy { table ->
+                TABLE_ORDER.indexOf(table.name).let { if (it == -1) TABLE_ORDER.size else it }
+            }
+            .forEach { table ->
+                sections.add(
+                    StatsSection(
+                        title = getString(R.string.db_stats_table, table.name),
+                        icon = "table",
+                        entries = tableEntries(table),
+                    )
                 )
-            )
-        }
+                // A bundled snapshot seeds its table, so its card sits right
+                // behind it.
+                bundles[table.name]?.let { sections.add(bundleSection(table.name, it)) }
+            }
 
         return sections
+    }
+
+    private fun bundleSection(table: String, bundle: BundleStats): StatsSection {
+        val formatter = NumberFormat.getIntegerInstance()
+        return StatsSection(
+            title = getString(R.string.db_stats_bundle, table),
+            icon = "inventory_2",
+            entries = buildList {
+                add(StatsEntry(getString(R.string.db_stats_location), bundle.location))
+                add(
+                    StatsEntry(
+                        getString(R.string.db_stats_size),
+                        Formatter.formatFileSize(requireContext(), bundle.sizeBytes),
+                    )
+                )
+                add(
+                    StatsEntry(
+                        getString(R.string.db_stats_visible_rows),
+                        formatter.format(bundle.visibleCount),
+                    )
+                )
+                add(
+                    StatsEntry(
+                        getString(R.string.db_stats_deleted_rows),
+                        formatter.format(bundle.deletedCount),
+                    )
+                )
+                bundle.maxUpdatedAt?.let {
+                    add(StatsEntry(getString(R.string.db_stats_max_updated_at), it))
+                }
+            },
+        )
     }
 
     private fun syncSection(state: SyncState): StatsSection = StatsSection(
@@ -201,5 +256,21 @@ class DbStatsFragment : Fragment() {
                 add(StatsEntry(getString(R.string.db_stats_max_updated_at), it))
             }
         }
+    }
+
+    private companion object {
+        /** Display order of the database table cards. */
+        val TABLE_ORDER = listOf("place", "comment", "area", "event", "pref")
+
+        /**
+         * The optional bundled snapshot that seeds each table, keyed by table
+         * name. Tables without a snapshot (like `pref`) simply have no card.
+         */
+        val BUNDLES = mapOf(
+            "place" to BundledPlaces.FILE_NAME,
+            "comment" to BundledComments.FILE_NAME,
+            "area" to BundledAreas.FILE_NAME,
+            "event" to BundledEvents.FILE_NAME,
+        )
     }
 }

@@ -37,7 +37,7 @@ import java.time.format.DateTimeParseException
  * permanently read-only.
  */
 object BundledPlaces {
-    private const val FILE_NAME = "bundled-places.json"
+    internal const val FILE_NAME = "bundled-places.json"
 
     internal const val BATCH_SIZE = 10_000
 
