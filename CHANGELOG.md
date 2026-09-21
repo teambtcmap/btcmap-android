@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show the configured API base URL at the top of the sync card on the database stats screen
 - Seed the local database from a full bundled places snapshot, including every synced field and each place's real update time, so a fresh install is fully usable offline and the first sync only downloads the changes made since the snapshot instead of every place
 - Bundle the areas snapshot too, with the full polygons, so community and country chips work offline on first launch and the first areas sync downloads only what changed instead of every polygon
 - Bundle the place-comments snapshot too, so a place's comments are readable offline and the first comments sync downloads only what changed

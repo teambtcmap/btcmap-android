@@ -19,6 +19,8 @@ import org.btcmap.R
 import org.btcmap.SyncState
 import org.btcmap.databinding.DbStatsFragmentBinding
 import org.btcmap.db
+import org.btcmap.settings.apiUrl
+import org.btcmap.settings.prefs
 import org.btcmap.stats.StatsAdapter
 import org.btcmap.stats.StatsEntry
 import org.btcmap.stats.StatsSection
@@ -158,6 +160,10 @@ class DbStatsFragment : Fragment() {
         title = getString(R.string.db_stats_sync),
         icon = "sync",
         entries = listOf(
+            StatsEntry(
+                getString(R.string.db_stats_sync_source),
+                prefs.apiUrl.toString(),
+            ),
             StatsEntry(
                 getString(R.string.db_stats_sync_state),
                 getString(state.labelRes),

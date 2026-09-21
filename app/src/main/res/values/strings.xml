@@ -144,6 +144,7 @@
     <string name="db_stats_future_rows" translatable="false">Future</string>
     <string name="db_stats_max_updated_at" translatable="false">Max updated at</string>
     <string name="db_stats_sync" translatable="false">Sync</string>
+    <string name="db_stats_sync_source" translatable="false">Source</string>
     <string name="db_stats_sync_state" translatable="false">State</string>
     <string name="db_stats_sync_state_idle" translatable="false">Idle</string>
     <string name="db_stats_sync_state_unbundling_places" translatable="false">Importing bundled places</string>
