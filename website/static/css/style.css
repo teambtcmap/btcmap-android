@@ -1,0 +1,341 @@
+/* BTC Map Android documentation — bare-bones stylesheet, no frameworks. */
+
+:root {
+  --accent: #f7931a;
+  --accent-ink: #ffffff;
+  --bg: #ffffff;
+  --bg-soft: #f7f7f5;
+  --fg: #1c1c1e;
+  --muted: #5f5f6a;
+  --border: #e4e4e0;
+  --code-bg: #f1f0ed;
+  --focus: #1d6ef5;
+  --sidebar-w: 17rem;
+  --content-w: 44rem;
+  --radius: 10px;
+  /* Tall phone screenshots are capped so they do not dominate the page. */
+  --image-max-height: min(70vh, 40rem);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16161a;
+    --bg-soft: #1c1c21;
+    --fg: #ececf1;
+    --muted: #a0a0ac;
+    --border: #2c2c33;
+    --code-bg: #24242b;
+    --focus: #6ea8ff;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ---- shell ------------------------------------------------------------- */
+
+.nav-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.page {
+  display: flex;
+  align-items: flex-start;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  flex: 0 0 var(--sidebar-w);
+  width: var(--sidebar-w);
+  height: 100vh;
+  overflow-y: auto;
+  padding: 1.5rem 1.25rem 3rem;
+  background: var(--bg-soft);
+  border-right: 1px solid var(--border);
+}
+
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--fg);
+}
+
+.brand:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.brand small {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.nav-button {
+  display: none;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-list a {
+  display: block;
+  padding: 0.35rem 0.6rem;
+  border-radius: 7px;
+  font-size: 0.95rem;
+  color: var(--fg);
+}
+
+.nav-list a:hover {
+  background: rgba(127, 127, 127, 0.14);
+  text-decoration: none;
+}
+
+.nav-list a[aria-current="page"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.nav-heading {
+  margin: 1.6rem 0.6rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ---- prose ------------------------------------------------------------- */
+
+.prose {
+  max-width: var(--content-w);
+  margin: 0 auto;
+  padding: 2.75rem 1.5rem 5rem;
+  overflow-wrap: break-word;
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose h1 {
+  margin: 0 0 1rem;
+  font-size: 2rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.prose h2 {
+  margin: 2.4rem 0 0.8rem;
+  font-size: 1.35rem;
+  line-height: 1.3;
+}
+
+.prose h3 {
+  margin: 1.8rem 0 0.6rem;
+  font-size: 1.1rem;
+}
+
+.prose p,
+.prose ul,
+.prose ol,
+.prose table,
+.prose blockquote,
+.prose pre {
+  margin: 0 0 1.1rem;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4rem;
+}
+
+.prose li {
+  margin: 0.25rem 0;
+}
+
+.prose strong {
+  font-weight: 650;
+}
+
+.prose hr {
+  margin: 2.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.prose img {
+  display: block;
+  max-width: 100%;
+  max-height: var(--image-max-height);
+  width: auto;
+  height: auto;
+  margin: 0.5rem auto 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.prose code {
+  padding: 0.12em 0.35em;
+  border-radius: 5px;
+  background: var(--code-bg);
+  font-size: 0.9em;
+}
+
+.prose pre {
+  padding: 1rem;
+  border-radius: var(--radius);
+  background: var(--code-bg);
+  overflow-x: auto;
+}
+
+.prose pre code {
+  padding: 0;
+  background: none;
+}
+
+.prose blockquote {
+  padding-left: 1rem;
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+}
+
+.prose table {
+  display: block;
+  width: 100%;
+  border-collapse: collapse;
+  overflow-x: auto;
+  font-size: 0.95rem;
+}
+
+.prose th,
+.prose td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.prose th {
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.prose a {
+  text-decoration: underline;
+  text-decoration-color: rgba(247, 147, 26, 0.5);
+  text-underline-offset: 2px;
+}
+
+.prose a:hover {
+  text-decoration-color: var(--accent);
+}
+
+/* ---- mobile ------------------------------------------------------------ */
+
+@media (max-width: 52rem) {
+  .page {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sidebar {
+    position: static;
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    padding: 0.9rem 1.25rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-top {
+    margin-bottom: 0;
+  }
+
+  .nav-button {
+    display: inline-block;
+  }
+
+  .sidebar nav {
+    display: none;
+    padding-top: 1rem;
+  }
+
+  .nav-toggle:checked ~ .page .sidebar nav {
+    display: block;
+  }
+
+  .prose {
+    padding: 1.75rem 1.25rem 4rem;
+  }
+}

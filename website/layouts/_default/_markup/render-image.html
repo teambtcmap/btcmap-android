@@ -1,0 +1,13 @@
+{{- /* Documentation images live under docs/images, which is served from the
+       site root, so relative sources are made root-relative. */ -}}
+{{- $dest := .Destination -}}
+{{- $url := $dest -}}
+{{- $absolute := or
+      (hasPrefix $dest "http://")
+      (hasPrefix $dest "https://")
+      (hasPrefix $dest "/")
+      (hasPrefix $dest "data:") -}}
+{{- if not $absolute -}}
+  {{- $url = $dest | relURL -}}
+{{- end -}}
+<img src="{{ $url }}" alt="{{ .Text }}"{{ with .Title }} title="{{ . }}"{{ end }}>

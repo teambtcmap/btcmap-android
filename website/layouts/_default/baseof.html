@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="{{ site.Language.Lang }}">
+<head>
+  {{ partial "head.html" . }}
+</head>
+<body>
+  <input class="nav-toggle" type="checkbox" id="nav-toggle" aria-label="Toggle navigation">
+  <div class="page">
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <a class="brand" href="{{ "/" | relURL }}">
+          BTC Map
+          <small>Android guide</small>
+        </a>
+        <label class="nav-button" for="nav-toggle">Menu</label>
+      </div>
+      {{ partial "nav.html" . }}
+    </aside>
+    <main class="content">
+      {{ block "main" . }}{{ end }}
+    </main>
+  </div>
+</body>
+</html>

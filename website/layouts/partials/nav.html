@@ -1,0 +1,21 @@
+{{- $features := slice -}}
+{{- range site.Params.features -}}
+  {{- with site.GetPage (printf "features/%s" .) -}}
+    {{- $features = $features | append . -}}
+  {{- end -}}
+{{- end -}}
+{{- $current := .RelPermalink -}}
+<nav aria-label="Documentation">
+  <ul class="nav-list">
+    <li><a href="{{ "/" | relURL }}"{{ if .IsHome }} aria-current="page"{{ end }}>Overview</a></li>
+    {{- with site.GetPage "getting-started" }}
+    <li><a href="{{ .RelPermalink }}"{{ if eq $current .RelPermalink }} aria-current="page"{{ end }}>{{ partial "page-title.html" . }}</a></li>
+    {{- end }}
+  </ul>
+  <p class="nav-heading">Feature guides</p>
+  <ul class="nav-list">
+    {{- range $features }}
+    <li><a href="{{ .RelPermalink }}"{{ if eq $current .RelPermalink }} aria-current="page"{{ end }}>{{ partial "page-title.html" . }}</a></li>
+    {{- end }}
+  </ul>
+</nav>

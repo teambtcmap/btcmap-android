@@ -1,0 +1,27 @@
+{{- /* Resolves the documentation's markdown links for the generated site.
+       Internal relative links (features/map.md, ../index.md) become the built
+       page URLs; links that point outside docs/ (../README.md, ../AGENTS.md)
+       become links to the repository. External links pass through. */ -}}
+{{- $dest := .Destination -}}
+{{- $url := $dest -}}
+{{- $external := or
+      (hasPrefix $dest "http://")
+      (hasPrefix $dest "https://")
+      (hasPrefix $dest "mailto:")
+      (hasPrefix $dest "#")
+      (hasPrefix $dest "//") -}}
+{{- if not $external -}}
+  {{- $path := $dest -}}
+  {{- $frag := "" -}}
+  {{- if in $dest "#" -}}
+    {{- $parts := split $dest "#" -}}
+    {{- $path = index $parts 0 -}}
+    {{- $frag = printf "#%s" (index $parts 1) -}}
+  {{- end -}}
+  {{- with .Page.GetPage $path -}}
+    {{- $url = printf "%s%s" .RelPermalink $frag -}}
+  {{- else -}}
+    {{- $url = printf "%s/blob/master/%s%s" site.Params.githubRepo (strings.TrimPrefix "../" $path) $frag -}}
+  {{- end -}}
+{{- end -}}
+<a href="{{ $url }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text }}</a>

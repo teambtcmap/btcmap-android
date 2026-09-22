@@ -27,5 +27,10 @@ emulator.log
 # Python bytecode cache
 __pycache__/
 
+# Hugo documentation site build output
+website/public/
+website/resources/
+website/.hugo_build.lock
+
 # opencode
 .opencode

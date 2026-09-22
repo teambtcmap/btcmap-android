@@ -1,0 +1,11 @@
+{{- /* The docs have no front matter, so the title is the first level-one
+heading of the file, falling back to the humanised file name. */ -}}
+{{- $title := .Title -}}
+{{- with .File -}}
+  {{- $title = .TranslationBaseName | humanize | title -}}
+{{- end -}}
+{{- $first := index (split .RawContent "\n") 0 | strings.TrimSpace -}}
+{{- if hasPrefix $first "# " -}}
+  {{- $title = strings.TrimPrefix "# " $first -}}
+{{- end -}}
+{{- $title -}}

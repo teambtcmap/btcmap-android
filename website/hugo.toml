@@ -1,0 +1,63 @@
+# Hugo configuration for the BTC Map Android user documentation site.
+#
+# The markdown sources live in ../docs and are mounted into this project at
+# build time, so they stay exactly where they are and keep rendering on GitHub.
+# See website/README.md for how to build and preview the site.
+
+# Set this to the URL the site will be served from. It is used for absolute
+# links and assets; `hugo server` overrides it with the local address.
+baseURL = "https://btcmap.org/"
+locale = "en"
+title = "BTC Map for Android"
+
+# The content is documentation only, so the generated tag, category and RSS
+# pages are noise.
+disableKinds = ["taxonomy", "term", "rss"]
+
+[params]
+  # Links in the documentation that point outside docs/ (../README.md,
+  # ../AGENTS.md, ...) are rewritten to this repository.
+  githubRepo = "https://github.com/teambtcmap/btcmap-android"
+
+  # Sidebar order for the guides under docs/features/. Keep in sync with the
+  # listing in docs/index.md.
+  features = [
+    "map",
+    "search",
+    "places",
+    "events",
+    "areas",
+    "offline-maps",
+    "comments",
+    "boosting",
+    "activity-feed",
+    "accounts",
+    "settings",
+  ]
+
+[module]
+  # The guides are mounted from ../docs, one entry per top-level page or
+  # directory, rather than mounting docs/ wholesale: a directory containing
+  # index.md is treated as a leaf bundle and would swallow its siblings. Add a
+  # mount here when a new top-level page appears; new files under
+  # docs/features/ are picked up automatically.
+  [[module.mounts]]
+    source = "../docs/index.md"
+    target = "content/_index.md"
+
+  [[module.mounts]]
+    source = "../docs/getting-started.md"
+    target = "content/getting-started.md"
+
+  [[module.mounts]]
+    source = "../docs/features"
+    target = "content/features"
+
+  # Screenshots are served as static assets, at /images/.
+  [[module.mounts]]
+    source = "static"
+    target = "static"
+
+  [[module.mounts]]
+    source = "../docs/images"
+    target = "static/images"

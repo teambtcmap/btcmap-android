@@ -1,0 +1,11 @@
+{{ define "main" }}
+<article class="prose">
+  <h1>{{ partial "page-title.html" . }}</h1>
+  {{ with .Content }}{{ . }}{{ end }}
+  <ul>
+    {{- range .Pages }}
+    <li><a href="{{ .RelPermalink }}">{{ partial "page-title.html" . }}</a></li>
+    {{- end }}
+  </ul>
+</article>
+{{ end }}
