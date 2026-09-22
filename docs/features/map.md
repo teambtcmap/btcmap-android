@@ -39,7 +39,7 @@ position. Denying permission does not affect any other feature.
 Just above the filter chips, the map shows a **country** chip followed by the
 **community** chips for the area you are looking at. Tap a chip to open that
 area's page, where you will find its description, upcoming events and issues.
-See [Areas and communities](areas.md).
+See [Countries and communities](areas.md).
 
 Area chips come from the local cache, so they appear instantly and work
 offline.

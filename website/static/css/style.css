@@ -90,45 +90,69 @@
   --content-width: 47.5rem;
   /* Tall phone screenshots are capped so they do not dominate the page. */
   --image-max-height: min(70vh, 40rem);
+
+  /* Background/text of the selected navigation item: the page background with
+     the same color as the other navigation labels, so the item reads as an
+     inset "aura" against the drawer. The border is the opposite of the
+     surface — near-black on light, near-white on dark — at 15% opacity. */
+  --nav-active-bg: var(--md-sys-color-surface);
+  --nav-active-fg: var(--md-sys-color-on-surface-variant);
+  --nav-active-border: color-mix(in srgb, var(--md-sys-color-on-surface) 15%, transparent);
+
+  /* Links stay neutral: the body text color, distinguished by the underline. */
+  --link-color: var(--md-sys-color-on-surface);
+
+  /* Section headers use an uppercase overline label, mirroring the
+     dashboard's section titles, so they read clearly as headers. */
+  --nav-heading-color: var(--md-sys-color-on-surface-variant);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --md-sys-color-primary: #feb876;
-    --md-sys-color-on-primary: #4b2800;
-    --md-sys-color-primary-container: #6a3b02;
-    --md-sys-color-on-primary-container: #ffdcbf;
-    --md-sys-color-secondary: #e2c0a4;
-    --md-sys-color-on-secondary: #412c18;
-    --md-sys-color-secondary-container: #59422d;
-    --md-sys-color-on-secondary-container: #ffdcbf;
-    --md-sys-color-tertiary: #c1cc99;
-    --md-sys-color-on-tertiary: #2c340f;
-    --md-sys-color-tertiary-container: #424a23;
-    --md-sys-color-on-tertiary-container: #dde8b3;
-    --md-sys-color-error: #ffb4ab;
+    /* Dark palette aligned with dashboard.btcmap.org (see its css/styles.css):
+       neutral zinc surfaces, Bitcoin-orange accent and the teal brand color. */
+    --md-sys-color-primary: #f7931a;
+    --md-sys-color-on-primary: #1a1a1d;
+    --md-sys-color-primary-container: #4a2e08;
+    --md-sys-color-on-primary-container: #ffddb3;
+    --md-sys-color-secondary: #79d5be;
+    --md-sys-color-on-secondary: #00382c;
+    --md-sys-color-secondary-container: #005142;
+    --md-sys-color-on-secondary-container: #9cf2da;
+    --md-sys-color-tertiary: #7fd3e0;
+    --md-sys-color-on-tertiary: #00363f;
+    --md-sys-color-tertiary-container: #004e5a;
+    --md-sys-color-on-tertiary-container: #a6edfb;
+    --md-sys-color-error: #ff8a8c;
     --md-sys-color-on-error: #690005;
     --md-sys-color-error-container: #93000a;
     --md-sys-color-on-error-container: #ffdad6;
-    --md-sys-color-background: #19120c;
-    --md-sys-color-on-background: #efe0d5;
-    --md-sys-color-surface: #19120c;
-    --md-sys-color-on-surface: #efe0d5;
-    --md-sys-color-surface-variant: #51443a;
-    --md-sys-color-on-surface-variant: #d5c3b6;
-    --md-sys-color-surface-dim: #19120c;
-    --md-sys-color-surface-bright: #403730;
-    --md-sys-color-surface-container-lowest: #130d07;
-    --md-sys-color-surface-container-low: #221a14;
-    --md-sys-color-surface-container: #261e18;
-    --md-sys-color-surface-container-high: #312822;
-    --md-sys-color-surface-container-highest: #3c332c;
-    --md-sys-color-outline: #9e8e81;
-    --md-sys-color-outline-variant: #51443a;
-    --md-sys-color-inverse-surface: #efe0d5;
-    --md-sys-color-inverse-on-surface: #372f28;
+    --md-sys-color-background: #222222;
+    --md-sys-color-on-background: #fafafa;
+    --md-sys-color-surface: #222222;
+    --md-sys-color-on-surface: #fafafa;
+    --md-sys-color-surface-variant: #343437;
+    --md-sys-color-on-surface-variant: #a1a1aa;
+    --md-sys-color-surface-dim: #1a1a1d;
+    --md-sys-color-surface-bright: #343437;
+    --md-sys-color-surface-container-lowest: #1a1a1d;
+    --md-sys-color-surface-container-low: #2a2a2d;
+    --md-sys-color-surface-container: #2e2e31;
+    --md-sys-color-surface-container-high: #343437;
+    --md-sys-color-surface-container-highest: #3c3c40;
+    --md-sys-color-outline: rgba(255, 255, 255, 0.13);
+    --md-sys-color-outline-variant: rgba(255, 255, 255, 0.07);
+    --md-sys-color-inverse-surface: #fafafa;
+    --md-sys-color-inverse-on-surface: #222222;
     --md-sys-color-inverse-primary: #86521a;
-    --md-sys-color-surface-tint: #feb876;
+    --md-sys-color-shadow: #000000;
+    --md-sys-color-scrim: #000000;
+    --md-sys-color-surface-tint: #f7931a;
+
+    /* Selected navigation item: a neutral #222222 aura; the label stays white
+       rather than matching the grey navigation labels. */
+    --nav-active-bg: #222222;
+    --nav-active-fg: var(--md-sys-color-on-surface);
   }
 }
 
@@ -156,7 +180,7 @@ body {
   font-family: "Roboto", "Roboto Flex", system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 1rem;
   line-height: 1.5rem;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
   background: var(--md-sys-color-surface);
   color: var(--md-sys-color-on-surface);
   -webkit-font-smoothing: antialiased;
@@ -164,7 +188,7 @@ body {
 }
 
 a {
-  color: var(--md-sys-color-primary);
+  color: var(--link-color);
 }
 
 ::selection {
@@ -189,7 +213,11 @@ a {
   border-radius: var(--md-sys-shape-corner-full);
   background: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
+  /* M3 label-large */
+  font-size: 0.875rem;
+  line-height: 1.25rem;
   font-weight: 500;
+  letter-spacing: 0.00625rem;
   text-decoration: none;
 }
 
@@ -263,7 +291,7 @@ a {
 .brand-name {
   font-size: 1.375rem;
   line-height: 1.75rem;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0;
 }
 
@@ -272,21 +300,23 @@ a {
   font-size: 0.75rem;
   line-height: 1rem;
   font-weight: 500;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
   color: var(--md-sys-color-on-surface-variant);
 }
 
 /* --- Navigation --------------------------------------------------------- */
 
+/* Section label: an uppercase overline in the dashboard's section-title
+   style (11/16, 500, 0.08em). It sits at the drawer edge while the items are
+   indented, so the grouping reads as nested. */
 .nav-heading {
-  margin: 1rem 1rem 0.25rem;
-  /* M3 label-small */
+  margin: 1.25rem 1rem 0.75rem 1rem;
   font-size: 0.6875rem;
   line-height: 1rem;
   font-weight: 500;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--md-sys-color-on-surface-variant);
+  color: var(--nav-heading-color);
 }
 
 .nav-list {
@@ -302,14 +332,14 @@ a {
   display: flex;
   align-items: center;
   min-height: 3.5rem;
-  margin: 0 0.25rem 0.125rem;
-  padding: 0 1.25rem;
+  margin: 0;
+  padding: 0 1rem;
   border-radius: var(--md-sys-shape-corner-full);
   /* M3 label-large */
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
-  letter-spacing: 0.1px;
+  letter-spacing: 0.00625rem;
   color: var(--md-sys-color-on-surface-variant);
   text-decoration: none;
   transition:
@@ -326,13 +356,14 @@ a {
 }
 
 .nav-list a[aria-current="page"] {
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
-  font-weight: 700;
+  background: var(--nav-active-bg);
+  color: var(--nav-active-fg);
+  font-weight: 500;
+  box-shadow: inset 0 0 0 1px var(--nav-active-border);
 }
 
 .nav-list a[aria-current="page"]:hover {
-  background: color-mix(in srgb, var(--md-sys-color-secondary-container) 92%, var(--md-sys-color-on-secondary-container) 8%);
+  background: color-mix(in srgb, var(--nav-active-bg) 92%, var(--nav-active-fg) 8%);
 }
 
 .nav-button {
@@ -393,7 +424,7 @@ a {
   margin-top: 0;
 }
 
-/* M3 headline-medium */
+/* M3 headline-large */
 .prose h1 {
   margin: 0 0 1.5rem;
   font-size: 2rem;
@@ -417,7 +448,7 @@ a {
   font-size: 1rem;
   line-height: 1.5rem;
   font-weight: 500;
-  letter-spacing: 0.15px;
+  letter-spacing: 0.009375rem;
 }
 
 .prose :is(h1, h2, h3, h4) {
@@ -437,7 +468,7 @@ a {
   /* M3 body-large */
   font-size: 1rem;
   line-height: 1.5rem;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
 }
 
 .prose ul,
@@ -458,7 +489,7 @@ a {
 }
 
 .prose a {
-  color: var(--md-sys-color-primary);
+  color: var(--link-color);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.15em;
@@ -522,7 +553,7 @@ a {
   /* M3 body-medium */
   font-size: 0.875rem;
   line-height: 1.25rem;
-  letter-spacing: 0.25px;
+  letter-spacing: 0.015625rem;
 }
 
 .prose th,
@@ -538,7 +569,7 @@ a {
   color: var(--md-sys-color-on-surface-variant);
   /* M3 label-large */
   font-weight: 500;
-  letter-spacing: 0.1px;
+  letter-spacing: 0.00625rem;
   white-space: nowrap;
 }
 
@@ -558,6 +589,21 @@ a {
   border-radius: var(--md-sys-shape-corner-large);
   background: var(--md-sys-color-surface-container);
   box-shadow: var(--md-sys-elevation-level1);
+}
+
+/* Two images in one paragraph (e.g. two screenshots) go side by side when
+   there is room; the mobile block below stacks them again. */
+.prose p:has(> img + img) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.prose p:has(> img + img) img {
+  margin: 0;
+  max-width: 48%;
 }
 
 /* --- Mobile ------------------------------------------------------------- */
@@ -601,6 +647,15 @@ a {
 
   .prose {
     padding: 1.5rem 1rem 4rem;
+  }
+
+  .prose p:has(> img + img) {
+    display: block;
+  }
+
+  .prose p:has(> img + img) img {
+    max-width: 100%;
+    margin: 1.5rem auto;
   }
 }
 

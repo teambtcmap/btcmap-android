@@ -10,9 +10,11 @@ is committed — it only exists for the duration of a build.
 
 A directory whose top level contains `index.md` is treated by Hugo as a *leaf
 bundle* that swallows its siblings, so `docs/` is mounted one entry at a time
-rather than wholesale: `index.md` as the home page, `getting-started.md`, the
-`features/` directory (which picks up new guides automatically), and `images/`.
-Add a mount when a new top-level page appears outside `features/`.
+rather than wholesale: `index.md` as the home page, the `getting-started/` and
+`features/` directories, and `images/`. Both directories are normal sections
+(no `index.md`), so their files are picked up automatically; the sidebar order
+for each lives in `params.gettingStarted` and `params.features` in
+`hugo.toml`. Add a mount when a new top-level page appears outside them.
 
 ## Requirements
 
@@ -47,11 +49,14 @@ The site follows Material 3 (Material You), the same design system as the app's
 `Theme.Material3Expressive.DynamicColors` theme. Everything lives in one
 hand-written stylesheet, `static/css/style.css`.
 
-- **Color.** The `--md-sys-color-*` roles are an M3 *tonal spot* scheme
-  generated from the Bitcoin orange brand seed `#f7931a` (the app's
-  boosted-marker default) — the same variant Android's dynamic color uses. Both
-  the light and dark schemes are inlined; dark follows `prefers-color-scheme`.
-  To re-seed, regenerate the roles with
+- **Color.** The **light** `--md-sys-color-*` roles are an M3 *tonal spot*
+  scheme generated from the Bitcoin orange brand seed `#f7931a` (the app's
+  boosted-marker default) — the same variant Android's dynamic color uses. The
+  **dark** roles are a bespoke palette aligned with the
+  `dashboard.btcmap.org` web app (its `css/styles.css`): neutral zinc
+  surfaces, the `#f7931a` accent and the teal brand. Dark follows
+  `prefers-color-scheme`. To re-seed the light scheme, regenerate the roles
+  with
   [`material-color-utilities`](https://github.com/material-foundation/material-color-utilities)
   (`SchemeTonalSpot`) and paste them back.
 - **Type.** Roboto is self-hosted as one variable Latin woff2

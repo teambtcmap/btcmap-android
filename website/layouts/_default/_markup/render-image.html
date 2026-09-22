@@ -8,6 +8,6 @@
       (hasPrefix $dest "/")
       (hasPrefix $dest "data:") -}}
 {{- if not $absolute -}}
-  {{- $url = $dest | relURL -}}
+  {{- $url = $dest | strings.TrimLeft "../" | relURL -}}
 {{- end -}}
 <img src="{{ $url }}" alt="{{ .Text }}"{{ with .Title }} title="{{ . }}"{{ end }}>

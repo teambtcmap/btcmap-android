@@ -14,6 +14,9 @@ Type a name into the search field and the app looks through:
 Results appear below the field as you type. A short pause is applied before the
 search runs, so the list keeps up while you type.
 
+![Search results in light mode, showing places, an area and events](../images/search-results-light.png)
+![Search results in dark mode, showing places, an area and events](../images/search-results-dark.png)
+
 ## How results are ordered
 
 Results prefer what is close to the middle of the map. Move the map to the area
@@ -38,5 +41,7 @@ Because search reads from the local database, it keeps working offline, and it
 stays fast regardless of how large the synced data is.
 
 ---
+
+Next: [Common actions](try-it-out.md).
 
 Back to the [documentation index](../index.md).

@@ -12,7 +12,7 @@ can download an area's tiles.
 ## Downloading an area
 
 1. Open the area from its chip on the map or from
-   [search](search.md).
+   [search](../getting-started/search.md).
 2. Choose **Download map** (in the menu or the offline section).
 3. Pick the **maximum zoom**. Higher zoom means more detail and a larger
    download; the dialog shows a live size estimate as you move the slider.

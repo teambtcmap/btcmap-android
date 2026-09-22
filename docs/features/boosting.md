@@ -1,4 +1,4 @@
-# Boosting
+# Boosts
 
 Boosting is a paid way to make a merchant stand out. A boosted place is drawn
 in Bitcoin orange on the map, is highlighted in search results, and appears in

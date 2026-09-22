@@ -1,3 +1,9 @@
+{{- $steps := slice -}}
+{{- range site.Params.gettingStarted -}}
+  {{- with site.GetPage (printf "getting-started/%s" .) -}}
+    {{- $steps = $steps | append . -}}
+  {{- end -}}
+{{- end -}}
 {{- $features := slice -}}
 {{- range site.Params.features -}}
   {{- with site.GetPage (printf "features/%s" .) -}}
@@ -8,7 +14,10 @@
 <nav aria-label="Documentation">
   <ul class="nav-list">
     <li><a href="{{ "/" | relURL }}"{{ if .IsHome }} aria-current="page"{{ end }}>Overview</a></li>
-    {{- with site.GetPage "getting-started" }}
+  </ul>
+  <p class="nav-heading">Getting started</p>
+  <ul class="nav-list">
+    {{- range $steps }}
     <li><a href="{{ .RelPermalink }}"{{ if eq $current .RelPermalink }} aria-current="page"{{ end }}>{{ partial "page-title.html" . }}</a></li>
     {{- end }}
   </ul>

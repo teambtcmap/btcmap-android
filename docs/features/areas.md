@@ -1,4 +1,4 @@
-# Areas and communities
+# Countries and communities
 
 Areas are regions that group places and events. They come in two kinds:
 **countries** and **communities** (for example a city or a local bitcoin

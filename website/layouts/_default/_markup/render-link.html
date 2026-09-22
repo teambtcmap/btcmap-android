@@ -21,7 +21,7 @@
   {{- with .Page.GetPage $path -}}
     {{- $url = printf "%s%s" .RelPermalink $frag -}}
   {{- else -}}
-    {{- $url = printf "%s/blob/master/%s%s" site.Params.githubRepo (strings.TrimPrefix "../" $path) $frag -}}
+    {{- $url = printf "%s/blob/master/%s%s" site.Params.githubRepo (strings.TrimLeft "../" $path) $frag -}}
   {{- end -}}
 {{- end -}}
 <a href="{{ $url }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text }}</a>

@@ -8,7 +8,7 @@
 # links and assets; `hugo server` overrides it with the local address.
 baseURL = "https://btcmap.org/"
 locale = "en"
-title = "BTC Map for Android"
+title = "BTC Map Android"
 
 # The content is documentation only, so the generated tag, category and RSS
 # pages are noise.
@@ -19,11 +19,19 @@ disableKinds = ["taxonomy", "term", "rss"]
   # ../AGENTS.md, ...) are rewritten to this repository.
   githubRepo = "https://github.com/teambtcmap/btcmap-android"
 
+  # Sidebar order for the getting-started steps under docs/getting-started/.
+  gettingStarted = [
+    "install",
+    "first-launch",
+    "permissions",
+    "search",
+    "try-it-out",
+  ]
+
   # Sidebar order for the guides under docs/features/. Keep in sync with the
   # listing in docs/index.md.
   features = [
     "map",
-    "search",
     "places",
     "events",
     "areas",
@@ -40,14 +48,15 @@ disableKinds = ["taxonomy", "term", "rss"]
   # directory, rather than mounting docs/ wholesale: a directory containing
   # index.md is treated as a leaf bundle and would swallow its siblings. Add a
   # mount here when a new top-level page appears; new files under
-  # docs/features/ are picked up automatically.
+  # docs/getting-started/ and docs/features/ are picked up automatically (add
+  # them to params.gettingStarted / params.features for the sidebar).
   [[module.mounts]]
     source = "../docs/index.md"
     target = "content/_index.md"
 
   [[module.mounts]]
-    source = "../docs/getting-started.md"
-    target = "content/getting-started.md"
+    source = "../docs/getting-started"
+    target = "content/getting-started"
 
   [[module.mounts]]
     source = "../docs/features"

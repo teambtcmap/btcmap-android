@@ -2,7 +2,7 @@
 
 Events are bitcoin meetups and other gatherings. They appear as markers when
 the **Events** filter is selected on the map, and they can also be found through
-[search](search.md).
+[search](../getting-started/search.md).
 
 ## The event screen
 

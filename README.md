@@ -25,7 +25,7 @@
 ## Documentation
 
 User guides live in [`docs/`](docs/index.md), starting with
-[Getting started](docs/getting-started.md) and standalone pages for each
+[Install the app](docs/getting-started/install.md) and standalone pages for each
 feature.
 
 ## Support BTC Map
