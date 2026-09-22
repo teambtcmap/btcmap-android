@@ -4,19 +4,26 @@
   {{ partial "head.html" . }}
 </head>
 <body>
+  <a class="skip-link" href="#content">Skip to content</a>
   <input class="nav-toggle" type="checkbox" id="nav-toggle" aria-label="Toggle navigation">
   <div class="page">
     <aside class="sidebar">
       <div class="sidebar-top">
         <a class="brand" href="{{ "/" | relURL }}">
-          BTC Map
-          <small>Android guide</small>
+          <img class="brand-logo" src="{{ "logo.svg" | relURL }}" alt="" width="31" height="40">
+          <span class="brand-text">
+            <span class="brand-name">BTC Map Android</span>
+            <span class="brand-sub">User guide</span>
+          </span>
         </a>
-        <label class="nav-button" for="nav-toggle">Menu</label>
+        <label class="nav-button" for="nav-toggle" aria-label="Toggle navigation">
+          <svg class="icon-menu" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18v-2H3v2Zm0-5h18v-2H3v2Zm0-7v2h18V6H3Z"/></svg>
+          <svg class="icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </label>
       </div>
       {{ partial "nav.html" . }}
     </aside>
-    <main class="content">
+    <main class="content" id="content">
       {{ block "main" . }}{{ end }}
     </main>
   </div>

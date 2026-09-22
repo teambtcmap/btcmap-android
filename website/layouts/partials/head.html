@@ -2,4 +2,5 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 {{- $title := partial "page-title.html" . }}
 <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ $title }} · {{ site.Title }}{{ end }}</title>
+<link rel="preload" href="{{ "fonts/roboto-latin.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ "css/style.css" | relURL }}">

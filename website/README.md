@@ -43,11 +43,29 @@ root.
 
 ## Styling
 
-The whole site is one hand-written stylesheet,
-`static/css/style.css`, with the palette and layout defined as custom
-properties at the top. In particular `--image-max-height`
-(default `min(70vh, 40rem)`) caps how tall the portrait phone screenshots get;
-lower it if they still feel too dominant.
+The site follows Material 3 (Material You), the same design system as the app's
+`Theme.Material3Expressive.DynamicColors` theme. Everything lives in one
+hand-written stylesheet, `static/css/style.css`.
+
+- **Color.** The `--md-sys-color-*` roles are an M3 *tonal spot* scheme
+  generated from the Bitcoin orange brand seed `#f7931a` (the app's
+  boosted-marker default) — the same variant Android's dynamic color uses. Both
+  the light and dark schemes are inlined; dark follows `prefers-color-scheme`.
+  To re-seed, regenerate the roles with
+  [`material-color-utilities`](https://github.com/material-foundation/material-color-utilities)
+  (`SchemeTonalSpot`) and paste them back.
+- **Type.** Roboto is self-hosted as one variable Latin woff2
+  (`static/fonts/roboto-latin.woff2`, SIL OFL — see `static/fonts/OFL.txt`) and
+  applied with the M3 typescale (headline, title, body and label roles).
+- **Brand.** The sidebar uses the official multicolor pin logo, vendored as
+  `static/logo.svg` from
+  [`dashboard.btcmap.org/icons/btcmap.svg`](https://dashboard.btcmap.org/icons/btcmap.svg).
+- **Shape, elevation, motion and state layers** use the `--md-sys-*` tokens at
+  the top of the file. The sidebar is an M3 navigation drawer with a rounded
+  active indicator; on mobile it becomes an app bar with a CSS-only menu.
+
+`--image-max-height` (default `min(70vh, 40rem)`) caps how tall the portrait
+phone screenshots get; lower it if they still feel too dominant.
 
 ## Publishing
 
