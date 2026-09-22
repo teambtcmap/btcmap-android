@@ -4,9 +4,10 @@
 # build time, so they stay exactly where they are and keep rendering on GitHub.
 # See website/README.md for how to build and preview the site.
 
-# Set this to the URL the site will be served from. It is used for absolute
-# links and assets; `hugo server` overrides it with the local address.
-baseURL = "https://btcmap.org/"
+# The URL the site is served from. It is used for absolute links and assets;
+# `hugo server` overrides it with the local address, and `./devtools website
+# deploy` publishes the build to this host.
+baseURL = "https://android.btcmap.org/"
 locale = "en"
 title = "BTC Map Android"
 

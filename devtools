@@ -17,6 +17,7 @@ Usage:
   ./devtools bundle data        Download latest places, areas, comments and events snapshots
   ./devtools bundle map-styles  Bundle MapLibre styles as assets (--force re-downloads)
   ./devtools bundle all         Run all bundlers (--force applies to map-styles)
+  ./devtools website deploy     Build the Hugo site and rsync it to android.btcmap.org
 EOF
 }
 
@@ -55,6 +56,15 @@ Commands:
   data         Download latest places, areas, comments and events snapshots (always refreshes)
   map-styles   Bundle MapLibre styles as assets (--force re-downloads)
   all          Run all bundlers (--force applies to map-styles)
+EOF
+}
+
+print_usage_website() {
+  cat <<EOF
+Usage: ./devtools website <command>
+
+Commands:
+  deploy    Build the Hugo site and rsync it to btcmap-api:/srv/http/android.btcmap.org
 EOF
 }
 
@@ -158,6 +168,38 @@ cmd_bundle() {
 }
 
 # END bundle section
+
+# START website section
+
+cmd_website_deploy() {
+  if ! command -v hugo >/dev/null 2>&1; then
+    err "hugo is not installed; install Hugo to build the site."
+    return 1
+  fi
+
+  local dest="btcmap-api:/srv/http/android.btcmap.org/"
+
+  # Hugo does not prune its output, so clear it to avoid shipping stale pages
+  # from earlier builds.
+  echo "Building the Hugo site..."
+  rm -rf website/public
+  (cd website && hugo)
+
+  echo "Deploying to $dest..."
+  rsync -avz --delete --chmod=D755,F644 website/public/ "$dest"
+}
+
+cmd_website() {
+  local target="${1:-help}"
+  shift || true
+  case "$target" in
+    deploy) cmd_website_deploy "$@" ;;
+    help|-h|--help) print_usage_website ;;
+    *) err "Unknown website command: $target"; print_usage_website; return 1 ;;
+  esac
+}
+
+# END website section
 
 # START app section
 
@@ -307,6 +349,7 @@ main() {
     emulator) cmd_emulator "$@" ;;
     app) cmd_app "$@" ;;
     bundle) cmd_bundle "$@" ;;
+    website) cmd_website "$@" ;;
     help|-h|--help) print_usage ;;
     *) err "Unknown command: $cmd"; print_usage; return 1 ;;
   esac

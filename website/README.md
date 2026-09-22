@@ -74,6 +74,14 @@ phone screenshots get; lower it if they still feel too dominant.
 
 ## Publishing
 
-`baseURL` in `hugo.toml` is a placeholder. Set it to the URL the site is served
-from before deploying; `hugo server` overrides it while previewing. The build
-output is `website/public/`.
+The site is published to `https://android.btcmap.org/` with, from the
+repository root:
+
+```sh
+./devtools website deploy
+```
+
+That builds the site (`hugo` in this directory) and rsyncs `website/public/` to
+`btcmap-api:/srv/http/android.btcmap.org/`, removing files that are no longer
+part of the build. `baseURL` in `hugo.toml` is set to that host; `hugo server`
+overrides it while previewing.
