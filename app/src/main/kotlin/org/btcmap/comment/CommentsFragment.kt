@@ -12,15 +12,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import org.btcmap.R
+import org.btcmap.SyncEvent
 import org.btcmap.databinding.CommentsFragmentBinding
 import org.btcmap.db
 import org.btcmap.syncController
@@ -38,25 +40,9 @@ class CommentsFragment : Fragment() {
     private var _binding: CommentsFragmentBinding? = null
     private val binding get() = _binding!!
 
-    /**
-     * Set when the add screen reports that a comment was paid for. The next
-     * resume then retries the sync for a few seconds instead of doing a single
-     * request, because the server can report the invoice as paid just before it
-     * flips the comment to visible.
-     */
-    private var postPaymentSync = false
-
-    /**
-     * Ids of the comments the user saw before opening the add screen. The retry
-     * uses them to tell whether the paid comment is already in the list, so a
-     * sync that stored it while the add screen was open does not trigger a
-     * pointless retry. Null when the add screen was not opened from here, or
-     * when the list had not rendered yet and the ids would be meaningless.
-     */
-    private var prePostCommentIds: Set<Long>? = null
-
-    /** Ids shown by the last [renderComments] call. */
-    private var renderedIds: Set<Long> = emptySet()
+    private val viewModel: CommentsViewModel by lazy {
+        ViewModelProvider(this)[CommentsViewModel::class.java]
+    }
 
     /**
      * Items handed to the adapter by the last [renderComments] call. Resumes and
@@ -66,16 +52,23 @@ class CommentsFragment : Fragment() {
     private var lastSubmittedItems: List<CommentsAdapterItem>? = null
 
     /**
-     * True once [renderComments] has populated [renderedIds]. Until then the
-     * ids are not a trustworthy baseline for the post-payment retry.
+     * True once the current resume's sync attempt has finished, so the empty
+     * state is held back while the list is still being fetched.
      */
-    private var renderedAtLeastOnce = false
+    private var syncFinished = false
 
     /**
-     * False until the current sync finishes. The empty state is held back until
-     * then so it cannot flash while the sync is running.
+     * Whether the last finished sync failed. The empty state then says the
+     * comments could not be loaded instead of claiming there are none.
      */
-    private var initialSyncDone = false
+    private var lastSyncFailed = false
+
+    /**
+     * Serializes [renderComments]: the change observer and the resume sync can
+     * both render, and without this the two reads could interleave and submit
+     * the list out of order.
+     */
+    private val renderMutex = Mutex()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -88,14 +81,6 @@ class CommentsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Restored so a pending retry survives a process recreation before the
-        // resume below consumes it.
-        postPaymentSync =
-            savedInstanceState?.getBoolean(STATE_POST_PAYMENT_SYNC) ?: postPaymentSync
-        savedInstanceState?.getLongArray(STATE_PRE_POST_COMMENT_IDS)?.let {
-            prePostCommentIds = it.toSet()
-        }
 
         binding.topAppBar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
@@ -127,10 +112,7 @@ class CommentsFragment : Fragment() {
         binding.fab.setOnClickListener {
             // Snapshot what the user has seen before the add screen can store
             // anything, so the retry knows which comments are genuinely new.
-            // Before the first render the ids are unknown, and an empty set
-            // would misread every stored comment as new, so leave the baseline
-            // null and let the retry run its full window instead.
-            prePostCommentIds = if (renderedAtLeastOnce) renderedIds else null
+            viewModel.onAddCommentOpened()
 
             parentFragmentManager.commit {
                 setReorderingAllowed(true)
@@ -156,7 +138,18 @@ class CommentsFragment : Fragment() {
             AddCommentFragment.REQUEST_KEY,
             viewLifecycleOwner,
         ) { _, _ ->
-            postPaymentSync = true
+            viewModel.onCommentPosted()
+        }
+
+        // A background sync (the app-scoped full sync, or another screen's) can
+        // publish the paid comment after the retry window; re-render when it
+        // does instead of waiting for the next resume.
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                syncController().events.collect { event ->
+                    if (event == SyncEvent.CommentsChanged) renderComments(adapter)
+                }
+            }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -164,51 +157,53 @@ class CommentsFragment : Fragment() {
                 // Hold the empty state back until this resume's sync finishes,
                 // not just the first one, so it cannot flash while the list is
                 // still being fetched (for example right after a payment).
-                initialSyncDone = false
+                syncFinished = false
                 val rendered = renderComments(adapter)
 
-                val synced = if (postPaymentSync) {
-                    // The flags are cleared only once the retry returns
-                    // normally. A cancellation (leaving the screen, a
-                    // configuration change) keeps them, and they are saved in
-                    // the instance state, so the recreated view retries with
-                    // the original baseline instead of giving up after a
-                    // single sync.
-                    val result = syncCommentsWithRetry(adapter, rendered)
-                    postPaymentSync = false
-                    prePostCommentIds = null
-                    result
-                } else {
-                    // Syncing on every resume also retries a sync that failed
-                    // while the screen was in the background. It stays cheap
-                    // because syncComments only fetches the delta since the
-                    // stored cursor.
-                    syncComments()
-                }
+                // Syncing on every resume also retries a sync that failed while
+                // the screen was in the background. It stays cheap because
+                // syncComments only fetches the delta since the stored cursor.
+                val synced = viewModel.syncOnResume(
+                    renderedIds = rendered.map { it.id }.toSet(),
+                    sync = { syncComments() },
+                    render = { renderComments(adapter).map { it.id }.toSet() },
+                )
 
-                // Only claim the list is empty once a sync actually completed;
-                // after a failure an empty list does not mean there are no
-                // comments, and asserting it would be misleading.
-                initialSyncDone = synced
+                lastSyncFailed = !synced
+                syncFinished = true
                 renderComments(adapter)
             }
         }
     }
 
     private suspend fun renderComments(adapter: CommentsAdapter): List<CommentsAdapterItem> {
-        val items = withContext(Dispatchers.IO) {
-            val formatter = commentDateFormatter()
-            db().comment.selectByPlaceId(args.placeId).map { it.toAdapterItem(formatter) }
-        }
+        return renderMutex.withLock {
+            val items = withContext(Dispatchers.IO) {
+                val formatter = commentDateFormatter()
+                db().comment.selectByPlaceId(args.placeId).map { it.toAdapterItem(formatter) }
+            }
 
-        if (items != lastSubmittedItems) {
-            adapter.submitList(items)
-            lastSubmittedItems = items
+            if (items != lastSubmittedItems) {
+                adapter.submitList(items)
+                lastSubmittedItems = items
+            }
+            viewModel.onCommentsRendered(items.map { it.id }.toSet())
+
+            // Only claim the list is empty once a sync attempt finished; after a
+            // failure it still says so, but with a message that admits the
+            // fetch failed rather than asserting there are no comments. The
+            // text is only touched when shown, so a background re-render does
+            // not allocate a string every time.
+            val showEmpty = syncFinished && items.isEmpty()
+            if (showEmpty) {
+                binding.empty.setText(
+                    if (lastSyncFailed) R.string.failed_to_load else R.string.no_comments_yet
+                )
+            }
+            binding.empty.isVisible = showEmpty
+
+            items
         }
-        renderedIds = items.map { it.id }.toSet()
-        renderedAtLeastOnce = true
-        binding.empty.isVisible = initialSyncDone && items.isEmpty()
-        return items
     }
 
     /** Returns whether the sync completed, as opposed to failing. */
@@ -216,88 +211,14 @@ class CommentsFragment : Fragment() {
         return !syncController().syncComments().failed
     }
 
-    /**
-     * Retries the delta sync after a payment until the paid comment shows up.
-     *
-     * The invoice can be reported as paid before the server has flipped the new
-     * comment to visible, and because the list only syncs on resume, a single
-     * request in that window would leave the comment hidden until the user
-     * leaves and re-enters the screen.
-     *
-     * A hidden comment is dropped instead of stored, so the paid comment shows
-     * up as an id that was not shown before the post flow started. Waiting for
-     * a new id for this place means an unrelated comment for another place
-     * cannot end the retries. A different comment for the same place published
-     * first would look like the expected signal, though: the paid comment's id
-     * is assigned by the server, so the two cannot be told apart.
-     *
-     * Retries back off and stop after a bounded window so a comment the server
-     * never publishes cannot poll forever.
-     */
-    private suspend fun syncCommentsWithRetry(
-        adapter: CommentsAdapter,
-        rendered: List<CommentsAdapterItem>,
-    ): Boolean {
-        // Fall back to the currently shown ids when the add screen was not
-        // opened from the list, for example after a process recreation that
-        // lost the snapshot taken when the add button was tapped. Nothing is
-        // then known to be new, and the retry below simply runs its window.
-        val baseline = prePostCommentIds ?: rendered.map { it.id }.toSet()
-
-        // A sync while the add screen was open may already have stored the paid
-        // comment; then the list already has it and there is nothing to wait
-        // for.
-        if (rendered.any { it.id !in baseline }) {
-            return true
-        }
-
-        // Remember the last attempt's outcome so the caller can tell a window
-        // that ended because the comment was never published from one where the
-        // server could not be reached.
-        var lastSyncSucceeded = true
-
-        withTimeoutOrNull(POST_PAYMENT_SYNC_TIMEOUT_MS) {
-            var delayMs = POST_PAYMENT_SYNC_INITIAL_DELAY_MS
-
-            while (true) {
-                lastSyncSucceeded = !syncController().syncComments().failed
-
-                if (renderComments(adapter).any { it.id !in baseline }) {
-                    return@withTimeoutOrNull
-                }
-
-                delay(delayMs)
-                delayMs = (delayMs * 2).coerceAtMost(POST_PAYMENT_SYNC_MAX_DELAY_MS)
-            }
-        }
-
-        return lastSyncSucceeded
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(STATE_POST_PAYMENT_SYNC, postPaymentSync)
-        prePostCommentIds?.let {
-            outState.putLongArray(STATE_PRE_POST_COMMENT_IDS, it.toLongArray())
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
-        // These ids describe the view that was showing. Clearing them means a
-        // tap before the recreated view renders again cannot snapshot a stale
-        // baseline. The pending post-payment flags are deliberately kept.
-        renderedIds = emptySet()
-        renderedAtLeastOnce = false
+        // These describe the view that was showing. Clearing them means a tap
+        // before the recreated view renders again cannot snapshot a stale
+        // baseline. The pending post-payment flags live in the view model and
+        // are deliberately kept.
         lastSubmittedItems = null
+        viewModel.onViewDestroyed()
         _binding = null
-    }
-
-    private companion object {
-        const val POST_PAYMENT_SYNC_TIMEOUT_MS = 10_000L
-        const val POST_PAYMENT_SYNC_INITIAL_DELAY_MS = 500L
-        const val POST_PAYMENT_SYNC_MAX_DELAY_MS = 2_000L
-        const val STATE_POST_PAYMENT_SYNC = "post_payment_sync"
-        const val STATE_PRE_POST_COMMENT_IDS = "pre_post_comment_ids"
     }
 }

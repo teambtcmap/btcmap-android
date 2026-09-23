@@ -47,6 +47,7 @@
     <string name="badge_text">Testo badge</string>
     <string name="boosted_marker_background">Sfondo marcatore promosso</string>
     <string name="btc_map_boost_payment_request">Richiesta di pagamento BTC Map Boost</string>
+    <string name="your_boost_is_active">La tua promozione è attiva</string>
     <string name="boosted">Promosso</string>
     <string name="boosted_merchants">Esercenti promossi</string>
     <string name="boosted_until_s">Promosso fino al %1$s</string>

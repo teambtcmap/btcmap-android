@@ -47,6 +47,7 @@
     <string name="badge_text">Kyltin teksti</string>
     <string name="boosted_marker_background">Nostetun merkin tausta</string>
     <string name="btc_map_boost_payment_request">BTC Map Boost -maksupyyntö</string>
+    <string name="your_boost_is_active">Nostosi on aktiivinen</string>
     <string name="boosted">Nostettu</string>
     <string name="boosted_merchants">Nostetut kauppiaat</string>
     <string name="boosted_until_s">Nostettu %1$s asti</string>

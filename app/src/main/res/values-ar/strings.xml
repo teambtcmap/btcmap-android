@@ -47,6 +47,7 @@
     <string name="badge_text">نص الشارة</string>
     <string name="boosted_marker_background">خلفية العلامة المعززة</string>
     <string name="btc_map_boost_payment_request">طلب دفع BTC Map Boost</string>
+    <string name="your_boost_is_active">تعزيزك نشط</string>
     <string name="boosted">معزز</string>
     <string name="boosted_merchants">التجار المعززون</string>
     <string name="boosted_until_s">معزز حتى %1$s</string>

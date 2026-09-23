@@ -47,6 +47,7 @@
     <string name="badge_text">Текст бейджа</string>
     <string name="boosted_marker_background">Фон підвищеного маркера</string>
     <string name="btc_map_boost_payment_request">Запит на оплату BTC Map Boost</string>
+    <string name="your_boost_is_active">Ваше підвищення активне</string>
     <string name="boosted">Підвищено</string>
     <string name="boosted_merchants">Підвищені продавці</string>
     <string name="boosted_until_s">Підвищено до %1$s</string>

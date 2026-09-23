@@ -47,6 +47,7 @@
     <string name="badge_text">Text de la insígnia</string>
     <string name="boosted_marker_background">Fons del marcador promocionat</string>
     <string name="btc_map_boost_payment_request">Sol·licitud de Pagament BTC Map Boost</string>
+    <string name="your_boost_is_active">La teva promoció està activa</string>
     <string name="boosted">Promocionat</string>
     <string name="boosted_merchants">Comerciants promocionats</string>
     <string name="boosted_until_s">Promocionat fins al %1$s</string>

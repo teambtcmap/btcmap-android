@@ -41,6 +41,7 @@ import org.btcmap.db.table.place.Place
 import org.btcmap.settings.prefs
 import org.btcmap.comment.AddCommentFragment
 import org.btcmap.comment.CommentsAdapter
+import org.btcmap.comment.commentDateFormatter
 import org.btcmap.comment.toAdapterItem
 import org.btcmap.comment.CommentsFragment
 import org.btcmap.util.iconTypeface
@@ -69,6 +70,14 @@ class PlaceFragment : Fragment() {
 
         private const val AUTH_ACTION_TOGGLE_SAVED = "toggle-saved"
         private const val AUTH_ACTION_OPEN_REPORT = "open-report"
+
+        /**
+         * How many comments the place screen previews inline. A place's full
+         * list is unbounded, so it is capped here to keep the sheet's
+         * RecyclerView from inflating with every comment; the comments button
+         * opens them all.
+         */
+        private const val COMMENTS_PREVIEW_LIMIT = 3
     }
 
     private var placeId = 0L
@@ -393,7 +402,10 @@ class PlaceFragment : Fragment() {
             } else {
                 getString(R.string.comments_d, comments.size)
             }
-            commentsAdapter.submitList(comments.map { it.toAdapterItem() })
+            val formatter = commentDateFormatter()
+            commentsAdapter.submitList(
+                comments.take(COMMENTS_PREVIEW_LIMIT).map { it.toAdapterItem(formatter) }
+            )
         }
     }
 

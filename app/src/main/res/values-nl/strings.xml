@@ -47,6 +47,7 @@
     <string name="badge_text">Badge tekst</string>
     <string name="boosted_marker_background">Gepromote marker achtergrond</string>
     <string name="btc_map_boost_payment_request">BTC Map Boost betalingsverzoek</string>
+    <string name="your_boost_is_active">Je promotie is actief</string>
     <string name="boosted">Gepromoot</string>
     <string name="boosted_merchants">Gepromote handelaars</string>
     <string name="boosted_until_s">Gepromoot tot %1$s</string>

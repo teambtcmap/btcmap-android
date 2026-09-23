@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.btcmap.db.Database
 import org.btcmap.db.table.comment.Comment
+import org.btcmap.reportSyncFailure
 import org.btcmap.util.rethrowIfCancellation
 import java.io.FileNotFoundException
 import java.io.InputStream
@@ -99,8 +100,11 @@ object BundledComments {
         } catch (e: Exception) {
             // Only recoverable failures are swallowed: an Error must keep
             // propagating instead of being reported as a successful empty seed
-            // that lets the caller continue into the sync.
+            // that lets the caller continue into the sync. The failure is still
+            // reported, so a broken database is not indistinguishable from a
+            // missing or empty snapshot.
             e.rethrowIfCancellation()
+            reportSyncFailure(e)
             return ImportResult(commentsImported = 0, duration = elapsedSince(startedAt))
         }
 

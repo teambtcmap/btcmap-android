@@ -47,6 +47,7 @@
     <string name="badge_text">バッジテキスト</string>
     <string name="boosted_marker_background">ブーストされたマーカー背景</string>
     <string name="btc_map_boost_payment_request">BTC Map ブースト支払いリクエスト</string>
+    <string name="your_boost_is_active">ブーストが有効になっています</string>
     <string name="boosted">ブースト済み</string>
     <string name="boosted_merchants">ブースト済みの加盟店</string>
     <string name="boosted_until_s">%1$s までブースト済み</string>

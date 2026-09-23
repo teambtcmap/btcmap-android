@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import org.btcmap.R
 import org.btcmap.api
@@ -85,14 +86,14 @@ class AddCommentFragment : Fragment() {
             },
         )
 
+        // Clear the validation message as soon as the user starts fixing the
+        // input instead of leaving it pinned to the field.
+        binding.comment.doAfterTextChanged { binding.commentInput.error = null }
+
         binding.btnContinue.setOnClickListener {
             val commentText = binding.comment.text.toString().trim()
             if (commentText.isEmpty()) {
-                Toast.makeText(
-                    requireContext(),
-                    R.string.comment_cannot_be_empty,
-                    Toast.LENGTH_SHORT
-                ).show()
+                binding.commentInput.error = getString(R.string.comment_cannot_be_empty)
                 return@setOnClickListener
             }
 

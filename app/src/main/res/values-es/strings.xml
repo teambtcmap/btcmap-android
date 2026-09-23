@@ -47,6 +47,7 @@
     <string name="badge_text">Texto de la insignia</string>
     <string name="boosted_marker_background">Fondo del marcador impulsado</string>
     <string name="btc_map_boost_payment_request">Solicitud de pago de impulso BTC Map</string>
+    <string name="your_boost_is_active">Tu impulso está activo</string>
     <string name="boosted">Impulsado</string>
     <string name="boosted_merchants">Comerciantes impulsados</string>
     <string name="boosted_until_s">Impulsado hasta %1$s</string>

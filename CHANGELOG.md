@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Translate the boost confirmation message into all supported languages
+- Update a place's comments when a background sync changes them, instead of only when the comments screen is reopened
+- Limit a comment to 500 characters, with a live counter and an inline error when it is left empty
+- Preview the three most recent comments on the place screen instead of the whole list
 - Treat a local cache that holds only tombstones as already seeded, so a place or area deleted after the bundled snapshot was built is not restored by a re-seed
 - Confirm a completed merchant boost with a short message, and keep the boost options and Continue button disabled until the quote has loaded, so a boost is never ordered before its price is shown
 - Keep the map where you left it after opening a place, a search result or another screen, instead of zooming out to the whole world

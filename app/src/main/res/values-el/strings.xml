@@ -47,6 +47,7 @@
     <string name="badge_text">Κείμενο ετικέτας</string>
     <string name="boosted_marker_background">Φόντο προωθημένου δείκτη</string>
     <string name="btc_map_boost_payment_request">Αίτημα Πληρωμής BTC Map Boost</string>
+    <string name="your_boost_is_active">Η προώθησή σας είναι ενεργή</string>
     <string name="boosted">Προωθημένο</string>
     <string name="boosted_merchants">Προωθημένοι έμποροι</string>
     <string name="boosted_until_s">Προωθημένο έως %1$s</string>

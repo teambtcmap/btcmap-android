@@ -47,6 +47,7 @@
     <string name="badge_text">Texto do distintivo</string>
     <string name="boosted_marker_background">Fundo do marcador impulsionado</string>
     <string name="btc_map_boost_payment_request">Solicitação de pagamento BTC Map Boost</string>
+    <string name="your_boost_is_active">Seu impulsionamento está ativo</string>
     <string name="boosted">Impulsionado</string>
     <string name="boosted_merchants">Comerciantes impulsionados</string>
     <string name="boosted_until_s">Impulsionado até %1$s</string>

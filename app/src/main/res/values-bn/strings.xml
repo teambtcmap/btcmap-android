@@ -47,6 +47,7 @@
     <string name="badge_text">ব্যাজ টেক্সট</string>
     <string name="boosted_marker_background">বুস্ট করা মার্কার পটভূমি</string>
     <string name="btc_map_boost_payment_request">BTC Map বুস্ট পেমেন্ট অনুরোধ</string>
+    <string name="your_boost_is_active">আপনার বুস্ট সক্রিয় হয়েছে</string>
     <string name="boosted">বুস্ট করা</string>
     <string name="boosted_merchants">বুস্ট করা বণিক</string>
     <string name="boosted_until_s">%1$s পর্যন্ত বুস্ট করা</string>

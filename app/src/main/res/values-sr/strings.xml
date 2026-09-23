@@ -47,6 +47,7 @@
     <string name="badge_text">Текст значке</string>
     <string name="boosted_marker_background">Позадина промовисаног маркера</string>
     <string name="btc_map_boost_payment_request">Захтев за плаћање BTC Map промоције</string>
+    <string name="your_boost_is_active">Ваша промоција је активна</string>
     <string name="boosted">Промовисано</string>
     <string name="boosted_merchants">Промовисани продавци</string>
     <string name="boosted_until_s">Промовисано до %1$s</string>

@@ -64,10 +64,13 @@
             </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/comment_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="@string/comment">
+                android:hint="@string/comment"
+                app:counterEnabled="true"
+                app:counterMaxLength="500">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/comment"
@@ -76,6 +79,7 @@
                     android:gravity="start"
                     android:inputType="textMultiLine"
                     android:lines="5"
+                    android:maxLength="500"
                     android:maxLines="10" />
 
             </com.google.android.material.textfield.TextInputLayout>

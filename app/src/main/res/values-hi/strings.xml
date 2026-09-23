@@ -47,6 +47,7 @@
     <string name="badge_text">बैज टेक्स्ट</string>
     <string name="boosted_marker_background">बूस्ट किए गए मार्कर की पृष्ठभूमि</string>
     <string name="btc_map_boost_payment_request">BTC Map बूस्ट भुगतान अनुरोध</string>
+    <string name="your_boost_is_active">आपका बूस्ट सक्रिय है</string>
     <string name="boosted">बूस्ट किया गया</string>
     <string name="boosted_merchants">बूस्ट किए गए व्यापारी</string>
     <string name="boosted_until_s">%1$s तक बूस्ट किया गया</string>
