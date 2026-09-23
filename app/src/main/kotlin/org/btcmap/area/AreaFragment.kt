@@ -4,7 +4,6 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
-import android.text.format.Formatter
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -22,14 +21,11 @@ import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withResumed
 import coil3.load
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.slider.Slider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -49,16 +45,9 @@ import org.btcmap.databinding.AreaFragmentBinding
 import org.btcmap.databinding.ItemAreaCardBinding
 import org.btcmap.event.EventFragment
 import org.btcmap.event.toBundle
-import org.btcmap.offline.OfflineAreaState
-import org.btcmap.offline.OfflineBounds
-import org.btcmap.offline.OfflineRegionEstimates
-import org.btcmap.offlineMaps
 import org.btcmap.saved.isAreaSaved
 import org.btcmap.saved.toggleSavedArea
 import org.btcmap.settings.authorized
-import org.btcmap.settings.mapStyle
-import org.btcmap.settings.name
-import org.btcmap.settings.offlineStyleUrl
 import org.btcmap.settings.prefs
 import org.btcmap.util.iconTypeface
 import org.btcmap.util.openInBrowser
@@ -88,7 +77,7 @@ class AreaFragment : Fragment() {
 
     private var areaName = ""
 
-    private var loadedArea: Area? = null
+    private var offlineMap: AreaOfflineMapController? = null
 
     private val eventDateFormat: DateTimeFormatter =
         DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
@@ -104,6 +93,8 @@ class AreaFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        offlineMap = AreaOfflineMapController(this, binding)
 
         // Registered here, not when the dialog is shown, so a form that was open
         // when the device rotated still reaches this (recreated) fragment.
@@ -122,7 +113,7 @@ class AreaFragment : Fragment() {
 
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.download -> onDownloadClicked()
+                R.id.download -> offlineMap?.onDownloadClicked()
                 R.id.save -> onSaveClicked()
             }
 
@@ -154,7 +145,7 @@ class AreaFragment : Fragment() {
             }
 
             renderArea(area)
-            renderOfflineMap(area)
+            offlineMap?.bind(area)
             binding.loading.isVisible = false
             binding.content.isVisible = true
 
@@ -174,202 +165,6 @@ class AreaFragment : Fragment() {
         binding.website.text = websiteDisplayText(area.id, area.websiteUrl)
         binding.toolbar.menu.findItem(R.id.save).isEnabled = true
         updateBookmarkIcon()
-    }
-
-    private fun renderOfflineMap(area: Area) {
-        loadedArea = area
-        val bounds = area.offlineBounds()
-        binding.toolbar.menu.findItem(R.id.download).isVisible = bounds != null
-        if (bounds == null) return
-
-        binding.offlineMapDownload.setOnClickListener { showOfflineMapDialog(area, bounds) }
-        binding.offlineMapDelete.setOnClickListener { confirmDeleteOfflineMap() }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                offlineMaps().states.collect { states ->
-                    renderOfflineMapState(states[area.id])
-                }
-            }
-        }
-    }
-
-    private fun onDownloadClicked() {
-        val area = loadedArea ?: return
-        val bounds = area.offlineBounds() ?: return
-        showOfflineMapDialog(area, bounds)
-    }
-
-    private fun renderOfflineMapState(state: OfflineAreaState?) {
-        val context = context ?: return
-        val resolved = state ?: OfflineAreaState.None
-
-        // The toolbar button is the only offline affordance until a download is
-        // started or finished; the panel is reserved for progress and result.
-        binding.offlineMap.isVisible = resolved !is OfflineAreaState.None
-        binding.toolbar.menu.findItem(R.id.download).isEnabled =
-            resolved !is OfflineAreaState.Downloading
-        if (resolved is OfflineAreaState.None) return
-
-        val downloading = resolved is OfflineAreaState.Downloading
-        binding.offlineMapProgress.isVisible = downloading
-        binding.offlineMapDownload.isVisible = !downloading
-        binding.offlineMapDelete.isVisible = resolved is OfflineAreaState.Complete
-        binding.offlineMapDownload.text = getString(
-            if (resolved is OfflineAreaState.Complete) {
-                R.string.offline_map_download_again
-            } else {
-                R.string.offline_map_download
-            },
-        )
-
-        val status = when (resolved) {
-            OfflineAreaState.None -> ""
-
-            is OfflineAreaState.Downloading -> {
-                val size = Formatter.formatFileSize(context, resolved.completedBytes)
-                val progress = resolved.progress
-                if (progress == null) {
-                    binding.offlineMapProgress.isIndeterminate = true
-                    getString(R.string.offline_map_status_downloading, size)
-                } else {
-                    binding.offlineMapProgress.isIndeterminate = false
-                    val percent = (progress * 100).toInt().coerceIn(0, 100)
-                    binding.offlineMapProgress.progress = percent
-                    getString(
-                        R.string.offline_map_status_downloading_progress,
-                        percent,
-                        size,
-                    )
-                }
-            }
-
-            is OfflineAreaState.Complete -> {
-                val size = Formatter.formatFileSize(context, resolved.bytes)
-                val downloaded = getString(
-                    R.string.offline_map_status_downloaded,
-                    size,
-                    OfflineRegionEstimates.MIN_ZOOM,
-                    resolved.maxZoom,
-                )
-                if (resolved.styleUrl == prefs.mapStyle.offlineStyleUrl(context)) {
-                    downloaded
-                } else {
-                    downloaded + "\n" + getString(R.string.offline_map_style_mismatch)
-                }
-            }
-
-            is OfflineAreaState.Failed ->
-                getString(R.string.offline_map_status_failed, resolved.message)
-        }
-
-        binding.offlineMapStatus.isVisible = status.isNotEmpty()
-        binding.offlineMapStatus.text = status
-    }
-
-    private fun showOfflineMapDialog(area: Area, bounds: OfflineBounds) {
-        val context = requireContext()
-        val view = layoutInflater.inflate(R.layout.dialog_offline_map, null)
-        val description = view.findViewById<TextView>(R.id.description)
-        val style = view.findViewById<TextView>(R.id.style)
-        val zoom = view.findViewById<TextView>(R.id.zoom)
-        val slider = view.findViewById<Slider>(R.id.zoom_slider)
-        val estimate = view.findViewById<TextView>(R.id.estimate)
-
-        description.text = getString(R.string.offline_map_description, area.name)
-        style.text = getString(R.string.offline_map_style, prefs.mapStyle.name(context))
-
-        val minZoom = OfflineRegionEstimates.MIN_SELECTABLE_MAX_ZOOM
-        val maxZoom = OfflineRegionEstimates.maxSelectableZoom(bounds)
-        val withinLimit = OfflineRegionEstimates.isWithinLimit(bounds)
-
-        fun update(selectedMaxZoom: Int) {
-            zoom.text = getString(R.string.offline_map_max_zoom, selectedMaxZoom)
-            val bytes = OfflineRegionEstimates.estimatedBytes(
-                bounds,
-                OfflineRegionEstimates.MIN_ZOOM,
-                selectedMaxZoom,
-            )
-            val size = Formatter.formatFileSize(context, bytes)
-            estimate.text = if (withinLimit) {
-                getString(R.string.offline_map_estimated_size, size)
-            } else {
-                getString(R.string.offline_map_too_large, size)
-            }
-        }
-
-        val fixedZoom = maxZoom <= minZoom
-        if (fixedZoom) {
-            slider.isVisible = false
-            update(minZoom)
-        } else {
-            slider.valueFrom = minZoom.toFloat()
-            slider.valueTo = maxZoom.toFloat()
-            slider.stepSize = 1f
-            slider.value = OfflineRegionEstimates.defaultMaxZoom(bounds)
-                .coerceIn(minZoom, maxZoom)
-                .toFloat()
-            slider.addOnChangeListener { _, value, _ -> update(value.toInt()) }
-            update(slider.value.toInt())
-        }
-
-        val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.offline_map)
-            .setView(view)
-            .setNegativeButton(android.R.string.cancel, null)
-            .setPositiveButton(R.string.offline_map_download) { _, _ ->
-                val selectedMaxZoom = if (fixedZoom) minZoom else slider.value.toInt()
-                startOfflineMapDownload(area, bounds, selectedMaxZoom)
-            }
-            .create()
-        dialog.show()
-
-        if (!withinLimit) {
-            dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).isEnabled = false
-        }
-    }
-
-    private fun startOfflineMapDownload(area: Area, bounds: OfflineBounds, maxZoom: Int) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                offlineMaps().download(
-                    areaId = area.id,
-                    areaName = area.name,
-                    bounds = bounds,
-                    styleUrl = prefs.mapStyle.offlineStyleUrl(requireContext()),
-                    maxZoom = maxZoom,
-                )
-            } catch (e: Throwable) {
-                e.rethrowIfCancellation()
-                showError(e)
-            }
-        }
-    }
-
-    private fun confirmDeleteOfflineMap() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.offline_map_delete_title)
-            .setMessage(R.string.offline_map_delete_message)
-            .setNegativeButton(android.R.string.cancel, null)
-            .setPositiveButton(R.string.delete) { _, _ ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    try {
-                        offlineMaps().delete(areaId)
-                    } catch (e: Throwable) {
-                        e.rethrowIfCancellation()
-                        showError(e)
-                    }
-                }
-            }
-            .show()
-    }
-
-    private fun Area.offlineBounds(): OfflineBounds? {
-        val west = bboxWest ?: return null
-        val south = bboxSouth ?: return null
-        val east = bboxEast ?: return null
-        val north = bboxNorth ?: return null
-        return OfflineBounds(west = west, south = south, east = east, north = north)
     }
 
     private fun loadEvents(area: Area) {
@@ -507,6 +302,7 @@ class AreaFragment : Fragment() {
             WindowCompat.getInsetsController(window, window.decorView)
                 .isAppearanceLightStatusBars = !isNightMode()
         }
+        offlineMap = null
         _binding = null
     }
 
