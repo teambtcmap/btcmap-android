@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep a change-password request running and its failure message on screen when the device is rotated, instead of cancelling it and losing the error
+- Keep account passwords out of saved instance state, so a password typed into a sign-in or change-password form is never written to disk
 - Keep the sign-in or sign-up failure message on screen when the device is rotated, instead of dismissing it and losing the error
 - Fix a crash while signing in on devices that report no manufacturer or model
 - Translate the offline map, verification warning and "no comments yet" strings, and the beta app name, into all supported languages

@@ -13,16 +13,19 @@ import org.btcmap.util.setFieldHelperText
 /**
  * Collects the current and new password for the change-password form.
  *
- * Like [AuthDialogFragment], the submitted passwords are reported through the
- * Fragment Result API under [REQUEST_KEY], and the typed passwords live in
- * [AuthFormViewModel] with the password fields opting out of view-state saving,
- * so the form survives a rotation without persisting the passwords.
+ * Like [AuthDialogFragment], the submitted passwords are handed to the host
+ * through a host-scoped [AuthFormResultViewModel] under [REQUEST_KEY] (the
+ * result bundle only signals that the form is ready), and the typed passwords
+ * live in [AuthFormViewModel] with the password fields opting out of view-state
+ * saving, so the form survives a rotation without persisting the passwords.
  */
 internal class ChangePasswordDialogFragment : AuthFormDialogFragment() {
 
     private val formState: AuthFormViewModel by lazy {
         ViewModelProvider(this)[AuthFormViewModel::class.java]
     }
+
+    private val formResults: AuthFormResultViewModel by lazy { hostAuthFormResults() }
 
     private lateinit var currentInput: TextInputEditText
     private lateinit var newInput: TextInputEditText
@@ -78,28 +81,29 @@ internal class ChangePasswordDialogFragment : AuthFormDialogFragment() {
         val current = currentInput.text.toString()
         val new = newInput.text.toString()
 
-        // The passwords are handed to the caller now; do not keep them in memory.
+        // The passwords are handed to the host now; do not keep them in memory.
         formState.currentPassword = ""
         formState.password = ""
         formState.confirmation = ""
 
-        parentFragmentManager.setFragmentResult(
-            REQUEST_KEY,
-            Bundle().apply {
-                putString(CURRENT_PASSWORD, current)
-                putString(NEW_PASSWORD, new)
-            },
+        // Held in a host-scoped view model, not the result bundle, so a pending
+        // result cannot persist the passwords to saved instance state.
+        formResults.pending = AuthFormResult.ChangePassword(
+            currentPassword = current,
+            newPassword = new,
         )
+
+        parentFragmentManager.setFragmentResult(REQUEST_KEY, Bundle())
     }
 
     companion object {
         const val TAG = "change-password-dialog"
 
-        /** Result key of the submitted passwords; see `registerChangePasswordResultListener`. */
+        /**
+         * Result key of a submitted form; the passwords themselves are held in
+         * [AuthFormResultViewModel]. See `registerChangePasswordResultListener`.
+         */
         const val REQUEST_KEY = "org.btcmap.auth.change-password"
-
-        const val CURRENT_PASSWORD = "current-password"
-        const val NEW_PASSWORD = "new-password"
 
         fun newInstance(): ChangePasswordDialogFragment = ChangePasswordDialogFragment()
     }

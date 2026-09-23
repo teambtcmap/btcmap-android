@@ -159,20 +159,11 @@ internal class AuthViewModel(
         _events.trySend(AuthEvent.Authenticated(name = response.user.name, extras = extras))
     }
 
-    private fun tokenLabel(): String = buildString {
-        append("BTC Map Android ")
-        append(BuildConfig.VERSION_CODE)
-        // Build.MANUFACTURER/MODEL are platform strings that can be null on a
-        // few devices (and in a JVM test), so trim defensively.
-        val device = listOf(Build.MANUFACTURER, Build.MODEL)
-            .mapNotNull { it?.trim() }
-            .filter { it.isNotEmpty() }
-            .joinToString(" ")
-        if (device.isNotEmpty()) {
-            append(' ')
-            append(device)
-        }
-    }
+    private fun tokenLabel(): String = authTokenLabel(
+        manufacturer = Build.MANUFACTURER,
+        model = Build.MODEL,
+        versionCode = BuildConfig.VERSION_CODE,
+    )
 
     class Factory(
         private val api: Api,
@@ -211,3 +202,25 @@ internal suspend fun storeSignedInSession(
         )
     }
 }
+
+/**
+ * A label for a token this app creates, shown in the account's token list on
+ * btcmap.org.
+ *
+ * [manufacturer] and [model] come from `Build` and can each be null on a few
+ * devices (and in a JVM test), so they are optional and trimmed before use; a
+ * missing or blank value is dropped instead of leaving a stray space.
+ */
+internal fun authTokenLabel(manufacturer: String?, model: String?, versionCode: Int): String =
+    buildString {
+        append("BTC Map Android ")
+        append(versionCode)
+        val device = listOf(manufacturer, model)
+            .mapNotNull { it?.trim() }
+            .filter { it.isNotEmpty() }
+            .joinToString(" ")
+        if (device.isNotEmpty()) {
+            append(' ')
+            append(device)
+        }
+    }

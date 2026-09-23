@@ -51,25 +51,21 @@ fun Fragment.registerAuthResultListener(onAuthenticated: (extras: Bundle) -> Uni
         this,
         AuthViewModel.Factory(api = api(), db = db(), prefs = prefs),
     )[AuthViewModel::class.java]
+    val results = authFormResults()
 
     childFragmentManager.setFragmentResultListener(
         AuthDialogFragment.REQUEST_KEY,
         viewLifecycleOwner,
-    ) { _, result ->
-        val modeName = result.getString(AuthDialogFragment.MODE)
+    ) { _, _ ->
+        // The credentials are held in the view model, not the result bundle, so
+        // a pending result never carries the password to saved instance state.
+        val pending = results.pending as? AuthFormResult.Credentials
             ?: return@setFragmentResultListener
-        val mode = try {
-            AuthMode.valueOf(modeName)
-        } catch (e: IllegalArgumentException) {
-            null
-        } ?: return@setFragmentResultListener
-        val username = result.getString(AuthDialogFragment.USERNAME).orEmpty()
-        val password = result.getString(AuthDialogFragment.PASSWORD).orEmpty()
-        val extras = result.getBundle(AuthDialogFragment.EXTRAS) ?: Bundle()
+        results.pending = null
 
-        when (mode) {
-            AuthMode.SignIn -> viewModel.signIn(username, password, extras)
-            AuthMode.SignUp -> viewModel.signUp(username, password, extras)
+        when (pending.mode) {
+            AuthMode.SignIn -> viewModel.signIn(pending.username, pending.password, pending.extras)
+            AuthMode.SignUp -> viewModel.signUp(pending.username, pending.password, pending.extras)
         }
     }
 
@@ -161,18 +157,43 @@ fun Fragment.showChangePasswordDialog() {
 /**
  * Registers the receiver of a submitted change-password form. Call this from
  * `onViewCreated` so the listener is re-established after a configuration
- * change. [onSubmit] receives the entered current and new password.
+ * change. The request runs in a retained [ChangePasswordViewModel], so it and
+ * its outcome survive a rotation; a failure is shown in an
+ * [AuthErrorDialogFragment], which is restored with the screen, and
+ * [onPasswordChanged] runs once the server has accepted the new password.
  */
-fun Fragment.registerChangePasswordResultListener(
-    onSubmit: (current: String, new: String) -> Unit,
-) {
+fun Fragment.registerChangePasswordResultListener(onPasswordChanged: () -> Unit) {
+    val viewModel = ViewModelProvider(
+        this,
+        ChangePasswordViewModel.Factory(api = api()),
+    )[ChangePasswordViewModel::class.java]
+    val results = authFormResults()
+
     childFragmentManager.setFragmentResultListener(
         ChangePasswordDialogFragment.REQUEST_KEY,
         viewLifecycleOwner,
-    ) { _, result ->
-        val current = result.getString(ChangePasswordDialogFragment.CURRENT_PASSWORD).orEmpty()
-        val new = result.getString(ChangePasswordDialogFragment.NEW_PASSWORD).orEmpty()
-        onSubmit(current, new)
+    ) { _, _ ->
+        // The passwords are held in the view model, not the result bundle, so a
+        // pending result never carries them to saved instance state.
+        val pending = results.pending as? AuthFormResult.ChangePassword
+            ?: return@setFragmentResultListener
+        results.pending = null
+        viewModel.change(
+            currentPassword = pending.currentPassword,
+            newPassword = pending.newPassword,
+        )
+    }
+
+    viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is ChangePasswordEvent.Changed -> onPasswordChanged()
+                    is ChangePasswordEvent.Failed ->
+                        showAuthError(event.error, getString(R.string.error))
+                }
+            }
+        }
     }
 }
 

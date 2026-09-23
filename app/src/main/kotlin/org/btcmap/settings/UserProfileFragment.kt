@@ -22,7 +22,6 @@ import org.btcmap.api.getUser
 import org.btcmap.api.removeSavedArea
 import org.btcmap.api.removeSavedPlace
 import org.btcmap.api.toDbUser
-import org.btcmap.api.updatePassword
 import org.btcmap.api.updateUsername
 import org.btcmap.app
 import org.btcmap.auth.registerChangePasswordResultListener
@@ -69,7 +68,9 @@ class UserProfileFragment : Fragment() {
             showChangePasswordDialog()
         }
 
-        registerChangePasswordResultListener { current, new -> changePassword(current, new) }
+        registerChangePasswordResultListener {
+            Toast.makeText(context, R.string.password_changed, Toast.LENGTH_SHORT).show()
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             val user = withContext(Dispatchers.IO) { db().user.select() }
@@ -111,22 +112,6 @@ class UserProfileFragment : Fragment() {
 
         binding.noSavedAreas.isVisible = user.savedAreas.isEmpty()
         binding.savedAreasList.isVisible = user.savedAreas.isNotEmpty()
-    }
-
-    private fun changePassword(oldPassword: String, newPassword: String) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                api().updatePassword(oldPassword, newPassword)
-                Toast.makeText(context, R.string.password_changed, Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                e.rethrowIfCancellation()
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.error)
-                    .setMessage(e.userFacingMessage(getString(R.string.error)))
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show()
-            }
-        }
     }
 
     private fun showChangeUsernameDialog() {

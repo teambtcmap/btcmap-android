@@ -19,9 +19,10 @@ import org.btcmap.util.setFieldError
  *
  * A subclass only inflates the form, validates its input and reports the result.
  * The form is a [DialogFragment] so it is recreated with the screen on a
- * configuration change; the submitted values are delivered through the Fragment
- * Result API by the subclass instead of a callback held by this fragment, which
- * would not survive that recreation.
+ * configuration change; the submitted values are handed to the host through a
+ * host-scoped view model (see [AuthFormResultViewModel]) and a fragment result
+ * signal, instead of a callback held by this fragment, which would not survive
+ * that recreation.
  */
 internal abstract class AuthFormDialogFragment : DialogFragment() {
 

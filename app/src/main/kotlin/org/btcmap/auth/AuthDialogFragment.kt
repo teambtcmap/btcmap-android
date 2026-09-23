@@ -18,11 +18,13 @@ internal enum class AuthMode {
 /**
  * Collects credentials for sign-in and sign-up.
  *
- * The submitted credentials are reported through the Fragment Result API under
- * [REQUEST_KEY], so they reach the (possibly recreated) caller through a
- * listener that caller registers in its own lifecycle, rather than a callback
- * held by this fragment. [EXTRAS] is echoed back untouched so the caller can
- * resume the action that needed the account.
+ * The submitted credentials are handed to the host through a host-scoped
+ * [AuthFormResultViewModel] under [REQUEST_KEY]: the values stay in memory while
+ * the result bundle carries only a signal that a form is ready. The host
+ * registers a listener for [REQUEST_KEY] in its own lifecycle, so the
+ * credentials reach it even when it is recreated by a configuration change. The
+ * extras given to [newCredentials] are carried through untouched, so the caller
+ * can resume the action that needed the account.
  *
  * The typed passwords are kept in [AuthFormViewModel] and the password fields
  * opt out of view-state saving, so they survive a rotation without being written
@@ -33,6 +35,8 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
     private val formState: AuthFormViewModel by lazy {
         ViewModelProvider(this)[AuthFormViewModel::class.java]
     }
+
+    private val formResults: AuthFormResultViewModel by lazy { hostAuthFormResults() }
 
     private lateinit var usernameInput: TextInputEditText
     private lateinit var passwordInput: TextInputEditText
@@ -107,19 +111,22 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
         val username = usernameInput.text.toString().trim()
         val password = passwordInput.text.toString()
 
-        // The credentials are handed to the caller now; do not keep them in memory.
+        // The credentials are handed to the host now; do not keep them in memory.
         formState.password = ""
         formState.confirmation = ""
 
-        parentFragmentManager.setFragmentResult(
-            REQUEST_KEY,
-            Bundle().apply {
-                putString(MODE, mode.name)
-                putString(USERNAME, username)
-                putString(PASSWORD, password)
-                arguments?.getBundle(ARG_EXTRAS)?.let { putBundle(EXTRAS, it) }
-            },
+        // Held in a host-scoped view model, not the result bundle: a pending
+        // result is written to saved instance state while no started listener
+        // has consumed it, which would persist the password. The result only
+        // signals that a form was submitted; see `registerAuthResultListener`.
+        formResults.pending = AuthFormResult.Credentials(
+            mode = mode,
+            username = username,
+            password = password,
+            extras = arguments?.getBundle(ARG_EXTRAS) ?: Bundle(),
         )
+
+        parentFragmentManager.setFragmentResult(REQUEST_KEY, Bundle())
     }
 
     private fun mode(): AuthMode {
@@ -134,13 +141,11 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
     companion object {
         const val TAG = "auth-dialog"
 
-        /** Result key of the submitted credentials; see `registerAuthResultListener`. */
+        /**
+         * Result key of a submitted form; the credentials themselves are held in
+         * [AuthFormResultViewModel]. See `registerAuthResultListener`.
+         */
         const val REQUEST_KEY = "org.btcmap.auth.credentials"
-
-        const val MODE = "mode"
-        const val USERNAME = "username"
-        const val PASSWORD = "password"
-        const val EXTRAS = "extras"
 
         private const val ARG_MODE = "arg-mode"
         private const val ARG_USERNAME = "arg-username"
