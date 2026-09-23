@@ -4,14 +4,9 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
-import android.util.TypedValue
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -19,8 +14,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
-import androidx.fragment.app.replace
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import coil3.load
@@ -30,34 +23,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
-import org.btcmap.api
-import org.btcmap.api.GetEventsItem
-import org.btcmap.api.GetPlaceIssuesItem
-import org.btcmap.api.getPlaceIssues
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.db.table.area.Area
-import org.btcmap.db.table.area.geoJsonGeometry
-import org.btcmap.db.table.event.Event
-import org.btcmap.db.table.event.isWithin
-import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.AreaFragmentBinding
-import org.btcmap.databinding.ItemAreaCardBinding
-import org.btcmap.event.EventFragment
-import org.btcmap.event.toBundle
 import org.btcmap.saved.isAreaSaved
 import org.btcmap.saved.toggleSavedArea
 import org.btcmap.settings.authorized
 import org.btcmap.settings.prefs
-import org.btcmap.util.iconTypeface
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 class AreaFragment : Fragment() {
 
@@ -80,8 +57,7 @@ class AreaFragment : Fragment() {
 
     private var offlineMap: AreaOfflineMapController? = null
 
-    private val eventDateFormat: DateTimeFormatter =
-        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+    private var sections: AreaSectionsController? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -96,6 +72,7 @@ class AreaFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         offlineMap = AreaOfflineMapController(this, binding)
+        sections = AreaSectionsController(this, binding)
 
         // Registered here, not when the dialog is shown, so a form that was open
         // when the device rotated still reaches this (recreated) fragment.
@@ -150,8 +127,8 @@ class AreaFragment : Fragment() {
             binding.loading.isVisible = false
             binding.content.isVisible = true
 
-            loadEvents(area)
-            loadPlaceIssues()
+            sections?.loadEvents(area)
+            sections?.loadPlaceIssues(areaId)
         }
     }
 
@@ -166,69 +143,6 @@ class AreaFragment : Fragment() {
         binding.website.text = websiteDisplayText(area.id, area.websiteUrl)
         binding.toolbar.menu.findItem(R.id.save).isEnabled = true
         updateBookmarkIcon()
-    }
-
-    private fun loadEvents(area: Area) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val events = withContext(Dispatchers.IO) { fetchAreaEvents(area) }
-                renderUpcomingEvents(events)
-            } catch (e: Throwable) {
-                e.rethrowIfCancellation()
-                showError(e)
-            }
-        }
-    }
-
-    private fun loadPlaceIssues() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val (rows, totalIssues) = withContext(Dispatchers.IO) {
-                    fetchPlaceIssues()
-                }
-                renderPlaceIssues(rows, totalIssues)
-            } catch (e: Throwable) {
-                // The issues list is secondary: when it cannot be fetched
-                // (typically offline) leave the section hidden rather than
-                // interrupting the area screen, which is fully usable offline.
-                e.rethrowIfCancellation()
-            }
-        }
-    }
-
-    /**
-     * Reads the area's upcoming events from the local cache instead of calling
-     * `GET /v4/areas/{id}/events`.
-     *
-     * The v4 events payload does not carry `area_id`, so the association cannot
-     * be looked up by column. The server links an event to an area by
-     * pre-filtering on the area's bbox and then running a point-in-polygon test
-     * against its GeoJSON; the same rule is applied here to the cached area
-     * geometry, mirroring [org.btcmap.map.MapAreasController].
-     */
-    private fun fetchAreaEvents(area: Area): List<GetEventsItem> {
-        val west = area.bboxWest ?: return emptyList()
-        val south = area.bboxSouth ?: return emptyList()
-        val east = area.bboxEast ?: return emptyList()
-        val north = area.bboxNorth ?: return emptyList()
-
-        val geometry = area.geoJsonGeometry()
-        return db().event.selectByBounds(south, north, west, east)
-            .filter { it.isWithin(geometry) }
-            .map { it.toGetEventsItem() }
-    }
-
-    private fun Event.toGetEventsItem(): GetEventsItem {
-        return GetEventsItem(
-            id = id,
-            areaId = areaId,
-            lat = lat,
-            lon = lon,
-            name = name,
-            website = website,
-            startsAt = startsAt,
-            endsAt = endsAt,
-        )
     }
 
     private fun onSaveClicked() {
@@ -304,6 +218,7 @@ class AreaFragment : Fragment() {
                 .isAppearanceLightStatusBars = !isNightMode()
         }
         offlineMap = null
+        sections = null
         _binding = null
     }
 
@@ -382,141 +297,7 @@ class AreaFragment : Fragment() {
         }
     }
 
-    private fun renderUpcomingEvents(events: List<GetEventsItem>) {
-        val sorted = upcomingEvents(events, ZonedDateTime.now(ZoneId.systemDefault()))
-
-        if (sorted.isEmpty()) return
-
-        val container = binding.upcomingEventsContainer
-        container.removeAllViews()
-        sorted.forEach { container.addEventCard(it) }
-        binding.eventsTitle.isVisible = true
-        container.isVisible = true
-    }
-
-    private fun ViewGroup.addEventCard(event: GetEventsItem) {
-        val card = ItemAreaCardBinding.inflate(layoutInflater, this, true)
-        val icon = ImageView(requireContext()).apply {
-            setImageResource(R.drawable.icon_event)
-            imageTintList = ColorStateList.valueOf(
-                MaterialColors.getColor(
-                    this,
-                    com.google.android.material.R.attr.colorSecondary,
-                    0,
-                )
-            )
-        }
-        card.icon.addView(
-            icon,
-            FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-            ),
-        )
-        card.title.text = event.name
-        card.subtitle.text = event.startsAt.format(eventDateFormat)
-        card.root.setOnClickListener {
-            parentFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<EventFragment>(R.id.fragmentContainerView, null, event.toBundle())
-                addToBackStack(null)
-            }
-        }
-    }
-
-    private data class IssueRow(
-        val issue: GetPlaceIssuesItem,
-        val place: Place?,
-    )
-
-    private suspend fun fetchPlaceIssues(): Pair<List<IssueRow>, Int> {
-        val response = api().getPlaceIssues(areaId, PLACE_ISSUES_LIMIT)
-        val rows = response.requestedIssues.map { issue ->
-            IssueRow(
-                issue = issue,
-                place = db().place.selectByOsmId(
-                    "${issue.elementOsmType}:${issue.elementOsmId}",
-                ),
-            )
-        }
-
-        return rows to response.totalIssues
-    }
-
-    private fun renderPlaceIssues(rows: List<IssueRow>, totalIssues: Int) {
-        if (rows.isEmpty()) return
-
-        val density = resources.displayMetrics.density
-        val container = binding.issuesContainer
-
-        val topMarginDp = if (binding.upcomingEventsContainer.isVisible) 8 else 24
-        (binding.issuesHeader.layoutParams as ViewGroup.MarginLayoutParams).topMargin =
-            (topMarginDp * density).toInt()
-
-        container.removeAllViews()
-        rows.forEach { container.addIssueCard(it) }
-
-        binding.issuesTitle.text = if (rows.size < totalIssues) {
-            getString(R.string.issues_d_of_d, rows.size, totalIssues)
-        } else {
-            getString(R.string.issues_d, totalIssues)
-        }
-        binding.issuesHeader.isVisible = true
-        container.isVisible = true
-    }
-
-    private fun ViewGroup.addIssueCard(row: IssueRow) {
-        val card = ItemAreaCardBinding.inflate(layoutInflater, this, true)
-        val placeIcon = row.place?.icon?.takeIf { it.isNotBlank() }
-        val icon = TextView(requireContext()).apply {
-            typeface = iconTypeface
-            text = placeIcon ?: ISSUE_FALLBACK_ICON
-            setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24f)
-            setTextColor(
-                MaterialColors.getColor(
-                    this,
-                    if (placeIcon != null) {
-                        com.google.android.material.R.attr.colorSecondary
-                    } else {
-                        android.R.attr.colorError
-                    },
-                    0,
-                )
-            )
-            gravity = Gravity.CENTER
-        }
-        card.icon.addView(
-            icon,
-            FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-            ),
-        )
-        card.title.isVisible = row.issue.elementName.isNotBlank()
-        card.title.text = row.issue.elementName
-        card.subtitle.text = issueDescription(row.issue.issueCode)
-        card.root.setOnClickListener {
-            openInBrowser(
-                "https://www.openstreetmap.org/edit?${row.issue.elementOsmType}=${row.issue.elementOsmId}"
-                    .toUri(),
-            )
-        }
-    }
-
-    private fun issueDescription(code: String): String {
-        val description = describeIssue(code)
-        return if (description.formatArg != null) {
-            getString(description.resId, description.formatArg)
-        } else {
-            getString(description.resId)
-        }
-    }
-
     companion object {
-        private const val PLACE_ISSUES_LIMIT = 50L
-
-        private const val ISSUE_FALLBACK_ICON = "warning"
-
         private const val JOIN_US_URL = "https://btcmap.org/join-us"
 
         private const val EXTRA_AUTH_ACTION = "auth-action"
