@@ -13,6 +13,7 @@ import android.view.animation.LinearInterpolator
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.isVisible
 import org.btcmap.R
 import org.btcmap.settings.buttonBackgroundColor
 import org.btcmap.settings.buttonBorderColor
@@ -100,7 +101,7 @@ class IconButton @JvmOverloads constructor(
         val target = pendingVisible ?: return
         pendingVisible = null
 
-        if (target && visibility == VISIBLE && alpha == shownAlpha) return
+        if (target && isVisible && alpha == shownAlpha) return
         if (!target && visibility != VISIBLE) return
 
         if (visibility != VISIBLE) {

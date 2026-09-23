@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">Λανθασμένο όνομα ετικέτας: %1$s</string>
     <string name="issue_unknown">Άγνωστο πρόβλημα</string>
     <string name="how_to_help">Πώς μπορώ να βοηθήσω;</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Δεν υπάρχουν ακόμη σχόλια</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Χάρτης εκτός σύνδεσης</string>
+    <string name="offline_map_download">Λήψη χάρτη</string>
+    <string name="offline_map_download_again">Λήψη ξανά</string>
+    <string name="offline_map_description">Κατεβάστε τον χάρτη του %1$s για χρήση εκτός σύνδεσης, ώστε να παραμένει διαθέσιμος χωρίς σύνδεση.</string>
+    <string name="offline_map_max_zoom">Μέγιστο zoom: %1$d</string>
+    <string name="offline_map_estimated_size">Εκτιμώμενο μέγεθος: ~%1$s</string>
+    <string name="offline_map_too_large">Πολύ μεγάλο για λήψη εκτός σύνδεσης (εκτίμηση %1$s).</string>
+    <string name="offline_map_estimate_note">Αυτή είναι μόνο μια εκτίμηση. Το πραγματικό μέγεθος εξαρτάται από το πόσα δεδομένα χάρτη περιέχει η περιοχή.</string>
+    <string name="offline_map_style">Στυλ χάρτη: %1$s</string>
+    <string name="offline_map_status_downloading">Λήψη… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Λήψη… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Λήφθηκε · %1$s · zoom %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Η λήψη απέτυχε: %1$s</string>
+    <string name="offline_map_style_mismatch">Λήφθηκε για διαφορετικό στυλ χάρτη. Κάντε λήψη ξανά για να το χρησιμοποιήσετε με το τρέχον στυλ.</string>
+    <string name="offline_map_delete_title">Διαγραφή χάρτη εκτός σύνδεσης;</string>
+    <string name="offline_map_delete_message">Τα ληφθέντα πλακίδια για αυτήν την περιοχή θα αφαιρεθούν από αυτήν τη συσκευή.</string>
+    <string name="verification_warning_title">Απαιτείται επαλήθευση</string>
+    <string name="verification_warning_outdated">Αυτό το μέρος επαληθεύτηκε τελευταία φορά πριν από περισσότερο από ένα χρόνο, επομένως τα στοιχεία του μπορεί να είναι ξεπερασμένα. Αν γνωρίζετε ότι εξακολουθεί να δέχεται sats, πατήστε Επαλήθευση. Αν γνωρίζετε ότι δεν το κάνει πια, πατήστε Αναφορά.</string>
+    <string name="verification_warning_not_verified">Αυτό το μέρος δεν έχει επαληθευτεί ακόμη, επομένως τα στοιχεία του μπορεί να μην είναι αξιόπιστα. Αν γνωρίζετε ότι εξακολουθεί να δέχεται sats, πατήστε Επαλήθευση. Αν γνωρίζετε ότι δεν το κάνει πια, πατήστε Αναφορά.</string>
 </resources>

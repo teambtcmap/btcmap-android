@@ -152,7 +152,12 @@ class EventFragment : Fragment() {
                 val date = start.format(dateFormatter)
                 val startTime = start.format(timeFormatter)
                 val endTime = end.format(timeFormatter)
-                binding.startDate.text = "$date, $startTime - $endTime"
+                binding.startDate.text = getString(
+                    R.string.event_date_time_range,
+                    date,
+                    startTime,
+                    endTime,
+                )
                 binding.endDate.isVisible = false
             }
 

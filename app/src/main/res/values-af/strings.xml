@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">Verkeerd gespelde etiketnaam: %1$s</string>
     <string name="issue_unknown">Onbekende probleem</string>
     <string name="how_to_help">Hoe kan ek help?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Nog geen kommentaar nie</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Aflynkaart</string>
+    <string name="offline_map_download">Laai kaart af</string>
+    <string name="offline_map_download_again">Laai weer af</string>
+    <string name="offline_map_description">Laai die kaart van %1$s af vir aflyngebruik, sodat dit sonder \'n verbinding beskikbaar bly.</string>
+    <string name="offline_map_max_zoom">Maksimum zoem: %1$d</string>
+    <string name="offline_map_estimated_size">Geskatte grootte: ~%1$s</string>
+    <string name="offline_map_too_large">Te groot om aflyn af te laai (geskat %1$s).</string>
+    <string name="offline_map_estimate_note">Dit is slegs \'n skatting. Die werklike grootte hang af van hoeveel kaartdata die gebied bevat.</string>
+    <string name="offline_map_style">Kaartstyl: %1$s</string>
+    <string name="offline_map_status_downloading">Laai af… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Laai af… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Afgelaai · %1$s · zoem %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Aflaai het misluk: %1$s</string>
+    <string name="offline_map_style_mismatch">Afgelaai vir \'n ander kaartstyl. Laai weer af om dit met die huidige styl te gebruik.</string>
+    <string name="offline_map_delete_title">Vee aflynkaart uit?</string>
+    <string name="offline_map_delete_message">Die afgelaai teëls vir hierdie gebied sal van hierdie toestel verwyder word.</string>
+    <string name="verification_warning_title">Verifikasie nodig</string>
+    <string name="verification_warning_outdated">Hierdie plek is laas meer as \'n jaar gelede geverifieer, so die besonderhede kan verouderd wees. As jy weet dat dit steeds sats aanvaar, tik Verifieer. As jy weet dat dit dit nie meer doen nie, tik Rapporteer.</string>
+    <string name="verification_warning_not_verified">Hierdie plek is nog nie geverifieer nie, so die besonderhede kan onbetroubaar wees. As jy weet dat dit steeds sats aanvaar, tik Verifieer. As jy weet dat dit dit nie meer doen nie, tik Rapporteer.</string>
 </resources>

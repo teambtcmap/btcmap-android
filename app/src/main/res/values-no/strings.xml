@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">Feilstavet tagnavn: %1$s</string>
     <string name="issue_unknown">Ukjent problem</string>
     <string name="how_to_help">Hvordan kan jeg hjelpe?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Ingen kommentarer ennå</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Frakoblet kart</string>
+    <string name="offline_map_download">Last ned kart</string>
+    <string name="offline_map_download_again">Last ned på nytt</string>
+    <string name="offline_map_description">Last ned kartet over %1$s for bruk frakoblet, slik at det forblir tilgjengelig uten tilkobling.</string>
+    <string name="offline_map_max_zoom">Maksimal zoom: %1$d</string>
+    <string name="offline_map_estimated_size">Anslått størrelse: ~%1$s</string>
+    <string name="offline_map_too_large">For stort til å lastes ned frakoblet (anslått %1$s).</string>
+    <string name="offline_map_estimate_note">Dette er bare et anslag. Den faktiske størrelsen avhenger av hvor mye kartdata området inneholder.</string>
+    <string name="offline_map_style">Kartstil: %1$s</string>
+    <string name="offline_map_status_downloading">Laster ned… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Laster ned… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Lastet ned · %1$s · zoom %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Nedlasting mislyktes: %1$s</string>
+    <string name="offline_map_style_mismatch">Lastet ned for en annen kartstil. Last ned på nytt for å bruke det med gjeldende stil.</string>
+    <string name="offline_map_delete_title">Slette frakoblet kart?</string>
+    <string name="offline_map_delete_message">De nedlastede flisene for dette området fjernes fra denne enheten.</string>
+    <string name="verification_warning_title">Verifisering kreves</string>
+    <string name="verification_warning_outdated">Dette stedet ble sist verifisert for mer enn ett år siden, så detaljene kan være utdaterte. Hvis du vet at det fortsatt godtar sats, trykk på Bekreft. Hvis du vet at det ikke gjør det lenger, trykk på Rapporter.</string>
+    <string name="verification_warning_not_verified">Dette stedet er ikke verifisert ennå, så detaljene kan være upålitelige. Hvis du vet at det fortsatt godtar sats, trykk på Bekreft. Hvis du vet at det ikke gjør det lenger, trykk på Rapporter.</string>
 </resources>

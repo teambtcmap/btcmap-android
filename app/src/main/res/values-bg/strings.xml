@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">Неправилно изписан етикет: %1$s</string>
     <string name="issue_unknown">Неизвестен проблем</string>
     <string name="how_to_help">Как да помогна?</string>
+    <string name="app_name_beta">BTC Map Бета</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Още няма коментари</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Офлайн карта</string>
+    <string name="offline_map_download">Изтегляне на картата</string>
+    <string name="offline_map_download_again">Изтегляне отново</string>
+    <string name="offline_map_description">Изтеглете картата на %1$s за офлайн употреба, за да остане достъпна без връзка.</string>
+    <string name="offline_map_max_zoom">Максимално увеличение: %1$d</string>
+    <string name="offline_map_estimated_size">Приблизителен размер: ~%1$s</string>
+    <string name="offline_map_too_large">Твърде голяма за офлайн изтегляне (приблизително %1$s).</string>
+    <string name="offline_map_estimate_note">Това е само приблизителна оценка. Действителният размер зависи от това колко картографски данни съдържа районът.</string>
+    <string name="offline_map_style">Стил на картата: %1$s</string>
+    <string name="offline_map_status_downloading">Изтегляне… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Изтегляне… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Изтеглено · %1$s · увеличение %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Изтеглянето не успя: %1$s</string>
+    <string name="offline_map_style_mismatch">Изтеглено за различен стил на картата. Изтеглете отново, за да го използвате с текущия стил.</string>
+    <string name="offline_map_delete_title">Изтриване на офлайн картата?</string>
+    <string name="offline_map_delete_message">Изтеглените плочки за този район ще бъдат премахнати от това устройство.</string>
+    <string name="verification_warning_title">Необходима е проверка</string>
+    <string name="verification_warning_outdated">Това място е проверявано за последно преди повече от година, така че данните му може да са остарели. Ако знаете, че все още приема sats, натиснете Потвърди. Ако знаете, че вече не приема, натиснете Докладвай.</string>
+    <string name="verification_warning_not_verified">Това място още не е проверявано, така че данните му може да са ненадеждни. Ако знаете, че все още приема sats, натиснете Потвърди. Ако знаете, че вече не приема, натиснете Докладвай.</string>
 </resources>

@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Translate the offline map, verification warning and "no comments yet" strings, and the beta app name, into all supported languages
 - Keep a sign-in or sign-up request running when the screen is rotated, instead of silently dropping it when the screen is recreated
 - Clear a validation error from the add-place form once the field is filled in, instead of leaving "Required" on a corrected field
 - Show validation errors inline under the field in the account, add-place and change-username forms, instead of as a floating error popup

@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">Yanlış yazılmış etiket adı: %1$s</string>
     <string name="issue_unknown">Bilinmeyen sorun</string>
     <string name="how_to_help">Nasıl yardımcı olabilirim?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Henüz yorum yok</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Çevrimdışı harita</string>
+    <string name="offline_map_download">Haritayı indir</string>
+    <string name="offline_map_download_again">Yeniden indir</string>
+    <string name="offline_map_description">Çevrimdışı kullanım için %1$s haritasını indirin, böylece bağlantı olmadan da kullanılabilir kalsın.</string>
+    <string name="offline_map_max_zoom">Maksimum yakınlaştırma: %1$d</string>
+    <string name="offline_map_estimated_size">Tahmini boyut: ~%1$s</string>
+    <string name="offline_map_too_large">Çevrimdışı indirmek için çok büyük (tahmini %1$s).</string>
+    <string name="offline_map_estimate_note">Bu yalnızca bir tahmindir. Gerçek boyut, bölgenin ne kadar harita verisi içerdiğine bağlıdır.</string>
+    <string name="offline_map_style">Harita stili: %1$s</string>
+    <string name="offline_map_status_downloading">İndiriliyor… %1$s</string>
+    <string name="offline_map_status_downloading_progress">İndiriliyor… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">İndirildi · %1$s · yakınlaştırma %2$d–%3$d</string>
+    <string name="offline_map_status_failed">İndirme başarısız: %1$s</string>
+    <string name="offline_map_style_mismatch">Farklı bir harita stili için indirildi. Geçerli stille kullanmak için yeniden indirin.</string>
+    <string name="offline_map_delete_title">Çevrimdışı harita silinsin mi?</string>
+    <string name="offline_map_delete_message">Bu bölge için indirilen döşemeler bu cihazdan kaldırılacak.</string>
+    <string name="verification_warning_title">Doğrulama gerekli</string>
+    <string name="verification_warning_outdated">Bu yer en son bir yıldan uzun süre önce doğrulandı, bu nedenle ayrıntıları güncel olmayabilir. Hâlâ sats kabul ettiğini biliyorsanız Doğrula\'ya dokunun. Artık kabul etmediğini biliyorsanız Bildir\'e dokunun.</string>
+    <string name="verification_warning_not_verified">Bu yer henüz doğrulanmadı, bu nedenle ayrıntıları güvenilir olmayabilir. Hâlâ sats kabul ettiğini biliyorsanız Doğrula\'ya dokunun. Artık kabul etmediğini biliyorsanız Bildir\'e dokunun.</string>
 </resources>

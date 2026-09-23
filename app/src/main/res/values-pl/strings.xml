@@ -194,4 +194,27 @@
     <string name="issue_misspelled_tag_name">Błędnie zapisana nazwa tagu: %1$s</string>
     <string name="issue_unknown">Nieznany problem</string>
     <string name="how_to_help">Jak mogę pomóc?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Brak komentarzy</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Mapa offline</string>
+    <string name="offline_map_download">Pobierz mapę</string>
+    <string name="offline_map_download_again">Pobierz ponownie</string>
+    <string name="offline_map_description">Pobierz mapę %1$s do użytku offline, aby była dostępna bez połączenia.</string>
+    <string name="offline_map_max_zoom">Maksymalne powiększenie: %1$d</string>
+    <string name="offline_map_estimated_size">Szacowany rozmiar: ~%1$s</string>
+    <string name="offline_map_too_large">Zbyt duża do pobrania offline (szacowany %1$s).</string>
+    <string name="offline_map_estimate_note">To tylko szacunek. Rzeczywisty rozmiar zależy od ilości danych mapowych w tym obszarze.</string>
+    <string name="offline_map_style">Styl mapy: %1$s</string>
+    <string name="offline_map_status_downloading">Pobieranie… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Pobieranie… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Pobrano · %1$s · powiększenie %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Pobieranie nie powiodło się: %1$s</string>
+    <string name="offline_map_style_mismatch">Pobrano dla innego stylu mapy. Pobierz ponownie, aby używać jej z bieżącym stylem.</string>
+    <string name="offline_map_delete_title">Usunąć mapę offline?</string>
+    <string name="offline_map_delete_message">Pobrane kafle dla tego obszaru zostaną usunięte z tego urządzenia.</string>
+    <string name="verification_warning_title">Wymagana weryfikacja</string>
+    <string name="verification_warning_outdated">To miejsce zostało ostatnio zweryfikowane ponad rok temu, więc jego dane mogą być nieaktualne. Jeśli wiesz, że nadal przyjmuje saty, dotknij Zweryfikuj. Jeśli wiesz, że już nie, dotknij Zgłoś.</string>
+    <string name="verification_warning_not_verified">To miejsce nie zostało jeszcze zweryfikowane, więc jego dane mogą być niewiarygodne. Jeśli wiesz, że nadal przyjmuje saty, dotknij Zweryfikuj. Jeśli wiesz, że już nie, dotknij Zgłoś.</string>
 </resources>

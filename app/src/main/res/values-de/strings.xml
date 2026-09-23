@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">Falsch geschriebener Tag-Name: %1$s</string>
     <string name="issue_unknown">Unbekanntes Problem</string>
     <string name="how_to_help">Wie kann ich helfen?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Noch keine Kommentare</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Offline-Karte</string>
+    <string name="offline_map_download">Karte herunterladen</string>
+    <string name="offline_map_download_again">Erneut herunterladen</string>
+    <string name="offline_map_description">Lade die Karte von %1$s für die Offline-Nutzung herunter, damit sie ohne Verbindung verfügbar bleibt.</string>
+    <string name="offline_map_max_zoom">Maximaler Zoom: %1$d</string>
+    <string name="offline_map_estimated_size">Geschätzte Größe: ~%1$s</string>
+    <string name="offline_map_too_large">Zu groß für den Offline-Download (geschätzt %1$s).</string>
+    <string name="offline_map_estimate_note">Dies ist nur eine Schätzung. Die tatsächliche Größe hängt davon ab, wie viele Kartendaten das Gebiet enthält.</string>
+    <string name="offline_map_style">Kartenstil: %1$s</string>
+    <string name="offline_map_status_downloading">Wird heruntergeladen… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Wird heruntergeladen… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Heruntergeladen · %1$s · Zoom %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Download fehlgeschlagen: %1$s</string>
+    <string name="offline_map_style_mismatch">Für einen anderen Kartenstil heruntergeladen. Lade erneut herunter, um sie mit dem aktuellen Stil zu verwenden.</string>
+    <string name="offline_map_delete_title">Offline-Karte löschen?</string>
+    <string name="offline_map_delete_message">Die heruntergeladenen Kacheln für dieses Gebiet werden von diesem Gerät entfernt.</string>
+    <string name="verification_warning_title">Verifizierung erforderlich</string>
+    <string name="verification_warning_outdated">Dieser Ort wurde zuletzt vor mehr als einem Jahr verifiziert, daher können die Angaben veraltet sein. Wenn du weißt, dass er noch sats akzeptiert, tippe auf Verifizieren. Wenn du weißt, dass er es nicht mehr tut, tippe auf Melden.</string>
+    <string name="verification_warning_not_verified">Dieser Ort wurde noch nicht verifiziert, daher können die Angaben unzuverlässig sein. Wenn du weißt, dass er noch sats akzeptiert, tippe auf Verifizieren. Wenn du weißt, dass er es nicht mehr tut, tippe auf Melden.</string>
 </resources>

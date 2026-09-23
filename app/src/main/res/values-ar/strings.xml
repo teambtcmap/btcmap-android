@@ -202,4 +202,27 @@
     <string name="issue_misspelled_tag_name">اسم وسم مكتوب خطأً: %1$s</string>
     <string name="issue_unknown">مشكلة غير معروفة</string>
     <string name="how_to_help">كيف يمكنني المساعدة؟</string>
+    <string name="app_name_beta">BTC Map بيتا</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">لا توجد تعليقات بعد</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">خريطة دون اتصال</string>
+    <string name="offline_map_download">تنزيل الخريطة</string>
+    <string name="offline_map_download_again">تنزيل مرة أخرى</string>
+    <string name="offline_map_description">نزّل خريطة %1$s للاستخدام دون اتصال، لتبقى متاحة بدون اتصال بالإنترنت.</string>
+    <string name="offline_map_max_zoom">أقصى تكبير: %1$d</string>
+    <string name="offline_map_estimated_size">الحجم المقدّر: ~%1$s</string>
+    <string name="offline_map_too_large">كبير جدًا للتنزيل دون اتصال (المقدّر %1$s).</string>
+    <string name="offline_map_estimate_note">هذا تقدير فقط. يعتمد الحجم الفعلي على كمية بيانات الخريطة التي تحتوي عليها المنطقة.</string>
+    <string name="offline_map_style">نمط الخريطة: %1$s</string>
+    <string name="offline_map_status_downloading">جارٍ التنزيل… %1$s</string>
+    <string name="offline_map_status_downloading_progress">جارٍ التنزيل… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">تم التنزيل · %1$s · تكبير %2$d–%3$d</string>
+    <string name="offline_map_status_failed">فشل التنزيل: %1$s</string>
+    <string name="offline_map_style_mismatch">تم التنزيل لنمط خريطة مختلف. نزّله مرة أخرى لاستخدامه مع النمط الحالي.</string>
+    <string name="offline_map_delete_title">حذف الخريطة دون اتصال؟</string>
+    <string name="offline_map_delete_message">ستتم إزالة البلاطات التي تم تنزيلها لهذه المنطقة من هذا الجهاز.</string>
+    <string name="verification_warning_title">التحقق مطلوب</string>
+    <string name="verification_warning_outdated">تم التحقق من هذا المكان آخر مرة منذ أكثر من عام، لذا قد تكون تفاصيله قديمة. إذا كنت تعلم أنه لا يزال يقبل sats، اضغط على تحقق. إذا كنت تعلم أنه لم يعد كذلك، اضغط على إبلاغ.</string>
+    <string name="verification_warning_not_verified">لم يتم التحقق من هذا المكان بعد، لذا قد تكون تفاصيله غير موثوقة. إذا كنت تعلم أنه لا يزال يقبل sats، اضغط على تحقق. إذا كنت تعلم أنه لم يعد كذلك، اضغط على إبلاغ.</string>
 </resources>

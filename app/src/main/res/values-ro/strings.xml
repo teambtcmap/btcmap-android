@@ -190,4 +190,27 @@
     <string name="issue_misspelled_tag_name">Nume de etichetă scris greșit: %1$s</string>
     <string name="issue_unknown">Problemă necunoscută</string>
     <string name="how_to_help">Cum pot ajuta?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Încă nu există comentarii</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Hartă offline</string>
+    <string name="offline_map_download">Descarcă harta</string>
+    <string name="offline_map_download_again">Descarcă din nou</string>
+    <string name="offline_map_description">Descarcă harta %1$s pentru utilizare offline, ca să rămână disponibilă fără conexiune.</string>
+    <string name="offline_map_max_zoom">Zoom maxim: %1$d</string>
+    <string name="offline_map_estimated_size">Dimensiune estimată: ~%1$s</string>
+    <string name="offline_map_too_large">Prea mare pentru descărcare offline (estimată %1$s).</string>
+    <string name="offline_map_estimate_note">Aceasta este doar o estimare. Dimensiunea reală depinde de cât de multe date cartografice conține zona.</string>
+    <string name="offline_map_style">Stil hartă: %1$s</string>
+    <string name="offline_map_status_downloading">Se descarcă… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Se descarcă… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Descărcată · %1$s · zoom %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Descărcarea a eșuat: %1$s</string>
+    <string name="offline_map_style_mismatch">Descărcată pentru un alt stil de hartă. Descarcă din nou pentru a o folosi cu stilul actual.</string>
+    <string name="offline_map_delete_title">Ștergi harta offline?</string>
+    <string name="offline_map_delete_message">Plăcile descărcate pentru această zonă vor fi eliminate de pe acest dispozitiv.</string>
+    <string name="verification_warning_title">Este necesară verificarea</string>
+    <string name="verification_warning_outdated">Acest loc a fost verificat ultima dată acum mai bine de un an, așa că detaliile pot fi învechite. Dacă știi că acceptă în continuare sats, apasă Verifică. Dacă știi că nu mai acceptă, apasă Raportează.</string>
+    <string name="verification_warning_not_verified">Acest loc nu a fost încă verificat, așa că detaliile pot fi nesigure. Dacă știi că acceptă în continuare sats, apasă Verifică. Dacă știi că nu mai acceptă, apasă Raportează.</string>
 </resources>

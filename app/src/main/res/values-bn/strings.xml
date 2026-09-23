@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">ভুল বানানের ট্যাগ নাম: %1$s</string>
     <string name="issue_unknown">অজানা সমস্যা</string>
     <string name="how_to_help">কীভাবে সাহায্য করব?</string>
+    <string name="app_name_beta">BTC Map বিটা</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">এখনও কোনো মন্তব্য নেই</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">অফলাইন মানচিত্র</string>
+    <string name="offline_map_download">মানচিত্র ডাউনলোড করুন</string>
+    <string name="offline_map_download_again">আবার ডাউনলোড করুন</string>
+    <string name="offline_map_description">অফলাইনে ব্যবহারের জন্য %1$s-এর মানচিত্র ডাউনলোড করুন, যাতে সংযোগ ছাড়াই এটি পাওয়া যায়।</string>
+    <string name="offline_map_max_zoom">সর্বোচ্চ জুম: %1$d</string>
+    <string name="offline_map_estimated_size">আনুমানিক আকার: ~%1$s</string>
+    <string name="offline_map_too_large">অফলাইনে ডাউনলোড করার জন্য অনেক বড় (আনুমানিক %1$s)।</string>
+    <string name="offline_map_estimate_note">এটি কেবল একটি আনুমানিক হিসাব। প্রকৃত আকার নির্ভর করে এলাকাটিতে কতটা মানচিত্র ডেটা আছে তার উপর।</string>
+    <string name="offline_map_style">মানচিত্রের স্টাইল: %1$s</string>
+    <string name="offline_map_status_downloading">ডাউনলোড হচ্ছে… %1$s</string>
+    <string name="offline_map_status_downloading_progress">ডাউনলোড হচ্ছে… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">ডাউনলোড হয়েছে · %1$s · জুম %2$d–%3$d</string>
+    <string name="offline_map_status_failed">ডাউনলোড ব্যর্থ: %1$s</string>
+    <string name="offline_map_style_mismatch">একটি ভিন্ন মানচিত্র স্টাইলের জন্য ডাউনলোড করা হয়েছে। বর্তমান স্টাইলের সাথে ব্যবহার করতে আবার ডাউনলোড করুন।</string>
+    <string name="offline_map_delete_title">অফলাইন মানচিত্র মুছবেন?</string>
+    <string name="offline_map_delete_message">এই এলাকার ডাউনলোড করা টাইলগুলি এই ডিভাইস থেকে সরানো হবে।</string>
+    <string name="verification_warning_title">যাচাইকরণ প্রয়োজন</string>
+    <string name="verification_warning_outdated">এই স্থানটি এক বছরেরও বেশি সময় আগে সর্বশেষ যাচাই করা হয়েছিল, তাই এর বিবরণ পুরনো হতে পারে। যদি আপনি জানেন যে এটি এখনও sats গ্রহণ করে, যাচাই করুন চাপুন। যদি আপনি জানেন যে আর করে না, রিপোর্ট করুন চাপুন।</string>
+    <string name="verification_warning_not_verified">এই স্থানটি এখনও যাচাই করা হয়নি, তাই এর বিবরণ নির্ভরযোগ্য নাও হতে পারে। যদি আপনি জানেন যে এটি এখনও sats গ্রহণ করে, যাচাই করুন চাপুন। যদি আপনি জানেন যে আর করে না, রিপোর্ট করুন চাপুন।</string>
 </resources>

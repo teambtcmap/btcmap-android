@@ -376,7 +376,7 @@ class MapFragment : Fragment() {
                         local
                     } else {
                         try {
-                            api().getEvent(eventId)?.toBundle()
+                            api().getEvent(eventId).toBundle()
                         } catch (t: Throwable) {
                             t.rethrowIfCancellation()
                             null

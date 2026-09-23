@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">Verkeerd gespelde tagnaam: %1$s</string>
     <string name="issue_unknown">Onbekend probleem</string>
     <string name="how_to_help">Hoe kan ik helpen?</string>
+    <string name="app_name_beta">BTC Map Bèta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Nog geen reacties</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Offlinekaart</string>
+    <string name="offline_map_download">Kaart downloaden</string>
+    <string name="offline_map_download_again">Opnieuw downloaden</string>
+    <string name="offline_map_description">Download de kaart van %1$s voor offline gebruik, zodat deze beschikbaar blijft zonder verbinding.</string>
+    <string name="offline_map_max_zoom">Maximale zoom: %1$d</string>
+    <string name="offline_map_estimated_size">Geschatte grootte: ~%1$s</string>
+    <string name="offline_map_too_large">Te groot om offline te downloaden (geschat %1$s).</string>
+    <string name="offline_map_estimate_note">Dit is slechts een schatting. De werkelijke grootte hangt af van hoeveel kaartgegevens het gebied bevat.</string>
+    <string name="offline_map_style">Kaartstijl: %1$s</string>
+    <string name="offline_map_status_downloading">Downloaden… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Downloaden… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Gedownload · %1$s · zoom %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Download mislukt: %1$s</string>
+    <string name="offline_map_style_mismatch">Gedownload voor een andere kaartstijl. Download opnieuw om het met de huidige stijl te gebruiken.</string>
+    <string name="offline_map_delete_title">Offlinekaart verwijderen?</string>
+    <string name="offline_map_delete_message">De gedownloade tegels voor dit gebied worden van dit apparaat verwijderd.</string>
+    <string name="verification_warning_title">Verificatie vereist</string>
+    <string name="verification_warning_outdated">Deze plek is voor het laatst meer dan een jaar geleden geverifieerd, dus de gegevens kunnen verouderd zijn. Als je weet dat er nog steeds sats worden geaccepteerd, tik op Verifiëren. Als je weet dat dit niet meer het geval is, tik op Rapporteren.</string>
+    <string name="verification_warning_not_verified">Deze plek is nog niet geverifieerd, dus de gegevens zijn mogelijk onbetrouwbaar. Als je weet dat er nog steeds sats worden geaccepteerd, tik op Verifiëren. Als je weet dat dit niet meer het geval is, tik op Rapporteren.</string>
 </resources>

@@ -182,4 +182,27 @@
     <string name="issue_misspelled_tag_name">ชื่อแท็กสะกดผิด: %1$s</string>
     <string name="issue_unknown">ปัญหาที่ไม่รู้จัก</string>
     <string name="how_to_help">ช่วยได้อย่างไร?</string>
+    <string name="app_name_beta">BTC Map เบต้า</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">ยังไม่มีความคิดเห็น</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">แผนที่ออฟไลน์</string>
+    <string name="offline_map_download">ดาวน์โหลดแผนที่</string>
+    <string name="offline_map_download_again">ดาวน์โหลดอีกครั้ง</string>
+    <string name="offline_map_description">ดาวน์โหลดแผนที่ของ %1$s ไว้ใช้แบบออฟไลน์ เพื่อให้ยังใช้งานได้เมื่อไม่มีการเชื่อมต่อ</string>
+    <string name="offline_map_max_zoom">ซูมสูงสุด: %1$d</string>
+    <string name="offline_map_estimated_size">ขนาดโดยประมาณ: ~%1$s</string>
+    <string name="offline_map_too_large">ใหญ่เกินไปที่จะดาวน์โหลดแบบออฟไลน์ (ประมาณ %1$s)</string>
+    <string name="offline_map_estimate_note">นี่เป็นเพียงการประมาณเท่านั้น ขนาดจริงขึ้นอยู่กับว่าพื้นที่นั้นมีข้อมูลแผนที่มากน้อยเพียงใด</string>
+    <string name="offline_map_style">สไตล์แผนที่: %1$s</string>
+    <string name="offline_map_status_downloading">กำลังดาวน์โหลด… %1$s</string>
+    <string name="offline_map_status_downloading_progress">กำลังดาวน์โหลด… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">ดาวน์โหลดแล้ว · %1$s · ซูม %2$d–%3$d</string>
+    <string name="offline_map_status_failed">ดาวน์โหลดล้มเหลว: %1$s</string>
+    <string name="offline_map_style_mismatch">ดาวน์โหลดไว้สำหรับสไตล์แผนที่อื่น ดาวน์โหลดอีกครั้งเพื่อใช้กับสไตล์ปัจจุบัน</string>
+    <string name="offline_map_delete_title">ลบแผนที่ออฟไลน์หรือไม่?</string>
+    <string name="offline_map_delete_message">ไทล์ที่ดาวน์โหลดไว้สำหรับพื้นที่นี้จะถูกลบออกจากอุปกรณ์นี้</string>
+    <string name="verification_warning_title">ต้องมีการยืนยัน</string>
+    <string name="verification_warning_outdated">สถานที่นี้ได้รับการยืนยันครั้งสุดท้ายเมื่อกว่าหนึ่งปีที่แล้ว รายละเอียดจึงอาจล้าสมัย หากคุณทราบว่ายังรับ sats อยู่ ให้แตะยืนยัน หากคุณทราบว่าไม่รับแล้ว ให้แตะรายงาน</string>
+    <string name="verification_warning_not_verified">สถานที่นี้ยังไม่ได้รับการยืนยัน รายละเอียดจึงอาจไม่น่าเชื่อถือ หากคุณทราบว่ายังรับ sats อยู่ ให้แตะยืนยัน หากคุณทราบว่าไม่รับแล้ว ให้แตะรายงาน</string>
 </resources>

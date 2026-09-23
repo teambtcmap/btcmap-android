@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">غلط املا والا ٹیگ نام: %1$s</string>
     <string name="issue_unknown">نامعلوم مسئلہ</string>
     <string name="how_to_help">میں کیسے مدد کر سکتا ہوں؟</string>
+    <string name="app_name_beta">BTC Map بیٹا</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">ابھی تک کوئی تبصرہ نہیں</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">آف لائن نقشہ</string>
+    <string name="offline_map_download">نقشہ ڈاؤن لوڈ کریں</string>
+    <string name="offline_map_download_again">دوبارہ ڈاؤن لوڈ کریں</string>
+    <string name="offline_map_description">%1$s کا نقشہ آف لائن استعمال کے لیے ڈاؤن لوڈ کریں، تاکہ یہ بغیر کنکشن کے دستیاب رہے۔</string>
+    <string name="offline_map_max_zoom">زیادہ سے زیادہ زوم: %1$d</string>
+    <string name="offline_map_estimated_size">تخمینی سائز: ~%1$s</string>
+    <string name="offline_map_too_large">آف لائن ڈاؤن لوڈ کے لیے بہت بڑا (تخمینہ %1$s)۔</string>
+    <string name="offline_map_estimate_note">یہ صرف ایک اندازہ ہے۔ اصل سائز کا انحصار اس بات پر ہے کہ علاقے میں کتنا نقشہ ڈیٹا موجود ہے۔</string>
+    <string name="offline_map_style">نقشے کا انداز: %1$s</string>
+    <string name="offline_map_status_downloading">ڈاؤن لوڈ ہو رہا ہے… %1$s</string>
+    <string name="offline_map_status_downloading_progress">ڈاؤن لوڈ ہو رہا ہے… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">ڈاؤن لوڈ ہو گیا · %1$s · زوم %2$d–%3$d</string>
+    <string name="offline_map_status_failed">ڈاؤن لوڈ ناکام: %1$s</string>
+    <string name="offline_map_style_mismatch">مختلف نقشہ انداز کے لیے ڈاؤن لوڈ کیا گیا۔ موجودہ انداز کے ساتھ استعمال کرنے کے لیے دوبارہ ڈاؤن لوڈ کریں۔</string>
+    <string name="offline_map_delete_title">آف لائن نقشہ حذف کریں؟</string>
+    <string name="offline_map_delete_message">اس علاقے کے ڈاؤن لوڈ کردہ ٹائلز اس ڈیوائس سے ہٹا دیے جائیں گے۔</string>
+    <string name="verification_warning_title">تصدیق درکار ہے</string>
+    <string name="verification_warning_outdated">اس جگہ کی آخری بار ایک سال سے زیادہ پہلے تصدیق کی گئی تھی، اس لیے اس کی تفصیلات پرانی ہو سکتی ہیں۔ اگر آپ جانتے ہیں کہ یہ اب بھی sats قبول کرتی ہے تو تصدیق کریں پر ٹیپ کریں۔ اگر آپ جانتے ہیں کہ اب نہیں کرتی تو رپورٹ کریں پر ٹیپ کریں۔</string>
+    <string name="verification_warning_not_verified">اس جگہ کی ابھی تک تصدیق نہیں ہوئی، اس لیے اس کی تفصیلات ناقابل اعتماد ہو سکتی ہیں۔ اگر آپ جانتے ہیں کہ یہ اب بھی sats قبول کرتی ہے تو تصدیق کریں پر ٹیپ کریں۔ اگر آپ جانتے ہیں کہ اب نہیں کرتی تو رپورٹ کریں پر ٹیپ کریں۔</string>
 </resources>

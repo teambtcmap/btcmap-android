@@ -182,4 +182,27 @@
     <string name="issue_misspelled_tag_name">タグ名の綴りが間違っています: %1$s</string>
     <string name="issue_unknown">不明な問題</string>
     <string name="how_to_help">協力するには？</string>
+    <string name="app_name_beta">BTC Map ベータ</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">まだコメントはありません</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">オフラインマップ</string>
+    <string name="offline_map_download">マップをダウンロード</string>
+    <string name="offline_map_download_again">再ダウンロード</string>
+    <string name="offline_map_description">%1$sのマップをオフライン用にダウンロードすると、接続がなくても利用できます。</string>
+    <string name="offline_map_max_zoom">最大ズーム: %1$d</string>
+    <string name="offline_map_estimated_size">推定サイズ: 約%1$s</string>
+    <string name="offline_map_too_large">オフラインでダウンロードするには大きすぎます（推定%1$s）。</string>
+    <string name="offline_map_estimate_note">これはあくまで推定値です。実際のサイズは、その地域に含まれる地図データの量によって異なります。</string>
+    <string name="offline_map_style">マップスタイル: %1$s</string>
+    <string name="offline_map_status_downloading">ダウンロード中… %1$s</string>
+    <string name="offline_map_status_downloading_progress">ダウンロード中… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">ダウンロード済み · %1$s · ズーム %2$d～%3$d</string>
+    <string name="offline_map_status_failed">ダウンロードに失敗しました: %1$s</string>
+    <string name="offline_map_style_mismatch">別のマップスタイル用にダウンロードされています。現在のスタイルで使用するには再ダウンロードしてください。</string>
+    <string name="offline_map_delete_title">オフラインマップを削除しますか？</string>
+    <string name="offline_map_delete_message">この地域用にダウンロードしたタイルは、このデバイスから削除されます。</string>
+    <string name="verification_warning_title">確認が必要です</string>
+    <string name="verification_warning_outdated">この場所が最後に確認されたのは1年以上前なので、情報が古くなっている可能性があります。まだsatsを受け付けている場合は「確認」をタップしてください。受け付けなくなった場合は「報告」をタップしてください。</string>
+    <string name="verification_warning_not_verified">この場所はまだ確認されていないため、情報が信頼できない可能性があります。まだsatsを受け付けている場合は「確認」をタップしてください。受け付けなくなった場合は「報告」をタップしてください。</string>
 </resources>

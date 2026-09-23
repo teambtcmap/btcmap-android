@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">Elgépelt címkenév: %1$s</string>
     <string name="issue_unknown">Ismeretlen probléma</string>
     <string name="how_to_help">Hogyan segíthetek?</string>
+    <string name="app_name_beta">BTC Map Béta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Még nincsenek hozzászólások</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Offline térkép</string>
+    <string name="offline_map_download">Térkép letöltése</string>
+    <string name="offline_map_download_again">Letöltés újra</string>
+    <string name="offline_map_description">Töltse le %1$s térképét offline használatra, hogy kapcsolat nélkül is elérhető maradjon.</string>
+    <string name="offline_map_max_zoom">Maximális nagyítás: %1$d</string>
+    <string name="offline_map_estimated_size">Becsült méret: ~%1$s</string>
+    <string name="offline_map_too_large">Túl nagy az offline letöltéshez (becsült érték: %1$s).</string>
+    <string name="offline_map_estimate_note">Ez csak becslés. A tényleges méret attól függ, mennyi térképadatot tartalmaz a terület.</string>
+    <string name="offline_map_style">Térképstílus: %1$s</string>
+    <string name="offline_map_status_downloading">Letöltés… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Letöltés… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Letöltve · %1$s · nagyítás %2$d–%3$d</string>
+    <string name="offline_map_status_failed">A letöltés sikertelen: %1$s</string>
+    <string name="offline_map_style_mismatch">Másik térképstílushoz lett letöltve. Töltse le újra, hogy a jelenlegi stílussal használhassa.</string>
+    <string name="offline_map_delete_title">Törli az offline térképet?</string>
+    <string name="offline_map_delete_message">A területhez letöltött csempék eltávolításra kerülnek erről az eszközről.</string>
+    <string name="verification_warning_title">Ellenőrzés szükséges</string>
+    <string name="verification_warning_outdated">Ezt a helyet több mint egy éve ellenőrizték utoljára, így az adatai elavultak lehetnek. Ha tudja, hogy még mindig elfogad satot, koppintson az Ellenőrzés elemre. Ha tudja, hogy már nem, koppintson a Bejelentés elemre.</string>
+    <string name="verification_warning_not_verified">Ezt a helyet még nem ellenőrizték, így az adatai megbízhatatlanok lehetnek. Ha tudja, hogy még mindig elfogad satot, koppintson az Ellenőrzés elemre. Ha tudja, hogy már nem, koppintson a Bejelentés elemre.</string>
 </resources>

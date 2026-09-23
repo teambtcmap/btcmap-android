@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">BTC Map</string>
-    <string name="app_name_beta" tools:ignore="MissingTranslation">BTC Map Beta</string>
+    <!-- Each build type substitutes one of these into the manifest through
+         manifestPlaceholders, so one of them is unused in every other variant. -->
+    <string name="app_name" tools:ignore="UnusedResources">BTC Map</string>
+    <string name="app_name_beta" tools:ignore="UnusedResources">BTC Map Beta</string>
     <string name="add_location">Add location</string>
     <string name="icon">Icon</string>
     <string name="qr_code">QR code</string>
@@ -25,9 +27,11 @@
     <string name="error">Error</string>
     <string name="failed_to_load">Failed to load</string>
     <string name="tap_to_retry">Tap to retry</string>
+    <!-- Joins the two strings above in the centered empty/error placeholder. -->
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
     <string name="close">Close</string>
     <string name="comments">Comments</string>
-    <string name="no_comments_yet" tools:ignore="MissingTranslation">No comments yet</string>
+    <string name="no_comments_yet">No comments yet</string>
     <string name="add">Add</string>
     <string name="boost">Boost</string>
     <string name="boost_merchant">Boost Merchant</string>
@@ -73,6 +77,8 @@
     <string name="read_more">Read more</string>
     <string name="collapse">Collapse</string>
     <string name="events">Events</string>
+    <!-- Date, start time and end time of an event that starts and ends on the same day. -->
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
     <string name="issues_d">Issues (%1$d)</string>
     <string name="issues_d_of_d">Issues (%1$d of %2$d)</string>
     <string name="issue_outdated">Outdated, needs verification</string>
@@ -211,22 +217,22 @@
     </plurals>
     <string name="show_attribution">Show attribution</string>
     <string name="map_rotation">Allow map rotation</string>
-    <string name="offline_map" tools:ignore="MissingTranslation">Offline map</string>
-    <string name="offline_map_download" tools:ignore="MissingTranslation">Download map</string>
-    <string name="offline_map_download_again" tools:ignore="MissingTranslation">Download again</string>
-    <string name="offline_map_description" tools:ignore="MissingTranslation">Download the map of %1$s for offline use, so it stays available without a connection.</string>
-    <string name="offline_map_max_zoom" tools:ignore="MissingTranslation">Maximum zoom: %1$d</string>
-    <string name="offline_map_estimated_size" tools:ignore="MissingTranslation">Estimated size: ~%1$s</string>
-    <string name="offline_map_too_large" tools:ignore="MissingTranslation">Too large to download offline (estimated %1$s).</string>
-    <string name="offline_map_estimate_note" tools:ignore="MissingTranslation">This is only an estimate. The actual size depends on how much map data the area contains.</string>
-    <string name="offline_map_style" tools:ignore="MissingTranslation">Map style: %1$s</string>
-    <string name="offline_map_status_downloading" tools:ignore="MissingTranslation">Downloading… %1$s</string>
-    <string name="offline_map_status_downloading_progress" tools:ignore="MissingTranslation">Downloading… %1$d%% (%2$s)</string>
-    <string name="offline_map_status_downloaded" tools:ignore="MissingTranslation">Downloaded · %1$s · zoom %2$d–%3$d</string>
-    <string name="offline_map_status_failed" tools:ignore="MissingTranslation">Download failed: %1$s</string>
-    <string name="offline_map_style_mismatch" tools:ignore="MissingTranslation">Downloaded for a different map style. Download again to use it with the current style.</string>
-    <string name="offline_map_delete_title" tools:ignore="MissingTranslation">Delete offline map?</string>
-    <string name="offline_map_delete_message" tools:ignore="MissingTranslation">The downloaded tiles for this area will be removed from this device.</string>
+    <string name="offline_map">Offline map</string>
+    <string name="offline_map_download">Download map</string>
+    <string name="offline_map_download_again">Download again</string>
+    <string name="offline_map_description">Download the map of %1$s for offline use, so it stays available without a connection.</string>
+    <string name="offline_map_max_zoom">Maximum zoom: %1$d</string>
+    <string name="offline_map_estimated_size">Estimated size: ~%1$s</string>
+    <string name="offline_map_too_large">Too large to download offline (estimated %1$s).</string>
+    <string name="offline_map_estimate_note">This is only an estimate. The actual size depends on how much map data the area contains.</string>
+    <string name="offline_map_style">Map style: %1$s</string>
+    <string name="offline_map_status_downloading">Downloading… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Downloading… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Downloaded · %1$s · zoom %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Download failed: %1$s</string>
+    <string name="offline_map_style_mismatch">Downloaded for a different map style. Download again to use it with the current style.</string>
+    <string name="offline_map_delete_title">Delete offline map?</string>
+    <string name="offline_map_delete_message">The downloaded tiles for this area will be removed from this device.</string>
     <string name="osm_attribution">© OpenStreetMap contributors</string>
     <string name="osm_attribution_url" translatable="false">https://www.openstreetmap.org/about/</string>
     <string name="add_location_drag_to_adjust">Drag the map to set the exact location</string>
@@ -253,9 +259,9 @@
     <string name="btn_submit">Submit</string>
     <string name="report_submitted">Report submitted</string>
     <string name="report_select_type">Please select a report type</string>
-    <string name="verification_warning_title" tools:ignore="MissingTranslation">Verification needed</string>
-    <string name="verification_warning_outdated" tools:ignore="MissingTranslation">This place was last verified more than a year ago, so its details may be out of date. If you know it still accepts sats, tap Verify. If you know it no longer does, tap Report.</string>
-    <string name="verification_warning_not_verified" tools:ignore="MissingTranslation">This place hasn\'t been verified yet, so its details may be unreliable. If you know it still accepts sats, tap Verify. If you know it no longer does, tap Report.</string>
+    <string name="verification_warning_title">Verification needed</string>
+    <string name="verification_warning_outdated">This place was last verified more than a year ago, so its details may be out of date. If you know it still accepts sats, tap Verify. If you know it no longer does, tap Report.</string>
+    <string name="verification_warning_not_verified">This place hasn\'t been verified yet, so its details may be unreliable. If you know it still accepts sats, tap Verify. If you know it no longer does, tap Report.</string>
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
 </resources>

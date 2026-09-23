@@ -2,7 +2,7 @@
 ## Foundation
 # Android Gradle Plugin
 # https://developer.android.com/build/releases/gradle-plugin
-agp = "9.4.0"
+agp = "9.4.1"
 # This project is Kotlin-only
 # https://github.com/JetBrains/kotlin/releases
 kotlin = "2.4.20"
@@ -56,7 +56,7 @@ qrgenerator = "1.0.5"
 colorpicker = "1.2.0"
 # Image loading
 # https://github.com/coil-kt/coil/releases
-coil = "3.6.2"
+coil = "3.6.3"
 # JSON parsing
 # https://github.com/google/gson/releases
 gson = "2.14.0"

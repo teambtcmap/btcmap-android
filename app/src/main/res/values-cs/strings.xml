@@ -194,4 +194,27 @@
     <string name="issue_misspelled_tag_name">Špatně napsaný název značky: %1$s</string>
     <string name="issue_unknown">Neznámý problém</string>
     <string name="how_to_help">Jak mohu pomoci?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Zatím žádné komentáře</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Offline mapa</string>
+    <string name="offline_map_download">Stáhnout mapu</string>
+    <string name="offline_map_download_again">Stáhnout znovu</string>
+    <string name="offline_map_description">Stáhněte si mapu %1$s pro použití offline, aby zůstala dostupná bez připojení.</string>
+    <string name="offline_map_max_zoom">Maximální přiblížení: %1$d</string>
+    <string name="offline_map_estimated_size">Odhadovaná velikost: ~%1$s</string>
+    <string name="offline_map_too_large">Příliš velká pro stažení offline (odhad %1$s).</string>
+    <string name="offline_map_estimate_note">Toto je pouze odhad. Skutečná velikost závisí na tom, kolik mapových dat oblast obsahuje.</string>
+    <string name="offline_map_style">Styl mapy: %1$s</string>
+    <string name="offline_map_status_downloading">Stahování… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Stahování… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Staženo · %1$s · přiblížení %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Stahování selhalo: %1$s</string>
+    <string name="offline_map_style_mismatch">Staženo pro jiný styl mapy. Stáhněte znovu, abyste ji mohli použít s aktuálním stylem.</string>
+    <string name="offline_map_delete_title">Smazat offline mapu?</string>
+    <string name="offline_map_delete_message">Stažené dlaždice pro tuto oblast budou z tohoto zařízení odstraněny.</string>
+    <string name="verification_warning_title">Je nutné ověření</string>
+    <string name="verification_warning_outdated">Toto místo bylo naposledy ověřeno před více než rokem, takže jeho údaje mohou být zastaralé. Pokud víte, že stále přijímá sats, klepněte na Ověřit. Pokud víte, že už ne, klepněte na Nahlásit.</string>
+    <string name="verification_warning_not_verified">Toto místo ještě nebylo ověřeno, takže jeho údaje mohou být nespolehlivé. Pokud víte, že stále přijímá sats, klepněte na Ověřit. Pokud víte, že už ne, klepněte na Nahlásit.</string>
 </resources>

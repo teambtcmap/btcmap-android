@@ -203,8 +203,11 @@ abstract class BaseActivityFeedTab : Fragment() {
         adapter.submitList(emptyList())
         binding.loading.visibility = View.GONE
         binding.emptyView.visibility = View.VISIBLE
-        binding.emptyView.text =
-            "${getString(R.string.failed_to_load)}\n\n${getString(R.string.tap_to_retry)}"
+        binding.emptyView.text = getString(
+            R.string.failed_to_load_tap_to_retry,
+            getString(R.string.failed_to_load),
+            getString(R.string.tap_to_retry),
+        )
         binding.emptyView.setOnClickListener { loadActivity() }
         binding.list.visibility = View.GONE
     }

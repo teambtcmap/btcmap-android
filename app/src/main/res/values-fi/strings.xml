@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">Väärin kirjoitettu tagin nimi: %1$s</string>
     <string name="issue_unknown">Tuntematon ongelma</string>
     <string name="how_to_help">Miten voin auttaa?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Ei vielä kommentteja</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Offline-kartta</string>
+    <string name="offline_map_download">Lataa kartta</string>
+    <string name="offline_map_download_again">Lataa uudelleen</string>
+    <string name="offline_map_description">Lataa %1$s:n kartta offline-käyttöön, jotta se pysyy saatavilla ilman yhteyttä.</string>
+    <string name="offline_map_max_zoom">Suurin zoom: %1$d</string>
+    <string name="offline_map_estimated_size">Arvioitu koko: ~%1$s</string>
+    <string name="offline_map_too_large">Liian suuri ladattavaksi offline-tilaan (arvio %1$s).</string>
+    <string name="offline_map_estimate_note">Tämä on vain arvio. Todellinen koko riippuu siitä, kuinka paljon karttadataa alue sisältää.</string>
+    <string name="offline_map_style">Karttatyyli: %1$s</string>
+    <string name="offline_map_status_downloading">Ladataan… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Ladataan… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Ladattu · %1$s · zoom %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Lataus epäonnistui: %1$s</string>
+    <string name="offline_map_style_mismatch">Ladattu eri karttatyylille. Lataa uudelleen käyttääksesi sitä nykyisellä tyylillä.</string>
+    <string name="offline_map_delete_title">Poistetaanko offline-kartta?</string>
+    <string name="offline_map_delete_message">Tämän alueen ladatut ruudut poistetaan tästä laitteesta.</string>
+    <string name="verification_warning_title">Vahvistus tarvitaan</string>
+    <string name="verification_warning_outdated">Tämä paikka vahvistettiin viimeksi yli vuosi sitten, joten sen tiedot voivat olla vanhentuneita. Jos tiedät, että se hyväksyy edelleen satseja, napauta Vahvista. Jos tiedät, ettei se enää hyväksy, napauta Ilmoita.</string>
+    <string name="verification_warning_not_verified">Tätä paikkaa ei ole vielä vahvistettu, joten sen tiedot voivat olla epäluotettavia. Jos tiedät, että se hyväksyy edelleen satseja, napauta Vahvista. Jos tiedät, ettei se enää hyväksy, napauta Ilmoita.</string>
 </resources>

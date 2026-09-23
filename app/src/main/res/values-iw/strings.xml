@@ -190,4 +190,27 @@
     <string name="issue_misspelled_tag_name">שם תג שגוי: %1$s</string>
     <string name="issue_unknown">בעיה לא ידועה</string>
     <string name="how_to_help">איך אפשר לעזור?</string>
+    <string name="app_name_beta">BTC Map בטא</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">אין עדיין תגובות</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">מפה לא מקוונת</string>
+    <string name="offline_map_download">הורדת מפה</string>
+    <string name="offline_map_download_again">הורדה שוב</string>
+    <string name="offline_map_description">הורד את המפה של %1$s לשימוש לא מקוון, כדי שתישאר זמינה ללא חיבור.</string>
+    <string name="offline_map_max_zoom">זום מקסימלי: %1$d</string>
+    <string name="offline_map_estimated_size">גודל משוער: ~%1$s</string>
+    <string name="offline_map_too_large">גדול מדי להורדה לא מקוונת (משוער %1$s).</string>
+    <string name="offline_map_estimate_note">זו הערכה בלבד. הגודל בפועל תלוי בכמות נתוני המפה שהאזור מכיל.</string>
+    <string name="offline_map_style">סגנון מפה: %1$s</string>
+    <string name="offline_map_status_downloading">מוריד… %1$s</string>
+    <string name="offline_map_status_downloading_progress">מוריד… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">הורד · %1$s · זום %2$d–%3$d</string>
+    <string name="offline_map_status_failed">ההורדה נכשלה: %1$s</string>
+    <string name="offline_map_style_mismatch">הורד עבור סגנון מפה אחר. הורד שוב כדי להשתמש בו עם הסגנון הנוכחי.</string>
+    <string name="offline_map_delete_title">למחוק את המפה הלא מקוונת?</string>
+    <string name="offline_map_delete_message">האריחים שהורדו עבור אזור זה יוסרו ממכשיר זה.</string>
+    <string name="verification_warning_title">נדרש אימות</string>
+    <string name="verification_warning_outdated">מקום זה אומת לאחרונה לפני יותר משנה, לכן ייתכן שפרטיו מיושנים. אם אתה יודע שהוא עדיין מקבל sats, הקש על אימות. אם אתה יודע שהוא כבר לא, הקש על דיווח.</string>
+    <string name="verification_warning_not_verified">מקום זה טרם אומת, לכן ייתכן שפרטיו אינם מהימנים. אם אתה יודע שהוא עדיין מקבל sats, הקש על אימות. אם אתה יודע שהוא כבר לא, הקש על דיווח.</string>
 </resources>

@@ -182,4 +182,27 @@
     <string name="issue_misspelled_tag_name">标签名称拼写错误：%1$s</string>
     <string name="issue_unknown">未知问题</string>
     <string name="how_to_help">如何提供帮助？</string>
+    <string name="app_name_beta">BTC Map 测试版</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">暂无评论</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">离线地图</string>
+    <string name="offline_map_download">下载地图</string>
+    <string name="offline_map_download_again">重新下载</string>
+    <string name="offline_map_description">下载 %1$s 的地图以供离线使用，让它在没有网络连接时也能使用。</string>
+    <string name="offline_map_max_zoom">最大缩放：%1$d</string>
+    <string name="offline_map_estimated_size">预计大小：约 %1$s</string>
+    <string name="offline_map_too_large">太大，无法离线下载（预计 %1$s）。</string>
+    <string name="offline_map_estimate_note">这只是一个估计值。实际大小取决于该区域包含多少地图数据。</string>
+    <string name="offline_map_style">地图样式：%1$s</string>
+    <string name="offline_map_status_downloading">正在下载… %1$s</string>
+    <string name="offline_map_status_downloading_progress">正在下载… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">已下载 · %1$s · 缩放 %2$d–%3$d</string>
+    <string name="offline_map_status_failed">下载失败：%1$s</string>
+    <string name="offline_map_style_mismatch">已针对其他地图样式下载。请重新下载以在当前样式下使用。</string>
+    <string name="offline_map_delete_title">删除离线地图？</string>
+    <string name="offline_map_delete_message">此区域已下载的瓦片将从此设备中移除。</string>
+    <string name="verification_warning_title">需要验证</string>
+    <string name="verification_warning_outdated">此地点上次验证是在一年多以前，因此其详细信息可能已过时。如果您知道它仍然接受 sats，请点按“验证”。如果您知道它已不再接受，请点按“报告”。</string>
+    <string name="verification_warning_not_verified">此地点尚未验证，因此其详细信息可能不可靠。如果您知道它仍然接受 sats，请点按“验证”。如果您知道它已不再接受，请点按“报告”。</string>
 </resources>

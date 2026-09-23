@@ -190,4 +190,27 @@
     <string name="issue_misspelled_tag_name">Nome da etiqueta escrito incorretamente: %1$s</string>
     <string name="issue_unknown">Problema desconhecido</string>
     <string name="how_to_help">Como ajudar?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Ainda sem comentários</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Mapa offline</string>
+    <string name="offline_map_download">Transferir mapa</string>
+    <string name="offline_map_download_again">Transferir novamente</string>
+    <string name="offline_map_description">Transfira o mapa de %1$s para utilização offline, para que fique disponível sem ligação.</string>
+    <string name="offline_map_max_zoom">Zoom máximo: %1$d</string>
+    <string name="offline_map_estimated_size">Tamanho estimado: ~%1$s</string>
+    <string name="offline_map_too_large">Demasiado grande para transferir offline (estimado %1$s).</string>
+    <string name="offline_map_estimate_note">Isto é apenas uma estimativa. O tamanho real depende da quantidade de dados de mapa que a área contém.</string>
+    <string name="offline_map_style">Estilo do mapa: %1$s</string>
+    <string name="offline_map_status_downloading">A transferir… %1$s</string>
+    <string name="offline_map_status_downloading_progress">A transferir… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Transferido · %1$s · zoom %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Falha na transferência: %1$s</string>
+    <string name="offline_map_style_mismatch">Transferido para um estilo de mapa diferente. Transfira novamente para o utilizar com o estilo atual.</string>
+    <string name="offline_map_delete_title">Eliminar mapa offline?</string>
+    <string name="offline_map_delete_message">Os mosaicos transferidos para esta área serão removidos deste dispositivo.</string>
+    <string name="verification_warning_title">Verificação necessária</string>
+    <string name="verification_warning_outdated">Este local foi verificado pela última vez há mais de um ano, por isso os detalhes podem estar desatualizados. Se sabe que ainda aceita sats, toque em Verificar. Se sabe que já não aceita, toque em Reportar.</string>
+    <string name="verification_warning_not_verified">Este local ainda não foi verificado, por isso os detalhes podem não ser fiáveis. Se sabe que ainda aceita sats, toque em Verificar. Se sabe que já não aceita, toque em Reportar.</string>
 </resources>

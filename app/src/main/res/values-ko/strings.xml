@@ -182,4 +182,27 @@
     <string name="issue_misspelled_tag_name">철자가 틀린 태그 이름: %1$s</string>
     <string name="issue_unknown">알 수 없는 문제</string>
     <string name="how_to_help">어떻게 도울 수 있나요?</string>
+    <string name="app_name_beta">BTC Map 베타</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">아직 댓글이 없습니다</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">오프라인 지도</string>
+    <string name="offline_map_download">지도 다운로드</string>
+    <string name="offline_map_download_again">다시 다운로드</string>
+    <string name="offline_map_description">오프라인 사용을 위해 %1$s 지도를 다운로드하면 연결 없이도 사용할 수 있습니다.</string>
+    <string name="offline_map_max_zoom">최대 확대: %1$d</string>
+    <string name="offline_map_estimated_size">예상 크기: ~%1$s</string>
+    <string name="offline_map_too_large">오프라인으로 다운로드하기에 너무 큽니다(예상 %1$s).</string>
+    <string name="offline_map_estimate_note">이는 추정치일 뿐입니다. 실제 크기는 해당 지역에 포함된 지도 데이터 양에 따라 달라집니다.</string>
+    <string name="offline_map_style">지도 스타일: %1$s</string>
+    <string name="offline_map_status_downloading">다운로드 중… %1$s</string>
+    <string name="offline_map_status_downloading_progress">다운로드 중… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">다운로드됨 · %1$s · 확대 %2$d~%3$d</string>
+    <string name="offline_map_status_failed">다운로드 실패: %1$s</string>
+    <string name="offline_map_style_mismatch">다른 지도 스타일용으로 다운로드되었습니다. 현재 스타일로 사용하려면 다시 다운로드하세요.</string>
+    <string name="offline_map_delete_title">오프라인 지도를 삭제할까요?</string>
+    <string name="offline_map_delete_message">이 지역의 다운로드된 타일이 이 기기에서 제거됩니다.</string>
+    <string name="verification_warning_title">확인 필요</string>
+    <string name="verification_warning_outdated">이 장소는 1년 넘게 전에 마지막으로 확인되었으므로 세부 정보가 오래되었을 수 있습니다. 아직 sats를 받는다면 확인을 누르세요. 더 이상 받지 않는다면 신고를 누르세요.</string>
+    <string name="verification_warning_not_verified">이 장소는 아직 확인되지 않았으므로 세부 정보가 신뢰할 수 없을 수 있습니다. 아직 sats를 받는다면 확인을 누르세요. 더 이상 받지 않는다면 신고를 누르세요.</string>
 </resources>

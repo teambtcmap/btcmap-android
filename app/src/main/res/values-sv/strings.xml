@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">Felstavat taggnamn: %1$s</string>
     <string name="issue_unknown">Okänt problem</string>
     <string name="how_to_help">Hur kan jag hjälpa till?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Inga kommentarer ännu</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Offlinekarta</string>
+    <string name="offline_map_download">Ladda ner karta</string>
+    <string name="offline_map_download_again">Ladda ner igen</string>
+    <string name="offline_map_description">Ladda ner kartan över %1$s för offlinebruk, så att den förblir tillgänglig utan anslutning.</string>
+    <string name="offline_map_max_zoom">Maximal zoom: %1$d</string>
+    <string name="offline_map_estimated_size">Uppskattad storlek: ~%1$s</string>
+    <string name="offline_map_too_large">För stor för att ladda ner offline (uppskattat %1$s).</string>
+    <string name="offline_map_estimate_note">Detta är bara en uppskattning. Den faktiska storleken beror på hur mycket kartdata området innehåller.</string>
+    <string name="offline_map_style">Kartstil: %1$s</string>
+    <string name="offline_map_status_downloading">Laddar ner… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Laddar ner… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Nedladdad · %1$s · zoom %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Nedladdning misslyckades: %1$s</string>
+    <string name="offline_map_style_mismatch">Nedladdad för en annan kartstil. Ladda ner igen för att använda den med den aktuella stilen.</string>
+    <string name="offline_map_delete_title">Ta bort offlinekarta?</string>
+    <string name="offline_map_delete_message">De nedladdade rutorna för detta område tas bort från den här enheten.</string>
+    <string name="verification_warning_title">Verifiering krävs</string>
+    <string name="verification_warning_outdated">Den här platsen verifierades senast för mer än ett år sedan, så uppgifterna kan vara inaktuella. Om du vet att den fortfarande accepterar sats, tryck på Verifiera. Om du vet att den inte gör det längre, tryck på Rapportera.</string>
+    <string name="verification_warning_not_verified">Den här platsen har inte verifierats ännu, så uppgifterna kan vara opålitliga. Om du vet att den fortfarande accepterar sats, tryck på Verifiera. Om du vet att den inte gör det längre, tryck på Rapportera.</string>
 </resources>

@@ -1,5 +1,6 @@
 package org.btcmap.auth
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -39,6 +40,9 @@ internal class ChangePasswordDialogFragment : AuthFormDialogFragment() {
 
     override val doneField: TextInputEditText get() = confirmationInput
 
+    // The form is the content of a MaterialAlertDialog, which has no parent view
+    // to inflate into, so its root layout params are intentionally unused.
+    @SuppressLint("InflateParams")
     override fun createFormView(inflater: LayoutInflater): View {
         val view = inflater.inflate(R.layout.change_password_dialog, null)
         currentInput = view.findViewById(R.id.currentPasswordInput)

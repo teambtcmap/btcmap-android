@@ -194,4 +194,27 @@
     <string name="issue_misspelled_tag_name">Nesprávne napísaný názov značky: %1$s</string>
     <string name="issue_unknown">Neznámy problém</string>
     <string name="how_to_help">Ako môžem pomôcť?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Zatiaľ žiadne komentáre</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Offline mapa</string>
+    <string name="offline_map_download">Stiahnuť mapu</string>
+    <string name="offline_map_download_again">Stiahnuť znova</string>
+    <string name="offline_map_description">Stiahnite si mapu %1$s na offline použitie, aby zostala dostupná bez pripojenia.</string>
+    <string name="offline_map_max_zoom">Maximálne priblíženie: %1$d</string>
+    <string name="offline_map_estimated_size">Odhadovaná veľkosť: ~%1$s</string>
+    <string name="offline_map_too_large">Príliš veľká na offline stiahnutie (odhad %1$s).</string>
+    <string name="offline_map_estimate_note">Toto je len odhad. Skutočná veľkosť závisí od toho, koľko mapových dát oblasť obsahuje.</string>
+    <string name="offline_map_style">Štýl mapy: %1$s</string>
+    <string name="offline_map_status_downloading">Sťahovanie… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Sťahovanie… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Stiahnuté · %1$s · priblíženie %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Sťahovanie zlyhalo: %1$s</string>
+    <string name="offline_map_style_mismatch">Stiahnuté pre iný štýl mapy. Stiahnite znova, aby ste ju mohli použiť s aktuálnym štýlom.</string>
+    <string name="offline_map_delete_title">Odstrániť offline mapu?</string>
+    <string name="offline_map_delete_message">Stiahnuté dlaždice pre túto oblasť budú z tohto zariadenia odstránené.</string>
+    <string name="verification_warning_title">Vyžaduje sa overenie</string>
+    <string name="verification_warning_outdated">Toto miesto bolo naposledy overené pred viac ako rokom, takže jeho údaje môžu byť zastarané. Ak viete, že stále prijíma sats, klepnite na Overiť. Ak viete, že už nie, klepnite na Nahlásiť.</string>
+    <string name="verification_warning_not_verified">Toto miesto ešte nebolo overené, takže jeho údaje môžu byť nespoľahlivé. Ak viete, že stále prijíma sats, klepnite na Overiť. Ak viete, že už nie, klepnite na Nahlásiť.</string>
 </resources>

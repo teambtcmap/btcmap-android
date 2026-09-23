@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">गलत वर्तनी वाला टैग नाम: %1$s</string>
     <string name="issue_unknown">अज्ञात समस्या</string>
     <string name="how_to_help">मैं कैसे मदद कर सकता हूँ?</string>
+    <string name="app_name_beta">BTC Map बीटा</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">अभी तक कोई टिप्पणी नहीं</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">ऑफ़लाइन मानचित्र</string>
+    <string name="offline_map_download">मानचित्र डाउनलोड करें</string>
+    <string name="offline_map_download_again">फिर से डाउनलोड करें</string>
+    <string name="offline_map_description">ऑफ़लाइन उपयोग के लिए %1$s का मानचित्र डाउनलोड करें, ताकि यह बिना कनेक्शन के उपलब्ध रहे।</string>
+    <string name="offline_map_max_zoom">अधिकतम ज़ूम: %1$d</string>
+    <string name="offline_map_estimated_size">अनुमानित आकार: ~%1$s</string>
+    <string name="offline_map_too_large">ऑफ़लाइन डाउनलोड करने के लिए बहुत बड़ा (अनुमानित %1$s)।</string>
+    <string name="offline_map_estimate_note">यह केवल एक अनुमान है। वास्तविक आकार इस बात पर निर्भर करता है कि क्षेत्र में कितना मानचित्र डेटा है।</string>
+    <string name="offline_map_style">मानचित्र शैली: %1$s</string>
+    <string name="offline_map_status_downloading">डाउनलोड हो रहा है… %1$s</string>
+    <string name="offline_map_status_downloading_progress">डाउनलोड हो रहा है… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">डाउनलोड हो गया · %1$s · ज़ूम %2$d–%3$d</string>
+    <string name="offline_map_status_failed">डाउनलोड विफल: %1$s</string>
+    <string name="offline_map_style_mismatch">किसी भिन्न मानचित्र शैली के लिए डाउनलोड किया गया। वर्तमान शैली के साथ उपयोग करने के लिए फिर से डाउनलोड करें।</string>
+    <string name="offline_map_delete_title">ऑफ़लाइन मानचित्र हटाएँ?</string>
+    <string name="offline_map_delete_message">इस क्षेत्र के डाउनलोड किए गए टाइल इस डिवाइस से हटा दिए जाएँगे।</string>
+    <string name="verification_warning_title">सत्यापन आवश्यक</string>
+    <string name="verification_warning_outdated">इस स्थान को एक वर्ष से अधिक समय पहले अंतिम बार सत्यापित किया गया था, इसलिए इसका विवरण पुराना हो सकता है। यदि आप जानते हैं कि यह अभी भी sats स्वीकार करता है, तो सत्यापित करें पर टैप करें। यदि आप जानते हैं कि अब नहीं करता, तो रिपोर्ट करें पर टैप करें।</string>
+    <string name="verification_warning_not_verified">इस स्थान को अभी तक सत्यापित नहीं किया गया है, इसलिए इसका विवरण अविश्वसनीय हो सकता है। यदि आप जानते हैं कि यह अभी भी sats स्वीकार करता है, तो सत्यापित करें पर टैप करें। यदि आप जानते हैं कि अब नहीं करता, तो रिपोर्ट करें पर टैप करें।</string>
 </resources>

@@ -182,4 +182,27 @@
     <string name="issue_misspelled_tag_name">Tên thẻ viết sai chính tả: %1$s</string>
     <string name="issue_unknown">Vấn đề không xác định</string>
     <string name="how_to_help">Làm sao để giúp?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Chưa có bình luận</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Bản đồ ngoại tuyến</string>
+    <string name="offline_map_download">Tải bản đồ</string>
+    <string name="offline_map_download_again">Tải lại</string>
+    <string name="offline_map_description">Tải bản đồ của %1$s để dùng ngoại tuyến, để bản đồ luôn khả dụng khi không có kết nối.</string>
+    <string name="offline_map_max_zoom">Thu phóng tối đa: %1$d</string>
+    <string name="offline_map_estimated_size">Kích thước ước tính: ~%1$s</string>
+    <string name="offline_map_too_large">Quá lớn để tải ngoại tuyến (ước tính %1$s).</string>
+    <string name="offline_map_estimate_note">Đây chỉ là ước tính. Kích thước thực tế phụ thuộc vào lượng dữ liệu bản đồ mà khu vực chứa.</string>
+    <string name="offline_map_style">Kiểu bản đồ: %1$s</string>
+    <string name="offline_map_status_downloading">Đang tải… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Đang tải… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Đã tải · %1$s · thu phóng %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Tải không thành công: %1$s</string>
+    <string name="offline_map_style_mismatch">Đã tải cho một kiểu bản đồ khác. Tải lại để dùng với kiểu hiện tại.</string>
+    <string name="offline_map_delete_title">Xóa bản đồ ngoại tuyến?</string>
+    <string name="offline_map_delete_message">Các ô bản đồ đã tải cho khu vực này sẽ bị xóa khỏi thiết bị này.</string>
+    <string name="verification_warning_title">Cần xác minh</string>
+    <string name="verification_warning_outdated">Địa điểm này được xác minh lần cuối hơn một năm trước, nên thông tin có thể đã lỗi thời. Nếu bạn biết nơi đây vẫn chấp nhận sats, hãy nhấn Xác minh. Nếu bạn biết nơi đây không còn chấp nhận, hãy nhấn Báo cáo.</string>
+    <string name="verification_warning_not_verified">Địa điểm này chưa được xác minh, nên thông tin có thể không đáng tin cậy. Nếu bạn biết nơi đây vẫn chấp nhận sats, hãy nhấn Xác minh. Nếu bạn biết nơi đây không còn chấp nhận, hãy nhấn Báo cáo.</string>
 </resources>

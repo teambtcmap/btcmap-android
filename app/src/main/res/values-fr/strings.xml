@@ -190,4 +190,27 @@
     <string name="issue_misspelled_tag_name">Nom de balise mal orthographié : %1$s</string>
     <string name="issue_unknown">Problème inconnu</string>
     <string name="how_to_help">Comment aider ?</string>
+    <string name="app_name_beta">BTC Map Bêta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Pas encore de commentaires</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Carte hors ligne</string>
+    <string name="offline_map_download">Télécharger la carte</string>
+    <string name="offline_map_download_again">Télécharger à nouveau</string>
+    <string name="offline_map_description">Téléchargez la carte de %1$s pour une utilisation hors ligne, afin qu\'elle reste disponible sans connexion.</string>
+    <string name="offline_map_max_zoom">Zoom maximal: %1$d</string>
+    <string name="offline_map_estimated_size">Taille estimée: ~%1$s</string>
+    <string name="offline_map_too_large">Trop volumineuse pour un téléchargement hors ligne (estimée à %1$s).</string>
+    <string name="offline_map_estimate_note">Ce n\'est qu\'une estimation. La taille réelle dépend de la quantité de données cartographiques contenues dans la zone.</string>
+    <string name="offline_map_style">Style de carte: %1$s</string>
+    <string name="offline_map_status_downloading">Téléchargement… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Téléchargement… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Téléchargée · %1$s · zoom %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Échec du téléchargement: %1$s</string>
+    <string name="offline_map_style_mismatch">Téléchargée pour un autre style de carte. Téléchargez-la à nouveau pour l\'utiliser avec le style actuel.</string>
+    <string name="offline_map_delete_title">Supprimer la carte hors ligne ?</string>
+    <string name="offline_map_delete_message">Les tuiles téléchargées pour cette zone seront supprimées de cet appareil.</string>
+    <string name="verification_warning_title">Vérification requise</string>
+    <string name="verification_warning_outdated">Ce lieu a été vérifié pour la dernière fois il y a plus d\'un an, ses informations peuvent donc être obsolètes. Si vous savez qu\'il accepte toujours des sats, appuyez sur Vérifier. Si vous savez que ce n\'est plus le cas, appuyez sur Signaler.</string>
+    <string name="verification_warning_not_verified">Ce lieu n\'a pas encore été vérifié, ses informations peuvent donc ne pas être fiables. Si vous savez qu\'il accepte toujours des sats, appuyez sur Vérifier. Si vous savez que ce n\'est plus le cas, appuyez sur Signaler.</string>
 </resources>

@@ -190,4 +190,27 @@
     <string name="issue_misspelled_tag_name">Погрешно написан назив ознаке: %1$s</string>
     <string name="issue_unknown">Непознат проблем</string>
     <string name="how_to_help">Како могу да помогнем?</string>
+    <string name="app_name_beta">BTC Map Бета</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Још нема коментара</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Офлајн мапа</string>
+    <string name="offline_map_download">Преузми мапу</string>
+    <string name="offline_map_download_again">Преузми поново</string>
+    <string name="offline_map_description">Преузмите мапу %1$s за офлајн коришћење, да би остала доступна без везе.</string>
+    <string name="offline_map_max_zoom">Максимално увећање: %1$d</string>
+    <string name="offline_map_estimated_size">Процењена величина: ~%1$s</string>
+    <string name="offline_map_too_large">Превелика за офлајн преузимање (процењено %1$s).</string>
+    <string name="offline_map_estimate_note">Ово је само процена. Стварна величина зависи од тога колико мапских података област садржи.</string>
+    <string name="offline_map_style">Стил мапе: %1$s</string>
+    <string name="offline_map_status_downloading">Преузимање… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Преузимање… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Преузето · %1$s · увећање %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Преузимање није успело: %1$s</string>
+    <string name="offline_map_style_mismatch">Преузето за други стил мапе. Преузмите поново да бисте га користили са тренутним стилом.</string>
+    <string name="offline_map_delete_title">Избрисати офлајн мапу?</string>
+    <string name="offline_map_delete_message">Преузете плочице за ову област биће уклоњене са овог уређаја.</string>
+    <string name="verification_warning_title">Потребна је верификација</string>
+    <string name="verification_warning_outdated">Ово место је последњи пут верификовано пре више од годину дана, па његови подаци могу бити застарели. Ако знате да још увек прихвата sats, додирните Потврди. Ако знате да више не прихвата, додирните Пријави.</string>
+    <string name="verification_warning_not_verified">Ово место још увек није верификовано, па његови подаци могу бити непоуздани. Ако знате да још увек прихвата sats, додирните Потврди. Ако знате да више не прихвата, додирните Пријави.</string>
 </resources>

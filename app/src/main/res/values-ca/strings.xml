@@ -190,4 +190,27 @@
     <string name="issue_misspelled_tag_name">Nom d\'etiqueta mal escrit: %1$s</string>
     <string name="issue_unknown">Problema desconegut</string>
     <string name="how_to_help">Com puc ajudar?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Encara no hi ha comentaris</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Mapa fora de línia</string>
+    <string name="offline_map_download">Baixa el mapa</string>
+    <string name="offline_map_download_again">Torna a baixar</string>
+    <string name="offline_map_description">Baixa el mapa de %1$s per usar-lo fora de línia, perquè estigui disponible sense connexió.</string>
+    <string name="offline_map_max_zoom">Zoom màxim: %1$d</string>
+    <string name="offline_map_estimated_size">Mida estimada: ~%1$s</string>
+    <string name="offline_map_too_large">Massa gran per baixar-lo fora de línia (estimat %1$s).</string>
+    <string name="offline_map_estimate_note">Això només és una estimació. La mida real depèn de quantes dades de mapa conté l\'àrea.</string>
+    <string name="offline_map_style">Estil del mapa: %1$s</string>
+    <string name="offline_map_status_downloading">S\'està baixant… %1$s</string>
+    <string name="offline_map_status_downloading_progress">S\'està baixant… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Baixat · %1$s · zoom %2$d–%3$d</string>
+    <string name="offline_map_status_failed">No s\'ha pogut baixar: %1$s</string>
+    <string name="offline_map_style_mismatch">Baixat per a un estil de mapa diferent. Torna a baixar-lo per usar-lo amb l\'estil actual.</string>
+    <string name="offline_map_delete_title">Vols eliminar el mapa fora de línia?</string>
+    <string name="offline_map_delete_message">Les rajoles baixades per a aquesta àrea s\'eliminaran d\'aquest dispositiu.</string>
+    <string name="verification_warning_title">Cal verificació</string>
+    <string name="verification_warning_outdated">Aquest lloc es va verificar per última vegada fa més d\'un any, així que les seves dades poden estar desactualitzades. Si saps que encara accepta sats, toca Verifica. Si saps que ja no ho fa, toca Informa.</string>
+    <string name="verification_warning_not_verified">Aquest lloc encara no s\'ha verificat, així que les seves dades poden no ser fiables. Si saps que encara accepta sats, toca Verifica. Si saps que ja no ho fa, toca Informa.</string>
 </resources>

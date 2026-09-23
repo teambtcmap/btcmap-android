@@ -194,4 +194,27 @@
     <string name="issue_misspelled_tag_name">Неправильно написана назва тегу: %1$s</string>
     <string name="issue_unknown">Невідома проблема</string>
     <string name="how_to_help">Як я можу допомогти?</string>
+    <string name="app_name_beta">BTC Map Бета</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Ще немає коментарів</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Офлайн-карта</string>
+    <string name="offline_map_download">Завантажити карту</string>
+    <string name="offline_map_download_again">Завантажити знову</string>
+    <string name="offline_map_description">Завантажте карту %1$s для офлайн-використання, щоб вона залишалася доступною без з\'єднання.</string>
+    <string name="offline_map_max_zoom">Максимальне наближення: %1$d</string>
+    <string name="offline_map_estimated_size">Приблизний розмір: ~%1$s</string>
+    <string name="offline_map_too_large">Занадто великий для офлайн-завантаження (приблизно %1$s).</string>
+    <string name="offline_map_estimate_note">Це лише оцінка. Фактичний розмір залежить від того, скільки картографічних даних містить область.</string>
+    <string name="offline_map_style">Стиль карти: %1$s</string>
+    <string name="offline_map_status_downloading">Завантаження… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Завантаження… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Завантажено · %1$s · наближення %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Не вдалося завантажити: %1$s</string>
+    <string name="offline_map_style_mismatch">Завантажено для іншого стилю карти. Завантажте знову, щоб використовувати з поточним стилем.</string>
+    <string name="offline_map_delete_title">Видалити офлайн-карту?</string>
+    <string name="offline_map_delete_message">Завантажені тайли для цієї області буде видалено з цього пристрою.</string>
+    <string name="verification_warning_title">Потрібна перевірка</string>
+    <string name="verification_warning_outdated">Це місце востаннє перевіряли понад рік тому, тож його дані можуть бути застарілими. Якщо ви знаєте, що воно досі приймає sats, торкніться «Підтвердити». Якщо ви знаєте, що вже не приймає, торкніться «Поскаржитися».</string>
+    <string name="verification_warning_not_verified">Це місце ще не перевіряли, тож його дані можуть бути ненадійними. Якщо ви знаєте, що воно досі приймає sats, торкніться «Підтвердити». Якщо ви знаєте, що вже не приймає, торкніться «Поскаржитися».</string>
 </resources>

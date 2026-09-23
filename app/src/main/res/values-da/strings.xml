@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">Fejlstavet tagnavn: %1$s</string>
     <string name="issue_unknown">Ukendt problem</string>
     <string name="how_to_help">Hvordan kan jeg hjælpe?</string>
+    <string name="app_name_beta">BTC Map Beta</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">Ingen kommentarer endnu</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">Offlinekort</string>
+    <string name="offline_map_download">Download kort</string>
+    <string name="offline_map_download_again">Download igen</string>
+    <string name="offline_map_description">Download kortet over %1$s til offlinebrug, så det forbliver tilgængeligt uden forbindelse.</string>
+    <string name="offline_map_max_zoom">Maksimal zoom: %1$d</string>
+    <string name="offline_map_estimated_size">Anslået størrelse: ~%1$s</string>
+    <string name="offline_map_too_large">For stort til at downloade offline (anslået %1$s).</string>
+    <string name="offline_map_estimate_note">Dette er kun et skøn. Den faktiske størrelse afhænger af, hvor mange kortdata området indeholder.</string>
+    <string name="offline_map_style">Kortstil: %1$s</string>
+    <string name="offline_map_status_downloading">Downloader… %1$s</string>
+    <string name="offline_map_status_downloading_progress">Downloader… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">Downloadet · %1$s · zoom %2$d–%3$d</string>
+    <string name="offline_map_status_failed">Download mislykkedes: %1$s</string>
+    <string name="offline_map_style_mismatch">Downloadet til en anden kortstil. Download igen for at bruge det med den aktuelle stil.</string>
+    <string name="offline_map_delete_title">Slet offlinekort?</string>
+    <string name="offline_map_delete_message">De downloadede fliser for dette område fjernes fra denne enhed.</string>
+    <string name="verification_warning_title">Verifikation påkrævet</string>
+    <string name="verification_warning_outdated">Dette sted blev sidst verificeret for mere end et år siden, så oplysningerne kan være forældede. Hvis du ved, at det stadig accepterer sats, tryk på Bekræft. Hvis du ved, at det ikke gør det længere, tryk på Rapportér.</string>
+    <string name="verification_warning_not_verified">Dette sted er endnu ikke blevet verificeret, så oplysningerne kan være upålidelige. Hvis du ved, at det stadig accepterer sats, tryk på Bekræft. Hvis du ved, at det ikke gør det længere, tryk på Rapportér.</string>
 </resources>

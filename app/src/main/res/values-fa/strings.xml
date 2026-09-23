@@ -186,4 +186,27 @@
     <string name="issue_misspelled_tag_name">نام برچسب اشتباه نوشته شده: %1$s</string>
     <string name="issue_unknown">مشکل ناشناخته</string>
     <string name="how_to_help">چگونه می‌توانم کمک کنم؟</string>
+    <string name="app_name_beta">BTC Map بتا</string>
+    <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
+    <string name="no_comments_yet">هنوز نظری ثبت نشده است</string>
+    <string name="event_date_time_range">%1$s, %2$s - %3$s</string>
+    <string name="offline_map">نقشه آفلاین</string>
+    <string name="offline_map_download">دانلود نقشه</string>
+    <string name="offline_map_download_again">دانلود مجدد</string>
+    <string name="offline_map_description">نقشه %1$s را برای استفاده آفلاین دانلود کنید تا بدون اتصال در دسترس بماند.</string>
+    <string name="offline_map_max_zoom">حداکثر بزرگنمایی: %1$d</string>
+    <string name="offline_map_estimated_size">اندازه تخمینی: ~%1$s</string>
+    <string name="offline_map_too_large">برای دانلود آفلاین بیش از حد بزرگ است (تخمین %1$s).</string>
+    <string name="offline_map_estimate_note">این فقط یک تخمین است. اندازه واقعی به میزان داده نقشه‌ای که منطقه دارد بستگی دارد.</string>
+    <string name="offline_map_style">سبک نقشه: %1$s</string>
+    <string name="offline_map_status_downloading">در حال دانلود… %1$s</string>
+    <string name="offline_map_status_downloading_progress">در حال دانلود… %1$d%% (%2$s)</string>
+    <string name="offline_map_status_downloaded">دانلود شد · %1$s · بزرگنمایی %2$d–%3$d</string>
+    <string name="offline_map_status_failed">دانلود ناموفق بود: %1$s</string>
+    <string name="offline_map_style_mismatch">برای سبک نقشه دیگری دانلود شده است. برای استفاده با سبک فعلی دوباره دانلود کنید.</string>
+    <string name="offline_map_delete_title">نقشه آفلاین حذف شود؟</string>
+    <string name="offline_map_delete_message">کاشی‌های دانلودشده برای این منطقه از این دستگاه حذف خواهند شد.</string>
+    <string name="verification_warning_title">نیاز به تأیید</string>
+    <string name="verification_warning_outdated">این مکان آخرین بار بیش از یک سال پیش تأیید شده است، بنابراین جزئیات آن ممکن است قدیمی باشد. اگر می‌دانید هنوز sats می‌پذیرد، تأیید را بزنید. اگر می‌دانید دیگر نمی‌پذیرد، گزارش را بزنید.</string>
+    <string name="verification_warning_not_verified">این مکان هنوز تأیید نشده است، بنابراین جزئیات آن ممکن است قابل اعتماد نباشد. اگر می‌دانید هنوز sats می‌پذیرد، تأیید را بزنید. اگر می‌دانید دیگر نمی‌پذیرد، گزارش را بزنید.</string>
 </resources>
