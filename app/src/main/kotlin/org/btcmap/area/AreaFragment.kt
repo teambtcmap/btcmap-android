@@ -40,6 +40,7 @@ import org.btcmap.db
 import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.area.geoJsonGeometry
 import org.btcmap.db.table.event.Event
+import org.btcmap.db.table.event.isWithin
 import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.AreaFragmentBinding
 import org.btcmap.databinding.ItemAreaCardBinding
@@ -213,7 +214,7 @@ class AreaFragment : Fragment() {
 
         val geometry = area.geoJsonGeometry()
         return db().event.selectByBounds(south, north, west, east)
-            .filter { geometry.contains(it.lat, it.lon) }
+            .filter { it.isWithin(geometry) }
             .map { it.toGetEventsItem() }
     }
 

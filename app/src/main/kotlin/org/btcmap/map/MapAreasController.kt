@@ -14,6 +14,7 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.area.AreaGeometry
 import org.btcmap.db.table.area.geoJsonGeometry
+import org.btcmap.db.table.event.isWithin
 import java.time.ZonedDateTime
 
 /**
@@ -129,7 +130,7 @@ class MapAreasController(
             .filter { !it.startsAt.isBefore(now) }
 
         return areas.associate { (area, geometry) ->
-            area.id to upcoming.count { geometry.contains(it.lat, it.lon) }
+            area.id to upcoming.count { it.isWithin(geometry) }
         }
     }
 
