@@ -103,7 +103,8 @@
     <string name="name">Name</string>
     <string name="name_placeholder">Satoshi Cafe</string>
     <string name="password">Password</string>
-    <string name="password_min_length">At least 8 characters</string>
+    <!-- A minimum, not a countable quantity; formatted with AuthValidation.MIN_PASSWORD_LENGTH. -->
+    <string name="password_min_length" tools:ignore="PluralsCandidate">At least %1$d characters</string>
     <string name="confirm_password">Confirm password</string>
     <string name="passwords_do_not_match">Passwords don\'t match</string>
     <string name="field_required">Required</string>
@@ -252,9 +253,9 @@
     <string name="btn_submit">Submit</string>
     <string name="report_submitted">Report submitted</string>
     <string name="report_select_type">Please select a report type</string>
-    <string name="verification_warning_title">Verification needed</string>
-    <string name="verification_warning_outdated">This place was last verified more than a year ago, so its details may be out of date. If you know it still accepts sats, tap Verify. If you know it no longer does, tap Report.</string>
-    <string name="verification_warning_not_verified">This place hasn\'t been verified yet, so its details may be unreliable. If you know it still accepts sats, tap Verify. If you know it no longer does, tap Report.</string>
+    <string name="verification_warning_title" tools:ignore="MissingTranslation">Verification needed</string>
+    <string name="verification_warning_outdated" tools:ignore="MissingTranslation">This place was last verified more than a year ago, so its details may be out of date. If you know it still accepts sats, tap Verify. If you know it no longer does, tap Report.</string>
+    <string name="verification_warning_not_verified" tools:ignore="MissingTranslation">This place hasn\'t been verified yet, so its details may be unreliable. If you know it still accepts sats, tap Verify. If you know it no longer does, tap Report.</string>
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
 </resources>

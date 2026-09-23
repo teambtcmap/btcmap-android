@@ -85,7 +85,7 @@
     <string name="name">نام</string>
     <string name="name_placeholder">ساتوشی کیفے</string>
     <string name="password">پاس ورڈ</string>
-    <string name="password_min_length">کم از کم 8 حروف</string>
+    <string name="password_min_length">کم از کم %1$d حروف</string>
     <string name="confirm_password">پاس ورڈ کی تصدیق کریں</string>
     <string name="passwords_do_not_match">پاس ورڈ مماثل نہیں ہیں</string>
     <string name="field_required">درکار</string>

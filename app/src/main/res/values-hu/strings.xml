@@ -85,7 +85,7 @@
     <string name="name">Név</string>
     <string name="name_placeholder">Satoshi Kávézó</string>
     <string name="password">Jelszó</string>
-    <string name="password_min_length">Legalább 8 karakter</string>
+    <string name="password_min_length">Legalább %1$d karakter</string>
     <string name="confirm_password">Jelszó megerősítése</string>
     <string name="passwords_do_not_match">A jelszavak nem egyeznek</string>
     <string name="field_required">Kötelező</string>

@@ -110,7 +110,9 @@ internal abstract class AuthFormDialogFragment : DialogFragment() {
             }
 
             AuthError.PasswordTooShort in errors -> {
-                passwordField.setFieldError(getString(R.string.password_min_length))
+                passwordField.setFieldError(
+                    getString(R.string.password_min_length, AuthValidation.MIN_PASSWORD_LENGTH),
+                )
             }
         }
         if (AuthError.PasswordsDoNotMatch in errors) {

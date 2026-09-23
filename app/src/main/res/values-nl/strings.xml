@@ -85,7 +85,7 @@
     <string name="name">Naam</string>
     <string name="name_placeholder">Satoshi Café</string>
     <string name="password">Wachtwoord</string>
-    <string name="password_min_length">Minimaal 8 tekens</string>
+    <string name="password_min_length">Minimaal %1$d tekens</string>
     <string name="confirm_password">Wachtwoord bevestigen</string>
     <string name="passwords_do_not_match">Wachtwoorden komen niet overeen</string>
     <string name="field_required">Vereist</string>

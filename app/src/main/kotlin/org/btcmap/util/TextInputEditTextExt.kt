@@ -19,6 +19,16 @@ fun TextInputEditText?.setFieldError(error: CharSequence?) {
     layout.error = error
 }
 
+/**
+ * Shows [text] as the field's helper text, or clears it when [text] is null.
+ * Useful for a message that depends on a value only known at runtime, such as
+ * the minimum password length.
+ */
+fun TextInputEditText?.setFieldHelperText(text: CharSequence?) {
+    val layout = this?.findTextInputLayout() ?: return
+    layout.helperText = text
+}
+
 private fun TextInputEditText.findTextInputLayout(): TextInputLayout? {
     var parent: ViewParent? = this.parent
     while (parent != null) {

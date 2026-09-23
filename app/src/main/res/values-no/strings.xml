@@ -85,7 +85,7 @@
     <string name="name">Navn</string>
     <string name="name_placeholder">Satoshi-kafé</string>
     <string name="password">Passord</string>
-    <string name="password_min_length">Minst 8 tegn</string>
+    <string name="password_min_length">Minst %1$d tegn</string>
     <string name="confirm_password">Bekreft passord</string>
     <string name="passwords_do_not_match">Passordene er ikke like</string>
     <string name="field_required">Påkrevd</string>

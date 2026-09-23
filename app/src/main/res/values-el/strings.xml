@@ -85,7 +85,7 @@
     <string name="name">Όνομα</string>
     <string name="name_placeholder">Καφέ Satoshi</string>
     <string name="password">Κωδικός πρόσβασης</string>
-    <string name="password_min_length">Τουλάχιστον 8 χαρακτήρες</string>
+    <string name="password_min_length">Τουλάχιστον %1$d χαρακτήρες</string>
     <string name="confirm_password">Επιβεβαίωση κωδικού πρόσβασης</string>
     <string name="passwords_do_not_match">Οι κωδικοί πρόσβασης δεν ταιριάζουν</string>
     <string name="field_required">Απαιτείται</string>

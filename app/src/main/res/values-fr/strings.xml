@@ -85,7 +85,7 @@
     <string name="name">Nom</string>
     <string name="name_placeholder">Café Satoshi</string>
     <string name="password">Mot de passe</string>
-    <string name="password_min_length">Au moins 8 caractères</string>
+    <string name="password_min_length">Au moins %1$d caractères</string>
     <string name="confirm_password">Confirmer le mot de passe</string>
     <string name="passwords_do_not_match">Les mots de passe ne correspondent pas</string>
     <string name="field_required">Obligatoire</string>

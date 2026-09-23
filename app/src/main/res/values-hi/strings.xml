@@ -85,7 +85,7 @@
     <string name="name">नाम</string>
     <string name="name_placeholder">सातोशी कैफ़े</string>
     <string name="password">पासवर्ड</string>
-    <string name="password_min_length">कम से कम 8 वर्ण</string>
+    <string name="password_min_length">कम से कम %1$d वर्ण</string>
     <string name="confirm_password">पासवर्ड की पुष्टि करें</string>
     <string name="passwords_do_not_match">पासवर्ड मेल नहीं खाते</string>
     <string name="field_required">आवश्यक</string>

@@ -85,7 +85,7 @@
     <string name="name">שם</string>
     <string name="name_placeholder">קפה סאטושי</string>
     <string name="password">סיסמה</string>
-    <string name="password_min_length">לפחות 8 תווים</string>
+    <string name="password_min_length">לפחות %1$d תווים</string>
     <string name="confirm_password">אימות סיסמה</string>
     <string name="passwords_do_not_match">הסיסמאות אינן תואמות</string>
     <string name="field_required">חובה</string>

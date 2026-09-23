@@ -85,7 +85,7 @@
     <string name="name">Tên</string>
     <string name="name_placeholder">Quán cà phê Satoshi</string>
     <string name="password">Mật khẩu</string>
-    <string name="password_min_length">Ít nhất 8 ký tự</string>
+    <string name="password_min_length">Ít nhất %1$d ký tự</string>
     <string name="confirm_password">Xác nhận mật khẩu</string>
     <string name="passwords_do_not_match">Mật khẩu không khớp</string>
     <string name="field_required">Bắt buộc</string>

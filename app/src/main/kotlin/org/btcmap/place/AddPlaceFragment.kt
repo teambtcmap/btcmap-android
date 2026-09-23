@@ -120,6 +120,11 @@ class AddPlaceFragment : Fragment() {
         val description = binding.description.text?.toString()?.trim().orEmpty()
 
         var valid = true
+        // Clear errors from the previous attempt first, so a corrected field
+        // does not keep showing an error that no longer applies.
+        binding.name.setFieldError(null)
+        binding.category.setFieldError(null)
+        binding.address.setFieldError(null)
         if (name.isEmpty()) {
             binding.name.setFieldError(getString(R.string.field_required))
             valid = false

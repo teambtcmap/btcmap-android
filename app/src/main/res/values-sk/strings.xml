@@ -85,7 +85,7 @@
     <string name="name">Názov</string>
     <string name="name_placeholder">Kaviareň Satoshi</string>
     <string name="password">Heslo</string>
-    <string name="password_min_length">Aspoň 8 znakov</string>
+    <string name="password_min_length">Aspoň %1$d znakov</string>
     <string name="confirm_password">Potvrdiť heslo</string>
     <string name="passwords_do_not_match">Heslá sa nezhodujú</string>
     <string name="field_required">Povinné</string>

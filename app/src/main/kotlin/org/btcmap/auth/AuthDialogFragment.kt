@@ -7,6 +7,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textfield.TextInputEditText
 import org.btcmap.R
+import org.btcmap.util.setFieldHelperText
 
 internal enum class AuthMode {
     SignIn,
@@ -63,6 +64,12 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
         passwordInput = view.findViewById(R.id.passwordInput)
         confirmationInput =
             if (signUp) view.findViewById<TextInputEditText>(R.id.confirmPasswordInput) else null
+
+        if (signUp) {
+            passwordInput.setFieldHelperText(
+                getString(R.string.password_min_length, AuthValidation.MIN_PASSWORD_LENGTH),
+            )
+        }
 
         requireArguments().getString(ARG_USERNAME)?.let(usernameInput::setText)
 

@@ -7,6 +7,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textfield.TextInputEditText
 import org.btcmap.R
+import org.btcmap.util.setFieldHelperText
 
 /**
  * Collects the current and new password for the change-password form.
@@ -43,6 +44,10 @@ internal class ChangePasswordDialogFragment : AuthFormDialogFragment() {
         currentInput = view.findViewById(R.id.currentPasswordInput)
         newInput = view.findViewById(R.id.newPasswordInput)
         confirmationInput = view.findViewById(R.id.confirmPasswordInput)
+
+        newInput.setFieldHelperText(
+            getString(R.string.password_min_length, AuthValidation.MIN_PASSWORD_LENGTH),
+        )
 
         currentInput.doAfterTextChanged { formState.currentPassword = it?.toString().orEmpty() }
         newInput.doAfterTextChanged { formState.password = it?.toString().orEmpty() }

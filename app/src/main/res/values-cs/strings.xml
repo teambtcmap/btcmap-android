@@ -85,7 +85,7 @@
     <string name="name">Název</string>
     <string name="name_placeholder">Kavárna Satoshi</string>
     <string name="password">Heslo</string>
-    <string name="password_min_length">Alespoň 8 znaků</string>
+    <string name="password_min_length">Alespoň %1$d znaků</string>
     <string name="confirm_password">Potvrdit heslo</string>
     <string name="passwords_do_not_match">Hesla se neshodují</string>
     <string name="field_required">Povinné</string>

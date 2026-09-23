@@ -85,7 +85,7 @@
     <string name="name">Nom</string>
     <string name="name_placeholder">Cafè Satoshi</string>
     <string name="password">Contrasenya</string>
-    <string name="password_min_length">Com a mínim 8 caràcters</string>
+    <string name="password_min_length">Com a mínim %1$d caràcters</string>
     <string name="confirm_password">Confirma la contrasenya</string>
     <string name="passwords_do_not_match">Les contrasenyes no coincideixen</string>
     <string name="field_required">Obligatori</string>

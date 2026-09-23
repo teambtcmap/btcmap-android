@@ -85,7 +85,7 @@
     <string name="name">Назив</string>
     <string name="name_placeholder">Кафе Satoshi</string>
     <string name="password">Лозинка</string>
-    <string name="password_min_length">Најмање 8 знакова</string>
+    <string name="password_min_length">Најмање %1$d знакова</string>
     <string name="confirm_password">Потврдите лозинку</string>
     <string name="passwords_do_not_match">Лозинке се не поклапају</string>
     <string name="field_required">Обавезно</string>

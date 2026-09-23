@@ -85,7 +85,7 @@
     <string name="name">Ad</string>
     <string name="name_placeholder">Satoshi Kafe</string>
     <string name="password">Parola</string>
-    <string name="password_min_length">En az 8 karakter</string>
+    <string name="password_min_length">En az %1$d karakter</string>
     <string name="confirm_password">Parolayı onayla</string>
     <string name="passwords_do_not_match">Parolalar eşleşmiyor</string>
     <string name="field_required">Gerekli</string>

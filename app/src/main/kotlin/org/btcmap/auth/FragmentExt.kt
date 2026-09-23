@@ -1,6 +1,5 @@
 package org.btcmap.auth
 
-import android.os.Build
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
@@ -8,29 +7,18 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
-import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.btcmap.api
-import org.btcmap.api.CreateTokenResponse
-import org.btcmap.api.createUser
-import org.btcmap.api.signIn
-import org.btcmap.api.toDbUser
 import org.btcmap.db
-import org.btcmap.db.Database
-import org.btcmap.settings.Settings
 import org.btcmap.settings.prefs
-import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.userFacingMessage
-import kotlin.coroutines.coroutineContext
 
 /**
  * Shows the account chooser and, once the user picks an option, the sign-in or
@@ -53,10 +41,17 @@ fun Fragment.showAuthDialog(extras: Bundle? = null) {
  * Registers the receiver of submitted sign-in/sign-up forms.
  *
  * Call this from `onViewCreated` so a fragment recreated after a configuration
- * change also receives a form submitted afterwards. [onAuthenticated] runs only
- * once the session has been stored, with the [extras] given to [showAuthDialog].
+ * change also receives a form submitted afterwards. The request runs in a
+ * retained [AuthViewModel], so it survives a rotation and its outcome reaches
+ * the recreated fragment. [onAuthenticated] runs only once the session has been
+ * stored, with the [extras] given to [showAuthDialog].
  */
 fun Fragment.registerAuthResultListener(onAuthenticated: (extras: Bundle) -> Unit) {
+    val viewModel = ViewModelProvider(
+        this,
+        AuthViewModel.Factory(api = api(), db = db(), prefs = prefs),
+    )[AuthViewModel::class.java]
+
     childFragmentManager.setFragmentResultListener(
         AuthDialogFragment.REQUEST_KEY,
         viewLifecycleOwner,
@@ -73,9 +68,82 @@ fun Fragment.registerAuthResultListener(onAuthenticated: (extras: Bundle) -> Uni
         val extras = result.getBundle(AuthDialogFragment.EXTRAS) ?: Bundle()
 
         when (mode) {
-            AuthMode.SignIn -> signIn(username, password, extras, onAuthenticated)
-            AuthMode.SignUp -> signUp(username, password, extras, onAuthenticated)
+            AuthMode.SignIn -> viewModel.signIn(username, password, extras)
+            AuthMode.SignUp -> viewModel.signUp(username, password, extras)
         }
+    }
+
+    // Kept outside the collectors so a stop/start of the view does not lose it
+    // and show a second progress dialog.
+    var progress: AlertDialog? = null
+
+    fun dismissProgress() {
+        progress?.dismiss()
+        progress = null
+    }
+
+    // The busy state follows the view, not STARTED, so a request that finishes
+    // while the app is in the background still dismisses its dialog.
+    viewLifecycleOwner.lifecycleScope.launch {
+        viewModel.busy.collect { busy ->
+            if (busy) {
+                if (progress == null) {
+                    progress = showProgressDialog(R.string.loading) { viewModel.cancel() }
+                }
+            } else {
+                dismissProgress()
+            }
+        }
+    }
+
+    // Outcomes are handled only while the view is visible; anything queued while
+    // it is not is buffered by the view model and delivered on return.
+    viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.events.collect { event ->
+                dismissProgress()
+                handleAuthEvent(event, onAuthenticated)
+            }
+        }
+    }
+}
+
+private fun Fragment.handleAuthEvent(
+    event: AuthEvent,
+    onAuthenticated: (extras: Bundle) -> Unit,
+) {
+    when (event) {
+        is AuthEvent.Authenticated -> {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.logged_in_as, event.name),
+                Toast.LENGTH_SHORT,
+            ).show()
+            onAuthenticated(event.extras)
+        }
+
+        is AuthEvent.AccountCreated -> {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.account_created_sign_in_failed),
+                Toast.LENGTH_LONG,
+            ).show()
+            AuthDialogFragment.newCredentials(
+                mode = AuthMode.SignIn,
+                extras = event.extras,
+                prefilledUsername = event.username,
+            ).show(childFragmentManager, AuthDialogFragment.TAG)
+        }
+
+        is AuthEvent.Failed -> showAuthError(
+            e = event.error,
+            fallbackMessage = getString(
+                when (event.operation) {
+                    AuthOperation.SignIn -> R.string.failed_to_sign_in
+                    AuthOperation.SignUp -> R.string.failed_to_create_new_account
+                },
+            ),
+        )
     }
 }
 
@@ -105,165 +173,6 @@ fun Fragment.registerChangePasswordResultListener(
         val current = result.getString(ChangePasswordDialogFragment.CURRENT_PASSWORD).orEmpty()
         val new = result.getString(ChangePasswordDialogFragment.NEW_PASSWORD).orEmpty()
         onSubmit(current, new)
-    }
-}
-
-private fun Fragment.signUp(
-    username: String,
-    password: String,
-    extras: Bundle,
-    onAuthenticated: (extras: Bundle) -> Unit,
-) {
-    viewLifecycleOwner.lifecycleScope.launch {
-        val user = runAuthRequest(
-            fallbackMessage = getString(R.string.failed_to_create_new_account),
-        ) {
-            api().createUser(name = username, password = password)
-        } ?: return@launch
-
-        // The account exists now. If signing in fails, fall back to the sign-in
-        // form instead of surfacing a second error dialog: the caller is told
-        // what happened with a toast.
-        val response = runAuthRequest(
-            fallbackMessage = getString(R.string.failed_to_sign_in),
-            showErrorDialog = false,
-        ) {
-            api().signIn(
-                username = user.name,
-                password = password,
-                label = tokenLabel(),
-            )
-        }
-
-        if (response == null) {
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.account_created_sign_in_failed),
-                Toast.LENGTH_LONG,
-            ).show()
-            if (isAdded) {
-                AuthDialogFragment.newCredentials(
-                    mode = AuthMode.SignIn,
-                    extras = extras,
-                    prefilledUsername = user.name,
-                ).show(childFragmentManager, AuthDialogFragment.TAG)
-            }
-            return@launch
-        }
-
-        completeSignIn(response, extras, onAuthenticated)
-    }
-}
-
-private fun Fragment.signIn(
-    username: String,
-    password: String,
-    extras: Bundle,
-    onAuthenticated: (extras: Bundle) -> Unit,
-) {
-    viewLifecycleOwner.lifecycleScope.launch {
-        val response = runAuthRequest(
-            fallbackMessage = getString(R.string.failed_to_sign_in),
-        ) {
-            api().signIn(
-                username = username,
-                password = password,
-                label = tokenLabel(),
-            )
-        } ?: return@launch
-
-        completeSignIn(response, extras, onAuthenticated)
-    }
-}
-
-/**
- * Runs [request] behind a cancelable progress dialog, with a timeout so a slow
- * server cannot trap the user behind a spinner. Returns null on failure, after
- * reporting it with a dialog when [showErrorDialog] is true.
- */
-private suspend fun <T> Fragment.runAuthRequest(
-    fallbackMessage: String,
-    showErrorDialog: Boolean = true,
-    request: suspend () -> T,
-): T? {
-    val context = coroutineContext
-    val progress = showProgressDialog(R.string.loading) { context.cancel() }
-
-    try {
-        return withTimeout(AUTH_TIMEOUT_MS) { request() }
-    } catch (e: TimeoutCancellationException) {
-        reportAuthError(e, fallbackMessage, showErrorDialog)
-        return null
-    } catch (e: Exception) {
-        e.rethrowIfCancellation()
-        reportAuthError(e, fallbackMessage, showErrorDialog)
-        return null
-    } finally {
-        progress.dismiss()
-    }
-}
-
-private fun Fragment.reportAuthError(
-    e: Throwable,
-    fallbackMessage: String,
-    showDialog: Boolean,
-) {
-    if (showDialog) {
-        showAuthError(e, fallbackMessage)
-    }
-}
-
-private suspend fun Fragment.completeSignIn(
-    response: CreateTokenResponse,
-    extras: Bundle,
-    onAuthenticated: (extras: Bundle) -> Unit,
-) {
-    try {
-        storeSignedInSession(db = db(), prefs = prefs, response = response)
-    } catch (e: Exception) {
-        e.rethrowIfCancellation()
-        showAuthError(
-            e = e,
-            fallbackMessage = getString(R.string.failed_to_sign_in),
-        )
-        return
-    }
-
-    // The session is durable now. If the view was destroyed in the meantime the
-    // coroutine is cancelled before the callback runs, so [onAuthenticated] may
-    // be skipped; the account is still signed in and the next screen sees it.
-    val toastContext = context
-    if (toastContext != null) {
-        Toast.makeText(
-            toastContext,
-            getString(R.string.logged_in_as, response.user.name),
-            Toast.LENGTH_SHORT,
-        ).show()
-    }
-
-    try {
-        onAuthenticated(extras)
-    } catch (e: Exception) {
-        e.rethrowIfCancellation()
-    }
-}
-
-/**
- * Persists a successful sign-in. The token and the cached user are written in a
- * single database transaction, so a failure can never leave the account only
- * partly stored and the previous session is kept intact.
- */
-internal suspend fun storeSignedInSession(
-    db: Database,
-    prefs: Settings,
-    response: CreateTokenResponse,
-) {
-    withContext(Dispatchers.IO) {
-        prefs.replaceSession(
-            db = db,
-            token = response.token,
-            user = response.user.toDbUser(),
-        )
     }
 }
 
@@ -314,18 +223,3 @@ private fun Fragment.dismissOnViewDestroyed(dialog: AlertDialog) {
         owner.lifecycle.removeObserver(observer)
     }
 }
-
-private fun tokenLabel(): String = buildString {
-    append("BTC Map Android ")
-    append(BuildConfig.VERSION_CODE)
-    val device = listOf(Build.MANUFACTURER, Build.MODEL)
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .joinToString(" ")
-    if (device.isNotEmpty()) {
-        append(' ')
-        append(device)
-    }
-}
-
-private const val AUTH_TIMEOUT_MS = 30_000L
