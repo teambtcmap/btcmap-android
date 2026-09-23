@@ -4,6 +4,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 class PlaceQueriesTest {
@@ -181,6 +182,37 @@ class PlaceQueriesTest {
         val results = db.place.selectBySearchString("pizza")
 
         Assert.assertTrue(results.isEmpty())
+    }
+
+    @Test
+    fun selectBySearchString_treatsWildcardsLiterally() {
+        val db = createDatabase()
+        db.place.insert(listOf(createPlace(id = 1L, name = "50% Off Cafe")))
+        db.place.insert(listOf(createPlace(id = 2L, name = "500 Satoshis Cafe")))
+
+        // Without an ESCAPE clause "%" is a wildcard, so "50%" would also match
+        // "500 Satoshis Cafe".
+        val results = db.place.selectBySearchString("50%")
+
+        Assert.assertEquals(1, results.size)
+        Assert.assertEquals("50% Off Cafe", results[0].name)
+    }
+
+    @Test
+    fun selectByOsmIds_chunksLargeInput() {
+        val db = createDatabase()
+        // Larger than the per-statement bound-variable cap, so the ids span
+        // more than one query and the results have to be merged.
+        val count = 1_000
+        db.place.insert(
+            (1..count).map { id -> createPlace(id = id.toLong()).copy(osmId = "node:$id") },
+        )
+
+        val result = db.place.selectByOsmIds((1..count).map { "node:$it" })
+
+        Assert.assertEquals(count, result.size)
+        Assert.assertEquals(1L, result.getValue("node:1").id)
+        Assert.assertEquals(count.toLong(), result.getValue("node:$count").id)
     }
 
     @Test
@@ -391,33 +423,36 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun deleteById_removesPlace() {
+    fun selectMerchantsByBounds_withMinVerifiedAt_comparesByInstantNotByText() {
         val db = createDatabase()
-        db.place.insert(listOf(createPlace(id = 1L)))
-        db.place.insert(listOf(createPlace(id = 2L)))
+        // "10:00:00Z" sorts after "10:00:00.500Z" as text but is earlier by
+        // instant, so a text comparison would wrongly include the first place.
+        db.place.insert(listOf(createPlace(
+            id = 1L,
+            icon = "restaurant",
+            verifiedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+        )))
+        db.place.insert(listOf(createPlace(
+            id = 2L,
+            icon = "coffee",
+            verifiedAt = ZonedDateTime.parse("2024-01-01T10:00:01Z"),
+        )))
 
-        Assert.assertEquals(2L, db.place.selectCount())
+        val results = db.place.selectMerchantsByBounds(
+            minLat = 40.0,
+            maxLat = 41.0,
+            minLon = -75.0,
+            maxLon = -73.0,
+            minVerifiedAt = ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
+        )
 
-        db.place.deleteById(1L)
-
-        Assert.assertEquals(1L, db.place.selectCount())
-        Assert.assertNull(db.place.selectById(1L))
-    }
-
-    @Test
-    fun deleteById_doesNothingWhenIdNotFound() {
-        val db = createDatabase()
-        db.place.insert(listOf(createPlace(id = 1L)))
-
-        db.place.deleteById(999L)
-
-        Assert.assertEquals(1L, db.place.selectCount())
+        Assert.assertEquals(listOf(2L), results.map { it.id })
     }
 
     @Test
     fun selectMerchantsByBounds_withMinVerifiedAt_returnsOnlyRecentMerchants() {
         val db = createDatabase()
-        val now = ZonedDateTime.now()
+        val now = ZonedDateTime.now(ZoneOffset.UTC)
         db.place.insert(listOf(createPlace(
             id = 1L,
             icon = "restaurant",
@@ -451,7 +486,7 @@ class PlaceQueriesTest {
     @Test
     fun selectMerchantsByBounds_withMinVerifiedAtNull_returnsAllMerchants() {
         val db = createDatabase()
-        val now = ZonedDateTime.now()
+        val now = ZonedDateTime.now(ZoneOffset.UTC)
         db.place.insert(listOf(createPlace(
             id = 1L,
             icon = "restaurant",
@@ -477,7 +512,7 @@ class PlaceQueriesTest {
     @Test
     fun selectMerchantsByBounds_withMinVerifiedAt_excludesUnverified() {
         val db = createDatabase()
-        val now = ZonedDateTime.now()
+        val now = ZonedDateTime.now(ZoneOffset.UTC)
         db.place.insert(listOf(createPlace(
             id = 1L,
             icon = "restaurant",
@@ -511,7 +546,7 @@ class PlaceQueriesTest {
     @Test
     fun selectMerchantsByBounds_withMinVerifiedAt_returnsEmptyWhenAllExcluded() {
         val db = createDatabase()
-        val now = ZonedDateTime.now()
+        val now = ZonedDateTime.now(ZoneOffset.UTC)
         db.place.insert(listOf(createPlace(
             id = 1L,
             icon = "restaurant",

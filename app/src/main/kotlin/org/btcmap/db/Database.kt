@@ -18,13 +18,14 @@ class Database(driver: SQLiteDriver, val path: String) {
          * Schema version stamped onto fresh databases created by this app.
          *
          * Databases below [FIRST_OWN_VERSION] are discarded rather than
-         * migrated; databases at or above it are migrated in place. The
+         * migrated, and so are databases from a newer app version (above this
+         * value); a database in between is migrated in place. The lower
          * boundary is deliberately far above the single-digit user_version of
          * the throwaway database that used the `btcmap.db` name early in the
          * project's history, so the stale file can be told apart from ours by
          * the pragma alone (see [initialize]).
          */
-        const val VERSION = 103
+        const val VERSION = 104
 
         /**
          * The first version this app is responsible for upgrading. Anything
@@ -41,8 +42,9 @@ class Database(driver: SQLiteDriver, val path: String) {
          * Whether opening [path] would run an in-place [migrate], which can
          * rewrite whole tables. Callers that open the database on the main
          * thread (to load the settings before the first screen) use this to
-         * keep that work off it. A missing, unreadable or below-[FIRST_OWN_VERSION]
-         * file is not a migration: it is created or discarded, which is cheap.
+         * keep that work off it. A missing, unreadable, below-[FIRST_OWN_VERSION]
+         * or above-[VERSION] file is not a migration: it is created or
+         * discarded, which is cheap.
          */
         fun needsMigration(driver: SQLiteDriver, path: String): Boolean {
             val version = readUserVersion(driver, path)
@@ -75,8 +77,12 @@ class Database(driver: SQLiteDriver, val path: String) {
     val preference = PreferenceQueries(conn)
     val user = UserStore(preference)
 
+    /** Guards [transaction] against reentrancy on the calling thread. */
+    private val inTransaction = ThreadLocal.withInitial { false }
+
     init {
-        // [initialize] discards only foreign databases, so a version of 0 here
+        // [initialize] discards every database this version cannot upgrade
+        // (foreign, unreadable or from a newer build), so a version of 0 here
         // means the file was just created (or a creation was interrupted before
         // the version was stamped, in which case it was deleted and retried) and
         // the schema has to be built. A database at an older own version is
@@ -98,18 +104,28 @@ class Database(driver: SQLiteDriver, val path: String) {
      * below [FIRST_OWN_VERSION] (including a missing version, which reads as 0).
      * Its sidecar files are removed too. An unreadable file cannot be one of
      * ours either, so it is discarded as well. Databases at or above
-     * [FIRST_OWN_VERSION] are kept and migrated.
+     * [FIRST_OWN_VERSION] and at or below [VERSION] are kept and migrated; a
+     * database left by a newer app version cannot be read safely and is
+     * discarded like a foreign one.
      */
     private fun initialize(driver: SQLiteDriver, path: String): SQLiteConnection {
         if (path != MEMORY_PATH) {
             val file = File(path)
-            if (file.exists() && readUserVersion(driver, path) < FIRST_OWN_VERSION) {
+            if (file.exists() && isDiscardable(readUserVersion(driver, path))) {
                 file.delete()
                 SIDECAR_SUFFIXES.forEach { suffix -> File("$path$suffix").delete() }
             }
         }
         return driver.open(path)
     }
+
+    /**
+     * Whether a database at [version] belongs to another app or a newer build
+     * and must be recreated instead of migrated. An unreadable or version-less
+     * file reads as a version below [FIRST_OWN_VERSION].
+     */
+    private fun isDiscardable(version: Int): Boolean =
+        version < FIRST_OWN_VERSION || version > VERSION
 
     private fun createSchema(conn: SQLiteConnection) {
         conn.execSQL(org.btcmap.db.table.place.CREATE)
@@ -119,6 +135,12 @@ class Database(driver: SQLiteDriver, val path: String) {
         conn.execSQL(org.btcmap.db.table.preference.CREATE)
         conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
         conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
+        conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_UPDATED_AT)
+        conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_OSM_ID)
+        conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_BOUNDS)
+        conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_UPDATED_AT)
+        conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_BOUNDS)
+        conn.execSQL(org.btcmap.db.table.area.CREATE_INDEX_UPDATED_AT)
         conn.execSQL("PRAGMA user_version=$VERSION;")
     }
 
@@ -234,6 +256,21 @@ class Database(driver: SQLiteDriver, val path: String) {
                     conn.execSQL("ALTER TABLE place_new RENAME TO place;")
                 }
 
+                103 -> {
+                    // The place, event and area sync cursors are read with
+                    // ORDER BY julianday(updated_at) at the start of every sync,
+                    // and the map and issue screens filter by bounds and osm_id;
+                    // add the indexes that back those reads, matching the
+                    // comment table's. The expression index lets SQLite read the
+                    // newest row directly instead of scanning and sorting.
+                    conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_UPDATED_AT)
+                    conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_OSM_ID)
+                    conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_BOUNDS)
+                    conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_UPDATED_AT)
+                    conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_BOUNDS)
+                    conn.execSQL(org.btcmap.db.table.area.CREATE_INDEX_UPDATED_AT)
+                }
+
                 else -> throw Exception("migration is missing for version $version")
             }
 
@@ -251,21 +288,36 @@ class Database(driver: SQLiteDriver, val path: String) {
      * connection and a write on another thread is a separate transaction that
      * cannot be rolled back by this one. Do not replace them with plain
      * statements or assume the connection is thread-confined.
+     *
+     * Nesting is not supported: a second [transaction] on the same thread throws
+     * instead of silently starting a savepoint-less inner transaction that the
+     * bundled driver (used in tests) would reject.
      */
     fun transaction(block: () -> Unit) {
-        conn.execSQL("BEGIN TRANSACTION;")
+        check(!inTransaction.get()) { "Database.transaction cannot be nested" }
+        inTransaction.set(true)
         try {
-            block()
-            conn.execSQL("COMMIT;")
-        } catch (e: Throwable) {
-            // Roll back on any failure, including an Error, and never let a
-            // failed rollback mask the original exception.
+            conn.execSQL("BEGIN TRANSACTION;")
             try {
-                conn.execSQL("ROLLBACK;")
-            } catch (_: Throwable) {
-                // Ignored: the original exception is already on its way out.
+                block()
+                conn.execSQL("COMMIT;")
+            } catch (e: Throwable) {
+                // Roll back on any failure, including an Error, and never let a
+                // failed rollback mask the original exception.
+                try {
+                    conn.execSQL("ROLLBACK;")
+                } catch (_: Throwable) {
+                    // Ignored: the original exception is already on its way out.
+                }
+                throw e
             }
-            throw e
+        } finally {
+            inTransaction.set(false)
         }
+    }
+
+    /** Closes the underlying connection. The app holds one for the process. */
+    fun close() {
+        conn.close()
     }
 }

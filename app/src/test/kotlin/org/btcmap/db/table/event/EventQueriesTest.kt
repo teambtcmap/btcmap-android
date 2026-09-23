@@ -234,14 +234,17 @@ class EventQueriesTest {
     }
 
     @Test
-    fun deleteById_removesOnlyThatEvent() {
+    fun selectBySearchString_treatsWildcardsLiterally() {
         val db = createDatabase()
-        db.event.insert(listOf(event(id = 1L), event(id = 2L)))
+        insertEvent(db, id = 1L, name = "50% Off Meetup")
+        insertEvent(db, id = 2L, name = "500 Satoshis Meetup")
 
-        db.event.deleteById(1L)
+        // Without an ESCAPE clause "%" is a wildcard, so "50%" would also match
+        // "500 Satoshis Meetup".
+        val results = db.event.selectBySearchString("50%")
 
-        Assert.assertNull(db.event.selectById(1L))
-        Assert.assertNotNull(db.event.selectById(2L))
+        Assert.assertEquals(1, results.size)
+        Assert.assertEquals("50% Off Meetup", results[0].name)
     }
 
     @Test

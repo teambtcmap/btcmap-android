@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Match search terms containing `%` or `_` literally on the map, instead of treating them as wildcards
+- Read corrupt stored data (a place's localized name or the signed-in account) as absent instead of crashing the screen that shows it
+- Speed up background syncing and map reads with indexes over the place, event and area tables
+- Recreate a local database left behind by a newer app version instead of opening a schema this build cannot read
 - Keep retrying a paid comment until the server publishes it, instead of stopping early when a different comment for the same place becomes visible first
 - Read only the newest comments for the place screen's inline preview, instead of loading every comment a place has
 - Translate the boost confirmation message into all supported languages

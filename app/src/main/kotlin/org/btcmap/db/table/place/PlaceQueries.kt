@@ -7,8 +7,16 @@ import org.btcmap.db.bindLongOrNull
 import org.btcmap.db.bindTextOrNull
 import org.btcmap.db.bindZonedDateTime
 import org.btcmap.db.bindZonedDateTimeOrNull
+import org.btcmap.db.escapeLikePattern
 import org.btcmap.db.getZonedDateTimeOrNull
 import java.time.ZonedDateTime
+
+/**
+ * Caps the number of bound variables per statement. Android 10 (minSdk 29)
+ * ships SQLite with a limit of 999, and [PlaceQueries.selectByOsmIds] binds one
+ * per id, so it splits large inputs into chunks below that.
+ */
+private const val MAX_QUERY_VARIABLES = 900
 
 class PlaceQueries(private val conn: SQLiteConnection) {
     fun insert(rows: List<Place>) {
@@ -86,28 +94,32 @@ class PlaceQueries(private val conn: SQLiteConnection) {
      * no matching place are simply absent from the result.
      *
      * A single query, so a caller resolving the places behind a list of issues
-     * does not run one query per row.
+     * does not run one query per row. The ids are chunked so a very long list
+     * does not exceed SQLite's bound-variable limit, and the chunks' results are
+     * merged.
      */
     fun selectByOsmIds(osmIds: Collection<String>): Map<String, Place> {
         val ids = osmIds.toSet()
         if (ids.isEmpty()) return emptyMap()
 
-        val placeholders = ids.indices.joinToString(", ") { "?${it + 1}" }
-        conn.prepare(
-            """
-                SELECT ${FullProjection.COLUMNS}
-                FROM $TABLE
-                WHERE $OSM_ID IN ($placeholders) AND $DELETED_AT IS NULL;
-            """
-        ).use { stmt ->
-            ids.forEachIndexed { index, osmId -> stmt.bindText(index + 1, osmId) }
-            val places = mutableMapOf<String, Place>()
-            while (stmt.step()) {
-                val place = FullProjection.fromStatement(stmt)
-                place.osmId?.let { places[it] = place }
+        val places = mutableMapOf<String, Place>()
+        for (chunk in ids.chunked(MAX_QUERY_VARIABLES)) {
+            val placeholders = chunk.indices.joinToString(", ") { "?${it + 1}" }
+            conn.prepare(
+                """
+                    SELECT ${FullProjection.COLUMNS}
+                    FROM $TABLE
+                    WHERE $OSM_ID IN ($placeholders) AND $DELETED_AT IS NULL;
+                """
+            ).use { stmt ->
+                chunk.forEachIndexed { index, osmId -> stmt.bindText(index + 1, osmId) }
+                while (stmt.step()) {
+                    val place = FullProjection.fromStatement(stmt)
+                    place.osmId?.let { places[it] = place }
+                }
             }
-            return places
         }
+        return places
     }
 
     fun selectBySearchString(searchString: String): List<Place> {
@@ -115,11 +127,11 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             """
                 SELECT ${FullProjection.COLUMNS}
                 FROM $TABLE
-                WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%'
+                WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%' ESCAPE '\'
                     AND $DELETED_AT IS NULL;
             """
         ).use {
-            it.bindText(1, searchString)
+            it.bindText(1, searchString.escapeLikePattern())
             val rows = mutableListOf<Place>()
             while (it.step()) {
                 rows.add(FullProjection.fromStatement(it))
@@ -165,9 +177,6 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    var selectMerchantsByBoundsCallCount = 0
-    var selectMerchantsByBoundsLastCallDurationMs = 0L
-
     fun selectMerchantsByBounds(
         minLat: Double,
         maxLat: Double,
@@ -175,14 +184,15 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         maxLon: Double,
         minVerifiedAt: ZonedDateTime? = null,
     ): List<Marker> {
-        val startTime = System.currentTimeMillis()
-        selectMerchantsByBoundsCallCount += 1
         val whereClause = buildString {
             append("$ICON <> 'local_atm' AND $ICON <> 'currency_exchange'")
             append(" AND $DELETED_AT IS NULL")
             append(" AND $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4")
             if (minVerifiedAt != null) {
-                append(" AND $VERIFIED_AT >= ?5")
+                // julianday, not plain text: timestamps are stored as
+                // ZonedDateTime.toString(), which is not fixed-width, so text
+                // ordering is not chronological (see selectMaxUpdatedAt).
+                append(" AND julianday($VERIFIED_AT) >= julianday(?5)")
             }
         }
         conn.prepare(
@@ -204,7 +214,6 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             while (it.step()) {
                 rows.add(MarkerProjection.fromStatement(it))
             }
-            selectMerchantsByBoundsLastCallDurationMs = System.currentTimeMillis() - startTime
             return rows
         }
     }
@@ -287,13 +296,6 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         conn.prepare("SELECT count(*) FROM $TABLE$where;").use {
             it.step()
             return it.getLong(0)
-        }
-    }
-
-    fun deleteById(id: Long) {
-        conn.prepare("DELETE FROM $TABLE WHERE $ID = ?1;").use {
-            it.bindLong(1, id)
-            it.step()
         }
     }
 }

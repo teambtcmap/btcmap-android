@@ -5,6 +5,7 @@ import org.btcmap.db.bindDoubleOrNull
 import org.btcmap.db.bindTextOrNull
 import org.btcmap.db.bindZonedDateTime
 import org.btcmap.db.bindZonedDateTimeOrNull
+import org.btcmap.db.escapeLikePattern
 import org.btcmap.db.getZonedDateTimeOrNull
 import java.time.ZonedDateTime
 
@@ -65,11 +66,11 @@ class AreaQueries(private val conn: SQLiteConnection) {
             """
             SELECT ${FullProjection.COLUMNS}
             FROM $TABLE
-            WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%'
+            WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%' ESCAPE '\'
                 AND $DELETED_AT IS NULL;
             """
         ).use {
-            it.bindText(1, searchString)
+            it.bindText(1, searchString.escapeLikePattern())
             val rows = mutableListOf<Area>()
             while (it.step()) {
                 rows.add(FullProjection.fromStatement(it))

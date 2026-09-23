@@ -5,6 +5,7 @@ import org.btcmap.db.bindHttpUrlOrNull
 import org.btcmap.db.bindLongOrNull
 import org.btcmap.db.bindZonedDateTime
 import org.btcmap.db.bindZonedDateTimeOrNull
+import org.btcmap.db.escapeLikePattern
 import org.btcmap.db.getZonedDateTimeOrNull
 import java.time.ZonedDateTime
 
@@ -29,7 +30,7 @@ class EventQueries(private val conn: SQLiteConnection) {
                 stmt.bindDouble(4, row.lon)
                 stmt.bindText(5, row.name)
                 stmt.bindHttpUrlOrNull(6, row.website)
-                stmt.bindText(7, row.startsAt.toString())
+                stmt.bindZonedDateTime(7, row.startsAt)
                 stmt.bindZonedDateTimeOrNull(8, row.endsAt)
                 stmt.bindZonedDateTime(9, row.updatedAt)
                 stmt.bindZonedDateTimeOrNull(10, row.deletedAt)
@@ -102,11 +103,11 @@ class EventQueries(private val conn: SQLiteConnection) {
             """
                 SELECT ${FullProjection.COLUMNS}
                 FROM $TABLE
-                WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%'
+                WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%' ESCAPE '\'
                     AND $DELETED_AT IS NULL;
             """
         ).use {
-            it.bindText(1, searchString)
+            it.bindText(1, searchString.escapeLikePattern())
             val rows = mutableListOf<Event>()
             while (it.step()) {
                 rows.add(FullProjection.fromStatement(it))
@@ -147,13 +148,5 @@ class EventQueries(private val conn: SQLiteConnection) {
             it.step()
             return it.getLong(0)
         }
-    }
-
-    fun deleteById(id: Long) {
-        conn.prepare("DELETE FROM $TABLE WHERE $ID = ?1;")
-            .use {
-                it.bindLong(1, id)
-                it.step()
-            }
     }
 }

@@ -37,3 +37,7 @@ const val CREATE = """
         $DELETED_AT TEXT
     );
  """
+
+// See place.CREATE_INDEX_UPDATED_AT: same cursor read, same expression index.
+const val CREATE_INDEX_UPDATED_AT =
+    "CREATE INDEX area_updated_at ON $TABLE(julianday($UPDATED_AT));"

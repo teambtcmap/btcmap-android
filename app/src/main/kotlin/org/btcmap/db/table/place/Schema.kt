@@ -55,3 +55,17 @@ const val CREATE = """
         $DELETED_AT TEXT
     );
 """
+
+// Serves selectMaxUpdatedAt: the expression index lets SQLite read the newest
+// row directly instead of scanning and sorting the whole table, mirroring
+// comment_updated_at.
+const val CREATE_INDEX_UPDATED_AT =
+    "CREATE INDEX place_updated_at ON $TABLE(julianday($UPDATED_AT));"
+
+// Serves selectByOsmId and selectByOsmIds, which resolve the places behind a
+// list of issues.
+const val CREATE_INDEX_OSM_ID = "CREATE INDEX place_osm_id ON $TABLE($OSM_ID);"
+
+// Serves the bounding-box reads: the leading latitude range keeps SQLite from
+// scanning the whole table, and a descending scan also satisfies ORDER BY lat.
+const val CREATE_INDEX_BOUNDS = "CREATE INDEX place_bounds ON $TABLE($LAT, $LON);"

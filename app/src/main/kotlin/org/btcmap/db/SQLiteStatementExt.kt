@@ -56,4 +56,7 @@ fun SQLiteStatement.getHttpUrlOrNull(index: Int): HttpUrl? =
     if (isNull(index)) null else getText(index).toHttpUrl()
 
 fun SQLiteStatement.getJsonObjectOrNull(index: Int): JsonObject? =
-    if (isNull(index)) null else JsonParser.parseString(getText(index)).asJsonObject
+    // A malformed value is treated as absent rather than thrown out of a read
+    // (the map and preview screens render straight from these projections).
+    if (isNull(index)) null
+    else runCatching { JsonParser.parseString(getText(index)).asJsonObject }.getOrNull()

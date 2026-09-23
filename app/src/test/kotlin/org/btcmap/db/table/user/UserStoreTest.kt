@@ -53,6 +53,16 @@ class UserStoreTest {
     }
 
     @Test
+    fun select_returnsNullForCorruptJson() {
+        val db = createDatabase()
+        // A value written by an older or broken build must read as "no user"
+        // instead of throwing out of a read.
+        db.preference.upsert(UserStore.KEY, "{not json")
+
+        Assert.assertNull(db.user.select())
+    }
+
+    @Test
     fun insert_replacesExistingUser() {
         val db = createDatabase()
         val user1 = createUser(id = 1L, name = "Original Name")

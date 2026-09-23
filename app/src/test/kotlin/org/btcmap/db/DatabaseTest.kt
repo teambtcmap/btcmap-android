@@ -170,6 +170,49 @@ class DatabaseTest {
     }
 
     @Test
+    fun version103Database_isMigratedWithTheNewIndexes() {
+        val path = existingPath()
+        // Reproduces the last schema before the place, event and area indexes
+        // were added: version 103 with the current tables but only the comment
+        // indexes.
+        createVersion103Database(path)
+
+        val db = Database(BundledSQLiteDriver(), path)
+
+        try {
+            Assert.assertEquals(Database.VERSION, userVersion(db.conn))
+            Assert.assertTrue(indexes(db.conn, "place").contains("place_updated_at"))
+            Assert.assertTrue(indexes(db.conn, "place").contains("place_osm_id"))
+            Assert.assertTrue(indexes(db.conn, "place").contains("place_bounds"))
+            Assert.assertTrue(indexes(db.conn, "event").contains("event_updated_at"))
+            Assert.assertTrue(indexes(db.conn, "event").contains("event_bounds"))
+            Assert.assertTrue(indexes(db.conn, "area").contains("area_updated_at"))
+            // The existing row survives the index-only upgrade.
+            Assert.assertEquals(1L, db.place.selectCount())
+        } finally {
+            db.conn.close()
+        }
+    }
+
+    @Test
+    fun newerDatabase_isDiscardedAndRecreated() {
+        val path = existingPath()
+        createStaleDatabase(path, version = Database.VERSION + 1)
+
+        val db = Database(BundledSQLiteDriver(), path)
+
+        try {
+            // A database from a newer build cannot be read safely, so it is
+            // recreated like a foreign one instead of being opened as-is.
+            Assert.assertFalse(hasTable(db.conn, "stale"))
+            Assert.assertTrue(hasTable(db.conn, "place"))
+            Assert.assertEquals(Database.VERSION, userVersion(db.conn))
+        } finally {
+            db.conn.close()
+        }
+    }
+
+    @Test
     fun databaseWithoutAVersion_isDiscardedAndRecreated() {
         val path = existingPath()
         createStaleDatabase(path, version = null)
@@ -196,7 +239,7 @@ class DatabaseTest {
     @Test
     fun needsMigration_isTrueForTheNewestMigratableVersion() {
         val path = existingPath()
-        createVersion102Database(path)
+        createVersion103Database(path)
 
         Assert.assertTrue(Database.needsMigration(BundledSQLiteDriver(), path))
     }
@@ -223,6 +266,16 @@ class DatabaseTest {
         // A file from an unrelated app is deleted and recreated, not migrated.
         val path = existingPath()
         createStaleDatabase(path, version = 1)
+
+        Assert.assertFalse(Database.needsMigration(BundledSQLiteDriver(), path))
+    }
+
+    @Test
+    fun needsMigration_isFalseForANewerDatabase() {
+        // A newer database is recreated, not migrated, so it is cheap enough to
+        // open on the main thread.
+        val path = existingPath()
+        createStaleDatabase(path, version = Database.VERSION + 1)
 
         Assert.assertFalse(Database.needsMigration(BundledSQLiteDriver(), path))
     }
@@ -359,6 +412,30 @@ class DatabaseTest {
         }
     }
 
+    /**
+     * The schema as of version 103: the current tables and comment indexes,
+     * before the place, event and area indexes were added.
+     */
+    private fun createVersion103Database(path: String) {
+        val conn = BundledSQLiteDriver().open(path)
+        try {
+            conn.execSQL(org.btcmap.db.table.place.CREATE)
+            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE)
+            conn.execSQL(org.btcmap.db.table.area.CREATE)
+            conn.execSQL(org.btcmap.db.table.preference.CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(
+                "INSERT INTO place (id, updated_at, lat, lon, icon) " +
+                    "VALUES (1, '2024-01-01T00:00:00Z', 0.0, 0.0, 'coffee');"
+            )
+            conn.execSQL("PRAGMA user_version=103;")
+        } finally {
+            conn.close()
+        }
+    }
+
     private fun areaColumns(conn: SQLiteConnection): List<String> =
         columns(conn, "area")
 
@@ -377,6 +454,16 @@ class DatabaseTest {
 
     private fun hasTable(conn: SQLiteConnection, name: String): Boolean =
         tables(conn).contains(name)
+
+    private fun indexes(conn: SQLiteConnection, table: String): List<String> {
+        val names = mutableListOf<String>()
+        conn.prepare("SELECT name FROM pragma_index_list('$table');").use {
+            while (it.step()) {
+                names.add(it.getText(0))
+            }
+        }
+        return names
+    }
 
     private fun tables(conn: SQLiteConnection): List<String> {
         val names = mutableListOf<String>()

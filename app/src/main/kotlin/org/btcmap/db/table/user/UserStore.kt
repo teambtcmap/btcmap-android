@@ -21,7 +21,10 @@ class UserStore(private val preference: PreferenceQueries) {
 
     fun select(): User? {
         val json = preference.select(KEY) ?: return null
-        return gson.fromJson(json, User::class.java)
+        // Corrupt or pre-format JSON is treated as absent, like a missing
+        // session, instead of throwing out of settings preload (which swallows
+        // it) or a screen that assumes a signed-in user.
+        return runCatching { gson.fromJson(json, User::class.java) }.getOrNull()
     }
 
     fun delete() {
