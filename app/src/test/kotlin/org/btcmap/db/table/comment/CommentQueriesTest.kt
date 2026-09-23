@@ -12,6 +12,24 @@ class CommentQueriesTest {
         return Database(BundledSQLiteDriver(), ":memory:")
     }
 
+    private fun comment(
+        id: Long,
+        placeId: Long = 100L,
+        createdAt: String = "2024-01-01T10:00:00Z",
+        deletedAt: String? = null,
+    ): Comment {
+        val created = ZonedDateTime.parse(createdAt)
+        val deleted = deletedAt?.let { ZonedDateTime.parse(it) }
+        return Comment(
+            id = id,
+            placeId = placeId,
+            comment = "Comment $id",
+            createdAt = created,
+            updatedAt = deleted ?: created,
+            deletedAt = deleted,
+        )
+    }
+
     @Test
     fun insert_and_selectByPlaceId() {
         val db = createDatabase()
@@ -256,38 +274,61 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun deleteById_removesComment() {
+    fun selectByPlaceId_limitReturnsTheNewestComments() {
         val db = createDatabase()
-        val comment = Comment(
-            id = 1L,
-            placeId = 100L,
-            comment = "To delete",
-            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+        db.comment.insert(
+            listOf(
+                comment(id = 1L, createdAt = "2024-01-01T10:00:00Z"),
+                comment(id = 2L, createdAt = "2024-01-02T10:00:00Z"),
+                comment(id = 3L, createdAt = "2024-01-03T10:00:00Z"),
+            )
         )
 
-        db.comment.insert(listOf(comment))
-        Assert.assertEquals(1, db.comment.selectByPlaceId(100L).size)
+        val results = db.comment.selectByPlaceId(100L, limit = 2L)
 
-        db.comment.deleteById(1L)
-        Assert.assertTrue(db.comment.selectByPlaceId(100L).isEmpty())
+        Assert.assertEquals(listOf(3L, 2L), results.map { it.id })
     }
 
     @Test
-    fun deleteById_doesNothingWhenIdNotFound() {
+    fun selectByPlaceId_limitDoesNotCountTombstones() {
         val db = createDatabase()
-        val comment = Comment(
-            id = 1L,
-            placeId = 100L,
-            comment = "Test",
-            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+        db.comment.insert(
+            listOf(
+                comment(id = 1L, createdAt = "2024-01-01T10:00:00Z"),
+                comment(id = 2L, createdAt = "2024-01-02T10:00:00Z"),
+                comment(
+                    id = 3L,
+                    createdAt = "2024-01-03T10:00:00Z",
+                    deletedAt = "2024-01-04T10:00:00Z",
+                ),
+            )
         )
 
-        db.comment.insert(listOf(comment))
-        db.comment.deleteById(999L)
+        // The newest row is a tombstone: the limit must apply after the
+        // deleted filter, not before it.
+        val results = db.comment.selectByPlaceId(100L, limit = 2L)
 
-        Assert.assertEquals(1, db.comment.selectByPlaceId(100L).size)
+        Assert.assertEquals(listOf(2L, 1L), results.map { it.id })
+    }
+
+    @Test
+    fun selectCountByPlaceId_countsOnlyVisibleComments() {
+        val db = createDatabase()
+        db.comment.insert(
+            listOf(
+                comment(id = 1L, placeId = 100L),
+                comment(
+                    id = 2L,
+                    placeId = 100L,
+                    deletedAt = "2024-01-02T10:00:00Z",
+                ),
+                comment(id = 3L, placeId = 200L),
+            )
+        )
+
+        Assert.assertEquals(1L, db.comment.selectCountByPlaceId(100L))
+        Assert.assertEquals(1L, db.comment.selectCountByPlaceId(200L))
+        Assert.assertEquals(0L, db.comment.selectCountByPlaceId(999L))
     }
 
     @Test

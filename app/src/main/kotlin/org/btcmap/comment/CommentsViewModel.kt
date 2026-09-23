@@ -23,6 +23,14 @@ internal class CommentsViewModel : ViewModel() {
     private var postPaymentSync = false
 
     /**
+     * The text the user posted, or null when the caller could not supply it.
+     * The retry uses it to tell the paid comment apart from an unrelated one
+     * for the same place that became visible while the add screen was open; a
+     * null falls back to treating any new id as the paid comment.
+     */
+    private var expectedComment: String? = null
+
+    /**
      * Ids of the comments the user saw before opening the add screen. The retry
      * uses them to tell whether the paid comment is already in the list, so a
      * sync that stored it while the add screen was open does not trigger a
@@ -71,9 +79,15 @@ internal class CommentsViewModel : ViewModel() {
         prePostCommentIds = if (renderedAtLeastOnce) renderedIds else null
     }
 
-    /** Records that the add screen reported a paid comment. */
-    fun onCommentPosted() {
+    /**
+     * Records that the add screen reported a paid comment. [comment] is the
+     * text that was posted, used to tell the paid comment apart from a
+     * different one for the same place published first, which is otherwise
+     * indistinguishable because the server assigns the id.
+     */
+    fun onCommentPosted(comment: String?) {
         postPaymentSync = true
+        expectedComment = comment
     }
 
     /**
@@ -87,16 +101,17 @@ internal class CommentsViewModel : ViewModel() {
      * up after a single sync.
      */
     suspend fun syncOnResume(
-        renderedIds: Set<Long>,
+        renderedNow: List<CommentsAdapterItem>,
         sync: suspend () -> Boolean,
-        render: suspend () -> Set<Long>,
+        render: suspend () -> List<CommentsAdapterItem>,
     ): Boolean {
         if (!postPaymentSync) return sync()
 
-        val baseline = prePostCommentIds ?: renderedIds
-        val result = syncAfterPayment(renderedIds, baseline, sync, render)
+        val baseline = prePostCommentIds ?: renderedNow.map { it.id }.toSet()
+        val result = syncAfterPayment(renderedNow, baseline, expectedComment, sync, render)
         postPaymentSync = false
         prePostCommentIds = null
+        expectedComment = null
         return result
     }
 
@@ -109,25 +124,26 @@ internal class CommentsViewModel : ViewModel() {
      * leaves and re-enters the screen.
      *
      * A hidden comment is dropped instead of stored, so the paid comment shows
-     * up as an id that was not shown before the post flow started. Waiting for
-     * a new id means an unrelated comment for another place cannot end the
-     * retries. A different comment for the same place published first would
-     * look like the expected signal, though: the paid comment's id is assigned
-     * by the server, so the two cannot be told apart.
+     * up as an id that was not shown before the post flow started. Matching the
+     * posted text as well means an unrelated comment for the same place that
+     * appears first cannot end the retries; without the text (or when the same
+     * text is posted twice) only a new id is available and such an unrelated
+     * comment still looks like the expected signal.
      *
      * Retries back off and stop after a bounded window so a comment the server
      * never publishes cannot poll forever.
      */
     private suspend fun syncAfterPayment(
-        renderedIds: Set<Long>,
+        renderedNow: List<CommentsAdapterItem>,
         baseline: Set<Long>,
+        expected: String?,
         sync: suspend () -> Boolean,
-        render: suspend () -> Set<Long>,
+        render: suspend () -> List<CommentsAdapterItem>,
     ): Boolean {
         // A sync while the add screen was open may already have stored the paid
         // comment; then the list already has it and there is nothing to wait
         // for.
-        if (renderedIds.any { it !in baseline }) {
+        if (renderedNow.hasPublishedComment(baseline, expected)) {
             return true
         }
 
@@ -142,7 +158,7 @@ internal class CommentsViewModel : ViewModel() {
             while (true) {
                 lastSyncSucceeded = sync()
 
-                if (render().any { it !in baseline }) {
+                if (render().hasPublishedComment(baseline, expected)) {
                     return@withTimeoutOrNull
                 }
 
@@ -159,4 +175,17 @@ internal class CommentsViewModel : ViewModel() {
         const val POST_PAYMENT_SYNC_INITIAL_DELAY_MS = 500L
         const val POST_PAYMENT_SYNC_MAX_DELAY_MS = 2_000L
     }
+}
+
+/**
+ * Whether this render already contains the paid comment: an id that was not
+ * shown before the add screen opened and, when the posted text is known, the
+ * same text. The text check keeps an unrelated comment for the same place,
+ * published first, from looking like the expected signal.
+ */
+private fun List<CommentsAdapterItem>.hasPublishedComment(
+    baseline: Set<Long>,
+    expected: String?,
+): Boolean = any { item ->
+    item.id !in baseline && (expected == null || item.comment == expected)
 }

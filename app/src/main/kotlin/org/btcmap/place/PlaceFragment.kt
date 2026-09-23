@@ -73,11 +73,11 @@ class PlaceFragment : Fragment() {
 
         /**
          * How many comments the place screen previews inline. A place's full
-         * list is unbounded, so it is capped here to keep the sheet's
-         * RecyclerView from inflating with every comment; the comments button
-         * opens them all.
+         * list is unbounded, so the preview query is capped here to keep the
+         * sheet's RecyclerView from inflating with every comment; the comments
+         * button shows the total and opens them all.
          */
-        private const val COMMENTS_PREVIEW_LIMIT = 3
+        private const val COMMENTS_PREVIEW_LIMIT = 3L
     }
 
     private var placeId = 0L
@@ -350,7 +350,7 @@ class PlaceFragment : Fragment() {
         binding.comments.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
                 val hasComments = withContext(Dispatchers.IO) {
-                    db().comment.selectByPlaceId(place.id).isNotEmpty()
+                    db().comment.selectCountByPlaceId(place.id) > 0
                 }
 
                 if (hasComments) {
@@ -380,32 +380,33 @@ class PlaceFragment : Fragment() {
     }
 
     /**
-     * Loads this place's comments off the main thread and shows them in the
+     * Loads a place's comments off the main thread and shows them in the
      * preview list and the comments button.
      *
      * Comments are synced globally, so the local table can be much larger than
      * one place's comments; reading it on the UI thread would block the frame.
+     * The preview query only reads the newest few, and the total is a separate
+     * count so the button can still label the full number.
      */
     private fun renderComments(placeId: Long) {
         commentsJob?.cancel()
         commentsJob = viewLifecycleOwner.lifecycleScope.launch {
-            val comments = withContext(Dispatchers.IO) {
-                db().comment.selectByPlaceId(placeId)
+            val (comments, total) = withContext(Dispatchers.IO) {
+                db().comment.selectByPlaceId(placeId, COMMENTS_PREVIEW_LIMIT) to
+                    db().comment.selectCountByPlaceId(placeId)
             }
 
             val binding = _binding ?: return@launch
 
-            binding.commentsTitle.text = getString(R.string.comments_d, comments.size)
-            binding.commentsTitle.isVisible = comments.isNotEmpty()
-            binding.comments.text = if (comments.isEmpty()) {
+            binding.commentsTitle.text = getString(R.string.comments_d, total)
+            binding.commentsTitle.isVisible = total > 0
+            binding.comments.text = if (total == 0L) {
                 getString(R.string.comment)
             } else {
-                getString(R.string.comments_d, comments.size)
+                getString(R.string.comments_d, total)
             }
             val formatter = commentDateFormatter()
-            commentsAdapter.submitList(
-                comments.take(COMMENTS_PREVIEW_LIMIT).map { it.toAdapterItem(formatter) }
-            )
+            commentsAdapter.submitList(comments.map { it.toAdapterItem(formatter) })
         }
     }
 

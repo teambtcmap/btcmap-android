@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep retrying a paid comment until the server publishes it, instead of stopping early when a different comment for the same place becomes visible first
+- Read only the newest comments for the place screen's inline preview, instead of loading every comment a place has
 - Translate the boost confirmation message into all supported languages
 - Update a place's comments when a background sync changes them, instead of only when the comments screen is reopened
 - Limit a comment to 500 characters, with a live counter and an inline error when it is left empty

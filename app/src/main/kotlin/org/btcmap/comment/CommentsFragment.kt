@@ -137,8 +137,8 @@ class CommentsFragment : Fragment() {
         parentFragmentManager.setFragmentResultListener(
             AddCommentFragment.REQUEST_KEY,
             viewLifecycleOwner,
-        ) { _, _ ->
-            viewModel.onCommentPosted()
+        ) { _, result ->
+            viewModel.onCommentPosted(result.getString(AddCommentFragment.ARG_POSTED_COMMENT))
         }
 
         // A background sync (the app-scoped full sync, or another screen's) can
@@ -164,9 +164,9 @@ class CommentsFragment : Fragment() {
                 // the screen was in the background. It stays cheap because
                 // syncComments only fetches the delta since the stored cursor.
                 val synced = viewModel.syncOnResume(
-                    renderedIds = rendered.map { it.id }.toSet(),
+                    renderedNow = rendered,
                     sync = { syncComments() },
-                    render = { renderComments(adapter).map { it.id }.toSet() },
+                    render = { renderComments(adapter) },
                 )
 
                 lastSyncFailed = !synced
@@ -194,13 +194,13 @@ class CommentsFragment : Fragment() {
             // fetch failed rather than asserting there are no comments. The
             // text is only touched when shown, so a background re-render does
             // not allocate a string every time.
-            val showEmpty = syncFinished && items.isEmpty()
-            if (showEmpty) {
-                binding.empty.setText(
-                    if (lastSyncFailed) R.string.failed_to_load else R.string.no_comments_yet
-                )
-            }
-            binding.empty.isVisible = showEmpty
+            val emptyMessage = commentsEmptyStateMessageRes(
+                syncFinished = syncFinished,
+                syncFailed = lastSyncFailed,
+                hasComments = items.isNotEmpty(),
+            )
+            binding.empty.isVisible = emptyMessage != null
+            emptyMessage?.let { binding.empty.setText(it) }
 
             items
         }

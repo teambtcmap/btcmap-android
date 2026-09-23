@@ -34,22 +34,48 @@ class CommentQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectByPlaceId(placeId: Long): List<Comment> {
+    /**
+     * Visible comments for a place, newest first.
+     *
+     * [limit] caps the read for a caller that only shows a few (the place
+     * preview); null reads them all (the comments screen).
+     */
+    fun selectByPlaceId(placeId: Long, limit: Long? = null): List<Comment> {
+        val limitClause = if (limit == null) "" else "LIMIT ?2"
         conn.prepare(
             """
             SELECT ${FullProjection.COLUMNS}
             FROM $TABLE
             WHERE $PLACE_ID = ?1
                 AND $DELETED_AT IS NULL
-            ORDER BY julianday($CREATED_AT) DESC, $ID DESC;
+            ORDER BY julianday($CREATED_AT) DESC, $ID DESC
+            $limitClause;
             """
         ).use {
             it.bindLong(1, placeId)
+            if (limit != null) it.bindLong(2, limit)
             val rows = mutableListOf<Comment>()
             while (it.step()) {
                 rows.add(FullProjection.fromStatement(it))
             }
             return rows
+        }
+    }
+
+    /**
+     * Visible comment count for a place. The place preview reads only the
+     * newest few, so it needs the total separately to label the button.
+     */
+    fun selectCountByPlaceId(placeId: Long): Long {
+        conn.prepare(
+            """
+            SELECT count(*) FROM $TABLE
+            WHERE $PLACE_ID = ?1 AND $DELETED_AT IS NULL;
+            """
+        ).use {
+            it.bindLong(1, placeId)
+            it.step()
+            return it.getLong(0)
         }
     }
 
@@ -85,13 +111,5 @@ class CommentQueries(private val conn: SQLiteConnection) {
             it.step()
             return it.getLong(0)
         }
-    }
-
-    fun deleteById(id: Long) {
-        conn.prepare("DELETE FROM $TABLE WHERE $ID = ?1;")
-            .use {
-                it.bindLong(1, id)
-                it.step()
-            }
     }
 }

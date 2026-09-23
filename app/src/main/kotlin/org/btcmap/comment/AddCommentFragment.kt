@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.api.CommentQuoteResponse
@@ -40,6 +41,10 @@ class AddCommentFragment : Fragment() {
 
     private val viewModel: InvoicePaymentViewModel<CommentQuoteResponse> by lazy {
         invoicePaymentViewModel { api().getCommentQuote() }
+    }
+
+    private val addCommentViewModel: AddCommentViewModel by lazy {
+        ViewModelProvider(this)[AddCommentViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -78,9 +83,16 @@ class AddCommentFragment : Fragment() {
                 // Only the comments list opened from CommentsFragment waits
                 // for this. A comment posted straight from the place screen
                 // must not leave a result behind that a later list visit
-                // would consume as a fresh payment.
+                // would consume as a fresh payment. The posted text rides
+                // along so the list can tell this comment apart from an
+                // unrelated one for the same place.
                 if (args.notifyOnPosted) {
-                    parentFragmentManager.setFragmentResult(REQUEST_KEY, Bundle())
+                    parentFragmentManager.setFragmentResult(
+                        REQUEST_KEY,
+                        Bundle().apply {
+                            putString(ARG_POSTED_COMMENT, addCommentViewModel.postedComment)
+                        },
+                    )
                 }
                 parentFragmentManager.popBackStack()
             },
@@ -102,6 +114,7 @@ class AddCommentFragment : Fragment() {
                     placeId = args.placeId,
                     comment = commentText,
                 )
+                addCommentViewModel.postedComment = commentText
                 PaymentInvoice(id = response.invoiceId, bolt11 = response.invoice)
             }
         }
@@ -149,5 +162,13 @@ class AddCommentFragment : Fragment() {
          * this screen directly and does not listen for the result.
          */
         const val ARG_NOTIFY_ON_POSTED = "notify_on_posted"
+
+        /**
+         * The posted text inside the [REQUEST_KEY] result bundle, so the list
+         * can tell the paid comment apart from an unrelated one for the same
+         * place. Absent when the text is unknown; the retry then falls back to
+         * any new comment id.
+         */
+        const val ARG_POSTED_COMMENT = "posted_comment"
     }
 }
