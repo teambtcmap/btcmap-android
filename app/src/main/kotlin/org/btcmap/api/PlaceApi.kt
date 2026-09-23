@@ -1,15 +1,12 @@
 package org.btcmap.api
 
 import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import okhttp3.Request
 import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
-import org.btcmap.util.toJsonLongArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 
 private val placeFields = listOf(
     "lat",
@@ -74,12 +71,7 @@ suspend fun Api.getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPl
         addQueryParameter("fields", placeFields.joinToString(separator = ","))
         addQueryParameter("limit", "$limit")
         addQueryParameter("include_deleted", "true")
-        if (updatedSince != null) {
-            addQueryParameter(
-                "updated_since",
-                updatedSince.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-            )
-        }
+        addUpdatedSince(updatedSince)
     }
 
     return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetPlacesItems() }
@@ -99,18 +91,9 @@ suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
     }
 }
 
-suspend fun Api.savePlace(id: Long): List<Long> {
-    val url = buildUrl("v4", "places", "saved")
-    val body = jsonBody(JsonPrimitive(id))
+suspend fun Api.savePlace(id: Long): List<Long> = saveItem("places", id)
 
-    return call(Request.Builder().post(body).url(url).build()) { it.toJsonLongArray() }
-}
-
-suspend fun Api.removeSavedPlace(id: Long): List<Long> {
-    val url = buildUrl("v4", "places", "saved", "$id")
-
-    return call(Request.Builder().delete().url(url).build()) { it.toJsonLongArray() }
-}
+suspend fun Api.removeSavedPlace(id: Long): List<Long> = removeSavedItem("places", id)
 
 private fun InputStream.toGetPlacesItems(): List<GetPlacesItem> {
     return toJsonArray().map { it.toGetPlacesItem() }

@@ -9,7 +9,6 @@ import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 data class GetEventsItem(
@@ -46,10 +45,7 @@ suspend fun Api.getEvents(updatedSince: ZonedDateTime, limit: Long): List<GetEve
         // Always send updated_since: without it the endpoint falls back to the
         // legacy full snapshot, which omits updated_at and so cannot seed a
         // cursor for the next sync.
-        addQueryParameter(
-            "updated_since",
-            updatedSince.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-        )
+        addUpdatedSince(updatedSince)
         addQueryParameter("limit", "$limit")
         addQueryParameter("include_deleted", "true")
     }

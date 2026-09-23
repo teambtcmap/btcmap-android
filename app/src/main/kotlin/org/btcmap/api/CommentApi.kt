@@ -7,7 +7,6 @@ import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 
 data class GetCommentsItem(
     val id: Long,
@@ -31,12 +30,7 @@ suspend fun Api.getComments(updatedSince: ZonedDateTime?, limit: Long): List<Get
     val url = buildUrl("v4", "place-comments") {
         addQueryParameter("limit", "$limit")
         addQueryParameter("include_deleted", "true")
-        if (updatedSince != null) {
-            addQueryParameter(
-                "updated_since",
-                updatedSince.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-            )
-        }
+        addUpdatedSince(updatedSince)
     }
 
     return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetCommentsItems() }

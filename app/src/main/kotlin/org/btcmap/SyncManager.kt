@@ -60,10 +60,10 @@ internal class SyncManager(
      * rather than for the whole full sync, e.g. the post-payment retry on the
      * comments screen.
      */
-    override suspend fun syncComments(): Sync.CommentSyncReport = mutex.withLock {
+    override suspend fun syncComments(): Sync.Report = mutex.withLock {
         try {
             val report = step(SyncState.SyncingComments) { sync().syncComments() }
-                ?: Sync.CommentSyncReport(duration = Duration.ZERO, rowsAffected = 0L, failed = true)
+                ?: Sync.Report(duration = Duration.ZERO, rowsAffected = 0L, failed = true)
 
             if (report.rowsAffected > 0) {
                 emit(SyncEvent.CommentsChanged)
@@ -122,7 +122,7 @@ internal class SyncManager(
             block()
         } catch (t: Throwable) {
             t.rethrowIfCancellation()
-            t.printStackTrace()
+            reportSyncFailure(t)
             null
         }
     }

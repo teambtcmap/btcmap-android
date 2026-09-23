@@ -173,6 +173,18 @@ class InvoicePaymentViewModelTest {
         Assert.assertEquals(invoice, model.state.value.invoice)
         Assert.assertEquals(2, calls)
     }
+
+    @Test
+    fun reportPaymentFailure_emitsEvent() = runTest(mainDispatcherRule.dispatcher) {
+        val error = IllegalStateException("payment polling failed")
+        val model = viewModel()
+
+        model.reportPaymentFailure(error)
+
+        val event = model.events.first()
+        Assert.assertTrue(event is PaymentEvent.PaymentFailed)
+        Assert.assertSame(error, (event as PaymentEvent.PaymentFailed).error)
+    }
 }
 
 private class UnrelatedViewModel : ViewModel()

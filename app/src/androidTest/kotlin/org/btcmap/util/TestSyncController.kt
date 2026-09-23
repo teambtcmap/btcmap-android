@@ -34,5 +34,5 @@ internal class TestSyncController(
         startedCount++
     }
 
-    override suspend fun syncComments(): Sync.CommentSyncReport = sync().syncComments()
+    override suspend fun syncComments(): Sync.Report = sync().syncComments()
 }

@@ -98,7 +98,38 @@ class SyncTest {
         val report = sync.syncPlaces()
 
         Assert.assertEquals(0L, report.rowsAffected)
+        Assert.assertFalse("a successful sync must not report a failure", report.failed)
         Assert.assertEquals(0L, db.place.selectCount())
+    }
+
+    @Test
+    fun everySyncReportsFailureInsteadOfSwallowingIt() = runTest {
+        val db = createDatabase()
+        val api = createApi()
+
+        // Every endpoint answers with a server error, so each delta read fails.
+        repeat(4) {
+            serverRule.server.enqueue(
+                MockResponse.Builder()
+                    .addHeader("Content-Type", "application/json")
+                    .code(500)
+                    .body("""{"message":"boom"}""")
+                    .build()
+            )
+        }
+
+        val sync = Sync(api, db)
+        val reports = listOf(
+            sync.syncPlaces(),
+            sync.syncComments(),
+            sync.syncEvents(),
+            sync.syncAreas(),
+        )
+
+        reports.forEach { report ->
+            Assert.assertTrue("a failed sync must be reported, not swallowed", report.failed)
+            Assert.assertEquals(0L, report.rowsAffected)
+        }
     }
 
     @Test

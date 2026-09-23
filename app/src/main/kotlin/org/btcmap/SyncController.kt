@@ -21,5 +21,5 @@ internal interface SyncController {
      * Syncs only the comments, for a screen that has to wait for its own change
      * rather than for the whole full sync.
      */
-    suspend fun syncComments(): Sync.CommentSyncReport
+    suspend fun syncComments(): Sync.Report
 }

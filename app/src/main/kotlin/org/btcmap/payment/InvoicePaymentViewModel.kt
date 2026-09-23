@@ -24,6 +24,13 @@ internal sealed interface PaymentEvent {
     data class QuoteFailed(val error: Throwable) : PaymentEvent
 
     data class OrderFailed(val error: Throwable) : PaymentEvent
+
+    /**
+     * The invoice could not be polled to completion, for example because the
+     * server rejected it permanently. Raised by the view layer, which owns the
+     * polling.
+     */
+    data class PaymentFailed(val error: Throwable) : PaymentEvent
 }
 
 /**
@@ -102,6 +109,16 @@ internal class InvoicePaymentViewModel<TQuote : Any>(
                 _state.update { it.copy(ordering = false) }
             }
         }
+    }
+
+    /**
+     * Reports a failure raised while polling an invoice for payment. The
+     * polling lives in the view layer, so it cannot use the [order] and
+     * [loadQuote] error handling and hands the failure back here instead, to
+     * keep a single error channel for the screen.
+     */
+    fun reportPaymentFailure(error: Throwable) {
+        _events.trySend(PaymentEvent.PaymentFailed(error))
     }
 
     /**

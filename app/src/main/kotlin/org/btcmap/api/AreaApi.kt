@@ -1,15 +1,12 @@
 package org.btcmap.api
 
 import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import okhttp3.Request
 import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
-import org.btcmap.util.toJsonLongArray
 import org.btcmap.util.toJsonObject
 import java.io.InputStream
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 data class GetAreaItem(
@@ -55,10 +52,7 @@ suspend fun Api.getAreas(updatedSince: ZonedDateTime, limit: Long): List<GetArea
         addQueryParameter("fields", AREA_DELTA_FIELDS)
         // Always send updated_since so the server filters rather than returning
         // the full snapshot, and include_deleted so tombstones reach the cache.
-        addQueryParameter(
-            "updated_since",
-            updatedSince.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-        )
+        addUpdatedSince(updatedSince)
         addQueryParameter("limit", "$limit")
         addQueryParameter("include_deleted", "true")
     }
@@ -89,18 +83,9 @@ suspend fun Api.getArea(
     }
 }
 
-suspend fun Api.saveArea(id: Long): List<Long> {
-    val url = buildUrl("v4", "areas", "saved")
-    val body = jsonBody(JsonPrimitive(id))
+suspend fun Api.saveArea(id: Long): List<Long> = saveItem("areas", id)
 
-    return call(Request.Builder().post(body).url(url).build()) { it.toJsonLongArray() }
-}
-
-suspend fun Api.removeSavedArea(id: Long): List<Long> {
-    val url = buildUrl("v4", "areas", "saved", "$id")
-
-    return call(Request.Builder().delete().url(url).build()) { it.toJsonLongArray() }
-}
+suspend fun Api.removeSavedArea(id: Long): List<Long> = removeSavedItem("areas", id)
 
 private fun JsonObject.toGetAreasDeltaItem(): GetAreasDeltaItem {
     val bbox = doubleArrayOrNull("bbox")?.takeIf { it.size == 4 }

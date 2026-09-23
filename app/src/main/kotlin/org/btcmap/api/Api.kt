@@ -16,21 +16,48 @@ import okhttp3.coroutines.executeAsync
 import java.io.IOException
 import java.io.InputStream
 
+/**
+ * Base type for every failure raised by [Api]. Coroutine cancellation is not an
+ * [ApiError] and always propagates untouched, so catching this type never
+ * swallows it. Use [retryable] to decide whether re-issuing the request could
+ * plausibly succeed.
+ */
+sealed class ApiError(
+    message: String,
+    cause: Throwable? = null,
+) : Exception(message, cause) {
+    /**
+     * Whether repeating the same request could eventually succeed. Transport
+     * failures and server-side (5xx) responses are transient; client errors
+     * (4xx) and parse failures will repeat until something else changes.
+     */
+    abstract val retryable: Boolean
+}
+
+/** The server answered with a non-2xx status. */
 class ApiException(
     val code: Int,
     message: String,
     val errorCode: String? = null,
-) : Exception(message)
+) : ApiError(message) {
+    override val retryable: Boolean get() = code >= 500
+}
 
+/** The response could not be parsed into the expected shape. */
 class ApiParseException(
     message: String,
     cause: Throwable? = null,
-) : Exception(message, cause)
+) : ApiError(message, cause) {
+    override val retryable: Boolean get() = false
+}
 
+/** The request never produced a readable response (connection/read failure). */
 class ApiTransportException(
     message: String,
     cause: Throwable? = null,
-) : Exception(message, cause)
+) : ApiError(message, cause) {
+    override val retryable: Boolean get() = true
+}
 
 class Api(
     internal val httpClient: OkHttpClient,

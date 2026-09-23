@@ -3,7 +3,6 @@ package org.btcmap.api
 import kotlinx.coroutines.delay
 import okhttp3.Request
 import org.btcmap.auth.withoutAuth
-import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.toJsonObject
 
 private const val PAYMENT_POLL_INTERVAL_MS = 500L
@@ -30,8 +29,10 @@ suspend fun Api.getInvoice(id: String): Invoice {
 }
 
 /**
- * Polls [id] until the invoice is paid, retrying transient failures. Call this
- * from a lifecycle-bound coroutine so the loop stops when the screen is no
+ * Polls [id] until the invoice is paid. Transient failures (transport and 5xx)
+ * are retried after [pollIntervalMillis]; permanent ones (4xx and parse errors)
+ * are rethrown so the caller can surface them instead of polling forever. Call
+ * this from a lifecycle-bound coroutine so the loop stops when the screen is no
  * longer visible; cancellation propagates instead of being retried.
  */
 suspend fun Api.awaitPaidInvoice(
@@ -41,8 +42,10 @@ suspend fun Api.awaitPaidInvoice(
     while (true) {
         val invoice = try {
             getInvoice(id)
-        } catch (e: Throwable) {
-            e.rethrowIfCancellation()
+        } catch (e: ApiError) {
+            if (!e.retryable) {
+                throw e
+            }
             delay(pollIntervalMillis)
             continue
         }
