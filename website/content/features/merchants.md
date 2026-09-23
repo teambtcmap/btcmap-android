@@ -33,12 +33,14 @@ The overflow menu on a place has:
 - **View on btcmap.org** — open the place on the website.
 - **Save** — bookmark the place. Signing in is required the first time; saved
   places are listed in your profile. See
-  [Accounts and saved items](accounts.md).
+  [BTC Map account](accounts.md).
 
 ## Verify or report a place
 
-Verifying and reporting help keep the map trustworthy. Both require an account.
-Open a place and choose:
+Verifying and reporting help keep the map trustworthy. Both require an account,
+but no personal data: any username works, including a throwaway one. The account
+is only there to prevent spam and to let you follow the status of your
+submissions. Open a place and choose:
 
 - **Verify** — you confirmed the place exists and still accepts bitcoin.
 - **Report** — choose the situation:
@@ -71,5 +73,7 @@ removed by editing its `currency:XBT` tag. The
 [tagging instructions](https://wiki.btcmap.org/Tagging-Merchants) explain how.
 
 ---
+
+Next: [Events](events.md).
 
 Back to the [documentation index](../index.md).

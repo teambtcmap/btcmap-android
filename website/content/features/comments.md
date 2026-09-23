@@ -37,4 +37,6 @@ If you do not have a compatible wallet, the app tells you so.
 
 ---
 
+Next: [Settings and appearance](settings.md).
+
 Back to the [documentation index](../index.md).

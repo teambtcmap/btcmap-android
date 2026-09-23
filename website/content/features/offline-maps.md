@@ -14,16 +14,19 @@ can download an area's tiles.
 1. Open the area from its chip on the map or from
    [search](../getting-started/search.md).
 2. Choose **Download map** (in the menu or the offline section).
-3. Pick the **maximum zoom**. Higher zoom means more detail and a larger
-   download; the dialog shows a live size estimate as you move the slider.
+3. Pick the **desired maximum zoom level**. Higher zoom means more detail and a
+   larger download; the dialog shows a live size estimate as you move the
+   slider.
 4. Confirm the download. Progress is shown on the area page while it runs, and
    you can leave the screen.
 
 If an area would be too large to download, the estimate warns you and the
-download is disabled, so you can lower the maximum zoom and try again.
+download is disabled, so you can lower the maximum zoom level and try again.
 
 The size shown is only an estimate; the actual download depends on how much map
 data the area contains.
+
+![The offline map dialog: the area's name, the map style used, a maximum-zoom slider and a live size estimate](/images/offline-map-dialog-light.png)
 
 ## Managing a download
 
@@ -34,6 +37,8 @@ status. From there you can:
   style.
 - **Delete** — remove the downloaded tiles from your device. A confirmation is
   shown first.
+
+![The area page after a download, showing the size, zoom range and the Download again and Delete actions](/images/offline-map-downloaded-light.png)
 
 ## Map styles
 

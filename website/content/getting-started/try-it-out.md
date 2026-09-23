@@ -19,7 +19,7 @@ A short path through the most common tasks:
 
 An account is needed for verifying, reporting, adding places, saving places and
 areas, and following other users. Comments and boosts do not require one.
-See [Accounts and saved items](../features/accounts.md) for details.
+See [BTC Map account](../features/accounts.md) for details.
 
 ## Where to go next
 

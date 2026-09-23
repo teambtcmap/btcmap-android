@@ -2,16 +2,18 @@
 
 Open **Settings** from the menu next to the search field on the map.
 
+![The Settings screen: the account, map style and verified filter, the map toggles and the map colors](/images/settings-light.png)
+
 ## Account
 
 Sign in, create an account, open your profile or log out. See
-[Accounts and saved items](accounts.md).
+[BTC Map account](accounts.md).
 
 ## Map style
 
 Choose the map's look:
 
-- **Auto** — light during the day, dark at night.
+- **Auto** — follows your device's light or dark theme.
 - **OpenFreeMap Liberty**, **Positron**, **Bright** and **Dark**.
 - **Carto Dark Matter**.
 
@@ -33,6 +35,8 @@ offer a **Reset** action to return to the default.
 
 With **Use adaptive colors** enabled, the colors follow your device's Material
 You palette instead of the defaults.
+
+![The color picker, with a shade, hue and alpha picker, a preview of the old and new color and a Reset action](/images/settings-color-picker-light.png)
 
 ## Map options
 
@@ -60,5 +64,7 @@ These are useful when reporting a problem: they show whether data is present and
 up to date without exposing anything personal.
 
 ---
+
+Next: [Offline maps](offline-maps.md).
 
 Back to the [documentation index](../index.md).

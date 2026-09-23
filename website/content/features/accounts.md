@@ -1,14 +1,19 @@
-# Accounts and saved items
+# BTC Map account
 
-An account is needed for actions that are tied to you:
+Viewing the map does not require an account: browsing, searching, reading place
+details, reading or adding comments, and boosting a merchant are open to
+everyone. You only need an account to get more involved:
 
 - Verifying and reporting places.
 - Adding a place.
 - Saving places and areas.
 - Following the activity of your saved areas.
 
-You do **not** need an account to browse the map, search, read place details,
-read or add comments, or boost a merchant.
+Creating an account requires no KYC: pick any username you like, and we never
+ask for your email address.
+
+![The BTC Map account dialog, offering to create a new account or log in with an existing one](/images/account-chooser-light.png)
+![The new account form: a username and a password, entered twice, with no email address requested](/images/account-create-light.png)
 
 ## Creating an account
 
@@ -39,6 +44,9 @@ Once signed in, **Settings → Account** opens your profile, where you can:
 - Review your **saved places** and **saved areas**, and remove any of them.
 - **Logout**.
 
+![The profile screen for a signed-in account, showing the username, the saved places and saved areas lists and the Logout action](/images/profile-light.png)
+![The same profile screen in dark mode](/images/profile-dark.png)
+
 ## Saving places and areas
 
 - On a place, use the **Save** bookmark action in its menu.
@@ -49,12 +57,8 @@ and then completes the action. Saved items are listed in your profile, and the
 areas you save are what the **Following** tab of the
 [activity feed](activity-feed.md) draws from.
 
-## A note on your session
-
-Signing in stores a session token in the app's private database. Backups are
-disabled, so it is not copied off the device, and the token is only ever sent to
-the configured API host.
-
 ---
+
+Next: [Activity feed](activity-feed.md).
 
 Back to the [documentation index](../index.md).

@@ -33,11 +33,12 @@ disableKinds = ["taxonomy", "term", "rss"]
   features = [
     "merchants",
     "events",
+    "exchanges",
     "areas",
-    "offline-maps",
-    "comments",
-    "boosting",
-    "activity-feed",
     "accounts",
+    "activity-feed",
+    "boosting",
+    "comments",
     "settings",
+    "offline-maps",
   ]

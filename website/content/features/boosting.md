@@ -18,6 +18,9 @@ the boosted locations section. The fee supports the BTC Map open-source project.
    **Pay** button, and copy the invoice if your wallet needs it.
 5. Once the payment is confirmed, the boost is active and the screen closes.
 
+![The Boost screen: 1, 3 or 12 months to choose from, each with its price in sats](/images/boost-options-light.png)
+![The same screen once an invoice is requested: the options lock and a Lightning QR code appears with Pay and Copy actions](/images/boost-invoice-light.png)
+
 The options and the continue button stay locked until the quote has loaded, so
 you cannot accidentally order or pay twice.
 
@@ -30,5 +33,7 @@ you cannot accidentally order or pay twice.
   been replaced by the live record from a sync.
 
 ---
+
+Next: [Comments](comments.md).
 
 Back to the [documentation index](../index.md).

@@ -1,4 +1,4 @@
-# Countries and communities
+# Communities and countries
 
 Areas are regions that group places and events. They come in two kinds:
 **countries** and **communities** (for example a city or a local bitcoin
@@ -6,6 +6,9 @@ group). The map shows the one country and the communities for the area you are
 looking at as chips above the filter chips.
 
 Tap a chip to open the area's page.
+
+![The map centred on Phuket, with the Thailand country chip and the Phuket Bitcoin community chip on the right](/images/area-chips-light.png)
+![The Phuket Bitcoin area page: a header image, the area's description, its upcoming events and a list of issues to fix](/images/area-page-light.png)
 
 ## The area page
 
@@ -21,7 +24,7 @@ An area page brings together everything about that region:
   in the OpenStreetMap editor, and the **How to help?** link explains what is
   involved.
 - A **Save** action to bookmark the area. This requires an account; saved areas
-  are listed in your profile. See [Accounts and saved items](accounts.md).
+  are listed in your profile. See [BTC Map account](accounts.md).
 - An **offline map** option to download the area's map tiles. See
   [Offline maps](offline-maps.md).
 
@@ -32,5 +35,7 @@ on them work offline. Only the map imagery itself needs to be downloaded
 separately if you want it available without a connection.
 
 ---
+
+Next: [BTC Map account](accounts.md).
 
 Back to the [documentation index](../index.md).

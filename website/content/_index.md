@@ -22,13 +22,14 @@ Each guide focuses on a specific feature and shows you how to make the most of i
 | --- | --- |
 | [Merchants](features/merchants.md) | Merchant details, verifying and reporting, adding a place. |
 | [Events](features/events.md) | Bitcoin meetups and conferences near you. |
-| [Countries and communities](features/areas.md) | Community and country pages. |
-| [Offline maps](features/offline-maps.md) | Select regions to download and use the app when offline. |
-| [Comments](features/comments.md) | Read and add anonymous, spam-protected comments. |
-| [Boosts](features/boosting.md) | Make a merchant stand out on the map. |
+| [Exchanges](features/exchanges.md) | Bitcoin ATMs and currency exchanges. |
+| [Communities and countries](features/areas.md) | Community and country pages. |
+| [BTC Map account](features/accounts.md) | Sign up, manage your profile, save places and areas. |
 | [Activity feed](features/activity-feed.md) | Recent changes nearby and in the areas you follow. |
-| [Accounts and saved items](features/accounts.md) | Sign up, manage your profile, save places and areas. |
+| [Boosts](features/boosting.md) | Make a merchant stand out on the map. |
+| [Comments](features/comments.md) | Read and add anonymous, spam-protected comments. |
 | [Settings and appearance](features/settings.md) | Map style, custom colors and diagnostics. |
+| [Offline maps](features/offline-maps.md) | Select regions to download and use the app when offline. |
 
 ## Good to know
 
