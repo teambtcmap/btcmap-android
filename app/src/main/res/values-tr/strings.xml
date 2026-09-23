@@ -47,6 +47,9 @@
     <string name="badge_text">Rozet metni</string>
     <string name="boosted_marker_background">Öne çıkarılmış işaretçi arka planı</string>
     <string name="btc_map_boost_payment_request">BTC Map Boost Ödeme Talebi</string>
+    <string name="boosted">Öne çıkarıldı</string>
+    <string name="boosted_merchants">Öne çıkarılmış satıcılar</string>
+    <string name="boosted_until_s">%1$s tarihine kadar öne çıkarıldı</string>
     <string name="your_comment_has_been_posted">Yorumunuz yayınlandı</string>
     <string name="comment_cannot_be_empty">Yorum boş olamaz</string>
     <string name="btc_map_comment_payment_request">BTC Map Yorum Ödeme Talebi</string>

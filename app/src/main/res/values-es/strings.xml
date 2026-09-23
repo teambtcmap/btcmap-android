@@ -47,6 +47,9 @@
     <string name="badge_text">Texto de la insignia</string>
     <string name="boosted_marker_background">Fondo del marcador impulsado</string>
     <string name="btc_map_boost_payment_request">Solicitud de pago de impulso BTC Map</string>
+    <string name="boosted">Impulsado</string>
+    <string name="boosted_merchants">Comerciantes impulsados</string>
+    <string name="boosted_until_s">Impulsado hasta %1$s</string>
     <string name="your_comment_has_been_posted">Tu comentario ha sido publicado</string>
     <string name="comment_cannot_be_empty">El comentario no puede estar vacío</string>
     <string name="btc_map_comment_payment_request">Solicitud de pago de comentario BTC Map</string>

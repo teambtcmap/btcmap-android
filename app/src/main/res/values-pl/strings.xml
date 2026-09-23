@@ -47,6 +47,9 @@
     <string name="badge_text">Tekst etykiety</string>
     <string name="boosted_marker_background">Tło podbitego znacznika</string>
     <string name="btc_map_boost_payment_request">Żądanie płatności BTC Map Boost</string>
+    <string name="boosted">Podbite</string>
+    <string name="boosted_merchants">Podbite firmy</string>
+    <string name="boosted_until_s">Podbite do %1$s</string>
     <string name="your_comment_has_been_posted">Twój komentarz został opublikowany</string>
     <string name="comment_cannot_be_empty">Komentarz nie może być pusty</string>
     <string name="btc_map_comment_payment_request">Żądanie płatności za komentarz BTC Map</string>

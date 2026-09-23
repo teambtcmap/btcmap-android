@@ -70,6 +70,16 @@ class Activity : AppCompatActivity() {
         return deepLink
     }
 
+    /**
+     * Opens [placeId] on the map, popping any screens above it. Used by a screen
+     * that is not the map (for example an area's boosted merchants), so tapping
+     * a merchant selects it the same way a btcmap.org merchant deep link does.
+     */
+    internal fun openPlace(placeId: Long) {
+        pendingDeepLink = DeepLink.Place(placeId)
+        deliverDeepLink()
+    }
+
     private fun deliverDeepLink() {
         val deepLink = pendingDeepLink ?: return
         // Take ownership right away so restoring MapFragment below doesn't deliver it a second time.

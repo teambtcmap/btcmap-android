@@ -184,6 +184,70 @@ class PlaceQueriesTest {
     }
 
     @Test
+    fun selectByBounds_returnsOnlyPlacesInsideTheBox() {
+        val db = createDatabase()
+        db.place.insert(
+            listOf(
+                createPlace(id = 1L, lat = 10.0, lon = 10.0),
+                createPlace(id = 2L, lat = 20.0, lon = 20.0),
+                createPlace(id = 3L, lat = 30.0, lon = 30.0),
+            )
+        )
+
+        val results = db.place.selectByBounds(
+            minLat = 9.0,
+            maxLat = 21.0,
+            minLon = 9.0,
+            maxLon = 21.0,
+        )
+
+        Assert.assertEquals(setOf(1L, 2L), results.map { it.id }.toSet())
+    }
+
+    @Test
+    fun selectByBounds_excludesDeletedPlaces() {
+        val db = createDatabase()
+        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        db.place.insert(
+            listOf(
+                createPlace(id = 1L, lat = 10.0, lon = 10.0),
+                createPlace(id = 2L, lat = 11.0, lon = 11.0).copy(deletedAt = deletedAt),
+            )
+        )
+
+        val results = db.place.selectByBounds(
+            minLat = 9.0,
+            maxLat = 12.0,
+            minLon = 9.0,
+            maxLon = 12.0,
+        )
+
+        Assert.assertEquals(listOf(1L), results.map { it.id })
+    }
+
+    @Test
+    fun selectByBounds_withBoost_returnsOnlyPlacesCarryingABoost() {
+        val db = createDatabase()
+        db.place.insert(
+            listOf(
+                createPlace(id = 1L, lat = 10.0, lon = 10.0),
+                createPlace(id = 2L, lat = 11.0, lon = 11.0)
+                    .copy(boostedUntil = ZonedDateTime.parse("2999-01-01T00:00:00Z")),
+            )
+        )
+
+        val results = db.place.selectByBounds(
+            minLat = 9.0,
+            maxLat = 12.0,
+            minLon = 9.0,
+            maxLon = 12.0,
+            withBoost = true,
+        )
+
+        Assert.assertEquals(listOf(2L), results.map { it.id })
+    }
+
+    @Test
     fun selectExchanges_includesOnlyAtmAndExchange() {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L, icon = "restaurant")))

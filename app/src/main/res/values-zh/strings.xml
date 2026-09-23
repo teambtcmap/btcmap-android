@@ -47,6 +47,9 @@
     <string name="badge_text">徽章文本</string>
     <string name="boosted_marker_background">推广标记背景</string>
     <string name="btc_map_boost_payment_request">BTC Map 推广付款请求</string>
+    <string name="boosted">已推广</string>
+    <string name="boosted_merchants">已推广商家</string>
+    <string name="boosted_until_s">已推广至 %1$s</string>
     <string name="your_comment_has_been_posted">您的评论已发布</string>
     <string name="comment_cannot_be_empty">评论不能为空</string>
     <string name="btc_map_comment_payment_request">BTC Map 评论付款请求</string>

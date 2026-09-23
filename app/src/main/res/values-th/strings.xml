@@ -47,6 +47,9 @@
     <string name="badge_text">ข้อความป้าย</string>
     <string name="boosted_marker_background">พื้นหลังมาร์กเกอร์ที่ได้รับการส่งเสริม</string>
     <string name="btc_map_boost_payment_request">คำขอชำระเงิน BTC Map Boost</string>
+    <string name="boosted">ได้รับการส่งเสริม</string>
+    <string name="boosted_merchants">ร้านค้าที่ได้รับการส่งเสริม</string>
+    <string name="boosted_until_s">ได้รับการส่งเสริมถึง %1$s</string>
     <string name="your_comment_has_been_posted">ความคิดเห็นของคุณได้รับการโพสต์แล้ว</string>
     <string name="comment_cannot_be_empty">ความคิดเห็นไม่สามารถว่างเปล่าได้</string>
     <string name="btc_map_comment_payment_request">คำขอชำระเงินความคิดเห็น BTC Map</string>

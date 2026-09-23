@@ -47,6 +47,9 @@
     <string name="badge_text">Merkie teks</string>
     <string name="boosted_marker_background">Bemarkte merker agtergrond</string>
     <string name="btc_map_boost_payment_request">BTC Map Bemark Betalingsversoek</string>
+    <string name="boosted">Bemark</string>
+    <string name="boosted_merchants">Bemarkte handelaars</string>
+    <string name="boosted_until_s">Bemark tot %1$s</string>
     <string name="your_comment_has_been_posted">U kommentaar is geplaas</string>
     <string name="comment_cannot_be_empty">Kommentaar mag nie leeg wees nie</string>
     <string name="btc_map_comment_payment_request">BTC Map Kommentaar Betalingsversoek</string>

@@ -47,6 +47,9 @@
     <string name="badge_text">Jelvény szöveg</string>
     <string name="boosted_marker_background">Kiemelt jelölő háttér</string>
     <string name="btc_map_boost_payment_request">BTC Map Kiemelés fizetési kérelem</string>
+    <string name="boosted">Kiemelt</string>
+    <string name="boosted_merchants">Kiemelt kereskedők</string>
+    <string name="boosted_until_s">Kiemelve %1$s-ig</string>
     <string name="your_comment_has_been_posted">A hozzászólásod közzétéve</string>
     <string name="comment_cannot_be_empty">A hozzászólás nem lehet üres</string>
     <string name="btc_map_comment_payment_request">BTC Map hozzászólás fizetési kérelem</string>

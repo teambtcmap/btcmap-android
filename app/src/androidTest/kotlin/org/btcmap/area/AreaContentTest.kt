@@ -295,6 +295,75 @@ class AreaContentTest : AreaScreenTest() {
         }
     }
 
+    @Test
+    fun boostedMerchants_renderOnlyActiveBoosts() {
+        apiRule.server.dispatcher = areaDispatcher()
+        databaseRule.db.area.insert(listOf(area()))
+        databaseRule.db.place.insert(
+            listOf(
+                place(
+                    osmId = "node:1",
+                    icon = "cafe",
+                    id = 1,
+                    lat = 48.8566,
+                    lon = 2.3522,
+                    name = "Boosted Cafe",
+                    boostedUntil = ZonedDateTime.parse("2999-01-01T00:00:00Z"),
+                ),
+                place(
+                    osmId = "node:2",
+                    icon = "cafe",
+                    id = 2,
+                    lat = 48.8566,
+                    lon = 2.3522,
+                    name = "Expired Cafe",
+                    boostedUntil = ZonedDateTime.parse("2020-01-01T00:00:00Z"),
+                ),
+                place(
+                    osmId = "node:3",
+                    icon = "cafe",
+                    id = 3,
+                    lat = 48.8566,
+                    lon = 2.3522,
+                    name = "Plain Cafe",
+                ),
+            ),
+        )
+
+        withArea { scenario, area ->
+            waitUntilOnMain { area.boostedContainer().childCount == 1 }
+
+            scenario.onActivity {
+                Assert.assertTrue(
+                    area.view().findViewById<View>(R.id.boosted_merchants_title).isVisible,
+                )
+                Assert.assertEquals(
+                    "Boosted Cafe",
+                    area.boostedContainer().getChildAt(0)
+                        .findViewById<TextView>(R.id.title).text.toString(),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun noBoostedMerchants_hidesBoostedSection() {
+        apiRule.server.dispatcher = areaDispatcher()
+        databaseRule.db.area.insert(listOf(area()))
+        databaseRule.db.place.insert(
+            listOf(place(osmId = "node:1", icon = "cafe", lat = 48.8566, lon = 2.3522)),
+        )
+
+        withArea { _, area ->
+            waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
+
+            Assert.assertFalse(
+                area.view().findViewById<View>(R.id.boosted_merchants_title).isVisible,
+            )
+            Assert.assertFalse(area.boostedContainer().isVisible)
+        }
+    }
+
     private fun AreaFragment.view(): View = requireView()
 
     private fun AreaFragment.eventsContainer(): ViewGroup =
@@ -303,14 +372,25 @@ class AreaContentTest : AreaScreenTest() {
     private fun AreaFragment.issuesContainer(): ViewGroup =
         view().findViewById(R.id.issues_container)
 
-    private fun place(osmId: String, icon: String): Place {
+    private fun AreaFragment.boostedContainer(): ViewGroup =
+        view().findViewById(R.id.boosted_merchants_container)
+
+    private fun place(
+        osmId: String,
+        icon: String,
+        id: Long = 1,
+        lat: Double = 0.0,
+        lon: Double = 0.0,
+        name: String = "Test Place",
+        boostedUntil: ZonedDateTime? = null,
+    ): Place {
         return Place(
-            id = 1,
+            id = id,
             updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
-            lat = 0.0,
-            lon = 0.0,
+            lat = lat,
+            lon = lon,
             icon = icon,
-            name = "Test Place",
+            name = name,
             localizedName = null,
             verifiedAt = null,
             address = null,
@@ -324,7 +404,7 @@ class AreaContentTest : AreaScreenTest() {
             instagram = null,
             line = null,
             requiredAppUrl = null,
-            boostedUntil = null,
+            boostedUntil = boostedUntil,
             comments = null,
             telegram = null,
             osmId = osmId,

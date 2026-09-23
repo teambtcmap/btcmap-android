@@ -47,6 +47,9 @@
     <string name="badge_text">Văn bản huy hiệu</string>
     <string name="boosted_marker_background">Nền đánh dấu đẩy mạnh</string>
     <string name="btc_map_boost_payment_request">Yêu cầu thanh toán BTC Map Boost</string>
+    <string name="boosted">Đã đẩy mạnh</string>
+    <string name="boosted_merchants">Nhà bán lẻ đã đẩy mạnh</string>
+    <string name="boosted_until_s">Đã đẩy mạnh đến %1$s</string>
     <string name="your_comment_has_been_posted">Bình luận của bạn đã được đăng</string>
     <string name="comment_cannot_be_empty">Bình luận không được để trống</string>
     <string name="btc_map_comment_payment_request">Yêu cầu thanh toán bình luận BTC Map</string>

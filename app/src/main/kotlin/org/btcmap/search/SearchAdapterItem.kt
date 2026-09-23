@@ -10,6 +10,7 @@ sealed class SearchAdapterItem {
         override val icon: String,
         override val name: String,
         override val distanceToUser: String?,
+        val boosted: Boolean,
     ) : SearchAdapterItem()
 
     data class Area(

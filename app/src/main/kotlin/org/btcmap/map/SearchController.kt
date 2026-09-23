@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.db.Database
 import org.btcmap.db.table.area.Area
+import org.btcmap.place.isBoosted
 import org.btcmap.search.SearchAdapterItem
 import org.maplibre.android.geometry.LatLng
 import java.text.NumberFormat
@@ -26,7 +27,9 @@ import java.time.ZonedDateTime
  *
  * Each entity is matched with a case-insensitive substring on its name. Results
  * are ordered like the server's `GET /v4/search`: exact name matches first, then
- * prefix matches, then substring matches, with proximity breaking ties.
+ * prefix matches, then substring matches, with proximity breaking ties. Boosted
+ * places are promoted above that relevance order, matching the website, so a
+ * boost is visible in search.
  */
 class SearchController(
     private val db: Database,
@@ -87,12 +90,20 @@ class SearchController(
 
             val places = db.place.selectBySearchString(query).map { place ->
                 val name = place.name ?: ""
-                localMatch(query, name, LatLng(place.lat, place.lon), referenceLocation) { distanceToUser ->
+                val boosted = place.isBoosted(now)
+                localMatch(
+                    query = query,
+                    name = name,
+                    location = LatLng(place.lat, place.lon),
+                    referenceLocation = referenceLocation,
+                    boosted = boosted,
+                ) { distanceToUser ->
                     SearchAdapterItem.Place(
                         placeId = place.id,
                         icon = place.icon,
                         name = name,
                         distanceToUser = distanceToUser,
+                        boosted = boosted,
                     )
                 }
             }
@@ -118,6 +129,9 @@ class SearchController(
         _results.value = matches
             .sortedWith(
                 compareBy(
+                    // Boosted places are promoted above the relevance order, like
+                    // the website: premium placement, then the server's ranking.
+                    { if (it.boosted) 0 else 1 },
                     { it.rank },
                     { it.distance ?: Double.MAX_VALUE },
                 )
@@ -136,12 +150,14 @@ class SearchController(
         name: String,
         location: LatLng?,
         referenceLocation: LatLng,
+        boosted: Boolean = false,
         item: (String?) -> SearchAdapterItem,
     ): LocalMatch {
         val distance = location?.let { distanceInMeters(referenceLocation, it) }
         return LocalMatch(
             rank = matchRank(name, query),
             distance = distance,
+            boosted = boosted,
             item = item(distance?.let { formatDistance(it) }),
         )
     }
@@ -189,6 +205,7 @@ class SearchController(
     private class LocalMatch(
         val rank: Int,
         val distance: Double?,
+        val boosted: Boolean,
         val item: SearchAdapterItem,
     )
 

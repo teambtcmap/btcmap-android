@@ -47,6 +47,9 @@
     <string name="badge_text">Text badge</string>
     <string name="boosted_marker_background">Pozadie boostnutého markeru</string>
     <string name="btc_map_boost_payment_request">Žiadosť o platbu BTC Map Boost</string>
+    <string name="boosted">Boostnuté</string>
+    <string name="boosted_merchants">Boostnuté obchody</string>
+    <string name="boosted_until_s">Boostnuté do %1$s</string>
     <string name="your_comment_has_been_posted">Tvoj komentár bol zverejnený</string>
     <string name="comment_cannot_be_empty">Komentár nemôže byť prázdny</string>
     <string name="btc_map_comment_payment_request">Žiadosť o platbu komentára BTC Map</string>

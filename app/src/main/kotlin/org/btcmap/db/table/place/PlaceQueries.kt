@@ -128,6 +128,43 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
+    /**
+     * Full places inside the bounding box, ordered by latitude descending like
+     * [selectMerchantsByBounds]. When [withBoost] is true only places that carry
+     * a boost timestamp are returned, so a caller looking for active boosts does
+     * not load every place in a large area; it still checks that the boost is
+     * active. The caller also narrows the box with the area's point-in-polygon
+     * test where the association has to match the server's.
+     */
+    fun selectByBounds(
+        minLat: Double,
+        maxLat: Double,
+        minLon: Double,
+        maxLon: Double,
+        withBoost: Boolean = false,
+    ): List<Place> {
+        val boostClause = if (withBoost) " AND $BOOSTED_UNTIL IS NOT NULL" else ""
+        conn.prepare(
+            """
+                SELECT ${FullProjection.COLUMNS}
+                FROM $TABLE
+                WHERE $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4
+                    AND $DELETED_AT IS NULL$boostClause
+                ORDER BY $LAT DESC;
+            """
+        ).use {
+            it.bindDouble(1, minLat)
+            it.bindDouble(2, maxLat)
+            it.bindDouble(3, minLon)
+            it.bindDouble(4, maxLon)
+            val rows = mutableListOf<Place>()
+            while (it.step()) {
+                rows.add(FullProjection.fromStatement(it))
+            }
+            return rows
+        }
+    }
+
     var selectMerchantsByBoundsCallCount = 0
     var selectMerchantsByBoundsLastCallDurationMs = 0L
 

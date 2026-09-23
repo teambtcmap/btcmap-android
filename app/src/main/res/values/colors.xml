@@ -4,4 +4,5 @@
     <color name="osm_attribution_text">#CC000000</color>
     <color name="verify_green">#2E7D32</color>
     <color name="report_red">#C62828</color>
+    <color name="bitcoin_orange">#F7931A</color>
 </resources>

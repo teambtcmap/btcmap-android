@@ -47,6 +47,9 @@
     <string name="badge_text">배지 텍스트</string>
     <string name="boosted_marker_background">승격된 마커 배경</string>
     <string name="btc_map_boost_payment_request">BTC Map 승격 결제 요청</string>
+    <string name="boosted">승격됨</string>
+    <string name="boosted_merchants">승격된 상인</string>
+    <string name="boosted_until_s">%1$s까지 승격됨</string>
     <string name="your_comment_has_been_posted">댓글이 게시되었습니다</string>
     <string name="comment_cannot_be_empty">댓글은 비워둘 수 없습니다</string>
     <string name="btc_map_comment_payment_request">BTC Map 댓글 결제 요청</string>

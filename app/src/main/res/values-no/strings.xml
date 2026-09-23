@@ -47,6 +47,9 @@
     <string name="badge_text">Skilt tekst</string>
     <string name="boosted_marker_background">Forfremmet merker bakgrunn</string>
     <string name="btc_map_boost_payment_request">BTC Map Boost betalingsforespørsel</string>
+    <string name="boosted">Forfremmet</string>
+    <string name="boosted_merchants">Forfremmede selgere</string>
+    <string name="boosted_until_s">Forfremmet til %1$s</string>
     <string name="your_comment_has_been_posted">Din kommentar er lagt ut</string>
     <string name="comment_cannot_be_empty">Kommentar kan ikke være tom</string>
     <string name="btc_map_comment_payment_request">BTC Map kommentar betalingsforespørsel</string>

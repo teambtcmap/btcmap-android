@@ -127,6 +127,7 @@ class AreaFragment : Fragment() {
             binding.loading.isVisible = false
             binding.content.isVisible = true
 
+            sections?.loadBoostedMerchants(area)
             sections?.loadEvents(area)
             sections?.loadPlaceIssues(areaId)
         }

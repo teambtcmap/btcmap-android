@@ -47,6 +47,9 @@
     <string name="badge_text">ব্যাজ টেক্সট</string>
     <string name="boosted_marker_background">বুস্ট করা মার্কার পটভূমি</string>
     <string name="btc_map_boost_payment_request">BTC Map বুস্ট পেমেন্ট অনুরোধ</string>
+    <string name="boosted">বুস্ট করা</string>
+    <string name="boosted_merchants">বুস্ট করা বণিক</string>
+    <string name="boosted_until_s">%1$s পর্যন্ত বুস্ট করা</string>
     <string name="your_comment_has_been_posted">আপনার মন্তব্য পোস্ট করা হয়েছে</string>
     <string name="comment_cannot_be_empty">মন্তব্য খালি থাকতে পারে না</string>
     <string name="btc_map_comment_payment_request">BTC Map মন্তব্য পেমেন্ট অনুরোধ</string>

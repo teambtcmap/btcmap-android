@@ -47,6 +47,9 @@
     <string name="badge_text">Testo badge</string>
     <string name="boosted_marker_background">Sfondo marcatore promosso</string>
     <string name="btc_map_boost_payment_request">Richiesta di pagamento BTC Map Boost</string>
+    <string name="boosted">Promosso</string>
+    <string name="boosted_merchants">Esercenti promossi</string>
+    <string name="boosted_until_s">Promosso fino al %1$s</string>
     <string name="your_comment_has_been_posted">Il tuo commento è stato pubblicato</string>
     <string name="comment_cannot_be_empty">Il commento non può essere vuoto</string>
     <string name="btc_map_comment_payment_request">Richiesta di pagamento commento BTC Map</string>

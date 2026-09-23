@@ -47,6 +47,9 @@
     <string name="badge_text">טקסט תג</string>
     <string name="boosted_marker_background">רקע סמן מקודם</string>
     <string name="btc_map_boost_payment_request">בקשת תשלום BTC Map Boost</string>
+    <string name="boosted">מקודם</string>
+    <string name="boosted_merchants">סוחרים מקודמים</string>
+    <string name="boosted_until_s">מקודם עד %1$s</string>
     <string name="your_comment_has_been_posted">התגובה שלך פורסמה</string>
     <string name="comment_cannot_be_empty">התגובה לא יכולה להיות ריקה</string>
     <string name="btc_map_comment_payment_request">בקשת תשלום תגובה BTC Map</string>

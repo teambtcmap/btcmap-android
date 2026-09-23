@@ -47,6 +47,9 @@
     <string name="badge_text">متن نشان</string>
     <string name="boosted_marker_background">پس‌زمینه نشانگر ارتقا یافته</string>
     <string name="btc_map_boost_payment_request">درخواست پرداخت ارتقای BTC Map</string>
+    <string name="boosted">ارتقا یافته</string>
+    <string name="boosted_merchants">تاجران ارتقا یافته</string>
+    <string name="boosted_until_s">ارتقا یافته تا %1$s</string>
     <string name="your_comment_has_been_posted">نظر شما منتشر شد</string>
     <string name="comment_cannot_be_empty">نظر نمی‌تواند خالی باشد</string>
     <string name="btc_map_comment_payment_request">درخواست پرداخت نظر BTC Map</string>

@@ -47,6 +47,9 @@
     <string name="badge_text">Text badge</string>
     <string name="boosted_marker_background">Fundal marker promovat</string>
     <string name="btc_map_boost_payment_request">Cerere de plată BTC Map Boost</string>
+    <string name="boosted">Promovat</string>
+    <string name="boosted_merchants">Comercianți promovați</string>
+    <string name="boosted_until_s">Promovat până la %1$s</string>
     <string name="your_comment_has_been_posted">Comentariul tău a fost publicat</string>
     <string name="comment_cannot_be_empty">Comentariul nu poate fi gol</string>
     <string name="btc_map_comment_payment_request">Cerere de plată comentariu BTC Map</string>

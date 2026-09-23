@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -18,6 +19,7 @@ import com.google.android.material.color.MaterialColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.api.GetEventsItem
@@ -33,6 +35,8 @@ import org.btcmap.db.table.event.isWithin
 import org.btcmap.db.table.place.Place
 import org.btcmap.event.EventFragment
 import org.btcmap.event.toBundle
+import org.btcmap.place.isBoosted
+import org.btcmap.place.isWithin
 import org.btcmap.util.iconTypeface
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
@@ -43,12 +47,12 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 /**
- * Renders the area screen's two content sections: the area's upcoming events
- * and its places with issues.
+ * Renders the area screen's content sections: the area's boosted merchants, its
+ * upcoming events and its places with issues.
  *
  * Kept out of [AreaFragment] so the screen only wires the area header and
- * bookkeeping. Both sections build their rows from the same [ItemAreaCardBinding]
- * through [addCard], so the event and issue cards stay visually consistent.
+ * bookkeeping. All sections build their rows from the same [ItemAreaCardBinding]
+ * through [addCard], so their cards stay visually consistent.
  */
 internal class AreaSectionsController(
     private val fragment: Fragment,
@@ -57,6 +61,78 @@ internal class AreaSectionsController(
 
     private val eventDateFormat: DateTimeFormatter =
         DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+
+    private val boostDateFormat: DateTimeFormatter =
+        DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+
+    /**
+     * Renders the area's currently boosted merchants from the local cache, so
+     * the section works offline like the events one. A place is linked to the
+     * area by the same bbox pre-filter and point-in-polygon test the server
+     * applies, and the boost must still be active.
+     */
+    fun loadBoostedMerchants(area: Area) {
+        fragment.viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val places = withContext(Dispatchers.IO) { fetchBoostedMerchants(area) }
+                renderBoostedMerchants(places)
+            } catch (e: Throwable) {
+                // The section is secondary: when it cannot be read, leave it
+                // hidden rather than interrupting the area screen.
+                e.rethrowIfCancellation()
+            }
+        }
+    }
+
+    private fun fetchBoostedMerchants(area: Area): List<Place> {
+        val west = area.bboxWest ?: return emptyList()
+        val south = area.bboxSouth ?: return emptyList()
+        val east = area.bboxEast ?: return emptyList()
+        val north = area.bboxNorth ?: return emptyList()
+
+        val geometry = area.geoJsonGeometry()
+        val now = ZonedDateTime.now()
+        return fragment.db().place.selectByBounds(south, north, west, east, withBoost = true)
+            .filter { it.isWithin(geometry) }
+            .filter { it.isBoosted(now) }
+            // The boost that runs longest is the most prominent, like the
+            // website's boosted section.
+            .sortedByDescending { it.boostedUntil }
+            .take(BOOSTED_MERCHANTS_LIMIT)
+    }
+
+    private fun renderBoostedMerchants(places: List<Place>) {
+        if (places.isEmpty()) return
+
+        val container = binding.boostedMerchantsContainer
+        container.removeAllViews()
+        places.forEach { container.addBoostedMerchantCard(it) }
+        binding.boostedMerchantsTitle.isVisible = true
+        container.isVisible = true
+    }
+
+    private fun ViewGroup.addBoostedMerchantCard(place: Place) {
+        addCard(
+            icon = TextView(fragment.requireContext()).apply {
+                typeface = iconTypeface
+                text = place.icon
+                setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24f)
+                setTextColor(ContextCompat.getColor(context, R.color.bitcoin_orange))
+                gravity = Gravity.CENTER
+            },
+            title = place.name.orEmpty(),
+            titleVisible = !place.name.isNullOrBlank(),
+            subtitle = boostSubtitle(place.boostedUntil),
+        ) {
+            (fragment.activity as? Activity)?.openPlace(place.id)
+        }
+    }
+
+    private fun boostSubtitle(boostedUntil: ZonedDateTime?): String {
+        val date = boostedUntil?.format(boostDateFormat)
+            ?: return fragment.getString(R.string.boosted)
+        return fragment.getString(R.string.boosted_until_s, date)
+    }
 
     fun loadEvents(area: Area) {
         fragment.viewLifecycleOwner.lifecycleScope.launch {
@@ -264,6 +340,8 @@ internal class AreaSectionsController(
 
     private companion object {
         const val PLACE_ISSUES_LIMIT = 50L
+
+        const val BOOSTED_MERCHANTS_LIMIT = 10
 
         const val ISSUE_FALLBACK_ICON = "warning"
     }

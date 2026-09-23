@@ -47,6 +47,9 @@
     <string name="badge_text">Текст значка</string>
     <string name="boosted_marker_background">Фон продвигаемого маркера</string>
     <string name="btc_map_boost_payment_request">Запрос на оплату BTC Map Boost</string>
+    <string name="boosted">Продвигается</string>
+    <string name="boosted_merchants">Продвигаемые продавцы</string>
+    <string name="boosted_until_s">Продвигается до %1$s</string>
     <string name="your_comment_has_been_posted">Ваш комментарий опубликован</string>
     <string name="comment_cannot_be_empty">Комментарий не может быть пустым</string>
     <string name="btc_map_comment_payment_request">Запрос на оплату комментария BTC Map</string>

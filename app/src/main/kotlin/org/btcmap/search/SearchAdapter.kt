@@ -1,5 +1,7 @@
 package org.btcmap.search
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -7,7 +9,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil3.load
+import com.google.android.material.color.MaterialColors
 import org.btcmap.area.preloadAreaHeader
+import org.btcmap.settings.boostedMarkerBackgroundColor
+import org.btcmap.settings.prefs
 import org.btcmap.util.iconTypeface
 import org.btcmap.databinding.SearchAdapterItemBinding
 
@@ -45,12 +50,18 @@ class SearchAdapter(
 
         fun bind(item: SearchAdapterItem, onItemClick: (SearchAdapterItem) -> Unit) {
             val area = item as? SearchAdapterItem.Area
+            val isBoosted = (item as? SearchAdapterItem.Place)?.boosted == true
             boundAreaId = area?.areaId
+
+            // The icon is hidden for areas, but tinting it anyway keeps the
+            // recycled holder correct when the next row is a merchant.
+            tintIcon(isBoosted)
 
             binding.apply {
                 icon.text = item.icon
                 name.text = item.name
                 distance.text = item.distanceToUser
+                boosted.isVisible = isBoosted
                 root.setOnClickListener { onItemClick(item) }
 
                 if (area?.iconUrl != null) {
@@ -75,6 +86,35 @@ class SearchAdapter(
                 // row falls back to the placeholder icon.
                 root.context.preloadAreaHeader(area?.headerImageUrl)
             }
+        }
+
+        /**
+         * Tints the icon circle with the configured boosted marker color and a
+         * white glyph when [isBoosted], and restores the theme colors otherwise
+         * so a recycled holder cannot keep a previous row's boost tint.
+         */
+        private fun tintIcon(isBoosted: Boolean) {
+            if (isBoosted) {
+                binding.icon.backgroundTintList =
+                    ColorStateList.valueOf(prefs.boostedMarkerBackgroundColor())
+                binding.icon.setTextColor(Color.WHITE)
+                return
+            }
+
+            binding.icon.backgroundTintList = ColorStateList.valueOf(
+                MaterialColors.getColor(
+                    binding.root,
+                    androidx.appcompat.R.attr.colorPrimary,
+                    Color.BLACK,
+                ),
+            )
+            binding.icon.setTextColor(
+                MaterialColors.getColor(
+                    binding.root,
+                    com.google.android.material.R.attr.colorOnPrimary,
+                    Color.WHITE,
+                ),
+            )
         }
 
         /**

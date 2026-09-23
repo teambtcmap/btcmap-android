@@ -47,6 +47,9 @@
     <string name="badge_text">Text odznaku</string>
     <string name="boosted_marker_background">Pozadí posílené značky</string>
     <string name="btc_map_boost_payment_request">Požadavek na platbu zvýraznění místa na BTC Map</string>
+    <string name="boosted">Zvýrazněno</string>
+    <string name="boosted_merchants">Zvýraznění obchodníci</string>
+    <string name="boosted_until_s">Zvýrazněno do %1$s</string>
     <string name="your_comment_has_been_posted">Váš komentář byl zveřejněn</string>
     <string name="comment_cannot_be_empty">Komentář nemůže být prázdný</string>
     <string name="btc_map_comment_payment_request">Požadavek na platbu komentáře na BTC Map</string>
