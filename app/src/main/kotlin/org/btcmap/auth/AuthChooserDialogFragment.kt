@@ -1,5 +1,6 @@
 package org.btcmap.auth
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
@@ -18,6 +19,9 @@ import org.btcmap.R
  */
 internal class AuthChooserDialogFragment : DialogFragment() {
 
+    // The dialog is the content of a MaterialAlertDialog, which has no parent
+    // view to inflate into, so its root layout params are intentionally unused.
+    @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialogView = layoutInflater.inflate(R.layout.account_choices_dialog, null)
 

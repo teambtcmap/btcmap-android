@@ -108,6 +108,49 @@ class ChangePasswordViewModelTest {
     }
 
     @Test
+    fun busy_isRaisedWhileInFlightAndClearedAfter() = runTest {
+        server.enqueue(
+            MockResponse.Builder()
+                .code(200)
+                .addHeader("Content-Type", "application/json")
+                .body("{}")
+                .bodyDelay(200, TimeUnit.MILLISECONDS)
+                .build()
+        )
+
+        val model = viewModel()
+        model.change(currentPassword = "old", newPassword = "new")
+
+        model.busy.first { it }
+        Assert.assertTrue(model.busy.value)
+
+        model.events.first()
+        model.busy.first { !it }
+        Assert.assertFalse(model.busy.value)
+    }
+
+    @Test
+    fun cancel_stopsTheRequestAndClearsBusy() = runTest {
+        server.enqueue(
+            MockResponse.Builder()
+                .code(200)
+                .addHeader("Content-Type", "application/json")
+                .body("{}")
+                .bodyDelay(5, TimeUnit.SECONDS)
+                .build()
+        )
+
+        val model = viewModel()
+        model.change(currentPassword = "old", newPassword = "new")
+        model.busy.first { it }
+
+        model.cancel()
+        model.busy.first { !it }
+
+        Assert.assertFalse(model.busy.value)
+    }
+
+    @Test
     fun factory_createsAChangePasswordViewModel() {
         val model = ChangePasswordViewModel.Factory(api())
             .create(ChangePasswordViewModel::class.java)

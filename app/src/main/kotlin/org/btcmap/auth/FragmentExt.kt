@@ -71,25 +71,12 @@ fun Fragment.registerAuthResultListener(onAuthenticated: (extras: Bundle) -> Uni
 
     // Kept outside the collectors so a stop/start of the view does not lose it
     // and show a second progress dialog.
-    var progress: AlertDialog? = null
-
-    fun dismissProgress() {
-        progress?.dismiss()
-        progress = null
-    }
+    val progress = RequestProgressDialog(this) { viewModel.cancel() }
 
     // The busy state follows the view, not STARTED, so a request that finishes
     // while the app is in the background still dismisses its dialog.
     viewLifecycleOwner.lifecycleScope.launch {
-        viewModel.busy.collect { busy ->
-            if (busy) {
-                if (progress == null) {
-                    progress = showProgressDialog(R.string.loading) { viewModel.cancel() }
-                }
-            } else {
-                dismissProgress()
-            }
-        }
+        viewModel.busy.collect { busy -> progress.setBusy(busy) }
     }
 
     // Outcomes are handled only while the view is visible; anything queued while
@@ -97,7 +84,7 @@ fun Fragment.registerAuthResultListener(onAuthenticated: (extras: Bundle) -> Uni
     viewLifecycleOwner.lifecycleScope.launch {
         viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.events.collect { event ->
-                dismissProgress()
+                progress.dismiss()
                 handleAuthEvent(event, onAuthenticated)
             }
         }
@@ -158,9 +145,10 @@ fun Fragment.showChangePasswordDialog() {
  * Registers the receiver of a submitted change-password form. Call this from
  * `onViewCreated` so the listener is re-established after a configuration
  * change. The request runs in a retained [ChangePasswordViewModel], so it and
- * its outcome survive a rotation; a failure is shown in an
- * [AuthErrorDialogFragment], which is restored with the screen, and
- * [onPasswordChanged] runs once the server has accepted the new password.
+ * its outcome survive a rotation; while it is in flight a progress dialog is
+ * shown, a failure is shown in an [AuthErrorDialogFragment], which is restored
+ * with the screen, and [onPasswordChanged] runs once the server has accepted
+ * the new password.
  */
 fun Fragment.registerChangePasswordResultListener(onPasswordChanged: () -> Unit) {
     val viewModel = ViewModelProvider(
@@ -184,9 +172,20 @@ fun Fragment.registerChangePasswordResultListener(onPasswordChanged: () -> Unit)
         )
     }
 
+    // Kept outside the collectors so a stop/start of the view does not lose it
+    // and show a second progress dialog.
+    val progress = RequestProgressDialog(this) { viewModel.cancel() }
+
+    // The busy state follows the view, not STARTED, so a request that finishes
+    // while the app is in the background still dismisses its dialog.
+    viewLifecycleOwner.lifecycleScope.launch {
+        viewModel.busy.collect { busy -> progress.setBusy(busy) }
+    }
+
     viewLifecycleOwner.lifecycleScope.launch {
         viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.events.collect { event ->
+                progress.dismiss()
                 when (event) {
                     is ChangePasswordEvent.Changed -> onPasswordChanged()
                     is ChangePasswordEvent.Failed ->
@@ -194,6 +193,34 @@ fun Fragment.registerChangePasswordResultListener(onPasswordChanged: () -> Unit)
                 }
             }
         }
+    }
+}
+
+/**
+ * Owns the blocking progress dialog for an in-flight request, driven by the
+ * view model's `busy` state. The dialog is created on the first busy value and
+ * dismissed once the request finishes or an outcome is handled, so a request
+ * that completes while the view is stopped still tears it down.
+ */
+private class RequestProgressDialog(
+    private val fragment: Fragment,
+    private val onCancel: () -> Unit,
+) {
+    private var dialog: AlertDialog? = null
+
+    fun setBusy(busy: Boolean) {
+        if (busy) {
+            if (dialog == null) {
+                dialog = fragment.showProgressDialog(R.string.loading, onCancel)
+            }
+        } else {
+            dismiss()
+        }
+    }
+
+    fun dismiss() {
+        dialog?.dismiss()
+        dialog = null
     }
 }
 

@@ -4,10 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import org.btcmap.api.Api
 import org.btcmap.api.updatePassword
 import org.btcmap.util.rethrowIfCancellation
@@ -26,10 +31,19 @@ internal sealed interface ChangePasswordEvent {
  * configuration change mid-request does not cancel it. Outcomes are delivered
  * through [events] and buffered while no view is collecting them, so a failure
  * reaches the recreated screen instead of being lost with the previous view.
+ *
+ * The request is bounded by a timeout and [busy] tracks it, so a stalled
+ * connection ends as a [ChangePasswordEvent.Failed] and the view can show and
+ * dismiss its progress dialog, like [AuthViewModel].
  */
 internal class ChangePasswordViewModel(
     private val api: Api,
 ) : ViewModel() {
+
+    private val _busy = MutableStateFlow(false)
+
+    /** True while a request is in flight; the view shows a progress dialog. */
+    val busy: StateFlow<Boolean> = _busy.asStateFlow()
 
     // Unlimited so a one-shot outcome is never dropped: the events are tiny and
     // produced at most once per request, and an outcome silently lost while no
@@ -43,14 +57,26 @@ internal class ChangePasswordViewModel(
         if (job?.isActive == true) return
 
         job = viewModelScope.launch {
+            _busy.value = true
             try {
-                api.updatePassword(oldPassword = currentPassword, newPassword = newPassword)
+                withTimeout(CHANGE_PASSWORD_TIMEOUT_MS) {
+                    api.updatePassword(oldPassword = currentPassword, newPassword = newPassword)
+                }
                 _events.trySend(ChangePasswordEvent.Changed)
+            } catch (e: TimeoutCancellationException) {
+                _events.trySend(ChangePasswordEvent.Failed(e))
             } catch (e: Exception) {
                 e.rethrowIfCancellation()
                 _events.trySend(ChangePasswordEvent.Failed(e))
+            } finally {
+                _busy.value = false
             }
         }
+    }
+
+    /** Cancels the in-flight request, e.g. when the progress dialog is dismissed. */
+    fun cancel() {
+        job?.cancel()
     }
 
     class Factory(
@@ -63,5 +89,9 @@ internal class ChangePasswordViewModel(
             @Suppress("UNCHECKED_CAST")
             return ChangePasswordViewModel(api) as T
         }
+    }
+
+    companion object {
+        private const val CHANGE_PASSWORD_TIMEOUT_MS = 30_000L
     }
 }
