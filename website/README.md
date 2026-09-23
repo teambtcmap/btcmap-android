@@ -40,7 +40,7 @@ Pages link to files outside `content/` (`../../README.md` from the home page,
 `../../../README.md` from a guide). The link render hook in
 `layouts/_default/_markup/render-link.html` rewrites those to
 `params.githubRepo`, so they resolve to the repository instead of 404ing.
-Internal relative links (`features/map.md`, `../index.md`) become the built page
+Internal relative links (`features/merchants.md`, `../index.md`) become the built page
 URLs.
 
 ## Styling

@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.StringRes
 import androidx.appcompat.widget.Toolbar
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
@@ -25,6 +26,7 @@ import androidx.fragment.app.replace
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -200,9 +202,6 @@ class PlaceFragment : Fragment() {
             binding.companionWarning.isVisible = false
         }
 
-        val outdatedUri =
-            "https://wiki.btcmap.org/Verifying-Existing-Merchants".toUri()
-
         if (place.verifiedAt != null) {
             val date = DateUtils.getRelativeDateTimeString(
                 requireContext(),
@@ -224,11 +223,11 @@ class PlaceFragment : Fragment() {
                 binding.lastVerified.isVisible = true
                 binding.lastVerified.setTextColor(requireContext().getErrorColor())
                 binding.lastVerified.setOnClickListener {
-                    startActivity(Intent(Intent.ACTION_VIEW, outdatedUri))
+                    showVerificationWarning(R.string.verification_warning_outdated)
                 }
                 binding.outdated.isVisible = true
                 binding.outdated.setOnClickListener {
-                    startActivity(Intent(Intent.ACTION_VIEW, outdatedUri))
+                    showVerificationWarning(R.string.verification_warning_outdated)
                 }
             }
         } else {
@@ -237,11 +236,11 @@ class PlaceFragment : Fragment() {
                 binding.lastVerified.text = getString(R.string.not_verified)
                 binding.lastVerified.setTextColor(requireContext().getErrorColor())
                 binding.lastVerified.setOnClickListener {
-                    startActivity(Intent(Intent.ACTION_VIEW, outdatedUri))
+                    showVerificationWarning(R.string.verification_warning_not_verified)
                 }
                 binding.outdated.isVisible = true
                 binding.outdated.setOnClickListener {
-                    startActivity(Intent(Intent.ACTION_VIEW, outdatedUri))
+                    showVerificationWarning(R.string.verification_warning_not_verified)
                 }
             } else {
                 binding.lastVerified.isVisible = false
@@ -409,6 +408,18 @@ class PlaceFragment : Fragment() {
             }
             commentsAdapter.submitList(comments.map { it.toAdapterItem() })
         }
+    }
+
+    /**
+     * Explains a verification warning. The dialog is informational only: the
+     * Verify and Report buttons on the place itself are what the user acts on.
+     */
+    private fun showVerificationWarning(@StringRes message: Int) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.verification_warning_title)
+            .setMessage(message)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     private fun openReport(defaultType: String?) {

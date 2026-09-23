@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Explain an outdated or unverified place's warning in a dialog instead of opening the wiki, pointing at the existing Verify and Report buttons
 - Stop the boost and comment payment screens from polling a rejected invoice forever, showing the error instead
 - Order the table cards on the database stats screen as place, comment, area, event, pref, label each as "… table", and add a bundle card behind every bundled table showing the snapshot's location, size, visible and deleted record counts and newest update time
 - Show the configured API base URL at the top of the sync card on the database stats screen

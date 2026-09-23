@@ -37,8 +37,8 @@ status. From there you can:
 
 ## Map styles
 
-Offline tiles are tied to the [map style](map.md#map-styles) that was active
-when you downloaded them. If you later change the style, the area page tells you
+Offline tiles are tied to the map style that was active when you downloaded
+them. If you later change the style, the area page tells you
 the download was made for a different style and offers to download it again.
 
 ---

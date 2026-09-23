@@ -1,17 +1,22 @@
-# Places
+# Merchants
 
-A place is a merchant, ATM or exchange that accepts bitcoin. Tapping a marker
-on the map opens its card in a bottom sheet; tapping some cards opens a full
-screen. Both show the same details.
+A merchant is a physical place that accepts bitcoin for goods or services. ATMs
+and exchanges are the only exception; they are only shown if you switch to the
+**Exchanges** filter.
 
-## What a place shows
+Tapping a marker on the map opens a bottom sheet, which you can drag up to
+expand to full screen.
+
+![The place card partly expanded over a dark map: the House of Satoshi sheet shows its name, the verify, report, boost and comments actions, the verification date, address and phone](/images/merchant-card-dark.png)
+![The same place's full details in light mode: address, phone, website, Telegram, Twitter, Instagram, email, opening hours and a comment](/images/merchant-details-light.png)
+
+## What merchant details show
 
 Depending on what OpenStreetMap knows about it, a place can show:
 
 - Its **name** and category icon.
 - When it was **last verified**, or a warning that it is not verified or may be
-  outdated. Tapping the warning opens the
-  [verification guide](https://wiki.btcmap.org/Verifying-Existing-Merchants).
+  outdated.
 - **Address**, **phone**, **website**, **email** and opening hours.
 - Social links such as Twitter/X, Telegram, LINE, Facebook and Instagram.
 - A note when a place needs a **companion app** to pay at it.

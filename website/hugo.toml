@@ -31,8 +31,7 @@ disableKinds = ["taxonomy", "term", "rss"]
   # Sidebar order for the guides under content/features/. Keep in sync with the
   # listing in content/_index.md.
   features = [
-    "map",
-    "places",
+    "merchants",
     "events",
     "areas",
     "offline-maps",

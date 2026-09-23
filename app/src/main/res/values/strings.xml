@@ -253,6 +253,9 @@
     <string name="btn_submit">Submit</string>
     <string name="report_submitted">Report submitted</string>
     <string name="report_select_type">Please select a report type</string>
+    <string name="verification_warning_title">Verification needed</string>
+    <string name="verification_warning_outdated">This place was last verified more than a year ago, so its details may be out of date. If you know it still accepts sats, tap Verify. If you know it no longer does, tap Report.</string>
+    <string name="verification_warning_not_verified">This place hasn\'t been verified yet, so its details may be unreliable. If you know it still accepts sats, tap Verify. If you know it no longer does, tap Report.</string>
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
 </resources>

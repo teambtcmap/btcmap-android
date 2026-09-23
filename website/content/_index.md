@@ -20,8 +20,7 @@ Each guide focuses on a specific feature and shows you how to make the most of i
 
 | Feature | What it covers |
 | --- | --- |
-| [Map](features/map.md) | Filters, markers, your location, area chips and map styles. |
-| [Places](features/places.md) | Merchant details, verifying and reporting, adding a place. |
+| [Merchants](features/merchants.md) | Merchant details, verifying and reporting, adding a place. |
 | [Events](features/events.md) | Bitcoin meetups and conferences near you. |
 | [Countries and communities](features/areas.md) | Community and country pages. |
 | [Offline maps](features/offline-maps.md) | Select regions to download and use the app when offline. |
