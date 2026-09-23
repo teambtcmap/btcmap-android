@@ -68,11 +68,20 @@ class AuthValidationTest {
 
     @Test
     fun signUp_reportsEveryProblemAtOnce() {
-        val errors = AuthValidation.signUp("", "", "mismatch")
+        val errors = AuthValidation.signUp("", "short", "mismatch")
 
         Assert.assertTrue(AuthError.UsernameRequired in errors)
-        Assert.assertTrue(AuthError.PasswordRequired in errors)
+        Assert.assertTrue(AuthError.PasswordTooShort in errors)
         Assert.assertTrue(AuthError.PasswordsDoNotMatch in errors)
+    }
+
+    @Test
+    fun signUp_emptyPassword_reportsOnlyPasswordRequiredNotMismatch() {
+        // Nothing to compare, so the filled confirmation must not add a match
+        // error next to the required-password error on the same field.
+        val errors = AuthValidation.signUp("satoshi", "", "confirmation")
+
+        Assert.assertEquals(listOf(AuthError.PasswordRequired), errors)
     }
 
     @Test
@@ -92,6 +101,13 @@ class AuthValidationTest {
     @Test
     fun changePassword_requiresNewPassword() {
         val errors = AuthValidation.changePassword("old-password", "", "")
+
+        Assert.assertEquals(listOf(AuthError.PasswordRequired), errors)
+    }
+
+    @Test
+    fun changePassword_emptyNewPassword_reportsOnlyPasswordRequiredNotMismatch() {
+        val errors = AuthValidation.changePassword("old-password", "", "confirmation")
 
         Assert.assertEquals(listOf(AuthError.PasswordRequired), errors)
     }

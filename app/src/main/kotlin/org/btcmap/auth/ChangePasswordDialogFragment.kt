@@ -88,7 +88,7 @@ internal class ChangePasswordDialogFragment : AuthFormDialogFragment() {
 
         // Held in a host-scoped view model, not the result bundle, so a pending
         // result cannot persist the passwords to saved instance state.
-        formResults.pending = AuthFormResult.ChangePassword(
+        formResults.changePassword = ChangePasswordCredentials(
             currentPassword = current,
             newPassword = new,
         )

@@ -119,7 +119,7 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
         // result is written to saved instance state while no started listener
         // has consumed it, which would persist the password. The result only
         // signals that a form was submitted; see `registerAuthResultListener`.
-        formResults.pending = AuthFormResult.Credentials(
+        formResults.credentials = AuthCredentials(
             mode = mode,
             username = username,
             password = password,

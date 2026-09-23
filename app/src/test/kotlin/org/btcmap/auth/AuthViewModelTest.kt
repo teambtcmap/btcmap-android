@@ -2,6 +2,9 @@ package org.btcmap.auth
 
 import android.os.Bundle
 import androidx.lifecycle.ViewModel
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.SQLiteDriver
+import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -142,6 +145,56 @@ class AuthViewModelTest {
     }
 
     @Test
+    fun signUp_cancelDuringAutoSignIn_stillReportsAccountCreated() = runTest {
+        enqueueJson("""{"id":124,"name":"Satoshi","roles":["user"]}""")
+        server.enqueue(
+            MockResponse.Builder()
+                .code(200)
+                .addHeader("Content-Type", "application/json")
+                .body(tokenResponse("token-1", "Satoshi"))
+                .bodyDelay(5, TimeUnit.SECONDS)
+                .build()
+        )
+
+        val model = viewModel()
+        model.signUp("Satoshi", "SuperSecure", Bundle())
+
+        // Wait until the account was created and the follow-up sign-in is in
+        // flight, then cancel mid-request: the account must still be reported.
+        server.takeRequest()
+        server.takeRequest()
+        model.cancel()
+
+        val event = model.events.first()
+
+        Assert.assertTrue(event is AuthEvent.AccountCreated)
+        Assert.assertEquals("Satoshi", (event as AuthEvent.AccountCreated).username)
+        Assert.assertNull(settings.authToken)
+    }
+
+    @Test
+    fun signUp_whenSessionStoreFails_reportsSignUpOperation() = runTest {
+        enqueueJson("""{"id":124,"name":"Satoshi","roles":["user"]}""")
+        enqueueJson(tokenResponse("token-1", "Satoshi"))
+
+        val driver = FailingDriver()
+        val failingDb = Database(driver, ":memory:")
+        val failingSettings = Settings(
+            dbProvider = { failingDb },
+            legacyValues = { emptyMap() },
+        )
+        driver.failing = true
+
+        val model = AuthViewModel(api(), failingDb, failingSettings)
+        model.signUp("Satoshi", "SuperSecure", Bundle())
+
+        val event = model.events.first()
+
+        Assert.assertTrue(event is AuthEvent.Failed)
+        Assert.assertEquals(AuthOperation.SignUp, (event as AuthEvent.Failed).operation)
+    }
+
+    @Test
     fun signIn_whileRequestInFlight_isIgnored() = runTest {
         enqueueJson(tokenResponse("token-1", "satoshi"))
 
@@ -217,3 +270,25 @@ class AuthViewModelTest {
 }
 
 private class UnrelatedViewModel : ViewModel()
+
+/** A [SQLiteDriver] that can be made to fail on the next statement. */
+private class FailingDriver : SQLiteDriver {
+    @Volatile
+    var failing = false
+
+    private val delegate = BundledSQLiteDriver()
+
+    override fun open(fileName: String): SQLiteConnection {
+        val connection = delegate.open(fileName)
+        return object : SQLiteConnection {
+            override fun prepare(sql: String): SQLiteStatement {
+                if (failing) throw RuntimeException("database unavailable")
+                return connection.prepare(sql)
+            }
+
+            override fun close() {
+                connection.close()
+            }
+        }
+    }
+}

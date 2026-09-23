@@ -32,7 +32,10 @@ internal object AuthValidation {
             password.isEmpty() -> add(AuthError.PasswordRequired)
             password.characterCount() < MIN_PASSWORD_LENGTH -> add(AuthError.PasswordTooShort)
         }
-        if (password != confirmation) add(AuthError.PasswordsDoNotMatch)
+        // A missing password is reported as [PasswordRequired]; there is nothing
+        // to compare against, so a filled confirmation must not also show a
+        // match error on the same field.
+        if (password.isNotEmpty() && password != confirmation) add(AuthError.PasswordsDoNotMatch)
     }
 
     fun changePassword(
@@ -45,7 +48,10 @@ internal object AuthValidation {
             new.isEmpty() -> add(AuthError.PasswordRequired)
             new.characterCount() < MIN_PASSWORD_LENGTH -> add(AuthError.PasswordTooShort)
         }
-        if (new != confirmation) add(AuthError.PasswordsDoNotMatch)
+        // A missing new password is reported as [PasswordRequired]; there is
+        // nothing to compare against, so a filled confirmation must not also
+        // show a match error on the same field.
+        if (new.isNotEmpty() && new != confirmation) add(AuthError.PasswordsDoNotMatch)
     }
 
     private fun String.characterCount(): Int = codePointCount(0, length)

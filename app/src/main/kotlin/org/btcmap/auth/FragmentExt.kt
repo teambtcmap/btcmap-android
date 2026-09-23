@@ -59,9 +59,9 @@ fun Fragment.registerAuthResultListener(onAuthenticated: (extras: Bundle) -> Uni
     ) { _, _ ->
         // The credentials are held in the view model, not the result bundle, so
         // a pending result never carries the password to saved instance state.
-        val pending = results.pending as? AuthFormResult.Credentials
+        val pending = results.credentials
             ?: return@setFragmentResultListener
-        results.pending = null
+        results.credentials = null
 
         when (pending.mode) {
             AuthMode.SignIn -> viewModel.signIn(pending.username, pending.password, pending.extras)
@@ -163,9 +163,9 @@ fun Fragment.registerChangePasswordResultListener(onPasswordChanged: () -> Unit)
     ) { _, _ ->
         // The passwords are held in the view model, not the result bundle, so a
         // pending result never carries them to saved instance state.
-        val pending = results.pending as? AuthFormResult.ChangePassword
+        val pending = results.changePassword
             ?: return@setFragmentResultListener
-        results.pending = null
+        results.changePassword = null
         viewModel.change(
             currentPassword = pending.currentPassword,
             newPassword = pending.newPassword,

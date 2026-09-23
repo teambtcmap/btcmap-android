@@ -93,9 +93,11 @@ class Settings(
     }
 
     /**
-     * Loads the settings into the in-memory cache. Call this off the main thread
-     * (for example from `Application.onCreate`) so the first settings read does
-     * not open the database on the UI thread.
+     * Loads the settings into the in-memory cache. Called from
+     * `Application.onCreate` so the session token is in the cache before any
+     * screen reads it; that call therefore opens the database on the main
+     * thread, accepting the one-time open (and any pending schema migration)
+     * in exchange for never reporting a signed-in user as signed out.
      */
     internal fun preload() {
         ensureLoaded()

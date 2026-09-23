@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Load the stored session before the first screen is shown, so a signed-in user is no longer briefly reported as signed out on a cold start
+- Keep the created account when a sign-up is cancelled during the automatic sign-in, instead of losing it and making a retry fail as an already-used username
+- Show the sign-up failure when the account is created but saving the session fails, instead of a sign-in failure
+- Show only the missing-password error, and not also a mismatched-confirmation error, when the password field is left empty
 - Show a progress dialog while a password change is in flight and fail with an error on a timeout, instead of leaving the change with no feedback
 - Keep a change-password request running and its failure message on screen when the device is rotated, instead of cancelling it and losing the error
 - Keep account passwords out of saved instance state, so a password typed into a sign-in or change-password form is never written to disk

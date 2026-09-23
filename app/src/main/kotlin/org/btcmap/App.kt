@@ -136,17 +136,24 @@ class App : Application(), SingletonImageLoader.Factory {
         // here does that before the background refresh below uses it.
         offlineMaps
 
-        // Delete the databases abandoned by earlier versions and load the
-        // settings from the database up front so later reads from the main
-        // thread hit the in-memory cache. The session token is part of the
-        // cache, so this also makes it available without touching the database.
+        // Load the settings from the database before the first screen can read
+        // them. The session token lives in this in-memory cache, so a read that
+        // raced the load would report a signed-in user as signed out. This is
+        // the one startup step that must finish before any UI, so it runs here
+        // rather than on [ioScope].
+        try {
+            prefs.preload()
+        } catch (t: Throwable) {
+            t.rethrowIfCancellation()
+        }
+
+        // Delete the databases abandoned by earlier versions and re-attach to
+        // packs left incomplete by a previous run; neither is needed before the
+        // first screen, so both stay off the main thread.
         ioScope.launch {
             try {
                 val path = getDatabasePath(DATABASE_NAME)
                 path.parentFile?.let { LegacyDatabases.delete(it, path) }
-                prefs.preload()
-                // Re-attach to packs left incomplete by a previous run and
-                // resume them.
                 offlineMaps.refresh()
             } catch (t: Throwable) {
                 t.rethrowIfCancellation()

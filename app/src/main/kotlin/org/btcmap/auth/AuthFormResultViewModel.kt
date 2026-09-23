@@ -5,6 +5,20 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
+/** A submitted sign-in or sign-up form. */
+internal data class AuthCredentials(
+    val mode: AuthMode,
+    val username: String,
+    val password: String,
+    val extras: Bundle,
+)
+
+/** A submitted change-password form. */
+internal data class ChangePasswordCredentials(
+    val currentPassword: String,
+    val newPassword: String,
+)
+
 /**
  * A credential form's submitted values, waiting to be consumed by the fragment
  * that showed the form.
@@ -17,31 +31,16 @@ import androidx.lifecycle.ViewModelProvider
  * configuration change but is never saved, so the password survives a rotation
  * without being written to disk. The result bundle itself carries only a signal
  * that a form was submitted.
- */
-internal sealed interface AuthFormResult {
-    /** A submitted sign-in or sign-up form. */
-    data class Credentials(
-        val mode: AuthMode,
-        val username: String,
-        val password: String,
-        val extras: Bundle,
-    ) : AuthFormResult
-
-    /** A submitted change-password form. */
-    data class ChangePassword(
-        val currentPassword: String,
-        val newPassword: String,
-    ) : AuthFormResult
-}
-
-/**
- * Holds the last submitted credential form until the host fragment consumes it.
- * Both the form (through [hostAuthFormResults]) and the host (through
- * [authFormResults]) reach the same instance.
+ *
+ * The sign-in/sign-up and change-password forms have separate slots, so a
+ * pending value from one flow can never be overwritten by the other.
  */
 internal class AuthFormResultViewModel : ViewModel() {
-    /** Set by a form, cleared by the host once it has read it. */
-    var pending: AuthFormResult? = null
+    /** Set by an auth form, cleared by the host once it has read it. */
+    var credentials: AuthCredentials? = null
+
+    /** Set by a change-password form, cleared by the host once it has read it. */
+    var changePassword: ChangePasswordCredentials? = null
 }
 
 /** The holder on this fragment, which consumes the forms it showed. */

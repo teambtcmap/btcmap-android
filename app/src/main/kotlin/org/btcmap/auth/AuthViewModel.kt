@@ -4,19 +4,10 @@ import android.os.Build
 import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import org.btcmap.BuildConfig
 import org.btcmap.api.Api
 import org.btcmap.api.CreateTokenResponse
@@ -48,54 +39,22 @@ internal sealed interface AuthEvent {
 /**
  * Runs the sign-in and sign-up requests and stores the resulting session.
  *
- * The requests run in the [viewModelScope], not the view's, so a configuration
- * change mid-request does not cancel them. Outcomes are delivered through
- * [events] and buffered while no view is collecting them, so a form submitted
- * just before a rotation still reaches the recreated screen.
+ * Inherits the retained, timed, exactly-once request machinery from
+ * [AuthRequestViewModel], so a request survives a configuration change and a
+ * form submitted just before a rotation still reaches the recreated screen.
  */
 internal class AuthViewModel(
     private val api: Api,
     private val db: Database,
     private val prefs: Settings,
-) : ViewModel() {
-
-    private val _busy = MutableStateFlow(false)
-
-    /** True while a request is in flight; the view shows a progress dialog. */
-    val busy: StateFlow<Boolean> = _busy.asStateFlow()
-
-    // Unlimited so a one-shot outcome is never dropped: the events are tiny and
-    // produced at most once per request, and an outcome silently lost while no
-    // view is attached would strand the action that asked for the account.
-    private val _events = Channel<AuthEvent>(Channel.UNLIMITED)
-    val events: Flow<AuthEvent> = _events.receiveAsFlow()
-
-    private var job: Job? = null
+) : AuthRequestViewModel<AuthEvent>() {
 
     fun signIn(username: String, password: String, extras: Bundle) {
-        start { performSignIn(username, password, extras) }
+        launchRequest { performSignIn(username, password, extras) }
     }
 
     fun signUp(username: String, password: String, extras: Bundle) {
-        start { performSignUp(username, password, extras) }
-    }
-
-    /** Cancels the in-flight request, e.g. when the progress dialog is dismissed. */
-    fun cancel() {
-        job?.cancel()
-    }
-
-    private fun start(block: suspend () -> Unit) {
-        if (job?.isActive == true) return
-
-        job = viewModelScope.launch {
-            _busy.value = true
-            try {
-                block()
-            } finally {
-                _busy.value = false
-            }
-        }
+        launchRequest { performSignUp(username, password, extras) }
     }
 
     private suspend fun performSignIn(username: String, password: String, extras: Bundle) {
@@ -103,7 +62,7 @@ internal class AuthViewModel(
             api.signIn(username = username, password = password, label = tokenLabel())
         } ?: return
 
-        completeSignIn(response, extras)
+        completeSignIn(response, extras, AuthOperation.SignIn)
     }
 
     private suspend fun performSignUp(username: String, password: String, extras: Bundle) {
@@ -111,18 +70,26 @@ internal class AuthViewModel(
             api.createUser(name = username, password = password)
         } ?: return
 
-        // The account exists now. If signing in fails, the view falls back to
-        // the sign-in form instead of surfacing a second error dialog.
-        val response = request(AuthOperation.SignUp, showError = false) {
-            api.signIn(username = user.name, password = password, label = tokenLabel())
+        // The account exists now, so a failure of the follow-up sign-in is
+        // reported as an [AuthEvent.AccountCreated] (the view then falls back to
+        // the sign-in form) instead of surfacing a second error dialog. The same
+        // applies when the user cancels the request: the account must not be
+        // silently swallowed, or a retried sign-up would fail as already taken.
+        val response = try {
+            request(AuthOperation.SignUp, showError = false) {
+                api.signIn(username = user.name, password = password, label = tokenLabel())
+            }
+        } catch (e: CancellationException) {
+            emit(AuthEvent.AccountCreated(username = user.name, extras = extras))
+            throw e
         }
 
         if (response == null) {
-            _events.trySend(AuthEvent.AccountCreated(username = user.name, extras = extras))
+            emit(AuthEvent.AccountCreated(username = user.name, extras = extras))
             return
         }
 
-        completeSignIn(response, extras)
+        completeSignIn(response, extras, AuthOperation.SignUp)
     }
 
     /**
@@ -136,27 +103,31 @@ internal class AuthViewModel(
         request: suspend () -> T,
     ): T? {
         return try {
-            withTimeout(AUTH_TIMEOUT_MS) { request() }
+            withRequestTimeout { request() }
         } catch (e: TimeoutCancellationException) {
-            if (showError) _events.trySend(AuthEvent.Failed(e, operation))
+            if (showError) emit(AuthEvent.Failed(e, operation))
             null
         } catch (e: Exception) {
             e.rethrowIfCancellation()
-            if (showError) _events.trySend(AuthEvent.Failed(e, operation))
+            if (showError) emit(AuthEvent.Failed(e, operation))
             null
         }
     }
 
-    private suspend fun completeSignIn(response: CreateTokenResponse, extras: Bundle) {
+    private suspend fun completeSignIn(
+        response: CreateTokenResponse,
+        extras: Bundle,
+        operation: AuthOperation,
+    ) {
         try {
             storeSignedInSession(db = db, prefs = prefs, response = response)
         } catch (e: Exception) {
             e.rethrowIfCancellation()
-            _events.trySend(AuthEvent.Failed(e, AuthOperation.SignIn))
+            emit(AuthEvent.Failed(e, operation))
             return
         }
 
-        _events.trySend(AuthEvent.Authenticated(name = response.user.name, extras = extras))
+        emit(AuthEvent.Authenticated(name = response.user.name, extras = extras))
     }
 
     private fun tokenLabel(): String = authTokenLabel(
@@ -177,10 +148,6 @@ internal class AuthViewModel(
             @Suppress("UNCHECKED_CAST")
             return AuthViewModel(api, db, prefs) as T
         }
-    }
-
-    companion object {
-        private const val AUTH_TIMEOUT_MS = 30_000L
     }
 }
 
