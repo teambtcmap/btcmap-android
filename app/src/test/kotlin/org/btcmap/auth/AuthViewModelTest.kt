@@ -145,6 +145,48 @@ class AuthViewModelTest {
     }
 
     @Test
+    fun signUp_whenCreateResponseIsLost_signsInAndStoresSession() = runTest {
+        // The server creates the account but the response is lost, so a failed
+        // create cannot be told apart from one that succeeded. Signing in with
+        // the same credentials proves the account exists and recovers the
+        // session instead of sending a retry into "username already taken".
+        enqueueJson("""{"message":"boom"}""", code = 500)
+        enqueueJson(tokenResponse("token-1", "Satoshi"))
+
+        val model = viewModel()
+        model.signUp("Satoshi", "SuperSecure", Bundle())
+
+        val event = model.events.first()
+
+        Assert.assertTrue(event is AuthEvent.Authenticated)
+        Assert.assertEquals("Satoshi", (event as AuthEvent.Authenticated).name)
+        Assert.assertEquals("token-1", settings.authToken)
+        Assert.assertEquals("Satoshi", db.user.select()?.name)
+        Assert.assertEquals(2, server.requestCount)
+    }
+
+    @Test
+    fun signUp_whenCreateFailsAndSignInFails_reportsCreateFailure() = runTest {
+        // Neither call succeeded, so no account exists and the creation error is
+        // the one the user must see, not a sign-in failure.
+        enqueueJson("""{"message":"Invalid password"}""", code = 400)
+        enqueueJson("""{"message":"Invalid credentials"}""", code = 401)
+
+        val model = viewModel()
+        model.signUp("Satoshi", "SuperSecure", Bundle())
+
+        val event = model.events.first()
+
+        Assert.assertTrue(event is AuthEvent.Failed)
+        val failed = event as AuthEvent.Failed
+        Assert.assertEquals(AuthOperation.SignUp, failed.operation)
+        Assert.assertTrue(failed.error is ApiException)
+        Assert.assertEquals(400, (failed.error as ApiException).code)
+        Assert.assertNull(settings.authToken)
+        Assert.assertNull(db.user.select())
+    }
+
+    @Test
     fun signUp_cancelDuringAutoSignIn_stillReportsAccountCreated() = runTest {
         enqueueJson("""{"id":124,"name":"Satoshi","roles":["user"]}""")
         server.enqueue(

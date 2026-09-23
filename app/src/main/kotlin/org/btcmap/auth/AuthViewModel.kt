@@ -41,6 +41,17 @@ internal sealed interface AuthEvent {
 }
 
 /**
+ * A guarded request's outcome, so a caller can inspect a failure instead of
+ * having it queued as an event immediately. Coroutine cancellation is never
+ * represented here; it propagates from the request runner untouched.
+ */
+private sealed interface RequestOutcome<out T> {
+    data class Success<T>(val value: T) : RequestOutcome<T>
+
+    data class Failure(val error: Throwable) : RequestOutcome<Nothing>
+}
+
+/**
  * Runs the sign-in and sign-up requests and stores the resulting session.
  *
  * Inherits the retained, timed, exactly-once request machinery from
@@ -62,9 +73,16 @@ internal class AuthViewModel(
     }
 
     private suspend fun performSignIn(username: String, password: String, extras: Bundle) {
-        val response = request(AuthOperation.SignIn) {
+        val response = when (val outcome = runRequest {
             api.signIn(username = username, password = password, label = tokenLabel())
-        } ?: return
+        }) {
+            is RequestOutcome.Failure -> {
+                emit(AuthEvent.Failed(outcome.error, AuthOperation.SignIn))
+                return
+            }
+
+            is RequestOutcome.Success -> outcome.value
+        }
 
         val failure = storeSession(response)
         if (failure != null) {
@@ -76,62 +94,85 @@ internal class AuthViewModel(
     }
 
     private suspend fun performSignUp(username: String, password: String, extras: Bundle) {
-        val user = request(AuthOperation.SignUp) {
+        val creation = runRequest {
             api.createUser(name = username, password = password)
-        } ?: return
+        }
 
-        // The account exists now, so a failure of the follow-up sign-in is
-        // reported as an [AuthEvent.AccountCreated] (the view then falls back to
-        // the sign-in form) instead of surfacing a second error dialog. The same
-        // applies when the user cancels the request: the account must not be
-        // silently swallowed, or a retried sign-up would fail as already taken.
+        // A failed creation is ambiguous: the server may have created the account
+        // before the response was lost (a transport failure, a timeout or an
+        // error after the row was committed), so signing in with the same
+        // credentials tells the two apart. Success means the account exists; a
+        // failure settles it, and the original creation error is the one to
+        // report. The name the server assigned is unknown when creation failed,
+        // so fall back to the one the user typed.
+        val name = when (creation) {
+            is RequestOutcome.Success -> creation.value.name
+            is RequestOutcome.Failure -> username
+        }
+
+        // The follow-up sign-in is not reported on its own: success signs the
+        // user in, while a failure means either that the account was created but
+        // could not be signed in (the view then falls back to the sign-in form)
+        // or that the creation itself failed. The same applies when the user
+        // cancels the sign-in: an account that was created must not be silently
+        // swallowed, or a retried sign-up would fail as already taken.
         val response = try {
-            request(AuthOperation.SignUp, showError = false) {
-                api.signIn(username = user.name, password = password, label = tokenLabel())
+            requestWithoutReporting {
+                api.signIn(username = name, password = password, label = tokenLabel())
             }
         } catch (e: CancellationException) {
-            emit(AuthEvent.AccountCreated(username = user.name, extras = extras))
+            if (creation is RequestOutcome.Success) {
+                emit(AuthEvent.AccountCreated(username = name, extras = extras))
+            }
             throw e
         }
 
         if (response == null) {
-            emit(AuthEvent.AccountCreated(username = user.name, extras = extras))
+            when (creation) {
+                is RequestOutcome.Success ->
+                    emit(AuthEvent.AccountCreated(username = name, extras = extras))
+
+                is RequestOutcome.Failure ->
+                    emit(AuthEvent.Failed(creation.error, AuthOperation.SignUp))
+            }
             return
         }
 
-        // The account exists, so a session that cannot be stored locally is
-        // reported the same way as a failed automatic sign-in: the user is told
-        // the account was created and the view falls back to the sign-in form,
-        // rather than claiming the account could not be created and sending a
-        // retry into "username already taken".
+        // A session that cannot be stored locally is reported like a failed
+        // automatic sign-in: the user is told the account was created and the
+        // view falls back to the sign-in form, rather than claiming the account
+        // could not be created and sending a retry into "username already taken".
         val failure = storeSession(response)
         if (failure != null) {
-            emit(AuthEvent.AccountCreated(username = user.name, extras = extras))
+            emit(AuthEvent.AccountCreated(username = name, extras = extras))
             return
         }
 
         emit(AuthEvent.Authenticated(name = response.user.name, extras = extras))
     }
 
+    /** Runs [request] and returns its value, or null when it failed. */
+    private suspend fun <T> requestWithoutReporting(request: suspend () -> T): T? =
+        when (val outcome = runRequest(request)) {
+            is RequestOutcome.Success -> outcome.value
+            is RequestOutcome.Failure -> null
+        }
+
     /**
-     * Runs [request] behind a timeout. Returns null and queues a
-     * [AuthEvent.Failed] on failure, unless [showError] is false (used when the
-     * caller reports the failure itself).
+     * Runs [request] behind the shared request timeout, turning a failure into
+     * an outcome the caller can inspect. A timeout becomes a
+     * [RequestOutcome.Failure] because the caller must decide what a stalled
+     * request means; any other coroutine cancellation is not a failure and
+     * propagates untouched.
      */
-    private suspend fun <T> request(
-        operation: AuthOperation,
-        showError: Boolean = true,
-        request: suspend () -> T,
-    ): T? {
+    private suspend fun <T> runRequest(request: suspend () -> T): RequestOutcome<T> {
         return try {
-            withRequestTimeout { request() }
+            RequestOutcome.Success(withRequestTimeout { request() })
         } catch (e: TimeoutCancellationException) {
-            if (showError) emit(AuthEvent.Failed(e, operation))
-            null
+            RequestOutcome.Failure(e)
         } catch (e: Exception) {
             e.rethrowIfCancellation()
-            if (showError) emit(AuthEvent.Failed(e, operation))
-            null
+            RequestOutcome.Failure(e)
         }
     }
 
