@@ -58,7 +58,9 @@ object BundledComments {
             // The count read is inside the try as well: a database failure must
             // not escape and take down the calling screen, for the same reason a
             // missing or malformed asset must not.
-            val commentsInDb = withContext(Dispatchers.IO) { db.comment.selectCount() }
+            val commentsInDb = withContext(Dispatchers.IO) {
+                db.comment.selectCount(includeDeleted = true)
+            }
             if (commentsInDb > 0) {
                 return ImportResult(commentsImported = 0, duration = elapsedSince(startedAt))
             }

@@ -57,9 +57,11 @@ object BundledPlaces {
         val startedAt = System.nanoTime()
 
         // Seeding is intentionally a one-shot, fresh-install operation: any
-        // place already stored means the snapshot was imported or live data was
-        // synced. Re-importing a newer asset later is deliberately avoided so a
-        // stale bundle can never overwrite rows that sync has since refreshed.
+        // place already stored — tombstone included — means the snapshot was
+        // imported or live data was synced. Re-importing a newer asset later is
+        // deliberately avoided so a stale bundle can never overwrite rows that
+        // sync has since refreshed, and counting tombstones stops a table that
+        // holds only deleted places from being re-seeded into resurrecting them.
         var placesImported = 0L
         try {
             // The count read is inside the try as well: a database failure must
@@ -73,7 +75,9 @@ object BundledPlaces {
             // MapFragment calls this, on the main lifecycle, so that is not
             // reachable today; even if it were, INSERT OR REPLACE makes a double
             // import idempotent rather than corrupting data.
-            val placesInDb = withContext(Dispatchers.IO) { db.place.selectCount() }
+            val placesInDb = withContext(Dispatchers.IO) {
+                db.place.selectCount(includeDeleted = true)
+            }
             if (placesInDb > 0) {
                 return ImportResult(placesImported = 0, duration = elapsedSince(startedAt))
             }

@@ -106,7 +106,9 @@ class AreaQueriesTest {
         Assert.assertNull(db.area.selectById(7L))
         Assert.assertTrue(db.area.selectAll().isEmpty())
         Assert.assertEquals(0L, db.area.selectCount())
-        // The row is still stored, so the delta cursor still points at it.
+        // The row is still stored, so the delta cursor still points at it, and a
+        // caller that needs the total can still count it.
+        Assert.assertEquals(1L, db.area.selectCount(includeDeleted = true))
         Assert.assertEquals(
             ZonedDateTime.parse("2024-01-01T00:00:00Z"),
             db.area.selectMaxUpdatedAt(),

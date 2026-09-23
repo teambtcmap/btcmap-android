@@ -52,15 +52,19 @@ object BundledAreas {
         val startedAt = System.nanoTime()
 
         // Seeding is intentionally a one-shot, fresh-install operation: any area
-        // already stored means the snapshot was imported or live data was
-        // synced. Re-importing a newer asset later is deliberately avoided so a
-        // stale bundle can never overwrite rows that sync has since refreshed.
+        // already stored — tombstone included — means the snapshot was imported
+        // or live data was synced. Re-importing a newer asset later is
+        // deliberately avoided so a stale bundle can never overwrite rows that
+        // sync has since refreshed, and counting tombstones stops a table that
+        // holds only deleted areas from being re-seeded into resurrecting them.
         var areasImported = 0L
         try {
             // The count read is inside the try as well: a database failure must
             // not escape and take down the calling screen, for the same reason a
             // missing or malformed asset must not.
-            val areasInDb = withContext(Dispatchers.IO) { db.area.selectCount() }
+            val areasInDb = withContext(Dispatchers.IO) {
+                db.area.selectCount(includeDeleted = true)
+            }
             if (areasInDb > 0) {
                 return ImportResult(areasImported = 0, duration = elapsedSince(startedAt))
             }

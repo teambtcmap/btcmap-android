@@ -275,8 +275,16 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectCount(): Long {
-        conn.prepare("SELECT count(*) FROM $TABLE WHERE $DELETED_AT IS NULL;").use {
+    /**
+     * Row count for the table. Tombstones are excluded by default; callers that
+     * need to know whether the table is populated at all (the bundled seed
+     * guard) pass [includeDeleted] = true, because a table that holds only
+     * deleted places is still already populated and re-seeding it would
+     * resurrect places that were deleted after the snapshot was built.
+     */
+    fun selectCount(includeDeleted: Boolean = false): Long {
+        val where = if (includeDeleted) "" else " WHERE $DELETED_AT IS NULL"
+        conn.prepare("SELECT count(*) FROM $TABLE$where;").use {
             it.step()
             return it.getLong(0)
         }

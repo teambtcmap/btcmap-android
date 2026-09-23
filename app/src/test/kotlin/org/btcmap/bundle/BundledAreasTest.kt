@@ -18,7 +18,7 @@ class BundledAreasTest {
 
     private fun createDatabase(): Database = Database(BundledSQLiteDriver(), ":memory:")
 
-    private fun area(id: Long) = Area(
+    private fun area(id: Long, deletedAt: ZonedDateTime? = null) = Area(
         id = id,
         name = "Area $id",
         type = "community",
@@ -33,6 +33,7 @@ class BundledAreasTest {
         bboxNorth = null,
         geoJson = null,
         updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+        deletedAt = deletedAt,
     )
 
     /** A snapshot with [count] minimal but complete areas, ids 1..count. */
@@ -264,6 +265,22 @@ class BundledAreasTest {
         Assert.assertFalse("snapshot must not be read once the seed is done", opened)
         Assert.assertEquals(1L, db.area.selectCount())
         Assert.assertEquals(99L, db.area.selectById(99L)!!.id)
+    }
+
+    @Test
+    fun importFrom_skipsWhenDatabaseHoldsOnlyTombstones() = runTest {
+        val db = createDatabase()
+        db.area.insert(
+            listOf(area(id = 99L, deletedAt = ZonedDateTime.parse("2026-05-01T00:00:00Z"))),
+        )
+
+        val result = BundledAreas.importFrom(db) { snapshotJson(2).byteInputStream() }
+
+        Assert.assertEquals(0L, result.areasImported)
+        Assert.assertEquals(1L, db.area.selectCount(includeDeleted = true))
+        Assert.assertEquals(0L, db.area.selectCount())
+        Assert.assertTrue(db.area.selectAll().isEmpty())
+        Assert.assertNull(db.area.selectById(99L))
     }
 
     @Test

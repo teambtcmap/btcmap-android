@@ -194,6 +194,21 @@ class EventQueriesTest {
     }
 
     @Test
+    fun selectCount_excludesTombstonesUnlessAsked() {
+        val db = createDatabase()
+        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        db.event.insert(
+            listOf(
+                event(id = 1L),
+                event(id = 2L, updatedAt = "2024-01-02T10:00:00Z").copy(deletedAt = deletedAt),
+            )
+        )
+
+        Assert.assertEquals(1L, db.event.selectCount())
+        Assert.assertEquals(2L, db.event.selectCount(includeDeleted = true))
+    }
+
+    @Test
     fun selectMaxUpdatedAt_returnsNullWhenEmpty() {
         val db = createDatabase()
 

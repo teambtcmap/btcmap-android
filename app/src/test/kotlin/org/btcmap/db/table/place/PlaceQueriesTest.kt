@@ -376,6 +376,21 @@ class PlaceQueriesTest {
     }
 
     @Test
+    fun selectCount_excludesTombstonesUnlessAsked() {
+        val db = createDatabase()
+        db.place.insert(listOf(createPlace(id = 1L)))
+        db.place.insert(
+            listOf(
+                createPlace(id = 2L)
+                    .copy(deletedAt = ZonedDateTime.parse("2024-02-01T00:00:00Z")),
+            ),
+        )
+
+        Assert.assertEquals(1L, db.place.selectCount())
+        Assert.assertEquals(2L, db.place.selectCount(includeDeleted = true))
+    }
+
+    @Test
     fun deleteById_removesPlace() {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L)))

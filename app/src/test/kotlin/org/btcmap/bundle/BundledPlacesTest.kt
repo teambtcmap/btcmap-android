@@ -18,7 +18,7 @@ class BundledPlacesTest {
 
     private fun createDatabase(): Database = Database(BundledSQLiteDriver(), ":memory:")
 
-    private fun place(id: Long) = Place(
+    private fun place(id: Long, deletedAt: ZonedDateTime? = null) = Place(
         id = id,
         updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
         lat = 0.0,
@@ -42,6 +42,7 @@ class BundledPlacesTest {
         comments = null,
         telegram = null,
         osmId = null,
+        deletedAt = deletedAt,
     )
 
     /** A snapshot with [count] minimal but complete places, ids 1..count. */
@@ -360,6 +361,21 @@ class BundledPlacesTest {
         Assert.assertFalse("snapshot must not be read once the seed is done", opened)
         Assert.assertEquals(1L, db.place.selectCount())
         Assert.assertEquals(99L, db.place.selectById(99L)!!.id)
+    }
+
+    @Test
+    fun importFrom_skipsWhenDatabaseHoldsOnlyTombstones() = runTest {
+        val db = createDatabase()
+        db.place.insert(
+            listOf(place(id = 99L, deletedAt = ZonedDateTime.parse("2026-05-01T00:00:00Z"))),
+        )
+
+        val result = BundledPlaces.importFrom(db) { snapshotJson(2).byteInputStream() }
+
+        Assert.assertEquals(0L, result.placesImported)
+        Assert.assertEquals(1L, db.place.selectCount(includeDeleted = true))
+        Assert.assertEquals(0L, db.place.selectCount())
+        Assert.assertNull(db.place.selectById(99L))
     }
 
     @Test

@@ -90,6 +90,34 @@ class CommentQueriesTest {
     }
 
     @Test
+    fun selectCount_excludesTombstonesUnlessAsked() {
+        val db = createDatabase()
+        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        db.comment.insert(
+            listOf(
+                Comment(
+                    id = 1L,
+                    placeId = 100L,
+                    comment = "visible",
+                    createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+                    updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+                ),
+                Comment(
+                    id = 2L,
+                    placeId = 100L,
+                    comment = "gone",
+                    createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+                    updatedAt = deletedAt,
+                    deletedAt = deletedAt,
+                ),
+            )
+        )
+
+        Assert.assertEquals(1L, db.comment.selectCount())
+        Assert.assertEquals(2L, db.comment.selectCount(includeDeleted = true))
+    }
+
+    @Test
     fun selectByPlaceId_ordersByCreatedAtDesc() {
         val db = createDatabase()
         val comment1 = Comment(

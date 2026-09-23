@@ -185,7 +185,7 @@ class BundledCommentsTest {
         val result = BundledComments.importFrom(db) { snapshotJson(2).byteInputStream() }
 
         Assert.assertEquals(0L, result.commentsImported)
-        Assert.assertEquals(1L, db.comment.selectCount())
+        Assert.assertEquals(1L, db.comment.selectCount(includeDeleted = true))
         Assert.assertTrue(db.comment.selectByPlaceId(1L).isEmpty())
     }
 

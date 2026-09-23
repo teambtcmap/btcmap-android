@@ -226,7 +226,7 @@ class BundledEventsTest {
         val result = BundledEvents.importFrom(db) { snapshotJson(2).byteInputStream() }
 
         Assert.assertEquals(0L, result.eventsImported)
-        Assert.assertEquals(1L, db.event.selectCount())
+        Assert.assertEquals(1L, db.event.selectCount(includeDeleted = true))
         Assert.assertTrue(db.event.selectAll().isEmpty())
     }
 

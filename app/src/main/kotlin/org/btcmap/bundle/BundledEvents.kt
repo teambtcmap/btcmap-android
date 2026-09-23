@@ -61,7 +61,9 @@ object BundledEvents {
             // The count read is inside the try as well: a database failure must
             // not escape and take down the calling screen, for the same reason a
             // missing or malformed asset must not.
-            val eventsInDb = withContext(Dispatchers.IO) { db.event.selectCount() }
+            val eventsInDb = withContext(Dispatchers.IO) {
+                db.event.selectCount(includeDeleted = true)
+            }
             if (eventsInDb > 0) {
                 return ImportResult(eventsImported = 0, duration = elapsedSince(startedAt))
             }
