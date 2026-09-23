@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import org.btcmap.R
 import org.btcmap.api
@@ -60,13 +61,20 @@ class BoostFragment : Fragment() {
         observeInvoicePayment(
             viewModel = viewModel,
             onState = { render(it, payment) },
-            onPaid = { parentFragmentManager.popBackStack() },
+            onPaid = {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.your_boost_is_active),
+                    Toast.LENGTH_LONG,
+                ).show()
+                parentFragmentManager.popBackStack()
+            },
         )
 
         binding.btnContinue.setOnClickListener {
-            val days = selectedDays()
+            val duration = selectedDuration() ?: return@setOnClickListener
             viewModel.order {
-                val response = api().boostPlace(placeId = args.placeId, days = days)
+                val response = api().boostPlace(placeId = args.placeId, days = duration.days)
                 PaymentInvoice(id = response.invoiceId, bolt11 = response.invoice)
             }
         }
@@ -79,18 +87,16 @@ class BoostFragment : Fragment() {
         payment: InvoicePaymentController,
     ) {
         state.quote?.let { quote ->
-            setDurationPrice(binding.boost1m, R.string.months_1, quote.quote30dsat)
-            setDurationPrice(binding.boost3m, R.string.months_3, quote.quote90dsat)
-            setDurationPrice(binding.boost12m, R.string.months_12, quote.quote365dsat)
+            BoostDuration.entries.forEach { duration ->
+                setDurationPrice(button(duration), duration, duration.priceSat(quote))
+            }
         }
 
         // The options and continue button are locked until the quote is loaded,
         // while an order is in flight, and once an invoice exists, so a second
         // boost cannot be ordered (and charged) by tapping continue again.
         val enabled = state.actionsEnabled
-        binding.boost1m.isEnabled = enabled
-        binding.boost3m.isEnabled = enabled
-        binding.boost12m.isEnabled = enabled
+        BoostDuration.entries.forEach { button(it).isEnabled = enabled }
         binding.btnContinue.isEnabled = enabled
 
         val invoice = state.invoice
@@ -101,16 +107,19 @@ class BoostFragment : Fragment() {
         }
     }
 
-    private fun setDurationPrice(button: RadioButton, labelRes: Int, priceSat: Long) {
+    private fun setDurationPrice(button: RadioButton, duration: BoostDuration, priceSat: Long) {
         val price = getString(R.string.d_sat, NumberFormat.getNumberInstance().format(priceSat))
-        button.text = getString(R.string.duration_with_price, getString(labelRes), price)
+        button.text = getString(R.string.duration_with_price, getString(duration.labelRes), price)
     }
 
-    private fun selectedDays(): Long = when {
-        binding.boost12m.isChecked -> 365L
-        binding.boost3m.isChecked -> 90L
-        else -> 30L
+    private fun button(duration: BoostDuration): RadioButton = when (duration) {
+        BoostDuration.ONE_MONTH -> binding.boost1m
+        BoostDuration.THREE_MONTHS -> binding.boost3m
+        BoostDuration.TWELVE_MONTHS -> binding.boost12m
     }
+
+    private fun selectedDuration(): BoostDuration? =
+        BoostDuration.fromButtonId(binding.durationOptions.checkedRadioButtonId)
 
     override fun onDestroyView() {
         super.onDestroyView()

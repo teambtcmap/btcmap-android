@@ -93,7 +93,10 @@ internal class InvoicePaymentViewModel<TQuote : Any>(
     }
 
     fun order(place: suspend () -> PaymentInvoice) {
-        if (orderRequested || _state.value.invoice != null) return
+        // No quote means the price has not been shown yet; the screen gates the
+        // controls on the same condition, so this only closes the window before
+        // the first render.
+        if (orderRequested || _state.value.invoice != null || _state.value.quote == null) return
         orderRequested = true
 
         viewModelScope.launch {

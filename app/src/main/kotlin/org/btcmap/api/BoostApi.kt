@@ -6,9 +6,9 @@ import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonObject
 
 data class PlaceBoostQuoteResponse(
-    val quote30dsat: Long,
-    val quote90dsat: Long,
-    val quote365dsat: Long,
+    val quote30dSat: Long,
+    val quote90dSat: Long,
+    val quote365dSat: Long,
 )
 
 data class PlaceBoostResponse(
@@ -23,9 +23,9 @@ suspend fun Api.getPlaceBoostQuote(): PlaceBoostQuoteResponse {
         val body = stream.toJsonObject()
 
         PlaceBoostQuoteResponse(
-            quote30dsat = body.long("quote_30d_sat"),
-            quote90dsat = body.long("quote_90d_sat"),
-            quote365dsat = body.long("quote_365d_sat"),
+            quote30dSat = body.long("quote_30d_sat"),
+            quote90dSat = body.long("quote_90d_sat"),
+            quote365dSat = body.long("quote_365d_sat"),
         )
     }
 }

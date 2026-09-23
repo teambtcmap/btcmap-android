@@ -14,9 +14,9 @@ class BoostApiTest : ApiTestBase() {
         val request = takeRequest()
         Assert.assertEquals("GET", request.method)
         Assert.assertEquals("/v4/place-boosts/quote", request.url.encodedPath)
-        Assert.assertEquals(5000L, quote.quote30dsat)
-        Assert.assertEquals(10000L, quote.quote90dsat)
-        Assert.assertEquals(30000L, quote.quote365dsat)
+        Assert.assertEquals(5000L, quote.quote30dSat)
+        Assert.assertEquals(10000L, quote.quote90dSat)
+        Assert.assertEquals(30000L, quote.quote365dSat)
     }
 
     @Test

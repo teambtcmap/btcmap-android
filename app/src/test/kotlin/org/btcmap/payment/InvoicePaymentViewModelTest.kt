@@ -150,6 +150,18 @@ class InvoicePaymentViewModelTest {
     }
 
     @Test
+    fun order_isIgnoredBeforeTheQuoteLoads() = runTest(mainDispatcherRule.dispatcher) {
+        val orders = mutableListOf<Int>()
+        val model = viewModel()
+
+        model.order { orders.add(1); invoice }
+        advanceUntilIdle()
+
+        Assert.assertTrue("no order without a quote", orders.isEmpty())
+        Assert.assertNull(model.state.value.invoice)
+    }
+
+    @Test
     fun order_canBeRetriedAfterFailure() = runTest(mainDispatcherRule.dispatcher) {
         var calls = 0
         val model = viewModel()
