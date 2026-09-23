@@ -100,6 +100,43 @@ class PlaceQueriesTest {
     }
 
     @Test
+    fun selectByOsmIds_returnsMatchingPlacesKeyedByOsmId() {
+        val db = createDatabase()
+        db.place.insert(
+            listOf(
+                createPlace(id = 1L, name = "Coffee Shop").copy(osmId = "node:1"),
+                createPlace(id = 2L, name = "Bar").copy(osmId = "way:2"),
+                createPlace(id = 3L, name = "Shop").copy(osmId = "node:3"),
+            )
+        )
+
+        val result = db.place.selectByOsmIds(listOf("node:1", "node:3", "node:999"))
+
+        Assert.assertEquals(setOf("node:1", "node:3"), result.keys)
+        Assert.assertEquals(1L, result.getValue("node:1").id)
+        Assert.assertEquals(3L, result.getValue("node:3").id)
+    }
+
+    @Test
+    fun selectByOsmIds_skipsDeletedPlacesAndEmptyInput() {
+        val db = createDatabase()
+        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        db.place.insert(
+            listOf(
+                createPlace(id = 1L, icon = "coffee", updatedAt = deletedAt)
+                    .copy(osmId = "node:1", deletedAt = deletedAt),
+                createPlace(id = 2L, icon = "bar").copy(osmId = "way:2"),
+            )
+        )
+
+        Assert.assertEquals(
+            setOf("way:2"),
+            db.place.selectByOsmIds(listOf("node:1", "way:2")).keys,
+        )
+        Assert.assertTrue(db.place.selectByOsmIds(emptyList()).isEmpty())
+    }
+
+    @Test
     fun insert_orReplace_updatesExistingPlace() {
         val db = createDatabase()
         val place1 = createPlace(id = 1L, name = "Original Name", icon = "coffee")

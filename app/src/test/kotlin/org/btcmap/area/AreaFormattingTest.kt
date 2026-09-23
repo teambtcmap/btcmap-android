@@ -55,7 +55,7 @@ class AreaFormattingTest {
     fun websiteDisplayText_stripsSchemeAndTrailingSlash() {
         Assert.assertEquals(
             "btcmap.org/community/grand-paris",
-            websiteDisplayText(7, "https://btcmap.org/community/grand-paris/"),
+            websiteDisplayText("https://btcmap.org/community/grand-paris/"),
         )
     }
 
@@ -63,23 +63,15 @@ class AreaFormattingTest {
     fun websiteDisplayText_stripsPlainHttp() {
         Assert.assertEquals(
             "example.com",
-            websiteDisplayText(7, "http://example.com/"),
+            websiteDisplayText("http://example.com/"),
         )
     }
 
     @Test
-    fun websiteDisplayText_overridesPhuketArea() {
+    fun websiteDisplayText_keepsUrlWithoutSchemeUntouched() {
         Assert.assertEquals(
-            "btcmap.org/phuket",
-            websiteDisplayText(PHUKET_AREA_ID, "https://btcmap.org/region/thailand"),
-        )
-    }
-
-    @Test
-    fun websiteDisplayText_keepsOtherAreasUntouched() {
-        Assert.assertEquals(
-            "btcmap.org/community/grand-paris",
-            websiteDisplayText(7, "https://btcmap.org/community/grand-paris"),
+            "example.com/path",
+            websiteDisplayText("example.com/path"),
         )
     }
 

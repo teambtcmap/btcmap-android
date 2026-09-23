@@ -118,7 +118,7 @@ class AreaFragment : Fragment() {
             val area = withContext(Dispatchers.IO) { db().area.selectById(areaId) }
             if (area == null) {
                 binding.loading.isVisible = false
-                showLoadError(IllegalStateException())
+                showLoadError()
                 return@launch
             }
 
@@ -140,7 +140,7 @@ class AreaFragment : Fragment() {
         binding.icon.load(headerImage)
         updateToolbarContentColor()
         renderDescription(area.description)
-        binding.website.text = websiteDisplayText(area.id, area.websiteUrl)
+        binding.website.text = websiteDisplayText(area.websiteUrl)
         binding.toolbar.menu.findItem(R.id.save).isEnabled = true
         updateBookmarkIcon()
     }
@@ -169,10 +169,10 @@ class AreaFragment : Fragment() {
         }
     }
 
-    private fun showLoadError(throwable: Throwable) {
+    private fun showLoadError() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.error)
-            .setMessage(throwable.message?.takeIf { it.isNotBlank() } ?: getString(R.string.error))
+            .setMessage(R.string.error)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 parentFragmentManager.popBackStack()
             }

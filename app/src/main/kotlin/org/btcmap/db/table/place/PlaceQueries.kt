@@ -81,6 +81,35 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
+    /**
+     * Places matching any of the given OSM ids, keyed by their OSM id. Ids with
+     * no matching place are simply absent from the result.
+     *
+     * A single query, so a caller resolving the places behind a list of issues
+     * does not run one query per row.
+     */
+    fun selectByOsmIds(osmIds: Collection<String>): Map<String, Place> {
+        val ids = osmIds.toSet()
+        if (ids.isEmpty()) return emptyMap()
+
+        val placeholders = ids.indices.joinToString(", ") { "?${it + 1}" }
+        conn.prepare(
+            """
+                SELECT ${FullProjection.COLUMNS}
+                FROM $TABLE
+                WHERE $OSM_ID IN ($placeholders) AND $DELETED_AT IS NULL;
+            """
+        ).use { stmt ->
+            ids.forEachIndexed { index, osmId -> stmt.bindText(index + 1, osmId) }
+            val places = mutableMapOf<String, Place>()
+            while (stmt.step()) {
+                val place = FullProjection.fromStatement(stmt)
+                place.osmId?.let { places[it] = place }
+            }
+            return places
+        }
+    }
+
     fun selectBySearchString(searchString: String): List<Place> {
         conn.prepare(
             """

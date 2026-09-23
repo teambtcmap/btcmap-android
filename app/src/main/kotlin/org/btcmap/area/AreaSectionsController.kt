@@ -161,12 +161,13 @@ internal class AreaSectionsController(
 
     private suspend fun fetchPlaceIssues(areaId: Long): Pair<List<IssueRow>, Int> {
         val response = fragment.api().getPlaceIssues(areaId, PLACE_ISSUES_LIMIT)
+        val places = fragment.db().place.selectByOsmIds(
+            response.requestedIssues.map { "${it.elementOsmType}:${it.elementOsmId}" }.toSet(),
+        )
         val rows = response.requestedIssues.map { issue ->
             IssueRow(
                 issue = issue,
-                place = fragment.db().place.selectByOsmId(
-                    "${issue.elementOsmType}:${issue.elementOsmId}",
-                ),
+                place = places["${issue.elementOsmType}:${issue.elementOsmId}"],
             )
         }
 

@@ -6,10 +6,6 @@ import java.time.ZonedDateTime
 
 internal const val ARG_AREA_ID = "area_id"
 
-internal const val PHUKET_AREA_ID = 671L
-
-internal const val PHUKET_WEBSITE_URL = "https://btcmap.org/phuket"
-
 private const val INVALID_TAG_VALUE_PREFIX = "invalid_tag_value:"
 private const val MISSPELLED_TAG_NAME_PREFIX = "misspelled_tag_name:"
 
@@ -23,9 +19,8 @@ internal fun descriptionParagraphs(description: String?): List<String> {
         .orEmpty()
 }
 
-internal fun websiteDisplayText(areaId: Long, websiteUrl: String): String {
-    val url = if (areaId == PHUKET_AREA_ID) PHUKET_WEBSITE_URL else websiteUrl
-    return url.replace("https://", "").replace("http://", "").trimEnd('/')
+internal fun websiteDisplayText(websiteUrl: String): String {
+    return websiteUrl.replace("https://", "").replace("http://", "").trimEnd('/')
 }
 
 internal fun upcomingEvents(events: List<GetEventsItem>, now: ZonedDateTime): List<GetEventsItem> {
