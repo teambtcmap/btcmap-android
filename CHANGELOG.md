@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Open a place's btcmap.org page in a browser tab when tapping "View on btcmap.org", instead of letting the app's own deep link capture the URL and reopen the place
 - Drop the bundled-place state and its "More details will appear after full sync" notice, so a place seeded from the bundled snapshot is a complete record with its action buttons available from the start
 - Explain an outdated or unverified place's warning in a dialog instead of opening the wiki, pointing at the existing Verify and Report buttons
 - Stop the boost and comment payment screens from polling a rejected invoice forever, showing the error instead

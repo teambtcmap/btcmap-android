@@ -18,6 +18,14 @@
         android:name="android.hardware.location.gps"
         android:required="false" />
 
+    <!-- Required on Android 11+ to resolve a Custom Tabs browser for the
+         "View on btcmap.org" action (see CustomTabsClient.getPackageName). -->
+    <queries>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
+
     <application
         android:name="org.btcmap.App"
         android:allowBackup="false"

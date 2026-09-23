@@ -27,7 +27,7 @@ android {
         targetSdk {
             version = release(37)
         }
-        versionCode = 78
+        versionCode = 79
         versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -126,6 +126,7 @@ dependencies {
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.viewpager2)
+    implementation(libs.androidx.browser)
 
     implementation(libs.material)
     implementation(libs.okhttp.coroutines)

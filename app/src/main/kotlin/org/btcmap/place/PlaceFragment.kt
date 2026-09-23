@@ -1,5 +1,7 @@
 package org.btcmap.place
 
+import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
@@ -14,6 +16,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.Toolbar
+import androidx.browser.customtabs.CustomTabsClient
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -31,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.btcmap.Activity
 import org.btcmap.boost.BoostFragment
 import org.btcmap.db.table.place.Place
 import org.btcmap.settings.prefs
@@ -120,11 +125,7 @@ class PlaceFragment : Fragment() {
                     requireContext().startActivity(Intent.createChooser(intent, null))
                 }
 
-                R.id.view_on_btcmap -> {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = "https://btcmap.org/merchant/$placeId".toUri()
-                    startActivity(intent)
-                }
+                R.id.view_on_btcmap -> openOnBtcmap()
 
                 R.id.save -> onSaveClicked()
             }
@@ -406,6 +407,40 @@ class PlaceFragment : Fragment() {
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, null)
             .show()
+    }
+
+    /**
+     * Opens the place on btcmap.org in a Custom Tab.
+     *
+     * The browser is targeted explicitly: a plain VIEW intent would be captured
+     * by this app's own verified App Link for btcmap.org/merchant and reopen the
+     * place instead of the site. If no Custom Tabs browser is available, fall
+     * back to a chooser that excludes this app, for the same reason.
+     */
+    private fun openOnBtcmap() {
+        val uri = "https://btcmap.org/merchant/$placeId".toUri()
+
+        CustomTabsClient.getPackageName(requireContext(), null)?.let { browser ->
+            val customTabs = CustomTabsIntent.Builder().build()
+            customTabs.intent.setPackage(browser)
+            try {
+                customTabs.launchUrl(requireContext(), uri)
+                return
+            } catch (_: ActivityNotFoundException) {
+                // Fall through to the chooser below.
+            }
+        }
+
+        val chooser = Intent.createChooser(Intent(Intent.ACTION_VIEW, uri), null)
+        chooser.putExtra(
+            Intent.EXTRA_EXCLUDE_COMPONENTS,
+            arrayOf(ComponentName(requireContext(), Activity::class.java)),
+        )
+        try {
+            startActivity(chooser)
+        } catch (e: ActivityNotFoundException) {
+            showError(e)
+        }
     }
 
     private fun openReport(defaultType: String?) {

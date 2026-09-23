@@ -35,6 +35,9 @@ androidx-recyclerview = "1.4.0"
 # Enables horizontal swiping between pages
 # https://developer.android.com/jetpack/androidx/releases/viewpager2
 androidx-viewpager2 = "1.1.0"
+# Renders web pages in an in-app browser tab
+# https://developer.android.com/jetpack/androidx/releases/browser
+androidx-browser = "1.10.0"
 
 # Material design components
 # https://github.com/material-components/material-components-android/releases
@@ -82,6 +85,7 @@ androidx-fragment = { group = "androidx.fragment", name = "fragment", version.re
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "androidx-recyclerview" }
 androidx-viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "androidx-viewpager2" }
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "androidx-browser" }
 
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "android-test-junit" }
 androidx-test-core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "android-test-core" }
