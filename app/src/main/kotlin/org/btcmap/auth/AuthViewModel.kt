@@ -29,7 +29,11 @@ internal sealed interface AuthEvent {
     /** Signed in and the session is stored; [extras] is the caller's payload. */
     data class Authenticated(val name: String, val extras: Bundle) : AuthEvent
 
-    /** The account was created but the follow-up sign-in failed. */
+    /**
+     * The account was created but the session could not be established: the
+     * automatic sign-in failed or timed out, or its session could not be
+     * stored. The view falls back to the sign-in form.
+     */
     data class AccountCreated(val username: String, val extras: Bundle) : AuthEvent
 
     /** The request failed; the view shows [error] with [operation]'s fallback. */
@@ -62,7 +66,13 @@ internal class AuthViewModel(
             api.signIn(username = username, password = password, label = tokenLabel())
         } ?: return
 
-        completeSignIn(response, extras, AuthOperation.SignIn)
+        val failure = storeSession(response)
+        if (failure != null) {
+            emit(AuthEvent.Failed(failure, AuthOperation.SignIn))
+            return
+        }
+
+        emit(AuthEvent.Authenticated(name = response.user.name, extras = extras))
     }
 
     private suspend fun performSignUp(username: String, password: String, extras: Bundle) {
@@ -89,7 +99,18 @@ internal class AuthViewModel(
             return
         }
 
-        completeSignIn(response, extras, AuthOperation.SignUp)
+        // The account exists, so a session that cannot be stored locally is
+        // reported the same way as a failed automatic sign-in: the user is told
+        // the account was created and the view falls back to the sign-in form,
+        // rather than claiming the account could not be created and sending a
+        // retry into "username already taken".
+        val failure = storeSession(response)
+        if (failure != null) {
+            emit(AuthEvent.AccountCreated(username = user.name, extras = extras))
+            return
+        }
+
+        emit(AuthEvent.Authenticated(name = response.user.name, extras = extras))
     }
 
     /**
@@ -114,21 +135,20 @@ internal class AuthViewModel(
         }
     }
 
-    private suspend fun completeSignIn(
-        response: CreateTokenResponse,
-        extras: Bundle,
-        operation: AuthOperation,
-    ) {
+    /**
+     * Persists the signed-in session, returning the failure that prevented it,
+     * or null on success. The caller decides how to report a failure: a sign-in
+     * that could not be stored is a sign-in failure, while a sign-up that could
+     * not be stored still created the account.
+     */
+    private suspend fun storeSession(response: CreateTokenResponse): Throwable? =
         try {
             storeSignedInSession(db = db, prefs = prefs, response = response)
+            null
         } catch (e: Exception) {
             e.rethrowIfCancellation()
-            emit(AuthEvent.Failed(e, operation))
-            return
+            e
         }
-
-        emit(AuthEvent.Authenticated(name = response.user.name, extras = extras))
-    }
 
     private fun tokenLabel(): String = authTokenLabel(
         manufacturer = Build.MANUFACTURER,

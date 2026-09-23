@@ -36,6 +36,34 @@ class Database(driver: SQLiteDriver, val path: String) {
         private const val USER_VERSION_QUERY = "SELECT user_version FROM pragma_user_version;"
 
         private val SIDECAR_SUFFIXES = listOf("-wal", "-shm", "-journal")
+
+        /**
+         * Whether opening [path] would run an in-place [migrate], which can
+         * rewrite whole tables. Callers that open the database on the main
+         * thread (to load the settings before the first screen) use this to
+         * keep that work off it. A missing, unreadable or below-[FIRST_OWN_VERSION]
+         * file is not a migration: it is created or discarded, which is cheap.
+         */
+        fun needsMigration(driver: SQLiteDriver, path: String): Boolean {
+            val version = readUserVersion(driver, path)
+            return version >= FIRST_OWN_VERSION && version < VERSION
+        }
+
+        private fun readUserVersion(driver: SQLiteDriver, path: String): Int {
+            return try {
+                driver.open(path).use { readUserVersion(it) }
+            } catch (_: Exception) {
+                // Treat an unreadable file as stale rather than letting it block
+                // every launch.
+                -1
+            }
+        }
+
+        private fun readUserVersion(conn: SQLiteConnection): Int {
+            conn.prepare(USER_VERSION_QUERY).use {
+                return if (it.step()) it.getInt(0) else 0
+            }
+        }
     }
 
     val conn = initialize(driver, path)
@@ -81,22 +109,6 @@ class Database(driver: SQLiteDriver, val path: String) {
             }
         }
         return driver.open(path)
-    }
-
-    private fun readUserVersion(driver: SQLiteDriver, path: String): Int {
-        return try {
-            driver.open(path).use { readUserVersion(it) }
-        } catch (_: Exception) {
-            // Treat an unreadable file as stale rather than letting it block
-            // every launch.
-            -1
-        }
-    }
-
-    private fun readUserVersion(conn: SQLiteConnection): Int {
-        conn.prepare(USER_VERSION_QUERY).use {
-            return if (it.step()) it.getInt(0) else 0
-        }
     }
 
     private fun createSchema(conn: SQLiteConnection) {

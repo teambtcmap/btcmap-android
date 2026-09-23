@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -37,6 +38,14 @@ class App : Application(), SingletonImageLoader.Factory {
     internal var dbForTesting: Database? = null
 
     internal var mapStyleUriForTesting: String? = null
+
+    /**
+     * Completed once the database has been opened (migrating it first when
+     * needed) and the settings loaded. [Activity] holds the first screen back
+     * until then, so no screen opens or migrates the database on the main
+     * thread.
+     */
+    internal val databaseReady = CompletableDeferred<Unit>()
 
     private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -136,15 +145,21 @@ class App : Application(), SingletonImageLoader.Factory {
         // here does that before the background refresh below uses it.
         offlineMaps
 
-        // Load the settings from the database before the first screen can read
-        // them. The session token lives in this in-memory cache, so a read that
-        // raced the load would report a signed-in user as signed out. This is
-        // the one startup step that must finish before any UI, so it runs here
-        // rather than on [ioScope].
-        try {
-            prefs.preload()
-        } catch (t: Throwable) {
-            t.rethrowIfCancellation()
+        // Load the settings before the first screen can read them: the session
+        // token lives in this in-memory cache, so a read that raced the load
+        // would report a signed-in user as signed out. Opening an up-to-date
+        // database is cheap and happens here; an in-place migration can rewrite
+        // whole tables, so that case runs on [ioScope] and [databaseReady] holds
+        // the first screen back instead of blocking the main thread.
+        val databasePath = getDatabasePath(DATABASE_NAME)
+        if (Database.needsMigration(AndroidSQLiteDriver(), databasePath.absolutePath)) {
+            ioScope.launch {
+                preloadSettings()
+                databaseReady.complete(Unit)
+            }
+        } else {
+            preloadSettings()
+            databaseReady.complete(Unit)
         }
 
         // Delete the databases abandoned by earlier versions and re-attach to
@@ -152,12 +167,24 @@ class App : Application(), SingletonImageLoader.Factory {
         // first screen, so both stay off the main thread.
         ioScope.launch {
             try {
-                val path = getDatabasePath(DATABASE_NAME)
-                path.parentFile?.let { LegacyDatabases.delete(it, path) }
+                databasePath.parentFile?.let { LegacyDatabases.delete(it, databasePath) }
                 offlineMaps.refresh()
             } catch (t: Throwable) {
                 t.rethrowIfCancellation()
             }
+        }
+    }
+
+    /**
+     * Loads the stored settings into the in-memory cache, so the session token
+     * is available without touching the database. A failure leaves the cache
+     * empty (the user reads as signed out) instead of crashing the start.
+     */
+    private fun preloadSettings() {
+        try {
+            prefs.preload()
+        } catch (t: Throwable) {
+            t.rethrowIfCancellation()
         }
     }
 

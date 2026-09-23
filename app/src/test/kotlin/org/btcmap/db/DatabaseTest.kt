@@ -186,6 +186,48 @@ class DatabaseTest {
     }
 
     @Test
+    fun needsMigration_isTrueForAnOlderOwnVersion() {
+        val path = existingPath()
+        createVersion100Database(path)
+
+        Assert.assertTrue(Database.needsMigration(BundledSQLiteDriver(), path))
+    }
+
+    @Test
+    fun needsMigration_isTrueForTheNewestMigratableVersion() {
+        val path = existingPath()
+        createVersion102Database(path)
+
+        Assert.assertTrue(Database.needsMigration(BundledSQLiteDriver(), path))
+    }
+
+    @Test
+    fun needsMigration_isFalseForACurrentDatabase() {
+        val path = existingPath()
+        Database(BundledSQLiteDriver(), path).conn.close()
+
+        Assert.assertFalse(Database.needsMigration(BundledSQLiteDriver(), path))
+    }
+
+    @Test
+    fun needsMigration_isFalseForAMissingDatabase() {
+        // A missing file is created rather than migrated, so it is cheap enough
+        // to open on the main thread.
+        val path = newPath()
+
+        Assert.assertFalse(Database.needsMigration(BundledSQLiteDriver(), path))
+    }
+
+    @Test
+    fun needsMigration_isFalseForADatabaseThatIsDiscarded() {
+        // A file from an unrelated app is deleted and recreated, not migrated.
+        val path = existingPath()
+        createStaleDatabase(path, version = 1)
+
+        Assert.assertFalse(Database.needsMigration(BundledSQLiteDriver(), path))
+    }
+
+    @Test
     fun unreadableDatabase_isDiscardedAndRecreated() {
         val path = existingPath()
         File(path).writeBytes(byteArrayOf(1, 2, 3, 4))

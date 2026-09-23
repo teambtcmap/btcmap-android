@@ -8,6 +8,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.databinding.ActivityBinding
 import org.btcmap.map.MapFragment
@@ -22,6 +24,22 @@ class Activity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val app = application as App
+        if (app.databaseReady.isCompleted) {
+            setUpContent(savedInstanceState)
+        } else {
+            // The database is being opened (and migrated, when needed) off the
+            // main thread. Building the first screen before it is ready would
+            // open it on the main thread, so wait for it without blocking.
+            lifecycleScope.launch {
+                app.databaseReady.await()
+                setUpContent(savedInstanceState)
+            }
+        }
+    }
+
+    private fun setUpContent(savedInstanceState: Bundle?) {
         // Only handle the launching link on a fresh start: on recreation the restored
         // back stack already contains the target screen, and re-delivering causes duplicates.
         pendingDeepLink = if (savedInstanceState == null) intent.deepLink() else null

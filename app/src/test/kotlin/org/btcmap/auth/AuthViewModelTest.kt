@@ -173,7 +173,7 @@ class AuthViewModelTest {
     }
 
     @Test
-    fun signUp_whenSessionStoreFails_reportsSignUpOperation() = runTest {
+    fun signUp_whenSessionStoreFails_reportsAccountCreated() = runTest {
         enqueueJson("""{"id":124,"name":"Satoshi","roles":["user"]}""")
         enqueueJson(tokenResponse("token-1", "Satoshi"))
 
@@ -190,8 +190,11 @@ class AuthViewModelTest {
 
         val event = model.events.first()
 
-        Assert.assertTrue(event is AuthEvent.Failed)
-        Assert.assertEquals(AuthOperation.SignUp, (event as AuthEvent.Failed).operation)
+        // The account was created; only the local session could not be stored,
+        // so this must not be reported as a failed account creation.
+        Assert.assertTrue(event is AuthEvent.AccountCreated)
+        Assert.assertEquals("Satoshi", (event as AuthEvent.AccountCreated).username)
+        Assert.assertNull(failingSettings.authToken)
     }
 
     @Test
