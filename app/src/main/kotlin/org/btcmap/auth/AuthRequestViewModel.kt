@@ -38,16 +38,26 @@ internal abstract class AuthRequestViewModel<E : Any> : ViewModel() {
 
     private var job: Job? = null
 
+    /**
+     * Identifies the most recent request. A cancelled request may still be
+     * unwinding when the request that replaced it has already started, so its
+     * `finally` must not clear the busy flag of that newer request.
+     */
+    private var requestId = 0L
+
     /** Runs [block] unless a request is already in flight, which it ignores. */
     protected fun launchRequest(block: suspend () -> Unit) {
         if (job?.isActive == true) return
 
+        val id = ++requestId
+        _busy.value = true
         job = viewModelScope.launch {
-            _busy.value = true
             try {
                 block()
             } finally {
-                _busy.value = false
+                // Only the latest request may clear the flag: a cancelled request
+                // that raced a newer one must not report the newer one as idle.
+                if (id == requestId) _busy.value = false
             }
         }
     }

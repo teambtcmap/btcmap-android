@@ -11,13 +11,24 @@ internal data class AuthCredentials(
     val username: String,
     val password: String,
     val extras: Bundle,
-)
+) {
+    // The generated data class toString() would print the password, which this
+    // module otherwise never persists or logs. Keep it out of any string that
+    // could reach a log or a crash report. The extras are left out too: they do
+    // not identify this object's purpose and may hold arbitrary caller payload.
+    override fun toString(): String =
+        "AuthCredentials(mode=$mode, username=$username, password=***)"
+}
 
 /** A submitted change-password form. */
 internal data class ChangePasswordCredentials(
     val currentPassword: String,
     val newPassword: String,
-)
+) {
+    // See AuthCredentials.toString(): never render the passwords.
+    override fun toString(): String =
+        "ChangePasswordCredentials(currentPassword=***, newPassword=***)"
+}
 
 /**
  * A credential form's submitted values, waiting to be consumed by the fragment

@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep the request progress dialog visible when a cancelled sign-in, sign-up or password change is retried immediately, instead of hiding it while the retry is still running
+- Keep a typed password out of the credentials' string form, so it can never reach a log or a crash report
 - Recover a sign-up whose account was created but could not be confirmed (a lost response, a timeout, a server error or a retry that hits an already-taken username) by signing in with the same credentials, instead of reporting a failed account creation and stranding the user
 - Drop the passwords typed into a sign-in, sign-up or change-password form from memory once the form is dismissed, instead of keeping them until the screen is collected
 - Load the stored session before the first screen is shown, so a signed-in user is no longer briefly reported as signed out on a cold start
