@@ -16,6 +16,7 @@ import org.btcmap.boost.BoostFragment
 import org.btcmap.comment.AddCommentFragment
 import org.btcmap.util.AppTestCase
 import org.junit.Rule
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
 internal const val BOOST_TAG = "boost"
@@ -55,6 +56,9 @@ internal class PaymentDispatcher(
     val orderRequests = AtomicInteger()
     val invoiceRequests = AtomicInteger()
 
+    /** Order request bodies, in the order they arrived. */
+    val orderBodies = CopyOnWriteArrayList<String>()
+
     override fun dispatch(request: RecordedRequest): MockResponse {
         val path = request.url.encodedPath
         return when {
@@ -65,6 +69,7 @@ internal class PaymentDispatcher(
 
             path == orderPath && request.method == "POST" -> {
                 orderRequests.incrementAndGet()
+                orderBodies.add(request.body?.utf8() ?: "")
                 jsonResponse(orderBody, orderCode)
             }
 

@@ -3,6 +3,7 @@ package org.btcmap.payment
 import android.view.View
 import android.widget.Button
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -99,6 +100,61 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
             waitUntilOnMain {
                 activity.supportFragmentManager.findFragmentByTag(BOOST_TAG) == null
             }
+        }
+    }
+
+    @Test
+    fun continue_sendsTheSelectedDuration() {
+        val dispatcher = boostDispatcher()
+        apiRule.server.dispatcher = dispatcher
+
+        withBoost { _, fragment ->
+            waitUntilOnMain {
+                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+            }
+
+            onView(withId(R.id.boost_12m)).perform(click())
+            onView(withId(R.id.btn_continue)).perform(click())
+            waitUntil { dispatcher.orderBodies.isNotEmpty() }
+
+            Assert.assertEquals(
+                """{"place_id":"1","days":365}""",
+                dispatcher.orderBodies.first(),
+            )
+        }
+    }
+
+    /**
+     * The polling block restarts on every resume, so a paid invoice must be
+     * reported only once per view instead of being polled and reported again
+     * after the app comes back to the foreground.
+     */
+    @Test
+    fun paidInvoice_isReportedOnceAcrossResume() {
+        val dispatcher = boostDispatcher(invoiceStatuses = listOf("paid"))
+        apiRule.server.dispatcher = dispatcher
+
+        withBoost { scenario, fragment ->
+            waitUntilOnMain {
+                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+            }
+            onView(withId(R.id.btn_continue)).perform(click())
+
+            waitUntil { dispatcher.invoiceRequests.get() == 1 }
+            // Let the observer report the paid invoice. popBackStack is a no-op
+            // here (the screen was not added to the back stack), so the view
+            // survives and the test can resume it.
+            Thread.sleep(300)
+
+            scenario.moveToState(Lifecycle.State.CREATED)
+            scenario.moveToState(Lifecycle.State.RESUMED)
+            Thread.sleep(300)
+
+            Assert.assertEquals(
+                "a paid invoice must not be polled again on resume",
+                1,
+                dispatcher.invoiceRequests.get(),
+            )
         }
     }
 

@@ -28,6 +28,12 @@ internal fun <TQuote : Any> Fragment.observeInvoicePayment(
     onPaid: () -> Unit,
 ) {
     viewLifecycleOwner.lifecycleScope.launch {
+        // Declared outside repeatOnLifecycle so it survives the background and
+        // foreground restarts of the block below: a paid invoice must be
+        // reported once per view, not once per resume. Recreating the view
+        // resets it, so a screen that was paid while away still closes.
+        var paymentReported = false
+
         repeatOnLifecycle(Lifecycle.State.RESUMED) {
             launch {
                 viewModel.state.collect { onState(it) }
@@ -38,17 +44,17 @@ internal fun <TQuote : Any> Fragment.observeInvoicePayment(
                     .map { it.invoice?.id }
                     .distinctUntilChanged()
                     .collect { invoiceId ->
-                        if (invoiceId != null) {
-                            try {
-                                api().awaitPaidInvoice(invoiceId)
-                                onPaid()
-                            } catch (t: Throwable) {
-                                // A permanent failure (e.g. the server no longer
-                                // knows the invoice) must surface, not crash the
-                                // lifecycle coroutine.
-                                t.rethrowIfCancellation()
-                                viewModel.reportPaymentFailure(t)
-                            }
+                        if (invoiceId == null || paymentReported) return@collect
+                        try {
+                            api().awaitPaidInvoice(invoiceId)
+                            paymentReported = true
+                            onPaid()
+                        } catch (t: Throwable) {
+                            // A permanent failure (e.g. the server no longer
+                            // knows the invoice) must surface, not crash the
+                            // lifecycle coroutine.
+                            t.rethrowIfCancellation()
+                            viewModel.reportPaymentFailure(t)
                         }
                     }
             }

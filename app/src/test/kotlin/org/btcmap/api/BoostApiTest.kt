@@ -32,4 +32,14 @@ class BoostApiTest : ApiTestBase() {
         Assert.assertEquals("inv-1", response.invoiceId)
         Assert.assertEquals("lnbc1...", response.invoice)
     }
+
+    @Test
+    fun boostPlace_sendsTheSelectedDuration() = runTest {
+        enqueueJson("""{"invoice_id":"inv-2","invoice":"lnbc2..."}""")
+
+        api().boostPlace(placeId = 42, days = 365)
+
+        val request = takeRequest()
+        Assert.assertEquals("""{"place_id":"42","days":365}""", request.jsonBody())
+    }
 }

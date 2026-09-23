@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Stop a paid merchant boost or comment invoice from being polled and reported again when the app returns to the foreground, so the payment screen cannot close a second time
 - Keep the request progress dialog visible when a cancelled sign-in, sign-up or password change is retried immediately, instead of hiding it while the retry is still running
 - Keep a typed password out of the credentials' string form, so it can never reach a log or a crash report
 - Recover a sign-up whose account was created but could not be confirmed (a lost response, a timeout, a server error or a retry that hits an already-taken username) by signing in with the same credentials, instead of reporting a failed account creation and stranding the user
