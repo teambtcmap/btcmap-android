@@ -98,25 +98,26 @@ internal abstract class AuthFormDialogFragment : DialogFragment() {
         passwordField.setFieldError(null)
         confirmationField.setFieldError(null)
 
-        if (AuthError.UsernameRequired in errors) {
-            usernameField.setFieldError(getString(R.string.field_required))
-        }
-        if (AuthError.CurrentPasswordRequired in errors) {
-            currentPasswordField.setFieldError(getString(R.string.field_required))
-        }
-        when {
-            AuthError.PasswordRequired in errors -> {
-                passwordField.setFieldError(getString(R.string.field_required))
-            }
+        // Every error is mapped explicitly so adding an AuthError fails to
+        // compile until it is shown somewhere, instead of being dropped.
+        errors.forEach { error ->
+            when (error) {
+                AuthError.UsernameRequired ->
+                    usernameField.setFieldError(getString(R.string.field_required))
 
-            AuthError.PasswordTooShort in errors -> {
-                passwordField.setFieldError(
+                AuthError.CurrentPasswordRequired ->
+                    currentPasswordField.setFieldError(getString(R.string.field_required))
+
+                AuthError.PasswordRequired ->
+                    passwordField.setFieldError(getString(R.string.field_required))
+
+                AuthError.PasswordTooShort -> passwordField.setFieldError(
                     getString(R.string.password_min_length, AuthValidation.MIN_PASSWORD_LENGTH),
                 )
+
+                AuthError.PasswordsDoNotMatch ->
+                    confirmationField.setFieldError(getString(R.string.passwords_do_not_match))
             }
-        }
-        if (AuthError.PasswordsDoNotMatch in errors) {
-            confirmationField.setFieldError(getString(R.string.passwords_do_not_match))
         }
     }
 }

@@ -197,14 +197,10 @@ private fun Fragment.showProgressDialog(
 private fun Fragment.showAuthError(e: Throwable, fallbackMessage: String) {
     if (!isAdded) return
 
-    val dialog = MaterialAlertDialogBuilder(requireContext())
-        .setTitle(R.string.error)
-        .setMessage(e.userFacingMessage(fallbackMessage))
-        .setPositiveButton(android.R.string.ok, null)
-        .create()
-
-    dialog.show()
-    dismissOnViewDestroyed(dialog)
+    // Shown as a fragment so it is restored with the screen: the failure event
+    // is delivered once, so a plain dialog dismissed on rotation would lose it.
+    AuthErrorDialogFragment.newInstance(e.userFacingMessage(fallbackMessage))
+        .show(childFragmentManager, AuthErrorDialogFragment.TAG)
 }
 
 /**

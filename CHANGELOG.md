@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep the sign-in or sign-up failure message on screen when the device is rotated, instead of dismissing it and losing the error
+- Fix a crash while signing in on devices that report no manufacturer or model
 - Translate the offline map, verification warning and "no comments yet" strings, and the beta app name, into all supported languages
 - Keep a sign-in or sign-up request running when the screen is rotated, instead of silently dropping it when the screen is recreated
 - Clear a validation error from the add-place form once the field is filled in, instead of leaving "Required" on a corrected field

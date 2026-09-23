@@ -1,5 +1,6 @@
 package org.btcmap.auth
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -54,6 +55,9 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
 
     private fun signUp(): Boolean = mode() == AuthMode.SignUp
 
+    // The form is the content of a MaterialAlertDialog, which has no parent view
+    // to inflate into, so its root layout params are intentionally unused.
+    @SuppressLint("InflateParams")
     override fun createFormView(inflater: LayoutInflater): View {
         val signUp = signUp()
         val view = inflater.inflate(

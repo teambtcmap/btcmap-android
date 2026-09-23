@@ -64,13 +64,16 @@ internal class AuthViewModel(
     /** True while a request is in flight; the view shows a progress dialog. */
     val busy: StateFlow<Boolean> = _busy.asStateFlow()
 
-    private val _events = Channel<AuthEvent>(Channel.BUFFERED)
+    // Unlimited so a one-shot outcome is never dropped: the events are tiny and
+    // produced at most once per request, and an outcome silently lost while no
+    // view is attached would strand the action that asked for the account.
+    private val _events = Channel<AuthEvent>(Channel.UNLIMITED)
     val events: Flow<AuthEvent> = _events.receiveAsFlow()
 
     private var job: Job? = null
 
     fun signIn(username: String, password: String, extras: Bundle) {
-        start { performSignIn(username, password, extras, AuthOperation.SignIn) }
+        start { performSignIn(username, password, extras) }
     }
 
     fun signUp(username: String, password: String, extras: Bundle) {
@@ -95,13 +98,8 @@ internal class AuthViewModel(
         }
     }
 
-    private suspend fun performSignIn(
-        username: String,
-        password: String,
-        extras: Bundle,
-        operation: AuthOperation,
-    ) {
-        val response = request(operation) {
+    private suspend fun performSignIn(username: String, password: String, extras: Bundle) {
+        val response = request(AuthOperation.SignIn) {
             api.signIn(username = username, password = password, label = tokenLabel())
         } ?: return
 
@@ -164,8 +162,10 @@ internal class AuthViewModel(
     private fun tokenLabel(): String = buildString {
         append("BTC Map Android ")
         append(BuildConfig.VERSION_CODE)
+        // Build.MANUFACTURER/MODEL are platform strings that can be null on a
+        // few devices (and in a JVM test), so trim defensively.
         val device = listOf(Build.MANUFACTURER, Build.MODEL)
-            .map { it.trim() }
+            .mapNotNull { it?.trim() }
             .filter { it.isNotEmpty() }
             .joinToString(" ")
         if (device.isNotEmpty()) {
