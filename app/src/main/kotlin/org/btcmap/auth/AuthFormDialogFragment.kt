@@ -11,6 +11,7 @@ import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import org.btcmap.R
+import org.btcmap.util.setFieldError
 
 /**
  * Shared scaffolding for the credential dialogs: the positive/negative buttons,
@@ -92,28 +93,28 @@ internal abstract class AuthFormDialogFragment : DialogFragment() {
     private fun showErrors(errors: List<AuthError>) {
         // Clear errors from the previous attempt first, so a corrected field
         // does not keep showing an error that no longer applies.
-        usernameField?.error = null
-        currentPasswordField?.error = null
-        passwordField.error = null
-        confirmationField?.error = null
+        usernameField.setFieldError(null)
+        currentPasswordField.setFieldError(null)
+        passwordField.setFieldError(null)
+        confirmationField.setFieldError(null)
 
         if (AuthError.UsernameRequired in errors) {
-            usernameField?.error = getString(R.string.field_required)
+            usernameField.setFieldError(getString(R.string.field_required))
         }
         if (AuthError.CurrentPasswordRequired in errors) {
-            currentPasswordField?.error = getString(R.string.field_required)
+            currentPasswordField.setFieldError(getString(R.string.field_required))
         }
         when {
             AuthError.PasswordRequired in errors -> {
-                passwordField.error = getString(R.string.field_required)
+                passwordField.setFieldError(getString(R.string.field_required))
             }
 
             AuthError.PasswordTooShort in errors -> {
-                passwordField.error = getString(R.string.password_min_length)
+                passwordField.setFieldError(getString(R.string.password_min_length))
             }
         }
         if (AuthError.PasswordsDoNotMatch in errors) {
-            confirmationField?.error = getString(R.string.passwords_do_not_match)
+            confirmationField.setFieldError(getString(R.string.passwords_do_not_match))
         }
     }
 }

@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show validation errors inline under the field in the account, add-place and change-username forms, instead of as a floating error popup
 - Fix a typo in the boost screen's description
 - Open a place's btcmap.org page in a browser tab when tapping "View on btcmap.org", instead of letting the app's own deep link capture the URL and reopen the place
 - Drop the bundled-place state and its "More details will appear after full sync" notice, so a place seeded from the bundled snapshot is a complete record with its action buttons available from the start

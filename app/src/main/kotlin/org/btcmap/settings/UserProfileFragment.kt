@@ -34,6 +34,7 @@ import org.btcmap.databinding.SavedAreaItemBinding
 import org.btcmap.databinding.SavedPlaceItemBinding
 import org.btcmap.databinding.UserProfileFragmentBinding
 import org.btcmap.util.rethrowIfCancellation
+import org.btcmap.util.setFieldError
 import org.btcmap.util.showError
 import org.btcmap.util.userFacingMessage
 
@@ -142,7 +143,7 @@ class UserProfileFragment : Fragment() {
             dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
                 val newName = usernameInput.text.toString().trim()
                 if (newName.isEmpty()) {
-                    usernameInput.error = getString(R.string.field_required)
+                    usernameInput.setFieldError(getString(R.string.field_required))
                     return@setOnClickListener
                 }
 

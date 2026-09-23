@@ -19,6 +19,7 @@ import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.prefs
 import org.btcmap.settings.uri
 import org.btcmap.util.rethrowIfCancellation
+import org.btcmap.util.setFieldError
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
@@ -120,15 +121,15 @@ class AddPlaceFragment : Fragment() {
 
         var valid = true
         if (name.isEmpty()) {
-            binding.name.error = getString(R.string.field_required)
+            binding.name.setFieldError(getString(R.string.field_required))
             valid = false
         }
         if (category.isEmpty()) {
-            binding.category.error = getString(R.string.field_required)
+            binding.category.setFieldError(getString(R.string.field_required))
             valid = false
         }
         if (address.isEmpty()) {
-            binding.address.error = getString(R.string.field_required)
+            binding.address.setFieldError(getString(R.string.field_required))
             valid = false
         }
         if (!valid) return

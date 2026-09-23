@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commitNow
@@ -102,9 +101,8 @@ class AuthDialogValidationTest : AppTestCase() {
         private const val OFFLINE_STYLE_URI = "asset://map-styles/test/style.json"
 
         /**
-         * Matches a [android.widget.EditText] by the error its [TextInputLayout]
-         * (or the edit text itself) is showing. A null [error] matches only when
-         * no error is set.
+         * Matches a field by the error its [TextInputLayout] is showing. A null
+         * [error] matches only when the layout has no error set.
          */
         private fun withInputError(error: String?): TypeSafeMatcher<View> =
             object : TypeSafeMatcher<View>() {
@@ -115,7 +113,6 @@ class AuthDialogValidationTest : AppTestCase() {
                 override fun matchesSafely(view: View): Boolean = inputError(view)?.toString() == error
 
                 private fun inputError(view: View): CharSequence? {
-                    if (view is EditText && view.error != null) return view.error
                     var parent = view.parent
                     while (parent != null) {
                         if (parent is TextInputLayout) return parent.error
