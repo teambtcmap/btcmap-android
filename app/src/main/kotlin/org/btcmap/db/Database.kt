@@ -78,7 +78,7 @@ class Database(driver: SQLiteDriver, val path: String) {
     val user = UserStore(preference)
 
     /** Guards [transaction] against reentrancy on the calling thread. */
-    private val inTransaction = ThreadLocal.withInitial { false }
+    private val inTransaction: ThreadLocal<Boolean> = ThreadLocal.withInitial { false }
 
     init {
         // [initialize] discards every database this version cannot upgrade
@@ -294,7 +294,7 @@ class Database(driver: SQLiteDriver, val path: String) {
      * bundled driver (used in tests) would reject.
      */
     fun transaction(block: () -> Unit) {
-        check(!inTransaction.get()) { "Database.transaction cannot be nested" }
+        check(inTransaction.get() != true) { "Database.transaction cannot be nested" }
         inTransaction.set(true)
         try {
             conn.execSQL("BEGIN TRANSACTION;")
