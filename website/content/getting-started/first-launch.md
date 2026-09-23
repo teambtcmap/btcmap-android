@@ -12,8 +12,8 @@ normal on the first launch or after a while without a connection.
 Tap any marker to open that place's details in a card along the bottom of the
 screen.
 
-![BTC Map on first launch: the map is centred on the default location in Willemstad, Curaçao, showing individual place pins and the opened place card for Santa Anna Curacao](../images/first-launch.png)
-![The BTC Map map with no place selected: the places, events and exchanges filter buttons sit at the bottom left, and the Curaçao country chip with a community chip sits on the right](../images/map-controls.png)
+![BTC Map on first launch: the map is centred on the default location in Willemstad, Curaçao, showing individual place pins and the opened place card for Santa Anna Curacao](/images/first-launch.png)
+![The BTC Map map with no place selected: the places, events and exchanges filter buttons sit at the bottom left, and the Curaçao country chip with a community chip sits on the right](/images/map-controls.png)
 
 With the card dismissed, the map shows the controls for browsing what is around
 you:
@@ -25,7 +25,7 @@ you:
   country at the top, then any local communities below it. Tapping one opens
   that area's page.
 
-![The map's lower controls: the places, events and exchanges buttons at the bottom left, and the country and community chips with the activity and locate buttons on the right](../images/map-controls-detail.png)
+![The map's lower controls: the places, events and exchanges buttons at the bottom left, and the country and community chips with the activity and locate buttons on the right](/images/map-controls-detail.png)
 
 ---
 

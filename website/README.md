@@ -1,20 +1,20 @@
 # BTC Map Android documentation site
 
-A small [Hugo](https://gohugo.io/) site that renders the user guides in
-[`../docs`](../docs) with a sidebar, typography and screenshots.
+A small [Hugo](https://gohugo.io/) site that renders the user guides with a
+sidebar, typography and screenshots. It is published to
+[android.btcmap.org](https://android.btcmap.org/).
 
-The markdown is **not** copied or moved. `hugo.toml` mounts the pages from
-`../docs` into the build, so the files under `docs/` remain the single source of
-truth and keep rendering on GitHub exactly as before. Nothing under `content/`
-is committed — it only exists for the duration of a build.
+The site uses Hugo's conventional layout, with the pages in
+[`content/`](content) and the screenshots in [`static/images/`](static/images):
 
-A directory whose top level contains `index.md` is treated by Hugo as a *leaf
-bundle* that swallows its siblings, so `docs/` is mounted one entry at a time
-rather than wholesale: `index.md` as the home page, the `getting-started/` and
-`features/` directories, and `images/`. Both directories are normal sections
-(no `index.md`), so their files are picked up automatically; the sidebar order
-for each lives in `params.gettingStarted` and `params.features` in
-`hugo.toml`. Add a mount when a new top-level page appears outside them.
+- `content/_index.md` is the overview page.
+- `content/getting-started/` holds the step-by-step install and first-run guides.
+- `content/features/` holds the standalone guide for each feature.
+- `static/images/` holds the screenshots, served from `/images/`.
+
+The sidebar order for the two sections lives in `params.gettingStarted` and
+`params.features` in `hugo.toml`; add a page to the matching list when you
+create one.
 
 ## Requirements
 
@@ -36,12 +36,12 @@ hugo               # one-off build into website/public/
 
 ## GitHub links
 
-`docs/` pages link to files outside `docs/` (`../README.md`, `../AGENTS.md`).
-The link render hook in `layouts/_default/_markup/render-link.html` rewrites
-those to `params.githubRepo`, so they resolve to the repository instead of
-404ing. Internal relative links (`features/map.md`, `../index.md`) become the
-built page URLs, and the `docs/images/*` screenshots are served from the site
-root.
+Pages link to files outside `content/` (`../../README.md` from the home page,
+`../../../README.md` from a guide). The link render hook in
+`layouts/_default/_markup/render-link.html` rewrites those to
+`params.githubRepo`, so they resolve to the repository instead of 404ing.
+Internal relative links (`features/map.md`, `../index.md`) become the built page
+URLs.
 
 ## Styling
 

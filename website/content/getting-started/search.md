@@ -14,8 +14,8 @@ Type a name into the search field and the app looks through:
 Results appear below the field as you type. A short pause is applied before the
 search runs, so the list keeps up while you type.
 
-![Search results in light mode, showing places, an area and events](../images/search-results-light.png)
-![Search results in dark mode, showing places, an area and events](../images/search-results-dark.png)
+![Search results in light mode, showing places, an area and events](/images/search-results-light.png)
+![Search results in dark mode, showing places, an area and events](/images/search-results-dark.png)
 
 ## How results are ordered
 

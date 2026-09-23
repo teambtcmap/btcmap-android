@@ -24,9 +24,10 @@
 
 ## Documentation
 
-User guides live in [`docs/`](docs/index.md), starting with
-[Install the app](docs/getting-started/install.md) and standalone pages for each
-feature.
+User guides are published at [android.btcmap.org](https://android.btcmap.org/),
+starting with [Install the app](website/content/getting-started/install.md) and
+standalone pages for each feature. The sources live in the Hugo site under
+[`website/`](website/README.md).
 
 ## Support BTC Map
 

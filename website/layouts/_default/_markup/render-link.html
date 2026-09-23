@@ -1,7 +1,8 @@
 {{- /* Resolves the documentation's markdown links for the generated site.
        Internal relative links (features/map.md, ../index.md) become the built
-       page URLs; links that point outside docs/ (../README.md, ../AGENTS.md)
-       become links to the repository. External links pass through. */ -}}
+       page URLs; links that point outside content/ (../../README.md,
+       ../../AGENTS.md) become links to the repository. External links pass
+       through. */ -}}
 {{- $dest := .Destination -}}
 {{- $url := $dest -}}
 {{- $external := or

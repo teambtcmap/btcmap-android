@@ -6,8 +6,8 @@ merchants, ATMs and exchanges that accept bitcoin. BTC Map is a free and
 open-source project.
 
 This documentation is for people using the app. If you want to build the app or
-contribute code, see [`AGENTS.md`](../AGENTS.md) and the
-[`README`](../README.md) instead.
+contribute code, see [`AGENTS.md`](../../AGENTS.md) and the
+[`README`](../../README.md) instead.
 
 ## Start here
 
@@ -45,4 +45,4 @@ Each guide focuses on a specific feature and shows you how to make the most of i
 - **Payments use Lightning.** Comments and boosts are paid in sats through a
   Lightning wallet on your device.
 - **Release signatures.** You can verify a release APK against the certificate
-  fingerprint listed in the [README](../README.md#verifying-signatures).
+  fingerprint listed in the [README](../../README.md#verifying-signatures).

@@ -1,6 +1,6 @@
 # Install the app
 
-BTC Map runs on [Android 10 and newer](../../app/build.gradle.kts). Every
+BTC Map runs on [Android 10 and newer](../../../app/build.gradle.kts). Every
 official download is listed on [btcmap.org/apps](https://btcmap.org/apps); pick
 whichever source you prefer:
 
@@ -32,7 +32,7 @@ whichever source you prefer:
 The APKs distributed directly by the BTC Map team — the direct downloads and
 GitHub releases — are signed with the team's release key, and you can check the
 signature as described in the
-[README](../../README.md#verifying-signatures). Builds installed from F-Droid
+[README](../../../README.md#verifying-signatures). Builds installed from F-Droid
 are signed by F-Droid with its own key instead, so that fingerprint does not
 apply to them.
 
@@ -64,7 +64,7 @@ early. There is no sign-up, invite or waiting list — just install it.
 
 The stable and beta APKs from the direct downloads above share the same release
 key, so you can verify either one as described in the
-[README](../../README.md#verifying-signatures).
+[README](../../../README.md#verifying-signatures).
 
 ---
 

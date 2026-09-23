@@ -1,8 +1,7 @@
 # Hugo configuration for the BTC Map Android user documentation site.
 #
-# The markdown sources live in ../docs and are mounted into this project at
-# build time, so they stay exactly where they are and keep rendering on GitHub.
-# See website/README.md for how to build and preview the site.
+# The pages live in content/ and the screenshots in static/images/. See
+# website/README.md for how to build and preview the site.
 
 # The URL the site is served from. It is used for absolute links and assets;
 # `hugo server` overrides it with the local address, and `./devtools website
@@ -16,11 +15,11 @@ title = "BTC Map Android"
 disableKinds = ["taxonomy", "term", "rss"]
 
 [params]
-  # Links in the documentation that point outside docs/ (../README.md,
-  # ../AGENTS.md, ...) are rewritten to this repository.
+  # Links in the documentation that point outside content/ (../../../README.md,
+  # ../../AGENTS.md, ...) are rewritten to this repository.
   githubRepo = "https://github.com/teambtcmap/btcmap-android"
 
-  # Sidebar order for the getting-started steps under docs/getting-started/.
+  # Sidebar order for the getting-started steps under content/getting-started/.
   gettingStarted = [
     "install",
     "first-launch",
@@ -29,8 +28,8 @@ disableKinds = ["taxonomy", "term", "rss"]
     "try-it-out",
   ]
 
-  # Sidebar order for the guides under docs/features/. Keep in sync with the
-  # listing in docs/index.md.
+  # Sidebar order for the guides under content/features/. Keep in sync with the
+  # listing in content/_index.md.
   features = [
     "map",
     "places",
@@ -43,31 +42,3 @@ disableKinds = ["taxonomy", "term", "rss"]
     "accounts",
     "settings",
   ]
-
-[module]
-  # The guides are mounted from ../docs, one entry per top-level page or
-  # directory, rather than mounting docs/ wholesale: a directory containing
-  # index.md is treated as a leaf bundle and would swallow its siblings. Add a
-  # mount here when a new top-level page appears; new files under
-  # docs/getting-started/ and docs/features/ are picked up automatically (add
-  # them to params.gettingStarted / params.features for the sidebar).
-  [[module.mounts]]
-    source = "../docs/index.md"
-    target = "content/_index.md"
-
-  [[module.mounts]]
-    source = "../docs/getting-started"
-    target = "content/getting-started"
-
-  [[module.mounts]]
-    source = "../docs/features"
-    target = "content/features"
-
-  # Screenshots are served as static assets, at /images/.
-  [[module.mounts]]
-    source = "static"
-    target = "static"
-
-  [[module.mounts]]
-    source = "../docs/images"
-    target = "static/images"
