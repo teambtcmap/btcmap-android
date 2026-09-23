@@ -130,6 +130,12 @@ class MapFragment : Fragment() {
         // dead renderer behind and later queries can crash natively.
         binding.map.onCreate(savedInstanceState)
 
+        // Capture the viewport to restore before any camera idle can overwrite
+        // it, so the restore does not race the map's default camera. moveTo
+        // clears it for a deep link or a search selection on this view.
+        viewportToRestore = prefs.mapViewport
+        mapPositioned = false
+
         searchController = SearchController(
             db = db(),
             resources = resources,
@@ -191,9 +197,12 @@ class MapFragment : Fragment() {
         binding.map.getMapAsync {
             it.addOnCameraIdleListener {
                 if (_binding == null) return@addOnCameraIdleListener
-                prefs.mapViewport = it.projection.visibleRegion.latLngBounds
-                val center = it.projection.visibleRegion.latLngBounds.center
-                mapAreasController.load(center.latitude, center.longitude)
+                val bounds = it.projection.visibleRegion.latLngBounds
+                // The default camera is not a position the user chose: saving it
+                // would replace the stored viewport with the world view and the
+                // next open would zoom all the way out.
+                if (mapPositioned) prefs.mapViewport = bounds
+                mapAreasController.load(bounds.center.latitude, bounds.center.longitude)
             }
 
             mapSelectionController = MapSelectionController(
@@ -254,14 +263,14 @@ class MapFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
-                binding.map.getMapAsync {
+                binding.map.getMapAsync { map ->
                     if (_binding == null) return@getMapAsync
-                    if (restoreMapViewport) {
-                        it.moveCamera(
-                            CameraUpdateFactory.newLatLngBounds(
-                                prefs.mapViewport, 0
-                            )
-                        )
+                    viewportToRestore?.let { bounds ->
+                        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
+                        // Restoring is the first intentional position, so camera
+                        // idles are persisted from here on. When moveTo cleared
+                        // the viewport, it sets this once its own move runs.
+                        mapPositioned = true
                     }
                     setFilter(filter)
                 }
@@ -435,7 +444,10 @@ class MapFragment : Fragment() {
     }
 
     private fun moveTo(lat: Double, lon: Double) {
-        restoreMapViewport = false
+        // Supersede the pending restore for this view: the deep link or search
+        // selection is the intended position, and the stored viewport is
+        // updated from it once the camera settles.
+        viewportToRestore = null
         binding.map.getMapAsync {
             it.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
@@ -443,6 +455,7 @@ class MapFragment : Fragment() {
                     16.0,
                 )
             )
+            mapPositioned = true
         }
     }
 
@@ -539,7 +552,21 @@ class MapFragment : Fragment() {
 
     private var filter = Filter.MERCHANTS
     private var searchDebounceJob: Job? = null
-    private var restoreMapViewport = true
+
+    /**
+     * The viewport to apply once the map is ready, or null once [moveTo] has
+     * superseded it for the current view. It is captured when the view is
+     * created so a camera idle fired by the map's default camera cannot
+     * overwrite the stored viewport before the restore runs.
+     */
+    private var viewportToRestore: LatLngBounds? = null
+
+    /**
+     * Whether the map has been positioned on purpose (restored, or moved by a
+     * deep link or a search selection). Camera idles are only persisted once
+     * this is true, so the default camera is never saved as the viewport.
+     */
+    private var mapPositioned = false
 
     private fun setFilter(filter: Filter) {
         binding.showMerchants.isSelected = filter == Filter.MERCHANTS

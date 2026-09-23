@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep the map where you left it after opening a place, a search result or another screen, instead of zooming out to the whole world
 - Show boosted places at the top of search results with a rocket icon, tinted from the boosted marker color setting, so a boost is visible in search
 - List an area's currently boosted merchants in a dedicated section on the area screen, and open one on the map from its card
 - Stop a paid merchant boost or comment invoice from being polled and reported again when the app returns to the foreground, so the payment screen cannot close a second time
