@@ -29,8 +29,6 @@ you cannot accidentally order or pay twice.
 - Boosting does not require an account.
 - A compatible Lightning wallet must be installed; if none is available, the app
   tells you.
-- Places from the bundled offline snapshot cannot be boosted until they have
-  been replaced by the live record from a sync.
 
 ---
 
