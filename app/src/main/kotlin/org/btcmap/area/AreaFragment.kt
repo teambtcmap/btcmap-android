@@ -35,7 +35,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.api
-import org.btcmap.api.GetAreaItem
 import org.btcmap.api.GetEventsItem
 import org.btcmap.api.GetPlaceIssuesItem
 import org.btcmap.api.getPlaceIssues
@@ -154,30 +153,17 @@ class AreaFragment : Fragment() {
                 return@launch
             }
 
-            renderArea(area.toGetAreaItem())
+            renderArea(area)
             renderOfflineMap(area)
             binding.loading.isVisible = false
             binding.content.isVisible = true
 
-            loadEvents()
+            loadEvents(area)
             loadPlaceIssues()
         }
     }
 
-    private fun Area.toGetAreaItem(): GetAreaItem {
-        return GetAreaItem(
-            id = id,
-            name = name,
-            type = type,
-            urlAlias = urlAlias,
-            icon = icon,
-            iconWide = iconWide,
-            websiteUrl = websiteUrl,
-            description = description,
-        )
-    }
-
-    private fun renderArea(area: GetAreaItem) {
+    private fun renderArea(area: Area) {
         areaName = area.name
         binding.toolbar.title = area.name
         val headerImage = area.iconWide ?: area.icon
@@ -386,10 +372,10 @@ class AreaFragment : Fragment() {
         return OfflineBounds(west = west, south = south, east = east, north = north)
     }
 
-    private fun loadEvents() {
+    private fun loadEvents(area: Area) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val events = withContext(Dispatchers.IO) { fetchAreaEvents() }
+                val events = withContext(Dispatchers.IO) { fetchAreaEvents(area) }
                 renderUpcomingEvents(events)
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
@@ -424,8 +410,7 @@ class AreaFragment : Fragment() {
      * against its GeoJSON; the same rule is applied here to the cached area
      * geometry, mirroring [org.btcmap.map.MapAreasController].
      */
-    private fun fetchAreaEvents(): List<GetEventsItem> {
-        val area = db().area.selectById(areaId) ?: return emptyList()
+    private fun fetchAreaEvents(area: Area): List<GetEventsItem> {
         val west = area.bboxWest ?: return emptyList()
         val south = area.bboxSouth ?: return emptyList()
         val east = area.bboxEast ?: return emptyList()
@@ -606,6 +591,7 @@ class AreaFragment : Fragment() {
         if (sorted.isEmpty()) return
 
         val container = binding.upcomingEventsContainer
+        container.removeAllViews()
         sorted.forEach { container.addEventCard(it) }
         binding.eventsTitle.isVisible = true
         container.isVisible = true
@@ -670,6 +656,7 @@ class AreaFragment : Fragment() {
         (binding.issuesHeader.layoutParams as ViewGroup.MarginLayoutParams).topMargin =
             (topMarginDp * density).toInt()
 
+        container.removeAllViews()
         rows.forEach { container.addIssueCard(it) }
 
         binding.issuesTitle.text = if (rows.size < totalIssues) {
