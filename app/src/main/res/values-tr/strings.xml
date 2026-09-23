@@ -34,7 +34,6 @@
     <string name="current_fee">Mevcut ücret:</string>
     <string name="loading">Yükleniyor</string>
     <string name="d_sat">%1$s sat</string>
-    <string name="more_details_will_appear_after_full_sync">Tam senkronizasyondan sonra daha fazla ayrıntı görünecek</string>
     <string name="map_style">Harita stili</string>
     <string name="style_auto">Otomatik</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

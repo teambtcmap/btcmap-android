@@ -34,7 +34,6 @@
     <string name="current_fee">Frais actuels:</string>
     <string name="loading">Chargement</string>
     <string name="d_sat">%1$s sats</string>
-    <string name="more_details_will_appear_after_full_sync">Plus de détails apparaîtront après la synchronisation complète</string>
     <string name="map_style">Style de carte</string>
     <string name="style_auto">Automatique</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

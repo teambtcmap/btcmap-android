@@ -11,7 +11,6 @@ import java.time.format.DateTimeParseException
 fun GetPlacesItem.toPlace(): FullProjection {
     return FullProjection(
         id = id,
-        bundled = false,
         updatedAt = updatedAt.toZonedDateTime(),
         lat = lat,
         lon = lon,

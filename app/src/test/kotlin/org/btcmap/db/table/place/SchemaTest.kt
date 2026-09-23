@@ -12,7 +12,6 @@ class SchemaTest {
     @Test
     fun columns() {
         assertEquals("id", ID)
-        assertEquals("bundled", BUNDLED)
         assertEquals("updated_at", UPDATED_AT)
         assertEquals("lat", LAT)
         assertEquals("lon", LON)
@@ -41,7 +40,6 @@ class SchemaTest {
     fun create() {
         assert(CREATE.contains(TABLE))
         assert(CREATE.contains(ID))
-        assert(CREATE.contains(BUNDLED))
         assert(CREATE.contains(UPDATED_AT))
         assert(CREATE.contains(LAT))
         assert(CREATE.contains(LON))

@@ -34,7 +34,6 @@
     <string name="current_fee">Taxa curentă:</string>
     <string name="loading">Se încarcă</string>
     <string name="d_sat">%1$s sat</string>
-    <string name="more_details_will_appear_after_full_sync">Mai multe detalii vor apărea după sincronizarea completă</string>
     <string name="map_style">Stilul hărții</string>
     <string name="style_auto">Automat</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

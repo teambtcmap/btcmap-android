@@ -28,13 +28,6 @@ import java.time.format.DateTimeParseException
  * delta. The map stays fully usable offline, or while the server is
  * unreachable and the delta cannot be fetched, because every field a place
  * screen reads is already present.
- *
- * Seeded rows are stored with `bundled = false` for the same reason: the
- * "more details will appear after full sync" state and the actions it disables
- * exist only for the partial rows the old minimal snapshot used to seed, and
- * those no longer exist. An unchanged place is never fetched again, so a flag
- * that stayed set until a live sync would otherwise leave every place
- * permanently read-only.
  */
 object BundledPlaces {
     internal const val FILE_NAME = "bundled-places.json"
@@ -211,7 +204,6 @@ internal fun JsonReader.readBundledPlace(): Place {
     require(placeIcon.isNotEmpty()) { "bundled place $placeId has an empty 'icon'" }
     return Place(
         id = placeId,
-        bundled = false,
         updatedAt = placeUpdatedAt,
         lat = placeLat,
         lon = placeLon,

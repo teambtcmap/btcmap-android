@@ -131,7 +131,6 @@ class DbStatsFragmentTest : AppTestCase() {
     private fun place(id: Long): Place {
         return Place(
             id = id,
-            bundled = false,
             updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
             lat = 40.7128,
             lon = -74.0060,

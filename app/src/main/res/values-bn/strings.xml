@@ -34,7 +34,6 @@
     <string name="current_fee">বর্তমান ফি:</string>
     <string name="loading">লোড হচ্ছে</string>
     <string name="d_sat">%1$s স্যাট</string>
-    <string name="more_details_will_appear_after_full_sync">সম্পূর্ণ সিঙ্কের পরে আরও বিবরণ দেখা যাবে</string>
     <string name="map_style">ম্যাপ স্টাইল</string>
     <string name="style_auto">স্বয়ংক্রিয়</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

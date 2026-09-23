@@ -34,7 +34,6 @@
     <string name="current_fee">Поточна плата:</string>
     <string name="loading">Завантаження</string>
     <string name="d_sat">%1$s сатоші</string>
-    <string name="more_details_will_appear_after_full_sync">Більше деталей з\'явиться після повної синхронізації</string>
     <string name="map_style">Стиль карти</string>
     <string name="style_auto">Автоматично</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

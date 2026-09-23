@@ -34,7 +34,6 @@
     <string name="current_fee">वर्तमान शुल्क:</string>
     <string name="loading">लोड हो रहा है</string>
     <string name="d_sat">%1$s सातोशि</string>
-    <string name="more_details_will_appear_after_full_sync">पूर्ण सिंक के बाद अधिक विवरण दिखाई देंगे</string>
     <string name="map_style">मानचित्र शैली</string>
     <string name="style_auto">स्वचालित</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

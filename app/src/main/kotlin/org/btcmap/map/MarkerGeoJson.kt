@@ -11,7 +11,7 @@ const val EVENT_MARKER_ICON_NAME = "marker-icon-event"
 const val EVENT_ICON = "event"
 
 fun Marker.isOutdated(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
-    return !bundled && (verifiedAt == null || verifiedAt.isBefore(now.minusYears(OUTDATED_AFTER_YEARS)))
+    return verifiedAt == null || verifiedAt.isBefore(now.minusYears(OUTDATED_AFTER_YEARS))
 }
 
 fun Marker.isBoosted(now: ZonedDateTime = ZonedDateTime.now()): Boolean {

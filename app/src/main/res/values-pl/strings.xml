@@ -34,7 +34,6 @@
     <string name="current_fee">Bieżąca opłata:</string>
     <string name="loading">Ładowanie</string>
     <string name="d_sat">%1$s sat</string>
-    <string name="more_details_will_appear_after_full_sync">Więcej szczegółów pojawi się po pełnej synchronizacji</string>
     <string name="map_style">Styl mapy</string>
     <string name="style_auto">Automatycznie</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

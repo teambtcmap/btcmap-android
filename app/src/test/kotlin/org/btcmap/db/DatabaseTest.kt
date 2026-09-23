@@ -9,6 +9,37 @@ import java.io.File
 import java.nio.file.Files
 import java.time.ZonedDateTime
 
+/** The `place` table as it shipped in schema version 102, with `bundled`. */
+private const val VERSION_102_PLACE_CREATE = """
+    CREATE TABLE place (
+        id INTEGER PRIMARY KEY NOT NULL,
+        bundled INTEGER NOT NULL,
+        updated_at TEXT NOT NULL,
+        lat REAL NOT NULL,
+        lon REAL NOT NULL,
+        icon TEXT NOT NULL,
+        name TEXT,
+        localized_name TEXT,
+        verified_at TEXT,
+        address TEXT,
+        opening_hours TEXT,
+        localized_opening_hours TEXT,
+        phone TEXT,
+        website TEXT,
+        email TEXT,
+        twitter TEXT,
+        facebook TEXT,
+        instagram TEXT,
+        line TEXT,
+        required_app_url TEXT,
+        boosted_until TEXT,
+        comments INTEGER,
+        telegram TEXT,
+        osm_id TEXT,
+        deleted_at TEXT
+    );
+"""
+
 /** The `area` table as it shipped in schema version 101, without `geo_json`. */
 private const val VERSION_101_AREA_CREATE = """
     CREATE TABLE area (
@@ -116,6 +147,29 @@ class DatabaseTest {
     }
 
     @Test
+    fun version102Database_isMigratedWithoutTheBundledColumn() {
+        val path = existingPath()
+        // Reproduces the last schema before the bundled flag was dropped:
+        // version 102 with a place table that still carries the column.
+        createVersion102Database(path)
+
+        val db = Database(BundledSQLiteDriver(), path)
+
+        try {
+            // The table is rebuilt without the column in place, keeping the
+            // existing row.
+            Assert.assertEquals(Database.VERSION, userVersion(db.conn))
+            Assert.assertFalse(placeColumns(db.conn).contains("bundled"))
+            val place = db.place.selectById(1L)
+            Assert.assertNotNull(place)
+            Assert.assertEquals("Cafe", place!!.name)
+            Assert.assertEquals(1L, db.place.selectCount())
+        } finally {
+            db.conn.close()
+        }
+    }
+
+    @Test
     fun databaseWithoutAVersion_isDiscardedAndRecreated() {
         val path = existingPath()
         createStaleDatabase(path, version = null)
@@ -201,8 +255,8 @@ class DatabaseTest {
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)
             conn.execSQL(
-                "INSERT INTO place (id, bundled, updated_at, lat, lon, icon) " +
-                    "VALUES (1, 0, '2024-01-01T00:00:00Z', 0.0, 0.0, 'coffee');"
+                "INSERT INTO place (id, updated_at, lat, lon, icon) " +
+                    "VALUES (1, '2024-01-01T00:00:00Z', 0.0, 0.0, 'coffee');"
             )
             conn.execSQL("PRAGMA user_version=100;")
         } finally {
@@ -241,9 +295,37 @@ class DatabaseTest {
         }
     }
 
-    private fun areaColumns(conn: SQLiteConnection): List<String> {
+    /**
+     * The schema as of the last release before the bundled flag was dropped:
+     * version 102, with a place table that still carries the `bundled` column.
+     */
+    private fun createVersion102Database(path: String) {
+        val conn = BundledSQLiteDriver().open(path)
+        try {
+            conn.execSQL(VERSION_102_PLACE_CREATE)
+            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE)
+            conn.execSQL(org.btcmap.db.table.area.CREATE)
+            conn.execSQL(org.btcmap.db.table.preference.CREATE)
+            conn.execSQL(
+                "INSERT INTO place (id, bundled, updated_at, lat, lon, icon, name) " +
+                    "VALUES (1, 0, '2024-01-01T00:00:00Z', 0.0, 0.0, 'local_cafe', 'Cafe');"
+            )
+            conn.execSQL("PRAGMA user_version=102;")
+        } finally {
+            conn.close()
+        }
+    }
+
+    private fun areaColumns(conn: SQLiteConnection): List<String> =
+        columns(conn, "area")
+
+    private fun placeColumns(conn: SQLiteConnection): List<String> =
+        columns(conn, "place")
+
+    private fun columns(conn: SQLiteConnection, table: String): List<String> {
         val names = mutableListOf<String>()
-        conn.prepare("SELECT name FROM pragma_table_info('area');").use {
+        conn.prepare("SELECT name FROM pragma_table_info('$table');").use {
             while (it.step()) {
                 names.add(it.getText(0))
             }

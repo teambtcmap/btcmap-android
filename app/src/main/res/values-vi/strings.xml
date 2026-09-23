@@ -34,7 +34,6 @@
     <string name="current_fee">Phí hiện tại:</string>
     <string name="loading">đang tải</string>
     <string name="d_sat">%1$s sat</string>
-    <string name="more_details_will_appear_after_full_sync">Chi tiết khác sẽ xuất hiện sau khi đồng bộ hóa đầy đủ</string>
     <string name="map_style">Phong cách bản đồ</string>
     <string name="style_auto">Tự động</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

@@ -184,15 +184,6 @@ class PlaceFragment : Fragment() {
 
         updateBookmarkIcon()
 
-        binding.bundledWarning.isVisible = place.bundled
-
-        // disable action buttons for bundled places
-        binding.btnVerify.isVisible = !place.bundled
-        binding.btnReport.isVisible = !place.bundled
-        binding.comments.isVisible = !place.bundled
-        binding.boost.isVisible = !place.bundled
-        binding.addComment.isVisible = !place.bundled
-
         if (place.requiredAppUrl != null) {
             binding.companionWarning.isVisible = true
             binding.companionWarning.setTextColor(requireContext().getErrorColor())
@@ -231,20 +222,15 @@ class PlaceFragment : Fragment() {
                 }
             }
         } else {
-            if (!place.bundled) {
-                binding.lastVerified.isVisible = true
-                binding.lastVerified.text = getString(R.string.not_verified)
-                binding.lastVerified.setTextColor(requireContext().getErrorColor())
-                binding.lastVerified.setOnClickListener {
-                    showVerificationWarning(R.string.verification_warning_not_verified)
-                }
-                binding.outdated.isVisible = true
-                binding.outdated.setOnClickListener {
-                    showVerificationWarning(R.string.verification_warning_not_verified)
-                }
-            } else {
-                binding.lastVerified.isVisible = false
-                binding.outdated.isVisible = false
+            binding.lastVerified.isVisible = true
+            binding.lastVerified.text = getString(R.string.not_verified)
+            binding.lastVerified.setTextColor(requireContext().getErrorColor())
+            binding.lastVerified.setOnClickListener {
+                showVerificationWarning(R.string.verification_warning_not_verified)
+            }
+            binding.outdated.isVisible = true
+            binding.outdated.setOnClickListener {
+                showVerificationWarning(R.string.verification_warning_not_verified)
             }
         }
 

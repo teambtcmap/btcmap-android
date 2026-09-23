@@ -46,7 +46,37 @@ class MarkerGeoJsonTest {
         Assert.assertTrue(json.contains("\"boosted\":false"))
     }
 
-    private fun marker(boostedUntil: ZonedDateTime?): Marker {
+    @Test
+    fun isOutdated_trueWhenNeverVerified() {
+        val marker = marker(boostedUntil = null, verifiedAt = null)
+
+        Assert.assertTrue(marker.isOutdated(now))
+    }
+
+    @Test
+    fun isOutdated_trueWhenVerifiedOverAYearAgo() {
+        val marker = marker(
+            boostedUntil = null,
+            verifiedAt = ZonedDateTime.parse("2025-05-31T00:00:00Z"),
+        )
+
+        Assert.assertTrue(marker.isOutdated(now))
+    }
+
+    @Test
+    fun isOutdated_falseWhenVerifiedWithinTheLastYear() {
+        val marker = marker(
+            boostedUntil = null,
+            verifiedAt = ZonedDateTime.parse("2026-05-01T00:00:00Z"),
+        )
+
+        Assert.assertFalse(marker.isOutdated(now))
+    }
+
+    private fun marker(
+        boostedUntil: ZonedDateTime?,
+        verifiedAt: ZonedDateTime? = ZonedDateTime.parse("2026-05-01T00:00:00Z"),
+    ): Marker {
         return Marker(
             id = 1,
             lat = 0.0,
@@ -55,8 +85,7 @@ class MarkerGeoJsonTest {
             boostedUntil = boostedUntil,
             requiredAppUrl = null,
             comments = 0,
-            verifiedAt = null,
-            bundled = true,
+            verifiedAt = verifiedAt,
         )
     }
 }

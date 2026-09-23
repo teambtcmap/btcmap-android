@@ -31,7 +31,6 @@ class PlaceQueriesTest {
         val db = createDatabase()
         val place = Place(
             id = 1L,
-            bundled = false,
             updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
             lat = 40.7128,
             lon = -74.0060,
@@ -463,7 +462,6 @@ class PlaceQueriesTest {
     ): Place {
         return Place(
             id = id,
-            bundled = false,
             updatedAt = updatedAt,
             lat = lat,
             lon = lon,

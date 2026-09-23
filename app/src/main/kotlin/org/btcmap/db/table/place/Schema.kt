@@ -3,7 +3,6 @@ package org.btcmap.db.table.place
 const val TABLE = "place"
 
 const val ID = "id"
-const val BUNDLED = "bundled"
 const val UPDATED_AT = "updated_at"
 const val LAT = "lat"
 const val LON = "lon"
@@ -31,7 +30,6 @@ const val DELETED_AT = "deleted_at"
 const val CREATE = """
     CREATE TABLE $TABLE (
         $ID INTEGER PRIMARY KEY NOT NULL,
-        $BUNDLED INTEGER NOT NULL,
         $UPDATED_AT TEXT NOT NULL,
         $LAT REAL NOT NULL,
         $LON REAL NOT NULL,

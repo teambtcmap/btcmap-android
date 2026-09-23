@@ -24,10 +24,6 @@ Depending on what OpenStreetMap knows about it, a place can show:
 - Buttons for **Verify**, **Report**, **Comments** and **Boost**, and a button
   to add a comment.
 
-Places that come from the bundled offline snapshot are read-only and show a
-"more details will appear after full sync" notice. Once a sync has brought in
-the live record, the action buttons become available.
-
 ## The place menu
 
 The overflow menu on a place has:

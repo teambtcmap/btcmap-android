@@ -14,36 +14,35 @@ class PlaceQueries(private val conn: SQLiteConnection) {
     fun insert(rows: List<Place>) {
         conn.prepare(
             """
-            INSERT OR REPLACE INTO $TABLE ($ID, $BUNDLED, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $LOCALIZED_OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM, $OSM_ID, $DELETED_AT)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25);
+            INSERT OR REPLACE INTO $TABLE ($ID, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $LOCALIZED_OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM, $OSM_ID, $DELETED_AT)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24);
             """
         ).use { stmt ->
             rows.forEach { row ->
                 stmt.bindLong(1, row.id)
-                stmt.bindBoolean(2, row.bundled)
-                stmt.bindZonedDateTime(3, row.updatedAt)
-                stmt.bindDouble(4, row.lat)
-                stmt.bindDouble(5, row.lon)
-                stmt.bindText(6, row.icon)
-                stmt.bindTextOrNull(7, row.name)
-                stmt.bindJsonObjectOrNull(8, row.localizedName)
-                stmt.bindZonedDateTimeOrNull(9, row.verifiedAt)
-                stmt.bindTextOrNull(10, row.address)
-                stmt.bindTextOrNull(11, row.openingHours)
-                stmt.bindJsonObjectOrNull(12, row.localizedOpeningHours)
-                stmt.bindTextOrNull(13, row.phone)
-                stmt.bindHttpUrlOrNull(14, row.website)
-                stmt.bindTextOrNull(15, row.email)
-                stmt.bindHttpUrlOrNull(16, row.twitter)
-                stmt.bindHttpUrlOrNull(17, row.facebook)
-                stmt.bindHttpUrlOrNull(18, row.instagram)
-                stmt.bindHttpUrlOrNull(19, row.line)
-                stmt.bindHttpUrlOrNull(20, row.requiredAppUrl)
-                stmt.bindZonedDateTimeOrNull(21, row.boostedUntil)
-                stmt.bindLongOrNull(22, row.comments)
-                stmt.bindHttpUrlOrNull(23, row.telegram)
-                stmt.bindTextOrNull(24, row.osmId)
-                stmt.bindZonedDateTimeOrNull(25, row.deletedAt)
+                stmt.bindZonedDateTime(2, row.updatedAt)
+                stmt.bindDouble(3, row.lat)
+                stmt.bindDouble(4, row.lon)
+                stmt.bindText(5, row.icon)
+                stmt.bindTextOrNull(6, row.name)
+                stmt.bindJsonObjectOrNull(7, row.localizedName)
+                stmt.bindZonedDateTimeOrNull(8, row.verifiedAt)
+                stmt.bindTextOrNull(9, row.address)
+                stmt.bindTextOrNull(10, row.openingHours)
+                stmt.bindJsonObjectOrNull(11, row.localizedOpeningHours)
+                stmt.bindTextOrNull(12, row.phone)
+                stmt.bindHttpUrlOrNull(13, row.website)
+                stmt.bindTextOrNull(14, row.email)
+                stmt.bindHttpUrlOrNull(15, row.twitter)
+                stmt.bindHttpUrlOrNull(16, row.facebook)
+                stmt.bindHttpUrlOrNull(17, row.instagram)
+                stmt.bindHttpUrlOrNull(18, row.line)
+                stmt.bindHttpUrlOrNull(19, row.requiredAppUrl)
+                stmt.bindZonedDateTimeOrNull(20, row.boostedUntil)
+                stmt.bindLongOrNull(21, row.comments)
+                stmt.bindHttpUrlOrNull(22, row.telegram)
+                stmt.bindTextOrNull(23, row.osmId)
+                stmt.bindZonedDateTimeOrNull(24, row.deletedAt)
                 stmt.step()
                 stmt.reset()
             }
@@ -117,7 +116,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             append(" AND $DELETED_AT IS NULL")
             append(" AND $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4")
             if (minVerifiedAt != null) {
-                append("AND ($BUNDLED = 1 OR $VERIFIED_AT >= ?5)")
+                append(" AND $VERIFIED_AT >= ?5")
             }
         }
         conn.prepare(

@@ -20,7 +20,6 @@ class BundledPlacesTest {
 
     private fun place(id: Long) = Place(
         id = id,
-        bundled = false,
         updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
         lat = 0.0,
         lon = 0.0,
@@ -83,9 +82,6 @@ class BundledPlacesTest {
         Assert.assertEquals(7L, place.comments)
         Assert.assertEquals(ZonedDateTime.parse("2026-02-01T00:00:00Z"), place.boostedUntil)
         Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), place.updatedAt)
-        // The snapshot carries complete records now, so a seeded place is a
-        // normal place: nothing about it is pending a full sync.
-        Assert.assertFalse(place.bundled)
     }
 
     @Test
@@ -341,17 +337,12 @@ class BundledPlacesTest {
         Assert.assertEquals(3L, first.comments)
         Assert.assertEquals(ZonedDateTime.parse("2026-02-01T00:00:00Z"), first.boostedUntil)
         Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), first.updatedAt)
-        // A seeded row is a complete record now, so it is not flagged as
-        // pending a full sync.
-        Assert.assertFalse(first.bundled)
-
         val second = db.place.selectById(2L)
         Assert.assertNotNull(second)
         Assert.assertNull(second!!.name)
         Assert.assertNull(second.comments)
         Assert.assertNull(second.boostedUntil)
         Assert.assertEquals(ZonedDateTime.parse("2026-04-01T12:00:00Z"), second.updatedAt)
-        Assert.assertFalse(second.bundled)
     }
 
     @Test

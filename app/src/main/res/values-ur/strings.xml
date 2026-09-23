@@ -34,7 +34,6 @@
     <string name="current_fee">موجودہ فیس:</string>
     <string name="loading">لوڈ ہو رہا ہے</string>
     <string name="d_sat">%1$s سیٹوشی</string>
-    <string name="more_details_will_appear_after_full_sync">مکمل سنک کے بعد مزید تفصیلات ظاہر ہوں گی</string>
     <string name="map_style">نقشے کا انداز</string>
     <string name="style_auto">آٹو</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

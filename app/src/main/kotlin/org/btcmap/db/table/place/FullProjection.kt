@@ -15,7 +15,6 @@ typealias Place = FullProjection
 
 data class FullProjection(
     val id: Long,
-    val bundled: Boolean,
     val updatedAt: ZonedDateTime,
     val lat: Double,
     val lon: Double,
@@ -41,35 +40,34 @@ data class FullProjection(
     val deletedAt: ZonedDateTime? = null,
 ) {
     companion object {
-        const val COLUMNS = "$ID, $BUNDLED, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $LOCALIZED_OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM, $OSM_ID, $DELETED_AT"
+        const val COLUMNS = "$ID, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $LOCALIZED_OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM, $OSM_ID, $DELETED_AT"
 
         fun fromStatement(stmt: SQLiteStatement): FullProjection {
             return FullProjection(
                 id = stmt.getLong(0),
-                bundled = stmt.getLong(1) != 0L,
-                updatedAt = stmt.getZonedDateTime(2),
-                lat = stmt.getDouble(3),
-                lon = stmt.getDouble(4),
-                icon = stmt.getText(5),
-                name = stmt.getTextOrNull(6),
-                localizedName = stmt.getJsonObjectOrNull(7),
-                verifiedAt = stmt.getZonedDateTimeOrNull(8),
-                address = stmt.getTextOrNull(9),
-                openingHours = stmt.getTextOrNull(10),
-                localizedOpeningHours = stmt.getJsonObjectOrNull(11),
-                phone = stmt.getTextOrNull(12),
-                website = stmt.getHttpUrlOrNull(13),
-                email = stmt.getTextOrNull(14),
-                twitter = stmt.getHttpUrlOrNull(15),
-                facebook = stmt.getHttpUrlOrNull(16),
-                instagram = stmt.getHttpUrlOrNull(17),
-                line = stmt.getHttpUrlOrNull(18),
-                requiredAppUrl = stmt.getHttpUrlOrNull(19),
-                boostedUntil = stmt.getZonedDateTimeOrNull(20),
-                comments = stmt.getLongOrNull(21),
-                telegram = stmt.getHttpUrlOrNull(22),
-                osmId = stmt.getTextOrNull(23),
-                deletedAt = stmt.getZonedDateTimeOrNull(24),
+                updatedAt = stmt.getZonedDateTime(1),
+                lat = stmt.getDouble(2),
+                lon = stmt.getDouble(3),
+                icon = stmt.getText(4),
+                name = stmt.getTextOrNull(5),
+                localizedName = stmt.getJsonObjectOrNull(6),
+                verifiedAt = stmt.getZonedDateTimeOrNull(7),
+                address = stmt.getTextOrNull(8),
+                openingHours = stmt.getTextOrNull(9),
+                localizedOpeningHours = stmt.getJsonObjectOrNull(10),
+                phone = stmt.getTextOrNull(11),
+                website = stmt.getHttpUrlOrNull(12),
+                email = stmt.getTextOrNull(13),
+                twitter = stmt.getHttpUrlOrNull(14),
+                facebook = stmt.getHttpUrlOrNull(15),
+                instagram = stmt.getHttpUrlOrNull(16),
+                line = stmt.getHttpUrlOrNull(17),
+                requiredAppUrl = stmt.getHttpUrlOrNull(18),
+                boostedUntil = stmt.getZonedDateTimeOrNull(19),
+                comments = stmt.getLongOrNull(20),
+                telegram = stmt.getHttpUrlOrNull(21),
+                osmId = stmt.getTextOrNull(22),
+                deletedAt = stmt.getZonedDateTimeOrNull(23),
             )
         }
     }

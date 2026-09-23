@@ -34,7 +34,6 @@
     <string name="current_fee">現在の料金:</string>
     <string name="loading">読み込み中</string>
     <string name="d_sat">%1$s sat</string>
-    <string name="more_details_will_appear_after_full_sync">完全な同期後に詳細が表示されます</string>
     <string name="map_style">マップスタイル</string>
     <string name="style_auto">自動</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

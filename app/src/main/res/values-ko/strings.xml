@@ -34,7 +34,6 @@
     <string name="current_fee">현재 수수료:</string>
     <string name="loading">로딩 중</string>
     <string name="d_sat">%1$s sat</string>
-    <string name="more_details_will_appear_after_full_sync">전체 동기화 후 더 많은 세부 정보가 표시됩니다</string>
     <string name="map_style">지도 스타일</string>
     <string name="style_auto">자동</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

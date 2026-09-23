@@ -34,7 +34,6 @@
     <string name="current_fee">Текуща такса:</string>
     <string name="loading">Зареждане</string>
     <string name="d_sat">%1$s сатоши</string>
-    <string name="more_details_will_appear_after_full_sync">Повече подробности ще се появят след пълна синхронизация</string>
     <string name="map_style">Стил на картата</string>
     <string name="style_auto">Автоматично</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

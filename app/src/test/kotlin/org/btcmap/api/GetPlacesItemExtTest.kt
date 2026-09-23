@@ -38,7 +38,6 @@ class GetPlacesItemExtTest {
 
         val place = item.toPlace()
 
-        Assert.assertFalse(place.bundled)
         Assert.assertEquals("2026-01-02T03:04:05Z", place.updatedAt.toString())
         Assert.assertEquals("Kaffee", place.localizedName!!.get("de").asString)
         Assert.assertEquals(ZonedDateTime.parse("2026-01-15T00:00:00Z"), place.verifiedAt)

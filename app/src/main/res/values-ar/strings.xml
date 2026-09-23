@@ -34,7 +34,6 @@
     <string name="current_fee">الرسوم الحالية:</string>
     <string name="loading">جارٍ التحميل</string>
     <string name="d_sat">%1$s ساتوشي</string>
-    <string name="more_details_will_appear_after_full_sync">ستظهر المزيد من التفاصيل بعد المزامنة الكاملة</string>
     <string name="map_style">نمط الخريطة</string>
     <string name="style_auto">تلقائي</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

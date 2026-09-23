@@ -24,7 +24,7 @@ class Database(driver: SQLiteDriver, val path: String) {
          * project's history, so the stale file can be told apart from ours by
          * the pragma alone (see [initialize]).
          */
-        const val VERSION = 102
+        const val VERSION = 103
 
         /**
          * The first version this app is responsible for upgrading. Anything
@@ -164,6 +164,62 @@ class Database(driver: SQLiteDriver, val path: String) {
                         "UPDATE ${org.btcmap.db.table.area.TABLE} " +
                             "SET ${org.btcmap.db.table.area.UPDATED_AT} = '2000-01-01T00:00:00Z';"
                     )
+                }
+
+                102 -> {
+                    // The bundled flag is gone: the snapshot now seeds complete
+                    // records, so no place is ever marked bundled and the
+                    // read-only "pending sync" state no longer exists. SQLite
+                    // cannot drop a column on the oldest supported devices, so
+                    // rebuild the table without it.
+                    conn.execSQL(
+                        """
+                        CREATE TABLE place_new (
+                            id INTEGER PRIMARY KEY NOT NULL,
+                            updated_at TEXT NOT NULL,
+                            lat REAL NOT NULL,
+                            lon REAL NOT NULL,
+                            icon TEXT NOT NULL,
+                            name TEXT,
+                            localized_name TEXT,
+                            verified_at TEXT,
+                            address TEXT,
+                            opening_hours TEXT,
+                            localized_opening_hours TEXT,
+                            phone TEXT,
+                            website TEXT,
+                            email TEXT,
+                            twitter TEXT,
+                            facebook TEXT,
+                            instagram TEXT,
+                            line TEXT,
+                            required_app_url TEXT,
+                            boosted_until TEXT,
+                            comments INTEGER,
+                            telegram TEXT,
+                            osm_id TEXT,
+                            deleted_at TEXT
+                        );
+                        """
+                    )
+                    conn.execSQL(
+                        """
+                        INSERT INTO place_new (
+                            id, updated_at, lat, lon, icon, name, localized_name, verified_at,
+                            address, opening_hours, localized_opening_hours, phone, website,
+                            email, twitter, facebook, instagram, line, required_app_url,
+                            boosted_until, comments, telegram, osm_id, deleted_at
+                        )
+                        SELECT
+                            id, updated_at, lat, lon, icon, name, localized_name, verified_at,
+                            address, opening_hours, localized_opening_hours, phone, website,
+                            email, twitter, facebook, instagram, line, required_app_url,
+                            boosted_until, comments, telegram, osm_id, deleted_at
+                        FROM place;
+                        """
+                    )
+                    conn.execSQL("DROP TABLE place;")
+                    conn.execSQL("ALTER TABLE place_new RENAME TO place;")
                 }
 
                 else -> throw Exception("migration is missing for version $version")

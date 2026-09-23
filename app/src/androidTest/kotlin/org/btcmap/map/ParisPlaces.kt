@@ -35,7 +35,6 @@ object ParisPlaces {
     private fun place(id: Long, name: String, lat: Double, lon: Double): Place {
         return Place(
             id = id,
-            bundled = true,
             updatedAt = ZonedDateTime.parse("2000-01-01T00:00:00Z"),
             lat = lat,
             lon = lon,

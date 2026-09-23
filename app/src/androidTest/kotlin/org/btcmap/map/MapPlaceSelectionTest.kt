@@ -40,7 +40,7 @@ class MapPlaceSelectionTest : AppTestCase() {
     private val app = ApplicationProvider.getApplicationContext<App>()
 
     @Test
-    fun bundledPlacesInParis_renderOnMap_andClickOpensBottomSheet() {
+    fun placesInParis_renderOnMap_andClickOpensBottomSheet() {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             renderSelectAndAssert()

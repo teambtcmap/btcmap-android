@@ -34,7 +34,6 @@
     <string name="current_fee">Тренутна накнада:</string>
     <string name="loading">Учитавање</string>
     <string name="d_sat">%1$s сат</string>
-    <string name="more_details_will_appear_after_full_sync">Више детаља ће се појавити након потпуне синхронизације</string>
     <string name="map_style">Стил мапе</string>
     <string name="style_auto">Аутоматски</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

@@ -34,7 +34,6 @@
     <string name="current_fee">کارمزد فعلی:</string>
     <string name="loading">در حال بارگذاری</string>
     <string name="d_sat">%1$s ساتوشی</string>
-    <string name="more_details_will_appear_after_full_sync">جزئیات بیشتر پس از همگام‌سازی کامل ظاهر می‌شوند</string>
     <string name="map_style">سبک نقشه</string>
     <string name="style_auto">خودکار</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

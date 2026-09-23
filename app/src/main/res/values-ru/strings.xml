@@ -34,7 +34,6 @@
     <string name="current_fee">Комиссия:</string>
     <string name="loading">загрузка</string>
     <string name="d_sat">%1$s сатоши</string>
-    <string name="more_details_will_appear_after_full_sync">Подробности появятся после полной синхронизации</string>
     <string name="map_style">Стиль карты</string>
     <string name="style_auto">Авто</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

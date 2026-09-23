@@ -34,7 +34,6 @@
     <string name="current_fee">Nuværende gebyr:</string>
     <string name="loading">Indlæser</string>
     <string name="d_sat">%1$s sat</string>
-    <string name="more_details_will_appear_after_full_sync">Flere detaljer vises efter fuld synkronisering</string>
     <string name="map_style">Kortstil</string>
     <string name="style_auto">Automatisk</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

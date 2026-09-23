@@ -34,7 +34,6 @@
     <string name="current_fee">Huidige fooi:</string>
     <string name="loading">laai</string>
     <string name="d_sat">%1$s sat</string>
-    <string name="more_details_will_appear_after_full_sync">Meer besonderhede sal verskyn na volledige sinkronisering</string>
     <string name="map_style">Kaartstyl</string>
     <string name="style_auto">Outomaties</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>

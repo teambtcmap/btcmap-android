@@ -306,7 +306,6 @@ class AreaContentTest : AreaScreenTest() {
     private fun place(osmId: String, icon: String): Place {
         return Place(
             id = 1,
-            bundled = false,
             updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
             lat = 0.0,
             lon = 0.0,

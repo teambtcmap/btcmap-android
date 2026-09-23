@@ -17,10 +17,9 @@ data class MarkerProjection(
     val requiredAppUrl: String?,
     val comments: Long,
     val verifiedAt: ZonedDateTime?,
-    val bundled: Boolean,
 ) {
     companion object {
-        const val COLUMNS = "$ID, $LAT, $LON, $ICON, $BOOSTED_UNTIL, $REQUIRED_APP_URL, $COMMENTS, $VERIFIED_AT, $BUNDLED"
+        const val COLUMNS = "$ID, $LAT, $LON, $ICON, $BOOSTED_UNTIL, $REQUIRED_APP_URL, $COMMENTS, $VERIFIED_AT"
 
         fun fromStatement(stmt: SQLiteStatement): MarkerProjection {
             return MarkerProjection(
@@ -32,7 +31,6 @@ data class MarkerProjection(
                 requiredAppUrl = stmt.getTextOrNull(5),
                 comments = stmt.getLongOrNull(6) ?: 0,
                 verifiedAt = stmt.getZonedDateTimeOrNull(7),
-                bundled = stmt.getLong(8) != 0L,
             )
         }
     }
