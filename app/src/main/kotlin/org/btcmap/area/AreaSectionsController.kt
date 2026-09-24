@@ -134,14 +134,20 @@ internal class AreaSectionsController(
         return fragment.getString(R.string.boosted_until_s, date)
     }
 
-    fun loadEvents(area: Area) {
+    /**
+     * Renders the area's upcoming events from the local cache. [reportErrors]
+     * is false when re-running after a background sync: a refresh that fails
+     * must not interrupt the screen with an error dialog the user did not ask
+     * for.
+     */
+    fun loadEvents(area: Area, reportErrors: Boolean = true) {
         fragment.viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val events = withContext(Dispatchers.IO) { fetchAreaEvents(area) }
                 renderUpcomingEvents(events)
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
-                fragment.showError(e)
+                if (reportErrors) fragment.showError(e)
             }
         }
     }
@@ -198,13 +204,13 @@ internal class AreaSectionsController(
     private fun renderUpcomingEvents(events: List<GetEventsItem>) {
         val sorted = upcomingEvents(events, ZonedDateTime.now(ZoneId.systemDefault()))
 
-        if (sorted.isEmpty()) return
-
+        // Idempotent: a sync-triggered refresh can empty a section that was
+        // previously populated, so the empty list has to hide it explicitly.
         val container = binding.upcomingEventsContainer
         container.removeAllViews()
         sorted.forEach { container.addEventCard(it) }
-        binding.eventsTitle.isVisible = true
-        container.isVisible = true
+        binding.eventsTitle.isVisible = sorted.isNotEmpty()
+        container.isVisible = sorted.isNotEmpty()
     }
 
     private fun ViewGroup.addEventCard(event: GetEventsItem) {

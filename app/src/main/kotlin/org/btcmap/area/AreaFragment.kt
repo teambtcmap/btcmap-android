@@ -14,7 +14,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withResumed
 import coil3.load
 import com.google.android.material.color.MaterialColors
@@ -23,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
+import org.btcmap.SyncEvent
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
@@ -32,6 +35,7 @@ import org.btcmap.saved.isAreaSaved
 import org.btcmap.saved.toggleSavedArea
 import org.btcmap.settings.authorized
 import org.btcmap.settings.prefs
+import org.btcmap.syncController
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
@@ -55,6 +59,9 @@ class AreaFragment : Fragment() {
 
     private var areaName = ""
 
+    /** The rendered area, kept so a sync-triggered refresh can re-read the cache. */
+    private var loadedArea: Area? = null
+
     private var offlineMap: AreaOfflineMapController? = null
 
     private var sections: AreaSectionsController? = null
@@ -73,6 +80,19 @@ class AreaFragment : Fragment() {
 
         offlineMap = AreaOfflineMapController(this, binding)
         sections = AreaSectionsController(this, binding)
+
+        // Events are read from the local cache, so a background sync that
+        // changes them makes this section stale; re-render when it does instead
+        // of leaving the stale list up until the screen is reopened.
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                syncController().events.collect { event ->
+                    if (event == SyncEvent.EventsChanged) {
+                        loadedArea?.let { sections?.loadEvents(it, reportErrors = false) }
+                    }
+                }
+            }
+        }
 
         // Registered here, not when the dialog is shown, so a form that was open
         // when the device rotated still reaches this (recreated) fragment.
@@ -122,6 +142,7 @@ class AreaFragment : Fragment() {
                 return@launch
             }
 
+            loadedArea = area
             renderArea(area)
             offlineMap?.bind(area)
             binding.loading.isVisible = false
@@ -220,6 +241,7 @@ class AreaFragment : Fragment() {
         }
         offlineMap = null
         sections = null
+        loadedArea = null
         _binding = null
     }
 

@@ -56,6 +56,12 @@ class AddPlaceFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // The MapView owns native resources and must receive its lifecycle
+        // callbacks, like MapFragment's map; without onCreate and onDestroy in
+        // particular, reopening this screen leaves a dead renderer behind and
+        // later queries can crash natively.
+        binding.map.onCreate(savedInstanceState)
+
         binding.topAppBar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
         }
@@ -187,8 +193,39 @@ class AddPlaceFragment : Fragment() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        _binding?.map?.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        _binding?.map?.onResume()
+    }
+
+    override fun onPause() {
+        _binding?.map?.onPause()
+        super.onPause()
+    }
+
+    override fun onStop() {
+        _binding?.map?.onStop()
+        super.onStop()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        _binding?.map?.onLowMemory()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        _binding?.map?.onSaveInstanceState(outState)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
+        _binding?.map?.onDestroy()
         _binding = null
         map = null
     }

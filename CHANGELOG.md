@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep an area screen's upcoming events and the map chips' event counts up to date when a background sync changes them, instead of leaving the stale list until the screen is reopened
+- Pass the event and add-place screens' maps through their full lifecycle, so reopening one no longer leaves a dead renderer behind that can crash the map
 - Ship only upcoming events in the bundled snapshot, instead of seeding events that have already started and are hidden by every screen anyway
 - List an event only while its start time is still in the future, so an event with no real start date is no longer shown on the map, in search or on an area screen
 - Match search terms containing `%` or `_` literally on the map, instead of treating them as wildcards

@@ -13,6 +13,10 @@ import java.time.format.DateTimeParseException
 
 data class GetEventsItem(
     val id: Long,
+    // Legacy: the server's v4 event payload does not carry `area_id`, so this
+    // is always null; the event-to-area link is resolved geometrically from
+    // the coordinates (see `org.btcmap.db.table.event.isWithin`). Retained
+    // only to tolerate an `area_id` field in older/bundled payloads.
     val areaId: Long?,
     val lat: Double,
     val lon: Double,
@@ -24,8 +28,8 @@ data class GetEventsItem(
 
 /**
  * A row of the incremental `GET /v4/events` change log. Unlike [GetEventsItem]
- * (used by the single and per-area endpoints, which omit them), a delta row
- * always carries [updatedAt] and may carry [deletedAt] as a tombstone.
+ * (used by the single-event endpoint, which omits them), a delta row always
+ * carries [updatedAt] and may carry [deletedAt] as a tombstone.
  */
 data class GetEventsDeltaItem(
     val id: Long,
@@ -57,12 +61,6 @@ suspend fun Api.getEvent(id: Long): GetEventsItem {
     val url = buildUrl("v4", "events", "$id")
 
     return call(Request.Builder().withoutAuth().url(url).build()) { it.toJsonObject().toGetEventsItem() }
-}
-
-suspend fun Api.getAreaEvents(idOrAlias: String): List<GetEventsItem> {
-    val url = buildUrl("v4", "areas", idOrAlias, "events")
-
-    return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetEventsItems() }
 }
 
 internal fun JsonObject.toGetEventsItem(): GetEventsItem {
@@ -100,10 +98,6 @@ private fun String.toApiZonedDateTime(field: String): ZonedDateTime {
     } catch (e: DateTimeParseException) {
         throw ApiParseException("Field '$field' is not a valid ISO 8601 datetime", e)
     }
-}
-
-private fun InputStream.toGetEventsItems(): List<GetEventsItem> {
-    return toJsonArray().map { it.toGetEventsItem() }
 }
 
 private fun InputStream.toGetEventsDeltaItems(): List<GetEventsDeltaItem> {

@@ -99,18 +99,6 @@ class EventApiTest : ApiTestBase() {
     }
 
     @Test
-    fun getAreaEvents_usesIdOrAlias() = runTest {
-        enqueueJson(EVENTS)
-
-        val events = api().getAreaEvents("grand-paris")
-
-        val request = takeRequest()
-        Assert.assertEquals("GET", request.method)
-        Assert.assertEquals("/v4/areas/grand-paris/events", request.url.encodedPath)
-        Assert.assertEquals(2, events.size)
-    }
-
-    @Test
     fun getEvent_parsesSingleEvent() = runTest {
         enqueueJson(EVENT)
 
@@ -160,31 +148,6 @@ class EventApiTest : ApiTestBase() {
                 "starts_at": "2025-08-29T19:00:00+07:00",
                 "ends_at": "2025-08-29T22:00:00+07:00"
             }
-        """
-
-        const val EVENTS = """
-            [
-                {
-                    "id": 1,
-                    "area_id": 1,
-                    "lat": 7.88,
-                    "lon": 98.38,
-                    "name": "Phuket Bitcoin Meetup",
-                    "website": "https://meetup.example/1",
-                    "starts_at": "2025-08-29T19:00:00+07:00",
-                    "ends_at": "2025-08-29T22:00:00+07:00"
-                },
-                {
-                    "id": 2,
-                    "area_id": null,
-                    "lat": 35.1,
-                    "lon": 129.03,
-                    "name": "Sats N Facts",
-                    "website": "https://satsnfacts.xyz/",
-                    "starts_at": "2025-12-05T00:00:00+09:00",
-                    "ends_at": null
-                }
-            ]
         """
 
         const val DELTA_EVENTS = """

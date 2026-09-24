@@ -14,6 +14,12 @@ typealias Event = FullProjection
 
 data class FullProjection(
     val id: Long,
+    // Legacy and effectively always null: the server's v4 event payload does
+    // not send `area_id`, so sync writes null and nothing reads this for
+    // behaviour. The event-to-area link is resolved geometrically instead (see
+    // `isWithin`), which is also why the area screen and map chips never query
+    // by area_id. Kept on the schema rather than dropped, because removing the
+    // column would force an event-table rebuild migration for no user benefit.
     val areaId: Long?,
     val lat: Double,
     val lon: Double,

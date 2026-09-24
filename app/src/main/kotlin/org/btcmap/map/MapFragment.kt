@@ -249,8 +249,13 @@ class MapFragment : Fragment() {
                 syncController().events.collect { event ->
                     when (event) {
                         SyncEvent.PlacesChanged -> rebuildCurrentCache()
-                        SyncEvent.EventsChanged ->
+                        SyncEvent.EventsChanged -> {
                             if (filter == Filter.EVENTS) rebuildCurrentCache()
+                            // The area chips display each area's upcoming event
+                            // count, so a changed event table makes them stale
+                            // even though the areas themselves did not change.
+                            mapAreasController.reload()
+                        }
                         SyncEvent.CommentsChanged ->
                             if (filter == Filter.MERCHANTS || filter == Filter.EXCHANGES) {
                                 rebuildCurrentCache()
