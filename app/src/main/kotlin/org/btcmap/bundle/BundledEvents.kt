@@ -19,9 +19,8 @@ import java.time.ZonedDateTime
  *
  * The snapshot carries each event's real `updated_at`, so the first sync only
  * fetches the few that changed since the snapshot was generated, and events are
- * searchable offline. Events are time-sensitive, but a past event is simply
- * filtered out by `starts_at` at display time, and the delta keeps the rest
- * fresh.
+ * searchable offline. It contains only events that had not started when it was
+ * generated, matching what the screens display; the delta keeps the rest fresh.
  */
 object BundledEvents {
     internal const val FILE_NAME = "bundled-events.json"

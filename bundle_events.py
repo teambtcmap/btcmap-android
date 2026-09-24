@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Download the latest events snapshot as a bundled Android asset.
 
-Fetches every event from the BTC Map API and writes it to
-``app/src/main/assets/bundled-events.json``. The snapshot carries each event's
-real ``updated_at``, so the first events sync only fetches the few that changed
-since the snapshot was generated, and events are searchable offline.
+Fetches every event from the BTC Map API, keeps only the upcoming ones and
+writes them to ``app/src/main/assets/bundled-events.json``. The snapshot carries
+each event's real ``updated_at``, so the first events sync only fetches the few
+that changed since the snapshot was generated, and events are searchable
+offline.
 
 Unlike places, areas and comments, ``updated_since`` is required: without it
 the endpoint falls back to a legacy full snapshot that omits ``updated_at`` and
@@ -12,6 +13,11 @@ so cannot seed a delta cursor. ``deleted_at`` is deliberately not requested:
 requesting it (or ``include_deleted``) also makes the API return soft-deleted
 tombstones, which the bundle does not need because an event that was deleted
 before the snapshot was built is simply absent from it.
+
+Delta mode deliberately returns events that have already started, so a sync
+client can observe edits and deletions of them, and an event without a real
+start date is stored at the epoch. Every screen filters those out at display
+time, so they are dropped here instead of shipping rows the app never shows.
 
 The output is pretty-printed and sorted by id. This keeps the diff of a
 refresh limited to the events that actually changed instead of rewriting the
@@ -67,14 +73,34 @@ def _is_number(value: object) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
+def _parse_timestamp(value: str) -> datetime.datetime:
+    timestamp = datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    # The app parses these with ZonedDateTime.parse, which rejects a value
+    # without an offset; match that here so a naive timestamp fails validation
+    # instead of raising a TypeError when it is compared against UTC now.
+    if timestamp.tzinfo is None:
+        raise ValueError("timestamp has no UTC offset")
+    return timestamp
+
+
 def _is_timestamp(value: object) -> bool:
     if not isinstance(value, str) or not value:
         return False
     try:
-        datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+        _parse_timestamp(value)
     except ValueError:
         return False
     return True
+
+
+def upcoming(events: list, now: datetime.datetime) -> list:
+    """Keep only the events whose start is strictly after [now].
+
+    Mirrors the app's ``ZonedDateTime.isUpcoming`` rule: the delta endpoint
+    returns past events and the epoch placeholder, and the screens filter them
+    out anyway, so they are not worth bundling.
+    """
+    return [event for event in events if _parse_timestamp(event["starts_at"]) > now]
 
 
 def validate(events: list) -> None:
@@ -138,6 +164,13 @@ def main() -> int:
         raise RuntimeError("downloaded events are not valid JSON") from exc
 
     validate(events)
+
+    # Delta mode returns already-started events and the epoch placeholder; keep
+    # only the upcoming ones, matching what every screen in the app displays.
+    events = upcoming(events, datetime.datetime.now(datetime.timezone.utc))
+    if not events:
+        raise RuntimeError("the API returned no upcoming events")
+
     events.sort(key=lambda event: event["id"])
     pretty = json.dumps(events, indent=2, ensure_ascii=False).encode("utf-8") + b"\n"
 
@@ -152,7 +185,8 @@ def main() -> int:
         tmp_file.unlink(missing_ok=True)
         raise
 
-    print(f"Bundled {len(events)} events into {OUTPUT_FILE.relative_to(APP_DIR.parent)}")
+    location = OUTPUT_FILE.relative_to(APP_DIR.parent)
+    print(f"Bundled {len(events)} upcoming events into {location}")
     return 0
 
 

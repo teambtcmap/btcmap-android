@@ -1,1034 +1,13 @@
 [
   {
-    "id": 1,
-    "lat": 7.8812324,
-    "lon": 98.3884695,
-    "name": "Phuket Bitcoin Meetup",
-    "website": "https://www.meetup.com/phuket-bitcoin-meetup/events/310120143/",
-    "starts_at": "2025-08-29T19:00:00+07:00",
-    "updated_at": "2026-04-21T07:07:38.323Z"
-  },
-  {
-    "id": 3,
-    "lat": 18.782225261011515,
-    "lon": 98.99429178234963,
-    "name": "Weekly Bitcoin Mixer",
-    "website": "https://www.meetup.com/bitcoinsinchiangmai/",
-    "starts_at": "2025-08-07T19:00:00+07:00",
-    "updated_at": "2025-08-04T04:51:23.293Z"
-  },
-  {
-    "id": 4,
-    "lat": -8.643221369429375,
-    "lon": 115.14280433620284,
-    "name": "Bitcoin Indonesia Conference 2025",
-    "website": "https://bitcoinindonesia.xyz/bitcoin-indonesia-conference-2025/",
-    "starts_at": "2025-09-05T10:00:00+08:00",
-    "updated_at": "2025-08-04T05:05:07.046Z"
-  },
-  {
-    "id": 5,
-    "lat": 13.724987758229249,
-    "lon": 100.58808957373424,
-    "name": "Grassroots Lightning Month - Meetup 1",
-    "website": "https://www.meetup.com/bob-space-community-events/events/310308479/",
-    "starts_at": "2025-08-08T18:30:00+07:00",
-    "updated_at": "2025-08-04T06:48:46.257Z"
-  },
-  {
-    "id": 6,
-    "lat": 18.7822,
-    "lon": 98.9942,
-    "name": "Chiang Mai Weekly Meetup",
-    "website": "https://www.meetup.com/bitcoinsinchiangmai/",
-    "starts_at": "2025-08-28T19:00:00+07:00",
-    "updated_at": "2025-08-28T04:45:38.908Z"
-  },
-  {
-    "id": 7,
-    "lat": 18.788,
-    "lon": 99.0156,
-    "name": "Bitcoin Half Marathon",
-    "website": "https://www.bitcoinmarathon.org/",
-    "starts_at": "2025-11-01T09:00:00+07:00",
-    "ends_at": "2025-11-02T23:00:00+07:00",
-    "updated_at": "2025-08-28T04:54:36.916Z"
-  },
-  {
-    "id": 8,
-    "lat": 18.7822,
-    "lon": 98.9942,
-    "name": "Chiang Mai Weekly Meetup",
-    "website": "https://www.meetup.com/bitcoinsinchiangmai/",
-    "starts_at": "2025-09-04T19:00:00+07:00",
-    "updated_at": "2025-08-31T03:49:39.567Z"
-  },
-  {
-    "id": 9,
-    "lat": 7.8812324,
-    "lon": 98.3884695,
-    "name": "Phuket Bitcoin Meetup",
-    "website": "https://www.meetup.com/phuket-bitcoin-meetup/events/310120143/",
-    "starts_at": "2025-09-26T19:00:00+07:00",
-    "updated_at": "2025-08-31T03:51:35.812Z"
-  },
-  {
-    "id": 10,
-    "lat": 7.8999,
-    "lon": 98.3676,
-    "name": "Phuket Bitcoin Meetup",
-    "website": "https://www.meetup.com/phuket-bitcoin-meetup/events/310120147/",
-    "starts_at": "2025-10-31T19:00:00+07:00",
-    "updated_at": "2025-10-27T11:47:06.88Z"
-  },
-  {
-    "id": 13,
-    "lat": 52.24066,
-    "lon": 21.0096,
-    "name": "BitcoinWalk Warsaw",
-    "website": "https://bitcoinwalk.org/warszawa/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2025-11-22T01:37:02.532Z"
-  },
-  {
-    "id": 14,
-    "lat": 53.2200113,
-    "lon": 6.5615664,
-    "name": "Bitcoin Grunn",
-    "website": "https://t.me/+Hjn5frWClcc1NDU0",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2025-11-10T04:19:10.76Z"
-  },
-  {
-    "id": 15,
-    "lat": 50.8450592,
-    "lon": 4.3532324,
-    "name": "Bitcoin Brussels",
-    "website": "https://www.meetup.com/bitcoinmeetup/events/311356949/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2025-11-10T04:24:11.951Z"
-  },
-  {
-    "id": 16,
-    "lat": 52.3798641,
-    "lon": 4.631866,
-    "name": "Satoshi Radio Meeetup",
-    "website": "https://www.meetup.com/satoshi-radio-meetup/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2025-11-10T05:09:21.783Z"
-  },
-  {
-    "id": 17,
-    "lat": 52.3685401,
-    "lon": 4.9188599,
-    "name": "BitDevs Amsterdam",
-    "website": "https://bitdevsamsterdam.org/events",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2025-11-10T05:19:38.335Z"
-  },
-  {
-    "id": 18,
-    "lat": 51.322151950000006,
-    "lon": 4.94839185,
-    "name": "Bitcoin Turnhout",
-    "website": "https://www.meetup.com/turnhout-bitcoin-meetup/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2025-11-10T05:23:30.861Z"
-  },
-  {
-    "id": 20,
-    "lat": 57.1498742,
-    "lon": -2.2074277,
-    "name": "BitcoinWalk Aberdeen",
-    "website": "https://bitcoinwalk.org/aberdeen/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:08.192Z"
-  },
-  {
-    "id": 21,
-    "lat": 40.4811584361,
-    "lon": -3.3548901416,
-    "name": "BitcoinWalk Alcalá de Henares",
-    "website": "https://bitcoinwalk.org/alcala-de-henares/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:09.055Z"
-  },
-  {
-    "id": 22,
-    "lat": 37.035384,
-    "lon": -8.026858,
-    "name": "BitcoinWalk Algarve",
-    "website": "https://bitcoinwalk.org/algarve/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:09.875Z"
-  },
-  {
-    "id": 23,
-    "lat": 52.385057,
-    "lon": 4.874925,
-    "name": "BitcoinWalk Amsterdam",
-    "website": "https://bitcoinwalk.org/amsterdam/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:10.689Z"
-  },
-  {
-    "id": 24,
-    "lat": 37.976612,
-    "lon": 23.72071,
-    "name": "BitcoinWalk Athens",
-    "website": "https://bitcoinwalk.org/athens/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:11.553Z"
-  },
-  {
-    "id": 25,
-    "lat": 33.937986,
-    "lon": -84.443412,
-    "name": "BitcoinWalk Atlanta",
-    "website": "https://bitcoinwalk.org/atlanta/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:12.376Z"
-  },
-  {
-    "id": 26,
-    "lat": -36.84235,
-    "lon": 174.75886,
-    "name": "BitcoinWalk Auckland",
-    "website": "https://bitcoinwalk.org/auckland/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:13.281Z"
-  },
-  {
-    "id": 27,
-    "lat": 30.241735,
-    "lon": -97.7269,
-    "name": "BitcoinWalk Austin",
-    "website": "https://bitcoinwalk.org/austin/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:14.099Z"
-  },
-  {
-    "id": 28,
-    "lat": -8.651846,
-    "lon": 115.121541,
-    "name": "BitcoinWalk Bali",
-    "website": "https://bitcoinwalk.org/bali/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:14.928Z"
-  },
-  {
-    "id": 29,
-    "lat": 41.827233,
-    "lon": 23.477545,
-    "name": "BitcoinWalk Bansko",
-    "website": "https://bitcoinwalk.org/bansko/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:15.741Z"
-  },
-  {
-    "id": 30,
-    "lat": 41.3867,
-    "lon": 2.1961,
-    "name": "BitcoinWalk Barcelona",
-    "website": "https://bitcoinwalk.org/barcelona/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:16.555Z"
-  },
-  {
-    "id": 31,
-    "lat": 15.256978,
-    "lon": 73.919373,
-    "name": "BitcoinWalk Benaulim Beach, South Goa",
-    "website": "https://bitcoinwalk.org/benaulim/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:17.37Z"
-  },
-  {
-    "id": 32,
-    "lat": 51.43939,
-    "lon": 7.272681,
-    "name": "BitcoinWalk Bochum",
-    "website": "https://bitcoinwalk.org/bochum/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:18.218Z"
-  },
-  {
-    "id": 33,
-    "lat": 43.610906,
-    "lon": -116.220551,
-    "name": "BitcoinWalk Boise",
-    "website": "https://bitcoinwalk.org/boise-idaho/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:19.036Z"
-  },
-  {
-    "id": 34,
-    "lat": 40.013848,
-    "lon": -105.281195,
-    "name": "BitcoinWalk Boulder",
-    "website": "https://bitcoinwalk.org/boulder/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:19.85Z"
-  },
-  {
-    "id": 35,
-    "lat": -27.475135,
-    "lon": 153.02081,
-    "name": "BitcoinWalk Brisbane",
-    "website": "https://bitcoinwalk.org/brisbane/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:20.665Z"
-  },
-  {
-    "id": 36,
-    "lat": 50.916252,
-    "lon": 4.411657,
-    "name": "BitcoinWalk Brussels",
-    "website": "https://bitcoinwalk.org/brussels/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:21.59Z"
-  },
-  {
-    "id": 37,
-    "lat": 47.525544,
-    "lon": 19.07684,
-    "name": "BitcoinWalk Budapest",
-    "website": "https://bitcoinwalk.org/budapest/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:22.406Z"
-  },
-  {
-    "id": 38,
-    "lat": -34.56832,
-    "lon": -58.41113,
-    "name": "BitcoinWalk Buenos Aires",
-    "website": "https://bitcoinwalk.org/buenos-aires/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:23.316Z"
-  },
-  {
-    "id": 39,
-    "lat": -20.158145,
-    "lon": 28.591039,
-    "name": "BitcoinWalk Bulawayo",
-    "website": "https://bitcoinwalk.org/bulawayo/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:24.146Z"
-  },
-  {
-    "id": 40,
-    "lat": 42.492589,
-    "lon": 27.48074,
-    "name": "BitcoinWalk Burgas",
-    "website": "https://bitcoinwalk.org/burgas/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:24.965Z"
-  },
-  {
-    "id": 41,
-    "lat": 51.054452,
-    "lon": -114.079234,
-    "name": "BitcoinWalk Calgary",
-    "website": "https://bitcoinwalk.org/calgary/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:25.814Z"
-  },
-  {
-    "id": 42,
-    "lat": 35.056086,
-    "lon": -85.308722,
-    "name": "BitcoinWalk Chattanooga",
-    "website": "https://bitcoinwalk.org/chattanooga/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:26.654Z"
-  },
-  {
-    "id": 43,
-    "lat": 40.001625,
-    "lon": -83.011883,
-    "name": "BitcoinWalk Columbus Ohio",
-    "website": "https://bitcoinwalk.org/columbus/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:27.471Z"
-  },
-  {
-    "id": 44,
-    "lat": 55.673898,
-    "lon": 12.57688,
-    "name": "BitcoinWalk Copenhagen",
-    "website": "https://bitcoinwalk.org/copenhagen/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:28.288Z"
-  },
-  {
-    "id": 45,
-    "lat": 49.691761,
-    "lon": -124.996969,
-    "name": "BitcoinWalk Courtenay",
-    "website": "https://bitcoinwalk.org/courtenay/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:29.106Z"
-  },
-  {
-    "id": 46,
-    "lat": 50.053896,
-    "lon": 19.932822,
-    "name": "BitcoinWalk Cracow",
-    "website": "https://bitcoinwalk.org/cracow/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:29.922Z"
-  },
-  {
-    "id": 47,
-    "lat": 51.056715,
-    "lon": 13.732958,
-    "name": "BitcoinWalk Dresden",
-    "website": "https://bitcoinwalk.org/dresden/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:30.735Z"
-  },
-  {
-    "id": 48,
-    "lat": 55.94273,
-    "lon": -3.195034,
-    "name": "BitcoinWalk Edinburgh",
-    "website": "https://bitcoinwalk.org/edinburgh/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:31.552Z"
-  },
-  {
-    "id": 49,
-    "lat": 38.84758,
-    "lon": -77.309087,
-    "name": "BitcoinWalk Fairfax",
-    "website": "https://bitcoinwalk.org/fairfax-virginia/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:32.367Z"
-  },
-  {
-    "id": 50,
-    "lat": 54.79258,
-    "lon": 9.43126,
-    "name": "BitcoinWalk Flensburg",
-    "website": "https://bitcoinwalk.org/flensburg/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:33.184Z"
-  },
-  {
-    "id": 51,
-    "lat": 47.994645,
-    "lon": 7.844111,
-    "name": "BitcoinWalk Freiburg im Breisgau",
-    "website": "https://bitcoinwalk.org/freiburg-im-breisgau/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:34.002Z"
-  },
-  {
-    "id": 52,
-    "lat": -3.428781,
-    "lon": 29.92318,
-    "name": "BitcoinWalk Gitega",
-    "website": "https://bitcoinwalk.org/gitega/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:34.85Z"
-  },
-  {
-    "id": 53,
-    "lat": 55.867911,
-    "lon": -4.28581,
-    "name": "BitcoinWalk Glasgow",
-    "website": "https://bitcoinwalk.org/glasgow/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:35.667Z"
-  },
-  {
-    "id": 54,
-    "lat": 57.697412,
-    "lon": 11.954752,
-    "name": "BitcoinWalk Göteborg",
-    "website": "https://bitcoinwalk.org/goteborg/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:36.488Z"
-  },
-  {
-    "id": 55,
-    "lat": 37.172268,
-    "lon": -3.59368,
-    "name": "BitcoinWalk Granada",
-    "website": "https://bitcoinwalk.org/granada/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:37.349Z"
-  },
-  {
-    "id": 56,
-    "lat": 47.073406,
-    "lon": 15.441162,
-    "name": "BitcoinWalk Graz",
-    "website": "https://bitcoinwalk.org/graz/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:38.265Z"
-  },
-  {
-    "id": 57,
-    "lat": 14.599723,
-    "lon": -90.509748,
-    "name": "BitcoinWalk Guatemala",
-    "website": "https://bitcoinwalk.org/guatemala/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:39.084Z"
-  },
-  {
-    "id": 58,
-    "lat": 53.541315,
-    "lon": 9.984351,
-    "name": "BitcoinWalk Hamburg",
-    "website": "https://bitcoinwalk.org/hamburg/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:39.9Z"
-  },
-  {
-    "id": 59,
-    "lat": 52.373977,
-    "lon": 9.735593,
-    "name": "BitcoinWalk Hannover",
-    "website": "https://bitcoinwalk.org/hannover/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:40.711Z"
-  },
-  {
-    "id": 60,
-    "lat": 60.161137,
-    "lon": 24.945207,
-    "name": "BitcoinWalk Helsinki",
-    "website": "https://bitcoinwalk.org/helsinki/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:41.548Z"
-  },
-  {
-    "id": 61,
-    "lat": 32.162413,
-    "lon": 34.844675,
-    "name": "BitcoinWalk Herzliya",
-    "website": "https://bitcoinwalk.org/herzliya/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:53:42.365Z"
-  },
-  {
-    "id": 62,
-    "lat": 47.156172,
-    "lon": 27.586616,
-    "name": "BitcoinWalk Iași",
-    "website": "https://bitcoinwalk.org/iasi/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:46.173Z"
-  },
-  {
-    "id": 63,
-    "lat": 48.766535,
-    "lon": 11.425754,
-    "name": "BitcoinWalk Ingolstadt",
-    "website": "https://bitcoinwalk.org/ingolstadt/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:46.996Z"
-  },
-  {
-    "id": 64,
-    "lat": 35.311028,
-    "lon": 139.546681,
-    "name": "BitcoinWalk Kamakura",
-    "website": "https://bitcoinwalk.org/kamakura/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:47.814Z"
-  },
-  {
-    "id": 65,
-    "lat": 50.941278,
-    "lon": 6.958281,
-    "name": "BitcoinWalk Köln",
-    "website": "https://bitcoinwalk.org/koeln/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:48.653Z"
-  },
-  {
-    "id": 66,
-    "lat": 54.04753,
-    "lon": -2.801648,
-    "name": "BitcoinWalk Lancaster",
-    "website": "https://bitcoinwalk.org/lancaster/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:49.472Z"
-  },
-  {
-    "id": 67,
-    "lat": 28.140417,
-    "lon": -15.431221,
-    "name": "BitcoinWalk Las Palmas de Gran Canaria",
-    "website": "https://bitcoinwalk.org/gran-canaria/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:50.303Z"
-  },
-  {
-    "id": 68,
-    "lat": 46.512683,
-    "lon": 6.643694,
-    "name": "BitcoinWalk Lausanne",
-    "website": "https://bitcoinwalk.org/lausanne/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:51.128Z"
-  },
-  {
-    "id": 69,
-    "lat": 51.34149,
-    "lon": 12.368593,
-    "name": "BitcoinWalk Leipzig",
-    "website": "https://bitcoinwalk.org/leipzig/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:51.947Z"
-  },
-  {
-    "id": 70,
-    "lat": 46.721495,
-    "lon": -122.951508,
-    "name": "BitcoinWalk Lewis County WA",
-    "website": "https://bitcoinwalk.org/lewis-county/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:52.765Z"
-  },
-  {
-    "id": 71,
-    "lat": 38.740156,
-    "lon": -9.141708,
-    "name": "BitcoinWalk Lisbon",
-    "website": "https://bitcoinwalk.org/lisbon/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:53.584Z"
-  },
-  {
-    "id": 72,
-    "lat": 51.507611,
-    "lon": -0.155495,
-    "name": "BitcoinWalk London",
-    "website": "https://bitcoinwalk.org/london/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:54.467Z"
-  },
-  {
-    "id": 73,
-    "lat": 45.99849,
-    "lon": 8.94829,
-    "name": "BitcoinWalk Lugano",
-    "website": "https://bitcoinwalk.org/lugano/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:55.385Z"
-  },
-  {
-    "id": 74,
-    "lat": 32.641571,
-    "lon": -16.924858,
-    "name": "BitcoinWalk Madeira",
-    "website": "https://bitcoinwalk.org/madeira/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:56.204Z"
-  },
-  {
-    "id": 75,
-    "lat": 25.76451,
-    "lon": -80.192383,
-    "name": "BitcoinWalk Miami",
-    "website": "https://bitcoinwalk.org/miami/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:57.023Z"
-  },
-  {
-    "id": 76,
-    "lat": 48.131158,
-    "lon": 11.57949,
-    "name": "BitcoinWalk München",
-    "website": "https://bitcoinwalk.org/muenchen/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:57.839Z"
-  },
-  {
-    "id": 77,
-    "lat": 40.712776,
-    "lon": -74.005974,
-    "name": "BitcoinWalk New York City",
-    "website": "https://bitcoinwalk.org/nyc/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:58.686Z"
-  },
-  {
-    "id": 78,
-    "lat": 52.237073,
-    "lon": -0.893335,
-    "name": "BitcoinWalk Northampton",
-    "website": "https://bitcoinwalk.org/northampton/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:54:59.577Z"
-  },
-  {
-    "id": 79,
-    "lat": 43.4675,
-    "lon": -79.6877,
-    "name": "BitcoinWalk Oakville",
-    "website": "https://bitcoinwalk.org/oakville/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:00.512Z"
-  },
-  {
-    "id": 80,
-    "lat": 51.7694,
-    "lon": 5.5285,
-    "name": "BitcoinWalk Oss",
-    "website": "https://bitcoinwalk.org/oss/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:01.441Z"
-  },
-  {
-    "id": 81,
-    "lat": 45.4215,
-    "lon": -75.6972,
-    "name": "BitcoinWalk Ottawa",
-    "website": "https://bitcoinwalk.org/ottawa/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:02.263Z"
-  },
-  {
-    "id": 82,
-    "lat": 39.5693,
-    "lon": 2.6502,
-    "name": "BitcoinWalk Palma de Mallorca",
-    "website": "https://bitcoinwalk.org/mallorca/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:03.085Z"
-  },
-  {
-    "id": 83,
-    "lat": 5.43561418,
-    "lon": 100.292865,
-    "name": "BitcoinWalk Penang",
-    "website": "https://bitcoinwalk.org/penang/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:03.908Z"
-  },
-  {
-    "id": 84,
-    "lat": 52.4064,
-    "lon": 16.9252,
-    "name": "BitcoinWalk Poznań",
-    "website": "https://bitcoinwalk.org/poznan/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:04.732Z"
-  },
-  {
-    "id": 85,
-    "lat": 50.0755,
-    "lon": 14.4378,
-    "name": "BitcoinWalk Prague",
-    "website": "https://bitcoinwalk.org/prague/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:05.627Z"
-  },
-  {
-    "id": 86,
-    "lat": 3.034232,
-    "lon": 101.617035,
-    "name": "BitcoinWalk Puchong",
-    "website": "https://bitcoinwalk.org/puchong/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:06.549Z"
-  },
-  {
-    "id": 87,
-    "lat": 56.9496,
-    "lon": 24.1052,
-    "name": "BitcoinWalk Riga",
-    "website": "https://bitcoinwalk.org/riga/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:07.37Z"
-  },
-  {
-    "id": 88,
-    "lat": -22.9068,
-    "lon": -43.1729,
-    "name": "BitcoinWalk Rio De Janeiro",
-    "website": "https://bitcoinwalk.org/rio/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:08.2Z"
-  },
-  {
-    "id": 89,
-    "lat": 16.31558,
-    "lon": -86.533221,
-    "name": "BitcoinWalk Roatan",
-    "website": "https://bitcoinwalk.org/roatan/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:09.034Z"
-  },
-  {
-    "id": 90,
-    "lat": 50.2589,
-    "lon": 18.8524,
-    "name": "BitcoinWalk Ruda Śląska",
-    "website": "https://bitcoinwalk.org/ruda-slaska/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:09.871Z"
-  },
-  {
-    "id": 91,
-    "lat": 29.424122,
-    "lon": -98.493628,
-    "name": "BitcoinWalk San Antonio",
-    "website": "https://bitcoinwalk.org/san-antonio/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:10.721Z"
-  },
-  {
-    "id": 92,
-    "lat": 13.68239,
-    "lon": -89.23238,
-    "name": "BitcoinWalk San Salvador",
-    "website": "https://bitcoinwalk.org/salvador/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:11.561Z"
-  },
-  {
-    "id": 93,
-    "lat": 34.019454,
-    "lon": -118.491191,
-    "name": "BitcoinWalk Santa Monica",
-    "website": "https://bitcoinwalk.org/santa-monica/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:12.39Z"
-  },
-  {
-    "id": 94,
-    "lat": 47.606209,
-    "lon": -122.332071,
-    "name": "BitcoinWalk Seattle",
-    "website": "https://bitcoinwalk.org/seattle/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:13.308Z"
-  },
-  {
-    "id": 95,
-    "lat": 47.0543,
-    "lon": 7.1539,
-    "name": "BitcoinWalk Seeland",
-    "website": "https://bitcoinwalk.org/seeland/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:14.126Z"
-  },
-  {
-    "id": 96,
-    "lat": 52.7073,
-    "lon": -2.7553,
-    "name": "BitcoinWalk Shrewsbury",
-    "website": "https://bitcoinwalk.org/shrewsbury/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:14.962Z"
-  },
-  {
-    "id": 97,
-    "lat": 1.2847,
-    "lon": 103.85195,
-    "name": "BitcoinWalk Singapore",
-    "website": "https://bitcoinwalk.org/singapore/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:15.782Z"
-  },
-  {
-    "id": 98,
-    "lat": 42.6977,
-    "lon": 23.3219,
-    "name": "BitcoinWalk Sofia",
-    "website": "https://bitcoinwalk.org/sofia/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:16.677Z"
-  },
-  {
-    "id": 99,
-    "lat": 59.3293,
-    "lon": 18.0686,
-    "name": "BitcoinWalk Stockholm",
-    "website": "https://bitcoinwalk.org/stockholm/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:17.5Z"
-  },
-  {
-    "id": 100,
-    "lat": 50.4431,
-    "lon": 18.8558,
-    "name": "BitcoinWalk Tarnowskie Góry",
-    "website": "https://bitcoinwalk.org/tarnowskie-gory/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:18.321Z"
-  },
-  {
-    "id": 101,
-    "lat": 41.7151,
-    "lon": 44.8271,
-    "name": "BitcoinWalk Tbilisi",
-    "website": "https://bitcoinwalk.org/tbilisi/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:19.164Z"
-  },
-  {
-    "id": 102,
-    "lat": 35.6895,
-    "lon": 139.6917,
-    "name": "BitcoinWalk Tokyo",
-    "website": "https://bitcoinwalk.org/tokyo/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:19.998Z"
-  },
-  {
-    "id": 103,
-    "lat": 45.067755,
-    "lon": 7.682489,
-    "name": "BitcoinWalk Torino",
-    "website": "https://bitcoinwalk.org/torino/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:20.816Z"
-  },
-  {
-    "id": 104,
-    "lat": 43.6045,
-    "lon": 1.4442,
-    "name": "BitcoinWalk Toulouse",
-    "website": "https://bitcoinwalk.org/toulouse/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:21.634Z"
-  },
-  {
-    "id": 105,
-    "lat": 49.2827,
-    "lon": -123.1207,
-    "name": "BitcoinWalk Vancouver",
-    "website": "https://bitcoinwalk.org/vancouver/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:22.463Z"
-  },
-  {
-    "id": 106,
-    "lat": 43.2141,
-    "lon": 27.9147,
-    "name": "BitcoinWalk Varna",
-    "website": "https://bitcoinwalk.org/varna/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:23.342Z"
-  },
-  {
-    "id": 107,
-    "lat": 48.2082,
-    "lon": 16.3738,
-    "name": "BitcoinWalk Vienna",
-    "website": "https://bitcoinwalk.org/vienna/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:24.164Z"
-  },
-  {
-    "id": 108,
-    "lat": 54.6872,
-    "lon": 25.2797,
-    "name": "BitcoinWalk Vilnius",
-    "website": "https://bitcoinwalk.org/vilnius/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:24.983Z"
-  },
-  {
-    "id": 110,
-    "lat": 42.825227,
-    "lon": -71.303276,
-    "name": "BitcoinWalk Windham, NH",
-    "website": "https://bitcoinwalk.org/windham/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:26.72Z"
-  },
-  {
-    "id": 111,
-    "lat": 51.482012,
-    "lon": -0.606355,
-    "name": "BitcoinWalk Windsor",
-    "website": "https://bitcoinwalk.org/windsor/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:27.534Z"
-  },
-  {
-    "id": 112,
-    "lat": 51.1099,
-    "lon": 17.0315,
-    "name": "BitcoinWalk Wrocław",
-    "website": "https://bitcoinwalk.org/wroclaw/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:28.347Z"
-  },
-  {
-    "id": 113,
-    "lat": 49.7915,
-    "lon": 9.9317,
-    "name": "BitcoinWalk Würzburg",
-    "website": "https://bitcoinwalk.org/wuerzburg/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:29.165Z"
-  },
-  {
-    "id": 114,
-    "lat": 40.1792,
-    "lon": 44.5152,
-    "name": "BitcoinWalk Yerevan",
-    "website": "https://bitcoinwalk.org/yerevan/",
-    "starts_at": "1970-01-01T00:00:00Z",
-    "updated_at": "2026-01-25T12:55:29.982Z"
-  },
-  {
-    "id": 117,
-    "lat": 7.985439356294918,
-    "lon": 98.30149152772992,
-    "name": "Bang Thao Bitcoin Meetup",
-    "website": "https://www.meetup.com/phuket-bitcoin-meetup/events/315676389",
-    "starts_at": "2026-08-20T19:00:00Z",
-    "updated_at": "2026-07-30T06:34:39.985Z"
-  },
-  {
-    "id": 119,
-    "lat": 46.31497762749274,
-    "lon": 7.990701288529607,
-    "name": "Bitcoin Wallis Meetup",
-    "website": "https://bitcoin-wallis.ch/",
-    "starts_at": "2026-08-25T19:30:00Z",
-    "ends_at": "2026-08-25T22:00:00Z",
-    "updated_at": "2026-08-10T06:34:23.881Z"
-  },
-  {
-    "id": 120,
-    "lat": 46.31937013014891,
-    "lon": 7.98665264448087,
-    "name": "Bitcoin Wallis Walk",
-    "website": "https://bitcoin-wallis.ch",
-    "starts_at": "2026-09-19T13:00:00Z",
-    "ends_at": "2026-09-19T18:00:00Z",
-    "updated_at": "2026-08-07T11:58:08.665Z"
-  },
-  {
-    "id": 121,
-    "lat": 7.89999616866497,
-    "lon": 98.36761422416038,
-    "name": "Central Bitcoin Meetup",
-    "website": "https://www.meetup.com/phuket-bitcoin-meetup/events/316252643/",
-    "starts_at": "2026-08-28T19:00:00Z",
-    "ends_at": "2026-08-28T22:00:00Z",
-    "updated_at": "2026-08-24T12:27:49.567Z"
-  },
-  {
     "id": 122,
     "lat": 7.899971135374869,
     "lon": 98.36758749588596,
     "name": "Central Phuket Meetup",
     "website": "https://www.meetup.com/phuket-bitcoin-meetup/",
-    "starts_at": "2026-09-25T19:00:00Z",
-    "ends_at": "2026-09-25T22:00:00Z",
-    "updated_at": "2026-09-10T06:12:53.776Z"
+    "starts_at": "2026-09-25T19:00:00+07:00",
+    "ends_at": "2026-09-25T22:00:00+07:00",
+    "updated_at": "2026-09-24T05:38:10.784Z"
   },
   {
     "id": 123,
@@ -1036,29 +15,9 @@
     "lon": 7.9906962547669025,
     "name": "Bitcoin Wallis Meetup",
     "website": "https://bitcoin-wallis.ch/",
-    "starts_at": "2026-10-06T19:00:00Z",
-    "ends_at": "2026-10-06T22:00:00Z",
-    "updated_at": "2026-09-03T11:16:05.517Z"
-  },
-  {
-    "id": 124,
-    "lat": 18.78220825507816,
-    "lon": 98.99420852372332,
-    "name": "Chiang Mai Weekly Meetup",
-    "website": "https://www.meetup.com/bitcoinsinchiangmai/",
-    "starts_at": "2026-09-10T19:00:00Z",
-    "ends_at": "2026-09-10T22:00:00Z",
-    "updated_at": "2026-09-08T06:39:45.973Z"
-  },
-  {
-    "id": 125,
-    "lat": 18.78222179966825,
-    "lon": 98.99419001829888,
-    "name": "Chiang Mai Weekly Meetup",
-    "website": "https://www.meetup.com/bitcoinsinchiangmai/",
-    "starts_at": "2026-09-17T19:00:00Z",
-    "ends_at": "2026-09-17T22:00:00Z",
-    "updated_at": "2026-09-10T05:29:08.799Z"
+    "starts_at": "2026-10-06T19:00:00+02:00",
+    "ends_at": "2026-10-06T22:00:00+02:00",
+    "updated_at": "2026-09-24T05:38:11.458Z"
   },
   {
     "id": 126,
@@ -1066,49 +25,9 @@
     "lon": 100.5284061557058,
     "name": "Bitcoin Thailand 2026",
     "website": "https://bitcointhailand.co/",
-    "starts_at": "2026-10-28T09:00:00Z",
-    "ends_at": "2026-10-29T22:00:00Z",
-    "updated_at": "2026-09-10T06:09:15.665Z"
-  },
-  {
-    "id": 127,
-    "lat": 51.9853971,
-    "lon": 5.8792471,
-    "name": "Noderunners Conference",
-    "website": "https://noderunners.network/en/conference",
-    "starts_at": "2026-09-19T09:00:00Z",
-    "ends_at": "2026-09-19T18:00:00Z",
-    "updated_at": "2026-09-15T09:33:36.365Z"
-  },
-  {
-    "id": 128,
-    "lat": 38.8950982,
-    "lon": -77.0363849,
-    "name": "Freedom Tech DC",
-    "website": "https://www.btcpolicy.org/summit",
-    "starts_at": "2026-09-22T09:00:00Z",
-    "ends_at": "2026-09-23T18:00:00Z",
-    "updated_at": "2026-09-15T09:34:59.584Z"
-  },
-  {
-    "id": 129,
-    "lat": 60.1666204,
-    "lon": 24.9435408,
-    "name": "European Mining Summit",
-    "website": "https://miningsummit.eu",
-    "starts_at": "2026-09-23T09:00:00Z",
-    "ends_at": "2026-09-23T18:00:00Z",
-    "updated_at": "2026-09-15T09:35:35.941Z"
-  },
-  {
-    "id": 130,
-    "lat": 39.9622601,
-    "lon": -83.0007065,
-    "name": "Midwest Bitcoin Summit",
-    "website": "https://midwestbtc.com",
-    "starts_at": "2026-09-23T09:00:00Z",
-    "ends_at": "2026-09-24T18:00:00Z",
-    "updated_at": "2026-09-15T10:19:09.229Z"
+    "starts_at": "2026-10-28T09:00:00+07:00",
+    "ends_at": "2026-10-29T22:00:00+07:00",
+    "updated_at": "2026-09-24T05:38:12.141Z"
   },
   {
     "id": 131,
@@ -1116,9 +35,9 @@
     "lon": 24.9435408,
     "name": "BTC HEL",
     "website": "https://btchel.com/",
-    "starts_at": "2026-09-25T09:00:00Z",
-    "ends_at": "2026-09-26T18:00:00Z",
-    "updated_at": "2026-09-15T10:19:49.374Z"
+    "starts_at": "2026-09-25T09:00:00+03:00",
+    "ends_at": "2026-09-26T18:00:00+03:00",
+    "updated_at": "2026-09-24T05:38:12.82Z"
   },
   {
     "id": 132,
@@ -1126,9 +45,9 @@
     "lon": 25.2829111,
     "name": "Proof Conference",
     "website": "https://proofconference.com/en/",
-    "starts_at": "2026-09-27T09:00:00Z",
-    "ends_at": "2026-09-27T18:00:00Z",
-    "updated_at": "2026-09-15T10:20:21.391Z"
+    "starts_at": "2026-09-27T09:00:00+03:00",
+    "ends_at": "2026-09-27T18:00:00+03:00",
+    "updated_at": "2026-09-24T05:38:13.498Z"
   },
   {
     "id": 133,
@@ -1136,9 +55,9 @@
     "lon": -74.0060152,
     "name": "Bitcoin Treasuries Conference NYC",
     "website": "https://bitcointreasuries.net/conference",
-    "starts_at": "2026-09-28T09:00:00Z",
-    "ends_at": "2026-09-28T18:00:00Z",
-    "updated_at": "2026-09-15T10:20:53.994Z"
+    "starts_at": "2026-09-28T09:00:00-04:00",
+    "ends_at": "2026-09-28T18:00:00-04:00",
+    "updated_at": "2026-09-24T05:38:14.18Z"
   },
   {
     "id": 134,
@@ -1146,9 +65,9 @@
     "lon": -86.4977513,
     "name": "Bitchill s04",
     "website": "https://thebitcoindistrict.com/bitchill",
-    "starts_at": "2026-10-01T09:00:00Z",
-    "ends_at": "2026-10-11T18:00:00Z",
-    "updated_at": "2026-09-15T10:21:20.49Z"
+    "starts_at": "2026-10-01T09:00:00-06:00",
+    "ends_at": "2026-10-11T18:00:00-06:00",
+    "updated_at": "2026-09-24T05:38:14.87Z"
   },
   {
     "id": 135,
@@ -1156,9 +75,9 @@
     "lon": 13.380209,
     "name": "bitcoin++ Berlin",
     "website": "https://btcpp.dev/berlin26",
-    "starts_at": "2026-10-01T09:00:00Z",
-    "ends_at": "2026-10-03T18:00:00Z",
-    "updated_at": "2026-09-15T10:23:28.32Z"
+    "starts_at": "2026-10-01T09:00:00+02:00",
+    "ends_at": "2026-10-03T18:00:00+02:00",
+    "updated_at": "2026-09-24T05:38:15.557Z"
   },
   {
     "id": 136,
@@ -1166,9 +85,9 @@
     "lon": -3.703507,
     "name": "Watch Out, Bitcoin!",
     "website": "https://wobitcoin.org/",
-    "starts_at": "2026-10-02T09:00:00Z",
-    "ends_at": "2026-10-04T18:00:00Z",
-    "updated_at": "2026-09-15T10:24:13.452Z"
+    "starts_at": "2026-10-02T09:00:00+02:00",
+    "ends_at": "2026-10-04T18:00:00+02:00",
+    "updated_at": "2026-09-24T05:38:16.253Z"
   },
   {
     "id": 137,
@@ -1176,9 +95,9 @@
     "lon": 16.9054611,
     "name": "Bitcoin Poland",
     "website": "https://bitcoin-poland.com/",
-    "starts_at": "2026-10-05T09:00:00Z",
-    "ends_at": "2026-10-06T18:00:00Z",
-    "updated_at": "2026-09-15T10:24:38.43Z"
+    "starts_at": "2026-10-05T09:00:00+02:00",
+    "ends_at": "2026-10-06T18:00:00+02:00",
+    "updated_at": "2026-09-24T05:38:16.945Z"
   },
   {
     "id": 138,
@@ -1186,9 +105,9 @@
     "lon": -86.7742984,
     "name": "Imagine IF",
     "website": "https://www.imagineifnashville.com/",
-    "starts_at": "2026-10-05T09:00:00Z",
-    "ends_at": "2026-10-06T18:00:00Z",
-    "updated_at": "2026-09-15T10:27:01.902Z"
+    "starts_at": "2026-10-05T09:00:00-05:00",
+    "ends_at": "2026-10-06T18:00:00-05:00",
+    "updated_at": "2026-09-24T05:38:17.63Z"
   },
   {
     "id": 139,
@@ -1196,9 +115,9 @@
     "lon": -84.3988077,
     "name": "TABConf",
     "website": "https://7.tabconf.com/",
-    "starts_at": "2026-10-12T09:00:00Z",
-    "ends_at": "2026-10-15T18:00:00Z",
-    "updated_at": "2026-09-15T10:27:42.128Z"
+    "starts_at": "2026-10-12T09:00:00-04:00",
+    "ends_at": "2026-10-15T18:00:00-04:00",
+    "updated_at": "2026-09-24T05:38:18.323Z"
   },
   {
     "id": 140,
@@ -1206,9 +125,9 @@
     "lon": -118.491227,
     "name": "Bitcoin Alpha",
     "website": "https://bitcoinalpha.org/",
-    "starts_at": "2026-10-15T09:00:00Z",
-    "ends_at": "2026-10-17T18:00:00Z",
-    "updated_at": "2026-09-15T10:28:52.316Z"
+    "starts_at": "2026-10-15T09:00:00-07:00",
+    "ends_at": "2026-10-17T18:00:00-07:00",
+    "updated_at": "2026-09-24T05:38:18.991Z"
   },
   {
     "id": 141,
@@ -1216,9 +135,9 @@
     "lon": 115.3488754,
     "name": "Bitcoin Bush Bash Busselton",
     "website": "https://bitcoinbushbash.info/busselton/",
-    "starts_at": "2026-10-16T09:00:00Z",
-    "ends_at": "2026-10-18T18:00:00Z",
-    "updated_at": "2026-09-15T10:29:42.416Z"
+    "starts_at": "2026-10-16T09:00:00+08:00",
+    "ends_at": "2026-10-18T18:00:00+08:00",
+    "updated_at": "2026-09-24T05:38:19.682Z"
   },
   {
     "id": 142,
@@ -1226,9 +145,9 @@
     "lon": 8.9512275,
     "name": "Future of Capital Markets",
     "website": "https://thefutureofcapitalmarkets.com/",
-    "starts_at": "2026-10-22T09:00:00Z",
-    "ends_at": "2026-10-22T18:00:00Z",
-    "updated_at": "2026-09-15T10:30:07.064Z"
+    "starts_at": "2026-10-22T09:00:00+02:00",
+    "ends_at": "2026-10-22T18:00:00+02:00",
+    "updated_at": "2026-09-24T05:38:20.354Z"
   },
   {
     "id": 143,
@@ -1236,9 +155,9 @@
     "lon": 8.9512275,
     "name": "Plan B Forum Lugano",
     "website": "https://planb.lugano.ch/planb-forum/",
-    "starts_at": "2026-10-23T09:00:00Z",
-    "ends_at": "2026-10-24T18:00:00Z",
-    "updated_at": "2026-09-15T10:30:33.676Z"
+    "starts_at": "2026-10-23T09:00:00+02:00",
+    "ends_at": "2026-10-24T18:00:00+02:00",
+    "updated_at": "2026-09-24T05:38:21.023Z"
   },
   {
     "id": 144,
@@ -1246,9 +165,9 @@
     "lon": 174.7772114,
     "name": "Bitkiwi XVII",
     "website": "https://kiwibitcoinguide.org/home/bitkiwi-meetups/bitkiwi-xvii-october-2026-wellington/",
-    "starts_at": "2026-10-24T09:00:00Z",
-    "ends_at": "2026-10-24T18:00:00Z",
-    "updated_at": "2026-09-15T10:31:47.056Z"
+    "starts_at": "2026-10-24T09:00:00+13:00",
+    "ends_at": "2026-10-24T18:00:00+13:00",
+    "updated_at": "2026-09-24T05:38:21.707Z"
   },
   {
     "id": 145,
@@ -1256,9 +175,9 @@
     "lon": -105.529442,
     "name": "Mita Tech Talks",
     "website": "https://2026.mitatechtalks.com/",
-    "starts_at": "2026-10-25T09:00:00Z",
-    "ends_at": "2026-10-27T18:00:00Z",
-    "updated_at": "2026-09-15T10:34:08.573Z"
+    "starts_at": "2026-10-25T09:00:00-06:00",
+    "ends_at": "2026-10-27T18:00:00-06:00",
+    "updated_at": "2026-09-24T05:38:22.389Z"
   },
   {
     "id": 146,
@@ -1266,9 +185,9 @@
     "lon": -86.7742984,
     "name": "Custody & Treasury Summit",
     "website": "https://www.meetup.com/bitcoinpark/events/314966347/",
-    "starts_at": "2026-10-28T09:00:00Z",
-    "ends_at": "2026-10-29T18:00:00Z",
-    "updated_at": "2026-09-15T10:37:02.51Z"
+    "starts_at": "2026-10-28T09:00:00-05:00",
+    "ends_at": "2026-10-29T18:00:00-05:00",
+    "updated_at": "2026-09-24T05:38:23.063Z"
   },
   {
     "id": 147,
@@ -1276,9 +195,9 @@
     "lon": -58.3955661,
     "name": "LABITCONF",
     "website": "https://labitconf.com/",
-    "starts_at": "2026-10-30T09:00:00Z",
-    "ends_at": "2026-10-31T18:00:00Z",
-    "updated_at": "2026-09-15T10:39:30.582Z"
+    "starts_at": "2026-10-30T09:00:00-03:00",
+    "ends_at": "2026-10-31T18:00:00-03:00",
+    "updated_at": "2026-09-24T05:38:23.74Z"
   },
   {
     "id": 148,
@@ -1286,9 +205,9 @@
     "lon": 4.8924534,
     "name": "Bitcoin for Corporations Symposium",
     "website": "https://bitcoinforcorporations.com/events/amsterdam-symposium-2026/",
-    "starts_at": "2026-11-04T09:00:00Z",
-    "ends_at": "2026-11-04T18:00:00Z",
-    "updated_at": "2026-09-15T10:40:42.634Z"
+    "starts_at": "2026-11-04T09:00:00+01:00",
+    "ends_at": "2026-11-04T18:00:00+01:00",
+    "updated_at": "2026-09-24T05:38:24.424Z"
   },
   {
     "id": 149,
@@ -1296,9 +215,9 @@
     "lon": 4.8924534,
     "name": "Bitcoin Amsterdam",
     "website": "https://www.bitcoin.amsterdam/2026",
-    "starts_at": "2026-11-05T09:00:00Z",
-    "ends_at": "2026-11-06T18:00:00Z",
-    "updated_at": "2026-09-15T10:41:07.504Z"
+    "starts_at": "2026-11-05T09:00:00+01:00",
+    "ends_at": "2026-11-06T18:00:00+01:00",
+    "updated_at": "2026-09-24T05:38:25.121Z"
   },
   {
     "id": 150,
@@ -1306,9 +225,9 @@
     "lon": 126.9782914,
     "name": "bitcoin++ Seoul",
     "website": "https://btcpp.dev/seoul",
-    "starts_at": "2026-11-05T09:00:00Z",
-    "ends_at": "2026-11-06T18:00:00Z",
-    "updated_at": "2026-09-15T10:42:59.508Z"
+    "starts_at": "2026-11-05T09:00:00+09:00",
+    "ends_at": "2026-11-06T18:00:00+09:00",
+    "updated_at": "2026-09-24T05:38:25.817Z"
   },
   {
     "id": 151,
@@ -1318,7 +237,7 @@
     "website": "https://bitfest.uk/",
     "starts_at": "2026-11-20T09:00:00Z",
     "ends_at": "2026-11-22T18:00:00Z",
-    "updated_at": "2026-09-15T10:45:59.788Z"
+    "updated_at": "2026-09-24T05:38:26.503Z"
   },
   {
     "id": 152,
@@ -1326,9 +245,9 @@
     "lon": 139.7743684,
     "name": "Bitcoin Japan",
     "website": "https://btc-jpn.com",
-    "starts_at": "2026-11-27T09:00:00Z",
-    "ends_at": "2026-11-28T18:00:00Z",
-    "updated_at": "2026-09-15T10:46:29.046Z"
+    "starts_at": "2026-11-27T09:00:00+09:00",
+    "ends_at": "2026-11-28T18:00:00+09:00",
+    "updated_at": "2026-09-24T05:38:27.195Z"
   },
   {
     "id": 153,
@@ -1336,9 +255,9 @@
     "lon": 35.0035694,
     "name": "Africa Bitcoin Conference",
     "website": "https://www.afrobitcoin.org/",
-    "starts_at": "2026-12-02T09:00:00Z",
-    "ends_at": "2026-12-05T18:00:00Z",
-    "updated_at": "2026-09-15T10:49:07.715Z"
+    "starts_at": "2026-12-02T09:00:00+02:00",
+    "ends_at": "2026-12-05T18:00:00+02:00",
+    "updated_at": "2026-09-24T05:38:27.865Z"
   },
   {
     "id": 154,
@@ -1346,9 +265,9 @@
     "lon": -81.7942944,
     "name": "Bitcoin Day Naples",
     "website": "https://bitcoinday.io/",
-    "starts_at": "2027-01-16T09:00:00Z",
-    "ends_at": "2027-01-16T18:00:00Z",
-    "updated_at": "2026-09-15T10:50:43.481Z"
+    "starts_at": "2027-01-16T09:00:00-05:00",
+    "ends_at": "2027-01-16T18:00:00-05:00",
+    "updated_at": "2026-09-24T05:38:28.546Z"
   },
   {
     "id": 155,
@@ -1356,9 +275,9 @@
     "lon": -89.191156,
     "name": "Plan B Forum El Salvador",
     "website": "https://planb.sv/",
-    "starts_at": "2027-01-29T09:00:00Z",
-    "ends_at": "2027-01-30T18:00:00Z",
-    "updated_at": "2026-09-15T10:51:42.173Z"
+    "starts_at": "2027-01-29T09:00:00-06:00",
+    "ends_at": "2027-01-30T18:00:00-06:00",
+    "updated_at": "2026-09-24T05:38:29.25Z"
   },
   {
     "id": 156,
@@ -1366,9 +285,9 @@
     "lon": -80.1220423,
     "name": "The Sovereign Summit",
     "website": "https://thesovereignsummit.com/",
-    "starts_at": "2027-02-04T09:00:00Z",
-    "ends_at": "2027-02-07T18:00:00Z",
-    "updated_at": "2026-09-15T10:52:25.77Z"
+    "starts_at": "2027-02-04T09:00:00-05:00",
+    "ends_at": "2027-02-07T18:00:00-05:00",
+    "updated_at": "2026-09-24T05:38:29.946Z"
   },
   {
     "id": 157,
@@ -1376,9 +295,9 @@
     "lon": 18.4172197,
     "name": "Adopting Bitcoin Cape Town",
     "website": "https://za27.adoptingbitcoin.org/",
-    "starts_at": "2027-02-26T09:00:00Z",
-    "ends_at": "2027-02-27T18:00:00Z",
-    "updated_at": "2026-09-15T10:53:32.044Z"
+    "starts_at": "2027-02-26T09:00:00+02:00",
+    "ends_at": "2027-02-27T18:00:00+02:00",
+    "updated_at": "2026-09-24T05:38:30.631Z"
   },
   {
     "id": 158,
@@ -1386,9 +305,9 @@
     "lon": -96.7968559,
     "name": "Mining Disrupt",
     "website": "https://miningdisrupt.com/",
-    "starts_at": "2027-03-22T09:00:00Z",
-    "ends_at": "2027-03-24T18:00:00Z",
-    "updated_at": "2026-09-15T10:54:29.518Z"
+    "starts_at": "2027-03-22T09:00:00-05:00",
+    "ends_at": "2027-03-24T18:00:00-05:00",
+    "updated_at": "2026-09-24T05:38:31.33Z"
   },
   {
     "id": 159,
@@ -1396,9 +315,9 @@
     "lon": -97.3477684,
     "name": "BitBlockBoom",
     "website": "https://bitblockboom.com/",
-    "starts_at": "2027-04-01T09:00:00Z",
-    "ends_at": "2027-04-04T18:00:00Z",
-    "updated_at": "2026-09-15T10:55:18.815Z"
+    "starts_at": "2027-04-01T09:00:00-05:00",
+    "ends_at": "2027-04-04T18:00:00-05:00",
+    "updated_at": "2026-09-24T05:38:32.017Z"
   },
   {
     "id": 160,
@@ -1406,9 +325,9 @@
     "lon": 168.7395712,
     "name": "Sovereignty Summit",
     "website": "https://sovereigntysummit.nz/",
-    "starts_at": "2027-04-02T09:00:00Z",
-    "ends_at": "2027-04-03T18:00:00Z",
-    "updated_at": "2026-09-15T10:56:25.293Z"
+    "starts_at": "2027-04-02T09:00:00+13:00",
+    "ends_at": "2027-04-03T18:00:00+13:00",
+    "updated_at": "2026-09-24T05:38:32.699Z"
   },
   {
     "id": 161,
@@ -1416,9 +335,9 @@
     "lon": 14.4212535,
     "name": "BTC Prague 2027",
     "website": "https://btcprague.com/",
-    "starts_at": "2027-05-06T09:00:00Z",
-    "ends_at": "2027-05-08T18:00:00Z",
-    "updated_at": "2026-09-15T11:04:18.896Z"
+    "starts_at": "2027-05-06T09:00:00+02:00",
+    "ends_at": "2027-05-08T18:00:00+02:00",
+    "updated_at": "2026-09-24T05:38:33.379Z"
   },
   {
     "id": 162,
@@ -1426,9 +345,9 @@
     "lon": -6.2605593,
     "name": "Bitcoin Ireland Conference",
     "website": "https://www.bitcoinireland.eu/",
-    "starts_at": "2027-05-21T09:00:00Z",
-    "ends_at": "2027-05-23T18:00:00Z",
-    "updated_at": "2026-09-15T11:04:44.275Z"
+    "starts_at": "2027-05-21T09:00:00+01:00",
+    "ends_at": "2027-05-23T18:00:00+01:00",
+    "updated_at": "2026-09-24T05:38:34.062Z"
   },
   {
     "id": 163,
@@ -1436,9 +355,9 @@
     "lon": 5.9108573,
     "name": "Adopting Bitcoin Arnhem",
     "website": "https://adoptingbitcoinarnhem.com/",
-    "starts_at": "2027-05-28T09:00:00Z",
-    "ends_at": "2027-05-29T18:00:00Z",
-    "updated_at": "2026-09-15T11:06:36.291Z"
+    "starts_at": "2027-05-28T09:00:00+02:00",
+    "ends_at": "2027-05-29T18:00:00+02:00",
+    "updated_at": "2026-09-24T05:38:34.738Z"
   },
   {
     "id": 164,
@@ -1446,9 +365,9 @@
     "lon": -2.5816622,
     "name": "Bitcoin Treasuries Summit",
     "website": "https://www.smarterwebcompany.co.uk/bitcoin-treasuries-unconference-uk-2027/",
-    "starts_at": "2027-05-28T09:00:00Z",
-    "ends_at": "2027-05-28T18:00:00Z",
-    "updated_at": "2026-09-15T11:07:00.168Z"
+    "starts_at": "2027-05-28T09:00:00+01:00",
+    "ends_at": "2027-05-28T18:00:00+01:00",
+    "updated_at": "2026-09-24T05:38:35.427Z"
   },
   {
     "id": 165,
@@ -1456,9 +375,9 @@
     "lon": 21.0711489,
     "name": "Bitcoin FilmFest",
     "website": "https://bitcoinfilmfest.com",
-    "starts_at": "2027-06-24T09:00:00Z",
-    "ends_at": "2027-06-27T18:00:00Z",
-    "updated_at": "2026-09-15T11:07:51.268Z"
+    "starts_at": "2027-06-24T09:00:00+02:00",
+    "ends_at": "2027-06-27T18:00:00+02:00",
+    "updated_at": "2026-09-24T05:38:36.099Z"
   },
   {
     "id": 166,
@@ -1466,9 +385,9 @@
     "lon": -86.7784512,
     "name": "Bitcoin 2027",
     "website": "https://conference.b.tc/",
-    "starts_at": "2027-07-15T09:00:00Z",
-    "ends_at": "2027-07-17T18:00:00Z",
-    "updated_at": "2026-09-15T11:08:39.031Z"
+    "starts_at": "2027-07-15T09:00:00-05:00",
+    "ends_at": "2027-07-17T18:00:00-05:00",
+    "updated_at": "2026-09-24T05:38:36.776Z"
   },
   {
     "id": 167,
@@ -1476,9 +395,9 @@
     "lon": -86.7742984,
     "name": "Bitcoin-Only Side Events Nashville",
     "website": "https://www.eventbrite.com/e/3-days-of-bitcoin-only-side-events-nashville-2027-including-pleb-party-tickets-1997169893915",
-    "starts_at": "2027-07-15T09:00:00Z",
-    "ends_at": "2027-07-17T18:00:00Z",
-    "updated_at": "2026-09-15T11:09:02.367Z"
+    "starts_at": "2027-07-15T09:00:00-05:00",
+    "ends_at": "2027-07-17T18:00:00-05:00",
+    "updated_at": "2026-09-24T05:38:37.45Z"
   },
   {
     "id": 168,
@@ -1486,9 +405,9 @@
     "lon": 114.1730688,
     "name": "Bitcoin Asia 2027",
     "website": "https://asia.b.tc/2027",
-    "starts_at": "2027-08-27T09:00:00Z",
-    "ends_at": "2027-08-28T18:00:00Z",
-    "updated_at": "2026-09-15T11:09:41.393Z"
+    "starts_at": "2027-08-27T09:00:00+08:00",
+    "ends_at": "2027-08-28T18:00:00+08:00",
+    "updated_at": "2026-09-24T05:38:38.137Z"
   },
   {
     "id": 169,
@@ -1496,9 +415,9 @@
     "lon": 126.9782914,
     "name": "Origin Seoul 2027",
     "website": "https://originseoulbtc.com/",
-    "starts_at": "2027-09-01T09:00:00Z",
-    "ends_at": "2027-09-03T18:00:00Z",
-    "updated_at": "2026-09-15T11:10:40.233Z"
+    "starts_at": "2027-09-01T09:00:00+09:00",
+    "ends_at": "2027-09-03T18:00:00+09:00",
+    "updated_at": "2026-09-24T05:38:38.822Z"
   },
   {
     "id": 170,
@@ -1506,8 +425,8 @@
     "lon": 7.986653406838201,
     "name": "Bitcoin Wallis Walk",
     "website": "https://bitcoin-wallis.ch",
-    "starts_at": "2026-10-10T13:13:00Z",
-    "ends_at": "2026-10-10T18:00:00Z",
-    "updated_at": "2026-09-19T16:40:47.181Z"
+    "starts_at": "2026-10-10T13:13:00+02:00",
+    "ends_at": "2026-10-10T18:00:00+02:00",
+    "updated_at": "2026-09-24T05:38:39.52Z"
   }
 ]
