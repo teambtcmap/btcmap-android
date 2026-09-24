@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- List an event only while its start time is still in the future, so an event with no real start date is no longer shown on the map, in search or on an area screen
 - Match search terms containing `%` or `_` literally on the map, instead of treating them as wildcards
 - Read corrupt stored data (a place's localized name or the signed-in account) as absent instead of crashing the screen that shows it
 - Speed up background syncing and map reads with indexes over the place, event and area tables

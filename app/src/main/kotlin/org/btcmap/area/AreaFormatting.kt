@@ -2,6 +2,7 @@ package org.btcmap.area
 
 import org.btcmap.R
 import org.btcmap.api.GetEventsItem
+import org.btcmap.util.isUpcoming
 import java.time.ZonedDateTime
 
 internal const val ARG_AREA_ID = "area_id"
@@ -24,7 +25,7 @@ internal fun websiteDisplayText(websiteUrl: String): String {
 }
 
 internal fun upcomingEvents(events: List<GetEventsItem>, now: ZonedDateTime): List<GetEventsItem> {
-    return events.filter { it.startsAt.isAfter(now) }.sortedBy { it.startsAt }
+    return events.filter { it.startsAt.isUpcoming(now) }.sortedBy { it.startsAt }
 }
 
 internal data class IssueDescription(

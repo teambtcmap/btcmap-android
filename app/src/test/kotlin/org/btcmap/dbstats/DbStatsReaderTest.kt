@@ -197,8 +197,8 @@ class DbStatsReaderTest {
 
             val table = DbStatsReader(conn).readTables().single()
 
-            // Only the first row: the past and the epoch sentinel are not
-            // future, and the deleted future event is not visible.
+            // Only the first row: the past and the epoch placeholder are not
+            // upcoming, and the deleted future event is not visible.
             Assert.assertEquals(1L, table.futureRowCount)
         }
     }

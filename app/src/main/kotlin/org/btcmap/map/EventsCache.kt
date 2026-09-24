@@ -2,6 +2,7 @@ package org.btcmap.map
 
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
+import org.btcmap.util.isUpcoming
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
 import java.time.ZonedDateTime
@@ -19,7 +20,7 @@ class EventsCache(
                 bounds.latitudeNorth,
                 lonRange1.first,
                 lonRange1.second,
-            ).filter { it.isUpcomingOrUndated(now) }.toHashSet()
+            ).filter { it.startsAt.isUpcoming(now) }.toHashSet()
         } else {
             val first = db.event.selectByBounds(
                 bounds.latitudeSouth,
@@ -33,7 +34,7 @@ class EventsCache(
                 lonRange2.first,
                 lonRange2.second,
             )
-            (first + second).filter { it.isUpcomingOrUndated(now) }.toHashSet()
+            (first + second).filter { it.startsAt.isUpcoming(now) }.toHashSet()
         }
     }
 

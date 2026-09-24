@@ -83,9 +83,9 @@ class DbStatsReader(private val conn: SQLiteConnection) {
         }
 
         val futureRowCount = if (STARTS_AT in columns) {
-            // The events table: how many visible events have not started yet.
-            // julianday compares the stored ISO-8601 text to now, so the epoch
-            // sentinel the API uses for undated events is not counted as future.
+            // The events table: how many visible events are upcoming. This is
+            // the SQL equivalent of the shared isUpcoming rule (a start strictly
+            // after now), so an event with no real start date is not counted.
             val notDeleted = if (hasDeletedAt) " AND $DELETED_AT IS NULL" else ""
             count(
                 "SELECT count(*) FROM \"$name\" " +

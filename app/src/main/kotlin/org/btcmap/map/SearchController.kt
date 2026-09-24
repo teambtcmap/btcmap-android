@@ -17,6 +17,7 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.area.Area
 import org.btcmap.place.isBoosted
 import org.btcmap.search.SearchAdapterItem
+import org.btcmap.util.isUpcoming
 import org.maplibre.android.geometry.LatLng
 import java.text.NumberFormat
 import java.time.ZonedDateTime
@@ -109,7 +110,7 @@ class SearchController(
             }
 
             val events = db.event.selectBySearchString(query)
-                .filter { it.isUpcomingOrUndated(now) }
+                .filter { it.startsAt.isUpcoming(now) }
                 .map { event ->
                     localMatch(query, event.name, LatLng(event.lat, event.lon), referenceLocation) { distanceToUser ->
                         SearchAdapterItem.Event(
