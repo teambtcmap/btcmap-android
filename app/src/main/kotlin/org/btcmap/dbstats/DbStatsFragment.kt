@@ -23,6 +23,11 @@ import org.btcmap.bundle.BundledEvents
 import org.btcmap.bundle.BundledPlaces
 import org.btcmap.databinding.DbStatsFragmentBinding
 import org.btcmap.db
+import org.btcmap.db.table.area.TABLE as AREA_TABLE
+import org.btcmap.db.table.comment.TABLE as COMMENT_TABLE
+import org.btcmap.db.table.event.TABLE as EVENT_TABLE
+import org.btcmap.db.table.place.TABLE as PLACE_TABLE
+import org.btcmap.db.table.preference.TABLE as PREF_TABLE
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.prefs
 import org.btcmap.stats.StatsAdapter
@@ -72,22 +77,30 @@ class DbStatsFragment : Fragment() {
         val database = db()
         val reader = DbStatsReader(database.conn)
         val context = requireContext()
-        // The database stats are read once, but the sync card has to follow the
-        // controller, so the two are combined for the adapter.
+        // The database cards are a live snapshot while the bundle cards come
+        // from immutable assets, so the bundles are read once and the whole list
+        // is rebuilt whenever the database is re-read. The sync card has to
+        // follow the controller, so the base sections are combined for the
+        // adapter.
         val baseSections = MutableStateFlow<List<StatsSection>>(emptyList())
+        var bundles: Map<String, BundleStats> = emptyMap()
+
+        suspend fun refresh() {
+            val file = withContext(Dispatchers.IO) {
+                DatabaseFile.read(database.path)
+            }
+            val version = withContext(Dispatchers.IO) {
+                reader.readUserVersion()
+            }
+            val tables = withContext(Dispatchers.IO) {
+                reader.readTables()
+            }
+            baseSections.value = buildSections(file, version, tables, bundles)
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val file = withContext(Dispatchers.IO) {
-                    DatabaseFile.read(database.path)
-                }
-                val version = withContext(Dispatchers.IO) {
-                    reader.readUserVersion()
-                }
-                val tables = withContext(Dispatchers.IO) {
-                    reader.readTables()
-                }
-                val bundles = withContext(Dispatchers.IO) {
+                bundles = withContext(Dispatchers.IO) {
                     BUNDLES.mapNotNull { (table, fileName) ->
                         BundleReader.read(
                             location = "assets/$fileName",
@@ -95,10 +108,26 @@ class DbStatsFragment : Fragment() {
                         )?.let { table to it }
                     }.toMap()
                 }
-                baseSections.value = buildSections(file, version, tables, bundles)
+                refresh()
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
+            }
+
+            // The database cards are a snapshot too, so re-read them when the
+            // app-scoped sync finishes and the underlying rows have changed.
+            var wasSyncing = false
+            sync.state.collect { state ->
+                val syncing = state != SyncState.Idle
+                if (wasSyncing && !syncing) {
+                    try {
+                        refresh()
+                    } catch (e: Throwable) {
+                        e.rethrowIfCancellation()
+                        showError(e)
+                    }
+                }
+                wasSyncing = syncing
             }
         }
 
@@ -260,17 +289,23 @@ class DbStatsFragment : Fragment() {
 
     private companion object {
         /** Display order of the database table cards. */
-        val TABLE_ORDER = listOf("place", "comment", "area", "event", "pref")
+        val TABLE_ORDER = listOf(
+            PLACE_TABLE,
+            COMMENT_TABLE,
+            AREA_TABLE,
+            EVENT_TABLE,
+            PREF_TABLE,
+        )
 
         /**
          * The optional bundled snapshot that seeds each table, keyed by table
          * name. Tables without a snapshot (like `pref`) simply have no card.
          */
         val BUNDLES = mapOf(
-            "place" to BundledPlaces.FILE_NAME,
-            "comment" to BundledComments.FILE_NAME,
-            "area" to BundledAreas.FILE_NAME,
-            "event" to BundledEvents.FILE_NAME,
+            PLACE_TABLE to BundledPlaces.FILE_NAME,
+            COMMENT_TABLE to BundledComments.FILE_NAME,
+            AREA_TABLE to BundledAreas.FILE_NAME,
+            EVENT_TABLE to BundledEvents.FILE_NAME,
         )
     }
 }

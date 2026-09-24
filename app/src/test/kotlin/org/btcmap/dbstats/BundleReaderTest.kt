@@ -49,6 +49,20 @@ class BundleReaderTest {
     }
 
     @Test
+    fun read_countsTrailingBytesInTheSize() {
+        // The parser stops at the closing bracket; the size must still cover
+        // the whole asset, including the trailing newline.
+        val bytes = "[{\"id\": 1}]\n".toByteArray()
+
+        val stats = BundleReader.read("assets/bundled-places.json") {
+            ByteArrayInputStream(bytes)
+        }
+
+        Assert.assertNotNull(stats)
+        Assert.assertEquals(bytes.size.toLong(), stats!!.sizeBytes)
+    }
+
+    @Test
     fun read_reportsNullMaxUpdatedAtWhenNoRecordHasOne() {
         val bytes = """[{"id": 1}]""".toByteArray()
 

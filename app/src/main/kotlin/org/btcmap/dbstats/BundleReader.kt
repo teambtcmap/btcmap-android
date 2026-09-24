@@ -33,17 +33,23 @@ object BundleReader {
      * so the caller controls how the asset path is displayed.
      */
     fun read(location: String, openStream: () -> InputStream): BundleStats? {
-        val bytes = try {
-            openStream().use { it.readBytes() }
+        val stream = try {
+            openStream()
         } catch (_: FileNotFoundException) {
             return null
         }
 
+        // The snapshot is streamed rather than buffered whole: it can be many
+        // megabytes, and only the counts and the byte size are needed. The
+        // counting stream makes the exact size available once the reader has
+        // consumed the asset to the end.
+        val counting = CountingInputStream(stream)
         var visible = 0L
         var deleted = 0L
         var maxUpdatedAt: String? = null
         var maxUpdatedAtInstant: ZonedDateTime? = null
-        JsonReader(bytes.inputStream().bufferedReader()).use { reader ->
+        val reader = JsonReader(counting.bufferedReader())
+        try {
             reader.beginArray()
             while (reader.hasNext()) {
                 val record = reader.readRecord()
@@ -59,11 +65,16 @@ object BundleReader {
                 }
             }
             reader.endArray()
+        } finally {
+            // Drain what the parser did not need (the final newline, say) so the
+            // counted size covers the whole asset, then close the stream.
+            counting.drain()
+            reader.close()
         }
 
         return BundleStats(
             location = location,
-            sizeBytes = bytes.size.toLong(),
+            sizeBytes = counting.count,
             visibleCount = visible,
             deletedCount = deleted,
             maxUpdatedAt = maxUpdatedAt,
@@ -96,4 +107,42 @@ object BundleReader {
 
     private const val DELETED_AT = "deleted_at"
     private const val UPDATED_AT = "updated_at"
+}
+
+/**
+ * Counts the bytes read through it, so a streamed asset's size is known without
+ * buffering the whole thing in memory.
+ */
+private class CountingInputStream(
+    private val delegate: InputStream,
+) : InputStream() {
+
+    var count: Long = 0L
+        private set
+
+    override fun read(): Int {
+        val value = delegate.read()
+        if (value != -1) count++
+        return value
+    }
+
+    override fun read(b: ByteArray, off: Int, len: Int): Int {
+        val read = delegate.read(b, off, len)
+        if (read > 0) count += read
+        return read
+    }
+
+    /** Reads the rest of the stream so [count] covers it in full. */
+    fun drain() {
+        val buffer = ByteArray(DRAIN_BUFFER_SIZE)
+        while (read(buffer) != -1) {
+            // Discarding on purpose: only the running count matters.
+        }
+    }
+
+    override fun close() = delegate.close()
+
+    private companion object {
+        const val DRAIN_BUFFER_SIZE = 8 * 1024
+    }
 }

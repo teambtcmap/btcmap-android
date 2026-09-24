@@ -203,6 +203,42 @@ class DbStatsReaderTest {
         }
     }
 
+    @Test
+    fun readTables_countsFutureEventsEvenWithoutSyncTrackingFields() {
+        withConnection { conn ->
+            conn.execSQL("CREATE TABLE event (id INTEGER PRIMARY KEY, starts_at TEXT);")
+            conn.execSQL(
+                """
+                INSERT INTO event (starts_at) VALUES
+                    ('2999-01-01T00:00:00Z'),
+                    ('2000-01-01T00:00:00Z');
+                """,
+            )
+
+            val table = DbStatsReader(conn).readTables().single()
+
+            // The count is absent because there is no cursor or tombstone, but
+            // the upcoming total is still reported.
+            Assert.assertNull(table.visibleRowCount)
+            Assert.assertNull(table.deletedRowCount)
+            Assert.assertNull(table.maxUpdatedAt)
+            Assert.assertEquals(1L, table.futureRowCount)
+        }
+    }
+
+    @Test
+    fun readTables_handlesATableNameThatNeedsQuoting() {
+        withConnection { conn ->
+            conn.execSQL("CREATE TABLE \"we\"\"ird\" (id INTEGER PRIMARY KEY, name TEXT);")
+            conn.execSQL("INSERT INTO \"we\"\"ird\" (name) VALUES ('a');")
+
+            val table = DbStatsReader(conn).readTables().single()
+
+            Assert.assertEquals("we\"ird", table.name)
+            Assert.assertEquals(1L, table.rowCount)
+        }
+    }
+
     private fun withConnection(block: (SQLiteConnection) -> Unit) {
         val conn = BundledSQLiteDriver().open(":memory:")
         try {

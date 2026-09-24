@@ -33,17 +33,30 @@ class DbStatsReader(private val conn: SQLiteConnection) {
     }
 
     private fun readTable(name: String): TableStats {
-        val columns = mutableSetOf<String>()
-        conn.prepare("SELECT name FROM pragma_table_info('$name');").use {
-            while (it.step()) {
-                columns.add(it.getText(0))
-            }
-        }
+        val table = quote(name)
+        val columns = readColumns(name)
 
-        val rowCount = count("SELECT count(*) FROM \"$name\";")
+        val rowCount = count("SELECT count(*) FROM $table;")
 
         val hasDeletedAt = DELETED_AT in columns
         val hasUpdatedAt = UPDATED_AT in columns
+
+        // Upcoming events are counted independently of the sync fields: a table
+        // with starts_at but neither deleted_at nor updated_at still reports a
+        // future count. This is the SQL equivalent of the shared isUpcoming rule
+        // (a start strictly after now), so an event with no real start date is
+        // not counted.
+        val futureRowCount = if (STARTS_AT in columns) {
+            val notDeleted = if (hasDeletedAt) " AND $DELETED_AT IS NULL" else ""
+            count(
+                "SELECT count(*) FROM $table " +
+                    "WHERE $STARTS_AT IS NOT NULL " +
+                    "AND julianday($STARTS_AT) > julianday('now')$notDeleted;"
+            )
+        } else {
+            null
+        }
+
         if (!hasDeletedAt && !hasUpdatedAt) {
             // Not a sync-tracked table (no tombstones, no cursor): report the
             // size only.
@@ -53,12 +66,12 @@ class DbStatsReader(private val conn: SQLiteConnection) {
                 visibleRowCount = null,
                 deletedRowCount = null,
                 maxUpdatedAt = null,
-                futureRowCount = null,
+                futureRowCount = futureRowCount,
             )
         }
 
         val deletedRowCount = if (hasDeletedAt) {
-            count("SELECT count(*) FROM \"$name\" WHERE $DELETED_AT IS NOT NULL;")
+            count("SELECT count(*) FROM $table WHERE $DELETED_AT IS NOT NULL;")
         } else {
             // A table without deleted_at simply has no tombstones.
             0L
@@ -70,7 +83,7 @@ class DbStatsReader(private val conn: SQLiteConnection) {
             // is not chronological.
             conn.prepare(
                 """
-                SELECT $UPDATED_AT FROM "$name"
+                SELECT $UPDATED_AT FROM $table
                 WHERE $UPDATED_AT IS NOT NULL
                 ORDER BY julianday($UPDATED_AT) DESC
                 LIMIT 1;
@@ -78,20 +91,6 @@ class DbStatsReader(private val conn: SQLiteConnection) {
             ).use {
                 if (it.step()) it.getText(0) else null
             }
-        } else {
-            null
-        }
-
-        val futureRowCount = if (STARTS_AT in columns) {
-            // The events table: how many visible events are upcoming. This is
-            // the SQL equivalent of the shared isUpcoming rule (a start strictly
-            // after now), so an event with no real start date is not counted.
-            val notDeleted = if (hasDeletedAt) " AND $DELETED_AT IS NULL" else ""
-            count(
-                "SELECT count(*) FROM \"$name\" " +
-                    "WHERE $STARTS_AT IS NOT NULL " +
-                    "AND julianday($STARTS_AT) > julianday('now')$notDeleted;"
-            )
         } else {
             null
         }
@@ -105,6 +104,25 @@ class DbStatsReader(private val conn: SQLiteConnection) {
             futureRowCount = futureRowCount,
         )
     }
+
+    /**
+     * Reads the column names of [name] through a bound parameter rather than
+     * interpolating the name, so a table name from `sqlite_master` that needs
+     * escaping cannot break out of the statement.
+     */
+    private fun readColumns(name: String): Set<String> {
+        val columns = mutableSetOf<String>()
+        conn.prepare("SELECT name FROM pragma_table_info(?);").use { stmt ->
+            stmt.bindText(1, name)
+            while (stmt.step()) {
+                columns.add(stmt.getText(0))
+            }
+        }
+        return columns
+    }
+
+    /** Quotes a SQL identifier, doubling any embedded double quote. */
+    private fun quote(name: String): String = "\"" + name.replace("\"", "\"\"") + "\""
 
     private fun count(sql: String): Long {
         conn.prepare(sql).use {

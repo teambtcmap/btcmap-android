@@ -47,6 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Explain an outdated or unverified place's warning in a dialog instead of opening the wiki, pointing at the existing Verify and Report buttons
 - Stop the boost and comment payment screens from polling a rejected invoice forever, showing the error instead
 - Order the table cards on the database stats screen as place, comment, area, event, pref, label each as "… table", and add a bundle card behind every bundled table showing the snapshot's location, size, visible and deleted record counts and newest update time
+- Refresh the database stats screen's row counts when a background sync finishes, instead of leaving the numbers from when the screen was opened
 - Show the configured API base URL at the top of the sync card on the database stats screen
 - Seed the local database from a full bundled places snapshot, including every synced field and each place's real update time, so a fresh install is fully usable offline and the first sync only downloads the changes made since the snapshot instead of every place
 - Bundle the areas snapshot too, with the full polygons, so community and country chips work offline on first launch and the first areas sync downloads only what changed instead of every polygon
