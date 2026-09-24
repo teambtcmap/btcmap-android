@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Helyi</string>
     <string name="activity_tab_following">Követettek</string>
     <string name="activity_filter_areas">Területek</string>
+    <string name="activity_feed_title">Aktivitási hírfolyam</string>
+    <string name="activity_empty_local">Nincs helyi aktivitás</string>
+    <string name="activity_empty_following_signed_out">Jelentkezz be a mentett területeid aktivitásának megtekintéséhez</string>
+    <string name="activity_empty_following_no_areas">Ments el néhány területet, hogy kövesd az aktivitásukat</string>
+    <string name="activity_empty_following_no_activity">Nincs aktivitás a követett területeiden</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">%1$d napra kiemelve</item>
         <item quantity="other">%1$d napra kiemelve</item>

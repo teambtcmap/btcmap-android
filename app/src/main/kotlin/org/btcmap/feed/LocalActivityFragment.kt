@@ -2,10 +2,11 @@ package org.btcmap.feed
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
+import org.btcmap.R
 
 class LocalActivityFragment : BaseActivityFeedTab() {
 
-    override fun emptyMessage(): String = "No local activity"
+    override fun emptyMessage(): String = getString(R.string.activity_empty_local)
 
     companion object {
         fun create(areas: List<Area>): Fragment {

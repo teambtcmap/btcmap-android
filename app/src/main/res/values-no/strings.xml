@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Lokalt</string>
     <string name="activity_tab_following">Følger</string>
     <string name="activity_filter_areas">Områder</string>
+    <string name="activity_feed_title">Aktivitetsfeed</string>
+    <string name="activity_empty_local">Ingen lokal aktivitet</string>
+    <string name="activity_empty_following_signed_out">Logg inn for å se aktivitet i dine lagrede områder</string>
+    <string name="activity_empty_following_no_areas">Lagre noen områder for å følge aktiviteten deres</string>
+    <string name="activity_empty_following_no_activity">Ingen aktivitet i de fulgte områdene dine</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">løftet frem i %1$d dag</item>
         <item quantity="other">løftet frem i %1$d dager</item>

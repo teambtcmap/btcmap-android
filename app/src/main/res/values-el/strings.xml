@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Τοπικά</string>
     <string name="activity_tab_following">Ακολουθείς</string>
     <string name="activity_filter_areas">Περιοχές</string>
+    <string name="activity_feed_title">Ροή δραστηριότητας</string>
+    <string name="activity_empty_local">Καμία τοπική δραστηριότητα</string>
+    <string name="activity_empty_following_signed_out">Συνδεθείτε για να δείτε τη δραστηριότητα στις αποθηκευμένες περιοχές σας</string>
+    <string name="activity_empty_following_no_areas">Αποθηκεύστε μερικές περιοχές για να ακολουθείτε τη δραστηριότητά τους</string>
+    <string name="activity_empty_following_no_activity">Καμία δραστηριότητα στις περιοχές που ακολουθείτε</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">ενισχυμένο για %1$d ημέρα</item>
         <item quantity="other">ενισχυμένο για %1$d ημέρες</item>

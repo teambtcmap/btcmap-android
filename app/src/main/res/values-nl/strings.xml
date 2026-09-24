@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Lokaal</string>
     <string name="activity_tab_following">Volgend</string>
     <string name="activity_filter_areas">Gebieden</string>
+    <string name="activity_feed_title">Activiteitenfeed</string>
+    <string name="activity_empty_local">Geen lokale activiteit</string>
+    <string name="activity_empty_following_signed_out">Log in om activiteit in je opgeslagen gebieden te zien</string>
+    <string name="activity_empty_following_no_areas">Sla enkele gebieden op om hun activiteit te volgen</string>
+    <string name="activity_empty_following_no_activity">Geen activiteit in je gevolgde gebieden</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">%1$d dag uitgelicht</item>
         <item quantity="other">%1$d dagen uitgelicht</item>

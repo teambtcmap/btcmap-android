@@ -129,6 +129,11 @@
     <string name="activity_tab_local">本地</string>
     <string name="activity_tab_following">已关注</string>
     <string name="activity_filter_areas">区域</string>
+    <string name="activity_feed_title">活动动态</string>
+    <string name="activity_empty_local">暂无本地活动</string>
+    <string name="activity_empty_following_signed_out">登录以查看已保存区域的活动</string>
+    <string name="activity_empty_following_no_areas">保存一些区域以关注其活动</string>
+    <string name="activity_empty_following_no_activity">你关注的区域暂无活动</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="other">已推广 %1$d 天</item>
     </plurals>

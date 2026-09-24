@@ -129,6 +129,11 @@
     <string name="activity_tab_local">ท้องถิ่น</string>
     <string name="activity_tab_following">กำลังติดตาม</string>
     <string name="activity_filter_areas">พื้นที่</string>
+    <string name="activity_feed_title">ฟีดกิจกรรม</string>
+    <string name="activity_empty_local">ไม่มีกิจกรรมในท้องถิ่น</string>
+    <string name="activity_empty_following_signed_out">เข้าสู่ระบบเพื่อดูกิจกรรมในพื้นที่ที่บันทึกไว้</string>
+    <string name="activity_empty_following_no_areas">บันทึกพื้นที่บางส่วนเพื่อติดตามกิจกรรมของพื้นที่นั้น</string>
+    <string name="activity_empty_following_no_activity">ไม่มีกิจกรรมในพื้นที่ที่คุณติดตาม</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="other">บูสต์เป็นเวลา %1$d วัน</item>
     </plurals>

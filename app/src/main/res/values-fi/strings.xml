@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Paikallinen</string>
     <string name="activity_tab_following">Seurattavat</string>
     <string name="activity_filter_areas">Alueet</string>
+    <string name="activity_feed_title">Aktiviteettivirta</string>
+    <string name="activity_empty_local">Ei paikallista aktiivisuutta</string>
+    <string name="activity_empty_following_signed_out">Kirjaudu sisään nähdäksesi tallennettujen alueidesi aktiivisuuden</string>
+    <string name="activity_empty_following_no_areas">Tallenna joitakin alueita seurataksesi niiden aktiivisuutta</string>
+    <string name="activity_empty_following_no_activity">Ei aktiivisuutta seuratuilla alueillasi</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">tehostettu %1$d päiväksi</item>
         <item quantity="other">tehostettu %1$d päiväksi</item>

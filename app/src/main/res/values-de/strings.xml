@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Lokal</string>
     <string name="activity_tab_following">Gefolgt</string>
     <string name="activity_filter_areas">Gebiete</string>
+    <string name="activity_feed_title">Aktivitätsfeed</string>
+    <string name="activity_empty_local">Keine lokale Aktivität</string>
+    <string name="activity_empty_following_signed_out">Melde dich an, um Aktivität in deinen gespeicherten Gebieten zu sehen</string>
+    <string name="activity_empty_following_no_areas">Speichere einige Gebiete, um ihre Aktivität zu verfolgen</string>
+    <string name="activity_empty_following_no_activity">Keine Aktivität in deinen gefolgten Gebieten</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">für %1$d Tag hervorgehoben</item>
         <item quantity="other">für %1$d Tage hervorgehoben</item>

@@ -129,6 +129,11 @@
     <string name="activity_tab_local">محلي</string>
     <string name="activity_tab_following">المتابَعون</string>
     <string name="activity_filter_areas">المناطق</string>
+    <string name="activity_feed_title">موجز النشاط</string>
+    <string name="activity_empty_local">لا يوجد نشاط محلي</string>
+    <string name="activity_empty_following_signed_out">سجّل الدخول لرؤية النشاط من مناطقك المحفوظة</string>
+    <string name="activity_empty_following_no_areas">احفظ بعض المناطق لمتابعة نشاطها</string>
+    <string name="activity_empty_following_no_activity">لا يوجد نشاط في المناطق التي تتابعها</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="zero">مُعزَّز لمدة %1$d أيام</item>
         <item quantity="one">مُعزَّز لمدة يوم واحد</item>

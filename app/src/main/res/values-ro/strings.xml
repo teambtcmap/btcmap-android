@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Local</string>
     <string name="activity_tab_following">Urmărite</string>
     <string name="activity_filter_areas">Zone</string>
+    <string name="activity_feed_title">Flux de activitate</string>
+    <string name="activity_empty_local">Nicio activitate locală</string>
+    <string name="activity_empty_following_signed_out">Autentifică-te pentru a vedea activitatea din zonele salvate</string>
+    <string name="activity_empty_following_no_areas">Salvează câteva zone pentru a le urmări activitatea</string>
+    <string name="activity_empty_following_no_activity">Nicio activitate în zonele urmărite</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">promovat pentru %1$d zi</item>
         <item quantity="few">promovat pentru %1$d zile</item>

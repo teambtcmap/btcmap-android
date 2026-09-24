@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Наблизо</string>
     <string name="activity_tab_following">Следвани</string>
     <string name="activity_filter_areas">Райони</string>
+    <string name="activity_feed_title">Поток на активност</string>
+    <string name="activity_empty_local">Няма местна активност</string>
+    <string name="activity_empty_following_signed_out">Влезте, за да видите активността в запазените си райони</string>
+    <string name="activity_empty_following_no_areas">Запазете няколко района, за да следите активността им</string>
+    <string name="activity_empty_following_no_activity">Няма активност в следваните райони</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">повишено за %1$d ден</item>
         <item quantity="other">повишено за %1$d дни</item>

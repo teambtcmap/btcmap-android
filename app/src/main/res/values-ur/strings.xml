@@ -129,6 +129,11 @@
     <string name="activity_tab_local">مقامی</string>
     <string name="activity_tab_following">فالو کیے گئے</string>
     <string name="activity_filter_areas">علاقے</string>
+    <string name="activity_feed_title">سرگرمی فیڈ</string>
+    <string name="activity_empty_local">کوئی مقامی سرگرمی نہیں</string>
+    <string name="activity_empty_following_signed_out">اپنے محفوظ علاقوں کی سرگرمی دیکھنے کے لیے لاگ ان کریں</string>
+    <string name="activity_empty_following_no_areas">ان کی سرگرمی فالو کرنے کے لیے کچھ علاقے محفوظ کریں</string>
+    <string name="activity_empty_following_no_activity">آپ کے فالو کیے گئے علاقوں میں کوئی سرگرمی نہیں</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">%1$d دن کے لیے بوسٹ کیا گیا</item>
         <item quantity="other">%1$d دن کے لیے بوسٹ کیا گیا</item>

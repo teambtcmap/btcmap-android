@@ -129,6 +129,11 @@
     <string name="activity_tab_local">স্থানীয়</string>
     <string name="activity_tab_following">অনুসরণ করছেন</string>
     <string name="activity_filter_areas">এলাকা</string>
+    <string name="activity_feed_title">কার্যক্রমের ফিড</string>
+    <string name="activity_empty_local">কোনো স্থানীয় কার্যক্রম নেই</string>
+    <string name="activity_empty_following_signed_out">আপনার সংরক্ষিত এলাকার কার্যক্রম দেখতে লগ ইন করুন</string>
+    <string name="activity_empty_following_no_areas">তাদের কার্যক্রম অনুসরণ করতে কিছু এলাকা সংরক্ষণ করুন</string>
+    <string name="activity_empty_following_no_activity">আপনার অনুসরণ করা এলাকায় কোনো কার্যক্রম নেই</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">%1$d দিনের জন্য বুস্ট করা হয়েছে</item>
         <item quantity="other">%1$d দিনের জন্য বুস্ট করা হয়েছে</item>

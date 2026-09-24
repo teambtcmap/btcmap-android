@@ -18,7 +18,7 @@
             android:minHeight="?attr/actionBarSize"
             app:menu="@menu/activity_feed"
             app:navigationIcon="?attr/homeAsUpIndicator"
-            app:title="Activity Feed" />
+            app:title="@string/activity_feed_title" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"

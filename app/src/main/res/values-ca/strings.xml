@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Local</string>
     <string name="activity_tab_following">Seguits</string>
     <string name="activity_filter_areas">Àrees</string>
+    <string name="activity_feed_title">Fil d\'activitat</string>
+    <string name="activity_empty_local">Cap activitat local</string>
+    <string name="activity_empty_following_signed_out">Inicia sessió per veure l\'activitat de les teves àrees desades</string>
+    <string name="activity_empty_following_no_areas">Desa algunes àrees per seguir-ne l\'activitat</string>
+    <string name="activity_empty_following_no_activity">Cap activitat a les àrees que segueixes</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">impulsat durant %1$d dia</item>
         <item quantity="many">impulsat durant %1$d dies</item>

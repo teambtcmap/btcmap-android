@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Yerel</string>
     <string name="activity_tab_following">Takip edilen</string>
     <string name="activity_filter_areas">Bölgeler</string>
+    <string name="activity_feed_title">Etkinlik akışı</string>
+    <string name="activity_empty_local">Yerel etkinlik yok</string>
+    <string name="activity_empty_following_signed_out">Kaydedilen bölgelerinizdeki etkinliği görmek için giriş yapın</string>
+    <string name="activity_empty_following_no_areas">Etkinliklerini takip etmek için birkaç bölge kaydedin</string>
+    <string name="activity_empty_following_no_activity">Takip ettiğiniz bölgelerde etkinlik yok</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">%1$d gün öne çıkarıldı</item>
         <item quantity="other">%1$d gün öne çıkarıldı</item>

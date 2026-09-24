@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Поруч</string>
     <string name="activity_tab_following">Відстежувані</string>
     <string name="activity_filter_areas">Області</string>
+    <string name="activity_feed_title">Стрічка активності</string>
+    <string name="activity_empty_local">Немає місцевої активності</string>
+    <string name="activity_empty_following_signed_out">Увійдіть, щоб бачити активність у збережених областях</string>
+    <string name="activity_empty_following_no_areas">Збережіть кілька областей, щоб стежити за їхньою активністю</string>
+    <string name="activity_empty_following_no_activity">Немає активності у відстежуваних областях</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">просунуто на %1$d день</item>
         <item quantity="few">просунуто на %1$d дні</item>

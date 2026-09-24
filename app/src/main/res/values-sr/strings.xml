@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Локално</string>
     <string name="activity_tab_following">Праћени</string>
     <string name="activity_filter_areas">Подручја</string>
+    <string name="activity_feed_title">Ток активности</string>
+    <string name="activity_empty_local">Нема локалне активности</string>
+    <string name="activity_empty_following_signed_out">Пријавите се да видите активност у сачуваним подручјима</string>
+    <string name="activity_empty_following_no_areas">Сачувајте неколико подручја да бисте пратили њихову активност</string>
+    <string name="activity_empty_following_no_activity">Нема активности у праћеним подручјима</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">истакнуто на %1$d дан</item>
         <item quantity="few">истакнуто на %1$d дана</item>

@@ -129,6 +129,11 @@
     <string name="activity_tab_local">로컬</string>
     <string name="activity_tab_following">팔로잉</string>
     <string name="activity_filter_areas">지역</string>
+    <string name="activity_feed_title">활동 피드</string>
+    <string name="activity_empty_local">로컬 활동이 없습니다</string>
+    <string name="activity_empty_following_signed_out">저장한 지역의 활동을 보려면 로그인하세요</string>
+    <string name="activity_empty_following_no_areas">지역을 저장하여 활동을 팔로우하세요</string>
+    <string name="activity_empty_following_no_activity">팔로우한 지역에 활동이 없습니다</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="other">%1$d일 동안 부스트됨</item>
     </plurals>

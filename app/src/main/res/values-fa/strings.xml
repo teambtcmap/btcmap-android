@@ -129,6 +129,11 @@
     <string name="activity_tab_local">محلی</string>
     <string name="activity_tab_following">دنبال‌شده‌ها</string>
     <string name="activity_filter_areas">مناطق</string>
+    <string name="activity_feed_title">جریان فعالیت</string>
+    <string name="activity_empty_local">فعالیت محلی وجود ندارد</string>
+    <string name="activity_empty_following_signed_out">برای دیدن فعالیت مناطق ذخیره‌شده‌تان وارد شوید</string>
+    <string name="activity_empty_following_no_areas">چند منطقه را ذخیره کنید تا فعالیت آن‌ها را دنبال کنید</string>
+    <string name="activity_empty_following_no_activity">هیچ فعالیتی در مناطق دنبال‌شده‌تان نیست</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">به مدت %1$d روز تقویت شد</item>
         <item quantity="other">به مدت %1$d روز تقویت شد</item>

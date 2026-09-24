@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Local</string>
     <string name="activity_tab_following">Suivis</string>
     <string name="activity_filter_areas">Zones</string>
+    <string name="activity_feed_title">Fil d\'activité</string>
+    <string name="activity_empty_local">Aucune activité locale</string>
+    <string name="activity_empty_following_signed_out">Connectez-vous pour voir l\'activité de vos zones enregistrées</string>
+    <string name="activity_empty_following_no_areas">Enregistrez des zones pour suivre leur activité</string>
+    <string name="activity_empty_following_no_activity">Aucune activité dans les zones que vous suivez</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">mis en avant pendant %1$d jour</item>
         <item quantity="many">mis en avant pendant %1$d jours</item>

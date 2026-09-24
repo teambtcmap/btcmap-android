@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Рядом</string>
     <string name="activity_tab_following">Отслеживаемые</string>
     <string name="activity_filter_areas">Области</string>
+    <string name="activity_feed_title">Лента активности</string>
+    <string name="activity_empty_local">Нет местной активности</string>
+    <string name="activity_empty_following_signed_out">Войдите, чтобы видеть активность в сохранённых областях</string>
+    <string name="activity_empty_following_no_areas">Сохраните несколько областей, чтобы следить за их активностью</string>
+    <string name="activity_empty_following_no_activity">Нет активности в отслеживаемых областях</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">продвинуто на %1$d день</item>
         <item quantity="few">продвинуто на %1$d дня</item>

@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Miestne</string>
     <string name="activity_tab_following">Sledované</string>
     <string name="activity_filter_areas">Oblasti</string>
+    <string name="activity_feed_title">Prehľad aktivity</string>
+    <string name="activity_empty_local">Žiadna miestna aktivita</string>
+    <string name="activity_empty_following_signed_out">Prihláste sa, aby ste videli aktivitu vo svojich uložených oblastiach</string>
+    <string name="activity_empty_following_no_areas">Uložte niekoľko oblastí, aby ste sledovali ich aktivitu</string>
+    <string name="activity_empty_following_no_activity">Žiadna aktivita v sledovaných oblastiach</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">podporené na %1$d deň</item>
         <item quantity="few">podporené na %1$d dni</item>

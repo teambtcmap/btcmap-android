@@ -129,6 +129,11 @@
     <string name="activity_tab_local">ローカル</string>
     <string name="activity_tab_following">フォロー中</string>
     <string name="activity_filter_areas">エリア</string>
+    <string name="activity_feed_title">アクティビティフィード</string>
+    <string name="activity_empty_local">ローカルのアクティビティはありません</string>
+    <string name="activity_empty_following_signed_out">保存したエリアのアクティビティを見るにはログインしてください</string>
+    <string name="activity_empty_following_no_areas">エリアを保存してアクティビティをフォローしましょう</string>
+    <string name="activity_empty_following_no_activity">フォロー中のエリアにアクティビティはありません</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="other">%1$d日間ブースト中</item>
     </plurals>

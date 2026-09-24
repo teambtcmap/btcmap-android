@@ -201,6 +201,11 @@
     <string name="activity_tab_local">Local</string>
     <string name="activity_tab_following">Following</string>
     <string name="activity_filter_areas">Areas</string>
+    <string name="activity_feed_title">Activity Feed</string>
+    <string name="activity_empty_local">No local activity</string>
+    <string name="activity_empty_following_signed_out">Sign in to see activity from your saved areas</string>
+    <string name="activity_empty_following_no_areas">Save some areas to follow their activity</string>
+    <string name="activity_empty_following_no_activity">No activity in your followed areas</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">boosted for %1$d day</item>
         <item quantity="other">boosted for %1$d days</item>

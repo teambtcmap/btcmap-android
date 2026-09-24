@@ -129,6 +129,11 @@
     <string name="activity_tab_local">Địa phương</string>
     <string name="activity_tab_following">Đang theo dõi</string>
     <string name="activity_filter_areas">Khu vực</string>
+    <string name="activity_feed_title">Bảng tin hoạt động</string>
+    <string name="activity_empty_local">Không có hoạt động tại địa phương</string>
+    <string name="activity_empty_following_signed_out">Đăng nhập để xem hoạt động trong các khu vực đã lưu của bạn</string>
+    <string name="activity_empty_following_no_areas">Lưu một số khu vực để theo dõi hoạt động của chúng</string>
+    <string name="activity_empty_following_no_activity">Không có hoạt động trong các khu vực bạn theo dõi</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="other">được đẩy lên trong %1$d ngày</item>
     </plurals>

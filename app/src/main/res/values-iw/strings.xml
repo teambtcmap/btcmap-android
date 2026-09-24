@@ -129,6 +129,11 @@
     <string name="activity_tab_local">מקומי</string>
     <string name="activity_tab_following">נעקבים</string>
     <string name="activity_filter_areas">אזורים</string>
+    <string name="activity_feed_title">פיד פעילות</string>
+    <string name="activity_empty_local">אין פעילות מקומית</string>
+    <string name="activity_empty_following_signed_out">התחברו כדי לראות פעילות באזורים השמורים שלכם</string>
+    <string name="activity_empty_following_no_areas">שמרו כמה אזורים כדי לעקוב אחר הפעילות שלהם</string>
+    <string name="activity_empty_following_no_activity">אין פעילות באזורים שאתם עוקבים אחריהם</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">מוגבר ליום אחד</item>
         <item quantity="two">מוגבר ליומיים</item>

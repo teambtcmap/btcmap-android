@@ -1,6 +1,7 @@
 package org.btcmap.feed
 
 import androidx.fragment.app.Fragment
+import org.btcmap.R
 import org.btcmap.db
 import org.btcmap.settings.authorized
 import org.btcmap.settings.prefs
@@ -9,9 +10,9 @@ class FollowingActivityFragment : BaseActivityFeedTab() {
 
     override fun emptyMessage(): String {
         return when {
-            !isLoggedIn() -> "Sign in to see activity from your saved areas"
-            savedAreaIds().isEmpty() -> "Save some areas to follow their activity"
-            else -> "No activity in your followed areas"
+            !isLoggedIn() -> getString(R.string.activity_empty_following_signed_out)
+            savedAreaIds().isEmpty() -> getString(R.string.activity_empty_following_no_areas)
+            else -> getString(R.string.activity_empty_following_no_activity)
         }
     }
 
