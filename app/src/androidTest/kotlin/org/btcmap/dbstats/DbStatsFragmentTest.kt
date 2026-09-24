@@ -13,10 +13,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
+import org.btcmap.SyncState
 import org.btcmap.db.Database
 import org.btcmap.db.table.place.Place
 import org.btcmap.settings.SettingsFragment
 import org.btcmap.stats.StatsAdapter
+import org.btcmap.stats.StatsSection
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.TestSyncController
 import org.btcmap.util.waitUntil
@@ -92,6 +94,51 @@ class DbStatsFragmentTest : AppTestCase() {
     }
 
     @Test
+    fun showsBundleStatsForEachSnapshot() {
+        launchFragment { scenario, fragment ->
+            lateinit var list: RecyclerView
+            scenario.onActivity {
+                list = fragment.requireView().findViewById(R.id.statsList)
+            }
+
+            waitUntilOnMain { sectionOf(list, "place bundle") != null }
+
+            scenario.onActivity {
+                val entries = requireNotNull(sectionOf(list, "place bundle"))
+                    .entries
+                    .associate { it.label to it.value }
+                Assert.assertEquals("assets/bundled-places.json", entries["Location"])
+                Assert.assertTrue("expected a Visible count, was $entries", "Visible" in entries)
+                Assert.assertTrue("expected a Deleted count, was $entries", "Deleted" in entries)
+            }
+        }
+    }
+
+    @Test
+    fun refreshesRowCountsWhenTheSyncFinishes() {
+        val controller = app.syncControllerForTesting as TestSyncController
+        databaseRule.db.place.insert(listOf(place(1L)))
+
+        launchFragment { scenario, fragment ->
+            lateinit var list: RecyclerView
+            scenario.onActivity {
+                list = fragment.requireView().findViewById(R.id.statsList)
+            }
+
+            waitUntilOnMain { valueOf(list, "place table", "Rows") == "1" }
+
+            // The sync writes a new row, reports that it is running, and only
+            // then finishes; the counts must be re-read when it does.
+            databaseRule.db.place.insert(listOf(place(2L)))
+            scenario.onActivity { controller.setState(SyncState.SyncingPlaces) }
+            waitUntilOnMain { valueOf(list, "Sync", "State") == "Syncing places" }
+            scenario.onActivity { controller.setState(SyncState.Idle) }
+
+            waitUntilOnMain { valueOf(list, "place table", "Rows") == "2" }
+        }
+    }
+
+    @Test
     fun settingsButtonOpensTheScreen() {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
             lateinit var activity: Activity
@@ -127,6 +174,12 @@ class DbStatsFragmentTest : AppTestCase() {
             block(scenario, fragment)
         }
     }
+
+    private fun sectionOf(list: RecyclerView, title: String): StatsSection? =
+        (list.adapter as? StatsAdapter)?.currentList?.firstOrNull { it.title == title }
+
+    private fun valueOf(list: RecyclerView, sectionTitle: String, label: String): String? =
+        sectionOf(list, sectionTitle)?.entries?.firstOrNull { it.label == label }?.value
 
     private fun place(id: Long): Place {
         return Place(

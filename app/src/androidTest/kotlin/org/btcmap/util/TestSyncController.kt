@@ -21,7 +21,8 @@ import org.btcmap.SyncState
 internal class TestSyncController(
     private val sync: () -> Sync,
 ) : SyncController {
-    override val state: StateFlow<SyncState> = MutableStateFlow(SyncState.Idle)
+    private val mutableState = MutableStateFlow<SyncState>(SyncState.Idle)
+    override val state: StateFlow<SyncState> = mutableState
 
     override val events: SharedFlow<SyncEvent> = MutableSharedFlow()
 
@@ -32,6 +33,14 @@ internal class TestSyncController(
 
     override fun start() {
         startedCount++
+    }
+
+    /**
+     * Moves the observed state, so a test can drive a screen that reacts to the
+     * sync starting and finishing (e.g. the database stats refresh).
+     */
+    fun setState(state: SyncState) {
+        mutableState.value = state
     }
 
     override suspend fun syncComments(): Sync.Report = sync().syncComments()

@@ -3,6 +3,7 @@ package org.btcmap.dbstats
 import com.google.gson.stream.JsonReader
 import org.btcmap.bundle.nextStringOrNull
 import org.btcmap.bundle.toZonedDateTimeOrNull
+import org.btcmap.util.rethrowIfCancellation
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.time.ZonedDateTime
@@ -14,6 +15,12 @@ data class BundleStats(
     val visibleCount: Long,
     val deletedCount: Long,
     val maxUpdatedAt: String?,
+)
+
+/** The bundle stats that were read and the snapshots that failed to read. */
+data class BundleReads(
+    val stats: Map<String, BundleStats>,
+    val failures: List<Throwable>,
 )
 
 /**
@@ -107,6 +114,38 @@ object BundleReader {
 
     private const val DELETED_AT = "deleted_at"
     private const val UPDATED_AT = "updated_at"
+}
+
+/**
+ * Reads every snapshot in [bundles], a table name to asset file name map,
+ * through [openStream].
+ *
+ * Every snapshot is optional and independent: one missing or malformed asset
+ * must not stop the others or hide the database stats, so a failure is
+ * collected in [BundleReads.failures] instead of thrown. A snapshot that does
+ * not exist is simply absent from [BundleReads.stats] and is not a failure.
+ * Cancellation is rethrown so the caller's coroutine still unwinds.
+ */
+fun readBundles(
+    bundles: Map<String, String>,
+    openStream: (String) -> InputStream,
+): BundleReads {
+    val stats = mutableMapOf<String, BundleStats>()
+    val failures = mutableListOf<Throwable>()
+
+    bundles.forEach { (table, fileName) ->
+        try {
+            BundleReader.read(
+                location = "assets/$fileName",
+                openStream = { openStream(fileName) },
+            )?.let { stats[table] = it }
+        } catch (e: Throwable) {
+            e.rethrowIfCancellation()
+            failures.add(e)
+        }
+    }
+
+    return BundleReads(stats = stats, failures = failures)
 }
 
 /**

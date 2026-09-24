@@ -100,14 +100,14 @@ class DbStatsFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                bundles = withContext(Dispatchers.IO) {
-                    BUNDLES.mapNotNull { (table, fileName) ->
-                        BundleReader.read(
-                            location = "assets/$fileName",
-                            openStream = { context.assets.open(fileName) },
-                        )?.let { table to it }
-                    }.toMap()
+                val reads = withContext(Dispatchers.IO) {
+                    readBundles(BUNDLES) { fileName -> context.assets.open(fileName) }
                 }
+                bundles = reads.stats
+                // A snapshot that cannot be read only loses its own card: the
+                // database stats above still render, and the problem is
+                // reported rather than hidden behind a blank screen.
+                reads.failures.forEach { showError(it) }
                 refresh()
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
