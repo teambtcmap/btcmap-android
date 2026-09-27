@@ -100,8 +100,15 @@ abstract class BaseActivityFeedTab : Fragment() {
         }
 
         selectedIds.clear()
-        if (showAreaChips) {
-            selectedIds.addAll(initialAreas.filter { it.type != "country" }.map { it.id })
+        val restoredSelection = savedInstanceState?.getStringArrayList(STATE_SELECTED_IDS)
+        if (restoredSelection != null) {
+            selectedIds.addAll(restoredSelection)
+        } else if (showAreaChips) {
+            // Communities are the useful default scope; a country is selected
+            // only when the map centre is inside no community, otherwise the
+            // tab would be empty in rural areas.
+            val communities = initialAreas.filter { it.type != "country" }
+            selectedIds.addAll(communities.ifEmpty { initialAreas }.map { it.id })
         }
 
         loadActivity()
@@ -253,6 +260,11 @@ abstract class BaseActivityFeedTab : Fragment() {
         binding.list.visibility = View.GONE
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putStringArrayList(STATE_SELECTED_IDS, ArrayList(selectedIds))
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         loadJob?.cancel()
@@ -265,5 +277,7 @@ abstract class BaseActivityFeedTab : Fragment() {
         const val ARG_INITIAL_AREA_IDS = "area_ids"
         const val ARG_INITIAL_AREA_NAMES = "area_names"
         const val ARG_INITIAL_AREA_TYPES = "area_types"
+
+        private const val STATE_SELECTED_IDS = "selected_ids"
     }
 }

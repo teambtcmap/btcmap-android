@@ -1,6 +1,7 @@
 package org.btcmap.feed
 
 import android.content.Context
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.StringRes
@@ -12,7 +13,8 @@ import org.btcmap.api.ActivityFeedItem
 import org.btcmap.databinding.ActivityFeedAdapterItemBinding
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
+import java.time.format.DateTimeParseException
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 class ActivityFeedAdapter(
@@ -87,7 +89,11 @@ class ActivityFeedAdapter(
         }
 
         private fun getRelativeTime(context: Context, dateString: String): String {
-            val date = ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME)
+            val date = try {
+                ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME)
+            } catch (e: DateTimeParseException) {
+                return dateString
+            }
             val now = ZonedDateTime.now()
             val diffMillis = now.toInstant().toEpochMilli() - date.toInstant().toEpochMilli()
 
@@ -112,7 +118,7 @@ class ActivityFeedAdapter(
                     days.toInt(),
                     days.toInt(),
                 )
-                else -> date.format(DateTimeFormatter.ofPattern("MMM d", Locale.getDefault()))
+                else -> DateFormat.getMediumDateFormat(context).format(Date.from(date.toInstant()))
             }
         }
     }
@@ -120,7 +126,9 @@ class ActivityFeedAdapter(
     class DiffCallback : DiffUtil.ItemCallback<ActivityFeedItem>() {
 
         override fun areItemsTheSame(oldItem: ActivityFeedItem, newItem: ActivityFeedItem): Boolean {
-            return newItem.placeId == oldItem.placeId && newItem.date == oldItem.date
+            return newItem.type == oldItem.type &&
+                newItem.placeId == oldItem.placeId &&
+                newItem.date == oldItem.date
         }
 
         override fun areContentsTheSame(oldItem: ActivityFeedItem, newItem: ActivityFeedItem): Boolean {
