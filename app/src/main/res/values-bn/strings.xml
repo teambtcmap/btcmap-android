@@ -127,18 +127,21 @@
     <string name="activity_interval_year">১বছর</string>
     <string name="filter">ফিল্টার</string>
     <string name="activity_tab_local">স্থানীয়</string>
-    <string name="activity_tab_following">অনুসরণ করছেন</string>
+    <string name="activity_tab_saved">সংরক্ষিত</string>
     <string name="activity_filter_areas">এলাকা</string>
-    <string name="activity_feed_title">কার্যক্রমের ফিড</string>
+    <string name="activity_feed_title">কার্যক্রম</string>
     <string name="activity_empty_local">কোনো স্থানীয় কার্যক্রম নেই</string>
-    <string name="activity_empty_following_signed_out">আপনার সংরক্ষিত এলাকার কার্যক্রম দেখতে লগ ইন করুন</string>
-    <string name="activity_empty_following_no_areas">তাদের কার্যক্রম অনুসরণ করতে কিছু এলাকা সংরক্ষণ করুন</string>
-    <string name="activity_empty_following_no_activity">আপনার অনুসরণ করা এলাকায় কোনো কার্যক্রম নেই</string>
+    <string name="activity_empty_saved_signed_out">আপনার সংরক্ষিত এলাকা ও স্থানের কার্যক্রম দেখতে লগ ইন করুন</string>
+    <string name="activity_empty_saved_no_items">তাদের কার্যক্রম দেখতে কিছু এলাকা বা স্থান সংরক্ষণ করুন</string>
+    <string name="activity_empty_saved_no_activity">আপনার সংরক্ষিত এলাকা ও স্থানে কোনো কার্যক্রম নেই</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">%1$d দিনের জন্য বুস্ট করা হয়েছে</item>
         <item quantity="other">%1$d দিনের জন্য বুস্ট করা হয়েছে</item>
     </plurals>
     <string name="activity_by_user">%1$s দ্বারা</string>
+    <string name="activity_added_by">%1$s দ্বারা যোগ করা হয়েছে</string>
+    <string name="activity_updated_by">%1$s দ্বারা আপডেট করা হয়েছে</string>
+    <string name="activity_deleted_by">%1$s দ্বারা মুছে ফেলা হয়েছে</string>
     <string name="activity_just_now">এখনই</string>
     <plurals name="activity_minutes_ago">
         <item quantity="one">%1$d মিনিট আগে</item>

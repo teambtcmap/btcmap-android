@@ -127,18 +127,21 @@
     <string name="activity_interval_year">1वर्ष</string>
     <string name="filter">फ़िल्टर</string>
     <string name="activity_tab_local">स्थानीय</string>
-    <string name="activity_tab_following">फ़ॉलो कर रहे</string>
+    <string name="activity_tab_saved">सहेजे गए</string>
     <string name="activity_filter_areas">क्षेत्र</string>
-    <string name="activity_feed_title">गतिविधि फ़ीड</string>
+    <string name="activity_feed_title">गतिविधि</string>
     <string name="activity_empty_local">कोई स्थानीय गतिविधि नहीं</string>
-    <string name="activity_empty_following_signed_out">अपने सहेजे गए क्षेत्रों की गतिविधि देखने के लिए लॉग इन करें</string>
-    <string name="activity_empty_following_no_areas">उनकी गतिविधि फ़ॉलो करने के लिए कुछ क्षेत्र सहेजें</string>
-    <string name="activity_empty_following_no_activity">आपके फ़ॉलो किए गए क्षेत्रों में कोई गतिविधि नहीं</string>
+    <string name="activity_empty_saved_signed_out">अपने सहेजे गए क्षेत्रों और स्थानों की गतिविधि देखने के लिए लॉग इन करें</string>
+    <string name="activity_empty_saved_no_items">उनकी गतिविधि देखने के लिए कुछ क्षेत्र या स्थान सहेजें</string>
+    <string name="activity_empty_saved_no_activity">आपके सहेजे गए क्षेत्रों और स्थानों में कोई गतिविधि नहीं</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">%1$d दिन के लिए बूस्ट किया गया</item>
         <item quantity="other">%1$d दिनों के लिए बूस्ट किया गया</item>
     </plurals>
     <string name="activity_by_user">%1$s द्वारा</string>
+    <string name="activity_added_by">%1$s द्वारा जोड़ा गया</string>
+    <string name="activity_updated_by">%1$s द्वारा अपडेट किया गया</string>
+    <string name="activity_deleted_by">%1$s द्वारा हटाया गया</string>
     <string name="activity_just_now">अभी-अभी</string>
     <plurals name="activity_minutes_ago">
         <item quantity="one">%1$d मिनट पहले</item>

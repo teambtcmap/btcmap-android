@@ -73,6 +73,28 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
+    /**
+     * Selects a place by id whether or not it is a tombstone. Most reads hide
+     * deleted places; a caller that already knows the row may be deleted, such
+     * as resolving the OSM link for a delete entry in the activity feed, needs
+     * the tombstone's last-known data.
+     */
+    fun selectByIdIncludingDeleted(id: Long): Place? {
+        conn.prepare(
+            """
+                SELECT ${FullProjection.COLUMNS}
+                FROM $TABLE
+                WHERE $ID = ?1;
+            """
+        ).use {
+            it.bindLong(1, id)
+            if (it.step()) {
+                return FullProjection.fromStatement(it)
+            }
+            return null
+        }
+    }
+
     fun selectByOsmId(osmId: String): Place? {
         conn.prepare(
             """

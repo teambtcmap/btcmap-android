@@ -7,7 +7,7 @@ everyone. You only need an account to get more involved:
 - Verifying and reporting places.
 - Adding a place.
 - Saving places and areas.
-- Following the activity of your saved areas.
+- Viewing activity in your saved areas and places.
 
 Creating an account requires no KYC: pick any username you like, and we never
 ask for your email address.
@@ -54,7 +54,7 @@ Once signed in, **Settings → Account** opens your profile, where you can:
 
 The first time you save something while signed out, the app asks you to sign in
 and then completes the action. Saved items are listed in your profile, and the
-areas you save are what the **Following** tab of the
+areas and places you save are what the **Saved** tab of the
 [activity feed](activity-feed.md) draws from.
 
 ---

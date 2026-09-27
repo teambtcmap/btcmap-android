@@ -127,18 +127,21 @@
     <string name="activity_interval_year">1y</string>
     <string name="filter">Filtre</string>
     <string name="activity_tab_local">Yerel</string>
-    <string name="activity_tab_following">Takip edilen</string>
+    <string name="activity_tab_saved">Kaydedilenler</string>
     <string name="activity_filter_areas">Bölgeler</string>
-    <string name="activity_feed_title">Etkinlik akışı</string>
+    <string name="activity_feed_title">Etkinlik</string>
     <string name="activity_empty_local">Yerel etkinlik yok</string>
-    <string name="activity_empty_following_signed_out">Kaydedilen bölgelerinizdeki etkinliği görmek için giriş yapın</string>
-    <string name="activity_empty_following_no_areas">Etkinliklerini takip etmek için birkaç bölge kaydedin</string>
-    <string name="activity_empty_following_no_activity">Takip ettiğiniz bölgelerde etkinlik yok</string>
+    <string name="activity_empty_saved_signed_out">Kaydedilen bölgelerinizdeki ve yerlerinizdeki etkinliği görmek için giriş yapın</string>
+    <string name="activity_empty_saved_no_items">Etkinliklerini görmek için birkaç bölge veya yer kaydedin</string>
+    <string name="activity_empty_saved_no_activity">Kaydedilen bölgelerinizde ve yerlerinizde etkinlik yok</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">%1$d gün öne çıkarıldı</item>
         <item quantity="other">%1$d gün öne çıkarıldı</item>
     </plurals>
     <string name="activity_by_user">%1$s tarafından</string>
+    <string name="activity_added_by">%1$s tarafından eklendi</string>
+    <string name="activity_updated_by">%1$s tarafından güncellendi</string>
+    <string name="activity_deleted_by">%1$s tarafından silindi</string>
     <string name="activity_just_now">az önce</string>
     <plurals name="activity_minutes_ago">
         <item quantity="one">%1$d dk önce</item>

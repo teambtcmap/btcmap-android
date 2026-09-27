@@ -25,7 +25,7 @@ Each guide focuses on a specific feature and shows you how to make the most of i
 | [Exchanges](features/exchanges.md) | Bitcoin ATMs and currency exchanges. |
 | [Communities and countries](features/areas.md) | Community and country pages. |
 | [BTC Map account](features/accounts.md) | Sign up, manage your profile, save places and areas. |
-| [Activity feed](features/activity-feed.md) | Recent changes nearby and in the areas you follow. |
+| [Activity feed](features/activity-feed.md) | Recent changes nearby and in the areas and places you save. |
 | [Boosts](features/boosting.md) | Make a merchant stand out on the map. |
 | [Comments](features/comments.md) | Read and add anonymous, spam-protected comments. |
 | [Settings and appearance](features/settings.md) | Map style, custom colors and diagnostics. |

@@ -127,18 +127,21 @@
     <string name="activity_interval_year">1سال</string>
     <string name="filter">فلٹر</string>
     <string name="activity_tab_local">مقامی</string>
-    <string name="activity_tab_following">فالو کیے گئے</string>
+    <string name="activity_tab_saved">محفوظ</string>
     <string name="activity_filter_areas">علاقے</string>
-    <string name="activity_feed_title">سرگرمی فیڈ</string>
+    <string name="activity_feed_title">سرگرمی</string>
     <string name="activity_empty_local">کوئی مقامی سرگرمی نہیں</string>
-    <string name="activity_empty_following_signed_out">اپنے محفوظ علاقوں کی سرگرمی دیکھنے کے لیے لاگ ان کریں</string>
-    <string name="activity_empty_following_no_areas">ان کی سرگرمی فالو کرنے کے لیے کچھ علاقے محفوظ کریں</string>
-    <string name="activity_empty_following_no_activity">آپ کے فالو کیے گئے علاقوں میں کوئی سرگرمی نہیں</string>
+    <string name="activity_empty_saved_signed_out">اپنے محفوظ علاقوں اور مقامات کی سرگرمی دیکھنے کے لیے لاگ ان کریں</string>
+    <string name="activity_empty_saved_no_items">ان کی سرگرمی دیکھنے کے لیے کچھ علاقے یا مقامات محفوظ کریں</string>
+    <string name="activity_empty_saved_no_activity">آپ کے محفوظ علاقوں اور مقامات میں کوئی سرگرمی نہیں</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">%1$d دن کے لیے بوسٹ کیا گیا</item>
         <item quantity="other">%1$d دن کے لیے بوسٹ کیا گیا</item>
     </plurals>
     <string name="activity_by_user">%1$s کی طرف سے</string>
+    <string name="activity_added_by">%1$s کی طرف سے شامل کیا گیا</string>
+    <string name="activity_updated_by">%1$s کی طرف سے اپ ڈیٹ کیا گیا</string>
+    <string name="activity_deleted_by">%1$s کی طرف سے حذف کیا گیا</string>
     <string name="activity_just_now">ابھی</string>
     <plurals name="activity_minutes_ago">
         <item quantity="one">%1$d منٹ پہلے</item>

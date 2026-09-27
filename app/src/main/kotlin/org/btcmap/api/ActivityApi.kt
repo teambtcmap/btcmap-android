@@ -16,15 +16,37 @@ data class ActivityFeedItem(
     val date: String,
     val durationDays: Long?,
     val comment: String?,
-)
+) {
+    companion object {
+        const val TYPE_PLACE_ADDED = "place_added"
+        const val TYPE_PLACE_UPDATED = "place_updated"
+        const val TYPE_PLACE_DELETED = "place_deleted"
+        const val TYPE_PLACE_COMMENTED = "place_commented"
+        const val TYPE_PLACE_BOOSTED = "place_boosted"
+    }
+}
 
-suspend fun Api.getActivity(areaIds: List<String>, days: Int = 7): List<ActivityFeedItem> {
-    if (areaIds.isEmpty()) {
+/**
+ * Fetches the merged activity feed. [areaIds] accepts numeric area ids or url
+ * aliases; [placeIds] are integer place ids. When both are given the endpoint
+ * returns the union, deduplicated server-side.
+ */
+suspend fun Api.getActivity(
+    areaIds: List<String>,
+    placeIds: List<String> = emptyList(),
+    days: Int = 7,
+): List<ActivityFeedItem> {
+    if (areaIds.isEmpty() && placeIds.isEmpty()) {
         return emptyList()
     }
 
     val url = buildUrl("v4", "activity") {
-        addQueryParameter("areas", areaIds.joinToString(","))
+        if (areaIds.isNotEmpty()) {
+            addQueryParameter("areas", areaIds.joinToString(","))
+        }
+        if (placeIds.isNotEmpty()) {
+            addQueryParameter("places", placeIds.joinToString(","))
+        }
         addQueryParameter("days", "$days")
     }
 

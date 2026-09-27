@@ -3,6 +3,7 @@ package org.btcmap.feed
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -44,32 +45,45 @@ class ActivityFeedAdapter(
             binding.apply {
                 placeName.text = item.placeName.orEmpty()
                 userName.text = when (item.type) {
-                    "place_boosted" -> item.durationDays?.let {
+                    ActivityFeedItem.TYPE_PLACE_BOOSTED -> item.durationDays?.let {
                         context.resources.getQuantityString(
                             R.plurals.activity_boosted_for_days,
                             it.toInt(),
                             it.toInt(),
                         )
                     } ?: ""
-                    "place_commented" -> item.comment ?: ""
-                    else -> item.osmUserName?.let {
-                        context.getString(R.string.activity_by_user, it)
-                    } ?: ""
+                    ActivityFeedItem.TYPE_PLACE_COMMENTED -> item.comment ?: ""
+                    ActivityFeedItem.TYPE_PLACE_ADDED ->
+                        userNameText(context, item, R.string.activity_added_by)
+                    ActivityFeedItem.TYPE_PLACE_UPDATED ->
+                        userNameText(context, item, R.string.activity_updated_by)
+                    ActivityFeedItem.TYPE_PLACE_DELETED ->
+                        userNameText(context, item, R.string.activity_deleted_by)
+                    else -> userNameText(context, item, R.string.activity_by_user)
                 }
                 date.text = getRelativeTime(context, item.date)
 
                 icon.setImageResource(
                     when (item.type) {
-                        "place_added" -> R.drawable.icon_add_location
-                        "place_updated" -> R.drawable.icon_edit
-                        "place_boosted" -> R.drawable.icon_rocket_launch
-                        "place_commented" -> R.drawable.icon_comment
+                        ActivityFeedItem.TYPE_PLACE_ADDED -> R.drawable.icon_add_location
+                        ActivityFeedItem.TYPE_PLACE_UPDATED -> R.drawable.icon_edit
+                        ActivityFeedItem.TYPE_PLACE_BOOSTED -> R.drawable.icon_rocket_launch
+                        ActivityFeedItem.TYPE_PLACE_COMMENTED -> R.drawable.icon_comment
+                        ActivityFeedItem.TYPE_PLACE_DELETED -> R.drawable.icon_delete
                         else -> R.drawable.icon_place
                     }
                 )
 
                 root.setOnClickListener { onItemClick(item) }
             }
+        }
+
+        private fun userNameText(
+            context: Context,
+            item: ActivityFeedItem,
+            @StringRes resId: Int,
+        ): String {
+            return item.osmUserName?.let { context.getString(resId, it) } ?: ""
         }
 
         private fun getRelativeTime(context: Context, dateString: String): String {

@@ -127,18 +127,21 @@
     <string name="activity_interval_year">1é</string>
     <string name="filter">Szűrő</string>
     <string name="activity_tab_local">Helyi</string>
-    <string name="activity_tab_following">Követettek</string>
+    <string name="activity_tab_saved">Mentett</string>
     <string name="activity_filter_areas">Területek</string>
-    <string name="activity_feed_title">Aktivitási hírfolyam</string>
+    <string name="activity_feed_title">Aktivitás</string>
     <string name="activity_empty_local">Nincs helyi aktivitás</string>
-    <string name="activity_empty_following_signed_out">Jelentkezz be a mentett területeid aktivitásának megtekintéséhez</string>
-    <string name="activity_empty_following_no_areas">Ments el néhány területet, hogy kövesd az aktivitásukat</string>
-    <string name="activity_empty_following_no_activity">Nincs aktivitás a követett területeiden</string>
+    <string name="activity_empty_saved_signed_out">Jelentkezz be a mentett területeid és helyeid aktivitásának megtekintéséhez</string>
+    <string name="activity_empty_saved_no_items">Ments el néhány területet vagy helyet, hogy lásd az aktivitásukat</string>
+    <string name="activity_empty_saved_no_activity">Nincs aktivitás a mentett területeiden és helyeiden</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">%1$d napra kiemelve</item>
         <item quantity="other">%1$d napra kiemelve</item>
     </plurals>
     <string name="activity_by_user">%1$s által</string>
+    <string name="activity_added_by">%1$s által hozzáadva</string>
+    <string name="activity_updated_by">%1$s által frissítve</string>
+    <string name="activity_deleted_by">%1$s által törölve</string>
     <string name="activity_just_now">épp most</string>
     <plurals name="activity_minutes_ago">
         <item quantity="one">%1$d perccel ezelőtt</item>

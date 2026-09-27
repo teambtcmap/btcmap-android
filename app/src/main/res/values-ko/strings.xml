@@ -127,17 +127,20 @@
     <string name="activity_interval_year">1년</string>
     <string name="filter">필터</string>
     <string name="activity_tab_local">로컬</string>
-    <string name="activity_tab_following">팔로잉</string>
+    <string name="activity_tab_saved">저장됨</string>
     <string name="activity_filter_areas">지역</string>
-    <string name="activity_feed_title">활동 피드</string>
+    <string name="activity_feed_title">활동</string>
     <string name="activity_empty_local">로컬 활동이 없습니다</string>
-    <string name="activity_empty_following_signed_out">저장한 지역의 활동을 보려면 로그인하세요</string>
-    <string name="activity_empty_following_no_areas">지역을 저장하여 활동을 팔로우하세요</string>
-    <string name="activity_empty_following_no_activity">팔로우한 지역에 활동이 없습니다</string>
+    <string name="activity_empty_saved_signed_out">저장한 지역과 장소의 활동을 보려면 로그인하세요</string>
+    <string name="activity_empty_saved_no_items">지역이나 장소를 저장하여 활동을 확인하세요</string>
+    <string name="activity_empty_saved_no_activity">저장한 지역과 장소에 활동이 없습니다</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="other">%1$d일 동안 부스트됨</item>
     </plurals>
     <string name="activity_by_user">%1$s 님</string>
+    <string name="activity_added_by">%1$s 님이 추가함</string>
+    <string name="activity_updated_by">%1$s 님이 업데이트함</string>
+    <string name="activity_deleted_by">%1$s 님이 삭제함</string>
     <string name="activity_just_now">방금 전</string>
     <plurals name="activity_minutes_ago">
         <item quantity="other">%1$d분 전</item>

@@ -127,17 +127,20 @@
     <string name="activity_interval_year">1年</string>
     <string name="filter">筛选</string>
     <string name="activity_tab_local">本地</string>
-    <string name="activity_tab_following">已关注</string>
+    <string name="activity_tab_saved">已保存</string>
     <string name="activity_filter_areas">区域</string>
-    <string name="activity_feed_title">活动动态</string>
+    <string name="activity_feed_title">活动</string>
     <string name="activity_empty_local">暂无本地活动</string>
-    <string name="activity_empty_following_signed_out">登录以查看已保存区域的活动</string>
-    <string name="activity_empty_following_no_areas">保存一些区域以关注其活动</string>
-    <string name="activity_empty_following_no_activity">你关注的区域暂无活动</string>
+    <string name="activity_empty_saved_signed_out">登录以查看已保存区域和地点的活动</string>
+    <string name="activity_empty_saved_no_items">保存一些区域或地点以查看它们的活动</string>
+    <string name="activity_empty_saved_no_activity">你保存的区域和地点暂无活动</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="other">已推广 %1$d 天</item>
     </plurals>
     <string name="activity_by_user">来自 %1$s</string>
+    <string name="activity_added_by">由 %1$s 添加</string>
+    <string name="activity_updated_by">由 %1$s 更新</string>
+    <string name="activity_deleted_by">由 %1$s 删除</string>
     <string name="activity_just_now">刚刚</string>
     <plurals name="activity_minutes_ago">
         <item quantity="other">%1$d 分钟前</item>

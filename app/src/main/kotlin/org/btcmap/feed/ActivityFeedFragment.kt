@@ -59,8 +59,8 @@ class ActivityFeedFragment : Fragment() {
                 },
             ),
             ActivityFeedPagerAdapter.TabSpec(
-                title = getString(R.string.activity_tab_following),
-                factory = { FollowingActivityFragment.create() },
+                title = getString(R.string.activity_tab_saved),
+                factory = { SavedActivityFragment.create() },
             ),
         )
 
@@ -79,16 +79,16 @@ class ActivityFeedFragment : Fragment() {
             .firstOrNull()
     }
 
-    private fun currentFollowingFragment(): FollowingActivityFragment? {
+    private fun currentSavedFragment(): SavedActivityFragment? {
         return requireActivity().supportFragmentManager.fragments
-            .filterIsInstance<FollowingActivityFragment>()
+            .filterIsInstance<SavedActivityFragment>()
             .firstOrNull()
     }
 
     private fun currentActiveTab(): BaseActivityFeedTab? {
         return when (binding.pager.currentItem) {
             0 -> currentLocalFragment()
-            1 -> currentFollowingFragment()
+            1 -> currentSavedFragment()
             else -> null
         }
     }

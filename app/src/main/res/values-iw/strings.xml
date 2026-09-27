@@ -127,19 +127,22 @@
     <string name="activity_interval_year">1ש</string>
     <string name="filter">סינון</string>
     <string name="activity_tab_local">מקומי</string>
-    <string name="activity_tab_following">נעקבים</string>
+    <string name="activity_tab_saved">שמורים</string>
     <string name="activity_filter_areas">אזורים</string>
-    <string name="activity_feed_title">פיד פעילות</string>
+    <string name="activity_feed_title">פעילות</string>
     <string name="activity_empty_local">אין פעילות מקומית</string>
-    <string name="activity_empty_following_signed_out">התחברו כדי לראות פעילות באזורים השמורים שלכם</string>
-    <string name="activity_empty_following_no_areas">שמרו כמה אזורים כדי לעקוב אחר הפעילות שלהם</string>
-    <string name="activity_empty_following_no_activity">אין פעילות באזורים שאתם עוקבים אחריהם</string>
+    <string name="activity_empty_saved_signed_out">התחברו כדי לראות פעילות באזורים ובמקומות השמורים שלכם</string>
+    <string name="activity_empty_saved_no_items">שמרו כמה אזורים או מקומות כדי לראות את הפעילות שלהם</string>
+    <string name="activity_empty_saved_no_activity">אין פעילות באזורים ובמקומות השמורים שלכם</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">מוגבר ליום אחד</item>
         <item quantity="two">מוגבר ליומיים</item>
         <item quantity="other">מוגבר ל-%1$d ימים</item>
     </plurals>
     <string name="activity_by_user">על ידי %1$s</string>
+    <string name="activity_added_by">נוסף על ידי %1$s</string>
+    <string name="activity_updated_by">עודכן על ידי %1$s</string>
+    <string name="activity_deleted_by">נמחק על ידי %1$s</string>
     <string name="activity_just_now">ממש עכשיו</string>
     <plurals name="activity_minutes_ago">
         <item quantity="one">לפני דקה</item>

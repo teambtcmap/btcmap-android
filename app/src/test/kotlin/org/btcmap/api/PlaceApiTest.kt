@@ -166,6 +166,30 @@ class PlaceApiTest : ApiTestBase() {
     }
 
     @Test
+    fun getPlaceOsmId_readsOsmIdOfDeletedPlace() = runTest {
+        enqueueJson(
+            """{"id":23257,"osm_id":"node:2756991716","deleted_at":"2026-05-19T11:44:04Z"}"""
+        )
+
+        val osmId = api().getPlaceOsmId(23257)
+
+        val request = takeRequest()
+        Assert.assertEquals("GET", request.method)
+        Assert.assertEquals("/v4/places/23257", request.url.encodedPath)
+        Assert.assertEquals("osm_id", request.url.queryParameter("fields"))
+        Assert.assertEquals("node:2756991716", osmId)
+    }
+
+    @Test
+    fun getPlaceOsmId_returnsNullWhenMissingOrBlank() = runTest {
+        enqueueJson("""{"id":5,"osm_id":null}""")
+        enqueueJson("""{"id":6,"osm_id":"  "}""")
+
+        Assert.assertNull(api().getPlaceOsmId(5))
+        Assert.assertNull(api().getPlaceOsmId(6))
+    }
+
+    @Test
     fun savePlace_postsIdAndReturnsUpdatedList() = runTest {
         enqueueJson("[123,456]")
 

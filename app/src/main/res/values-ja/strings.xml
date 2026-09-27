@@ -127,17 +127,20 @@
     <string name="activity_interval_year">1年</string>
     <string name="filter">フィルター</string>
     <string name="activity_tab_local">ローカル</string>
-    <string name="activity_tab_following">フォロー中</string>
+    <string name="activity_tab_saved">保存済み</string>
     <string name="activity_filter_areas">エリア</string>
-    <string name="activity_feed_title">アクティビティフィード</string>
+    <string name="activity_feed_title">アクティビティ</string>
     <string name="activity_empty_local">ローカルのアクティビティはありません</string>
-    <string name="activity_empty_following_signed_out">保存したエリアのアクティビティを見るにはログインしてください</string>
-    <string name="activity_empty_following_no_areas">エリアを保存してアクティビティをフォローしましょう</string>
-    <string name="activity_empty_following_no_activity">フォロー中のエリアにアクティビティはありません</string>
+    <string name="activity_empty_saved_signed_out">保存したエリアや場所のアクティビティを見るにはログインしてください</string>
+    <string name="activity_empty_saved_no_items">エリアや場所を保存してアクティビティを確認しましょう</string>
+    <string name="activity_empty_saved_no_activity">保存したエリアや場所にアクティビティはありません</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="other">%1$d日間ブースト中</item>
     </plurals>
     <string name="activity_by_user">%1$sによる</string>
+    <string name="activity_added_by">%1$s が追加</string>
+    <string name="activity_updated_by">%1$s が更新</string>
+    <string name="activity_deleted_by">%1$s が削除</string>
     <string name="activity_just_now">たった今</string>
     <plurals name="activity_minutes_ago">
         <item quantity="other">%1$d分前</item>

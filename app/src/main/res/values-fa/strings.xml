@@ -127,18 +127,21 @@
     <string name="activity_interval_year">۱س</string>
     <string name="filter">فیلتر</string>
     <string name="activity_tab_local">محلی</string>
-    <string name="activity_tab_following">دنبال‌شده‌ها</string>
+    <string name="activity_tab_saved">ذخیره‌شده‌ها</string>
     <string name="activity_filter_areas">مناطق</string>
-    <string name="activity_feed_title">جریان فعالیت</string>
+    <string name="activity_feed_title">فعالیت</string>
     <string name="activity_empty_local">فعالیت محلی وجود ندارد</string>
-    <string name="activity_empty_following_signed_out">برای دیدن فعالیت مناطق ذخیره‌شده‌تان وارد شوید</string>
-    <string name="activity_empty_following_no_areas">چند منطقه را ذخیره کنید تا فعالیت آن‌ها را دنبال کنید</string>
-    <string name="activity_empty_following_no_activity">هیچ فعالیتی در مناطق دنبال‌شده‌تان نیست</string>
+    <string name="activity_empty_saved_signed_out">برای دیدن فعالیت مناطق و مکان‌های ذخیره‌شده‌تان وارد شوید</string>
+    <string name="activity_empty_saved_no_items">چند منطقه یا مکان را ذخیره کنید تا فعالیت آن‌ها را ببینید</string>
+    <string name="activity_empty_saved_no_activity">هیچ فعالیتی در مناطق و مکان‌های ذخیره‌شده‌تان نیست</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">به مدت %1$d روز تقویت شد</item>
         <item quantity="other">به مدت %1$d روز تقویت شد</item>
     </plurals>
     <string name="activity_by_user">توسط %1$s</string>
+    <string name="activity_added_by">افزوده‌شده توسط %1$s</string>
+    <string name="activity_updated_by">به‌روزرسانی‌شده توسط %1$s</string>
+    <string name="activity_deleted_by">حذف‌شده توسط %1$s</string>
     <string name="activity_just_now">همین حالا</string>
     <plurals name="activity_minutes_ago">
         <item quantity="one">%1$d دقیقه پیش</item>

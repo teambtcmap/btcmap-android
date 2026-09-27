@@ -91,6 +91,23 @@ suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
     }
 }
 
+/**
+ * Looks up a place's OSM id, including for deleted places. Delete entries in
+ * the activity feed can name a place whose tombstone never reached the device
+ * (the bundled snapshot carries only live places, and a tombstone older than
+ * the snapshot's cursor is never in the delta), so the id has to be read from
+ * the server. Returns null when the place is unknown or has no OSM id.
+ */
+suspend fun Api.getPlaceOsmId(id: Long): String? {
+    val url = buildUrl("v4", "places", "$id") {
+        addQueryParameter("fields", "osm_id")
+    }
+
+    return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
+        stream.toJsonObject().nonBlankStringOrNull("osm_id")
+    }
+}
+
 suspend fun Api.savePlace(id: Long): List<Long> = saveItem("places", id)
 
 suspend fun Api.removeSavedPlace(id: Long): List<Long> = removeSavedItem("places", id)

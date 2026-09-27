@@ -6,11 +6,11 @@ care about. Open it from the activity button on the map.
 It has two tabs:
 
 - **Local** — activity in the areas currently shown around the map.
-- **Following** — activity in the areas you have saved. Signing in is required,
-  and you need at least one saved area. See
+- **Saved** — activity in the areas and places you have saved. Signing in is
+  required, and you need at least one saved area or place. See
   [BTC Map account](accounts.md).
 
-![The activity feed's Local tab, listing recent changes such as places edited, comments and boosts, each with who did it and how long ago](/images/activity-feed-light.png)
+![The activity feed's Local tab, listing recent changes with who made them and how long ago](/images/activity-feed-light.png)
 
 ## Filtering
 
@@ -23,16 +23,16 @@ The filter button in the feed's menu opens a dialog with:
 
 Changing a chip reloads the feed immediately.
 
-![The feed's filter dialog, choosing how far back to look from 1 day to 1 year](/images/activity-feed-filter-light.png)
+![The feed's filter dialog, choosing which areas to include and how far back to look, from 1 day to 1 year](/images/activity-feed-filter-light.png)
 
 ## Reading the feed
 
 Each entry names the place or area, what happened, who did it, and how long ago.
 Boosted places show how long they are boosted for. Tapping an entry opens the
-place.
+place; a deleted place opens on OpenStreetMap instead.
 
 If a request fails, the feed offers **Tap to retry** instead of an empty list.
-The Following tab explains what to do when you are signed out or have no saved
+The Saved tab explains what to do when you are signed out or have no saved
 areas yet.
 
 ---

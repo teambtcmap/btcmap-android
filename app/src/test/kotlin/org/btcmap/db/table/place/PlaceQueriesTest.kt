@@ -76,6 +76,40 @@ class PlaceQueriesTest {
     }
 
     @Test
+    fun selectByIdIncludingDeleted_returnsTombstone() {
+        val db = createDatabase()
+        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        db.place.insert(
+            listOf(
+                createPlace(id = 1L, icon = "coffee", updatedAt = deletedAt)
+                    .copy(deletedAt = deletedAt, osmId = "node:1"),
+            ),
+        )
+
+        Assert.assertNull(db.place.selectById(1L))
+
+        val tombstone = db.place.selectByIdIncludingDeleted(1L)
+        Assert.assertNotNull(tombstone)
+        Assert.assertEquals("node:1", tombstone!!.osmId)
+        Assert.assertEquals(deletedAt, tombstone.deletedAt)
+    }
+
+    @Test
+    fun selectByIdIncludingDeleted_returnsLivePlace() {
+        val db = createDatabase()
+        db.place.insert(listOf(createPlace(id = 2L).copy(osmId = "way:2")))
+
+        Assert.assertEquals(2L, db.place.selectByIdIncludingDeleted(2L)!!.id)
+    }
+
+    @Test
+    fun selectByIdIncludingDeleted_returnsNullWhenNotFound() {
+        val db = createDatabase()
+
+        Assert.assertNull(db.place.selectByIdIncludingDeleted(99L))
+    }
+
+    @Test
     fun selectByOsmId_returnsMatchingPlace() {
         val db = createDatabase()
         db.place.insert(

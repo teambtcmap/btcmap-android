@@ -127,17 +127,20 @@
     <string name="activity_interval_year">1 năm</string>
     <string name="filter">Bộ lọc</string>
     <string name="activity_tab_local">Địa phương</string>
-    <string name="activity_tab_following">Đang theo dõi</string>
+    <string name="activity_tab_saved">Đã lưu</string>
     <string name="activity_filter_areas">Khu vực</string>
-    <string name="activity_feed_title">Bảng tin hoạt động</string>
+    <string name="activity_feed_title">Hoạt động</string>
     <string name="activity_empty_local">Không có hoạt động tại địa phương</string>
-    <string name="activity_empty_following_signed_out">Đăng nhập để xem hoạt động trong các khu vực đã lưu của bạn</string>
-    <string name="activity_empty_following_no_areas">Lưu một số khu vực để theo dõi hoạt động của chúng</string>
-    <string name="activity_empty_following_no_activity">Không có hoạt động trong các khu vực bạn theo dõi</string>
+    <string name="activity_empty_saved_signed_out">Đăng nhập để xem hoạt động trong các khu vực và địa điểm đã lưu của bạn</string>
+    <string name="activity_empty_saved_no_items">Lưu một số khu vực hoặc địa điểm để xem hoạt động của chúng</string>
+    <string name="activity_empty_saved_no_activity">Không có hoạt động trong các khu vực và địa điểm đã lưu của bạn</string>
     <plurals name="activity_boosted_for_days">
-        <item quantity="other">được đẩy lên trong %1$d ngày</item>
+        <item quantity="other">Được đẩy lên trong %1$d ngày</item>
     </plurals>
     <string name="activity_by_user">bởi %1$s</string>
+    <string name="activity_added_by">Thêm bởi %1$s</string>
+    <string name="activity_updated_by">Cập nhật bởi %1$s</string>
+    <string name="activity_deleted_by">Xóa bởi %1$s</string>
     <string name="activity_just_now">vừa xong</string>
     <plurals name="activity_minutes_ago">
         <item quantity="other">%1$d phút trước</item>

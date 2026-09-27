@@ -127,18 +127,21 @@
     <string name="activity_interval_year">1j</string>
     <string name="filter">Filter</string>
     <string name="activity_tab_local">Lokaal</string>
-    <string name="activity_tab_following">Volgend</string>
+    <string name="activity_tab_saved">Opgeslagen</string>
     <string name="activity_filter_areas">Gebieden</string>
-    <string name="activity_feed_title">Activiteitenfeed</string>
+    <string name="activity_feed_title">Activiteit</string>
     <string name="activity_empty_local">Geen lokale activiteit</string>
-    <string name="activity_empty_following_signed_out">Log in om activiteit in je opgeslagen gebieden te zien</string>
-    <string name="activity_empty_following_no_areas">Sla enkele gebieden op om hun activiteit te volgen</string>
-    <string name="activity_empty_following_no_activity">Geen activiteit in je gevolgde gebieden</string>
+    <string name="activity_empty_saved_signed_out">Log in om activiteit in je opgeslagen gebieden en plaatsen te zien</string>
+    <string name="activity_empty_saved_no_items">Sla enkele gebieden of plaatsen op om hun activiteit te zien</string>
+    <string name="activity_empty_saved_no_activity">Geen activiteit in je opgeslagen gebieden en plaatsen</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="one">%1$d dag uitgelicht</item>
         <item quantity="other">%1$d dagen uitgelicht</item>
     </plurals>
     <string name="activity_by_user">door %1$s</string>
+    <string name="activity_added_by">Toegevoegd door %1$s</string>
+    <string name="activity_updated_by">Bijgewerkt door %1$s</string>
+    <string name="activity_deleted_by">Verwijderd door %1$s</string>
     <string name="activity_just_now">zojuist</string>
     <plurals name="activity_minutes_ago">
         <item quantity="one">%1$d min geleden</item>

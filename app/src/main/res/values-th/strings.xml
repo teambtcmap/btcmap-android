@@ -127,17 +127,20 @@
     <string name="activity_interval_year">1ปี</string>
     <string name="filter">ตัวกรอง</string>
     <string name="activity_tab_local">ท้องถิ่น</string>
-    <string name="activity_tab_following">กำลังติดตาม</string>
+    <string name="activity_tab_saved">บันทึกไว้</string>
     <string name="activity_filter_areas">พื้นที่</string>
-    <string name="activity_feed_title">ฟีดกิจกรรม</string>
+    <string name="activity_feed_title">กิจกรรม</string>
     <string name="activity_empty_local">ไม่มีกิจกรรมในท้องถิ่น</string>
-    <string name="activity_empty_following_signed_out">เข้าสู่ระบบเพื่อดูกิจกรรมในพื้นที่ที่บันทึกไว้</string>
-    <string name="activity_empty_following_no_areas">บันทึกพื้นที่บางส่วนเพื่อติดตามกิจกรรมของพื้นที่นั้น</string>
-    <string name="activity_empty_following_no_activity">ไม่มีกิจกรรมในพื้นที่ที่คุณติดตาม</string>
+    <string name="activity_empty_saved_signed_out">เข้าสู่ระบบเพื่อดูกิจกรรมในพื้นที่และสถานที่ที่บันทึกไว้</string>
+    <string name="activity_empty_saved_no_items">บันทึกพื้นที่หรือสถานที่บางส่วนเพื่อดูกิจกรรมของพวกเขา</string>
+    <string name="activity_empty_saved_no_activity">ไม่มีกิจกรรมในพื้นที่และสถานที่ที่คุณบันทึกไว้</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="other">บูสต์เป็นเวลา %1$d วัน</item>
     </plurals>
     <string name="activity_by_user">โดย %1$s</string>
+    <string name="activity_added_by">เพิ่มโดย %1$s</string>
+    <string name="activity_updated_by">อัปเดตโดย %1$s</string>
+    <string name="activity_deleted_by">ลบโดย %1$s</string>
     <string name="activity_just_now">เมื่อสักครู่</string>
     <plurals name="activity_minutes_ago">
         <item quantity="other">%1$d นาทีที่แล้ว</item>

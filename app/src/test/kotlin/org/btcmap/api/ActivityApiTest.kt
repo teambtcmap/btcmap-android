@@ -63,8 +63,32 @@ class ActivityApiTest : ApiTestBase() {
     }
 
     @Test
-    fun getActivity_returnsEmptyWithoutRequestWhenNoAreas() = runTest {
-        val items = api().getActivity(areaIds = emptyList(), days = 7)
+    fun getActivity_sendsAreasAndPlaces() = runTest {
+        enqueueJson("[]")
+
+        api().getActivity(areaIds = listOf("germany"), placeIds = listOf("1", "2"), days = 30)
+
+        val request = takeRequest()
+        Assert.assertEquals("germany", request.url.queryParameter("areas"))
+        Assert.assertEquals("1,2", request.url.queryParameter("places"))
+        Assert.assertEquals("30", request.url.queryParameter("days"))
+    }
+
+    @Test
+    fun getActivity_sendsOnlyPlacesWhenNoAreas() = runTest {
+        enqueueJson("[]")
+
+        api().getActivity(areaIds = emptyList(), placeIds = listOf("7"))
+
+        val request = takeRequest()
+        Assert.assertNull(request.url.queryParameter("areas"))
+        Assert.assertEquals("7", request.url.queryParameter("places"))
+        Assert.assertEquals("7", request.url.queryParameter("days"))
+    }
+
+    @Test
+    fun getActivity_returnsEmptyWithoutRequestWhenNoScope() = runTest {
+        val items = api().getActivity(areaIds = emptyList(), placeIds = emptyList(), days = 7)
 
         Assert.assertTrue(items.isEmpty())
         Assert.assertEquals(0, server.requestCount)

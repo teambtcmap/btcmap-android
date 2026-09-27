@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
@@ -17,20 +18,31 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.api
+import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getActivity
+import org.btcmap.api.getPlaceOsmId
 import org.btcmap.databinding.ActivityFeedFilterDialogBinding
 import org.btcmap.databinding.ActivityFeedTabBinding
+import org.btcmap.db
 import org.btcmap.place.PlaceFragment
+import org.btcmap.place.toOsmUrl
 import org.btcmap.settings.ActivityInterval
 import org.btcmap.settings.activityIntervalDays
 import org.btcmap.settings.prefs
+import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
+
+/** The area and place ids an activity feed tab queries. */
+data class ActivityScope(
+    val areaIds: List<String>,
+    val placeIds: List<String> = emptyList(),
+)
 
 /**
  * Common scaffolding for an Activity Feed tab: list of items, filter chips
  * surfaced via [showFilterDialog], and a placeholder for empty/loading states.
- * Subclasses override [loadAreaIds] to yield the set of area ids to query for
- * the current selection (or null to short-circuit with empty).
+ * Subclasses override [loadScope] to yield the ids to query for the current
+ * selection (or null to short-circuit with empty).
  */
 abstract class BaseActivityFeedTab : Fragment() {
 
@@ -62,10 +74,14 @@ abstract class BaseActivityFeedTab : Fragment() {
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         val adapter = ActivityFeedAdapter { item ->
-            requireActivity().supportFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace(R.id.fragmentContainerView, PlaceFragment.create(item.placeId))
-                addToBackStack(null)
+            if (item.type == ActivityFeedItem.TYPE_PLACE_DELETED) {
+                openDeletedPlace(item.placeId)
+            } else {
+                requireActivity().supportFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    replace(R.id.fragmentContainerView, PlaceFragment.create(item.placeId))
+                    addToBackStack(null)
+                }
             }
         }
         binding.list.adapter = adapter
@@ -141,26 +157,21 @@ abstract class BaseActivityFeedTab : Fragment() {
     }
 
     /**
-     * Returns the area ids that should be queried given the current chip
-     * selection. Returning an empty list means "no areas selected" and the
-     * tab shows its empty state. Return null to skip the network call
-     * entirely (e.g. user not logged in for the Following tab).
+     * Returns the ids that should be queried given the current selection.
+     * Returning an empty scope means "nothing selected" and the tab shows its
+     * empty state. Return null to skip the network call entirely (e.g. user
+     * not logged in for the Saved tab).
      */
-    protected open fun loadAreaIds(): List<String>? {
-        return selectedIds.toList()
+    protected open fun loadScope(): ActivityScope? {
+        return ActivityScope(areaIds = selectedIds.toList())
     }
 
     protected fun loadActivity() {
         loadJob?.cancel()
         val adapter = binding.list.adapter as ActivityFeedAdapter
 
-        val ids = loadAreaIds()
-        if (ids == null) {
-            showEmptyState(adapter)
-            return
-        }
-
-        if (ids.isEmpty()) {
+        val scope = loadScope()
+        if (scope == null || (scope.areaIds.isEmpty() && scope.placeIds.isEmpty())) {
             showEmptyState(adapter)
             return
         }
@@ -172,7 +183,11 @@ abstract class BaseActivityFeedTab : Fragment() {
         loadJob = viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val items = withContext(Dispatchers.IO) {
-                    api().getActivity(ids, days = prefs.activityIntervalDays)
+                    api().getActivity(
+                        scope.areaIds,
+                        scope.placeIds,
+                        prefs.activityIntervalDays,
+                    )
                 }
                 binding.loading.visibility = View.GONE
                 if (items.isEmpty()) {
@@ -187,6 +202,32 @@ abstract class BaseActivityFeedTab : Fragment() {
                 e.rethrowIfCancellation()
                 showErrorState(adapter)
             }
+        }
+    }
+
+    /**
+     * A deleted place no longer has a screen to open, so the row opens its
+     * OpenStreetMap page instead. The OSM id is taken from the local tombstone
+     * when present, and read from the server otherwise: a delete can name a
+     * place whose tombstone never reached the device.
+     */
+    private fun openDeletedPlace(placeId: Long) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val osmId = withContext(Dispatchers.IO) {
+                db().place.selectByIdIncludingDeleted(placeId)?.osmId
+                    ?: fetchOsmId(placeId)
+            } ?: return@launch
+            val url = osmId.toOsmUrl() ?: return@launch
+            openInBrowser(url.toUri())
+        }
+    }
+
+    private suspend fun fetchOsmId(placeId: Long): String? {
+        return try {
+            api().getPlaceOsmId(placeId)
+        } catch (t: Throwable) {
+            t.rethrowIfCancellation()
+            null
         }
     }
 

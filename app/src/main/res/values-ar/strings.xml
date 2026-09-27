@@ -127,13 +127,13 @@
     <string name="activity_interval_year">1س</string>
     <string name="filter">تصفية</string>
     <string name="activity_tab_local">محلي</string>
-    <string name="activity_tab_following">المتابَعون</string>
+    <string name="activity_tab_saved">المحفوظات</string>
     <string name="activity_filter_areas">المناطق</string>
-    <string name="activity_feed_title">موجز النشاط</string>
+    <string name="activity_feed_title">النشاط</string>
     <string name="activity_empty_local">لا يوجد نشاط محلي</string>
-    <string name="activity_empty_following_signed_out">سجّل الدخول لرؤية النشاط من مناطقك المحفوظة</string>
-    <string name="activity_empty_following_no_areas">احفظ بعض المناطق لمتابعة نشاطها</string>
-    <string name="activity_empty_following_no_activity">لا يوجد نشاط في المناطق التي تتابعها</string>
+    <string name="activity_empty_saved_signed_out">سجّل الدخول لرؤية النشاط من مناطقك وأماكنك المحفوظة</string>
+    <string name="activity_empty_saved_no_items">احفظ بعض المناطق أو الأماكن لرؤية نشاطها</string>
+    <string name="activity_empty_saved_no_activity">لا يوجد نشاط في مناطقك وأماكنك المحفوظة</string>
     <plurals name="activity_boosted_for_days">
         <item quantity="zero">مُعزَّز لمدة %1$d أيام</item>
         <item quantity="one">مُعزَّز لمدة يوم واحد</item>
@@ -143,6 +143,9 @@
         <item quantity="other">مُعزَّز لمدة %1$d يوم</item>
     </plurals>
     <string name="activity_by_user">بواسطة %1$s</string>
+    <string name="activity_added_by">أضيف بواسطة %1$s</string>
+    <string name="activity_updated_by">حُدّث بواسطة %1$s</string>
+    <string name="activity_deleted_by">حُذف بواسطة %1$s</string>
     <string name="activity_just_now">الآن</string>
     <plurals name="activity_minutes_ago">
         <item quantity="zero">منذ %1$d دقائق</item>
