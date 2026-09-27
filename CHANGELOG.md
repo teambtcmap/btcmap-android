@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Stop retrying a rate-limited request once its screen is closed, and wait out a server-requested cool-down longer than a minute instead of retrying early
 - Keep the activity feed's area filter when the screen is recreated, and fall back to a country's activity when the map centre is inside no community
 - Show activity feed dates in the device's date format and stop crashing the feed on an unexpected date
 - Keep the activity feed's filter dialog and list in sync, so reopening the feed after moving the map no longer picks up the previous screen's areas
