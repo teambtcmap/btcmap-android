@@ -61,10 +61,10 @@ abstract class BaseActivityFeedTab : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
-        val adapter = ActivityFeedAdapter { _ ->
+        val adapter = ActivityFeedAdapter { item ->
             requireActivity().supportFragmentManager.commit {
                 setReorderingAllowed(true)
-                replace<PlaceFragment>(R.id.fragmentContainerView, null)
+                replace(R.id.fragmentContainerView, PlaceFragment.create(item.placeId))
                 addToBackStack(null)
             }
         }

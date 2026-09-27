@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Open a place from an activity feed entry instead of a blank screen, showing a preview map on a place opened outside the map whose marker matches the map's pins and jumps to the place on the map when tapped
+- Keep a place's toolbar clear of the status bar and give it room for a two-line name when it is opened outside the map
+- Add a ripple to activity feed rows when they are pressed
+- Show a single comment button on a place with no comments instead of the duplicate pair, labelling the only remaining bottom button Add Comment and showing it only once there are comments
 - Remove the event table's unused legacy area reference, rebuilding the table without it in a database migration
 - Translate the activity feed's title and empty-state messages into all supported languages, instead of always showing them in English
 - Keep an area screen's upcoming events and the map chips' event counts up to date when a background sync changes them, instead of leaving the stale list until the screen is reopened

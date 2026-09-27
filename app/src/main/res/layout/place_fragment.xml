@@ -11,6 +11,8 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="@dimen/place_toolbar_vertical_padding"
+        android:paddingBottom="@dimen/place_toolbar_vertical_padding"
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/place"
         tools:text="Satoshi's Bar" />
@@ -26,6 +28,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <org.maplibre.android.maps.MapView
+                android:id="@+id/map"
+                android:layout_width="match_parent"
+                android:layout_height="192dp"
+                android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone"
+                app:maplibre_uiAttribution="false"
+                app:maplibre_uiLogo="false"
+                app:maplibre_uiRotateGestures="false"
+                app:maplibre_uiScrollGestures="false"
+                app:maplibre_uiTiltGestures="false"
+                app:maplibre_uiZoomGestures="false" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -99,7 +116,8 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
 
                 <TextView
                     android:id="@+id/lastVerified"
@@ -291,7 +309,8 @@
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/comment"
+                android:text="@string/add_comment"
+                android:visibility="gone"
                 app:icon="@drawable/icon_comment"
                 app:iconGravity="textStart" />
 

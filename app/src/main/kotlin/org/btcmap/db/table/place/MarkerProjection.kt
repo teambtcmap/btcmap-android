@@ -35,3 +35,17 @@ data class MarkerProjection(
         }
     }
 }
+
+/** The marker fields of a [Place], for rendering a single marker. */
+fun Place.toMarker(): Marker {
+    return Marker(
+        id = id,
+        lat = lat,
+        lon = lon,
+        icon = icon,
+        boostedUntil = boostedUntil,
+        requiredAppUrl = requiredAppUrl?.toString(),
+        comments = comments ?: 0,
+        verifiedAt = verifiedAt,
+    )
+}

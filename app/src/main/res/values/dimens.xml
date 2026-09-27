@@ -5,4 +5,8 @@
          preload the header at this size so it is already decoded in memory when
          the area screen opens. -->
     <dimen name="area_header_height">192dp</dimen>
+
+    <!-- Extra vertical breathing room in the place screen's toolbar, so a
+         two-line title is not cramped against the status bar and the content. -->
+    <dimen name="place_toolbar_vertical_padding">8dp</dimen>
 </resources>

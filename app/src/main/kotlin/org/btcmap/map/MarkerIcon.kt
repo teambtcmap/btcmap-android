@@ -68,16 +68,12 @@ suspend fun ensureMerchantMarkerImages(
             val outdated = marker.isOutdated(now)
             val boosted = marker.isBoosted(now)
             val pin = if (boosted && !outdated) boostedPin else normalPin
-            val glyph = resolveGlyph(marker.icon)
-            val textColor = if (outdated) OUTDATED_ICON_COLOR else Color.WHITE
-            val comments = marker.comments.takeIf { it > 0 }
 
-            val bitmap = compositeMarker(
+            val bitmap = compositeMarkerBitmap(
                 context = context,
                 pin = pin,
-                character = glyph,
-                textColor = textColor,
-                comments = comments,
+                marker = marker,
+                outdated = outdated,
                 badgeBackgroundColor = markerBadgeBackgroundColor,
                 badgeTextColor = markerBadgeTextColor,
             )
@@ -94,6 +90,55 @@ suspend fun ensureMerchantMarkerImages(
             merchantMarkerMasks[name] = image.second
         }
     }
+}
+
+/**
+ * Composites a single merchant marker: the tinted pin with the place's glyph
+ * and comment badge baked in, exactly like the main map's markers. Used where
+ * only one marker is needed, such as the place screen's preview map.
+ */
+fun merchantMarkerBitmap(
+    context: Context,
+    marker: Marker,
+    markerBackgroundColor: Int,
+    boostedMarkerBackgroundColor: Int,
+    markerBadgeBackgroundColor: Int,
+    markerBadgeTextColor: Int,
+    now: ZonedDateTime = ZonedDateTime.now(),
+): Bitmap {
+    val outdated = marker.isOutdated(now)
+    val boosted = marker.isBoosted(now)
+    val pin = tintedPin(
+        context,
+        if (boosted && !outdated) boostedMarkerBackgroundColor else markerBackgroundColor,
+    )
+    return compositeMarkerBitmap(
+        context = context,
+        pin = pin,
+        marker = marker,
+        outdated = outdated,
+        badgeBackgroundColor = markerBadgeBackgroundColor,
+        badgeTextColor = markerBadgeTextColor,
+    )
+}
+
+private fun compositeMarkerBitmap(
+    context: Context,
+    pin: Drawable,
+    marker: Marker,
+    outdated: Boolean,
+    badgeBackgroundColor: Int,
+    badgeTextColor: Int,
+): Bitmap {
+    return compositeMarker(
+        context = context,
+        pin = pin,
+        character = resolveGlyph(marker.icon),
+        textColor = if (outdated) OUTDATED_ICON_COLOR else Color.WHITE,
+        comments = marker.comments.takeIf { it > 0 },
+        badgeBackgroundColor = badgeBackgroundColor,
+        badgeTextColor = badgeTextColor,
+    )
 }
 
 suspend fun ensureExchangeMarkerImages(
