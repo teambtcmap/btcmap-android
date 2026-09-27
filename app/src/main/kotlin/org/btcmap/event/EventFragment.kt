@@ -37,7 +37,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 private const val ARG_ID = "id"
-private const val ARG_AREA_ID = "area_id"
 private const val ARG_LAT = "lat"
 private const val ARG_LON = "lon"
 private const val ARG_NAME = "name"
@@ -47,7 +46,6 @@ private const val ARG_ENDS_AT = "ends_at"
 
 fun Event.toBundle(): Bundle = Bundle().apply {
     putLong(ARG_ID, id)
-    putString(ARG_AREA_ID, areaId?.toString())
     putDouble(ARG_LAT, lat)
     putDouble(ARG_LON, lon)
     putString(ARG_NAME, name)
@@ -58,7 +56,6 @@ fun Event.toBundle(): Bundle = Bundle().apply {
 
 fun GetEventsItem.toBundle(): Bundle = Bundle().apply {
     putLong(ARG_ID, id)
-    putString(ARG_AREA_ID, areaId?.toString())
     putDouble(ARG_LAT, lat)
     putDouble(ARG_LON, lon)
     putString(ARG_NAME, name)
@@ -73,7 +70,6 @@ class EventFragment : Fragment() {
         val args = requireArguments()
         Event(
             id = args.getLong(ARG_ID),
-            areaId = args.getString(ARG_AREA_ID)?.toLongOrNull(),
             lat = args.getDouble(ARG_LAT),
             lon = args.getDouble(ARG_LON),
             name = args.getString(ARG_NAME).orEmpty(),

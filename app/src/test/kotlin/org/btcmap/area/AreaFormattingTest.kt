@@ -130,7 +130,6 @@ class AreaFormattingTest {
     private fun event(id: Long, startsAt: String): GetEventsItem {
         return GetEventsItem(
             id = id,
-            areaId = null,
             lat = 0.0,
             lon = 0.0,
             name = "Event $id",

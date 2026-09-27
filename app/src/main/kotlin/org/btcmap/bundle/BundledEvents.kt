@@ -115,7 +115,6 @@ object BundledEvents {
 
 internal fun JsonReader.readBundledEvent(): Event {
     var id: Long? = null
-    var areaId: Long? = null
     var lat: Double? = null
     var lon: Double? = null
     var name: String? = null
@@ -127,7 +126,6 @@ internal fun JsonReader.readBundledEvent(): Event {
     while (hasNext()) {
         when (nextName()) {
             "id" -> id = nextLong()
-            "area_id" -> areaId = nextLongOrNull()
             "lat" -> lat = nextDouble()
             "lon" -> lon = nextDouble()
             "name" -> name = nextStringOrNull()
@@ -158,7 +156,6 @@ internal fun JsonReader.readBundledEvent(): Event {
     require(eventName.isNotEmpty()) { "bundled event $eventId has an empty 'name'" }
     return Event(
         id = eventId,
-        areaId = areaId,
         lat = eventLat,
         lon = eventLon,
         name = eventName,

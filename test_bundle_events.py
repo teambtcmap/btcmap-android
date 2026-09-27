@@ -29,14 +29,13 @@ class ValidateTest(unittest.TestCase):
     def test_accepts_well_formed_events(self):
         bundle_events.validate([
             event(),
-            event(id=2, area_id=None, ends_at=None, website=None),
+            event(id=2, ends_at=None, website=None),
         ])
 
     def test_accepts_full_field_set(self):
         bundle_events.validate([
             event(
                 id=7,
-                area_id=42,
                 website="https://www.bitcoinmarathon.org/",
                 ends_at="2026-11-02T23:00:00+07:00",
             ),
@@ -87,10 +86,6 @@ class ValidateTest(unittest.TestCase):
             with self.subTest(name=name):
                 with self.assertRaises(RuntimeError):
                     bundle_events.validate([event(name=name)])
-
-    def test_rejects_non_integer_area_id(self):
-        with self.assertRaises(RuntimeError):
-            bundle_events.validate([event(area_id="42")])
 
     def test_rejects_non_string_website(self):
         with self.assertRaises(RuntimeError):

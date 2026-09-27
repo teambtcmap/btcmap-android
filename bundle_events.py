@@ -140,10 +140,6 @@ def validate(events: list) -> None:
         if not isinstance(name, str) or not name:
             raise RuntimeError(f"event {event_id} has a non-string or empty 'name'")
 
-        area_id = event.get("area_id")
-        if area_id is not None and (not isinstance(area_id, int) or isinstance(area_id, bool)):
-            raise RuntimeError(f"event {event_id} has a non-integer 'area_id'")
-
         website = event.get("website")
         if website is not None and not isinstance(website, str):
             raise RuntimeError(f"event {event_id} has a non-string 'website'")

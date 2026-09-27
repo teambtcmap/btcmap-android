@@ -60,6 +60,25 @@ private const val VERSION_101_AREA_CREATE = """
     );
 """
 
+/**
+ * The `event` table as it shipped through schema version 104, with the legacy
+ * `area_id` column. Migration 104 rebuilds it without that column.
+ */
+private const val VERSION_104_EVENT_CREATE = """
+    CREATE TABLE event (
+        id INTEGER PRIMARY KEY NOT NULL,
+        area_id INTEGER,
+        lat REAL NOT NULL,
+        lon REAL NOT NULL,
+        name TEXT NOT NULL,
+        website TEXT,
+        starts_at TEXT NOT NULL,
+        ends_at TEXT,
+        updated_at TEXT NOT NULL,
+        deleted_at TEXT
+    );
+"""
+
 class DatabaseTest {
 
     @Test
@@ -189,6 +208,30 @@ class DatabaseTest {
             Assert.assertTrue(indexes(db.conn, "area").contains("area_updated_at"))
             // The existing row survives the index-only upgrade.
             Assert.assertEquals(1L, db.place.selectCount())
+        } finally {
+            db.conn.close()
+        }
+    }
+
+    @Test
+    fun version104Database_isMigratedWithoutTheLegacyEventAreaIdColumn() {
+        val path = existingPath()
+        // Reproduces the last schema before the event area_id column was
+        // dropped: version 104 with event still carrying the column.
+        createVersion104Database(path)
+
+        val db = Database(BundledSQLiteDriver(), path)
+
+        try {
+            // The table is rebuilt without the column in place, keeping the
+            // existing row and recreating the indexes the rebuild dropped.
+            Assert.assertEquals(Database.VERSION, userVersion(db.conn))
+            Assert.assertFalse(eventColumns(db.conn).contains("area_id"))
+            val event = db.event.selectById(1L)
+            Assert.assertNotNull(event)
+            Assert.assertEquals("Meetup", event!!.name)
+            Assert.assertTrue(indexes(db.conn, "event").contains("event_updated_at"))
+            Assert.assertTrue(indexes(db.conn, "event").contains("event_bounds"))
         } finally {
             db.conn.close()
         }
@@ -346,7 +389,7 @@ class DatabaseTest {
         val conn = BundledSQLiteDriver().open(path)
         try {
             conn.execSQL(org.btcmap.db.table.place.CREATE)
-            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(VERSION_104_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)
             conn.execSQL(
@@ -375,7 +418,7 @@ class DatabaseTest {
         val conn = BundledSQLiteDriver().open(path)
         try {
             conn.execSQL(org.btcmap.db.table.place.CREATE)
-            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(VERSION_104_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(VERSION_101_AREA_CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)
@@ -398,7 +441,7 @@ class DatabaseTest {
         val conn = BundledSQLiteDriver().open(path)
         try {
             conn.execSQL(VERSION_102_PLACE_CREATE)
-            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(VERSION_104_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(org.btcmap.db.table.area.CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)
@@ -420,7 +463,7 @@ class DatabaseTest {
         val conn = BundledSQLiteDriver().open(path)
         try {
             conn.execSQL(org.btcmap.db.table.place.CREATE)
-            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(VERSION_104_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(org.btcmap.db.table.area.CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)
@@ -436,8 +479,42 @@ class DatabaseTest {
         }
     }
 
+    /**
+     * The schema as of version 104: the current tables with the event table
+     * still carrying its legacy `area_id` column.
+     */
+    private fun createVersion104Database(path: String) {
+        val conn = BundledSQLiteDriver().open(path)
+        try {
+            conn.execSQL(org.btcmap.db.table.place.CREATE)
+            conn.execSQL(VERSION_104_EVENT_CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE)
+            conn.execSQL(org.btcmap.db.table.area.CREATE)
+            conn.execSQL(org.btcmap.db.table.preference.CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_OSM_ID)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_BOUNDS)
+            conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_BOUNDS)
+            conn.execSQL(org.btcmap.db.table.area.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(
+                "INSERT INTO event (id, area_id, lat, lon, name, starts_at, updated_at) " +
+                    "VALUES (1, 42, 1.0, 2.0, 'Meetup', '2099-01-01T00:00:00Z', " +
+                    "'2024-01-01T00:00:00Z');"
+            )
+            conn.execSQL("PRAGMA user_version=104;")
+        } finally {
+            conn.close()
+        }
+    }
+
     private fun areaColumns(conn: SQLiteConnection): List<String> =
         columns(conn, "area")
+
+    private fun eventColumns(conn: SQLiteConnection): List<String> =
+        columns(conn, "event")
 
     private fun placeColumns(conn: SQLiteConnection): List<String> =
         columns(conn, "place")

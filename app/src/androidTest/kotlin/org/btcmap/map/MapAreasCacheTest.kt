@@ -173,7 +173,6 @@ class MapAreasCacheTest : AppTestCase() {
     private fun event(): Event {
         return Event(
             id = 1L,
-            areaId = 7L,
             lat = 48.86,
             lon = 2.35,
             name = "Meetup",

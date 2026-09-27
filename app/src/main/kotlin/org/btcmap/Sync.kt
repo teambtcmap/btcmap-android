@@ -186,7 +186,6 @@ private fun GetCommentsItem.toComment(): Comment = Comment(
 
 private fun GetEventsDeltaItem.toEvent(): Event = Event(
     id = id,
-    areaId = areaId,
     lat = lat,
     lon = lon,
     name = name,

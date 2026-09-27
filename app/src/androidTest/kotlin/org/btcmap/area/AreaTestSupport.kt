@@ -143,7 +143,6 @@ internal fun event(
 ): Event {
     return Event(
         id = id,
-        areaId = null,
         lat = lat,
         lon = lon,
         name = name,

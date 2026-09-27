@@ -24,7 +24,6 @@ class EventApiTest : ApiTestBase() {
 
         Assert.assertEquals(2, events.size)
         Assert.assertEquals(1L, events[0].id)
-        Assert.assertEquals(1L, events[0].areaId)
         Assert.assertEquals(7.88, events[0].lat, 0.0)
         Assert.assertEquals(98.38, events[0].lon, 0.0)
         Assert.assertEquals("Phuket Bitcoin Meetup", events[0].name)
@@ -108,7 +107,6 @@ class EventApiTest : ApiTestBase() {
         Assert.assertEquals("GET", request.method)
         Assert.assertEquals("/v4/events/1", request.url.encodedPath)
         Assert.assertEquals(1L, event.id)
-        Assert.assertEquals(1L, event.areaId)
         Assert.assertEquals(7.88, event.lat, 0.0)
         Assert.assertEquals(98.38, event.lon, 0.0)
         Assert.assertEquals("Phuket Bitcoin Meetup", event.name)
@@ -140,7 +138,6 @@ class EventApiTest : ApiTestBase() {
         const val EVENT = """
             {
                 "id": 1,
-                "area_id": 1,
                 "lat": 7.88,
                 "lon": 98.38,
                 "name": "Phuket Bitcoin Meetup",
@@ -154,7 +151,6 @@ class EventApiTest : ApiTestBase() {
             [
                 {
                     "id": 1,
-                    "area_id": 1,
                     "lat": 7.88,
                     "lon": 98.38,
                     "name": "Phuket Bitcoin Meetup",
@@ -165,7 +161,6 @@ class EventApiTest : ApiTestBase() {
                 },
                 {
                     "id": 2,
-                    "area_id": null,
                     "lat": 35.1,
                     "lon": 129.03,
                     "name": "Sats N Facts",

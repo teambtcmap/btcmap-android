@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Remove the event table's unused legacy area reference, rebuilding the table without it in a database migration
 - Translate the activity feed's title and empty-state messages into all supported languages, instead of always showing them in English
 - Keep an area screen's upcoming events and the map chips' event counts up to date when a background sync changes them, instead of leaving the stale list until the screen is reopened
 - Pass the event and add-place screens' maps through their full lifecycle, so reopening one no longer leaves a dead renderer behind that can crash the map

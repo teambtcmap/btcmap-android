@@ -3,7 +3,6 @@ package org.btcmap.db.table.event
 import androidx.sqlite.SQLiteStatement
 import okhttp3.HttpUrl
 import org.btcmap.db.getHttpUrlOrNull
-import org.btcmap.db.getLongOrNull
 import org.btcmap.db.getZonedDateTime
 import org.btcmap.db.getZonedDateTimeOrNull
 import java.time.Instant
@@ -14,13 +13,6 @@ typealias Event = FullProjection
 
 data class FullProjection(
     val id: Long,
-    // Legacy and effectively always null: the server's v4 event payload does
-    // not send `area_id`, so sync writes null and nothing reads this for
-    // behaviour. The event-to-area link is resolved geometrically instead (see
-    // `isWithin`), which is also why the area screen and map chips never query
-    // by area_id. Kept on the schema rather than dropped, because removing the
-    // column would force an event-table rebuild migration for no user benefit.
-    val areaId: Long?,
     val lat: Double,
     val lon: Double,
     val name: String,
@@ -34,20 +26,19 @@ data class FullProjection(
     val deletedAt: ZonedDateTime? = null,
 ) {
     companion object {
-        const val COLUMNS = "$ID, $AREA_ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $UPDATED_AT, $DELETED_AT"
+        const val COLUMNS = "$ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $UPDATED_AT, $DELETED_AT"
 
         fun fromStatement(stmt: SQLiteStatement): FullProjection {
             return FullProjection(
                 id = stmt.getLong(0),
-                areaId = stmt.getLongOrNull(1),
-                lat = stmt.getDouble(2),
-                lon = stmt.getDouble(3),
-                name = stmt.getText(4),
-                website = stmt.getHttpUrlOrNull(5),
-                startsAt = stmt.getZonedDateTime(6),
-                endsAt = stmt.getZonedDateTimeOrNull(7),
-                updatedAt = stmt.getZonedDateTime(8),
-                deletedAt = stmt.getZonedDateTimeOrNull(9),
+                lat = stmt.getDouble(1),
+                lon = stmt.getDouble(2),
+                name = stmt.getText(3),
+                website = stmt.getHttpUrlOrNull(4),
+                startsAt = stmt.getZonedDateTime(5),
+                endsAt = stmt.getZonedDateTimeOrNull(6),
+                updatedAt = stmt.getZonedDateTime(7),
+                deletedAt = stmt.getZonedDateTimeOrNull(8),
             )
         }
     }

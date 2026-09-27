@@ -17,7 +17,6 @@ class EventQueriesTest {
         val db = createDatabase()
         val event = Event(
             id = 1L,
-            areaId = null,
             lat = 40.7128,
             lon = -74.0060,
             name = "Bitcoin Meetup",
@@ -41,7 +40,6 @@ class EventQueriesTest {
         val db = createDatabase()
         val event = Event(
             id = 42L,
-            areaId = null,
             lat = 51.5074,
             lon = -0.1278,
             name = "London BTC",
@@ -64,7 +62,6 @@ class EventQueriesTest {
         val db = createDatabase()
         val event = Event(
             id = 1L,
-            areaId = null,
             lat = 40.7128,
             lon = -74.0060,
             name = "No Website",
@@ -101,7 +98,6 @@ class EventQueriesTest {
         val db = createDatabase()
         val event1 = Event(
             id = 1L,
-            areaId = null,
             lat = 40.7128,
             lon = -74.0060,
             name = "NYC Event",
@@ -111,7 +107,6 @@ class EventQueriesTest {
         )
         val event2 = Event(
             id = 2L,
-            areaId = null,
             lat = 51.5074,
             lon = -0.1278,
             name = "London Event",
@@ -121,7 +116,6 @@ class EventQueriesTest {
         )
         val event3 = Event(
             id = 3L,
-            areaId = null,
             lat = 34.0522,
             lon = -118.2437,
             name = "LA Event",
@@ -149,7 +143,6 @@ class EventQueriesTest {
         val db = createDatabase()
         val event = Event(
             id = 1L,
-            areaId = null,
             lat = 40.7128,
             lon = -74.0060,
             name = "NYC Event",
@@ -333,7 +326,6 @@ class EventQueriesTest {
     ): Event {
         return Event(
             id = id,
-            areaId = null,
             lat = 40.7128,
             lon = -74.0060,
             name = name,
@@ -354,7 +346,6 @@ class EventQueriesTest {
             listOf(
                 Event(
                     id = id,
-                    areaId = null,
                     lat = 40.7128,
                     lon = -74.0060,
                     name = name,

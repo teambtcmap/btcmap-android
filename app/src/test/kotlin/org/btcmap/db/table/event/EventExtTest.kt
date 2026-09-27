@@ -30,7 +30,6 @@ class EventExtTest {
     private fun event(lat: Double, lon: Double): Event {
         return Event(
             id = 1,
-            areaId = null,
             lat = lat,
             lon = lon,
             name = "Event",

@@ -170,8 +170,8 @@ internal class AreaSectionsController(
      * Reads the area's upcoming events from the local cache instead of calling
      * `GET /v4/areas/{id}/events`.
      *
-     * The v4 events payload does not carry `area_id`, so the association cannot
-     * be looked up by column. The server links an event to an area by
+     * The v4 events payload carries no area association, so it cannot be looked
+     * up by column. The server links an event to an area by
      * pre-filtering on the area's bbox and then running a point-in-polygon test
      * against its GeoJSON; the same rule is applied here to the cached area
      * geometry, mirroring [org.btcmap.map.MapAreasController].
@@ -191,7 +191,6 @@ internal class AreaSectionsController(
     private fun Event.toGetEventsItem(): GetEventsItem {
         return GetEventsItem(
             id = id,
-            areaId = areaId,
             lat = lat,
             lon = lon,
             name = name,

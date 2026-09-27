@@ -326,7 +326,6 @@ class EventSearchTest : AppTestCase() {
     ): Event {
         return Event(
             id = id,
-            areaId = null,
             lat = lat,
             lon = lon,
             name = name,

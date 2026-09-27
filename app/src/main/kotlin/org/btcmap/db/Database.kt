@@ -25,7 +25,7 @@ class Database(driver: SQLiteDriver, val path: String) {
          * project's history, so the stale file can be told apart from ours by
          * the pragma alone (see [initialize]).
          */
-        const val VERSION = 104
+        const val VERSION = 105
 
         /**
          * The first version this app is responsible for upgrading. Anything
@@ -269,6 +269,46 @@ class Database(driver: SQLiteDriver, val path: String) {
                     conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_UPDATED_AT)
                     conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_BOUNDS)
                     conn.execSQL(org.btcmap.db.table.area.CREATE_INDEX_UPDATED_AT)
+                }
+
+                104 -> {
+                    // The event's legacy area_id column is gone: the v4 payload
+                    // never carried one and the event-to-area link is resolved
+                    // geometrically, so the column was always null. SQLite
+                    // cannot drop a column on the oldest supported devices, so
+                    // rebuild the table without it; the drop also removes the
+                    // indexes, which are recreated below.
+                    conn.execSQL(
+                        """
+                        CREATE TABLE event_new (
+                            id INTEGER PRIMARY KEY NOT NULL,
+                            lat REAL NOT NULL,
+                            lon REAL NOT NULL,
+                            name TEXT NOT NULL,
+                            website TEXT,
+                            starts_at TEXT NOT NULL,
+                            ends_at TEXT,
+                            updated_at TEXT NOT NULL,
+                            deleted_at TEXT
+                        );
+                        """
+                    )
+                    conn.execSQL(
+                        """
+                        INSERT INTO event_new (
+                            id, lat, lon, name, website,
+                            starts_at, ends_at, updated_at, deleted_at
+                        )
+                        SELECT
+                            id, lat, lon, name, website,
+                            starts_at, ends_at, updated_at, deleted_at
+                        FROM event;
+                        """
+                    )
+                    conn.execSQL("DROP TABLE event;")
+                    conn.execSQL("ALTER TABLE event_new RENAME TO event;")
+                    conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_UPDATED_AT)
+                    conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_BOUNDS)
                 }
 
                 else -> throw Exception("migration is missing for version $version")

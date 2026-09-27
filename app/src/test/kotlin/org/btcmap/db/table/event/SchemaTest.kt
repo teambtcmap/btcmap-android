@@ -12,7 +12,6 @@ class SchemaTest {
     @Test
     fun columns() {
         assertEquals("id", ID)
-        assertEquals("area_id", AREA_ID)
         assertEquals("lat", LAT)
         assertEquals("lon", LON)
         assertEquals("name", NAME)
@@ -27,7 +26,6 @@ class SchemaTest {
     fun create() {
         assert(CREATE.contains(TABLE))
         assert(CREATE.contains(ID))
-        assert(CREATE.contains(AREA_ID))
         assert(CREATE.contains(LAT))
         assert(CREATE.contains(LON))
         assert(CREATE.contains(NAME))

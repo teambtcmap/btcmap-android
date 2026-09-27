@@ -13,11 +13,9 @@ import java.time.format.DateTimeParseException
 
 data class GetEventsItem(
     val id: Long,
-    // Legacy: the server's v4 event payload does not carry `area_id`, so this
-    // is always null; the event-to-area link is resolved geometrically from
-    // the coordinates (see `org.btcmap.db.table.event.isWithin`). Retained
-    // only to tolerate an `area_id` field in older/bundled payloads.
-    val areaId: Long?,
+    // The v4 event payload carries no area association, so the event-to-area
+    // link is resolved geometrically from the coordinates (see
+    // `org.btcmap.db.table.event.isWithin`).
     val lat: Double,
     val lon: Double,
     val name: String,
@@ -33,7 +31,6 @@ data class GetEventsItem(
  */
 data class GetEventsDeltaItem(
     val id: Long,
-    val areaId: Long?,
     val lat: Double,
     val lon: Double,
     val name: String,
@@ -66,7 +63,6 @@ suspend fun Api.getEvent(id: Long): GetEventsItem {
 internal fun JsonObject.toGetEventsItem(): GetEventsItem {
     return GetEventsItem(
         id = long("id"),
-        areaId = longOrNull("area_id"),
         lat = double("lat"),
         lon = double("lon"),
         name = string("name"),
@@ -80,7 +76,6 @@ private fun JsonObject.toGetEventsDeltaItem(): GetEventsDeltaItem {
     val item = toGetEventsItem()
     return GetEventsDeltaItem(
         id = item.id,
-        areaId = item.areaId,
         lat = item.lat,
         lon = item.lon,
         name = item.name,

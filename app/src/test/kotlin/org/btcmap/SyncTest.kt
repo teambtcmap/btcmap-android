@@ -568,7 +568,6 @@ class SyncTest {
             listOf(
                 Event(
                     id = 999,
-                    areaId = null,
                     lat = 40.7128,
                     lon = -74.0060,
                     name = "Old Event",
@@ -604,7 +603,6 @@ class SyncTest {
             listOf(
                 Event(
                     id = 1L,
-                    areaId = null,
                     lat = 40.7128,
                     lon = -74.0060,
                     name = "Old Event",

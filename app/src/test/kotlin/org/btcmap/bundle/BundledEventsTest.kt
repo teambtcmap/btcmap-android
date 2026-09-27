@@ -19,7 +19,6 @@ class BundledEventsTest {
 
     private fun event(id: Long, deletedAt: ZonedDateTime? = null) = Event(
         id = id,
-        areaId = null,
         lat = 1.0,
         lon = 2.0,
         name = "Event $id",
@@ -50,7 +49,6 @@ class BundledEventsTest {
         val json = """
             {
               "id": 7,
-              "area_id": 42,
               "lat": 18.788,
               "lon": 99.0156,
               "name": "Bitcoin Half Marathon",
@@ -65,7 +63,6 @@ class BundledEventsTest {
         val event = reader(json).readBundledEvent()
 
         Assert.assertEquals(7L, event.id)
-        Assert.assertEquals(42L, event.areaId)
         Assert.assertEquals(18.788, event.lat, 0.0)
         Assert.assertEquals(99.0156, event.lon, 0.0)
         Assert.assertEquals("Bitcoin Half Marathon", event.name)
@@ -91,7 +88,6 @@ class BundledEventsTest {
 
         val event = reader(json).readBundledEvent()
 
-        Assert.assertNull(event.areaId)
         Assert.assertNull(event.website)
         Assert.assertNull(event.endsAt)
     }
@@ -175,7 +171,7 @@ class BundledEventsTest {
         val db = createDatabase()
         val json = """
             [
-              {"id":1,"area_id":42,"lat":1.0,"lon":2.0,"name":"One","website":"https://example.com","starts_at":"2026-11-01T09:00:00Z","ends_at":"2026-11-02T09:00:00Z","updated_at":"2026-03-01T12:00:00Z"},
+              {"id":1,"lat":1.0,"lon":2.0,"name":"One","website":"https://example.com","starts_at":"2026-11-01T09:00:00Z","ends_at":"2026-11-02T09:00:00Z","updated_at":"2026-03-01T12:00:00Z"},
               {"id":2,"lat":3.0,"lon":4.0,"name":"Two","starts_at":"2026-12-01T09:00:00Z","updated_at":"2026-04-01T12:00:00Z"}
             ]
         """.trimIndent()
@@ -188,16 +184,14 @@ class BundledEventsTest {
 
         val first = db.event.selectById(1L)
         Assert.assertNotNull(first)
-        Assert.assertEquals(42L, first!!.areaId)
-        Assert.assertEquals("One", first.name)
+        Assert.assertEquals("One", first!!.name)
         Assert.assertEquals("https://example.com/", first.website.toString())
         Assert.assertEquals(ZonedDateTime.parse("2026-11-02T09:00:00Z"), first.endsAt)
         Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), first.updatedAt)
 
         val second = db.event.selectById(2L)
         Assert.assertNotNull(second)
-        Assert.assertNull(second!!.areaId)
-        Assert.assertNull(second.endsAt)
+        Assert.assertNull(second!!.endsAt)
     }
 
     @Test

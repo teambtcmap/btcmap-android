@@ -2,7 +2,6 @@ package org.btcmap.db.table.event
 
 import androidx.sqlite.SQLiteConnection
 import org.btcmap.db.bindHttpUrlOrNull
-import org.btcmap.db.bindLongOrNull
 import org.btcmap.db.bindZonedDateTime
 import org.btcmap.db.bindZonedDateTimeOrNull
 import org.btcmap.db.escapeLikePattern
@@ -19,21 +18,20 @@ class EventQueries(private val conn: SQLiteConnection) {
         // the whole sync transaction with a primary-key conflict.
         conn.prepare(
             """
-            INSERT OR REPLACE INTO $TABLE ($ID, $AREA_ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $UPDATED_AT, $DELETED_AT)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);
+            INSERT OR REPLACE INTO $TABLE ($ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $UPDATED_AT, $DELETED_AT)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
             """
         ).use { stmt ->
             rows.forEach { row ->
                 stmt.bindLong(1, row.id)
-                stmt.bindLongOrNull(2, row.areaId)
-                stmt.bindDouble(3, row.lat)
-                stmt.bindDouble(4, row.lon)
-                stmt.bindText(5, row.name)
-                stmt.bindHttpUrlOrNull(6, row.website)
-                stmt.bindZonedDateTime(7, row.startsAt)
-                stmt.bindZonedDateTimeOrNull(8, row.endsAt)
-                stmt.bindZonedDateTime(9, row.updatedAt)
-                stmt.bindZonedDateTimeOrNull(10, row.deletedAt)
+                stmt.bindDouble(2, row.lat)
+                stmt.bindDouble(3, row.lon)
+                stmt.bindText(4, row.name)
+                stmt.bindHttpUrlOrNull(5, row.website)
+                stmt.bindZonedDateTime(6, row.startsAt)
+                stmt.bindZonedDateTimeOrNull(7, row.endsAt)
+                stmt.bindZonedDateTime(8, row.updatedAt)
+                stmt.bindZonedDateTimeOrNull(9, row.deletedAt)
                 stmt.step()
                 stmt.reset()
             }
