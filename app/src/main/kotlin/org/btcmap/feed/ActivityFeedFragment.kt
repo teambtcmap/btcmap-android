@@ -64,7 +64,7 @@ class ActivityFeedFragment : Fragment() {
             ),
         )
 
-        binding.pager.adapter = ActivityFeedPagerAdapter(requireActivity(), tabs)
+        binding.pager.adapter = ActivityFeedPagerAdapter(this, tabs)
         binding.pager.offscreenPageLimit = 1
         binding.tabs.tabMode = TabLayout.MODE_FIXED
 
@@ -74,13 +74,13 @@ class ActivityFeedFragment : Fragment() {
     }
 
     private fun currentLocalFragment(): LocalActivityFragment? {
-        return requireActivity().supportFragmentManager.fragments
+        return childFragmentManager.fragments
             .filterIsInstance<LocalActivityFragment>()
             .firstOrNull()
     }
 
     private fun currentSavedFragment(): SavedActivityFragment? {
-        return requireActivity().supportFragmentManager.fragments
+        return childFragmentManager.fragments
             .filterIsInstance<SavedActivityFragment>()
             .firstOrNull()
     }

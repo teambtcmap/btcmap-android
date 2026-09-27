@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep the activity feed's filter dialog and list in sync, so reopening the feed after moving the map no longer picks up the previous screen's areas
 - Rename the activity feed to Activity and its Following tab to Saved, which now includes saved places as well as saved areas
 - Label activity feed entries with Added by, Updated by or Deleted by instead of a generic by, and capitalize the boost wording
 - Open a deleted place from the activity feed on OpenStreetMap instead of a blank place screen
