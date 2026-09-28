@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep the place shown in the map's bottom sheet, and the sheet's position, when the screen is recreated
 - Keep the map's merchant, event or exchange filter when the screen is recreated, instead of snapping back to merchants
 - Make a tap on an exchange or event marker land only on the pin, rejecting its transparent corners the way a merchant marker already does
 - Show an area's initials on its map chip while its image loads and keep them when it cannot load, using the map buttons' colors and a regular weight, instead of a blank circle

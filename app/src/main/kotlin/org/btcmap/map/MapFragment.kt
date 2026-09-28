@@ -28,6 +28,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -381,9 +382,37 @@ class MapFragment : Fragment() {
             is DeepLink.Event -> openEventById(deepLink.id)
             null -> {}
         }
+
+        // After the deep link, so a fresh link still wins: the restore only runs
+        // on a recreation, where the Activity does not re-deliver the link.
+        savedInstanceState?.let(::restoreBottomSheet)
+    }
+
+    /**
+     * Re-selects the place the sheet was showing before the view was recreated,
+     * and restores its position, so a rotation does not dismiss it. A hidden
+     * sheet is left closed: the user dismissed it, or nothing was selected.
+     */
+    private fun restoreBottomSheet(savedInstanceState: Bundle) {
+        val placeId = savedInstanceState.getLong(STATE_PLACE_ID, 0L)
+        val sheetState =
+            savedInstanceState.getInt(STATE_SHEET_STATE, BottomSheetBehavior.STATE_HIDDEN)
+        if (placeId <= 0L || sheetState == BottomSheetBehavior.STATE_HIDDEN) return
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val place = withContext(Dispatchers.IO) { db().place.selectById(placeId) }
+                ?: return@launch
+
+            selectPlace(place)
+            if (sheetState == BottomSheetBehavior.STATE_EXPANDED) {
+                bottomSheetController?.bottomSheetBehavior?.state =
+                    BottomSheetBehavior.STATE_EXPANDED
+            }
+        }
     }
 
     private fun selectPlace(place: Place) {
+        selectedPlaceId = place.id
         val placeFragment =
             childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment
         placeFragment.setPlace(place)
@@ -543,6 +572,12 @@ class MapFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(STATE_FILTER, filter.name)
+        selectedPlaceId?.let { outState.putLong(STATE_PLACE_ID, it) }
+        outState.putInt(
+            STATE_SHEET_STATE,
+            bottomSheetController?.bottomSheetBehavior?.state
+                ?: BottomSheetBehavior.STATE_HIDDEN,
+        )
         _binding?.map?.onSaveInstanceState(outState)
     }
 
@@ -587,6 +622,13 @@ class MapFragment : Fragment() {
 
     private var filter = Filter.MERCHANTS
     private var searchDebounceJob: Job? = null
+
+    /**
+     * The place the bottom sheet is showing, or null when nothing is selected.
+     * Saved with the view so a rotation keeps the sheet's place and position
+     * instead of dismissing it.
+     */
+    private var selectedPlaceId: Long? = null
 
     /**
      * The viewport to apply once the map is ready, or null once [moveTo] has
@@ -826,6 +868,10 @@ class MapFragment : Fragment() {
         private const val SEARCH_DEBOUNCE_MS = 300L
 
         private const val STATE_FILTER = "map_filter"
+
+        private const val STATE_PLACE_ID = "map_selected_place_id"
+
+        private const val STATE_SHEET_STATE = "map_sheet_state"
 
         // Long enough for the connectivity callbacks that follow a network
         // coming back to settle before the chip images are retried.
