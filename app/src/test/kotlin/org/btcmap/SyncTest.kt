@@ -58,7 +58,6 @@ class SyncTest {
                         "verified_at": null,
                         "address": null,
                         "opening_hours": null,
-                        "localized_opening_hours": null,
                         "website": null,
                         "phone": null,
                         "email": null,
@@ -156,7 +155,6 @@ class SyncTest {
                         "verified_at": null,
                         "address": null,
                         "opening_hours": null,
-                        "localized_opening_hours": null,
                         "website": null,
                         "phone": null,
                         "email": null,
@@ -207,7 +205,6 @@ class SyncTest {
                         "verified_at": null,
                         "address": null,
                         "opening_hours": null,
-                        "localized_opening_hours": null,
                         "website": null,
                         "phone": null,
                         "email": null,
@@ -232,7 +229,6 @@ class SyncTest {
                         "verified_at": null,
                         "address": null,
                         "opening_hours": null,
-                        "localized_opening_hours": null,
                         "website": null,
                         "phone": null,
                         "email": null,
@@ -840,7 +836,7 @@ class SyncTest {
 
     private fun pagedPlaceDispatcher(rows: List<SyncRow>): Dispatcher =
         pagedDispatcher(rows) { row ->
-            """{"id":${row.id},"lat":40.7128,"lon":-74.006,"icon":"coffee","name":"p","localized_name":null,"updated_at":"${row.updatedAt}","deleted_at":null,"required_app_url":null,"boosted_until":null,"verified_at":null,"address":null,"opening_hours":null,"localized_opening_hours":null,"website":null,"phone":null,"email":null,"twitter":null,"facebook":null,"instagram":null,"line":null,"comments":0,"telegram":null,"osm_id":null}"""
+            """{"id":${row.id},"lat":40.7128,"lon":-74.006,"icon":"coffee","name":"p","localized_name":null,"updated_at":"${row.updatedAt}","deleted_at":null,"required_app_url":null,"boosted_until":null,"verified_at":null,"address":null,"opening_hours":null,"website":null,"phone":null,"email":null,"twitter":null,"facebook":null,"instagram":null,"line":null,"comments":0,"telegram":null,"osm_id":null}"""
         }
 
     private fun pagedEventDispatcher(rows: List<SyncRow>): Dispatcher =

@@ -68,14 +68,6 @@
     <string name="use_adaptive_colors">Použiť adaptívne farby</string>
     <string name="reset">Reset</string>
     <string name="area_icon">Ikona oblasti</string>
-    <string name="monday">Pondelok</string>
-    <string name="tuesday">Utorok</string>
-    <string name="wednesday">Streda</string>
-    <string name="thursday">Štvrtok</string>
-    <string name="friday">Piatok</string>
-    <string name="saturday">Sobota</string>
-    <string name="sunday">Nedeľa</string>
-    <string name="closed">Zatvorené</string>
     <string name="save">Uložiť</string>
     <string name="account">Účet BTC Map</string>
     <string name="not_logged_in">Účet</string>

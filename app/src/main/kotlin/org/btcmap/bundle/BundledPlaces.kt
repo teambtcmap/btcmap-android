@@ -142,7 +142,6 @@ internal fun JsonReader.readBundledPlace(): Place {
     var verifiedAt: ZonedDateTime? = null
     var address: String? = null
     var openingHours: String? = null
-    var localizedOpeningHours: JsonObject? = null
     var phone: String? = null
     var website: HttpUrl? = null
     var email: String? = null
@@ -168,7 +167,6 @@ internal fun JsonReader.readBundledPlace(): Place {
             "verified_at" -> verifiedAt = nextStringOrNull()?.toVerifiedAtOrNull()
             "address" -> address = nextStringOrNull()
             "opening_hours" -> openingHours = nextStringOrNull()
-            "localized_opening_hours" -> localizedOpeningHours = nextJsonObjectOrNull()
             "phone" -> phone = nextStringOrNull()
             "website" -> website = nextStringOrNull()?.toHttpUrlOrNull()
             "email" -> email = nextStringOrNull()
@@ -217,7 +215,6 @@ internal fun JsonReader.readBundledPlace(): Place {
         verifiedAt = verifiedAt,
         address = address,
         openingHours = openingHours,
-        localizedOpeningHours = localizedOpeningHours,
         phone = phone,
         website = website,
         email = email,

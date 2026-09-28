@@ -68,14 +68,6 @@
     <string name="use_adaptive_colors">Usa colori adattivi</string>
     <string name="reset">Reimposta</string>
     <string name="area_icon">Icona area</string>
-    <string name="monday">Lunedì</string>
-    <string name="tuesday">Martedì</string>
-    <string name="wednesday">Mercoledì</string>
-    <string name="thursday">Giovedì</string>
-    <string name="friday">Venerdì</string>
-    <string name="saturday">Sabato</string>
-    <string name="sunday">Domenica</string>
-    <string name="closed">Chiuso</string>
     <string name="save">Salva</string>
     <string name="account">Account BTC Map</string>
     <string name="not_logged_in">Account</string>

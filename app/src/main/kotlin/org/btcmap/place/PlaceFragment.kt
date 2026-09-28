@@ -68,7 +68,6 @@ import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.databinding.PlaceFragmentBinding
 import org.btcmap.i18n.getLocalizedName
-import org.btcmap.i18n.getLocalizedOpeningHours
 import org.btcmap.saved.toggleSavedPlace
 import org.btcmap.settings.authorized
 import org.btcmap.settings.badgeBackgroundColor
@@ -480,7 +479,7 @@ class PlaceFragment : Fragment() {
 
     fun setPlace(place: Place) {
         placeId = place.id
-        placeName = place.getLocalizedName().orEmpty()
+        placeName = place.getLocalizedName()
 
         binding.toolbar.title = place.getLocalizedName()
         binding.toolbar.setSingleLine(false)
@@ -629,8 +628,8 @@ class PlaceFragment : Fragment() {
         binding.email.text = place.email
         binding.email.isVisible = place.email != null
 
-        binding.openingHours.text = place.getLocalizedOpeningHours(requireContext())
-        binding.openingHours.isVisible = place.getLocalizedOpeningHours(requireContext()) != null
+        binding.openingHours.text = place.openingHours
+        binding.openingHours.isVisible = place.openingHours != null
 
         binding.btnVerify.setOnClickListener {
             openReport(defaultType = "verified")

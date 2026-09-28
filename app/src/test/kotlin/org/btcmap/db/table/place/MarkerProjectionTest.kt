@@ -48,7 +48,6 @@ class MarkerProjectionTest {
             verifiedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
             address = null,
             openingHours = null,
-            localizedOpeningHours = null,
             phone = null,
             website = null,
             email = null,

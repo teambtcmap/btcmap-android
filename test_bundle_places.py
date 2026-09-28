@@ -43,7 +43,6 @@ class ValidateTest(unittest.TestCase):
                 verified_at="2026-01-01",
                 address="1 Main St",
                 opening_hours="Mo-Fr 08:00-18:00",
-                localized_opening_hours={"en": "Mo-Fr 08:00-18:00"},
                 website="https://example.com",
                 phone="+1234567890",
                 email="a@example.com",

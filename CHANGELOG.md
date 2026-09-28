@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show a place's opening hours as the raw OpenStreetMap value instead of a partially translated human-readable one, and stop bundling the per-language opening-hours map
+- Show boosted merchants on an area screen with the place's name in the device language
 - Show an area's name and description in the device language where the API has a translation, bundling and caching the per-language values so they work offline
 - Stop retrying a rate-limited request once its screen is closed, and wait out a server-requested cool-down longer than a minute instead of retrying early
 - Keep the activity feed's area filter when the screen is recreated, and fall back to a country's activity when the map centre is inside no community

@@ -103,6 +103,42 @@ private const val VERSION_104_EVENT_CREATE = """
     );
 """
 
+/**
+ * The `place` table as it shipped through schema version 106, before
+ * `localized_opening_hours` was dropped. Migration 106 rebuilds it without the
+ * column. The earlier version helpers use it too: those releases shipped the
+ * same columns (only 102 adds the legacy `bundled` flag, which has its own
+ * constant), so a rebuilt table proves the column was actually removed.
+ */
+private const val VERSION_106_PLACE_CREATE = """
+    CREATE TABLE place (
+        id INTEGER PRIMARY KEY NOT NULL,
+        updated_at TEXT NOT NULL,
+        lat REAL NOT NULL,
+        lon REAL NOT NULL,
+        icon TEXT NOT NULL,
+        name TEXT,
+        localized_name TEXT,
+        verified_at TEXT,
+        address TEXT,
+        opening_hours TEXT,
+        localized_opening_hours TEXT,
+        phone TEXT,
+        website TEXT,
+        email TEXT,
+        twitter TEXT,
+        facebook TEXT,
+        instagram TEXT,
+        line TEXT,
+        required_app_url TEXT,
+        boosted_until TEXT,
+        comments INTEGER,
+        telegram TEXT,
+        osm_id TEXT,
+        deleted_at TEXT
+    );
+"""
+
 class DatabaseTest {
 
     @Test
@@ -149,15 +185,17 @@ class DatabaseTest {
 
         try {
             // Our own databases are upgraded in place, not discarded: the
-            // existing place survives and the area table is added by migration.
-            // If someone bumps VERSION without adding a step, this database is
-            // not discarded and the assertion on `area` fails.
+            // schema reaches the current version and the area table is added by
+            // migration. If someone bumps VERSION without adding a step, this
+            // database is not discarded and the assertion on `area` fails.
+            // The place cache ends up empty because the final migration empties
+            // it so the bundled snapshot re-seeds it.
             Assert.assertEquals(Database.VERSION, userVersion(db.conn))
             Assert.assertEquals(
                 listOf("area", "comment", "event", "place", "pref"),
                 tables(db.conn),
             )
-            Assert.assertEquals(1L, db.place.selectCount())
+            Assert.assertEquals(0L, db.place.selectCount())
             Assert.assertEquals(0L, db.area.selectCount())
         } finally {
             db.conn.close()
@@ -195,14 +233,12 @@ class DatabaseTest {
         val db = Database(BundledSQLiteDriver(), path)
 
         try {
-            // The table is rebuilt without the column in place, keeping the
-            // existing row.
+            // The table is rebuilt without the `bundled` column. The place
+            // cache ends up empty because the final migration empties it so the
+            // bundled snapshot re-seeds it.
             Assert.assertEquals(Database.VERSION, userVersion(db.conn))
             Assert.assertFalse(placeColumns(db.conn).contains("bundled"))
-            val place = db.place.selectById(1L)
-            Assert.assertNotNull(place)
-            Assert.assertEquals("Cafe", place!!.name)
-            Assert.assertEquals(1L, db.place.selectCount())
+            Assert.assertEquals(0L, db.place.selectCount())
         } finally {
             db.conn.close()
         }
@@ -226,8 +262,10 @@ class DatabaseTest {
             Assert.assertTrue(indexes(db.conn, "event").contains("event_updated_at"))
             Assert.assertTrue(indexes(db.conn, "event").contains("event_bounds"))
             Assert.assertTrue(indexes(db.conn, "area").contains("area_updated_at"))
-            // The existing row survives the index-only upgrade.
-            Assert.assertEquals(1L, db.place.selectCount())
+            // The place cache ends up empty because the final migration empties
+            // it so the bundled snapshot re-seeds it; the recreated indexes are
+            // still in place.
+            Assert.assertEquals(0L, db.place.selectCount())
         } finally {
             db.conn.close()
         }
@@ -283,6 +321,30 @@ class DatabaseTest {
     }
 
     @Test
+    fun version106Database_isMigratedWithoutTheLocalizedOpeningHoursColumn() {
+        val path = existingPath()
+        // Reproduces the last schema before the per-language opening-hours map
+        // was dropped: version 106 with place still carrying the column.
+        createVersion106Database(path)
+
+        val db = Database(BundledSQLiteDriver(), path)
+
+        try {
+            // The table is rebuilt without the column and emptied, so the
+            // bundled snapshot re-seeds it on the next sync; the rebuild drops
+            // the indexes, which are recreated.
+            Assert.assertEquals(Database.VERSION, userVersion(db.conn))
+            Assert.assertFalse(placeColumns(db.conn).contains("localized_opening_hours"))
+            Assert.assertEquals(0L, db.place.selectCount(includeDeleted = true))
+            Assert.assertTrue(indexes(db.conn, "place").contains("place_updated_at"))
+            Assert.assertTrue(indexes(db.conn, "place").contains("place_osm_id"))
+            Assert.assertTrue(indexes(db.conn, "place").contains("place_bounds"))
+        } finally {
+            db.conn.close()
+        }
+    }
+
+    @Test
     fun newerDatabase_isDiscardedAndRecreated() {
         val path = existingPath()
         createStaleDatabase(path, version = Database.VERSION + 1)
@@ -327,7 +389,7 @@ class DatabaseTest {
     @Test
     fun needsMigration_isTrueForTheNewestMigratableVersion() {
         val path = existingPath()
-        createVersion105Database(path)
+        createVersion106Database(path)
 
         Assert.assertTrue(Database.needsMigration(BundledSQLiteDriver(), path))
     }
@@ -433,7 +495,7 @@ class DatabaseTest {
     private fun createVersion100Database(path: String) {
         val conn = BundledSQLiteDriver().open(path)
         try {
-            conn.execSQL(org.btcmap.db.table.place.CREATE)
+            conn.execSQL(VERSION_106_PLACE_CREATE)
             conn.execSQL(VERSION_104_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)
@@ -462,7 +524,7 @@ class DatabaseTest {
     private fun createVersion101Database(path: String) {
         val conn = BundledSQLiteDriver().open(path)
         try {
-            conn.execSQL(org.btcmap.db.table.place.CREATE)
+            conn.execSQL(VERSION_106_PLACE_CREATE)
             conn.execSQL(VERSION_104_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(VERSION_101_AREA_CREATE)
@@ -507,7 +569,7 @@ class DatabaseTest {
     private fun createVersion103Database(path: String) {
         val conn = BundledSQLiteDriver().open(path)
         try {
-            conn.execSQL(org.btcmap.db.table.place.CREATE)
+            conn.execSQL(VERSION_106_PLACE_CREATE)
             conn.execSQL(VERSION_104_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(VERSION_105_AREA_CREATE)
@@ -531,7 +593,7 @@ class DatabaseTest {
     private fun createVersion104Database(path: String) {
         val conn = BundledSQLiteDriver().open(path)
         try {
-            conn.execSQL(org.btcmap.db.table.place.CREATE)
+            conn.execSQL(VERSION_106_PLACE_CREATE)
             conn.execSQL(VERSION_104_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(VERSION_105_AREA_CREATE)
@@ -562,7 +624,7 @@ class DatabaseTest {
     private fun createVersion105Database(path: String) {
         val conn = BundledSQLiteDriver().open(path)
         try {
-            conn.execSQL(org.btcmap.db.table.place.CREATE)
+            conn.execSQL(VERSION_106_PLACE_CREATE)
             conn.execSQL(org.btcmap.db.table.event.CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(VERSION_105_AREA_CREATE)
@@ -581,6 +643,37 @@ class DatabaseTest {
                     "'https://btcmap.org/community/grand-paris', '2024-01-01T00:00:00Z');"
             )
             conn.execSQL("PRAGMA user_version=105;")
+        } finally {
+            conn.close()
+        }
+    }
+
+    /**
+     * The schema as of version 106: the current tables, with the place table
+     * still carrying the per-language opening-hours column.
+     */
+    private fun createVersion106Database(path: String) {
+        val conn = BundledSQLiteDriver().open(path)
+        try {
+            conn.execSQL(VERSION_106_PLACE_CREATE)
+            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE)
+            conn.execSQL(org.btcmap.db.table.area.CREATE)
+            conn.execSQL(org.btcmap.db.table.preference.CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_OSM_ID)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_BOUNDS)
+            conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_BOUNDS)
+            conn.execSQL(org.btcmap.db.table.area.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(
+                "INSERT INTO place (id, updated_at, lat, lon, icon, name, opening_hours, " +
+                    "localized_opening_hours) VALUES (1, '2024-01-01T00:00:00Z', 0.0, 0.0, " +
+                    "'local_cafe', 'Cafe', 'Mo-Fr 08:00-18:00', '{\"en\":\"Mo-Fr 08:00-18:00\"}');"
+            )
+            conn.execSQL("PRAGMA user_version=106;")
         } finally {
             conn.close()
         }

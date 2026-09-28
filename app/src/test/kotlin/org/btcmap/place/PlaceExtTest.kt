@@ -67,7 +67,6 @@ class PlaceExtTest {
             verifiedAt = null,
             address = null,
             openingHours = null,
-            localizedOpeningHours = null,
             phone = null,
             website = null,
             email = null,

@@ -25,7 +25,7 @@ class Database(driver: SQLiteDriver, val path: String) {
          * project's history, so the stale file can be told apart from ours by
          * the pragma alone (see [initialize]).
          */
-        const val VERSION = 106
+        const val VERSION = 107
 
         /**
          * The first version this app is responsible for upgrading. Anything
@@ -333,6 +333,53 @@ class Database(driver: SQLiteDriver, val path: String) {
                             "ADD COLUMN ${org.btcmap.db.table.area.LOCALIZED_DESCRIPTION} TEXT;"
                     )
                     conn.execSQL("DELETE FROM ${org.btcmap.db.table.area.TABLE};")
+                }
+
+                106 -> {
+                    // The per-language opening-hours map is gone: the API's
+                    // human-readable variants were never translated fully, so
+                    // the raw `opening_hours` is shown instead. SQLite cannot
+                    // drop a column on the oldest supported devices, so rebuild
+                    // the table without it.
+                    //
+                    // The rows are discarded rather than copied: places are a
+                    // pure cache and an empty table is re-seeded from the
+                    // bundled snapshot on the next sync, so the column can go
+                    // without re-downloading every place from the API. The drop
+                    // also removes the indexes, which are recreated below.
+                    conn.execSQL("DROP TABLE ${org.btcmap.db.table.place.TABLE};")
+                    conn.execSQL(
+                        """
+                        CREATE TABLE place (
+                            id INTEGER PRIMARY KEY NOT NULL,
+                            updated_at TEXT NOT NULL,
+                            lat REAL NOT NULL,
+                            lon REAL NOT NULL,
+                            icon TEXT NOT NULL,
+                            name TEXT,
+                            localized_name TEXT,
+                            verified_at TEXT,
+                            address TEXT,
+                            opening_hours TEXT,
+                            phone TEXT,
+                            website TEXT,
+                            email TEXT,
+                            twitter TEXT,
+                            facebook TEXT,
+                            instagram TEXT,
+                            line TEXT,
+                            required_app_url TEXT,
+                            boosted_until TEXT,
+                            comments INTEGER,
+                            telegram TEXT,
+                            osm_id TEXT,
+                            deleted_at TEXT
+                        );
+                        """
+                    )
+                    conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_UPDATED_AT)
+                    conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_OSM_ID)
+                    conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_BOUNDS)
                 }
 
                 else -> throw Exception("migration is missing for version $version")

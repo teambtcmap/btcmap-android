@@ -35,6 +35,7 @@ import org.btcmap.db.table.event.isWithin
 import org.btcmap.db.table.place.Place
 import org.btcmap.event.EventFragment
 import org.btcmap.event.toBundle
+import org.btcmap.i18n.getLocalizedName
 import org.btcmap.place.isBoosted
 import org.btcmap.place.isWithin
 import org.btcmap.util.iconTypeface
@@ -112,6 +113,7 @@ internal class AreaSectionsController(
     }
 
     private fun ViewGroup.addBoostedMerchantCard(place: Place) {
+        val name = place.getLocalizedName()
         addCard(
             icon = TextView(fragment.requireContext()).apply {
                 typeface = iconTypeface
@@ -120,8 +122,8 @@ internal class AreaSectionsController(
                 setTextColor(ContextCompat.getColor(context, R.color.bitcoin_orange))
                 gravity = Gravity.CENTER
             },
-            title = place.name.orEmpty(),
-            titleVisible = !place.name.isNullOrBlank(),
+            title = name,
+            titleVisible = name.isNotBlank(),
             subtitle = boostSubtitle(place.boostedUntil),
         ) {
             (fragment.activity as? Activity)?.openPlace(place.id)

@@ -20,7 +20,6 @@ fun GetPlacesItem.toPlace(): FullProjection {
         verifiedAt = verifiedAt?.toVerifiedAt(),
         address = address,
         openingHours = openingHours,
-        localizedOpeningHours = localizedOpeningHours,
         phone = phone,
         website = website?.toHttpUrlOrNull(),
         email = email,

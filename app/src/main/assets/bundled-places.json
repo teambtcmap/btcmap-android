@@ -2927,9 +2927,6 @@
     "verified_at": "2025-12-17",
     "address": "Marszałkowska Warszawa 00-110",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 0:00-24:00\nTuesday: 0:00-24:00\nWednesday: 0:00-24:00\nThursday: 0:00-24:00\nFriday: 0:00-24:00\nSaturday: 0:00-24:00\nSunday: 0:00-24:00"
-    },
     "website": "https://shitcoins.club/lokalizacje-bitomatow/bitomat-warszawa-marszalkowska",
     "phone": "+48 728 008 004",
     "email": "support@shitcoins.club",
@@ -2987,9 +2984,6 @@
     "verified_at": "2024-06-15",
     "address": "34/36 Leszno Warszawa 01-199",
     "opening_hours": "Mo-Fr 10:00-20:00; Sa 10:00-16:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-20:00\nTuesday: 10:00-20:00\nWednesday: 10:00-20:00\nThursday: 10:00-20:00\nFriday: 10:00-20:00\nSaturday: 10:00-16:00\nSunday: closed"
-    },
     "phone": "+48 578 70 70 78",
     "osm_id": "node:10110857573"
   },
@@ -3013,9 +3007,6 @@
     "updated_at": "2026-04-08T00:05:30.55Z",
     "verified_at": "2025-04-08",
     "opening_hours": "Mo-Fr 10:00-18:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-18:00\nTuesday: 10:00-18:00\nWednesday: 10:00-18:00\nThursday: 10:00-18:00\nFriday: 10:00-18:00\nSaturday: closed\nSunday: closed"
-    },
     "osm_id": "node:10111151702"
   },
   {
@@ -3223,9 +3214,6 @@
     "verified_at": "2024-04-15",
     "address": "43 Sienna Warszawa",
     "opening_hours": "Mo-Fr 10:00-18:00; Sa-Su 10:00-16:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-18:00  \nTuesday: 10:00-18:00  \nWednesday: 10:00-18:00  \nThursday: 10:00-18:00  \nFriday: 10:00-18:00  \nSaturday: 10:00-16:00  \nSunday: 10:00-16:00"
-    },
     "osm_id": "node:10112109829"
   },
   {
@@ -4489,9 +4477,6 @@
     "verified_at": "2025-10-01",
     "address": "5/13 ถนนเจ้าฟ้าตะวันตก Phuket 83000",
     "opening_hours": "Mo-Su 08:00-18:00",
-    "localized_opening_hours": {
-      "en": "Monday: 8:00-18:00  \nTuesday: 8:00-18:00  \nWednesday: 8:00-18:00  \nThursday: 8:00-18:00  \nFriday: 8:00-18:00  \nSaturday: 8:00-18:00  \nSunday: 8:00-18:00"
-    },
     "website": "https://linktr.ee/CryptoCoff",
     "phone": "+66 76 682 246",
     "email": "cryptocoffphuket@gmail.com",
@@ -11024,9 +11009,6 @@
     "verified_at": "2024-06-04",
     "address": "2 Plac Stanisława Małachowskiego Warszawa 00-066",
     "opening_hours": "Mo-Fr 10:00-18:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-18:00  \nTuesday: 10:00-18:00  \nWednesday: 10:00-18:00  \nThursday: 10:00-18:00  \nFriday: 10:00-18:00  \nSaturday: closed  \nSunday: closed"
-    },
     "website": "http://gogoapps.io/",
     "osm_id": "node:10537155134"
   },
@@ -13511,9 +13493,6 @@
     "verified_at": "2025-12-28",
     "address": "12 Ząbkowska Warszawa 03-735",
     "opening_hours": "Fr-Sa 19:00-03:00; Su,We,Th 19:00-01:00",
-    "localized_opening_hours": {
-      "en": "Monday: closed  \nTuesday: closed  \nWednesday: 19:00-01:00  \nThursday: 19:00-01:00  \nFriday: 19:00-03:00  \nSaturday: 19:00-03:00  \nSunday: 19:00-01:00"
-    },
     "phone": "+48 534 370 670",
     "email": "bazzartoffice@gmail.com",
     "comments": 2,
@@ -14819,9 +14798,6 @@
     "verified_at": "2023-02-06",
     "address": "Calle Central Nueva Guinea 81301",
     "opening_hours": "Mo-Sa 08:00-17:00",
-    "localized_opening_hours": {
-      "en": "Monday: 8:00-17:00\nTuesday: 8:00-17:00\nWednesday: 8:00-17:00\nThursday: 8:00-17:00\nFriday: 8:00-17:00\nSaturday: 8:00-17:00"
-    },
     "website": "https://www.baseunlock.com/",
     "phone": "+505 8456 2064",
     "email": "baseunlock@gmail.com",
@@ -17261,9 +17237,6 @@
     "verified_at": "2025-09-15",
     "address": "334/13 Near Bang Tao Beach Thalang 83110",
     "opening_hours": "Mo-Su 10:00-22:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-22:00\nTuesday: 10:00-22:00\nWednesday: 10:00-22:00\nThursday: 10:00-22:00\nFriday: 10:00-22:00\nSaturday: 10:00-22:00\nSunday: 10:00-22:00"
-    },
     "website": "https://linktr.ee/cryptoinktattoo",
     "phone": "+66 94 943 8877",
     "facebook": "https://www.facebook.com/cryptoinktattoo/",
@@ -25227,9 +25200,6 @@
     "verified_at": "2023-06-05",
     "address": "8 Belgradzka Warszawa 02-793",
     "opening_hours": "Mo-Su 09:00-21:00",
-    "localized_opening_hours": {
-      "en": "Monday: 9:00-21:00\nTuesday: 9:00-21:00\nWednesday: 9:00-21:00\nThursday: 9:00-21:00\nFriday: 9:00-21:00\nSaturday: 9:00-21:00\nSunday: 9:00-21:00"
-    },
     "website": "https://buybitart.com/",
     "osm_id": "node:10956987211"
   },
@@ -32309,9 +32279,6 @@
     "updated_at": "2026-04-12T00:05:16.458Z",
     "verified_at": "2025-04-12",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 00:00-24:00  \nTuesday: 00:00-24:00  \nWednesday: 00:00-24:00  \nThursday: 00:00-24:00  \nFriday: 00:00-24:00  \nSaturday: 00:00-24:00  \nSunday: 00:00-24:00"
-    },
     "website": "https://www.cashify.eu/lokalizacje/bitomat-warszawa-pulawska-86",
     "osm_id": "node:11093572025"
   },
@@ -61490,9 +61457,6 @@
     "verified_at": "2024-04-16",
     "address": "6910 Fayetteville Road Durham 27713",
     "opening_hours": "Mo-Sa 10:00-21:00; Su 12:00-19:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-21:00\nTuesday: 10:00-21:00\nWednesday: 10:00-21:00\nThursday: 10:00-21:00\nFriday: 10:00-21:00\nSaturday: 10:00-21:00\nSunday: 12:00-19:00"
-    },
     "website": "https://www.reeds.com/",
     "phone": "+1-919-544-1174",
     "osm_id": "node:5955988100"
@@ -67230,9 +67194,6 @@
     "verified_at": "2024-04-20",
     "address": "410 Ranch Rd 620 S Lakeway 78734",
     "opening_hours": "Mo-Th 08:00-17:00",
-    "localized_opening_hours": {
-      "en": "Monday: 8:00-17:00\nTuesday: 8:00-17:00\nWednesday: 8:00-17:00\nThursday: 8:00-17:00"
-    },
     "website": "https://www.lakewaycosmeticdentistry.com/",
     "phone": "+1-512-402-9399",
     "osm_id": "node:8497622037"
@@ -70931,9 +70892,6 @@
     "verified_at": "2025-10-16",
     "address": "39 Płocka Warszawa 01-231",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 0:00-24:00\nTuesday: 0:00-24:00\nWednesday: 0:00-24:00\nThursday: 0:00-24:00\nFriday: 0:00-24:00\nSaturday: 0:00-24:00\nSunday: 0:00-24:00"
-    },
     "website": "https://shitcoins.club/lokalizacje-bitomatow/bitomat-warszawa-plocka",
     "phone": "+48 728 008 004",
     "email": "support@shitcoins.club",
@@ -78755,9 +78713,6 @@
     "verified_at": "2025-11-12",
     "address": "16 Županijska ulica",
     "opening_hours": "Mo-Fr 08:00-20:00; Sa 09:00-14:00",
-    "localized_opening_hours": {
-      "en": "Monday: 8:00-20:00\nTuesday: 8:00-20:00\nWednesday: 8:00-20:00\nThursday: 8:00-20:00\nFriday: 8:00-20:00\nSaturday: 9:00-14:00"
-    },
     "website": "https://www.bitstore.net/hr/poslovnice/#osijek",
     "phone": "+385 31 241 465",
     "osm_id": "node:11321578713"
@@ -84412,9 +84367,6 @@
     "verified_at": "2026-03-02",
     "address": "5/55 Mae Luan Road 83000",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 0:00-24:00  \nTuesday: 0:00-24:00  \nWednesday: 0:00-24:00  \nThursday: 0:00-24:00  \nFriday: 0:00-24:00  \nSaturday: 0:00-24:00  \nSunday: 0:00-24:00"
-    },
     "website": "https://roamphuket.com/",
     "phone": "+66 95 239 6462",
     "email": "hello@roamphuket.com",
@@ -95473,9 +95425,6 @@
     "verified_at": "2025-10-17",
     "address": "19 Stawiszyńska Kalisz 62-800",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 0:00-24:00  \nTuesday: 0:00-24:00  \nWednesday: 0:00-24:00  \nThursday: 0:00-24:00  \nFriday: 0:00-24:00  \nSaturday: 0:00-24:00  \nSunday: 0:00-24:00"
-    },
     "website": "https://shitcoins.club/lokalizacje-bitomatow/bitomat-kalisz-stawiszynska",
     "phone": "+48 728 008 004",
     "email": "support@shitcoins.club",
@@ -96736,9 +96685,6 @@
     "verified_at": "2025-10-17",
     "address": "23 Kobielska Warszawa 04-359",
     "opening_hours": "Mo-Sa 07:00-21:00; Su 09:00-18:00",
-    "localized_opening_hours": {
-      "en": "Monday: 7:00-21:00\nTuesday: 7:00-21:00\nWednesday: 7:00-21:00\nThursday: 7:00-21:00\nFriday: 7:00-21:00\nSaturday: 7:00-21:00\nSunday: 9:00-18:00"
-    },
     "website": "https://shitcoins.club/lokalizacje-bitomatow/bitomat-warszawa-grochow",
     "phone": "+48 728 008 004",
     "email": "support@shitcoins.club",
@@ -97029,9 +96975,6 @@
     "verified_at": "2024-02-21",
     "address": "2 Zwycięzców Warszawa 03-941",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 00:00-24:00\nTuesday: 00:00-24:00\nWednesday: 00:00-24:00\nThursday: 00:00-24:00\nFriday: 00:00-24:00\nSaturday: 00:00-24:00\nSunday: 00:00-24:00"
-    },
     "website": "https://www.swag42.com/",
     "phone": "+48 662 428 687",
     "email": "sales@swag42.com",
@@ -97377,9 +97320,6 @@
     "verified_at": "2024-01-21",
     "address": "6 Tadeusza Rechniewskiego Warszawa 03-980",
     "opening_hours": "Mo 08:30-15:00,Th 14:00-19:00, Sa 09:00-14:00",
-    "localized_opening_hours": {
-      "en": "Monday: 8:30-15:00  \nTuesday: closed  \nWednesday: closed  \nThursday: 14:00-19:00  \nFriday: closed  \nSaturday: 9:00-14:00  \nSunday: closed"
-    },
     "website": "https://www.salvadent.pl/",
     "phone": "+48 22 211 20 02",
     "osm_id": "node:11656296013"
@@ -99765,9 +99705,6 @@
     "verified_at": "2026-03-02",
     "address": "18/27 Soi Poontowkong Phuket Town 83000",
     "opening_hours": "Mo-Su 09:00-21:00",
-    "localized_opening_hours": {
-      "en": "Output:\nMonday: 9:00-21:00\nTuesday: 9:00-21:00\nWednesday: 9:00-21:00\nThursday: 9:00-21:00\nFriday: 9:00-21:00\nSaturday: 9:00-21:00\nSunday: 9:00-21:00"
-    },
     "facebook": "https://www.facebook.com/people/Motorbike-Rental-Sa/100091356727879/",
     "comments": 1,
     "osm_id": "node:11726495452"
@@ -100310,9 +100247,6 @@
     "verified_at": "2025-10-18",
     "address": "57 Marymoncka Warszawa 01-802",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 0:00-24:00\nTuesday: 0:00-24:00\nWednesday: 0:00-24:00\nThursday: 0:00-24:00\nFriday: 0:00-24:00\nSaturday: 0:00-24:00\nSunday: 0:00-24:00"
-    },
     "website": "https://shitcoins.club/lokalizacje-bitomatow/bitomat-warszawa-marymoncka",
     "phone": "+48 728 008 004",
     "email": "support@shitcoins.club",
@@ -100332,9 +100266,6 @@
     "verified_at": "2025-10-16",
     "address": "1 Andrzeja Sołtana Warszawa 01-494",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 0:00-24:00  \nTuesday: 0:00-24:00  \nWednesday: 0:00-24:00  \nThursday: 0:00-24:00  \nFriday: 0:00-24:00  \nSaturday: 0:00-24:00  \nSunday: 0:00-24:00"
-    },
     "website": "https://shitcoins.club/lokalizacje-bitomatow/bitomat-warszawa-soltana",
     "phone": "+48 728 008 004",
     "email": "support@shitcoins.club",
@@ -100394,9 +100325,6 @@
     "verified_at": "2025-10-18",
     "address": "208 Aleja Armii Ludowej Warszawa 00-608",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 00:00-24:00  \nTuesday: 00:00-24:00  \nWednesday: 00:00-24:00  \nThursday: 00:00-24:00  \nFriday: 00:00-24:00  \nSaturday: 00:00-24:00  \nSunday: 00:00-24:00"
-    },
     "website": "https://shitcoins.club/lokalizacje-bitomatow/bitomat-warszawa-niepodleglosci",
     "phone": "+48 728 008 004",
     "email": "support@shitcoins.club",
@@ -100416,9 +100344,6 @@
     "verified_at": "2025-10-18",
     "address": "6 Aleja Jana Rodowicza \"Anody\" Warszawa 02-787",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 00:00-24:00\nTuesday: 00:00-24:00\nWednesday: 00:00-24:00\nThursday: 00:00-24:00\nFriday: 00:00-24:00\nSaturday: 00:00-24:00\nSunday: 00:00-24:00"
-    },
     "website": "https://shitcoins.club/lokalizacje-bitomatow/bitomat-circle_k-warszawa-rodowicza",
     "phone": "+48 728 008 004",
     "email": "support@shitcoins.club",
@@ -100438,9 +100363,6 @@
     "verified_at": "2025-10-18",
     "address": "228 Aleje Jerozolimskie Warszawa 02-495",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 0:00-24:00\nTuesday: 0:00-24:00\nWednesday: 0:00-24:00\nThursday: 0:00-24:00\nFriday: 0:00-24:00\nSaturday: 0:00-24:00\nSunday: 0:00-24:00"
-    },
     "website": "https://shitcoins.club/lokalizacje-bitomatow/bitomat-circle_k-warszawa-aleje-jerozolimskie",
     "phone": "+48 728 008 004",
     "email": "support@shitcoins.club",
@@ -100459,9 +100381,6 @@
     "updated_at": "2026-07-21T00:05:08.545Z",
     "verified_at": "2025-10-18",
     "opening_hours": "Mo-Sa 09:00-21:00; Su 10:00-20:00",
-    "localized_opening_hours": {
-      "en": "Monday: 9:00-21:00\nTuesday: 9:00-21:00\nWednesday: 9:00-21:00\nThursday: 9:00-21:00\nFriday: 9:00-21:00\nSaturday: 9:00-21:00\nSunday: 10:00-20:00"
-    },
     "website": "https://shitcoins.club/lokalizacje-bitomatow/bitomat-warszawa-marki-M1",
     "phone": "+48 728 008 004",
     "email": "support@shitcoins.club",
@@ -100990,9 +100909,6 @@
     "verified_at": "2025-08-18",
     "address": "2 Ptasia Warszawa 00-138",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 00:00-24:00  \nTuesday: 00:00-24:00  \nWednesday: 00:00-24:00  \nThursday: 00:00-24:00  \nFriday: 00:00-24:00  \nSaturday: 00:00-24:00  \nSunday: 00:00-24:00"
-    },
     "website": "https://www.kantor-house.com/",
     "email": "5",
     "osm_id": "node:11747985846"
@@ -104764,9 +104680,6 @@
     "verified_at": "2025-11-17",
     "address": "80/20 เจ้าฟ้าตะวันออก Chalong 83130",
     "opening_hours": "Mo-Fr 10:00-17:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-17:00\nTuesday: 10:00-17:00\nWednesday: 10:00-17:00\nThursday: 10:00-17:00\nFriday: 10:00-17:00\nSaturday: closed\nSunday: closed"
-    },
     "phone": "+66 83 692 3779",
     "email": "contact@infinimedia.in.th",
     "line": "https://page.line.me/gcs8865c",
@@ -106662,9 +106575,6 @@
     "updated_at": "2026-03-13T06:00:43.235Z",
     "verified_at": "2026-02-10",
     "opening_hours": "Mo-Su 10:00-22:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-22:00\nTuesday: 10:00-22:00\nWednesday: 10:00-22:00\nThursday: 10:00-22:00\nFriday: 10:00-22:00\nSaturday: 10:00-22:00\nSunday: 10:00-22:00"
-    },
     "website": "https://www.cryptomonkey.net/wymiana-kryptowalut-bitomat/atm/BT301100",
     "osm_id": "node:11825082679"
   },
@@ -108238,9 +108148,6 @@
     "updated_at": "2026-03-13T05:47:47.042Z",
     "verified_at": "2026-02-10",
     "opening_hours": "Mo-Sa 11:00-21:00",
-    "localized_opening_hours": {
-      "en": "Monday: 11:00-21:00\nTuesday: 11:00-21:00\nWednesday: 11:00-21:00\nThursday: 11:00-21:00\nFriday: 11:00-21:00\nSaturday: 11:00-21:00\nSunday: closed"
-    },
     "website": "https://bit-box.pl/bitomat-warszawa-ul-glebocka-15/",
     "osm_id": "node:11850309015"
   },
@@ -110481,9 +110388,6 @@
     "updated_at": "2026-03-13T05:58:11.923Z",
     "verified_at": "2024-10-04",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 00:00-24:00\nTuesday: 00:00-24:00\nWednesday: 00:00-24:00\nThursday: 00:00-24:00\nFriday: 00:00-24:00\nSaturday: 00:00-24:00\nSunday: 00:00-24:00"
-    },
     "website": "https://www.cashify.eu/lokalizacje/bitomat-warszawa-powstancow-slaskich-90",
     "osm_id": "node:11893502414"
   },
@@ -110508,9 +110412,6 @@
     "updated_at": "2026-03-13T05:47:49.337Z",
     "verified_at": "2024-05-10",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 00:00-24:00  \nTuesday: 00:00-24:00  \nWednesday: 00:00-24:00  \nThursday: 00:00-24:00  \nFriday: 00:00-24:00  \nSaturday: 00:00-24:00  \nSunday: 00:00-24:00"
-    },
     "website": "https://www.cashify.eu/lokalizacje/bitomat-warszawa-dzika-29",
     "osm_id": "node:11893650252"
   },
@@ -111306,9 +111207,6 @@
     "verified_at": "2024-05-15",
     "address": "73 Pruszkowska Raszyn 05-090",
     "opening_hours": "Mo-Fr 10:00-18:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-18:00  \nTuesday: 10:00-18:00  \nWednesday: 10:00-18:00  \nThursday: 10:00-18:00  \nFriday: 10:00-18:00  \nSaturday: closed  \nSunday: closed"
-    },
     "website": "https://www.cashify.eu/lokalizacje/kantor-kryptowalut-raszyn-pruszkowska-73",
     "phone": "+48 535 565 103",
     "osm_id": "node:11905448500"
@@ -112713,9 +112611,6 @@
     "verified_at": "2024-05-23",
     "address": "Penzance TR20 8TT",
     "opening_hours": "\"by appointment\"",
-    "localized_opening_hours": {
-      "en": "Monday: By appointment  \nTuesday: By appointment  \nWednesday: By appointment  \nThursday: By appointment  \nFriday: By appointment  \nSaturday: By appointment  \nSunday: By appointment"
-    },
     "website": "https://www.pengsucculents.com/",
     "email": "pengsucculents@outlook.com",
     "osm_id": "node:11928522169"
@@ -114442,9 +114337,6 @@
     "verified_at": "2026-02-10",
     "address": "17 Puławska Warszawa 02-515",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 00:00-24:00\nTuesday: 00:00-24:00\nWednesday: 00:00-24:00\nThursday: 00:00-24:00\nFriday: 00:00-24:00\nSaturday: 00:00-24:00\nSunday: 00:00-24:00"
-    },
     "website": "https://shitcoins.club/lokalizacje-bitomatow/bitomat-warszawa-europlex-pulawska-17",
     "phone": "+48 728 008 004",
     "email": "support@shitcoins.club",
@@ -114695,9 +114587,6 @@
     "verified_at": "2024-05-31",
     "address": "18 Świętokrzyska Warszawa 00-052",
     "opening_hours": "Mo-Fr 10:00-18:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-18:00\nTuesday: 10:00-18:00\nWednesday: 10:00-18:00\nThursday: 10:00-18:00\nFriday: 10:00-18:00\nSaturday: closed\nSunday: closed"
-    },
     "website": "https://quark.house/kantory/kantor-bitcoin-quark-warszawa/",
     "phone": "+48 531 976 200",
     "email": "warszawa@quark.house",
@@ -119017,9 +118906,6 @@
     "verified_at": "2024-12-14",
     "address": "2 Grzybowska 00-131",
     "opening_hours": "Mo-Sa 10:00-18:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-18:00\nTuesday: 10:00-18:00\nWednesday: 10:00-18:00\nThursday: 10:00-18:00\nFriday: 10:00-18:00\nSaturday: 10:00-18:00\nSunday: closed"
-    },
     "website": "https://cryptoexchangewarsaw.com",
     "osm_id": "node:12038261112"
   },
@@ -119189,9 +119075,6 @@
     "verified_at": "2024-07-08",
     "address": "98 Rua Costa Aguiar Campinas 13010-060",
     "opening_hours": "Mo-Fr 09:00-17:00",
-    "localized_opening_hours": {
-      "en": "Monday: 9:00-17:00\nTuesday: 9:00-17:00\nWednesday: 9:00-17:00\nThursday: 9:00-17:00\nFriday: 9:00-17:00"
-    },
     "website": "https://www.emanuelfonseca.adv.br/",
     "phone": "+55 19 3231-7551",
     "osm_id": "node:12040789027"
@@ -120574,9 +120457,6 @@
     "updated_at": "2026-03-11T11:22:22.956Z",
     "verified_at": "2024-07-16",
     "opening_hours": "Mo-Th 09:00-19:30; Fr 09:00-21:00; Sa 09:00-18:00",
-    "localized_opening_hours": {
-      "en": "Monday: 9:00-19:30  \nTuesday: 9:00-19:30  \nWednesday: 9:00-19:30  \nThursday: 9:00-19:30  \nFriday: 9:00-21:00  \nSaturday: 9:00-18:00"
-    },
     "website": "https://at.kurant.net/de/automat/media-markt-salzburg-europastrasse-europastrasse-1-5020-salzburg-oesterreich/",
     "osm_id": "node:12057015187"
   },
@@ -122389,9 +122269,6 @@
     "verified_at": "2024-08-01",
     "address": "36 Emilii Plater",
     "opening_hours": "10:00-21:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-21:00\nTuesday: 10:00-21:00\nWednesday: 10:00-21:00\nThursday: 10:00-21:00\nFriday: 10:00-21:00\nSaturday: 10:00-21:00\nSunday: 10:00-21:00"
-    },
     "osm_id": "node:4621890680"
   },
   {
@@ -123343,9 +123220,6 @@
     "verified_at": "2026-03-02",
     "address": "50/2 ถนนตะกั่วป่า 83000",
     "opening_hours": "Tu-Su 17:00-01:00",
-    "localized_opening_hours": {
-      "en": "Monday: closed  \nTuesday: 17:00-1:00  \nWednesday: 17:00-1:00  \nThursday: 17:00-1:00  \nFriday: 17:00-1:00  \nSaturday: 17:00-1:00  \nSunday: 17:00-1:00"
-    },
     "website": "https://chitholding.com/",
     "phone": "+66 64 954 6616",
     "email": "chitholehkt@gmail.com",
@@ -124284,9 +124158,6 @@
     "verified_at": "2025-03-23",
     "address": "1 Pod Lipą Warszawa 02-798",
     "opening_hours": "Mo-Fr 10:00-18:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-18:00\nTuesday: 10:00-18:00\nWednesday: 10:00-18:00\nThursday: 10:00-18:00\nFriday: 10:00-18:00\nSaturday: closed\nSunday: closed"
-    },
     "website": "https://quark.house/kantory/kantor-bitcoin-quark-warszawa-kabaty/",
     "phone": "+48 780 604 013",
     "email": "kabaty@quark.house",
@@ -134287,9 +134158,6 @@
     "verified_at": "2024-11-02",
     "address": "188/9 Strzelców Bytomskich Bytom 41-914",
     "opening_hours": "Mo-Fr 09:00-18:00",
-    "localized_opening_hours": {
-      "en": "Monday: 9:00-18:00\nTuesday: 9:00-18:00\nWednesday: 9:00-18:00\nThursday: 9:00-18:00\nFriday: 9:00-18:00"
-    },
     "phone": "+48 782803193",
     "email": "natalia.ardelli@gmail.com",
     "osm_id": "node:12307916995"
@@ -140932,9 +140800,6 @@
     "verified_at": "2024-12-03",
     "address": "Avenida España San Salvador",
     "opening_hours": "Mo-Su 07:00-21:30",
-    "localized_opening_hours": {
-      "en": "Monday: 7:00-21:30\nTuesday: 7:00-21:30\nWednesday: 7:00-21:30\nThursday: 7:00-21:30\nFriday: 7:00-21:30\nSaturday: 7:00-21:30\nSunday: 7:00-21:30"
-    },
     "website": "http://superselectos.com/",
     "osm_id": "way:395443160"
   },
@@ -147272,9 +147137,6 @@
     "updated_at": "2026-03-11T10:30:58.157Z",
     "verified_at": "2024-12-19",
     "opening_hours": "Mo-Sa 11:00-19:00",
-    "localized_opening_hours": {
-      "en": "Monday: 11:00-19:00  \nTuesday: 11:00-19:00  \nWednesday: 11:00-19:00  \nThursday: 11:00-19:00  \nFriday: 11:00-19:00  \nSaturday: 11:00-19:00"
-    },
     "phone": "+50686876783",
     "osm_id": "node:12299872001"
   },
@@ -152252,9 +152114,6 @@
     "updated_at": "2026-07-18T00:05:08.005Z",
     "verified_at": "2025-10-15",
     "opening_hours": "Mo-Su 09:00-23:00",
-    "localized_opening_hours": {
-      "en": "Monday: 9:00-23:00  \nTuesday: 9:00-23:00  \nWednesday: 9:00-23:00  \nThursday: 9:00-23:00  \nFriday: 9:00-23:00  \nSaturday: 9:00-23:00  \nSunday: 9:00-23:00"
-    },
     "phone": "0816135882",
     "instagram": "https://www.instagram.com/robbi_phuket/",
     "comments": 3,
@@ -154587,9 +154446,6 @@
     "verified_at": "2026-02-21",
     "address": "9 Chmielna Warszawa 00-021",
     "opening_hours": "10:00-21:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-21:00\nTuesday: 10:00-21:00\nWednesday: 10:00-21:00\nThursday: 10:00-21:00\nFriday: 10:00-21:00\nSaturday: 10:00-21:00\nSunday: 10:00-21:00"
-    },
     "website": "https://tonwex.online/",
     "phone": "+48 572 094 700",
     "osm_id": "node:319423954"
@@ -155810,9 +155666,6 @@
     "verified_at": "2025-01-24",
     "address": "23 Rue d'Orbandelle Auxerre 89000",
     "opening_hours": "Mo-Su 12:00-14:30; Mo-Su 19:00-22:00",
-    "localized_opening_hours": {
-      "en": "Monday: 12:00-14:30, 19:00-22:00\nTuesday: 12:00-14:30, 19:00-22:00\nWednesday: 12:00-14:30, 19:00-22:00\nThursday: 12:00-14:30, 19:00-22:00\nFriday: 12:00-14:30, 19:00-22:00\nSaturday: 12:00-14:30, 19:00-22:00\nSunday: 12:00-14:30, 19:00-22:00"
-    },
     "website": "https://www.shivanagar.com/",
     "phone": "+33 9 53 78 76 70",
     "osm_id": "node:806509008"
@@ -183379,9 +183232,6 @@
     "verified_at": "2026-02-25",
     "address": "64 Kata Road 83000",
     "opening_hours": "Mo-Su 12:00-23:00",
-    "localized_opening_hours": {
-      "en": "Monday: 12:00-23:00\nTuesday: 12:00-23:00\nWednesday: 12:00-23:00\nThursday: 12:00-23:00\nFriday: 12:00-23:00\nSaturday: 12:00-23:00\nSunday: 12:00-23:00"
-    },
     "website": "https://italianophuket.com/il-tagliere-pizzeria-ristorante/",
     "phone": "+66 76 330 679",
     "email": "d.cavatassi@gmail.com",
@@ -205476,9 +205326,6 @@
     "verified_at": "2025-08-01",
     "address": "Gert Viljoen Road Hawston 7202",
     "opening_hours": "Mo-Su 00:00-24:00",
-    "localized_opening_hours": {
-      "en": "Monday: 0:00-24:00  \nTuesday: 0:00-24:00  \nWednesday: 0:00-24:00  \nThursday: 0:00-24:00  \nFriday: 0:00-24:00  \nSaturday: 0:00-24:00  \nSunday: 0:00-24:00"
-    },
     "osm_id": "node:12335010176"
   },
   {
@@ -208267,9 +208114,6 @@
     "verified_at": "2025-08-17",
     "address": "Manyanja Road Nairobi",
     "opening_hours": "Mo-Su 06:00-23:00",
-    "localized_opening_hours": {
-      "en": "Monday: 6:00-23:00  \nTuesday: 6:00-23:00  \nWednesday: 6:00-23:00  \nThursday: 6:00-23:00  \nFriday: 6:00-23:00  \nSaturday: 6:00-23:00  \nSunday: 6:00-23:00"
-    },
     "phone": "+254 768 206821",
     "osm_id": "node:13076006596"
   },
@@ -208407,9 +208251,6 @@
     "verified_at": "2025-08-18",
     "address": "100 ถนนรพช. (ถนนพรุสมภาร-งานทวี) 83110",
     "opening_hours": "09:00-20:00; We off",
-    "localized_opening_hours": {
-      "en": "Monday: 9:00-20:00  \nTuesday: 9:00-20:00  \nWednesday: closed  \nThursday: 9:00-20:00  \nFriday: 9:00-20:00  \nSaturday: 9:00-20:00  \nSunday: 9:00-20:00"
-    },
     "phone": "+66 89 972 2339",
     "facebook": "https://www.facebook.com/apanthip",
     "osm_id": "node:13038683343"
@@ -211978,9 +211819,6 @@
     "verified_at": "2025-08-26",
     "address": "90/6 ถนนโคกโตนด 83100",
     "opening_hours": "Mo-Sat 13:00-23:00",
-    "localized_opening_hours": {
-      "en": "Monday: 13:00-23:00  \nTuesday: 13:00-23:00  \nWednesday: 13:00-23:00  \nThursday: 13:00-23:00  \nFriday: 13:00-23:00  \nSaturday: 13:00-23:00  \nSunday: closed"
-    },
     "osm_id": "node:13098484874"
   },
   {
@@ -212896,9 +212734,6 @@
     "verified_at": "2025-09-19",
     "address": "38 57180",
     "opening_hours": "Mo-Su 06:00-20:00",
-    "localized_opening_hours": {
-      "en": "Monday: 6:00-20:00  \nTuesday: 6:00-20:00  \nWednesday: 6:00-20:00  \nThursday: 6:00-20:00  \nFriday: 6:00-20:00  \nSaturday: 6:00-20:00  \nSunday: 6:00-20:00"
-    },
     "phone": "+66 53 656 138",
     "facebook": "https://www.facebook.com/pages/เพิ่มพรการค้า/1547918155302466",
     "osm_id": "node:13155162510"
@@ -219333,9 +219168,6 @@
     "verified_at": "2025-10-21",
     "address": "93 Благој Ѓорев Велес 1400",
     "opening_hours": "Mo-Fr 09:00-16:00",
-    "localized_opening_hours": {
-      "en": "Monday: 9:00-16:00\nTuesday: 9:00-16:00\nWednesday: 9:00-16:00\nThursday: 9:00-16:00\nFriday: 9:00-16:00"
-    },
     "phone": "+38 97 2266889",
     "facebook": "https://www.facebook.com/share/1XQu4P1KJs/?mibextid=wwXIfr",
     "osm_id": "node:13248189212"
@@ -222523,9 +222355,6 @@
     "verified_at": "2025-11-05",
     "address": "136 Thain Road Lewiston 83501",
     "opening_hours": "Mo-Fr 09:00-17:00",
-    "localized_opening_hours": {
-      "en": "Monday: 9:00-17:00  \nTuesday: 9:00-17:00  \nWednesday: 9:00-17:00  \nThursday: 9:00-17:00  \nFriday: 9:00-17:00"
-    },
     "website": "https://a1lockguys.com/",
     "phone": "+1-208-746-2014",
     "email": "a1lockguys@gmail.com",
@@ -227952,9 +227781,6 @@
     "verified_at": "2025-11-13",
     "address": "4222 Rosehill Road Garland 75043",
     "opening_hours": "Tu-Sa 09:00-17:00",
-    "localized_opening_hours": {
-      "en": "Tuesday: 9:00-17:00  \nWednesday: 9:00-17:00  \nThursday: 9:00-17:00  \nFriday: 9:00-17:00  \nSaturday: 9:00-17:00"
-    },
     "osm_id": "node:13301955716"
   },
   {
@@ -242812,9 +242638,6 @@
     "verified_at": "2025-11-25",
     "address": "2240 Navigation Boulevard Houston 77003-1577",
     "opening_hours": "Mo 22:00-24:00; Tu-Sa 00:00-21:00,22:00-24:00; Su 00:00-21:00",
-    "localized_opening_hours": {
-      "en": "Monday: 22:00-24:00  \nTuesday: 0:00-21:00, 22:00-24:00  \nWednesday: 0:00-21:00, 22:00-24:00  \nThursday: 0:00-21:00, 22:00-24:00  \nFriday: 0:00-21:00, 22:00-24:00  \nSaturday: 0:00-21:00, 22:00-24:00  \nSunday: 0:00-21:00"
-    },
     "osm_id": "node:8451861255"
   },
   {
@@ -246332,9 +246155,6 @@
     "verified_at": "2025-11-30",
     "address": "822 Hartz Way Danville 94526-3471",
     "opening_hours": "Mo-Th 10:00-17:00; Fr 10:00-15:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-17:00\nTuesday: 10:00-17:00\nWednesday: 10:00-17:00\nThursday: 10:00-17:00\nFriday: 10:00-15:00"
-    },
     "osm_id": "node:13341552987"
   },
   {
@@ -246715,9 +246535,6 @@
     "verified_at": "2025-11-29",
     "address": "4168 Rocky River Drive Cleveland 44135",
     "opening_hours": "Mo-Fr 10:00-18:00, Sa 10:00-16:00, Su closed",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-18:00  \nTuesday: 10:00-18:00  \nWednesday: 10:00-18:00  \nThursday: 10:00-18:00  \nFriday: 10:00-18:00  \nSaturday: 10:00-16:00  \nSunday: closed"
-    },
     "website": "https://www.facebook.com/scrubsrusinc/",
     "phone": "+1 216 417 0091",
     "email": "scrubsrus_moreuniforms@yahoo.com",
@@ -249467,9 +249284,6 @@
     "verified_at": "2025-12-04",
     "address": "12954 West Washington Boulevard Los Angeles 90066-5127",
     "opening_hours": "Mo 08:00-18:00; Tu-Sa 08:00-20:00; Su 08:00-17:00",
-    "localized_opening_hours": {
-      "en": "Monday: 8:00-18:00  \nTuesday: 8:00-20:00  \nWednesday: 8:00-20:00  \nThursday: 8:00-20:00  \nFriday: 8:00-20:00  \nSaturday: 8:00-20:00  \nSunday: 8:00-17:00"
-    },
     "osm_id": "node:13352507801"
   },
   {
@@ -256615,9 +256429,6 @@
     "verified_at": "2025-12-15",
     "address": "43/232 ถนนเมืองทอง-เขาขาด 83000",
     "opening_hours": "Mo-Su 07:30-02:00",
-    "localized_opening_hours": {
-      "en": "Monday: 07:30-02:00  \nTuesday: 07:30-02:00  \nWednesday: 07:30-02:00  \nThursday: 07:30-02:00  \nFriday: 07:30-02:00  \nSaturday: 07:30-02:00  \nSunday: 07:30-02:00"
-    },
     "phone": "+66 96 298 9116",
     "osm_id": "node:13377368589"
   },
@@ -261476,9 +261287,6 @@
     "verified_at": "2026-01-03",
     "address": "42 Dobra Warszawa",
     "opening_hours": "Mo-Th 12:00-22:00; Fr 12:00-23:00; Sa 11:00-23:00; Su 11:00-22:00",
-    "localized_opening_hours": {
-      "en": "Monday: 12:00-22:00  \nTuesday: 12:00-22:00  \nWednesday: 12:00-22:00  \nThursday: 12:00-22:00  \nFriday: 12:00-23:00  \nSaturday: 11:00-23:00  \nSunday: 11:00-22:00"
-    },
     "website": "https://smashnyburger.pl",
     "phone": "+48 603 039 305",
     "email": "biuro@smashnyburger.pl",
@@ -264876,9 +264684,6 @@
     "verified_at": "2025-12-26",
     "address": "1037 1000 South Albion 83311",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 0:00-24:00  \nTuesday: 0:00-24:00  \nWednesday: 0:00-24:00  \nThursday: 0:00-24:00  \nFriday: 0:00-24:00  \nSaturday: 0:00-24:00  \nSunday: 0:00-24:00"
-    },
     "website": "https://www.marshbasinmobilerepair.com/",
     "phone": "+1-208-650-8409",
     "email": "tlc@marshbasinmobilerepair.co",
@@ -266780,9 +266585,6 @@
     "verified_at": "2025-12-29",
     "address": "743 Rua Coronel Alves Teixeira Fortaleza 60130-000",
     "opening_hours": "Mo-Fr 08:30-18:00; Sa 08:30-12:00",
-    "localized_opening_hours": {
-      "en": "Monday: 8:30-18:00  \nTuesday: 8:30-18:00  \nWednesday: 8:30-18:00  \nThursday: 8:30-18:00  \nFriday: 8:30-18:00  \nSaturday: 8:30-12:00"
-    },
     "website": "https://www.primareodonto.com.br/",
     "phone": "+55 85 99267 5899",
     "email": "recepcao@primareodonto.com.br",
@@ -270507,9 +270309,6 @@
     "updated_at": "2026-03-12T07:27:10.714Z",
     "address": "5/13 Chalong, Mueang Phuket 83130",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 00:00-24:00\nTuesday: 00:00-24:00\nWednesday: 00:00-24:00\nThursday: 00:00-24:00\nFriday: 00:00-24:00\nSaturday: 00:00-24:00\nSunday: 00:00-24:00"
-    },
     "website": "https://btc-space.com/",
     "phone": "+66 76 682 245",
     "email": "sales@btc-space.com",
@@ -275198,9 +274997,6 @@
     "verified_at": "2026-01-10",
     "address": "115 Hampton Avenue Greenwood 29656",
     "opening_hours": "Tu-Fr 13:00-18:00",
-    "localized_opening_hours": {
-      "en": "Tuesday: 13:00-18:00\nWednesday: 13:00-18:00\nThursday: 13:00-18:00\nFriday: 13:00-18:00"
-    },
     "website": "https://snackeaterycorporation.org/",
     "phone": "+1-864-259-3200",
     "email": "nachoexpress@yahoo.com",
@@ -276095,9 +275891,6 @@
     "verified_at": "2026-01-12",
     "address": "410 Four Seasons Town Center Greensboro 27427",
     "opening_hours": "Mo-Th 11:00-19:00; Fr-Sa 11:00-20:00; Su 12:00-18:00",
-    "localized_opening_hours": {
-      "en": "Monday: 11:00-19:00  \nTuesday: 11:00-19:00  \nWednesday: 11:00-19:00  \nThursday: 11:00-19:00  \nFriday: 11:00-20:00  \nSaturday: 11:00-20:00  \nSunday: 12:00-18:00"
-    },
     "phone": "+1-336-355-9334",
     "facebook": "https://www.facebook.com/p/Shake-Shop-Creamery-Four-Seasons-Mall-61554752050234/",
     "osm_id": "node:13449199362"
@@ -280558,9 +280351,6 @@
     "verified_at": "2026-01-19",
     "address": "5959 Florence Avenue Bell Gardens 90201",
     "opening_hours": "Mo-Su 08:00-21:00",
-    "localized_opening_hours": {
-      "en": "Monday: 8:00-21:00\nTuesday: 8:00-21:00\nWednesday: 8:00-21:00\nThursday: 8:00-21:00\nFriday: 8:00-21:00\nSaturday: 8:00-21:00\nSunday: 8:00-21:00"
-    },
     "phone": "+1-562-928-1400",
     "facebook": "https://www.facebook.com/mariasflowershopofficial",
     "osm_id": "node:13465212000"
@@ -282371,9 +282161,6 @@
     "verified_at": "2026-01-21",
     "address": "508 West Lookout Drive Richardson 75080",
     "opening_hours": "Mo-Fr 10:00-18:00; Sa 10:00-16:00",
-    "localized_opening_hours": {
-      "en": "Monday: 10:00-18:00  \nTuesday: 10:00-18:00  \nWednesday: 10:00-18:00  \nThursday: 10:00-18:00  \nFriday: 10:00-18:00  \nSaturday: 10:00-16:00"
-    },
     "website": "https://canyoncreekpostal.com",
     "phone": "+1-972-669-4055",
     "email": "canyonc.postal@gmail.com",
@@ -287511,9 +287298,6 @@
     "verified_at": "2026-01-30",
     "address": "Grogan Road",
     "opening_hours": "Mo-Su 09:00-21:00",
-    "localized_opening_hours": {
-      "en": "Monday: 9:00-21:00\nTuesday: 9:00-21:00\nWednesday: 9:00-21:00\nThursday: 9:00-21:00\nFriday: 9:00-21:00\nSaturday: 9:00-21:00\nSunday: 9:00-21:00"
-    },
     "phone": "01104060550",
     "osm_id": "node:13511510236"
   },
@@ -289075,9 +288859,6 @@
     "updated_at": "2026-03-13T05:57:47.375Z",
     "verified_at": "2026-02-01",
     "opening_hours": "24/7",
-    "localized_opening_hours": {
-      "en": "Monday: 0:00-24:00\nTuesday: 0:00-24:00\nWednesday: 0:00-24:00\nThursday: 0:00-24:00\nFriday: 0:00-24:00\nSaturday: 0:00-24:00\nSunday: 0:00-24:00"
-    },
     "website": "https://localcoinatm.com/pl-pl/bitcoin-atm/mazowieckie/warszawa/PY5BXR/",
     "osm_id": "node:11435375756"
   },
@@ -300103,9 +299884,6 @@
     "verified_at": "2026-02-20",
     "address": "3054 East Lake Lansing Road East Lansing 48823",
     "opening_hours": "Mo-Tu 07:00-19:00; Fr-Su 07:00-13:00",
-    "localized_opening_hours": {
-      "en": "Monday: 7:00-19:00  \nTuesday: 7:00-19:00  \nFriday: 7:00-13:00  \nSaturday: 7:00-13:00  \nSunday: 7:00-13:00"
-    },
     "website": "https://www.groovydonuts.com",
     "phone": "+1-517-580-7302",
     "email": "thegroovydonutshop@gmail.com",
@@ -300479,9 +300257,6 @@
     "verified_at": "2024-12-19",
     "address": "59 Krochmalna",
     "opening_hours": "Mo-Fr 09:00-20:00; Sa 12:00-19:00",
-    "localized_opening_hours": {
-      "en": "Monday: 9:00-20:00\nTuesday: 9:00-20:00\nWednesday: 9:00-20:00\nThursday: 9:00-20:00\nFriday: 9:00-20:00\nSaturday: 12:00-19:00\nSunday: closed"
-    },
     "phone": "+48 798 142 210",
     "osm_id": "node:8981030457"
   },
@@ -306883,9 +306658,6 @@
     "verified_at": "2026-03-04",
     "address": "19 千代田区 102-0092",
     "opening_hours": "Tu 11:30-14:30",
-    "localized_opening_hours": {
-      "en": "Tuesday: 11:30-14:30"
-    },
     "website": "https://kitchencars-japan.com/k/around",
     "instagram": "https://www.instagram.com/around_official__/",
     "osm_id": "node:13617498534"
@@ -309344,9 +309116,6 @@
     "verified_at": "2026-03-09",
     "address": "6515 Clinton Highway Knoxville 37912-1121",
     "opening_hours": "Mo-Fr 11:00-21:00; Sa 12:00-22:00",
-    "localized_opening_hours": {
-      "en": "Monday: 11:00-21:00\nTuesday: 11:00-21:00\nWednesday: 11:00-21:00\nThursday: 11:00-21:00\nFriday: 11:00-21:00\nSaturday: 12:00-22:00"
-    },
     "website": "https://streetshawarma.square.site",
     "phone": "+1-865-256-5452",
     "email": "contact@streetshawarmas.com",

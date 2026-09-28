@@ -29,7 +29,6 @@ class BundledPlacesTest {
         verifiedAt = null,
         address = null,
         openingHours = null,
-        localizedOpeningHours = null,
         phone = null,
         website = null,
         email = null,
@@ -99,7 +98,6 @@ class BundledPlacesTest {
               "verified_at": "2026-01-15",
               "address": "1 Main St",
               "opening_hours": "Mo-Fr 08:00-18:00",
-              "localized_opening_hours": {"en": "Mo-Fr 08:00-18:00"},
               "phone": "+1234567890",
               "website": "https://example.com",
               "email": "a@example.com",
@@ -124,10 +122,6 @@ class BundledPlacesTest {
         )
         Assert.assertEquals("1 Main St", place.address)
         Assert.assertEquals("Mo-Fr 08:00-18:00", place.openingHours)
-        Assert.assertEquals(
-            JsonParser.parseString("""{"en":"Mo-Fr 08:00-18:00"}"""),
-            place.localizedOpeningHours,
-        )
         Assert.assertEquals("+1234567890", place.phone)
         Assert.assertEquals("https://example.com/", place.website.toString())
         Assert.assertEquals("a@example.com", place.email)
@@ -155,7 +149,6 @@ class BundledPlacesTest {
               "verified_at": null,
               "address": null,
               "opening_hours": null,
-              "localized_opening_hours": null,
               "phone": null,
               "website": null,
               "email": null,

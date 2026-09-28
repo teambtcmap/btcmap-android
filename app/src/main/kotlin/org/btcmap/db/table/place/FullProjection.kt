@@ -24,7 +24,6 @@ data class FullProjection(
     val verifiedAt: ZonedDateTime?,
     val address: String?,
     val openingHours: String?,
-    val localizedOpeningHours: JsonObject?,
     val phone: String?,
     val website: HttpUrl?,
     val email: String?,
@@ -40,7 +39,7 @@ data class FullProjection(
     val deletedAt: ZonedDateTime? = null,
 ) {
     companion object {
-        const val COLUMNS = "$ID, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $LOCALIZED_OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM, $OSM_ID, $DELETED_AT"
+        const val COLUMNS = "$ID, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM, $OSM_ID, $DELETED_AT"
 
         fun fromStatement(stmt: SQLiteStatement): FullProjection {
             return FullProjection(
@@ -54,20 +53,19 @@ data class FullProjection(
                 verifiedAt = stmt.getZonedDateTimeOrNull(7),
                 address = stmt.getTextOrNull(8),
                 openingHours = stmt.getTextOrNull(9),
-                localizedOpeningHours = stmt.getJsonObjectOrNull(10),
-                phone = stmt.getTextOrNull(11),
-                website = stmt.getHttpUrlOrNull(12),
-                email = stmt.getTextOrNull(13),
-                twitter = stmt.getHttpUrlOrNull(14),
-                facebook = stmt.getHttpUrlOrNull(15),
-                instagram = stmt.getHttpUrlOrNull(16),
-                line = stmt.getHttpUrlOrNull(17),
-                requiredAppUrl = stmt.getHttpUrlOrNull(18),
-                boostedUntil = stmt.getZonedDateTimeOrNull(19),
-                comments = stmt.getLongOrNull(20),
-                telegram = stmt.getHttpUrlOrNull(21),
-                osmId = stmt.getTextOrNull(22),
-                deletedAt = stmt.getZonedDateTimeOrNull(23),
+                phone = stmt.getTextOrNull(10),
+                website = stmt.getHttpUrlOrNull(11),
+                email = stmt.getTextOrNull(12),
+                twitter = stmt.getHttpUrlOrNull(13),
+                facebook = stmt.getHttpUrlOrNull(14),
+                instagram = stmt.getHttpUrlOrNull(15),
+                line = stmt.getHttpUrlOrNull(16),
+                requiredAppUrl = stmt.getHttpUrlOrNull(17),
+                boostedUntil = stmt.getZonedDateTimeOrNull(18),
+                comments = stmt.getLongOrNull(19),
+                telegram = stmt.getHttpUrlOrNull(20),
+                osmId = stmt.getTextOrNull(21),
+                deletedAt = stmt.getZonedDateTimeOrNull(22),
             )
         }
     }

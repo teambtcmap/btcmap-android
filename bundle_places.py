@@ -46,7 +46,6 @@ FIELDS = (
     "verified_at",
     "address",
     "opening_hours",
-    "localized_opening_hours",
     "website",
     "phone",
     "email",
@@ -85,7 +84,7 @@ OPTIONAL_STRING_FIELDS = (
     "osm_id",
 )
 
-OPTIONAL_OBJECT_FIELDS = ("localized_name", "localized_opening_hours")
+OPTIONAL_OBJECT_FIELDS = ("localized_name",)
 
 
 def user_agent() -> str:

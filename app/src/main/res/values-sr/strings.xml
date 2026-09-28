@@ -68,14 +68,6 @@
     <string name="use_adaptive_colors">Користи адаптивне боје</string>
     <string name="reset">Ресетуј</string>
     <string name="area_icon">Иконица области</string>
-    <string name="monday">Понедељак</string>
-    <string name="tuesday">Уторак</string>
-    <string name="wednesday">Среда</string>
-    <string name="thursday">Четвртак</string>
-    <string name="friday">Петак</string>
-    <string name="saturday">Субота</string>
-    <string name="sunday">Недеља</string>
-    <string name="closed"> затворено</string>
     <string name="save">Сачувај</string>
     <string name="account">BTC Map налог</string>
     <string name="not_logged_in">Налог</string>

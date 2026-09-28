@@ -39,7 +39,6 @@ class PlaceApiTest : ApiTestBase() {
         Assert.assertEquals("2026-01-15", place.verifiedAt)
         Assert.assertEquals("1 Main St", place.address)
         Assert.assertEquals("Mo-Fr 09:00-17:00", place.openingHours)
-        Assert.assertEquals("Mo-Fr", place.localizedOpeningHours!!.get("de").asString)
         Assert.assertEquals("https://cafe.example", place.website)
         Assert.assertEquals("+123", place.phone)
         Assert.assertEquals("a@b.c", place.email)
@@ -71,7 +70,6 @@ class PlaceApiTest : ApiTestBase() {
                     "verified_at": null,
                     "address": "  ",
                     "opening_hours": null,
-                    "localized_opening_hours": null,
                     "website": null,
                     "phone": null,
                     "email": null,
@@ -99,7 +97,6 @@ class PlaceApiTest : ApiTestBase() {
         Assert.assertNull(place.verifiedAt)
         Assert.assertNull(place.address)
         Assert.assertNull(place.openingHours)
-        Assert.assertNull(place.localizedOpeningHours)
         Assert.assertNull(place.website)
         Assert.assertNull(place.phone)
         Assert.assertNull(place.email)
@@ -131,7 +128,6 @@ class PlaceApiTest : ApiTestBase() {
                     "verified_at": null,
                     "address": null,
                     "opening_hours": null,
-                    "localized_opening_hours": null,
                     "website": null,
                     "phone": null,
                     "email": null,
@@ -231,7 +227,6 @@ class PlaceApiTest : ApiTestBase() {
                     "verified_at": "2026-01-15",
                     "address": "1 Main St",
                     "opening_hours": "Mo-Fr 09:00-17:00",
-                    "localized_opening_hours": {"de": "Mo-Fr"},
                     "website": "https://cafe.example",
                     "phone": "+123",
                     "email": "a@b.c",

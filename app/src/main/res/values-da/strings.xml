@@ -68,14 +68,6 @@
     <string name="use_adaptive_colors">Brug adaptive farver</string>
     <string name="reset">Nulstil</string>
     <string name="area_icon">Områdeikon</string>
-    <string name="monday">Mandag</string>
-    <string name="tuesday">Tirsdag</string>
-    <string name="wednesday">Onsdag</string>
-    <string name="thursday">Torsdag</string>
-    <string name="friday">Fredag</string>
-    <string name="saturday">Lørdag</string>
-    <string name="sunday">Søndag</string>
-    <string name="closed">Lukket</string>
     <string name="save">Gem</string>
     <string name="account">BTC Map-konto</string>
     <string name="not_logged_in">Konto</string>

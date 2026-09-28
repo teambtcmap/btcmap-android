@@ -22,8 +22,8 @@ class PlaceQueries(private val conn: SQLiteConnection) {
     fun insert(rows: List<Place>) {
         conn.prepare(
             """
-            INSERT OR REPLACE INTO $TABLE ($ID, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $LOCALIZED_OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM, $OSM_ID, $DELETED_AT)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24);
+            INSERT OR REPLACE INTO $TABLE ($ID, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM, $OSM_ID, $DELETED_AT)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23);
             """
         ).use { stmt ->
             rows.forEach { row ->
@@ -37,20 +37,19 @@ class PlaceQueries(private val conn: SQLiteConnection) {
                 stmt.bindZonedDateTimeOrNull(8, row.verifiedAt)
                 stmt.bindTextOrNull(9, row.address)
                 stmt.bindTextOrNull(10, row.openingHours)
-                stmt.bindJsonObjectOrNull(11, row.localizedOpeningHours)
-                stmt.bindTextOrNull(12, row.phone)
-                stmt.bindHttpUrlOrNull(13, row.website)
-                stmt.bindTextOrNull(14, row.email)
-                stmt.bindHttpUrlOrNull(15, row.twitter)
-                stmt.bindHttpUrlOrNull(16, row.facebook)
-                stmt.bindHttpUrlOrNull(17, row.instagram)
-                stmt.bindHttpUrlOrNull(18, row.line)
-                stmt.bindHttpUrlOrNull(19, row.requiredAppUrl)
-                stmt.bindZonedDateTimeOrNull(20, row.boostedUntil)
-                stmt.bindLongOrNull(21, row.comments)
-                stmt.bindHttpUrlOrNull(22, row.telegram)
-                stmt.bindTextOrNull(23, row.osmId)
-                stmt.bindZonedDateTimeOrNull(24, row.deletedAt)
+                stmt.bindTextOrNull(11, row.phone)
+                stmt.bindHttpUrlOrNull(12, row.website)
+                stmt.bindTextOrNull(13, row.email)
+                stmt.bindHttpUrlOrNull(14, row.twitter)
+                stmt.bindHttpUrlOrNull(15, row.facebook)
+                stmt.bindHttpUrlOrNull(16, row.instagram)
+                stmt.bindHttpUrlOrNull(17, row.line)
+                stmt.bindHttpUrlOrNull(18, row.requiredAppUrl)
+                stmt.bindZonedDateTimeOrNull(19, row.boostedUntil)
+                stmt.bindLongOrNull(20, row.comments)
+                stmt.bindHttpUrlOrNull(21, row.telegram)
+                stmt.bindTextOrNull(22, row.osmId)
+                stmt.bindZonedDateTimeOrNull(23, row.deletedAt)
                 stmt.step()
                 stmt.reset()
             }

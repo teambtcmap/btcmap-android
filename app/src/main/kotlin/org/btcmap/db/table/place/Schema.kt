@@ -12,7 +12,6 @@ const val LOCALIZED_NAME = "localized_name"
 const val VERIFIED_AT = "verified_at"
 const val ADDRESS = "address"
 const val OPENING_HOURS = "opening_hours"
-const val LOCALIZED_OPENING_HOURS = "localized_opening_hours"
 const val PHONE = "phone"
 const val WEBSITE = "website"
 const val EMAIL = "email"
@@ -39,7 +38,6 @@ const val CREATE = """
         $VERIFIED_AT TEXT,
         $ADDRESS TEXT,
         $OPENING_HOURS TEXT,
-        $LOCALIZED_OPENING_HOURS TEXT,
         $PHONE TEXT,
         $WEBSITE TEXT,
         $EMAIL TEXT,
