@@ -22,6 +22,7 @@ import org.maplibre.geojson.Point
 class MapSelectionController(
     private val map: MapLibreMap,
     private val db: Database,
+    private val markerImageRegistry: MarkerImageRegistry,
     private val onOpenPlace: suspend (Place) -> Unit,
     private val onOpenEvent: (Event) -> Unit,
     private val onNoHit: () -> Unit,
@@ -109,7 +110,7 @@ class MapSelectionController(
             outdated = feature.getBooleanProperty("outdated") == true,
             comments = feature.getNumberProperty("comments")?.toLong() ?: 0,
         )
-        val mask = merchantMarkerMask(name) ?: return true
+        val mask = markerImageRegistry.merchantMask(name) ?: return true
         val geometry = feature.geometry() as? Point ?: return true
         val anchor = map.projection.toScreenLocation(
             LatLng(geometry.latitude(), geometry.longitude())

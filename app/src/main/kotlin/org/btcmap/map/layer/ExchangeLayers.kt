@@ -1,6 +1,7 @@
 package org.btcmap.map.layer
 
 import android.graphics.Color
+import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.EXCHANGE_MARKER_ICON_PREFIX
 import org.btcmap.map.ICON_OFFSET_Y
 import org.maplibre.android.style.expressions.Expression
@@ -22,7 +23,7 @@ fun createExchangeLayers(
 ): Pair<GeoJsonSource, List<Layer>> {
     val source = GeoJsonSource(
         id = "exchange",
-        geoJson = """{"type":"FeatureCollection","features":[]}""",
+        geoJson = EMPTY_GEOJSON,
         options = GeoJsonOptions().withCluster(true).withClusterMaxZoom(14).withClusterRadius(50),
     )
 

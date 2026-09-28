@@ -18,6 +18,14 @@ import org.btcmap.R
 import org.btcmap.view.IconButton
 import org.btcmap.util.rethrowIfCancellation
 
+/**
+ * Shows an update button when the published APK is newer than this build.
+ *
+ * The check and the button's tap are independent of the map, but the button
+ * lives on the map, so the controller is rebuilt with every map view. It must
+ * therefore not own anything expensive: the HTTP client is shared for the whole
+ * process instead of being created (and leaked) per instance.
+ */
 class UpdateNotificationController(
     private val context: Context,
     private val lifecycleOwner: LifecycleOwner,
@@ -29,7 +37,7 @@ class UpdateNotificationController(
             lifecycleOwner.withResumed {
                 launch {
                     try {
-                        val latestVerJson = OkHttpClient.Builder().build().newCall(
+                        val latestVerJson = sharedHttpClient.newCall(
                             Request.Builder()
                                 .url(manifestUrl().toHttpUrl())
                                 .build()
@@ -41,42 +49,42 @@ class UpdateNotificationController(
                         val latestVerName = latestVer.get("name").asString
                         val latestVerUrl = latestVer.get("url").asString
 
-                        if (!BuildConfig.DEBUG &&
-                            latestVerCode > BuildConfig.VERSION_CODE
+                        if (isUpdateAvailable(
+                                currentVersionCode = BuildConfig.VERSION_CODE,
+                                latestVersionCode = latestVerCode,
+                                isDebugBuild = BuildConfig.DEBUG,
+                            )
                         ) {
-                            lifecycleOwner.withResumed {
-                                icon.isVisible = true
-                                icon.iconColor(context.getErrorColor())
+                            icon.isVisible = true
+                            icon.iconColor(context.getErrorColor())
 
-                                icon.setOnClickListener {
-                                    MaterialAlertDialogBuilder(context)
-                                        .setTitle(R.string.update_available)
-                                        .setMessage(
-                                            if (isBeta) {
-                                                context.getString(
-                                                    R.string.update_available_description_beta,
-                                                    BuildConfig.VERSION_CODE, latestVerCode
-                                                )
-                                            } else {
-                                                context.getString(
-                                                    R.string.update_available_description,
-                                                    BuildConfig.VERSION_NAME, latestVerName
-                                                )
-                                            }
-                                        )
-                                        .setPositiveButton(R.string.get_apk) { _, _ ->
-                                            val intent = Intent(Intent.ACTION_VIEW)
-                                            intent.data = latestVerUrl.toUri()
-                                            context.startActivity(intent)
+                            icon.setOnClickListener {
+                                MaterialAlertDialogBuilder(context)
+                                    .setTitle(R.string.update_available)
+                                    .setMessage(
+                                        if (isBeta) {
+                                            context.getString(
+                                                R.string.update_available_description_beta,
+                                                BuildConfig.VERSION_CODE, latestVerCode
+                                            )
+                                        } else {
+                                            context.getString(
+                                                R.string.update_available_description,
+                                                BuildConfig.VERSION_NAME, latestVerName
+                                            )
                                         }
-                                        .setNegativeButton(R.string.ignore, null)
-                                        .show()
-                                }
+                                    )
+                                    .setPositiveButton(R.string.get_apk) { _, _ ->
+                                        val intent = Intent(Intent.ACTION_VIEW)
+                                        intent.data = latestVerUrl.toUri()
+                                        context.startActivity(intent)
+                                    }
+                                    .setNegativeButton(R.string.ignore, null)
+                                    .show()
                             }
                         }
                     } catch (e: Throwable) {
                         e.rethrowIfCancellation()
-
                     }
                 }
             }
@@ -88,9 +96,27 @@ class UpdateNotificationController(
 
     private fun manifestUrl(): String {
         return if (isBeta) {
-            "https://static.btcmap.org/android/latest-app-beta-ver.json"
+            BETA_MANIFEST_URL
         } else {
-            "https://static.btcmap.org/android/latest-app-ver.json"
+            RELEASE_MANIFEST_URL
         }
     }
+
+    private companion object {
+        val sharedHttpClient: OkHttpClient by lazy { OkHttpClient() }
+
+        const val RELEASE_MANIFEST_URL = "https://static.btcmap.org/android/latest-app-ver.json"
+        const val BETA_MANIFEST_URL = "https://static.btcmap.org/android/latest-app-beta-ver.json"
+    }
 }
+
+/**
+ * Whether the published APK is newer than this build. Debug builds are installed
+ * locally and must not be nagged about the published APK, even when their
+ * version code is lower.
+ */
+internal fun isUpdateAvailable(
+    currentVersionCode: Int,
+    latestVersionCode: Int,
+    isDebugBuild: Boolean,
+): Boolean = !isDebugBuild && latestVersionCode > currentVersionCode

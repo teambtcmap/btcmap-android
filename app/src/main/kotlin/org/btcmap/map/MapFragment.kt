@@ -26,7 +26,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -75,18 +74,16 @@ import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
-import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.style.sources.GeoJsonSource
 
 class MapFragment : Fragment() {
     private var _binding: MapFragmentBinding? = null
     private val binding get() = _binding!!
 
-    var statusBarController: MapStatusBarController? = null
-    var bottomSheetController: BottomSheetController? = null
-    var updateNotificationController: UpdateNotificationController? = null
+    private var statusBarController: MapStatusBarController? = null
+    private var bottomSheetController: BottomSheetController? = null
+    private var updateNotificationController: UpdateNotificationController? = null
 
-    private var currentCache: Any? = null
+    private var currentCache: ViewportCache<*>? = null
     private var mapSelectionController: MapSelectionController? = null
     private var mapSetupController: MapSetupController? = null
     private var locationController: LocationController? = null
@@ -194,10 +191,11 @@ class MapFragment : Fragment() {
         binding.showEvents.setOnClickListener { setFilter(Filter.EVENTS) }
         binding.showExchanges.setOnClickListener { setFilter(Filter.EXCHANGES) }
 
-        binding.map.getMapAsync {
-            it.addOnCameraIdleListener {
+        binding.map.getMapAsync { map ->
+            if (_binding == null) return@getMapAsync
+            map.addOnCameraIdleListener {
                 if (_binding == null) return@addOnCameraIdleListener
-                val bounds = it.projection.visibleRegion.latLngBounds
+                val bounds = map.projection.visibleRegion.latLngBounds
                 // The default camera is not a position the user chose: saving it
                 // would replace the stored viewport with the world view and the
                 // next open would zoom all the way out.
@@ -205,9 +203,14 @@ class MapFragment : Fragment() {
                 mapAreasController.load(bounds.center.latitude, bounds.center.longitude)
             }
 
+            // The setup controller owns the per-map marker image registry, so
+            // hit-testing rejects taps through a marker's transparent pixels
+            // using the same images the renderer was given.
+            val setup = mapSetupController ?: return@getMapAsync
             mapSelectionController = MapSelectionController(
-                map = it,
+                map = map,
                 db = db(),
+                markerImageRegistry = setup.markerImageRegistry,
                 onOpenPlace = ::selectPlace,
                 onOpenEvent = { openEvent(it.toBundle()) },
                 onNoHit = { bottomSheetController?.hide() },
@@ -406,19 +409,20 @@ class MapFragment : Fragment() {
     }
 
     private fun openPlace(row: SearchAdapterItem.Place) {
-        val place = db().place.selectById(row.placeId) ?: return
-
-        if (place.isMerchant()) {
-            binding.showMerchants.performClick()
-        } else {
-            binding.showExchanges.performClick()
-        }
-
         viewLifecycleOwner.lifecycleScope.launch {
-            selectPlace(place)
-        }
+            val place = withContext(Dispatchers.IO) {
+                db().place.selectById(row.placeId)
+            } ?: return@launch
 
-        moveTo(place.lat, place.lon)
+            if (place.isMerchant()) {
+                binding.showMerchants.performClick()
+            } else {
+                binding.showExchanges.performClick()
+            }
+
+            selectPlace(place)
+            moveTo(place.lat, place.lon)
+        }
     }
 
     fun openPlaceById(placeId: Long) {
@@ -526,7 +530,7 @@ class MapFragment : Fragment() {
         super.onDestroyView()
         searchDebounceJob?.cancel()
         searchDebounceJob = null
-        searchController.clear()
+        searchController.dispose()
         mapAreasController.dispose()
         mapSelectionController?.detach()
         mapSelectionController = null
@@ -579,7 +583,7 @@ class MapFragment : Fragment() {
         binding.showExchanges.isSelected = filter == Filter.EXCHANGES
 
         if (filter == this.filter && currentCache != null) {
-            (currentCache as? ViewportCache<*>)?.refresh()
+            currentCache?.refresh()
             return
         }
 
@@ -592,11 +596,28 @@ class MapFragment : Fragment() {
         setup.eventsSource.setGeoJson(EMPTY_GEOJSON)
         setup.exchangesSource.setGeoJson(EMPTY_GEOJSON)
 
+        val selected = filter
         binding.map.getMapAsync { map ->
+            if (_binding == null) return@getMapAsync
+            // A newer switch may have run while this callback waited for the
+            // map; the last one wins, so drop the stale request.
+            if (selected != filter) return@getMapAsync
             when (filter) {
-                Filter.MERCHANTS -> showCache(map, setup.merchantsSource) { MerchantsCache(map, db()) }
-                Filter.EVENTS -> showCache(map, setup.eventsSource) { EventsCache(map, db()) }
-                Filter.EXCHANGES -> showCache(map, setup.exchangesSource) { ExchangesCache(map, db()) }
+                Filter.MERCHANTS -> showCache {
+                    MerchantsCache(map, db(), setup.merchantsSource) {
+                        mapSetupController?.ensureMerchantMarkers(it)
+                    }
+                }
+
+                Filter.EVENTS -> showCache {
+                    EventsCache(map, db(), setup.eventsSource)
+                }
+
+                Filter.EXCHANGES -> showCache {
+                    ExchangesCache(map, db(), setup.exchangesSource) {
+                        mapSetupController?.ensureExchangeMarkers(it)
+                    }
+                }
             }
         }
     }
@@ -612,37 +633,28 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun showCache(map: MapLibreMap, source: GeoJsonSource, factory: () -> ViewportCache<*>) {
+    private fun showCache(factory: () -> ViewportCache<*>) {
         val cache = factory()
+        // A race between two getMapAsync callbacks can reach here twice; drop
+        // whatever the previous call left behind before adopting the new one.
+        destroyCurrentCache()
         currentCache = cache
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            cache.geoJson.collectLatest { geoJson ->
-                if (cache is MerchantsCache) {
-                    mapSetupController?.ensureMerchantMarkers(cache.lastMarkers)
-                }
-                if (cache is ExchangesCache) {
-                    mapSetupController?.ensureExchangeMarkers(cache.lastMarkers)
-                }
-                source.setGeoJson(geoJson)
-            }
-            }
-        }
     }
 
     private fun destroyCurrentCache() {
-        (currentCache as? MerchantsCache)?.destroy()
-        (currentCache as? ExchangesCache)?.destroy()
-        (currentCache as? EventsCache)?.destroy()
+        // destroy() cancels the cache's own source collector with it, so no
+        // collector outlives the cache or accumulates on every filter switch.
+        currentCache?.destroy()
         currentCache = null
     }
 
     private fun rebuildCurrentCache() {
-        if (currentCache == null) {
+        val cache = currentCache
+        if (cache == null) {
             setFilter(filter)
             return
         }
-        (currentCache as? ViewportCache<*>)?.forceRebuild()
+        cache.forceRebuild()
     }
 
     private lateinit var areasAdapter: AreasAdapter

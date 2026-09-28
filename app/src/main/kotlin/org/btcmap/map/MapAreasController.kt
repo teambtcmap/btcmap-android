@@ -39,8 +39,14 @@ class MapAreasController(
 
     // Parsed geometry is expensive to rebuild (a country's polygon can be
     // large) and only changes when the area is resynced, so it is kept by area
-    // id and invalidated on updated_at.
-    private val geometryCache = mutableMapOf<Long, CachedGeometry>()
+    // id and invalidated on updated_at. It is an access-ordered LRU capped at
+    // [MAX_CACHED_GEOMETRIES] so a long session, or areas deleted server-side,
+    // cannot grow it without limit.
+    private val geometryCache = object : LinkedHashMap<Long, CachedGeometry>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Long, CachedGeometry>?): Boolean {
+            return size > MAX_CACHED_GEOMETRIES
+        }
+    }
 
     private val _areas = MutableStateFlow<List<MapArea>>(emptyList())
     val areas: StateFlow<List<MapArea>> = _areas.asStateFlow()
@@ -62,7 +68,7 @@ class MapAreasController(
         if (hasLastLocation) load(lastLat, lastLon)
     }
 
-    fun clear() {
+    private fun clear() {
         currentJob?.cancel("map view destroyed")
         currentJob = null
         hasLastLocation = false
@@ -106,15 +112,24 @@ class MapAreasController(
     }
 
     private fun geometryFor(area: Area): AreaGeometry {
-        val cached = geometryCache[area.id]
-        if (cached != null && cached.updatedAt == area.updatedAt) {
-            return cached.geometry
+        // Synchronized: a superseded lookup keeps running after cancel (the
+        // nullary work does not suspend), so two lookups can touch the cache at
+        // once. Holding the lock while parsing also avoids parsing twice.
+        return synchronized(geometryCache) {
+            val cached = geometryCache[area.id]
+            if (cached != null && cached.updatedAt == area.updatedAt) {
+                cached.geometry
+            } else {
+                area.geoJsonGeometry().also {
+                    geometryCache[area.id] = CachedGeometry(area.updatedAt, it)
+                }
+            }
         }
-
-        val geometry = area.geoJsonGeometry()
-        geometryCache[area.id] = CachedGeometry(area.updatedAt, geometry)
-        return geometry
     }
+
+    /** The number of cached geometries; exposed so tests can assert the cap. */
+    internal val cachedGeometryCount: Int
+        get() = synchronized(geometryCache) { geometryCache.size }
 
     /**
      * Counts the upcoming events whose location falls inside each area,
@@ -152,5 +167,7 @@ class MapAreasController(
 
         // The whole-world area would contain every point; the server skips it.
         private const val EARTH_ALIAS = "earth"
+
+        internal const val MAX_CACHED_GEOMETRIES = 256
     }
 }

@@ -1,6 +1,7 @@
 package org.btcmap.map.layer
 
 import android.graphics.Color
+import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.MAX_COMMENT_BADGE
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
@@ -18,7 +19,7 @@ fun createMerchantLayers(
 ): Pair<GeoJsonSource, List<Layer>> {
     val merchantsSource = GeoJsonSource(
         "merchant",
-        """{"type":"FeatureCollection","features":[]}""",
+        EMPTY_GEOJSON,
         GeoJsonOptions()
             .withCluster(true)
             .withClusterMaxZoom(14)

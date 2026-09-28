@@ -1,6 +1,7 @@
 package org.btcmap.map.layer
 
 import android.graphics.Color
+import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.EVENT_MARKER_ICON_NAME
 import org.btcmap.map.ICON_OFFSET_Y
 import org.maplibre.android.style.expressions.Expression
@@ -20,7 +21,7 @@ fun createEventLayers(
 ): Pair<GeoJsonSource, List<Layer>> {
     val source = GeoJsonSource(
         id = "event",
-        geoJson = """{"type":"FeatureCollection","features":[]}""",
+        geoJson = EMPTY_GEOJSON,
         options = GeoJsonOptions().withCluster(true).withClusterMaxZoom(14).withClusterRadius(30),
     )
 

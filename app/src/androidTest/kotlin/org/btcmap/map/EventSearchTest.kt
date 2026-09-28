@@ -37,6 +37,29 @@ class EventSearchTest : AppTestCase() {
     private val reference = LatLng(48.8566, 2.3522)
 
     @Test
+    fun searchAfterDispose_doesNothing() {
+        databaseRule.db.event.insert(
+            listOf(
+                event(
+                    id = 1L,
+                    name = "Bitcoin Meetup Paris",
+                    lat = 48.8570,
+                    lon = 2.3530,
+                )
+            )
+        )
+        val controller = searchController()
+        controller.dispose()
+
+        controller.search(reference, "bitcoin")
+
+        // The controller's scope is cancelled, so the query never runs. The map
+        // relies on this when it disposes the controller with its view.
+        Thread.sleep(300)
+        Assert.assertTrue(controller.results.value.isEmpty())
+    }
+
+    @Test
     fun offlineSearch_returnsMatchingEvent() {
         databaseRule.db.event.insert(
             listOf(

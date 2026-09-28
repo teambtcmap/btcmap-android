@@ -6,25 +6,44 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.style.sources.GeoJsonSource
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * Loads the features in the viewport from the local cache and keeps [source]
+ * up to date as the camera moves.
+ *
+ * The cache owns the source and the coroutine that feeds it, so its lifetime is
+ * exactly the cache's: [destroy] cancels both together. A caller that swaps the
+ * cache (for example on a filter change) therefore cannot leave a collector
+ * behind.
+ */
 abstract class ViewportCache<T : Any>(
     private val map: MapLibreMap,
+    private val source: GeoJsonSource,
 ) : MapLibreMap.OnCameraIdleListener {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val pendingQuery = AtomicReference<Job?>(null)
-    private val lock = Any()
-    private val seenIds: MutableSet<Long> = mutableSetOf()
-    private val items: MutableSet<T> = mutableSetOf()
-    val geoJson: MutableStateFlow<String>
+    private val store = FeatureStore<T>({ idOf(it) })
+    private val snapshots = MutableStateFlow<Set<T>>(emptySet())
 
     init {
-        geoJson = MutableStateFlow(emptySet<T>().toGeoJson())
         map.addOnCameraIdleListener(this)
+
+        scope.launch {
+            snapshots.collectLatest { snapshot ->
+                // Serialising a large viewport is not main-thread work.
+                val geoJson = withContext(Dispatchers.Default) { snapshot.toGeoJson() }
+                onSnapshot(snapshot)
+                source.setGeoJson(geoJson)
+            }
+        }
+
         loadInBounds(map.projection.visibleRegion.latLngBounds.expand())
     }
 
@@ -39,21 +58,9 @@ abstract class ViewportCache<T : Any>(
                     fetch(expandedBounds)
                 }
 
-                val next = withContext(Dispatchers.Default) {
-                    val snapshot = synchronized(lock) {
-                        val newOnes = fetched.filter { idOf(it) !in seenIds }
-                        if (newOnes.isEmpty()) return@synchronized null
-
-                        seenIds.addAll(newOnes.map { idOf(it) })
-                        items.addAll(newOnes)
-                        items.toSet()
-                    } ?: return@withContext null
-
-                    snapshot.toGeoJson()
-                } ?: return@launch
-
-                if (next == geoJson.value) return@launch
-                geoJson.value = next
+                val snapshot = store.merge(fetched) ?: return@launch
+                if (snapshot == snapshots.value) return@launch
+                snapshots.value = snapshot
             }
         )?.cancel()
     }
@@ -64,17 +71,25 @@ abstract class ViewportCache<T : Any>(
 
     protected abstract fun Set<T>.toGeoJson(): String
 
+    /**
+     * Called on the main thread with each snapshot just before it is drawn, so
+     * a subclass can prepare anything the GeoJSON references (such as marker
+     * images).
+     */
+    protected open suspend fun onSnapshot(snapshot: Set<T>) = Unit
+
     fun refresh() {
         loadInBounds(map.projection.visibleRegion.latLngBounds.expand())
     }
 
     fun forceRebuild() {
-        synchronized(lock) {
-            seenIds.clear()
-            items.clear()
-        }
+        store.clear()
         loadInBounds(map.projection.visibleRegion.latLngBounds.expand())
     }
+
+    /** The number of retained features; exposed so tests can assert the cap. */
+    internal val cachedCount: Int
+        get() = store.size
 
     fun destroy() {
         map.removeOnCameraIdleListener(this)

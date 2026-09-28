@@ -23,6 +23,12 @@ class MapSetupController(
 ) {
     private var style: Style? = null
 
+    /**
+     * Kept per controller (and so per map view), not process-wide, so a new map
+     * resetting its own marker images cannot invalidate another map's masks.
+     */
+    val markerImageRegistry = MarkerImageRegistry()
+
     private val merchants = createMerchantLayers(
         markerBackgroundColor = markerBackgroundColor,
         usingOpenFreeMap = usingOpenFreeMap,
@@ -45,7 +51,7 @@ class MapSetupController(
     val exchangesSource: GeoJsonSource = exchanges.first
 
     fun install() {
-        clearMarkerImages()
+        markerImageRegistry.clear()
         mapView.getMapAsync { map ->
             map.setStyle(Style.Builder().fromUri(styleUri))
             map.uiSettings.setCompassMargins(0, dpToPx(120 + 16), dpToPx(16), 0)
@@ -95,6 +101,7 @@ class MapSetupController(
             boostedMarkerBackgroundColor = boostedMarkerBackgroundColor,
             markerBadgeBackgroundColor = markerBadgeBackgroundColor,
             markerBadgeTextColor = markerBadgeTextColor,
+            registry = markerImageRegistry,
         )
     }
 
@@ -104,6 +111,7 @@ class MapSetupController(
             context = mapView.context,
             style = style,
             markers = markers,
+            registry = markerImageRegistry,
         )
     }
 

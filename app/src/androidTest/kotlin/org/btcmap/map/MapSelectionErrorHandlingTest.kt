@@ -44,13 +44,11 @@ class MapSelectionErrorHandlingTest : AppTestCase() {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
                 lateinit var mapView: MapView
                 var map: MapLibreMap? = null
-                var mapFinishedLoading = false
 
                 scenario.onActivity { activity ->
                     val mapFragment = activity.supportFragmentManager
                         .findFragmentById(R.id.fragmentContainerView) as MapFragment
                     mapView = mapFragment.requireView().findViewById(R.id.map)
-                    mapView.addOnDidFinishLoadingMapListener { mapFinishedLoading = true }
                     mapView.getMapAsync { m -> map = m }
                 }
 
@@ -64,11 +62,13 @@ class MapSelectionErrorHandlingTest : AppTestCase() {
                 }
 
                 waitUntilOnMain {
-                    if (!mapFinishedLoading) return@waitUntilOnMain false
                     val currentMap = map ?: return@waitUntilOnMain false
                     // queryRenderedFeatures crashes in native code until the
-                    // renderer has started, so wait for the map to load first.
+                    // renderer has started, so wait for the style to be fully
+                    // loaded; registering a did-finish-listener is racy because
+                    // an asset style can finish before the listener is added.
                     val style = currentMap.style ?: return@waitUntilOnMain false
+                    if (!style.isFullyLoaded) return@waitUntilOnMain false
                     if (style.getLayer(MERCHANT_MARKER_LAYER_ID) == null) {
                         return@waitUntilOnMain false
                     }
@@ -82,6 +82,7 @@ class MapSelectionErrorHandlingTest : AppTestCase() {
                 val controller = MapSelectionController(
                     map = map!!,
                     db = db,
+                    markerImageRegistry = MarkerImageRegistry(),
                     onOpenPlace = { },
                     onOpenEvent = { },
                     onNoHit = { },

@@ -2,31 +2,65 @@ package org.btcmap.map
 
 import org.maplibre.android.geometry.LatLngBounds
 
+/**
+ * Expands the viewport by [scaleFactor] so markers just off screen are
+ * preloaded. Longitude is handled the long way around when the viewport crosses
+ * the antimeridian, where MapLibre reports `east < west` and a negative
+ * longitude span; a plain centre/span would put the centre on the wrong side
+ * and could build an invalid bounds.
+ */
 fun LatLngBounds.expand(scaleFactor: Double = 2.0): LatLngBounds {
     val latSpan = latitudeSpan * scaleFactor
-    val lonSpan = longitudeSpan * scaleFactor
     val latNorth = (center.latitude + latSpan / 2).coerceAtMost(90.0)
     val latSouth = (center.latitude - latSpan / 2).coerceAtLeast(-90.0)
+
+    val wrapSpan = longitudeEast + 360.0 - longitudeWest
+    val spansAntimeridian = longitudeEast < longitudeWest
+    val lonSpan = (if (spansAntimeridian) wrapSpan else longitudeSpan) * scaleFactor
+    val lonCenter = if (spansAntimeridian) {
+        normalizeLongitude(longitudeWest + wrapSpan / 2)
+    } else {
+        center.longitude
+    }
+
+    if (lonSpan >= 360.0) {
+        return LatLngBounds.from(
+            latNorth = latNorth,
+            lonEast = 180.0,
+            latSouth = latSouth,
+            lonWest = -180.0,
+        )
+    }
+
     return LatLngBounds.from(
         latNorth = latNorth,
-        lonEast = center.longitude + lonSpan / 2,
+        lonEast = lonCenter + lonSpan / 2,
         latSouth = latSouth,
-        lonWest = center.longitude - lonSpan / 2,
+        lonWest = lonCenter - lonSpan / 2,
     )
 }
 
+/**
+ * Splits a bounds into the two longitude ranges that together cover it, when it
+ * crosses the antimeridian, so the two halves can be queried separately. A
+ * bounds that does not cross is returned as-is with a null second range.
+ *
+ * Either edge can be reported just outside [-180, 180] after [expand], so both
+ * are normalised before the crossing is detected.
+ */
 fun LatLngBounds.splitAtAntimeridian(): Pair<Pair<Double, Double>, Pair<Double, Double>?> {
-    var west = longitudeWest
-    var east = longitudeEast
-    if (west > 180.0) {
-        west -= 360.0
-    }
-    if (east > 180.0) {
-        east -= 360.0
-    }
+    val west = normalizeLongitude(longitudeWest)
+    val east = normalizeLongitude(longitudeEast)
     return if (west <= east) {
         Pair(west to east, null)
     } else {
         Pair(-180.0 to east, west to 180.0)
     }
+}
+
+private fun normalizeLongitude(longitude: Double): Double {
+    var normalized = longitude
+    while (normalized > 180.0) normalized -= 360.0
+    while (normalized < -180.0) normalized += 360.0
+    return normalized
 }

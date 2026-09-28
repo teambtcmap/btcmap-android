@@ -4,14 +4,14 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.place.Marker
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.style.sources.GeoJsonSource
 
 class ExchangesCache(
     map: MapLibreMap,
     private val db: Database,
-) : ViewportCache<Marker>(map) {
-    @Volatile
-    var lastMarkers: Set<Marker> = emptySet()
-        private set
+    source: GeoJsonSource,
+    private val onMarkers: suspend (Set<Marker>) -> Unit,
+) : ViewportCache<Marker>(map, source) {
 
     override suspend fun fetch(bounds: LatLngBounds): Set<Marker> {
         val (lonRange1, lonRange2) = bounds.splitAtAntimeridian()
@@ -39,10 +39,11 @@ class ExchangesCache(
         }
     }
 
-    override fun Set<Marker>.toGeoJson(): String {
-        lastMarkers = this
-        return toMarkerGeoJson()
+    override suspend fun onSnapshot(snapshot: Set<Marker>) {
+        onMarkers(snapshot)
     }
+
+    override fun Set<Marker>.toGeoJson(): String = toMarkerGeoJson()
 
     override fun idOf(item: Marker): Long = item.id
 }

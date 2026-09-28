@@ -5,12 +5,14 @@ import org.btcmap.db.table.event.Event
 import org.btcmap.util.isUpcoming
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.style.sources.GeoJsonSource
 import java.time.ZonedDateTime
 
 class EventsCache(
     map: MapLibreMap,
     private val db: Database,
-) : ViewportCache<Event>(map) {
+    source: GeoJsonSource,
+) : ViewportCache<Event>(map, source) {
     override suspend fun fetch(bounds: LatLngBounds): Set<Event> {
         val now = ZonedDateTime.now()
         val (lonRange1, lonRange2) = bounds.splitAtAntimeridian()

@@ -52,8 +52,9 @@ suspend fun ensureMerchantMarkerImages(
     boostedMarkerBackgroundColor: Int,
     markerBadgeBackgroundColor: Int,
     markerBadgeTextColor: Int,
+    registry: MarkerImageRegistry,
 ) {
-    val known = merchantMarkerMasks.keys.toHashSet()
+    val known = registry.merchantMaskNames()
     val normalPin = tintedPin(context, markerBackgroundColor)
     val boostedPin = tintedPin(context, boostedMarkerBackgroundColor)
 
@@ -85,9 +86,9 @@ suspend fun ensureMerchantMarkerImages(
 
     withContext(Dispatchers.Main) {
         pending.forEach { (name, image) ->
-            if (merchantMarkerMasks.containsKey(name)) return@forEach
+            if (registry.hasMerchantMask(name)) return@forEach
             style.addImage(name, image.first)
-            merchantMarkerMasks[name] = image.second
+            registry.addMerchantMask(name, image.second)
         }
     }
 }
@@ -145,8 +146,9 @@ suspend fun ensureExchangeMarkerImages(
     context: Context,
     style: Style,
     markers: Set<Marker>,
+    registry: MarkerImageRegistry,
 ) {
-    val known = exchangeMarkerImageNames.toHashSet()
+    val known = registry.exchangeImageNames()
 
     val pending = withContext(Dispatchers.Default) {
         val result = mutableMapOf<String, Bitmap>()
@@ -160,9 +162,9 @@ suspend fun ensureExchangeMarkerImages(
 
     withContext(Dispatchers.Main) {
         pending.forEach { (name, bitmap) ->
-            if (name in exchangeMarkerImageNames) return@forEach
+            if (registry.hasExchangeImage(name)) return@forEach
             style.addImage(name, bitmap)
-            exchangeMarkerImageNames += name
+            registry.addExchangeImage(name)
         }
     }
 }
@@ -176,15 +178,39 @@ fun ensureEventMarkerImage(context: Context, style: Style) {
     }
 }
 
-private val merchantMarkerMasks = mutableMapOf<String, AlphaMask>()
-private val exchangeMarkerImageNames = mutableSetOf<String>()
+/**
+ * The marker images a single map style has been given, so the renderer and the
+ * tap hit-testing agree on which images exist. One registry per map view:
+ * sharing it across maps would let one map's reset drop masks another map still
+ * needs to reject taps through transparent marker pixels.
+ */
+class MarkerImageRegistry {
+    private val merchantMasks = mutableMapOf<String, AlphaMask>()
+    private val exchangeMarkerImages = mutableSetOf<String>()
 
-fun clearMarkerImages() {
-    merchantMarkerMasks.clear()
-    exchangeMarkerImageNames.clear()
+    fun merchantMaskNames(): Set<String> = merchantMasks.keys.toHashSet()
+
+    fun hasMerchantMask(name: String): Boolean = merchantMasks.containsKey(name)
+
+    fun merchantMask(name: String): AlphaMask? = merchantMasks[name]
+
+    fun addMerchantMask(name: String, mask: AlphaMask) {
+        merchantMasks[name] = mask
+    }
+
+    fun exchangeImageNames(): Set<String> = exchangeMarkerImages.toHashSet()
+
+    fun hasExchangeImage(name: String): Boolean = exchangeMarkerImages.contains(name)
+
+    fun addExchangeImage(name: String) {
+        exchangeMarkerImages += name
+    }
+
+    fun clear() {
+        merchantMasks.clear()
+        exchangeMarkerImages.clear()
+    }
 }
-
-fun merchantMarkerMask(name: String): AlphaMask? = merchantMarkerMasks[name]
 
 class AlphaMask(
     val width: Int,
