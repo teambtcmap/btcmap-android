@@ -46,8 +46,8 @@ class ImageLoadStatsTest {
 
     @Test
     fun recordError_andCancel_areCounted() {
-        ImageLoadStats.recordError(0)
-        ImageLoadStats.recordCancel(0)
+        ImageLoadStats.recordError()
+        ImageLoadStats.recordCancel()
 
         val counters = ImageLoadStats.snapshot()
         Assert.assertEquals(1L, counters.errors)
@@ -61,6 +61,26 @@ class ImageLoadStatsTest {
         ImageLoadStats.recordSuccess(DataSource.NETWORK, tenMillis * 3)
 
         Assert.assertEquals(20L, ImageLoadStats.snapshot().averageLoadMillis)
+    }
+
+    @Test
+    fun averageLoad_ignoresErrorsAndCancels() {
+        val tenMillis = TimeUnit.MILLISECONDS.toNanos(10)
+        ImageLoadStats.recordSuccess(DataSource.NETWORK, tenMillis)
+        ImageLoadStats.recordError()
+        ImageLoadStats.recordCancel()
+
+        Assert.assertEquals(10L, ImageLoadStats.snapshot().averageLoadMillis)
+    }
+
+    @Test
+    fun averageLoad_skipsLoadsWithoutAStartTime() {
+        val tenMillis = TimeUnit.MILLISECONDS.toNanos(10)
+        ImageLoadStats.recordSuccess(DataSource.NETWORK, tenMillis)
+        ImageLoadStats.recordSuccess(DataSource.NETWORK, tenMillis)
+        ImageLoadStats.recordSuccess(DataSource.NETWORK, 0)
+
+        Assert.assertEquals(10L, ImageLoadStats.snapshot().averageLoadMillis)
     }
 
     @Test

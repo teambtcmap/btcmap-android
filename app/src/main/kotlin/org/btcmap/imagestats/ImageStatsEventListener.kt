@@ -13,6 +13,9 @@ import coil3.request.SuccessResult
  */
 class ImageStatsEventListener : EventListener() {
 
+    // Written in onStart and read from whichever thread finishes the load, so
+    // mark it volatile to publish the start time across those threads.
+    @Volatile
     private var startNanos = 0L
 
     override fun onStart(request: ImageRequest) {
@@ -25,11 +28,11 @@ class ImageStatsEventListener : EventListener() {
     }
 
     override fun onError(request: ImageRequest, result: ErrorResult) {
-        ImageLoadStats.recordError(durationNanos())
+        ImageLoadStats.recordError()
     }
 
     override fun onCancel(request: ImageRequest) {
-        ImageLoadStats.recordCancel(durationNanos())
+        ImageLoadStats.recordCancel()
     }
 
     private fun durationNanos(): Long {

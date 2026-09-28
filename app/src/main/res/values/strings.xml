@@ -179,6 +179,7 @@
     <string name="image_stats_errors" translatable="false">Errors</string>
     <string name="image_stats_cancels" translatable="false">Cancels</string>
     <string name="image_stats_average_load" translatable="false">Average load</string>
+    <string name="image_stats_refresh" translatable="false">Refresh</string>
     <string name="image_stats_percent" translatable="false">%1$d%%</string>
     <string name="image_stats_millis" translatable="false">%1$d ms</string>
     <string name="verified_filter">Only show places</string>

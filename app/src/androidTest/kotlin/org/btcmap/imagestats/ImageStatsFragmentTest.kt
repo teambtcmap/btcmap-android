@@ -9,6 +9,7 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.android.material.appbar.MaterialToolbar
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.settings.SettingsFragment
@@ -17,7 +18,6 @@ import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -70,6 +70,30 @@ class ImageStatsFragmentTest : AppTestCase() {
     }
 
     @Test
+    fun refreshButtonReReadsTheCounters() {
+        launchFragment { scenario, fragment ->
+            lateinit var list: RecyclerView
+            scenario.onActivity {
+                list = fragment.requireView().findViewById(R.id.statsList)
+            }
+
+            // The screen loads no images itself, so the counters start at zero
+            // once the initial read has landed.
+            waitUntilOnMain { valueOf(list, "Loads", "Requests") == "0" }
+
+            // A load that happens after the screen opened only shows up once
+            // the refresh action re-reads the counters.
+            scenario.onActivity { ImageLoadStats.recordStart() }
+            scenario.onActivity {
+                val toolbar = fragment.requireView().findViewById<MaterialToolbar>(R.id.topAppBar)
+                toolbar.menu.performIdentifierAction(R.id.refresh, 0)
+            }
+
+            waitUntilOnMain { valueOf(list, "Loads", "Requests") == "1" }
+        }
+    }
+
+    @Test
     fun settingsButtonOpensTheScreen() {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
             lateinit var activity: Activity
@@ -105,6 +129,14 @@ class ImageStatsFragmentTest : AppTestCase() {
             block(scenario, fragment)
         }
     }
+
+    private fun valueOf(list: RecyclerView, sectionTitle: String, label: String): String? =
+        (list.adapter as? StatsAdapter)
+            ?.currentList
+            ?.firstOrNull { it.title == sectionTitle }
+            ?.entries
+            ?.firstOrNull { it.label == label }
+            ?.value
 
     private companion object {
         const val IMAGE_STATS_TAG = "image-stats"

@@ -13,6 +13,7 @@ data class ImageLoadCounters(
     val networkLoads: Long,
     val errors: Long,
     val cancels: Long,
+    /** Average duration of a successful load, in milliseconds. */
     val averageLoadMillis: Long,
 ) {
 

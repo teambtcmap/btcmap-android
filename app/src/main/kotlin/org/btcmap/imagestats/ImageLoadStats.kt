@@ -20,15 +20,21 @@ object ImageLoadStats {
     private val networkLoads = AtomicLong()
     private val errors = AtomicLong()
     private val cancels = AtomicLong()
-    private val totalNanos = AtomicLong()
-    private val completed = AtomicLong()
+    private val successNanos = AtomicLong()
+    private val successfulLoads = AtomicLong()
 
     /** Records that a load started. */
     fun recordStart() {
         requests.incrementAndGet()
     }
 
-    /** Records a successful load, bucketed by the source that served it. */
+    /**
+     * Records a successful load, bucketed by the source that served it.
+     *
+     * Only successes feed the average load time: errors and cancels are not
+     * what it is meant to describe, and a cancelled load is often short, so
+     * counting it would pull the average down misleadingly.
+     */
     fun recordSuccess(dataSource: DataSource, durationNanos: Long) {
         when (dataSource) {
             // MEMORY covers images that were already decoded in memory outside
@@ -37,24 +43,27 @@ object ImageLoadStats {
             DataSource.DISK -> diskCacheHits.incrementAndGet()
             DataSource.NETWORK -> networkLoads.incrementAndGet()
         }
-        recordCompletion(durationNanos)
+        // A non-positive duration means the listener never saw the load start,
+        // so there is nothing to average; skip it rather than count an instant.
+        if (durationNanos > 0) {
+            successNanos.addAndGet(durationNanos)
+            successfulLoads.incrementAndGet()
+        }
     }
 
     /** Records a load that failed. */
-    fun recordError(durationNanos: Long) {
+    fun recordError() {
         errors.incrementAndGet()
-        recordCompletion(durationNanos)
     }
 
     /** Records a load that was cancelled before it finished. */
-    fun recordCancel(durationNanos: Long) {
+    fun recordCancel() {
         cancels.incrementAndGet()
-        recordCompletion(durationNanos)
     }
 
     /** Reads the current totals. */
     fun snapshot(): ImageLoadCounters {
-        val completedCount = completed.get()
+        val loads = successfulLoads.get()
         return ImageLoadCounters(
             requests = requests.get(),
             memoryCacheHits = memoryCacheHits.get(),
@@ -62,30 +71,23 @@ object ImageLoadStats {
             networkLoads = networkLoads.get(),
             errors = errors.get(),
             cancels = cancels.get(),
-            averageLoadMillis = if (completedCount == 0L) {
+            averageLoadMillis = if (loads == 0L) {
                 0L
             } else {
-                TimeUnit.NANOSECONDS.toMillis(totalNanos.get() / completedCount)
+                TimeUnit.NANOSECONDS.toMillis(successNanos.get() / loads)
             },
         )
     }
 
     /** Clears every counter, for tests. */
-    fun reset() {
+    internal fun reset() {
         requests.set(0)
         memoryCacheHits.set(0)
         diskCacheHits.set(0)
         networkLoads.set(0)
         errors.set(0)
         cancels.set(0)
-        totalNanos.set(0)
-        completed.set(0)
-    }
-
-    private fun recordCompletion(durationNanos: Long) {
-        if (durationNanos > 0) {
-            totalNanos.addAndGet(durationNanos)
-        }
-        completed.incrementAndGet()
+        successNanos.set(0)
+        successfulLoads.set(0)
     }
 }

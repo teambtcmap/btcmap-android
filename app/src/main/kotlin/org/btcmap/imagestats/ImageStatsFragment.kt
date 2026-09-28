@@ -26,6 +26,8 @@ class ImageStatsFragment : Fragment() {
     private var _binding: ImageStatsFragmentBinding? = null
     private val binding get() = _binding!!
 
+    private lateinit var adapter: StatsAdapter
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -39,13 +41,38 @@ class ImageStatsFragment : Fragment() {
         binding.topAppBar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
         }
+        binding.topAppBar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.refresh -> {
+                    refresh()
+                    true
+                }
+                else -> false
+            }
+        }
 
         binding.statsList.layoutManager = LinearLayoutManager(requireContext())
-        val adapter = StatsAdapter()
+        adapter = StatsAdapter()
         binding.statsList.adapter = adapter
 
+        refresh()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    /**
+     * Re-reads both caches and the load counters and shows the result. Called
+     * once when the screen opens and again whenever the refresh action is
+     * tapped, since the snapshot otherwise goes stale while the screen stays
+     * open.
+     */
+    private fun refresh() {
         val appContext = requireContext().applicationContext
         val homeDirectory = requireContext().dataDir.path
+        val currentAdapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 // Reading the caches can initialize them and touch the disk, so
@@ -56,17 +83,12 @@ class ImageStatsFragment : Fragment() {
                         homeDirectory = homeDirectory,
                     ).read()
                 }
-                adapter.submitList(buildSections(cache, ImageLoadStats.snapshot()))
+                currentAdapter.submitList(buildSections(cache, ImageLoadStats.snapshot()))
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun buildSections(
