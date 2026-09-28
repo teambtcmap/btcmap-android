@@ -198,6 +198,8 @@
     <string name="issue_misspelled_tag_name">Špatně napsaný název značky: %1$s</string>
     <string name="issue_unknown">Neznámý problém</string>
     <string name="how_to_help">Jak mohu pomoci?</string>
+    <string name="opening_hours_closed">Zavřeno</string>
+    <string name="opening_hours_open_24_7">Otevřeno 24/7</string>
     <string name="app_name_beta">BTC Map Beta</string>
     <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
     <string name="no_comments_yet">Zatím žádné komentáře</string>

@@ -186,6 +186,8 @@
     <string name="issue_misspelled_tag_name">タグ名の綴りが間違っています: %1$s</string>
     <string name="issue_unknown">不明な問題</string>
     <string name="how_to_help">協力するには？</string>
+    <string name="opening_hours_closed">閉店</string>
+    <string name="opening_hours_open_24_7">24時間営業</string>
     <string name="app_name_beta">BTC Map ベータ</string>
     <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
     <string name="no_comments_yet">まだコメントはありません</string>

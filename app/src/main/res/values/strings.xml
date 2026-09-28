@@ -92,6 +92,8 @@
     <string name="issue_misspelled_tag_name">Misspelled tag name: %1$s</string>
     <string name="issue_unknown">Unknown issue</string>
     <string name="how_to_help">How to help?</string>
+    <string name="opening_hours_closed">Closed</string>
+    <string name="opening_hours_open_24_7">Open 24/7</string>
     <string name="save">Save</string>
     <string name="account">BTC Map Account</string>
     <string name="not_logged_in">Account</string>

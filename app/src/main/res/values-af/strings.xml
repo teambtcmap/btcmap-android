@@ -190,6 +190,8 @@
     <string name="issue_misspelled_tag_name">Verkeerd gespelde etiketnaam: %1$s</string>
     <string name="issue_unknown">Onbekende probleem</string>
     <string name="how_to_help">Hoe kan ek help?</string>
+    <string name="opening_hours_closed">Gesluit</string>
+    <string name="opening_hours_open_24_7">24/7 oop</string>
     <string name="app_name_beta">BTC Map Beta</string>
     <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
     <string name="no_comments_yet">Nog geen kommentaar nie</string>

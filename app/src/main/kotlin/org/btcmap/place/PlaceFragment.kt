@@ -5,11 +5,14 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.format.DateUtils
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.text.style.URLSpan
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -22,6 +25,7 @@ import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
@@ -62,6 +66,8 @@ import org.btcmap.util.iconTypeface
 import org.btcmap.util.showError
 import org.btcmap.map.getErrorColor
 import org.btcmap.map.getOnSurfaceColor
+import org.btcmap.openinghours.OpeningHours
+import org.btcmap.openinghours.toOpeningHours
 import org.btcmap.R
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
@@ -86,6 +92,7 @@ import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Point
+import java.time.LocalDate
 import java.time.ZonedDateTime
 import kotlin.math.abs
 
@@ -628,7 +635,15 @@ class PlaceFragment : Fragment() {
         binding.email.text = place.email
         binding.email.isVisible = place.email != null
 
-        binding.openingHours.text = place.openingHours
+        val openingHours = place.openingHours?.toOpeningHours()
+        binding.openingHours.text = when {
+            openingHours != null -> openingHours.toEmphasizedString(
+                closedLabel = getString(R.string.opening_hours_closed),
+                aroundTheClockLabel = getString(R.string.opening_hours_open_24_7),
+            )
+
+            else -> place.openingHours
+        }
         binding.openingHours.isVisible = place.openingHours != null
 
         binding.btnVerify.setOnClickListener {
@@ -673,6 +688,39 @@ class PlaceFragment : Fragment() {
         previewPlace = place
         previewLatLng = LatLng(place.lat, place.lon)
         renderSmallMap()
+    }
+
+    /**
+     * The parsed week as a multi-line string with today's line bolded and
+     * tinted, so the current day stands out. A week that collapses to a single
+     * line has no day to emphasize and is returned as-is.
+     */
+    private fun OpeningHours.toEmphasizedString(
+        closedLabel: String,
+        aroundTheClockLabel: String,
+    ): CharSequence {
+        val display = toDisplayString(
+            closedLabel = closedLabel,
+            aroundTheClockLabel = aroundTheClockLabel,
+        )
+        val lineIndex = todayLineIndex(LocalDate.now().dayOfWeek) ?: return display
+
+        val lines = display.split('\n')
+        val start = lines.take(lineIndex).sumOf { it.length + 1 }
+        val end = start + lines[lineIndex].length
+
+        return SpannableString(display).apply {
+            val flags = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            setSpan(StyleSpan(Typeface.BOLD), start, end, flags)
+            setSpan(
+                ForegroundColorSpan(
+                    ContextCompat.getColor(requireContext(), R.color.opening_hours_today),
+                ),
+                start,
+                end,
+                flags,
+            )
+        }
     }
 
     /**

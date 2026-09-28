@@ -194,6 +194,8 @@
     <string name="issue_misspelled_tag_name">Nome da tag escrito incorretamente: %1$s</string>
     <string name="issue_unknown">Problema desconhecido</string>
     <string name="how_to_help">Como ajudar?</string>
+    <string name="opening_hours_closed">Fechado</string>
+    <string name="opening_hours_open_24_7">Aberto 24h</string>
     <string name="app_name_beta">BTC Map Beta</string>
     <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
     <string name="no_comments_yet">Ainda não há comentários</string>

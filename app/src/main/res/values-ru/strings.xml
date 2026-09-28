@@ -198,6 +198,8 @@
     <string name="issue_misspelled_tag_name">Неправильно написано имя тега: %1$s</string>
     <string name="issue_unknown">Неизвестная проблема</string>
     <string name="how_to_help">Как я могу помочь?</string>
+    <string name="opening_hours_closed">Закрыто</string>
+    <string name="opening_hours_open_24_7">Круглосуточно</string>
     <string name="app_name_beta">BTC Map Бета</string>
     <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
     <string name="no_comments_yet">Пока нет комментариев</string>
