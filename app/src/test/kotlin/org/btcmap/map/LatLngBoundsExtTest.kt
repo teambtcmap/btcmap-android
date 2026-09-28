@@ -123,6 +123,39 @@ class LatLngBoundsExtTest {
         Assert.assertEquals(160.0 to 180.0, second)
     }
 
+    @Test
+    fun queryByBounds_whenNotCrossing_runsOneQuery() {
+        val bounds = LatLngBounds.from(
+            latNorth = 10.0,
+            lonEast = 20.0,
+            latSouth = 0.0,
+            lonWest = 0.0,
+        )
+        val ranges = mutableListOf<List<Double>>()
+
+        val result = bounds.queryByBounds { minLat, maxLat, minLon, maxLon ->
+            ranges.add(listOf(minLat, maxLat, minLon, maxLon))
+            listOf("a")
+        }
+
+        Assert.assertEquals(listOf(listOf(0.0, 10.0, 0.0, 20.0)), ranges)
+        Assert.assertEquals(listOf("a"), result)
+    }
+
+    @Test
+    fun queryByBounds_whenCrossing_runsBothRangesAndMerges() {
+        val bounds = wrappedBounds(latNorth = 10.0, lonEast = -170.0, latSouth = 0.0, lonWest = 170.0)
+        val ranges = mutableListOf<Pair<Double, Double>>()
+
+        val result = bounds.queryByBounds { _, _, minLon, maxLon ->
+            ranges.add(minLon to maxLon)
+            listOf(minLon)
+        }
+
+        Assert.assertEquals(listOf(-180.0 to -170.0, 170.0 to 180.0), ranges)
+        Assert.assertEquals(listOf(-180.0, 170.0), result)
+    }
+
     /**
      * MapLibre's public factories reject east < west, but the renderer can
      * report a crossing viewport through the internal constructor it uses

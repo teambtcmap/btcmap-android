@@ -103,14 +103,23 @@ class MapSelectionController(
     }
 
     private fun isOpaqueHit(feature: Feature, screenLocation: PointF): Boolean {
-        val iconId = feature.getStringProperty("iconId") ?: return true
-        val name = merchantMarkerImageName(
-            iconId = iconId,
-            boosted = feature.getBooleanProperty("boosted") == true,
-            outdated = feature.getBooleanProperty("outdated") == true,
-            comments = feature.getNumberProperty("comments")?.toLong() ?: 0,
-        )
-        val mask = markerImageRegistry.merchantMask(name) ?: return true
+        val iconId = feature.getStringProperty("iconId")
+        // A merchant marker's image bakes its glyph and badge into the pin, so
+        // its own mask is the shape to test. An exchange marker has no merchant
+        // mask, the event marker has no iconId, and both draw the plain pin
+        // (their glyph is a separate, unqueried layer), so the pin mask applies.
+        val mask = if (iconId != null) {
+            val name = merchantMarkerImageName(
+                iconId = iconId,
+                boosted = feature.getBooleanProperty("boosted") == true,
+                outdated = feature.getBooleanProperty("outdated") == true,
+                comments = feature.getNumberProperty("comments")?.toLong() ?: 0,
+            )
+            markerImageRegistry.merchantMask(name) ?: markerImageRegistry.pinMask()
+        } else {
+            markerImageRegistry.pinMask()
+        } ?: return true
+
         val geometry = feature.geometry() as? Point ?: return true
         val anchor = map.projection.toScreenLocation(
             LatLng(geometry.latitude(), geometry.longitude())

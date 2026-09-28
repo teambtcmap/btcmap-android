@@ -1,6 +1,7 @@
 package org.btcmap.map
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.Network
@@ -122,6 +123,12 @@ class MapFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Restore the filter before the map's first position settles, so a
+        // rotation does not drop the list the user was looking at.
+        filter = savedInstanceState?.getString(STATE_FILTER)
+            ?.let { name -> runCatching { Filter.valueOf(name) }.getOrNull() }
+            ?: Filter.MERCHANTS
+
         // Registered here, not when the dialog is shown, so a form that was open
         // when the device rotated still reaches this (recreated) fragment.
         registerAuthResultListener { navigateToAddPlace() }
@@ -193,7 +200,7 @@ class MapFragment : Fragment() {
             rotationEnabled = prefs.mapRotationEnabled,
         ).also {
             it.install()
-            it.setOffline(!isOnline())
+            it.setOffline(!isOnline(requireContext()))
         }
         registerConnectivity()
 
@@ -311,7 +318,9 @@ class MapFragment : Fragment() {
 
         searchController.results.onEach {
             searchAdapter.submitList(it) {
-                val layoutManager = binding.searchResults.layoutManager ?: return@submitList
+                // The diff commits after the collector may have been cancelled
+                // by view destruction, so the binding can be gone by now.
+                val layoutManager = _binding?.searchResults?.layoutManager ?: return@submitList
                 layoutManager.scrollToPosition(0)
             }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
@@ -533,6 +542,7 @@ class MapFragment : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        outState.putString(STATE_FILTER, filter.name)
         _binding?.map?.onSaveInstanceState(outState)
     }
 
@@ -671,8 +681,8 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun isOnline(): Boolean {
-        val manager = requireContext().getSystemService(ConnectivityManager::class.java)
+    private fun isOnline(context: Context): Boolean {
+        val manager = context.getSystemService(ConnectivityManager::class.java)
             ?: return false
         val capabilities = manager.activeNetwork?.let { manager.getNetworkCapabilities(it) }
         return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
@@ -685,6 +695,9 @@ class MapFragment : Fragment() {
      */
     private fun registerConnectivity() {
         val manager = requireContext().getSystemService(ConnectivityManager::class.java) ?: return
+        // Application context, not the fragment's: a callback already in flight
+        // when the view is destroyed must not touch a detached fragment.
+        val context = requireContext().applicationContext
 
         val callback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) = refresh()
@@ -696,7 +709,7 @@ class MapFragment : Fragment() {
 
             private fun refresh() {
                 connectivityHandler.post {
-                    val isOnline = isOnline()
+                    val isOnline = isOnline(context)
                     // An image request made offline failed and was not retried,
                     // so a chip that fell back to its initials needs a fresh
                     // request once the network is back. The delay coalesces the
@@ -811,6 +824,8 @@ class MapFragment : Fragment() {
 
     companion object {
         private const val SEARCH_DEBOUNCE_MS = 300L
+
+        private const val STATE_FILTER = "map_filter"
 
         // Long enough for the connectivity callbacks that follow a network
         // coming back to settle before the chip images are retried.

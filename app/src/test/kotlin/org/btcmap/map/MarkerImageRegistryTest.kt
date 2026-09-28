@@ -29,6 +29,19 @@ class MarkerImageRegistryTest {
     }
 
     @Test
+    fun pinMask_isStoredAndCleared() {
+        val registry = MarkerImageRegistry()
+
+        Assert.assertNull(registry.pinMask())
+        registry.addPinMask(mask())
+        Assert.assertNotNull(registry.pinMask())
+
+        registry.clear()
+
+        Assert.assertNull(registry.pinMask())
+    }
+
+    @Test
     fun clear_dropsEverything() {
         val registry = MarkerImageRegistry()
         registry.addMerchantMask("a", mask())

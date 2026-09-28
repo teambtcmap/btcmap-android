@@ -56,13 +56,6 @@ class SearchController(
         }
     }
 
-    fun clear() {
-        currentJob?.cancel("cleared")
-        currentJob = null
-        currentQuery = null
-        _results.value = emptyList()
-    }
-
     fun dispose() {
         currentJob?.cancel("disposed")
         scope.cancel()

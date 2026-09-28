@@ -102,6 +102,10 @@ internal class MapSetupController(
 
                 ensureEventMarkerImage(mapView.context, style)
 
+                // The plain pin exchange and event markers draw, so their taps
+                // are hit-tested through its transparent pixels too.
+                markerImageRegistry.addPinMask(markerPinAlphaMask(mapView.context))
+
                 style.addSource(merchants.first)
                 merchants.second.forEach { style.addLayer(it) }
                 style.addSource(events.first)

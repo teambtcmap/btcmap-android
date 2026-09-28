@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep the map's merchant, event or exchange filter when the screen is recreated, instead of snapping back to merchants
+- Make a tap on an exchange or event marker land only on the pin, rejecting its transparent corners the way a merchant marker already does
 - Show an area's initials on its map chip while its image loads and keep them when it cannot load, using the map buttons' colors and a regular weight, instead of a blank circle
 - Retry the map chips' images when the network returns, so a chip that fell back to its initials offline recovers on its own
 - Show an area search result's glyph instead of an empty circle when its image cannot load, such as while offline

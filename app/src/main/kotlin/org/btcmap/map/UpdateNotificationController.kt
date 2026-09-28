@@ -8,7 +8,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -37,11 +39,13 @@ class UpdateNotificationController(
             lifecycleOwner.withResumed {
                 launch {
                     try {
-                        val latestVerJson = sharedHttpClient.newCall(
-                            Request.Builder()
-                                .url(manifestUrl().toHttpUrl())
-                                .build()
-                        ).executeAsync().use { it.body.string().trim() }
+                        val latestVerJson = withContext(Dispatchers.IO) {
+                            sharedHttpClient.newCall(
+                                Request.Builder()
+                                    .url(manifestUrl().toHttpUrl())
+                                    .build()
+                            ).executeAsync().use { it.body.string().trim() }
+                        }
 
                         val latestVer =
                             com.google.gson.JsonParser.parseString(latestVerJson).asJsonObject

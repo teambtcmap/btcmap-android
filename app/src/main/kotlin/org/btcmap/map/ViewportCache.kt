@@ -87,10 +87,6 @@ abstract class ViewportCache<T : Any>(
         loadInBounds(map.projection.visibleRegion.latLngBounds.expand())
     }
 
-    /** The number of retained features; exposed so tests can assert the cap. */
-    internal val cachedCount: Int
-        get() = store.size
-
     fun destroy() {
         map.removeOnCameraIdleListener(this)
         pendingQuery.getAndSet(null)?.cancel()

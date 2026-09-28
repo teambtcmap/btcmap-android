@@ -187,6 +187,7 @@ fun ensureEventMarkerImage(context: Context, style: Style) {
 class MarkerImageRegistry {
     private val merchantMasks = mutableMapOf<String, AlphaMask>()
     private val exchangeMarkerImages = mutableSetOf<String>()
+    private var markerPinMask: AlphaMask? = null
 
     fun merchantMaskNames(): Set<String> = merchantMasks.keys.toHashSet()
 
@@ -196,6 +197,18 @@ class MarkerImageRegistry {
 
     fun addMerchantMask(name: String, mask: AlphaMask) {
         merchantMasks[name] = mask
+    }
+
+    /**
+     * The mask of the plain pin that exchange and event markers draw, or null
+     * before the map has set it up. Unlike a merchant marker, their glyph is a
+     * separate layer and their image is just the pin, so this is the shape a
+     * tap has to clear.
+     */
+    fun pinMask(): AlphaMask? = markerPinMask
+
+    fun addPinMask(mask: AlphaMask) {
+        markerPinMask = mask
     }
 
     fun exchangeImageNames(): Set<String> = exchangeMarkerImages.toHashSet()
@@ -209,7 +222,24 @@ class MarkerImageRegistry {
     fun clear() {
         merchantMasks.clear()
         exchangeMarkerImages.clear()
+        markerPinMask = null
     }
+}
+
+/**
+ * The alpha mask of the plain [R.drawable.map_marker] pin. Exchange and event
+ * markers render this image on its own (their glyph is a separate layer), so a
+ * tap is accepted only where the pin is. Tint does not change alpha, so one
+ * mask covers every marker colour.
+ */
+fun markerPinAlphaMask(context: Context): AlphaMask {
+    val drawable = AppCompatResources.getDrawable(context, R.drawable.map_marker)!!
+    val width = drawable.intrinsicWidth
+    val height = drawable.intrinsicHeight
+    val bitmap = createBitmap(width, height)
+    drawable.setBounds(0, 0, width, height)
+    drawable.draw(Canvas(bitmap))
+    return AlphaMask.from(bitmap)
 }
 
 class AlphaMask(

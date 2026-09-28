@@ -64,3 +64,18 @@ private fun normalizeLongitude(longitude: Double): Double {
     while (normalized < -180.0) normalized += 360.0
     return normalized
 }
+
+/**
+ * Runs [fetch] over this bounds' longitude range(s), splitting it in two when
+ * the viewport crosses the antimeridian. The database only holds longitudes in
+ * [-180, 180], so the wrapped half has to be queried as its own range and the
+ * results merged.
+ */
+internal fun <T> LatLngBounds.queryByBounds(
+    fetch: (minLat: Double, maxLat: Double, minLon: Double, maxLon: Double) -> List<T>,
+): List<T> {
+    val (first, second) = splitAtAntimeridian()
+    val head = fetch(latitudeSouth, latitudeNorth, first.first, first.second)
+    if (second == null) return head
+    return head + fetch(latitudeSouth, latitudeNorth, second.first, second.second)
+}

@@ -14,29 +14,9 @@ class ExchangesCache(
 ) : ViewportCache<Marker>(map, source) {
 
     override suspend fun fetch(bounds: LatLngBounds): Set<Marker> {
-        val (lonRange1, lonRange2) = bounds.splitAtAntimeridian()
-        return if (lonRange2 == null) {
-            db.place.selectExchangesByBounds(
-                bounds.latitudeSouth,
-                bounds.latitudeNorth,
-                lonRange1.first,
-                lonRange1.second,
-            ).toHashSet()
-        } else {
-            val first = db.place.selectExchangesByBounds(
-                bounds.latitudeSouth,
-                bounds.latitudeNorth,
-                lonRange1.first,
-                lonRange1.second,
-            )
-            val second = db.place.selectExchangesByBounds(
-                bounds.latitudeSouth,
-                bounds.latitudeNorth,
-                lonRange2.first,
-                lonRange2.second,
-            )
-            (first + second).toHashSet()
-        }
+        return bounds.queryByBounds { minLat, maxLat, minLon, maxLon ->
+            db.place.selectExchangesByBounds(minLat, maxLat, minLon, maxLon)
+        }.toHashSet()
     }
 
     override suspend fun onSnapshot(snapshot: Set<Marker>) {

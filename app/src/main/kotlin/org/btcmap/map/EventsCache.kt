@@ -15,29 +15,9 @@ class EventsCache(
 ) : ViewportCache<Event>(map, source) {
     override suspend fun fetch(bounds: LatLngBounds): Set<Event> {
         val now = ZonedDateTime.now()
-        val (lonRange1, lonRange2) = bounds.splitAtAntimeridian()
-        return if (lonRange2 == null) {
-            db.event.selectByBounds(
-                bounds.latitudeSouth,
-                bounds.latitudeNorth,
-                lonRange1.first,
-                lonRange1.second,
-            ).filter { it.startsAt.isUpcoming(now) }.toHashSet()
-        } else {
-            val first = db.event.selectByBounds(
-                bounds.latitudeSouth,
-                bounds.latitudeNorth,
-                lonRange1.first,
-                lonRange1.second,
-            )
-            val second = db.event.selectByBounds(
-                bounds.latitudeSouth,
-                bounds.latitudeNorth,
-                lonRange2.first,
-                lonRange2.second,
-            )
-            (first + second).filter { it.startsAt.isUpcoming(now) }.toHashSet()
-        }
+        return bounds.queryByBounds { minLat, maxLat, minLon, maxLon ->
+            db.event.selectByBounds(minLat, maxLat, minLon, maxLon)
+        }.filter { it.startsAt.isUpcoming(now) }.toHashSet()
     }
 
     override fun Set<Event>.toGeoJson(): String = toEventGeoJson()

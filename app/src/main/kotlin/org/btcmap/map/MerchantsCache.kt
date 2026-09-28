@@ -14,32 +14,15 @@ class MerchantsCache(
 ) : ViewportCache<Marker>(map, source) {
 
     override suspend fun fetch(bounds: LatLngBounds): Set<Marker> {
-        val (lonRange1, lonRange2) = bounds.splitAtAntimeridian()
-        return if (lonRange2 == null) {
+        return bounds.queryByBounds { minLat, maxLat, minLon, maxLon ->
             db.place.selectMerchantsByBounds(
-                bounds.latitudeSouth,
-                bounds.latitudeNorth,
-                lonRange1.first,
-                lonRange1.second,
-                minVerifiedAt = null,
-            ).toHashSet()
-        } else {
-            val first = db.place.selectMerchantsByBounds(
-                bounds.latitudeSouth,
-                bounds.latitudeNorth,
-                lonRange1.first,
-                lonRange1.second,
+                minLat,
+                maxLat,
+                minLon,
+                maxLon,
                 minVerifiedAt = null,
             )
-            val second = db.place.selectMerchantsByBounds(
-                bounds.latitudeSouth,
-                bounds.latitudeNorth,
-                lonRange2.first,
-                lonRange2.second,
-                minVerifiedAt = null,
-            )
-            (first + second).toHashSet()
-        }
+        }.toHashSet()
     }
 
     override suspend fun onSnapshot(snapshot: Set<Marker>) {
