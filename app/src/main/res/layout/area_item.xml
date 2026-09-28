@@ -2,25 +2,32 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginVertical="8dp">
+
+    <!-- The initials sit behind the image: they show while it loads and stay
+         when it never does, so the chip is never a blank circle. -->
+    <TextView
+        android:id="@+id/initials"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@drawable/area_chip_placeholder_background"
+        android:gravity="center"
+        android:importantForAccessibility="no"
+        android:textColor="#ffffff"
+        android:textFontWeight="400"
+        android:textSize="20sp"
+        tools:text="TH" />
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/icon"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:background="#f79413"
         android:contentDescription="@string/area_icon"
         android:scaleType="centerCrop"
         app:shapeAppearanceOverlay="@style/CircleImageView" />
-
-    <ProgressBar
-        android:id="@+id/loading"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_gravity="center"
-        android:indeterminateTint="#ffffff" />
 
     <TextView
         android:id="@+id/badge"

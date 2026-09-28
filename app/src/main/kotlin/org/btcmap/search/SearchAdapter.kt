@@ -71,14 +71,11 @@ class SearchAdapter(
                     iconImage.load(area.iconUrl) {
                         listener(
                             onSuccess = { _, _ -> hideLoading(area.areaId) },
-                            onError = { _, _ -> hideLoading(area.areaId) },
+                            onError = { _, _ -> showFallbackIcon(area.areaId) },
                         )
                     }
                 } else {
-                    loading.isVisible = false
-                    iconImage.isVisible = false
-                    iconImage.setImageDrawable(null)
-                    icon.isVisible = true
+                    showFallbackIcon(areaId = null)
                 }
 
                 // Tapping an area row can open the area screen straight away,
@@ -118,14 +115,27 @@ class SearchAdapter(
         }
 
         /**
-         * Hides the spinner once the row's image has loaded or failed, so a
-         * failed load leaves the plain placeholder rather than a spinner that
-         * never stops.
+         * Hides the spinner once the row's image has loaded, leaving the image
+         * on screen. The glyph stays hidden, so a recycled holder cannot flash
+         * it over an image that loaded.
          */
         private fun hideLoading(areaId: Long) {
             if (boundAreaId == areaId) {
                 binding.loading.isVisible = false
             }
+        }
+
+        /**
+         * Restores the row's glyph placeholder once its image has failed, so a
+         * failed load (for example while offline) leaves the glyph visible
+         * instead of an empty circle. Also used for a row that has no image.
+         */
+        private fun showFallbackIcon(areaId: Long?) {
+            if (areaId != null && boundAreaId != areaId) return
+            binding.loading.isVisible = false
+            binding.iconImage.isVisible = false
+            binding.iconImage.setImageDrawable(null)
+            binding.icon.isVisible = true
         }
     }
 

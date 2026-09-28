@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show an area's initials on its map chip while its image loads and keep them when it cannot load, using the map buttons' colors and a regular weight, instead of a blank circle
+- Retry the map chips' images when the network returns, so a chip that fell back to its initials offline recovers on its own
+- Show an area search result's glyph instead of an empty circle when its image cannot load, such as while offline
 - Bundle a low-zoom world basemap and the map labels' glyphs, so the map still draws offline, keeping any tile it has already cached in full detail and falling back to the bundled world map only where it has none
 - Use the OpenFreeMap dark style for Auto at night and remove the Carto Dark Matter style, so every style now shares one source and the same offline behaviour
 - Show and search places and events near the antimeridian, by wrapping the viewport query the short way around instead of asking the database for a longitude range it can never hold
@@ -83,7 +86,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Bundle the place-comments snapshot too, so a place's comments are readable offline and the first comments sync downloads only what changed
 - Bundle the events snapshot too, so events are searchable offline and the first events sync downloads only what changed
 - Download a community's or country's map tiles for offline browsing from the area screen, choosing the maximum zoom against an estimated size
-- Show a spinner on an area chip or search result while its icon loads instead of a blank placeholder
+- Show a spinner on a search result while its icon loads instead of a blank placeholder
 - Preload an area's header image in the background while its map chip or search result is visible, so opening the area screen shows the image without waiting for the network
 - Read the map's community and country chips from the local cache instead of querying the server on every map move, so they appear instantly and work offline
 - Show a country's chip before its communities on the map

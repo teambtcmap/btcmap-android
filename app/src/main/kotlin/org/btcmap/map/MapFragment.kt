@@ -543,6 +543,7 @@ class MapFragment : Fragment() {
                 ?.unregisterNetworkCallback(callback)
         }
         connectivityCallback = null
+        connectivityHandler.removeCallbacks(retryChipImages)
         searchDebounceJob?.cancel()
         searchDebounceJob = null
         searchController.dispose()
@@ -655,6 +656,21 @@ class MapFragment : Fragment() {
 
     private var connectivityCallback: ConnectivityManager.NetworkCallback? = null
 
+    // Tracks the last observed connectivity so a chip's failed image request is
+    // retried only when the network comes back, not on every capability change.
+    private var online = false
+
+    /**
+     * Re-runs the chips' image requests after the network comes back. Posted
+     * after a short delay so it runs once the callbacks that announce the
+     * network have settled and the connection is actually usable.
+     */
+    private val retryChipImages = Runnable {
+        if (_binding != null && ::areasAdapter.isInitialized) {
+            areasAdapter.refreshImages()
+        }
+    }
+
     private fun isOnline(): Boolean {
         val manager = requireContext().getSystemService(ConnectivityManager::class.java)
             ?: return false
@@ -680,8 +696,21 @@ class MapFragment : Fragment() {
 
             private fun refresh() {
                 connectivityHandler.post {
-                    val online = isOnline()
-                    mapSetupController?.setOffline(!online)
+                    val isOnline = isOnline()
+                    // An image request made offline failed and was not retried,
+                    // so a chip that fell back to its initials needs a fresh
+                    // request once the network is back. The delay coalesces the
+                    // burst of callbacks that announces the network and lets it
+                    // become usable before the requests are re-issued.
+                    if (isOnline && !online) {
+                        connectivityHandler.removeCallbacks(retryChipImages)
+                        connectivityHandler.postDelayed(
+                            retryChipImages,
+                            CHIP_IMAGE_RETRY_DELAY_MS,
+                        )
+                    }
+                    online = isOnline
+                    mapSetupController?.setOffline(!isOnline)
                 }
             }
         }
@@ -782,5 +811,9 @@ class MapFragment : Fragment() {
 
     companion object {
         private const val SEARCH_DEBOUNCE_MS = 300L
+
+        // Long enough for the connectivity callbacks that follow a network
+        // coming back to settle before the chip images are retried.
+        private const val CHIP_IMAGE_RETRY_DELAY_MS = 1_000L
     }
 }
