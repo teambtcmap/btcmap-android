@@ -96,7 +96,8 @@ class AreaApiTest : ApiTestBase() {
         Assert.assertEquals("GET", request.method)
         Assert.assertEquals("/v4/areas", request.url.encodedPath)
         Assert.assertEquals(
-            "id,name,type,url_alias,icon,icon_wide,website_url,description,bbox,geo_json,updated_at,deleted_at",
+            "id,name,type,url_alias,icon,icon_wide,website_url,description,localized_name," +
+                "localized_description,bbox,geo_json,updated_at,deleted_at",
             request.url.queryParameter("fields"),
         )
         Assert.assertEquals(
@@ -112,6 +113,8 @@ class AreaApiTest : ApiTestBase() {
         Assert.assertEquals("community", area.type)
         Assert.assertEquals("grand-paris", area.urlAlias)
         Assert.assertEquals("Greater Paris", area.description)
+        Assert.assertEquals("Большой Париж", area.localizedName!!.get("ru").asString)
+        Assert.assertEquals("Greater Paris", area.localizedDescription!!.get("en").asString)
         Assert.assertEquals(2.22, area.bboxWest!!, 0.0001)
         Assert.assertEquals(48.91, area.bboxNorth!!, 0.0001)
         Assert.assertEquals(
@@ -131,6 +134,8 @@ class AreaApiTest : ApiTestBase() {
         Assert.assertNull(area.icon)
         Assert.assertNull(area.iconWide)
         Assert.assertNull(area.description)
+        Assert.assertNull(area.localizedName)
+        Assert.assertNull(area.localizedDescription)
         Assert.assertNull(area.deletedAt)
         Assert.assertNull(area.bboxWest)
         Assert.assertNull(area.bboxNorth)
@@ -174,6 +179,8 @@ class AreaApiTest : ApiTestBase() {
                     "icon_wide": "https://static.example/wide.png",
                     "website_url": "https://btcmap.org/community/grand-paris",
                     "description": "Greater Paris",
+                    "localized_name": {"en": "Grand Paris", "ru": "Большой Париж"},
+                    "localized_description": {"en": "Greater Paris"},
                     "bbox": [2.22, 48.81, 2.47, 48.91],
                     "geo_json": {"type":"Polygon","coordinates":[[[2.22,48.81],[2.47,48.81],[2.47,48.91],[2.22,48.81]]]},
                     "updated_at": "2025-06-11T00:00:00Z",

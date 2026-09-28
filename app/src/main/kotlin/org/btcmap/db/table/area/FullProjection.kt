@@ -1,7 +1,9 @@
 package org.btcmap.db.table.area
 
 import androidx.sqlite.SQLiteStatement
+import com.google.gson.JsonObject
 import org.btcmap.db.getDoubleOrNull
+import org.btcmap.db.getJsonObjectOrNull
 import org.btcmap.db.getTextOrNull
 import org.btcmap.db.getZonedDateTime
 import org.btcmap.db.getZonedDateTimeOrNull
@@ -34,11 +36,16 @@ data class FullProjection(
     // delta cursor, and an epoch value simply means "sync from the beginning".
     val updatedAt: ZonedDateTime = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
     val deletedAt: ZonedDateTime? = null,
+    // Per-language maps keyed by a two-letter code, or null when the area has
+    // no translation for any language.
+    val localizedName: JsonObject? = null,
+    val localizedDescription: JsonObject? = null,
 ) {
     companion object {
         const val COLUMNS =
             "$ID, $NAME, $TYPE, $URL_ALIAS, $ICON, $ICON_WIDE, $WEBSITE_URL, $DESCRIPTION, " +
-                "$BBOX_WEST, $BBOX_SOUTH, $BBOX_EAST, $BBOX_NORTH, $GEO_JSON, $UPDATED_AT, $DELETED_AT"
+                "$BBOX_WEST, $BBOX_SOUTH, $BBOX_EAST, $BBOX_NORTH, $GEO_JSON, $UPDATED_AT, " +
+                "$DELETED_AT, $LOCALIZED_NAME, $LOCALIZED_DESCRIPTION"
 
         fun fromStatement(stmt: SQLiteStatement): FullProjection {
             return FullProjection(
@@ -57,6 +64,8 @@ data class FullProjection(
                 geoJson = stmt.getTextOrNull(12),
                 updatedAt = stmt.getZonedDateTime(13),
                 deletedAt = stmt.getZonedDateTimeOrNull(14),
+                localizedName = stmt.getJsonObjectOrNull(15),
+                localizedDescription = stmt.getJsonObjectOrNull(16),
             )
         }
     }

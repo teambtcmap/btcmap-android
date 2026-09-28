@@ -7,7 +7,6 @@ import org.junit.Assert
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
-import java.time.ZonedDateTime
 
 /** The `place` table as it shipped in schema version 102, with `bundled`. */
 private const val VERSION_102_PLACE_CREATE = """
@@ -55,6 +54,31 @@ private const val VERSION_101_AREA_CREATE = """
         bbox_south REAL,
         bbox_east REAL,
         bbox_north REAL,
+        updated_at TEXT NOT NULL,
+        deleted_at TEXT
+    );
+"""
+
+/**
+ * The `area` table as it stood through schema version 105, before the
+ * per-language `localized_name`/`localized_description` columns were added.
+ * Version 106 appends those columns in place.
+ */
+private const val VERSION_105_AREA_CREATE = """
+    CREATE TABLE area (
+        id INTEGER PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        url_alias TEXT NOT NULL,
+        icon TEXT,
+        icon_wide TEXT,
+        website_url TEXT NOT NULL,
+        description TEXT,
+        bbox_west REAL,
+        bbox_south REAL,
+        bbox_east REAL,
+        bbox_north REAL,
+        geo_json TEXT,
         updated_at TEXT NOT NULL,
         deleted_at TEXT
     );
@@ -150,16 +174,12 @@ class DatabaseTest {
         val db = Database(BundledSQLiteDriver(), path)
 
         try {
-            // The migration adds the column in place, keeping existing rows, and
-            // rewinds each row's updated_at to the sentinel so the next sync
-            // re-reads it and fills geo_json.
+            // Migration 101 adds the geo_json column. This opens at the current
+            // VERSION, so the later area migrations run too: 105 clears the
+            // cache to force a re-seed, leaving the table empty at the end.
             Assert.assertEquals(Database.VERSION, userVersion(db.conn))
             Assert.assertTrue(areaColumns(db.conn).contains("geo_json"))
-            Assert.assertEquals(1L, db.area.selectCount())
-            Assert.assertEquals(
-                ZonedDateTime.parse("2000-01-01T00:00:00Z"),
-                db.area.selectMaxUpdatedAt(),
-            )
+            Assert.assertEquals(0L, db.area.selectCount())
         } finally {
             db.conn.close()
         }
@@ -238,6 +258,31 @@ class DatabaseTest {
     }
 
     @Test
+    fun version105Database_isMigratedByClearingTheAreaCache() {
+        val path = existingPath()
+        // Reproduces the last schema before areas cached per-language names and
+        // descriptions: version 105 with the area table but without the
+        // localized columns.
+        createVersion105Database(path)
+
+        val db = Database(BundledSQLiteDriver(), path)
+
+        try {
+            // The migration adds the columns and empties the cache, so the next
+            // sync re-seeds it from the refreshed bundled snapshot (which now
+            // carries the per-language fields) instead of re-downloading every
+            // area's polygon. An empty table also resets the delta cursor.
+            Assert.assertEquals(Database.VERSION, userVersion(db.conn))
+            Assert.assertTrue(areaColumns(db.conn).contains("localized_name"))
+            Assert.assertTrue(areaColumns(db.conn).contains("localized_description"))
+            Assert.assertEquals(0L, db.area.selectCount(includeDeleted = true))
+            Assert.assertNull(db.area.selectMaxUpdatedAt())
+        } finally {
+            db.conn.close()
+        }
+    }
+
+    @Test
     fun newerDatabase_isDiscardedAndRecreated() {
         val path = existingPath()
         createStaleDatabase(path, version = Database.VERSION + 1)
@@ -282,7 +327,7 @@ class DatabaseTest {
     @Test
     fun needsMigration_isTrueForTheNewestMigratableVersion() {
         val path = existingPath()
-        createVersion103Database(path)
+        createVersion105Database(path)
 
         Assert.assertTrue(Database.needsMigration(BundledSQLiteDriver(), path))
     }
@@ -443,7 +488,7 @@ class DatabaseTest {
             conn.execSQL(VERSION_102_PLACE_CREATE)
             conn.execSQL(VERSION_104_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
-            conn.execSQL(org.btcmap.db.table.area.CREATE)
+            conn.execSQL(VERSION_105_AREA_CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)
             conn.execSQL(
                 "INSERT INTO place (id, bundled, updated_at, lat, lon, icon, name) " +
@@ -465,7 +510,7 @@ class DatabaseTest {
             conn.execSQL(org.btcmap.db.table.place.CREATE)
             conn.execSQL(VERSION_104_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
-            conn.execSQL(org.btcmap.db.table.area.CREATE)
+            conn.execSQL(VERSION_105_AREA_CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
             conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
@@ -489,7 +534,7 @@ class DatabaseTest {
             conn.execSQL(org.btcmap.db.table.place.CREATE)
             conn.execSQL(VERSION_104_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
-            conn.execSQL(org.btcmap.db.table.area.CREATE)
+            conn.execSQL(VERSION_105_AREA_CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
             conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
@@ -505,6 +550,37 @@ class DatabaseTest {
                     "'2024-01-01T00:00:00Z');"
             )
             conn.execSQL("PRAGMA user_version=104;")
+        } finally {
+            conn.close()
+        }
+    }
+
+    /**
+     * The schema as of version 105: the current tables, with the area table
+     * still missing the per-language name/description columns.
+     */
+    private fun createVersion105Database(path: String) {
+        val conn = BundledSQLiteDriver().open(path)
+        try {
+            conn.execSQL(org.btcmap.db.table.place.CREATE)
+            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE)
+            conn.execSQL(VERSION_105_AREA_CREATE)
+            conn.execSQL(org.btcmap.db.table.preference.CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_OSM_ID)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_BOUNDS)
+            conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_BOUNDS)
+            conn.execSQL(org.btcmap.db.table.area.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(
+                "INSERT INTO area (id, name, type, url_alias, website_url, updated_at) " +
+                    "VALUES (1, 'Grand Paris', 'community', 'grand-paris', " +
+                    "'https://btcmap.org/community/grand-paris', '2024-01-01T00:00:00Z');"
+            )
+            conn.execSQL("PRAGMA user_version=105;")
         } finally {
             conn.close()
         }

@@ -38,6 +38,8 @@ class ValidateTest(unittest.TestCase):
                 icon="https://static.btcmap.org/images/communities/community.jpg",
                 icon_wide="https://static.btcmap.org/images/communities/community-wide.jpg",
                 description="A community",
+                localized_name={"en": "Community", "de": "Gemeinschaft"},
+                localized_description={"en": "A community"},
                 bbox=[-8.72, 42.325, -8.535, 42.535],
                 geo_json={"type": "Polygon", "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 0]]]},
             ),
@@ -109,6 +111,15 @@ class ValidateTest(unittest.TestCase):
     def test_rejects_non_object_geo_json(self):
         with self.assertRaises(RuntimeError):
             bundle_areas.validate([area(geo_json="Polygon")])
+
+    def test_accepts_missing_localized_maps(self):
+        bundle_areas.validate([area(localized_name=None, localized_description=None)])
+
+    def test_rejects_non_object_localized_field(self):
+        for field in bundle_areas.OPTIONAL_OBJECT_FIELDS:
+            with self.subTest(field=field):
+                with self.assertRaises(RuntimeError):
+                    bundle_areas.validate([area(**{field: "Community"})])
 
 
 if __name__ == "__main__":

@@ -124,6 +124,8 @@ internal fun JsonReader.readBundledArea(): Area {
     var iconWide: String? = null
     var websiteUrl: String? = null
     var description: String? = null
+    var localizedName: JsonObject? = null
+    var localizedDescription: JsonObject? = null
     var bbox: List<Double>? = null
     var geoJson: JsonObject? = null
     var updatedAt: ZonedDateTime? = null
@@ -138,6 +140,8 @@ internal fun JsonReader.readBundledArea(): Area {
             "icon_wide" -> iconWide = nextStringOrNull()
             "website_url" -> websiteUrl = nextStringOrNull()
             "description" -> description = nextStringOrNull()
+            "localized_name" -> localizedName = nextJsonObjectOrNull()
+            "localized_description" -> localizedDescription = nextJsonObjectOrNull()
             "bbox" -> bbox = nextDoubleListOrNull()
             "geo_json" -> geoJson = nextJsonObjectOrNull()
             "updated_at" -> updatedAt = nextStringOrNull()?.toZonedDateTimeOrNull()
@@ -181,5 +185,7 @@ internal fun JsonReader.readBundledArea(): Area {
         geoJson = geoJson?.toString(),
         updatedAt = areaUpdatedAt,
         deletedAt = null,
+        localizedName = localizedName,
+        localizedDescription = localizedDescription,
     )
 }

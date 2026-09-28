@@ -212,6 +212,8 @@ private fun GetAreasDeltaItem.toArea(): Area = Area(
     geoJson = geoJson,
     updatedAt = ZonedDateTime.parse(updatedAt),
     deletedAt = deletedAt?.toZonedDateTime(),
+    localizedName = localizedName,
+    localizedDescription = localizedDescription,
 )
 
 /**

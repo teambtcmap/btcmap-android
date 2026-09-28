@@ -26,6 +26,8 @@ class SchemaTest {
         assertEquals("geo_json", GEO_JSON)
         assertEquals("updated_at", UPDATED_AT)
         assertEquals("deleted_at", DELETED_AT)
+        assertEquals("localized_name", LOCALIZED_NAME)
+        assertEquals("localized_description", LOCALIZED_DESCRIPTION)
     }
 
     @Test
@@ -46,5 +48,7 @@ class SchemaTest {
         assert(CREATE.contains(GEO_JSON))
         assert(CREATE.contains(UPDATED_AT))
         assert(CREATE.contains(DELETED_AT))
+        assert(CREATE.contains(LOCALIZED_NAME))
+        assert(CREATE.contains(LOCALIZED_DESCRIPTION))
     }
 }

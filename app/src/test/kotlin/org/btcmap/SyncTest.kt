@@ -686,6 +686,8 @@ class SyncTest {
                             "icon_wide": null,
                             "website_url": "https://btcmap.org/community/grand-paris",
                             "description": "Greater Paris",
+                            "localized_name": {"en":"Grand Paris","ru":"Большой Париж"},
+                            "localized_description": {"ru":"Большой Париж"},
                             "bbox": [2.22, 48.81, 2.47, 48.91],
                             "geo_json": {"type":"Point","coordinates":[2.22,48.81]},
                             "updated_at": "2024-01-01T10:00:00Z",
@@ -714,6 +716,8 @@ class SyncTest {
         val area = db.area.selectById(7L)!!
         Assert.assertEquals("Grand Paris", area.name)
         Assert.assertEquals("Greater Paris", area.description)
+        Assert.assertEquals("Большой Париж", area.localizedName!!.get("ru").asString)
+        Assert.assertEquals("Большой Париж", area.localizedDescription!!.get("ru").asString)
         Assert.assertEquals(2.22, area.bboxWest!!, 0.0001)
         Assert.assertEquals(
             """{"type":"Point","coordinates":[2.22,48.81]}""",

@@ -2,6 +2,7 @@ package org.btcmap.db.table.area
 
 import androidx.sqlite.SQLiteConnection
 import org.btcmap.db.bindDoubleOrNull
+import org.btcmap.db.bindJsonObjectOrNull
 import org.btcmap.db.bindTextOrNull
 import org.btcmap.db.bindZonedDateTime
 import org.btcmap.db.bindZonedDateTimeOrNull
@@ -19,8 +20,8 @@ class AreaQueries(private val conn: SQLiteConnection) {
         // the whole sync transaction with a primary-key conflict.
         conn.prepare(
             """
-            INSERT OR REPLACE INTO $TABLE ($ID, $NAME, $TYPE, $URL_ALIAS, $ICON, $ICON_WIDE, $WEBSITE_URL, $DESCRIPTION, $BBOX_WEST, $BBOX_SOUTH, $BBOX_EAST, $BBOX_NORTH, $GEO_JSON, $UPDATED_AT, $DELETED_AT)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15);
+            INSERT OR REPLACE INTO $TABLE ($ID, $NAME, $TYPE, $URL_ALIAS, $ICON, $ICON_WIDE, $WEBSITE_URL, $DESCRIPTION, $BBOX_WEST, $BBOX_SOUTH, $BBOX_EAST, $BBOX_NORTH, $GEO_JSON, $UPDATED_AT, $DELETED_AT, $LOCALIZED_NAME, $LOCALIZED_DESCRIPTION)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17);
             """
         ).use { stmt ->
             rows.forEach { row ->
@@ -39,6 +40,8 @@ class AreaQueries(private val conn: SQLiteConnection) {
                 stmt.bindTextOrNull(13, row.geoJson)
                 stmt.bindZonedDateTime(14, row.updatedAt)
                 stmt.bindZonedDateTimeOrNull(15, row.deletedAt)
+                stmt.bindJsonObjectOrNull(16, row.localizedName)
+                stmt.bindJsonObjectOrNull(17, row.localizedDescription)
                 stmt.step()
                 stmt.reset()
             }

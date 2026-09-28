@@ -3,8 +3,10 @@
 
 Fetches every area from the BTC Map API and writes it to
 ``app/src/main/assets/bundled-areas.json``. Like the places snapshot, it carries
-the full field set the app syncs, including the full ``geo_json`` polygon and
-each area's real ``updated_at``, so a seeded row is a complete record. The first
+the full field set the app syncs, including the full ``geo_json`` polygon,
+each area's real ``updated_at`` and its ``localized_name`` /
+``localized_description`` maps, so a seeded row is a complete record and the
+UI can localize offline. The first
 sync therefore only has to fetch the delta since the snapshot was generated, and
 community and country chips work offline (and while the server is unreachable)
 without downloading megabytes of polygons first.
@@ -43,6 +45,8 @@ FIELDS = (
     "icon_wide",
     "website_url",
     "description",
+    "localized_name",
+    "localized_description",
     "bbox",
     "geo_json",
     "updated_at",
@@ -57,6 +61,10 @@ REQUIRED_FIELDS = ("id", "name", "type", "url_alias", "website_url", "updated_at
 
 # Optional free-text fields.
 OPTIONAL_STRING_FIELDS = ("icon", "icon_wide", "description")
+
+# Optional per-language maps, keyed by two-letter language code, built by the
+# API from the area's `name:<lang>` / `description:<lang>` tags.
+OPTIONAL_OBJECT_FIELDS = ("localized_name", "localized_description")
 
 
 def user_agent() -> str:
@@ -136,6 +144,11 @@ def validate(areas: list) -> None:
             value = area.get(field)
             if value is not None and not isinstance(value, str):
                 raise RuntimeError(f"area {area_id} has a non-string '{field}'")
+
+        for field in OPTIONAL_OBJECT_FIELDS:
+            value = area.get(field)
+            if value is not None and not isinstance(value, dict):
+                raise RuntimeError(f"area {area_id} has a non-object '{field}'")
 
         # The app stores bbox as four separate columns, so the snapshot must
         # carry exactly west, south, east, north or nothing at all.

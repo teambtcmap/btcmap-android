@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.AreaFragmentBinding
 import org.btcmap.db.table.area.Area
+import org.btcmap.i18n.getLocalizedName
 import org.btcmap.offline.OfflineAreaState
 import org.btcmap.offline.OfflineBounds
 import org.btcmap.offline.OfflineRegionEstimates
@@ -140,7 +141,8 @@ internal class AreaOfflineMapController(
         val slider = view.findViewById<Slider>(R.id.zoom_slider)
         val estimate = view.findViewById<TextView>(R.id.estimate)
 
-        description.text = fragment.getString(R.string.offline_map_description, area.name)
+        description.text =
+            fragment.getString(R.string.offline_map_description, area.getLocalizedName())
         style.text = fragment.getString(
             R.string.offline_map_style,
             prefs.mapStyle.name(context),
@@ -201,7 +203,7 @@ internal class AreaOfflineMapController(
             try {
                 fragment.offlineMaps().download(
                     areaId = area.id,
-                    areaName = area.name,
+                    areaName = area.getLocalizedName(),
                     bounds = bounds,
                     styleUrl = prefs.mapStyle.offlineStyleUrl(fragment.requireContext()),
                     maxZoom = maxZoom,

@@ -15,6 +15,7 @@ import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.area.AreaGeometry
 import org.btcmap.db.table.area.geoJsonGeometry
 import org.btcmap.db.table.event.isWithin
+import org.btcmap.i18n.getLocalizedName
 import org.btcmap.util.isUpcoming
 import java.time.ZonedDateTime
 
@@ -95,7 +96,7 @@ class MapAreasController(
         return contained.map { (area, _) ->
             MapArea(
                 id = area.id,
-                name = area.name,
+                name = area.getLocalizedName(),
                 type = area.type,
                 urlAlias = area.urlAlias,
                 upcomingEventsCount = counts[area.id] ?: 0,

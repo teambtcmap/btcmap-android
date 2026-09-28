@@ -1,6 +1,7 @@
 package org.btcmap.db.table.area
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.google.gson.JsonParser
 import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
@@ -54,6 +55,28 @@ class AreaQueriesTest {
     }
 
     @Test
+    fun insert_and_selectLocalizedMaps() {
+        val db = createDatabase()
+        val nameTranslations =
+            JsonParser.parseString("""{"en":"Grand Paris","ru":"Большой Париж"}""").asJsonObject
+        val descriptionTranslations =
+            JsonParser.parseString("""{"en":"Greater Paris"}""").asJsonObject
+
+        db.area.insert(
+            listOf(
+                area(7L).copy(
+                    localizedName = nameTranslations,
+                    localizedDescription = descriptionTranslations,
+                )
+            )
+        )
+
+        val result = db.area.selectById(7L)!!
+        Assert.assertEquals(nameTranslations, result.localizedName)
+        Assert.assertEquals(descriptionTranslations, result.localizedDescription)
+    }
+
+    @Test
     fun insert_and_selectGeoJson() {
         val db = createDatabase()
         val polygon = """{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[2.22,48.81],[2.47,48.81],[2.47,48.91],[2.22,48.81]]]}}"""
@@ -85,6 +108,8 @@ class AreaQueriesTest {
         Assert.assertNull(result.description)
         Assert.assertNull(result.bboxWest)
         Assert.assertNull(result.geoJson)
+        Assert.assertNull(result.localizedName)
+        Assert.assertNull(result.localizedDescription)
     }
 
     @Test

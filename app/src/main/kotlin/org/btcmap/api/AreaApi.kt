@@ -34,6 +34,11 @@ data class GetAreasDeltaItem(
     val iconWide: String?,
     val websiteUrl: String,
     val description: String?,
+    // Per-language `name:<lang>` / `description:<lang>` maps keyed by a
+    // two-letter code, merged into one object by the API. Null when the area
+    // carries no translation for any language.
+    val localizedName: JsonObject?,
+    val localizedDescription: JsonObject?,
     val bboxWest: Double?,
     val bboxSouth: Double?,
     val bboxEast: Double?,
@@ -45,7 +50,8 @@ data class GetAreasDeltaItem(
 )
 
 private const val AREA_DELTA_FIELDS =
-    "id,name,type,url_alias,icon,icon_wide,website_url,description,bbox,geo_json,updated_at,deleted_at"
+    "id,name,type,url_alias,icon,icon_wide,website_url,description,localized_name," +
+        "localized_description,bbox,geo_json,updated_at,deleted_at"
 
 suspend fun Api.getAreas(updatedSince: ZonedDateTime, limit: Long): List<GetAreasDeltaItem> {
     val url = buildUrl("v4", "areas") {
@@ -99,6 +105,8 @@ private fun JsonObject.toGetAreasDeltaItem(): GetAreasDeltaItem {
         iconWide = nonBlankStringOrNull("icon_wide"),
         websiteUrl = string("website_url"),
         description = nonBlankStringOrNull("description"),
+        localizedName = objectOrNull("localized_name"),
+        localizedDescription = objectOrNull("localized_description"),
         bboxWest = bbox?.get(0),
         bboxSouth = bbox?.get(1),
         bboxEast = bbox?.get(2),

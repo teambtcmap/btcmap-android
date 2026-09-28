@@ -63,6 +63,8 @@ class BundledAreasTest {
               "icon_wide": "https://static.btcmap.org/images/communities/grand-paris-wide.jpg",
               "website_url": "https://btcmap.org/community/grand-paris",
               "description": "A community",
+              "localized_name": {"en": "Grand Paris", "ru": "Большой Париж"},
+              "localized_description": {"en": "A community"},
               "bbox": [2.22, 48.81, 2.47, 48.91],
               "geo_json": {"type": "Polygon", "coordinates": [[[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 0.0]]]},
               "updated_at": "2026-03-01T12:00:00Z",
@@ -86,6 +88,14 @@ class BundledAreasTest {
         )
         Assert.assertEquals("https://btcmap.org/community/grand-paris", area.websiteUrl)
         Assert.assertEquals("A community", area.description)
+        Assert.assertEquals(
+            JsonParser.parseString("""{"en":"Grand Paris","ru":"Большой Париж"}"""),
+            area.localizedName,
+        )
+        Assert.assertEquals(
+            JsonParser.parseString("""{"en":"A community"}"""),
+            area.localizedDescription,
+        )
         Assert.assertEquals(2.22, area.bboxWest!!, 0.0)
         Assert.assertEquals(48.81, area.bboxSouth!!, 0.0)
         Assert.assertEquals(2.47, area.bboxEast!!, 0.0)
@@ -118,6 +128,8 @@ class BundledAreasTest {
         Assert.assertNull(area.icon)
         Assert.assertNull(area.iconWide)
         Assert.assertNull(area.description)
+        Assert.assertNull(area.localizedName)
+        Assert.assertNull(area.localizedDescription)
         Assert.assertNull(area.bboxWest)
         Assert.assertNull(area.bboxSouth)
         Assert.assertNull(area.bboxEast)
@@ -213,6 +225,27 @@ class BundledAreasTest {
         Assert.assertNull(reader(json).readBundledArea().geoJson)
     }
 
+    @Test
+    fun readBundledArea_degradesNonObjectLocalizedFieldsToNull() {
+        val json = """
+            {
+              "id": 1,
+              "name": "Community",
+              "type": "community",
+              "url_alias": "community",
+              "website_url": "https://btcmap.org/community/community",
+              "updated_at": "2026-03-01T12:00:00Z",
+              "localized_name": "Community",
+              "localized_description": ["A community"]
+            }
+        """.trimIndent()
+
+        val area = reader(json).readBundledArea()
+
+        Assert.assertNull(area.localizedName)
+        Assert.assertNull(area.localizedDescription)
+    }
+
     // --- seeding ----------------------------------------------------------------
 
     @Test
@@ -220,7 +253,7 @@ class BundledAreasTest {
         val db = createDatabase()
         val json = """
             [
-              {"id":1,"name":"One","type":"community","url_alias":"one","website_url":"https://example.com/1","icon":"https://example.com/1.jpg","bbox":[1.0,2.0,3.0,4.0],"geo_json":{"type":"Polygon","coordinates":[]},"updated_at":"2026-03-01T12:00:00Z"},
+              {"id":1,"name":"One","type":"community","url_alias":"one","website_url":"https://example.com/1","icon":"https://example.com/1.jpg","localized_name":{"en":"One"},"bbox":[1.0,2.0,3.0,4.0],"geo_json":{"type":"Polygon","coordinates":[]},"updated_at":"2026-03-01T12:00:00Z"},
               {"id":2,"name":"Two","type":"country","url_alias":"two","website_url":"https://example.com/2","description":"","updated_at":"2026-04-01T12:00:00Z"}
             ]
         """.trimIndent()
@@ -240,6 +273,10 @@ class BundledAreasTest {
         Assert.assertEquals(1.0, first.bboxWest!!, 0.0)
         Assert.assertEquals(4.0, first.bboxNorth!!, 0.0)
         Assert.assertNotNull(first.geoJson)
+        Assert.assertEquals(
+            JsonParser.parseString("""{"en":"One"}"""),
+            first.localizedName,
+        )
         Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), first.updatedAt)
 
         val second = db.area.selectById(2L)

@@ -18,6 +18,12 @@ const val GEO_JSON = "geo_json"
 const val UPDATED_AT = "updated_at"
 const val DELETED_AT = "deleted_at"
 
+// Per-language `name:<lang>` / `description:<lang>` maps stored as JSON text,
+// keyed by a two-letter language code, or null when the area has no
+// translation. See i18n/Area.kt for how the locale is resolved.
+const val LOCALIZED_NAME = "localized_name"
+const val LOCALIZED_DESCRIPTION = "localized_description"
+
 const val CREATE = """
     CREATE TABLE $TABLE (
         $ID INTEGER PRIMARY KEY NOT NULL,
@@ -34,7 +40,9 @@ const val CREATE = """
         $BBOX_NORTH REAL,
         $GEO_JSON TEXT,
         $UPDATED_AT TEXT NOT NULL,
-        $DELETED_AT TEXT
+        $DELETED_AT TEXT,
+        $LOCALIZED_NAME TEXT,
+        $LOCALIZED_DESCRIPTION TEXT
     );
  """
 

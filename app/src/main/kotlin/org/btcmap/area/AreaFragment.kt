@@ -31,6 +31,8 @@ import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.db.table.area.Area
 import org.btcmap.databinding.AreaFragmentBinding
+import org.btcmap.i18n.getLocalizedDescription
+import org.btcmap.i18n.getLocalizedName
 import org.btcmap.saved.isAreaSaved
 import org.btcmap.saved.toggleSavedArea
 import org.btcmap.settings.authorized
@@ -155,13 +157,13 @@ class AreaFragment : Fragment() {
     }
 
     private fun renderArea(area: Area) {
-        areaName = area.name
-        binding.toolbar.title = area.name
+        areaName = area.getLocalizedName()
+        binding.toolbar.title = area.getLocalizedName()
         val headerImage = area.iconWide ?: area.icon
         binding.icon.isVisible = headerImage != null
         binding.icon.load(headerImage)
         updateToolbarContentColor()
-        renderDescription(area.description)
+        renderDescription(area.getLocalizedDescription())
         binding.website.text = websiteDisplayText(area.websiteUrl)
         binding.toolbar.menu.findItem(R.id.save).isEnabled = true
         updateBookmarkIcon()

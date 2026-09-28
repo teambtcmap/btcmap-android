@@ -25,7 +25,7 @@ class Database(driver: SQLiteDriver, val path: String) {
          * project's history, so the stale file can be told apart from ours by
          * the pragma alone (see [initialize]).
          */
-        const val VERSION = 105
+        const val VERSION = 106
 
         /**
          * The first version this app is responsible for upgrading. Anything
@@ -309,6 +309,30 @@ class Database(driver: SQLiteDriver, val path: String) {
                     conn.execSQL("ALTER TABLE event_new RENAME TO event;")
                     conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_UPDATED_AT)
                     conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_BOUNDS)
+                }
+
+                105 -> {
+                    // Areas now cache their per-language names and descriptions
+                    // so the UI can localize offline like it already does for
+                    // places. Add the columns and clear the cached areas so the
+                    // refreshed bundled snapshot re-seeds them with the new
+                    // fields on the next sync.
+                    //
+                    // Clearing beats merely rewinding the sync cursor: rewinding
+                    // would make the delta sync re-download every area's polygon
+                    // from the API, while the seed reads the asset offline and
+                    // leaves only a small delta. It is safe because areas are a
+                    // pure cache, saved areas live server-side, and the delta
+                    // sync re-adds any tombstone newer than the snapshot.
+                    conn.execSQL(
+                        "ALTER TABLE ${org.btcmap.db.table.area.TABLE} " +
+                            "ADD COLUMN ${org.btcmap.db.table.area.LOCALIZED_NAME} TEXT;"
+                    )
+                    conn.execSQL(
+                        "ALTER TABLE ${org.btcmap.db.table.area.TABLE} " +
+                            "ADD COLUMN ${org.btcmap.db.table.area.LOCALIZED_DESCRIPTION} TEXT;"
+                    )
+                    conn.execSQL("DELETE FROM ${org.btcmap.db.table.area.TABLE};")
                 }
 
                 else -> throw Exception("migration is missing for version $version")
