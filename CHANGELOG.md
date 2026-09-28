@@ -238,6 +238,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Move settings and the stored session into the database so signing in and out updates the token and cached account atomically
 - Fade the map sync icon in and out and spin it while a sync is running
 - Update the map sync icon artwork
+- Keep the map from crashing when the location-permission result arrives after the screen is gone
+- Escape a place's icon name when building the map's marker data, so a malformed icon can no longer hide every marker
+- Bound the map's parsed-area cache by total polygon size, not just entry count, so panning across large country polygons cannot grow memory without limit
 
 ## [1.1.0] - 2026-03-30
 

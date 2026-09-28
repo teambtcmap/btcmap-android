@@ -27,6 +27,14 @@ internal class AreaGeometry private constructor(
     private val polygons: List<Polygon>,
     private val lines: List<LineString>,
 ) {
+    /**
+     * The total number of ring/line points, used to bound the map's geometry
+     * cache by memory rather than by entry count alone.
+     */
+    val pointCount: Int =
+        polygons.sumOf { polygon -> polygon.coordinates().sumOf { it.size } } +
+            lines.sumOf { it.coordinates().size }
+
     fun contains(lat: Double, lon: Double): Boolean {
         return polygons.any { it.contains(lon, lat) } || lines.any { it.contains(lon, lat) }
     }

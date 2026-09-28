@@ -208,6 +208,50 @@ cmd_website() {
 
 # END website section
 
+# START cdn section
+
+# BunnyCDN API key for the static.btcmap.org pull zone. Set BUNNY_API_KEY in
+# the environment or add `bunny.api.key=...` to local.properties.
+bunny_api_key() {
+  if [ -n "${BUNNY_API_KEY:-}" ]; then
+    printf '%s' "$BUNNY_API_KEY"
+    return 0
+  fi
+  local key
+  key="$(sed -n 's/^bunny\.api\.key=//p' local.properties 2>/dev/null | head -n1)"
+  if [ -n "$key" ]; then
+    printf '%s' "$key"
+    return 0
+  fi
+  return 1
+}
+
+assert_bunny_api_key() {
+  if ! bunny_api_key >/dev/null; then
+    err "no BunnyCDN API key; refusing to deploy without purging the CDN cache."
+    err "Set BUNNY_API_KEY in the environment or add 'bunny.api.key=...' to local.properties."
+    return 1
+  fi
+}
+
+# Purge absolute CDN URLs from the Bunny edge cache, waiting for the purge to
+# complete so a request right after the deploy cannot hit a stale object.
+purge_cdn() {
+  local key
+  key="$(bunny_api_key)" || return 1
+  local url
+  for url in "$@"; do
+    echo "Purging $url from the CDN..."
+    curl -fsS -X POST -G \
+      --data-urlencode "url=$url" \
+      --data-urlencode "async=false" \
+      -H "AccessKey: $key" \
+      "https://api.bunny.net/purge" >/dev/null
+  done
+}
+
+# END cdn section
+
 # START app section
 
 cmd_app_install() {
@@ -285,6 +329,8 @@ cmd_app_uninstall() {
 }
 
 cmd_app_deploy_beta() {
+  assert_bunny_api_key
+
   ./gradlew assembleBeta "$@"
 
   local apk_dir="app/build/outputs/apk/beta"
@@ -318,6 +364,13 @@ JSON
   rsync -avz --progress "$apk_dir"/app-universal-beta.apk "$dest/beta-universal.apk"
   rsync -avz --progress --chmod=F644 "$manifest" "$manifest_dest"
   rm -f "$manifest"
+
+  # The APK and manifest are overwritten in place, so the pull zone would keep
+  # serving its cached copy for the full max-age window unless we purge it.
+  purge_cdn \
+    "https://cdn.static.btcmap.org/android/apk/beta.apk" \
+    "https://cdn.static.btcmap.org/android/apk/beta-universal.apk" \
+    "https://cdn.static.btcmap.org/android/latest-app-beta-ver.json"
 }
 
 cmd_app_deploy_release() {

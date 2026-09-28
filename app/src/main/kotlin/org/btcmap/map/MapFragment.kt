@@ -100,6 +100,10 @@ class MapFragment : Fragment() {
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
     ) {
+        // The result can be delivered after the view is gone (the callback is
+        // not view-lifecycle-scoped); there is nothing left to build a location
+        // component on, and touching the binding would throw.
+        if (_binding == null) return@registerForActivityResult
         if (it.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
             ensureLocationController().onPermissionGranted(requireContext(), animateToFirstKnown = true)
         }

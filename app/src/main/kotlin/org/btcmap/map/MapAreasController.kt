@@ -39,14 +39,13 @@ class MapAreasController(
 
     // Parsed geometry is expensive to rebuild (a country's polygon can be
     // large) and only changes when the area is resynced, so it is kept by area
-    // id and invalidated on updated_at. It is an access-ordered LRU capped at
-    // [MAX_CACHED_GEOMETRIES] so a long session, or areas deleted server-side,
-    // cannot grow it without limit.
-    private val geometryCache = object : LinkedHashMap<Long, CachedGeometry>(16, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Long, CachedGeometry>?): Boolean {
-            return size > MAX_CACHED_GEOMETRIES
-        }
-    }
+    // id and invalidated on updated_at. The access-ordered LRU is bounded by
+    // both entry count and total points so a long session, or areas deleted
+    // server-side, cannot grow it without limit.
+    private val geometryCache = AreaGeometryCache(
+        maxEntries = MAX_CACHED_GEOMETRIES,
+        maxPoints = MAX_CACHED_GEOMETRY_POINTS,
+    )
 
     private val _areas = MutableStateFlow<List<MapArea>>(emptyList())
     val areas: StateFlow<List<MapArea>> = _areas.asStateFlow()
@@ -116,14 +115,7 @@ class MapAreasController(
         // nullary work does not suspend), so two lookups can touch the cache at
         // once. Holding the lock while parsing also avoids parsing twice.
         return synchronized(geometryCache) {
-            val cached = geometryCache[area.id]
-            if (cached != null && cached.updatedAt == area.updatedAt) {
-                cached.geometry
-            } else {
-                area.geoJsonGeometry().also {
-                    geometryCache[area.id] = CachedGeometry(area.updatedAt, it)
-                }
-            }
+            geometryCache.getOrPut(area.id, area.updatedAt) { area.geoJsonGeometry() }
         }
     }
 
@@ -151,11 +143,6 @@ class MapAreasController(
         }
     }
 
-    private class CachedGeometry(
-        val updatedAt: ZonedDateTime,
-        val geometry: AreaGeometry,
-    )
-
     companion object {
         // The server expands the search box before its bbox pre-filter so that
         // an area whose bounding box does not contain the point but whose
@@ -169,5 +156,10 @@ class MapAreasController(
         private const val EARTH_ALIAS = "earth"
 
         internal const val MAX_CACHED_GEOMETRIES = 256
+
+        // The entry cap still allows a lot of coordinate memory when every
+        // cached area is a country-sized polygon, so the total is capped too.
+        // The bundled snapshot's largest polygon is ~12k points.
+        internal const val MAX_CACHED_GEOMETRY_POINTS = 200_000
     }
 }
