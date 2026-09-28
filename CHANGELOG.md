@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Bundle a low-zoom world basemap and the map labels' glyphs, so the map still draws offline, keeping any tile it has already cached in full detail and falling back to the bundled world map only where it has none
+- Use the OpenFreeMap dark style for Auto at night and remove the Carto Dark Matter style, so every style now shares one source and the same offline behaviour
 - Show and search places and events near the antimeridian, by wrapping the viewport query the short way around instead of asking the database for a longitude range it can never hold
 - Stop the map leaking a viewport query, its marker data and its source collector every time the merchant, event or exchange filter changes, and bound the marker and area caches so a long session no longer grows without limit
 - Load a place tapped in search off the main thread so the map no longer stutters, and dispose the search controller with the view instead of leaving its scope behind

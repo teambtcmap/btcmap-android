@@ -256,7 +256,6 @@ class SettingsFragment : Fragment() {
                 invoke(dialog.findViewById(R.id.positron), MapStyle.Positron)
                 invoke(dialog.findViewById(R.id.bright), MapStyle.Bright)
                 invoke(dialog.findViewById(R.id.dark), MapStyle.Dark)
-                invoke(dialog.findViewById(R.id.carto_dark_matter), MapStyle.CartoDarkMatter)
             }
         }
     }

@@ -2,8 +2,12 @@ package org.btcmap.map
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.content.res.Configuration
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,6 +47,7 @@ import org.btcmap.area.ARG_AREA_ID
 import org.btcmap.area.AreaFragment
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
+import org.btcmap.bundle.BundledBasemap
 import org.btcmap.db
 import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.MapFragmentBinding
@@ -53,7 +58,6 @@ import org.btcmap.place.PlaceFragment
 import org.btcmap.place.isMerchant
 import org.btcmap.search.SearchAdapter
 import org.btcmap.search.SearchAdapterItem
-import org.btcmap.settings.MapStyle
 import org.btcmap.settings.SettingsFragment
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authorized
@@ -176,16 +180,22 @@ class MapFragment : Fragment() {
         }
 
         val app = requireContext().applicationContext as App
+        val styleUri = app.mapStyleUriForTesting ?: prefs.mapStyle.uri(requireContext())
         mapSetupController = MapSetupController(
             mapView = binding.map,
-            styleUri = app.mapStyleUriForTesting ?: prefs.mapStyle.uri(requireContext()),
+            styleUri = styleUri,
+            bundledStyle = bundledBasemapStyle(app, styleUri),
             markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
             markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
             markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
             boostedMarkerBackgroundColor = prefs.boostedMarkerBackgroundColor(),
-            usingOpenFreeMap = app.mapStyleUriForTesting == null && usingOpenFreeMap(),
+            usingOpenFreeMap = app.mapStyleUriForTesting == null,
             rotationEnabled = prefs.mapRotationEnabled,
-        ).also { it.install() }
+        ).also {
+            it.install()
+            it.setOffline(!isOnline())
+        }
+        registerConnectivity()
 
         binding.showMerchants.setOnClickListener { setFilter(Filter.MERCHANTS) }
         binding.showEvents.setOnClickListener { setFilter(Filter.EVENTS) }
@@ -528,6 +538,11 @@ class MapFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        connectivityCallback?.let { callback ->
+            requireContext().getSystemService(ConnectivityManager::class.java)
+                ?.unregisterNetworkCallback(callback)
+        }
+        connectivityCallback = null
         searchDebounceJob?.cancel()
         searchDebounceJob = null
         searchController.dispose()
@@ -622,15 +637,57 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun usingOpenFreeMap(): Boolean {
-        val nightMode =
-            requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+    /**
+     * The bundled-basemap rewrite of [styleUri], or null when the archive is
+     * unavailable or a test pinned a style of its own.
+     */
+    private fun bundledBasemapStyle(app: App, styleUri: String): BundledBasemapStyle? {
+        if (app.mapStyleUriForTesting != null) return null
+        val archive = app.bundledBasemapFile ?: return null
+        return bundledBasemapStyleJson(
+            context = requireContext(),
+            styleUri = styleUri,
+            pmtilesUrl = BundledBasemap.pmtilesUrl(archive),
+        )
+    }
 
-        return when (prefs.mapStyle) {
-            MapStyle.Auto -> !nightMode
-            MapStyle.CartoDarkMatter -> false
-            else -> true
+    private val connectivityHandler = Handler(Looper.getMainLooper())
+
+    private var connectivityCallback: ConnectivityManager.NetworkCallback? = null
+
+    private fun isOnline(): Boolean {
+        val manager = requireContext().getSystemService(ConnectivityManager::class.java)
+            ?: return false
+        val capabilities = manager.activeNetwork?.let { manager.getNetworkCapabilities(it) }
+        return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+    }
+
+    /**
+     * Flips the bundled basemap between the split (online) and all-overzoomed
+     * (offline) behaviour as the network comes and goes. The map redraws the
+     * hosted tiles by itself once they can be fetched again.
+     */
+    private fun registerConnectivity() {
+        val manager = requireContext().getSystemService(ConnectivityManager::class.java) ?: return
+
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) = refresh()
+            override fun onLost(network: Network) = refresh()
+            override fun onCapabilitiesChanged(
+                network: Network,
+                capabilities: NetworkCapabilities,
+            ) = refresh()
+
+            private fun refresh() {
+                connectivityHandler.post {
+                    val online = isOnline()
+                    mapSetupController?.setOffline(!online)
+                }
+            }
         }
+
+        manager.registerDefaultNetworkCallback(callback)
+        connectivityCallback = callback
     }
 
     private fun showCache(factory: () -> ViewportCache<*>) {

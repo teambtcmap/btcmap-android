@@ -89,8 +89,8 @@ class SettingsPersistenceTest : AppTestCase() {
     @Test
     fun mapStyle_rendersLocalizedResourceName() {
         Assert.assertEquals(
-            preferencesRule.context.getString(R.string.style_carto_dark_matter),
-            MapStyle.CartoDarkMatter.name(preferencesRule.context),
+            preferencesRule.context.getString(R.string.style_dark),
+            MapStyle.Dark.name(preferencesRule.context),
         )
     }
 

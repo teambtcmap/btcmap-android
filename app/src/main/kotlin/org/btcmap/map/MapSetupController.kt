@@ -9,11 +9,19 @@ import org.btcmap.map.layer.createExchangeLayers
 import org.btcmap.map.layer.createMerchantLayers
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.Property
+import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonSource
 
-class MapSetupController(
+internal class MapSetupController(
     private val mapView: MapView,
     private val styleUri: String,
+    /**
+     * The bundled-basemap rewrite of the style (see [rewriteForBundledBasemap]),
+     * or null to load [styleUri] as-is. It also carries the layer ids flipped
+     * when connectivity changes.
+     */
+    private val bundledStyle: BundledBasemapStyle? = null,
     private val markerBackgroundColor: Int,
     private val markerBadgeBackgroundColor: Int,
     private val markerBadgeTextColor: Int,
@@ -22,6 +30,13 @@ class MapSetupController(
     private val rotationEnabled: Boolean,
 ) {
     private var style: Style? = null
+
+    /**
+     * Whether the bundled low-zoom tiles should overzoom all the way up. Set by
+     * [setOffline] from the connectivity callbacks, and applied again whenever
+     * the style (re)loads so the first frame already matches the network.
+     */
+    private var offline = false
 
     /**
      * Kept per controller (and so per map view), not process-wide, so a new map
@@ -53,7 +68,13 @@ class MapSetupController(
     fun install() {
         markerImageRegistry.clear()
         mapView.getMapAsync { map ->
-            map.setStyle(Style.Builder().fromUri(styleUri))
+            map.setStyle(
+                if (bundledStyle != null) {
+                    Style.Builder().fromJson(bundledStyle.json)
+                } else {
+                    Style.Builder().fromUri(styleUri)
+                },
+            )
             map.uiSettings.setCompassMargins(0, dpToPx(120 + 16), dpToPx(16), 0)
             map.uiSettings.isLogoEnabled = false
             map.uiSettings.isAttributionEnabled = false
@@ -87,7 +108,33 @@ class MapSetupController(
                 events.second.forEach { style.addLayer(it) }
                 style.addSource(exchanges.first)
                 exchanges.second.forEach { style.addLayer(it) }
+
+                applyOffline()
             }
+        }
+    }
+
+    /**
+     * Switches the bundled basemap between the split (online) and the
+     * all-overzoomed (offline) behaviour. Safe to call before the style has
+     * loaded: the state is applied when it does.
+     */
+    fun setOffline(offline: Boolean) {
+        this.offline = offline
+        applyOffline()
+    }
+
+    private fun applyOffline() {
+        val style = style ?: return
+        val bundled = bundledStyle ?: return
+
+        // Offline shows the archive under the hosted layers, so a tile MapLibre
+        // has cached still draws in detail and only the rest falls back to the
+        // overzoomed z4. Online the fallback is hidden and the hosted tiles are
+        // used at every zoom.
+        val visibility = if (offline) Property.VISIBLE else Property.NONE
+        for (id in bundled.fallbackLayers) {
+            style.getLayer(id)?.setProperties(PropertyFactory.visibility(visibility))
         }
     }
 

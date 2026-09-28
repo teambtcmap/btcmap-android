@@ -14,6 +14,7 @@ import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 
 const val EVENT_MARKER_LAYER_ID = "event_marker"
+const val EVENT_CLUSTER_COUNT_LAYER_ID = "event_cluster_count"
 
 fun createEventLayers(
     markerBackgroundColor: Int,
@@ -45,7 +46,7 @@ fun createEventLayers(
     }
 
     val clusterCount =
-        SymbolLayer("event_cluster_count", source.id).apply {
+        SymbolLayer(EVENT_CLUSTER_COUNT_LAYER_ID, source.id).apply {
             if (usingOpenFreeMap) {
                 setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Regular")))
             }

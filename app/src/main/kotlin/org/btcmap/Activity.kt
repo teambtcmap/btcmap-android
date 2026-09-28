@@ -26,14 +26,17 @@ class Activity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val app = application as App
-        if (app.databaseReady.isCompleted) {
+        if (app.databaseReady.isCompleted && app.basemapReady.isCompleted) {
             setUpContent(savedInstanceState)
         } else {
             // The database is being opened (and migrated, when needed) off the
             // main thread. Building the first screen before it is ready would
-            // open it on the main thread, so wait for it without blocking.
+            // open it on the main thread, so wait for it without blocking. The
+            // bundled basemap is awaited too, so the map does not start on the
+            // hosted style only to swap once the archive is extracted.
             lifecycleScope.launch {
                 app.databaseReady.await()
+                app.basemapReady.await()
                 setUpContent(savedInstanceState)
             }
         }

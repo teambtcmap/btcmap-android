@@ -60,7 +60,6 @@ enum class MapStyle {
     Positron,
     Bright,
     Dark,
-    CartoDarkMatter,
 }
 
 private fun mapStyleFromPrefValue(pref: String): MapStyle {
@@ -70,7 +69,6 @@ private fun mapStyleFromPrefValue(pref: String): MapStyle {
         "positron" -> MapStyle.Positron
         "bright" -> MapStyle.Bright
         "dark" -> MapStyle.Dark
-        "carto_dark_matter" -> MapStyle.CartoDarkMatter
         else -> MapStyle.Auto
     }
 }
@@ -82,7 +80,6 @@ fun MapStyle.toPrefValue(): String {
         MapStyle.Positron -> "positron"
         MapStyle.Bright -> "bright"
         MapStyle.Dark -> "dark"
-        MapStyle.CartoDarkMatter -> "carto_dark_matter"
     }
 }
 
@@ -93,7 +90,6 @@ fun MapStyle.name(context: Context): String {
         MapStyle.Positron -> context.getString(R.string.style_positron)
         MapStyle.Bright -> context.getString(R.string.style_bright)
         MapStyle.Dark -> context.getString(R.string.style_dark)
-        MapStyle.CartoDarkMatter -> context.getString(R.string.style_carto_dark_matter)
     }
 }
 
@@ -101,7 +97,7 @@ fun MapStyle.uri(context: Context): String {
     return when (this) {
         MapStyle.Auto -> {
             if (isNightMode(context)) {
-                "asset://map-styles/carto-dark-matter/style.json"
+                "asset://map-styles/dark/style.json"
             } else {
                 "asset://map-styles/light/style.json"
             }
@@ -111,7 +107,6 @@ fun MapStyle.uri(context: Context): String {
         MapStyle.Positron -> "asset://map-styles/positron/style.json"
         MapStyle.Bright -> "asset://map-styles/bright/style.json"
         MapStyle.Dark -> "asset://map-styles/dark/style.json"
-        MapStyle.CartoDarkMatter -> "asset://map-styles/carto-dark-matter/style.json"
     }
 }
 
@@ -127,7 +122,7 @@ fun MapStyle.uri(context: Context): String {
 fun MapStyle.offlineStyleUrl(context: Context): String {
     return when (this) {
         MapStyle.Auto -> if (isNightMode(context)) {
-            CARTO_DARK_MATTER_STYLE_URL
+            DARK_STYLE_URL
         } else {
             LIGHT_STYLE_URL
         }
@@ -136,7 +131,6 @@ fun MapStyle.offlineStyleUrl(context: Context): String {
         MapStyle.Positron -> POSITRON_STYLE_URL
         MapStyle.Bright -> BRIGHT_STYLE_URL
         MapStyle.Dark -> DARK_STYLE_URL
-        MapStyle.CartoDarkMatter -> CARTO_DARK_MATTER_STYLE_URL
     }
 }
 
@@ -150,12 +144,10 @@ private const val DARK_STYLE_URL = "https://static.btcmap.org/map-styles/dark.js
 private const val LIBERTY_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
 private const val POSITRON_STYLE_URL = "https://tiles.openfreemap.org/styles/positron"
 private const val BRIGHT_STYLE_URL = "https://tiles.openfreemap.org/styles/bright"
-private const val CARTO_DARK_MATTER_STYLE_URL =
-    "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
 
 fun Settings.mapStyleIsDark(): Boolean {
     return when (mapStyle) {
-        MapStyle.Dark, MapStyle.CartoDarkMatter -> true
+        MapStyle.Dark -> true
         MapStyle.Auto -> {
             false
         }

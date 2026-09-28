@@ -14,6 +14,8 @@ import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 
 const val EXCHANGE_MARKER_LAYER_ID = "exchange_marker"
+const val EXCHANGE_CLUSTER_TEXT_LAYER_ID = "exchange_cluster_text"
+const val EXCHANGE_COMMENT_COUNT_TEXT_LAYER_ID = "exchange_comment_count_text"
 
 fun createExchangeLayers(
     markerBackgroundColor: Int,
@@ -43,7 +45,7 @@ fun createExchangeLayers(
     }
 
     val clusterText =
-        SymbolLayer("exchange_cluster_text", source.id).apply {
+        SymbolLayer(EXCHANGE_CLUSTER_TEXT_LAYER_ID, source.id).apply {
             if (usingOpenFreeMap) {
                 setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Regular")))
             }
@@ -109,7 +111,7 @@ fun createExchangeLayers(
         }
 
     val commentCountText =
-        SymbolLayer("exchange_comment_count_text", source.id).apply {
+        SymbolLayer(EXCHANGE_COMMENT_COUNT_TEXT_LAYER_ID, source.id).apply {
             if (usingOpenFreeMap) {
                 setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Bold")))
             }

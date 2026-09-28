@@ -15,7 +15,7 @@
     }
   },
   "sprite": "asset://map-styles/ofm-sprites/sprite",
-  "glyphs": "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
+  "glyphs": "asset://map-styles/glyphs/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "background",

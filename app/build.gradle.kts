@@ -27,7 +27,7 @@ android {
         targetSdk {
             version = release(37)
         }
-        versionCode = 122
+        versionCode = 123
         versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -92,6 +92,11 @@ android {
 
     androidResources {
         generateLocaleConfig = true
+        // The bundled basemap is a PMTiles archive that MapLibre reads with
+        // byte-range requests after it has been copied out of the APK. Storing
+        // it uncompressed keeps that copy a straight block copy and lets
+        // AssetManager report its real size through openFd.
+        noCompress.add("pmtiles")
     }
 
     splits {

@@ -22,6 +22,9 @@ build/
 app/fdroid
 app/play
 
+# Generated basemap archive, rebuilt with ./devtools bundle basemap
+*.pmtiles
+
 emulator.log
 
 # Python bytecode cache

@@ -12,6 +12,7 @@ import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 
 const val MERCHANT_MARKER_LAYER_ID = "merchant_marker"
+const val MERCHANT_CLUSTER_COUNT_LAYER_ID = "merchant_cluster_count"
 
 fun createMerchantLayers(
     markerBackgroundColor: Int,
@@ -45,7 +46,7 @@ fun createMerchantLayers(
         }
 
     val clusterCountLayer =
-        SymbolLayer("merchant_cluster_count", merchantsSource.id).apply {
+        SymbolLayer(MERCHANT_CLUSTER_COUNT_LAYER_ID, merchantsSource.id).apply {
             if (usingOpenFreeMap) {
                 setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Regular")))
             }

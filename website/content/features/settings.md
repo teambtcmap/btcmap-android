@@ -15,7 +15,6 @@ Choose the map's look:
 
 - **Auto** — follows your device's light or dark theme.
 - **OpenFreeMap Liberty**, **Positron**, **Bright** and **Dark**.
-- **Carto Dark Matter**.
 
 Changing the style takes effect on the map immediately. Offline downloads are
 tied to the style they were made with; see [Offline maps](offline-maps.md).
