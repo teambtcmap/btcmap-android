@@ -144,12 +144,17 @@ class PlaceQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectBySearchString(searchString: String): List<Place> {
+        // The base name plus the raw `localized_name` JSON, so a query in any
+        // cached language matches. The caller re-checks the parsed names, so
+        // the JSON match only has to be a superset.
         conn.prepare(
             """
                 SELECT ${FullProjection.COLUMNS}
                 FROM $TABLE
-                WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%' ESCAPE '\'
-                    AND $DELETED_AT IS NULL;
+                WHERE (
+                    UPPER($NAME) LIKE '%' || UPPER(?1) || '%' ESCAPE '\'
+                    OR UPPER($LOCALIZED_NAME) LIKE '%' || UPPER(?1) || '%' ESCAPE '\'
+                ) AND $DELETED_AT IS NULL;
             """
         ).use {
             it.bindText(1, searchString.escapeLikePattern())

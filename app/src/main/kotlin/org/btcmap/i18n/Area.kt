@@ -20,3 +20,11 @@ fun Area.getLocalizedName(): String =
 /** The area's description in the device language, with the same fallback. */
 fun Area.getLocalizedDescription(): String? =
     localizedDescription.translated(Locale.getDefault().language) ?: description
+
+/**
+ * Every name the area can be found by: its base `name` tag plus each
+ * `name:<lang>` translation. Search matches against all of them, so a query in
+ * any cached language finds the area even when the device language differs.
+ */
+internal fun Area.getSearchableNames(): List<String> =
+    listOf(name) + localizedName.localizedValues()

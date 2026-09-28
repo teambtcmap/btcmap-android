@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Stop bundling the per-language opening-hours map
 - Show boosted merchants on an area screen with the place's name in the device language
 - Show an area's name and description in the device language where the API has a translation, bundling and caching the per-language values so they work offline
+- Search places and areas by any cached translation and show each result in the device language, so a name in a language other than the device one still finds it
+- Show saved places and areas on the profile screen in the device language instead of always in the API's base name
 - Stop retrying a rate-limited request once its screen is closed, and wait out a server-requested cool-down longer than a minute instead of retrying early
 - Keep the activity feed's area filter when the screen is recreated, and fall back to a country's activity when the map centre is inside no community
 - Show activity feed dates in the device's date format and stop crashing the feed on an unexpected date

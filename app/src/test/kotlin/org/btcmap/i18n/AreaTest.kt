@@ -100,4 +100,19 @@ class AreaTest {
     fun getLocalizedDescription_isNullWhenMissing() {
         Assert.assertNull(withLocale("ru") { area(description = null).getLocalizedDescription() })
     }
+
+    @Test
+    fun getSearchableNames_includesBaseNameAndTranslations() {
+        val area = area(localizedName = """{"ru":"Большой Париж","en":"Grand Paris"}""")
+
+        Assert.assertEquals(
+            setOf("Grand Paris", "Большой Париж"),
+            area.getSearchableNames().toSet(),
+        )
+    }
+
+    @Test
+    fun getSearchableNames_isJustTheBaseNameWithoutTranslations() {
+        Assert.assertEquals(listOf("Grand Paris"), area().getSearchableNames())
+    }
 }

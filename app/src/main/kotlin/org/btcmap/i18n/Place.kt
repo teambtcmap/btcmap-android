@@ -12,3 +12,11 @@ import java.util.Locale
  */
 fun Place.getLocalizedName(): String =
     localizedName?.stringAt(Locale.getDefault().language) ?: name.orEmpty()
+
+/**
+ * Every name the place can be found by: its synced `name` plus each
+ * `name:<lang>` translation. Search matches against all of them, so a query in
+ * any cached language finds the place even when the device language differs.
+ */
+internal fun Place.getSearchableNames(): List<String> =
+    listOfNotNull(name) + localizedName.localizedValues()

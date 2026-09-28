@@ -180,6 +180,37 @@ class AreaQueriesTest {
     }
 
     @Test
+    fun selectBySearchString_matchesLocalizedName() {
+        val db = createDatabase()
+        db.area.insert(
+            listOf(
+                area(1L, name = "Grand Paris").copy(
+                    localizedName = JsonParser.parseString("""{"ru":"Большой Париж"}""").asJsonObject
+                )
+            )
+        )
+
+        val results = db.area.selectBySearchString("Большой")
+
+        Assert.assertEquals(1, results.size)
+        Assert.assertEquals("Grand Paris", results[0].name)
+    }
+
+    @Test
+    fun selectBySearchString_doesNotMatchAnUnrelatedLocalizedMap() {
+        val db = createDatabase()
+        db.area.insert(
+            listOf(
+                area(1L, name = "Grand Paris").copy(
+                    localizedName = JsonParser.parseString("""{"ru":"Большой Париж"}""").asJsonObject
+                )
+            )
+        )
+
+        Assert.assertTrue(db.area.selectBySearchString("Berlin").isEmpty())
+    }
+
+    @Test
     fun selectByBbox_returnsOnlyOverlappingVisibleAreas() {
         val db = createDatabase()
         db.area.insert(

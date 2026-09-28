@@ -15,8 +15,11 @@ import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.db.Database
 import org.btcmap.db.table.area.Area
+import org.btcmap.i18n.getLocalizedName
+import org.btcmap.i18n.getSearchableNames
 import org.btcmap.place.isBoosted
 import org.btcmap.search.SearchAdapterItem
+import org.btcmap.search.nameMatchRank
 import org.btcmap.util.isUpcoming
 import org.maplibre.android.geometry.LatLng
 import java.text.NumberFormat
@@ -26,11 +29,12 @@ import java.time.ZonedDateTime
  * Searches the local cache only. Places, areas and events are kept in SQLite by
  * [org.btcmap.Sync], so search needs no network call and works offline.
  *
- * Each entity is matched with a case-insensitive substring on its name. Results
- * are ordered like the server's `GET /v4/search`: exact name matches first, then
- * prefix matches, then substring matches, with proximity breaking ties. Boosted
- * places are promoted above that relevance order, matching the website, so a
- * boost is visible in search.
+ * Each entity is matched with a case-insensitive substring on any of its names,
+ * including the per-language translations, and is shown under the device
+ * language. Results are ordered like the server's `GET /v4/search`: exact name
+ * matches first, then prefix matches, then substring matches, with proximity
+ * breaking ties. Boosted places are promoted above that relevance order,
+ * matching the website, so a boost is visible in search.
  */
 class SearchController(
     private val db: Database,
@@ -73,28 +77,27 @@ class SearchController(
         val matches = withContext(Dispatchers.IO) {
             val now = ZonedDateTime.now()
 
-            val areas = db.area.selectBySearchString(query).map { area ->
+            val areas = db.area.selectBySearchString(query).mapNotNull { area ->
                 val bbox = area.searchBbox()
                 val center = bbox?.let { LatLng((it[1] + it[3]) / 2, (it[0] + it[2]) / 2) }
-                localMatch(query, area.name, center, referenceLocation) { distanceToUser ->
+                localMatch(query, area.getSearchableNames(), center, referenceLocation) { distanceToUser ->
                     SearchAdapterItem.Area(
                         areaId = area.id,
                         bbox = bbox,
                         iconUrl = area.icon,
                         headerImageUrl = area.iconWide ?: area.icon,
                         icon = AREA_ICON,
-                        name = area.name,
+                        name = area.getLocalizedName(),
                         distanceToUser = distanceToUser,
                     )
                 }
             }
 
-            val places = db.place.selectBySearchString(query).map { place ->
-                val name = place.name ?: ""
+            val places = db.place.selectBySearchString(query).mapNotNull { place ->
                 val boosted = place.isBoosted(now)
                 localMatch(
                     query = query,
-                    name = name,
+                    names = place.getSearchableNames(),
                     location = LatLng(place.lat, place.lon),
                     referenceLocation = referenceLocation,
                     boosted = boosted,
@@ -102,7 +105,7 @@ class SearchController(
                     SearchAdapterItem.Place(
                         placeId = place.id,
                         icon = place.icon,
-                        name = name,
+                        name = place.getLocalizedName(),
                         distanceToUser = distanceToUser,
                         boosted = boosted,
                     )
@@ -111,8 +114,8 @@ class SearchController(
 
             val events = db.event.selectBySearchString(query)
                 .filter { it.startsAt.isUpcoming(now) }
-                .map { event ->
-                    localMatch(query, event.name, LatLng(event.lat, event.lon), referenceLocation) { distanceToUser ->
+                .mapNotNull { event ->
+                    localMatch(query, listOf(event.name), LatLng(event.lat, event.lon), referenceLocation) { distanceToUser ->
                         SearchAdapterItem.Event(
                             eventId = event.id,
                             icon = EVENT_ICON,
@@ -144,36 +147,26 @@ class SearchController(
     /**
      * Builds a [LocalMatch], computing the relevance rank and the formatted
      * distance to [location] (null when the entity has no location to measure,
-     * e.g. an area without a bounding box).
+     * e.g. an area without a bounding box). Returns null when none of [names]
+     * matches, so a row the SQL pre-filter returned for an unrelated reason is
+     * dropped.
      */
     private inline fun localMatch(
         query: String,
-        name: String,
+        names: List<String>,
         location: LatLng?,
         referenceLocation: LatLng,
         boosted: Boolean = false,
         item: (String?) -> SearchAdapterItem,
-    ): LocalMatch {
+    ): LocalMatch? {
+        val rank = nameMatchRank(names, query) ?: return null
         val distance = location?.let { distanceInMeters(referenceLocation, it) }
         return LocalMatch(
-            rank = matchRank(name, query),
+            rank = rank,
             distance = distance,
             boosted = boosted,
             item = item(distance?.let { formatDistance(it) }),
         )
-    }
-
-    /**
-     * Mirrors the server's ranking: exact name match, then name prefix, then a
-     * name substring. Everything local matches on the name, so there is no
-     * lower "matched another tag" rank.
-     */
-    private fun matchRank(name: String, query: String): Int {
-        return when {
-            name.equals(query, ignoreCase = true) -> 0
-            name.startsWith(query, ignoreCase = true) -> 1
-            else -> 2
-        }
     }
 
     private fun Area.searchBbox(): List<Double>? {

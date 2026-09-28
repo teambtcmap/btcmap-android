@@ -20,3 +20,14 @@ internal fun JsonObject.stringAt(key: String): String? =
  */
 internal fun JsonObject?.translated(locale: String): String? =
     if (this == null) null else stringAt(locale) ?: stringAt("en")
+
+/**
+ * Every non-blank string value in the map, e.g. all of a place's or area's
+ * `name:<lang>` translations. Values that are null or not JSON strings are
+ * skipped, matching [stringAt]. Used by search so a query in any cached
+ * language matches, not just the device language.
+ */
+internal fun JsonObject?.localizedValues(): List<String> =
+    this?.entrySet().orEmpty().mapNotNull { entry ->
+        (entry.value as? JsonPrimitive)?.takeIf { it.isString }?.asString?.ifBlank { null }
+    }

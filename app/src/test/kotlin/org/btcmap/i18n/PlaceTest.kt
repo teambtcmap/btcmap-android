@@ -80,4 +80,19 @@ class PlaceTest {
     fun getLocalizedName_isEmptyWhenNameMissing() {
         Assert.assertEquals("", withLocale("ru") { place(name = null).getLocalizedName() })
     }
+
+    @Test
+    fun getSearchableNames_includesSyncedNameAndTranslations() {
+        val place = place(name = "Bakery", localizedName = """{"ru":"Пекарня","en":"Bakery"}""")
+
+        Assert.assertEquals(
+            setOf("Bakery", "Пекарня"),
+            place.getSearchableNames().toSet(),
+        )
+    }
+
+    @Test
+    fun getSearchableNames_isEmptyWhenThePlaceHasNoName() {
+        Assert.assertTrue(place(name = null).getSearchableNames().isEmpty())
+    }
 }

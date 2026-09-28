@@ -1,6 +1,7 @@
 package org.btcmap.db.table.place
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.google.gson.JsonParser
 import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
@@ -229,6 +230,20 @@ class PlaceQueriesTest {
 
         Assert.assertEquals(1, results.size)
         Assert.assertEquals("50% Off Cafe", results[0].name)
+    }
+
+    @Test
+    fun selectBySearchString_matchesLocalizedName() {
+        val db = createDatabase()
+        val place = createPlace(id = 1L, name = "Bakery").copy(
+            localizedName = JsonParser.parseString("""{"ru":"Пекарня"}""").asJsonObject
+        )
+        db.place.insert(listOf(place))
+
+        val results = db.place.selectBySearchString("Пекарня")
+
+        Assert.assertEquals(1, results.size)
+        Assert.assertEquals("Bakery", results[0].name)
     }
 
     @Test

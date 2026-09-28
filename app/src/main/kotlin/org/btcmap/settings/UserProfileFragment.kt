@@ -32,6 +32,7 @@ import org.btcmap.db.table.user.User
 import org.btcmap.databinding.SavedAreaItemBinding
 import org.btcmap.databinding.SavedPlaceItemBinding
 import org.btcmap.databinding.UserProfileFragmentBinding
+import org.btcmap.i18n.getLocalizedName
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.setFieldError
 import org.btcmap.util.showError
@@ -87,13 +88,13 @@ class UserProfileFragment : Fragment() {
         }
     }
 
-    private fun bindUser(user: User) {
+    private suspend fun bindUser(user: User) {
         binding.username.text = user.name
         binding.password.text = getString(R.string.password_mask)
 
         binding.savedPlacesList.layoutManager = LinearLayoutManager(requireContext())
         binding.savedPlacesList.adapter = SavedPlacesAdapter(
-            places = user.savedPlaces,
+            places = user.savedPlaces.withLocalizedPlaceNames(),
             onDeleteClick = { placeId ->
                 deleteSavedPlace(placeId)
             }
@@ -104,7 +105,7 @@ class UserProfileFragment : Fragment() {
 
         binding.savedAreasList.layoutManager = LinearLayoutManager(requireContext())
         binding.savedAreasList.adapter = SavedAreasAdapter(
-            areas = user.savedAreas,
+            areas = user.savedAreas.withLocalizedAreaNames(),
             onDeleteClick = { areaId ->
                 deleteSavedArea(areaId)
             }
@@ -112,6 +113,28 @@ class UserProfileFragment : Fragment() {
 
         binding.noSavedAreas.isVisible = user.savedAreas.isEmpty()
         binding.savedAreasList.isVisible = user.savedAreas.isNotEmpty()
+    }
+
+    /**
+     * The user endpoint returns each saved entity's base name, with no `lang`,
+     * so the names are re-resolved against the local cache when it holds the
+     * entity. A name that is missing locally falls back to the server's.
+     */
+    private suspend fun List<SavedItem>.withLocalizedAreaNames(): List<SavedItem> =
+        mapSavedNames { db().area.selectById(it.id)?.getLocalizedName() }
+
+    private suspend fun List<SavedItem>.withLocalizedPlaceNames(): List<SavedItem> =
+        mapSavedNames { db().place.selectById(it.id)?.getLocalizedName() }
+
+    private suspend fun List<SavedItem>.mapSavedNames(
+        localizedName: suspend (SavedItem) -> String?,
+    ): List<SavedItem> = withContext(Dispatchers.IO) {
+        this@mapSavedNames.map { item ->
+            localizedName(item)
+                ?.takeIf { it.isNotBlank() }
+                ?.let { item.copy(name = it) }
+                ?: item
+        }
     }
 
     private fun showChangeUsernameDialog() {
@@ -242,7 +265,7 @@ class UserProfileFragment : Fragment() {
                     }
                 }
                 binding.savedPlacesList.adapter = SavedPlacesAdapter(
-                    places = user.savedPlaces,
+                    places = user.savedPlaces.withLocalizedPlaceNames(),
                     onDeleteClick = { placeId ->
                         deleteSavedPlace(placeId)
                     }
@@ -251,7 +274,7 @@ class UserProfileFragment : Fragment() {
                 binding.savedPlacesList.isVisible = user.savedPlaces.isNotEmpty()
 
                 binding.savedAreasList.adapter = SavedAreasAdapter(
-                    areas = user.savedAreas,
+                    areas = user.savedAreas.withLocalizedAreaNames(),
                     onDeleteClick = { areaId ->
                         deleteSavedArea(areaId)
                     }
