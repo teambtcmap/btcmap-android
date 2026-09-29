@@ -101,6 +101,7 @@ class ImageStatsFragment : Fragment() {
         cache.memory?.let { memory ->
             sections.add(
                 StatsSection(
+                    key = "memory",
                     title = getString(R.string.image_stats_memory_cache),
                     icon = "memory",
                     entries = listOf(
@@ -120,6 +121,7 @@ class ImageStatsFragment : Fragment() {
         cache.disk?.let { disk ->
             sections.add(
                 StatsSection(
+                    key = "disk",
                     title = getString(R.string.image_stats_disk_cache),
                     icon = "hard_drive",
                     entries = listOf(
@@ -135,6 +137,7 @@ class ImageStatsFragment : Fragment() {
 
         sections.add(
             StatsSection(
+                key = "loads",
                 title = getString(R.string.image_stats_loads),
                 icon = "query_stats",
                 entries = buildList {

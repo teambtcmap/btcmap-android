@@ -167,6 +167,7 @@ class DbStatsFragment : Fragment() {
 
         sections.add(
             StatsSection(
+                key = "database",
                 title = getString(R.string.db_stats_database),
                 icon = "database",
                 entries = buildList {
@@ -195,6 +196,7 @@ class DbStatsFragment : Fragment() {
             .forEach { table ->
                 sections.add(
                     StatsSection(
+                        key = "table:${table.name}",
                         title = getString(R.string.db_stats_table, table.name),
                         icon = "table",
                         entries = tableEntries(table),
@@ -211,6 +213,7 @@ class DbStatsFragment : Fragment() {
     private fun bundleSection(table: String, bundle: BundleStats): StatsSection {
         val formatter = NumberFormat.getIntegerInstance()
         return StatsSection(
+            key = "bundle:$table",
             title = getString(R.string.db_stats_bundle, table),
             icon = "inventory_2",
             entries = buildList {
@@ -241,6 +244,7 @@ class DbStatsFragment : Fragment() {
     }
 
     private fun syncSection(state: SyncState): StatsSection = StatsSection(
+        key = "sync",
         title = getString(R.string.db_stats_sync),
         icon = "sync",
         entries = listOf(

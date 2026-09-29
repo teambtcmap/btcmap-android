@@ -6,6 +6,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import org.btcmap.R
 import org.btcmap.databinding.StatsRowItemBinding
 import org.btcmap.databinding.StatsSectionItemBinding
 import org.btcmap.util.iconTypeface
@@ -46,6 +47,13 @@ class StatsAdapter : ListAdapter<StatsSection, StatsAdapter.SectionViewHolder>(D
                 row.divider.isVisible = index > 0
                 row.label.text = entry.label
                 row.value.text = entry.value
+                // The label and value are one accessibility node, so a screen
+                // reader announces them together instead of as two stops.
+                row.root.contentDescription = row.root.context.getString(
+                    R.string.stats_row_description,
+                    entry.label,
+                    entry.value,
+                )
                 binding.rows.addView(row.root)
             }
         }

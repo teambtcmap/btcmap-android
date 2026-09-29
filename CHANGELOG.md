@@ -256,6 +256,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Keep the map from crashing when the location-permission result arrives after the screen is gone
 - Escape a place's icon name when building the map's marker data, so a malformed icon can no longer hide every marker
 - Bound the map's parsed-area cache by total polygon size, not just entry count, so panning across large country polygons cannot grow memory without limit
+- Announce each row on the database and image stats screens as one label and value for screen readers, instead of reading them as two separate stops
 
 ## [1.1.0] - 2026-03-30
 

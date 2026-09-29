@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:focusable="true"
     android:orientation="vertical">
 
     <com.google.android.material.divider.MaterialDivider
@@ -30,6 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
+            android:importantForAccessibility="no"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?attr/colorOnSurfaceVariant"
             tools:text="Entries" />
@@ -40,6 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="end"
+            android:importantForAccessibility="no"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?attr/colorOnSurface"
             tools:text="1,234" />
