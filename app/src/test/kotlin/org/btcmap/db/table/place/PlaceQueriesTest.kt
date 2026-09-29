@@ -3,6 +3,8 @@ package org.btcmap.db.table.place
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.google.gson.JsonParser
 import org.btcmap.db.Database
+import org.btcmap.i18n.getSearchableNames
+import org.btcmap.search.nameMatchRank
 import org.junit.Assert
 import org.junit.Test
 import java.time.ZoneOffset
@@ -244,6 +246,25 @@ class PlaceQueriesTest {
 
         Assert.assertEquals(1, results.size)
         Assert.assertEquals("Bakery", results[0].name)
+    }
+
+    @Test
+    fun selectBySearchString_matchesRawLocalizedNameJsonAsASuperset() {
+        val db = createDatabase()
+        val place = createPlace(id = 1L, name = "Bakery").copy(
+            localizedName = JsonParser.parseString("""{"ru":"Пекарня"}""").asJsonObject
+        )
+        db.place.insert(listOf(place))
+
+        // "ru" occurs only as a key in the raw localized_name JSON, so the SQL
+        // pre-filter returns the row even though no name the user sees contains
+        // it. SearchController re-checks the parsed names, and that re-check is
+        // what has to drop it; this test pins that split so a future change
+        // cannot treat the pre-filter as the final match.
+        val results = db.place.selectBySearchString("ru")
+
+        Assert.assertEquals(1, results.size)
+        Assert.assertNull(nameMatchRank(results[0].getSearchableNames(), "ru"))
     }
 
     @Test

@@ -15,7 +15,6 @@ import org.btcmap.api
 import org.btcmap.api.submitPlace
 import org.btcmap.databinding.AddPlaceFragmentBinding
 import org.btcmap.settings.mapStyle
-import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.prefs
 import org.btcmap.settings.uri
 import org.btcmap.util.rethrowIfCancellation
@@ -75,6 +74,11 @@ class AddPlaceFragment : Fragment() {
         }
 
         binding.map.getMapAsync { map ->
+            // The map becomes ready asynchronously. If the screen was closed
+            // first, there is nothing left to configure and `requireContext()`
+            // below would throw on the detached fragment.
+            if (_binding == null) return@getMapAsync
+
             this.map = map
             map.setStyle(
                 Style.Builder().fromUri(prefs.mapStyle.uri(requireContext()))
@@ -83,17 +87,6 @@ class AddPlaceFragment : Fragment() {
             map.uiSettings.isLogoEnabled = false
             map.uiSettings.isAttributionEnabled = false
             map.uiSettings.isCompassEnabled = false
-
-            val markerColor = prefs.markerBackgroundColor(requireContext())
-            map.getStyle { style ->
-                if (style.getImage("btcmap-marker") == null) {
-                    val drawable = androidx.appcompat.content.res.AppCompatResources
-                        .getDrawable(requireContext(), R.drawable.map_marker)!!
-                        .mutate()
-                    androidx.core.graphics.drawable.DrawableCompat.setTint(drawable, markerColor)
-                    style.addImage("btcmap-marker", drawable)
-                }
-            }
 
             map.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
