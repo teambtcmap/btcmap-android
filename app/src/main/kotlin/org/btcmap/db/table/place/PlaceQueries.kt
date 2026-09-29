@@ -143,13 +143,14 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         return places
     }
 
-    fun selectBySearchString(searchString: String): List<Place> {
+    fun selectBySearchString(searchString: String): List<SearchPlace> {
         // The base name plus the raw `localized_name` JSON, so a query in any
         // cached language matches. The caller re-checks the parsed names, so
-        // the JSON match only has to be a superset.
+        // the JSON match only has to be a superset. Only the fields search
+        // needs are read; the rest of the row is never shown.
         conn.prepare(
             """
-                SELECT ${FullProjection.COLUMNS}
+                SELECT ${PlaceSearchProjection.COLUMNS}
                 FROM $TABLE
                 WHERE (
                     UPPER($NAME) LIKE '%' || UPPER(?1) || '%' ESCAPE '\'
@@ -158,9 +159,9 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             """
         ).use {
             it.bindText(1, searchString.escapeLikePattern())
-            val rows = mutableListOf<Place>()
+            val rows = mutableListOf<SearchPlace>()
             while (it.step()) {
-                rows.add(FullProjection.fromStatement(it))
+                rows.add(PlaceSearchProjection.fromStatement(it))
             }
             return rows
         }

@@ -96,19 +96,21 @@ class EventQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectBySearchString(searchString: String): List<Event> {
+    fun selectBySearchString(searchString: String): List<SearchEvent> {
+        // Only the fields search needs, so a broad match does not materialize
+        // every event column.
         conn.prepare(
             """
-                SELECT ${FullProjection.COLUMNS}
+                SELECT ${EventSearchProjection.COLUMNS}
                 FROM $TABLE
                 WHERE UPPER($NAME) LIKE '%' || UPPER(?1) || '%' ESCAPE '\'
                     AND $DELETED_AT IS NULL;
             """
         ).use {
             it.bindText(1, searchString.escapeLikePattern())
-            val rows = mutableListOf<Event>()
+            val rows = mutableListOf<SearchEvent>()
             while (it.step()) {
-                rows.add(FullProjection.fromStatement(it))
+                rows.add(EventSearchProjection.fromStatement(it))
             }
             return rows
         }

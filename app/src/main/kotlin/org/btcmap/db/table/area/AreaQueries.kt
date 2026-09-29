@@ -64,13 +64,14 @@ class AreaQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectBySearchString(searchString: String): List<Area> {
+    fun selectBySearchString(searchString: String): List<SearchArea> {
         // The base name plus the raw `localized_name` JSON, so a query in any
         // cached language matches. The caller re-checks the parsed names, so
-        // the JSON match only has to be a superset.
+        // the JSON match only has to be a superset. Only the fields search
+        // needs are read, so a broad match never loads a full GeoJSON polygon.
         conn.prepare(
             """
-            SELECT ${FullProjection.COLUMNS}
+            SELECT ${AreaSearchProjection.COLUMNS}
             FROM $TABLE
             WHERE (
                 UPPER($NAME) LIKE '%' || UPPER(?1) || '%' ESCAPE '\'
@@ -79,9 +80,9 @@ class AreaQueries(private val conn: SQLiteConnection) {
             """
         ).use {
             it.bindText(1, searchString.escapeLikePattern())
-            val rows = mutableListOf<Area>()
+            val rows = mutableListOf<SearchArea>()
             while (it.step()) {
-                rows.add(FullProjection.fromStatement(it))
+                rows.add(AreaSearchProjection.fromStatement(it))
             }
             return rows
         }

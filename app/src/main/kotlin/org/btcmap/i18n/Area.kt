@@ -1,6 +1,8 @@
 package org.btcmap.i18n
 
+import com.google.gson.JsonObject
 import org.btcmap.db.table.area.Area
+import org.btcmap.db.table.area.SearchArea
 import java.util.Locale
 
 /**
@@ -14,8 +16,10 @@ import java.util.Locale
  * also keeps a cached area reading the same as one fetched from the single-area
  * endpoint, which localizes server-side with the same chain.
  */
-fun Area.getLocalizedName(): String =
-    localizedName.translated(Locale.getDefault().language) ?: name
+fun Area.getLocalizedName(): String = areaLocalizedName(name, localizedName)
+
+/** [getLocalizedName] for a search row, which omits fields search does not use. */
+fun SearchArea.getLocalizedName(): String = areaLocalizedName(name, localizedName)
 
 /** The area's description in the device language, with the same fallback. */
 fun Area.getLocalizedDescription(): String? =
@@ -27,4 +31,14 @@ fun Area.getLocalizedDescription(): String? =
  * any cached language finds the area even when the device language differs.
  */
 internal fun Area.getSearchableNames(): List<String> =
+    areaSearchableNames(name, localizedName)
+
+/** [getSearchableNames] for a search row. */
+internal fun SearchArea.getSearchableNames(): List<String> =
+    areaSearchableNames(name, localizedName)
+
+private fun areaLocalizedName(name: String, localizedName: JsonObject?): String =
+    localizedName.translated(Locale.getDefault().language) ?: name
+
+private fun areaSearchableNames(name: String, localizedName: JsonObject?): List<String> =
     listOf(name) + localizedName.localizedValues()

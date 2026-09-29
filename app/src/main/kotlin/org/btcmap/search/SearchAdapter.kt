@@ -145,7 +145,15 @@ class SearchAdapter(
             oldItem: SearchAdapterItem,
             newItem: SearchAdapterItem,
         ): Boolean {
-            return newItem == oldItem
+            return when {
+                oldItem is SearchAdapterItem.Place && newItem is SearchAdapterItem.Place ->
+                    oldItem.placeId == newItem.placeId
+                oldItem is SearchAdapterItem.Area && newItem is SearchAdapterItem.Area ->
+                    oldItem.areaId == newItem.areaId
+                oldItem is SearchAdapterItem.Event && newItem is SearchAdapterItem.Event ->
+                    oldItem.eventId == newItem.eventId
+                else -> false
+            }
         }
 
         override fun areContentsTheSame(

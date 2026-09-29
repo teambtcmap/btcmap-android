@@ -2,6 +2,7 @@ package org.btcmap.map
 
 import android.content.res.Resources
 import android.location.Location
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.db.Database
-import org.btcmap.db.table.area.Area
+import org.btcmap.db.table.area.SearchArea
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.i18n.getSearchableNames
 import org.btcmap.place.isBoosted
@@ -38,8 +39,24 @@ import java.time.ZonedDateTime
  */
 class SearchController(
     private val db: Database,
-    private val resources: Resources,
+    private val formatDistance: (Double) -> String,
+    private val distanceInMeters: (LatLng, LatLng) -> Double = ::locationDistanceInMeters,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
+    /**
+     * Production entry point: formats a result's distance with the app's
+     * resources. The formatter, the geodesic distance and the dispatcher the
+     * cache queries run on are injectable so the controller can be exercised
+     * off-device, where [Location] and [Resources] are not usable.
+     */
+    constructor(
+        db: Database,
+        resources: Resources,
+    ) : this(
+        db = db,
+        formatDistance = { meters -> formatSearchDistance(resources, meters) },
+    )
+
     private val _results = MutableStateFlow<List<SearchAdapterItem>>(emptyList())
     val results: StateFlow<List<SearchAdapterItem>> = _results.asStateFlow()
 
@@ -67,7 +84,7 @@ class SearchController(
             return
         }
 
-        val matches = withContext(Dispatchers.IO) {
+        val matches = withContext(ioDispatcher) {
             val now = ZonedDateTime.now()
 
             val areas = db.area.selectBySearchString(query).mapNotNull { area ->
@@ -162,35 +179,13 @@ class SearchController(
         )
     }
 
-    private fun Area.searchBbox(): List<Double>? {
+    private fun SearchArea.searchBbox(): List<Double>? {
         return listOf(
             bboxWest ?: return null,
             bboxSouth ?: return null,
             bboxEast ?: return null,
             bboxNorth ?: return null,
         )
-    }
-
-    private fun formatDistance(meters: Double): String {
-        // Built per call: a superseded search keeps running its non-suspending
-        // IO work, so two searches can format a distance at the same time and a
-        // shared NumberFormat is not thread-safe.
-        val format = NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }
-        return if (meters < 1_000) {
-            resources.getString(R.string.s_m, format.format(meters))
-        } else {
-            resources.getString(R.string.s_km, format.format(meters / 1_000))
-        }
-    }
-
-    private fun distanceInMeters(start: LatLng, end: LatLng): Double {
-        val result = FloatArray(1)
-        Location.distanceBetween(
-            start.latitude, start.longitude,
-            end.latitude, end.longitude,
-            result,
-        )
-        return result[0].toDouble()
     }
 
     private class LocalMatch(
@@ -206,4 +201,30 @@ class SearchController(
 
         private const val AREA_ICON = "public"
     }
+}
+
+/**
+ * Formats a search result's distance with the app's localized strings and
+ * number formatting. Built per call: a superseded search keeps running its
+ * non-suspending IO work, so two searches can format a distance at the same
+ * time and a shared [NumberFormat] is not thread-safe.
+ */
+private fun formatSearchDistance(resources: Resources, meters: Double): String {
+    val format = NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }
+    return if (meters < 1_000) {
+        resources.getString(R.string.s_m, format.format(meters))
+    } else {
+        resources.getString(R.string.s_km, format.format(meters / 1_000))
+    }
+}
+
+/** Distance in metres between two points, via the platform's geodesic helper. */
+private fun locationDistanceInMeters(start: LatLng, end: LatLng): Double {
+    val result = FloatArray(1)
+    Location.distanceBetween(
+        start.latitude, start.longitude,
+        end.latitude, end.longitude,
+        result,
+    )
+    return result[0].toDouble()
 }

@@ -2,6 +2,7 @@ package org.btcmap.place
 
 import org.btcmap.db.table.area.AreaGeometry
 import org.btcmap.db.table.place.Place
+import org.btcmap.db.table.place.SearchPlace
 import java.time.ZonedDateTime
 
 fun Place.isMerchant(): Boolean {
@@ -13,6 +14,11 @@ fun Place.isMerchant(): Boolean {
  * one whose boost expired, is not boosted.
  */
 fun Place.isBoosted(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
+    return boostedUntil?.isAfter(now) == true
+}
+
+/** [isBoosted] for a search row, which omits fields search does not use. */
+fun SearchPlace.isBoosted(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
     return boostedUntil?.isAfter(now) == true
 }
 
