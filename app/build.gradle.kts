@@ -155,3 +155,14 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.mockwebserver)
 }
+
+// The published F-Droid recipe predates the move of asset bundling from Gradle
+// to ./devtools (see AGENTS.md) and still runs `gradle bundleData` as an extra
+// step before `assembleRelease`. Keep a no-op task under that name so a new
+// release does not fail with "Task 'bundleData' not found in project ':app'".
+// Bundling is a deliberate manual step now; this task intentionally does
+// nothing. Remove it once the F-Droid recipe drops its `build:` line.
+tasks.register("bundleData") {
+    group = "build"
+    description = "Compatibility no-op; asset bundling lives in ./devtools bundle"
+}
