@@ -355,7 +355,7 @@ cmd_app_deploy_beta() {
 {
   "code": $version_code,
   "name": "$version_name",
-  "url": "https://static.btcmap.org/android/apk/beta.apk"
+  "url": "https://cdn.static.btcmap.org/android/apk/beta.apk"
 }
 JSON
   chmod 644 "$manifest"
