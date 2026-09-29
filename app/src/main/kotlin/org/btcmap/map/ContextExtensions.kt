@@ -2,33 +2,28 @@ package org.btcmap.map
 
 import android.content.Context
 import com.google.android.material.R
+import com.google.android.material.color.MaterialColors
 
 fun Context.getOnSurfaceColor(): Int {
-    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnSurface))
-    return attrs.getColor(0, 0)
+    return MaterialColors.getColor(this, R.attr.colorOnSurface, 0)
 }
 
 fun Context.getPrimaryContainerColor(): Int {
-    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorPrimaryContainer))
-    return attrs.getColor(0, 0)
+    return MaterialColors.getColor(this, R.attr.colorPrimaryContainer, 0)
 }
 
 fun Context.getTertiaryContainerColor(): Int {
-    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorTertiaryContainer))
-    return attrs.getColor(0, 0)
+    return MaterialColors.getColor(this, R.attr.colorTertiaryContainer, 0)
 }
 
 fun Context.getOnTertiaryContainerColor(): Int {
-    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnTertiaryContainer))
-    return attrs.getColor(0, 0)
+    return MaterialColors.getColor(this, R.attr.colorOnTertiaryContainer, 0)
 }
 
 fun Context.getOnPrimaryContainerColor(): Int {
-    val attrs = theme.obtainStyledAttributes(intArrayOf(R.attr.colorOnPrimaryContainer))
-    return attrs.getColor(0, 0)
+    return MaterialColors.getColor(this, R.attr.colorOnPrimaryContainer, 0)
 }
 
 fun Context.getErrorColor(): Int {
-    val attrs = theme.obtainStyledAttributes(intArrayOf(android.R.attr.colorError))
-    return attrs.getColor(0, 0)
+    return MaterialColors.getColor(this, android.R.attr.colorError, 0)
 }

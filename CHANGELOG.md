@@ -10,8 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Load the icon font off the main thread and start the first sync as soon as the database is ready, so a cold start reaches the first frame and the first pins sooner
 - Stop the app crashing while a screen reads the local database and a background sync writes to it at the same time
 - Refresh the place screen when a background sync updates the place, so a merchant deep link opened from a chat room no longer keeps showing the pre-sync copy
-- Keep the place shown in the map's bottom sheet, and the sheet's position, when the screen is recreated
-- Keep the map's merchant, event or exchange filter when the screen is recreated, instead of snapping back to merchants
+- Keep the place shown in the map's bottom sheet, and the sheet's position, when returning to the map from another screen or recreating it
+- Keep the map's merchant, event or exchange filter when returning to the map from another screen or recreating it, instead of snapping back to merchants
 - Make a tap on an exchange or event marker land only on the pin, rejecting its transparent corners the way a merchant marker already does
 - Show an area's initials on its map chip while its image loads and keep them when it cannot load, using the map buttons' colors and a regular weight, instead of a blank circle
 - Retry the map chips' images when the network returns, so a chip that fell back to its initials offline recovers on its own

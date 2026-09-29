@@ -130,10 +130,13 @@ class MapFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Restore the filter before the map's first position settles, so a
-        // rotation does not drop the list the user was looking at.
+        // rotation does not drop the list the user was looking at. On a
+        // back-stack return there is no saved state (the fragment instance
+        // survives, only its view is recreated), so the field keeps the filter
+        // the user last chose; a fresh instance defaults to merchants.
         filter = savedInstanceState?.getString(STATE_FILTER)
             ?.let { name -> runCatching { Filter.valueOf(name) }.getOrNull() }
-            ?: Filter.MERCHANTS
+            ?: filter
 
         // Registered here, not when the dialog is shown, so a form that was open
         // when the device rotated still reaches this (recreated) fragment.
@@ -157,11 +160,12 @@ class MapFragment : Fragment() {
 
         mapAreasController = MapAreasController(db = db())
 
-        bottomSheetController = BottomSheetController(
+        val bottomSheet = BottomSheetController(
             view = binding.placeBottomSheet,
             viewLifecycleOwner = viewLifecycleOwner,
             placeFragment = childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment,
         )
+        bottomSheetController = bottomSheet
 
         statusBarController = MapStatusBarController(
             conf = resources.configuration,
@@ -169,7 +173,7 @@ class MapFragment : Fragment() {
                 requireActivity().window,
                 requireActivity().window.decorView,
             ),
-            bottomSheetBehavior = bottomSheetController?.bottomSheetBehavior!!,
+            bottomSheetBehavior = bottomSheet.bottomSheetBehavior,
         )
         statusBarController?.onViewCreated()
 
@@ -390,18 +394,23 @@ class MapFragment : Fragment() {
 
         // After the deep link, so a fresh link still wins: the restore only runs
         // on a recreation, where the Activity does not re-deliver the link.
-        savedInstanceState?.let(::restoreBottomSheet)
+        restoreBottomSheet(savedInstanceState)
     }
 
     /**
      * Re-selects the place the sheet was showing before the view was recreated,
-     * and restores its position, so a rotation does not dismiss it. A hidden
-     * sheet is left closed: the user dismissed it, or nothing was selected.
+     * and restores its position, so a rotation or a return from another screen
+     * does not dismiss it. A hidden sheet is left closed: the user dismissed it,
+     * or nothing was selected.
      */
-    private fun restoreBottomSheet(savedInstanceState: Bundle) {
-        val placeId = savedInstanceState.getLong(STATE_PLACE_ID, 0L)
+    private fun restoreBottomSheet(savedInstanceState: Bundle?) {
+        // A rotation delivers the values through the saved state. A back-stack
+        // return has none (the fragment instance survives, only its view is
+        // recreated), so they come from the retained fields instead.
+        val placeId = savedInstanceState?.getLong(STATE_PLACE_ID, 0L) ?: selectedPlaceId ?: 0L
         val sheetState =
-            savedInstanceState.getInt(STATE_SHEET_STATE, BottomSheetBehavior.STATE_HIDDEN)
+            savedInstanceState?.getInt(STATE_SHEET_STATE, BottomSheetBehavior.STATE_HIDDEN)
+                ?: lastSheetState
         if (placeId <= 0L || sheetState == BottomSheetBehavior.STATE_HIDDEN) return
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -604,6 +613,10 @@ class MapFragment : Fragment() {
         locationController?.destroy()
         locationController = null
         destroyCurrentCache()
+        // Remembered so a back-stack return can restore the sheet, which has no
+        // saved instance state to read from.
+        lastSheetState = bottomSheetController?.bottomSheetBehavior?.state
+            ?: BottomSheetBehavior.STATE_HIDDEN
         bottomSheetController = null
         statusBarController?.onDestroyView()
         statusBarController = null
@@ -634,6 +647,14 @@ class MapFragment : Fragment() {
      * instead of dismissing it.
      */
     private var selectedPlaceId: Long? = null
+
+    /**
+     * The sheet's state when the view was last destroyed. A back-stack return
+     * keeps this fragment instance but has no saved instance state, so this is
+     * what tells [restoreBottomSheet] whether the sheet was visible (and how).
+     * A rotation reads the state from the saved bundle instead.
+     */
+    private var lastSheetState = BottomSheetBehavior.STATE_HIDDEN
 
     /**
      * The viewport to apply once the map is ready, or null once [moveTo] has

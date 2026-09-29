@@ -172,10 +172,14 @@ class SearchController(
     }
 
     private fun formatDistance(meters: Double): String {
+        // Built per call: a superseded search keeps running its non-suspending
+        // IO work, so two searches can format a distance at the same time and a
+        // shared NumberFormat is not thread-safe.
+        val format = NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }
         return if (meters < 1_000) {
-            resources.getString(R.string.s_m, DISTANCE_FORMAT.format(meters))
+            resources.getString(R.string.s_m, format.format(meters))
         } else {
-            resources.getString(R.string.s_km, DISTANCE_FORMAT.format(meters / 1_000))
+            resources.getString(R.string.s_km, format.format(meters / 1_000))
         }
     }
 
@@ -201,9 +205,5 @@ class SearchController(
         private const val MAX_RESULTS = 20
 
         private const val AREA_ICON = "public"
-
-        private val DISTANCE_FORMAT = NumberFormat.getNumberInstance().apply {
-            maximumFractionDigits = 1
-        }
     }
 }

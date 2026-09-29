@@ -26,24 +26,14 @@ fun createEventLayers(
         options = GeoJsonOptions().withCluster(true).withClusterMaxZoom(14).withClusterRadius(30),
     )
 
-    val clusterBackground by lazy {
+    val clusterBackground =
         CircleLayer("event_cluster_background", source.id).apply {
             setProperties(
                 PropertyFactory.circleColor(markerBackgroundColor),
                 PropertyFactory.circleRadius(23f),
             )
-            val pointCount = Expression.toNumber(Expression.get("point_count"))
-            setFilter(
-                Expression.all(
-                    Expression.has("point_count"),
-                    Expression.gte(
-                        pointCount,
-                        Expression.literal(1)
-                    )
-                )
-            )
+            setFilter(Expression.has("point_count"))
         }
-    }
 
     val clusterCount =
         SymbolLayer(EVENT_CLUSTER_COUNT_LAYER_ID, source.id).apply {

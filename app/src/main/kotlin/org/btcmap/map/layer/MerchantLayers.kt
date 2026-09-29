@@ -33,16 +33,7 @@ fun createMerchantLayers(
                 PropertyFactory.circleColor(markerBackgroundColor),
                 PropertyFactory.circleRadius(23f),
             )
-            val pointCount = Expression.toNumber(Expression.get("point_count"))
-            setFilter(
-                Expression.all(
-                    Expression.has("point_count"),
-                    Expression.gte(
-                        pointCount,
-                        Expression.literal(1)
-                    )
-                )
-            )
+            setFilter(Expression.has("point_count"))
         }
 
     val clusterCountLayer =

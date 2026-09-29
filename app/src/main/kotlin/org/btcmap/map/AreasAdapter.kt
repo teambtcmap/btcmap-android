@@ -31,7 +31,15 @@ class AreasAdapter(
             false,
         )
 
-        return ItemViewHolder(apiUrl, binding)
+        // Read once per holder instead of on every bind; the theme is fixed for
+        // the adapter's lifetime (a theme change recreates the screen).
+        val context = parent.context
+        return ItemViewHolder(
+            apiUrl = apiUrl,
+            buttonBackgroundColor = prefs.buttonBackgroundColor(context),
+            buttonIconColor = prefs.buttonIconColor(context),
+            binding = binding,
+        )
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
@@ -50,6 +58,8 @@ class AreasAdapter(
 
     class ItemViewHolder(
         private val apiUrl: HttpUrl,
+        private val buttonBackgroundColor: Int,
+        private val buttonIconColor: Int,
         private val binding: AreaItemBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
@@ -58,10 +68,8 @@ class AreasAdapter(
                 // The initials show through until the image is set over them,
                 // and are left visible when the request fails. They use the same
                 // colors as the map's buttons so the fallback matches them.
-                val context = root.context
-                initials.backgroundTintList =
-                    ColorStateList.valueOf(prefs.buttonBackgroundColor(context))
-                initials.setTextColor(prefs.buttonIconColor(context))
+                initials.backgroundTintList = ColorStateList.valueOf(buttonBackgroundColor)
+                initials.setTextColor(buttonIconColor)
                 initials.text = areaInitials(area)
                 icon.load("$apiUrl/v4/areas/${area.id}/image?type=square&w=256&h=256")
                 root.context.preloadAreaHeader(area.headerImageUrl)
