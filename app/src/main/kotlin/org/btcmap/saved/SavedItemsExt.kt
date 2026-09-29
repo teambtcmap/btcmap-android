@@ -1,6 +1,8 @@
 package org.btcmap.saved
 
 import androidx.fragment.app.Fragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.btcmap.api
 import org.btcmap.api.getUser
 import org.btcmap.api.removeSavedArea
@@ -12,26 +14,30 @@ import org.btcmap.db
 import org.btcmap.db.table.user.SavedItem
 
 suspend fun Fragment.toggleSavedArea(areaId: Long, areaName: String) {
-    val user = requireNotNull(db().user.select()) { "user is not signed in" }
+    val user = withContext(Dispatchers.IO) {
+        requireNotNull(db().user.select()) { "user is not signed in" }
+    }
     val saved = user.savedAreas.any { it.id == areaId }
     val ids = if (saved) api().removeSavedArea(areaId) else api().saveArea(areaId)
     val savedAreas = user.savedAreas.withIds(ids, areaId, areaName) ?: return refreshUser()
 
-    db().user.insert(user.copy(savedAreas = savedAreas))
+    withContext(Dispatchers.IO) { db().user.insert(user.copy(savedAreas = savedAreas)) }
 }
 
 suspend fun Fragment.isAreaSaved(areaId: Long): Boolean {
-    val user = db().user.select() ?: return false
+    val user = withContext(Dispatchers.IO) { db().user.select() } ?: return false
     return user.savedAreas.any { it.id == areaId }
 }
 
 suspend fun Fragment.toggleSavedPlace(placeId: Long, placeName: String) {
-    val user = requireNotNull(db().user.select()) { "user is not signed in" }
+    val user = withContext(Dispatchers.IO) {
+        requireNotNull(db().user.select()) { "user is not signed in" }
+    }
     val saved = user.savedPlaces.any { it.id == placeId }
     val ids = if (saved) api().removeSavedPlace(placeId) else api().savePlace(placeId)
     val savedPlaces = user.savedPlaces.withIds(ids, placeId, placeName) ?: return refreshUser()
 
-    db().user.insert(user.copy(savedPlaces = savedPlaces))
+    withContext(Dispatchers.IO) { db().user.insert(user.copy(savedPlaces = savedPlaces)) }
 }
 
 private fun List<SavedItem>.withIds(
@@ -57,8 +63,10 @@ private fun List<SavedItem>.withIds(
 private suspend fun Fragment.refreshUser() {
     val updated = api().getUser()
 
-    db().transaction {
-        db().user.delete()
-        db().user.insert(updated.toDbUser())
+    withContext(Dispatchers.IO) {
+        db().transaction {
+            db().user.delete()
+            db().user.insert(updated.toDbUser())
+        }
     }
 }

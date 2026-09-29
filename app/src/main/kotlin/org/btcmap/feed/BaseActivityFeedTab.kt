@@ -169,7 +169,7 @@ abstract class BaseActivityFeedTab : Fragment() {
      * empty state. Return null to skip the network call entirely (e.g. user
      * not logged in for the Saved tab).
      */
-    protected open fun loadScope(): ActivityScope? {
+    protected open suspend fun loadScope(): ActivityScope? {
         return ActivityScope(areaIds = selectedIds.toList())
     }
 
@@ -177,17 +177,21 @@ abstract class BaseActivityFeedTab : Fragment() {
         loadJob?.cancel()
         val adapter = binding.list.adapter as ActivityFeedAdapter
 
-        val scope = loadScope()
-        if (scope == null || (scope.areaIds.isEmpty() && scope.placeIds.isEmpty())) {
-            showEmptyState(adapter)
-            return
-        }
-
-        binding.list.visibility = View.VISIBLE
-        binding.emptyView.visibility = View.GONE
-        binding.loading.visibility = View.VISIBLE
-
         loadJob = viewLifecycleOwner.lifecycleScope.launch {
+            // [loadScope] reads the local cache for the Saved tab, so it runs
+            // inside the coroutine (and off the main thread): the shared SQLite
+            // connection's lock can stall a main-thread read behind a background
+            // sync write.
+            val scope = loadScope()
+            if (scope == null || (scope.areaIds.isEmpty() && scope.placeIds.isEmpty())) {
+                showEmptyState(adapter)
+                return@launch
+            }
+
+            binding.list.visibility = View.VISIBLE
+            binding.emptyView.visibility = View.GONE
+            binding.loading.visibility = View.VISIBLE
+
             try {
                 val items = withContext(Dispatchers.IO) {
                     api().getActivity(

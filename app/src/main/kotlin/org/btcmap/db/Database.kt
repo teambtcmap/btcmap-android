@@ -68,7 +68,17 @@ class Database(driver: SQLiteDriver, val path: String) {
         }
     }
 
-    val conn = initialize(driver, path)
+    /**
+     * The single connection every query object in this database shares.
+     *
+     * Wrapped in [LockingSQLiteConnection] so a read cursor is never
+     * interleaved with a write on another thread: Android refills a cursor's
+     * window lazily, so a write between two refills would make the next
+     * `step()`/`get*()` throw `Couldn't read row N from CursorWindow`. The
+     * public type stays [SQLiteConnection] so the wrapper is an implementation
+     * detail.
+     */
+    val conn: SQLiteConnection = LockingSQLiteConnection(initialize(driver, path))
 
     val place = PlaceQueries(conn)
     val comment = CommentQueries(conn)
@@ -392,36 +402,20 @@ class Database(driver: SQLiteDriver, val path: String) {
     /**
      * Runs [block] in a database transaction, rolling back if it throws.
      *
-     * The raw `BEGIN`/`COMMIT` statements are mapped by the framework driver to
-     * its real transaction machinery (see `SQLiteSession.executeSpecial`), so the
-     * session pins a pooled connection for the duration of the block. This makes
-     * concurrent transactions from different threads safe: each owns its own
-     * connection and a write on another thread is a separate transaction that
-     * cannot be rolled back by this one. Do not replace them with plain
-     * statements or assume the connection is thread-confined.
+     * The connection's serialization lock is held for the whole block (see
+     * [LockingSQLiteConnection.transaction]), so no other statement — on this or
+     * any other thread — can interleave with the transaction. Concurrent
+     * transactions from different threads are therefore serialized instead of
+     * racing for the connection.
      *
      * Nesting is not supported: a second [transaction] on the same thread throws
-     * instead of silently starting a savepoint-less inner transaction that the
-     * bundled driver (used in tests) would reject.
+     * instead of silently reusing the outer transaction.
      */
     fun transaction(block: () -> Unit) {
         check(inTransaction.get() != true) { "Database.transaction cannot be nested" }
         inTransaction.set(true)
         try {
-            conn.execSQL("BEGIN TRANSACTION;")
-            try {
-                block()
-                conn.execSQL("COMMIT;")
-            } catch (e: Throwable) {
-                // Roll back on any failure, including an Error, and never let a
-                // failed rollback mask the original exception.
-                try {
-                    conn.execSQL("ROLLBACK;")
-                } catch (_: Throwable) {
-                    // Ignored: the original exception is already on its way out.
-                }
-                throw e
-            }
+            conn.transaction(block)
         } finally {
             inTransaction.set(false)
         }

@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Stop the app crashing while a screen reads the local database and a background sync writes to it at the same time
 - Refresh the place screen when a background sync updates the place, so a merchant deep link opened from a chat room no longer keeps showing the pre-sync copy
 - Keep the place shown in the map's bottom sheet, and the sheet's position, when the screen is recreated
 - Keep the map's merchant, event or exchange filter when the screen is recreated, instead of snapping back to merchants

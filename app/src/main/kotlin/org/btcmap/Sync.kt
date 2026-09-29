@@ -44,7 +44,7 @@ class Sync(val api: Api, val db: Database) {
 
     suspend fun syncPlaces(): Report = syncDelta(
         baseBatchSize = PLACES_BATCH_SIZE,
-        cursor = db.place.selectMaxUpdatedAt(),
+        cursor = { db.place.selectMaxUpdatedAt() },
         fetch = { since, limit -> api.getPlaces(since, limit) },
         updatedAt = { it.updatedAt },
         apply = { rows ->
@@ -59,7 +59,7 @@ class Sync(val api: Api, val db: Database) {
 
     suspend fun syncComments(): Report = syncDelta(
         baseBatchSize = DEFAULT_BATCH_SIZE,
-        cursor = db.comment.selectMaxUpdatedAt(),
+        cursor = { db.comment.selectMaxUpdatedAt() },
         fetch = { since, limit -> api.getComments(since, limit) },
         updatedAt = { it.updatedAt },
         apply = { rows ->
@@ -74,7 +74,7 @@ class Sync(val api: Api, val db: Database) {
 
     suspend fun syncEvents(): Report = syncDelta(
         baseBatchSize = DEFAULT_BATCH_SIZE,
-        cursor = db.event.selectMaxUpdatedAt() ?: EPOCH,
+        cursor = { db.event.selectMaxUpdatedAt() ?: EPOCH },
         fetch = { since, limit -> api.getEvents(requireNotNull(since), limit) },
         updatedAt = { it.updatedAt },
         apply = { rows ->
@@ -87,7 +87,7 @@ class Sync(val api: Api, val db: Database) {
 
     suspend fun syncAreas(): Report = syncDelta(
         baseBatchSize = DEFAULT_BATCH_SIZE,
-        cursor = db.area.selectMaxUpdatedAt() ?: EPOCH,
+        cursor = { db.area.selectMaxUpdatedAt() ?: EPOCH },
         fetch = { since, limit -> api.getAreas(requireNotNull(since), limit) },
         updatedAt = { it.updatedAt },
         apply = { rows ->
@@ -111,7 +111,7 @@ class Sync(val api: Api, val db: Database) {
      */
     private suspend fun <T> syncDelta(
         baseBatchSize: Long,
-        cursor: ZonedDateTime?,
+        cursor: suspend () -> ZonedDateTime?,
         fetch: suspend (since: ZonedDateTime?, limit: Long) -> List<T>,
         updatedAt: (T) -> String,
         apply: (List<T>) -> Unit,
@@ -119,7 +119,11 @@ class Sync(val api: Api, val db: Database) {
         val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
         var rowsAffected = 0L
         var failed = false
-        var maxKnownUpdatedAt = cursor
+        // [cursor] is a lambda, not an already-read value, so the read runs on
+        // this IO dispatcher: a comment sync started from the UI thread must not
+        // touch the shared SQLite connection on the main thread, where the
+        // connection's lock can stall it behind a background write.
+        var maxKnownUpdatedAt = cursor()
         var batchSize = baseBatchSize
 
         while (true) {
