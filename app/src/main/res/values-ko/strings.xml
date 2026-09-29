@@ -210,4 +210,6 @@
     <string name="verification_warning_title">확인 필요</string>
     <string name="verification_warning_outdated">이 장소는 1년 넘게 전에 마지막으로 확인되었으므로 세부 정보가 오래되었을 수 있습니다. 아직 sats를 받는다면 확인을 누르세요. 더 이상 받지 않는다면 신고를 누르세요.</string>
     <string name="verification_warning_not_verified">이 장소는 아직 확인되지 않았으므로 세부 정보가 신뢰할 수 없을 수 있습니다. 아직 sats를 받는다면 확인을 누르세요. 더 이상 받지 않는다면 신고를 누르세요.</string>
+    <string name="start_over">다시 시작</string>
+    <string name="discard_invoice_confirmation">다시 시작할까요? 이 인보이스를 이미 결제했다면 다시 청구됩니다.</string>
 </resources>

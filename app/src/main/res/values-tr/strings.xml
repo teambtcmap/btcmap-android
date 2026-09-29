@@ -214,4 +214,6 @@
     <string name="verification_warning_title">Doğrulama gerekli</string>
     <string name="verification_warning_outdated">Bu yer en son bir yıldan uzun süre önce doğrulandı, bu nedenle ayrıntıları güncel olmayabilir. Hâlâ sats kabul ettiğini biliyorsanız Doğrula\'ya dokunun. Artık kabul etmediğini biliyorsanız Bildir\'e dokunun.</string>
     <string name="verification_warning_not_verified">Bu yer henüz doğrulanmadı, bu nedenle ayrıntıları güvenilir olmayabilir. Hâlâ sats kabul ettiğini biliyorsanız Doğrula\'ya dokunun. Artık kabul etmediğini biliyorsanız Bildir\'e dokunun.</string>
+    <string name="start_over">Baştan başla</string>
+    <string name="discard_invoice_confirmation">Baştan başla? Bu faturayı zaten ödediyseniz tekrar ücretlendirilirsiniz.</string>
 </resources>

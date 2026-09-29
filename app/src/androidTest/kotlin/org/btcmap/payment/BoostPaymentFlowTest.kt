@@ -12,6 +12,9 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import mockwebserver3.Dispatcher
+import mockwebserver3.MockResponse
+import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.boost.BoostFragment
@@ -155,6 +158,95 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
                 1,
                 dispatcher.invoiceRequests.get(),
             )
+        }
+    }
+
+    @Test
+    fun startOver_discardsTheInvoiceAndAllowsAnotherOrder() {
+        val dispatcher = boostDispatcher()
+        apiRule.server.dispatcher = dispatcher
+
+        withBoost { _, fragment ->
+            waitUntilOnMain {
+                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+            }
+            onView(withId(R.id.btn_continue)).perform(click())
+            waitUntil { dispatcher.orderRequests.get() == 1 }
+            waitUntilOnMain { fragment.requireView().findViewById<View>(R.id.qr).isVisible }
+
+            onView(withId(R.id.start_over)).perform(click())
+            onView(withText(R.string.start_over)).inRoot(isDialog()).perform(click())
+
+            waitUntilOnMain {
+                val view = fragment.requireView()
+                !view.findViewById<View>(R.id.qr).isVisible &&
+                    view.findViewById<Button>(R.id.btn_continue).isEnabled
+            }
+            Assert.assertEquals(
+                "starting over must not place an order by itself",
+                1,
+                dispatcher.orderRequests.get(),
+            )
+
+            onView(withId(R.id.btn_continue)).perform(click())
+            waitUntil { dispatcher.orderRequests.get() == 2 }
+        }
+    }
+
+    /**
+     * Starting over must stop watching the discarded invoice. The first invoice
+     * never becomes paid, so a poll that outlives it would keep the observer
+     * busy and the paid second invoice would never close the screen.
+     */
+    @Test
+    fun startOver_thenPaidSecondInvoice_closesScreen() {
+        val firstInvoice = "boost-1"
+        val secondInvoice = "boost-2"
+        var orders = 0
+        apiRule.server.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                val path = request.url.encodedPath
+                return when {
+                    path == "/v4/place-boosts/quote" -> jsonResponse(BOOST_QUOTE_JSON)
+
+                    path == "/v4/place-boosts" && request.method == "POST" -> {
+                        orders++
+                        val id = if (orders == 1) firstInvoice else secondInvoice
+                        jsonResponse("""{"invoice_id":"$id","invoice":"lnbc-$id"}""")
+                    }
+
+                    path == "/v4/invoices/$firstInvoice" ->
+                        jsonResponse(invoiceJson(firstInvoice, "unpaid"))
+
+                    path == "/v4/invoices/$secondInvoice" ->
+                        jsonResponse(invoiceJson(secondInvoice, "paid"))
+
+                    else -> jsonResponse("[]")
+                }
+            }
+        }
+
+        withBoost(addToBackStack = true) { scenario, fragment ->
+            lateinit var activity: Activity
+            scenario.onActivity { activity = it }
+
+            waitUntilOnMain {
+                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+            }
+            onView(withId(R.id.btn_continue)).perform(click())
+            waitUntilOnMain { fragment.requireView().findViewById<View>(R.id.qr).isVisible }
+
+            onView(withId(R.id.start_over)).perform(click())
+            onView(withText(R.string.start_over)).inRoot(isDialog()).perform(click())
+            waitUntilOnMain {
+                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+            }
+
+            onView(withId(R.id.btn_continue)).perform(click())
+
+            waitUntilOnMain {
+                activity.supportFragmentManager.findFragmentByTag(BOOST_TAG) == null
+            }
         }
     }
 

@@ -5,13 +5,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.api.awaitPaidInvoice
-import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.userFacingMessage
 
 /**
@@ -27,36 +25,25 @@ internal fun <TQuote : Any> Fragment.observeInvoicePayment(
     onState: (InvoicePaymentState<TQuote>) -> Unit,
     onPaid: () -> Unit,
 ) {
-    viewLifecycleOwner.lifecycleScope.launch {
-        // Declared outside repeatOnLifecycle so it survives the background and
-        // foreground restarts of the block below: a paid invoice must be
-        // reported once per view, not once per resume. Recreating the view
-        // resets it, so a screen that was paid while away still closes.
-        var paymentReported = false
+    val poller = InvoicePaymentPoller { invoiceId -> api().awaitPaidInvoice(invoiceId) }
 
+    viewLifecycleOwner.lifecycleScope.launch {
+        // The poller is created once per view and declared outside
+        // repeatOnLifecycle so it survives the background and foreground
+        // restarts of the block below: a paid invoice must be reported once per
+        // view, not once per resume. Recreating the view resets it, so a screen
+        // that was paid while away still closes.
         repeatOnLifecycle(Lifecycle.State.RESUMED) {
             launch {
                 viewModel.state.collect { onState(it) }
             }
 
             launch {
-                viewModel.state
-                    .map { it.invoice?.id }
-                    .distinctUntilChanged()
-                    .collect { invoiceId ->
-                        if (invoiceId == null || paymentReported) return@collect
-                        try {
-                            api().awaitPaidInvoice(invoiceId)
-                            paymentReported = true
-                            onPaid()
-                        } catch (t: Throwable) {
-                            // A permanent failure (e.g. the server no longer
-                            // knows the invoice) must surface, not crash the
-                            // lifecycle coroutine.
-                            t.rethrowIfCancellation()
-                            viewModel.reportPaymentFailure(t)
-                        }
-                    }
+                poller.awaitPayment(
+                    ids = viewModel.state.map { it.invoice?.id },
+                    onPaid = onPaid,
+                    onFailure = viewModel::reportPaymentFailure,
+                )
             }
 
             launch {

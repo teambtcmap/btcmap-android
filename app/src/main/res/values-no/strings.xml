@@ -214,4 +214,6 @@
     <string name="verification_warning_title">Verifisering kreves</string>
     <string name="verification_warning_outdated">Dette stedet ble sist verifisert for mer enn ett år siden, så detaljene kan være utdaterte. Hvis du vet at det fortsatt godtar sats, trykk på Bekreft. Hvis du vet at det ikke gjør det lenger, trykk på Rapporter.</string>
     <string name="verification_warning_not_verified">Dette stedet er ikke verifisert ennå, så detaljene kan være upålitelige. Hvis du vet at det fortsatt godtar sats, trykk på Bekreft. Hvis du vet at det ikke gjør det lenger, trykk på Rapporter.</string>
+    <string name="start_over">Start på nytt</string>
+    <string name="discard_invoice_confirmation">Start på nytt? Hvis du allerede har betalt denne fakturaen, blir du belastet på nytt.</string>
 </resources>

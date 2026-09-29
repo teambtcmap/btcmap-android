@@ -214,4 +214,6 @@
     <string name="verification_warning_title">যাচাইকরণ প্রয়োজন</string>
     <string name="verification_warning_outdated">এই স্থানটি এক বছরেরও বেশি সময় আগে সর্বশেষ যাচাই করা হয়েছিল, তাই এর বিবরণ পুরনো হতে পারে। যদি আপনি জানেন যে এটি এখনও sats গ্রহণ করে, যাচাই করুন চাপুন। যদি আপনি জানেন যে আর করে না, রিপোর্ট করুন চাপুন।</string>
     <string name="verification_warning_not_verified">এই স্থানটি এখনও যাচাই করা হয়নি, তাই এর বিবরণ নির্ভরযোগ্য নাও হতে পারে। যদি আপনি জানেন যে এটি এখনও sats গ্রহণ করে, যাচাই করুন চাপুন। যদি আপনি জানেন যে আর করে না, রিপোর্ট করুন চাপুন।</string>
+    <string name="start_over">আবার শুরু করুন</string>
+    <string name="discard_invoice_confirmation">আবার শুরু করবেন? আপনি যদি ইতিমধ্যে এই ইনভয়েসটি পরিশোধ করে থাকেন, তাহলে আবার চার্জ করা হবে।</string>
 </resources>

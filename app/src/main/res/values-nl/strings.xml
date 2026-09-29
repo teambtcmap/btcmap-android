@@ -214,4 +214,6 @@
     <string name="verification_warning_title">Verificatie vereist</string>
     <string name="verification_warning_outdated">Deze plek is voor het laatst meer dan een jaar geleden geverifieerd, dus de gegevens kunnen verouderd zijn. Als je weet dat er nog steeds sats worden geaccepteerd, tik op Verifiëren. Als je weet dat dit niet meer het geval is, tik op Rapporteren.</string>
     <string name="verification_warning_not_verified">Deze plek is nog niet geverifieerd, dus de gegevens zijn mogelijk onbetrouwbaar. Als je weet dat er nog steeds sats worden geaccepteerd, tik op Verifiëren. Als je weet dat dit niet meer het geval is, tik op Rapporteren.</string>
+    <string name="start_over">Opnieuw beginnen</string>
+    <string name="discard_invoice_confirmation">Opnieuw beginnen? Als je deze factuur al hebt betaald, wordt er opnieuw afgeschreven.</string>
 </resources>

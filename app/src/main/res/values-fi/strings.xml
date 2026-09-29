@@ -214,4 +214,6 @@
     <string name="verification_warning_title">Vahvistus tarvitaan</string>
     <string name="verification_warning_outdated">Tämä paikka vahvistettiin viimeksi yli vuosi sitten, joten sen tiedot voivat olla vanhentuneita. Jos tiedät, että se hyväksyy edelleen satseja, napauta Vahvista. Jos tiedät, ettei se enää hyväksy, napauta Ilmoita.</string>
     <string name="verification_warning_not_verified">Tätä paikkaa ei ole vielä vahvistettu, joten sen tiedot voivat olla epäluotettavia. Jos tiedät, että se hyväksyy edelleen satseja, napauta Vahvista. Jos tiedät, ettei se enää hyväksy, napauta Ilmoita.</string>
+    <string name="start_over">Aloita alusta</string>
+    <string name="discard_invoice_confirmation">Aloita alusta? Jos olet jo maksanut tämän laskun, sinulta veloitetaan uudelleen.</string>
 </resources>

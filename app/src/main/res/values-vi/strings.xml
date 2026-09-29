@@ -210,4 +210,6 @@
     <string name="verification_warning_title">Cần xác minh</string>
     <string name="verification_warning_outdated">Địa điểm này được xác minh lần cuối hơn một năm trước, nên thông tin có thể đã lỗi thời. Nếu bạn biết nơi đây vẫn chấp nhận sats, hãy nhấn Xác minh. Nếu bạn biết nơi đây không còn chấp nhận, hãy nhấn Báo cáo.</string>
     <string name="verification_warning_not_verified">Địa điểm này chưa được xác minh, nên thông tin có thể không đáng tin cậy. Nếu bạn biết nơi đây vẫn chấp nhận sats, hãy nhấn Xác minh. Nếu bạn biết nơi đây không còn chấp nhận, hãy nhấn Báo cáo.</string>
+    <string name="start_over">Bắt đầu lại</string>
+    <string name="discard_invoice_confirmation">Bắt đầu lại? Nếu bạn đã thanh toán hóa đơn này, bạn sẽ bị tính phí lần nữa.</string>
 </resources>

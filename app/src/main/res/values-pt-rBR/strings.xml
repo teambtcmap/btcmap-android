@@ -218,4 +218,6 @@
     <string name="verification_warning_title">Verificação necessária</string>
     <string name="verification_warning_outdated">Este local foi verificado pela última vez há mais de um ano, então os detalhes podem estar desatualizados. Se você sabe que ainda aceita sats, toque em Verificar. Se você sabe que não aceita mais, toque em Reportar.</string>
     <string name="verification_warning_not_verified">Este local ainda não foi verificado, então os detalhes podem não ser confiáveis. Se você sabe que ainda aceita sats, toque em Verificar. Se você sabe que não aceita mais, toque em Reportar.</string>
+    <string name="start_over">Começar de novo</string>
+    <string name="discard_invoice_confirmation">Começar de novo? Se você já pagou esta fatura, será cobrado novamente.</string>
 </resources>

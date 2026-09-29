@@ -218,4 +218,6 @@
     <string name="verification_warning_title">Cal verificació</string>
     <string name="verification_warning_outdated">Aquest lloc es va verificar per última vegada fa més d\'un any, així que les seves dades poden estar desactualitzades. Si saps que encara accepta sats, toca Verifica. Si saps que ja no ho fa, toca Informa.</string>
     <string name="verification_warning_not_verified">Aquest lloc encara no s\'ha verificat, així que les seves dades poden no ser fiables. Si saps que encara accepta sats, toca Verifica. Si saps que ja no ho fa, toca Informa.</string>
+    <string name="start_over">Comença de nou</string>
+    <string name="discard_invoice_confirmation">Comença de nou? Si ja has pagat aquesta factura, se\'t tornarà a cobrar.</string>
 </resources>

@@ -222,4 +222,6 @@
     <string name="verification_warning_title">Vyžaduje sa overenie</string>
     <string name="verification_warning_outdated">Toto miesto bolo naposledy overené pred viac ako rokom, takže jeho údaje môžu byť zastarané. Ak viete, že stále prijíma sats, klepnite na Overiť. Ak viete, že už nie, klepnite na Nahlásiť.</string>
     <string name="verification_warning_not_verified">Toto miesto ešte nebolo overené, takže jeho údaje môžu byť nespoľahlivé. Ak viete, že stále prijíma sats, klepnite na Overiť. Ak viete, že už nie, klepnite na Nahlásiť.</string>
+    <string name="start_over">Začať odznova</string>
+    <string name="discard_invoice_confirmation">Začať odznova? Ak ste túto faktúru už zaplatili, bude vám účtovaná znova.</string>
 </resources>

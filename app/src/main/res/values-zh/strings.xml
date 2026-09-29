@@ -210,4 +210,6 @@
     <string name="verification_warning_title">需要验证</string>
     <string name="verification_warning_outdated">此地点上次验证是在一年多以前，因此其详细信息可能已过时。如果您知道它仍然接受 sats，请点按“验证”。如果您知道它已不再接受，请点按“报告”。</string>
     <string name="verification_warning_not_verified">此地点尚未验证，因此其详细信息可能不可靠。如果您知道它仍然接受 sats，请点按“验证”。如果您知道它已不再接受，请点按“报告”。</string>
+    <string name="start_over">重新开始</string>
+    <string name="discard_invoice_confirmation">重新开始？如果您已支付此账单，将会再次向您收费。</string>
 </resources>

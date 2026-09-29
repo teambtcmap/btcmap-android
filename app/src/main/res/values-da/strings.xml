@@ -214,4 +214,6 @@
     <string name="verification_warning_title">Verifikation påkrævet</string>
     <string name="verification_warning_outdated">Dette sted blev sidst verificeret for mere end et år siden, så oplysningerne kan være forældede. Hvis du ved, at det stadig accepterer sats, tryk på Bekræft. Hvis du ved, at det ikke gør det længere, tryk på Rapportér.</string>
     <string name="verification_warning_not_verified">Dette sted er endnu ikke blevet verificeret, så oplysningerne kan være upålidelige. Hvis du ved, at det stadig accepterer sats, tryk på Bekræft. Hvis du ved, at det ikke gør det længere, tryk på Rapportér.</string>
+    <string name="start_over">Start forfra</string>
+    <string name="discard_invoice_confirmation">Start forfra? Hvis du allerede har betalt denne faktura, bliver du opkrævet igen.</string>
 </resources>

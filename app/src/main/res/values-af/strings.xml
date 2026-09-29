@@ -214,4 +214,6 @@
     <string name="verification_warning_title">Verifikasie nodig</string>
     <string name="verification_warning_outdated">Hierdie plek is laas meer as \'n jaar gelede geverifieer, so die besonderhede kan verouderd wees. As jy weet dat dit steeds sats aanvaar, tik Verifieer. As jy weet dat dit dit nie meer doen nie, tik Rapporteer.</string>
     <string name="verification_warning_not_verified">Hierdie plek is nog nie geverifieer nie, so die besonderhede kan onbetroubaar wees. As jy weet dat dit steeds sats aanvaar, tik Verifieer. As jy weet dat dit dit nie meer doen nie, tik Rapporteer.</string>
+    <string name="start_over">Begin oor</string>
+    <string name="discard_invoice_confirmation">Begin oor? As jy hierdie faktuur al betaal het, sal jy weer gehef word.</string>
 </resources>

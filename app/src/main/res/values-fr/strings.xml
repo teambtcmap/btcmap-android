@@ -218,4 +218,6 @@
     <string name="verification_warning_title">Vérification requise</string>
     <string name="verification_warning_outdated">Ce lieu a été vérifié pour la dernière fois il y a plus d\'un an, ses informations peuvent donc être obsolètes. Si vous savez qu\'il accepte toujours des sats, appuyez sur Vérifier. Si vous savez que ce n\'est plus le cas, appuyez sur Signaler.</string>
     <string name="verification_warning_not_verified">Ce lieu n\'a pas encore été vérifié, ses informations peuvent donc ne pas être fiables. Si vous savez qu\'il accepte toujours des sats, appuyez sur Vérifier. Si vous savez que ce n\'est plus le cas, appuyez sur Signaler.</string>
+    <string name="start_over">Recommencer</string>
+    <string name="discard_invoice_confirmation">Recommencer ? Si vous avez déjà payé cette facture, vous serez facturé à nouveau.</string>
 </resources>

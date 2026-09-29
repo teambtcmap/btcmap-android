@@ -214,4 +214,6 @@
     <string name="verification_warning_title">Ellenőrzés szükséges</string>
     <string name="verification_warning_outdated">Ezt a helyet több mint egy éve ellenőrizték utoljára, így az adatai elavultak lehetnek. Ha tudja, hogy még mindig elfogad satot, koppintson az Ellenőrzés elemre. Ha tudja, hogy már nem, koppintson a Bejelentés elemre.</string>
     <string name="verification_warning_not_verified">Ezt a helyet még nem ellenőrizték, így az adatai megbízhatatlanok lehetnek. Ha tudja, hogy még mindig elfogad satot, koppintson az Ellenőrzés elemre. Ha tudja, hogy már nem, koppintson a Bejelentés elemre.</string>
+    <string name="start_over">Újrakezdés</string>
+    <string name="discard_invoice_confirmation">Újrakezdés? Ha ezt a számlát már kifizetted, ismét felszámításra kerül.</string>
 </resources>

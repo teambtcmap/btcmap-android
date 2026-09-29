@@ -222,4 +222,6 @@
     <string name="verification_warning_title">Je nutné ověření</string>
     <string name="verification_warning_outdated">Toto místo bylo naposledy ověřeno před více než rokem, takže jeho údaje mohou být zastaralé. Pokud víte, že stále přijímá sats, klepněte na Ověřit. Pokud víte, že už ne, klepněte na Nahlásit.</string>
     <string name="verification_warning_not_verified">Toto místo ještě nebylo ověřeno, takže jeho údaje mohou být nespolehlivé. Pokud víte, že stále přijímá sats, klepněte na Ověřit. Pokud víte, že už ne, klepněte na Nahlásit.</string>
+    <string name="start_over">Začít znovu</string>
+    <string name="discard_invoice_confirmation">Začít znovu? Pokud jste tuto fakturu už zaplatili, bude vám naúčtována znovu.</string>
 </resources>

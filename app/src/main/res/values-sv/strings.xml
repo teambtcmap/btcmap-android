@@ -214,4 +214,6 @@
     <string name="verification_warning_title">Verifiering krävs</string>
     <string name="verification_warning_outdated">Den här platsen verifierades senast för mer än ett år sedan, så uppgifterna kan vara inaktuella. Om du vet att den fortfarande accepterar sats, tryck på Verifiera. Om du vet att den inte gör det längre, tryck på Rapportera.</string>
     <string name="verification_warning_not_verified">Den här platsen har inte verifierats ännu, så uppgifterna kan vara opålitliga. Om du vet att den fortfarande accepterar sats, tryck på Verifiera. Om du vet att den inte gör det längre, tryck på Rapportera.</string>
+    <string name="start_over">Börja om</string>
+    <string name="discard_invoice_confirmation">Börja om? Om du redan har betalat denna faktura debiteras du igen.</string>
 </resources>

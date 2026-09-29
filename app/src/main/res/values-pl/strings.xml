@@ -222,4 +222,6 @@
     <string name="verification_warning_title">Wymagana weryfikacja</string>
     <string name="verification_warning_outdated">To miejsce zostało ostatnio zweryfikowane ponad rok temu, więc jego dane mogą być nieaktualne. Jeśli wiesz, że nadal przyjmuje saty, dotknij Zweryfikuj. Jeśli wiesz, że już nie, dotknij Zgłoś.</string>
     <string name="verification_warning_not_verified">To miejsce nie zostało jeszcze zweryfikowane, więc jego dane mogą być niewiarygodne. Jeśli wiesz, że nadal przyjmuje saty, dotknij Zweryfikuj. Jeśli wiesz, że już nie, dotknij Zgłoś.</string>
+    <string name="start_over">Zacznij od nowa</string>
+    <string name="discard_invoice_confirmation">Zacząć od nowa? Jeśli już zapłaciłeś tę fakturę, zostaniesz obciążony ponownie.</string>
 </resources>

@@ -210,4 +210,6 @@
     <string name="verification_warning_title">確認が必要です</string>
     <string name="verification_warning_outdated">この場所が最後に確認されたのは1年以上前なので、情報が古くなっている可能性があります。まだsatsを受け付けている場合は「確認」をタップしてください。受け付けなくなった場合は「報告」をタップしてください。</string>
     <string name="verification_warning_not_verified">この場所はまだ確認されていないため、情報が信頼できない可能性があります。まだsatsを受け付けている場合は「確認」をタップしてください。受け付けなくなった場合は「報告」をタップしてください。</string>
+    <string name="start_over">やり直す</string>
+    <string name="discard_invoice_confirmation">やり直しますか？この請求書をすでに支払っている場合は、再度請求されます。</string>
 </resources>

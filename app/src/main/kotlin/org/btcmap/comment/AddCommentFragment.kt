@@ -68,7 +68,9 @@ class AddCommentFragment : Fragment() {
             qr = binding.qr,
             payButton = binding.payInvoice,
             copyButton = binding.copyInvoice,
+            startOverButton = binding.startOver,
             paymentRequestLabel = getString(R.string.btc_map_comment_payment_request),
+            onStartOver = viewModel::startOver,
         )
 
         observeInvoicePayment(

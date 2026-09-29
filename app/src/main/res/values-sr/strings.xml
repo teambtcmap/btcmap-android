@@ -218,4 +218,6 @@
     <string name="verification_warning_title">Потребна је верификација</string>
     <string name="verification_warning_outdated">Ово место је последњи пут верификовано пре више од годину дана, па његови подаци могу бити застарели. Ако знате да још увек прихвата sats, додирните Потврди. Ако знате да више не прихвата, додирните Пријави.</string>
     <string name="verification_warning_not_verified">Ово место још увек није верификовано, па његови подаци могу бити непоуздани. Ако знате да још увек прихвата sats, додирните Потврди. Ако знате да више не прихвата, додирните Пријави.</string>
+    <string name="start_over">Почни испочетка</string>
+    <string name="discard_invoice_confirmation">Почни испочетка? Ако сте већ платили овај рачун, биће вам поново наплаћено.</string>
 </resources>

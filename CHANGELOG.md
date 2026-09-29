@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Let a boost or comment payment screen start over after the invoice is shown, confirming first because an invoice cannot be cancelled and paying the discarded one as well would charge twice
+- Keep a pending boost or comment invoice when the app is killed in the background, so returning to the screen no longer forgets the payment
+- Stop polling the invoice a start-over discarded, so paying the next invoice still closes the screen
+- Poll an unpaid invoice with an interval that grows up to five seconds, instead of every half second
 - Show a place's opening hours correctly when a value adds a second rule with a comma, cut only the matching times for a partial closure instead of closing the whole day, and accept weekdays written with a trailing dot
 - Keep an area's offline map download running after leaving the area screen, instead of leaving it stuck on Downloading until the app is restarted
 - Stop reporting a downloaded offline map as being for a different style when the Auto style follows the system theme between light and dark

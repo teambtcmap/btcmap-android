@@ -210,4 +210,6 @@
     <string name="verification_warning_title">ต้องมีการยืนยัน</string>
     <string name="verification_warning_outdated">สถานที่นี้ได้รับการยืนยันครั้งสุดท้ายเมื่อกว่าหนึ่งปีที่แล้ว รายละเอียดจึงอาจล้าสมัย หากคุณทราบว่ายังรับ sats อยู่ ให้แตะยืนยัน หากคุณทราบว่าไม่รับแล้ว ให้แตะรายงาน</string>
     <string name="verification_warning_not_verified">สถานที่นี้ยังไม่ได้รับการยืนยัน รายละเอียดจึงอาจไม่น่าเชื่อถือ หากคุณทราบว่ายังรับ sats อยู่ ให้แตะยืนยัน หากคุณทราบว่าไม่รับแล้ว ให้แตะรายงาน</string>
+    <string name="start_over">เริ่มใหม่</string>
+    <string name="discard_invoice_confirmation">เริ่มใหม่? หากคุณชำระใบแจ้งหนี้นี้แล้ว คุณจะถูกเรียกเก็บเงินอีกครั้ง</string>
 </resources>

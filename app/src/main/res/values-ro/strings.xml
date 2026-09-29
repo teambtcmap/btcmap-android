@@ -218,4 +218,6 @@
     <string name="verification_warning_title">Este necesară verificarea</string>
     <string name="verification_warning_outdated">Acest loc a fost verificat ultima dată acum mai bine de un an, așa că detaliile pot fi învechite. Dacă știi că acceptă în continuare sats, apasă Verifică. Dacă știi că nu mai acceptă, apasă Raportează.</string>
     <string name="verification_warning_not_verified">Acest loc nu a fost încă verificat, așa că detaliile pot fi nesigure. Dacă știi că acceptă în continuare sats, apasă Verifică. Dacă știi că nu mai acceptă, apasă Raportează.</string>
+    <string name="start_over">Începe din nou</string>
+    <string name="discard_invoice_confirmation">Începe din nou? Dacă ai plătit deja această factură, vei fi taxat din nou.</string>
 </resources>

@@ -109,4 +109,27 @@ class InvoiceApiTest : ApiTestBase() {
 
         Assert.assertTrue(job.isCancelled)
     }
+
+    @Test
+    fun awaitPaidInvoice_retriesRepeatedTransientFailures() = runTest {
+        repeat(3) { enqueueJson("""{"message":"boom"}""", code = 500) }
+        enqueueJson("""{"id":"inv-1","status":"paid"}""")
+
+        val invoice = api().awaitPaidInvoice(
+            "inv-1",
+            initialPollIntervalMillis = 10,
+            maxPollIntervalMillis = 40,
+        )
+
+        Assert.assertTrue(invoice.paid)
+        Assert.assertEquals(4, server.requestCount)
+    }
+
+    @Test
+    fun nextPollInterval_doublesUntilTheCap() {
+        Assert.assertEquals(1_000L, nextPollInterval(500, 5_000))
+        Assert.assertEquals(4_000L, nextPollInterval(2_000, 5_000))
+        Assert.assertEquals(5_000L, nextPollInterval(4_000, 5_000))
+        Assert.assertEquals(5_000L, nextPollInterval(5_000, 5_000))
+    }
 }
