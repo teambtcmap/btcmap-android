@@ -18,9 +18,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.api
-import org.btcmap.api.getUser
-import org.btcmap.api.removeSavedArea
-import org.btcmap.api.removeSavedPlace
 import org.btcmap.api.toDbUser
 import org.btcmap.api.updateUsername
 import org.btcmap.app
@@ -29,10 +26,11 @@ import org.btcmap.auth.showChangePasswordDialog
 import org.btcmap.db
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
-import org.btcmap.databinding.SavedAreaItemBinding
-import org.btcmap.databinding.SavedPlaceItemBinding
+import org.btcmap.databinding.SavedItemBinding
 import org.btcmap.databinding.UserProfileFragmentBinding
 import org.btcmap.i18n.getLocalizedName
+import org.btcmap.saved.removeSavedArea
+import org.btcmap.saved.removeSavedPlace
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.setFieldError
 import org.btcmap.util.showError
@@ -91,10 +89,13 @@ class UserProfileFragment : Fragment() {
     private suspend fun bindUser(user: User) {
         binding.username.text = user.name
         binding.password.text = getString(R.string.password_mask)
+        renderSavedItems(user)
+    }
 
+    private suspend fun renderSavedItems(user: User) {
         binding.savedPlacesList.layoutManager = LinearLayoutManager(requireContext())
-        binding.savedPlacesList.adapter = SavedPlacesAdapter(
-            places = user.savedPlaces.withLocalizedPlaceNames(),
+        binding.savedPlacesList.adapter = SavedItemsAdapter(
+            items = user.savedPlaces.withLocalizedPlaceNames(),
             onDeleteClick = { placeId ->
                 deleteSavedPlace(placeId)
             }
@@ -104,8 +105,8 @@ class UserProfileFragment : Fragment() {
         binding.savedPlacesList.isVisible = user.savedPlaces.isNotEmpty()
 
         binding.savedAreasList.layoutManager = LinearLayoutManager(requireContext())
-        binding.savedAreasList.adapter = SavedAreasAdapter(
-            areas = user.savedAreas.withLocalizedAreaNames(),
+        binding.savedAreasList.adapter = SavedItemsAdapter(
+            items = user.savedAreas.withLocalizedAreaNames(),
             onDeleteClick = { areaId ->
                 deleteSavedArea(areaId)
             }
@@ -167,15 +168,18 @@ class UserProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val user = api().updateUsername(newName)
+                val updated = user.toDbUser()
                 withContext(Dispatchers.IO) {
                     val database = db()
                     val existing = database.user.select()
                     database.transaction {
                         database.user.delete()
                         database.user.insert(
-                            user.toDbUser().copy(
-                                savedPlaces = existing?.savedPlaces ?: user.savedPlaces,
-                                savedAreas = existing?.savedAreas ?: user.savedAreas,
+                            updated.copy(
+                                // The username endpoint returns the saved lists
+                                // empty, so keep the cached ones.
+                                savedPlaces = existing?.savedPlaces ?: updated.savedPlaces,
+                                savedAreas = existing?.savedAreas ?: updated.savedAreas,
                             )
                         )
                     }
@@ -232,8 +236,7 @@ class UserProfileFragment : Fragment() {
     private fun deleteSavedPlace(placeId: Long) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                api().removeSavedPlace(placeId)
-                refreshUserData()
+                renderSavedItems(removeSavedPlace(placeId))
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
@@ -244,8 +247,7 @@ class UserProfileFragment : Fragment() {
     private fun deleteSavedArea(areaId: Long) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                api().removeSavedArea(areaId)
-                refreshUserData()
+                renderSavedItems(removeSavedArea(areaId))
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
@@ -253,52 +255,21 @@ class UserProfileFragment : Fragment() {
         }
     }
 
-    private fun refreshUserData() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val user = api().getUser()
-                withContext(Dispatchers.IO) {
-                    val database = db()
-                    database.transaction {
-                        database.user.delete()
-                        database.user.insert(user.toDbUser())
-                    }
-                }
-                binding.savedPlacesList.adapter = SavedPlacesAdapter(
-                    places = user.savedPlaces.withLocalizedPlaceNames(),
-                    onDeleteClick = { placeId ->
-                        deleteSavedPlace(placeId)
-                    }
-                )
-                binding.noSavedPlaces.isVisible = user.savedPlaces.isEmpty()
-                binding.savedPlacesList.isVisible = user.savedPlaces.isNotEmpty()
-
-                binding.savedAreasList.adapter = SavedAreasAdapter(
-                    areas = user.savedAreas.withLocalizedAreaNames(),
-                    onDeleteClick = { areaId ->
-                        deleteSavedArea(areaId)
-                    }
-                )
-                binding.noSavedAreas.isVisible = user.savedAreas.isEmpty()
-                binding.savedAreasList.isVisible = user.savedAreas.isNotEmpty()
-            } catch (e: Throwable) {
-                e.rethrowIfCancellation()
-                showError(e)
-            }
-        }
-    }
-
-    private class SavedPlacesAdapter(
-        private val places: List<SavedItem>,
+    /**
+     * Both saved lists render the same row, so one adapter serves places and
+     * areas and only the data and delete callback differ.
+     */
+    private class SavedItemsAdapter(
+        private val items: List<SavedItem>,
         private val onDeleteClick: (Long) -> Unit,
-    ) : RecyclerView.Adapter<SavedPlacesAdapter.ViewHolder>() {
+    ) : RecyclerView.Adapter<SavedItemsAdapter.ViewHolder>() {
 
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val binding: SavedPlaceItemBinding = SavedPlaceItemBinding.bind(view)
+            val binding: SavedItemBinding = SavedItemBinding.bind(view)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val binding = SavedPlaceItemBinding.inflate(
+            val binding = SavedItemBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false,
@@ -307,42 +278,13 @@ class UserProfileFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val place = places[position]
-            holder.binding.placeName.text = place.name
+            val item = items[position]
+            holder.binding.name.text = item.name
             holder.binding.deleteButton.setOnClickListener {
-                onDeleteClick(place.id)
+                onDeleteClick(item.id)
             }
         }
 
-        override fun getItemCount(): Int = places.size
-    }
-
-    private class SavedAreasAdapter(
-        private val areas: List<SavedItem>,
-        private val onDeleteClick: (Long) -> Unit,
-    ) : RecyclerView.Adapter<SavedAreasAdapter.ViewHolder>() {
-
-        class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val binding: SavedAreaItemBinding = SavedAreaItemBinding.bind(view)
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val binding = SavedAreaItemBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false,
-            )
-            return ViewHolder(binding.root)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val area = areas[position]
-            holder.binding.areaName.text = area.name
-            holder.binding.deleteButton.setOnClickListener {
-                onDeleteClick(area.id)
-            }
-        }
-
-        override fun getItemCount(): Int = areas.size
+        override fun getItemCount(): Int = items.size
     }
 }

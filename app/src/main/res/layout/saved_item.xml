@@ -9,7 +9,7 @@
     android:paddingBottom="12dp">
 
     <TextView
-        android:id="@+id/placeName"
+        android:id="@+id/name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textAppearance="?textAppearanceBodyLarge"

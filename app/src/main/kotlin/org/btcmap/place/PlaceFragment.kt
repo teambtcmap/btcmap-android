@@ -77,6 +77,7 @@ import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.databinding.PlaceFragmentBinding
 import org.btcmap.i18n.getLocalizedName
+import org.btcmap.saved.isPlaceSaved
 import org.btcmap.saved.toggleSavedPlace
 import org.btcmap.settings.authorized
 import org.btcmap.settings.badgeBackgroundColor
@@ -921,8 +922,7 @@ class PlaceFragment : Fragment() {
         if (prefs.authorized) {
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
-                    val user = withContext(Dispatchers.IO) { db().user.select() }
-                    val saved = user?.savedPlaces?.any { it.id == placeId } == true
+                    val saved = isPlaceSaved(placeId)
                     withResumed {
                         binding.toolbar.menu.findItem(R.id.save).setIcon(
                             if (saved) R.drawable.icon_bookmark_check else R.drawable.icon_bookmark

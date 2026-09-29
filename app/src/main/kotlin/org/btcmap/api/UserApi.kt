@@ -3,7 +3,6 @@ package org.btcmap.api
 import com.google.gson.JsonObject
 import okhttp3.Request
 import org.btcmap.auth.withoutAuth
-import org.btcmap.db.table.user.SavedItem
 import org.btcmap.util.toJsonObject
 
 data class User(

@@ -3,9 +3,10 @@ package org.btcmap.auth
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.test.runTest
 import org.btcmap.api.CreateTokenResponse
+import org.btcmap.api.SavedItem
 import org.btcmap.api.User
 import org.btcmap.db.Database
-import org.btcmap.db.table.user.SavedItem
+import org.btcmap.db.table.user.SavedItem as DbSavedItem
 import org.btcmap.settings.Settings
 import org.btcmap.settings.authToken
 import org.junit.Assert
@@ -45,8 +46,8 @@ class StoreSignedInSessionTest {
         Assert.assertEquals(1L, stored!!.id)
         Assert.assertEquals("satoshi", stored.name)
         Assert.assertEquals(listOf("user"), stored.roles)
-        Assert.assertEquals(listOf(SavedItem(id = 10, name = "Bitcoin Cafe")), stored.savedPlaces)
-        Assert.assertEquals(listOf(SavedItem(id = 20, name = "Downtown")), stored.savedAreas)
+        Assert.assertEquals(listOf(DbSavedItem(id = 10, name = "Bitcoin Cafe")), stored.savedPlaces)
+        Assert.assertEquals(listOf(DbSavedItem(id = 20, name = "Downtown")), stored.savedAreas)
     }
 
     @Test

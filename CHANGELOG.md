@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Remove a saved place or area from the profile screen as soon as the delete succeeds, instead of refetching the account and leaving the row behind when that second request fails
 - Let a boost or comment payment screen start over after the invoice is shown, confirming first because an invoice cannot be cancelled and paying the discarded one as well would charge twice
 - Keep a pending boost or comment invoice when the app is killed in the background, so returning to the screen no longer forgets the payment
 - Stop polling the invoice a start-over discarded, so paying the next invoice still closes the screen
