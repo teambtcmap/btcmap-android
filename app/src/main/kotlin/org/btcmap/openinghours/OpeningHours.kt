@@ -13,12 +13,12 @@ data class OpeningHours(val days: Map<DayOfWeek, DaySchedule>) {
 
     /** Whether every day is open around the clock. */
     val isOpenAroundTheClock: Boolean
-        get() = days.size == DayOfWeek.values().size &&
+        get() = days.size == DayOfWeek.entries.size &&
             days.values.all { it is DaySchedule.OpenAllDay }
 
     /** Whether the place never opens. */
     val isAlwaysClosed: Boolean
-        get() = days.values.all { it is DaySchedule.Closed }
+        get() = days.isNotEmpty() && days.values.all { it is DaySchedule.Closed }
 
     /**
      * The zero-based index of [today]'s line in [toDisplayString], or null
@@ -47,7 +47,7 @@ data class OpeningHours(val days: Map<DayOfWeek, DaySchedule>) {
         if (isOpenAroundTheClock) return aroundTheClockLabel
         if (isAlwaysClosed) return closedLabel
 
-        return DayOfWeek.values().joinToString("\n") { day ->
+        return DayOfWeek.entries.joinToString("\n") { day ->
             val name = day.getDisplayName(TextStyle.FULL, locale)
                 .replaceFirstChar { it.titlecase(locale) }
             "$name: ${days[day]?.describe(closedLabel) ?: closedLabel}"

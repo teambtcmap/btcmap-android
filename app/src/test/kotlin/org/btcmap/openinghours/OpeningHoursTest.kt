@@ -232,7 +232,87 @@ class OpeningHoursTest {
     @Test
     fun timeRange_isAllDay() {
         Assert.assertTrue(TimeRange("00:00", "24:00").isAllDay)
-        Assert.assertTrue(TimeRange("00:00", null).isAllDay)
+        Assert.assertFalse(TimeRange("00:00", null).isAllDay)
         Assert.assertFalse(TimeRange("00:00", "18:00").isAllDay)
+    }
+
+    @Test
+    fun toOpeningHours_commaRuleAddsToEarlierHours() {
+        // "Mo-Sa 09:00-12:00, We 15:00-18:00" is open Wednesday morning and
+        // afternoon; a semicolon would instead make the later rule override.
+        val hours = "Mo-Sa 09:00-12:00, We 15:00-18:00".toOpeningHours()
+
+        Assert.assertNotNull(hours)
+        Assert.assertEquals(
+            listOf("09:00–12:00", "15:00–18:00"),
+            (hours!!.days[DayOfWeek.WEDNESDAY] as DaySchedule.Open).ranges.map { it.format() },
+        )
+        Assert.assertEquals(
+            listOf("09:00–12:00"),
+            (hours.days[DayOfWeek.SATURDAY] as DaySchedule.Open).ranges.map { it.format() },
+        )
+    }
+
+    @Test
+    fun toOpeningHours_semicolonRuleOverridesEarlierHours() {
+        val hours = "Mo-Sa 09:00-12:00; We 15:00-18:00".toOpeningHours()
+
+        Assert.assertNotNull(hours)
+        Assert.assertEquals(
+            listOf("15:00–18:00"),
+            (hours!!.days[DayOfWeek.WEDNESDAY] as DaySchedule.Open).ranges.map { it.format() },
+        )
+    }
+
+    @Test
+    fun toOpeningHours_partialOff_cutsOnlyTheGivenTimes() {
+        val hours = "Mo-Fr 09:00-17:00; We 12:00-13:00 off".toOpeningHours()
+
+        Assert.assertNotNull(hours)
+        Assert.assertEquals(
+            listOf("09:00–12:00", "13:00–17:00"),
+            (hours!!.days[DayOfWeek.WEDNESDAY] as DaySchedule.Open).ranges.map { it.format() },
+        )
+        Assert.assertEquals(
+            listOf("09:00–17:00"),
+            (hours.days[DayOfWeek.THURSDAY] as DaySchedule.Open).ranges.map { it.format() },
+        )
+    }
+
+    @Test
+    fun toOpeningHours_trailingDots_areAccepted() {
+        val hours = "Mo.-Fr. 09:00-17:00".toOpeningHours()
+
+        Assert.assertNotNull(hours)
+        Assert.assertEquals(
+            "09:00–17:00",
+            (hours!!.days[DayOfWeek.MONDAY] as DaySchedule.Open).ranges.single().format(),
+        )
+        Assert.assertEquals(DaySchedule.Closed, hours.days[DayOfWeek.SATURDAY])
+    }
+
+    @Test
+    fun toOpeningHours_aroundTheClockWithModifier() {
+        val hours = "24/7 open".toOpeningHours()
+
+        Assert.assertNotNull(hours)
+        Assert.assertTrue(hours!!.isOpenAroundTheClock)
+    }
+
+    @Test
+    fun toOpeningHours_openEndedSpan_isNotTreatedAsAllDay() {
+        val hours = "Mo-Su 00:00+".toOpeningHours()
+
+        Assert.assertNotNull(hours)
+        Assert.assertFalse(hours!!.isOpenAroundTheClock)
+        Assert.assertEquals(
+            "00:00+",
+            (hours.days[DayOfWeek.MONDAY] as DaySchedule.Open).ranges.single().format(),
+        )
+    }
+
+    @Test
+    fun toOpeningHours_aroundTheClockOff_fallsBackToNull() {
+        Assert.assertNull("24/7 off".toOpeningHours())
     }
 }

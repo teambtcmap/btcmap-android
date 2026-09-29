@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show a place's opening hours correctly when a value adds a second rule with a comma, cut only the matching times for a partial closure instead of closing the whole day, and accept weekdays written with a trailing dot
 - Keep an area's offline map download running after leaving the area screen, instead of leaving it stuck on Downloading until the app is restarted
 - Stop reporting a downloaded offline map as being for a different style when the Auto style follows the system theme between light and dark
 - Allow a failed offline map download to be deleted, not only retried

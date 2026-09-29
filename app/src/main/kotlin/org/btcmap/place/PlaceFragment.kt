@@ -683,7 +683,7 @@ class PlaceFragment : Fragment() {
 
             else -> place.openingHours
         }
-        binding.openingHours.isVisible = place.openingHours != null
+        binding.openingHours.isVisible = !place.openingHours.isNullOrBlank()
 
         binding.btnVerify.setOnClickListener {
             openReport(defaultType = "verified")

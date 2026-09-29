@@ -15,12 +15,8 @@ fun String.toOpeningHours(): OpeningHours? {
     val cleaned = normalizePunctuation().stripComments().substringBefore("||").trim()
     if (cleaned.isEmpty()) return null
 
-    if (cleaned.equals("24/7", ignoreCase = true)) {
-        return OpeningHours(WEEKDAYS.associateWith { DaySchedule.OpenAllDay })
-    }
-
-    val schedule: MutableMap<DayOfWeek, DaySchedule?> =
-        WEEKDAYS.associateWithTo(LinkedHashMap()) { null as DaySchedule? }
+    val schedule: MutableMap<DayOfWeek, DaySchedule> =
+        WEEKDAYS.associateWithTo(LinkedHashMap()) { DaySchedule.Closed }
     var applied = false
 
     for (segment in cleaned.split(';', '\n')) {
@@ -32,16 +28,126 @@ fun String.toOpeningHours(): OpeningHours? {
         val rules = parseSegment(rule) ?: return null
 
         for (parsed in rules) {
-            for (day in parsed.days) schedule[day] = parsed.schedule
+            // Overlapping normal rules and partial closures are combined the
+            // way the OpenStreetMap specification prescribes. A combination the
+            // weekly model cannot represent bails out to the raw value.
+            if (!apply(schedule, parsed)) return null
             applied = true
         }
     }
 
     if (!applied) return null
-    return OpeningHours(schedule.mapValues { it.value ?: DaySchedule.Closed })
+    return OpeningHours(schedule)
 }
 
-private val WEEKDAYS: List<DayOfWeek> = DayOfWeek.values().toList()
+/**
+ * Applies one rule to the running week.
+ *
+ * A normal rule replaces the days it covers; an additional rule (one introduced
+ * by a comma) adds to them. An `off`/`closed` rule instead cuts the times it
+ * matches out of the days, or closes them entirely when it has no time
+ * selector. Returns false when the result cannot be represented.
+ */
+private fun apply(schedule: MutableMap<DayOfWeek, DaySchedule>, rule: Rule): Boolean {
+    for (day in rule.days) {
+        val current = schedule.getValue(day)
+        schedule[day] = when {
+            rule.schedule is DaySchedule.Closed -> cut(current, rule.offTimes) ?: return false
+            rule.additional -> union(current, rule.schedule)
+            else -> rule.schedule
+        }
+    }
+    return true
+}
+
+/** Adds [add] to [current], keeping the ranges of both. */
+private fun union(current: DaySchedule, add: DaySchedule): DaySchedule = when {
+    current is DaySchedule.Closed -> add
+    current is DaySchedule.OpenAllDay || add is DaySchedule.OpenAllDay -> DaySchedule.OpenAllDay
+    current is DaySchedule.Open && add is DaySchedule.Open -> {
+        val ranges = LinkedHashSet<TimeRange>()
+        ranges += current.ranges
+        ranges += add.ranges
+        DaySchedule.Open(ranges.toList())
+    }
+
+    else -> current
+}
+
+/** Removes [off] from [current]; null when the times cannot be represented. */
+private fun cut(current: DaySchedule, off: List<TimeRange>?): DaySchedule? {
+    if (off == null) return DaySchedule.Closed
+
+    val open = current.toSpans() ?: return null
+    if (open.isEmpty()) return DaySchedule.Closed
+
+    return open.subtract(off.toSpans() ?: return null).toSchedule()
+}
+
+private data class Span(val start: Int, val end: Int)
+
+private fun DaySchedule.toSpans(): List<Span>? = when (this) {
+    DaySchedule.Closed -> emptyList()
+    DaySchedule.OpenAllDay -> listOf(Span(0, DAY_MINUTES))
+    is DaySchedule.Open -> ranges.toSpans()
+}
+
+private fun List<TimeRange>.toSpans(): List<Span>? {
+    val spans = ArrayList<Span>(size)
+    for (range in this) {
+        val start = range.start.toMinutes() ?: return null
+        val end = range.end?.toMinutes() ?: return null
+        // A range that ends before it starts wraps past midnight.
+        val fixedEnd = if (end <= start) end + DAY_MINUTES else end
+        if (fixedEnd <= start) return null
+        spans += Span(start, fixedEnd)
+    }
+    return spans
+}
+
+private fun List<Span>.subtract(cuts: List<Span>): List<Span> {
+    var result = this
+    for (cut in cuts) {
+        val next = ArrayList<Span>()
+        for (span in result) {
+            if (cut.end <= span.start || cut.start >= span.end) {
+                next += span
+                continue
+            }
+            if (cut.start > span.start) next += Span(span.start, cut.start)
+            if (cut.end < span.end) next += Span(cut.end, span.end)
+        }
+        result = next
+    }
+    return result
+}
+
+private fun List<Span>.toSchedule(): DaySchedule = when {
+    isEmpty() -> DaySchedule.Closed
+    size == 1 && this[0].start == 0 && this[0].end == DAY_MINUTES -> DaySchedule.OpenAllDay
+    else -> DaySchedule.Open(map { it.toTimeRange() })
+}
+
+private fun Span.toTimeRange(): TimeRange {
+    val start = formatMinutes(start)
+    val end = if (end > DAY_MINUTES) formatMinutes(end - DAY_MINUTES) else formatMinutes(end)
+    return TimeRange(start, end)
+}
+
+private fun String.toMinutes(): Int? {
+    val parts = split(':')
+    val hours = parts.getOrNull(0)?.toIntOrNull() ?: return null
+    val minutes = parts.getOrNull(1)?.toIntOrNull() ?: return null
+    if (minutes !in 0..59) return null
+    return hours * 60 + minutes
+}
+
+private fun formatMinutes(minutes: Int): String =
+    "%02d:%02d".format(minutes / 60, minutes % 60)
+
+private const val DAY_MINUTES = 24 * 60
+
+private val WEEKDAYS: List<DayOfWeek> = DayOfWeek.entries
 
 private val ALL_WEEKDAYS: Set<DayOfWeek> = LinkedHashSet(WEEKDAYS)
 
@@ -57,7 +163,11 @@ private val dayAbbreviations = mapOf(
 
 private val timeRegex = Regex("""\d{1,2}:\d{2}""")
 
-private val wordRegex = Regex("""[^\s,;:+\-–—"]+""")
+private val wordRegex = Regex("""[^\s,;:+\-"]+""")
+
+/** Matches `24/7`, optionally followed by an `open`, `off` or `closed` modifier. */
+private val aroundTheClockRegex =
+    Regex("""^24/7(?:\s+(open|off|closed))?$""", RegexOption.IGNORE_CASE)
 
 private sealed interface Token {
     data class Day(val day: DayOfWeek) : Token
@@ -68,7 +178,13 @@ private sealed interface Token {
     data class Word(val value: String) : Token
 }
 
-private data class Rule(val days: Set<DayOfWeek>, val schedule: DaySchedule)
+private data class Rule(
+    val days: Set<DayOfWeek>,
+    val schedule: DaySchedule,
+    val additional: Boolean,
+    /** The times an `off`/`closed` rule cuts out, or null to close the whole day. */
+    val offTimes: List<TimeRange>? = null,
+)
 
 private class TokenCursor(private val tokens: List<Token>) {
 
@@ -154,15 +270,14 @@ private fun Token.DayRange.days(): Set<DayOfWeek> {
 }
 
 private fun parseSegment(segment: String): List<Rule>? {
-    if (segment.equals("24/7", ignoreCase = true)) {
-        return listOf(Rule(ALL_WEEKDAYS, DaySchedule.OpenAllDay))
-    }
+    parseAroundTheClock(segment)?.let { return it }
 
     val tokens = tokenize(segment) ?: return null
     if (tokens.isEmpty()) return null
 
     val cursor = TokenCursor(tokens)
     val rules = ArrayList<Rule>()
+    var additional = false
 
     while (true) {
         val days = cursor.takeDaySelector()
@@ -176,14 +291,19 @@ private fun parseSegment(segment: String): List<Rule>? {
             else -> return null
         }
 
-        when {
-            days == null -> rules += Rule(ALL_WEEKDAYS, schedule)
-            days.isNotEmpty() -> rules += Rule(days, schedule)
-            // A holiday-only selector carries no weekday information.
+        // A holiday-only selector carries no weekday information.
+        if (days == null || days.isNotEmpty()) {
+            rules += Rule(
+                days = days ?: ALL_WEEKDAYS,
+                schedule = schedule,
+                additional = additional,
+                offTimes = if (schedule is DaySchedule.Closed) times else null,
+            )
         }
 
         if (cursor.peek() == Token.Comma) {
             cursor.take()
+            additional = true
         } else if (cursor.hasMore()) {
             return null
         } else {
@@ -192,6 +312,14 @@ private fun parseSegment(segment: String): List<Rule>? {
     }
 
     return rules
+}
+
+private fun parseAroundTheClock(segment: String): List<Rule>? {
+    val match = aroundTheClockRegex.matchEntire(segment) ?: return null
+    val modifier = match.groupValues[1].lowercase()
+    // "24/7 off" is contradictory; let the caller fall back to the raw value.
+    if (modifier == "off" || modifier == "closed") return null
+    return listOf(Rule(ALL_WEEKDAYS, DaySchedule.OpenAllDay, additional = false))
 }
 
 private fun scheduleOf(ranges: List<TimeRange>): DaySchedule =
@@ -230,7 +358,7 @@ private fun tokenize(input: String): List<Token>? {
                         index = range.second
                     } else {
                         tokens += Token.Day(day)
-                        index += 2
+                        index = skipDot(input, index + 2)
                     }
                 } else if (input.regionMatches(index, "PH", 0, 2, ignoreCase = true) ||
                     input.regionMatches(index, "SH", 0, 2, ignoreCase = true)
@@ -250,16 +378,14 @@ private fun tokenize(input: String): List<Token>? {
     return tokens
 }
 
-/** Matches "Mo-Fr" starting at [index], returning the end day and next index. */
+/** Matches "Mo-Fr" (dots as in "Mo.-Fr." are tolerated) starting at [index]. */
 private fun matchDayRange(input: String, index: Int, from: DayOfWeek): Pair<DayOfWeek, Int>? {
-    var cursor = index + 2
-    while (cursor < input.length && input[cursor].isWhitespace()) cursor++
+    var cursor = skipDotsAndSpaces(input, index + 2)
     if (input.getOrNull(cursor) != '-') return null
 
-    cursor++
-    while (cursor < input.length && input[cursor].isWhitespace()) cursor++
+    cursor = skipDotsAndSpaces(input, cursor + 1)
     val to = matchDay(input, cursor) ?: return null
-    return to to (cursor + 2)
+    return to to skipDot(input, cursor + 2)
 }
 
 private fun matchDay(input: String, index: Int): DayOfWeek? {
@@ -267,7 +393,16 @@ private fun matchDay(input: String, index: Int): DayOfWeek? {
     return dayAbbreviations[input.substring(index, index + 2).lowercase()]
 }
 
-private class Matched<T>(val value: T, val endIndex: Int)
+private fun skipDot(input: String, index: Int): Int =
+    if (input.getOrNull(index) == '.') index + 1 else index
+
+private fun skipDotsAndSpaces(input: String, start: Int): Int {
+    var index = start
+    while (index < input.length && (input[index] == '.' || input[index].isWhitespace())) index++
+    return index
+}
+
+private data class Matched<T>(val value: T, val endIndex: Int)
 
 private fun matchTime(input: String, start: Int): Matched<TimeRange>? {
     val first = timeRegex.find(input, start) ?: return null

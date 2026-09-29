@@ -10,7 +10,7 @@ data class TimeRange(val start: String, val end: String?) {
 
     /** Whether the span covers midnight to midnight, i.e. the whole day. */
     val isAllDay: Boolean
-        get() = start == "00:00" && (end == "24:00" || end == null)
+        get() = start == "00:00" && end == "24:00"
 
     /** The span as "08:00–17:00", or "10:00+" when there is no end. */
     fun format(): String = if (end == null) "$start+" else "$start–$end"
