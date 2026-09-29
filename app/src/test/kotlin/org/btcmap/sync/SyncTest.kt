@@ -388,6 +388,38 @@ class SyncTest {
     }
 
     @Test
+    fun syncComments_reportsAMalformedTimestampInsteadOfThrowing() = runTest {
+        val db = createDatabase()
+        val api = createApi()
+
+        // The cursor computation parses every row's updated_at, so a bad value
+        // must be reported as a failure rather than thrown at the caller.
+        serverRule.server.enqueue(
+            MockResponse.Builder()
+                .addHeader("Content-Type", "application/json")
+                .body(
+                    """
+                    [
+                        {
+                            "id": 1,
+                            "place_id": 100,
+                            "text": "c",
+                            "created_at": "2024-01-01T10:00:00Z",
+                            "updated_at": "not-a-timestamp",
+                            "deleted_at": null
+                        }
+                    ]
+                    """.trimIndent()
+                ).build()
+        )
+
+        val report = Sync(api, db).syncComments()
+
+        Assert.assertTrue("a malformed row must be reported, not thrown", report.failed)
+        Assert.assertEquals(0L, report.rowsAffected)
+    }
+
+    @Test
     fun syncComments_widensBatchWhenAllRowsShareTimestamp() = runTest {
         val db = createDatabase()
         val api = createApi()

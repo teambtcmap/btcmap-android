@@ -170,6 +170,31 @@ class SyncManagerTest {
     }
 
     @Test
+    fun runFullSync_letsAnErrorPropagate() = runTest {
+        enqueueEmpty()
+        val sync = Sync(createApi(), createDatabase())
+
+        val error = Error("seed failed hard")
+        val subject = manager(
+            sync = { sync },
+            seedPlaces = { throw error },
+        )
+
+        // The bundled seeds deliberately let an Error propagate so a
+        // non-recoverable condition is not mistaken for an empty step; the sync
+        // step must not swallow it.
+        var caught: Error? = null
+        try {
+            subject.runFullSync()
+        } catch (e: Error) {
+            caught = e
+        }
+
+        Assert.assertSame(error, caught)
+        Assert.assertEquals(SyncState.Idle, subject.state.value)
+    }
+
+    @Test
     fun syncComments_reportsFailureInsteadOfThrowing() = runTest {
         val subject = manager(sync = { throw RuntimeException("database unavailable") })
 

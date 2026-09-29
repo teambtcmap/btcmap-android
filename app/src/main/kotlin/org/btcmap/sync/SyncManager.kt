@@ -119,19 +119,23 @@ internal class SyncManager(
     /**
      * Runs one sync step and returns its result, or null when it failed.
      *
-     * The sync is app-scoped, so a failure must not escape: an unhandled
-     * exception on the manager's own scope would crash the process, and a
-     * database that is temporarily unusable must not stop the remaining steps.
-     * [Sync] already guards its network and apply steps; this also covers the
-     * cursor read before them and any other unexpected failure.
+     * The sync is app-scoped, so a recoverable failure must not escape: an
+     * unhandled exception on the manager's own scope would crash the process,
+     * and a database that is temporarily unusable must not stop the remaining
+     * steps. [Sync] already guards its network and apply steps; this also covers
+     * the cursor read before them and any other unexpected failure.
+     *
+     * Only [Exception] is caught, never [Error]: the bundled seeds intentionally
+     * let an [Error] propagate so a non-recoverable condition is not mistaken for
+     * a successful empty step.
      */
     private suspend fun <T> step(state: SyncState, block: suspend () -> T): T? {
         _state.value = state
         return try {
             block()
-        } catch (t: Throwable) {
-            t.rethrowIfCancellation()
-            reportSyncFailure(t)
+        } catch (e: Exception) {
+            e.rethrowIfCancellation()
+            reportSyncFailure(e)
             null
         }
     }

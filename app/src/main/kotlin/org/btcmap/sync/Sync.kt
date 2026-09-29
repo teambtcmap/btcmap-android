@@ -105,9 +105,10 @@ class Sync(val api: Api, val db: Database) {
      *
      * Reads pages newer than [cursor], advancing it to the newest timestamp
      * that is certainly complete and widening [baseBatchSize] when a whole page
-     * shares one timestamp (see [nextUpdatedAtCursor]). A failed page read or
-     * apply stops the loop and leaves the cursor where it is, so the next sync
-     * retries the same page; it never throws at the caller.
+     * shares one timestamp (see [nextUpdatedAtCursor]). A failed page read,
+     * cursor computation or apply stops the loop and leaves the cursor where it
+     * is, so the next sync retries the same page; it never throws an [Exception]
+     * at the caller. An [Error] is left to propagate.
      */
     private suspend fun <T> syncDelta(
         baseBatchSize: Long,
@@ -127,13 +128,16 @@ class Sync(val api: Api, val db: Database) {
         var batchSize = baseBatchSize
 
         while (true) {
+            // Only [Exception] is caught, never [Error]: a failed delta must not
+            // crash the caller, but a non-recoverable condition (OutOfMemory,
+            // and the like) must keep propagating, matching the bundled seeds.
             val delta = try {
                 fetch(maxKnownUpdatedAt, batchSize)
-            } catch (t: Throwable) {
+            } catch (e: Exception) {
                 // A failed delta must not crash the caller; leave the cursor
                 // where it is so the next sync retries the same page.
-                t.rethrowIfCancellation()
-                reportSyncFailure(t)
+                e.rethrowIfCancellation()
+                reportSyncFailure(e)
                 failed = true
                 break
             }
@@ -142,7 +146,17 @@ class Sync(val api: Api, val db: Database) {
                 break
             }
 
-            val nextCursor = nextUpdatedAtCursor(delta.map(updatedAt), batchSize)
+            // The cursor computation parses every row's `updated_at`, so guard it
+            // too: a malformed timestamp from the server must be reported as a
+            // failure rather than thrown at the caller.
+            val nextCursor = try {
+                nextUpdatedAtCursor(delta.map(updatedAt), batchSize)
+            } catch (e: Exception) {
+                e.rethrowIfCancellation()
+                reportSyncFailure(e)
+                failed = true
+                break
+            }
             if (nextCursor == null) {
                 batchSize *= 2
                 continue
@@ -156,9 +170,9 @@ class Sync(val api: Api, val db: Database) {
                 // row or a database failure here must not escape and take down
                 // the lifecycle coroutine that called sync.
                 apply(delta)
-            } catch (t: Throwable) {
-                t.rethrowIfCancellation()
-                reportSyncFailure(t)
+            } catch (e: Exception) {
+                e.rethrowIfCancellation()
+                reportSyncFailure(e)
                 failed = true
                 break
             }

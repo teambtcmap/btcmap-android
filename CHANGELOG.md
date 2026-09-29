@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Report a server row with an unreadable timestamp as a failed sync instead of letting it escape the sync worker, and stop swallowing a non-recoverable error while syncing as if the step had simply found no changes
 - Keep a map button's icon tint to that button, instead of letting it bleed into other views that share the same cached icon
 - Stop the map's sync spinner from animating while the app is in the background
 - Treat a network that is up but cannot reach the internet, such as a captive portal, as offline on the map, so it falls back to the bundled basemap instead of trying to load hosted tiles it cannot fetch
