@@ -6,7 +6,7 @@
     <string name="icon">Ikona</string>
     <string name="qr_code">QR kód</string>
     <string name="copied_to_clipboard">Skopírované</string>
-    <string name="search_here">Hľadať tu</string>
+    <string name="search_hint">Miesta, udalosti, komunity</string>
     <string name="settings">Nastavenia</string>
     <string name="pay">Zaplatiť</string>
     <string name="you_dont_have_a_compatible_wallet">Nemáš kompatibilnú peňaženku</string>

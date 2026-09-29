@@ -6,7 +6,7 @@
     <string name="icon">Biểu tượng</string>
     <string name="qr_code">Mã QR</string>
     <string name="copied_to_clipboard">Đã sao chép vào bảng nhớ tạm</string>
-    <string name="search_here">Tìm kiếm ở đây</string>
+    <string name="search_hint">Địa điểm, sự kiện, cộng đồng</string>
     <string name="settings">Cài đặt</string>
     <string name="pay">Thanh toán</string>
     <string name="you_dont_have_a_compatible_wallet">Bạn không có ví tương thích</string>

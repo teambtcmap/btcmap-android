@@ -6,7 +6,7 @@
     <string name="icon">ไอคอน</string>
     <string name="qr_code">คิวอาร์โค้ด</string>
     <string name="copied_to_clipboard">คัดลอกไปที่คลิปบอร์ดแล้ว</string>
-    <string name="search_here">ค้นหาที่นี่</string>
+    <string name="search_hint">สถานที่ กิจกรรม ชุมชน</string>
     <string name="settings">การตั้งค่า</string>
     <string name="pay">จ่าย</string>
     <string name="you_dont_have_a_compatible_wallet">คุณไม่มีกระเป๋าเงินที่เข้ากันได้</string>

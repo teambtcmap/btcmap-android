@@ -6,7 +6,7 @@
     <string name="icon">Icoon</string>
     <string name="qr_code">QR-code</string>
     <string name="copied_to_clipboard">Gekopieerd naar klembord</string>
-    <string name="search_here">Hier zoeken</string>
+    <string name="search_hint">Plaatsen, evenementen, gemeenschappen</string>
     <string name="settings">Instellingen</string>
     <string name="pay">Betaling</string>
     <string name="you_dont_have_a_compatible_wallet">Je hebt geen compatibele wallet</string>

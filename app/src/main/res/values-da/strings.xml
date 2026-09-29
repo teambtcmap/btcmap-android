@@ -6,7 +6,7 @@
     <string name="icon">Ikon</string>
     <string name="qr_code">QR-kode</string>
     <string name="copied_to_clipboard">Kopieret til udklipsholder</string>
-    <string name="search_here">Søg her</string>
+    <string name="search_hint">Steder, begivenheder, fællesskaber</string>
     <string name="settings">Indstillinger</string>
     <string name="pay">Betaling</string>
     <string name="you_dont_have_a_compatible_wallet">Du har ikke en kompatibel tegnebog</string>

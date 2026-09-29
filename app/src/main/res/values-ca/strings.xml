@@ -6,7 +6,7 @@
     <string name="icon">Icona</string>
     <string name="qr_code">Codi QR</string>
     <string name="copied_to_clipboard">Copiat al porta-retalls</string>
-    <string name="search_here">Cerca aquí</string>
+    <string name="search_hint">Llocs, esdeveniments, comunitats</string>
     <string name="settings">Configuració</string>
     <string name="pay">Paga</string>
     <string name="you_dont_have_a_compatible_wallet">No tens un portafolis compatible</string>

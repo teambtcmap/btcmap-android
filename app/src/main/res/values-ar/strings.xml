@@ -6,7 +6,7 @@
     <string name="icon">أيقونة</string>
     <string name="qr_code">رمز QR</string>
     <string name="copied_to_clipboard">تم النسخ إلى الحافظة</string>
-    <string name="search_here">ابحث هنا</string>
+    <string name="search_hint">أماكن، فعاليات، مجتمعات</string>
     <string name="settings">الإعدادات</string>
     <string name="pay">ادفع</string>
     <string name="you_dont_have_a_compatible_wallet">ليس لديك محفظة متوافقة</string>

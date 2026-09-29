@@ -6,7 +6,7 @@
     <string name="icon">아이콘</string>
     <string name="qr_code">QR 코드</string>
     <string name="copied_to_clipboard">클립보드에 복사됨</string>
-    <string name="search_here">여기서 검색</string>
+    <string name="search_hint">장소, 이벤트, 커뮤니티</string>
     <string name="settings">설정</string>
     <string name="pay">결제</string>
     <string name="you_dont_have_a_compatible_wallet">호환 가능한 지갑이 없습니다</string>

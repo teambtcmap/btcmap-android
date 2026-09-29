@@ -6,7 +6,7 @@
     <string name="icon">আইকন</string>
     <string name="qr_code">QR কোড</string>
     <string name="copied_to_clipboard">ক্লিপবোর্ডে কপি হয়েছে</string>
-    <string name="search_here">এখানে খুঁজুন</string>
+    <string name="search_hint">স্থান, ইভেন্ট, সম্প্রদায়</string>
     <string name="settings">সেটিংস</string>
     <string name="pay">পেমেন্ট</string>
     <string name="you_dont_have_a_compatible_wallet">আপনার কাছে সামঞ্জস্যপূর্ণ ওয়ালেট নেই</string>

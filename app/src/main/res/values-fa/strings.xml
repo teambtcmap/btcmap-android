@@ -6,7 +6,7 @@
     <string name="icon">آیکون</string>
     <string name="qr_code">کد QR</string>
     <string name="copied_to_clipboard">در کلیپ‌بورد کپی شد</string>
-    <string name="search_here">اینجا جستجو کنید</string>
+    <string name="search_hint">مکان‌ها، رویدادها، جوامع</string>
     <string name="settings">تنظیمات</string>
     <string name="pay">پرداخت</string>
     <string name="you_dont_have_a_compatible_wallet">شما کیف پول سازگار ندارید</string>

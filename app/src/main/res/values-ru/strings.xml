@@ -6,7 +6,7 @@
     <string name="icon">Иконка</string>
     <string name="qr_code">QR код</string>
     <string name="copied_to_clipboard">Адрес скопирован в буфер обмена</string>
-    <string name="search_here">Поиск мест</string>
+    <string name="search_hint">Места, события, сообщества</string>
     <string name="settings">Настройки</string>
     <string name="pay">Оплатить</string>
     <string name="you_dont_have_a_compatible_wallet">У вас не установленно совместимых кошельков</string>

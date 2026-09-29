@@ -6,7 +6,7 @@
     <string name="icon">Ícone</string>
     <string name="qr_code">QR Code</string>
     <string name="copied_to_clipboard">Copiar</string>
-    <string name="search_here">Pesquise aqui</string>
+    <string name="search_hint">Locais, eventos, comunidades</string>
     <string name="settings">Configurações</string>
     <string name="pay">Pagar</string>
     <string name="you_dont_have_a_compatible_wallet">Você não possui uma carteira compatível</string>

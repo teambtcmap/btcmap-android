@@ -23,7 +23,7 @@
             android:id="@+id/search_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/search_here"
+            android:hint="@string/search_hint"
             app:defaultScrollFlagsEnabled="false"
             app:menu="@menu/map" />
 
@@ -46,7 +46,7 @@
         android:id="@+id/searchView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:hint="@string/search_here"
+        android:hint="@string/search_hint"
         app:layout_anchor="@id/search_bar">
 
         <androidx.recyclerview.widget.RecyclerView

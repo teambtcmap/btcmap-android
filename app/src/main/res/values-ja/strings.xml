@@ -6,7 +6,7 @@
     <string name="icon">アイコン</string>
     <string name="qr_code">QRコード</string>
     <string name="copied_to_clipboard">クリップボードにコピーしました</string>
-    <string name="search_here">ここで検索</string>
+    <string name="search_hint">場所、イベント、コミュニティ</string>
     <string name="settings">設定</string>
     <string name="pay">支払い</string>
     <string name="you_dont_have_a_compatible_wallet">互換性のあるウォレットがありません</string>

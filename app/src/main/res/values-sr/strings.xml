@@ -6,7 +6,7 @@
     <string name="icon">Иконица</string>
     <string name="qr_code">QR код</string>
     <string name="copied_to_clipboard">Копирано у међумеморију</string>
-    <string name="search_here">Претражи овде</string>
+    <string name="search_hint">Места, догађаји, заједнице</string>
     <string name="settings">Подешавања</string>
     <string name="pay">Плати</string>
     <string name="you_dont_have_a_compatible_wallet">Немате компатибилан новчаник</string>

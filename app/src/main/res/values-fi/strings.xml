@@ -6,7 +6,7 @@
     <string name="icon">Kuvake</string>
     <string name="qr_code">QR-koodi</string>
     <string name="copied_to_clipboard">Kopioitu leikepöydälle</string>
-    <string name="search_here">Hae täältä</string>
+    <string name="search_hint">Paikat, tapahtumat, yhteisöt</string>
     <string name="settings">Asetukset</string>
     <string name="pay">Maksa</string>
     <string name="you_dont_have_a_compatible_wallet">Sinulla ei ole yhteensopivaa lompakkoa</string>

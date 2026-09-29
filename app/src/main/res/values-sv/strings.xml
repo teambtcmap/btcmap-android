@@ -6,7 +6,7 @@
     <string name="icon">Ikon</string>
     <string name="qr_code">QR-kod</string>
     <string name="copied_to_clipboard">Kopierat till urklipp</string>
-    <string name="search_here">Sök här</string>
+    <string name="search_hint">Platser, evenemang, gemenskaper</string>
     <string name="settings">Inställningar</string>
     <string name="pay">Betala</string>
     <string name="you_dont_have_a_compatible_wallet">Du har ingen kompatibel plånbok</string>

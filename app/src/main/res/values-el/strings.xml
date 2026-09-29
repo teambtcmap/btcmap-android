@@ -6,7 +6,7 @@
     <string name="icon">Εικονίδιο</string>
     <string name="qr_code">Κωδικός QR</string>
     <string name="copied_to_clipboard">Έγινε αντιγραφή στο πρόχειρο</string>
-    <string name="search_here">Αναζητήστε εδώ</string>
+    <string name="search_hint">Μέρη, εκδηλώσεις, κοινότητες</string>
     <string name="settings">Ρυθμίσεις</string>
     <string name="pay">Πληρωμή</string>
     <string name="you_dont_have_a_compatible_wallet">Δεν διαθέτετε συμβατό πορτοφόλι</string>

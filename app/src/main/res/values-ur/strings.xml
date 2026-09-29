@@ -6,7 +6,7 @@
     <string name="icon">آئیکن</string>
     <string name="qr_code">QR کوڈ</string>
     <string name="copied_to_clipboard">کلپ بورڈ پر کاپی ہوگیا</string>
-    <string name="search_here">یہاں تلاش کریں</string>
+    <string name="search_hint">مقامات، تقریبات، کمیونٹیز</string>
     <string name="settings">ترتیبات</string>
     <string name="pay">ادائیگی کریں</string>
     <string name="you_dont_have_a_compatible_wallet">آپ کے پاس مطابقت والا بٹویلیٹ نہیں ہے</string>

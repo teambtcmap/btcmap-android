@@ -6,7 +6,7 @@
     <string name="icon">Ikon</string>
     <string name="qr_code">QR-kode</string>
     <string name="copied_to_clipboard">Kopiert til utklippstavlen</string>
-    <string name="search_here">Søk her</string>
+    <string name="search_hint">Steder, arrangementer, fellesskap</string>
     <string name="settings">Innstillinger</string>
     <string name="pay">Betal</string>
     <string name="you_dont_have_a_compatible_wallet">Du har ikke en kompatibel lommebok</string>

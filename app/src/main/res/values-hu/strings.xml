@@ -6,7 +6,7 @@
     <string name="icon">Ikon</string>
     <string name="qr_code">QR kód</string>
     <string name="copied_to_clipboard">Másolva a vágólapra</string>
-    <string name="search_here">Keresés itt</string>
+    <string name="search_hint">Helyek, események, közösségek</string>
     <string name="settings">Beállítások</string>
     <string name="pay">Fizetés</string>
     <string name="you_dont_have_a_compatible_wallet">Nincs kompatibilis tárcád</string>

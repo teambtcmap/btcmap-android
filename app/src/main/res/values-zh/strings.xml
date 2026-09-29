@@ -6,7 +6,7 @@
     <string name="icon">图标</string>
     <string name="qr_code">二维码</string>
     <string name="copied_to_clipboard">已复制到剪贴板</string>
-    <string name="search_here">在此搜索</string>
+    <string name="search_hint">地点，活动，社区</string>
     <string name="settings">设置</string>
     <string name="pay">支付</string>
     <string name="you_dont_have_a_compatible_wallet">您没有兼容的钱包</string>
