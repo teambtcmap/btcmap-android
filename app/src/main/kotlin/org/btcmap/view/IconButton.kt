@@ -37,8 +37,10 @@ class IconButton @JvmOverloads constructor(
     }
 
     var iconResId = R.drawable.icon_store
+        private set
 
     var iconColor = 0
+        private set
 
     var icon: Bitmap? = null
         private set
@@ -103,6 +105,12 @@ class IconButton @JvmOverloads constructor(
 
         if (target && isVisible && alpha == shownAlpha) return
         if (!target && visibility != VISIBLE) return
+
+        // Already faded out: hide directly instead of running a no-op fade.
+        if (!target && alpha == 0f) {
+            visibility = GONE
+            return
+        }
 
         if (visibility != VISIBLE) {
             alpha = 0f
@@ -182,7 +190,10 @@ class IconButton @JvmOverloads constructor(
     }
 
     private fun generateIcon(iconResId: Int, color: Int): Bitmap? {
-        val drawable = ContextCompat.getDrawable(context, iconResId) ?: return null
+        // Mutate before tinting: drawables for a resource are cached and share
+        // their constant state, so tinting without it would recolor every other
+        // use of the same icon.
+        val drawable = ContextCompat.getDrawable(context, iconResId)?.mutate() ?: return null
         DrawableCompat.setTint(drawable, color)
         val drawableSize = (resources.displayMetrics.density * 22).toInt()
         return drawable.toBitmap(width = drawableSize, height = drawableSize)
@@ -204,8 +215,15 @@ class IconButton @JvmOverloads constructor(
         updateSpin()
     }
 
+    override fun onWindowVisibilityChanged(visibility: Int) {
+        super.onWindowVisibilityChanged(visibility)
+        updateSpin()
+    }
+
     private fun updateSpin() {
-        if (spinning && isShown) startSpin() else stopSpin()
+        // isShown does not account for the window being hidden, so a backgrounded
+        // button would otherwise keep its spin animator running.
+        if (spinning && isShown && windowVisibility == VISIBLE) startSpin() else stopSpin()
     }
 
     private fun startSpin() {
