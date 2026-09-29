@@ -24,7 +24,16 @@ internal class TestSyncController(
     private val mutableState = MutableStateFlow<SyncState>(SyncState.Idle)
     override val state: StateFlow<SyncState> = mutableState
 
-    override val events: SharedFlow<SyncEvent> = MutableSharedFlow()
+    private val mutableEvents = MutableSharedFlow<SyncEvent>(extraBufferCapacity = 16)
+    override val events: SharedFlow<SyncEvent> = mutableEvents
+
+    /**
+     * Publishes a change the way a finished sync step would, so a test can drive
+     * a screen that refreshes itself when the app-scoped sync touches its data.
+     */
+    fun emit(event: SyncEvent) {
+        mutableEvents.tryEmit(event)
+    }
 
     /** How many times [start] was called, for tests that trigger a sync. */
     @Volatile

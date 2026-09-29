@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Refresh the place screen when a background sync updates the place, so a merchant deep link opened from a chat room no longer keeps showing the pre-sync copy
 - Keep the place shown in the map's bottom sheet, and the sheet's position, when the screen is recreated
 - Keep the map's merchant, event or exchange filter when the screen is recreated, instead of snapping back to merchants
 - Make a tap on an exchange or event marker land only on the pin, rejecting its transparent corners the way a merchant marker already does

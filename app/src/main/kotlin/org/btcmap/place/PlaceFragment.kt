@@ -39,7 +39,9 @@ import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withResumed
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -69,6 +71,7 @@ import org.btcmap.map.getOnSurfaceColor
 import org.btcmap.openinghours.OpeningHours
 import org.btcmap.openinghours.toOpeningHours
 import org.btcmap.R
+import org.btcmap.SyncEvent
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
@@ -82,6 +85,7 @@ import org.btcmap.settings.boostedMarkerBackgroundColor
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.uri
+import org.btcmap.syncController
 import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -221,6 +225,19 @@ class PlaceFragment : Fragment() {
         commentsAdapter = CommentsAdapter()
         binding.commentsList.layoutManager = LinearLayoutManager(requireContext())
         binding.commentsList.adapter = commentsAdapter
+
+        // The place is read from the local cache, so a deep link opened while
+        // the row is still the pre-sync copy (or any background sync that
+        // rewrites it) makes this screen stale. Re-render when the sync reports
+        // the place table changed instead of leaving the outdated copy up until
+        // the screen is reopened.
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                syncController().events.collect { event ->
+                    if (event == SyncEvent.PlacesChanged) reloadPlace()
+                }
+            }
+        }
 
         if (isStandalone) {
             setUpStandalone(savedInstanceState)
@@ -414,6 +431,23 @@ class PlaceFragment : Fragment() {
             previewPlace = null
             previewLatLng = LatLng(coordinates.lat, coordinates.lon)
             renderSmallMap()
+        }
+    }
+
+    /**
+     * Re-reads the place being shown from the local cache and renders the new
+     * copy. Does nothing before a place has been selected, and leaves the row
+     * up if it disappeared from the cache (for example a deleted place), since
+     * there is nothing fresher to show.
+     */
+    private fun reloadPlace() {
+        val id = placeId
+        if (id <= 0L) return
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val place = withContext(Dispatchers.IO) { db().place.selectById(id) } ?: return@launch
+            if (_binding == null) return@launch
+            setPlace(place)
         }
     }
 
