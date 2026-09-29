@@ -172,8 +172,8 @@ fun Settings.mapStyleIsDark(): Boolean {
 }
 
 fun Settings.markerBackgroundColor(context: Context): Int {
-    val customColor = getInt("markerBackgroundColor", -1)
-    if (customColor != -1) return customColor
+    val customColor = getIntOrNull("markerBackgroundColor")
+    if (customColor != null) return customColor
 
     if (useAdaptiveColors) {
         return context.getPrimaryContainerColor()
@@ -200,8 +200,8 @@ fun Settings.setBoostedMarkerBackgroundColor(color: Int?) {
 }
 
 fun Settings.markerIconColor(context: Context): Int {
-    val customColor = getInt("markerIconColor", -1)
-    if (customColor != -1) return customColor
+    val customColor = getIntOrNull("markerIconColor")
+    if (customColor != null) return customColor
 
     if (useAdaptiveColors) {
         return context.getOnPrimaryContainerColor()
@@ -218,8 +218,8 @@ fun Settings.setMarkerIconColor(color: Int?) {
 }
 
 fun Settings.badgeBackgroundColor(context: Context): Int {
-    val customColor = getInt("badgeBackgroundColor", -1)
-    if (customColor != -1) return customColor
+    val customColor = getIntOrNull("badgeBackgroundColor")
+    if (customColor != null) return customColor
 
     if (useAdaptiveColors) {
         return context.getOnPrimaryContainerColor()
@@ -236,8 +236,8 @@ fun Settings.setBadgeBackgroundColor(color: Int?) {
 }
 
 fun Settings.badgeTextColor(context: Context): Int {
-    val customColor = getInt("badgeTextColor", -1)
-    if (customColor != -1) return customColor
+    val customColor = getIntOrNull("badgeTextColor")
+    if (customColor != null) return customColor
 
     if (useAdaptiveColors) {
         return context.getPrimaryContainerColor()
@@ -273,8 +273,8 @@ var Settings.apiUrl: HttpUrl
 private const val KEY_BUTTON_BACKGROUND_COLOR = "buttonBackgroundColor"
 
 fun Settings.buttonBackgroundColor(context: Context): Int {
-    val customColor = getInt(KEY_BUTTON_BACKGROUND_COLOR, -1)
-    if (customColor != -1) return customColor
+    val customColor = getIntOrNull(KEY_BUTTON_BACKGROUND_COLOR)
+    if (customColor != null) return customColor
 
     if (useAdaptiveColors) {
         return context.getTertiaryContainerColor()
@@ -293,8 +293,8 @@ fun Settings.setButtonBackgroundColor(color: Int?) {
 private const val KEY_BUTTON_ICON_COLOR = "buttonIconColor"
 
 fun Settings.buttonIconColor(context: Context): Int {
-    val customColor = getInt(KEY_BUTTON_ICON_COLOR, -1)
-    if (customColor != -1) return customColor
+    val customColor = getIntOrNull(KEY_BUTTON_ICON_COLOR)
+    if (customColor != null) return customColor
 
     if (useAdaptiveColors) {
         return context.getOnTertiaryContainerColor()
@@ -319,8 +319,8 @@ var Settings.useAdaptiveColors: Boolean
     }
 
 fun Settings.buttonBorderColor(context: Context): Int {
-    val customColor = getInt(KEY_BUTTON_BORDER_COLOR, -1)
-    if (customColor != -1) return customColor
+    val customColor = getIntOrNull(KEY_BUTTON_BORDER_COLOR)
+    if (customColor != null) return customColor
 
     if (useAdaptiveColors) {
         return context.getOnTertiaryContainerColor()

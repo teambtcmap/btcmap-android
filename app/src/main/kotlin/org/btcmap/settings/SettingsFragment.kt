@@ -388,7 +388,7 @@ class SettingsFragment : Fragment() {
         binding.badgeBackgroundColor.setColorHex(prefs.badgeBackgroundColor(requireContext()))
         binding.badgeBackgroundColor.setTextColor(prefs.badgeBackgroundColor(requireContext()))
         binding.badgeTextColor.setColorHex(prefs.badgeTextColor(requireContext()))
-        binding.badgeTextColor.setTextColor(prefs.badgeBackgroundColor(requireContext()))
+        binding.badgeTextColor.setTextColor(prefs.badgeTextColor(requireContext()))
         binding.buttonBackgroundColor.setColorHex(prefs.buttonBackgroundColor(requireContext()))
         binding.buttonBackgroundColor.setTextColor(prefs.buttonBackgroundColor(requireContext()))
         binding.buttonIconColor.setColorHex(prefs.buttonIconColor(requireContext()))

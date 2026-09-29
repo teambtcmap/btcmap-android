@@ -159,6 +159,15 @@ class Settings(
         return getString(key, null)?.toIntOrNull() ?: default
     }
 
+    /**
+     * Returns the stored [key] parsed as an Int, or null when it is absent or
+     * cannot be parsed. Unlike [getInt] this lets a caller tell "no value" from
+     * a stored value that happens to equal any default it would otherwise use.
+     */
+    internal fun getIntOrNull(key: String): Int? {
+        return getString(key, null)?.toIntOrNull()
+    }
+
     internal fun getFloat(key: String, default: Float): Float {
         return getString(key, null)?.toFloatOrNull() ?: default
     }
