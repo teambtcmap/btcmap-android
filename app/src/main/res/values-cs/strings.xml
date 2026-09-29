@@ -65,7 +65,6 @@
     <string name="button_background">Pozadí tlačítka</string>
     <string name="button_icon">Ikona tlačítka</string>
     <string name="button_border">Okraj tlačítka</string>
-    <string name="use_adaptive_colors">Použít adaptivní barvy</string>
     <string name="reset">Obnovit</string>
     <string name="area_icon">Ikona oblasti</string>
     <string name="save">Uložit</string>

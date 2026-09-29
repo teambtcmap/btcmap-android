@@ -65,7 +65,6 @@
     <string name="button_background">বোতাম পটভূমি</string>
     <string name="button_icon">বোতাম আইকন</string>
     <string name="button_border">বোতাম সীমানা</string>
-    <string name="use_adaptive_colors">অভিযোজক রঙ ব্যবহার করুন</string>
     <string name="reset">রিসেট</string>
     <string name="area_icon">এলাকা আইকন</string>
     <string name="save">সংরক্ষণ করুন</string>

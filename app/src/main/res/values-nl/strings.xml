@@ -65,7 +65,6 @@
     <string name="button_background">Knop achtergrond</string>
     <string name="button_icon">Knop icoon</string>
     <string name="button_border">Knop rand</string>
-    <string name="use_adaptive_colors">Adaptieve kleuren gebruiken</string>
     <string name="reset">Herstellen</string>
     <string name="area_icon">Gebiedspictogram</string>
     <string name="save">Opslaan</string>

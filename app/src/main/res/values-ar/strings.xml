@@ -65,7 +65,6 @@
     <string name="button_background">خلفية الزر</string>
     <string name="button_icon">أيقونة الزر</string>
     <string name="button_border">حد الزر</string>
-    <string name="use_adaptive_colors">استخدم الألوان التكيفية</string>
     <string name="reset">إعادة تعيين</string>
     <string name="area_icon">أيقونة المنطقة</string>
     <string name="save">حفظ</string>

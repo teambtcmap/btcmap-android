@@ -65,7 +65,6 @@
     <string name="button_background">Фон кнопки</string>
     <string name="button_icon">Іконка кнопки</string>
     <string name="button_border">Рамка кнопки</string>
-    <string name="use_adaptive_colors">Використовувати адаптивні кольори</string>
     <string name="reset">Скинути</string>
     <string name="area_icon">Іконка області</string>
     <string name="save">Зберегти</string>

@@ -65,7 +65,6 @@
     <string name="button_background">Knapp bakgrund</string>
     <string name="button_icon">Knapp ikon</string>
     <string name="button_border">Knapp kant</string>
-    <string name="use_adaptive_colors">Använd adaptiva färger</string>
     <string name="reset">Återställ</string>
     <string name="area_icon">Områdesikon</string>
     <string name="save">Spara</string>

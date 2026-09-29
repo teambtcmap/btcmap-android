@@ -65,7 +65,6 @@
     <string name="button_background">Nền nút</string>
     <string name="button_icon">Biểu tượng nút</string>
     <string name="button_border">Viền nút</string>
-    <string name="use_adaptive_colors">Sử dụng màu thích ứng</string>
     <string name="reset">Đặt lại</string>
     <string name="area_icon">Biểu tượng khu vực</string>
     <string name="save">Lưu</string>

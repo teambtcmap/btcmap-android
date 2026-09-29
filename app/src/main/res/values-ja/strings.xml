@@ -65,7 +65,6 @@
     <string name="button_background">ボタン背景</string>
     <string name="button_icon">ボタンアイコン</string>
     <string name="button_border">ボタン境界</string>
-    <string name="use_adaptive_colors">適応色を使用</string>
     <string name="reset">リセット</string>
     <string name="area_icon">エリアアイコン</string>
     <string name="save">保存</string>

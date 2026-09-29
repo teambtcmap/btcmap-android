@@ -65,7 +65,6 @@
     <string name="button_background">Sfondo pulsante</string>
     <string name="button_icon">Icona pulsante</string>
     <string name="button_border">Bordo pulsante</string>
-    <string name="use_adaptive_colors">Usa colori adattivi</string>
     <string name="reset">Reimposta</string>
     <string name="area_icon">Icona area</string>
     <string name="save">Salva</string>

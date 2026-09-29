@@ -62,12 +62,6 @@ class SettingsFragment : Fragment() {
         initMapStyleButton()
         initVerifiedFilterButton()
 
-        binding.useAdaptiveColors.isChecked = prefs.useAdaptiveColors
-        binding.useAdaptiveColors.setOnCheckedChangeListener { _, isChecked ->
-            prefs.useAdaptiveColors = isChecked
-            refreshAllColors()
-        }
-
         binding.showAttribution.isChecked = prefs.showAttribution
         binding.showAttribution.setOnCheckedChangeListener { _, isChecked ->
             prefs.showAttribution = isChecked
@@ -514,44 +508,6 @@ class SettingsFragment : Fragment() {
                 colorPickerPopUp.dismissDialog()
             }
         }
-    }
-
-    private fun refreshAllColors() {
-        setColor(
-            binding.markerBackgroundColorSwatch,
-            binding.markerBackgroundColor,
-            prefs.markerBackgroundColor(requireContext()),
-        )
-        setColor(
-            binding.markerIconColorSwatch,
-            binding.markerIconColor,
-            prefs.markerIconColor(requireContext()),
-        )
-        setColor(
-            binding.badgeBackgroundColorSwatch,
-            binding.badgeBackgroundColor,
-            prefs.badgeBackgroundColor(requireContext()),
-        )
-        setColor(
-            binding.badgeTextColorSwatch,
-            binding.badgeTextColor,
-            prefs.badgeTextColor(requireContext()),
-        )
-        setColor(
-            binding.buttonBackgroundColorSwatch,
-            binding.buttonBackgroundColor,
-            prefs.buttonBackgroundColor(requireContext()),
-        )
-        setColor(
-            binding.buttonIconColorSwatch,
-            binding.buttonIconColor,
-            prefs.buttonIconColor(requireContext()),
-        )
-        setColor(
-            binding.buttonBorderColorSwatch,
-            binding.buttonBorderColor,
-            prefs.buttonBorderColor(requireContext()),
-        )
     }
 
     private fun updateAccountUi() {

@@ -65,7 +65,6 @@
     <string name="button_background">Painikkeen tausta</string>
     <string name="button_icon">Painikkeen kuvake</string>
     <string name="button_border">Painikkeen reunus</string>
-    <string name="use_adaptive_colors">Käytä mukautuvia värejä</string>
     <string name="reset">Nollaa</string>
     <string name="area_icon">Aluekuvake</string>
     <string name="save">Tallenna</string>

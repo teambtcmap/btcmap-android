@@ -65,7 +65,6 @@
     <string name="button_background">Фон на бутона</string>
     <string name="button_icon">Икона на бутона</string>
     <string name="button_border">Рамка на бутона</string>
-    <string name="use_adaptive_colors">Използвайте адаптивни цветове</string>
     <string name="reset">Нулиране</string>
     <string name="area_icon">Икона на област</string>
     <string name="save">Запази</string>

@@ -269,6 +269,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Draw an outdated merchant's icon in the configured color at reduced opacity instead of a fixed gray
 - Reuse the badge background and text colors for the event-count badge on the map's area chips
 - Draw an outdated exchange marker's icon at reduced opacity, like an outdated merchant's, instead of leaving it fully opaque
+- Remove the "Use adaptive colors" setting, so the map and its controls always use a configured color or the fixed default
 
 ## [1.1.0] - 2026-03-30
 

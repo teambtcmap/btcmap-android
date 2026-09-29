@@ -65,7 +65,6 @@
     <string name="button_background">Φόντο κουμπιού</string>
     <string name="button_icon">Εικονίδιο κουμπιού</string>
     <string name="button_border">Περίγραμμα κουμπιού</string>
-    <string name="use_adaptive_colors">Χρήση προσαρμοστικών χρωμάτων</string>
     <string name="reset">Επαναφορά</string>
     <string name="area_icon">Εικονίδιο περιοχής</string>
     <string name="save">Αποθήκευση</string>

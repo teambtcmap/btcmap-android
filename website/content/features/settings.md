@@ -32,9 +32,6 @@ offer a **Reset** action to return to the default.
 - **Button background**, **button icon** and **button border** — the on-map
   controls.
 
-With **Use adaptive colors** enabled, the colors follow your device's Material
-You palette instead of the defaults.
-
 ![The color picker, with a shade, hue and alpha picker, a preview of the old and new color and a Reset action](/images/settings-color-picker-light.png)
 
 ## Map options

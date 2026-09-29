@@ -65,7 +65,6 @@
     <string name="button_background">Позадина дугмета</string>
     <string name="button_icon">Иконица дугмета</string>
     <string name="button_border">Оквир дугмета</string>
-    <string name="use_adaptive_colors">Користи адаптивне боје</string>
     <string name="reset">Ресетуј</string>
     <string name="area_icon">Иконица области</string>
     <string name="save">Сачувај</string>

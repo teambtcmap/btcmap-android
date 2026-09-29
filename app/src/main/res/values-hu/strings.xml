@@ -65,7 +65,6 @@
     <string name="button_background">Gomb háttér</string>
     <string name="button_icon">Gomb ikon</string>
     <string name="button_border">Gomb keret</string>
-    <string name="use_adaptive_colors">Használj adaptív színeket</string>
     <string name="reset">Visszaállítás</string>
     <string name="area_icon">Terület ikon</string>
     <string name="save">Mentés</string>

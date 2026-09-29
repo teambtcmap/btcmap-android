@@ -65,7 +65,6 @@
     <string name="button_background">רקע כפתור</string>
     <string name="button_icon">אייקון כפתור</string>
     <string name="button_border">גבול כפתור</string>
-    <string name="use_adaptive_colors">השתמש בצבעים אדפטיביים</string>
     <string name="reset">אפס</string>
     <string name="area_icon">אייקון אזור</string>
     <string name="save">שמירה</string>

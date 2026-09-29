@@ -7,10 +7,6 @@ import androidx.core.graphics.toColorInt
 import org.btcmap.App
 import org.btcmap.BuildConfig
 import org.btcmap.R
-import org.btcmap.map.getOnPrimaryContainerColor
-import org.btcmap.map.getOnTertiaryContainerColor
-import org.btcmap.map.getPrimaryContainerColor
-import org.btcmap.map.getTertiaryContainerColor
 import org.maplibre.android.geometry.LatLngBounds
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -177,10 +173,6 @@ fun Settings.markerBackgroundColor(context: Context): Int {
     val customColor = getIntOrNull("markerBackgroundColor")
     if (customColor != null) return customColor
 
-    if (useAdaptiveColors) {
-        return context.getPrimaryContainerColor()
-    }
-
     val isDark = mapStyleIsDark() ||
             (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
 
@@ -215,10 +207,6 @@ fun Settings.markerIconColor(context: Context): Int {
     val customColor = getIntOrNull("markerIconColor")
     if (customColor != null) return customColor
 
-    if (useAdaptiveColors) {
-        return context.getOnPrimaryContainerColor()
-    }
-
     val isDark = mapStyleIsDark() ||
             (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
 
@@ -233,10 +221,6 @@ fun Settings.badgeBackgroundColor(context: Context): Int {
     val customColor = getIntOrNull("badgeBackgroundColor")
     if (customColor != null) return customColor
 
-    if (useAdaptiveColors) {
-        return context.getOnPrimaryContainerColor()
-    }
-
     val isDark = mapStyleIsDark() ||
             (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
 
@@ -250,10 +234,6 @@ fun Settings.setBadgeBackgroundColor(color: Int?) {
 fun Settings.badgeTextColor(context: Context): Int {
     val customColor = getIntOrNull("badgeTextColor")
     if (customColor != null) return customColor
-
-    if (useAdaptiveColors) {
-        return context.getPrimaryContainerColor()
-    }
 
     val isDark = mapStyleIsDark() ||
             (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
@@ -288,10 +268,6 @@ fun Settings.buttonBackgroundColor(context: Context): Int {
     val customColor = getIntOrNull(KEY_BUTTON_BACKGROUND_COLOR)
     if (customColor != null) return customColor
 
-    if (useAdaptiveColors) {
-        return context.getTertiaryContainerColor()
-    }
-
     val isDark = mapStyleIsDark() ||
             (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
 
@@ -308,10 +284,6 @@ fun Settings.buttonIconColor(context: Context): Int {
     val customColor = getIntOrNull(KEY_BUTTON_ICON_COLOR)
     if (customColor != null) return customColor
 
-    if (useAdaptiveColors) {
-        return context.getOnTertiaryContainerColor()
-    }
-
     val isDark = mapStyleIsDark() ||
             (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
 
@@ -324,19 +296,9 @@ fun Settings.setButtonIconColor(color: Int?) {
 
 private const val KEY_BUTTON_BORDER_COLOR = "buttonBorderColor"
 
-var Settings.useAdaptiveColors: Boolean
-    get() = getBoolean("useAdaptiveColors", false)
-    set(value) {
-        putBoolean("useAdaptiveColors", value)
-    }
-
 fun Settings.buttonBorderColor(context: Context): Int {
     val customColor = getIntOrNull(KEY_BUTTON_BORDER_COLOR)
     if (customColor != null) return customColor
-
-    if (useAdaptiveColors) {
-        return context.getOnTertiaryContainerColor()
-    }
 
     val isDark = mapStyleIsDark() ||
             (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)

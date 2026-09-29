@@ -65,7 +65,6 @@
     <string name="button_background">Fons del botó</string>
     <string name="button_icon">Icona del botó</string>
     <string name="button_border">Vora del botó</string>
-    <string name="use_adaptive_colors">Utilitza colors adaptatius</string>
     <string name="reset">Restableix</string>
     <string name="area_icon">Icona d\'àrea</string>
     <string name="save">Desa</string>

@@ -44,13 +44,9 @@ class SettingsPersistenceTest : AppTestCase() {
 
     @Test
     fun toggles_persistSelection() {
-        Assert.assertFalse(prefs.useAdaptiveColors)
-
-        prefs.useAdaptiveColors = true
         prefs.showAttribution = false
         prefs.mapRotationEnabled = true
 
-        Assert.assertTrue(prefs.useAdaptiveColors)
         Assert.assertFalse(prefs.showAttribution)
         Assert.assertTrue(prefs.mapRotationEnabled)
     }

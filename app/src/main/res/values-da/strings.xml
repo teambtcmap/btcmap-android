@@ -65,7 +65,6 @@
     <string name="button_background">Knap baggrund</string>
     <string name="button_icon">Knap ikon</string>
     <string name="button_border">Knap kant</string>
-    <string name="use_adaptive_colors">Brug adaptive farver</string>
     <string name="reset">Nulstil</string>
     <string name="area_icon">Områdeikon</string>
     <string name="save">Gem</string>

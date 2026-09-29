@@ -65,7 +65,6 @@
     <string name="button_background">Fundal buton</string>
     <string name="button_icon">Pictogramă buton</string>
     <string name="button_border">Margine buton</string>
-    <string name="use_adaptive_colors">Folosește culori adaptive</string>
     <string name="reset">Resetează</string>
     <string name="area_icon">Iconița zonei</string>
     <string name="save">Salvează</string>
