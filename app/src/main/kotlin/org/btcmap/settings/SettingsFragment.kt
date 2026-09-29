@@ -23,6 +23,7 @@ import org.btcmap.databinding.SettingsFragmentBinding
 import org.btcmap.db
 import org.btcmap.dbstats.DbStatsFragment
 import org.btcmap.imagestats.ImageStatsFragment
+import org.btcmap.view.ColorSwatchView
 
 class SettingsFragment : Fragment() {
 
@@ -102,8 +103,13 @@ class SettingsFragment : Fragment() {
         initMarkerIconButton()
 
         initBoostedMarkerBackgroundButton()
+        initBoostedMarkerIconButton()
 
-        binding.badgeBackgroundColor.setColorHex(prefs.badgeBackgroundColor(requireContext()))
+        setColor(
+            binding.badgeBackgroundColorSwatch,
+            binding.badgeBackgroundColor,
+            prefs.badgeBackgroundColor(requireContext()),
+        )
 
         binding.changeBadgeBackgroundColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -112,6 +118,11 @@ class SettingsFragment : Fragment() {
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setBadgeBackgroundColor(color)
+                        setColor(
+                            binding.badgeBackgroundColorSwatch,
+                            binding.badgeBackgroundColor,
+                            color,
+                        )
                     }
 
                     override fun onCancel() {
@@ -121,12 +132,20 @@ class SettingsFragment : Fragment() {
                 .show()
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setBadgeBackgroundColor(null)
-                binding.badgeBackgroundColor.setColorHex(prefs.badgeBackgroundColor(requireContext()))
+                setColor(
+                    binding.badgeBackgroundColorSwatch,
+                    binding.badgeBackgroundColor,
+                    prefs.badgeBackgroundColor(requireContext()),
+                )
                 colorPickerPopUp.dismissDialog()
             }
         }
 
-        binding.badgeTextColor.setColorHex(prefs.badgeTextColor(requireContext()))
+        setColor(
+            binding.badgeTextColorSwatch,
+            binding.badgeTextColor,
+            prefs.badgeTextColor(requireContext()),
+        )
 
         binding.changeBadgeTextColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -135,6 +154,11 @@ class SettingsFragment : Fragment() {
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setBadgeTextColor(color)
+                        setColor(
+                            binding.badgeTextColorSwatch,
+                            binding.badgeTextColor,
+                            color,
+                        )
                     }
 
                     override fun onCancel() {
@@ -144,12 +168,20 @@ class SettingsFragment : Fragment() {
                 .show()
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setBadgeTextColor(null)
-                binding.badgeTextColor.setColorHex(prefs.badgeTextColor(requireContext()))
+                setColor(
+                    binding.badgeTextColorSwatch,
+                    binding.badgeTextColor,
+                    prefs.badgeTextColor(requireContext()),
+                )
                 colorPickerPopUp.dismissDialog()
             }
         }
 
-        binding.buttonBackgroundColor.setColorHex(prefs.buttonBackgroundColor(requireContext()))
+        setColor(
+            binding.buttonBackgroundColorSwatch,
+            binding.buttonBackgroundColor,
+            prefs.buttonBackgroundColor(requireContext()),
+        )
 
         binding.changeButtonBackgroundColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -158,6 +190,11 @@ class SettingsFragment : Fragment() {
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setButtonBackgroundColor(color)
+                        setColor(
+                            binding.buttonBackgroundColorSwatch,
+                            binding.buttonBackgroundColor,
+                            color,
+                        )
                     }
 
                     override fun onCancel() {
@@ -167,12 +204,20 @@ class SettingsFragment : Fragment() {
                 .show()
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setButtonBackgroundColor(null)
-                binding.buttonBackgroundColor.setColorHex(prefs.buttonBackgroundColor(requireContext()))
+                setColor(
+                    binding.buttonBackgroundColorSwatch,
+                    binding.buttonBackgroundColor,
+                    prefs.buttonBackgroundColor(requireContext()),
+                )
                 colorPickerPopUp.dismissDialog()
             }
         }
 
-        binding.buttonIconColor.setColorHex(prefs.buttonIconColor(requireContext()))
+        setColor(
+            binding.buttonIconColorSwatch,
+            binding.buttonIconColor,
+            prefs.buttonIconColor(requireContext()),
+        )
 
         binding.changeButtonIconColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -181,6 +226,11 @@ class SettingsFragment : Fragment() {
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setButtonIconColor(color)
+                        setColor(
+                            binding.buttonIconColorSwatch,
+                            binding.buttonIconColor,
+                            color,
+                        )
                     }
 
                     override fun onCancel() {
@@ -190,12 +240,20 @@ class SettingsFragment : Fragment() {
                 .show()
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setButtonIconColor(null)
-                binding.buttonIconColor.setColorHex(prefs.buttonIconColor(requireContext()))
+                setColor(
+                    binding.buttonIconColorSwatch,
+                    binding.buttonIconColor,
+                    prefs.buttonIconColor(requireContext()),
+                )
                 colorPickerPopUp.dismissDialog()
             }
         }
 
-        binding.buttonBorderColor.setColorHex(prefs.buttonBorderColor(requireContext()))
+        setColor(
+            binding.buttonBorderColorSwatch,
+            binding.buttonBorderColor,
+            prefs.buttonBorderColor(requireContext()),
+        )
 
         binding.changeButtonBorderColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -204,6 +262,11 @@ class SettingsFragment : Fragment() {
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setButtonBorderColor(color)
+                        setColor(
+                            binding.buttonBorderColorSwatch,
+                            binding.buttonBorderColor,
+                            color,
+                        )
                     }
 
                     override fun onCancel() {
@@ -213,7 +276,11 @@ class SettingsFragment : Fragment() {
                 .show()
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setButtonBorderColor(null)
-                binding.buttonBorderColor.setColorHex(prefs.buttonBorderColor(requireContext()))
+                setColor(
+                    binding.buttonBorderColorSwatch,
+                    binding.buttonBorderColor,
+                    prefs.buttonBorderColor(requireContext()),
+                )
                 colorPickerPopUp.dismissDialog()
             }
         }
@@ -224,8 +291,9 @@ class SettingsFragment : Fragment() {
         _binding = null
     }
 
-    private fun TextView.setColorHex(color: Int) {
-        text = context.getString(R.string.color_hex, color.toHexString())
+    private fun setColor(swatch: ColorSwatchView, value: TextView, color: Int) {
+        swatch.setColor(color)
+        value.text = getString(R.string.color_hex, color.toHexString())
     }
 
     private fun initMapStyleButton() {
@@ -293,8 +361,11 @@ class SettingsFragment : Fragment() {
     }
 
     private fun initMarkerBackgroundButton() {
-        binding.markerBackgroundColor.setColorHex(prefs.markerBackgroundColor(requireContext()))
-        binding.markerBackgroundColor.setTextColor(prefs.markerBackgroundColor(requireContext()))
+        setColor(
+            binding.markerBackgroundColorSwatch,
+            binding.markerBackgroundColor,
+            prefs.markerBackgroundColor(requireContext()),
+        )
 
         binding.changeMarkerBackgroundColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -303,7 +374,11 @@ class SettingsFragment : Fragment() {
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setMarkerBackgroundColor(color)
-                        binding.markerBackgroundColor.setTextColor(color)
+                        setColor(
+                            binding.markerBackgroundColorSwatch,
+                            binding.markerBackgroundColor,
+                            color,
+                        )
                     }
 
                     override fun onCancel() {
@@ -314,11 +389,10 @@ class SettingsFragment : Fragment() {
             colorPickerPopUp.negativeButton.setText(R.string.reset)
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setMarkerBackgroundColor(null)
-                binding.markerBackgroundColor.setColorHex(prefs.markerBackgroundColor(requireContext()))
-                binding.markerBackgroundColor.setTextColor(
-                    prefs.markerBackgroundColor(
-                        requireContext()
-                    )
+                setColor(
+                    binding.markerBackgroundColorSwatch,
+                    binding.markerBackgroundColor,
+                    prefs.markerBackgroundColor(requireContext()),
                 )
                 colorPickerPopUp.dismissDialog()
             }
@@ -326,8 +400,11 @@ class SettingsFragment : Fragment() {
     }
 
     private fun initMarkerIconButton() {
-        binding.markerIconColor.setColorHex(prefs.markerIconColor(requireContext()))
-        binding.markerIconColor.setTextColor(prefs.markerIconColor(requireContext()))
+        setColor(
+            binding.markerIconColorSwatch,
+            binding.markerIconColor,
+            prefs.markerIconColor(requireContext()),
+        )
 
         binding.changeMarkerIconColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -336,7 +413,11 @@ class SettingsFragment : Fragment() {
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setMarkerIconColor(color)
-                        binding.markerIconColor.setTextColor(color)
+                        setColor(
+                            binding.markerIconColorSwatch,
+                            binding.markerIconColor,
+                            color,
+                        )
                     }
 
                     override fun onCancel() {
@@ -347,15 +428,22 @@ class SettingsFragment : Fragment() {
             colorPickerPopUp.negativeButton.setText(R.string.reset)
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setMarkerIconColor(null)
-                binding.markerIconColor.setColorHex(prefs.markerIconColor(requireContext()))
-                binding.markerIconColor.setTextColor(prefs.markerIconColor(requireContext()))
+                setColor(
+                    binding.markerIconColorSwatch,
+                    binding.markerIconColor,
+                    prefs.markerIconColor(requireContext()),
+                )
                 colorPickerPopUp.dismissDialog()
             }
         }
     }
 
     private fun initBoostedMarkerBackgroundButton() {
-        binding.boostedMarkerBackgroundColor.setColorHex(prefs.boostedMarkerBackgroundColor())
+        setColor(
+            binding.boostedMarkerBackgroundColorSwatch,
+            binding.boostedMarkerBackgroundColor,
+            prefs.boostedMarkerBackgroundColor(),
+        )
 
         binding.changeBoostedMarkerBackgroundColor.setOnClickListener {
             val colorPickerPopUp = ColorPickerPopUp(context)
@@ -364,6 +452,11 @@ class SettingsFragment : Fragment() {
                 .setOnPickColorListener(object : OnPickColorListener {
                     override fun onColorPicked(color: Int) {
                         prefs.setBoostedMarkerBackgroundColor(color)
+                        setColor(
+                            binding.boostedMarkerBackgroundColorSwatch,
+                            binding.boostedMarkerBackgroundColor,
+                            color,
+                        )
                     }
 
                     override fun onCancel() {
@@ -374,27 +467,91 @@ class SettingsFragment : Fragment() {
             colorPickerPopUp.negativeButton.setText(R.string.reset)
             colorPickerPopUp.negativeButton.setOnClickListener {
                 prefs.setBoostedMarkerBackgroundColor(null)
-                binding.boostedMarkerBackgroundColor.setColorHex(prefs.boostedMarkerBackgroundColor())
+                setColor(
+                    binding.boostedMarkerBackgroundColorSwatch,
+                    binding.boostedMarkerBackgroundColor,
+                    prefs.boostedMarkerBackgroundColor(),
+                )
+                colorPickerPopUp.dismissDialog()
+            }
+        }
+    }
+
+    private fun initBoostedMarkerIconButton() {
+        setColor(
+            binding.boostedMarkerIconColorSwatch,
+            binding.boostedMarkerIconColor,
+            prefs.boostedMarkerIconColor(),
+        )
+
+        binding.changeBoostedMarkerIconColor.setOnClickListener {
+            val colorPickerPopUp = ColorPickerPopUp(context)
+            colorPickerPopUp.setShowAlpha(true)
+                .setDefaultColor(prefs.boostedMarkerIconColor())
+                .setOnPickColorListener(object : OnPickColorListener {
+                    override fun onColorPicked(color: Int) {
+                        prefs.setBoostedMarkerIconColor(color)
+                        setColor(
+                            binding.boostedMarkerIconColorSwatch,
+                            binding.boostedMarkerIconColor,
+                            color,
+                        )
+                    }
+
+                    override fun onCancel() {
+                        colorPickerPopUp.dismissDialog() // Dismiss the dialog.
+                    }
+                })
+                .show()
+            colorPickerPopUp.negativeButton.setText(R.string.reset)
+            colorPickerPopUp.negativeButton.setOnClickListener {
+                prefs.setBoostedMarkerIconColor(null)
+                setColor(
+                    binding.boostedMarkerIconColorSwatch,
+                    binding.boostedMarkerIconColor,
+                    prefs.boostedMarkerIconColor(),
+                )
                 colorPickerPopUp.dismissDialog()
             }
         }
     }
 
     private fun refreshAllColors() {
-        binding.markerBackgroundColor.setColorHex(prefs.markerBackgroundColor(requireContext()))
-        binding.markerBackgroundColor.setTextColor(prefs.markerBackgroundColor(requireContext()))
-        binding.markerIconColor.setColorHex(prefs.markerIconColor(requireContext()))
-        binding.markerIconColor.setTextColor(prefs.markerIconColor(requireContext()))
-        binding.badgeBackgroundColor.setColorHex(prefs.badgeBackgroundColor(requireContext()))
-        binding.badgeBackgroundColor.setTextColor(prefs.badgeBackgroundColor(requireContext()))
-        binding.badgeTextColor.setColorHex(prefs.badgeTextColor(requireContext()))
-        binding.badgeTextColor.setTextColor(prefs.badgeTextColor(requireContext()))
-        binding.buttonBackgroundColor.setColorHex(prefs.buttonBackgroundColor(requireContext()))
-        binding.buttonBackgroundColor.setTextColor(prefs.buttonBackgroundColor(requireContext()))
-        binding.buttonIconColor.setColorHex(prefs.buttonIconColor(requireContext()))
-        binding.buttonIconColor.setTextColor(prefs.buttonIconColor(requireContext()))
-        binding.buttonBorderColor.setColorHex(prefs.buttonBorderColor(requireContext()))
-        binding.buttonBorderColor.setTextColor(prefs.buttonBorderColor(requireContext()))
+        setColor(
+            binding.markerBackgroundColorSwatch,
+            binding.markerBackgroundColor,
+            prefs.markerBackgroundColor(requireContext()),
+        )
+        setColor(
+            binding.markerIconColorSwatch,
+            binding.markerIconColor,
+            prefs.markerIconColor(requireContext()),
+        )
+        setColor(
+            binding.badgeBackgroundColorSwatch,
+            binding.badgeBackgroundColor,
+            prefs.badgeBackgroundColor(requireContext()),
+        )
+        setColor(
+            binding.badgeTextColorSwatch,
+            binding.badgeTextColor,
+            prefs.badgeTextColor(requireContext()),
+        )
+        setColor(
+            binding.buttonBackgroundColorSwatch,
+            binding.buttonBackgroundColor,
+            prefs.buttonBackgroundColor(requireContext()),
+        )
+        setColor(
+            binding.buttonIconColorSwatch,
+            binding.buttonIconColor,
+            prefs.buttonIconColor(requireContext()),
+        )
+        setColor(
+            binding.buttonBorderColorSwatch,
+            binding.buttonBorderColor,
+            prefs.buttonBorderColor(requireContext()),
+        )
     }
 
     private fun updateAccountUi() {

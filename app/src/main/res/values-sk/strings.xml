@@ -45,6 +45,7 @@
     <string name="badge_background">Pozadie badge</string>
     <string name="badge_text">Text badge</string>
     <string name="boosted_marker_background">Pozadie boostnutého markeru</string>
+    <string name="boosted_marker_icon">Ikona boostnutého markeru</string>
     <string name="btc_map_boost_payment_request">Žiadosť o platbu BTC Map Boost</string>
     <string name="your_boost_is_active">Váš boost je aktívny</string>
     <string name="boosted">Boostnuté</string>

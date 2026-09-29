@@ -45,6 +45,7 @@
     <string name="badge_background">Märke bakgrund</string>
     <string name="badge_text">Märke text</string>
     <string name="boosted_marker_background">Främjd markör bakgrund</string>
+    <string name="boosted_marker_icon">Främjd markör ikon</string>
     <string name="btc_map_boost_payment_request">BTC Map Boost betalningsbegäran</string>
     <string name="your_boost_is_active">Din främjning är aktiv</string>
     <string name="boosted">Främjad</string>

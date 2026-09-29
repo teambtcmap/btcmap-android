@@ -1,6 +1,5 @@
 package org.btcmap.map.layer
 
-import android.graphics.Color
 import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.EXCHANGE_MARKER_ICON_PREFIX
 import org.btcmap.map.ICON_OFFSET_Y
@@ -19,6 +18,7 @@ const val EXCHANGE_COMMENT_COUNT_TEXT_LAYER_ID = "exchange_comment_count_text"
 
 fun createExchangeLayers(
     markerBackgroundColor: Int,
+    markerIconColor: Int,
     markerBadgeBackgroundColor: Int,
     markerBadgeTextColor: Int,
     usingOpenFreeMap: Boolean,
@@ -40,12 +40,12 @@ fun createExchangeLayers(
     val clusterText =
         SymbolLayer(EXCHANGE_CLUSTER_TEXT_LAYER_ID, source.id).apply {
             if (usingOpenFreeMap) {
-                setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Regular")))
+                setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Bold")))
             }
             setProperties(
                 PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
-                PropertyFactory.textSize(16f),
-                PropertyFactory.textColor(Color.WHITE),
+                PropertyFactory.textSize(18f),
+                PropertyFactory.textColor(markerIconColor),
             )
         }
 

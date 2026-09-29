@@ -45,6 +45,7 @@
     <string name="badge_background">Mærke baggrund</string>
     <string name="badge_text">Mærke tekst</string>
     <string name="boosted_marker_background">Boostet marker baggrund</string>
+    <string name="boosted_marker_icon">Boostet marker ikon</string>
     <string name="btc_map_boost_payment_request">BTC Map Boost betalingsanmodning</string>
     <string name="your_boost_is_active">Din boost er aktiv</string>
     <string name="boosted">Boostet</string>

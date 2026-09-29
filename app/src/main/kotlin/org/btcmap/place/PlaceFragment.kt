@@ -83,8 +83,10 @@ import org.btcmap.settings.authorized
 import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.boostedMarkerBackgroundColor
+import org.btcmap.settings.boostedMarkerIconColor
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.markerBackgroundColor
+import org.btcmap.settings.markerIconColor
 import org.btcmap.settings.uri
 import org.btcmap.syncController
 import org.btcmap.util.rethrowIfCancellation
@@ -334,7 +336,9 @@ class PlaceFragment : Fragment() {
                     context = requireContext(),
                     marker = marker,
                     markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
+                    markerIconColor = prefs.markerIconColor(requireContext()),
                     boostedMarkerBackgroundColor = prefs.boostedMarkerBackgroundColor(),
+                    boostedMarkerIconColor = prefs.boostedMarkerIconColor(),
                     markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
                     markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
                 ),

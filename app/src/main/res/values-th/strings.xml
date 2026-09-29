@@ -45,6 +45,7 @@
     <string name="badge_background">พื้นหลังป้าย</string>
     <string name="badge_text">ข้อความป้าย</string>
     <string name="boosted_marker_background">พื้นหลังมาร์กเกอร์ที่ได้รับการส่งเสริม</string>
+    <string name="boosted_marker_icon">ไอคอนมาร์กเกอร์ที่ได้รับการส่งเสริม</string>
     <string name="btc_map_boost_payment_request">คำขอชำระเงิน BTC Map Boost</string>
     <string name="your_boost_is_active">การส่งเสริมของคุณเปิดใช้งานอยู่</string>
     <string name="boosted">ได้รับการส่งเสริม</string>

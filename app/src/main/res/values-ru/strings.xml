@@ -45,6 +45,7 @@
     <string name="badge_background">Фон значка</string>
     <string name="badge_text">Текст значка</string>
     <string name="boosted_marker_background">Фон продвигаемого маркера</string>
+    <string name="boosted_marker_icon">Иконка продвигаемого маркера</string>
     <string name="btc_map_boost_payment_request">Запрос на оплату BTC Map Boost</string>
     <string name="your_boost_is_active">Ваш буст активен</string>
     <string name="boosted">Продвигается</string>

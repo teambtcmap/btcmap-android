@@ -20,6 +20,7 @@ import org.btcmap.map.ICON_OFFSET_Y
 import org.btcmap.map.ensureEventMarkerImage
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.markerBackgroundColor
+import org.btcmap.settings.markerIconColor
 import org.btcmap.settings.prefs
 import org.btcmap.settings.uri
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -198,7 +199,11 @@ class EventFragment : Fragment() {
                     DrawableCompat.setTint(drawable, prefs.markerBackgroundColor(requireContext()))
                     style.addImage("btcmap-marker", drawable)
                 }
-                ensureEventMarkerImage(requireContext(), style)
+                ensureEventMarkerImage(
+                    requireContext(),
+                    style,
+                    prefs.markerIconColor(requireContext()),
+                )
                 renderEventMarker(style)
             }
 

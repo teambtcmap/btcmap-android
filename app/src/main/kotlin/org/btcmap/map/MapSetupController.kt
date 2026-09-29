@@ -23,9 +23,11 @@ internal class MapSetupController(
      */
     private val bundledStyle: BundledBasemapStyle? = null,
     private val markerBackgroundColor: Int,
+    private val markerIconColor: Int,
     private val markerBadgeBackgroundColor: Int,
     private val markerBadgeTextColor: Int,
     private val boostedMarkerBackgroundColor: Int,
+    private val boostedMarkerIconColor: Int,
     private val usingOpenFreeMap: Boolean,
     private val rotationEnabled: Boolean,
 ) {
@@ -46,16 +48,19 @@ internal class MapSetupController(
 
     private val merchants = createMerchantLayers(
         markerBackgroundColor = markerBackgroundColor,
+        markerIconColor = markerIconColor,
         usingOpenFreeMap = usingOpenFreeMap,
     )
 
     private val events = createEventLayers(
         markerBackgroundColor = markerBackgroundColor,
+        markerIconColor = markerIconColor,
         usingOpenFreeMap = usingOpenFreeMap,
     )
 
     private val exchanges = createExchangeLayers(
         markerBackgroundColor = markerBackgroundColor,
+        markerIconColor = markerIconColor,
         markerBadgeBackgroundColor = markerBadgeBackgroundColor,
         markerBadgeTextColor = markerBadgeTextColor,
         usingOpenFreeMap = usingOpenFreeMap,
@@ -100,7 +105,7 @@ internal class MapSetupController(
                     style.addImage("btcmap-marker-boosted", drawable)
                 }
 
-                ensureEventMarkerImage(mapView.context, style)
+                ensureEventMarkerImage(mapView.context, style, markerIconColor)
 
                 // The plain pin exchange and event markers draw, so their taps
                 // are hit-tested through its transparent pixels too.
@@ -149,7 +154,9 @@ internal class MapSetupController(
             style = style,
             markers = markers,
             markerBackgroundColor = markerBackgroundColor,
+            markerIconColor = markerIconColor,
             boostedMarkerBackgroundColor = boostedMarkerBackgroundColor,
+            boostedMarkerIconColor = boostedMarkerIconColor,
             markerBadgeBackgroundColor = markerBadgeBackgroundColor,
             markerBadgeTextColor = markerBadgeTextColor,
             registry = markerImageRegistry,
@@ -162,6 +169,7 @@ internal class MapSetupController(
             context = mapView.context,
             style = style,
             markers = markers,
+            markerIconColor = markerIconColor,
             registry = markerImageRegistry,
         )
     }

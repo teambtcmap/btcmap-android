@@ -45,6 +45,7 @@
     <string name="badge_background">Jelvény háttér</string>
     <string name="badge_text">Jelvény szöveg</string>
     <string name="boosted_marker_background">Kiemelt jelölő háttér</string>
+    <string name="boosted_marker_icon">Kiemelt jelölő ikon</string>
     <string name="btc_map_boost_payment_request">BTC Map Kiemelés fizetési kérelem</string>
     <string name="your_boost_is_active">A kiemelésed aktív</string>
     <string name="boosted">Kiemelt</string>

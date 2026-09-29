@@ -199,6 +199,16 @@ fun Settings.setBoostedMarkerBackgroundColor(color: Int?) {
     putInt(KEY_BOOSTED_MARKER_BACKGROUND_COLOR, color)
 }
 
+private const val KEY_BOOSTED_MARKER_ICON_COLOR = "boostedMarkerIconColor"
+
+fun Settings.boostedMarkerIconColor(): Int {
+    return getInt(KEY_BOOSTED_MARKER_ICON_COLOR, 0xFFFFFFFF.toInt())
+}
+
+fun Settings.setBoostedMarkerIconColor(color: Int?) {
+    putInt(KEY_BOOSTED_MARKER_ICON_COLOR, color)
+}
+
 fun Settings.markerIconColor(context: Context): Int {
     val customColor = getIntOrNull("markerIconColor")
     if (customColor != null) return customColor

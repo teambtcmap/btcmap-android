@@ -45,6 +45,7 @@
     <string name="badge_background">پس‌زمینه نشان</string>
     <string name="badge_text">متن نشان</string>
     <string name="boosted_marker_background">پس‌زمینه نشانگر ارتقا یافته</string>
+    <string name="boosted_marker_icon">آیکون نشانگر ارتقا یافته</string>
     <string name="btc_map_boost_payment_request">درخواست پرداخت ارتقای BTC Map</string>
     <string name="your_boost_is_active">ارتقای شما فعال است</string>
     <string name="boosted">ارتقا یافته</string>

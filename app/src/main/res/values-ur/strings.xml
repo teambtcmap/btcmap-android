@@ -45,6 +45,7 @@
     <string name="badge_background">بیج کا پس منظر</string>
     <string name="badge_text">بیج کا متن</string>
     <string name="boosted_marker_background">بوسٹ شدہ مارکر کا پس منظر</string>
+    <string name="boosted_marker_icon">بوسٹ شدہ مارکر کا آئیکن</string>
     <string name="btc_map_boost_payment_request">BTC Map بوسٹ ادائیگی کی درخواست</string>
     <string name="your_boost_is_active">آپ کا بوسٹ فعال ہے</string>
     <string name="boosted">بوسٹ شدہ</string>

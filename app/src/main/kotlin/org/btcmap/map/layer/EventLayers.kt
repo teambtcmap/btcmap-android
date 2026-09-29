@@ -1,6 +1,5 @@
 package org.btcmap.map.layer
 
-import android.graphics.Color
 import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.EVENT_MARKER_ICON_NAME
 import org.btcmap.map.ICON_OFFSET_Y
@@ -18,6 +17,7 @@ const val EVENT_CLUSTER_COUNT_LAYER_ID = "event_cluster_count"
 
 fun createEventLayers(
     markerBackgroundColor: Int,
+    markerIconColor: Int,
     usingOpenFreeMap: Boolean,
 ): Pair<GeoJsonSource, List<Layer>> {
     val source = GeoJsonSource(
@@ -38,12 +38,12 @@ fun createEventLayers(
     val clusterCount =
         SymbolLayer(EVENT_CLUSTER_COUNT_LAYER_ID, source.id).apply {
             if (usingOpenFreeMap) {
-                setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Regular")))
+                setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Bold")))
             }
             setProperties(
                 PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
-                PropertyFactory.textSize(16f),
-                PropertyFactory.textColor(Color.WHITE),
+                PropertyFactory.textSize(18f),
+                PropertyFactory.textColor(markerIconColor),
             )
         }
 

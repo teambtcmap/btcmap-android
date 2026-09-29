@@ -20,11 +20,18 @@ import org.maplibre.android.maps.Style
 import java.time.ZonedDateTime
 import java.util.concurrent.ConcurrentHashMap
 
-private val OUTDATED_ICON_COLOR = 0xFFBDBDBD.toInt()
-
 private const val FALLBACK_ICON = "storefront"
 private const val SINGLE_GLYPH_MAX_WIDTH_RATIO = 1.5f
 private const val GLYPH_MEASURE_TEXT_SIZE = 100f
+
+// Outdated markers keep the configured icon color but are drawn translucent so
+// they stay recognisable while reading as stale.
+private const val OUTDATED_ICON_ALPHA = 0.6f
+
+private fun Int.withAlpha(factor: Float): Int {
+    val alpha = (Color.alpha(this) * factor).toInt().coerceIn(0, 255)
+    return (this and 0x00FFFFFF) or (alpha shl 24)
+}
 
 private val resolvedGlyphs = ConcurrentHashMap<String, String>()
 
@@ -49,7 +56,9 @@ suspend fun ensureMerchantMarkerImages(
     style: Style,
     markers: Set<Marker>,
     markerBackgroundColor: Int,
+    markerIconColor: Int,
     boostedMarkerBackgroundColor: Int,
+    boostedMarkerIconColor: Int,
     markerBadgeBackgroundColor: Int,
     markerBadgeTextColor: Int,
     registry: MarkerImageRegistry,
@@ -69,12 +78,14 @@ suspend fun ensureMerchantMarkerImages(
             val outdated = marker.isOutdated(now)
             val boosted = marker.isBoosted(now)
             val pin = if (boosted && !outdated) boostedPin else normalPin
+            val iconColor = if (boosted && !outdated) boostedMarkerIconColor else markerIconColor
 
             val bitmap = compositeMarkerBitmap(
                 context = context,
                 pin = pin,
                 marker = marker,
                 outdated = outdated,
+                markerIconColor = iconColor,
                 badgeBackgroundColor = markerBadgeBackgroundColor,
                 badgeTextColor = markerBadgeTextColor,
             )
@@ -102,7 +113,9 @@ fun merchantMarkerBitmap(
     context: Context,
     marker: Marker,
     markerBackgroundColor: Int,
+    markerIconColor: Int,
     boostedMarkerBackgroundColor: Int,
+    boostedMarkerIconColor: Int,
     markerBadgeBackgroundColor: Int,
     markerBadgeTextColor: Int,
     now: ZonedDateTime = ZonedDateTime.now(),
@@ -118,6 +131,7 @@ fun merchantMarkerBitmap(
         pin = pin,
         marker = marker,
         outdated = outdated,
+        markerIconColor = if (boosted && !outdated) boostedMarkerIconColor else markerIconColor,
         badgeBackgroundColor = markerBadgeBackgroundColor,
         badgeTextColor = markerBadgeTextColor,
     )
@@ -128,6 +142,7 @@ private fun compositeMarkerBitmap(
     pin: Drawable,
     marker: Marker,
     outdated: Boolean,
+    markerIconColor: Int,
     badgeBackgroundColor: Int,
     badgeTextColor: Int,
 ): Bitmap {
@@ -135,7 +150,7 @@ private fun compositeMarkerBitmap(
         context = context,
         pin = pin,
         character = resolveGlyph(marker.icon),
-        textColor = if (outdated) OUTDATED_ICON_COLOR else Color.WHITE,
+        textColor = if (outdated) markerIconColor.withAlpha(OUTDATED_ICON_ALPHA) else markerIconColor,
         comments = marker.comments.takeIf { it > 0 },
         badgeBackgroundColor = badgeBackgroundColor,
         badgeTextColor = badgeTextColor,
@@ -146,6 +161,7 @@ suspend fun ensureExchangeMarkerImages(
     context: Context,
     style: Style,
     markers: Set<Marker>,
+    markerIconColor: Int,
     registry: MarkerImageRegistry,
 ) {
     val known = registry.exchangeImageNames()
@@ -155,7 +171,8 @@ suspend fun ensureExchangeMarkerImages(
         markers.forEach { marker ->
             val name = exchangeMarkerIconImageName(marker.icon)
             if (name in known || name in result) return@forEach
-            result[name] = generateIconBitmap(context, resolveGlyph(marker.icon))
+            result[name] =
+                generateIconBitmap(context, resolveGlyph(marker.icon), textColor = markerIconColor)
         }
         result
     }
@@ -169,11 +186,11 @@ suspend fun ensureExchangeMarkerImages(
     }
 }
 
-fun ensureEventMarkerImage(context: Context, style: Style) {
+fun ensureEventMarkerImage(context: Context, style: Style, markerIconColor: Int) {
     if (style.getImage(EVENT_MARKER_ICON_NAME) == null) {
         style.addImage(
             EVENT_MARKER_ICON_NAME,
-            generateIconBitmap(context, resolveGlyph(EVENT_ICON)),
+            generateIconBitmap(context, resolveGlyph(EVENT_ICON), textColor = markerIconColor),
         )
     }
 }

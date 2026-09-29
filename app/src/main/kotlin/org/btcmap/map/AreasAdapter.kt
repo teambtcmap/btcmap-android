@@ -12,6 +12,8 @@ import okhttp3.HttpUrl
 import java.text.NumberFormat
 import org.btcmap.area.preloadAreaHeader
 import org.btcmap.databinding.AreaItemBinding
+import org.btcmap.settings.badgeBackgroundColor
+import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.buttonBackgroundColor
 import org.btcmap.settings.buttonIconColor
 import org.btcmap.settings.prefs
@@ -38,6 +40,8 @@ class AreasAdapter(
             apiUrl = apiUrl,
             buttonBackgroundColor = prefs.buttonBackgroundColor(context),
             buttonIconColor = prefs.buttonIconColor(context),
+            badgeBackgroundColor = prefs.badgeBackgroundColor(context),
+            badgeTextColor = prefs.badgeTextColor(context),
             binding = binding,
         )
     }
@@ -60,6 +64,8 @@ class AreasAdapter(
         private val apiUrl: HttpUrl,
         private val buttonBackgroundColor: Int,
         private val buttonIconColor: Int,
+        private val badgeBackgroundColor: Int,
+        private val badgeTextColor: Int,
         private val binding: AreaItemBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
@@ -73,6 +79,10 @@ class AreasAdapter(
                 initials.text = areaInitials(area)
                 icon.load("$apiUrl/v4/areas/${area.id}/image?type=square&w=256&h=256")
                 root.context.preloadAreaHeader(area.headerImageUrl)
+                // The event count badge reuses the marker badge colors so the
+                // chips match the markers they sit next to.
+                badge.backgroundTintList = ColorStateList.valueOf(badgeBackgroundColor)
+                badge.setTextColor(badgeTextColor)
                 val count = area.upcomingEventsCount
                 badge.isVisible = count > 0
                 if (count > 0) {

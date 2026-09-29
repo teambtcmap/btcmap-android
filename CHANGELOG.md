@@ -261,6 +261,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Escape a place's icon name when building the map's marker data, so a malformed icon can no longer hide every marker
 - Bound the map's parsed-area cache by total polygon size, not just entry count, so panning across large country polygons cannot grow memory without limit
 - Announce each row on the database and image stats screens as one label and value for screen readers, instead of reading them as two separate stops
+- Apply the configured marker icon color to a marker's glyph, which was always drawn white, and add a separate Boosted marker icon color for boosted pins
+- Draw the map's cluster counts in the marker icon color, and make them bold and slightly larger so a count stays legible over its cluster
+- Show each color in settings as a swatch beside its hex value instead of tinting the value text, and update the swatch as soon as a color is picked
+- Draw an outdated merchant's icon in the configured color at reduced opacity instead of a fixed gray
+- Reuse the badge background and text colors for the event-count badge on the map's area chips
 
 ## [1.1.0] - 2026-03-30
 

@@ -65,10 +65,12 @@ import org.btcmap.settings.authorized
 import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.boostedMarkerBackgroundColor
+import org.btcmap.settings.boostedMarkerIconColor
 import org.btcmap.settings.mapRotationEnabled
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.mapViewport
 import org.btcmap.settings.markerBackgroundColor
+import org.btcmap.settings.markerIconColor
 import org.btcmap.settings.prefs
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.uri
@@ -203,9 +205,11 @@ class MapFragment : Fragment() {
             styleUri = styleUri,
             bundledStyle = bundledBasemapStyle(app, styleUri),
             markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
+            markerIconColor = prefs.markerIconColor(requireContext()),
             markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
             markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
             boostedMarkerBackgroundColor = prefs.boostedMarkerBackgroundColor(),
+            boostedMarkerIconColor = prefs.boostedMarkerIconColor(),
             usingOpenFreeMap = app.mapStyleUriForTesting == null,
             rotationEnabled = prefs.mapRotationEnabled,
         ).also {

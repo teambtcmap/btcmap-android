@@ -1,6 +1,5 @@
 package org.btcmap.map.layer
 
-import android.graphics.Color
 import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.MAX_COMMENT_BADGE
 import org.maplibre.android.style.expressions.Expression
@@ -16,6 +15,7 @@ const val MERCHANT_CLUSTER_COUNT_LAYER_ID = "merchant_cluster_count"
 
 fun createMerchantLayers(
     markerBackgroundColor: Int,
+    markerIconColor: Int,
     usingOpenFreeMap: Boolean,
 ): Pair<GeoJsonSource, List<Layer>> {
     val merchantsSource = GeoJsonSource(
@@ -39,13 +39,13 @@ fun createMerchantLayers(
     val clusterCountLayer =
         SymbolLayer(MERCHANT_CLUSTER_COUNT_LAYER_ID, merchantsSource.id).apply {
             if (usingOpenFreeMap) {
-                setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Regular")))
+                setProperties(PropertyFactory.textFont(arrayOf("Noto Sans Bold")))
             }
 
             setProperties(
                 PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
-                PropertyFactory.textSize(16f),
-                PropertyFactory.textColor(Color.WHITE),
+                PropertyFactory.textSize(18f),
+                PropertyFactory.textColor(markerIconColor),
             )
         }
 
