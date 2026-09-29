@@ -41,4 +41,26 @@ class OfflineRegionMetadataTest {
             ),
         )
     }
+
+    @Test
+    fun outOfRangeMaxZoomIsRejected() {
+        Assert.assertNull(
+            parseOfflineRegionMetadata(
+                """{"areaId":1,"areaName":"A","styleUrl":"https://example.com","maxZoom":99}"""
+                    .toByteArray(),
+            ),
+        )
+    }
+
+    @Test
+    fun theHighestSelectableMaxZoomIsAccepted() {
+        val metadata = OfflineRegionMetadata(
+            areaId = 1L,
+            areaName = "A",
+            styleUrl = "https://example.com/style.json",
+            maxZoom = OfflineRegionEstimates.MAX_SELECTABLE_MAX_ZOOM,
+        )
+
+        Assert.assertEquals(metadata, parseOfflineRegionMetadata(metadata.toBytes()))
+    }
 }

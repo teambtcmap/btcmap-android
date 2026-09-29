@@ -1,11 +1,16 @@
 package org.btcmap.offline
 
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.geometry.LatLngBounds
@@ -22,9 +27,11 @@ import kotlin.coroutines.resumeWithException
  * offline manager's callback API.
  *
  * The manager owns its own database and can only be driven from the main thread,
- * so every public method switches to the main dispatcher. Downloads keep running
- * while the process lives; [refresh] re-attaches observers and resumes any pack
- * that was still incomplete when the app last exited.
+ * so all work runs on the main dispatcher. [download] and [delete] hand off to
+ * the app-scoped [scope] and return immediately, so the sequence that activates
+ * a pack survives the screen that started it. Downloads keep running while the
+ * process lives; [refresh] re-attaches observers and resumes any pack that was
+ * still incomplete when the app last exited.
  */
 internal class OfflineMaps(context: Context) {
 
@@ -32,8 +39,40 @@ internal class OfflineMaps(context: Context) {
     private val manager = OfflineManager.getInstance(appContext)
     private val regions = mutableMapOf<Long, OfflineRegion>()
 
+    /**
+     * App-scoped so the create/observe/activate sequence a download needs runs
+     * to completion even when the screen that started it is closed meanwhile.
+     * MapLibre delivers its callbacks on the main thread, so the scope does too.
+     */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /**
+     * Serializes every MapLibre offline operation. They all suspend across the
+     * manager's callbacks, so without this a download could interleave with
+     * [refresh] (e.g. started before the initial refresh populated [regions]),
+     * see no existing pack, and create a duplicate region for the same area that
+     * [refresh] then silently drops — an orphaned pack stuck on disk forever.
+     */
+    private val mutex = Mutex()
+
+    /**
+     * Whether [regions] reflects MapLibre's database. It stays false until a
+     * [refreshRegions] succeeds, so a download can tell "no pack for this area"
+     * apart from "the region list was never loaded" and reload before acting.
+     */
+    private var regionsLoaded = false
+
     private val _states = MutableStateFlow<Map<Long, OfflineAreaState>>(emptyMap())
     val states: StateFlow<Map<Long, OfflineAreaState>> = _states.asStateFlow()
+
+    /**
+     * Test-only: publishes [states] as the tracked pack states without touching
+     * MapLibre's database or the network, so the offline UI can be driven to a
+     * given state in a test.
+     */
+    internal fun setStatesForTesting(states: Map<Long, OfflineAreaState>) {
+        _states.value = states
+    }
 
     init {
         // MapLibre inherited a hard tile count limit from Mapbox; lift it so a
@@ -42,7 +81,9 @@ internal class OfflineMaps(context: Context) {
     }
 
     /** Rebuilds the state from MapLibre's database and resumes unfinished packs. */
-    suspend fun refresh() = withContext(Dispatchers.Main.immediate) {
+    suspend fun refresh() = mutex.withLock { refreshRegions() }
+
+    private suspend fun refreshRegions() = withContext(Dispatchers.Main.immediate) {
         val listed = try {
             awaitRegions()
         } catch (t: Throwable) {
@@ -51,10 +92,11 @@ internal class OfflineMaps(context: Context) {
         }
 
         regions.clear()
-        val states = mutableMapOf<Long, OfflineAreaState>()
+        val present = mutableSetOf<Long>()
         for (region in listed) {
             val metadata = parseOfflineRegionMetadata(region.metadata) ?: continue
             regions[metadata.areaId] = region
+            present += metadata.areaId
 
             val status = try {
                 awaitStatus(region)
@@ -63,84 +105,117 @@ internal class OfflineMaps(context: Context) {
                 continue
             }
 
-            if (status.isComplete) {
-                states[metadata.areaId] = status.toCompleteState(metadata)
-            } else {
+            if (!status.isComplete) {
                 observe(region, metadata)
                 region.setDownloadState(OfflineRegion.STATE_ACTIVE)
-                states[metadata.areaId] = status.toDownloadingState()
             }
+            // Publish each area as it is read rather than replacing the whole
+            // map at the end, so an observer update that lands while this is
+            // running (a pack can finish during the loop) is not overwritten.
+            setState(metadata.areaId, status.toAreaState(metadata))
         }
-        _states.value = states
+
+        // Drop the states of areas whose pack is gone, keeping everything else.
+        _states.value = _states.value.filterKeys { it in present }
+        regionsLoaded = true
     }
 
     /**
      * Replaces any pack for [areaId] with a fresh download of [bounds] in
-     * [styleUrl] up to [maxZoom].
+     * [styleUrl] up to [maxZoom]. Returns immediately; the work runs on the
+     * app-scoped [scope] so closing the area screen cannot cancel it before
+     * MapLibre activates the new region.
      */
-    suspend fun download(
+    fun download(
         areaId: Long,
         areaName: String,
         bounds: OfflineBounds,
         styleUrl: String,
         maxZoom: Int,
-    ) = withContext(Dispatchers.Main.immediate) {
-        regions.remove(areaId)?.let { existing ->
+    ) {
+        scope.launch { performDownload(areaId, areaName, bounds, styleUrl, maxZoom) }
+    }
+
+    private suspend fun performDownload(
+        areaId: Long,
+        areaName: String,
+        bounds: OfflineBounds,
+        styleUrl: String,
+        maxZoom: Int,
+    ) = mutex.withLock {
+        withContext(Dispatchers.Main.immediate) {
+            // A download can be started before the initial refresh populated
+            // [regions], or after that refresh failed; reload first so an
+            // existing pack for this area is replaced instead of duplicated.
+            if (!regionsLoaded) refreshRegions()
+
+            regions.remove(areaId)?.let { existing ->
+                try {
+                    awaitDelete(existing)
+                } catch (t: Throwable) {
+                    t.rethrowIfCancellation()
+                }
+            }
+
+            val metadata = OfflineRegionMetadata(areaId, areaName, styleUrl, maxZoom)
+            setState(areaId, OfflineAreaState.Downloading(completedBytes = 0L, progress = null))
+
+            val definition = OfflineTilePyramidRegionDefinition(
+                styleUrl,
+                bounds.toLatLngBounds(),
+                OfflineRegionEstimates.MIN_ZOOM.toDouble(),
+                maxZoom.toDouble(),
+                appContext.resources.displayMetrics.density,
+            )
+
             try {
-                awaitDelete(existing)
+                val region = awaitCreate(definition, metadata.toBytes())
+                regions[areaId] = region
+                observe(region, metadata)
+                region.setDownloadState(OfflineRegion.STATE_ACTIVE)
             } catch (t: Throwable) {
                 t.rethrowIfCancellation()
+                setState(areaId, OfflineAreaState.Failed(t.message ?: ""))
             }
-        }
-
-        val metadata = OfflineRegionMetadata(areaId, areaName, styleUrl, maxZoom)
-        setState(areaId, OfflineAreaState.Downloading(completedBytes = 0L, progress = null))
-
-        val definition = OfflineTilePyramidRegionDefinition(
-            styleUrl,
-            bounds.toLatLngBounds(),
-            OfflineRegionEstimates.MIN_ZOOM.toDouble(),
-            maxZoom.toDouble(),
-            appContext.resources.displayMetrics.density,
-        )
-
-        try {
-            val region = awaitCreate(definition, metadata.toBytes())
-            regions[areaId] = region
-            observe(region, metadata)
-            region.setDownloadState(OfflineRegion.STATE_ACTIVE)
-        } catch (t: Throwable) {
-            t.rethrowIfCancellation()
-            setState(areaId, OfflineAreaState.Failed(t.message ?: ""))
         }
     }
 
-    suspend fun delete(areaId: Long) = withContext(Dispatchers.Main.immediate) {
-        // A region can be missing from the in-memory map if the initial refresh
-        // failed; reload before giving up so delete still works.
-        if (regions[areaId] == null) refresh()
+    /**
+     * Deletes the pack for [areaId], if any. Returns immediately; the work runs
+     * on the app-scoped [scope].
+     */
+    fun delete(areaId: Long) {
+        scope.launch { performDelete(areaId) }
+    }
 
-        val region = regions.remove(areaId) ?: return@withContext
-        try {
-            awaitDelete(region)
-            setState(areaId, OfflineAreaState.None)
-        } catch (t: Throwable) {
-            t.rethrowIfCancellation()
-            setState(areaId, OfflineAreaState.Failed(t.message ?: ""))
+    private suspend fun performDelete(areaId: Long) = mutex.withLock {
+        withContext(Dispatchers.Main.immediate) {
+            // A region can be missing from the in-memory map if the initial
+            // refresh failed; reload before giving up so delete still works.
+            if (regions[areaId] == null) refreshRegions()
+
+            val region = regions.remove(areaId)
+            if (region == null) {
+                // Nothing on disk for this area (for example, creating the pack
+                // failed before a region existed); clear the state so a failed
+                // pack's Delete action actually dismisses the panel.
+                setState(areaId, OfflineAreaState.None)
+                return@withContext
+            }
+            try {
+                awaitDelete(region)
+                setState(areaId, OfflineAreaState.None)
+            } catch (t: Throwable) {
+                t.rethrowIfCancellation()
+                setState(areaId, OfflineAreaState.Failed(t.message ?: ""))
+            }
         }
     }
 
     private fun observe(region: OfflineRegion, metadata: OfflineRegionMetadata) {
         region.setObserver(object : OfflineRegion.OfflineRegionObserver {
             override fun onStatusChanged(status: OfflineRegionStatus) {
-                setState(
-                    metadata.areaId,
-                    if (status.isComplete) {
-                        status.toCompleteState(metadata)
-                    } else {
-                        status.toDownloadingState()
-                    },
-                )
+                setState(metadata.areaId, status.toAreaState(metadata))
             }
 
             override fun onError(error: OfflineRegionError) {
@@ -234,23 +309,16 @@ internal class OfflineMaps(context: Context) {
         }
 }
 
-private fun OfflineRegionStatus.toCompleteState(
+private fun OfflineRegionStatus.toAreaState(
     metadata: OfflineRegionMetadata,
-): OfflineAreaState.Complete = OfflineAreaState.Complete(
-    bytes = completedResourceSize,
-    maxZoom = metadata.maxZoom,
-    styleUrl = metadata.styleUrl,
+): OfflineAreaState = offlineAreaState(
+    metadata = metadata,
+    isComplete = isComplete,
+    completedResourceSize = completedResourceSize,
+    isRequiredResourceCountPrecise = isRequiredResourceCountPrecise,
+    requiredResourceCount = requiredResourceCount,
+    completedResourceCount = completedResourceCount,
 )
-
-private fun OfflineRegionStatus.toDownloadingState(): OfflineAreaState.Downloading =
-    OfflineAreaState.Downloading(
-        completedBytes = completedResourceSize,
-        progress = if (isRequiredResourceCountPrecise && requiredResourceCount > 0) {
-            completedResourceCount.toFloat() / requiredResourceCount.toFloat()
-        } else {
-            null
-        },
-    )
 
 private fun OfflineBounds.toLatLngBounds(): LatLngBounds = LatLngBounds.from(
     latNorth = north,

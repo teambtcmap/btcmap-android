@@ -20,3 +20,35 @@ internal sealed interface OfflineAreaState {
 
     data class Failed(val message: String) : OfflineAreaState
 }
+
+/**
+ * Maps MapLibre's status fields onto the UI state.
+ *
+ * Kept free of MapLibre types so the mapping — which decides whether a pack
+ * reads as complete and how progress is reported — is unit testable.
+ */
+internal fun offlineAreaState(
+    metadata: OfflineRegionMetadata,
+    isComplete: Boolean,
+    completedResourceSize: Long,
+    isRequiredResourceCountPrecise: Boolean,
+    requiredResourceCount: Long,
+    completedResourceCount: Long,
+): OfflineAreaState = if (isComplete) {
+    OfflineAreaState.Complete(
+        bytes = completedResourceSize,
+        maxZoom = metadata.maxZoom,
+        styleUrl = metadata.styleUrl,
+    )
+} else {
+    OfflineAreaState.Downloading(
+        completedBytes = completedResourceSize,
+        // MapLibre reports the required count as imprecise until it has parsed
+        // the style, so an early zero would otherwise read as 0% forever.
+        progress = if (isRequiredResourceCountPrecise && requiredResourceCount > 0) {
+            completedResourceCount.toFloat() / requiredResourceCount.toFloat()
+        } else {
+            null
+        },
+    )
+}

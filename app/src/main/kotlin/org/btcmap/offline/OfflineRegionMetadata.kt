@@ -34,7 +34,10 @@ internal fun parseOfflineRegionMetadata(bytes: ByteArray?): OfflineRegionMetadat
             ?: return null
     val areaName = parsed.areaName ?: return null
     val styleUrl = parsed.styleUrl ?: return null
-    if (parsed.areaId <= 0L || parsed.maxZoom <= 0) return null
+    if (parsed.areaId <= 0L) return null
+    // The download dialog only ever writes a selectable maximum zoom, so a value
+    // outside that range means foreign or corrupt metadata.
+    if (parsed.maxZoom !in 1..OfflineRegionEstimates.MAX_SELECTABLE_MAX_ZOOM) return null
     return OfflineRegionMetadata(
         areaId = parsed.areaId,
         areaName = areaName,

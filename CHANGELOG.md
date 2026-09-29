@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep an area's offline map download running after leaving the area screen, instead of leaving it stuck on Downloading until the app is restarted
+- Stop reporting a downloaded offline map as being for a different style when the Auto style follows the system theme between light and dark
+- Allow a failed offline map download to be deleted, not only retried
 - Fill the map's pins in on a fresh install as the bundled places are imported, instead of leaving the map empty for the whole snapshot: the import commits in batches that the map draws as they land
 - Load the icon font off the main thread and start the first sync as soon as the database is ready, so a cold start reaches the first frame and the first pins sooner
 - Stop the app crashing while a screen reads the local database and a background sync writes to it at the same time

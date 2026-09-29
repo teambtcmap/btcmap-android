@@ -21,10 +21,9 @@ import org.btcmap.offline.OfflineRegionEstimates
 import org.btcmap.offlineMaps
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.name
+import org.btcmap.settings.offlineStyleFamily
 import org.btcmap.settings.offlineStyleUrl
 import org.btcmap.settings.prefs
-import org.btcmap.util.rethrowIfCancellation
-import org.btcmap.util.showError
 
 /**
  * Drives the offline-map section of the area screen: the toolbar download
@@ -79,7 +78,10 @@ internal class AreaOfflineMapController(
         val downloading = resolved is OfflineAreaState.Downloading
         binding.offlineMapProgress.isVisible = downloading
         binding.offlineMapDownload.isVisible = !downloading
-        binding.offlineMapDelete.isVisible = resolved is OfflineAreaState.Complete
+        // A failed pack can be replaced with Download or removed outright;
+        // without this it could only be cleaned up by downloading again.
+        binding.offlineMapDelete.isVisible =
+            resolved is OfflineAreaState.Complete || resolved is OfflineAreaState.Failed
         binding.offlineMapDownload.text = fragment.getString(
             if (resolved is OfflineAreaState.Complete) {
                 R.string.offline_map_download_again
@@ -117,7 +119,8 @@ internal class AreaOfflineMapController(
                     OfflineRegionEstimates.MIN_ZOOM,
                     resolved.maxZoom,
                 )
-                if (resolved.styleUrl == prefs.mapStyle.offlineStyleUrl(context)) {
+                val currentFamily = offlineStyleFamily(prefs.mapStyle.offlineStyleUrl(context))
+                if (offlineStyleFamily(resolved.styleUrl) == currentFamily) {
                     downloaded
                 } else {
                     downloaded + "\n" + fragment.getString(R.string.offline_map_style_mismatch)
@@ -199,20 +202,13 @@ internal class AreaOfflineMapController(
     }
 
     private fun startDownload(area: Area, bounds: OfflineBounds, maxZoom: Int) {
-        fragment.viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                fragment.offlineMaps().download(
-                    areaId = area.id,
-                    areaName = area.getLocalizedName(),
-                    bounds = bounds,
-                    styleUrl = prefs.mapStyle.offlineStyleUrl(fragment.requireContext()),
-                    maxZoom = maxZoom,
-                )
-            } catch (e: Throwable) {
-                e.rethrowIfCancellation()
-                fragment.showError(e)
-            }
-        }
+        fragment.offlineMaps().download(
+            areaId = area.id,
+            areaName = area.getLocalizedName(),
+            bounds = bounds,
+            styleUrl = prefs.mapStyle.offlineStyleUrl(fragment.requireContext()),
+            maxZoom = maxZoom,
+        )
     }
 
     private fun confirmDelete(area: Area) {
@@ -221,14 +217,7 @@ internal class AreaOfflineMapController(
             .setMessage(R.string.offline_map_delete_message)
             .setNegativeButton(android.R.string.cancel, null)
             .setPositiveButton(R.string.delete) { _, _ ->
-                fragment.viewLifecycleOwner.lifecycleScope.launch {
-                    try {
-                        fragment.offlineMaps().delete(area.id)
-                    } catch (e: Throwable) {
-                        e.rethrowIfCancellation()
-                        fragment.showError(e)
-                    }
-                }
+                fragment.offlineMaps().delete(area.id)
             }
             .show()
     }

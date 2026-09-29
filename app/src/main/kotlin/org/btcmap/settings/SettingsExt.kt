@@ -139,6 +139,21 @@ private fun isNightMode(context: Context): Boolean {
         Configuration.UI_MODE_NIGHT_YES
 }
 
+/**
+ * Groups the hosted offline style URLs that render the same map.
+ *
+ * [MapStyle.Auto] resolves to the light or dark hosted style depending on the
+ * system theme, but both draw the same sources, so they share one family: a
+ * pack downloaded at noon must not read as "a different style" once dark mode
+ * turns on. Every other style keeps its own identity.
+ */
+internal fun offlineStyleFamily(styleUrl: String): String = when (styleUrl) {
+    LIGHT_STYLE_URL, DARK_STYLE_URL -> AUTO_STYLE_FAMILY
+    else -> styleUrl
+}
+
+private const val AUTO_STYLE_FAMILY = "auto"
+
 private const val LIGHT_STYLE_URL = "https://static.btcmap.org/map-styles/light.json"
 private const val DARK_STYLE_URL = "https://static.btcmap.org/map-styles/dark.json"
 private const val LIBERTY_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
