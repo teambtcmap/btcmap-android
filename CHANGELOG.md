@@ -273,6 +273,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Reuse the badge background and text colors for the event-count badge on the map's area chips
 - Draw an outdated exchange marker's icon at reduced opacity, like an outdated merchant's, instead of leaving it fully opaque
 - Remove the "Use adaptive colors" setting, so the map and its controls always use a configured color or the fixed default
+- Bring back the Carto Dark Matter style as an optional map style, loaded from Carto's own servers while Auto and the other styles keep using OpenFreeMap
 
 ## [1.1.0] - 2026-03-30
 

@@ -49,4 +49,12 @@
         android:paddingEnd="8dp"
         android:text="@string/style_dark" />
 
+    <RadioButton
+        android:id="@+id/carto_dark_matter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:text="@string/style_carto_dark_matter" />
+
 </RadioGroup>

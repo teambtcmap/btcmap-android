@@ -42,6 +42,7 @@
     <string name="style_positron">OpenFreeMap Positron</string>
     <string name="style_bright">OpenFreeMap Bright</string>
     <string name="style_dark">OpenFreeMap Dark</string>
+    <string name="style_carto_dark_matter">Carto Dark Matter</string>
     <string name="marker_background_color">마커 배경</string>
     <string name="marker_icon_color">마커 아이콘</string>
     <string name="badge_background">배지 배경</string>
