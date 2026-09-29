@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Dein Konto wurde erstellt, aber die Anmeldung ist fehlgeschlagen. Bitte melde dich an.</string>
     <string name="click_to_see_your_profile">Klicke, um dein Profil zu sehen</string>
     <string name="delete">Löschen</string>
-    <string name="show_debug_info">Debug-Informationen anzeigen</string>
     <string name="verified_filter">Nur Orte anzeigen</string>
     <string name="verified_filter_1_year">Innerhalb 1 Jahr verifiziert</string>
     <string name="verified_filter_2_years">Innerhalb 2 Jahren verifiziert</string>

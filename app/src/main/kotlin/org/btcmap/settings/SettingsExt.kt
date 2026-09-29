@@ -5,7 +5,6 @@ import android.content.res.Configuration
 import androidx.core.content.edit
 import androidx.core.graphics.toColorInt
 import org.btcmap.App
-import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.maplibre.android.geometry.LatLngBounds
 import okhttp3.HttpUrl
@@ -323,14 +322,6 @@ val Settings.authToken: String?
 
 val Settings.authorized: Boolean
     get() = !authToken.isNullOrBlank()
-
-private const val KEY_SHOW_DEBUG_INFO = "show_debug_info"
-
-var Settings.showDebugInfo: Boolean
-    get() = getBoolean(KEY_SHOW_DEBUG_INFO, BuildConfig.DEBUG)
-    set(value) {
-        putBoolean(KEY_SHOW_DEBUG_INFO, value)
-    }
 
 private const val KEY_SHOW_ATTRIBUTION = "show_attribution"
 

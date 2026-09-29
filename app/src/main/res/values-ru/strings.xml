@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Ваш аккаунт создан, но вход не удался. Пожалуйста, войдите.</string>
     <string name="click_to_see_your_profile">Нажмите, чтобы посмотреть профиль</string>
     <string name="delete">Удалить</string>
-    <string name="show_debug_info">Показать отладочную информацию</string>
     <string name="verified_filter">Показывать только места</string>
     <string name="verified_filter_1_year">Подтверждено за 1 год</string>
     <string name="verified_filter_2_years">Подтверждено за 2 года</string>

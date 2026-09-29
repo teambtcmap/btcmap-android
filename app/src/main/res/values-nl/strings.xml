@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Je account is aangemaakt, maar inloggen is mislukt. Probeer opnieuw in te loggen.</string>
     <string name="click_to_see_your_profile">Tik om je profiel te bekijken</string>
     <string name="delete">Verwijderen</string>
-    <string name="show_debug_info">Foutopsporingsinformatie tonen</string>
     <string name="verified_filter">Alleen plaatsen tonen</string>
     <string name="verified_filter_1_year">Binnen 1 jaar geverifieerd</string>
     <string name="verified_filter_2_years">Binnen 2 jaar geverifieerd</string>

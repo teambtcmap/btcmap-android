@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">계정이 생성되었지만 로그인하지 못했습니다. 다시 로그인해 주세요.</string>
     <string name="click_to_see_your_profile">탭하여 프로필 보기</string>
     <string name="delete">삭제</string>
-    <string name="show_debug_info">디버그 정보 표시</string>
     <string name="verified_filter">장소만 표시</string>
     <string name="verified_filter_1_year">1년 이내 확인됨</string>
     <string name="verified_filter_2_years">2년 이내 확인됨</string>

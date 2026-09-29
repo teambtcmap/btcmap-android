@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">تم إنشاء حسابك، لكن تسجيل الدخول فشل. يرجى تسجيل الدخول.</string>
     <string name="click_to_see_your_profile">انقر لعرض ملفك الشخصي</string>
     <string name="delete">حذف</string>
-    <string name="show_debug_info">عرض معلومات التصحيح</string>
     <string name="verified_filter">إظهار الأماكن فقط</string>
     <string name="verified_filter_1_year">تم التحقق خلال سنة واحدة</string>
     <string name="verified_filter_2_years">تم التحقق خلال سنتين</string>

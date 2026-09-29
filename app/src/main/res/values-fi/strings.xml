@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Tilisi luotiin, mutta kirjautuminen epäonnistui. Yritä kirjautua uudelleen.</string>
     <string name="click_to_see_your_profile">Näytä profiilisi napauttamalla</string>
     <string name="delete">Poista</string>
-    <string name="show_debug_info">Näytä virheenkorjaustiedot</string>
     <string name="verified_filter">Näytä vain paikat</string>
     <string name="verified_filter_1_year">Vahvistettu 1 vuoden sisällä</string>
     <string name="verified_filter_2_years">Vahvistettu 2 vuoden sisällä</string>

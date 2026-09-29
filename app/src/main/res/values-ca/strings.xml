@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">El teu compte s\'ha creat, però no s\'ha pogut iniciar sessió. Torna-ho a provar.</string>
     <string name="click_to_see_your_profile">Fes clic per veure el teu perfil</string>
     <string name="delete">Elimina</string>
-    <string name="show_debug_info">Mostra la informació de depuració</string>
     <string name="verified_filter">Mostra només els llocs</string>
     <string name="verified_filter_1_year">Verificats en 1 any</string>
     <string name="verified_filter_2_years">Verificats en 2 anys</string>

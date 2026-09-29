@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Váš účet bol vytvorený, ale prihlásenie zlyhalo. Skúste sa prihlásiť.</string>
     <string name="click_to_see_your_profile">Kliknutím zobrazíte svoj profil</string>
     <string name="delete">Odstrániť</string>
-    <string name="show_debug_info">Zobraziť informácie o ladení</string>
     <string name="verified_filter">Zobraziť iba miesta</string>
     <string name="verified_filter_1_year">Overené za 1 rok</string>
     <string name="verified_filter_2_years">Overené za 2 roky</string>

@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Hesabınız oluşturuldu ancak giriş yapılamadı. Lütfen giriş yapmayı deneyin.</string>
     <string name="click_to_see_your_profile">Profilinizi görmek için dokunun</string>
     <string name="delete">Sil</string>
-    <string name="show_debug_info">Hata ayıklama bilgilerini göster</string>
     <string name="verified_filter">Yalnızca yerleri göster</string>
     <string name="verified_filter_1_year">1 yıl içinde doğrulandı</string>
     <string name="verified_filter_2_years">2 yıl içinde doğrulandı</string>

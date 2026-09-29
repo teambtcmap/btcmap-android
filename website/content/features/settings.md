@@ -42,8 +42,6 @@ offer a **Reset** action to return to the default.
   Tapping it opens the OpenStreetMap website.
 - **Allow map rotation** — let the map rotate with a two-finger gesture. Off by
   default.
-- **Show debug info** — display extra diagnostic information. On by default in
-  debug builds only.
 
 ## Diagnostics
 

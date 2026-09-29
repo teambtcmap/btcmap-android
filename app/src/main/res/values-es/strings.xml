@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Tu cuenta se creó, pero el inicio de sesión falló. Inténtalo de nuevo.</string>
     <string name="click_to_see_your_profile">Toca para ver tu perfil</string>
     <string name="delete">Eliminar</string>
-    <string name="show_debug_info">Mostrar información de depuración</string>
     <string name="verified_filter">Mostrar solo lugares</string>
     <string name="verified_filter_1_year">Verificados en 1 año</string>
     <string name="verified_filter_2_years">Verificados en 2 años</string>

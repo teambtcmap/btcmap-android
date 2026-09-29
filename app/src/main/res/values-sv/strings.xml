@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Ditt konto skapades, men inloggningen misslyckades. Försök logga in igen.</string>
     <string name="click_to_see_your_profile">Tryck för att se din profil</string>
     <string name="delete">Ta bort</string>
-    <string name="show_debug_info">Visa felsökningsinformation</string>
     <string name="verified_filter">Visa endast platser</string>
     <string name="verified_filter_1_year">Verifierade inom 1 år</string>
     <string name="verified_filter_2_years">Verifierade inom 2 år</string>

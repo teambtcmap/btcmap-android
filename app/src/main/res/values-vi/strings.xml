@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Tài khoản của bạn đã được tạo, nhưng đăng nhập không thành công. Vui lòng đăng nhập.</string>
     <string name="click_to_see_your_profile">Nhấn để xem hồ sơ của bạn</string>
     <string name="delete">Xóa</string>
-    <string name="show_debug_info">Hiển thị thông tin gỡ lỗi</string>
     <string name="verified_filter">Chỉ hiển thị địa điểm</string>
     <string name="verified_filter_1_year">Đã xác minh trong 1 năm</string>
     <string name="verified_filter_2_years">Đã xác minh trong 2 năm</string>

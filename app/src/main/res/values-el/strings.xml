@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Ο λογαριασμός σας δημιουργήθηκε, αλλά η σύνδεση απέτυχε. Παρακαλώ συνδεθείτε.</string>
     <string name="click_to_see_your_profile">Πάτησε για να δεις το προφίλ σου</string>
     <string name="delete">Διαγραφή</string>
-    <string name="show_debug_info">Εμφάνιση πληροφοριών εντοπισμού σφαλμάτων</string>
     <string name="verified_filter">Εμφάνιση μόνο μέρων</string>
     <string name="verified_filter_1_year">Επαληθεύτηκε εντός 1 έτους</string>
     <string name="verified_filter_2_years">Επαληθεύτηκε εντός 2 ετών</string>

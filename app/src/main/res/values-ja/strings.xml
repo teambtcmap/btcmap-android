@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">アカウントは作成されましたが、サインインに失敗しました。サインインしてください。</string>
     <string name="click_to_see_your_profile">タップしてプロフィールを表示</string>
     <string name="delete">削除</string>
-    <string name="show_debug_info">デバッグ情報を表示</string>
     <string name="verified_filter">場所のみ表示</string>
     <string name="verified_filter_1_year">1年以内に確認済み</string>
     <string name="verified_filter_2_years">2年以内に確認済み</string>

@@ -72,11 +72,6 @@ class SettingsFragment : Fragment() {
             prefs.mapRotationEnabled = isChecked
         }
 
-        binding.showDebugInfo.isChecked = prefs.showDebugInfo
-        binding.showDebugInfo.setOnCheckedChangeListener { _, isChecked ->
-            prefs.showDebugInfo = isChecked
-        }
-
         binding.dbStatsButton.setOnClickListener {
             parentFragmentManager.commit {
                 setReorderingAllowed(true)

@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Contul tău a fost creat, dar autentificarea a eșuat. Te rugăm să te autentifici.</string>
     <string name="click_to_see_your_profile">Atinge pentru a-ți vedea profilul</string>
     <string name="delete">Șterge</string>
-    <string name="show_debug_info">Afișează informații de depanare</string>
     <string name="verified_filter">Afișează doar locuri</string>
     <string name="verified_filter_1_year">Verificate în 1 an</string>
     <string name="verified_filter_2_years">Verificate în 2 ani</string>

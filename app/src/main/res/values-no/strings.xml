@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Kontoen din ble opprettet, men pålogging mislyktes. Prøv å logge inn.</string>
     <string name="click_to_see_your_profile">Trykk for å se profilen din</string>
     <string name="delete">Slett</string>
-    <string name="show_debug_info">Vis feilsøkingsinformasjon</string>
     <string name="verified_filter">Vis bare steder</string>
     <string name="verified_filter_1_year">Bekreftet innen 1 år</string>
     <string name="verified_filter_2_years">Bekreftet innen 2 år</string>

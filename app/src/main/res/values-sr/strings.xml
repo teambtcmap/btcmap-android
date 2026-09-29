@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Ваш налог је направљен, али пријављивање није успело. Пријавите се.</string>
     <string name="click_to_see_your_profile">Додирните да видите свој профил</string>
     <string name="delete">Избриши</string>
-    <string name="show_debug_info">Прикажи информације за отклањање грешака</string>
     <string name="verified_filter">Прикажи само места</string>
     <string name="verified_filter_1_year">Потврђено у року од 1 године</string>
     <string name="verified_filter_2_years">Потврђено у року од 2 године</string>

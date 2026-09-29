@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Twoje konto zostało utworzone, ale logowanie nie powiodło się. Spróbuj się zalogować.</string>
     <string name="click_to_see_your_profile">Dotknij, aby zobaczyć swój profil</string>
     <string name="delete">Usuń</string>
-    <string name="show_debug_info">Pokaż informacje debugowania</string>
     <string name="verified_filter">Pokaż tylko miejsca</string>
     <string name="verified_filter_1_year">Zweryfikowane w ciągu 1 roku</string>
     <string name="verified_filter_2_years">Zweryfikowane w ciągu 2 lat</string>

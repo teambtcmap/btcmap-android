@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">آپ کا اکاؤنٹ بنا لیا گیا ہے، لیکن سائن ان ناکام ہو گیا۔ براہ کرم سائن ان کریں۔</string>
     <string name="click_to_see_your_profile">اپنی پروفائل دیکھنے کے لیے ٹیپ کریں</string>
     <string name="delete">حذف کریں</string>
-    <string name="show_debug_info">ڈیبگ معلومات دکھائیں</string>
     <string name="verified_filter">صرف مقامات دکھائیں</string>
     <string name="verified_filter_1_year">1 سال کے اندر تصدیق شدہ</string>
     <string name="verified_filter_2_years">2 سال کے اندر تصدیق شدہ</string>

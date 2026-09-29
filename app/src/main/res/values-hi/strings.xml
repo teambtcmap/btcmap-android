@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">आपका खाता बन गया, लेकिन साइन इन विफल रहा। कृपया साइन इन करें।</string>
     <string name="click_to_see_your_profile">अपनी प्रोफ़ाइल देखने के लिए टैप करें</string>
     <string name="delete">हटाएं</string>
-    <string name="show_debug_info">डिबग जानकारी दिखाएं</string>
     <string name="verified_filter">केवल स्थान दिखाएं</string>
     <string name="verified_filter_1_year">1 वर्ष के भीतर सत्यापित</string>
     <string name="verified_filter_2_years">2 वर्ष के भीतर सत्यापित</string>

@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Váš účet byl vytvořen, ale přihlášení se nezdařilo. Zkuste se přihlásit.</string>
     <string name="click_to_see_your_profile">Kliknutím zobrazíte svůj profil</string>
     <string name="delete">Smazat</string>
-    <string name="show_debug_info">Zobrazit ladicí informace</string>
     <string name="verified_filter">Zobrazit pouze místa</string>
     <string name="verified_filter_1_year">Ověřeno za 1 rok</string>
     <string name="verified_filter_2_years">Ověřeno za 2 roky</string>

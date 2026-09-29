@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">A fiókod létrejött, de a bejelentkezés nem sikerült. Kérjük, jelentkezz be.</string>
     <string name="click_to_see_your_profile">Koppintson a profilja megtekintéséhez</string>
     <string name="delete">Törlés</string>
-    <string name="show_debug_info">Hibakeresési információk megjelenítése</string>
     <string name="verified_filter">Csak helyek megjelenítése</string>
     <string name="verified_filter_1_year">1 éven belül ellenőrizve</string>
     <string name="verified_filter_2_years">2 éven belül ellenőrizve</string>

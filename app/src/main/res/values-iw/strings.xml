@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">החשבון שלך נוצר, אך ההתחברות נכשלה. אנא התחבר.</string>
     <string name="click_to_see_your_profile">הקישו כדי לראות את הפרופיל שלכם</string>
     <string name="delete">מחיקה</string>
-    <string name="show_debug_info">הצגת פרטי ניפוי באגים</string>
     <string name="verified_filter">הצג רק מקומות</string>
     <string name="verified_filter_1_year">אומת בתוך שנה</string>
     <string name="verified_filter_2_years">אומת בתוך שנתיים</string>

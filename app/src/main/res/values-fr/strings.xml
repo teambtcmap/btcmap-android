@@ -105,7 +105,6 @@
     <string name="account_created_sign_in_failed">Votre compte a été créé, mais la connexion a échoué. Veuillez vous connecter.</string>
     <string name="click_to_see_your_profile">Appuyez pour voir votre profil</string>
     <string name="delete">Supprimer</string>
-    <string name="show_debug_info">Afficher les informations de débogage</string>
     <string name="verified_filter">Afficher uniquement les lieux</string>
     <string name="verified_filter_1_year">Vérifiés depuis 1 an</string>
     <string name="verified_filter_2_years">Vérifiés depuis 2 ans</string>
