@@ -54,16 +54,27 @@ const val CREATE = """
     );
 """
 
+const val INDEX_UPDATED_AT = "place_updated_at"
+const val INDEX_OSM_ID = "place_osm_id"
+const val INDEX_BOUNDS = "place_bounds"
+
 // Serves selectMaxUpdatedAt: the expression index lets SQLite read the newest
 // row directly instead of scanning and sorting the whole table, mirroring
 // comment_updated_at.
 const val CREATE_INDEX_UPDATED_AT =
-    "CREATE INDEX place_updated_at ON $TABLE(julianday($UPDATED_AT));"
+    "CREATE INDEX IF NOT EXISTS $INDEX_UPDATED_AT ON $TABLE(julianday($UPDATED_AT));"
 
 // Serves selectByOsmId and selectByOsmIds, which resolve the places behind a
 // list of issues.
-const val CREATE_INDEX_OSM_ID = "CREATE INDEX place_osm_id ON $TABLE($OSM_ID);"
+const val CREATE_INDEX_OSM_ID =
+    "CREATE INDEX IF NOT EXISTS $INDEX_OSM_ID ON $TABLE($OSM_ID);"
 
 // Serves the bounding-box reads: the leading latitude range keeps SQLite from
 // scanning the whole table, and a descending scan also satisfies ORDER BY lat.
-const val CREATE_INDEX_BOUNDS = "CREATE INDEX place_bounds ON $TABLE($LAT, $LON);"
+const val CREATE_INDEX_BOUNDS =
+    "CREATE INDEX IF NOT EXISTS $INDEX_BOUNDS ON $TABLE($LAT, $LON);"
+
+/** Every place index, so the bulk seed can drop before and rebuild after. */
+val INDEX_NAMES = listOf(INDEX_UPDATED_AT, INDEX_OSM_ID, INDEX_BOUNDS)
+
+val CREATE_INDEXES = listOf(CREATE_INDEX_UPDATED_AT, CREATE_INDEX_OSM_ID, CREATE_INDEX_BOUNDS)

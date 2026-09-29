@@ -80,6 +80,7 @@ import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.android.maps.MapView
 
 class MapFragment : Fragment() {
     private var _binding: MapFragmentBinding? = null
@@ -676,17 +677,17 @@ class MapFragment : Fragment() {
             if (selected != filter) return@getMapAsync
             when (filter) {
                 Filter.MERCHANTS -> showCache {
-                    MerchantsCache(map, db(), setup.merchantsSource) {
+                    MerchantsCache(map, db(), setup.merchantsSource, ::reportMapContentDrawn) {
                         mapSetupController?.ensureMerchantMarkers(it)
                     }
                 }
 
                 Filter.EVENTS -> showCache {
-                    EventsCache(map, db(), setup.eventsSource)
+                    EventsCache(map, db(), setup.eventsSource, ::reportMapContentDrawn)
                 }
 
                 Filter.EXCHANGES -> showCache {
-                    ExchangesCache(map, db(), setup.exchangesSource) {
+                    ExchangesCache(map, db(), setup.exchangesSource, ::reportMapContentDrawn) {
                         mapSetupController?.ensureExchangeMarkers(it)
                     }
                 }
@@ -800,6 +801,34 @@ class MapFragment : Fragment() {
             return
         }
         cache.forceRebuild()
+    }
+
+    private var mapContentReported = false
+
+    /**
+     * Reports the app as fully drawn once the map has drawn its first real
+     * feature snapshot. Android's default fully-drawn moment is the first
+     * frame, which here is an empty map, so the default startup metric stops
+     * well before the pins the user is waiting for. Deferring it to the frame
+     * after the first non-empty snapshot makes the metric match the map the
+     * user actually sees.
+     */
+    private fun reportMapContentDrawn() {
+        if (mapContentReported || _binding == null) return
+        mapContentReported = true
+
+        val listener = object : MapView.OnDidFinishRenderingFrameListener {
+            override fun onDidFinishRenderingFrame(
+                fullyRendered: Boolean,
+                frameEncodingTime: Double,
+                frameRenderingTime: Double,
+            ) {
+                _binding?.map?.removeOnDidFinishRenderingFrameListener(this)
+                (activity as? Activity)?.reportFullyDrawn()
+            }
+        }
+
+        binding.map.addOnDidFinishRenderingFrameListener(listener)
     }
 
     private lateinit var areasAdapter: AreasAdapter

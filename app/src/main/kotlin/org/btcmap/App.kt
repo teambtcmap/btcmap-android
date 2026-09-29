@@ -85,7 +85,7 @@ class App : Application(), SingletonImageLoader.Factory {
     private val defaultSyncManager: SyncManager by lazy {
         SyncManager(
             sync = { sync },
-            seedPlaces = { BundledPlaces.import(this, db).placesImported },
+            seedPlaces = { onBatch -> BundledPlaces.import(this, db, onBatch).placesImported },
             seedEvents = { BundledEvents.import(this, db).eventsImported },
             seedComments = { BundledComments.import(this, db).commentsImported },
             seedAreas = { BundledAreas.import(this, db).areasImported },
@@ -155,7 +155,10 @@ class App : Application(), SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
         settingsInit(this)
-        typefaceInit(this)
+        // The icon font is loaded off the main thread (see Typeface.init):
+        // building it here would add a few tens of milliseconds to every cold
+        // start before the first frame.
+        typefaceInit(this, ioScope)
         MapLibre.getInstance(this)
 
         // OfflineManager must be created on the UI thread; touching the lazy
@@ -191,6 +194,18 @@ class App : Application(), SingletonImageLoader.Factory {
         } else {
             preloadSettings()
             databaseReady.complete(Unit)
+        }
+
+        // Start the sync as soon as the database is usable instead of waiting
+        // for the map's first resume. On a fresh install the bundled places
+        // import runs in one transaction for the better part of a second, and
+        // the map cannot draw a single pin until it commits, so overlapping the
+        // import with the rest of startup is what gets the first pins on screen
+        // soonest. The map still calls start() as well; a running sync is left
+        // alone.
+        ioScope.launch {
+            databaseReady.await()
+            syncController.start()
         }
 
         // Delete the databases abandoned by earlier versions and re-attach to

@@ -31,7 +31,13 @@ import java.time.Duration
 internal class SyncManager(
     private val sync: () -> Sync,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
-    private val seedPlaces: suspend () -> Long,
+    /**
+     * Seeds the places table, invoking the callback with the running total
+     * after each committed batch. The import is the slowest part of a fresh
+     * install, so its progress is surfaced as [SyncEvent.PlacesChanged] to let
+     * the map draw the places that have landed.
+     */
+    private val seedPlaces: suspend (onBatch: (Long) -> Unit) -> Long,
     private val seedEvents: suspend () -> Long,
     private val seedComments: suspend () -> Long,
     private val seedAreas: suspend () -> Long,
@@ -77,9 +83,12 @@ internal class SyncManager(
 
     internal suspend fun runFullSync() = mutex.withLock {
         try {
-            val placesImported = step(SyncState.UnbundlingPlaces) { seedPlaces() } ?: 0L
+            // Each seeded batch is announced as it commits, so the map fills in
+            // while the rest of the snapshot is still being imported rather than
+            // staying empty for the whole seed.
+            step(SyncState.UnbundlingPlaces) { seedPlaces { emit(SyncEvent.PlacesChanged) } }
             val places = step(SyncState.SyncingPlaces) { sync().syncPlaces() }
-            if (placesImported > 0 || (places?.rowsAffected ?: 0L) > 0) {
+            if ((places?.rowsAffected ?: 0L) > 0) {
                 emit(SyncEvent.PlacesChanged)
             }
 

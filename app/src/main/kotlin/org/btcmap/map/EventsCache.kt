@@ -12,7 +12,8 @@ class EventsCache(
     map: MapLibreMap,
     private val db: Database,
     source: GeoJsonSource,
-) : ViewportCache<Event>(map, source) {
+    onFirstDataDrawn: (() -> Unit)? = null,
+) : ViewportCache<Event>(map, source, onFirstDataDrawn) {
     override suspend fun fetch(bounds: LatLngBounds): Set<Event> {
         val now = ZonedDateTime.now()
         return bounds.queryByBounds { minLat, maxLat, minLon, maxLon ->

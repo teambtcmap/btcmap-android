@@ -324,4 +324,16 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             return it.getLong(0)
         }
     }
+
+    /**
+     * Removes every row, tombstone included.
+     *
+     * Used only by the bundled seed, which is the sole writer on a table it just
+     * found empty: it clears a seed interrupted by a previous launch before
+     * retrying, and a partial seed after a parse failure. Nothing else may call
+     * this while sync rows could be present.
+     */
+    fun deleteAll() {
+        conn.prepare("DELETE FROM $TABLE;").use { it.step() }
+    }
 }

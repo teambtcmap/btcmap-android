@@ -26,11 +26,18 @@ import java.util.concurrent.atomic.AtomicReference
 abstract class ViewportCache<T : Any>(
     private val map: MapLibreMap,
     private val source: GeoJsonSource,
+    /**
+     * Called once, after the first non-empty snapshot has been handed to the
+     * map, so a caller can tell that the layer now has real content to draw
+     * (for example to report the app as fully drawn).
+     */
+    private val onFirstDataDrawn: (() -> Unit)? = null,
 ) : MapLibreMap.OnCameraIdleListener {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val pendingQuery = AtomicReference<Job?>(null)
     private val store = FeatureStore<T>({ idOf(it) })
     private val snapshots = MutableStateFlow<Set<T>>(emptySet())
+    private var firstDataReported = false
 
     init {
         map.addOnCameraIdleListener(this)
@@ -41,6 +48,11 @@ abstract class ViewportCache<T : Any>(
                 val geoJson = withContext(Dispatchers.Default) { snapshot.toGeoJson() }
                 onSnapshot(snapshot)
                 source.setGeoJson(geoJson)
+
+                if (snapshot.isNotEmpty() && !firstDataReported) {
+                    firstDataReported = true
+                    onFirstDataDrawn?.invoke()
+                }
             }
         }
 

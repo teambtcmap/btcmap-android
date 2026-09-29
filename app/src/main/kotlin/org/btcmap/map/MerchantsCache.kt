@@ -10,8 +10,9 @@ class MerchantsCache(
     map: MapLibreMap,
     private val db: Database,
     source: GeoJsonSource,
+    onFirstDataDrawn: (() -> Unit)? = null,
     private val onMarkers: suspend (Set<Marker>) -> Unit,
-) : ViewportCache<Marker>(map, source) {
+) : ViewportCache<Marker>(map, source, onFirstDataDrawn) {
 
     override suspend fun fetch(bounds: LatLngBounds): Set<Marker> {
         return bounds.queryByBounds { minLat, maxLat, minLon, maxLon ->

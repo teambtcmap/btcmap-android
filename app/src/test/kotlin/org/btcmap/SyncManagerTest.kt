@@ -45,7 +45,7 @@ class SyncManagerTest {
 
     private fun manager(
         sync: () -> Sync,
-        seedPlaces: suspend () -> Long = { 0L },
+        seedPlaces: suspend (onBatch: (Long) -> Unit) -> Long = { 0L },
         seedEvents: suspend () -> Long = { 0L },
         seedComments: suspend () -> Long = { 0L },
         seedAreas: suspend () -> Long = { 0L },
@@ -64,7 +64,7 @@ class SyncManagerTest {
 
         val subject = manager(
             sync = { sync },
-            seedPlaces = { 1L },
+            seedPlaces = { onBatch -> onBatch(1L); 1L },
             seedEvents = { 1L },
             seedComments = { 0L },
             seedAreas = { 1L },
@@ -87,6 +87,34 @@ class SyncManagerTest {
         Assert.assertEquals(
             listOf("/v4/places", "/v4/events", "/v4/place-comments", "/v4/areas"),
             paths,
+        )
+    }
+
+    @Test
+    fun runFullSync_emitsPlacesChangedForEachSeededBatch() = runTest {
+        enqueueEmpty()
+        val sync = Sync(createApi(), createDatabase())
+
+        val subject = manager(
+            sync = { sync },
+            seedPlaces = { onBatch ->
+                onBatch(1L)
+                onBatch(2L)
+                onBatch(3L)
+                3L
+            },
+        )
+
+        val events = mutableListOf<SyncEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            subject.events.collect { events += it }
+        }
+
+        subject.runFullSync()
+
+        Assert.assertEquals(
+            listOf(SyncEvent.PlacesChanged, SyncEvent.PlacesChanged, SyncEvent.PlacesChanged),
+            events,
         )
     }
 

@@ -6,7 +6,6 @@ import org.btcmap.util.toZonedDateTime
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
-import java.time.format.DateTimeParseException
 
 fun GetPlacesItem.toPlace(): FullProjection {
     return FullProjection(
@@ -37,9 +36,13 @@ fun GetPlacesItem.toPlace(): FullProjection {
 }
 
 internal fun String.toVerifiedAt(): ZonedDateTime {
-    return try {
-        LocalDate.parse(this).atStartOfDay(ZoneOffset.UTC)
-    } catch (e: DateTimeParseException) {
+    // A date-only value gets midnight UTC; anything else is a full timestamp.
+    // Choosing on the date/time separator instead of trying LocalDate first
+    // keeps a full timestamp from paying for a thrown and caught
+    // DateTimeParseException, which costs far more than the parse itself.
+    return if (contains('T')) {
         ZonedDateTime.parse(this)
+    } else {
+        LocalDate.parse(this).atStartOfDay(ZoneOffset.UTC)
     }
 }

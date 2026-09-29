@@ -384,6 +384,41 @@ class BundledPlacesTest {
     }
 
     @Test
+    fun importFrom_reportsProgressAfterEachCommittedBatch() = runTest {
+        val db = createDatabase()
+        val count = BundledPlaces.BATCH_SIZE * 2 + 3
+        val totals = mutableListOf<Long>()
+
+        BundledPlaces.importFrom(db, onBatch = { totals += it }) {
+            snapshotJson(count).byteInputStream()
+        }
+
+        Assert.assertEquals(
+            listOf(
+                BundledPlaces.BATCH_SIZE.toLong(),
+                (BundledPlaces.BATCH_SIZE * 2).toLong(),
+                count.toLong(),
+            ),
+            totals,
+        )
+    }
+
+    @Test
+    fun importFrom_restartsAnInterruptedSeedInsteadOfTrustingItsRows() = runTest {
+        val db = createDatabase()
+        // A previous import committed one batch and was killed before it could
+        // mark itself complete.
+        db.place.insert(listOf(place(id = 99L)))
+        db.preference.upsert(BundledPlaces.SEED_STATE_KEY, BundledPlaces.SEED_IN_PROGRESS)
+
+        val result = BundledPlaces.importFrom(db) { snapshotJson(2).byteInputStream() }
+
+        Assert.assertEquals(2L, result.placesImported)
+        Assert.assertEquals(2L, db.place.selectCount())
+        Assert.assertNull("the interrupted prefix must not survive", db.place.selectById(99L))
+    }
+
+    @Test
     fun importFrom_emptySnapshotSeedsNothing() = runTest {
         val db = createDatabase()
 
