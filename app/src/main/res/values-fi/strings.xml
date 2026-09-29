@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Kartan tyyli</string>
     <string name="customize_colors">Mukauta värejä</string>
+    <string name="customize_colors_secondary">Merkin, kyltin ja painikkeen värit</string>
     <string name="style_auto">Automaattinen</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -147,7 +148,9 @@
         <item quantity="other">%1$d päivää sitten</item>
     </plurals>
     <string name="show_attribution">Näytä lähdetiedot</string>
+    <string name="show_attribution_secondary">Näkyy oletuksena OSM-käytännön mukaan</string>
     <string name="map_rotation">Salli kartan kierto</string>
+    <string name="map_rotation_secondary">Kompassi näkyy, kun ei osoita pohjoiseen</string>
     <string name="osm_attribution">© OpenStreetMapin tekijät</string>
     <string name="add_location_drag_to_adjust">Aseta tarkka sijainti vetämällä karttaa</string>
     <string name="category">Luokka</string>

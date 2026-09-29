@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Štýl mapy</string>
     <string name="customize_colors">Prispôsobiť farby</string>
+    <string name="customize_colors_secondary">Farby markeru, badge a tlačidla</string>
     <string name="style_auto">Automaticky</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -155,7 +156,9 @@
         <item quantity="other">pred %1$d dní</item>
     </plurals>
     <string name="show_attribution">Zobraziť atribúciu</string>
+    <string name="show_attribution_secondary">Zobrazené predvolene podľa OSM</string>
     <string name="map_rotation">Povoliť otáčanie mapy</string>
+    <string name="map_rotation_secondary">Kompas sa zobrazí, keď nesmeruje na sever</string>
     <string name="osm_attribution">© Prispievatelia OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">Potiahnutím mapy nastavíte presnú polohu</string>
     <string name="category">Kategória</string>

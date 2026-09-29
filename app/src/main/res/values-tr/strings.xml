@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Harita stili</string>
     <string name="customize_colors">Renkleri özelleştir</string>
+    <string name="customize_colors_secondary">İşaretçi, rozet ve düğme renkleri</string>
     <string name="style_auto">Otomatik</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -147,7 +148,9 @@
         <item quantity="other">%1$d gün önce</item>
     </plurals>
     <string name="show_attribution">Atıfı göster</string>
+    <string name="show_attribution_secondary">OSM gereği varsayılan olarak görünür</string>
     <string name="map_rotation">Harita döndürmeye izin ver</string>
+    <string name="map_rotation_secondary">Kuzeye bakmadığında pusula görünür</string>
     <string name="osm_attribution">© OpenStreetMap katkıda bulunanlar</string>
     <string name="add_location_drag_to_adjust">Tam konumu ayarlamak için haritayı sürükleyin</string>
     <string name="category">Kategori</string>

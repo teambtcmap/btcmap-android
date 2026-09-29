@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Kartstil</string>
     <string name="customize_colors">Anpassa färger</string>
+    <string name="customize_colors_secondary">Färger för markör, märke och knapp</string>
     <string name="style_auto">Automatisk</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -147,7 +148,9 @@
         <item quantity="other">för %1$d dagar sedan</item>
     </plurals>
     <string name="show_attribution">Visa källhänvisning</string>
+    <string name="show_attribution_secondary">Visas som standard enligt OSM</string>
     <string name="map_rotation">Tillåt kartrotation</string>
+    <string name="map_rotation_secondary">Kompass visas när kartan inte pekar norr</string>
     <string name="osm_attribution">© OpenStreetMap-bidragsgivare</string>
     <string name="add_location_drag_to_adjust">Dra kartan för att ange den exakta platsen</string>
     <string name="category">Kategori</string>

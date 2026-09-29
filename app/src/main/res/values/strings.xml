@@ -47,6 +47,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Map style</string>
     <string name="customize_colors">Customize colors</string>
+    <string name="customize_colors_secondary">Marker, badge and button colors</string>
     <string name="style_auto">Auto</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -225,7 +226,9 @@
         <item quantity="other">%1$d days ago</item>
     </plurals>
     <string name="show_attribution">Show attribution</string>
+    <string name="show_attribution_secondary">Visible by default per OSM policy</string>
     <string name="map_rotation">Allow map rotation</string>
+    <string name="map_rotation_secondary">Compass appears when not facing north</string>
     <string name="offline_map">Offline map</string>
     <string name="offline_map_download">Download map</string>
     <string name="offline_map_download_again">Download again</string>

@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Στυλ Χάρτη</string>
     <string name="customize_colors">Προσαρμογή χρωμάτων</string>
+    <string name="customize_colors_secondary">Χρώματα δείκτη, ετικέτας και κουμπιού</string>
     <string name="style_auto">Αυτόματο</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -147,7 +148,9 @@
         <item quantity="other">πριν %1$d ημέρες</item>
     </plurals>
     <string name="show_attribution">Εμφάνιση αναφοράς</string>
+    <string name="show_attribution_secondary">Εμφανίζεται από προεπιλογή κατά OSM</string>
     <string name="map_rotation">Να επιτρέπεται η περιστροφή χάρτη</string>
+    <string name="map_rotation_secondary">Η πυξίδα εμφανίζεται όταν δεν δείχνει βορρά</string>
     <string name="osm_attribution">© Συνεισφέροντες του OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">Σύρε τον χάρτη για να ορίσεις την ακριβή τοποθεσία</string>
     <string name="category">Κατηγορία</string>

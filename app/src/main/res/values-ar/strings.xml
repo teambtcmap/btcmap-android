@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s ساتوشي</string>
     <string name="map_style">نمط الخريطة</string>
     <string name="customize_colors">تخصيص الألوان</string>
+    <string name="customize_colors_secondary">ألوان العلامة والشارة والزر</string>
     <string name="style_auto">تلقائي</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -163,7 +164,9 @@
         <item quantity="other">منذ %1$d يوم</item>
     </plurals>
     <string name="show_attribution">إظهار الإسناد</string>
+    <string name="show_attribution_secondary">مرئي افتراضيًا وفقًا لسياسة OSM</string>
     <string name="map_rotation">السماح بتدوير الخريطة</string>
+    <string name="map_rotation_secondary">تظهر البوصلة عند عدم الاتجاه شمالًا</string>
     <string name="osm_attribution">© مساهمو OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">اسحب الخريطة لضبط الموقع الدقيق</string>
     <string name="category">الفئة</string>

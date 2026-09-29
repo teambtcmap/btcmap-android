@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Kaartstijl</string>
     <string name="customize_colors">Kleuren aanpassen</string>
+    <string name="customize_colors_secondary">Kleuren van marker, badge en knop</string>
     <string name="style_auto">Automatisch</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -147,7 +148,9 @@
         <item quantity="other">%1$d dagen geleden</item>
     </plurals>
     <string name="show_attribution">Naamsvermelding tonen</string>
+    <string name="show_attribution_secondary">Standaard zichtbaar volgens OSM</string>
     <string name="map_rotation">Kaartrotatie toestaan</string>
+    <string name="map_rotation_secondary">Kompas verschijnt als niet op noord gericht</string>
     <string name="osm_attribution">© OpenStreetMap-bijdragers</string>
     <string name="add_location_drag_to_adjust">Sleep de kaart om de exacte locatie in te stellen</string>
     <string name="category">Categorie</string>

@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Styl mapy</string>
     <string name="customize_colors">Dostosuj kolory</string>
+    <string name="customize_colors_secondary">Kolory znacznika, etykiety i przycisku</string>
     <string name="style_auto">Automatycznie</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -155,7 +156,9 @@
         <item quantity="other">%1$d dni temu</item>
     </plurals>
     <string name="show_attribution">Pokaż atrybucję</string>
+    <string name="show_attribution_secondary">Widoczne domyślnie zgodnie z OSM</string>
     <string name="map_rotation">Zezwól na obrót mapy</string>
+    <string name="map_rotation_secondary">Kompas pojawia się, gdy nie na północ</string>
     <string name="osm_attribution">© Współtwórcy OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">Przeciągnij mapę, aby ustawić dokładną lokalizację</string>
     <string name="category">Kategoria</string>

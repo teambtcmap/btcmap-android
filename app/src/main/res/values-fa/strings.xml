@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s ساتوشی</string>
     <string name="map_style">سبک نقشه</string>
     <string name="customize_colors">سفارشی‌سازی رنگ‌ها</string>
+    <string name="customize_colors_secondary">رنگ‌های نشانگر، نشان و دکمه</string>
     <string name="style_auto">خودکار</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -147,7 +148,9 @@
         <item quantity="other">%1$d روز پیش</item>
     </plurals>
     <string name="show_attribution">نمایش انتساب</string>
+    <string name="show_attribution_secondary">پیش‌فرض طبق سیاست OSM دیده می‌شود</string>
     <string name="map_rotation">اجازه چرخش نقشه</string>
+    <string name="map_rotation_secondary">قطب‌نما وقتی رو به شمال نیست ظاهر می‌شود</string>
     <string name="osm_attribution">© مشارکت‌کنندگان OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">برای تعیین موقعیت دقیق، نقشه را بکشید</string>
     <string name="category">دسته‌بندی</string>

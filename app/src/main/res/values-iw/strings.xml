@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s סאט</string>
     <string name="map_style">סגנון מפה</string>
     <string name="customize_colors">התאמת צבעים</string>
+    <string name="customize_colors_secondary">צבעי סמן, תג וכפתור</string>
     <string name="style_auto">אוטומטי</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -151,7 +152,9 @@
         <item quantity="other">לפני %1$d ימים</item>
     </plurals>
     <string name="show_attribution">הצגת ייחוס</string>
+    <string name="show_attribution_secondary">מוצג כברירת מחדל לפי OSM</string>
     <string name="map_rotation">אפשר סיבוב מפה</string>
+    <string name="map_rotation_secondary">מצפן מופיע כשלא פונה לצפון</string>
     <string name="osm_attribution">© תורמי OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">גררו את המפה כדי לקבוע את המיקום המדויק</string>
     <string name="category">קטגוריה</string>

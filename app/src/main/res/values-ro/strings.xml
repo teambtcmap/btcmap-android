@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Stilul hărții</string>
     <string name="customize_colors">Personalizează culorile</string>
+    <string name="customize_colors_secondary">Culorile markerului, badge-ului și butonului</string>
     <string name="style_auto">Automat</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -151,7 +152,9 @@
         <item quantity="other">acum %1$d de zile</item>
     </plurals>
     <string name="show_attribution">Afișează atribuirea</string>
+    <string name="show_attribution_secondary">Vizibil implicit conform OSM</string>
     <string name="map_rotation">Permite rotirea hărții</string>
+    <string name="map_rotation_secondary">Busola apare când nu e orientată spre nord</string>
     <string name="osm_attribution">© Contribuitori OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">Trage harta pentru a seta locația exactă</string>
     <string name="category">Categorie</string>

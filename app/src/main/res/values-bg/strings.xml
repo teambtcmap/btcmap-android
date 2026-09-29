@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s сатоши</string>
     <string name="map_style">Стил на картата</string>
     <string name="customize_colors">Персонализиране на цветовете</string>
+    <string name="customize_colors_secondary">Цветове на маркера, значката и бутона</string>
     <string name="style_auto">Автоматично</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -147,7 +148,9 @@
         <item quantity="other">преди %1$d дни</item>
     </plurals>
     <string name="show_attribution">Показване на признание</string>
+    <string name="show_attribution_secondary">Видим по подразбиране според OSM</string>
     <string name="map_rotation">Разрешаване на завъртане на картата</string>
+    <string name="map_rotation_secondary">Компасът се появява, когато не сочи север</string>
     <string name="osm_attribution">© Сътрудници на OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">Плъзнете картата, за да зададете точното местоположение</string>
     <string name="category">Категория</string>

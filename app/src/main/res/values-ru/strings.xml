@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s сатоши</string>
     <string name="map_style">Стиль карты</string>
     <string name="customize_colors">Настроить цвета</string>
+    <string name="customize_colors_secondary">Цвета маркера, значка и кнопки</string>
     <string name="style_auto">Авто</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -155,7 +156,9 @@
         <item quantity="other">%1$d дня назад</item>
     </plurals>
     <string name="show_attribution">Показать атрибуцию</string>
+    <string name="show_attribution_secondary">Виден по умолчанию согласно OSM</string>
     <string name="map_rotation">Разрешить вращение карты</string>
+    <string name="map_rotation_secondary">Компас появляется, когда не смотрит на север</string>
     <string name="osm_attribution">© Участники OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">Перетащите карту, чтобы указать точное местоположение</string>
     <string name="category">Категория</string>

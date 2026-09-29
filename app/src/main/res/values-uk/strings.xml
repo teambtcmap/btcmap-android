@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s сатоші</string>
     <string name="map_style">Стиль карти</string>
     <string name="customize_colors">Налаштувати кольори</string>
+    <string name="customize_colors_secondary">Кольори маркера, бейджа та кнопки</string>
     <string name="style_auto">Автоматично</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -155,7 +156,9 @@
         <item quantity="other">%1$d дня тому</item>
     </plurals>
     <string name="show_attribution">Показати зазначення джерела</string>
+    <string name="show_attribution_secondary">Показано за замовчуванням за OSM</string>
     <string name="map_rotation">Дозволити обертання карти</string>
+    <string name="map_rotation_secondary">Компас з\'являється, коли не вказує на північ</string>
     <string name="osm_attribution">© Учасники OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">Перетягніть карту, щоб указати точне місце</string>
     <string name="category">Категорія</string>

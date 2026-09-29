@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">รูปแบบแผนที่</string>
     <string name="customize_colors">ปรับแต่งสี</string>
+    <string name="customize_colors_secondary">สีของมาร์กเกอร์ ป้าย และปุ่ม</string>
     <string name="style_auto">อัตโนมัติ</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -143,7 +144,9 @@
         <item quantity="other">%1$d วันที่แล้ว</item>
     </plurals>
     <string name="show_attribution">แสดงแหล่งที่มา</string>
+    <string name="show_attribution_secondary">แสดงตามค่าเริ่มต้นตามนโยบาย OSM</string>
     <string name="map_rotation">อนุญาตให้หมุนแผนที่</string>
+    <string name="map_rotation_secondary">เข็มทิศจะแสดงเมื่อไม่ได้หันไปทางเหนือ</string>
     <string name="osm_attribution">© ผู้มีส่วนร่วม OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">ลากแผนที่เพื่อกำหนดตำแหน่งที่แน่นอน</string>
     <string name="category">หมวดหมู่</string>

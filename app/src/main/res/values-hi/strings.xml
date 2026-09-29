@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s सातोशि</string>
     <string name="map_style">मानचित्र शैली</string>
     <string name="customize_colors">रंग अनुकूलित करें</string>
+    <string name="customize_colors_secondary">मार्कर, बैज और बटन के रंग</string>
     <string name="style_auto">स्वचालित</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -147,7 +148,9 @@
         <item quantity="other">%1$d दिन पहले</item>
     </plurals>
     <string name="show_attribution">एट्रिब्यूशन दिखाएं</string>
+    <string name="show_attribution_secondary">OSM नीति से डिफ़ॉल्ट रूप से दृश्य</string>
     <string name="map_rotation">मानचित्र घुमाने की अनुमति दें</string>
+    <string name="map_rotation_secondary">उत्तर की ओर न होने पर कंपास दिखता है</string>
     <string name="osm_attribution">© OpenStreetMap योगदानकर्ता</string>
     <string name="add_location_drag_to_adjust">सटीक स्थान निर्धारित करने के लिए मानचित्र को खींचें</string>
     <string name="category">श्रेणी</string>

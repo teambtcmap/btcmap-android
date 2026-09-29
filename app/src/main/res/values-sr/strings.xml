@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s сат</string>
     <string name="map_style">Стил мапе</string>
     <string name="customize_colors">Прилагоди боје</string>
+    <string name="customize_colors_secondary">Боје маркера, значке и дугмета</string>
     <string name="style_auto">Аутоматски</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -151,7 +152,9 @@
         <item quantity="other">пре %1$d дана</item>
     </plurals>
     <string name="show_attribution">Прикажи приписивање</string>
+    <string name="show_attribution_secondary">Приказано подразумевано према OSM</string>
     <string name="map_rotation">Дозволи ротацију мапе</string>
+    <string name="map_rotation_secondary">Компас се појављује кад није окренут на север</string>
     <string name="osm_attribution">© OpenStreetMap доприносиоци</string>
     <string name="add_location_drag_to_adjust">Превуците мапу да поставите тачну локацију</string>
     <string name="category">Категорија</string>

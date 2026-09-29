@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">지도 스타일</string>
     <string name="customize_colors">색상 사용자 지정</string>
+    <string name="customize_colors_secondary">마커, 배지, 버튼 색상</string>
     <string name="style_auto">자동</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -143,7 +144,9 @@
         <item quantity="other">%1$d일 전</item>
     </plurals>
     <string name="show_attribution">출처 표시</string>
+    <string name="show_attribution_secondary">OSM 정책에 따라 기본 표시</string>
     <string name="map_rotation">지도 회전 허용</string>
+    <string name="map_rotation_secondary">북쪽이 아니면 나침반 표시</string>
     <string name="osm_attribution">© OpenStreetMap 기여자</string>
     <string name="add_location_drag_to_adjust">지도를 드래그하여 정확한 위치를 설정하세요</string>
     <string name="category">카테고리</string>

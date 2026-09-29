@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Estilo do mapa</string>
     <string name="customize_colors">Personalizar cores</string>
+    <string name="customize_colors_secondary">Cores do marcador, distintivo e botão</string>
     <string name="style_auto">Automático</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -151,7 +152,9 @@
         <item quantity="other">há %1$d dias</item>
     </plurals>
     <string name="show_attribution">Mostrar atribuição</string>
+    <string name="show_attribution_secondary">Visível por predefinição segundo o OSM</string>
     <string name="map_rotation">Permitir rotação do mapa</string>
+    <string name="map_rotation_secondary">A bússola aparece se não apontar a norte</string>
     <string name="osm_attribution">© Contribuidores do OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">Arraste o mapa para definir a localização exata</string>
     <string name="category">Categoria</string>

@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Estil del mapa</string>
     <string name="customize_colors">Personalitza els colors</string>
+    <string name="customize_colors_secondary">Colors del marcador, la insígnia i el botó</string>
     <string name="style_auto">Automàtic</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -151,7 +152,9 @@
         <item quantity="other">fa %1$d dies</item>
     </plurals>
     <string name="show_attribution">Mostra l\'atribució</string>
+    <string name="show_attribution_secondary">Visible per defecte segons OSM</string>
     <string name="map_rotation">Permet la rotació del mapa</string>
+    <string name="map_rotation_secondary">La brúixola apareix si no apunta al nord</string>
     <string name="osm_attribution">© Col·laboradors d\'OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">Arrossega el mapa per establir la ubicació exacta</string>
     <string name="category">Categoria</string>

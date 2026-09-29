@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Phong cách bản đồ</string>
     <string name="customize_colors">Tùy chỉnh màu sắc</string>
+    <string name="customize_colors_secondary">Màu của điểm đánh dấu, huy hiệu và nút</string>
     <string name="style_auto">Tự động</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -143,7 +144,9 @@
         <item quantity="other">%1$d ngày trước</item>
     </plurals>
     <string name="show_attribution">Hiển thị ghi nguồn</string>
+    <string name="show_attribution_secondary">Hiển thị mặc định theo chính sách OSM</string>
     <string name="map_rotation">Cho phép xoay bản đồ</string>
+    <string name="map_rotation_secondary">La bàn hiện khi không hướng bắc</string>
     <string name="osm_attribution">© Những người đóng góp OpenStreetMap</string>
     <string name="add_location_drag_to_adjust">Kéo bản đồ để đặt vị trí chính xác</string>
     <string name="category">Danh mục</string>

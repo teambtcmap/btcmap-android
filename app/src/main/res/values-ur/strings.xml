@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s سیٹوشی</string>
     <string name="map_style">نقشے کا انداز</string>
     <string name="customize_colors">رنگوں کو حسب ضرورت بنائیں</string>
+    <string name="customize_colors_secondary">مارکر، بیج اور بٹن کے رنگ</string>
     <string name="style_auto">آٹو</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -147,7 +148,9 @@
         <item quantity="other">%1$d دن پہلے</item>
     </plurals>
     <string name="show_attribution">انتساب دکھائیں</string>
+    <string name="show_attribution_secondary">OSM پالیسی کے مطابق بطور ڈیفالٹ نظر آتا ہے</string>
     <string name="map_rotation">نقشے کی گردش کی اجازت دیں</string>
+    <string name="map_rotation_secondary">شمال کی طرف نہ ہونے پر کمپاس ظاہر ہوتا ہے</string>
     <string name="osm_attribution">© OpenStreetMap تعاون کنندگان</string>
     <string name="add_location_drag_to_adjust">درست مقام مقرر کرنے کے لیے نقشہ گھسیٹیں</string>
     <string name="category">زمرہ</string>

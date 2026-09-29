@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">マップスタイル</string>
     <string name="customize_colors">色をカスタマイズ</string>
+    <string name="customize_colors_secondary">マーカー、バッジ、ボタンの色</string>
     <string name="style_auto">自動</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -143,7 +144,9 @@
         <item quantity="other">%1$d日前</item>
     </plurals>
     <string name="show_attribution">帰属表示を表示</string>
+    <string name="show_attribution_secondary">OSMポリシーにより既定で表示</string>
     <string name="map_rotation">地図の回転を許可</string>
+    <string name="map_rotation_secondary">北を向いていないとコンパスを表示</string>
     <string name="osm_attribution">© OpenStreetMap 貢献者</string>
     <string name="add_location_drag_to_adjust">地図をドラッグして正確な場所を設定</string>
     <string name="category">カテゴリ</string>

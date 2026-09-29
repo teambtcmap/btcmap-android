@@ -36,6 +36,7 @@
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Térkép stílus</string>
     <string name="customize_colors">Színek testreszabása</string>
+    <string name="customize_colors_secondary">Jelölő, jelvény és gomb színei</string>
     <string name="style_auto">Automatikus</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
@@ -147,7 +148,9 @@
         <item quantity="other">%1$d nappal ezelőtt</item>
     </plurals>
     <string name="show_attribution">Attribúció megjelenítése</string>
+    <string name="show_attribution_secondary">Alapból látható az OSM szerint</string>
     <string name="map_rotation">Térkép forgatásának engedélyezése</string>
+    <string name="map_rotation_secondary">Iránytű jelenik meg, ha nem északra néz</string>
     <string name="osm_attribution">© OpenStreetMap közreműködők</string>
     <string name="add_location_drag_to_adjust">Húzza a térképet a pontos hely beállításához</string>
     <string name="category">Kategória</string>
