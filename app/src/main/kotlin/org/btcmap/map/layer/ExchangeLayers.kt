@@ -3,6 +3,7 @@ package org.btcmap.map.layer
 import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.EXCHANGE_MARKER_ICON_PREFIX
 import org.btcmap.map.ICON_OFFSET_Y
+import org.btcmap.map.OUTDATED_ICON_ALPHA
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.Layer
@@ -76,6 +77,13 @@ fun createExchangeLayers(
                     arrayOf(
                         0f,
                         ICON_OFFSET_Y
+                    )
+                ),
+                PropertyFactory.iconOpacity(
+                    Expression.switchCase(
+                        Expression.get("outdated"),
+                        Expression.literal(OUTDATED_ICON_ALPHA),
+                        Expression.literal(1f)
                     )
                 ),
                 PropertyFactory.iconAllowOverlap(true),

@@ -26,7 +26,7 @@ private const val GLYPH_MEASURE_TEXT_SIZE = 100f
 
 // Outdated markers keep the configured icon color but are drawn translucent so
 // they stay recognisable while reading as stale.
-private const val OUTDATED_ICON_ALPHA = 0.6f
+const val OUTDATED_ICON_ALPHA = 0.6f
 
 private fun Int.withAlpha(factor: Float): Int {
     val alpha = (Color.alpha(this) * factor).toInt().coerceIn(0, 255)
