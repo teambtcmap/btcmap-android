@@ -1,4 +1,4 @@
-package org.btcmap
+package org.btcmap.sync
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

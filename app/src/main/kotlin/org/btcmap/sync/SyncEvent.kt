@@ -1,4 +1,4 @@
-package org.btcmap
+package org.btcmap.sync
 
 /**
  * A table the app-scoped sync changed, emitted once the step that touched it

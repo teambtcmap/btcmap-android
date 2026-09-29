@@ -26,7 +26,7 @@ than the whole suite, and always run a test you newly added to confirm it passes
 
 ```bash
 # Run a specific unit test class
-./gradlew testDebugUnitTest --tests 'org.btcmap.SyncManagerTest'
+./gradlew testDebugUnitTest --tests 'org.btcmap.sync.SyncManagerTest'
 
 # Run all unit tests
 ./gradlew testDebugUnitTest

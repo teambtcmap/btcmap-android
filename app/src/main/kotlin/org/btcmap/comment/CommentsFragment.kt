@@ -22,7 +22,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.btcmap.R
-import org.btcmap.SyncEvent
+import org.btcmap.sync.SyncEvent
 import org.btcmap.databinding.CommentsFragmentBinding
 import org.btcmap.db
 import org.btcmap.syncController

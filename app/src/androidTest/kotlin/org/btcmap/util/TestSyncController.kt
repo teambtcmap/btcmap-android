@@ -4,10 +4,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.btcmap.Sync
-import org.btcmap.SyncController
-import org.btcmap.SyncEvent
-import org.btcmap.SyncState
+import org.btcmap.sync.Sync
+import org.btcmap.sync.SyncController
+import org.btcmap.sync.SyncEvent
+import org.btcmap.sync.SyncState
 
 /**
  * A [SyncController] for tests that do not exercise the app-scoped sync.

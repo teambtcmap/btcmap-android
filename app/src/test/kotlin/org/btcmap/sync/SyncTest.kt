@@ -1,4 +1,4 @@
-package org.btcmap
+package org.btcmap.sync
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import okhttp3.HttpUrl.Companion.toHttpUrl

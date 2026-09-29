@@ -28,7 +28,7 @@ import java.time.ZonedDateTime
 
 /**
  * Searches the local cache only. Places, areas and events are kept in SQLite by
- * [org.btcmap.Sync], so search needs no network call and works offline.
+ * [org.btcmap.sync.Sync], so search needs no network call and works offline.
  *
  * Each entity is matched with a case-insensitive substring on any of its names,
  * including the per-language translations, and is shown under the device

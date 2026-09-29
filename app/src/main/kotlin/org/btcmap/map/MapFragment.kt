@@ -38,8 +38,8 @@ import kotlinx.coroutines.withContext
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
-import org.btcmap.SyncEvent
-import org.btcmap.SyncState
+import org.btcmap.sync.SyncEvent
+import org.btcmap.sync.SyncState
 import org.btcmap.feed.ActivityFeedFragment
 import org.btcmap.api
 import org.btcmap.api.getEvent

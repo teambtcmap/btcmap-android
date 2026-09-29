@@ -26,6 +26,9 @@ import org.btcmap.imagestats.ImageStatsEventListener
 import org.btcmap.offline.OfflineMaps
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.prefs
+import org.btcmap.sync.Sync
+import org.btcmap.sync.SyncController
+import org.btcmap.sync.SyncManager
 import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.MapLibre
 import org.btcmap.settings.init as settingsInit

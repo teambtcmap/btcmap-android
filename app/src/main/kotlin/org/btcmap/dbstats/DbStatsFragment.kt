@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
-import org.btcmap.SyncState
+import org.btcmap.sync.SyncState
 import org.btcmap.bundle.BundledAreas
 import org.btcmap.bundle.BundledComments
 import org.btcmap.bundle.BundledEvents

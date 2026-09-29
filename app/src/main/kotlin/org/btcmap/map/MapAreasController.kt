@@ -23,7 +23,7 @@ import java.time.ZonedDateTime
  * Finds the communities and countries containing the map centre in the local
  * cache, so panning the map costs no network round trip and works offline.
  *
- * Areas are synced in full by [org.btcmap.Sync], and their cached GeoJSON is
+ * Areas are synced in full by [org.btcmap.sync.Sync], and their cached GeoJSON is
  * tested with the same bbox pre-filter and point-in-polygon rules the server
  * uses, so the chips match what `GET /v4/areas?lat=&lon=` used to return.
  */

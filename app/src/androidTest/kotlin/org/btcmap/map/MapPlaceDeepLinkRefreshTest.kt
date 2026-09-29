@@ -10,7 +10,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
-import org.btcmap.SyncEvent
+import org.btcmap.sync.SyncEvent
 import org.btcmap.db.table.place.Place
 import org.btcmap.place.PlaceFragment
 import org.btcmap.util.AppTestCase

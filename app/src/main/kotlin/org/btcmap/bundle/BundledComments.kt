@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.btcmap.db.Database
 import org.btcmap.db.table.comment.Comment
-import org.btcmap.reportSyncFailure
+import org.btcmap.sync.reportSyncFailure
 import org.btcmap.util.rethrowIfCancellation
 import java.io.FileNotFoundException
 import java.io.InputStream

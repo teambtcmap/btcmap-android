@@ -71,7 +71,7 @@ import org.btcmap.map.getOnSurfaceColor
 import org.btcmap.openinghours.OpeningHours
 import org.btcmap.openinghours.toOpeningHours
 import org.btcmap.R
-import org.btcmap.SyncEvent
+import org.btcmap.sync.SyncEvent
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db

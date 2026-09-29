@@ -1,4 +1,4 @@
-package org.btcmap
+package org.btcmap.sync
 
 /**
  * What the app-scoped sync is currently doing.
