@@ -1,7 +1,6 @@
 package org.btcmap.map
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.Network
@@ -75,6 +74,7 @@ import org.btcmap.settings.showAttribution
 import org.btcmap.settings.uri
 import org.btcmap.syncController
 import org.btcmap.util.DeepLink
+import org.btcmap.util.isOnline
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -210,7 +210,7 @@ class MapFragment : Fragment() {
             rotationEnabled = prefs.mapRotationEnabled,
         ).also {
             it.install()
-            it.setOffline(!isOnline(requireContext()))
+            it.setOffline(!requireContext().isOnline())
         }
         registerConnectivity()
 
@@ -749,13 +749,6 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun isOnline(context: Context): Boolean {
-        val manager = context.getSystemService(ConnectivityManager::class.java)
-            ?: return false
-        val capabilities = manager.activeNetwork?.let { manager.getNetworkCapabilities(it) }
-        return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
-    }
-
     /**
      * Flips the bundled basemap between the split (online) and all-overzoomed
      * (offline) behaviour as the network comes and goes. The map redraws the
@@ -777,7 +770,7 @@ class MapFragment : Fragment() {
 
             private fun refresh() {
                 connectivityHandler.post {
-                    val isOnline = isOnline(context)
+                    val isOnline = context.isOnline()
                     // An image request made offline failed and was not retried,
                     // so a chip that fell back to its initials needs a fresh
                     // request once the network is back. The delay coalesces the

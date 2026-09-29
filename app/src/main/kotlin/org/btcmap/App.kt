@@ -29,7 +29,7 @@ import org.btcmap.settings.prefs
 import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.MapLibre
 import org.btcmap.settings.init as settingsInit
-import org.btcmap.util.init as typefaceInit
+import org.btcmap.util.initIconTypeface
 import java.io.File
 
 private const val DATABASE_NAME = "btcmap.db"
@@ -155,10 +155,10 @@ class App : Application(), SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
         settingsInit(this)
-        // The icon font is loaded off the main thread (see Typeface.init):
+        // The icon font is loaded off the main thread (see initIconTypeface):
         // building it here would add a few tens of milliseconds to every cold
         // start before the first frame.
-        typefaceInit(this, ioScope)
+        initIconTypeface(this, ioScope)
         MapLibre.getInstance(this)
 
         // OfflineManager must be created on the UI thread; touching the lazy

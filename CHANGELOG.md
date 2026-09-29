@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Treat a network that is up but cannot reach the internet, such as a captive portal, as offline on the map, so it falls back to the bundled basemap instead of trying to load hosted tiles it cannot fetch
 - Apply a custom marker, badge or button color even when the picked color is opaque white, which was mistaken for "no custom color", and preview the badge text in its own color instead of the badge background's
 - Read only the fields a search result needs from the local cache instead of every column of every matching row, and keep a result's row when only its distance changed, so search stays responsive and stable as the bundled snapshot grows
 - Remove a saved place or area from the profile screen as soon as the delete succeeds, instead of refetching the account and leaving the row behind when that second request fails
