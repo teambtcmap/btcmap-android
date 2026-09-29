@@ -74,6 +74,7 @@ import org.btcmap.settings.markerIconColor
 import org.btcmap.settings.prefs
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.uri
+import org.btcmap.settings.verifiedFilterMinVerifiedAt
 import org.btcmap.syncController
 import org.btcmap.util.DeepLink
 import org.btcmap.util.isOnline
@@ -702,7 +703,13 @@ class MapFragment : Fragment() {
             if (selected != filter) return@getMapAsync
             when (filter) {
                 Filter.MERCHANTS -> showCache {
-                    MerchantsCache(map, db(), setup.merchantsSource, ::reportMapContentDrawn) {
+                    MerchantsCache(
+                        map,
+                        db(),
+                        setup.merchantsSource,
+                        prefs.verifiedFilterMinVerifiedAt(),
+                        ::reportMapContentDrawn,
+                    ) {
                         mapSetupController?.ensureMerchantMarkers(it)
                     }
                 }
@@ -712,7 +719,13 @@ class MapFragment : Fragment() {
                 }
 
                 Filter.EXCHANGES -> showCache {
-                    ExchangesCache(map, db(), setup.exchangesSource, ::reportMapContentDrawn) {
+                    ExchangesCache(
+                        map,
+                        db(),
+                        setup.exchangesSource,
+                        prefs.verifiedFilterMinVerifiedAt(),
+                        ::reportMapContentDrawn,
+                    ) {
                         mapSetupController?.ensureExchangeMarkers(it)
                     }
                 }

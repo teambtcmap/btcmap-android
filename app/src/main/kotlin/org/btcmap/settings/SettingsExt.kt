@@ -15,6 +15,8 @@ import org.maplibre.android.geometry.LatLngBounds
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 lateinit var prefs: Settings
     private set
@@ -401,6 +403,19 @@ fun Int.toVerifiedFilterYears(context: Context): String {
         3 -> context.getString(R.string.verified_filter_3_years)
         else -> ""
     }
+}
+
+/**
+ * The oldest verification instant the map still shows: places verified before
+ * this moment are hidden. Derived from [Settings.verifiedFilterYears], so the
+ * map, not just the settings screen, honours the choice.
+ *
+ * The result is normalised to UTC: the viewport query compares it with
+ * `julianday()`, which returns NULL for a zone id such as `[Asia/Bangkok]`, so
+ * a cutoff carrying one would hide every place instead of the old ones.
+ */
+fun Settings.verifiedFilterMinVerifiedAt(now: ZonedDateTime = ZonedDateTime.now()): ZonedDateTime {
+    return now.minusYears(verifiedFilterYears.toLong()).withZoneSameInstant(ZoneOffset.UTC)
 }
 
 enum class ActivityInterval(val days: Int) {

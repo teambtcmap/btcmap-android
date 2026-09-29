@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Filter the map's places, exchanges included, by the "Only show places" setting again: the choice was saved but the map still drew places verified longer ago, because the viewport query never received the cutoff
 - Change the search field's hint to "Places, events, communities" and translate it into all supported languages
 - Report a server row with an unreadable timestamp as a failed sync instead of letting it escape the sync worker, and stop swallowing a non-recoverable error while syncing as if the step had simply found no changes
 - Keep a map button's icon tint to that button, instead of letting it bleed into other views that share the same cached icon

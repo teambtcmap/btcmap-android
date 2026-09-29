@@ -5,11 +5,13 @@ import org.btcmap.db.table.place.Marker
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.style.sources.GeoJsonSource
+import java.time.ZonedDateTime
 
 class MerchantsCache(
     map: MapLibreMap,
     private val db: Database,
     source: GeoJsonSource,
+    private val minVerifiedAt: ZonedDateTime?,
     onFirstDataDrawn: (() -> Unit)? = null,
     private val onMarkers: suspend (Set<Marker>) -> Unit,
 ) : ViewportCache<Marker>(map, source, onFirstDataDrawn) {
@@ -21,7 +23,7 @@ class MerchantsCache(
                 maxLat,
                 minLon,
                 maxLon,
-                minVerifiedAt = null,
+                minVerifiedAt = minVerifiedAt,
             )
         }.toHashSet()
     }

@@ -431,6 +431,66 @@ class PlaceQueriesTest {
     }
 
     @Test
+    fun selectExchangesByBounds_withMinVerifiedAt_excludesOldAndUnverified() {
+        val db = createDatabase()
+        val now = ZonedDateTime.now(ZoneOffset.UTC)
+        db.place.insert(listOf(createPlace(
+            id = 1L,
+            icon = "local_atm",
+            verifiedAt = now.minusYears(1),
+        )))
+        db.place.insert(listOf(createPlace(
+            id = 2L,
+            icon = "currency_exchange",
+            verifiedAt = null,
+        )))
+        db.place.insert(listOf(createPlace(
+            id = 3L,
+            icon = "local_atm",
+            verifiedAt = now.minusYears(2),
+        )))
+
+        val results = db.place.selectExchangesByBounds(
+            minLat = 40.0,
+            maxLat = 41.0,
+            minLon = -75.0,
+            maxLon = -73.0,
+            minVerifiedAt = now.minusYears(1).minusDays(1),
+        )
+
+        Assert.assertEquals(1, results.size)
+        Assert.assertTrue(results.any { it.id == 1L })
+        Assert.assertFalse(results.any { it.id == 2L })
+        Assert.assertFalse(results.any { it.id == 3L })
+    }
+
+    @Test
+    fun selectExchangesByBounds_withMinVerifiedAtNull_returnsAllExchanges() {
+        val db = createDatabase()
+        val now = ZonedDateTime.now(ZoneOffset.UTC)
+        db.place.insert(listOf(createPlace(
+            id = 1L,
+            icon = "local_atm",
+            verifiedAt = now.minusYears(5),
+        )))
+        db.place.insert(listOf(createPlace(
+            id = 2L,
+            icon = "currency_exchange",
+            verifiedAt = null,
+        )))
+
+        val results = db.place.selectExchangesByBounds(
+            minLat = 40.0,
+            maxLat = 41.0,
+            minLon = -75.0,
+            maxLon = -73.0,
+            minVerifiedAt = null,
+        )
+
+        Assert.assertEquals(2, results.size)
+    }
+
+    @Test
     fun selectMaxUpdatedAt_returnsNullWhenEmpty() {
         val db = createDatabase()
 

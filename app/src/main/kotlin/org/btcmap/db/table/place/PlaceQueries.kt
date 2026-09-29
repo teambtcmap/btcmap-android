@@ -269,15 +269,22 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         maxLat: Double,
         minLon: Double,
         maxLon: Double,
+        minVerifiedAt: ZonedDateTime? = null,
     ): List<Marker> {
+        val whereClause = buildString {
+            append("($ICON = 'local_atm' OR $ICON = 'currency_exchange')")
+            append(" AND $DELETED_AT IS NULL")
+            append(" AND $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4")
+            if (minVerifiedAt != null) {
+                // julianday, not plain text: see selectMerchantsByBounds.
+                append(" AND julianday($VERIFIED_AT) >= julianday(?5)")
+            }
+        }
         conn.prepare(
             """
                 SELECT ${MarkerProjection.COLUMNS}
                 FROM $TABLE
-                WHERE
-                    ($ICON = 'local_atm' OR $ICON = 'currency_exchange')
-                    AND $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4
-                    AND $DELETED_AT IS NULL
+                WHERE $whereClause
                 ORDER BY $LAT DESC;
             """
         ).use {
@@ -285,6 +292,9 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             it.bindDouble(2, maxLat)
             it.bindDouble(3, minLon)
             it.bindDouble(4, maxLon)
+            if (minVerifiedAt != null) {
+                it.bindText(5, minVerifiedAt.toString())
+            }
             val rows = mutableListOf<Marker>()
             while (it.step()) {
                 rows.add(MarkerProjection.fromStatement(it))

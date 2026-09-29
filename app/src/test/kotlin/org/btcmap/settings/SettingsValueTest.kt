@@ -4,6 +4,8 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 class SettingsValueTest {
 
@@ -48,5 +50,44 @@ class SettingsValueTest {
         settings.putInt("markerBackgroundColor", null)
 
         Assert.assertNull(settings.getIntOrNull("markerBackgroundColor"))
+    }
+
+    @Test
+    fun verifiedFilterMinVerifiedAt_subtractsConfiguredYears() {
+        val settings = createSettings(createDatabase())
+        settings.verifiedFilterYears = 1
+        val now = ZonedDateTime.parse("2026-06-15T12:00:00Z")
+
+        Assert.assertEquals(
+            ZonedDateTime.parse("2025-06-15T12:00:00Z"),
+            settings.verifiedFilterMinVerifiedAt(now),
+        )
+    }
+
+    @Test
+    fun verifiedFilterMinVerifiedAt_defaultsToThreeYears() {
+        val settings = createSettings(createDatabase())
+        val now = ZonedDateTime.parse("2026-06-15T12:00:00Z")
+
+        Assert.assertEquals(
+            ZonedDateTime.parse("2023-06-15T12:00:00Z"),
+            settings.verifiedFilterMinVerifiedAt(now),
+        )
+    }
+
+    @Test
+    fun verifiedFilterMinVerifiedAt_normalisesCutoffToUtc() {
+        // A device east of UTC turns ZonedDateTime.now() into a value whose
+        // toString() carries "[Asia/Bangkok]"; SQLite's julianday() returns NULL
+        // for that, which would make the viewport query hide every place. The
+        // cutoff must therefore be a bare UTC instant.
+        val settings = createSettings(createDatabase())
+        settings.verifiedFilterYears = 1
+        val now = ZonedDateTime.parse("2026-06-15T12:00:00+07:00[Asia/Bangkok]")
+
+        val cutoff = settings.verifiedFilterMinVerifiedAt(now)
+
+        Assert.assertEquals(ZonedDateTime.parse("2025-06-15T05:00:00Z"), cutoff)
+        Assert.assertEquals(ZoneOffset.UTC, cutoff.offset)
     }
 }
