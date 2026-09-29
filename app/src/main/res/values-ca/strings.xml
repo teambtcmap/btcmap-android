@@ -35,6 +35,7 @@
     <string name="loading">Carregant</string>
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Estil del mapa</string>
+    <string name="customize_colors">Personalitza els colors</string>
     <string name="style_auto">Automàtic</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>

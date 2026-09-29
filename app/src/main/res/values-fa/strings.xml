@@ -35,6 +35,7 @@
     <string name="loading">در حال بارگذاری</string>
     <string name="d_sat">%1$s ساتوشی</string>
     <string name="map_style">سبک نقشه</string>
+    <string name="customize_colors">سفارشی‌سازی رنگ‌ها</string>
     <string name="style_auto">خودکار</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>

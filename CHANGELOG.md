@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Group the customizable marker, badge and button colors into a "Customize colors" subscreen, so the settings list is no longer dominated by color rows
 - Remove the unused "Show debug info" settings toggle, which was stored but never read back and so changed nothing
 - Filter the map's places, exchanges included, by the "Only show places" setting again: the choice was saved but the map still drew places verified longer ago, because the viewport query never received the cutoff
 - Change the search field's hint to "Places, events, communities" and translate it into all supported languages

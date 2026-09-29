@@ -35,6 +35,7 @@
     <string name="loading">Завантаження</string>
     <string name="d_sat">%1$s сатоші</string>
     <string name="map_style">Стиль карти</string>
+    <string name="customize_colors">Налаштувати кольори</string>
     <string name="style_auto">Автоматично</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>

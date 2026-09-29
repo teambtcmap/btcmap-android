@@ -35,6 +35,7 @@
     <string name="loading">Ladataan</string>
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Kartan tyyli</string>
+    <string name="customize_colors">Mukauta värejä</string>
     <string name="style_auto">Automaattinen</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>

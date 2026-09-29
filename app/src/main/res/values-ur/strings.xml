@@ -35,6 +35,7 @@
     <string name="loading">لوڈ ہو رہا ہے</string>
     <string name="d_sat">%1$s سیٹوشی</string>
     <string name="map_style">نقشے کا انداز</string>
+    <string name="customize_colors">رنگوں کو حسب ضرورت بنائیں</string>
     <string name="style_auto">آٹو</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>

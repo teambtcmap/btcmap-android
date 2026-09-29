@@ -35,6 +35,7 @@
     <string name="loading">लोड हो रहा है</string>
     <string name="d_sat">%1$s सातोशि</string>
     <string name="map_style">मानचित्र शैली</string>
+    <string name="customize_colors">रंग अनुकूलित करें</string>
     <string name="style_auto">स्वचालित</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>

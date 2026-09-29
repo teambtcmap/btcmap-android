@@ -35,6 +35,7 @@
     <string name="loading">Indlæser</string>
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Kortstil</string>
+    <string name="customize_colors">Tilpas farver</string>
     <string name="style_auto">Automatisk</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>

@@ -35,6 +35,7 @@
     <string name="loading">Laster</string>
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">Kartstil</string>
+    <string name="customize_colors">Tilpass farger</string>
     <string name="style_auto">Automatisk</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>

@@ -35,6 +35,7 @@
     <string name="loading">로딩 중</string>
     <string name="d_sat">%1$s sat</string>
     <string name="map_style">지도 스타일</string>
+    <string name="customize_colors">색상 사용자 지정</string>
     <string name="style_auto">자동</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>

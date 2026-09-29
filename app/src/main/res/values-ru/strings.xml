@@ -35,6 +35,7 @@
     <string name="loading">загрузка</string>
     <string name="d_sat">%1$s сатоши</string>
     <string name="map_style">Стиль карты</string>
+    <string name="customize_colors">Настроить цвета</string>
     <string name="style_auto">Авто</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>

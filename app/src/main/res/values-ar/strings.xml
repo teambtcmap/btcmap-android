@@ -35,6 +35,7 @@
     <string name="loading">جارٍ التحميل</string>
     <string name="d_sat">%1$s ساتوشي</string>
     <string name="map_style">نمط الخريطة</string>
+    <string name="customize_colors">تخصيص الألوان</string>
     <string name="style_auto">تلقائي</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>

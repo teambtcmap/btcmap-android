@@ -35,6 +35,7 @@
     <string name="loading">טוען</string>
     <string name="d_sat">%1$s סאט</string>
     <string name="map_style">סגנון מפה</string>
+    <string name="customize_colors">התאמת צבעים</string>
     <string name="style_auto">אוטומטי</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
