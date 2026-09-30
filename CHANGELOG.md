@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Tag a submitted place with the app name and version as its origin, the same way a report is tagged, so a submission says which app filed it
 - Redesign the Add comment screen against Material 3: left-align the explanation and fee, load the fee with a spinner, show a placeholder in the empty field, and stay open with an inline "Tap to retry" when the fee fails instead of closing the screen and showing a dialog
 - Title the Add comment screen with the place's name instead of a static "Add comment", so it is clear which place the comment is about
 - Show a payment confirmation such as "Your comment has been posted" in a snackbar instead of a toast, so it is not tied to the screen that closes and it clears the system bars

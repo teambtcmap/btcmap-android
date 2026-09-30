@@ -2,6 +2,7 @@ package org.btcmap.api
 
 import com.google.gson.JsonObject
 import okhttp3.Request
+import org.btcmap.userAgent
 import org.btcmap.util.toJsonObject
 
 data class SubmitPlaceResponse(
@@ -25,13 +26,12 @@ suspend fun Api.submitPlace(
         addProperty("category", category)
         addProperty("name", name)
         val extra = JsonObject().apply {
+            addProperty("origin", userAgent)
             address?.takeIf { it.isNotBlank() }?.let { addProperty("address", it) }
             website?.takeIf { it.isNotBlank() }?.let { addProperty("website", it) }
             description?.takeIf { it.isNotBlank() }?.let { addProperty("description", it) }
         }
-        if (extra.size() > 0) {
-            add("extra_fields", extra)
-        }
+        add("extra_fields", extra)
     }
 
     return call(
