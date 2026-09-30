@@ -374,16 +374,36 @@ JSON
 }
 
 cmd_app_deploy_release() {
+  assert_bunny_api_key
+
   ./gradlew assembleRelease "$@"
 
   local apk_dir="app/build/outputs/apk/release"
   local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
+  local build_config="app/build/generated/source/buildConfig/release/org/btcmap/BuildConfig.java"
 
   assert_apk_signed "$apk_dir/app-arm64-v8a-release.apk"
   assert_apk_signed "$apk_dir/app-universal-release.apk"
 
-  rsync -avz --progress "$apk_dir"/app-arm64-v8a-release.apk "$dest/release.apk"
-  rsync -avz --progress "$apk_dir"/app-universal-release.apk "$dest/release-universal.apk"
+  local version_name
+  version_name="$(sed -n 's/.*VERSION_NAME = "\(.*\)";.*/\1/p' "$build_config" | head -n1)"
+  if [ -z "$version_name" ]; then
+    echo "Error: could not read version info from $build_config" >&2
+    return 1
+  fi
+
+  local apk_base="btcmap-android-${version_name}"
+
+  rsync -avz --progress "$apk_dir"/app-arm64-v8a-release.apk "$dest/${apk_base}.apk"
+  rsync -avz --progress "$apk_dir"/app-universal-release.apk "$dest/${apk_base}-universal.apk"
+
+  # A rebuilt APK can be published under a version name that is already on the
+  # CDN (for example when re-releasing a fix for the same version), so the pull
+  # zone would keep serving the previous bytes for the full max-age window
+  # unless we purge it.
+  purge_cdn \
+    "https://cdn.static.btcmap.org/android/apk/${apk_base}.apk" \
+    "https://cdn.static.btcmap.org/android/apk/${apk_base}-universal.apk"
 }
 
 cmd_app() {
