@@ -19,6 +19,7 @@
     <string name="comments_d">コメント (%1$d)</string>
     <string name="add_element_comment_disclosure_1">すべてのコメントは匿名のものとして、少額のsats料金を垃圾メール防止としていただいております</string>
     <string name="comment">コメント</string>
+    <string name="comment_placeholder">この場所について何か書いてください…</string>
     <string name="btn_continue">続行</string>
     <string name="add_comment">コメントを追加</string>
     <string name="error">エラー</string>

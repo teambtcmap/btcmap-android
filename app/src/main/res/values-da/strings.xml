@@ -19,6 +19,7 @@
     <string name="comments_d">Kommentarer (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Alle kommentarer er anonyme, men vi opkræver et lille gebyr i sats som spam-beskyttelse</string>
     <string name="comment">Kommentar</string>
+    <string name="comment_placeholder">Skriv noget om dette sted…</string>
     <string name="btn_continue">Fortsæt</string>
     <string name="add_comment">Tilføj kommentar</string>
     <string name="error">Fejl</string>

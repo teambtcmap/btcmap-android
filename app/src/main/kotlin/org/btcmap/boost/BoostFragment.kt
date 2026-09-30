@@ -5,9 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.api.PlaceBoostQuoteResponse
@@ -60,10 +60,10 @@ class BoostFragment : Fragment() {
 
         val payment = InvoicePaymentController(
             fragment = this,
-            qr = binding.qr,
-            payButton = binding.payInvoice,
-            copyButton = binding.copyInvoice,
-            startOverButton = binding.startOver,
+            qr = binding.invoicePayment.qr,
+            payButton = binding.invoicePayment.payInvoice,
+            copyButton = binding.invoicePayment.copyInvoice,
+            startOverButton = binding.invoicePayment.startOver,
             paymentRequestLabel = getString(R.string.btc_map_boost_payment_request),
             onStartOver = viewModel::startOver,
         )
@@ -72,11 +72,9 @@ class BoostFragment : Fragment() {
             viewModel = viewModel,
             onState = { render(it, payment) },
             onPaid = {
-                Toast.makeText(
-                    requireContext(),
+                (activity as? Activity)?.showMessage(
                     getString(R.string.your_boost_is_active),
-                    Toast.LENGTH_LONG,
-                ).show()
+                )
                 parentFragmentManager.popBackStack()
             },
         )

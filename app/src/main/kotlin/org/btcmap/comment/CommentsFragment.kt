@@ -31,10 +31,14 @@ class CommentsFragment : Fragment() {
 
     private data class Args(
         val placeId: Long,
+        val placeName: String?,
     )
 
     private val args by lazy {
-        Args(requireArguments().getLong("place_id"))
+        Args(
+            placeId = requireArguments().getLong("place_id"),
+            placeName = requireArguments().getString("place_name"),
+        )
     }
 
     private var _binding: CommentsFragmentBinding? = null
@@ -121,6 +125,7 @@ class CommentsFragment : Fragment() {
                     null,
                     Bundle().apply {
                         putLong("place_id", args.placeId)
+                        putString("place_name", args.placeName)
                         putBoolean(AddCommentFragment.ARG_NOTIFY_ON_POSTED, true)
                     }
                 )

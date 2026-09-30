@@ -9,6 +9,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.btcmap.databinding.ActivityBinding
@@ -81,6 +82,15 @@ class Activity : AppCompatActivity() {
     internal fun openPlace(placeId: Long) {
         pendingDeepLink = DeepLink.Place(placeId)
         deliverDeepLink()
+    }
+
+    /**
+     * Shows a transient confirmation over the current screen. It lives on the
+     * activity so a message can outlive the fragment that raised it, for example
+     * a payment screen that closes right after a successful payment.
+     */
+    internal fun showMessage(message: CharSequence) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
     }
 
     private fun deliverDeepLink() {

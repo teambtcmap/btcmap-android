@@ -19,11 +19,16 @@ import org.btcmap.util.userFacingMessage
  * Tying the work to the view lifecycle means polling stops in the background
  * and is restarted after a rotation, picking the invoice back up from the
  * retained state instead of starting over.
+ *
+ * A screen that can show a failed quote inline, with its own retry, passes
+ * [onQuoteFailure] to take over that case. Otherwise a quote failure pops the
+ * screen, because without a quote there is nothing it can do.
  */
 internal fun <TQuote : Any> Fragment.observeInvoicePayment(
     viewModel: InvoicePaymentViewModel<TQuote>,
     onState: (InvoicePaymentState<TQuote>) -> Unit,
     onPaid: () -> Unit,
+    onQuoteFailure: (() -> Unit)? = null,
 ) {
     val poller = InvoicePaymentPoller { invoiceId -> api().awaitPaidInvoice(invoiceId) }
 
@@ -47,7 +52,14 @@ internal fun <TQuote : Any> Fragment.observeInvoicePayment(
             }
 
             launch {
-                viewModel.events.collect { event -> showError(event) }
+                viewModel.events.collect { event ->
+                    when {
+                        event is PaymentEvent.QuoteFailed && onQuoteFailure != null ->
+                            onQuoteFailure()
+
+                        else -> showError(event)
+                    }
+                }
             }
         }
     }

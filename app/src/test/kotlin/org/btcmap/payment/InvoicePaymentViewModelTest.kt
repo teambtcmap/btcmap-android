@@ -76,6 +76,35 @@ class InvoicePaymentViewModelTest {
     }
 
     @Test
+    fun loadQuote_canBeRetriedAfterFailure() = runTest(mainDispatcherRule.dispatcher) {
+        var calls = 0
+        val model = viewModel(
+            quoteLoader = {
+                calls++
+                if (calls == 1) throw IllegalStateException("boom")
+                "quote"
+            },
+        )
+
+        model.loadQuote()
+        advanceUntilIdle()
+        Assert.assertFalse(model.state.value.loadingQuote)
+        Assert.assertNull(model.state.value.quote)
+
+        model.loadQuote()
+        Assert.assertTrue(
+            "a retry shows the loading state again",
+            model.state.value.loadingQuote,
+        )
+        advanceUntilIdle()
+
+        Assert.assertEquals("quote", model.state.value.quote)
+        Assert.assertFalse(model.state.value.loadingQuote)
+        Assert.assertTrue(model.state.value.actionsEnabled)
+        Assert.assertEquals(2, calls)
+    }
+
+    @Test
     fun order_publishesInvoiceAndLocksControls() = runTest(mainDispatcherRule.dispatcher) {
         val model = viewModel()
         model.loadQuote()

@@ -8,13 +8,13 @@ import android.content.Intent
 import android.graphics.Color
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.Toast
 import androidmads.library.qrgenearator.QRGContents
 import androidmads.library.qrgenearator.QRGEncoder
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.btcmap.Activity
 import org.btcmap.R
 
 /**
@@ -86,11 +86,7 @@ internal class InvoicePaymentController(
         try {
             fragment.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(
-                fragment.requireContext(),
-                R.string.you_dont_have_a_compatible_wallet,
-                Toast.LENGTH_LONG,
-            ).show()
+            showMessage(R.string.you_dont_have_a_compatible_wallet)
         }
     }
 
@@ -98,8 +94,15 @@ internal class InvoicePaymentController(
         val clipboard =
             fragment.requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText(paymentRequestLabel, invoice))
-        Toast.makeText(fragment.requireContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT)
-            .show()
+        showMessage(R.string.copied_to_clipboard)
+    }
+
+    /**
+     * Routed through the activity so the message is not tied to this screen's
+     * view, which a payment that closes it would take away.
+     */
+    private fun showMessage(messageRes: Int) {
+        (fragment.activity as? Activity)?.showMessage(fragment.getString(messageRes))
     }
 
     private companion object {

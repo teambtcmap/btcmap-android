@@ -94,53 +94,11 @@
                 android:enabled="false"
                 android:text="@string/btn_continue" />
 
-            <ImageView
-                android:id="@+id/qr"
+            <include
+                android:id="@+id/invoice_payment"
+                layout="@layout/invoice_payment"
                 android:layout_width="match_parent"
-                android:layout_height="230dp"
-                android:layout_marginHorizontal="40dp"
-                android:contentDescription="@string/qr_code"
-                android:visibility="gone"
-                tools:background="#ff0000"
-                tools:visibility="visible" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="40dp"
-                android:layout_marginVertical="16dp"
-                android:gravity="center">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/pay_invoice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/pay"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/copy_invoice"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="@android:string/copy"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-            </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/start_over"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:text="@string/start_over"
-                android:visibility="gone"
-                tools:visibility="visible" />
+                android:layout_height="wrap_content" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 

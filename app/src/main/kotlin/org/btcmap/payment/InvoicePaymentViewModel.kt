@@ -86,6 +86,10 @@ internal class InvoicePaymentViewModel<TQuote : Any>(
         if (quoteRequested) return
         quoteRequested = true
 
+        // Set before the launch so a retry after a failure shows the loading
+        // state again instead of briefly looking like it did nothing.
+        _state.update { it.copy(loadingQuote = true) }
+
         viewModelScope.launch {
             try {
                 val quote = quoteLoader()

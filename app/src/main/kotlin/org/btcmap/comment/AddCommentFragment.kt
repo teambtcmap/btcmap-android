@@ -4,11 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.api.CommentQuoteResponse
@@ -27,12 +27,14 @@ class AddCommentFragment : Fragment() {
 
     private data class Args(
         val placeId: Long,
+        val placeName: String?,
         val notifyOnPosted: Boolean,
     )
 
     private val args by lazy {
         Args(
             placeId = requireArguments().getLong("place_id"),
+            placeName = requireArguments().getString("place_name"),
             notifyOnPosted = requireArguments().getBoolean(ARG_NOTIFY_ON_POSTED, false),
         )
     }
@@ -64,12 +66,16 @@ class AddCommentFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
+        // The place name tells the user which place they are commenting on;
+        // the static title is the fallback when it was not passed along.
+        args.placeName?.let { binding.topAppBar.title = it }
+
         val payment = InvoicePaymentController(
             fragment = this,
-            qr = binding.qr,
-            payButton = binding.payInvoice,
-            copyButton = binding.copyInvoice,
-            startOverButton = binding.startOver,
+            qr = binding.invoicePayment.qr,
+            payButton = binding.invoicePayment.payInvoice,
+            copyButton = binding.invoicePayment.copyInvoice,
+            startOverButton = binding.invoicePayment.startOver,
             paymentRequestLabel = getString(R.string.btc_map_comment_payment_request),
             onStartOver = viewModel::startOver,
         )
@@ -78,11 +84,9 @@ class AddCommentFragment : Fragment() {
             viewModel = viewModel,
             onState = { render(it, payment) },
             onPaid = {
-                Toast.makeText(
-                    requireContext(),
+                (activity as? Activity)?.showMessage(
                     getString(R.string.your_comment_has_been_posted),
-                    Toast.LENGTH_LONG,
-                ).show()
+                )
                 // Only the comments list opened from CommentsFragment waits
                 // for this. A comment posted straight from the place screen
                 // must not leave a result behind that a later list visit
@@ -99,11 +103,16 @@ class AddCommentFragment : Fragment() {
                 }
                 parentFragmentManager.popBackStack()
             },
+            // A failed quote is rendered inline with a retry instead of
+            // closing the screen, since retrying is the only thing it can do.
+            onQuoteFailure = {},
         )
 
         // Clear the validation message as soon as the user starts fixing the
         // input instead of leaving it pinned to the field.
         binding.comment.doAfterTextChanged { binding.commentInput.error = null }
+
+        binding.quoteRetryButton.setOnClickListener { viewModel.loadQuote() }
 
         binding.btnContinue.setOnClickListener {
             val commentText = binding.comment.text.toString().trim()
@@ -129,15 +138,21 @@ class AddCommentFragment : Fragment() {
         state: InvoicePaymentState<CommentQuoteResponse>,
         payment: InvoicePaymentController,
     ) {
-        state.quote?.let { quote ->
-            val fee = NumberFormat.getNumberInstance().format(quote.quoteSat)
-            binding.fee.text = getString(R.string.d_sat, fee)
-        }
+        val quote = state.quote
+        val quoteFailed = quote == null && !state.loadingQuote && state.invoice == null
+
+        binding.feeRow.isVisible = !quoteFailed
+        binding.quoteProgress.isVisible = state.loadingQuote
+        binding.quoteRetry.isVisible = quoteFailed
+        binding.fee.text = quote?.let {
+            getString(R.string.d_sat, NumberFormat.getNumberInstance().format(it.quoteSat))
+        }.orEmpty()
 
         // The field stays usable while the quote loads, but is locked while the
         // order is placed and once an invoice exists.
         binding.comment.isEnabled = state.inputEnabled
         binding.btnContinue.isEnabled = state.actionsEnabled
+        binding.orderProgress.isVisible = state.ordering
 
         val invoice = state.invoice
         // The invoice block replaces the order controls, so the continue button

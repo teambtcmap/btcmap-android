@@ -19,6 +19,7 @@
     <string name="comments_d">Kommentit (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Kaikki kommentit ovat anonyymejä, mutta perimme pienen maksun sateina roskapostisuojana</string>
     <string name="comment">Kommentti</string>
+    <string name="comment_placeholder">Kirjoita jotain tästä paikasta…</string>
     <string name="btn_continue">Jatka</string>
     <string name="add_comment">Lisää kommentti</string>
     <string name="error">Virhe</string>

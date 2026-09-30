@@ -9,4 +9,9 @@
     <!-- Extra vertical breathing room in the place screen's toolbar, so a
          two-line title is not cramped against the status bar and the content. -->
     <dimen name="place_toolbar_vertical_padding">8dp</dimen>
+
+    <!-- A form's left and right padding. It grows with the window so a single
+         column of fields keeps a comfortable reading width on large screens
+         instead of stretching edge to edge. -->
+    <dimen name="form_horizontal_padding">16dp</dimen>
 </resources>

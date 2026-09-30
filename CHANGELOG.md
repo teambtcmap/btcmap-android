@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Redesign the Add comment screen against Material 3: left-align the explanation and fee, load the fee with a spinner, show a placeholder in the empty field, and stay open with an inline "Tap to retry" when the fee fails instead of closing the screen and showing a dialog
+- Title the Add comment screen with the place's name instead of a static "Add comment", so it is clear which place the comment is about
+- Show a payment confirmation such as "Your comment has been posted" in a snackbar instead of a toast, so it is not tied to the screen that closes and it clears the system bars
+- Keep the comment form at a comfortable reading width on tablets instead of stretching it edge to edge
 - Add "View on openstreetmap.org" and "Edit on openstreetmap.org" actions to the place screen, next to "View on btcmap.org"
 - Mark the current day's line in a place's opening hours with an underline instead of a custom color, so the day stands out without relying on color alone
 - Group the customizable marker, badge and button colors into a "Customize colors" subscreen, so the settings list is no longer dominated by color rows

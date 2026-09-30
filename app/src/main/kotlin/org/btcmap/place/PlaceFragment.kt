@@ -903,7 +903,12 @@ class PlaceFragment : Fragment() {
         requireActivity().supportFragmentManager.commit {
             setReorderingAllowed(true)
             replace<CommentsFragment>(
-                R.id.fragmentContainerView, null, Bundle().apply { putLong("place_id", placeId) }
+                R.id.fragmentContainerView,
+                null,
+                Bundle().apply {
+                    putLong("place_id", placeId)
+                    putString("place_name", placeName)
+                },
             )
             addToBackStack(null)
         }
@@ -913,7 +918,12 @@ class PlaceFragment : Fragment() {
         requireActivity().supportFragmentManager.commit {
             setReorderingAllowed(true)
             replace<AddCommentFragment>(
-                R.id.fragmentContainerView, null, Bundle().apply { putLong("place_id", placeId) }
+                R.id.fragmentContainerView,
+                null,
+                Bundle().apply {
+                    putLong("place_id", placeId)
+                    putString("place_name", placeName)
+                },
             )
             addToBackStack(null)
         }

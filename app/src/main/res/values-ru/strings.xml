@@ -19,6 +19,7 @@
     <string name="comments_d">Комментарии (%1$d)</string>
     <string name="add_element_comment_disclosure_1">Все комментарии анонимны но мы берем небольшую комиссию для защиты от спама.</string>
     <string name="comment">Комментарий</string>
+    <string name="comment_placeholder">Напишите что-нибудь об этом месте…</string>
     <string name="btn_continue">Продолжить</string>
     <string name="add_comment">Оставить комментарий</string>
     <string name="error">Ошибка</string>
