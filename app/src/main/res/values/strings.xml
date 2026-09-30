@@ -261,7 +261,6 @@
     <string name="description_placeholder">Accepts Lightning payments via Blink wallet, ATM in the back room</string>
     <string name="submit_place">Submit place</string>
     <string name="place_submitted">Place submitted for review</string>
-    <string name="verify_or_report">Verify / Report</string>
     <string name="verify_or_report_description">Let editors know the current state of this place. Your report will be reviewed by the BTC Map community.</string>
     <string name="report_type_verified">Verified — still accepts Bitcoin</string>
     <string name="report_type_verified_description">You confirmed this place exists and currently accepts Bitcoin payments.</string>
@@ -273,7 +272,6 @@
     <string name="report_comment_placeholder">Anything that helps reviewers understand the situation…</string>
     <string name="btn_submit">Submit</string>
     <string name="report_submitted">Report submitted</string>
-    <string name="report_select_type">Please select a report type</string>
     <string name="verification_warning_title">Verification needed</string>
     <string name="verification_warning_outdated">This place was last verified more than a year ago, so its details may be out of date. If you know it still accepts sats, tap Verify. If you know it no longer does, tap Report.</string>
     <string name="verification_warning_not_verified">This place hasn\'t been verified yet, so its details may be unreliable. If you know it still accepts sats, tap Verify. If you know it no longer does, tap Report.</string>

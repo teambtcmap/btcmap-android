@@ -182,7 +182,6 @@
     <string name="description_placeholder">يقبل مدفوعات Lightning عبر محفظة Blink، وماكينة صراف آلي في الغرفة الخلفية</string>
     <string name="submit_place">إرسال المكان</string>
     <string name="place_submitted">تم إرسال المكان للمراجعة</string>
-    <string name="verify_or_report">تحقق / إبلاغ</string>
     <string name="verify_or_report_description">أخبر المحررين بالحالة الحالية لهذا المكان. ستتم مراجعة تقريرك من قبل مجتمع BTC Map.</string>
     <string name="report_type_verified">تم التحقق — لا يزال يقبل Bitcoin</string>
     <string name="report_type_verified_description">لقد أكدت وجود هذا المكان وأنه يقبل مدفوعات Bitcoin حاليًا.</string>
@@ -194,7 +193,6 @@
     <string name="report_comment_placeholder">أي شيء يساعد المراجعين على فهم الموقف…</string>
     <string name="btn_submit">إرسال</string>
     <string name="report_submitted">تم إرسال الإبلاغ</string>
-    <string name="report_select_type">الرجاء تحديد نوع الإبلاغ</string>
     <string name="zoom_in">تكبير</string>
     <string name="zoom_out">تصغير</string>
     <string name="failed_to_load">فشل التحميل</string>

@@ -166,7 +166,6 @@
     <string name="description_placeholder">Aanvaar Lightning-betalings via Blink-beursie, OTM in die agterkamer</string>
     <string name="submit_place">Dien plek in</string>
     <string name="place_submitted">Plek ingedien vir hersiening</string>
-    <string name="verify_or_report">Verifieer / Rapporteer</string>
     <string name="verify_or_report_description">Laat redigeerders weet wat die huidige toestand van hierdie plek is. Jou verslag sal deur die BTC Map-gemeenskap hersien word.</string>
     <string name="report_type_verified">Geverifieer — aanvaar steeds Bitcoin</string>
     <string name="report_type_verified_description">Jy het bevestig dat hierdie plek bestaan en tans Bitcoin-betalings aanvaar.</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">Enigiets wat hersieners help om die situasie te verstaan…</string>
     <string name="btn_submit">Dien in</string>
     <string name="report_submitted">Verslag ingedien</string>
-    <string name="report_select_type">Kies asseblief \'n tipe verslag</string>
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom uit</string>
     <string name="failed_to_load">Kon nie laai nie</string>

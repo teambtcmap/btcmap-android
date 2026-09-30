@@ -166,7 +166,6 @@
     <string name="description_placeholder">Godtar Lightning-betalinger via Blink-lommebok, minibank i bakrommet</string>
     <string name="submit_place">Send inn sted</string>
     <string name="place_submitted">Sted sendt inn til gjennomgang</string>
-    <string name="verify_or_report">Bekreft / Rapporter</string>
     <string name="verify_or_report_description">Informer redaktørene om stedets nåværende tilstand. Rapporten din vil bli gjennomgått av BTC Map-fellesskapet.</string>
     <string name="report_type_verified">Bekreftet — godtar fortsatt Bitcoin</string>
     <string name="report_type_verified_description">Du har bekreftet at dette stedet eksisterer og for tiden godtar Bitcoin-betalinger.</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">Alt som hjelper anmelderne å forstå situasjonen…</string>
     <string name="btn_submit">Send inn</string>
     <string name="report_submitted">Rapport sendt inn</string>
-    <string name="report_select_type">Velg en rapporttype</string>
     <string name="zoom_in">Zoom inn</string>
     <string name="zoom_out">Zoom ut</string>
     <string name="failed_to_load">Kunne ikke lastes</string>

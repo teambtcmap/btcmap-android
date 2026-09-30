@@ -166,7 +166,6 @@
     <string name="description_placeholder">Accepterar Lightning-betalningar via Blink-plånbok, bankomat i bakre rummet</string>
     <string name="submit_place">Skicka in plats</string>
     <string name="place_submitted">Platsen har skickats in för granskning</string>
-    <string name="verify_or_report">Verifiera / Rapportera</string>
     <string name="verify_or_report_description">Informera redaktörerna om platsens aktuella status. Din rapport kommer att granskas av BTC Map-gemenskapen.</string>
     <string name="report_type_verified">Verifierad — accepterar fortfarande Bitcoin</string>
     <string name="report_type_verified_description">Du har bekräftat att denna plats finns och för närvarande accepterar Bitcoin-betalningar.</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">Allt som hjälper granskare att förstå situationen…</string>
     <string name="btn_submit">Skicka</string>
     <string name="report_submitted">Rapporten har skickats</string>
-    <string name="report_select_type">Välj en rapporttyp</string>
     <string name="zoom_in">Zooma in</string>
     <string name="zoom_out">Zooma ut</string>
     <string name="failed_to_load">Kunde inte läsas in</string>

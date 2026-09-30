@@ -166,7 +166,6 @@
     <string name="description_placeholder">Blink والٹ کے ذریعے Lightning ادائیگیاں قبول کرتا ہے، پچھلے کمرے میں ATM</string>
     <string name="submit_place">مقام جمع کریں</string>
     <string name="place_submitted">مقام جائزے کے لیے جمع کر دیا گیا</string>
-    <string name="verify_or_report">تصدیق / رپورٹ</string>
     <string name="verify_or_report_description">ایڈیٹرز کو اس مقام کی موجودہ حالت بتائیں۔ آپ کی رپورٹ BTC Map کمیونٹی کے ذریعے جانچی جائے گی۔</string>
     <string name="report_type_verified">تصدیق شدہ — اب بھی Bitcoin قبول کرتا ہے</string>
     <string name="report_type_verified_description">آپ نے تصدیق کی کہ یہ مقام موجود ہے اور فی الحال Bitcoin ادائیگیاں قبول کرتا ہے۔</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">کوئی بھی چیز جو جائزہ لینے والوں کو صورتحال سمجھنے میں مدد دے…</string>
     <string name="btn_submit">جمع کریں</string>
     <string name="report_submitted">رپورٹ جمع کر دی گئی</string>
-    <string name="report_select_type">براہ کرم رپورٹ کی قسم منتخب کریں</string>
     <string name="zoom_in">زوم ان</string>
     <string name="zoom_out">زوم آؤٹ</string>
     <string name="failed_to_load">لوڈ نہیں ہو سکا</string>

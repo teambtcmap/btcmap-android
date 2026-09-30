@@ -166,7 +166,6 @@
     <string name="description_placeholder">پرداخت‌های Lightning را از طریق کیف پول Blink می‌پذیرد، خودپرداز در اتاق عقب</string>
     <string name="submit_place">ارسال مکان</string>
     <string name="place_submitted">مکان برای بررسی ارسال شد</string>
-    <string name="verify_or_report">تأیید / گزارش</string>
     <string name="verify_or_report_description">وضعیت فعلی این مکان را به ویرایشگران اطلاع دهید. گزارش شما توسط جامعه BTC Map بررسی می‌شود.</string>
     <string name="report_type_verified">تأییدشده — هنوز بیت‌کوین می‌پذیرد</string>
     <string name="report_type_verified_description">شما تأیید کردید که این مکان وجود دارد و در حال حاضر پرداخت‌های بیت‌کوین را می‌پذیرد.</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">هر چیزی که به بازبینان در درک وضعیت کمک کند…</string>
     <string name="btn_submit">ارسال</string>
     <string name="report_submitted">گزارش ارسال شد</string>
-    <string name="report_select_type">لطفاً یک نوع گزارش انتخاب کنید</string>
     <string name="zoom_in">بزرگ‌نمایی</string>
     <string name="zoom_out">کوچک‌نمایی</string>
     <string name="failed_to_load">بارگذاری ناموفق بود</string>

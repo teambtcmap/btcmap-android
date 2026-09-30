@@ -276,6 +276,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Draw an outdated exchange marker's icon at reduced opacity, like an outdated merchant's, instead of leaving it fully opaque
 - Remove the "Use adaptive colors" setting, so the map and its controls always use a configured color or the fixed default
 - Bring back the Carto Dark Matter style as an optional map style, loaded from Carto's own servers while Auto and the other styles keep using OpenFreeMap
+- Show the place's name in the Verify / Report screen's title and disable Submit until a report type is picked, and restyle the report options with Material 3's text and color roles
+- Tag a place report submitted from the app with its name and version in the report's extra fields, so reviewers can tell which app filed it
 
 ## [1.1.0] - 2026-03-30
 

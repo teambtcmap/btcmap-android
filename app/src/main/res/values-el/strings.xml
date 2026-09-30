@@ -166,7 +166,6 @@
     <string name="description_placeholder">Δέχεται πληρωμές Lightning μέσω πορτοφολιού Blink, ATM στο πίσω δωμάτιο</string>
     <string name="submit_place">Υποβολή μέρους</string>
     <string name="place_submitted">Το μέρος υποβλήθηκε για έλεγχο</string>
-    <string name="verify_or_report">Επαλήθευση / Αναφορά</string>
     <string name="verify_or_report_description">Ενημέρωσε τους συντάκτες για την τρέχουσα κατάσταση αυτού του μέρους. Η αναφορά σου θα εξεταστεί από την κοινότητα του BTC Map.</string>
     <string name="report_type_verified">Επαληθεύτηκε — δέχεται ακόμη Bitcoin</string>
     <string name="report_type_verified_description">Επιβεβαίωσες ότι αυτό το μέρος υπάρχει και δέχεται επί του παρόντος πληρωμές Bitcoin.</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">Οτιδήποτε βοηθά τους ελεγκτές να κατανοήσουν την κατάσταση…</string>
     <string name="btn_submit">Υποβολή</string>
     <string name="report_submitted">Η αναφορά υποβλήθηκε</string>
-    <string name="report_select_type">Επίλεξε έναν τύπο αναφοράς</string>
     <string name="zoom_in">Μεγέθυνση</string>
     <string name="zoom_out">Σμίκρυνση</string>
     <string name="failed_to_load">Αποτυχία φόρτωσης</string>

@@ -170,7 +170,6 @@
     <string name="description_placeholder">Прихвата Lightning плаћања преко Blink новчаника, банкомат у задњој просторији</string>
     <string name="submit_place">Пошаљи место</string>
     <string name="place_submitted">Место послато на проверу</string>
-    <string name="verify_or_report">Потврди / Пријави</string>
     <string name="verify_or_report_description">Обавестите уреднике о тренутном стању овог места. Вашу пријаву ће прегледати BTC Map заједница.</string>
     <string name="report_type_verified">Потврђено — још увек прихвата Bitcoin</string>
     <string name="report_type_verified_description">Потврдили сте да ово место постоји и да тренутно прихвата Bitcoin плаћања.</string>
@@ -182,7 +181,6 @@
     <string name="report_comment_placeholder">Све што помаже прегледачима да разумеју ситуацију…</string>
     <string name="btn_submit">Пошаљи</string>
     <string name="report_submitted">Пријава послата</string>
-    <string name="report_select_type">Изаберите тип пријаве</string>
     <string name="zoom_in">Увећај</string>
     <string name="zoom_out">Умањи</string>
     <string name="failed_to_load">Учитавање није успело</string>

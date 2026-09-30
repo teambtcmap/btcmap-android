@@ -166,7 +166,6 @@
     <string name="description_placeholder">Accepterer Lightning-betalinger via Blink-tegnebog, hæveautomat i baglokalet</string>
     <string name="submit_place">Indsend sted</string>
     <string name="place_submitted">Sted indsendt til gennemgang</string>
-    <string name="verify_or_report">Bekræft / Rapportér</string>
     <string name="verify_or_report_description">Fortæl redaktørerne om stedets aktuelle tilstand. Din rapport vil blive gennemgået af BTC Map-fællesskabet.</string>
     <string name="report_type_verified">Bekræftet — accepterer stadig Bitcoin</string>
     <string name="report_type_verified_description">Du har bekræftet, at dette sted eksisterer og i øjeblikket accepterer Bitcoin-betalinger.</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">Alt, der hjælper gennemgående med at forstå situationen…</string>
     <string name="btn_submit">Indsend</string>
     <string name="report_submitted">Rapport indsendt</string>
-    <string name="report_select_type">Vælg venligst en rapporttype</string>
     <string name="zoom_in">Zoom ind</string>
     <string name="zoom_out">Zoom ud</string>
     <string name="failed_to_load">Kunne ikke indlæses</string>

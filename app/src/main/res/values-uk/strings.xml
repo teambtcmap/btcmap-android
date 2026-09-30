@@ -174,7 +174,6 @@
     <string name="description_placeholder">Приймає платежі Lightning через гаманець Blink, банкомат у задній кімнаті</string>
     <string name="submit_place">Надіслати місце</string>
     <string name="place_submitted">Місце надіслано на перевірку</string>
-    <string name="verify_or_report">Підтвердити / Поскаржитися</string>
     <string name="verify_or_report_description">Повідомте редакторам про поточний стан цього місця. Вашу скаргу розгляне спільнота BTC Map.</string>
     <string name="report_type_verified">Підтверджено — досі приймає Bitcoin</string>
     <string name="report_type_verified_description">Ви підтвердили, що це місце існує і наразі приймає платежі в Bitcoin.</string>
@@ -186,7 +185,6 @@
     <string name="report_comment_placeholder">Усе, що допоможе перевіряльникам зрозуміти ситуацію…</string>
     <string name="btn_submit">Надіслати</string>
     <string name="report_submitted">Скаргу надіслано</string>
-    <string name="report_select_type">Будь ласка, виберіть тип скарги</string>
     <string name="zoom_in">Збільшити</string>
     <string name="zoom_out">Зменшити</string>
     <string name="failed_to_load">Не вдалося завантажити</string>

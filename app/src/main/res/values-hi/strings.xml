@@ -166,7 +166,6 @@
     <string name="description_placeholder">Blink वॉलेट के माध्यम से Lightning भुगतान स्वीकार करता है, पिछले कमरे में ATM</string>
     <string name="submit_place">स्थान जमा करें</string>
     <string name="place_submitted">समीक्षा के लिए स्थान जमा किया गया</string>
-    <string name="verify_or_report">सत्यापित करें / रिपोर्ट करें</string>
     <string name="verify_or_report_description">संपादकों को इस स्थान की वर्तमान स्थिति बताएं। आपकी रिपोर्ट की BTC Map समुदाय द्वारा समीक्षा की जाएगी।</string>
     <string name="report_type_verified">सत्यापित — अभी भी Bitcoin स्वीकार करता है</string>
     <string name="report_type_verified_description">आपने पुष्टि की है कि यह स्थान मौजूद है और वर्तमान में Bitcoin भुगतान स्वीकार करता है।</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">समीक्षकों को स्थिति समझने में मदद करने वाली कोई भी बात…</string>
     <string name="btn_submit">जमा करें</string>
     <string name="report_submitted">रिपोर्ट जमा की गई</string>
-    <string name="report_select_type">कृपया रिपोर्ट का प्रकार चुनें</string>
     <string name="zoom_in">ज़ूम इन</string>
     <string name="zoom_out">ज़ूम आउट</string>
     <string name="failed_to_load">लोड नहीं हो सका</string>

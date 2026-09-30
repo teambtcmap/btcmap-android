@@ -162,7 +162,6 @@
     <string name="description_placeholder">รับชำระผ่าน Lightning ผ่านกระเป๋าเงิน Blink, มีตู้ ATM ในห้องด้านหลัง</string>
     <string name="submit_place">ส่งสถานที่</string>
     <string name="place_submitted">ส่งสถานที่เพื่อตรวจสอบแล้ว</string>
-    <string name="verify_or_report">ยืนยัน / รายงาน</string>
     <string name="verify_or_report_description">แจ้งบรรณาธิการเกี่ยวกับสถานะปัจจุบันของสถานที่นี้ รายงานของคุณจะได้รับการตรวจสอบโดยชุมชน BTC Map</string>
     <string name="report_type_verified">ยืนยันแล้ว — ยังรับ Bitcoin</string>
     <string name="report_type_verified_description">คุณยืนยันว่าสถานที่นี้มีอยู่และปัจจุบันรับชำระด้วย Bitcoin</string>
@@ -174,7 +173,6 @@
     <string name="report_comment_placeholder">สิ่งใดก็ตามที่ช่วยให้ผู้ตรวจสอบเข้าใจสถานการณ์…</string>
     <string name="btn_submit">ส่ง</string>
     <string name="report_submitted">ส่งรายงานแล้ว</string>
-    <string name="report_select_type">โปรดเลือกประเภทรายงาน</string>
     <string name="zoom_in">ซูมเข้า</string>
     <string name="zoom_out">ซูมออก</string>
     <string name="failed_to_load">โหลดไม่สำเร็จ</string>

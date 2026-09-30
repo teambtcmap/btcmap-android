@@ -174,7 +174,6 @@
     <string name="description_placeholder">Přijímá platby Lightning přes peněženku Blink, bankomat v zadní místnosti</string>
     <string name="submit_place">Odeslat místo</string>
     <string name="place_submitted">Místo odesláno ke kontrole</string>
-    <string name="verify_or_report">Ověřit / Nahlásit</string>
     <string name="verify_or_report_description">Dejte editorům vědět o aktuálním stavu tohoto místa. Vaše hlášení bude zkontrolováno komunitou BTC Map.</string>
     <string name="report_type_verified">Ověřeno — stále přijímá Bitcoin</string>
     <string name="report_type_verified_description">Potvrdili jste, že toto místo existuje a v současnosti přijímá platby Bitcoin.</string>
@@ -186,7 +185,6 @@
     <string name="report_comment_placeholder">Cokoli, co pomůže kontrolorům pochopit situaci…</string>
     <string name="btn_submit">Odeslat</string>
     <string name="report_submitted">Hlášení odesláno</string>
-    <string name="report_select_type">Vyberte prosím typ hlášení</string>
     <string name="zoom_in">Přiblížit</string>
     <string name="zoom_out">Oddálit</string>
     <string name="failed_to_load">Nepodařilo se načíst</string>

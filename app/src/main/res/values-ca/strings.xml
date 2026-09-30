@@ -170,7 +170,6 @@
     <string name="description_placeholder">Accepta pagaments Lightning mitjançant la cartera Blink, caixer automàtic a l\'habitació del darrere</string>
     <string name="submit_place">Envia el lloc</string>
     <string name="place_submitted">Lloc enviat per a revisió</string>
-    <string name="verify_or_report">Verifica / Informa</string>
     <string name="verify_or_report_description">Informa els editors de l\'estat actual d\'aquest lloc. El teu informe serà revisat per la comunitat de BTC Map.</string>
     <string name="report_type_verified">Verificat — encara accepta Bitcoin</string>
     <string name="report_type_verified_description">Has confirmat que aquest lloc existeix i actualment accepta pagaments amb Bitcoin.</string>
@@ -182,7 +181,6 @@
     <string name="report_comment_placeholder">Qualsevol cosa que ajudi els revisors a entendre la situació…</string>
     <string name="btn_submit">Envia</string>
     <string name="report_submitted">Informe enviat</string>
-    <string name="report_select_type">Selecciona un tipus d\'informe</string>
     <string name="zoom_in">Amplia</string>
     <string name="zoom_out">Redueix</string>
     <string name="failed_to_load">No s\'ha pogut carregar</string>

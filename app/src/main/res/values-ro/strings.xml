@@ -170,7 +170,6 @@
     <string name="description_placeholder">Acceptă plăți Lightning prin portofelul Blink, bancomat în camera din spate</string>
     <string name="submit_place">Trimite locul</string>
     <string name="place_submitted">Loc trimis spre verificare</string>
-    <string name="verify_or_report">Verifică / Raportează</string>
     <string name="verify_or_report_description">Informează editorii despre starea actuală a acestui loc. Raportul tău va fi verificat de comunitatea BTC Map.</string>
     <string name="report_type_verified">Verificat — acceptă în continuare Bitcoin</string>
     <string name="report_type_verified_description">Ai confirmat că acest loc există și acceptă în prezent plăți în Bitcoin.</string>
@@ -182,7 +181,6 @@
     <string name="report_comment_placeholder">Orice ajută verificatorii să înțeleagă situația…</string>
     <string name="btn_submit">Trimite</string>
     <string name="report_submitted">Raport trimis</string>
-    <string name="report_select_type">Selectează un tip de raport</string>
     <string name="zoom_in">Mărește</string>
     <string name="zoom_out">Micșorează</string>
     <string name="failed_to_load">Încărcarea a eșuat</string>

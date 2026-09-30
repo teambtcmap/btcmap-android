@@ -170,7 +170,6 @@
     <string name="description_placeholder">Acepta pagos Lightning mediante la cartera Blink, cajero automático en la trastienda</string>
     <string name="submit_place">Enviar lugar</string>
     <string name="place_submitted">Lugar enviado para revisión</string>
-    <string name="verify_or_report">Verificar / Reportar</string>
     <string name="verify_or_report_description">Informa a los editores del estado actual de este lugar. Tu informe será revisado por la comunidad de BTC Map.</string>
     <string name="report_type_verified">Verificado — sigue aceptando Bitcoin</string>
     <string name="report_type_verified_description">Has confirmado que este lugar existe y actualmente acepta pagos con Bitcoin.</string>
@@ -182,7 +181,6 @@
     <string name="report_comment_placeholder">Cualquier cosa que ayude a los revisores a entender la situación…</string>
     <string name="btn_submit">Enviar</string>
     <string name="report_submitted">Informe enviado</string>
-    <string name="report_select_type">Selecciona un tipo de informe</string>
     <string name="zoom_in">Acercar</string>
     <string name="zoom_out">Alejar</string>
     <string name="failed_to_load">No se pudo cargar</string>

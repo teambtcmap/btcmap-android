@@ -170,7 +170,6 @@
     <string name="description_placeholder">Accetta pagamenti Lightning tramite wallet Blink, bancomat nella stanza sul retro</string>
     <string name="submit_place">Invia luogo</string>
     <string name="place_submitted">Luogo inviato per la revisione</string>
-    <string name="verify_or_report">Verifica / Segnala</string>
     <string name="verify_or_report_description">Informa gli editori dello stato attuale di questo luogo. La tua segnalazione sarà esaminata dalla comunità di BTC Map.</string>
     <string name="report_type_verified">Verificato — accetta ancora Bitcoin</string>
     <string name="report_type_verified_description">Hai confermato che questo luogo esiste e attualmente accetta pagamenti in Bitcoin.</string>
@@ -182,7 +181,6 @@
     <string name="report_comment_placeholder">Qualsiasi cosa che aiuti i revisori a capire la situazione…</string>
     <string name="btn_submit">Invia</string>
     <string name="report_submitted">Segnalazione inviata</string>
-    <string name="report_select_type">Seleziona un tipo di segnalazione</string>
     <string name="zoom_in">Ingrandisci</string>
     <string name="zoom_out">Riduci</string>
     <string name="failed_to_load">Caricamento non riuscito</string>

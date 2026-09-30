@@ -20,12 +20,14 @@ class ReportPlaceFragment : Fragment() {
 
     private data class Args(
         val placeId: Long,
+        val placeName: String?,
         val defaultType: String?,
     )
 
     private val args by lazy {
         Args(
             placeId = requireArguments().getLong("place_id"),
+            placeName = requireArguments().getString("place_name"),
             defaultType = if (requireArguments().containsKey("default_type")) {
                 requireArguments().getString("default_type")
             } else null,
@@ -51,6 +53,12 @@ class ReportPlaceFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
+        binding.topAppBar.title = args.placeName
+
+        binding.reportType.setOnCheckedChangeListener { _, checkedId ->
+            binding.btnSubmit.isEnabled = checkedId != View.NO_ID
+        }
+
         when (args.defaultType) {
             "verified" -> binding.reportType.check(R.id.typeVerified)
             "refused_sats" -> binding.reportType.check(R.id.typeRefusedSats)
@@ -66,16 +74,7 @@ class ReportPlaceFragment : Fragment() {
             R.id.typeVerified -> "verified"
             R.id.typeRefusedSats -> "refused_sats"
             R.id.typeOutOfBusiness -> "out_of_business"
-            else -> null
-        }
-
-        if (type == null) {
-            Toast.makeText(
-                requireContext(),
-                R.string.report_select_type,
-                Toast.LENGTH_SHORT,
-            ).show()
-            return
+            else -> return
         }
 
         val comment = binding.comment.text?.toString()?.trim().orEmpty()

@@ -166,7 +166,6 @@
     <string name="description_placeholder">Accepteert Lightning-betalingen via Blink-portemonnee, pinautomaat in de achterkamer</string>
     <string name="submit_place">Plaats indienen</string>
     <string name="place_submitted">Plaats ingediend ter beoordeling</string>
-    <string name="verify_or_report">Verifiëren / Rapporteren</string>
     <string name="verify_or_report_description">Informeer redacteuren over de huidige staat van deze plaats. Je rapport wordt beoordeeld door de BTC Map-gemeenschap.</string>
     <string name="report_type_verified">Geverifieerd — accepteert nog steeds Bitcoin</string>
     <string name="report_type_verified_description">Je hebt bevestigd dat deze plaats bestaat en momenteel Bitcoin-betalingen accepteert.</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">Alles wat beoordelaars helpt de situatie te begrijpen…</string>
     <string name="btn_submit">Verzenden</string>
     <string name="report_submitted">Rapport ingediend</string>
-    <string name="report_select_type">Selecteer een rapporttype</string>
     <string name="zoom_in">Inzoomen</string>
     <string name="zoom_out">Uitzoomen</string>
     <string name="failed_to_load">Laden mislukt</string>

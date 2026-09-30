@@ -166,7 +166,6 @@
     <string name="description_placeholder">Приема плащания с Lightning чрез портфейл Blink, банкомат в задната стая</string>
     <string name="submit_place">Изпрати място</string>
     <string name="place_submitted">Мястото е изпратено за преглед</string>
-    <string name="verify_or_report">Потвърди / Докладвай</string>
     <string name="verify_or_report_description">Уведомете редакторите за текущото състояние на това място. Докладът ви ще бъде прегледан от общността на BTC Map.</string>
     <string name="report_type_verified">Потвърдено — все още приема Bitcoin</string>
     <string name="report_type_verified_description">Потвърдихте, че това място съществува и понастоящем приема плащания с Bitcoin.</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">Всичко, което помага на проверяващите да разберат ситуацията…</string>
     <string name="btn_submit">Изпрати</string>
     <string name="report_submitted">Докладът е изпратен</string>
-    <string name="report_select_type">Моля, изберете тип на доклада</string>
     <string name="zoom_in">Приближи</string>
     <string name="zoom_out">Отдалечи</string>
     <string name="failed_to_load">Неуспешно зареждане</string>

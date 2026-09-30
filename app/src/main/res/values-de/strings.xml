@@ -166,7 +166,6 @@
     <string name="description_placeholder">Akzeptiert Lightning-Zahlungen über Blink-Wallet, Geldautomat im Hinterzimmer</string>
     <string name="submit_place">Ort einreichen</string>
     <string name="place_submitted">Ort zur Überprüfung eingereicht</string>
-    <string name="verify_or_report">Verifizieren / Melden</string>
     <string name="verify_or_report_description">Informiere die Redakteure über den aktuellen Zustand dieses Ortes. Deine Meldung wird von der BTC Map-Community geprüft.</string>
     <string name="report_type_verified">Verifiziert — akzeptiert weiterhin Bitcoin</string>
     <string name="report_type_verified_description">Du hast bestätigt, dass dieser Ort existiert und derzeit Bitcoin-Zahlungen akzeptiert.</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">Alles, was Prüfern hilft, die Situation zu verstehen…</string>
     <string name="btn_submit">Absenden</string>
     <string name="report_submitted">Meldung eingereicht</string>
-    <string name="report_select_type">Bitte wähle einen Meldungstyp</string>
     <string name="zoom_in">Vergrößern</string>
     <string name="zoom_out">Verkleinern</string>
     <string name="failed_to_load">Laden fehlgeschlagen</string>

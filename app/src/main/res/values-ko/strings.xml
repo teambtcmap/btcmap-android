@@ -162,7 +162,6 @@
     <string name="description_placeholder">Blink 지갑을 통한 Lightning 결제 가능, 뒷방에 ATM 있음</string>
     <string name="submit_place">장소 제출</string>
     <string name="place_submitted">장소가 검토를 위해 제출되었습니다</string>
-    <string name="verify_or_report">확인 / 신고</string>
     <string name="verify_or_report_description">편집자에게 이 장소의 현재 상태를 알려주세요. 귀하의 신고는 BTC Map 커뮤니티에서 검토됩니다.</string>
     <string name="report_type_verified">확인됨 — 여전히 Bitcoin을 받습니다</string>
     <string name="report_type_verified_description">이 장소가 존재하며 현재 Bitcoin 결제를 받는다는 것을 확인했습니다.</string>
@@ -174,7 +173,6 @@
     <string name="report_comment_placeholder">검토자가 상황을 이해하는 데 도움이 되는 내용…</string>
     <string name="btn_submit">제출</string>
     <string name="report_submitted">신고가 제출되었습니다</string>
-    <string name="report_select_type">신고 유형을 선택하세요</string>
     <string name="zoom_in">확대</string>
     <string name="zoom_out">축소</string>
     <string name="failed_to_load">불러오지 못했습니다</string>

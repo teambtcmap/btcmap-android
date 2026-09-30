@@ -166,7 +166,6 @@
     <string name="description_placeholder">Lightning-fizetéseket fogad el Blink tárcán keresztül, ATM a hátsó helyiségben</string>
     <string name="submit_place">Hely beküldése</string>
     <string name="place_submitted">A hely ellenőrzésre beküldve</string>
-    <string name="verify_or_report">Ellenőrzés / Bejelentés</string>
     <string name="verify_or_report_description">Tájékoztassa a szerkesztőket a hely jelenlegi állapotáról. Bejelentését a BTC Map közössége vizsgálja felül.</string>
     <string name="report_type_verified">Ellenőrizve — továbbra is elfogad Bitcoint</string>
     <string name="report_type_verified_description">Megerősítette, hogy ez a hely létezik, és jelenleg elfogad Bitcoin-fizetéseket.</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">Bármi, ami segít az ellenőrzőknek megérteni a helyzetet…</string>
     <string name="btn_submit">Beküldés</string>
     <string name="report_submitted">Bejelentés beküldve</string>
-    <string name="report_select_type">Kérjük, válasszon bejelentéstípust</string>
     <string name="zoom_in">Nagyítás</string>
     <string name="zoom_out">Kicsinyítés</string>
     <string name="failed_to_load">Nem sikerült betölteni</string>

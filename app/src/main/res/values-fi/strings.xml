@@ -166,7 +166,6 @@
     <string name="description_placeholder">Hyväksyy Lightning-maksut Blink-lompakon kautta, käteisautomaatti takahuoneessa</string>
     <string name="submit_place">Lähetä paikka</string>
     <string name="place_submitted">Paikka lähetetty tarkistettavaksi</string>
-    <string name="verify_or_report">Vahvista / Ilmoita</string>
     <string name="verify_or_report_description">Kerro muokkaajille paikan nykyinen tila. Yhteisö BTC Map tarkistaa ilmoituksesi.</string>
     <string name="report_type_verified">Vahvistettu — hyväksyy edelleen Bitcoinin</string>
     <string name="report_type_verified_description">Vahvistit, että tämä paikka on olemassa ja hyväksyy tällä hetkellä Bitcoin-maksuja.</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">Kaikki, mikä auttaa tarkistajia ymmärtämään tilanteen…</string>
     <string name="btn_submit">Lähetä</string>
     <string name="report_submitted">Ilmoitus lähetetty</string>
-    <string name="report_select_type">Valitse ilmoituksen tyyppi</string>
     <string name="zoom_in">Lähennä</string>
     <string name="zoom_out">Loitonna</string>
     <string name="failed_to_load">Lataus epäonnistui</string>

@@ -170,7 +170,6 @@
     <string name="description_placeholder">Aceita pagamentos Lightning através da carteira Blink, multibanco na sala dos fundos</string>
     <string name="submit_place">Submeter local</string>
     <string name="place_submitted">Local submetido para revisão</string>
-    <string name="verify_or_report">Verificar / Reportar</string>
     <string name="verify_or_report_description">Informe os editores do estado atual deste local. O seu relatório será revisto pela comunidade BTC Map.</string>
     <string name="report_type_verified">Verificado — ainda aceita Bitcoin</string>
     <string name="report_type_verified_description">Confirmou que este local existe e atualmente aceita pagamentos em Bitcoin.</string>
@@ -182,7 +181,6 @@
     <string name="report_comment_placeholder">Qualquer coisa que ajude os revisores a compreender a situação…</string>
     <string name="btn_submit">Submeter</string>
     <string name="report_submitted">Relatório submetido</string>
-    <string name="report_select_type">Selecione um tipo de relatório</string>
     <string name="zoom_in">Aproximar</string>
     <string name="zoom_out">Afastar</string>
     <string name="failed_to_load">Falha ao carregar</string>

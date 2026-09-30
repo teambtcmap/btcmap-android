@@ -170,7 +170,6 @@
     <string name="description_placeholder">מקבל תשלומי Lightning דרך ארנק Blink, כספומט בחדר האחורי</string>
     <string name="submit_place">שליחת מקום</string>
     <string name="place_submitted">המקום נשלח לבדיקה</string>
-    <string name="verify_or_report">אימות / דיווח</string>
     <string name="verify_or_report_description">עדכנו את העורכים על מצבו הנוכחי של מקום זה. הדיווח שלכם ייבדק על ידי קהילת BTC Map.</string>
     <string name="report_type_verified">מאומת — עדיין מקבל Bitcoin</string>
     <string name="report_type_verified_description">אישרתם שמקום זה קיים וכרגע מקבל תשלומי Bitcoin.</string>
@@ -182,7 +181,6 @@
     <string name="report_comment_placeholder">כל דבר שיעזור לבודקים להבין את המצב…</string>
     <string name="btn_submit">שליחה</string>
     <string name="report_submitted">הדיווח נשלח</string>
-    <string name="report_select_type">אנא בחרו סוג דיווח</string>
     <string name="zoom_in">הגדלה</string>
     <string name="zoom_out">הקטנה</string>
     <string name="failed_to_load">הטעינה נכשלה</string>

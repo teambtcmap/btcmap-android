@@ -188,6 +188,7 @@ class PlaceFragment : Fragment() {
 
                 AUTH_ACTION_OPEN_REPORT -> navigateToReport(
                     placeId = extras.getLong(EXTRA_PLACE_ID, placeId),
+                    placeName = extras.getString(EXTRA_PLACE_NAME) ?: placeName,
                     defaultType = extras.getString(EXTRA_REPORT_TYPE),
                 )
             }
@@ -872,21 +873,23 @@ class PlaceFragment : Fragment() {
 
     private fun openReport(defaultType: String?) {
         if (prefs.authorized) {
-            navigateToReport(placeId, defaultType)
+            navigateToReport(placeId, placeName, defaultType)
         } else {
             showAuthDialog(Bundle().apply {
                 putString(EXTRA_AUTH_ACTION, AUTH_ACTION_OPEN_REPORT)
                 putLong(EXTRA_PLACE_ID, placeId)
+                putString(EXTRA_PLACE_NAME, placeName)
                 if (defaultType != null) putString(EXTRA_REPORT_TYPE, defaultType)
             })
         }
     }
 
-    private fun navigateToReport(placeId: Long, defaultType: String?) {
+    private fun navigateToReport(placeId: Long, placeName: String, defaultType: String?) {
         requireActivity().supportFragmentManager.commit {
             setReorderingAllowed(true)
             val args = Bundle().apply {
                 putLong("place_id", placeId)
+                putString("place_name", placeName)
                 if (defaultType != null) putString("default_type", defaultType)
             }
             replace<ReportPlaceFragment>(R.id.fragmentContainerView, null, args)

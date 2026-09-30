@@ -166,7 +166,6 @@
     <string name="description_placeholder">Blink cüzdanı üzerinden Lightning ödemeleri kabul edilir, arka odada ATM var</string>
     <string name="submit_place">Yeri gönder</string>
     <string name="place_submitted">Yer incelemeye gönderildi</string>
-    <string name="verify_or_report">Doğrula / Bildir</string>
     <string name="verify_or_report_description">Editörlere bu yerin güncel durumunu bildirin. Bildiriniz BTC Map topluluğu tarafından incelenecektir.</string>
     <string name="report_type_verified">Doğrulandı — hâlâ Bitcoin kabul ediyor</string>
     <string name="report_type_verified_description">Bu yerin mevcut olduğunu ve şu anda Bitcoin ödemelerini kabul ettiğini doğruladınız.</string>
@@ -178,7 +177,6 @@
     <string name="report_comment_placeholder">İnceleyenlerin durumu anlamasına yardımcı olacak her şey…</string>
     <string name="btn_submit">Gönder</string>
     <string name="report_submitted">Bildirim gönderildi</string>
-    <string name="report_select_type">Lütfen bir bildirim türü seçin</string>
     <string name="zoom_in">Yakınlaştır</string>
     <string name="zoom_out">Uzaklaştır</string>
     <string name="failed_to_load">Yüklenemedi</string>

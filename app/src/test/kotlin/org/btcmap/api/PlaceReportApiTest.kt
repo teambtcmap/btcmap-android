@@ -1,6 +1,7 @@
 package org.btcmap.api
 
 import kotlinx.coroutines.test.runTest
+import org.btcmap.userAgent
 import org.junit.Assert
 import org.junit.Test
 
@@ -15,7 +16,7 @@ class PlaceReportApiTest : ApiTestBase() {
         Assert.assertEquals("POST", request.method)
         Assert.assertEquals("/v4/place-reports", request.url.encodedPath)
         Assert.assertEquals(
-            """{"place_id":42,"type":"verification","extra_fields":{"comment":"Looks closed"}}""",
+            """{"place_id":42,"type":"verification","extra_fields":{"origin":"$userAgent","comment":"Looks closed"}}""",
             request.jsonBody(),
         )
         Assert.assertEquals(18108L, response.id)
@@ -23,12 +24,15 @@ class PlaceReportApiTest : ApiTestBase() {
     }
 
     @Test
-    fun reportPlace_omitsExtraFieldsWhenCommentBlank() = runTest {
+    fun reportPlace_sendsOriginWithoutCommentWhenCommentBlank() = runTest {
         enqueueJson("""{"id":18109,"origin":"user"}""")
 
         api().reportPlace(placeId = 42, type = "verification", comment = "  ")
 
         val request = takeRequest()
-        Assert.assertEquals("""{"place_id":42,"type":"verification"}""", request.jsonBody())
+        Assert.assertEquals(
+            """{"place_id":42,"type":"verification","extra_fields":{"origin":"$userAgent"}}""",
+            request.jsonBody(),
+        )
     }
 }

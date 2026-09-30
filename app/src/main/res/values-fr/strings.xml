@@ -170,7 +170,6 @@
     <string name="description_placeholder">Accepte les paiements Lightning via le portefeuille Blink, distributeur automatique à l\'arrière</string>
     <string name="submit_place">Soumettre le lieu</string>
     <string name="place_submitted">Lieu soumis pour examen</string>
-    <string name="verify_or_report">Vérifier / Signaler</string>
     <string name="verify_or_report_description">Informez les éditeurs de l\'état actuel de ce lieu. Votre signalement sera examiné par la communauté BTC Map.</string>
     <string name="report_type_verified">Vérifié — accepte toujours Bitcoin</string>
     <string name="report_type_verified_description">Vous avez confirmé que ce lieu existe et accepte actuellement les paiements en Bitcoin.</string>
@@ -182,7 +181,6 @@
     <string name="report_comment_placeholder">Tout ce qui aide les réviseurs à comprendre la situation…</string>
     <string name="btn_submit">Envoyer</string>
     <string name="report_submitted">Signalement envoyé</string>
-    <string name="report_select_type">Veuillez sélectionner un type de signalement</string>
     <string name="zoom_in">Zoom avant</string>
     <string name="zoom_out">Zoom arrière</string>
     <string name="failed_to_load">Échec du chargement</string>

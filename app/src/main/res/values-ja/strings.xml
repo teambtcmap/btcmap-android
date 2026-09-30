@@ -162,7 +162,6 @@
     <string name="description_placeholder">Blink ウォレット経由の Lightning 決済に対応、奥の部屋に ATM あり</string>
     <string name="submit_place">場所を送信</string>
     <string name="place_submitted">場所をレビュー用に送信しました</string>
-    <string name="verify_or_report">確認 / 報告</string>
     <string name="verify_or_report_description">この場所の現在の状態を編集者に知らせてください。あなたの報告は BTC Map コミュニティによってレビューされます。</string>
     <string name="report_type_verified">確認済み — 現在も Bitcoin を受け付けています</string>
     <string name="report_type_verified_description">この場所が存在し、現在 Bitcoin 決済を受け付けていることを確認しました。</string>
@@ -174,7 +173,6 @@
     <string name="report_comment_placeholder">レビュアーが状況を理解するのに役立つ情報…</string>
     <string name="btn_submit">送信</string>
     <string name="report_submitted">報告を送信しました</string>
-    <string name="report_select_type">報告の種類を選択してください</string>
     <string name="zoom_in">拡大</string>
     <string name="zoom_out">縮小</string>
     <string name="failed_to_load">読み込みに失敗しました</string>

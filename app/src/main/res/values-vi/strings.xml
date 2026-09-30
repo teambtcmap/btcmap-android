@@ -162,7 +162,6 @@
     <string name="description_placeholder">Chấp nhận thanh toán Lightning qua ví Blink, có ATM ở phòng sau</string>
     <string name="submit_place">Gửi địa điểm</string>
     <string name="place_submitted">Đã gửi địa điểm để xem xét</string>
-    <string name="verify_or_report">Xác minh / Báo cáo</string>
     <string name="verify_or_report_description">Cho biên tập viên biết tình trạng hiện tại của địa điểm này. Báo cáo của bạn sẽ được cộng đồng BTC Map xem xét.</string>
     <string name="report_type_verified">Đã xác minh — vẫn chấp nhận Bitcoin</string>
     <string name="report_type_verified_description">Bạn đã xác nhận rằng địa điểm này tồn tại và hiện đang chấp nhận thanh toán Bitcoin.</string>
@@ -174,7 +173,6 @@
     <string name="report_comment_placeholder">Bất cứ điều gì giúp người xem xét hiểu rõ tình hình…</string>
     <string name="btn_submit">Gửi</string>
     <string name="report_submitted">Đã gửi báo cáo</string>
-    <string name="report_select_type">Vui lòng chọn loại báo cáo</string>
     <string name="zoom_in">Phóng to</string>
     <string name="zoom_out">Thu nhỏ</string>
     <string name="failed_to_load">Không tải được</string>
