@@ -55,6 +55,36 @@ class PlaceExtTest {
         Assert.assertNull(place(boostedUntil = null).copy(osmId = ":123").osmUrl())
     }
 
+    @Test
+    fun osmEditUrl_buildsFromOsmId() {
+        val place = place(boostedUntil = null).copy(osmId = "node:123")
+
+        Assert.assertEquals(
+            "https://www.openstreetmap.org/edit?node=123",
+            place.osmEditUrl(),
+        )
+    }
+
+    @Test
+    fun osmEditUrl_keepsWayAndRelationTypes() {
+        Assert.assertEquals(
+            "https://www.openstreetmap.org/edit?way=9",
+            place(boostedUntil = null).copy(osmId = "way:9").osmEditUrl(),
+        )
+        Assert.assertEquals(
+            "https://www.openstreetmap.org/edit?relation=42",
+            place(boostedUntil = null).copy(osmId = "relation:42").osmEditUrl(),
+        )
+    }
+
+    @Test
+    fun osmEditUrl_nullWhenOsmIdMissingOrMalformed() {
+        Assert.assertNull(place(boostedUntil = null).osmEditUrl())
+        Assert.assertNull(place(boostedUntil = null).copy(osmId = "node").osmEditUrl())
+        Assert.assertNull(place(boostedUntil = null).copy(osmId = "node:").osmEditUrl())
+        Assert.assertNull(place(boostedUntil = null).copy(osmId = ":123").osmEditUrl())
+    }
+
     private fun place(boostedUntil: ZonedDateTime?): Place {
         return Place(
             id = 1,

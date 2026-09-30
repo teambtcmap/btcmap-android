@@ -63,6 +63,8 @@
     <string name="get_apk">Λήψη APK</string>
     <string name="ignore">Αγνόηση</string>
     <string name="view_on_btcmap">Προβολή στο btcmap.org</string>
+    <string name="view_on_osm">Προβολή στο openstreetmap.org</string>
+    <string name="edit_on_osm">Επεξεργασία στο openstreetmap.org</string>
     <string name="s_km">%1$s χλμ</string>
     <string name="s_m">%1$s μ</string>
     <string name="button_background">Φόντο κουμπιού</string>

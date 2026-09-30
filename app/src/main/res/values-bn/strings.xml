@@ -63,6 +63,8 @@
     <string name="get_apk">APK পান</string>
     <string name="ignore">উপেক্ষা করুন</string>
     <string name="view_on_btcmap">btcmap.org এ দেখুন</string>
+    <string name="view_on_osm">openstreetmap.org এ দেখুন</string>
+    <string name="edit_on_osm">openstreetmap.org এ সম্পাদনা করুন</string>
     <string name="s_km">%1$s কিমি</string>
     <string name="s_m">%1$s মি</string>
     <string name="button_background">বোতাম পটভূমি</string>

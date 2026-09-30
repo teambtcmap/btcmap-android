@@ -36,6 +36,13 @@ internal fun Place.isWithin(geometry: AreaGeometry): Boolean = geometry.contains
 fun Place.osmUrl(): String? = osmId?.toOsmUrl()
 
 /**
+ * The place's OpenStreetMap editor page, e.g.
+ * "https://www.openstreetmap.org/edit?node=123", which the web editor opens
+ * with the element selected. Null when no OSM id is known.
+ */
+fun Place.osmEditUrl(): String? = osmId?.toOsmEditUrl()
+
+/**
  * Builds an OpenStreetMap page URL from a "type:id" identifier, e.g.
  * "node:123" becomes "https://www.openstreetmap.org/node/123". The v4 API
  * stores [Place.osmId] in this colon-separated form. Null when either part is
@@ -46,4 +53,16 @@ internal fun String.toOsmUrl(): String? {
     val type = parts.getOrNull(0)?.takeIf { it.isNotBlank() } ?: return null
     val id = parts.getOrNull(1)?.takeIf { it.isNotBlank() } ?: return null
     return "https://www.openstreetmap.org/$type/$id"
+}
+
+/**
+ * Builds an OpenStreetMap editor URL from a "type:id" identifier, e.g.
+ * "node:123" becomes "https://www.openstreetmap.org/edit?node=123". Null when
+ * either part is missing.
+ */
+internal fun String.toOsmEditUrl(): String? {
+    val parts = split(':', limit = 2)
+    val type = parts.getOrNull(0)?.takeIf { it.isNotBlank() } ?: return null
+    val id = parts.getOrNull(1)?.takeIf { it.isNotBlank() } ?: return null
+    return "https://www.openstreetmap.org/edit?$type=$id"
 }

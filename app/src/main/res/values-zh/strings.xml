@@ -63,6 +63,8 @@
     <string name="get_apk">获取 APK</string>
     <string name="ignore">忽略</string>
     <string name="view_on_btcmap">在 btcmap.org 上查看</string>
+    <string name="view_on_osm">在 openstreetmap.org 上查看</string>
+    <string name="edit_on_osm">在 openstreetmap.org 上编辑</string>
     <string name="s_km">%1$s 公里</string>
     <string name="s_m">%1$s 米</string>
     <string name="button_background">按钮背景</string>

@@ -63,6 +63,8 @@
     <string name="get_apk">APK letöltése</string>
     <string name="ignore">Figyelmen kívül hagyás</string>
     <string name="view_on_btcmap">Megtekintés a btcmap.org oldalon</string>
+    <string name="view_on_osm">Megtekintés a openstreetmap.org oldalon</string>
+    <string name="edit_on_osm">Szerkesztés az openstreetmap.org oldalon</string>
     <string name="s_km">%1$s km</string>
     <string name="s_m">%1$s m</string>
     <string name="button_background">Gomb háttér</string>

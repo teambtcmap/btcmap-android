@@ -63,6 +63,8 @@
     <string name="get_apk">Obține APK</string>
     <string name="ignore">Ignoră</string>
     <string name="view_on_btcmap">Vezi pe btcmap.org</string>
+    <string name="view_on_osm">Vezi pe openstreetmap.org</string>
+    <string name="edit_on_osm">Editează pe openstreetmap.org</string>
     <string name="s_km">%1$s km</string>
     <string name="s_m">%1$s m</string>
     <string name="button_background">Fundal buton</string>

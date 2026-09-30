@@ -63,6 +63,8 @@
     <string name="get_apk">ดาวน์โหลด APK</string>
     <string name="ignore">ข้าม</string>
     <string name="view_on_btcmap">ดูบน btcmap.org</string>
+    <string name="view_on_osm">ดูบน openstreetmap.org</string>
+    <string name="edit_on_osm">แก้ไขบน openstreetmap.org</string>
     <string name="s_km">%1$s กม.</string>
     <string name="s_m">%1$s ม.</string>
     <string name="button_background">พื้นหลังปุ่ม</string>

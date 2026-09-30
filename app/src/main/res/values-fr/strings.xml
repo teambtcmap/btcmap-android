@@ -63,6 +63,8 @@
     <string name="get_apk">Obtenir l\'APK</string>
     <string name="ignore">Ignorer</string>
     <string name="view_on_btcmap">Voir sur btcmap.org</string>
+    <string name="view_on_osm">Voir sur openstreetmap.org</string>
+    <string name="edit_on_osm">Modifier sur openstreetmap.org</string>
     <string name="s_km">%1$s km</string>
     <string name="s_m">%1$s m</string>
     <string name="button_background">Arrière-plan du bouton</string>

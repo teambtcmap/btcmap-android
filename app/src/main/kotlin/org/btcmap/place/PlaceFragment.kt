@@ -5,14 +5,12 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.format.DateUtils
-import android.text.style.ForegroundColorSpan
-import android.text.style.StyleSpan
+import android.text.style.UnderlineSpan
 import android.text.style.URLSpan
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -25,7 +23,6 @@ import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
@@ -89,6 +86,7 @@ import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.markerIconColor
 import org.btcmap.settings.uri
 import org.btcmap.syncController
+import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -156,6 +154,12 @@ class PlaceFragment : Fragment() {
     private var previewTouchDownX = 0f
     private var previewTouchDownY = 0f
 
+    /** The place's OpenStreetMap page, or null when it has no OSM id. */
+    private var osmUrl: String? = null
+
+    /** The place's OpenStreetMap editor page, or null when it has no OSM id. */
+    private var osmEditUrl: String? = null
+
     private val isStandalone: Boolean
         get() = arguments?.containsKey(ARG_PLACE_ID) == true
 
@@ -214,6 +218,10 @@ class PlaceFragment : Fragment() {
                 }
 
                 R.id.view_on_btcmap -> openOnBtcmap()
+
+                R.id.view_on_osm -> openOnOpenStreetMap()
+
+                R.id.edit_on_osm -> openOsmEditor()
 
                 R.id.save -> onSaveClicked()
             }
@@ -535,6 +543,11 @@ class PlaceFragment : Fragment() {
         binding.toolbar.title = place.getLocalizedName()
         binding.toolbar.setSingleLine(false)
 
+        osmUrl = place.osmUrl()
+        binding.toolbar.menu.findItem(R.id.view_on_osm)?.isVisible = osmUrl != null
+        osmEditUrl = place.osmEditUrl()
+        binding.toolbar.menu.findItem(R.id.edit_on_osm)?.isVisible = osmEditUrl != null
+
         updateBookmarkIcon()
 
         if (place.requiredAppUrl != null) {
@@ -735,9 +748,9 @@ class PlaceFragment : Fragment() {
     }
 
     /**
-     * The parsed week as a multi-line string with today's line bolded and
-     * tinted, so the current day stands out. A week that collapses to a single
-     * line has no day to emphasize and is returned as-is.
+     * The parsed week as a multi-line string with today's line underlined, so
+     * the current day stands out. A week that collapses to a single line has no
+     * day to emphasize and is returned as-is.
      */
     private fun OpeningHours.toEmphasizedString(
         closedLabel: String,
@@ -754,16 +767,7 @@ class PlaceFragment : Fragment() {
         val end = start + lines[lineIndex].length
 
         return SpannableString(display).apply {
-            val flags = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            setSpan(StyleSpan(Typeface.BOLD), start, end, flags)
-            setSpan(
-                ForegroundColorSpan(
-                    ContextCompat.getColor(requireContext(), R.color.opening_hours_today),
-                ),
-                start,
-                end,
-                flags,
-            )
+            setSpan(UnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
     }
 
@@ -846,6 +850,24 @@ class PlaceFragment : Fragment() {
         } catch (e: ActivityNotFoundException) {
             showError(e)
         }
+    }
+
+    /**
+     * Opens the place's OpenStreetMap element page. The action is hidden for a
+     * place without an OSM id, so there is always a URL by the time this runs.
+     */
+    private fun openOnOpenStreetMap() {
+        val url = osmUrl ?: return
+        openInBrowser(url.toUri())
+    }
+
+    /**
+     * Opens the place in the OpenStreetMap web editor with the element selected.
+     * Hidden without an OSM id, so there is always a URL by the time this runs.
+     */
+    private fun openOsmEditor() {
+        val url = osmEditUrl ?: return
+        openInBrowser(url.toUri())
     }
 
     private fun openReport(defaultType: String?) {

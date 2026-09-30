@@ -5,7 +5,4 @@
     <color name="verify_green">#2E7D32</color>
     <color name="report_red">#C62828</color>
     <color name="bitcoin_orange">#F7931A</color>
-    <!-- Today's opening-hours line. A darker, readable orange on the light
-         surface; the brand orange takes over at night (see values-night). -->
-    <color name="opening_hours_today">#C2410C</color>
 </resources>

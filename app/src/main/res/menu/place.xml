@@ -23,4 +23,14 @@
         android:title="@string/view_on_btcmap"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/view_on_osm"
+        android:title="@string/view_on_osm"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/edit_on_osm"
+        android:title="@string/edit_on_osm"
+        app:showAsAction="never" />
+
 </menu>

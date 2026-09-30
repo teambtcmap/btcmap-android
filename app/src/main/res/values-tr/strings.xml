@@ -63,6 +63,8 @@
     <string name="get_apk">APK al</string>
     <string name="ignore">Göz ardı et</string>
     <string name="view_on_btcmap">btcmap.org\'da görüntüle</string>
+    <string name="view_on_osm">openstreetmap.org\'da görüntüle</string>
+    <string name="edit_on_osm">openstreetmap.org\'da düzenle</string>
     <string name="s_km">%1$s km</string>
     <string name="s_m">%1$s m</string>
     <string name="button_background">Düğme arka planı</string>

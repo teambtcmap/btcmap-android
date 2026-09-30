@@ -63,6 +63,8 @@
     <string name="get_apk">קבל APK</string>
     <string name="ignore">התעלם</string>
     <string name="view_on_btcmap">צפה ב-btcmap.org</string>
+    <string name="view_on_osm">צפה ב-openstreetmap.org</string>
+    <string name="edit_on_osm">ערוך ב-openstreetmap.org</string>
     <string name="s_km">%1$s ק\"מ</string>
     <string name="s_m">%1$s מ</string>
     <string name="button_background">רקע כפתור</string>

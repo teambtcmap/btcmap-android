@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Add "View on openstreetmap.org" and "Edit on openstreetmap.org" actions to the place screen, next to "View on btcmap.org"
+- Mark the current day's line in a place's opening hours with an underline instead of a custom color, so the day stands out without relying on color alone
 - Group the customizable marker, badge and button colors into a "Customize colors" subscreen, so the settings list is no longer dominated by color rows
 - Explain the attribution and map rotation switches with a subtitle, saying the attribution is shown by default per OSM policy and the map shows a compass when it is not facing north
 - Remove the unused "Show debug info" settings toggle, which was stored but never read back and so changed nothing

@@ -63,6 +63,8 @@
     <string name="get_apk">APK حاصل کریں</string>
     <string name="ignore">نظرانداز کریں</string>
     <string name="view_on_btcmap">btcmap.org پر دیکھیں</string>
+    <string name="view_on_osm">openstreetmap.org پر دیکھیں</string>
+    <string name="edit_on_osm">openstreetmap.org پر ترمیم کریں</string>
     <string name="s_km">%1$s کلومیٹر</string>
     <string name="s_m">%1$s میٹر</string>
     <string name="button_background">بٹن کا پس منظر</string>

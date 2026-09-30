@@ -2,5 +2,4 @@
 
 <resources>
     <color name="osm_attribution_text">#FFFFFFFF</color>
-    <color name="opening_hours_today">#F7931A</color>
 </resources>

@@ -63,6 +63,8 @@
     <string name="get_apk">Преузми APK</string>
     <string name="ignore">Игнориши</string>
     <string name="view_on_btcmap">Погледај на btcmap.org</string>
+    <string name="view_on_osm">Погледај на openstreetmap.org</string>
+    <string name="edit_on_osm">Уреди на openstreetmap.org</string>
     <string name="s_km">%1$s km</string>
     <string name="s_m">%1$s m</string>
     <string name="button_background">Позадина дугмета</string>
