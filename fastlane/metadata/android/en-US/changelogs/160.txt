@@ -1,0 +1,15 @@
+- Add global search covering places, communities, conferences and more
+- Full offline mode including a bundled world map
+- Download high-res region maps for offline use
+- Add community pulse and community/country screens
+- Manage saved places and areas
+- Add a personalized timeline for watched places and areas
+- Show boosted places at the top of search results with a rocket icon
+- Add optional account sign-in
+- Open btcmap.org place links in-app
+- Support per-app language selection on Android 13+
+- Simplify the add location and verify/report workflows
+- Show human readable opening hours
+- Improve payment flow reliability
+- Speed up app startup
+- Bug fixes and performance improvements
