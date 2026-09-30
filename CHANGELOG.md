@@ -278,6 +278,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Bring back the Carto Dark Matter style as an optional map style, loaded from Carto's own servers while Auto and the other styles keep using OpenFreeMap
 - Show the place's name in the Verify / Report screen's title and disable Submit until a report type is picked, and restyle the report options with Material 3's text and color roles
 - Tag a place report submitted from the app with its name and version in the report's extra fields, so reviewers can tell which app filed it
+- Show the place's name in the boost screen's title, like the Verify / Report screen, and restyle the boost and comment payment screens' text and buttons with Material 3's text and color roles
+- Show "Loading quote…" on the boost duration options and the comment fee while the quote is in flight, instead of leaving the options unpriced
+- Hide the Continue button once a boost or comment invoice is shown, since the invoice block replaces the order controls
 
 ## [1.1.0] - 2026-03-30
 

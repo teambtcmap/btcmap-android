@@ -28,9 +28,11 @@
     <string name="boost">بوسٹ</string>
     <string name="boost_merchant">تاجر بوسٹ</string>
     <string name="boost_description">اس تاجر کو نقشے پر بٹ کوائن نارنجی رنگ میں الگ بنائیں، تلاش کے نتائج میں چمکیں، اور خصوصی بوسٹ شدہ مقامات کے سیکشن میں دریافت کریں!\n\nفیس BTC Map اوپن سورس پراجیکٹ کی حمایت اور اس کی ترقی جاری رکھنے کے لیے gebruik ہوتی ہے۔</string>
+    <string name="boost_duration">بوسٹ کا دورانیہ</string>
     <string name="months_1">1 ماہ</string>
     <string name="months_3">3 ماہ</string>
     <string name="months_12">12 ماہ</string>
+    <string name="loading_quote">قیمت لوڈ ہو رہا ہے…</string>
     <string name="current_fee">موجودہ فیس:</string>
     <string name="loading">لوڈ ہو رہا ہے</string>
     <string name="d_sat">%1$s سیٹوشی</string>

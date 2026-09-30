@@ -28,9 +28,11 @@
     <string name="boost">Đẩy mạnh</string>
     <string name="boost_merchant">Đẩy mạnh nhà bán lẻ</string>
     <string name="boost_description">Làm cho nhà bán lẻ này nổi bật trên bản đồ bằng màu cam Bitcoin, tỏa sáng trong kết quả tìm kiếm và được khám phá trong phần địa điểm đặc biệt!\n\nPhí được sử dụng để hỗ trợ dự án mã nguồn mở BTC Map và tiếp tục phát triển nó.</string>
+    <string name="boost_duration">Thời hạn đẩy mạnh</string>
     <string name="months_1">1 tháng</string>
     <string name="months_3">3 tháng</string>
     <string name="months_12">12 tháng</string>
+    <string name="loading_quote">Đang tải báo giá…</string>
     <string name="current_fee">Phí hiện tại:</string>
     <string name="loading">đang tải</string>
     <string name="d_sat">%1$s sat</string>

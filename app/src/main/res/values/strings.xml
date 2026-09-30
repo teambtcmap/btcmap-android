@@ -38,10 +38,12 @@
     <string name="boost">Boost</string>
     <string name="boost_merchant">Boost Merchant</string>
     <string name="boost_description">Make this merchant stand out in Bitcoin orange on the map, shine in the search results, and be discovered in the exclusive boosted locations section!\n\nThe fee is used to support the BTC Map open source project and continue its development.</string>
+    <string name="boost_duration">Boost Duration</string>
     <string name="months_1">1 Month</string>
     <string name="months_3">3 Months</string>
     <string name="months_12">12 Months</string>
     <string name="duration_with_price" translatable="false">%1$s - %2$s</string>
+    <string name="loading_quote">Loading quote…</string>
     <string name="current_fee">Current fee:</string>
     <string name="loading">loading</string>
     <string name="d_sat">%1$s sat</string>

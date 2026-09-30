@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import org.btcmap.R
 import org.btcmap.api
@@ -23,9 +24,14 @@ import java.text.NumberFormat
 
 class BoostFragment : Fragment() {
 
-    private data class Args(val placeId: Long)
+    private data class Args(val placeId: Long, val placeName: String?)
 
-    private val args by lazy { Args(requireArguments().getLong("place_id")) }
+    private val args by lazy {
+        Args(
+            placeId = requireArguments().getLong("place_id"),
+            placeName = requireArguments().getString("place_name"),
+        )
+    }
 
     private var _binding: BoostFragmentBinding? = null
     private val binding get() = _binding!!
@@ -49,6 +55,8 @@ class BoostFragment : Fragment() {
         binding.topAppBar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
         }
+
+        binding.topAppBar.title = args.placeName ?: getString(R.string.boost_merchant)
 
         val payment = InvoicePaymentController(
             fragment = this,
@@ -88,9 +96,14 @@ class BoostFragment : Fragment() {
         state: InvoicePaymentState<PlaceBoostQuoteResponse>,
         payment: InvoicePaymentController,
     ) {
-        state.quote?.let { quote ->
+        val quote = state.quote
+        if (quote != null) {
             BoostDuration.entries.forEach { duration ->
                 setDurationPrice(button(duration), duration, duration.priceSat(quote))
+            }
+        } else if (state.loadingQuote) {
+            BoostDuration.entries.forEach { duration ->
+                setDurationLoading(button(duration), duration)
             }
         }
 
@@ -102,6 +115,9 @@ class BoostFragment : Fragment() {
         binding.btnContinue.isEnabled = enabled
 
         val invoice = state.invoice
+        // The invoice block replaces the order controls, so the continue button
+        // that started the order is hidden once one exists.
+        binding.btnContinue.isVisible = invoice == null
         if (invoice == null) {
             payment.hide()
         } else {
@@ -112,6 +128,14 @@ class BoostFragment : Fragment() {
     private fun setDurationPrice(button: RadioButton, duration: BoostDuration, priceSat: Long) {
         val price = getString(R.string.d_sat, NumberFormat.getNumberInstance().format(priceSat))
         button.text = getString(R.string.duration_with_price, getString(duration.labelRes), price)
+    }
+
+    private fun setDurationLoading(button: RadioButton, duration: BoostDuration) {
+        button.text = getString(
+            R.string.duration_with_price,
+            getString(duration.labelRes),
+            getString(R.string.loading_quote),
+        )
     }
 
     private fun button(duration: BoostDuration): RadioButton = when (duration) {

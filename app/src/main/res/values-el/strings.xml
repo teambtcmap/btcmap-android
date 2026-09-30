@@ -28,9 +28,11 @@
     <string name="boost">Προώθηση</string>
     <string name="boost_merchant">Προώθηση Εμπόρου</string>
     <string name="boost_description">Κάντε αυτόν τον έμπορο να ξεχωρίζει στο χάρτη με πορτοκαλί χρώμα Bitcoin, να λάμπει στα αποτελέσματα αναζήτησης και να ανακαλύπτεται στην αποκλειστική ενότητα προωθημένων τοποθεσιών!\n\nΗ χρέωση χρησιμοποιείται για την υποστήριξη του ανοιχτού κώδικα έργου BTC Map και τη συνέχιση της ανάπτυξής του.</string>
+    <string name="boost_duration">Διάρκεια προώθησης</string>
     <string name="months_1">1 Μήνας</string>
     <string name="months_3">3 Μήνες</string>
     <string name="months_12">12 Μήνες</string>
+    <string name="loading_quote">Φόρτωση προσφοράς…</string>
     <string name="current_fee">Τρέχουσα χρέωση:</string>
     <string name="loading">Φόρτωση</string>
     <string name="d_sat">%1$s sat</string>

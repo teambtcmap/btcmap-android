@@ -28,9 +28,11 @@
     <string name="boost">Boost</string>
     <string name="boost_merchant">Vyboostovať obchodníka</string>
     <string name="boost_description">Nechaj tohto obchodníka vyniknúť v bitcoinovej oranžovej farbe na mape, nech zažiari vo výsledkoch vyhľadávania a nech sa objaví v sekcii exkluzívnych lokalít!\n\nPoplatok sa používa na podporu projektu s otvoreným zdrojovým kódom BTC Map a pokračovanie v jeho vývoji.</string>
+    <string name="boost_duration">Trvanie boostu</string>
     <string name="months_1">1 mesiac</string>
     <string name="months_3">3 mesiace</string>
     <string name="months_12">12 mesiacov</string>
+    <string name="loading_quote">Načítavam cenovú ponuku…</string>
     <string name="current_fee">Aktuálny poplatok:</string>
     <string name="loading">Načítavam</string>
     <string name="d_sat">%1$s sat</string>

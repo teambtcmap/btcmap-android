@@ -28,9 +28,11 @@
     <string name="boost">বুস্ট</string>
     <string name="boost_merchant">বণিক বুস্ট করুন</string>
     <string name="boost_description">এই বণিককে ম্যাপে বিটকয়েন কমলা রঙে আলাদা করুন, অনুসন্ধান ফলাফলে উজ্জ্বল করুন এবং এক্সক্লুসিভ বুস্ট করা স্থান বিভাগে আবিষ্কার করুন!\n\nফি BTC Map ওপেন সোর্স প্রজেক্ট সমর্থন করতে এবং এর বিকাশ অব্যাহত রাখতে ব্যবহৃত হয়।</string>
+    <string name="boost_duration">বুস্টের সময়কাল</string>
     <string name="months_1">১ মাস</string>
     <string name="months_3">৩ মাস</string>
     <string name="months_12">১২ মাস</string>
+    <string name="loading_quote">কোটেশন লোড হচ্ছে…</string>
     <string name="current_fee">বর্তমান ফি:</string>
     <string name="loading">লোড হচ্ছে</string>
     <string name="d_sat">%1$s স্যাট</string>

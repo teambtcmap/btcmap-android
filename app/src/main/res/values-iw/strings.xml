@@ -28,9 +28,11 @@
     <string name="boost">קידום</string>
     <string name="boost_merchant">קדם סוחר</string>
     <string name="boost_description">הפוך את הסוחר הזה לבולט בכתום ביטקוין על המפה, זרוז בתוצאות החיפוש והתגלה במדור המיקומים המקודמים הבלעדי!\n\nהעמלה משמשת לתמיכה בפרויקט הקוד הפתוח של BTC Map ולהמשך הפיתוח שלו.</string>
+    <string name="boost_duration">משך הקידום</string>
     <string name="months_1">חודש</string>
     <string name="months_3">3 חודשים</string>
     <string name="months_12">12 חודשים</string>
+    <string name="loading_quote">טוען הצעת מחיר…</string>
     <string name="current_fee">עמלה נוכחית:</string>
     <string name="loading">טוען</string>
     <string name="d_sat">%1$s סאט</string>

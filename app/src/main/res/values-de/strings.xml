@@ -28,9 +28,11 @@
     <string name="boost">Boost</string>
     <string name="boost_merchant">Händler boosten</string>
     <string name="boost_description">Lass diesen Händler in Bitcoin-Orange auf der Karte hervorstechen, in den Suchergebnissen leuchten und im exklusiven Boosted-Bereich von anderen entdecken!\n\nDie Gebühr wird verwendet, um das BTC Map Open-Source-Projekt zu unterstützen und dessen Weiterentwicklung fortzusetzen.</string>
+    <string name="boost_duration">Boost-Dauer</string>
     <string name="months_1">1 Monat</string>
     <string name="months_3">3 Monate</string>
     <string name="months_12">12 Monate</string>
+    <string name="loading_quote">Angebot wird geladen…</string>
     <string name="current_fee">Aktuelle Gebühr:</string>
     <string name="loading">Lädt</string>
     <string name="d_sat">%1$s sats</string>

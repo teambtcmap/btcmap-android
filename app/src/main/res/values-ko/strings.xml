@@ -28,9 +28,11 @@
     <string name="boost">승격</string>
     <string name="boost_merchant">상인 승격</string>
     <string name="boost_description">이 상인을 지도에서 비트코인 오렌지 색으로 눈에 띄게 하고, 검색 결과에서 빛나며, 독점 승격 장소 섹션에서 발견되도록하세요!\n\n수수료는 BTC Map 오픈소스 프로젝트 지원 및 개발 계속에 사용됩니다.</string>
+    <string name="boost_duration">승격 기간</string>
     <string name="months_1">1개월</string>
     <string name="months_3">3개월</string>
     <string name="months_12">12개월</string>
+    <string name="loading_quote">견적 로딩 중…</string>
     <string name="current_fee">현재 수수료:</string>
     <string name="loading">로딩 중</string>
     <string name="d_sat">%1$s sat</string>

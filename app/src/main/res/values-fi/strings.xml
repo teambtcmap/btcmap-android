@@ -28,9 +28,11 @@
     <string name="boost">Nosta</string>
     <string name="boost_merchant">Nosta kauppiasta</string>
     <string name="boost_description">Tee tämä kauppias näkyväksi Bitcoin-oranssina kartalla, loista hakutuloksissa ja löydy eksklusiivisesta nostettujen sijaintien osiosta!\n\nMaksua käytetään BTC Map -avoimen lähdekoodin projektin tukemiseen ja sen kehityksen jatkamiseen.</string>
+    <string name="boost_duration">Noston kesto</string>
     <string name="months_1">1 kuukausi</string>
     <string name="months_3">3 kuukautta</string>
     <string name="months_12">12 kuukautta</string>
+    <string name="loading_quote">Ladataan tarjousta…</string>
     <string name="current_fee">Nykyinen maksu:</string>
     <string name="loading">Ladataan</string>
     <string name="d_sat">%1$s sat</string>

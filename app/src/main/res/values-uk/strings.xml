@@ -28,9 +28,11 @@
     <string name="boost">Підвищити</string>
     <string name="boost_merchant">Підвищити продавця</string>
     <string name="boost_description">Зробіть цього продавця помітним на карті оранжевим кольором Bitcoin, сяйте в результатах пошуку та будете виявлені в ексклюзивному розділі підвищених локацій!\n\nПлата використовується для підтримки проекту з відкритим кодом BTC Map та продовження його розробки.</string>
+    <string name="boost_duration">Тривалість бусту</string>
     <string name="months_1">1 місяць</string>
     <string name="months_3">3 місяці</string>
     <string name="months_12">12 місяців</string>
+    <string name="loading_quote">Завантаження пропозиції…</string>
     <string name="current_fee">Поточна плата:</string>
     <string name="loading">Завантаження</string>
     <string name="d_sat">%1$s сатоші</string>

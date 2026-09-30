@@ -28,9 +28,11 @@
     <string name="boost">Zvýraznit</string>
     <string name="boost_merchant">Zvýraznit obchodníka</string>
     <string name="boost_description">Zvýrazněte tohoto obchodníka na mapě v bitcoinové oranžové, zářte ve výsledcích vyhledávání a buďte objeveni v exkluzivní sekci zvýrazněných míst!\n\nPoplatek je určen na podporu open source projektu BTC Map a pokračování jeho vývoje.</string>
+    <string name="boost_duration">Doba zvýraznění</string>
     <string name="months_1">1 měsíc</string>
     <string name="months_3">3 měsíce</string>
     <string name="months_12">12 měsíců</string>
+    <string name="loading_quote">Načítání cenové nabídky…</string>
     <string name="current_fee">Aktuální poplatek:</string>
     <string name="loading">načítání</string>
     <string name="d_sat">%1$s sat</string>

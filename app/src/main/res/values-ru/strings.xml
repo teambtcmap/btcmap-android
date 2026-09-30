@@ -28,9 +28,11 @@
     <string name="boost">Забустить</string>
     <string name="boost_merchant">Забустить место</string>
     <string name="boost_description">Буст позволяет сделать место более заметным для всех пользователей. Комиссия идет на поддержку проекта.</string>
+    <string name="boost_duration">Срок буста</string>
     <string name="months_1">1 месяц</string>
     <string name="months_3">3 месяца</string>
     <string name="months_12">12 месяцев</string>
+    <string name="loading_quote">Загрузка стоимости…</string>
     <string name="current_fee">Комиссия:</string>
     <string name="loading">загрузка</string>
     <string name="d_sat">%1$s сатоши</string>

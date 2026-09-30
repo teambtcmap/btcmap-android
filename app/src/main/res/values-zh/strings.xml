@@ -28,9 +28,11 @@
     <string name="boost">推广</string>
     <string name="boost_merchant">推广商家</string>
     <string name="boost_description">让此商家在地图上以比特币橙色脱颖而出，在搜索结果中闪耀，并在独家推广地点部分被发现！\n\n费用用于支持 BTC Map 开源项目并继续其开发。</string>
+    <string name="boost_duration">推广时长</string>
     <string name="months_1">1 个月</string>
     <string name="months_3">3 个月</string>
     <string name="months_12">12 个月</string>
+    <string name="loading_quote">正在加载报价…</string>
     <string name="current_fee">当前费用：</string>
     <string name="loading">加载中</string>
     <string name="d_sat">%1$s sat</string>

@@ -30,17 +30,18 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="vertical"
-            android:paddingLeft="8dp"
+            android:paddingStart="16dp"
             android:paddingTop="16dp"
-            android:paddingRight="8dp"
-            android:paddingBottom="16dp">
+            android:paddingEnd="16dp"
+            android:paddingBottom="24dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
                 android:gravity="center"
-                android:text="@string/add_element_comment_disclosure_1" />
+                android:text="@string/add_element_comment_disclosure_1"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -52,7 +53,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="@string/current_fee" />
+                    android:text="@string/current_fee"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
                 <TextView
                     android:id="@+id/fee"
@@ -60,7 +63,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
                     android:gravity="center"
-                    android:text="@string/loading" />
+                    android:text="@string/loading_quote"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurface" />
             </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -84,16 +89,14 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_continue"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
+                android:layout_marginTop="24dp"
                 android:layout_marginBottom="16dp"
                 android:enabled="false"
-                android:text="@string/btn_continue"
-                tools:ignore="ButtonStyle" />
+                android:text="@string/btn_continue" />
 
             <ImageView
                 android:id="@+id/qr"
@@ -112,36 +115,35 @@
                 android:layout_marginVertical="16dp"
                 android:gravity="center">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/pay_invoice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:text="@string/pay"
                     android:visibility="gone"
-                    tools:ignore="ButtonStyle"
                     tools:visibility="visible" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/copy_invoice"
+                    style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="@android:string/copy"
                     android:visibility="gone"
-                    tools:ignore="ButtonStyle"
                     tools:visibility="visible" />
 
             </LinearLayout>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/start_over"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:text="@string/start_over"
                 android:visibility="gone"
-                tools:ignore="ButtonStyle"
                 tools:visibility="visible" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>

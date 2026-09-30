@@ -28,9 +28,11 @@
     <string name="boost">Promuovi</string>
     <string name="boost_merchant">Promuovi esercente</string>
     <string name="boost_description">Fai risaltare questo esercente in arancione Bitcoin sulla mappa, brilla nei risultati di ricerca e vieni scoperto nella sezione esclusiva delle posizioni promosse!\n\nLa tariffa viene utilizzata per supportare il progetto open source BTC Map e continuare il suo sviluppo.</string>
+    <string name="boost_duration">Durata della promozione</string>
     <string name="months_1">1 Mese</string>
     <string name="months_3">3 Mesi</string>
     <string name="months_12">12 Mesi</string>
+    <string name="loading_quote">Caricamento preventivo…</string>
     <string name="current_fee">Tariffa attuale:</string>
     <string name="loading">Caricamento</string>
     <string name="d_sat">%1$s sat</string>

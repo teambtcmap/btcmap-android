@@ -732,6 +732,7 @@ class PlaceFragment : Fragment() {
                 replace<BoostFragment>(
                     R.id.fragmentContainerView, null, Bundle().apply {
                         putLong("place_id", place.id)
+                        putString("place_name", placeName)
                     }
                 )
                 addToBackStack(null)

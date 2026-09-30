@@ -28,9 +28,11 @@
     <string name="boost">Промовиши</string>
     <string name="boost_merchant">Промовиши продавца</string>
     <string name="boost_description">Учините да се овај продавац истиче на мапи бојом биткоин наранџасте, засјајте у резултатима претраге и будите откривени у ексклузивном одељку промовисаних локација!\n\nНакнада се користи за подршку BTC Map отвореном пројекту и настављање његовог развоја.</string>
+    <string name="boost_duration">Трајање промоције</string>
     <string name="months_1">1 месец</string>
     <string name="months_3">3 месеца</string>
     <string name="months_12">12 месеци</string>
+    <string name="loading_quote">Учитавање понуде…</string>
     <string name="current_fee">Тренутна накнада:</string>
     <string name="loading">Учитавање</string>
     <string name="d_sat">%1$s сат</string>

@@ -28,9 +28,11 @@
     <string name="boost">Impulsar</string>
     <string name="boost_merchant">Impulsar Comerciante</string>
     <string name="boost_description">¡Haz que este comerciante se destaque en naranja en el mapa, brille en los resultados de búsqueda y sea descubierto en la sección exclusiva de lugares impulsados!\n\nLa tarifa se usa para apoyar el proyecto de código abierto BTC Map y continuar su desarrollo.</string>
+    <string name="boost_duration">Duración del impulso</string>
     <string name="months_1">1 Mes</string>
     <string name="months_3">3 Meses</string>
     <string name="months_12">12 Meses</string>
+    <string name="loading_quote">Cargando presupuesto…</string>
     <string name="current_fee">Tarifa actual:</string>
     <string name="loading">cargando</string>
     <string name="d_sat">%1$s sat</string>

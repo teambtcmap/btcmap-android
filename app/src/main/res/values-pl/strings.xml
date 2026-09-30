@@ -28,9 +28,11 @@
     <string name="boost">Podbij</string>
     <string name="boost_merchant">Podbij sprzedawcę</string>
     <string name="boost_description">Wyróżnij tego sprzedawcę na mapie kolorem bitcoinowej pomarańczy, zwiększ jego widoczność w wynikach wyszukiwania i umieść w ekskluzywnej sekcji promowanych lokalizacji!\n\nOpłata wspiera rozwój otwartoźródłowego projektu BTC Map i umożliwia jego dalsze ulepszanie.</string>
+    <string name="boost_duration">Czas podbicia</string>
     <string name="months_1">1 miesiąc</string>
     <string name="months_3">3 miesiące</string>
     <string name="months_12">12 miesięcy</string>
+    <string name="loading_quote">Ładowanie wyceny…</string>
     <string name="current_fee">Bieżąca opłata:</string>
     <string name="loading">Ładowanie</string>
     <string name="d_sat">%1$s sat</string>

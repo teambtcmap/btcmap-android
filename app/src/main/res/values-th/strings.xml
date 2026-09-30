@@ -28,9 +28,11 @@
     <string name="boost">ส่งเสริม</string>
     <string name="boost_merchant">ส่งเสริมพ่อค้า</string>
     <string name="boost_description">ทำให้ผู้ค้ารายนี้โดดเด่นในสีส้ม Bitcoin บนแผนที่ เปล่งประกายในผลการค้นหา และถูกค้นพบในส่วนตำแหน่งที่ได้รับการส่งเสริมพิเศษ!\n\nค่าธรรมเนียมนี้ใช้เพื่อสนับสนุนโครงการโอเพนซอร์ส BTC Map และพัฒนาต่อไป</string>
+    <string name="boost_duration">ระยะเวลาบูสต์</string>
     <string name="months_1">1 เดือน</string>
     <string name="months_3">3 เดือน</string>
     <string name="months_12">12 เดือน</string>
+    <string name="loading_quote">กำลังโหลดใบเสนอราคา…</string>
     <string name="current_fee">ค่าธรรมเนียมปัจจุบัน:</string>
     <string name="loading">กำลังโหลด</string>
     <string name="d_sat">%1$s sat</string>

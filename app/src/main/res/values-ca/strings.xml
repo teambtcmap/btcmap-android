@@ -28,9 +28,11 @@
     <string name="boost">Promociona</string>
     <string name="boost_merchant">Promociona Comerciant</string>
     <string name="boost_description">Fes que aquest comerciant destaqui en taronja Bitcoin al mapa, brilli als resultats de cerca i descobreix-lo a la secció exclusiva de llocs promocionats!\n\nLa tarifa s\'utilitza per recolzar el projecte de codi obert BTC Map i continuar el seu desenvolupament.</string>
+    <string name="boost_duration">Durada de la promoció</string>
     <string name="months_1">1 Mes</string>
     <string name="months_3">3 Mesos</string>
     <string name="months_12">12 Mesos</string>
+    <string name="loading_quote">Carregant pressupost…</string>
     <string name="current_fee">Tarifa actual:</string>
     <string name="loading">Carregant</string>
     <string name="d_sat">%1$s sat</string>

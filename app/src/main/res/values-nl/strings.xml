@@ -28,9 +28,11 @@
     <string name="boost">Promoten</string>
     <string name="boost_merchant">Handelaar promoten</string>
     <string name="boost_description">Laat deze handelaar opvallen in Bitcoin-oranje op de kaart, schitter in de zoekresultaten en ontdek de exclusieve sectie voor gepromote locaties!\n\nDe vergoeding wordt gebruikt om het BTC Map open source project te ondersteunen en de ontwikkeling voort te zetten.</string>
+    <string name="boost_duration">Boostduur</string>
     <string name="months_1">1 maand</string>
     <string name="months_3">3 maanden</string>
     <string name="months_12">12 maanden</string>
+    <string name="loading_quote">Offerte laden…</string>
     <string name="current_fee">Huidige vergoeding:</string>
     <string name="loading">Laden</string>
     <string name="d_sat">%1$s sat</string>

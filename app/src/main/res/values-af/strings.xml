@@ -28,9 +28,11 @@
     <string name="boost">Bemark</string>
     <string name="boost_merchant">Bemark Handelaar</string>
     <string name="boost_description">Laat hierdie handelaar uitstaan in Bitcoin-oranje op die kaart, skitter in die soekresultate, en ontdek in die eksklusiewe bemarkte liggings!\n\nDie fooi word gebruik om die BTC Map oopbronprojek te ondersteun en die ontwikkeling voort te sit.</string>
+    <string name="boost_duration">Boost-duur</string>
     <string name="months_1">1 Maand</string>
     <string name="months_3">3 Maande</string>
     <string name="months_12">12 Maande</string>
+    <string name="loading_quote">Kwotasie laai…</string>
     <string name="current_fee">Huidige fooi:</string>
     <string name="loading">laai</string>
     <string name="d_sat">%1$s sat</string>

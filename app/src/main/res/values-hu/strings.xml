@@ -28,9 +28,11 @@
     <string name="boost">Kiemelés</string>
     <string name="boost_merchant">Kereskedő kiemelése</string>
     <string name="boost_description">Tüntesd fel ezt a kereskedőt a térképen Bitcoin-narancssárga színnel, ragyogj a keresési eredmények között, és fedezd fel a kiemelt helyszínek exkluzív szekciójában!\n\nA díj a BTC Map nyílt forráskódú projekt támogatására és fejlesztésének folytatására szolgál.</string>
+    <string name="boost_duration">Kiemelés időtartama</string>
     <string name="months_1">1 hónap</string>
     <string name="months_3">3 hónap</string>
     <string name="months_12">12 hónap</string>
+    <string name="loading_quote">Ajánlat betöltése…</string>
     <string name="current_fee">Jelenlegi díj:</string>
     <string name="loading">Betöltés</string>
     <string name="d_sat">%1$s sat</string>

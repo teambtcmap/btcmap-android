@@ -28,9 +28,11 @@
     <string name="boost">Promouvoir</string>
     <string name="boost_merchant">Promouvoir le commerçant</string>
     <string name="boost_description">Faites ressortir ce commerçant en orange Bitcoin sur la carte, brillez dans les résultats de recherche et soyez découvert dans la section des lieux en vedette exclusive!\n\nLes frais sont utilisés pour soutenir le projet open source BTC Map et poursuivre son développement.</string>
+    <string name="boost_duration">Durée de la promotion</string>
     <string name="months_1">1 mois</string>
     <string name="months_3">3 mois</string>
     <string name="months_12">12 mois</string>
+    <string name="loading_quote">Chargement du devis…</string>
     <string name="current_fee">Frais actuels:</string>
     <string name="loading">Chargement</string>
     <string name="d_sat">%1$s sats</string>

@@ -28,9 +28,11 @@
     <string name="boost">बूस्ट</string>
     <string name="boost_merchant">व्यापारी बूस्ट करें</string>
     <string name="boost_description">इस व्यापारी को मानचित्र पर बिटकॉइन नारंगी रंग में प्रमुख बनाएं, खोज परिणामों में चमकें, और विशेष बूस्ट किए गए स्थानों में खोजें!\n\nशुल्क BTC Map ओपन सोर्स प्रोजेक्ट का समर्थन करने और इसके विकास को जारी रखने के लिए उपयोग किया जाता है।</string>
+    <string name="boost_duration">बूस्ट अवधि</string>
     <string name="months_1">1 महीना</string>
     <string name="months_3">3 महीने</string>
     <string name="months_12">12 महीने</string>
+    <string name="loading_quote">मूल्य लोड हो रहा है…</string>
     <string name="current_fee">वर्तमान शुल्क:</string>
     <string name="loading">लोड हो रहा है</string>
     <string name="d_sat">%1$s सातोशि</string>

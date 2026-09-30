@@ -15,8 +15,7 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="?attr/homeAsUpIndicator"
-            app:title="@string/boost_merchant" />
+            app:navigationIcon="?attr/homeAsUpIndicator" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -38,45 +37,62 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="@string/boost_description" />
+                android:text="@string/boost_description"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/boost_duration"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorOnSurfaceVariant" />
 
             <RadioGroup
                 android:id="@+id/duration_options"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp">
 
                 <RadioButton
                     android:id="@+id/boost_1m"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/months_1" />
+                    android:paddingStart="8dp"
+                    android:text="@string/months_1"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:textColor="?attr/colorOnSurface" />
 
                 <RadioButton
                     android:id="@+id/boost_3m"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
                     android:checked="true"
-                    android:text="@string/months_3" />
+                    android:text="@string/months_3"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:textColor="?attr/colorOnSurface" />
 
                 <RadioButton
                     android:id="@+id/boost_12m"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/months_12" />
+                    android:paddingStart="8dp"
+                    android:text="@string/months_12"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:textColor="?attr/colorOnSurface" />
 
             </RadioGroup>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_continue"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
+                android:layout_marginTop="24dp"
                 android:layout_marginBottom="16dp"
                 android:enabled="false"
-                android:text="@string/btn_continue"
-                tools:ignore="ButtonStyle" />
+                android:text="@string/btn_continue" />
 
             <ImageView
                 android:id="@+id/qr"
@@ -95,36 +111,35 @@
                 android:layout_marginVertical="16dp"
                 android:gravity="center">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/pay_invoice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:text="@string/pay"
                     android:visibility="gone"
-                    tools:ignore="ButtonStyle"
                     tools:visibility="visible" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/copy_invoice"
+                    style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="@android:string/copy"
                     android:visibility="gone"
-                    tools:ignore="ButtonStyle"
                     tools:visibility="visible" />
 
             </LinearLayout>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/start_over"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:text="@string/start_over"
                 android:visibility="gone"
-                tools:ignore="ButtonStyle"
                 tools:visibility="visible" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>

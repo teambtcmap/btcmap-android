@@ -28,9 +28,11 @@
     <string name="boost">Forfrem</string>
     <string name="boost_merchant">Forfrem selger</string>
     <string name="boost_description">Få denne selgeren til å skille seg ut i Bitcoin-oransje på kartet, skin i søkeresultatene og bli oppdaget i den eksklusive forfremmede steder-delen!\n\nGebyret brukes til å støtte BTC Map open source-prosjektet og fortsette utviklingen.</string>
+    <string name="boost_duration">Boost-varighet</string>
     <string name="months_1">1 måned</string>
     <string name="months_3">3 måneder</string>
     <string name="months_12">12 måneder</string>
+    <string name="loading_quote">Laster inn tilbud…</string>
     <string name="current_fee">Gjeldende gebyr:</string>
     <string name="loading">Laster</string>
     <string name="d_sat">%1$s sat</string>

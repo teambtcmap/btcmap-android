@@ -28,9 +28,11 @@
     <string name="boost">Öne çıkar</string>
     <string name="boost_merchant">Taciri öne çıkar</string>
     <string name="boost_description">Bu taciri haritada Bitcoin turuncu renginde öne çıkarın, arama sonuçlarında parlayın ve özel öne çıkarılmış konular bölümünde keşfedilin!\n\nÜcret, BTC Map açık kaynak projesini desteklemek ve geliştirmeye devam etmek için kullanılır.</string>
+    <string name="boost_duration">Öne çıkarma süresi</string>
     <string name="months_1">1 Ay</string>
     <string name="months_3">3 Ay</string>
     <string name="months_12">12 Ay</string>
+    <string name="loading_quote">Teklif yükleniyor…</string>
     <string name="current_fee">Mevcut ücret:</string>
     <string name="loading">Yükleniyor</string>
     <string name="d_sat">%1$s sat</string>

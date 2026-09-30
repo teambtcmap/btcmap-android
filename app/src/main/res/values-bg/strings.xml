@@ -28,9 +28,11 @@
     <string name="boost">Буст</string>
     <string name="boost_merchant">Буст на търговец</string>
     <string name="boost_description">Направете този търговец да се откроява в оранжевото на Bitcoin на картата, да блести в резултатите от търсенето и да бъде открит в ексклузивната секция за бустести места!\n\nТаксата се използва за подпомагане на проекта с отворен код BTC Map и продължаването на неговото развитие.</string>
+    <string name="boost_duration">Продължителност на буста</string>
     <string name="months_1">1 месец</string>
     <string name="months_3">3 месеца</string>
     <string name="months_12">12 месеца</string>
+    <string name="loading_quote">Зареждане на оферта…</string>
     <string name="current_fee">Текуща такса:</string>
     <string name="loading">Зареждане</string>
     <string name="d_sat">%1$s сатоши</string>

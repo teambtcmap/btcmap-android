@@ -28,9 +28,11 @@
     <string name="boost">Impulsionar</string>
     <string name="boost_merchant">Impulsionar comerciante</string>
     <string name="boost_description">Faça este comerciante aparecer em laranja Bitcoin no mapa, brilhar nos resultados de pesquisa e ser descoberto nos seção de locais exclusivos de impulsionamento!\n\nEsta taxa é usada para apoiar o projeto open-source BTC Map e continuar com o seu desenvolvimento.</string>
+    <string name="boost_duration">Duração do impulso</string>
     <string name="months_1">1 mês</string>
     <string name="months_3">3 meses</string>
     <string name="months_12">12 meses</string>
+    <string name="loading_quote">Carregando orçamento…</string>
     <string name="current_fee">Taxa atual:</string>
     <string name="loading">Carregando</string>
     <string name="d_sat">%1$s sat</string>

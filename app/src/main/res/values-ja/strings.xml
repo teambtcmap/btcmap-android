@@ -28,9 +28,11 @@
     <string name="boost">ブースト</string>
     <string name="boost_merchant">カラーをブースト</string>
     <string name="boost_description">このカラーをマップ上でビットコインオレンジ色際立たせ、検索結果で輝きを発見!\n\nこの手数料は、BTC Mapオープンソースプロジェクトのサポートとその開発の継続に使用されます。</string>
+    <string name="boost_duration">ブースト期間</string>
     <string name="months_1">1ヶ月</string>
     <string name="months_3">3ヶ月</string>
     <string name="months_12">12ヶ月</string>
+    <string name="loading_quote">見積もりを読み込み中…</string>
     <string name="current_fee">現在の料金:</string>
     <string name="loading">読み込み中</string>
     <string name="d_sat">%1$s sat</string>

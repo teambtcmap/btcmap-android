@@ -28,9 +28,11 @@
     <string name="boost">Främja</string>
     <string name="boost_merchant">Främja handlare</string>
     <string name="boost_description">Låt denna handlare sticka ut i Bitcoin-orange på kartan, lys i sökresultaten och upptäckas i den exklusiva sektionen för främjade platser!\n\nAvgiften används för att stödja BTC Map open source-projektet och fortsätta dess utveckling.</string>
+    <string name="boost_duration">Boostvaraktighet</string>
     <string name="months_1">1 månad</string>
     <string name="months_3">3 månader</string>
     <string name="months_12">12 månader</string>
+    <string name="loading_quote">Laddar erbjudande…</string>
     <string name="current_fee">Nuvarande avgift:</string>
     <string name="loading">Laddar</string>
     <string name="d_sat">%1$s sat</string>

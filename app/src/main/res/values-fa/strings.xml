@@ -28,9 +28,11 @@
     <string name="boost">ارتقا</string>
     <string name="boost_merchant">ارتقای تاجر</string>
     <string name="boost_description">این تاجر را در نقشه با رنگ نارنجی بیت‌کوین متمایز کنید، در نتایج جستجو بدرخشید و در بخش انحصاری مکان‌های ارتقا یافته کشف شوید!\n\nکارمزد برای حمایت از پروژه متن‌باز BTC Map و ادامه توسعه آن استفاده می‌شود.</string>
+    <string name="boost_duration">مدت ارتقا</string>
     <string name="months_1">1 ماه</string>
     <string name="months_3">3 ماه</string>
     <string name="months_12">12 ماه</string>
+    <string name="loading_quote">در حال بارگذاری قیمت…</string>
     <string name="current_fee">کارمزد فعلی:</string>
     <string name="loading">در حال بارگذاری</string>
     <string name="d_sat">%1$s ساتوشی</string>

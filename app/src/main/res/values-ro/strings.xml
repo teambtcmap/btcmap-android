@@ -28,9 +28,11 @@
     <string name="boost">Promovează</string>
     <string name="boost_merchant">Promovează comerciantul</string>
     <string name="boost_description">Fă acest comerciant să iasă în evidență în portocaliu Bitcoin pe hartă, strălucește în rezultatele căutării și fi descoperit în secțiunea exclusivă de locații promovate!\n\nTaxa este folosită pentru a susține proiectul open source BTC Map și pentru a continua dezvoltarea acestuia.</string>
+    <string name="boost_duration">Durata promovării</string>
     <string name="months_1">1 lună</string>
     <string name="months_3">3 luni</string>
     <string name="months_12">12 luni</string>
+    <string name="loading_quote">Se încarcă oferta…</string>
     <string name="current_fee">Taxa curentă:</string>
     <string name="loading">Se încarcă</string>
     <string name="d_sat">%1$s sat</string>

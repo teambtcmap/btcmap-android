@@ -28,9 +28,11 @@
     <string name="boost">Boost</string>
     <string name="boost_merchant">Boost forretning</string>
     <string name="boost_description">Få denne forretning til at skille sig ud i Bitcoin-orange på kortet, skin i søgeresultaterne og bliv opdaget i den eksklusive boostede placeringer sektion!\n\nGebyret bruges til at støtte BTC Map open source-projektet og fortsætte dets udvikling.</string>
+    <string name="boost_duration">Boost-varighed</string>
     <string name="months_1">1 måned</string>
     <string name="months_3">3 måneder</string>
     <string name="months_12">12 måneder</string>
+    <string name="loading_quote">Indlæser tilbud…</string>
     <string name="current_fee">Nuværende gebyr:</string>
     <string name="loading">Indlæser</string>
     <string name="d_sat">%1$s sat</string>

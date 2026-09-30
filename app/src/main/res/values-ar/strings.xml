@@ -28,9 +28,11 @@
     <string name="boost">تعزيز</string>
     <string name="boost_merchant">تعزيز التاجر</string>
     <string name="boost_description">اجعل هذا التاجر يبرز بلون Bitcoin البرتقالي على الخريطة، ويتألق في نتائج البحث، ويكتشف في قسم المواقع المعززة الحصرية!\n\nتُستخدم الرسوم لدعم مشروع BTC Map مفتوح المصدر ومواصلة تطويره.</string>
+    <string name="boost_duration">مدة التعزيز</string>
     <string name="months_1">شهر واحد</string>
     <string name="months_3">3 أشهر</string>
     <string name="months_12">12 شهراً</string>
+    <string name="loading_quote">جارٍ تحميل عرض السعر…</string>
     <string name="current_fee">الرسوم الحالية:</string>
     <string name="loading">جارٍ التحميل</string>
     <string name="d_sat">%1$s ساتوشي</string>
