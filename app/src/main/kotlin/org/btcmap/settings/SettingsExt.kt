@@ -57,7 +57,7 @@ enum class MapStyle {
     Positron,
     Bright,
     Dark,
-    CartoDarkMatter,
+    DarkMatter,
 }
 
 private fun mapStyleFromPrefValue(pref: String): MapStyle {
@@ -67,7 +67,9 @@ private fun mapStyleFromPrefValue(pref: String): MapStyle {
         "positron" -> MapStyle.Positron
         "bright" -> MapStyle.Bright
         "dark" -> MapStyle.Dark
-        "carto_dark_matter" -> MapStyle.CartoDarkMatter
+        // "carto_dark_matter" is the value a previous build stored; the style
+        // was rebased onto OpenFreeMap, so keep an existing choice on it.
+        "dark_matter", "carto_dark_matter" -> MapStyle.DarkMatter
         else -> MapStyle.Auto
     }
 }
@@ -79,7 +81,7 @@ fun MapStyle.toPrefValue(): String {
         MapStyle.Positron -> "positron"
         MapStyle.Bright -> "bright"
         MapStyle.Dark -> "dark"
-        MapStyle.CartoDarkMatter -> "carto_dark_matter"
+        MapStyle.DarkMatter -> "dark_matter"
     }
 }
 
@@ -90,7 +92,7 @@ fun MapStyle.name(context: Context): String {
         MapStyle.Positron -> context.getString(R.string.style_positron)
         MapStyle.Bright -> context.getString(R.string.style_bright)
         MapStyle.Dark -> context.getString(R.string.style_dark)
-        MapStyle.CartoDarkMatter -> context.getString(R.string.style_carto_dark_matter)
+        MapStyle.DarkMatter -> context.getString(R.string.style_dark_matter)
     }
 }
 
@@ -98,7 +100,7 @@ fun MapStyle.uri(context: Context): String {
     return when (this) {
         MapStyle.Auto -> {
             if (isNightMode(context)) {
-                "asset://map-styles/dark/style.json"
+                "asset://map-styles/dark-matter/style.json"
             } else {
                 "asset://map-styles/light/style.json"
             }
@@ -108,11 +110,7 @@ fun MapStyle.uri(context: Context): String {
         MapStyle.Positron -> "asset://map-styles/positron/style.json"
         MapStyle.Bright -> "asset://map-styles/bright/style.json"
         MapStyle.Dark -> "asset://map-styles/dark/style.json"
-
-        // Carto Dark Matter is not bundled: it draws from Carto's own tiles,
-        // sprites and glyphs, so it is loaded from its hosted style and has no
-        // offline basemap of its own.
-        MapStyle.CartoDarkMatter -> CARTO_DARK_MATTER_STYLE_URL
+        MapStyle.DarkMatter -> "asset://map-styles/dark-matter/style.json"
     }
 }
 
@@ -120,11 +118,13 @@ fun MapStyle.uri(context: Context): String {
  * The hosted style URL to hand to MapLibre's offline manager.
  *
  * Offline regions can only be created from an http(s) style: the native
- * downloader cannot resolve the bundled `asset://` styles. These URLs are the
- * ones `bundle_map_styles.py` generates the bundled copies from, so they
- * reference the same tiles, glyphs and sprites and the downloaded resources
- * also serve the bundled style at render time. Carto Dark Matter has no
- * bundled copy, so its hosted style URL is used as-is.
+ * downloader cannot resolve the bundled `asset://` styles. These URLs all draw
+ * OpenFreeMap's tiles, the same ones the bundled styles draw, so a downloaded
+ * region also serves the bundled style at render time. Dark Matter is rebased
+ * onto OpenFreeMap, so it downloads through the Liberty style; the pack
+ * therefore also serves whichever of the two was selected. Auto keeps the
+ * light and dark hosted URLs so its light/dark variants stay one family, even
+ * though its night variant renders the bundled Dark Matter.
  */
 fun MapStyle.offlineStyleUrl(context: Context): String {
     return when (this) {
@@ -138,7 +138,7 @@ fun MapStyle.offlineStyleUrl(context: Context): String {
         MapStyle.Positron -> POSITRON_STYLE_URL
         MapStyle.Bright -> BRIGHT_STYLE_URL
         MapStyle.Dark -> DARK_STYLE_URL
-        MapStyle.CartoDarkMatter -> CARTO_DARK_MATTER_STYLE_URL
+        MapStyle.DarkMatter -> LIBERTY_STYLE_URL
     }
 }
 
@@ -153,7 +153,9 @@ private fun isNightMode(context: Context): Boolean {
  * [MapStyle.Auto] resolves to the light or dark hosted style depending on the
  * system theme, but both draw the same sources, so they share one family: a
  * pack downloaded at noon must not read as "a different style" once dark mode
- * turns on. Every other style keeps its own identity.
+ * turns on. [MapStyle.DarkMatter] downloads through the Liberty style (see
+ * [offlineStyleUrl]) and so shares its family for the same reason. Every other
+ * style keeps its own identity.
  */
 internal fun offlineStyleFamily(styleUrl: String): String = when (styleUrl) {
     LIGHT_STYLE_URL, DARK_STYLE_URL -> AUTO_STYLE_FAMILY
@@ -167,12 +169,10 @@ private const val DARK_STYLE_URL = "https://static.btcmap.org/map-styles/dark.js
 private const val LIBERTY_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
 private const val POSITRON_STYLE_URL = "https://tiles.openfreemap.org/styles/positron"
 private const val BRIGHT_STYLE_URL = "https://tiles.openfreemap.org/styles/bright"
-private const val CARTO_DARK_MATTER_STYLE_URL =
-    "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
 
 fun Settings.mapStyleIsDark(): Boolean {
     return when (mapStyle) {
-        MapStyle.Dark, MapStyle.CartoDarkMatter -> true
+        MapStyle.Dark, MapStyle.DarkMatter -> true
         MapStyle.Auto -> {
             false
         }

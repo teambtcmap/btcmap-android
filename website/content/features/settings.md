@@ -14,7 +14,7 @@ Sign in, create an account, open your profile or log out. See
 Choose the map's look:
 
 - **Auto** — follows your device's light or dark theme.
-- **OpenFreeMap Liberty**, **Positron**, **Bright** and **Dark**.
+- **OpenFreeMap Liberty**, **Positron**, **Bright**, **Dark** and **Dark Matter**.
 
 Changing the style takes effect on the map immediately. Offline downloads are
 tied to the style they were made with; see [Offline maps](offline-maps.md).

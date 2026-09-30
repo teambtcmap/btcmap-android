@@ -44,7 +44,7 @@ class MapStatusBarController(
                 }
 
                 MapStyle.Dark,
-                MapStyle.CartoDarkMatter -> insetsController.isAppearanceLightStatusBars = false
+                MapStyle.DarkMatter -> insetsController.isAppearanceLightStatusBars = false
 
                 else -> insetsController.isAppearanceLightStatusBars = true
             }

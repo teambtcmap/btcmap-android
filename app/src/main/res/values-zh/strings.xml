@@ -45,7 +45,7 @@
     <string name="style_positron">OpenFreeMap Positron</string>
     <string name="style_bright">OpenFreeMap Bright</string>
     <string name="style_dark">OpenFreeMap Dark</string>
-    <string name="style_carto_dark_matter">Carto Dark Matter</string>
+    <string name="style_dark_matter">OpenFreeMap Dark Matter</string>
     <string name="marker_background_color">标记背景</string>
     <string name="marker_icon_color">标记图标</string>
     <string name="badge_background">徽章背景</string>

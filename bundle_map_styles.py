@@ -18,7 +18,10 @@ Each sprite directory records the base it was downloaded from in
 changes or a file is missing, so a plain run does not re-fetch the large PNGs.
 
 Tile sources and other remote references are left alone so the basemap and POI
-data continue to load over the network when available.
+data continue to load over the network when available, except for the styles in
+``REBASED_ON_OPENFREEMAP`` (Carto Dark Matter), whose Carto source, sprite and
+glyphs are swapped for OpenFreeMap's so they share the bundled basemap,
+sprites and glyphs.
 
 Run:
 
@@ -41,6 +44,7 @@ STYLE_URLS: dict[str, str] = {
     "bright":             "https://tiles.openfreemap.org/styles/bright",
     "light":              "https://static.btcmap.org/map-styles/light.json",
     "dark":               "https://static.btcmap.org/map-styles/dark.json",
+    "dark-matter":        "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
 }
 
 STYLE_TO_SPRITE_BUNDLE: dict[str, str] = {
@@ -49,7 +53,23 @@ STYLE_TO_SPRITE_BUNDLE: dict[str, str] = {
     "bright":            "ofm-sprites",
     "light":             "ofm-sprites",
     "dark":              "ofm-sprites",
+    "dark-matter":       "ofm-sprites",
 }
+
+# Styles that are not served by OpenFreeMap but can be rebased onto its data
+# (see `rebase_on_openfreemap`). Their upstream tile source, sprite and glyphs
+# are replaced, so the values below are not read from the fetched style.
+REBASED_ON_OPENFREEMAP = {"dark-matter"}
+
+OPENMAPTILES_SOURCE = "openmaptiles"
+CARTO_SOURCE = "carto"
+
+# The OpenFreeMap endpoints the rebased styles are pointed at. They are the
+# same ones the OpenFreeMap-hosted styles declare, and the checks below fail
+# loudly if upstream moves them.
+OPENFREEMAP_PLANET_URL = "https://tiles.openfreemap.org/planet"
+OPENFREEMAP_SPRITE_URL = "https://tiles.openfreemap.org/sprites/ofm_f384/ofm"
+OPENFREEMAP_GLYPHS_URL = "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf"
 
 # MapLibre resolves a sprite base URL to three files; we store them under a
 # stable name and rewrite every style to point at that name.
@@ -180,6 +200,58 @@ def sprite_bundle_is_complete(bundle: str) -> bool:
     return all(sprite_path(bundle, suffix).exists() for suffix in SPRITE_SUFFIXES)
 
 
+def noto_sans_variant(fonts: list[str]) -> str:
+    """The bundled Noto Sans face that best stands in for a style's font stack."""
+    joined = " ".join(fonts)
+    if "Italic" in joined:
+        return "Noto Sans Italic"
+    if "Bold" in joined or "Medium" in joined:
+        return "Noto Sans Bold"
+    return "Noto Sans Regular"
+
+
+def rebase_on_openfreemap(style: dict) -> None:
+    """Rewrites a Carto style so it draws OpenFreeMap's tiles and assets.
+
+    Carto's vector tiles use the same layer names and fields as OpenMapTiles,
+    which OpenFreeMap serves, so only the source is swapped. Carto's label
+    fonts are not hosted by OpenFreeMap, so every text-font stack is collapsed
+    to the Noto Sans variant that is bundled, and the one sprite icon the style
+    names is pointed at the bundled equivalent.
+    """
+    style["sources"] = {
+        OPENMAPTILES_SOURCE: {"type": "vector", "url": OPENFREEMAP_PLANET_URL},
+    }
+    style["sprite"] = OPENFREEMAP_SPRITE_URL
+    style["glyphs"] = OPENFREEMAP_GLYPHS_URL
+
+    for layer in style.get("layers", []):
+        if layer.get("source") == CARTO_SOURCE:
+            layer["source"] = OPENMAPTILES_SOURCE
+
+        layout = layer.get("layout")
+        if not isinstance(layout, dict):
+            continue
+
+        fonts = layout.get("text-font")
+        if isinstance(fonts, list) and fonts:
+            layout["text-font"] = [noto_sans_variant(fonts)]
+
+        # Carto spells it with a hyphen; the bundled sprite uses an underscore.
+        if layout.get("icon-image") == "circle-11":
+            layout["icon-image"] = "circle_11"
+
+    # Every layer must now draw from the OpenFreeMap source; a layer left on
+    # another one would silently render nothing, so fail the bundle instead.
+    dangling = sorted({
+        layer["source"]
+        for layer in style.get("layers", [])
+        if isinstance(layer.get("source"), str) and layer["source"] != OPENMAPTILES_SOURCE
+    })
+    if dangling:
+        raise RuntimeError(f"rebase left layers on unknown sources: {dangling}")
+
+
 def bundle_style(name: str, style: dict) -> None:
     target = ASSETS_ROOT / name / "style.json"
     sprite_bundle = STYLE_TO_SPRITE_BUNDLE[name]
@@ -272,6 +344,9 @@ def main() -> int:
     for name, url in STYLE_URLS.items():
         print(f"[style] {name}: {url}")
         style = json.loads(fetch(url))
+
+        if name in REBASED_ON_OPENFREEMAP:
+            rebase_on_openfreemap(style)
 
         base = style.get("sprite")
         if not isinstance(base, str) or not base:

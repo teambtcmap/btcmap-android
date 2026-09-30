@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Rebase the Carto Dark Matter style onto OpenFreeMap's tiles, sprites and glyphs as a bundled "OpenFreeMap Dark Matter", so it draws the bundled basemap offline like every other style, and use it for Auto in dark mode
 - Tag a submitted place with the app name and version as its origin, the same way a report is tagged, so a submission says which app filed it
 - Redesign the Add comment screen against Material 3: left-align the explanation and fee, load the fee with a spinner, show a placeholder in the empty field, and stay open with an inline "Tap to retry" when the fee fails instead of closing the screen and showing a dialog
 - Title the Add comment screen with the place's name instead of a static "Add comment", so it is clear which place the comment is about
@@ -44,7 +45,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Retry the map chips' images when the network returns, so a chip that fell back to its initials offline recovers on its own
 - Show an area search result's glyph instead of an empty circle when its image cannot load, such as while offline
 - Bundle a low-zoom world basemap and the map labels' glyphs, so the map still draws offline, keeping any tile it has already cached in full detail and falling back to the bundled world map only where it has none
-- Use the OpenFreeMap dark style for Auto at night and remove the Carto Dark Matter style, so every style now shares one source and the same offline behaviour
 - Show and search places and events near the antimeridian, by wrapping the viewport query the short way around instead of asking the database for a longitude range it can never hold
 - Stop the map leaking a viewport query, its marker data and its source collector every time the merchant, event or exchange filter changes, and bound the marker and area caches so a long session no longer grows without limit
 - Load a place tapped in search off the main thread so the map no longer stutters, and dispose the search controller with the view instead of leaving its scope behind
@@ -280,7 +280,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Reuse the badge background and text colors for the event-count badge on the map's area chips
 - Draw an outdated exchange marker's icon at reduced opacity, like an outdated merchant's, instead of leaving it fully opaque
 - Remove the "Use adaptive colors" setting, so the map and its controls always use a configured color or the fixed default
-- Bring back the Carto Dark Matter style as an optional map style, loaded from Carto's own servers while Auto and the other styles keep using OpenFreeMap
 - Show the place's name in the Verify / Report screen's title and disable Submit until a report type is picked, and restyle the report options with Material 3's text and color roles
 - Tag a place report submitted from the app with its name and version in the report's extra fields, so reviewers can tell which app filed it
 - Show the place's name in the boost screen's title, like the Verify / Report screen, and restyle the boost and comment payment screens' text and buttons with Material 3's text and color roles

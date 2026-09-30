@@ -59,7 +59,6 @@ import org.btcmap.place.PlaceFragment
 import org.btcmap.place.isMerchant
 import org.btcmap.search.SearchAdapter
 import org.btcmap.search.SearchAdapterItem
-import org.btcmap.settings.MapStyle
 import org.btcmap.settings.SettingsFragment
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authorized
@@ -212,7 +211,10 @@ class MapFragment : Fragment() {
             markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
             boostedMarkerBackgroundColor = prefs.boostedMarkerBackgroundColor(),
             boostedMarkerIconColor = prefs.boostedMarkerIconColor(),
-            usingOpenFreeMap = app.mapStyleUriForTesting == null && usingOpenFreeMap(),
+            // Every selectable style draws from OpenFreeMap, so it carries the
+            // Noto Sans Bold font the cluster counts need. A test style pinned
+            // via mapStyleUriForTesting does not.
+            usingOpenFreeMap = app.mapStyleUriForTesting == null,
             rotationEnabled = prefs.mapRotationEnabled,
         ).also {
             it.install()
@@ -732,16 +734,6 @@ class MapFragment : Fragment() {
                 }
             }
         }
-    }
-
-    /**
-     * Whether the selected style draws from OpenFreeMap, and so carries the
-     * `Noto Sans Bold` font the cluster counts need. The other styles, Carto
-     * Dark Matter included, have their own glyph sets and use their default
-     * font for those counts.
-     */
-    private fun usingOpenFreeMap(): Boolean {
-        return prefs.mapStyle != MapStyle.CartoDarkMatter
     }
 
     /**
