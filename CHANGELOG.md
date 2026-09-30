@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Translate the Database and Image cache settings screens, and the Database screen's Sync action, into every supported language instead of leaving them English-only
+- Give the Verify / Report radio options a little space between the button and its label, and line their descriptions up under the labels
+- Refresh the Russian wording of the OSM attribution, the report action and the comments section
 - Rebase the Carto Dark Matter style onto OpenFreeMap's tiles, sprites and glyphs as a bundled "OpenFreeMap Dark Matter", so it draws the bundled basemap offline like every other style, and use it for Auto in dark mode
 - Tag a submitted place with the app name and version as its origin, the same way a report is tagged, so a submission says which app filed it
 - Redesign the Add comment screen against Material 3: left-align the explanation and fee, load the fee with a spinner, show a placeholder in the empty field, and stay open with an inline "Tap to retry" when the fee fails instead of closing the screen and showing a dialog
