@@ -31,7 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="240dp">
 
-            <org.maplibre.android.maps.MapView
+            <org.btcmap.ui.EventPreviewMapView
                 android:id="@+id/map"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />

@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -16,23 +14,17 @@ import org.btcmap.api.GetEventsItem
 import org.btcmap.databinding.EventFragmentBinding
 import org.btcmap.db.table.event.Event
 import org.btcmap.map.EVENT_MARKER_ICON_NAME
-import org.btcmap.map.ICON_OFFSET_Y
-import org.btcmap.map.ensureEventMarkerImage
+import org.btcmap.settings.badgeBackgroundColor
+import org.btcmap.settings.badgeTextColor
+import org.btcmap.settings.boostedMarkerBackgroundColor
+import org.btcmap.settings.boostedMarkerIconColor
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.markerIconColor
+import androidx.compose.ui.graphics.Color
+import org.btcmap.map.toEventGeoJson
 import org.btcmap.settings.prefs
 import org.btcmap.settings.uri
-import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.Style
-import org.maplibre.android.style.layers.Property.ICON_ANCHOR_BOTTOM
-import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
-import org.maplibre.android.style.layers.PropertyFactory
-import org.maplibre.android.style.layers.SymbolLayer
-import org.maplibre.android.style.sources.GeoJsonSource
-import org.maplibre.geojson.Point
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -85,8 +77,6 @@ class EventFragment : Fragment() {
 
     val eventId: Long get() = event.id
 
-    private var map: MapLibreMap? = null
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -98,12 +88,6 @@ class EventFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // The MapView owns native resources and must receive its lifecycle
-        // callbacks, like MapFragment's map; without onCreate and onDestroy in
-        // particular, reopening this screen leaves a dead renderer behind and
-        // later queries can crash natively.
-        binding.map.onCreate(savedInstanceState)
 
         binding.toolbar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
@@ -121,15 +105,15 @@ class EventFragment : Fragment() {
         binding.toolbar.title = event.name
 
         binding.zoomIn.setOnClickListener {
-            map?.animateCamera(CameraUpdateFactory.zoomIn())
+            binding.map.zoomIn()
         }
 
         binding.zoomOut.setOnClickListener {
-            map?.animateCamera(CameraUpdateFactory.zoomOut())
+            binding.map.zoomOut()
         }
 
         renderEvent()
-        initMap()
+        renderEventMap()
     }
 
     private fun renderEvent() {
@@ -182,109 +166,30 @@ class EventFragment : Fragment() {
         startActivity(Intent.createChooser(intent, null))
     }
 
-    private fun initMap() {
-        binding.map.getMapAsync { map ->
-            this.map = map
-            map.setStyle(Style.Builder().fromUri(prefs.mapStyle.uri(requireContext())))
-            map.uiSettings.setAllGesturesEnabled(true)
-            map.uiSettings.isLogoEnabled = false
-            map.uiSettings.isAttributionEnabled = false
-            map.uiSettings.isCompassEnabled = false
-
-            map.getStyle { style ->
-                if (style.getImage("btcmap-marker") == null) {
-                    val drawable = AppCompatResources
-                        .getDrawable(requireContext(), R.drawable.map_marker)!!
-                        .mutate()
-                    DrawableCompat.setTint(drawable, prefs.markerBackgroundColor(requireContext()))
-                    style.addImage("btcmap-marker", drawable)
-                }
-                ensureEventMarkerImage(
-                    requireContext(),
-                    style,
-                    prefs.markerIconColor(requireContext()),
-                )
-                renderEventMarker(style)
-            }
-
-            map.moveCamera(
-                CameraUpdateFactory.newLatLngZoom(
-                    LatLng(event.lat, event.lon),
-                    EVENT_ZOOM,
-                )
-            )
+    /** Points the shared event map at the event, with its marker. */
+    private fun renderEventMap() {
+        binding.map.apply {
+            lat = event.lat
+            lon = event.lon
+            geoJson = listOf(event).toEventGeoJson()
+            styleUrl = prefs.mapStyle.uri(requireContext())
+            markerBackgroundColor = Color(prefs.markerBackgroundColor(requireContext()))
+            markerIconColor = Color(prefs.markerIconColor(requireContext()))
+            boostedMarkerBackgroundColor = Color(prefs.boostedMarkerBackgroundColor())
+            boostedMarkerIconColor = Color(prefs.boostedMarkerIconColor())
+            markerBadgeBackgroundColor = Color(prefs.badgeBackgroundColor(requireContext()))
+            markerBadgeTextColor = Color(prefs.badgeTextColor(requireContext()))
+            usingOpenFreeMap = true
+            iconTypeface = org.btcmap.util.iconTypeface
         }
     }
 
-    private fun renderEventMarker(style: Style) {
-        if (style.getSource(MARKER_SOURCE_ID) != null) return
-
-        style.addSource(
-            GeoJsonSource(MARKER_SOURCE_ID, Point.fromLngLat(event.lon, event.lat))
-        )
-
-        style.addLayer(
-            SymbolLayer(MARKER_PIN_LAYER_ID, MARKER_SOURCE_ID).withProperties(
-                PropertyFactory.iconImage("btcmap-marker"),
-                PropertyFactory.iconAnchor(ICON_ANCHOR_BOTTOM),
-                PropertyFactory.iconAllowOverlap(true),
-                PropertyFactory.iconIgnorePlacement(true),
-            )
-        )
-
-        style.addLayer(
-            SymbolLayer(MARKER_ICON_LAYER_ID, MARKER_SOURCE_ID).withProperties(
-                PropertyFactory.iconImage(EVENT_MARKER_ICON_NAME),
-                PropertyFactory.iconAnchor(ICON_ANCHOR_CENTER),
-                PropertyFactory.iconOffset(arrayOf(0f, ICON_OFFSET_Y)),
-                PropertyFactory.iconAllowOverlap(true),
-                PropertyFactory.iconIgnorePlacement(true),
-            )
-        )
-    }
-
-    override fun onStart() {
-        super.onStart()
-        _binding?.map?.onStart()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        _binding?.map?.onResume()
-    }
-
-    override fun onPause() {
-        _binding?.map?.onPause()
-        super.onPause()
-    }
-
-    override fun onStop() {
-        _binding?.map?.onStop()
-        super.onStop()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        _binding?.map?.onLowMemory()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        _binding?.map?.onSaveInstanceState(outState)
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding?.map?.onDestroy()
         _binding = null
-        map = null
     }
 
     companion object {
-        private const val EVENT_ZOOM = 15.0
-
-        private const val MARKER_SOURCE_ID = "event_marker_source"
-        private const val MARKER_PIN_LAYER_ID = "event_marker_pin"
-        private const val MARKER_ICON_LAYER_ID = "event_marker_icon"
     }
 }

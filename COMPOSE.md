@@ -933,6 +933,19 @@ Two details worth keeping:
 Verified in the app: the standalone place screen (activity feed → a place)
 renders the bundled dark-matter style with the place's marker.
 
+### Phase 3, eighteenth slice — done (step 5: the event map)
+
+The event screen's embedded `MapView` is gone: `event_fragment.xml` uses the new
+`EventPreviewMapView` (`:ui` androidMain), which hosts the shared
+`EventPreviewMap`. It draws the event marker with the shared pin and glyph
+images and the bundled style, and the host's `zoomIn`/`zoomOut` drive the shared
+camera through the `MapState` it is handed. `EventFragment` no longer imports
+any MapLibre Android SDK class.
+
+Verified in the app: the `btcmap.org/event/165` deep link opens the event
+screen, which renders the bundled dark-matter style with the event marker, and
+the zoom buttons zoom the shared map.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
