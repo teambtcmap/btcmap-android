@@ -1,12 +1,18 @@
 package org.btcmap.map
 
+import android.content.ActivityNotFoundException
+import android.content.ComponentName
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.browser.customtabs.CustomTabsClient
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.ui.graphics.Color
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
@@ -15,7 +21,6 @@ import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,18 +30,31 @@ import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.api.getEvent
 import org.btcmap.api.getPlaceCoordinates
+import org.btcmap.api.getPlaceImages
+import org.btcmap.api.placeImageUrl
 import org.btcmap.area.ARG_AREA_ID
 import org.btcmap.area.AreaFragment
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
+import org.btcmap.boost.BoostFragment
+import org.btcmap.comment.AddCommentFragment
+import org.btcmap.comment.CommentsFragment
 import org.btcmap.db
+import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.MapFragmentBinding
 import org.btcmap.event.EventFragment
 import org.btcmap.event.toBundle
 import org.btcmap.feed.ActivityFeedFragment
+import org.btcmap.i18n.getLocalizedName
 import org.btcmap.place.AddPlaceFragment
-import org.btcmap.db.table.place.Place
 import org.btcmap.place.PlaceFragment
+import org.btcmap.place.ReportPlaceFragment
+import org.btcmap.place.btcmapUrl
+import org.btcmap.place.osmEditUrl
+import org.btcmap.place.osmMapUrl
+import org.btcmap.place.osmUrl
+import org.btcmap.saved.isPlaceSaved
+import org.btcmap.saved.toggleSavedPlace
 import org.btcmap.settings.SettingsFragment
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authorized
@@ -57,10 +75,13 @@ import org.btcmap.settings.uri
 import org.btcmap.settings.verifiedFilterMinVerifiedAt
 import org.btcmap.sync.SyncState
 import org.btcmap.syncController
+import org.btcmap.ui.PlaceAction
+import org.btcmap.ui.PlaceSheetStrings
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.bundledStyleJsonFor
 import org.btcmap.util.DeepLink
 import org.btcmap.util.iconTypeface
+import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
 import java.text.NumberFormat
 
@@ -68,8 +89,6 @@ class MapFragment : Fragment() {
     private var _binding: MapFragmentBinding? = null
     private val binding get() = _binding!!
 
-    private var statusBarController: MapStatusBarController? = null
-    private var bottomSheetController: BottomSheetController? = null
     private var updateNotificationController: UpdateNotificationController? = null
 
     override fun onCreateView(
@@ -85,26 +104,9 @@ class MapFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Registered here, not when the dialog is shown, so a form that was open
-        // when the device rotated still reaches this (recreated) fragment.
-        registerAuthResultListener { addPlaceAfterAuth() }
-
-        val bottomSheet = BottomSheetController(
-            view = binding.placeBottomSheet,
-            viewLifecycleOwner = viewLifecycleOwner,
-            placeFragment = childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment,
-        )
-        bottomSheetController = bottomSheet
-
-        statusBarController = MapStatusBarController(
-            conf = resources.configuration,
-            insetsController = WindowCompat.getInsetsController(
-                requireActivity().window,
-                requireActivity().window.decorView,
-            ),
-            bottomSheetBehavior = bottomSheet.bottomSheetBehavior,
-        )
-        statusBarController?.onViewCreated()
+        // The place sheet's actions can need a signed-in user; the map asks for
+        // one here and finishes the action when the form comes back.
+        registerAuthResultListener { extras -> onAuthResult(extras) }
 
         updateNotificationController = UpdateNotificationController(
             context = requireContext(),
@@ -145,7 +147,7 @@ class MapFragment : Fragment() {
 
         // After the deep link, so a fresh link still wins: the restore only runs
         // on a recreation, where the Activity does not re-deliver the link.
-        restoreBottomSheet(savedInstanceState)
+        restoreSelectedPlace(savedInstanceState)
     }
 
     /**
@@ -186,11 +188,35 @@ class MapFragment : Fragment() {
             markerBadgeTextColor = Color(prefs.badgeTextColor(requireContext()))
             areaChipButtonColor = Color(prefs.buttonBackgroundColor(requireContext()))
             areaChipIconColor = Color(prefs.buttonIconColor(requireContext()))
-            // The place screen is still a Views screen: verify, report, boost
-            // and the photo flows live there, so this host keeps its own sheet
-            // and borrows only the map.
-            placeSheet = false
-            onPlaceSelected = ::selectPlace
+            placeSheetStrings = PlaceSheetStrings(
+                directions = getString(R.string.directions),
+                share = getString(R.string.share),
+                viewOnBtcmap = getString(R.string.view_on_btcmap),
+                viewOnOsm = getString(R.string.view_on_osm),
+                editOnOsm = getString(R.string.edit_on_osm),
+                notVerified = getString(R.string.not_verified),
+                verificationWarningTitle = getString(R.string.verification_warning_title),
+                verificationWarningOutdated = getString(R.string.verification_warning_outdated),
+                verificationWarningNotVerified = getString(R.string.verification_warning_not_verified),
+                ok = getString(android.R.string.ok),
+                companionWarning = { getString(R.string.companion_warning, it) },
+                verify = getString(R.string.btn_verify),
+                report = getString(R.string.btn_report),
+                boost = getString(R.string.boost),
+                comments = { count ->
+                    if (count == 0L) {
+                        getString(R.string.comments)
+                    } else {
+                        getString(R.string.comments_d, count.toInt())
+                    }
+                },
+                commentsTitle = { count -> getString(R.string.comments_d, count.toInt()) },
+                addComment = getString(R.string.add_comment),
+                save = getString(R.string.save),
+                addPhoto = getString(R.string.add_photo),
+            )
+            onPlaceSelected = ::onPlaceSelected
+            onPlaceAction = ::onPlaceAction
             onEventSelected = { openEvent(it.toBundle()) }
             onAreaSelected = ::openArea
             onOpenFeed = ::openFeed
@@ -213,39 +239,235 @@ class MapFragment : Fragment() {
     }
 
     /**
-     * Re-selects the place the sheet was showing before the view was recreated,
-     * and restores its position, so a rotation or a return from another screen
-     * does not dismiss it. A hidden sheet is left closed: the user dismissed it,
-     * or nothing was selected.
+     * Re-opens the sheet on the place it was showing before the view was
+     * recreated, so a rotation does not dismiss it.
      */
-    private fun restoreBottomSheet(savedInstanceState: Bundle?) {
-        // A rotation delivers the values through the saved state. A back-stack
-        // return has none (the fragment instance survives, only its view is
-        // recreated), so they come from the retained fields instead.
+    private fun restoreSelectedPlace(savedInstanceState: Bundle?) {
         val placeId = savedInstanceState?.getLong(STATE_PLACE_ID, 0L) ?: selectedPlaceId ?: 0L
-        val sheetState =
-            savedInstanceState?.getInt(STATE_SHEET_STATE, BottomSheetBehavior.STATE_HIDDEN)
-                ?: lastSheetState
-        if (placeId <= 0L || sheetState == BottomSheetBehavior.STATE_HIDDEN) return
+        if (placeId <= 0L) return
 
         viewLifecycleOwner.lifecycleScope.launch {
             val place = withContext(Dispatchers.IO) { db().place.selectById(placeId) }
                 ?: return@launch
+            binding.map.openPlaceId = place.id
+        }
+    }
 
-            selectPlace(place)
-            if (sheetState == BottomSheetBehavior.STATE_EXPANDED) {
-                bottomSheetController?.bottomSheetBehavior?.state =
-                    BottomSheetBehavior.STATE_EXPANDED
+    private fun onPlaceSelected(place: Place) {
+        selectedPlaceId = place.id
+        refreshSheet(place)
+    }
+
+    /** Fills in what only the app can supply the sheet: its photos and its bookmark. */
+    private fun refreshSheet(place: Place) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            binding.map.bookmarked = isPlaceSaved(place.id)
+            val images = try {
+                api().getPlaceImages(place.id)
+            } catch (t: Throwable) {
+                t.rethrowIfCancellation()
+                emptyList()
+            }
+            binding.map.photos = images.map {
+                api().placeImageUrl(place.id, it.id, width = 144, height = 144)
             }
         }
     }
 
-    private fun selectPlace(place: Place) {
-        selectedPlaceId = place.id
-        val placeFragment =
-            childFragmentManager.findFragmentById(R.id.placeFragment) as PlaceFragment
-        placeFragment.setPlace(place)
-        bottomSheetController?.halfExpand()
+    private fun onPlaceAction(place: Place, action: PlaceAction) {
+        when (action) {
+            PlaceAction.Directions -> startActivity(
+                Intent.createChooser(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        "geo:${place.lat},${place.lon}?q=${place.getLocalizedName()}".toUri(),
+                    ),
+                    null,
+                ),
+            )
+
+            PlaceAction.Share -> startActivity(
+                Intent.createChooser(
+                    Intent(Intent.ACTION_SEND).apply {
+                        putExtra(Intent.EXTRA_TEXT, place.btcmapUrl())
+                        type = "text/plain"
+                    },
+                    null,
+                ),
+            )
+
+            PlaceAction.ViewOnBtcmap -> openOnBtcmap(place.btcmapUrl())
+
+            PlaceAction.ViewOnOsm -> place.osmUrl()?.let { openInBrowser(it.toUri()) }
+
+            PlaceAction.EditOnOsm -> place.osmEditUrl()?.let { openInBrowser(it.toUri()) }
+
+            PlaceAction.ToggleBookmark -> {
+                if (prefs.authorized) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        try {
+                            toggleSavedPlace(place.id, place.name.orEmpty())
+                            binding.map.bookmarked = isPlaceSaved(place.id)
+                        } catch (t: Throwable) {
+                            t.rethrowIfCancellation()
+                            showError(t)
+                        }
+                    }
+                } else {
+                    showAuthDialog(
+                        Bundle().apply {
+                            putString(EXTRA_AUTH_ACTION, AUTH_ACTION_TOGGLE_SAVED)
+                            putLong(EXTRA_PLACE_ID, place.id)
+                            putString(EXTRA_PLACE_NAME, place.name.orEmpty())
+                        },
+                    )
+                }
+            }
+
+            PlaceAction.Verify -> openReport(place, defaultType = "verified")
+
+            PlaceAction.Report -> openReport(place, defaultType = null)
+
+            PlaceAction.Boost -> navigate(
+                BoostFragment(),
+                Bundle().apply {
+                    putLong("place_id", place.id)
+                    putString("place_name", place.name.orEmpty())
+                },
+            )
+
+            PlaceAction.Comments -> viewLifecycleOwner.lifecycleScope.launch {
+                val hasComments = withContext(Dispatchers.IO) {
+                    db().comment.selectCountByPlaceId(place.id) > 0
+                }
+                if (hasComments) openComments(place) else openAddComment(place)
+            }
+
+            PlaceAction.AddComment -> openAddComment(place)
+
+            // The photo picker, camera and upload live in the place screen, so
+            // this action hands over to it: the sheet's own photo strip and the
+            // upload form are wired together there. Porting them here is the
+            // next slice.
+            PlaceAction.AddPhoto -> navigate(PlaceFragment.create(place.id), null)
+        }
+    }
+
+    private fun onAuthResult(extras: Bundle) {
+        when (extras.getString(EXTRA_AUTH_ACTION)) {
+            AUTH_ACTION_TOGGLE_SAVED -> {
+                val placeId = extras.getLong(EXTRA_PLACE_ID, 0L)
+                val placeName = extras.getString(EXTRA_PLACE_NAME) ?: return
+                if (placeId <= 0L) return
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try {
+                        toggleSavedPlace(placeId, placeName)
+                        if (selectedPlaceId == placeId) binding.map.bookmarked = isPlaceSaved(placeId)
+                    } catch (t: Throwable) {
+                        t.rethrowIfCancellation()
+                        showError(t)
+                    }
+                }
+            }
+
+            AUTH_ACTION_OPEN_REPORT -> viewLifecycleOwner.lifecycleScope.launch {
+                val placeId = extras.getLong(EXTRA_PLACE_ID, 0L)
+                if (placeId <= 0L) return@launch
+                val place = withContext(Dispatchers.IO) { db().place.selectById(placeId) }
+                    ?: return@launch
+                navigateToReport(place, extras.getString(EXTRA_REPORT_TYPE))
+            }
+
+            // No action means the map only asked the user to sign in: the action
+            // that needed it was adding a place.
+            else -> addPlaceAfterAuth()
+        }
+    }
+
+    private fun openReport(place: Place, defaultType: String?) {
+        if (prefs.authorized) {
+            navigateToReport(place, defaultType)
+        } else {
+            showAuthDialog(
+                Bundle().apply {
+                    putString(EXTRA_AUTH_ACTION, AUTH_ACTION_OPEN_REPORT)
+                    putLong(EXTRA_PLACE_ID, place.id)
+                    putString(EXTRA_PLACE_NAME, place.name.orEmpty())
+                    if (defaultType != null) putString(EXTRA_REPORT_TYPE, defaultType)
+                },
+            )
+        }
+    }
+
+    private fun navigateToReport(place: Place, defaultType: String?) {
+        navigate(
+            ReportPlaceFragment(),
+            Bundle().apply {
+                putLong("place_id", place.id)
+                putString("place_name", place.name.orEmpty())
+                if (defaultType != null) putString("default_type", defaultType)
+            },
+        )
+    }
+
+    private fun openComments(place: Place) {
+        navigate(CommentsFragment(), placeArgs(place))
+    }
+
+    private fun openAddComment(place: Place) {
+        navigate(AddCommentFragment(), placeArgs(place))
+    }
+
+    private fun placeArgs(place: Place): Bundle = Bundle().apply {
+        putLong("place_id", place.id)
+        putString("place_name", place.name.orEmpty())
+    }
+
+    /**
+     * Opens the place on btcmap.org in a Custom Tab.
+     *
+     * The browser is targeted explicitly: a plain VIEW intent would be captured
+     * by this app's own verified App Link for btcmap.org/merchant and reopen the
+     * place instead of the site. If no Custom Tabs browser is available, fall
+     * back to a chooser that excludes this app, for the same reason.
+     */
+    private fun openOnBtcmap(url: String) {
+        val uri = url.toUri()
+
+        CustomTabsClient.getPackageName(requireContext(), null)?.let { browser ->
+            val customTabs = CustomTabsIntent.Builder().build()
+            customTabs.intent.setPackage(browser)
+            try {
+                customTabs.launchUrl(requireContext(), uri)
+                return
+            } catch (_: ActivityNotFoundException) {
+                // Fall through to the chooser below.
+            }
+        }
+
+        val chooser = Intent.createChooser(Intent(Intent.ACTION_VIEW, uri), null)
+        chooser.putExtra(
+            Intent.EXTRA_EXCLUDE_COMPONENTS,
+            arrayOf(ComponentName(requireContext(), Activity::class.java)),
+        )
+        try {
+            startActivity(chooser)
+        } catch (e: ActivityNotFoundException) {
+            showError(e)
+        }
+    }
+
+    private fun navigate(fragment: Fragment, args: Bundle?) {
+        fragment.arguments = args
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.fragmentContainerView, fragment)
+            addToBackStack(null)
+        }
+    }
+
+    private fun showError(t: Throwable) {
+        Toast.makeText(requireContext(), t.message ?: t.toString(), Toast.LENGTH_LONG).show()
     }
 
     private fun openEvent(bundle: Bundle) {
@@ -318,7 +540,7 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun openFeed(areas: List<MapArea>) {
+    private fun openFeed(areas: List<org.btcmap.map.MapArea>) {
         parentFragmentManager.commit {
             setReorderingAllowed(true)
             replace<ActivityFeedFragment>(
@@ -335,40 +557,20 @@ class MapFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         selectedPlaceId?.let { outState.putLong(STATE_PLACE_ID, it) }
-        outState.putInt(
-            STATE_SHEET_STATE,
-            bottomSheetController?.bottomSheetBehavior?.state
-                ?: BottomSheetBehavior.STATE_HIDDEN,
-        )
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // Remembered so a back-stack return can restore the sheet, which has no
-        // saved instance state to read from.
-        lastSheetState = bottomSheetController?.bottomSheetBehavior?.state
-            ?: BottomSheetBehavior.STATE_HIDDEN
-        bottomSheetController = null
-        statusBarController?.onDestroyView()
-        statusBarController = null
         updateNotificationController = null
         _binding = null
     }
 
     /**
-     * The place the bottom sheet is showing, or null when nothing is selected.
-     * Saved with the view so a rotation keeps the sheet's place and position
-     * instead of dismissing it.
+     * The place the sheet is showing, or null when nothing is selected. Kept so a
+     * rotation (through the saved state) or a back-stack return (through the
+     * field) reopens the same place.
      */
     private var selectedPlaceId: Long? = null
-
-    /**
-     * The sheet's state when the view was last destroyed. A back-stack return
-     * keeps this fragment instance but has no saved instance state, so this is
-     * what tells [restoreBottomSheet] whether the sheet was visible (and how).
-     * A rotation reads the state from the saved bundle instead.
-     */
-    private var lastSheetState = BottomSheetBehavior.STATE_HIDDEN
 
     /**
      * The map centre an add-place that still has to authenticate should use once
@@ -437,6 +639,14 @@ class MapFragment : Fragment() {
     private companion object {
         private const val STATE_PLACE_ID = "map_selected_place_id"
 
-        private const val STATE_SHEET_STATE = "map_sheet_state"
+        // The auth hand-off protocol, the same shape the place screen uses: what
+        // the sheet asked for, and what the form has to hand back to finish it.
+        private const val EXTRA_AUTH_ACTION = "auth-action"
+        private const val EXTRA_PLACE_ID = "auth-place-id"
+        private const val EXTRA_PLACE_NAME = "auth-place-name"
+        private const val EXTRA_REPORT_TYPE = "auth-report-type"
+
+        private const val AUTH_ACTION_TOGGLE_SAVED = "toggle-saved"
+        private const val AUTH_ACTION_OPEN_REPORT = "open-report"
     }
 }

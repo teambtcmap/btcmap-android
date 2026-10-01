@@ -28,13 +28,10 @@ Done and pushed:
 
 Next, in rough order of value:
 
-1. **Place sheet action parity** — the map screen keeps its Views place screen,
-   because the shared sheet's twelve actions (verify, report, boost, photos,
-   bookmark, comments) are implemented there. Porting them to the Compose sheet is
-   the last big Android slice; `MapScreen.placeSheet = false` is the staging flag
-   that keeps the Views sheet in charge meanwhile. The link actions the desktop
-   now serves (slice 41) are the ones both hosts share via `Place.btcmapUrl` and
-   `Place.osmMapUrl`.
+1. **Add photo on the map sheet** — the one action slice 42 could not port: the
+   picker, camera and upload live inside `PlaceFragment`, so the sheet's button
+   bridges to that screen meanwhile. Porting the flow (its picker/camera
+   launchers and the upload call) is what lets the bridge go.
 2. **Desktop polish** — the add-place flow, the comments/user-profile screens and the
    auth forms on the desktop (they need a place/session context).
 3. **Port the deleted search tests.** `EventSearchTest`'s offline search cases
@@ -1394,6 +1391,37 @@ for.
 Verified by `:shared:jvmTest` (the two link builders) and a desktop compile; the
 window's actions cannot be clicked from here, since this Wayland session has no
 input-injection tool.
+
+### Phase 3, forty-second slice — done (the shared place sheet on Android)
+
+The map's place sheet is the shared Compose sheet now. `MapScreen.placeSheet` is
+no longer set false, `MapFragment` supplies its strings, photos (the place-images
+endpoint) and bookmark state, and every action the sheet offers is wired:
+
+- Directions, Share, View on btcmap and the two OSM links use the links the
+  desktop slice moved to `:shared`;
+- Verify and Report go through the same auth hand-off the Views screen used, then
+  `ReportPlaceFragment` (Verify pre-selecting "still accepts Bitcoin");
+- Boost, Comments (or Add comment when the place has none yet) and Add comment
+  open their existing Views screens
+  and, as in slice 41, add photo is the one action left bridging to a screen that
+  owns its flow (`PlaceFragment.create`, the standalone place screen);
+- Save toggles the bookmark with the same auth hand-off, and the sheet's bookmark
+  and photo strip are refilled from `isPlaceSaved` and the place-images endpoint.
+
+The map no longer needs its Views sheet, so `BottomSheetController`,
+`MapStatusBarController` and the bottom-sheet container left the layout; the
+fragment keeps only the sheet's place id, to reopen it after a rotation.
+
+`MapScreen` also re-reads the selected place when the host bumps `reloadKey`, so
+a sync that rewrites the row the sheet is showing refreshes it. That replaces
+`MapPlaceDeepLinkRefreshTest`, which drove the Views sheet and was deleted with
+it; the same behaviour wants a Compose-side test.
+
+Verified on the emulator: tapping a marker opens the Compose sheet with its
+photos and a labelled action grid; Comments opened the add-comment form (the
+place has none) and Verify opened the report screen with the verified reason
+selected.
 
 ## Working notes
 

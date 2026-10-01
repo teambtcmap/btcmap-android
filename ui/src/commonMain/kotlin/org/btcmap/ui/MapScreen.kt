@@ -275,6 +275,14 @@ fun MapScreen(
         }
     }
 
+    // The sheet shows the row the map last opened. A sync rewrites rows in
+    // place, so re-read the selected one instead of leaving a stale copy up.
+    LaunchedEffect(reloadKey) {
+        val current = selectedPlace ?: return@LaunchedEffect
+        withContext(Dispatchers.Default) { db.place.selectById(current.id) }
+            ?.let { selectedPlace = it }
+    }
+
     LaunchedEffect(openTarget) {
         val target = openTarget ?: return@LaunchedEffect
         state.animateCamera(

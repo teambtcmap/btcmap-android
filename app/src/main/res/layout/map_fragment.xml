@@ -9,7 +9,7 @@
         The map itself is the shared Compose map, which also draws the search
         field, the area chips, the activity button and the location button. What
         is left here is the Android-only chrome around it: the place sheet with
-        its Views place screen, the sync and update buttons, and the attribution.
+        the sync and update buttons.
     -->
     <org.btcmap.ui.MapComposeView
         android:id="@+id/map"
@@ -30,22 +30,6 @@
         android:visibility="gone" />
 
 
-    <FrameLayout
-        android:id="@+id/placeBottomSheet"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?attr/colorSurface"
-        android:elevation="6dp"
-        app:behavior_hideable="true"
-        app:layout_behavior="@string/bottom_sheet_behavior">
-
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/placeFragment"
-            android:name="org.btcmap.place.PlaceFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/buttonGroup"
