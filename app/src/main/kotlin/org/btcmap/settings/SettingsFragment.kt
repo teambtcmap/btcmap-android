@@ -4,11 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioButton
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,6 +23,8 @@ import org.btcmap.databinding.SettingsFragmentBinding
 import org.btcmap.db
 import org.btcmap.dbstats.DbStatsFragment
 import org.btcmap.imagestats.ImageStatsFragment
+import org.btcmap.ui.RadioOption
+import org.btcmap.ui.RadioPickerComposeView
 import org.btcmap.ui.SettingsItem
 
 class SettingsFragment : Fragment() {
@@ -149,59 +154,60 @@ class SettingsFragment : Fragment() {
     }
 
     private fun showMapStyleDialog() {
-        val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.map_style)
-            .setView(R.layout.map_style_dialog).show()
-
-        val setupStyle = fun RadioButton?.(style: MapStyle) {
-            if (this == null) return
-
-            text = style.name(requireContext())
-            isChecked = prefs.mapStyle == style
-
-            setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) {
-                    prefs.mapStyle = style
-                    refreshItems()
-                    dialog.dismiss()
-                }
-            }
+        val options = MapStyle.entries.map { style ->
+            RadioOption(key = style.name, label = style.name(requireContext()))
         }
-
-        setupStyle.apply {
-            invoke(dialog.findViewById(R.id.auto), MapStyle.Auto)
-            invoke(dialog.findViewById(R.id.liberty), MapStyle.Liberty)
-            invoke(dialog.findViewById(R.id.positron), MapStyle.Positron)
-            invoke(dialog.findViewById(R.id.bright), MapStyle.Bright)
-            invoke(dialog.findViewById(R.id.dark), MapStyle.Dark)
-            invoke(dialog.findViewById(R.id.dark_matter), MapStyle.DarkMatter)
+        showRadioPickerDialog(
+            titleRes = R.string.map_style,
+            options = options,
+            selectedKey = prefs.mapStyle.name,
+        ) { key ->
+            MapStyle.entries.firstOrNull { it.name == key }?.let { prefs.mapStyle = it }
+            refreshItems()
         }
     }
 
     private fun showVerifiedFilterDialog() {
-        val dialog =
-            MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.verified_filter)
-                .setView(R.layout.verified_filter_dialog).show()
-
-        val setupFilter = fun RadioButton?.(filter: Int) {
-            if (this == null) return
-
-            text = filter.toVerifiedFilterYears(requireContext())
-            isChecked = prefs.verifiedFilterYears == filter
-
-            setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) {
-                    prefs.verifiedFilterYears = filter
-                    refreshItems()
-                    dialog.dismiss()
-                }
-            }
+        val options = listOf(1, 2, 3).map { years ->
+            RadioOption(key = years.toString(), label = years.toVerifiedFilterYears(requireContext()))
         }
-
-        setupFilter.apply {
-            invoke(dialog.findViewById(R.id.one_year), 1)
-            invoke(dialog.findViewById(R.id.two_years), 2)
-            invoke(dialog.findViewById(R.id.three_years), 3)
+        showRadioPickerDialog(
+            titleRes = R.string.verified_filter,
+            options = options,
+            selectedKey = prefs.verifiedFilterYears.toString(),
+        ) { key ->
+            key.toIntOrNull()?.let { prefs.verifiedFilterYears = it }
+            refreshItems()
         }
+    }
+
+    /**
+     * Shows a titled radio picker. The content is a Compose view, so the dialog
+     * window is given the view-tree owners it would otherwise miss; a selection
+     * applies the setting and dismisses.
+     */
+    private fun showRadioPickerDialog(
+        @StringRes titleRes: Int,
+        options: List<RadioOption>,
+        selectedKey: String?,
+        onSelect: (key: String) -> Unit,
+    ) {
+        val view = RadioPickerComposeView(requireContext()).apply {
+            setViewTreeLifecycleOwner(this@SettingsFragment)
+            setViewTreeSavedStateRegistryOwner(this@SettingsFragment)
+            setViewTreeViewModelStoreOwner(this@SettingsFragment)
+            this.options = options
+            this.selectedKey = selectedKey
+        }
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(titleRes)
+            .setView(view)
+            .create()
+        view.onSelect = { key ->
+            onSelect(key)
+            dialog.dismiss()
+        }
+        dialog.show()
     }
 
     private fun updateAccountUi() {

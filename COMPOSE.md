@@ -512,6 +512,11 @@ Durable facts and conventions for continuing the migration.
   `Content()` wraps the screen in `AppTheme`.
 - Screens never touch Android resources: the fragment resolves strings (often via
   a labels data class) and passes them in, so `:ui` stays resource-free.
+- Compose content inside an Android `MaterialAlertDialog` (the map-style and
+  verified-filter pickers): build a `:ui` `AbstractComposeView`, set the
+  view-tree lifecycle, saved-state and view-model owners on it (a dialog window
+  does not inherit them), then `setView(view)`. A selection applies the setting
+  and dismisses.
 
 ### Theme, icons, Compose gotchas
 
@@ -567,6 +572,14 @@ Durable facts and conventions for continuing the migration.
   `test-diver` / `qwertyui`.
 - Verify visually via `adb shell uiautomator dump` + pulling the XML; sample
   pixels with PIL for colour checks.
+
+### Phase 2, twelfth slice — done
+
+Migrated the map-style and verified-filter dialogs from their XML radio layouts
+to a shared `RadioPickerContent` composable, hosted by a `RadioPickerComposeView`
+set into the `MaterialAlertDialog` via `setView`. Deleted
+`map_style_dialog.xml` and `verified_filter_dialog.xml`. The activity feed's chip
+filter dialog is still Views. No behavior change.
 
 ## Next
 
