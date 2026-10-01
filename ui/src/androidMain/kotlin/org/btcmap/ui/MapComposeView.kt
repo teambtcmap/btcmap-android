@@ -14,8 +14,10 @@ import androidx.compose.ui.text.font.FontFamily
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
+import org.btcmap.map.MapArea
 import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.MarkerPalette
+import org.btcmap.ui.map.SearchActions
 import java.time.ZonedDateTime
 
 /**
@@ -102,6 +104,14 @@ class MapComposeView @JvmOverloads constructor(
 
     var formatDistance: (Double) -> String by mutableStateOf({ it.toString() })
 
+    var searchActions: SearchActions? by mutableStateOf(null)
+
+    var onAddPlace: ((Double, Double) -> Unit)? by mutableStateOf(null)
+
+    var onOpenFeed: ((List<MapArea>) -> Unit)? by mutableStateOf(null)
+
+    var openPlaceId: Long? by mutableStateOf(null)
+
     @Composable
     override fun Content() {
         val fontFamily = remember(iconTypeface) { iconTypeface?.let { FontFamily(it) } }
@@ -132,6 +142,10 @@ class MapComposeView @JvmOverloads constructor(
             ),
             apiUrl = apiUrl,
             placeSheetStrings = placeSheetStrings,
+            searchActions = searchActions,
+            onAddPlace = onAddPlace,
+            onOpenFeed = onOpenFeed,
+            openPlaceId = openPlaceId,
             photos = photos,
             bookmarked = bookmarked,
             onPlaceSelected = onPlaceSelected,

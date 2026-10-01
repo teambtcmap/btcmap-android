@@ -27,11 +27,14 @@ Done and pushed:
 Next, in rough order of value:
 
 1. **Android main map swap** — point `MapFragment` at the shared map and delete
-   `MapSetupController`, `MarkerIcon`, the layer builders, `MapSelectionController`
-   and `ViewportCache`/caches, then drop the MapLibre Android SDK. Every former
-   blocker is gone: the marker filter and the offline bundled basemap were dropped
-   (slices 35 and 36) and the location button was ported to the shared map
-   (slice 37), so the swap itself is all that is left.
+   `MapSetupController`, `MarkerIcon`, the layer builders, `MapSelectionController`,
+   `LocationController`, `SearchController`, `BottomSheetController` and
+   `ViewportCache`/caches, then drop the MapLibre Android SDK. Every former
+   blocker is gone (slices 35-38): the marker filter and the offline bundled
+   basemap were dropped, the location button was ported, and the shared map now
+   has the hooks the Android host needs (see slice 38), so what remains is the
+   fragment and layout rewrite, the deletions, and the instrumented tests that
+   target the Views UI.
 2. **Desktop polish** — the add-place flow, the comments/user-profile screens and
    the auth forms (they need a place/session context).
 3. **Packaging** — `packageDeb` needs `dpkg-deb` (absent here); DMG/MSI need
@@ -1285,6 +1288,21 @@ device's location?"); allowing it recentred the camera onto the fix and drew the
 purple puck at the centre. The desktop window also renders the button (its Linux
 portal backend lives in the `location-runtime-linux` artifact the module pulls
 in).
+
+### Phase 3, thirty-eighth slice — done (the shared map's host hooks)
+
+Before the Android host can be pointed at the shared map, the map had to expose
+the few things only it knows. `MapScreen` gained `openPlaceId` (select a place and
+move to it, for a deep link), `onAddPlace(lat, lon)` (the map supplies its centre
+for the new place) and `onOpenFeed(areas)` (the feed is about the areas the map is
+showing, and the map is the only one that has them); `MapComposeView` forwards all
+three. Selecting a **search result** now also moves the camera to the place, which
+the Views map did and the shared one did not.
+
+Verified through the spike activity on the emulator: `openPlaceId` selected
+"Bazzart" (12 Ząbkowska, Warszawa), moved the camera to it at zoom 16 and opened
+the sheet; panning away and then tapping the same search result brought the map
+back to the place. The add-place and feed hooks are wired in the spike (Toasts).
 
 ## Working notes
 

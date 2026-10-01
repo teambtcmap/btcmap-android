@@ -39,6 +39,7 @@ import org.btcmap.map.EVENT_ICON
 import org.btcmap.map.EVENT_MARKER_ICON_NAME
 import org.btcmap.map.exchangeMarkerIconImageName
 import org.btcmap.util.isUpcoming
+import org.btcmap.map.MapArea
 import org.btcmap.map.markerImageName
 import org.btcmap.search.SearchAdapterItem
 import org.btcmap.map.toEventGeoJson
@@ -94,7 +95,17 @@ fun MapScreen(
     iconFont: FontFamily?,
     placeSheetStrings: PlaceSheetStrings,
     searchActions: SearchActions? = null,
-    onOpenFeed: (() -> Unit)? = null,
+    /**
+     * Creates a place at the map centre, if the host can. The map supplies the
+     * coordinates because only it knows where the user is looking.
+     */
+    onAddPlace: ((Double, Double) -> Unit)? = null,
+    onOpenFeed: ((List<MapArea>) -> Unit)? = null,
+    /**
+     * A place the host wants the map to open from outside it, such as a deep
+     * link. The map selects it and moves to it, as a tap on its marker would.
+     */
+    openPlaceId: Long? = null,
     photos: List<String> = emptyList(),
     bookmarked: Boolean = false,
     onPlaceSelected: (Place) -> Unit = {},
@@ -229,6 +240,34 @@ fun MapScreen(
 
     val areas = rememberMapAreas(state, db)
 
+    LaunchedEffect(openPlaceId) {
+        val id = openPlaceId ?: return@LaunchedEffect
+        val place = withContext(Dispatchers.Default) { db.place.selectById(id) }
+            ?: return@LaunchedEffect
+        selectedPlace = place
+        onPlaceSelected(place)
+        state.animateCamera(
+            CameraUpdate(target = Position(place.lon, place.lat), zoom = OPEN_ZOOM),
+        )
+    }
+
+    // The host supplies what it can do, but only the map knows where it is
+    // looking, so the add-place action is handed the map centre.
+    val mapSearchActions = if (searchActions == null && onAddPlace == null) {
+        null
+    } else {
+        SearchActions(
+            onAddPlace = onAddPlace?.let { createPlace ->
+                {
+                    state.cameraPosition?.target?.let { centre ->
+                        createPlace(centre.latitude, centre.longitude)
+                    }
+                }
+            },
+            onSettings = searchActions?.onSettings,
+        )
+    }
+
     var searchQuery by remember { mutableStateOf("") }
     val searchResults = rememberSearchResults(
         db = db,
@@ -240,9 +279,17 @@ fun MapScreen(
         searchQuery = ""
         when (result) {
             is SearchAdapterItem.Place -> scope.launch {
-                withContext(Dispatchers.Default) { db.place.selectById(result.placeId) }?.let {
-                    selectedPlace = it
-                    onPlaceSelected(it)
+                withContext(Dispatchers.Default) { db.place.selectById(result.placeId) }?.let { place ->
+                    selectedPlace = place
+                    onPlaceSelected(place)
+                    // A search result can be anywhere, so the map moves to it
+                    // rather than only opening its sheet.
+                    state.animateCamera(
+                        CameraUpdate(
+                            target = Position(place.lon, place.lat),
+                            zoom = OPEN_ZOOM,
+                        ),
+                    )
                 }
             }
 
@@ -340,7 +387,9 @@ fun MapScreen(
                     onAreaClick = { onSelectArea(it.id) },
                 )
                 onOpenFeed?.let { openFeed ->
-                    FilledTonalIconButton(onClick = openFeed) {
+                    // The feed is about the areas the map is showing, and the
+                    // map is the only one that knows them.
+                    FilledTonalIconButton(onClick = { openFeed(areas) }) {
                         MaterialSymbol(glyph = "monitor_heart", contentDescription = null)
                     }
                 }
@@ -403,7 +452,7 @@ fun MapScreen(
                 onQueryChange = { searchQuery = it },
                 results = searchResults,
                 onResultClick = onSearchResultClick,
-                actions = searchActions,
+                actions = mapSearchActions,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(start = 16.dp, end = 16.dp, top = 56.dp, bottom = 16.dp),
@@ -411,6 +460,9 @@ fun MapScreen(
         }
     }
 }
+
+/** The zoom a place the map was asked to open is shown at. */
+private const val OPEN_ZOOM = 16.0
 
 /** The zoom the location button moves to, matching the Android map's own. */
 private const val LOCATION_ZOOM = 14.0

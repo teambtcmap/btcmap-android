@@ -78,6 +78,20 @@ class MapSpikeActivity : AppCompatActivity() {
             onAreaSelected = { areaId ->
                 Toast.makeText(this@MapSpikeActivity, "area $areaId", Toast.LENGTH_SHORT).show()
             }
+            onAddPlace = { lat, lon ->
+                Toast.makeText(
+                    this@MapSpikeActivity,
+                    "add place at $lat,$lon",
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+            onOpenFeed = { areas ->
+                Toast.makeText(
+                    this@MapSpikeActivity,
+                    "feed: ${areas.joinToString { it.name }}",
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
             formatDistance = ::formatDistance
         }
         view.onPlaceSelected = { place ->
@@ -88,6 +102,12 @@ class MapSpikeActivity : AppCompatActivity() {
                 }
             }
         }
+        lifecycleScope.launch {
+            delay(6_000)
+            val place = app.db.place.selectMerchantsByBounds(52.20, 52.26, 21.02, 21.12).firstOrNull()
+            if (place != null) view.openPlaceId = place.id
+        }
+
         setContentView(view)
 
         // Phase 4 spike: drive a small offline pack so the port can be watched.
