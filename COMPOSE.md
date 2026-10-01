@@ -1,11 +1,11 @@
 # Migration Plan: Compose (Multiplatform) and a Shared Module
 
-Status: Phases 1 and 2 are complete (the portable core in `:shared`; the non-map
-UI in Compose). Phase 3 (the map and the desktop target) is well advanced: the
-Android map's layers, overlays, search, place sheet, offline packs and styles are
-all on MapLibre Compose, and a working **desktop app** runs from the same
-`:shared` + `:ui` code. See Progress for every slice and Working notes for the
-pitfalls.
+Status (2026-10-01): Phases 1 and 2 are complete (the portable core in `:shared`;
+the non-map UI in Compose). Phase 3 is **most of the way there**: the Android map
+and its place sheet are the shared Compose ones, and a working **desktop app**
+runs from the same `:shared` + `:ui` code with its map, feed, settings, account
+and report screens. What is left is listed under Next steps. See Progress for
+every slice and Working notes for the pitfalls.
 
 ## Current status and next steps
 
@@ -16,36 +16,40 @@ Done and pushed:
 - **`:ui`** — the Compose Multiplatform UI: the previously Views screens, the
   shared theme/toolkit, and the map (`MapScreen` and its layers, markers, chips,
   search, place sheet with photos/comments/preview map, offline packs).
-- **Android** — the **main map is the shared map**: markers, clusters, chips,
-  search, the location button and the activity button all come from `MapScreen`.
-  The place sheet is still the Views `PlaceFragment` (its twelve actions live
-  there), and the MapLibre Android SDK is still used by the offline-pack
-  downloader and the add-place form.
+- **Android** — the **map and its place sheet are the shared Compose ones**:
+  markers, clusters, chips, search, the location and activity buttons, and the
+  sheet with its twelve actions and photo strip all come from `MapScreen`. The
+  MapLibre Android SDK is left to the offline-pack downloader; every other screen
+  is Compose content hosted by its existing Views fragment (or, for the place and
+  event previews, a shared composable).
 - **Desktop (`:desktopApp`)** — runs, opens the shared database in `~/.btcmap`,
-  syncs the full cache, renders the shared map with the bundled styles and font,
-  and opens Settings from the search bar's gear and Activity from a pulse button
-  under the chips. `createDistributable` yields a self-contained app image.
+  syncs the full cache, and renders the shared map with the bundled styles and
+  font. It has its own Settings (from the search bar's gear), Activity feed (a
+  pulse button under the chips, whose rows open the place on the map), an Account
+  page that signs in with the shared API, a place **save** action and a **report**
+  form. Headless screenshots render a screen to a PNG, and `createDistributable`
+  yields a self-contained app image.
 
-Next, in rough order of value:
+Next, in rough order of value (state at 2026-10-01):
 
-1. **Unify the two add-photo flows** — slice 43 gave the map sheet its own copy
-   of the picker, camera and upload (they are the same helpers, but the launchers
-   and the upload live in each host). When the place screen itself becomes
-   Compose, the two should collapse into one.
-2. **Desktop polish** — the desktop can sign in (slice 47), save a place and
-   report one (slices 48 and 49). Left: the boost flow and posting comments (both
-   are paid in sats, so they need a wallet flow the desktop does not have), the
-   add-place and user-profile screens, evidence photos on a report, and signing
-   up and out.
-3. **Two tests the swap deleted are still to replace.** The search logic cases
-   were ported in slice 44; what remains is `MarkerIconTest`'s glyph check (the
-   shared `MarkerBitmapFactory.renderableGlyph` is private and needs the icon
-   font in jvmTest) and a Compose-side test for the sheet's refresh when a sync
+1. **Desktop polish** — what the sign-in unlocked is partly done: save and report
+   work (slices 48 and 49). Left: the **add-place** and **user-profile** screens,
+   report **evidence photos**, **sign-up and sign-out**, and the two sheet actions
+   that are paid in sats (**boost** and **comment**) and so need a wallet flow
+   rather than another form.
+2. **Unify the two add-photo flows** — slice 43 gave the map sheet its own copy of
+   the picker, camera and upload (the helpers are shared, the launchers are not).
+   It collapses when the place screen itself becomes Compose.
+3. **Two tests the swap deleted are still to replace** — the search cases came
+   back in slice 44; left are `MarkerIconTest`'s glyph check (the shared
+   `MarkerBitmapFactory.renderableGlyph` is private and needs the icon font on the
+   jvmTest classpath) and a Compose-side test for the sheet refreshing when a sync
    rewrites the row it shows.
-4. **Small parity gaps** left by the swap, all listed in slice 39: tapping empty
-   map no longer dismisses the place sheet (the map exposes no map-tap callback;
-   `InteractionBindingsBuilder` has gesture bindings but no host click callback),
-   and an area search result opens the area screen instead of framing its bbox.
+4. **Small parity gaps** — tapping empty map no longer dismisses the place sheet
+   (the map exposes no map-tap callback; `InteractionBindingsBuilder` has gesture
+   bindings but no host click callback), and an area search result opens the area
+   screen instead of framing its bbox (arguably the better behaviour; it needs a
+   decision, not code).
 
 ## Goal
 
@@ -144,11 +148,13 @@ Three Gradle modules:
   (`AppTheme`, `MaterialSymbol` and the migrated screens) plus a `:ui:run`
   desktop entry point.
 
-The Android UI is Compose **except for the map**: the still-Views pieces are the
-MapLibre `MapView` in `MapFragment` plus the embedded maps in `EventFragment` and
-`PlaceFragment`, and `AuthErrorDialogFragment` (a plain message dialog).
-`:shared` has no Android dependency; the only Android-carrying logic left in
-`:app` is `area/AreaFormatting` (`R.string`) and `UserAgent` (`BuildConfig`).
+There is a fourth module now, **`:desktopApp`** — the JVM Compose Desktop app
+sharing `:shared` and `:ui`. The Android UI is Compose content hosted by Views
+fragments; the only parts still Views are the fragments' own chrome,
+`AuthErrorDialogFragment` (a plain message dialog) and the offline-pack
+downloader. `:shared` has no Android dependency; the only Android-carrying logic
+left in `:app` is `area/AreaFormatting` (`R.string`) and `UserAgent`
+(`BuildConfig`).
 
 ## Phases
 
@@ -219,10 +225,11 @@ desktop stays a secondary client.
 
 ### Phase 3 — Map to MapLibre Compose (and the desktop target)
 
-**Not started.** The last and riskiest phase, gated on `maplibre-compose`
-maturing. The map is the app's core and the only part that cannot be shared
-without changing rendering stacks; everything else is already shared or platform
-glue.
+**Done on Android (slice 39) and running on the desktop (slices 22-33).** What
+the plan below describes as "to change" has largely happened; it is kept as the
+record of what the migration involved. Still open from it: the place screen
+itself (only its sheet is shared), the offline-pack manager on desktop, and the
+desktop screens listed under Next steps.
 
 #### Library state (re-verify at implementation time)
 
@@ -350,7 +357,9 @@ Scaling factors:
 - **UI-rewrite estimates are notoriously optimistic.** Treat Phase 2 as a range
   with a long right tail.
 - **Offline/basemap rework.** The PMTiles archive and MapLibre offline packs are
-  Android-specific; desktop needs a different storage/caching path.
+  Android-specific; desktop needs a different storage/caching path. **Half
+  resolved**: the bundled archive is gone (slice 36), so only the offline *packs*
+  remain desktop work.
 - **Visibility churn.** Module extraction forces many `internal` declarations
   public; a large diff with little behaviour change.
 
@@ -1032,7 +1041,11 @@ Verified on the emulator with "Chit Hole Phuket Brewery": tapping a thumbnail
 opens the photo full screen, a swipe pages to the next one, and the close button
 returns to the sheet.
 
-### Main map swap — blocked (assessed)
+### Main map swap — blocked (assessed) — **resolved in slices 35-39**
+
+This entry is kept as the record of what was tried; the swap itself landed in
+slice 39, after the filter was dropped (35), the bundled basemap removed (36) and
+location ported (37).
 
 `MapFragment` has ~46 references to the Views map and three features a swap
 would regress, so the main map cannot be swapped in one slice yet:
@@ -1604,8 +1617,9 @@ Durable facts and conventions for continuing the migration.
   first); the CMP `compose.*` dependency accessors emit build-script deprecation
   warnings but work.
 - Migrating a screen usually retires its Views: delete the adapter and item
-  layout it used, and retarget the tests that read them. The only Views left are
-  the map itself (see Phase 3) and `AuthErrorDialogFragment`.
+  layout it used, and retarget the tests that read them. The map and the place
+  sheet have since left Views too (slices 39 and 42), so the only Views left are
+  the fragments' own chrome and `AuthErrorDialogFragment`.
 
 ### Tests
 
@@ -1644,11 +1658,24 @@ Durable facts and conventions for continuing the migration.
 
 ## Next
 
-Phases 1 and 2 are complete. The only remaining track is **Phase 3** (see its
-plan above): migrate the map to MapLibre Compose and add the desktop target.
-Nothing starts until Phase 3 is prioritised; it is gated on MapLibre Compose
-maturing (desktop is Alpha).
+Hand-off for the next session (state at 2026-10-01, tip `2371d0cf`):
 
-Interim state: the `:ui:run` entry point renders only `StatsScreen`, so the
-shared UI can be iterated on desktop already, but there is no desktop navigation
-or map yet. `AuthErrorDialogFragment` and the embedded `MapView`s stay Views.
+Phases 1 and 2 are complete. Phase 3 is nearly complete: the Android map and its
+place sheet are shared, and the desktop app runs its map, feed, settings, account
+and report screens from the same code. Pick up from the four items under "Next,
+in rough order of value" at the top of this file; the first is the desktop's
+add-place screen.
+
+Useful commands, all of them exercised this week:
+
+```bash
+./gradlew :shared:jvmTest :ui:jvmTest :app:testDebugUnitTest \
+  :app:compileDebugKotlin :app:compileDebugAndroidTestKotlin :desktopApp:compileKotlin
+./devtools app run                     # build, install, launch on emulator-5554
+./gradlew :desktopApp:run              # the desktop window (poll for "Rendered the first map frame")
+./gradlew :desktopApp:screenshot -Pscreenshot=settings:/tmp/x.png:dark   # settings, cache, account, report
+```
+
+Instrumented tests are compile-checked here but not run (`AGENTS.md`); the
+Working notes above record the emulator, screenshot and desktop-run recipes, the
+MapLibre Compose 0.18.0 pitfalls, and the hosting pattern for shared screens.
