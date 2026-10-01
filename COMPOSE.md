@@ -34,10 +34,11 @@ Next, in rough order of value:
    Compose, the two should collapse into one.
 2. **Desktop polish** — the add-place flow, the comments/user-profile screens and the
    auth forms on the desktop (they need a place/session context).
-3. **Port the deleted search tests.** `EventSearchTest`'s offline search cases
-   went with the Views search; the shared `MapSearch` is its port and has no tests
-   yet. `MarkerIconTest`'s glyph check went the same way (the shared
-   `MarkerBitmapFactory.renderableGlyph` is private and needs a font in jvmTest).
+3. **Two tests the swap deleted are still to replace.** The search logic cases
+   were ported in slice 44; what remains is `MarkerIconTest`'s glyph check (the
+   shared `MarkerBitmapFactory.renderableGlyph` is private and needs the icon
+   font in jvmTest) and a Compose-side test for the sheet's refresh when a sync
+   rewrites the row it shows.
 4. **Small parity gaps** left by the swap, all listed in slice 39: tapping empty
    map no longer dismisses the place sheet (the map exposes no map-tap callback;
    `InteractionBindingsBuilder` has gesture bindings but no host click callback),
@@ -1441,6 +1442,19 @@ for when the place screen itself becomes Compose.
 Verified on the emulator: Add photo opened the source dialog with both options,
 and Choose from gallery opened the system photo picker. The upload itself was not
 re-run, so as not to post a test photo to a live place.
+
+### Phase 3, forty-fourth slice — done (the search tests are back)
+
+`EventSearchTest`'s offline search cases went with the Views search and the
+shared `MapSearch` had none, so they are back in `:ui:jvmTest` as
+`MapSearchTest`: a matching event is returned with its icon and distance, places
+and events sort by distance, an event's website is not searched, a matching area
+comes back with its bbox and header image, and an exact name match ranks above a
+substring one. The search itself is `internal` now, and `:ui`'s jvm tests carry
+the bundled SQLite driver and Gson, since the rows the search reads are real
+table rows and one of them holds a Gson geometry column.
+
+Verified by running the five cases on the JVM.
 
 ## Working notes
 

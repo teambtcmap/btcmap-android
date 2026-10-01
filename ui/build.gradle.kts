@@ -53,6 +53,11 @@ kotlin {
 
         jvmTest.dependencies {
             implementation(kotlin("test"))
+            // The shared search runs against a real database, so the tests open
+            // one with the same driver the app uses on the JVM.
+            implementation(libs.androidx.sqlite.bundled.jvm)
+            // The table rows the search reads carry a Gson geometry column.
+            implementation(libs.gson)
         }
     }
 }

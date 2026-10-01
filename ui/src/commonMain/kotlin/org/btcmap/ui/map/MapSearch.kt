@@ -80,7 +80,7 @@ private fun AreaSearchProjection.searchBbox(): List<Double>? {
     return listOf(west, south, east, north)
 }
 
-private fun search(
+internal fun search(
     db: Database,
     query: String,
     referenceLat: Double,
