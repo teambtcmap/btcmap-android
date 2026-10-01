@@ -32,8 +32,10 @@ Next, in rough order of value:
    of the picker, camera and upload (they are the same helpers, but the launchers
    and the upload live in each host). When the place screen itself becomes
    Compose, the two should collapse into one.
-2. **Desktop polish** — the add-place flow, the comments/user-profile screens and the
-   auth forms on the desktop (they need a place/session context).
+2. **Desktop polish** — now that the desktop can sign in (slice 47), the sheet
+   actions that need a session (verify, report, boost, comment, save) and the
+   add-place and user-profile screens are next; signing up, signing out and the
+   other account actions are still to do as well.
 3. **Two tests the swap deleted are still to replace.** The search logic cases
    were ported in slice 44; what remains is `MarkerIconTest`'s glyph check (the
    shared `MarkerBitmapFactory.renderableGlyph` is private and needs the icon
@@ -1476,6 +1478,23 @@ The map is rebuilt on the way back, so the effect always runs.
 Verified by compiling and running the desktop window, which rendered its first
 map frame; the click itself cannot be exercised from here, since this Wayland
 session has no input-injection tool.
+
+### Phase 3, forty-seventh slice — done (the desktop can sign in)
+
+The desktop's Account row said "Not signed in" and did nothing, which gated
+everything that needs a session: the place sheet's verify, report, boost,
+comment and save actions. Settings' Account row now opens an **Account** page
+with a username and password form, and signing in calls the same shared
+`Api.signIn` the app uses (as the `BTC Map desktop` token label) and stores the
+session with `Settings.replaceSession`, so the rest of the app —
+`prefs.authorized`, the sync's token, the user row — sees a signed-in user.
+Accounts are still created in the app or on btcmap.org; signing up, signing out
+and the other account actions are the follow-up.
+
+Verified by rendering the page with the desktop's headless screenshot mode
+(`-Pscreenshot=account:...`): the title, both fields, the disabled-until-filled
+Sign in button and the note render. Signing in itself was not exercised, as that
+needs real credentials.
 
 ## Working notes
 
