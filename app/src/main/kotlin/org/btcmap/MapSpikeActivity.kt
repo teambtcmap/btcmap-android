@@ -25,7 +25,8 @@ class MapSpikeActivity : AppCompatActivity() {
             setViewTreeViewModelStoreOwner(this@MapSpikeActivity)
             initialLat = CENTER_LAT
             initialLon = CENTER_LON
-            initialZoom = 12.0
+            initialZoom = 15.0
+            iconTypeface = org.btcmap.util.iconTypeface
         }
         setContentView(view)
 
@@ -46,8 +47,8 @@ class MapSpikeActivity : AppCompatActivity() {
         const val TAG = "MapSpike"
 
         // Johannesburg, the densest cell in the bundled snapshot.
-        const val CENTER_LAT = -26.2041
-        const val CENTER_LON = 28.0473
+        const val CENTER_LAT = -26.2803652
+        const val CENTER_LON = 28.1245857
         const val HALF_BOX = 0.08
     }
 }

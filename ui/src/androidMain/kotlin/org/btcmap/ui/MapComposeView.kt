@@ -1,13 +1,16 @@
 package org.btcmap.ui
 
 import android.content.Context
+import android.graphics.Typeface
 import android.util.AttributeSet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AbstractComposeView
+import androidx.compose.ui.text.font.FontFamily
 import org.btcmap.db.table.place.Marker
 
 /**
@@ -35,10 +38,19 @@ class MapComposeView @JvmOverloads constructor(
 
     var boostedMarkerBackgroundColor: Color by mutableStateOf(Color(0xFF7B3FE4))
 
+    var boostedMarkerIconColor: Color by mutableStateOf(Color.White)
+
+    var markerBadgeBackgroundColor: Color by mutableStateOf(Color(0xFFE53935))
+
+    var markerBadgeTextColor: Color by mutableStateOf(Color.White)
+
     var usingOpenFreeMap: Boolean by mutableStateOf(true)
+
+    var iconTypeface: Typeface? by mutableStateOf(null)
 
     @Composable
     override fun Content() {
+        val fontFamily = remember(iconTypeface) { iconTypeface?.let { FontFamily(it) } }
         MapScreen(
             styleUrl = styleUrl,
             markers = markers,
@@ -48,7 +60,11 @@ class MapComposeView @JvmOverloads constructor(
             markerBackgroundColor = markerBackgroundColor,
             markerIconColor = markerIconColor,
             boostedMarkerBackgroundColor = boostedMarkerBackgroundColor,
+            boostedMarkerIconColor = boostedMarkerIconColor,
+            markerBadgeBackgroundColor = markerBadgeBackgroundColor,
+            markerBadgeTextColor = markerBadgeTextColor,
             usingOpenFreeMap = usingOpenFreeMap,
+            iconFont = fontFamily,
         )
     }
 }

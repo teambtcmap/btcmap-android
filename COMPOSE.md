@@ -667,6 +667,38 @@ MapLibre Compose DSL notes worth keeping:
 - `rememberMapState`'s camera seed parameter is `initialCameraPosition`.
 - `condition(...)` + `switch(..., fallback = ...)` build the style's `switch`.
 
+### Phase 3, third slice — done (merchant marker bitmaps)
+
+Ported `org.btcmap.map.MarkerIcon`'s merchant marker to Compose graphics in
+`ui/.../map/MarkerBitmapFactory.kt`: the same `map_marker` pin outline (as a
+`PathParser` path), the Material Symbols glyph measured with `TextMeasurer`, and
+the comment badge, at the same dp sizes and variants (boosted, outdated,
+`-bN`/`-b9p`). The icon font comes from the host, like the rest of the shared UI.
+
+`MerchantLayers` draws the marker with `iconImage = image(<name expression>)`,
+the name matching `org.btcmap.map.merchantMarkerImageName`; `MapScreen`
+generates each distinct bitmap and registers it in the style. The pin's alpha
+masks and tap hit-testing (`MarkerImageRegistry`) are not ported yet; they belong
+with the interaction work.
+
+The important discovery (0.18.0), worth not rediscovering:
+
+- **A layer that references a style image by name only draws it when the image
+  already exists in the style *and* the layer is declared after it is added.**
+  Neither `MapState.missingImageResolver` nor registering the image afterwards
+  makes an already-declared layer draw it. `MapScreen` therefore registers the
+  bitmaps first and only then declares the marker layer (re-declaring it for a
+  frame when the markers change).
+- `image(ImageBitmap)` (the inline overload) is fine on its own — the layer
+  registers the image itself — but it cannot vary per feature.
+- `StyleImages` has an internal constructor, but `MapState.style.images`
+  exposes it, and the commands apply to the loaded style, so wait for
+  `MapStyleState.loadState is StyleLoadState.Ready` first.
+
+Verified on the emulator: the pins draw with their glyphs (orange pin, white
+shopping-cart and fuel-pump glyphs) over the OpenFreeMap liberty style, and
+clustering still works at low zoom.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
