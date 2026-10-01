@@ -438,6 +438,16 @@ to drive the Compose view. Also fixed a theme gap this screen exposed:
 and vanished on a dark background; `AppTheme` now provides the scheme's
 `onBackground` as `LocalContentColor`. No behavior change.
 
+### Phase 2, seventh slice — done
+
+Migrated `CommentsFragment` to a shared `CommentsScreen` in `:ui`: a lazy list
+of comment rows (person icon, message, date), an empty state, and an add FAB
+whose icon is drawn from the Material Symbols font, hosted by a
+`CommentsComposeView`. The fragment keeps the view model, the sync/retry logic
+and the add-screen navigation. `CommentsAdapter` and its item layout stay for
+`PlaceFragment`, which still renders the same rows in Views. Updated
+`CommentsFragmentTest` to drive the Compose view. No behavior change.
+
 ## Next
 
 Phase 2 continues: migrate the remaining non-map screens to `:ui` screen by

@@ -1,21 +1,21 @@
 package org.btcmap.comment
 
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
-import androidx.core.view.isVisible
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.typeText
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
@@ -23,10 +23,10 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.db.table.comment.Comment
+import org.btcmap.ui.CommentsComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
-import org.hamcrest.Matchers.not
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -39,6 +39,15 @@ import java.util.concurrent.atomic.AtomicInteger
 class CommentsFragmentTest : AppTestCase() {
 
     private val placeId = 1L
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
+
+    private val addDescription =
+        ApplicationProvider.getApplicationContext<android.content.Context>().getString(R.string.add)
+
+    private fun commentsView(fragment: CommentsFragment): CommentsComposeView =
+        fragment.requireView().findViewById(R.id.commentsList)
 
     private fun comment(id: Long, text: String, createdAt: String): Comment = Comment(
         id = id,
@@ -75,24 +84,18 @@ class CommentsFragmentTest : AppTestCase() {
         )
 
         launchComments { _, fragment ->
-            waitUntilOnMain {
-                fragment.requireView()
-                    .findViewById<RecyclerView>(R.id.list)
-                    .adapter?.itemCount == 2
-            }
-            onView(withText("Second")).check(matches(isDisplayed()))
-            onView(withText("First")).check(matches(isDisplayed()))
-            onView(withId(R.id.empty)).check(matches(not(isDisplayed())))
+            waitUntilOnMain { commentsView(fragment).items.size == 2 }
+            composeTestRule.onNodeWithText("Second").assertIsDisplayed()
+            composeTestRule.onNodeWithText("First").assertIsDisplayed()
+            Assert.assertNull(commentsView(fragment).emptyMessage)
         }
     }
 
     @Test
     fun showsEmptyStateWhenThereAreNoComments() {
         launchComments { _, fragment ->
-            waitUntilOnMain {
-                fragment.requireView().findViewById<View>(R.id.empty).isVisible
-            }
-            onView(withId(R.id.empty)).check(matches(isDisplayed()))
+            waitUntilOnMain { commentsView(fragment).emptyMessage != null }
+            Assert.assertNotNull(commentsView(fragment).emptyMessage)
         }
     }
 
@@ -104,7 +107,7 @@ class CommentsFragmentTest : AppTestCase() {
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
 
-            onView(withId(R.id.fab)).perform(click())
+            composeTestRule.onNodeWithContentDescription(addDescription).performClick()
 
             waitUntilOnMain {
                 activity.supportFragmentManager
@@ -126,13 +129,11 @@ class CommentsFragmentTest : AppTestCase() {
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
 
-            waitUntilOnMain {
-                fragment.requireView().findViewById<View>(R.id.empty).isVisible
-            }
+            waitUntilOnMain { commentsView(fragment).emptyMessage != null }
             // Let the first sync finish so the list is stable before posting.
             waitUntil { dispatcher.commentsRequests.get() >= 1 }
 
-            onView(withId(R.id.fab)).perform(click())
+            composeTestRule.onNodeWithContentDescription(addDescription).performClick()
             waitUntilOnMain {
                 activity.supportFragmentManager
                     .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
@@ -152,13 +153,13 @@ class CommentsFragmentTest : AppTestCase() {
 
             waitUntil {
                 try {
-                    onView(withText("gm")).check(matches(isDisplayed()))
+                    composeTestRule.onNodeWithText("gm").assertIsDisplayed()
                     true
                 } catch (t: Throwable) {
                     false
                 }
             }
-            onView(withId(R.id.empty)).check(matches(not(isDisplayed())))
+            Assert.assertNull(commentsView(fragment).emptyMessage)
         }
     }
 
@@ -176,12 +177,10 @@ class CommentsFragmentTest : AppTestCase() {
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
 
-            waitUntilOnMain {
-                fragment.requireView().findViewById<View>(R.id.empty).isVisible
-            }
+            waitUntilOnMain { commentsView(fragment).emptyMessage != null }
             waitUntil { dispatcher.commentsRequests.get() >= 1 }
 
-            onView(withId(R.id.fab)).perform(click())
+            composeTestRule.onNodeWithContentDescription(addDescription).performClick()
             waitUntilOnMain {
                 activity.supportFragmentManager
                     .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
@@ -201,7 +200,7 @@ class CommentsFragmentTest : AppTestCase() {
 
             waitUntil {
                 try {
-                    onView(withText("gm")).check(matches(isDisplayed()))
+                    composeTestRule.onNodeWithText("gm").assertIsDisplayed()
                     true
                 } catch (t: Throwable) {
                     false
@@ -211,7 +210,7 @@ class CommentsFragmentTest : AppTestCase() {
                 "the list must have retried the sync",
                 dispatcher.commentsAfterPost.get() >= 2,
             )
-            onView(withId(R.id.empty)).check(matches(not(isDisplayed())))
+            Assert.assertNull(commentsView(fragment).emptyMessage)
         }
     }
 
@@ -229,12 +228,10 @@ class CommentsFragmentTest : AppTestCase() {
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
 
-            waitUntilOnMain {
-                fragment.requireView().findViewById<View>(R.id.empty).isVisible
-            }
+            waitUntilOnMain { commentsView(fragment).emptyMessage != null }
             waitUntil { dispatcher.commentsRequests.get() >= 1 }
 
-            onView(withId(R.id.fab)).perform(click())
+            composeTestRule.onNodeWithContentDescription(addDescription).performClick()
             waitUntilOnMain {
                 activity.supportFragmentManager
                     .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
@@ -254,7 +251,7 @@ class CommentsFragmentTest : AppTestCase() {
 
             waitUntil {
                 try {
-                    onView(withText("gm")).check(matches(isDisplayed()))
+                    composeTestRule.onNodeWithText("gm").assertIsDisplayed()
                     true
                 } catch (t: Throwable) {
                     false
@@ -281,12 +278,10 @@ class CommentsFragmentTest : AppTestCase() {
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
 
-            waitUntilOnMain {
-                fragment.requireView().findViewById<View>(R.id.empty).isVisible
-            }
+            waitUntilOnMain { commentsView(fragment).emptyMessage != null }
             waitUntil { dispatcher.commentsRequests.get() >= 1 }
 
-            onView(withId(R.id.fab)).perform(click())
+            composeTestRule.onNodeWithContentDescription(addDescription).performClick()
             waitUntilOnMain {
                 activity.supportFragmentManager
                     .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
@@ -308,7 +303,7 @@ class CommentsFragmentTest : AppTestCase() {
             // published, so the list is still genuinely empty; the empty state
             // must not be shown while the retry is still looking for it.
             waitUntil { dispatcher.commentsAfterPost.get() >= 2 }
-            onView(withId(R.id.empty)).check(matches(not(isDisplayed())))
+            Assert.assertNull(commentsView(fragment).emptyMessage)
         }
     }
 
@@ -326,12 +321,10 @@ class CommentsFragmentTest : AppTestCase() {
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
 
-            waitUntilOnMain {
-                fragment.requireView().findViewById<View>(R.id.empty).isVisible
-            }
+            waitUntilOnMain { commentsView(fragment).emptyMessage != null }
             waitUntil { dispatcher.commentsRequests.get() >= 1 }
 
-            onView(withId(R.id.fab)).perform(click())
+            composeTestRule.onNodeWithContentDescription(addDescription).performClick()
             waitUntilOnMain {
                 activity.supportFragmentManager
                     .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
@@ -357,13 +350,13 @@ class CommentsFragmentTest : AppTestCase() {
 
             waitUntil {
                 try {
-                    onView(withText("gm")).check(matches(isDisplayed()))
+                    composeTestRule.onNodeWithText("gm").assertIsDisplayed()
                     true
                 } catch (t: Throwable) {
                     false
                 }
             }
-            onView(withId(R.id.empty)).check(matches(not(isDisplayed())))
+            Assert.assertNull(commentsView(fragment).emptyMessage)
         }
     }
 

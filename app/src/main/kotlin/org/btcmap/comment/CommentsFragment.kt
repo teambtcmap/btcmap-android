@@ -4,10 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
@@ -15,17 +11,17 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.btcmap.R
-import org.btcmap.sync.SyncEvent
 import org.btcmap.databinding.CommentsFragmentBinding
 import org.btcmap.db
+import org.btcmap.sync.SyncEvent
 import org.btcmap.syncController
+import org.btcmap.util.iconTypeface
 
 class CommentsFragment : Fragment() {
 
@@ -47,13 +43,6 @@ class CommentsFragment : Fragment() {
     private val viewModel: CommentsViewModel by lazy {
         ViewModelProvider(this)[CommentsViewModel::class.java]
     }
-
-    /**
-     * Items handed to the adapter by the last [renderComments] call. Resumes and
-     * the post-payment retry re-read the same rows repeatedly, so the adapter is
-     * only updated when the list actually changed.
-     */
-    private var lastSubmittedItems: List<CommentsAdapterItem>? = null
 
     /**
      * True once the current resume's sync attempt has finished, so the empty
@@ -88,32 +77,9 @@ class CommentsFragment : Fragment() {
 
         binding.topAppBar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
-        binding.list.layoutManager = LinearLayoutManager(requireContext())
-        val adapter = CommentsAdapter()
-        binding.list.adapter = adapter
-        binding.list.setHasFixedSize(true)
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val margin = (resources.displayMetrics.density * 24).toInt()
-            // The insets are physical while marginEnd follows the layout
-            // direction, so under RTL the button's end margin must clear the
-            // physical left inset, not the right one.
-            val endInset = if (v.layoutDirection == View.LAYOUT_DIRECTION_RTL) {
-                insets.left
-            } else {
-                insets.right
-            }
-
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                marginEnd = endInset + margin
-                bottomMargin = insets.bottom + margin
-            }
-
-            WindowInsetsCompat.CONSUMED
-        }
-
-        binding.fab.setOnClickListener {
+        binding.commentsList.iconTypeface = iconTypeface
+        binding.commentsList.addDescription = getString(R.string.add)
+        binding.commentsList.onAddComment = {
             // Snapshot what the user has seen before the add screen can store
             // anything, so the retry knows which comments are genuinely new.
             viewModel.onAddCommentOpened()
@@ -152,7 +118,7 @@ class CommentsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 syncController().events.collect { event ->
-                    if (event == SyncEvent.CommentsChanged) renderComments(adapter)
+                    if (event == SyncEvent.CommentsChanged) renderComments()
                 }
             }
         }
@@ -163,7 +129,7 @@ class CommentsFragment : Fragment() {
                 // not just the first one, so it cannot flash while the list is
                 // still being fetched (for example right after a payment).
                 syncFinished = false
-                val rendered = renderComments(adapter)
+                val rendered = renderComments()
 
                 // Syncing on every resume also retries a sync that failed while
                 // the screen was in the background. It stays cheap because
@@ -171,41 +137,37 @@ class CommentsFragment : Fragment() {
                 val synced = viewModel.syncOnResume(
                     renderedNow = rendered,
                     sync = { syncComments() },
-                    render = { renderComments(adapter) },
+                    render = { renderComments() },
                 )
 
                 lastSyncFailed = !synced
                 syncFinished = true
-                renderComments(adapter)
+                renderComments()
             }
         }
     }
 
-    private suspend fun renderComments(adapter: CommentsAdapter): List<CommentsAdapterItem> {
+    private suspend fun renderComments(): List<CommentsAdapterItem> {
         return renderMutex.withLock {
             val items = withContext(Dispatchers.IO) {
                 val formatter = commentDateFormatter()
                 db().comment.selectByPlaceId(args.placeId).map { it.toAdapterItem(formatter) }
             }
 
-            if (items != lastSubmittedItems) {
-                adapter.submitList(items)
-                lastSubmittedItems = items
-            }
-            viewModel.onCommentsRendered(items.map { it.id }.toSet())
-
             // Only claim the list is empty once a sync attempt finished; after a
-            // failure it still says so, but with a message that admits the
-            // fetch failed rather than asserting there are no comments. The
-            // text is only touched when shown, so a background re-render does
-            // not allocate a string every time.
+            // failure it still says so, but with a message that admits the fetch
+            // failed rather than asserting there are no comments.
             val emptyMessage = commentsEmptyStateMessageRes(
                 syncFinished = syncFinished,
                 syncFailed = lastSyncFailed,
                 hasComments = items.isNotEmpty(),
             )
-            binding.empty.isVisible = emptyMessage != null
-            emptyMessage?.let { binding.empty.setText(it) }
+
+            _binding?.commentsList?.let {
+                it.items = items
+                it.emptyMessage = emptyMessage?.let(::getString)
+            }
+            viewModel.onCommentsRendered(items.map { it.id }.toSet())
 
             items
         }
@@ -218,11 +180,8 @@ class CommentsFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // These describe the view that was showing. Clearing them means a tap
-        // before the recreated view renders again cannot snapshot a stale
-        // baseline. The pending post-payment flags live in the view model and
-        // are deliberately kept.
-        lastSubmittedItems = null
+        // The pending post-payment flags live in the view model and are
+        // deliberately kept across a view recreation.
         viewModel.onViewDestroyed()
         _binding = null
     }
