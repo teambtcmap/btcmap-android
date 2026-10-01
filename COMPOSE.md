@@ -1083,6 +1083,32 @@ history. That took about a minute and left 42,981 places, 1,008 areas, 2,843
 comments and 172 events in `~/.btcmap/btcmap.db`, so the map and the shared
 screens have real data.
 
+### Phase 3, twenty-seventh slice — done (step 6: desktop navigation)
+
+The desktop window gained a `NavigationRail` with a **Map** and a **Cache**
+screen; the cache screen shows the sync state, a Sync button and the shared
+stats screen (recomputed when the sync state changes), and the map keeps the
+whole window otherwise.
+
+Verified visually: the rail renders with Map selected beside the shared map,
+its markers and the area chips.
+
+### Taking a desktop screenshot in this environment
+
+The session is GNOME on Wayland and neither `import` (ImageMagick here has no
+X11 delegate) nor `grim` (mutter does not implement wlr-screencopy) works, and
+`org.gnome.Shell.Screenshot` is denied. The portal does work:
+
+```bash
+gdbus call --session --dest org.freedesktop.portal.Desktop \
+  --object-path /org/freedesktop/portal/desktop \
+  --method org.freedesktop.portal.Screenshot.Screenshot "" '{}'
+# writes ~/Pictures/Screenshot.png (a prompt may appear)
+```
+
+Launch the app first so its window is focused — the portal captures the whole
+screen, so whatever is in front is what lands in the file.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

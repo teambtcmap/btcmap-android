@@ -20,12 +20,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import org.btcmap.ui.MaterialSymbol
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -92,7 +100,28 @@ fun main() = application {
                 val syncState by syncManager.state.collectAsState()
                 LaunchedEffect(Unit) { syncManager.start() }
 
-                androidx.compose.foundation.layout.Box {
+                var screen by remember { mutableStateOf(Screen.Map) }
+
+                Row(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
+                    NavigationRail {
+                        NavigationRailItem(
+                            selected = screen == Screen.Map,
+                            onClick = { screen = Screen.Map },
+                            icon = { MaterialSymbol(glyph = "map", contentDescription = null) },
+                            label = { Text("Map") },
+                        )
+                        NavigationRailItem(
+                            selected = screen == Screen.Stats,
+                            onClick = { screen = Screen.Stats },
+                            icon = { MaterialSymbol(glyph = "insights", contentDescription = null) },
+                            label = { Text("Cache") },
+                        )
+                    }
+
+                    androidx.compose.foundation.layout.Box(
+                        modifier = androidx.compose.ui.Modifier.weight(1f),
+                    ) {
+                if (screen == Screen.Map) {
                 MapScreen(
                     db = db,
                     styleUrl = "https://tiles.openfreemap.org/styles/liberty",
@@ -123,22 +152,26 @@ fun main() = application {
                     onSelectArea = {},
                     formatDistance = { meters -> "%.1f km".format(meters / 1000) },
                 )
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(16.dp),
-                ) {
-                    Text(text = "Sync: $syncState")
-                    Button(onClick = { syncManager.start() }) { Text("Sync now") }
-                    Text(text = "Places: ${db.place.selectCount()}")
+                } else {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = androidx.compose.ui.Modifier.padding(24.dp),
+                    ) {
+                        Text(text = "Sync: $syncState")
+                        Button(onClick = { syncManager.start() }) { Text("Sync now") }
+                    }
+                    val sections = remember(syncState) { statsSections(db, settings) }
+                    StatsScreen(sections = sections)
+                }
                 }
                 }
             }
         }
     }
 }
+
+/** The desktop app's screens. */
+private enum class Screen { Map, Stats }
 
 private const val API_URL = "https://api.btcmap.org"
 private const val USER_AGENT = "btcmap-desktop"
