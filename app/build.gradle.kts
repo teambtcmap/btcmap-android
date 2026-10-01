@@ -27,7 +27,7 @@ android {
         targetSdk {
             version = release(37)
         }
-        versionCode = 162
+        versionCode = 163
         versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -123,6 +123,8 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":shared"))
+
     implementation(libs.kotlinx.coroutines)
 
     implementation(libs.androidx.sqlite)

@@ -8,7 +8,7 @@ package org.btcmap.search
  * unrelated reason is dropped. Everything local matches on the name, so there
  * is no lower "matched another tag" rank.
  */
-internal fun nameMatchRank(names: List<String>, query: String): Int? {
+fun nameMatchRank(names: List<String>, query: String): Int? {
     var best: Int? = null
     for (name in names) {
         if (!name.contains(query, ignoreCase = true)) continue
