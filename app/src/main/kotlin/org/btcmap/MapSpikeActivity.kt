@@ -7,6 +7,7 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import org.btcmap.ui.MapComposeView
+import java.text.NumberFormat
 
 /**
  * Phase 3 spike: hosts the shared MapLibre Compose map ([MapComposeView]) so it
@@ -35,11 +36,22 @@ class MapSpikeActivity : AppCompatActivity() {
             onEventSelected = { event ->
                 Toast.makeText(this@MapSpikeActivity, "event ${event.id}: ${event.name}", Toast.LENGTH_SHORT).show()
             }
-            onAreaSelected = { area ->
-                Toast.makeText(this@MapSpikeActivity, "area ${area.id}: ${area.name}", Toast.LENGTH_SHORT).show()
+            onAreaSelected = { areaId ->
+                Toast.makeText(this@MapSpikeActivity, "area $areaId", Toast.LENGTH_SHORT).show()
             }
+            formatDistance = ::formatDistance
         }
         setContentView(view)
+    }
+
+    /** Mirrors `SearchController`'s distance formatting. */
+    private fun formatDistance(meters: Double): String {
+        val format = NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }
+        return if (meters < 1_000) {
+            getString(R.string.s_m, format.format(meters))
+        } else {
+            getString(R.string.s_km, format.format(meters / 1_000))
+        }
     }
 
     private companion object {

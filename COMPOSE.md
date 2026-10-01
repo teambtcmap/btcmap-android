@@ -781,6 +781,26 @@ Verified on the emulator: Warsaw shows the Poland country chip and the
 "21 Bitcoin Polska" community chip, each with its event badge, and tapping a
 chip selects its area (530).
 
+### Phase 3, eighth slice — done (map search)
+
+Ported `org.btcmap.map.SearchController` and the `SearchView` to the shared UI:
+`ui/.../map/MapSearch.kt` (`rememberSearchResults`, the local ranking over
+places, areas and events, debounced) and `ui/.../map/SearchOverlay.kt` (the
+query field and the results list with the icon, name and distance). `MapScreen`
+overlays the search at the top and routes a result to the existing
+`onSelectPlace`/`onSelectEvent`/`onSelectArea` callbacks, clearing the query.
+The distance formatter is supplied by the host, like the other strings.
+
+Notes worth keeping:
+
+- The geodesic distance is a local haversine (no `android.location` in common
+  code), and the search reads the map centre only when a query runs, so it does
+  not recompose the map on every camera frame.
+
+Verified on the emulator: typing "bitcoin" lists the ranked local matches with
+their icons and distances, and tapping one selects it (event 165) and clears
+the field.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

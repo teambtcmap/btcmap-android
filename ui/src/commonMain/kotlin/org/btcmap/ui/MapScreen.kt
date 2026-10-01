@@ -26,13 +26,13 @@ import kotlinx.serialization.json.longOrNull
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
-import org.btcmap.map.MapArea
 import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.EVENT_ICON
 import org.btcmap.map.EVENT_MARKER_ICON_NAME
 import org.btcmap.map.exchangeMarkerIconImageName
 import org.btcmap.util.isUpcoming
 import org.btcmap.map.markerImageName
+import org.btcmap.search.SearchAdapterItem
 import org.btcmap.map.toEventGeoJson
 import org.btcmap.map.toMarkerGeoJson
 import org.btcmap.ui.map.AreaChipPalette
@@ -44,6 +44,8 @@ import org.btcmap.ui.map.MarkerBitmapFactory
 import org.btcmap.ui.map.MarkerClickHandler
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.MerchantLayers
+import org.btcmap.ui.map.SearchOverlay
+import org.btcmap.ui.map.rememberSearchResults
 import org.btcmap.ui.map.rememberMapAreas
 import org.btcmap.ui.map.rememberViewportFeatures
 import org.maplibre.compose.camera.CameraPosition
@@ -74,7 +76,8 @@ fun MapScreen(
     iconFont: FontFamily?,
     onSelectPlace: (Place) -> Unit,
     onSelectEvent: (Event) -> Unit,
-    onSelectArea: (MapArea) -> Unit,
+    onSelectArea: (Long) -> Unit,
+    formatDistance: (Double) -> String,
     modifier: Modifier = Modifier,
 ) {
     val textMeasurer = rememberTextMeasurer()
@@ -156,6 +159,30 @@ fun MapScreen(
 
     val areas = rememberMapAreas(state, db)
 
+    var searchQuery by remember { mutableStateOf("") }
+    val searchResults = rememberSearchResults(
+        db = db,
+        state = state,
+        query = searchQuery,
+        formatDistance = formatDistance,
+    )
+    val onSearchResultClick: (SearchAdapterItem) -> Unit = { result ->
+        searchQuery = ""
+        when (result) {
+            is SearchAdapterItem.Place -> scope.launch {
+                withContext(Dispatchers.Default) { db.place.selectById(result.placeId) }
+                    ?.let(onSelectPlace)
+            }
+
+            is SearchAdapterItem.Event -> scope.launch {
+                withContext(Dispatchers.Default) { db.event.selectById(result.eventId) }
+                    ?.let(onSelectEvent)
+            }
+
+            is SearchAdapterItem.Area -> onSelectArea(result.areaId)
+        }
+    }
+
     val merchants = rememberViewportFeatures(
         state = state,
         idOf = { it.id },
@@ -231,10 +258,19 @@ fun MapScreen(
                 areas = areas,
                 apiUrl = apiUrl,
                 palette = areaChipPalette,
-                onAreaClick = onSelectArea,
+                onAreaClick = { onSelectArea(it.id) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 24.dp, bottom = 112.dp),
+            )
+            SearchOverlay(
+                query = searchQuery,
+                onQueryChange = { searchQuery = it },
+                results = searchResults,
+                onResultClick = onSearchResultClick,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(start = 16.dp, end = 16.dp, top = 56.dp, bottom = 16.dp),
             )
         }
     }

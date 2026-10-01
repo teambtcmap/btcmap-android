@@ -14,7 +14,6 @@ import androidx.compose.ui.text.font.FontFamily
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
-import org.btcmap.map.MapArea
 import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.MarkerPalette
 import java.time.ZonedDateTime
@@ -67,7 +66,9 @@ class MapComposeView @JvmOverloads constructor(
 
     var onEventSelected: (Event) -> Unit by mutableStateOf({})
 
-    var onAreaSelected: (MapArea) -> Unit by mutableStateOf({})
+    var onAreaSelected: (Long) -> Unit by mutableStateOf({})
+
+    var formatDistance: (Double) -> String by mutableStateOf({ it.toString() })
 
     @Composable
     override fun Content() {
@@ -100,6 +101,7 @@ class MapComposeView @JvmOverloads constructor(
             onSelectPlace = onPlaceSelected,
             onSelectEvent = onEventSelected,
             onSelectArea = onAreaSelected,
+            formatDistance = formatDistance,
         )
     }
 }
