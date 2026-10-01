@@ -19,6 +19,8 @@ import java.awt.Color as AwtColor
 import androidx.compose.ui.graphics.Color
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +29,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.rememberCoroutineScope
 import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getActivity
 import org.btcmap.map.MapAreasController
@@ -40,7 +46,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.btcmap.ui.SettingsItem
 import org.btcmap.ui.SettingsScreen
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,6 +59,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.api.Api
+import org.btcmap.api.signIn
+import org.btcmap.api.toDbUser
 import org.btcmap.api.apiHttpClient
 import org.btcmap.db.Database
 import org.btcmap.sync.Sync
@@ -205,6 +215,13 @@ private fun runApp() = application {
                             DesktopSettingsScreen(db, settings)
                         }
 
+                        Route.Account -> DesktopAccountScreen(
+                            api = api,
+                            db = db,
+                            settings = settings,
+                            onBack = { route = Route.Settings },
+                        )
+
                         Route.Feed -> ScreenPage(
                             title = "Activity",
                             onBack = { route = Route.Map },
@@ -245,7 +262,7 @@ private fun ScreenPage(
 }
 
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Feed, Settings }
+private enum class Route { Map, Feed, Settings, Account }
 
 private const val SCREENSHOT_ARG = "--screenshot="
 
@@ -279,7 +296,21 @@ private fun renderScreen(spec: String) {
             Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
                 when (name) {
                     "settings" -> DesktopSettingsScreen(db, settings)
-                    "cache" -> StatsScreen(sections = statsSections(db, settings))
+                    "account" -> DesktopAccountScreen(
+                        api = Api(
+                            httpClient = apiHttpClient(
+                                userAgent = USER_AGENT,
+                                token = { settings.getString(KEY_AUTH_TOKEN, null) },
+                                apiUrl = { API_URL.toHttpUrl() },
+                            ),
+                            baseUrl = { API_URL.toHttpUrl() },
+                            userAgent = USER_AGENT,
+                        ),
+                        db = db,
+                        settings = settings,
+                        onBack = {},
+                    )
+
                     else -> Text(text = "Unknown screen: $name")
                 }
             }
@@ -391,6 +422,99 @@ private fun relativeDate(date: String): String = runCatching {
     }
 }.getOrDefault(date)
 
+/**
+ * The desktop's account page. It signs in with the same credentials the app
+ * uses and stores the same session the rest of the app reads, so everything
+ * that needs a signed-in user works once this succeeds. Accounts themselves are
+ * created elsewhere (the app or btcmap.org), and signing up from here, signing
+ * out, and the other account actions follow later.
+ */
+@androidx.compose.runtime.Composable
+private fun DesktopAccountScreen(
+    api: Api,
+    db: Database,
+    settings: Settings,
+    onBack: () -> Unit,
+) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var signedInName by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(settings.authorized) {
+        signedInName = if (settings.authorized) {
+            withContext(Dispatchers.IO) { db.user.select()?.name }
+        } else {
+            null
+        }
+    }
+
+    ScreenPage(title = "Account", onBack = onBack) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(16.dp),
+        ) {
+            if (settings.authorized) {
+                Text(text = "Signed in as ${signedInName ?: "..."}")
+            } else {
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text(text = "Username") },
+                    singleLine = true,
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text(text = "Password") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                )
+                error?.let { Text(text = it, color = MaterialTheme.colorScheme.error) }
+                Button(
+                    enabled = !busy && username.isNotBlank() && password.isNotBlank(),
+                    onClick = {
+                        busy = true
+                        error = null
+                        scope.launch {
+                            try {
+                                val response = api.signIn(
+                                    username = username.trim(),
+                                    password = password,
+                                    label = DESKTOP_TOKEN_LABEL,
+                                )
+                                withContext(Dispatchers.IO) {
+                                    settings.replaceSession(
+                                        db = db,
+                                        token = response.token,
+                                        user = response.user.toDbUser(),
+                                    )
+                                }
+                                password = ""
+                            } catch (t: Throwable) {
+                                error = t.message ?: t.toString()
+                            } finally {
+                                busy = false
+                            }
+                        }
+                    },
+                ) {
+                    Text(text = "Sign in")
+                }
+                Text(
+                    text = "Accounts are created in the mobile app or on btcmap.org.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+    }
+}
+
+/** The label this machine's session shows up under in the account's devices. */
+private const val DESKTOP_TOKEN_LABEL = "BTC Map desktop"
+
 private const val FEED_LAT = 52.2333742
 private const val FEED_LON = 21.0711489
 
@@ -399,6 +523,7 @@ private const val FEED_LON = 21.0711489
 private fun DesktopSettingsScreen(
     db: Database,
     settings: Settings,
+    onOpenAccount: () -> Unit = {},
 ) {
     var attribution by remember { mutableStateOf(settings.showAttribution) }
     var rotation by remember { mutableStateOf(settings.mapRotationEnabled) }
@@ -414,7 +539,7 @@ private fun DesktopSettingsScreen(
                 secondary = if (settings.authorized) "Signed in" else "Not signed in",
             ),
         ),
-        onItemClick = {},
+        onItemClick = { key -> if (key == "account") onOpenAccount() },
         onItemCheckedChange = { key, checked ->
             when (key) {
                 "attribution" -> {
