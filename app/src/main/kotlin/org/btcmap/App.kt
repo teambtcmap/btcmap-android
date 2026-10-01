@@ -16,7 +16,6 @@ import org.btcmap.api.Api
 import org.btcmap.api.apiHttpClient
 import org.btcmap.api.signOut
 import org.btcmap.bundle.BundledAreas
-import org.btcmap.bundle.BundledBasemap
 import org.btcmap.bundle.BundledComments
 import org.btcmap.bundle.BundledEvents
 import org.btcmap.bundle.BundledPlaces
@@ -35,7 +34,6 @@ import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.MapLibre
 import org.btcmap.settings.init as settingsInit
 import org.btcmap.util.initIconTypeface
-import java.io.File
 
 private const val DATABASE_NAME = "btcmap.db"
 
@@ -53,21 +51,6 @@ class App : Application(), SingletonImageLoader.Factory {
      * thread.
      */
     internal val databaseReady = CompletableDeferred<Unit>()
-
-    /**
-     * Completed once the bundled low-zoom basemap has been extracted, or found
-     * to be unavailable. The first screen waits for it so the map is built with
-     * the bundled style from its first frame instead of swapping styles later.
-     */
-    internal val basemapReady = CompletableDeferred<Unit>()
-
-    /**
-     * The extracted bundled basemap archive, or null when it is unavailable.
-     * Written on [ioScope] before [basemapReady] completes and read from the
-     * main thread afterwards; volatile keeps that ordering visible.
-     */
-    @Volatile
-    internal var bundledBasemapFile: File? = null
 
     private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -177,20 +160,6 @@ class App : Application(), SingletonImageLoader.Factory {
         // OfflineManager must be created on the UI thread; touching the lazy
         // here does that before the background refresh below uses it.
         offlineMaps
-
-        // Extracting the bundled basemap is a one-time copy of a large asset on
-        // first launch (or the first launch after it changed). It runs off the
-        // main thread while the first screen waits on [basemapReady], and is a
-        // no-op on later launches when the extracted archive is already current.
-        ioScope.launch {
-            try {
-                bundledBasemapFile = BundledBasemap.ensure(this@App)
-            } catch (t: Throwable) {
-                t.rethrowIfCancellation()
-            } finally {
-                basemapReady.complete(Unit)
-            }
-        }
 
         // Load the settings before the first screen can read them: the session
         // token lives in this in-memory cache, so a read that raced the load

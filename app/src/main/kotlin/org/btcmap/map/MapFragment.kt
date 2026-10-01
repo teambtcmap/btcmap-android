@@ -48,7 +48,6 @@ import org.btcmap.area.ARG_AREA_ID
 import org.btcmap.area.AreaFragment
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
-import org.btcmap.bundle.BundledBasemap
 import org.btcmap.db
 import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.MapFragmentBinding
@@ -210,7 +209,6 @@ class MapFragment : Fragment() {
         mapSetupController = MapSetupController(
             mapView = binding.map,
             styleUri = styleUri,
-            bundledStyle = bundledBasemapStyle(app, styleUri),
             markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
             markerIconColor = prefs.markerIconColor(requireContext()),
             markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
@@ -224,7 +222,6 @@ class MapFragment : Fragment() {
             rotationEnabled = prefs.mapRotationEnabled,
         ).also {
             it.install()
-            it.setOffline(!requireContext().isOnline())
         }
         registerConnectivity()
 
@@ -689,20 +686,6 @@ class MapFragment : Fragment() {
         }
     }
 
-    /**
-     * The bundled-basemap rewrite of [styleUri], or null when the archive is
-     * unavailable or a test pinned a style of its own.
-     */
-    private fun bundledBasemapStyle(app: App, styleUri: String): BundledBasemapStyle? {
-        if (app.mapStyleUriForTesting != null) return null
-        val archive = app.bundledBasemapFile ?: return null
-        return bundledBasemapStyleJson(
-            context = requireContext(),
-            styleUri = styleUri,
-            pmtilesUrl = BundledBasemap.pmtilesUrl(archive),
-        )
-    }
-
     private val connectivityHandler = Handler(Looper.getMainLooper())
 
     private var connectivityCallback: ConnectivityManager.NetworkCallback? = null
@@ -720,9 +703,7 @@ class MapFragment : Fragment() {
     }
 
     /**
-     * Flips the bundled basemap between the split (online) and all-overzoomed
-     * (offline) behaviour as the network comes and goes. The map redraws the
-     * hosted tiles by itself once they can be fetched again.
+     * Re-issues the chips' failed image requests as the network comes and goes.
      */
     private fun registerConnectivity() {
         val manager = requireContext().getSystemService(ConnectivityManager::class.java) ?: return
@@ -754,7 +735,6 @@ class MapFragment : Fragment() {
                         )
                     }
                     online = isOnline
-                    mapSetupController?.setOffline(!isOnline)
                 }
             }
         }

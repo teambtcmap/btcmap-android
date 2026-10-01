@@ -28,15 +28,13 @@ Next, in rough order of value:
 
 1. **Android main map swap** — point `MapFragment` at the shared map and delete
    `MapSetupController`, `MarkerIcon`, the layer builders, `MapSelectionController`
-   and `ViewportCache`/caches, then drop the MapLibre Android SDK. The marker
-   filter is **no longer a blocker**: it was dropped and every kind is shown at
-   once (see the slice below). What remains is the **location button** and the
-   **offline toggle**, which have no Compose equivalent yet.
-3. **Desktop polish** — the add-place flow, the comments/user-profile screens and
-   the auth forms (they need a place/session context), the location button, and
-   offline tiles (the bundled styles still point their tile sources at the
-   hosted URLs, so offline needs the PMTiles basemap port).
-4. **Packaging** — `packageDeb` needs `dpkg-deb` (absent here); DMG/MSI need
+   and `ViewportCache`/caches, then drop the MapLibre Android SDK. Two former
+   blockers are gone: the marker filter and the offline bundled basemap were both
+   dropped (slices 35 and 36). The **location button** is what remains — the
+   Compose location API and the Android permission flow still have to be wired.
+2. **Desktop polish** — the add-place flow, the comments/user-profile screens, the
+   auth forms (they need a place/session context) and the location button.
+3. **Packaging** — `packageDeb` needs `dpkg-deb` (absent here); DMG/MSI need
    their platforms.
 
 ## Goal
@@ -262,9 +260,10 @@ Two pieces need their own design:
 
 - **Basemap / offline assets.** The bundled PMTiles archive + `noCompress` +
   `BundledBasemap` + `MapSetupController`'s uncapping of the bundled z0–z4 layers
-  have no direct desktop equivalent (no `AssetManager`). Either load the archive
-  through a `pmtiles://` source from the desktop cache, or fall back to hosted
-  tiles online-only. The `OfflinePacksSource` API can drive an offline-pack
+  had no direct desktop equivalent (no `AssetManager`). **Resolved by dropping
+  it** (slice 36): the archive, its bundler and the offline flip are gone, and the
+  map always draws the hosted style, so there is no basemap-strategy question
+  left for desktop. The `OfflinePacksSource` API still drives an offline-pack
   management UI.
 - **Marker icon pipeline.** The app builds marker bitmaps from drawables + the
   icon font at runtime; on Compose those become `ImageBitmap`s added to the style.
@@ -290,8 +289,9 @@ A new `:desktopApp` (JVM) sharing `:shared` and `:ui`:
    and the marker images.
 3. **Controllers and overlays.** Selection, search, bottom sheet, viewport
    caches, and the area chips.
-4. **Offline and basemap.** Port `OfflineMaps` to the Compose `OfflineManager`;
-   settle the PMTiles strategy for desktop.
+4. **Offline and basemap.** Port `OfflineMaps` to the Compose `OfflineManager`
+   (done); the PMTiles strategy was settled by dropping the bundled basemap
+   (slice 36).
 5. **Swap the Android map** and delete the MapLibre Android SDK usage.
 6. **Desktop entry point** with navigation and the map; then packaging.
 
@@ -304,7 +304,8 @@ A new `:desktopApp` (JVM) sharing `:shared` and `:ui`:
 - **Feature gaps** — map snapshot isn't supported on any target (our app does not
   use it); "Compose resource URIs" load styles/assets on Android/Web but not
   desktop, which affects how the basemap style is bundled.
-- **PMTiles on desktop** and the offline-pack parity are open design questions.
+- **PMTiles on desktop** went away with the bundled basemap (slice 36); the
+  offline-pack parity is still an open design question.
 
 **Effort:** ~1–3 months focused, solo, **very low confidence**; the desktop track
 adds more and depends on MapLibre Compose leaving Alpha.
@@ -1043,8 +1044,9 @@ would regress, so the main map cannot be swapped in one slice yet:
   filter is not solved, and the main map swap stays blocked.
 - **Location** — `LocationController` is not ported; the Compose location API and
   the permission flow still have to be wired.
-- **Offline/basemap** — the offline toggle and `BundledBasemapStyle`'s layer
-  uncapping have no Compose equivalent yet.
+- **Offline/basemap** — resolved by dropping the feature (slice 36): the bundled
+  z0–z4 PMTiles archive, `BundledBasemapStyle`'s layer uncapping and the offline
+  flip are gone, and the map always uses the hosted style.
 
 ### Phase 3, twenty-second slice — done (step 6: the desktop module)
 
@@ -1227,6 +1229,42 @@ Verified in the window: the log shows `bundled map style
 map-styles/dark-matter/style.json` and the map renders with its **bundled
 labels, sprites and glyphs**. The tile *sources* in the bundled styles are still
 hosted URLs, so offline tiles still need the PMTiles basemap port.
+
+### Phase 3, thirty-fourth slice — done (the desktop's own affordances)
+
+The desktop shell lost its navigation **rail**: the window is the shared
+`MapScreen` full-window, Settings opens from the search bar's gear and Activity
+from a pulse button under the area chips, which mirrors how the map screen
+offers both on Android. The search bar also got its opaque `surface` container
+and moved its actions inside the field.
+
+### Phase 3, thirty-fifth slice — done (the marker filter is gone)
+
+Hiding a marker kind in place is the one thing maplibre-compose 0.18.0 cannot do
+(see the layer quirks below), so the merchants/events/exchanges button group was
+**dropped**: `MapFragment` keeps all three viewport caches instead of one active
+filter, selecting a place no longer switches kinds first, the three buttons left
+`map_fragment.xml`, and the two instrumented filter tests were deleted. Every
+kind is now always on, which removes that blocker from the main map swap.
+
+Verified on the emulator: merchants and exchanges draw together, with badges, and
+the button group is gone.
+
+### Phase 3, thirty-sixth slice — done (the bundled basemap is gone)
+
+The offline bundled basemap was dropped too, because the offline toggle was the
+other piece with no Compose equivalent and the archive's only purpose was that
+toggle. Removed: `BundledBasemap` and `BundledBasemapStyle` (and their unit
+test), `MapSetupController`'s `bundledStyle`/`setOffline`/`applyOffline`,
+`MapFragment`'s style rewrite and connectivity flip (the callback stays for the
+chips' image retry), `App`'s extraction with `basemapReady`/`bundledBasemapFile`
+(`Activity` no longer waits on it), the `noCompress` entry, `bundle_basemap.py`
+and its `./devtools bundle basemap` command, and the AGENTS.md section. The map
+always loads the hosted style, and the first launch no longer copies a 58 MB
+asset.
+
+Verified on the emulator: the map renders the hosted dark style with every
+marker kind, chips and the place sheet intact.
 
 ## Working notes
 

@@ -16,7 +16,7 @@
 ./gradlew assembleRelease    # Build release APK
 ```
 
-Bundled assets (places snapshot, map styles, low-zoom basemap) are managed
+Bundled assets (places snapshot, map styles) are managed
 outside Gradle via the `./devtools bundle` commands, see below.
 
 ### Running Tests
@@ -79,7 +79,6 @@ The `./devtools` wrapper manages the emulator and app deployment. Default device
 
 ./devtools bundle data         # Download latest places, areas, comments and events snapshots
 ./devtools bundle map-styles   # Bundle MapLibre styles, sprites and glyphs
-./devtools bundle basemap      # Bundle the low-zoom world basemap as a PMTiles asset (~58 MB)
 ./devtools bundle all          # Run all bundlers
 
 ./devtools website deploy      # Build and rsync the documentation site to android.btcmap.org
@@ -89,7 +88,7 @@ When asked to "launch", "run", or "start" the app, use `./devtools app run` (it 
 
 ## Bundled Assets
 
-Places, areas, comments, events, map styles and the low-zoom basemap are
+Places, areas, comments, events and map styles are
 committed as assets and refreshed manually with `./devtools bundle`. This is
 intentional:
 
@@ -109,19 +108,10 @@ intentional:
   separate multi-megabyte geometry download. The events snapshot must send
   `updated_since`, because the endpoint's no-cursor fallback omits
   `updated_at` and so cannot seed a delta cursor.
-- The basemap is a single PMTiles archive of OpenFreeMap tiles for zoom 0
-  through 4, built by `bundle_basemap.py`; the label glyphs the styles need are
-  bundled next to them by `bundle_map_styles.py` (`map-styles/glyphs`). Online
-  the styles draw zoom 0-4 from the archive and above that from the hosted
-  source; offline `MapSetupController` uncaps the bundled layers so the z4 tiles
-  overzoom to any zoom, and hides the hosted layers. Every layer, symbol layers
-  included, is split between the two, so labels render from the archive offline
-  too. The CJK ideograph and Hangul syllable glyph blocks are deliberately not
-  bundled (they are ~90 MB on their own), so labels that fall back to them stay
-  online-only. MapLibre on the pinned version cannot read a PMTiles archive from
-  `assets` directly, so `BundledBasemap` copies it to private storage on first
-  launch. The archive is stored uncompressed (`androidResources.noCompress`) so
-  that copy stays a straight block copy.
+- The label glyphs the map styles need are bundled by `bundle_map_styles.py`
+  (`map-styles/glyphs`). The CJK ideograph and Hangul syllable glyph blocks are
+  deliberately not bundled (they are ~90 MB on their own), so labels that fall
+  back to them stay online-only.
 
 ## Code Style Guidelines
 
