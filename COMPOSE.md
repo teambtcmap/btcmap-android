@@ -1,9 +1,47 @@
 # Migration Plan: Compose (Multiplatform) and a Shared Module
 
-Status: Phase 1 (shared module) and Phase 2 (non-map UI to Compose Multiplatform)
-are complete — 14 slices, all verified on the emulator. Phase 3 (the map, and the
-desktop target) is in progress: the Android spike renders a shared MapLibre
-Compose map (see Progress).
+Status: Phases 1 and 2 are complete (the portable core in `:shared`; the non-map
+UI in Compose). Phase 3 (the map and the desktop target) is well advanced: the
+Android map's layers, overlays, search, place sheet, offline packs and styles are
+all on MapLibre Compose, and a working **desktop app** runs from the same
+`:shared` + `:ui` code. See Progress for every slice and Working notes for the
+pitfalls.
+
+## Current status and next steps
+
+Done and pushed:
+
+- **`:shared`** — the portable core (database, API, sync, settings, geo/map
+  helpers, offline metadata and estimates), 62 JVM test classes.
+- **`:ui`** — the Compose Multiplatform UI: the previously Views screens, the
+  shared theme/toolkit, and the map (`MapScreen` and its layers, markers, chips,
+  search, place sheet with photos/comments/preview map, offline packs).
+- **Android** — the area chips, search, place preview map, event map and the whole
+  place sheet are on the shared map; the MapLibre Android SDK is still used only
+  by `MapFragment` and the remaining Views pieces.
+- **Desktop (`:desktopApp`)** — runs, opens the shared database in `~/.btcmap`,
+  syncs the full cache, renders the shared map with the bundled styles and font,
+  and opens Settings from the search bar's gear and Activity from a pulse button
+  under the chips. `createDistributable` yields a self-contained app image.
+
+Next, in rough order of value:
+
+1. **Android main map swap** — point `MapFragment` at the shared map and delete
+   `MapSetupController`, `MarkerIcon`, the layer builders, `MapSelectionController`
+   and `ViewportCache`/caches, then drop the MapLibre Android SDK. **Blocked** on
+   the marker filter (see the Working notes: maplibre-compose 0.18.0 stops the
+   shown kind drawing as soon as another kind's layers are hidden in place, and
+   neither a never-matching filter nor rebuilding the map around one kind worked),
+   and on the **location button** and the **offline toggle**, which have no
+   Compose equivalent yet.
+2. **Marker filter on the shared map** — the real unblocker for (1); an upstream
+   repro of the 0.18.0 behaviour would be worth filing.
+3. **Desktop polish** — the add-place flow, the comments/user-profile screens and
+   the auth forms (they need a place/session context), the location button, and
+   offline tiles (the bundled styles still point their tile sources at the
+   hosted URLs, so offline needs the PMTiles basemap port).
+4. **Packaging** — `packageDeb` needs `dpkg-deb` (absent here); DMG/MSI need
+   their platforms.
 
 ## Goal
 
