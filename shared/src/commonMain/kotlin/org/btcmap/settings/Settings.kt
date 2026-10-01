@@ -17,7 +17,7 @@ import org.btcmap.db.table.user.User
  * copied off the device. Never log it, and send it only to the configured API
  * host (see `TokenSettingInterceptor`).
  */
-internal const val KEY_AUTH_TOKEN = "auth_token"
+const val KEY_AUTH_TOKEN = "auth_token"
 
 private const val KEY_LEGACY_IMPORTED = "legacy_prefs_imported"
 
@@ -71,7 +71,7 @@ class Settings(
      * database load.
      */
     @Volatile
-    internal var sessionToken: String? = null
+    var sessionToken: String? = null
         private set
 
     /**
@@ -99,7 +99,7 @@ class Settings(
      * thread, accepting the one-time open (and any pending schema migration)
      * in exchange for never reporting a signed-in user as signed out.
      */
-    internal fun preload() {
+    fun preload() {
         ensureLoaded()
     }
 
@@ -145,17 +145,17 @@ class Settings(
         clearLegacyValues(imported)
     }
 
-    internal fun getString(key: String, default: String?): String? {
+    fun getString(key: String, default: String?): String? {
         ensureLoaded()
         val stored = synchronized(lock) { cache[key] }
         return stored ?: default
     }
 
-    internal fun getBoolean(key: String, default: Boolean): Boolean {
+    fun getBoolean(key: String, default: Boolean): Boolean {
         return getString(key, null)?.toBooleanStrictOrNull() ?: default
     }
 
-    internal fun getInt(key: String, default: Int): Int {
+    fun getInt(key: String, default: Int): Int {
         return getString(key, null)?.toIntOrNull() ?: default
     }
 
@@ -164,15 +164,15 @@ class Settings(
      * cannot be parsed. Unlike [getInt] this lets a caller tell "no value" from
      * a stored value that happens to equal any default it would otherwise use.
      */
-    internal fun getIntOrNull(key: String): Int? {
+    fun getIntOrNull(key: String): Int? {
         return getString(key, null)?.toIntOrNull()
     }
 
-    internal fun getFloat(key: String, default: Float): Float {
+    fun getFloat(key: String, default: Float): Float {
         return getString(key, null)?.toFloatOrNull() ?: default
     }
 
-    internal fun putString(key: String, value: String?) {
+    fun putString(key: String, value: String?) {
         val db = ensureLoaded()
         synchronized(lock) {
             if (value == null) cache.remove(key) else cache[key] = value
@@ -182,15 +182,15 @@ class Settings(
         }
     }
 
-    internal fun putInt(key: String, value: Int?) {
+    fun putInt(key: String, value: Int?) {
         putString(key, value?.toString())
     }
 
-    internal fun putBoolean(key: String, value: Boolean) {
+    fun putBoolean(key: String, value: Boolean) {
         putString(key, value.toString())
     }
 
-    internal fun putFloat(key: String, value: Float) {
+    fun putFloat(key: String, value: Float) {
         putString(key, value.toString())
     }
 
@@ -205,7 +205,7 @@ class Settings(
      * main-thread setting reads. Runs synchronously, so call it off the main
      * thread.
      */
-    internal fun replaceSession(db: Database, token: String?, user: User?) {
+    fun replaceSession(db: Database, token: String?, user: User?) {
         ensureLoaded()
         synchronized(sessionLock) {
             db.transaction {
@@ -228,7 +228,7 @@ class Settings(
      * Atomically clears the stored session token and the cached user. Runs
      * synchronously, so call it off the main thread.
      */
-    internal fun clearSession(db: Database) {
+    fun clearSession(db: Database) {
         ensureLoaded()
         synchronized(sessionLock) {
             db.transaction {
@@ -253,7 +253,7 @@ class Settings(
      * Returns true when the session was cleared. Runs synchronously, so call it
      * off the main thread.
      */
-    internal fun clearSessionIfTokenMatches(db: Database, expected: String): Boolean {
+    fun clearSessionIfTokenMatches(db: Database, expected: String): Boolean {
         ensureLoaded()
         synchronized(sessionLock) {
             if (synchronized(lock) { cache[KEY_AUTH_TOKEN] } != expected) return false
@@ -276,7 +276,7 @@ class Settings(
      * particular session state; production code must use [replaceSession] so the
      * token and the cached account stay consistent.
      */
-    internal fun setAuthTokenForTesting(token: String?) {
+    fun setAuthTokenForTesting(token: String?) {
         ensureLoaded()
         val db = dbProvider()
         synchronized(sessionLock) {
@@ -293,7 +293,7 @@ class Settings(
     }
 
     /** Drops the cached values and stored settings, reloading them on next use. */
-    internal fun clearForTesting() {
+    fun clearForTesting() {
         ensureLoaded()
         try {
             dbProvider().preference.deleteAll()

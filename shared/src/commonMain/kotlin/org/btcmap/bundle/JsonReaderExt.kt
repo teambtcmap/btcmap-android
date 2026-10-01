@@ -18,7 +18,7 @@ import java.time.format.DateTimeParseException
  */
 
 /** Reads the current value as a string, mapping an explicit `null` to null. */
-internal fun JsonReader.nextStringOrNull(): String? {
+fun JsonReader.nextStringOrNull(): String? {
     if (peek() == JsonToken.NULL) {
         skipValue()
         return null
@@ -27,7 +27,7 @@ internal fun JsonReader.nextStringOrNull(): String? {
 }
 
 /** Reads the current value as a long, mapping an explicit `null` to null. */
-internal fun JsonReader.nextLongOrNull(): Long? {
+fun JsonReader.nextLongOrNull(): Long? {
     if (peek() == JsonToken.NULL) {
         skipValue()
         return null
@@ -39,7 +39,7 @@ internal fun JsonReader.nextLongOrNull(): Long? {
  * Reads the current value as a JSON object, mapping `null` or a non-object to
  * null.
  */
-internal fun JsonReader.nextJsonObjectOrNull(): JsonObject? {
+fun JsonReader.nextJsonObjectOrNull(): JsonObject? {
     if (peek() == JsonToken.NULL) {
         skipValue()
         return null
@@ -54,7 +54,7 @@ internal fun JsonReader.nextJsonObjectOrNull(): JsonObject? {
  * importer expects exactly four (west, south, east, north) and treats any other
  * length as absent.
  */
-internal fun JsonReader.nextDoubleListOrNull(): List<Double>? {
+fun JsonReader.nextDoubleListOrNull(): List<Double>? {
     if (peek() == JsonToken.NULL) {
         skipValue()
         return null
@@ -75,7 +75,7 @@ internal fun JsonReader.nextDoubleListOrNull(): List<Double>? {
  * not roll back the whole snapshot and leave the map empty, so it degrades to
  * null exactly like a missing field.
  */
-internal fun String.toZonedDateTimeOrNull(): ZonedDateTime? =
+fun String.toZonedDateTimeOrNull(): ZonedDateTime? =
     try {
         ZonedDateTime.parse(this)
     } catch (_: DateTimeParseException) {

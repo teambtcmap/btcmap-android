@@ -9,7 +9,7 @@ package org.btcmap.auth
  * when a password is set (sign-up and change-password), so accounts created
  * before the rule existed can still sign in.
  */
-internal enum class AuthError {
+enum class AuthError {
     UsernameRequired,
     CurrentPasswordRequired,
     PasswordRequired,
@@ -17,7 +17,7 @@ internal enum class AuthError {
     PasswordsDoNotMatch,
 }
 
-internal object AuthValidation {
+object AuthValidation {
     /** Minimum number of characters accepted when setting a password. */
     const val MIN_PASSWORD_LENGTH = 8
 

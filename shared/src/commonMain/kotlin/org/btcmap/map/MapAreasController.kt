@@ -120,7 +120,7 @@ class MapAreasController(
     }
 
     /** The number of cached geometries; exposed so tests can assert the cap. */
-    internal val cachedGeometryCount: Int
+    val cachedGeometryCount: Int
         get() = synchronized(geometryCache) { geometryCache.size }
 
     /**
@@ -155,7 +155,7 @@ class MapAreasController(
         // The whole-world area would contain every point; the server skips it.
         private const val EARTH_ALIAS = "earth"
 
-        internal const val MAX_CACHED_GEOMETRIES = 256
+        const val MAX_CACHED_GEOMETRIES = 256
 
         // The entry cap still allows a lot of coordinate memory when every
         // cached area is a country-sized polygon, so the total is capped too.

@@ -6,7 +6,7 @@ package org.btcmap.offline
  *
  * Kept independent of MapLibre so the download estimates stay unit testable.
  */
-internal data class OfflineBounds(
+data class OfflineBounds(
     val west: Double,
     val south: Double,
     val east: Double,

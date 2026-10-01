@@ -10,7 +10,7 @@ import com.google.gson.Gson
  * metadata, so this is the only link between a pack and an [org.btcmap.db.table.area.Area].
  * Storing it here avoids a database migration.
  */
-internal data class OfflineRegionMetadata(
+data class OfflineRegionMetadata(
     val areaId: Long,
     val areaName: String,
     val styleUrl: String,
@@ -19,7 +19,7 @@ internal data class OfflineRegionMetadata(
 
 private val gson = Gson()
 
-internal fun OfflineRegionMetadata.toBytes(): ByteArray =
+fun OfflineRegionMetadata.toBytes(): ByteArray =
     gson.toJson(this).toByteArray(Charsets.UTF_8)
 
 /**
@@ -27,7 +27,7 @@ internal fun OfflineRegionMetadata.toBytes(): ByteArray =
  * not write, or that was written by a version whose shape no longer matches, so
  * an unknown pack is ignored rather than crashing.
  */
-internal fun parseOfflineRegionMetadata(bytes: ByteArray?): OfflineRegionMetadata? {
+fun parseOfflineRegionMetadata(bytes: ByteArray?): OfflineRegionMetadata? {
     val json = bytes?.toString(Charsets.UTF_8) ?: return null
     val parsed =
         runCatching { gson.fromJson(json, OfflineRegionMetadataJson::class.java) }.getOrNull()

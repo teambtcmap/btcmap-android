@@ -317,15 +317,42 @@ Verified: `:shared:jvmTest` (50 classes), `:app:testDebugUnitTest` (44 classes),
 `:app:compileDebugKotlin`, `:app:compileDebugAndroidTestKotlin`. No behavior
 change.
 
-## Suggested next step
+### Phase 1, fifth slice — done
 
-Phase 1 has two kinds of work left. First, `settings/Settings.kt` (the portable
-core; `:app` keeps the `Context`-bound `prefs` singleton, `init` and the legacy
-`SharedPreferences` import in `SettingsExt`). Second, a grab-bag of pure
-helpers/models: `area/AreaFormatting`, `bundle/JsonReaderExt`, the
-`SearchAdapterItem`/`CommentsAdapterItem`/`StatsEntry`-style models,
-`offline`'s bounds/estimates, `payment/InvoicePaymentPoller`, the `imagestats`
-models, and the pure map data helpers (`EventGeoJson`, `FeatureStore`,
-`map/layer/*`, caches). What can never move: `bundle/Bundled*` (APK assets), the
-Android `util` files, MapLibre layers/controllers, Coil and every Fragment. Verify
-with the same commands.
+Moved the remaining portable logic into `:shared`: `settings/Settings` (the
+portable store; `:app` keeps the `Context`-bound `SettingsExt` — the `prefs`
+singleton, `init`, the legacy-`SharedPreferences` import and the
+`authToken`/`apiUrl` accessors), `auth/AuthValidation`, `bundle/JsonReaderExt`,
+`comment/CommentExt` + `CommentsAdapterItem`, `dbstats`'s
+`BundleReader`/`DatabaseFile`/`TableStats`, the `imagestats` models, the pure
+`map` data helpers (`AreaGeometryCache`, `EventGeoJson`, `FeatureStore`,
+`MapArea`, `MapAreasController`, `MapConstants`, `MarkerGeoJson`,
+`StringBuilderExt`), the `offline` state/bounds/estimates/metadata,
+`payment/InvoicePaymentPoller`, `place/PlaceExt` + `PlacePhoto` and
+`search/SearchAdapterItem`. Visibility churn: the `Settings` members, the
+`offline` types, `AuthValidation`, `CommentExt`, `FeatureStore`, `JsonReader`,
+`PlaceExt`, `InvoicePaymentPoller` and `MapAreasController`'s geometry-cache
+accessors became public.
+
+Verified: `:shared:jvmTest` (62 classes), `:app:testDebugUnitTest` (32 classes),
+`:app:compileDebugKotlin`, `:app:compileDebugAndroidTestKotlin`, and the app runs
+on the emulator. No behavior change.
+
+## Phase 1 status
+
+Phase 1 is effectively done. Only two files that carry no Android imports still
+live in `:app`, and both are platform-bound by design:
+
+- `area/AreaFormatting` maps issue codes to `R.string` resources.
+- `UserAgent` embeds `BuildConfig.VERSION_CODE`.
+
+Everything else in `:app` imports `android.*`/`androidx.*`, MapLibre, Coil or
+Material — the UI, the map controllers, the asset seeding and the platform glue.
+`:shared` now holds the entire portable core.
+
+## Next
+
+The remaining tracks are Phase 2 (UI → Compose Multiplatform) and Phase 3 (map →
+MapLibre Compose), both gated on the open decisions above (hours/week, whether
+desktop needs the map, whether Android moves to CMP). Phase 1 needs no further
+work.

@@ -13,7 +13,7 @@ import java.util.Locale
  * the current [zone] and [locale] (the device ones by default) instead of the
  * values that were active when the process started.
  */
-internal fun commentDateFormatter(
+fun commentDateFormatter(
     zone: ZoneId = ZoneId.systemDefault(),
     locale: Locale = Locale.getDefault(Locale.Category.FORMAT),
 ): DateTimeFormatter =
@@ -28,7 +28,7 @@ internal fun commentDateFormatter(
  * formatter converts it to the device zone before formatting; otherwise a
  * comment posted late in the day could be shown with the previous day's date.
  */
-internal fun Comment.toAdapterItem(formatter: DateTimeFormatter): CommentsAdapterItem =
+fun Comment.toAdapterItem(formatter: DateTimeFormatter): CommentsAdapterItem =
     CommentsAdapterItem(
         id = id,
         comment = comment,
@@ -41,7 +41,7 @@ internal fun Comment.toAdapterItem(formatter: DateTimeFormatter): CommentsAdapte
  * Prefer [toAdapterItem] with a shared formatter when mapping several comments;
  * this overload exists for callers that handle a single comment.
  */
-internal fun Comment.toAdapterItem(
+fun Comment.toAdapterItem(
     zone: ZoneId = ZoneId.systemDefault(),
     locale: Locale = Locale.getDefault(Locale.Category.FORMAT),
 ): CommentsAdapterItem = toAdapterItem(commentDateFormatter(zone, locale))

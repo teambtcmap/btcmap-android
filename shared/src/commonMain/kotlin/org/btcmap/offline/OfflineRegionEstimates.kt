@@ -17,7 +17,7 @@ import kotlin.math.tan
  * exceed the shown figure by much while rural areas are overestimated on
  * purpose. The UI always presents the result as approximate.
  */
-internal object OfflineRegionEstimates {
+object OfflineRegionEstimates {
 
     /** Every pack includes the low zooms so the user can zoom out. */
     const val MIN_ZOOM = 0

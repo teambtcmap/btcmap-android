@@ -1,7 +1,7 @@
 package org.btcmap.offline
 
 /** The offline-map state of a single area. */
-internal sealed interface OfflineAreaState {
+sealed interface OfflineAreaState {
 
     /** No pack exists for the area. */
     data object None : OfflineAreaState
@@ -27,7 +27,7 @@ internal sealed interface OfflineAreaState {
  * Kept free of MapLibre types so the mapping — which decides whether a pack
  * reads as complete and how progress is reported — is unit testable.
  */
-internal fun offlineAreaState(
+fun offlineAreaState(
     metadata: OfflineRegionMetadata,
     isComplete: Boolean,
     completedResourceSize: Long,

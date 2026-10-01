@@ -1,7 +1,7 @@
 package org.btcmap.imagestats
 
 /**
- * A point-in-time view of [ImageLoadStats].
+ * A point-in-time view of the image load counters.
  *
  * The counters are lifetime counters: they cover every load since the process
  * started and are not persisted across restarts.

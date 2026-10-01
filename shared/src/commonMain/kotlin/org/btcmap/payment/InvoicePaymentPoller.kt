@@ -18,7 +18,7 @@ import org.btcmap.util.rethrowIfCancellation
  * reported again when the view resumes. A screen creates one instance per view,
  * so a recreated view starts fresh.
  */
-internal class InvoicePaymentPoller(
+class InvoicePaymentPoller(
     private val awaitPaidInvoice: suspend (String) -> Unit,
 ) {
 

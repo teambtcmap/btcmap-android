@@ -6,7 +6,7 @@ package org.btcmap.map
  * set for the current viewport is cheap compared to keeping an unbounded
  * history for the whole session.
  */
-internal const val MAX_CACHED_FEATURES = 5_000
+const val MAX_CACHED_FEATURES = 5_000
 
 /**
  * Accumulates the features seen so far, keyed by [idOf], so panning back over
@@ -18,7 +18,7 @@ internal const val MAX_CACHED_FEATURES = 5_000
  * All access is synchronized because the SQLite fetch and the GeoJSON build
  * happen on different coroutine dispatchers.
  */
-internal class FeatureStore<T>(
+class FeatureStore<T>(
     private val idOf: (T) -> Long,
     private val maxItems: Int = MAX_CACHED_FEATURES,
 ) {
