@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">İnceleyenlerin durumu anlamasına yardımcı olacak her şey…</string>
     <string name="btn_submit">Gönder</string>
     <string name="report_submitted">Bildirim gönderildi</string>
+    <string name="report_photos_optional">Kanıt fotoğrafları (isteğe bağlı)</string>
+    <string name="report_photos_hint">Yerin güncel durumunu gösteren en fazla 5 fotoğraf. Bunlar editörlerin bildirinizi incelemesine yardımcı olur.</string>
+    <string name="add_photo">Fotoğraf ekle</string>
+    <string name="report_photo_take">Fotoğraf çek</string>
+    <string name="report_photo_choose">Galeriden seç</string>
+    <string name="report_photo_remove">Fotoğrafı kaldır</string>
+    <string name="report_photo_limit">En fazla 5 fotoğraf ekleyebilirsiniz</string>
+    <string name="report_photo_failed">Fotoğraflardan biri eklenemedi</string>
+    <string name="report_photo_no_camera">Kullanılabilir kamera uygulaması yok</string>
     <string name="zoom_in">Yakınlaştır</string>
     <string name="zoom_out">Uzaklaştır</string>
     <string name="failed_to_load">Yüklenemedi</string>

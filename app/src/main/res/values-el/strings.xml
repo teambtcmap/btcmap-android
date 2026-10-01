@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">Οτιδήποτε βοηθά τους ελεγκτές να κατανοήσουν την κατάσταση…</string>
     <string name="btn_submit">Υποβολή</string>
     <string name="report_submitted">Η αναφορά υποβλήθηκε</string>
+    <string name="report_photos_optional">Φωτογραφίες τεκμηρίωσης (προαιρετικό)</string>
+    <string name="report_photos_hint">Έως 5 φωτογραφίες που δείχνουν την τρέχουσα κατάσταση του μέρους. Βοηθούν τους συντάκτες να εξετάσουν την αναφορά σου.</string>
+    <string name="add_photo">Προσθήκη φωτογραφίας</string>
+    <string name="report_photo_take">Λήψη φωτογραφίας</string>
+    <string name="report_photo_choose">Επιλογή από τη συλλογή</string>
+    <string name="report_photo_remove">Αφαίρεση φωτογραφίας</string>
+    <string name="report_photo_limit">Μπορείς να επισυνάψεις έως 5 φωτογραφίες</string>
+    <string name="report_photo_failed">Δεν ήταν δυνατή η προσθήκη μίας από τις φωτογραφίες</string>
+    <string name="report_photo_no_camera">Δεν υπάρχει διαθέσιμη εφαρμογή κάμερας</string>
     <string name="zoom_in">Μεγέθυνση</string>
     <string name="zoom_out">Σμίκρυνση</string>
     <string name="failed_to_load">Αποτυχία φόρτωσης</string>

@@ -241,6 +241,15 @@
     <string name="report_comment_placeholder">أي شيء يساعد المراجعين على فهم الموقف…</string>
     <string name="btn_submit">إرسال</string>
     <string name="report_submitted">تم إرسال الإبلاغ</string>
+    <string name="report_photos_optional">صور إثبات (اختياري)</string>
+    <string name="report_photos_hint">حتى 5 صور تُظهر الحالة الحالية للمكان. تساعد هذه المحررين في مراجعة تقريرك.</string>
+    <string name="add_photo">إضافة صورة</string>
+    <string name="report_photo_take">التقاط صورة</string>
+    <string name="report_photo_choose">الاختيار من المعرض</string>
+    <string name="report_photo_remove">إزالة الصورة</string>
+    <string name="report_photo_limit">يمكنك إرفاق ما يصل إلى 5 صور</string>
+    <string name="report_photo_failed">تعذّر إضافة إحدى الصور</string>
+    <string name="report_photo_no_camera">لا يوجد تطبيق كاميرا متاح</string>
     <string name="zoom_in">تكبير</string>
     <string name="zoom_out">تصغير</string>
     <string name="failed_to_load">فشل التحميل</string>

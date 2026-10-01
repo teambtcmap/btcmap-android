@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">পর্যালোচকদের পরিস্থিতি বুঝতে সহায়তা করে এমন কিছু…</string>
     <string name="btn_submit">জমা দিন</string>
     <string name="report_submitted">রিপোর্ট জমা দেওয়া হয়েছে</string>
+    <string name="report_photos_optional">প্রমাণের ছবি (ঐচ্ছিক)</string>
+    <string name="report_photos_hint">স্থানটির বর্তমান অবস্থা দেখানো সর্বোচ্চ ৫টি ছবি। এগুলো সম্পাদকদের আপনার রিপোর্ট পর্যালোচনা করতে সাহায্য করে।</string>
+    <string name="add_photo">ছবি যোগ করুন</string>
+    <string name="report_photo_take">ছবি তুলুন</string>
+    <string name="report_photo_choose">গ্যালারি থেকে বাছুন</string>
+    <string name="report_photo_remove">ছবি সরান</string>
+    <string name="report_photo_limit">আপনি সর্বোচ্চ ৫টি ছবি সংযুক্ত করতে পারেন</string>
+    <string name="report_photo_failed">ছবিগুলোর একটি যোগ করা যায়নি</string>
+    <string name="report_photo_no_camera">কোনো ক্যামেরা অ্যাপ পাওয়া যায়নি</string>
     <string name="zoom_in">জুম ইন</string>
     <string name="zoom_out">জুম আউট</string>
     <string name="failed_to_load">লোড করা যায়নি</string>

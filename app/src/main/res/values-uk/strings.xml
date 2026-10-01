@@ -233,6 +233,15 @@
     <string name="report_comment_placeholder">Усе, що допоможе перевіряльникам зрозуміти ситуацію…</string>
     <string name="btn_submit">Надіслати</string>
     <string name="report_submitted">Скаргу надіслано</string>
+    <string name="report_photos_optional">Фотографії-докази (необов\'язково)</string>
+    <string name="report_photos_hint">До 5 фотографій, що показують поточний стан місця. Вони допомагають редакторам розглянути вашу скаргу.</string>
+    <string name="add_photo">Додати фото</string>
+    <string name="report_photo_take">Зробити фото</string>
+    <string name="report_photo_choose">Вибрати з галереї</string>
+    <string name="report_photo_remove">Видалити фото</string>
+    <string name="report_photo_limit">Можна прикріпити до 5 фотографій</string>
+    <string name="report_photo_failed">Не вдалося додати одну з фотографій</string>
+    <string name="report_photo_no_camera">Немає доступного застосунку камери</string>
     <string name="zoom_in">Збільшити</string>
     <string name="zoom_out">Зменшити</string>
     <string name="failed_to_load">Не вдалося завантажити</string>

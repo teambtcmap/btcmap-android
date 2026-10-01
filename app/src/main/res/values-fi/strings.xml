@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">Kaikki, mikä auttaa tarkistajia ymmärtämään tilanteen…</string>
     <string name="btn_submit">Lähetä</string>
     <string name="report_submitted">Ilmoitus lähetetty</string>
+    <string name="report_photos_optional">Todistuskuvat (valinnainen)</string>
+    <string name="report_photos_hint">Enintään 5 kuvaa paikan nykyisestä tilasta. Ne auttavat muokkaajia tarkistamaan ilmoituksesi.</string>
+    <string name="add_photo">Lisää kuva</string>
+    <string name="report_photo_take">Ota kuva</string>
+    <string name="report_photo_choose">Valitse galleriasta</string>
+    <string name="report_photo_remove">Poista kuva</string>
+    <string name="report_photo_limit">Voit liittää enintään 5 kuvaa</string>
+    <string name="report_photo_failed">Yhtä kuvista ei voitu lisätä</string>
+    <string name="report_photo_no_camera">Kamera-sovellusta ei ole saatavilla</string>
     <string name="zoom_in">Lähennä</string>
     <string name="zoom_out">Loitonna</string>
     <string name="failed_to_load">Lataus epäonnistui</string>

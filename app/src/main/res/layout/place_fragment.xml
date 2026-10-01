@@ -114,6 +114,29 @@
 
             </LinearLayout>
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/photos_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:clipToPadding="false"
+                android:paddingHorizontal="16dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/add_photo"
+                style="@style/Button.Outlined.NoTopInset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:insetBottom="0dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:minHeight="36dp"
+                android:text="@string/add_photo"
+                android:visibility="gone"
+                app:icon="@drawable/icon_add"
+                app:iconGravity="textStart" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

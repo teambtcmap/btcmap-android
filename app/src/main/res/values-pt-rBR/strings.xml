@@ -229,6 +229,15 @@
     <string name="report_comment_placeholder">Qualquer coisa que ajude os revisores a entender a situação…</string>
     <string name="btn_submit">Enviar</string>
     <string name="report_submitted">Relatório enviado</string>
+    <string name="report_photos_optional">Fotos de evidência (opcional)</string>
+    <string name="report_photos_hint">Até 5 fotos mostrando o estado atual do local. Elas ajudam os editores a revisar seu relatório.</string>
+    <string name="add_photo">Adicionar foto</string>
+    <string name="report_photo_take">Tirar foto</string>
+    <string name="report_photo_choose">Escolher da galeria</string>
+    <string name="report_photo_remove">Remover foto</string>
+    <string name="report_photo_limit">Você pode anexar até 5 fotos</string>
+    <string name="report_photo_failed">Não foi possível adicionar uma das fotos</string>
+    <string name="report_photo_no_camera">Nenhum aplicativo de câmera disponível</string>
     <string name="zoom_in">Ampliar</string>
     <string name="zoom_out">Reduzir</string>
     <string name="failed_to_load">Falha ao carregar</string>

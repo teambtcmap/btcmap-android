@@ -221,6 +221,15 @@
     <string name="report_comment_placeholder">검토자가 상황을 이해하는 데 도움이 되는 내용…</string>
     <string name="btn_submit">제출</string>
     <string name="report_submitted">신고가 제출되었습니다</string>
+    <string name="report_photos_optional">증거 사진(선택 사항)</string>
+    <string name="report_photos_hint">장소의 현재 상태를 보여주는 최대 5장의 사진입니다. 편집자가 신고를 검토하는 데 도움이 됩니다.</string>
+    <string name="add_photo">사진 추가</string>
+    <string name="report_photo_take">사진 촬영</string>
+    <string name="report_photo_choose">갤러리에서 선택</string>
+    <string name="report_photo_remove">사진 제거</string>
+    <string name="report_photo_limit">사진을 최대 5장까지 첨부할 수 있습니다</string>
+    <string name="report_photo_failed">사진 중 하나를 추가하지 못했습니다</string>
+    <string name="report_photo_no_camera">사용 가능한 카메라 앱이 없습니다</string>
     <string name="zoom_in">확대</string>
     <string name="zoom_out">축소</string>
     <string name="failed_to_load">불러오지 못했습니다</string>

@@ -229,6 +229,15 @@
     <string name="report_comment_placeholder">Qualsiasi cosa che aiuti i revisori a capire la situazione…</string>
     <string name="btn_submit">Invia</string>
     <string name="report_submitted">Segnalazione inviata</string>
+    <string name="report_photos_optional">Foto come prova (facoltativo)</string>
+    <string name="report_photos_hint">Fino a 5 foto che mostrano lo stato attuale del luogo. Aiutano gli editori a esaminare la tua segnalazione.</string>
+    <string name="add_photo">Aggiungi foto</string>
+    <string name="report_photo_take">Scatta foto</string>
+    <string name="report_photo_choose">Scegli dalla galleria</string>
+    <string name="report_photo_remove">Rimuovi foto</string>
+    <string name="report_photo_limit">Puoi allegare fino a 5 foto</string>
+    <string name="report_photo_failed">Impossibile aggiungere una delle foto</string>
+    <string name="report_photo_no_camera">Nessuna app fotocamera disponibile</string>
     <string name="zoom_in">Ingrandisci</string>
     <string name="zoom_out">Riduci</string>
     <string name="failed_to_load">Caricamento non riuscito</string>

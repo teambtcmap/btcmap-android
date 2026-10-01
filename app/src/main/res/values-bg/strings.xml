@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">Всичко, което помага на проверяващите да разберат ситуацията…</string>
     <string name="btn_submit">Изпрати</string>
     <string name="report_submitted">Докладът е изпратен</string>
+    <string name="report_photos_optional">Снимки като доказателство (по избор)</string>
+    <string name="report_photos_hint">До 5 снимки, показващи текущото състояние на мястото. Те помагат на редакторите да прегледат доклада ви.</string>
+    <string name="add_photo">Добавяне на снимка</string>
+    <string name="report_photo_take">Направи снимка</string>
+    <string name="report_photo_choose">Избери от галерията</string>
+    <string name="report_photo_remove">Премахни снимката</string>
+    <string name="report_photo_limit">Можете да прикачите до 5 снимки</string>
+    <string name="report_photo_failed">Една от снимките не можа да бъде добавена</string>
+    <string name="report_photo_no_camera">Няма налично приложение за камера</string>
     <string name="zoom_in">Приближи</string>
     <string name="zoom_out">Отдалечи</string>
     <string name="failed_to_load">Неуспешно зареждане</string>

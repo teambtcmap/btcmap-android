@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">Alles wat beoordelaars helpt de situatie te begrijpen…</string>
     <string name="btn_submit">Verzenden</string>
     <string name="report_submitted">Rapport ingediend</string>
+    <string name="report_photos_optional">Bewijsfoto\'s (optioneel)</string>
+    <string name="report_photos_hint">Maximaal 5 foto\'s die de huidige staat van de plaats tonen. Ze helpen redacteuren je rapport te beoordelen.</string>
+    <string name="add_photo">Foto toevoegen</string>
+    <string name="report_photo_take">Foto maken</string>
+    <string name="report_photo_choose">Kiezen uit galerij</string>
+    <string name="report_photo_remove">Foto verwijderen</string>
+    <string name="report_photo_limit">Je kunt maximaal 5 foto\'s toevoegen</string>
+    <string name="report_photo_failed">Eén van de foto\'s kon niet worden toegevoegd</string>
+    <string name="report_photo_no_camera">Geen camera-app beschikbaar</string>
     <string name="zoom_in">Inzoomen</string>
     <string name="zoom_out">Uitzoomen</string>
     <string name="failed_to_load">Laden mislukt</string>

@@ -221,6 +221,15 @@
     <string name="report_comment_placeholder">สิ่งใดก็ตามที่ช่วยให้ผู้ตรวจสอบเข้าใจสถานการณ์…</string>
     <string name="btn_submit">ส่ง</string>
     <string name="report_submitted">ส่งรายงานแล้ว</string>
+    <string name="report_photos_optional">รูปภาพหลักฐาน (ไม่บังคับ)</string>
+    <string name="report_photos_hint">รูปภาพสูงสุด 5 รูปที่แสดงสถานะปัจจุบันของสถานที่ ช่วยให้บรรณาธิการตรวจสอบรายงานของคุณ</string>
+    <string name="add_photo">เพิ่มรูปภาพ</string>
+    <string name="report_photo_take">ถ่ายรูป</string>
+    <string name="report_photo_choose">เลือกจากแกลเลอรี</string>
+    <string name="report_photo_remove">ลบรูปภาพ</string>
+    <string name="report_photo_limit">คุณสามารถแนบรูปภาพได้สูงสุด 5 รูป</string>
+    <string name="report_photo_failed">ไม่สามารถเพิ่มรูปภาพหนึ่งรูปได้</string>
+    <string name="report_photo_no_camera">ไม่มีแอปกล้องที่ใช้งานได้</string>
     <string name="zoom_in">ซูมเข้า</string>
     <string name="zoom_out">ซูมออก</string>
     <string name="failed_to_load">โหลดไม่สำเร็จ</string>

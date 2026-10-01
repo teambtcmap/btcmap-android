@@ -221,6 +221,15 @@
     <string name="report_comment_placeholder">レビュアーが状況を理解するのに役立つ情報…</string>
     <string name="btn_submit">送信</string>
     <string name="report_submitted">報告を送信しました</string>
+    <string name="report_photos_optional">証拠写真（任意）</string>
+    <string name="report_photos_hint">場所の現在の状態を示す最大5枚の写真。編集者が報告を確認するのに役立ちます。</string>
+    <string name="add_photo">写真を追加</string>
+    <string name="report_photo_take">写真を撮る</string>
+    <string name="report_photo_choose">ギャラリーから選択</string>
+    <string name="report_photo_remove">写真を削除</string>
+    <string name="report_photo_limit">写真は最大5枚まで添付できます</string>
+    <string name="report_photo_failed">写真の一部を追加できませんでした</string>
+    <string name="report_photo_no_camera">利用可能なカメラアプリがありません</string>
     <string name="zoom_in">拡大</string>
     <string name="zoom_out">縮小</string>
     <string name="failed_to_load">読み込みに失敗しました</string>

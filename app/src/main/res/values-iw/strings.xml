@@ -229,6 +229,15 @@
     <string name="report_comment_placeholder">כל דבר שיעזור לבודקים להבין את המצב…</string>
     <string name="btn_submit">שליחה</string>
     <string name="report_submitted">הדיווח נשלח</string>
+    <string name="report_photos_optional">תמונות ראיה (אופציונלי)</string>
+    <string name="report_photos_hint">עד 5 תמונות שמציגות את מצבו הנוכחי של המקום. הן עוזרות לעורכים לבדוק את הדיווח שלך.</string>
+    <string name="add_photo">הוספת תמונה</string>
+    <string name="report_photo_take">צילום תמונה</string>
+    <string name="report_photo_choose">בחירה מהגלריה</string>
+    <string name="report_photo_remove">הסרת תמונה</string>
+    <string name="report_photo_limit">ניתן לצרף עד 5 תמונות</string>
+    <string name="report_photo_failed">לא ניתן היה להוסיף את אחת התמונות</string>
+    <string name="report_photo_no_camera">אין אפליקציית מצלמה זמינה</string>
     <string name="zoom_in">הגדלה</string>
     <string name="zoom_out">הקטנה</string>
     <string name="failed_to_load">הטעינה נכשלה</string>

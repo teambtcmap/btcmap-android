@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">Alles, was Prüfern hilft, die Situation zu verstehen…</string>
     <string name="btn_submit">Absenden</string>
     <string name="report_submitted">Meldung eingereicht</string>
+    <string name="report_photos_optional">Belegfotos (optional)</string>
+    <string name="report_photos_hint">Bis zu 5 Fotos, die den aktuellen Zustand des Ortes zeigen. Sie helfen den Redakteuren, deine Meldung zu prüfen.</string>
+    <string name="add_photo">Foto hinzufügen</string>
+    <string name="report_photo_take">Foto aufnehmen</string>
+    <string name="report_photo_choose">Aus Galerie auswählen</string>
+    <string name="report_photo_remove">Foto entfernen</string>
+    <string name="report_photo_limit">Du kannst bis zu 5 Fotos anhängen</string>
+    <string name="report_photo_failed">Eines der Fotos konnte nicht hinzugefügt werden</string>
+    <string name="report_photo_no_camera">Keine Kamera-App verfügbar</string>
     <string name="zoom_in">Vergrößern</string>
     <string name="zoom_out">Verkleinern</string>
     <string name="failed_to_load">Laden fehlgeschlagen</string>

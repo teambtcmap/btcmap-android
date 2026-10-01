@@ -221,6 +221,15 @@
     <string name="report_comment_placeholder">Bất cứ điều gì giúp người xem xét hiểu rõ tình hình…</string>
     <string name="btn_submit">Gửi</string>
     <string name="report_submitted">Đã gửi báo cáo</string>
+    <string name="report_photos_optional">Ảnh bằng chứng (không bắt buộc)</string>
+    <string name="report_photos_hint">Tối đa 5 ảnh thể hiện tình trạng hiện tại của địa điểm. Những ảnh này giúp biên tập viên xem xét báo cáo của bạn.</string>
+    <string name="add_photo">Thêm ảnh</string>
+    <string name="report_photo_take">Chụp ảnh</string>
+    <string name="report_photo_choose">Chọn từ thư viện</string>
+    <string name="report_photo_remove">Xóa ảnh</string>
+    <string name="report_photo_limit">Bạn có thể đính kèm tối đa 5 ảnh</string>
+    <string name="report_photo_failed">Không thể thêm một trong các ảnh</string>
+    <string name="report_photo_no_camera">Không có ứng dụng máy ảnh khả dụng</string>
     <string name="zoom_in">Phóng to</string>
     <string name="zoom_out">Thu nhỏ</string>
     <string name="failed_to_load">Không tải được</string>

@@ -35,4 +35,37 @@ class PlaceReportApiTest : ApiTestBase() {
             request.jsonBody(),
         )
     }
+
+    @Test
+    fun reportPlace_sendsPhotosAsBase64AndReadsTheirIds() = runTest {
+        enqueueJson("""{"id":18110,"origin":"user","photo_ids":[3,4]}""")
+
+        val response = api().reportPlace(
+            placeId = 42,
+            type = "verification",
+            comment = null,
+            photos = listOf(byteArrayOf(1, 2, 3), byteArrayOf(4, 5)),
+        )
+
+        val request = takeRequest()
+        Assert.assertEquals(
+            """{"place_id":42,"type":"verification","extra_fields":{"origin":"$userAgent"},"photos":[{"data_base64":"AQID"},{"data_base64":"BAU="}]}""",
+            request.jsonBody(),
+        )
+        Assert.assertEquals(listOf(3L, 4L), response.photoIds)
+    }
+
+    @Test
+    fun reportPlace_omitsPhotosAndDefaultsToNoIdsWhenNoneProvided() = runTest {
+        enqueueJson("""{"id":18111,"origin":"user"}""")
+
+        val response = api().reportPlace(placeId = 42, type = "verification", comment = null)
+
+        val request = takeRequest()
+        Assert.assertEquals(
+            """{"place_id":42,"type":"verification","extra_fields":{"origin":"$userAgent"}}""",
+            request.jsonBody(),
+        )
+        Assert.assertTrue(response.photoIds.isEmpty())
+    }
 }

@@ -221,6 +221,15 @@
     <string name="report_comment_placeholder">任何有助于审核者了解情况的信息…</string>
     <string name="btn_submit">提交</string>
     <string name="report_submitted">报告已提交</string>
+    <string name="report_photos_optional">证据照片（可选）</string>
+    <string name="report_photos_hint">最多 5 张显示该地点当前状态的照片。它们有助于编辑者审核您的报告。</string>
+    <string name="add_photo">添加照片</string>
+    <string name="report_photo_take">拍照</string>
+    <string name="report_photo_choose">从图库选择</string>
+    <string name="report_photo_remove">移除照片</string>
+    <string name="report_photo_limit">最多可附加 5 张照片</string>
+    <string name="report_photo_failed">无法添加其中一张照片</string>
+    <string name="report_photo_no_camera">没有可用的相机应用</string>
     <string name="zoom_in">放大</string>
     <string name="zoom_out">缩小</string>
     <string name="failed_to_load">加载失败</string>

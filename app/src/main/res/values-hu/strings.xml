@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">Bármi, ami segít az ellenőrzőknek megérteni a helyzetet…</string>
     <string name="btn_submit">Beküldés</string>
     <string name="report_submitted">Bejelentés beküldve</string>
+    <string name="report_photos_optional">Bizonyítékfotók (nem kötelező)</string>
+    <string name="report_photos_hint">Legfeljebb 5 fotó a hely jelenlegi állapotáról. Ezek segítenek a szerkesztőknek átnézni a bejelentésedet.</string>
+    <string name="add_photo">Fotó hozzáadása</string>
+    <string name="report_photo_take">Fotó készítése</string>
+    <string name="report_photo_choose">Kiválasztás a galériából</string>
+    <string name="report_photo_remove">Fotó eltávolítása</string>
+    <string name="report_photo_limit">Legfeljebb 5 fotót csatolhatsz</string>
+    <string name="report_photo_failed">Az egyik fotót nem sikerült hozzáadni</string>
+    <string name="report_photo_no_camera">Nem érhető el kamerás alkalmazás</string>
     <string name="zoom_in">Nagyítás</string>
     <string name="zoom_out">Kicsinyítés</string>
     <string name="failed_to_load">Nem sikerült betölteni</string>

@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">هر چیزی که به بازبینان در درک وضعیت کمک کند…</string>
     <string name="btn_submit">ارسال</string>
     <string name="report_submitted">گزارش ارسال شد</string>
+    <string name="report_photos_optional">عکس‌های مدرک (اختیاری)</string>
+    <string name="report_photos_hint">حداکثر ۵ عکس که وضعیت فعلی مکان را نشان می‌دهد. این‌ها به ویرایشگران در بررسی گزارش شما کمک می‌کنند.</string>
+    <string name="add_photo">افزودن عکس</string>
+    <string name="report_photo_take">گرفتن عکس</string>
+    <string name="report_photo_choose">انتخاب از گالری</string>
+    <string name="report_photo_remove">حذف عکس</string>
+    <string name="report_photo_limit">می‌توانید حداکثر ۵ عکس پیوست کنید</string>
+    <string name="report_photo_failed">افزودن یکی از عکس‌ها ممکن نشد</string>
+    <string name="report_photo_no_camera">هیچ برنامه دوربینی موجود نیست</string>
     <string name="zoom_in">بزرگ‌نمایی</string>
     <string name="zoom_out">کوچک‌نمایی</string>
     <string name="failed_to_load">بارگذاری ناموفق بود</string>

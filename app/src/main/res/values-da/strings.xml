@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">Alt, der hjælper gennemgående med at forstå situationen…</string>
     <string name="btn_submit">Indsend</string>
     <string name="report_submitted">Rapport indsendt</string>
+    <string name="report_photos_optional">Bevisbilleder (valgfrit)</string>
+    <string name="report_photos_hint">Op til 5 billeder, der viser stedets aktuelle tilstand. De hjælper redaktørerne med at gennemgå din rapport.</string>
+    <string name="add_photo">Tilføj billede</string>
+    <string name="report_photo_take">Tag billede</string>
+    <string name="report_photo_choose">Vælg fra galleri</string>
+    <string name="report_photo_remove">Fjern billede</string>
+    <string name="report_photo_limit">Du kan vedhæfte op til 5 billeder</string>
+    <string name="report_photo_failed">Kunne ikke tilføje et af billederne</string>
+    <string name="report_photo_no_camera">Ingen kameraapp tilgængelig</string>
     <string name="zoom_in">Zoom ind</string>
     <string name="zoom_out">Zoom ud</string>
     <string name="failed_to_load">Kunne ikke indlæses</string>

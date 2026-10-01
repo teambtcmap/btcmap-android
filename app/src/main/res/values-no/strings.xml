@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">Alt som hjelper anmelderne å forstå situasjonen…</string>
     <string name="btn_submit">Send inn</string>
     <string name="report_submitted">Rapport sendt inn</string>
+    <string name="report_photos_optional">Bevisbilder (valgfritt)</string>
+    <string name="report_photos_hint">Opptil 5 bilder som viser stedets nåværende tilstand. De hjelper redaktørene med å gjennomgå rapporten din.</string>
+    <string name="add_photo">Legg til bilde</string>
+    <string name="report_photo_take">Ta bilde</string>
+    <string name="report_photo_choose">Velg fra galleri</string>
+    <string name="report_photo_remove">Fjern bilde</string>
+    <string name="report_photo_limit">Du kan legge ved opptil 5 bilder</string>
+    <string name="report_photo_failed">Kunne ikke legge til ett av bildene</string>
+    <string name="report_photo_no_camera">Ingen kamerapp tilgjengelig</string>
     <string name="zoom_in">Zoom inn</string>
     <string name="zoom_out">Zoom ut</string>
     <string name="failed_to_load">Kunne ikke lastes</string>

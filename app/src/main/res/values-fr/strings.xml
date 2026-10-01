@@ -229,6 +229,15 @@
     <string name="report_comment_placeholder">Tout ce qui aide les réviseurs à comprendre la situation…</string>
     <string name="btn_submit">Envoyer</string>
     <string name="report_submitted">Signalement envoyé</string>
+    <string name="report_photos_optional">Photos justificatives (facultatif)</string>
+    <string name="report_photos_hint">Jusqu\'à 5 photos montrant l\'état actuel du lieu. Elles aident les éditeurs à examiner votre signalement.</string>
+    <string name="add_photo">Ajouter une photo</string>
+    <string name="report_photo_take">Prendre une photo</string>
+    <string name="report_photo_choose">Choisir dans la galerie</string>
+    <string name="report_photo_remove">Supprimer la photo</string>
+    <string name="report_photo_limit">Vous pouvez joindre jusqu\'à 5 photos</string>
+    <string name="report_photo_failed">Impossible d\'ajouter l\'une des photos</string>
+    <string name="report_photo_no_camera">Aucune application appareil photo disponible</string>
     <string name="zoom_in">Zoom avant</string>
     <string name="zoom_out">Zoom arrière</string>
     <string name="failed_to_load">Échec du chargement</string>

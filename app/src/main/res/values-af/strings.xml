@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">Enigiets wat hersieners help om die situasie te verstaan…</string>
     <string name="btn_submit">Dien in</string>
     <string name="report_submitted">Verslag ingedien</string>
+    <string name="report_photos_optional">Bewysfoto\'s (opsioneel)</string>
+    <string name="report_photos_hint">Tot 5 foto\'s wat die huidige toestand van die plek wys. Dit help redigeerders om jou verslag te hersien.</string>
+    <string name="add_photo">Voeg foto by</string>
+    <string name="report_photo_take">Neem foto</string>
+    <string name="report_photo_choose">Kies uit galery</string>
+    <string name="report_photo_remove">Verwyder foto</string>
+    <string name="report_photo_limit">Jy kan tot 5 foto\'s byvoeg</string>
+    <string name="report_photo_failed">Kon nie een van die foto\'s byvoeg nie</string>
+    <string name="report_photo_no_camera">Geen kamera-app beskikbaar nie</string>
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom uit</string>
     <string name="failed_to_load">Kon nie laai nie</string>

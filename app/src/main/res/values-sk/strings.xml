@@ -233,6 +233,15 @@
     <string name="report_comment_placeholder">Čokoľvek, čo pomôže kontrolórom pochopiť situáciu…</string>
     <string name="btn_submit">Odoslať</string>
     <string name="report_submitted">Hlásenie odoslané</string>
+    <string name="report_photos_optional">Fotografie ako dôkaz (voliteľné)</string>
+    <string name="report_photos_hint">Až 5 fotografií zobrazujúcich aktuálny stav miesta. Pomôžu editorom skontrolovať vaše hlásenie.</string>
+    <string name="add_photo">Pridať fotografiu</string>
+    <string name="report_photo_take">Odfotiť</string>
+    <string name="report_photo_choose">Vybrať z galérie</string>
+    <string name="report_photo_remove">Odstrániť fotografiu</string>
+    <string name="report_photo_limit">Môžete priložiť až 5 fotografií</string>
+    <string name="report_photo_failed">Jednu z fotografií sa nepodarilo pridať</string>
+    <string name="report_photo_no_camera">Nie je k dispozícii žiadna aplikácia fotoaparátu</string>
     <string name="zoom_in">Priblížiť</string>
     <string name="zoom_out">Oddialiť</string>
     <string name="failed_to_load">Nepodarilo sa načítať</string>

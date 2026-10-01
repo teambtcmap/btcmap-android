@@ -40,7 +40,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withResumed
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.transition.TransitionManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -49,6 +51,8 @@ import kotlinx.coroutines.withContext
 import org.btcmap.Activity
 import org.btcmap.api
 import org.btcmap.api.getPlaceCoordinates
+import org.btcmap.api.getPlaceImages
+import org.btcmap.api.placeImageUrl
 import org.btcmap.app
 import org.btcmap.boost.BoostFragment
 import org.btcmap.db.table.place.Place
@@ -126,6 +130,12 @@ class PlaceFragment : Fragment() {
          */
         private const val COMMENTS_PREVIEW_LIMIT = 3L
 
+        /** The thumbnail strip asks the API for small, square renditions. */
+        private const val PHOTO_THUMBNAIL_SIZE = 320
+
+        /** The fullscreen viewer asks for a larger rendition of the same photo. */
+        private const val PHOTO_FULL_SIZE = 1600
+
         private const val SMALL_MAP_ZOOM = 16.0
         private const val SMALL_MAP_DEFAULT_MARKER_IMAGE = "place-preview-marker"
         private const val SMALL_MAP_SOURCE_ID = "place_preview_source"
@@ -146,6 +156,13 @@ class PlaceFragment : Fragment() {
     private lateinit var commentsAdapter: CommentsAdapter
 
     private var commentsJob: Job? = null
+
+    private lateinit var photosAdapter: PlacePhotosAdapter
+
+    private var photosJob: Job? = null
+
+    /** The place whose photos the strip currently belongs to, or null. */
+    private var renderedPhotosPlaceId: Long? = null
 
     private var smallMap: MapLibreMap? = null
     private var smallMapCreated = false
@@ -242,6 +259,16 @@ class PlaceFragment : Fragment() {
         commentsAdapter = CommentsAdapter()
         binding.commentsList.layoutManager = LinearLayoutManager(requireContext())
         binding.commentsList.adapter = commentsAdapter
+
+        photosAdapter = PlacePhotosAdapter { index -> showPhotoViewer(index) }
+        binding.photosList.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.photosList.adapter = ConcatAdapter(
+            photosAdapter,
+            // There is no endpoint to attach a photo to an existing place yet,
+            // so the add tile is intentionally inert for now.
+            PlacePhotoAddAdapter {},
+        )
 
         // The place is read from the local cache, so a deep link opened while
         // the row is still the pre-sync copy (or any background sync that
@@ -743,6 +770,7 @@ class PlaceFragment : Fragment() {
 
         binding.comments.isEnabled = true
         renderComments(place.id)
+        renderPhotos(place.id)
 
         previewPlace = place
         previewLatLng = LatLng(place.lat, place.lon)
@@ -806,6 +834,99 @@ class PlaceFragment : Fragment() {
             val formatter = commentDateFormatter()
             commentsAdapter.submitList(comments.map { it.toAdapterItem(formatter) })
         }
+    }
+
+    /**
+     * Loads a place's photos off the main thread and shows them in the thumbnail
+     * strip. Most places have none, so the whole section stays hidden until at
+     * least one image arrives; a failed fetch leaves it hidden rather than
+     * interrupting the screen.
+     */
+    private fun renderPhotos(placeId: Long) {
+        photosJob?.cancel()
+
+        // Switching to a different place must not leave the previous place's
+        // photos on screen, even for a frame, so hide the whole section until
+        // the new place's list is committed. A reload of the same place keeps
+        // its strip up to avoid flicker.
+        if (renderedPhotosPlaceId != placeId) {
+            renderedPhotosPlaceId = placeId
+            _binding?.let {
+                it.photosList.isVisible = false
+                it.addPhoto.isVisible = false
+            }
+        }
+
+        photosJob = viewLifecycleOwner.lifecycleScope.launch {
+            val api = api()
+
+            val photos = try {
+                withContext(Dispatchers.IO) {
+                    api.getPlaceImages(placeId).map { image ->
+                        PlacePhoto(
+                            id = image.id,
+                            thumbnailUrl = api.placeImageUrl(
+                                placeId = placeId,
+                                imageId = image.id,
+                                width = PHOTO_THUMBNAIL_SIZE,
+                                height = PHOTO_THUMBNAIL_SIZE,
+                            ),
+                            fullUrl = api.placeImageUrl(
+                                placeId = placeId,
+                                imageId = image.id,
+                                width = PHOTO_FULL_SIZE,
+                            ),
+                        )
+                    }
+                }
+            } catch (t: Throwable) {
+                t.rethrowIfCancellation()
+                emptyList()
+            }
+
+            if (_binding == null) return@launch
+
+            // With photos, the strip ends in an add tile; without any, the same
+            // spot shows a full-width add button so the affordance stays there.
+            // Reveal only once the new list is committed, so the previous
+            // place's rows cannot flash while the diff is applied.
+            photosAdapter.submitList(photos) {
+                val binding = _binding
+                if (binding != null) {
+                    val hasPhotos = photos.isNotEmpty()
+                    val showList = hasPhotos
+                    val showAdd = !hasPhotos
+                    val wasListVisible = binding.photosList.isVisible
+
+                    if (wasListVisible != showList ||
+                        binding.addPhoto.isVisible != showAdd
+                    ) {
+                        // Animate the row in and let the rows below slide down
+                        // instead of jumping when the network result lands.
+                        (binding.photosList.parent as? ViewGroup)?.let {
+                            TransitionManager.beginDelayedTransition(it)
+                        }
+                        binding.photosList.isVisible = showList
+                        binding.addPhoto.isVisible = showAdd
+
+                        // The list was committed while hidden, so pin it to the
+                        // first photo; otherwise the layout manager can settle
+                        // on the last one and open the strip scrolled to the end.
+                        if (showList && !wasListVisible) {
+                            binding.photosList.scrollToPosition(0)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showPhotoViewer(index: Int) {
+        val urls = photosAdapter.currentList.map { it.fullUrl }
+        if (urls.isEmpty()) return
+
+        PlacePhotoViewerDialogFragment.newInstance(ArrayList(urls), index)
+            .show(parentFragmentManager, PlacePhotoViewerDialogFragment.TAG)
     }
 
     /**

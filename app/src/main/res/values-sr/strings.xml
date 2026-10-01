@@ -229,6 +229,15 @@
     <string name="report_comment_placeholder">Све што помаже прегледачима да разумеју ситуацију…</string>
     <string name="btn_submit">Пошаљи</string>
     <string name="report_submitted">Пријава послата</string>
+    <string name="report_photos_optional">Фотографије као доказ (опционо)</string>
+    <string name="report_photos_hint">До 5 фотографија које приказују тренутно стање места. Оне помажу уредницима да прегледају вашу пријаву.</string>
+    <string name="add_photo">Додај фотографију</string>
+    <string name="report_photo_take">Усликај фотографију</string>
+    <string name="report_photo_choose">Изабери из галерије</string>
+    <string name="report_photo_remove">Уклони фотографију</string>
+    <string name="report_photo_limit">Можете приложити до 5 фотографија</string>
+    <string name="report_photo_failed">Није било могуће додати једну од фотографија</string>
+    <string name="report_photo_no_camera">Нема доступне апликације камере</string>
     <string name="zoom_in">Увећај</string>
     <string name="zoom_out">Умањи</string>
     <string name="failed_to_load">Учитавање није успело</string>

@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">Allt som hjälper granskare att förstå situationen…</string>
     <string name="btn_submit">Skicka</string>
     <string name="report_submitted">Rapporten har skickats</string>
+    <string name="report_photos_optional">Bevisfoton (valfritt)</string>
+    <string name="report_photos_hint">Upp till 5 foton som visar platsens aktuella skick. De hjälper redaktörerna att granska din rapport.</string>
+    <string name="add_photo">Lägg till foto</string>
+    <string name="report_photo_take">Ta foto</string>
+    <string name="report_photo_choose">Välj från galleri</string>
+    <string name="report_photo_remove">Ta bort foto</string>
+    <string name="report_photo_limit">Du kan bifoga upp till 5 foton</string>
+    <string name="report_photo_failed">Kunde inte lägga till ett av fotona</string>
+    <string name="report_photo_no_camera">Ingen kameraapp tillgänglig</string>
     <string name="zoom_in">Zooma in</string>
     <string name="zoom_out">Zooma ut</string>
     <string name="failed_to_load">Kunde inte läsas in</string>

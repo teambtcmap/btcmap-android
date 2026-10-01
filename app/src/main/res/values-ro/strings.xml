@@ -229,6 +229,15 @@
     <string name="report_comment_placeholder">Orice ajută verificatorii să înțeleagă situația…</string>
     <string name="btn_submit">Trimite</string>
     <string name="report_submitted">Raport trimis</string>
+    <string name="report_photos_optional">Fotografii dovezi (opțional)</string>
+    <string name="report_photos_hint">Până la 5 fotografii care arată starea actuală a locului. Acestea îi ajută pe editori să verifice raportul tău.</string>
+    <string name="add_photo">Adaugă fotografie</string>
+    <string name="report_photo_take">Fă o fotografie</string>
+    <string name="report_photo_choose">Alege din galerie</string>
+    <string name="report_photo_remove">Elimină fotografia</string>
+    <string name="report_photo_limit">Poți atașa până la 5 fotografii</string>
+    <string name="report_photo_failed">Una dintre fotografii nu a putut fi adăugată</string>
+    <string name="report_photo_no_camera">Nicio aplicație de cameră disponibilă</string>
     <string name="zoom_in">Mărește</string>
     <string name="zoom_out">Micșorează</string>
     <string name="failed_to_load">Încărcarea a eșuat</string>

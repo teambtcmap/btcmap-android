@@ -225,6 +225,15 @@
     <string name="report_comment_placeholder">समीक्षकों को स्थिति समझने में मदद करने वाली कोई भी बात…</string>
     <string name="btn_submit">जमा करें</string>
     <string name="report_submitted">रिपोर्ट जमा की गई</string>
+    <string name="report_photos_optional">सबूत की तस्वीरें (वैकल्पिक)</string>
+    <string name="report_photos_hint">स्थान की वर्तमान स्थिति दिखाने वाली अधिकतम 5 तस्वीरें। ये संपादकों को आपकी रिपोर्ट की समीक्षा करने में मदद करती हैं।</string>
+    <string name="add_photo">तस्वीर जोड़ें</string>
+    <string name="report_photo_take">तस्वीर लें</string>
+    <string name="report_photo_choose">गैलरी से चुनें</string>
+    <string name="report_photo_remove">तस्वीर हटाएं</string>
+    <string name="report_photo_limit">आप अधिकतम 5 तस्वीरें संलग्न कर सकते हैं</string>
+    <string name="report_photo_failed">तस्वीरों में से एक जोड़ी नहीं जा सकी</string>
+    <string name="report_photo_no_camera">कोई कैमरा ऐप उपलब्ध नहीं है</string>
     <string name="zoom_in">ज़ूम इन</string>
     <string name="zoom_out">ज़ूम आउट</string>
     <string name="failed_to_load">लोड नहीं हो सका</string>

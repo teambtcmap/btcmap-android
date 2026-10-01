@@ -119,6 +119,49 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/report_photos_optional"
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                android:textColor="?attr/colorOnSurface" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/report_photos_hint"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <HorizontalScrollView
+                android:id="@+id/photosScroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:scrollbars="none"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:id="@+id/photos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+
+            </HorizontalScrollView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddPhoto"
+                style="@style/Button.Outlined.NoTopInset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:enabled="false"
+                android:text="@string/add_photo"
+                app:icon="@drawable/icon_add"
+                app:iconGravity="textStart" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSubmit"
                 android:layout_width="match_parent"

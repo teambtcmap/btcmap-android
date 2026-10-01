@@ -69,6 +69,18 @@
 
         </activity>
 
+        <!-- Hands the camera a writable location for a new evidence photo. The
+             file lives in the cache and is deleted after it is read. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
     </application>
 
 </manifest>

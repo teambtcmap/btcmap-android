@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<paths>
+    <!-- Camera evidence is written here as a temporary file and deleted once it
+         has been read and encoded for upload. -->
+    <cache-path
+        name="report_photos"
+        path="report-photos/" />
+</paths>

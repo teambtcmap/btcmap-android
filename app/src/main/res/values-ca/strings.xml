@@ -229,6 +229,15 @@
     <string name="report_comment_placeholder">Qualsevol cosa que ajudi els revisors a entendre la situació…</string>
     <string name="btn_submit">Envia</string>
     <string name="report_submitted">Informe enviat</string>
+    <string name="report_photos_optional">Fotos de prova (opcional)</string>
+    <string name="report_photos_hint">Fins a 5 fotos que mostrin l\'estat actual del lloc. Ajuden els editors a revisar el teu informe.</string>
+    <string name="add_photo">Afegeix una foto</string>
+    <string name="report_photo_take">Fes una foto</string>
+    <string name="report_photo_choose">Tria de la galeria</string>
+    <string name="report_photo_remove">Elimina la foto</string>
+    <string name="report_photo_limit">Pots adjuntar fins a 5 fotos</string>
+    <string name="report_photo_failed">No s\'ha pogut afegir una de les fotos</string>
+    <string name="report_photo_no_camera">No hi ha cap aplicació de càmera disponible</string>
     <string name="zoom_in">Amplia</string>
     <string name="zoom_out">Redueix</string>
     <string name="failed_to_load">No s\'ha pogut carregar</string>
