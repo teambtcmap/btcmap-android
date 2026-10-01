@@ -11,7 +11,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.text.font.FontFamily
+import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Marker
+import org.btcmap.ui.map.MarkerPalette
 
 /**
  * Hosts [MapScreen] inside the Android Views hierarchy (Phase 3 spike). The
@@ -25,6 +27,10 @@ class MapComposeView @JvmOverloads constructor(
     var styleUrl: String by mutableStateOf("https://tiles.openfreemap.org/styles/liberty")
 
     var markers: List<Marker> by mutableStateOf(emptyList())
+
+    var exchanges: List<Marker> by mutableStateOf(emptyList())
+
+    var events: List<Event> by mutableStateOf(emptyList())
 
     var initialLat: Double by mutableStateOf(0.0)
 
@@ -54,15 +60,19 @@ class MapComposeView @JvmOverloads constructor(
         MapScreen(
             styleUrl = styleUrl,
             markers = markers,
+            exchanges = exchanges,
+            events = events,
             initialLat = initialLat,
             initialLon = initialLon,
             initialZoom = initialZoom,
-            markerBackgroundColor = markerBackgroundColor,
-            markerIconColor = markerIconColor,
-            boostedMarkerBackgroundColor = boostedMarkerBackgroundColor,
-            boostedMarkerIconColor = boostedMarkerIconColor,
-            markerBadgeBackgroundColor = markerBadgeBackgroundColor,
-            markerBadgeTextColor = markerBadgeTextColor,
+            palette = MarkerPalette(
+                markerBackground = markerBackgroundColor,
+                markerIcon = markerIconColor,
+                boostedMarkerBackground = boostedMarkerBackgroundColor,
+                boostedMarkerIcon = boostedMarkerIconColor,
+                badgeBackground = markerBadgeBackgroundColor,
+                badgeText = markerBadgeTextColor,
+            ),
             usingOpenFreeMap = usingOpenFreeMap,
             iconFont = fontFamily,
         )

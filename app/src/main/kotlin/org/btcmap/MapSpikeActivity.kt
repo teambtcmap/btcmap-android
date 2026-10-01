@@ -7,12 +7,15 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import org.btcmap.ui.MapComposeView
+import org.btcmap.util.isUpcoming
+import java.time.ZonedDateTime
 
 /**
  * Phase 3 spike: hosts the shared MapLibre Compose map ([MapComposeView]) so it
- * can be launched directly (`adb shell am start`). It loads real merchants from
- * the local database around a dense area to exercise the ported layer pipeline.
- * Temporary scaffolding; remove once the shared map replaces [map.MapFragment].
+ * can be launched directly (`adb shell am start`). It loads real merchants,
+ * exchanges and events from the local database around a busy area to exercise
+ * the ported layer pipelines. Temporary scaffolding; remove once the shared map
+ * replaces [map.MapFragment].
  */
 class MapSpikeActivity : AppCompatActivity() {
 
@@ -25,30 +28,39 @@ class MapSpikeActivity : AppCompatActivity() {
             setViewTreeViewModelStoreOwner(this@MapSpikeActivity)
             initialLat = CENTER_LAT
             initialLon = CENTER_LON
-            initialZoom = 15.0
+            initialZoom = 13.0
             iconTypeface = org.btcmap.util.iconTypeface
         }
         setContentView(view)
 
         val app = application as App
         Thread {
-            val markers = app.db.place.selectMerchantsByBounds(
-                minLat = CENTER_LAT - HALF_BOX,
-                maxLat = CENTER_LAT + HALF_BOX,
-                minLon = CENTER_LON - HALF_BOX,
-                maxLon = CENTER_LON + HALF_BOX,
-            )
-            Log.i(TAG, "loaded ${markers.size} merchants")
-            runOnUiThread { view.markers = markers }
+            val minLat = CENTER_LAT - HALF_BOX
+            val maxLat = CENTER_LAT + HALF_BOX
+            val minLon = CENTER_LON - HALF_BOX
+            val maxLon = CENTER_LON + HALF_BOX
+            val now = ZonedDateTime.now()
+
+            val merchants = app.db.place.selectMerchantsByBounds(minLat, maxLat, minLon, maxLon)
+            val exchanges = app.db.place.selectExchangesByBounds(minLat, maxLat, minLon, maxLon)
+            val events = app.db.event.selectByBounds(minLat, maxLat, minLon, maxLon)
+                .filter { it.startsAt.isUpcoming(now) }
+
+            Log.i(TAG, "loaded ${merchants.size} merchants, ${exchanges.size} exchanges, ${events.size} events")
+            runOnUiThread {
+                view.markers = merchants
+                view.exchanges = exchanges
+                view.events = events
+            }
         }.start()
     }
 
     private companion object {
         const val TAG = "MapSpike"
 
-        // Johannesburg, the densest cell in the bundled snapshot.
-        const val CENTER_LAT = -26.2803652
-        const val CENTER_LON = 28.1245857
+        // Warsaw, which has merchants, exchanges and an upcoming event nearby.
+        const val CENTER_LAT = 52.2333742
+        const val CENTER_LON = 21.0711489
         const val HALF_BOX = 0.08
     }
 }

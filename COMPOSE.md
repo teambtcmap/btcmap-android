@@ -699,6 +699,25 @@ Verified on the emulator: the pins draw with their glyphs (orange pin, white
 shopping-cart and fuel-pump glyphs) over the OpenFreeMap liberty style, and
 clustering still works at low zoom.
 
+### Phase 3, fourth slice — done (event and exchange layers)
+
+Ported `createEventLayers` and `createExchangeLayers` to
+`ui/.../map/EventLayers.kt` and `ExchangeLayers.kt`: their clustered sources,
+the cluster circle/count, the shared plain pin (`MarkerBitmapFactory.pin`) on
+the marker layer with the glyph on a second layer
+(`MarkerBitmapFactory.icon`), and the exchange comment-count badge circle and
+text (with the viewport translate). The marker colors moved into a
+`MarkerPalette` data class.
+
+`MapScreen` now takes the events and exchanges too and registers the shared
+pin, the event glyph and one glyph per distinct exchange icon; the marker
+layers only appear once those images exist, as before. `MapSpikeActivity` loads
+merchants, exchanges and events around Warsaw.
+
+Verified on the emulator: 12 merchants, 31 exchanges and 1 event loaded, and
+all three render — the merchant glyph baked into the pin, and the exchange and
+event glyphs on their own layers over the shared pin.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

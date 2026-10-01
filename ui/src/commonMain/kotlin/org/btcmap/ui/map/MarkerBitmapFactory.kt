@@ -27,25 +27,17 @@ import org.btcmap.map.isOutdated
 import kotlin.math.roundToInt
 
 /**
- * Builds the merchant marker bitmaps in common Compose graphics, ported from
+ * Builds the marker bitmaps in common Compose graphics, ported from
  * `org.btcmap.map.MarkerIcon` (which draws them with the Android Canvas). The
- * pin outline is the same vector as `R.drawable.map_marker`; the place glyph
- * and the comment badge are laid out at the same dp sizes.
+ * pin outline is the same vector as `R.drawable.map_marker`; the glyph and the
+ * comment badge are laid out at the same dp sizes.
  */
 class MarkerBitmapFactory(
     private val textMeasurer: TextMeasurer,
     private val iconFont: FontFamily?,
     private val density: Density,
-    private val markerBackgroundColor: Color,
-    private val markerIconColor: Color,
-    private val boostedMarkerBackgroundColor: Color,
-    private val boostedMarkerIconColor: Color,
-    private val markerBadgeBackgroundColor: Color,
-    private val markerBadgeTextColor: Color,
+    private val palette: MarkerPalette,
 ) {
-
-    /** The plain [R.drawable.map_marker] pin, used for unknown image names. */
-    fun plainPin(): ImageBitmap = render(character = null, outdated = false, boosted = false, comments = null)
 
     /** The marker for a place, with its glyph, variant and comment badge. */
     fun merchantMarker(marker: Marker): ImageBitmap {
@@ -58,6 +50,42 @@ class MarkerBitmapFactory(
         )
     }
 
+    /**
+     * The plain [R.drawable.map_marker] pin in [backgroundColor]. Exchange and
+     * event markers draw it on its own, with their glyph on a separate layer.
+     */
+    fun pin(backgroundColor: Color): ImageBitmap {
+        val pinPx = with(density) { PIN_SIZE_DP.dp.toPx() }
+        val size = pinPx.roundToInt()
+        return draw(size, size) {
+            drawPath(scaledPin(pinPx), color = backgroundColor)
+        }
+    }
+
+    /**
+     * The place glyph on its own, for the exchange and event markers, which
+     * draw the glyph over the shared pin instead of baking it in.
+     */
+    fun icon(character: String, color: Color): ImageBitmap {
+        val glyph = renderableGlyph(character) ?: return ImageBitmap(1, 1)
+        val style = TextStyle(
+            fontFamily = iconFont,
+            fontSize = with(density) { GLYPH_TEXT_DP.dp.toSp() },
+            color = color,
+        )
+        val measured = textMeasurer.measure(glyph, style)
+        val width = measured.size.width + ICON_PADDING_PX * 2
+        val height = measured.size.height + ICON_PADDING_PX * 2
+        return draw(width, height) {
+            drawText(
+                textMeasurer = textMeasurer,
+                text = glyph,
+                topLeft = Offset(ICON_PADDING_PX.toFloat(), ICON_PADDING_PX.toFloat()),
+                style = style,
+            )
+        }
+    }
+
     private fun render(
         character: String?,
         outdated: Boolean,
@@ -65,11 +93,11 @@ class MarkerBitmapFactory(
         comments: Long?,
     ): ImageBitmap {
         val boostedAndCurrent = boosted && !outdated
-        val pinColor = if (boostedAndCurrent) boostedMarkerBackgroundColor else markerBackgroundColor
+        val pinColor = if (boostedAndCurrent) palette.boostedMarkerBackground else palette.markerBackground
         val glyphColor = when {
-            outdated -> markerIconColor.copy(alpha = markerIconColor.alpha * OUTDATED_ICON_ALPHA)
-            boostedAndCurrent -> boostedMarkerIconColor
-            else -> markerIconColor
+            outdated -> palette.markerIcon.copy(alpha = palette.markerIcon.alpha * OUTDATED_ICON_ALPHA)
+            boostedAndCurrent -> palette.boostedMarkerIcon
+            else -> palette.markerIcon
         }
 
         val pinPx = with(density) { PIN_SIZE_DP.dp.toPx() }
@@ -77,20 +105,18 @@ class MarkerBitmapFactory(
         val width = pinPx.roundToInt()
         val height = (pinPx + topPadding).roundToInt()
 
-        val bitmap = ImageBitmap(width, height)
-        CanvasDrawScope().draw(
-            density = density,
-            layoutDirection = LayoutDirection.Ltr,
-            canvas = Canvas(bitmap),
-            size = Size(width.toFloat(), height.toFloat()),
-        ) {
+        return draw(width, height) {
             translate(top = topPadding) {
                 drawPath(scaledPin(pinPx), color = pinColor)
             }
 
             val glyph = renderableGlyph(character)
             if (glyph != null) {
-                val style = TextStyle(fontFamily = iconFont, fontSize = with(density) { GLYPH_TEXT_DP.dp.toSp() })
+                val style = TextStyle(
+                    fontFamily = iconFont,
+                    fontSize = with(density) { GLYPH_TEXT_DP.dp.toSp() },
+                    color = glyphColor,
+                )
                 val measured = textMeasurer.measure(glyph, style)
                 drawText(
                     textMeasurer = textMeasurer,
@@ -99,7 +125,7 @@ class MarkerBitmapFactory(
                         x = (width - measured.size.width) / 2f,
                         y = topPadding + pinPx * PIN_GLYPH_CENTER_RATIO - measured.size.height / 2f,
                     ),
-                    style = style.copy(color = glyphColor),
+                    style = style,
                 )
             }
 
@@ -107,18 +133,20 @@ class MarkerBitmapFactory(
                 drawBadge(comments, width, pinPx, topPadding)
             }
         }
-
-        return bitmap
     }
 
     private fun DrawScope.drawBadge(comments: Long, width: Int, pinPx: Float, topPadding: Float) {
         val cx = width / 2f + BADGE_OFFSET_X_DP.dp.toPx()
         val cy = topPadding + pinPx - BADGE_OFFSET_Y_DP.dp.toPx()
 
-        drawCircle(color = markerBadgeBackgroundColor, radius = BADGE_RADIUS_DP.dp.toPx(), center = Offset(cx, cy))
+        drawCircle(
+            color = palette.badgeBackground,
+            radius = BADGE_RADIUS_DP.dp.toPx(),
+            center = Offset(cx, cy),
+        )
 
         val style = TextStyle(
-            color = markerBadgeTextColor,
+            color = palette.badgeText,
             fontSize = BADGE_TEXT_DP.dp.toSp(),
             fontWeight = FontWeight.Bold,
         )
@@ -130,6 +158,18 @@ class MarkerBitmapFactory(
             topLeft = Offset(cx - measured.size.width / 2f, cy - measured.size.height / 2f),
             style = style,
         )
+    }
+
+    private fun draw(width: Int, height: Int, block: DrawScope.() -> Unit): ImageBitmap {
+        val bitmap = ImageBitmap(width, height)
+        CanvasDrawScope().draw(
+            density = density,
+            layoutDirection = LayoutDirection.Ltr,
+            canvas = Canvas(bitmap),
+            size = Size(width.toFloat(), height.toFloat()),
+            block = block,
+        )
+        return bitmap
     }
 
     /**
@@ -164,10 +204,10 @@ class MarkerBitmapFactory(
         const val BADGE_RADIUS_DP = 9f
         const val BADGE_TEXT_DP = 11f
         const val BADGE_TOP_PADDING_DP = 10f
-        const val OUTDATED_ICON_ALPHA = 0.6f
         const val FALLBACK_ICON = "storefront"
         const val SINGLE_GLYPH_MAX_WIDTH_RATIO = 1.5f
         const val PIN_VIEWPORT = 24f
+        const val ICON_PADDING_PX = 4
 
         val GLYPH_MEASURE_SIZE = 100.sp
 
