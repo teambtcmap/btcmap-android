@@ -239,7 +239,7 @@ private fun GetAreasDeltaItem.toArea(): Area = Area(
  * so a failure is never shown to the user; it is logged for debugging instead.
  * Centralised so the whole sync has a single place to route these through.
  */
-internal fun reportSyncFailure(t: Throwable) {
+fun reportSyncFailure(t: Throwable) {
     t.printStackTrace()
 }
 

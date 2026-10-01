@@ -9,7 +9,7 @@ package org.btcmap.sync
  * emits. Each entity is seeded from its bundled snapshot (the `Unbundling`
  * states) before its delta is pulled from the API (the `Syncing` states).
  */
-internal sealed interface SyncState {
+sealed interface SyncState {
     /** No sync is running. */
     data object Idle : SyncState
 

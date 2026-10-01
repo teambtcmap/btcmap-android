@@ -20,12 +20,16 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.androidx.sqlite)
             implementation(libs.gson)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.okhttp.brotli)
             implementation(libs.okhttp.coroutines)
         }
 
         jvmTest.dependencies {
-            implementation(libs.junit)
             implementation(libs.androidx.sqlite.bundled.jvm)
+            implementation(libs.junit)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.mockwebserver)
         }
     }
 }

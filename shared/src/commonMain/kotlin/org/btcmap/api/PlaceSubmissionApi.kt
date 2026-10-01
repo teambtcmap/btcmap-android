@@ -2,7 +2,6 @@ package org.btcmap.api
 
 import com.google.gson.JsonObject
 import okhttp3.Request
-import org.btcmap.userAgent
 import org.btcmap.util.toJsonObject
 
 data class SubmitPlaceResponse(

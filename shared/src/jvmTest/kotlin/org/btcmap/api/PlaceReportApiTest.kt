@@ -1,7 +1,6 @@
 package org.btcmap.api
 
 import kotlinx.coroutines.test.runTest
-import org.btcmap.userAgent
 import org.junit.Assert
 import org.junit.Test
 

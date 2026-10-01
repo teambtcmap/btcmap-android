@@ -28,7 +28,7 @@ import java.time.Duration
  * (the comments screen) can ask for a comments sync while the full sync is
  * still running.
  */
-internal class SyncManager(
+class SyncManager(
     private val sync: () -> Sync,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
     /**

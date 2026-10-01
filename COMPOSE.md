@@ -296,13 +296,36 @@ Verified: `:shared:jvmTest` (24 test classes), `:app:testDebugUnitTest`,
 `:app:compileDebugKotlin`, `:app:compileDebugAndroidTestKotlin`. No behavior
 change.
 
+### Phase 1, fourth slice — done
+
+Moved `api/**`, `sync/**`, the portable `util` files (`CoroutineExt`, `DeepLink`,
+`InputStreamExt`, `StringExt`, `ThrowableExt`, `ZonedDateTimeExt`) and the
+`auth`/`http` support they need (`RequestBuilderExt`, `TokenSettingInterceptor`,
+`RateLimitingInterceptor`, `UserAgentSettingInterceptor`) into `:shared`, with
+their tests. `:shared` gained `kotlinx-coroutines-core`, `okhttp-brotli` and, for
+JVM tests, MockWebServer and `kotlinx-coroutines-test`.
+
+The `settings` seam was avoided rather than abstracted: `ApiHttpClient` now takes
+`userAgent`, `token` and `apiUrl` providers as parameters, so `:app`'s `App`
+passes `prefs.authToken` and `prefs.apiUrl` and `:shared` never sees `settings`.
+`UserAgent` embeds the app's version code, so it was injected too — `Api` carries
+a `userAgent` and `UserAgentSettingInterceptor` takes one. Visibility churn:
+`SyncController`, `SyncManager`, `SyncEvent`, `SyncState`, `reportSyncFailure`
+and `Api.toVerifiedAt` became public (`:app`'s sync observers, `bundle/`).
+
+Verified: `:shared:jvmTest` (50 classes), `:app:testDebugUnitTest` (44 classes),
+`:app:compileDebugKotlin`, `:app:compileDebugAndroidTestKotlin`. No behavior
+change.
+
 ## Suggested next step
 
-Continue Phase 1 with `sync/*` plus the portable parts of `api/*` and `util/*`
-(`sync` depends on `api`; `api` depends on `util` and on the `settings`
-singleton). The real design point is the `settings` seam: `api` reaches into
-`settings.prefs` for `authToken` and `apiUrl`, and `Settings` is backed by the app
-database with a legacy-`SharedPreferences` import — move that behind an injected
-accessor so `api`/`sync` can live in `:shared` while `:app` keeps the
-`Context`-bound pieces. Verify with the same four commands plus the affected
-`:app` tests.
+Phase 1 has two kinds of work left. First, `settings/Settings.kt` (the portable
+core; `:app` keeps the `Context`-bound `prefs` singleton, `init` and the legacy
+`SharedPreferences` import in `SettingsExt`). Second, a grab-bag of pure
+helpers/models: `area/AreaFormatting`, `bundle/JsonReaderExt`, the
+`SearchAdapterItem`/`CommentsAdapterItem`/`StatsEntry`-style models,
+`offline`'s bounds/estimates, `payment/InvoicePaymentPoller`, the `imagestats`
+models, and the pure map data helpers (`EventGeoJson`, `FeatureStore`,
+`map/layer/*`, caches). What can never move: `bundle/Bundled*` (APK assets), the
+Android `util` files, MapLibre layers/controllers, Coil and every Fragment. Verify
+with the same commands.

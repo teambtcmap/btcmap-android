@@ -25,6 +25,7 @@ import org.btcmap.db.LegacyDatabases
 import org.btcmap.imagestats.ImageStatsEventListener
 import org.btcmap.offline.OfflineMaps
 import org.btcmap.settings.apiUrl
+import org.btcmap.settings.authToken
 import org.btcmap.settings.prefs
 import org.btcmap.sync.Sync
 import org.btcmap.sync.SyncController
@@ -100,9 +101,14 @@ class App : Application(), SingletonImageLoader.Factory {
 
     private val defaultApi: Api by lazy {
         Api(
-            httpClient = apiHttpClient(),
+            httpClient = apiHttpClient(
+                userAgent = userAgent,
+                token = { prefs.authToken },
+                apiUrl = { prefs.apiUrl },
+            ),
             baseUrl = { prefs.apiUrl },
             onUnauthorized = { handleUnauthorized(it) },
+            userAgent = userAgent,
         )
     }
 

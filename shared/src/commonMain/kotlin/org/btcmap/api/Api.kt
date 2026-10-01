@@ -63,6 +63,12 @@ class Api(
     internal val httpClient: OkHttpClient,
     private val baseUrl: () -> HttpUrl,
     private val onUnauthorized: suspend (requestToken: String?) -> Unit = {},
+    /**
+     * Identifies this app to the server as the `origin` of a place report or
+     * submission. Injected because it embeds the app's version code, which only
+     * the platform entry point knows.
+     */
+    val userAgent: String = "BTC Map",
 ) {
     internal val url: HttpUrl
         get() = baseUrl()

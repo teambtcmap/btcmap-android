@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
  * controller that keeps the background full sync out of the way while leaving
  * an explicitly requested comments sync working.
  */
-internal interface SyncController {
+interface SyncController {
     val state: StateFlow<SyncState>
     val events: SharedFlow<SyncEvent>
 

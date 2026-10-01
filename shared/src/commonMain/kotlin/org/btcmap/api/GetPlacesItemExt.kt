@@ -35,7 +35,7 @@ fun GetPlacesItem.toPlace(): FullProjection {
     )
 }
 
-internal fun String.toVerifiedAt(): ZonedDateTime {
+fun String.toVerifiedAt(): ZonedDateTime {
     // A date-only value gets midnight UTC; anything else is a full timestamp.
     // Choosing on the date/time separator instead of trying LocalDate first
     // keeps a full timestamp from paying for a thrown and caught

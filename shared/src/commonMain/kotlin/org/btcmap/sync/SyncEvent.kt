@@ -8,7 +8,7 @@ package org.btcmap.sync
  * drive it and instead reacts to what actually changed: the map rebuilds its
  * viewport cache for the affected table, or reloads the area chips.
  */
-internal sealed interface SyncEvent {
+sealed interface SyncEvent {
     data object PlacesChanged : SyncEvent
     data object EventsChanged : SyncEvent
     data object CommentsChanged : SyncEvent

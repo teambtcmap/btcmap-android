@@ -15,10 +15,14 @@ abstract class ApiTestBase {
     protected val server: MockWebServer
         get() = serverRule.server
 
+    /** The User-Agent/origin the test [api] reports to the server. */
+    protected val userAgent = "test-user-agent"
+
     protected fun api(): Api {
         return Api(
             httpClient = OkHttpClient(),
             baseUrl = { server.url("/") },
+            userAgent = userAgent,
         )
     }
 
