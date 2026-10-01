@@ -1169,6 +1169,17 @@ project directories in play. The map styles are still fetched from the network
 needs `dpkg-deb`, which this machine does not have, so only the app image was
 produced here.
 
+### Phase 3, thirty-second slice — done (desktop activity feed)
+
+The desktop shell gained a **Feed** screen: it asks the shared
+`MapAreasController` for the areas around the starting point, fetches the shared
+`Api.getActivity` for them and renders the shared `ActivityFeedScreen` with rows
+it maps itself (icons, per-type subtitles and a relative date). The app's own row
+mapping stays in `:app` because it needs Android plurals.
+
+Verified in the window: the feed lists a real recent entry ("Adrian GSM Fix —
+Added by Comino, 2 days ago").
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

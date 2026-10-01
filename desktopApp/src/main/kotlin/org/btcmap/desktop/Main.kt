@@ -26,7 +26,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Surface
+import org.btcmap.api.ActivityFeedItem
+import org.btcmap.api.getActivity
+import org.btcmap.map.MapAreasController
+import org.btcmap.ui.ActivityFeedRow
+import org.btcmap.ui.ActivityFeedScreen
+import org.btcmap.ui.ActivityFeedState
 import org.btcmap.ui.MaterialSymbol
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import org.btcmap.ui.SettingsItem
 import org.btcmap.ui.SettingsScreen
 import androidx.compose.material3.Button
@@ -138,6 +146,12 @@ private fun runApp() = application {
                             label = { Text("Cache") },
                         )
                         NavigationRailItem(
+                            selected = screen == Screen.Feed,
+                            onClick = { screen = Screen.Feed },
+                            icon = { MaterialSymbol(glyph = "dynamic_feed", contentDescription = null) },
+                            label = { Text("Feed") },
+                        )
+                        NavigationRailItem(
                             selected = screen == Screen.Settings,
                             onClick = { screen = Screen.Settings },
                             icon = { MaterialSymbol(glyph = "settings", contentDescription = null) },
@@ -184,6 +198,8 @@ private fun runApp() = application {
                     onSelectArea = {},
                     formatDistance = { meters -> "%.1f km".format(meters / 1000) },
                 )
+                } else if (screen == Screen.Feed) {
+                    DesktopFeedScreen(api = api, db = db)
                 } else if (screen == Screen.Settings) {
                     DesktopSettingsScreen(db, settings)
                 } else {
@@ -206,7 +222,7 @@ private fun runApp() = application {
 }
 
 /** The desktop app's screens. */
-private enum class Screen { Map, Stats, Settings }
+private enum class Screen { Map, Feed, Stats, Settings }
 
 private const val SCREENSHOT_ARG = "--screenshot="
 
@@ -253,6 +269,100 @@ private fun renderScreen(spec: String) {
     File(path).writeBytes(bytes)
     println("desktop: wrote $path")
 }
+
+/**
+ * The shared activity feed for the areas containing the map's starting point.
+ * The desktop has no selected place or area of its own yet, so it asks the
+ * shared area lookup for the ones around [FEED_LAT]/[FEED_LON].
+ */
+@androidx.compose.runtime.Composable
+private fun DesktopFeedScreen(api: Api, db: Database) {
+    var attempt by remember { mutableStateOf(0) }
+    var state by remember { mutableStateOf<ActivityFeedState>(ActivityFeedState.Loading) }
+
+    LaunchedEffect(attempt) {
+        state = ActivityFeedState.Loading
+        state = loadFeed(api, db)
+    }
+
+    ActivityFeedScreen(
+        state = state,
+        onItemClick = {},
+        onRetry = { attempt++ },
+    )
+}
+
+private suspend fun loadFeed(api: Api, db: Database): ActivityFeedState {
+    val aliases = areaAliases(db)
+    if (aliases.isEmpty()) {
+        return ActivityFeedState.Empty("No area found for the feed.", retryable = true)
+    }
+
+    return try {
+        val items = api.getActivity(areaIds = aliases, days = 7)
+        if (items.isEmpty()) {
+            ActivityFeedState.Empty("No recent activity.", retryable = true)
+        } else {
+            ActivityFeedState.Content(items.map { it.toRow() })
+        }
+    } catch (t: Throwable) {
+        ActivityFeedState.Empty("Could not load the feed.", retryable = true)
+    }
+}
+
+private suspend fun areaAliases(db: Database): List<String> {
+    val controller = MapAreasController(db)
+    return try {
+        controller.load(FEED_LAT, FEED_LON)
+        withTimeoutOrNull(5_000) { controller.areas.first { it.isNotEmpty() } }
+            ?.map { it.urlAlias }
+            ?: emptyList()
+    } finally {
+        controller.dispose()
+    }
+}
+
+/** A feed item as a row, with the labels spelled out for the desktop. */
+private fun ActivityFeedItem.toRow(): ActivityFeedRow {
+    val icon = when (type) {
+        ActivityFeedItem.TYPE_PLACE_ADDED -> "add_location"
+        ActivityFeedItem.TYPE_PLACE_UPDATED -> "edit"
+        ActivityFeedItem.TYPE_PLACE_BOOSTED -> "rocket_launch"
+        ActivityFeedItem.TYPE_PLACE_COMMENTED -> "comment"
+        ActivityFeedItem.TYPE_PLACE_DELETED -> "delete"
+        else -> "place"
+    }
+
+    val subtitle = when (type) {
+        ActivityFeedItem.TYPE_PLACE_BOOSTED -> durationDays?.let { "Boosted for $it days" }.orEmpty()
+        ActivityFeedItem.TYPE_PLACE_COMMENTED -> comment.orEmpty()
+        ActivityFeedItem.TYPE_PLACE_ADDED -> osmUserName?.let { "Added by $it" }.orEmpty()
+        ActivityFeedItem.TYPE_PLACE_UPDATED -> osmUserName?.let { "Updated by $it" }.orEmpty()
+        ActivityFeedItem.TYPE_PLACE_DELETED -> osmUserName?.let { "Deleted by $it" }.orEmpty()
+        else -> osmUserName?.let { "by $it" }.orEmpty()
+    }
+
+    return ActivityFeedRow(
+        key = "$type:$placeId:$date",
+        icon = icon,
+        placeName = placeName.orEmpty(),
+        subtitle = subtitle,
+        date = relativeDate(date),
+    )
+}
+
+private fun relativeDate(date: String): String = runCatching {
+    val then = java.time.OffsetDateTime.parse(date).atZoneSameInstant(java.time.ZoneId.systemDefault())
+    val days = java.time.Duration.between(then, java.time.ZonedDateTime.now()).toDays()
+    when {
+        days <= 0L -> "today"
+        days == 1L -> "yesterday"
+        else -> "$days days ago"
+    }
+}.getOrDefault(date)
+
+private const val FEED_LAT = 52.2333742
+private const val FEED_LON = 21.0711489
 
 /** The shared settings list, used by both the window and the screenshot mode. */
 @androidx.compose.runtime.Composable
