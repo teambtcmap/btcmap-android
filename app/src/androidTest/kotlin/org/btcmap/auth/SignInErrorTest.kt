@@ -14,10 +14,13 @@ import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
-import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
@@ -31,6 +34,7 @@ import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.Database
+import org.btcmap.ui.AUTH_FIELD_TAG_PREFIX
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.junit.Rule
@@ -41,6 +45,9 @@ import org.junit.runner.RunWith
 class SignInErrorTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     @Test
     fun signIn_whenFailureHasNoMessage_showsSignInErrorMessage() {
@@ -86,11 +93,15 @@ class SignInErrorTest : AppTestCase() {
                     host.showAuthDialog()
                 }
 
-                onView(withId(R.id.signInOption)).inRoot(isDialog()).perform(click())
-                onView(withId(R.id.usernameInput)).inRoot(isDialog())
-                    .perform(typeText("satoshi"), closeSoftKeyboard())
-                onView(withId(R.id.passwordInput)).inRoot(isDialog())
-                    .perform(typeText("hunter2"), closeSoftKeyboard())
+                composeTestRule
+                    .onNodeWithText(app.getString(R.string.log_in_with_existing_account))
+                    .performClick()
+                composeTestRule
+                    .onNodeWithTag(AUTH_FIELD_TAG_PREFIX + "username")
+                    .performTextInput("satoshi")
+                composeTestRule
+                    .onNodeWithTag(AUTH_FIELD_TAG_PREFIX + "password")
+                    .performTextInput("hunter2")
 
                 scenario.onActivity { driver.failing = true }
 

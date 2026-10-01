@@ -590,13 +590,32 @@ the selection and reloads on each toggle; the dialog stays open until OK.
 Deleted `activity_feed_filter_dialog.xml`. This was the last non-auth Views
 dialog. No behavior change.
 
+### Phase 2, fourteenth slice — done
+
+Migrated the auth dialogs' content to Compose: the account chooser
+(`AuthChooserContent`) and the credential / change-password forms
+(`AuthFormContent` — text fields with password visibility toggles, inline errors
+and helpers), hosted by `AuthChooserComposeView` / `AuthFormComposeView` set into
+the `MaterialAlertDialog` (owner pattern). `AuthFormDialogFragment` now holds the
+field values and drives the Compose form; the typed values still live in
+`AuthFormViewModel` (retained across rotation, never saved) and results are
+delivered through `AuthFormResultViewModel` + `setFragmentResult` as before.
+Deleted the `account_choices`, `account`, `account_sign_up` and
+`change_password` layouts, and updated the auth instrumented tests
+(`AuthDialogValidationTest`, `SignInErrorTest`, `AuthRotationTest`,
+`ChangePasswordRotationTest`) to drive the Compose fields.
+`AuthErrorDialogFragment` (a plain message dialog) stays Views. No behavior
+change.
+
 ## Next
 
-The small Views dialogs are done (all three are now Compose). Next, roughly in
-order: `AreaFragment`, `EventFragment`, the remaining place screens
-(`PlaceFragment` is the largest and MapLibre-heavy), and the deferred **auth
-dialogs** (form scaffolding + rotation tests) last.
+Phase 2's non-map UI is now complete: the auth dialogs were the last cluster.
+What remains is map-coupled and belongs in Phase 3 — `EventFragment` and
+`PlaceFragment` embed MapLibre `MapView`s, and `AreaFragment` is
+MapLibre/offline-chrome-heavy. `AuthErrorDialogFragment` (plain message dialog)
+and each screen's embedded `MapView` stay Views for now.
 
-Still open for the desktop target: the `:ui:run` entry point renders only
-`StatsScreen` today; a JVM theme fallback exists but no desktop navigation. Phase
-3 (map → MapLibre Compose) stays gated on that library maturing.
+For the desktop target: the `:ui:run` entry point still renders only
+`StatsScreen`; a JVM theme fallback exists but there is no desktop navigation or
+`MapView` equivalent. Phase 3 (map → MapLibre Compose) stays gated on that
+library maturing.

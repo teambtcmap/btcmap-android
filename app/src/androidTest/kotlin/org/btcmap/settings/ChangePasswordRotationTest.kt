@@ -1,16 +1,20 @@
 package org.btcmap.settings
 
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
-import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
@@ -24,6 +28,7 @@ import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.user.User
+import org.btcmap.ui.AUTH_FIELD_TAG_PREFIX
 import org.btcmap.ui.UserProfileComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
@@ -65,12 +70,8 @@ class ChangePasswordRotationTest : AppTestCase() {
 
                 // The password fields opt out of view-state saving, so their
                 // restored text proves the retained change-password form.
-                onView(withId(R.id.currentPasswordInput)).inRoot(isDialog())
-                    .check(matches(withText(CURRENT_PASSWORD)))
-                onView(withId(R.id.newPasswordInput)).inRoot(isDialog())
-                    .check(matches(withText(NEW_PASSWORD)))
-                onView(withId(R.id.confirmPasswordInput)).inRoot(isDialog())
-                    .check(matches(withText(NEW_PASSWORD)))
+                composeTestRule.onNodeWithText(CURRENT_PASSWORD).assertIsDisplayed()
+                composeTestRule.onAllNodesWithText(NEW_PASSWORD).assertCountEquals(2)
 
                 onView(withId(android.R.id.button1)).inRoot(isDialog()).perform(click())
 
@@ -162,12 +163,15 @@ class ChangePasswordRotationTest : AppTestCase() {
     }
 
     private fun fillPasswordFields() {
-        onView(withId(R.id.currentPasswordInput)).inRoot(isDialog())
-            .perform(typeText(CURRENT_PASSWORD), closeSoftKeyboard())
-        onView(withId(R.id.newPasswordInput)).inRoot(isDialog())
-            .perform(typeText(NEW_PASSWORD), closeSoftKeyboard())
-        onView(withId(R.id.confirmPasswordInput)).inRoot(isDialog())
-            .perform(typeText(NEW_PASSWORD), closeSoftKeyboard())
+        composeTestRule
+            .onNodeWithTag(AUTH_FIELD_TAG_PREFIX + "current")
+            .performTextInput(CURRENT_PASSWORD)
+        composeTestRule
+            .onNodeWithTag(AUTH_FIELD_TAG_PREFIX + "new")
+            .performTextInput(NEW_PASSWORD)
+        composeTestRule
+            .onNodeWithTag(AUTH_FIELD_TAG_PREFIX + "confirmation")
+            .performTextInput(NEW_PASSWORD)
     }
 
     private fun waitForPasswordRequest(): RecordedRequest {

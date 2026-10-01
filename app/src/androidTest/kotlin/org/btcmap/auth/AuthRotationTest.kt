@@ -10,14 +10,16 @@ import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
-import androidx.test.espresso.action.ViewActions.typeText
-import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
@@ -25,6 +27,7 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
+import org.btcmap.ui.AUTH_FIELD_TAG_PREFIX
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.junit.Assert
@@ -43,6 +46,9 @@ import org.junit.runner.RunWith
 class AuthRotationTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     @Test
     fun credentialsSubmittedAfterRotation_reachTheRecreatedHost() {
@@ -85,20 +91,22 @@ class AuthRotationTest : AppTestCase() {
                     host.showAuthDialog(Bundle().apply { putString(EXTRA_MARKER, MARKER) })
                 }
 
-                onView(withId(R.id.signInOption)).inRoot(isDialog()).perform(click())
-                onView(withId(R.id.usernameInput)).inRoot(isDialog())
-                    .perform(typeText("satoshi"), closeSoftKeyboard())
-                onView(withId(R.id.passwordInput)).inRoot(isDialog())
-                    .perform(typeText("hunter2"), closeSoftKeyboard())
+                composeTestRule
+                    .onNodeWithText(app.getString(R.string.log_in_with_existing_account))
+                    .performClick()
+                composeTestRule
+                    .onNodeWithTag(AUTH_FIELD_TAG_PREFIX + "username")
+                    .performTextInput("satoshi")
+                composeTestRule
+                    .onNodeWithTag(AUTH_FIELD_TAG_PREFIX + "password")
+                    .performTextInput("hunter2")
 
                 scenario.recreate()
 
                 // The passwords opt out of view-state saving, so the fact that
                 // they are still here proves the retained ViewModel is used.
-                onView(withId(R.id.usernameInput)).inRoot(isDialog())
-                    .check(matches(withText("satoshi")))
-                onView(withId(R.id.passwordInput)).inRoot(isDialog())
-                    .check(matches(withText("hunter2")))
+                composeTestRule.onNodeWithText("satoshi").assertIsDisplayed()
+                composeTestRule.onNodeWithText("hunter2").assertIsDisplayed()
 
                 onView(withId(android.R.id.button1)).inRoot(isDialog()).perform(click())
 

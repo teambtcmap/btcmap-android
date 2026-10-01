@@ -1,12 +1,15 @@
 package org.btcmap.auth
 
-import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
-import android.view.View
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.btcmap.R
+import org.btcmap.ui.AuthChooserComposeView
+import org.btcmap.ui.AuthChooserOption
 
 /**
  * Asks whether the user wants to create an account or sign in, then opens the
@@ -19,26 +22,31 @@ import org.btcmap.R
  */
 internal class AuthChooserDialogFragment : DialogFragment() {
 
-    // The dialog is the content of a MaterialAlertDialog, which has no parent
-    // view to inflate into, so its root layout params are intentionally unused.
-    @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialogView = layoutInflater.inflate(R.layout.account_choices_dialog, null)
+        val view = AuthChooserComposeView(requireContext()).apply {
+            setViewTreeLifecycleOwner(this@AuthChooserDialogFragment)
+            setViewTreeSavedStateRegistryOwner(this@AuthChooserDialogFragment)
+            setViewTreeViewModelStoreOwner(this@AuthChooserDialogFragment)
+            options = listOf(
+                AuthChooserOption(
+                    key = SIGN_UP,
+                    title = getString(R.string.i_don_t_have_an_account),
+                    subtitle = getString(R.string.create_account_subtitle),
+                ),
+                AuthChooserOption(
+                    key = SIGN_IN,
+                    title = getString(R.string.log_in_with_existing_account),
+                    subtitle = getString(R.string.sign_in_subtitle),
+                ),
+            )
+            onSelect = { key -> showCredentials(if (key == SIGN_UP) AuthMode.SignUp else AuthMode.SignIn) }
+        }
 
-        val dialog = MaterialAlertDialogBuilder(requireContext())
+        return MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.account)
-            .setView(dialogView)
+            .setView(view)
             .setNegativeButton(android.R.string.cancel, null)
             .create()
-
-        dialogView.findViewById<View>(R.id.createAccountOption).setOnClickListener {
-            showCredentials(AuthMode.SignUp)
-        }
-        dialogView.findViewById<View>(R.id.signInOption).setOnClickListener {
-            showCredentials(AuthMode.SignIn)
-        }
-
-        return dialog
     }
 
     private fun showCredentials(mode: AuthMode) {
@@ -51,6 +59,8 @@ internal class AuthChooserDialogFragment : DialogFragment() {
         const val TAG = "auth-chooser"
 
         private const val ARG_EXTRAS = "arg-extras"
+        private const val SIGN_UP = "sign-up"
+        private const val SIGN_IN = "sign-in"
 
         fun newInstance(extras: Bundle?): AuthChooserDialogFragment =
             AuthChooserDialogFragment().apply {

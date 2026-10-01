@@ -3,26 +3,25 @@ package org.btcmap.auth
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.inputmethod.EditorInfo
 import androidx.annotation.StringRes
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.TextInputEditText
-import org.btcmap.R
-import org.btcmap.util.setFieldError
+import org.btcmap.ui.AuthField
+import org.btcmap.ui.AuthFormComposeView
+import org.btcmap.util.iconTypeface
 
 /**
  * Shared scaffolding for the credential dialogs: the positive/negative buttons,
  * submitting from the keyboard, and showing [AuthError]s on the matching fields.
  *
- * A subclass only inflates the form, validates its input and reports the result.
- * The form is a [DialogFragment] so it is recreated with the screen on a
- * configuration change; the submitted values are handed to the host through a
- * host-scoped view model (see [AuthFormResultViewModel]) and a fragment result
- * signal, instead of a callback held by this fragment, which would not survive
- * that recreation.
+ * The form content is a Compose `AuthFormComposeView` set into a
+ * `MaterialAlertDialog`; the typed values live here and in the subclass's
+ * retained view model, so a rotation recreates the form with the same values
+ * (and, for passwords, without persisting them). A subclass describes its
+ * fields, validates them and reports the result.
  */
 internal abstract class AuthFormDialogFragment : DialogFragment() {
 
@@ -32,93 +31,77 @@ internal abstract class AuthFormDialogFragment : DialogFragment() {
     @get:StringRes
     protected abstract val positiveRes: Int
 
-    /** Inflates the form and binds the subclass's field properties. */
-    protected abstract fun createFormView(inflater: LayoutInflater): View
+    /** The fields to render, with their labels, retained values and helpers. */
+    protected abstract fun fields(): List<AuthField>
 
-    /** Validates the fields, returning every problem found. */
-    protected abstract fun validate(): List<AuthError>
+    /** Validates the current values, returning every problem found. */
+    protected abstract fun validate(values: Map<String, String>): List<AuthError>
 
     /** Reports the collected input; runs only when [validate] returns no errors. */
-    protected abstract fun onSubmit()
+    protected abstract fun onSubmit(values: Map<String, String>)
 
-    /** Restores text that must survive a configuration change but not process death. */
-    protected open fun restoreFormState() = Unit
+    /** Persists the typed values so they survive a configuration change. */
+    protected open fun onValuesChanged(values: Map<String, String>) = Unit
 
-    /** The field whose Done action submits the form. */
-    protected abstract val doneField: TextInputEditText
+    /** The field key a given error belongs to. */
+    protected abstract fun fieldKeyFor(error: AuthError): String
 
-    protected open val usernameField: TextInputEditText? get() = null
+    /** The message shown for a given error. */
+    protected abstract fun errorMessage(error: AuthError): String
 
-    protected open val currentPasswordField: TextInputEditText? get() = null
-
-    protected abstract val passwordField: TextInputEditText
-
-    protected open val confirmationField: TextInputEditText? get() = null
+    private lateinit var formView: AuthFormComposeView
+    private val values = mutableMapOf<String, String>()
 
     final override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val form = createFormView(layoutInflater)
-        restoreFormState()
+        values.clear()
+        fields().forEach { values[it.key] = it.value }
+
+        val iconFont = iconTypeface
+        formView = AuthFormComposeView(requireContext()).apply {
+            setViewTreeLifecycleOwner(this@AuthFormDialogFragment)
+            setViewTreeSavedStateRegistryOwner(this@AuthFormDialogFragment)
+            setViewTreeViewModelStoreOwner(this@AuthFormDialogFragment)
+            iconTypeface = iconFont
+            onValueChange = { key, value ->
+                values[key] = value
+                onValuesChanged(values)
+                render(emptyList())
+            }
+            onDone = { submit() }
+        }
+        render(emptyList())
 
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(titleRes)
-            .setView(form)
+            .setView(formView)
             .setPositiveButton(positiveRes, null)
             .setNegativeButton(android.R.string.cancel, null)
             .create()
 
         dialog.setOnShowListener {
             dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener { submit() }
-            doneField.setOnEditorActionListener { _, actionId, _ ->
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    submit()
-                    true
-                } else {
-                    false
-                }
-            }
         }
 
         return dialog
     }
 
+    private fun render(errors: List<AuthError>) {
+        val errorByKey = errors.associate { fieldKeyFor(it) to errorMessage(it) }
+        formView.fields = fields().map { field ->
+            field.copy(
+                value = values[field.key] ?: field.value,
+                error = errorByKey[field.key],
+            )
+        }
+    }
+
     private fun submit() {
-        val errors = validate()
+        val errors = validate(values)
         if (errors.isEmpty()) {
-            onSubmit()
+            onSubmit(values)
             dismiss()
             return
         }
-        showErrors(errors)
-    }
-
-    private fun showErrors(errors: List<AuthError>) {
-        // Clear errors from the previous attempt first, so a corrected field
-        // does not keep showing an error that no longer applies.
-        usernameField.setFieldError(null)
-        currentPasswordField.setFieldError(null)
-        passwordField.setFieldError(null)
-        confirmationField.setFieldError(null)
-
-        // Every error is mapped explicitly so adding an AuthError fails to
-        // compile until it is shown somewhere, instead of being dropped.
-        errors.forEach { error ->
-            when (error) {
-                AuthError.UsernameRequired ->
-                    usernameField.setFieldError(getString(R.string.field_required))
-
-                AuthError.CurrentPasswordRequired ->
-                    currentPasswordField.setFieldError(getString(R.string.field_required))
-
-                AuthError.PasswordRequired ->
-                    passwordField.setFieldError(getString(R.string.field_required))
-
-                AuthError.PasswordTooShort -> passwordField.setFieldError(
-                    getString(R.string.password_min_length, AuthValidation.MIN_PASSWORD_LENGTH),
-                )
-
-                AuthError.PasswordsDoNotMatch ->
-                    confirmationField.setFieldError(getString(R.string.passwords_do_not_match))
-            }
-        }
+        render(errors)
     }
 }

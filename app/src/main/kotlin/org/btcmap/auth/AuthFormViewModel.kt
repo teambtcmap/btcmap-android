@@ -11,17 +11,19 @@ import androidx.lifecycle.ViewModel
  * a possible process death, unlike the dialog view hierarchy, which is saved.
  */
 internal class AuthFormViewModel : ViewModel() {
+    var username: String = ""
     var currentPassword: String = ""
     var password: String = ""
     var confirmation: String = ""
 
     /**
-     * Drops any typed password once the form is gone for good (submitted or
+     * Drops any typed value once the form is gone for good (submitted or
      * dismissed), so it does not linger until the fragment instance is
      * collected. A configuration change keeps this view model, so [onCleared] is
      * not called and the values still survive a rotation.
      */
     override fun onCleared() {
+        username = ""
         currentPassword = ""
         password = ""
         confirmation = ""

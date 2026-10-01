@@ -1,23 +1,18 @@
 package org.btcmap.auth
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.textfield.TextInputEditText
 import org.btcmap.R
-import org.btcmap.util.setFieldHelperText
+import org.btcmap.ui.AuthField
+import org.btcmap.ui.AuthImeAction
 
 /**
  * Collects the current and new password for the change-password form.
  *
  * Like [AuthDialogFragment], the submitted passwords are handed to the host
  * through a host-scoped [AuthFormResultViewModel] under [REQUEST_KEY] (the
- * result bundle only signals that the form is ready), and the typed passwords
- * live in [AuthFormViewModel] with the password fields opting out of view-state
- * saving, so the form survives a rotation without persisting the passwords.
+ * result bundle only signals that the form is ready), and the typed values live
+ * in [AuthFormViewModel], retained across a rotation but never saved.
  */
 internal class ChangePasswordDialogFragment : AuthFormDialogFragment() {
 
@@ -27,59 +22,44 @@ internal class ChangePasswordDialogFragment : AuthFormDialogFragment() {
 
     private val formResults: AuthFormResultViewModel by lazy { hostAuthFormResults() }
 
-    private lateinit var currentInput: TextInputEditText
-    private lateinit var newInput: TextInputEditText
-    private lateinit var confirmationInput: TextInputEditText
-
     override val titleRes: Int get() = R.string.change_password
 
     override val positiveRes: Int get() = R.string.save
 
-    override val currentPasswordField: TextInputEditText get() = currentInput
-
-    override val passwordField: TextInputEditText get() = newInput
-
-    override val confirmationField: TextInputEditText get() = confirmationInput
-
-    override val doneField: TextInputEditText get() = confirmationInput
-
-    // The form is the content of a MaterialAlertDialog, which has no parent view
-    // to inflate into, so its root layout params are intentionally unused.
-    @SuppressLint("InflateParams")
-    override fun createFormView(inflater: LayoutInflater): View {
-        val view = inflater.inflate(R.layout.change_password_dialog, null)
-        currentInput = view.findViewById(R.id.currentPasswordInput)
-        newInput = view.findViewById(R.id.newPasswordInput)
-        confirmationInput = view.findViewById(R.id.confirmPasswordInput)
-
-        newInput.setFieldHelperText(
-            getString(R.string.password_min_length, AuthValidation.MIN_PASSWORD_LENGTH),
-        )
-
-        currentInput.doAfterTextChanged { formState.currentPassword = it?.toString().orEmpty() }
-        newInput.doAfterTextChanged { formState.password = it?.toString().orEmpty() }
-        confirmationInput.doAfterTextChanged {
-            formState.confirmation = it?.toString().orEmpty()
-        }
-
-        return view
-    }
-
-    override fun restoreFormState() {
-        currentInput.setText(formState.currentPassword)
-        newInput.setText(formState.password)
-        confirmationInput.setText(formState.confirmation)
-    }
-
-    override fun validate(): List<AuthError> = AuthValidation.changePassword(
-        current = currentInput.text.toString(),
-        new = newInput.text.toString(),
-        confirmation = confirmationInput.text.toString(),
+    override fun fields(): List<AuthField> = listOf(
+        AuthField(
+            key = CURRENT,
+            label = getString(R.string.current_password),
+            value = formState.currentPassword,
+            isPassword = true,
+            imeAction = AuthImeAction.Next,
+        ),
+        AuthField(
+            key = NEW,
+            label = getString(R.string.new_password),
+            value = formState.password,
+            isPassword = true,
+            helper = getString(R.string.password_min_length, AuthValidation.MIN_PASSWORD_LENGTH),
+            imeAction = AuthImeAction.Next,
+        ),
+        AuthField(
+            key = CONFIRMATION,
+            label = getString(R.string.confirm_password),
+            value = formState.confirmation,
+            isPassword = true,
+            imeAction = AuthImeAction.Done,
+        ),
     )
 
-    override fun onSubmit() {
-        val current = currentInput.text.toString()
-        val new = newInput.text.toString()
+    override fun validate(values: Map<String, String>): List<AuthError> = AuthValidation.changePassword(
+        current = values[CURRENT].orEmpty(),
+        new = values[NEW].orEmpty(),
+        confirmation = values[CONFIRMATION].orEmpty(),
+    )
+
+    override fun onSubmit(values: Map<String, String>) {
+        val current = values[CURRENT].orEmpty()
+        val new = values[NEW].orEmpty()
 
         // The passwords are handed to the host now; do not keep them in memory.
         formState.currentPassword = ""
@@ -96,6 +76,30 @@ internal class ChangePasswordDialogFragment : AuthFormDialogFragment() {
         parentFragmentManager.setFragmentResult(REQUEST_KEY, Bundle())
     }
 
+    override fun onValuesChanged(values: Map<String, String>) {
+        formState.currentPassword = values[CURRENT].orEmpty()
+        formState.password = values[NEW].orEmpty()
+        formState.confirmation = values[CONFIRMATION].orEmpty()
+    }
+
+    override fun fieldKeyFor(error: AuthError): String = when (error) {
+        AuthError.CurrentPasswordRequired -> CURRENT
+        AuthError.PasswordRequired, AuthError.PasswordTooShort -> NEW
+        AuthError.PasswordsDoNotMatch -> CONFIRMATION
+        // Not raised by this form.
+        AuthError.UsernameRequired -> CURRENT
+    }
+
+    override fun errorMessage(error: AuthError): String = when (error) {
+        AuthError.CurrentPasswordRequired, AuthError.UsernameRequired, AuthError.PasswordRequired ->
+            getString(R.string.field_required)
+
+        AuthError.PasswordTooShort ->
+            getString(R.string.password_min_length, AuthValidation.MIN_PASSWORD_LENGTH)
+
+        AuthError.PasswordsDoNotMatch -> getString(R.string.passwords_do_not_match)
+    }
+
     companion object {
         const val TAG = "change-password-dialog"
 
@@ -104,6 +108,10 @@ internal class ChangePasswordDialogFragment : AuthFormDialogFragment() {
          * [AuthFormResultViewModel]. See `registerChangePasswordResultListener`.
          */
         const val REQUEST_KEY = "org.btcmap.auth.change-password"
+
+        private const val CURRENT = "current"
+        private const val NEW = "new"
+        private const val CONFIRMATION = "confirmation"
 
         fun newInstance(): ChangePasswordDialogFragment = ChangePasswordDialogFragment()
     }

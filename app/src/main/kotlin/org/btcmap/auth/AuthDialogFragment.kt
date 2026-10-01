@@ -1,14 +1,10 @@
 package org.btcmap.auth
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.textfield.TextInputEditText
 import org.btcmap.R
-import org.btcmap.util.setFieldHelperText
+import org.btcmap.ui.AuthField
+import org.btcmap.ui.AuthImeAction
 
 internal enum class AuthMode {
     SignIn,
@@ -26,9 +22,9 @@ internal enum class AuthMode {
  * extras given to [newCredentials] are carried through untouched, so the caller
  * can resume the action that needed the account.
  *
- * The typed passwords are kept in [AuthFormViewModel] and the password fields
- * opt out of view-state saving, so they survive a rotation without being written
- * to saved instance state.
+ * The typed values are kept in [AuthFormViewModel], which is retained across a
+ * configuration change but never saved, so they survive a rotation without the
+ * passwords being written to saved instance state.
  */
 internal class AuthDialogFragment : AuthFormDialogFragment() {
 
@@ -38,66 +34,61 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
 
     private val formResults: AuthFormResultViewModel by lazy { hostAuthFormResults() }
 
-    private lateinit var usernameInput: TextInputEditText
-    private lateinit var passwordInput: TextInputEditText
-    private var confirmationInput: TextInputEditText? = null
-
     override val titleRes: Int
         get() = if (signUp()) R.string.new_account else R.string.login
 
     override val positiveRes: Int
         get() = if (signUp()) R.string.sign_up else R.string.login
 
-    override val usernameField: TextInputEditText get() = usernameInput
-
-    override val passwordField: TextInputEditText get() = passwordInput
-
-    override val confirmationField: TextInputEditText? get() = confirmationInput
-
-    override val doneField: TextInputEditText
-        get() = confirmationInput ?: passwordInput
-
     private fun signUp(): Boolean = mode() == AuthMode.SignUp
 
-    // The form is the content of a MaterialAlertDialog, which has no parent view
-    // to inflate into, so its root layout params are intentionally unused.
-    @SuppressLint("InflateParams")
-    override fun createFormView(inflater: LayoutInflater): View {
-        val signUp = signUp()
-        val view = inflater.inflate(
-            if (signUp) R.layout.account_sign_up_dialog else R.layout.account_dialog,
-            null,
-        )
-        usernameInput = view.findViewById(R.id.usernameInput)
-        passwordInput = view.findViewById(R.id.passwordInput)
-        confirmationInput =
-            if (signUp) view.findViewById<TextInputEditText>(R.id.confirmPasswordInput) else null
+    override fun fields(): List<AuthField> {
+        // A prefilled username seeds the retained value once.
+        if (formState.username.isEmpty()) {
+            formState.username = requireArguments().getString(ARG_USERNAME).orEmpty()
+        }
 
-        if (signUp) {
-            passwordInput.setFieldHelperText(
-                getString(R.string.password_min_length, AuthValidation.MIN_PASSWORD_LENGTH),
+        val list = mutableListOf(
+            AuthField(
+                key = USERNAME,
+                label = getString(R.string.username),
+                value = formState.username,
+                isPassword = false,
+                imeAction = AuthImeAction.Next,
+            ),
+            AuthField(
+                key = PASSWORD,
+                label = getString(R.string.password),
+                value = formState.password,
+                isPassword = true,
+                helper = if (signUp()) {
+                    getString(R.string.password_min_length, AuthValidation.MIN_PASSWORD_LENGTH)
+                } else {
+                    null
+                },
+                imeAction = if (signUp()) AuthImeAction.Next else AuthImeAction.Done,
+            ),
+        )
+
+        if (signUp()) {
+            list.add(
+                AuthField(
+                    key = CONFIRMATION,
+                    label = getString(R.string.confirm_password),
+                    value = formState.confirmation,
+                    isPassword = true,
+                    imeAction = AuthImeAction.Done,
+                )
             )
         }
 
-        requireArguments().getString(ARG_USERNAME)?.let(usernameInput::setText)
-
-        passwordInput.doAfterTextChanged { formState.password = it?.toString().orEmpty() }
-        confirmationInput?.doAfterTextChanged {
-            formState.confirmation = it?.toString().orEmpty()
-        }
-
-        return view
+        return list
     }
 
-    override fun restoreFormState() {
-        passwordInput.setText(formState.password)
-        confirmationInput?.setText(formState.confirmation)
-    }
-
-    override fun validate(): List<AuthError> {
-        val username = usernameInput.text.toString().trim()
-        val password = passwordInput.text.toString()
-        val confirmation = confirmationInput?.text?.toString().orEmpty()
+    override fun validate(values: Map<String, String>): List<AuthError> {
+        val username = values[USERNAME].orEmpty().trim()
+        val password = values[PASSWORD].orEmpty()
+        val confirmation = values[CONFIRMATION].orEmpty()
 
         return if (signUp()) {
             AuthValidation.signUp(username, password, confirmation)
@@ -106,12 +97,13 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
         }
     }
 
-    override fun onSubmit() {
+    override fun onSubmit(values: Map<String, String>) {
         val mode = mode()
-        val username = usernameInput.text.toString().trim()
-        val password = passwordInput.text.toString()
+        val username = values[USERNAME].orEmpty().trim()
+        val password = values[PASSWORD].orEmpty()
 
         // The credentials are handed to the host now; do not keep them in memory.
+        formState.username = ""
         formState.password = ""
         formState.confirmation = ""
 
@@ -127,6 +119,30 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
         )
 
         parentFragmentManager.setFragmentResult(REQUEST_KEY, Bundle())
+    }
+
+    override fun onValuesChanged(values: Map<String, String>) {
+        formState.username = values[USERNAME].orEmpty()
+        formState.password = values[PASSWORD].orEmpty()
+        formState.confirmation = values[CONFIRMATION].orEmpty()
+    }
+
+    override fun fieldKeyFor(error: AuthError): String = when (error) {
+        AuthError.UsernameRequired -> USERNAME
+        AuthError.PasswordRequired, AuthError.PasswordTooShort -> PASSWORD
+        AuthError.PasswordsDoNotMatch -> CONFIRMATION
+        // Not raised by this form.
+        AuthError.CurrentPasswordRequired -> USERNAME
+    }
+
+    override fun errorMessage(error: AuthError): String = when (error) {
+        AuthError.UsernameRequired, AuthError.CurrentPasswordRequired, AuthError.PasswordRequired ->
+            getString(R.string.field_required)
+
+        AuthError.PasswordTooShort ->
+            getString(R.string.password_min_length, AuthValidation.MIN_PASSWORD_LENGTH)
+
+        AuthError.PasswordsDoNotMatch -> getString(R.string.passwords_do_not_match)
     }
 
     private fun mode(): AuthMode {
@@ -150,6 +166,10 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
         private const val ARG_MODE = "arg-mode"
         private const val ARG_USERNAME = "arg-username"
         private const val ARG_EXTRAS = "arg-extras"
+
+        private const val USERNAME = "username"
+        private const val PASSWORD = "password"
+        private const val CONFIRMATION = "confirmation"
 
         fun newCredentials(
             mode: AuthMode,
