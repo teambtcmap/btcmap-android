@@ -15,9 +15,7 @@ import android.text.style.UnderlineSpan
 import android.text.style.URLSpan
 import android.util.TypedValue
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
-import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -27,6 +25,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.ui.graphics.Color
 import androidx.appcompat.widget.Toolbar
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.browser.customtabs.CustomTabsClient
@@ -64,7 +63,6 @@ import org.btcmap.boost.BoostFragment
 import org.btcmap.db.table.place.Place
 import org.btcmap.db.table.place.toMarker
 import org.btcmap.map.markerImageName
-import org.btcmap.map.merchantMarkerBitmap
 import org.btcmap.settings.prefs
 import org.btcmap.comment.AddCommentFragment
 import org.btcmap.comment.CommentsAdapter
@@ -100,15 +98,6 @@ import org.btcmap.settings.uri
 import org.btcmap.syncController
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
-import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.Style
-import org.maplibre.android.style.layers.Property
-import org.maplibre.android.style.layers.PropertyFactory
-import org.maplibre.android.style.layers.SymbolLayer
-import org.maplibre.android.style.sources.GeoJsonSource
-import org.maplibre.geojson.Point
 import java.io.File
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -146,10 +135,6 @@ class PlaceFragment : Fragment() {
         /** The fullscreen viewer asks for a larger rendition of the same photo. */
         private const val PHOTO_FULL_SIZE = 1600
 
-        private const val SMALL_MAP_ZOOM = 16.0
-        private const val SMALL_MAP_DEFAULT_MARKER_IMAGE = "place-preview-marker"
-        private const val SMALL_MAP_SOURCE_ID = "place_preview_source"
-        private const val SMALL_MAP_LAYER_ID = "place_preview_marker"
 
         /** A place screen with its own preview map, not hosted by the map. */
         fun create(placeId: Long): PlaceFragment {
@@ -195,12 +180,9 @@ class PlaceFragment : Fragment() {
         if (success && uri != null) uploadPhoto(uri, file) else file?.delete()
     }
 
-    private var smallMap: MapLibreMap? = null
-    private var smallMapCreated = false
     private var previewPlace: Place? = null
-    private var previewLatLng: LatLng? = null
-    private var previewTouchDownX = 0f
-    private var previewTouchDownY = 0f
+    private var previewLat: Double? = null
+    private var previewLon: Double? = null
 
     /** The place's OpenStreetMap page, or null when it has no OSM id. */
     private var osmUrl: String? = null
@@ -346,10 +328,7 @@ class PlaceFragment : Fragment() {
         binding.toolbar.navigationIcon = homeAsUpIndicator()
 
         binding.map.visibility = View.VISIBLE
-        binding.map.setOnTouchListener(::onPreviewMapTouch)
-        binding.map.onCreate(savedInstanceState)
-        smallMapCreated = true
-        initSmallMap()
+        renderSmallMap()
         loadStandalonePlace()
     }
 
@@ -367,124 +346,33 @@ class PlaceFragment : Fragment() {
         }
     }
 
-    private fun initSmallMap() {
-        binding.map.getMapAsync { map ->
-            if (_binding == null) return@getMapAsync
-            smallMap = map
-            map.setStyle(Style.Builder().fromUri(styleUri()))
-            map.uiSettings.apply {
-                setAllGesturesEnabled(false)
-                isLogoEnabled = false
-                isAttributionEnabled = false
-                isCompassEnabled = false
-            }
-            // The place may have loaded before the map was ready, so render now
-            // as well; renderSmallMap is idempotent.
-            renderSmallMap()
-        }
-    }
 
     private fun styleUri(): String {
         return app().mapStyleUriForTesting ?: prefs.mapStyle.uri(requireContext())
     }
 
-    /**
-     * Adds the place's composited marker to the preview style and returns the
-     * image name to draw. Falls back to a plain pin when the place has not
-     * synced yet and only its coordinates are known.
-     */
-    private fun previewMarkerImage(style: Style): String {
-        val place = previewPlace ?: return defaultPreviewMarkerImage(style)
 
-        val marker = place.toMarker()
-        val name = marker.markerImageName()
-        if (style.getImage(name) == null) {
-            style.addImage(
-                name,
-                merchantMarkerBitmap(
-                    context = requireContext(),
-                    marker = marker,
-                    markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
-                    markerIconColor = prefs.markerIconColor(requireContext()),
-                    boostedMarkerBackgroundColor = prefs.boostedMarkerBackgroundColor(),
-                    boostedMarkerIconColor = prefs.boostedMarkerIconColor(),
-                    markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
-                    markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
-                ),
-            )
-        }
-        return name
-    }
-
-    private fun defaultPreviewMarkerImage(style: Style): String {
-        if (style.getImage(SMALL_MAP_DEFAULT_MARKER_IMAGE) == null) {
-            val drawable = AppCompatResources.getDrawable(requireContext(), R.drawable.map_marker)!!
-                .mutate()
-            DrawableCompat.setTint(drawable, prefs.markerBackgroundColor(requireContext()))
-            style.addImage(SMALL_MAP_DEFAULT_MARKER_IMAGE, drawable)
-        }
-        return SMALL_MAP_DEFAULT_MARKER_IMAGE
-    }
-
-    /** Centres the preview map on the place and draws its marker. */
+    /** Points the preview map at the place, with its marker when it is known. */
     private fun renderSmallMap() {
-        val target = previewLatLng ?: return
-        val map = smallMap ?: return
+        val binding = _binding ?: return
+        val lat = previewLat ?: return
+        val lon = previewLon ?: return
 
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(target, SMALL_MAP_ZOOM))
-        map.getStyle { style ->
-            if (_binding == null) return@getStyle
-            renderSmallMapMarker(style, target, previewMarkerImage(style))
+        binding.map.apply {
+            this.lat = lat
+            this.lon = lon
+            marker = previewPlace?.toMarker()
+            styleUrl = styleUri()
+            markerBackgroundColor = Color(prefs.markerBackgroundColor(requireContext()))
+            markerIconColor = Color(prefs.markerIconColor(requireContext()))
+            boostedMarkerBackgroundColor = Color(prefs.boostedMarkerBackgroundColor())
+            boostedMarkerIconColor = Color(prefs.boostedMarkerIconColor())
+            markerBadgeBackgroundColor = Color(prefs.badgeBackgroundColor(requireContext()))
+            markerBadgeTextColor = Color(prefs.badgeTextColor(requireContext()))
+            usingOpenFreeMap = app().mapStyleUriForTesting == null
+            iconTypeface = org.btcmap.util.iconTypeface
+            onClick = { (activity as? Activity)?.openPlace(requestedPlaceId) }
         }
-    }
-
-    private fun renderSmallMapMarker(style: Style, target: LatLng, imageName: String) {
-        val point = Point.fromLngLat(target.longitude, target.latitude)
-
-        val source = style.getSource(SMALL_MAP_SOURCE_ID) as? GeoJsonSource
-        if (source == null) {
-            style.addSource(GeoJsonSource(SMALL_MAP_SOURCE_ID, point))
-        } else {
-            source.setGeoJson(point)
-        }
-
-        if (style.getLayer(SMALL_MAP_LAYER_ID) == null) {
-            style.addLayer(
-                SymbolLayer(SMALL_MAP_LAYER_ID, SMALL_MAP_SOURCE_ID).withProperties(
-                    PropertyFactory.iconImage(imageName),
-                    PropertyFactory.iconAnchor(Property.ICON_ANCHOR_BOTTOM),
-                    PropertyFactory.iconAllowOverlap(true),
-                    PropertyFactory.iconIgnorePlacement(true),
-                )
-            )
-        }
-    }
-
-    /**
-     * The preview map is non-interactive, so a tap on it asks for the place to
-     * be opened on the real map. A tap is told apart from a scroll by touch
-     * slop, and the listener returns false so the parent can still scroll.
-     */
-    private fun onPreviewMapTouch(view: View, event: MotionEvent): Boolean {
-        when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                previewTouchDownX = event.x
-                previewTouchDownY = event.y
-            }
-
-            MotionEvent.ACTION_UP -> {
-                val slop = ViewConfiguration.get(view.context).scaledTouchSlop
-                val placeId = requestedPlaceId
-                if (placeId > 0L &&
-                    abs(event.x - previewTouchDownX) <= slop &&
-                    abs(event.y - previewTouchDownY) <= slop
-                ) {
-                    (activity as? Activity)?.openPlace(placeId)
-                }
-            }
-        }
-
-        return false
     }
 
     private fun loadStandalonePlace() {
@@ -508,7 +396,8 @@ class PlaceFragment : Fragment() {
             } ?: return@launch
 
             previewPlace = null
-            previewLatLng = LatLng(coordinates.lat, coordinates.lon)
+            previewLat = coordinates.lat
+            previewLon = coordinates.lon
             renderSmallMap()
         }
     }
@@ -556,44 +445,30 @@ class PlaceFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        if (smallMapCreated) _binding?.map?.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        if (smallMapCreated) _binding?.map?.onResume()
     }
 
     override fun onPause() {
-        if (smallMapCreated) _binding?.map?.onPause()
         super.onPause()
     }
 
     override fun onStop() {
-        if (smallMapCreated) _binding?.map?.onStop()
         super.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        if (smallMapCreated) _binding?.map?.onLowMemory()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        if (smallMapCreated) _binding?.map?.onSaveInstanceState(outState)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // The preview map owns native resources and only receives lifecycle
-        // callbacks when this is a standalone screen; without onDestroy it
-        // would leave a dead renderer behind.
-        if (smallMapCreated) {
-            _binding?.map?.onDestroy()
-            smallMapCreated = false
-        }
-        smallMap = null
         hideUploading()
         _binding = null
     }
@@ -809,7 +684,8 @@ class PlaceFragment : Fragment() {
         renderPhotos(place.id)
 
         previewPlace = place
-        previewLatLng = LatLng(place.lat, place.lon)
+        previewLat = place.lat
+        previewLon = place.lon
         renderSmallMap()
     }
 

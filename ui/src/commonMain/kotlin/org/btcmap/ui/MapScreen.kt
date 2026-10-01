@@ -31,6 +31,7 @@ import org.btcmap.comment.toAdapterItem
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
+import org.btcmap.db.table.place.toMarker
 import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.EVENT_ICON
 import org.btcmap.map.EVENT_MARKER_ICON_NAME
@@ -298,7 +299,9 @@ fun MapScreen(
                     onDismiss = { selectedPlace = null },
                     previewMap = {
                         PlacePreviewMap(
-                            place = place,
+                            lat = place.lat,
+                            lon = place.lon,
+                            marker = place.toMarker(),
                             styleUrl = styleUrl,
                             styleJson = styleJson,
                             palette = palette,

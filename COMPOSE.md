@@ -912,6 +912,27 @@ Verified on the emulator: the spike renders the bundled **liberty** style with
 its tiles, labels, sprites and glyphs (no glyph or style load errors), and the
 place sheet's preview map renders the same bundled style.
 
+### Phase 3, seventeenth slice — done (step 5: the place preview map)
+
+The place screen's embedded `MapView` is gone: `place_fragment.xml` now uses the
+new `PlacePreviewMapView` (`:ui` androidMain), which hosts the shared
+`PlacePreviewMap`. `PlacePreviewMap` takes the coordinates and an optional
+marker (the screen can show coordinates before the place has synced), and the
+style; the host resolves the bundled style JSON from the style URL. The
+fragment now only sets the view's properties, and `PlaceFragment` no longer
+imports any MapLibre Android SDK class.
+
+Two details worth keeping:
+
+- The preview map must not be composed until the style URL is known: a map
+  created with an empty style stays stuck on the style background.
+- The tap-to-open behaviour (a tap on the non-interactive preview opened the
+  place on the map) is an `onClick` on the host view now; the old touch-slop
+  handling existed only to tell a tap from a scroll in the nested scroll view.
+
+Verified in the app: the standalone place screen (activity feed → a place)
+renders the bundled dark-matter style with the place's marker.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

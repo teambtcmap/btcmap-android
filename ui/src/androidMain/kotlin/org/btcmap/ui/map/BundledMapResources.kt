@@ -39,3 +39,14 @@ fun configureBundledMapResources(context: Context) {
 fun bundledStyleJson(context: Context, assetPath: String): String =
     context.assets.open(assetPath).readBytes().decodeToString()
         .replace("asset://map-styles/", "$BUNDLED_MAP_SCHEME://map-styles/")
+
+/**
+ * [bundledStyleJson] for a style [styleUrl], or null when the style is not a
+ * bundled asset one (so the caller can pass the URL through instead).
+ */
+fun bundledStyleJsonFor(context: Context, styleUrl: String): String? =
+    if (styleUrl.startsWith("asset://")) {
+        bundledStyleJson(context, styleUrl.removePrefix("asset://"))
+    } else {
+        null
+    }

@@ -11,9 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
-import org.btcmap.db.table.place.Place
+import org.btcmap.db.table.place.Marker
+import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.markerImageName
-import org.btcmap.db.table.place.toMarker
 import org.btcmap.map.toMarkerGeoJson
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.interaction.ClickResult
@@ -32,7 +32,9 @@ import org.maplibre.spatialk.geojson.Position
  */
 @Composable
 fun PlacePreviewMap(
-    place: Place,
+    lat: Double,
+    lon: Double,
+    marker: Marker?,
     styleUrl: String,
     styleJson: String? = null,
     palette: MarkerPalette,
@@ -40,9 +42,10 @@ fun PlacePreviewMap(
     iconFont: FontFamily?,
     modifier: Modifier = Modifier,
 ) {
-    val marker = remember(place) { place.toMarker() }
-    val geoJson = remember(marker) { listOf(marker).toMarkerGeoJson() }
-    val imageName = remember(marker) { marker.markerImageName() }
+    val geoJson = remember(marker) {
+        marker?.let { listOf(it).toMarkerGeoJson() } ?: EMPTY_GEOJSON
+    }
+    val imageName = remember(marker) { marker?.markerImageName() }
 
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
@@ -61,7 +64,7 @@ fun PlacePreviewMap(
     val state = rememberMapState(
         baseStyle = if (styleJson != null) BaseStyle.Json(styleJson) else BaseStyle.Uri(styleUrl),
         initialCameraPosition = CameraPosition(
-            target = Position(place.lon, place.lat),
+            target = Position(lon, lat),
             zoom = PREVIEW_ZOOM,
         ),
     ) {
@@ -78,6 +81,10 @@ fun PlacePreviewMap(
     val loadState = state.style.loadState
     LaunchedEffect(state, factory, imageName, loadState) {
         if (loadState !is StyleLoadState.Ready) return@LaunchedEffect
+        if (imageName == null || marker == null) {
+            imagesReady = true
+            return@LaunchedEffect
+        }
         imagesReady = false
         withFrameNanos { }
         state.style.images.set(imageName, factory.merchantMarker(marker))
