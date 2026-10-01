@@ -640,7 +640,32 @@ Verified toolchain facts (worth not rediscovering):
   coexist during the migration.
 
 `MapSpikeActivity` is throwaway scaffolding; remove it once the shared map
-replaces `MapFragment`. Next: port the marker/layer pipeline (step 2).
+replaces `MapFragment`.
+
+### Phase 3, second slice — done (merchant layers)
+
+Ported `org.btcmap.map.layer.createMerchantLayers` to the MapLibre Compose style
+DSL in `ui/src/commonMain/kotlin/org/btcmap/ui/map/MerchantLayers.kt`: a
+clustered GeoJSON source plus the cluster background circle, the cluster count
+symbol and the marker layer. `MapScreen` now takes the style URL, the markers
+and the marker colours; `MapComposeView` exposes them as Compose state; the
+spike activity loads real merchants from the database.
+
+Markers draw as circles for now. The Android marker bitmaps (icon glyphs,
+comment badges and the boosted/outdated variants) and the event and exchange
+pipelines are the following slices.
+
+Verified on the emulator: 126 real merchants loaded and drawn (the brand orange
+`#F7931A` accounts for ~11k sampled pixels over the OpenStreetMap "liberty"
+style), with no expression errors in logcat.
+
+MapLibre Compose DSL notes worth keeping:
+
+- `neq` and the `convertToString`/`convertToNumber`/`convertToBoolean`
+  conversions are **extension functions** (`expr.neq(other)`), not top-level.
+- `constStringList` is only the JVM name of a `const(List<String>)` overload.
+- `rememberMapState`'s camera seed parameter is `initialCameraPosition`.
+- `condition(...)` + `switch(..., fallback = ...)` build the style's `switch`.
 
 ## Working notes
 
