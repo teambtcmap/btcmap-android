@@ -901,6 +901,14 @@ Durable facts and conventions for continuing the migration.
 
 ### MapLibre Compose 0.18.0 layer quirks
 
+- **The app's styles are `asset://map-styles/<style>/style.json`** (a MapLibre
+  Android SDK scheme). The Compose map cannot load them: the load fails and only
+  the style background draws. Every embedded map, and the main map swap, is
+  blocked on feeding the Compose map the bundled style another way — most likely
+  reading the JSON and passing `BaseStyle.Json`, with its sprite/glyph URLs
+  rewritten — which is the step 4 basemap piece. (Tried swapping the place
+  screen's preview `MapView` to the shared preview map: it compiled and laid out
+  but stayed blank for exactly this reason, so it was reverted.)
 - Taking a marker kind's layers out of the declaration (an early return, or an
   `if`) makes the other marker kinds stop drawing entirely. So does setting the
   layer's own `visible` property, and so does emptying the hidden kind's source
