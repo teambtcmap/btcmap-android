@@ -818,6 +818,17 @@ verification/outdated warnings.
 Verified on the emulator: selecting place 18048 ("Swag42") opens the sheet with
 its details and actions, and tapping Verify reports the action back.
 
+### Phase 3, tenth slice — done (place sheet, stage 2: comments)
+
+`PlaceSheet` now shows the place's comments: a "Comments (N)" header and the
+rows (`CommentRow`, extracted from `CommentsScreen` so both share it).
+`MapScreen` loads the comments when the selected place changes, mapping them
+through the shared `Comment.toAdapterItem` and the app's localized date
+formatter.
+
+Verified on the emulator: selecting "Bishops Brew" shows its two comments with
+their dates below the action row.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

@@ -70,6 +70,7 @@ class MapComposeView @JvmOverloads constructor(
             report = "",
             boost = "",
             comments = { it.toString() },
+            commentsTitle = { it.toString() },
             addComment = "",
         )
     )

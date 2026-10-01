@@ -23,6 +23,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
+import org.btcmap.comment.CommentsAdapterItem
+import org.btcmap.comment.commentDateFormatter
+import org.btcmap.comment.toAdapterItem
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
@@ -86,6 +89,19 @@ fun MapScreen(
 
     val scope = rememberCoroutineScope()
     var selectedPlace by remember { mutableStateOf<Place?>(null) }
+    var selectedComments by remember { mutableStateOf<List<CommentsAdapterItem>>(emptyList()) }
+
+    LaunchedEffect(selectedPlace) {
+        val place = selectedPlace
+        selectedComments = if (place == null) {
+            emptyList()
+        } else {
+            withContext(Dispatchers.Default) {
+                val formatter = commentDateFormatter()
+                db.comment.selectByPlaceId(place.id).map { it.toAdapterItem(formatter) }
+            }
+        }
+    }
 
     val onMarkerClick: MarkerClickHandler = { features ->
         val properties = features.firstOrNull()?.properties
@@ -270,6 +286,7 @@ fun MapScreen(
             selectedPlace?.let { place ->
                 PlaceSheet(
                     place = place,
+                    comments = selectedComments,
                     strings = placeSheetStrings,
                     onAction = { onPlaceAction(place, it) },
                     onDismiss = { selectedPlace = null },

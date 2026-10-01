@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.btcmap.comment.CommentsAdapterItem
 import org.btcmap.db.table.place.Place
 import org.btcmap.i18n.getLocalizedName
 import java.time.ZonedDateTime
@@ -37,19 +38,26 @@ import java.time.format.FormatStyle
 @Composable
 fun PlaceSheet(
     place: Place,
+    comments: List<CommentsAdapterItem>,
     strings: PlaceSheetStrings,
     onAction: (PlaceAction) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
-        PlaceSheetContent(place = place, strings = strings, onAction = onAction)
+        PlaceSheetContent(
+            place = place,
+            comments = comments,
+            strings = strings,
+            onAction = onAction,
+        )
     }
 }
 
 @Composable
 private fun PlaceSheetContent(
     place: Place,
+    comments: List<CommentsAdapterItem>,
     strings: PlaceSheetStrings,
     onAction: (PlaceAction) -> Unit,
 ) {
@@ -114,6 +122,11 @@ private fun PlaceSheetContent(
             endLabel = strings.comments(place.comments ?: 0),
             onEnd = { onAction(PlaceAction.Comments) },
         )
+
+        if (comments.isNotEmpty()) {
+            InfoRow(glyph = "comment", text = strings.commentsTitle(comments.size.toLong()))
+            comments.forEach { CommentRow(item = it) }
+        }
 
         OutlinedButton(
             onClick = { onAction(PlaceAction.AddComment) },

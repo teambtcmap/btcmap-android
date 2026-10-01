@@ -44,6 +44,7 @@ class MapSpikeActivity : AppCompatActivity() {
                         getString(R.string.comments_d, count.toInt())
                     }
                 },
+                commentsTitle = { count -> getString(R.string.comments_d, count.toInt()) },
                 addComment = getString(R.string.add_comment),
             )
             onPlaceAction = { place, action ->

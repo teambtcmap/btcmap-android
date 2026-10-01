@@ -11,5 +11,6 @@ data class PlaceSheetStrings(
     val report: String,
     val boost: String,
     val comments: (Long) -> String,
+    val commentsTitle: (Long) -> String,
     val addComment: String,
 )
