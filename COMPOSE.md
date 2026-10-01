@@ -862,6 +862,23 @@ code), so the preview shows the standard attribution bar for now.
 
 Verified on the emulator: opening "Swag42" shows its preview map with the marker.
 
+### Phase 3, fourteenth slice — done (offline packs, step 4)
+
+Ported `org.btcmap.offline.OfflineMaps` to the Compose offline manager as
+`ui/.../map/OfflinePacks.kt`. It uses `DefaultMapRuntime.instance.offlineManager`
+and maps each pack's `DownloadProgress` (`Healthy`, `Error`, `TileLimitExceeded`,
+`Unknown`) onto the shared `OfflineAreaState`, so the existing mapping and its
+tests carry over. A download replaces any pack the area already has, so a
+re-download cannot orphan a region on disk.
+
+Verified on the emulator: a small pack for area 530 downloads from 0% to
+`Complete(bytes = 67,883,857, maxZoom = 12, styleUrl = liberty)`, survives an app
+restart (the persisted pack is listed and reported complete), and the
+"replace an existing pack" path runs before the re-download.
+
+The PMTiles/basemap side of step 4 is not touched yet: the bundled archive is
+Android-only (`AssetManager`), and the desktop strategy is still open.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

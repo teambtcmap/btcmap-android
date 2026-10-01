@@ -1,8 +1,15 @@
 package org.btcmap
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.btcmap.offline.OfflineAreaState
+import org.btcmap.offline.OfflineBounds
+import org.btcmap.ui.map.OfflinePacks
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
@@ -68,6 +75,23 @@ class MapSpikeActivity : AppCompatActivity() {
             formatDistance = ::formatDistance
         }
         setContentView(view)
+
+        // Phase 4 spike: drive a small offline pack so the port can be watched.
+        val offlinePacks = OfflinePacks(resources.displayMetrics.density)
+        lifecycleScope.launch {
+            offlinePacks.states.collect { states -> Log.i(TAG, "offline states: $states") }
+        }
+        lifecycleScope.launch {
+            delay(4_000)
+            if (offlinePacks.states.value[SPIKE_AREA_ID] is OfflineAreaState.Complete) return@launch
+            offlinePacks.download(
+                areaId = SPIKE_AREA_ID,
+                areaName = "Poland",
+                bounds = OfflineBounds(west = 21.00, south = 52.20, east = 21.10, north = 52.30),
+                styleUrl = view.styleUrl,
+                maxZoom = 12,
+            )
+        }
     }
 
     /** Mirrors `SearchController`'s distance formatting. */
@@ -81,6 +105,9 @@ class MapSpikeActivity : AppCompatActivity() {
     }
 
     private companion object {
+        const val TAG = "MapSpike"
+        const val SPIKE_AREA_ID = 530L
+
         // Warsaw, which has merchants, exchanges and an upcoming event nearby.
         const val CENTER_LAT = 52.2333742
         const val CENTER_LON = 21.0711489
