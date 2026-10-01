@@ -112,6 +112,12 @@ fun MapScreen(
     /** Reports where the camera came to rest, so the host can remember it. */
     onCameraIdle: ((Double, Double, Double) -> Unit)? = null,
     /**
+     * Called once, after the first non-empty marker snapshot has been drawn, for
+     * startup metrics. Android's default fully-drawn moment is the first frame,
+     * which here is an empty map, so the host reports it from here instead.
+     */
+    onFeaturesDrawn: (() -> Unit)? = null,
+    /**
      * Whether the map draws its own place sheet. A host with a place screen of
      * its own says no and handles [onPlaceSelected] itself.
      */
@@ -384,6 +390,21 @@ fun MapScreen(
     }
     val exchangeIcons = remember(exchanges.snapshot) { exchanges.snapshot.map { it.icon }.distinct() }
     val hasEvents = events.snapshot.isNotEmpty()
+
+    // Reported once, on the frame after the first non-empty snapshot, so the
+    // metric matches the map the user is waiting for rather than an empty one.
+    var featuresReported by remember { mutableStateOf(false) }
+    val hasFeatures = merchants.snapshot.isNotEmpty() ||
+        exchanges.snapshot.isNotEmpty() ||
+        events.snapshot.isNotEmpty()
+    LaunchedEffect(imagesReady, hasFeatures, onFeaturesDrawn) {
+        val callback = onFeaturesDrawn ?: return@LaunchedEffect
+        if (!imagesReady || !hasFeatures || featuresReported) return@LaunchedEffect
+        withFrameNanos { }
+        withFrameNanos { }
+        featuresReported = true
+        callback()
+    }
 
     val loadState = state.style.loadState
     LaunchedEffect(state, factory, markersByName, exchangeIcons, hasEvents, loadState) {

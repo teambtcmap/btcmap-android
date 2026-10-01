@@ -200,6 +200,7 @@ class MapFragment : Fragment() {
             }
             searchActions = SearchActions(onSettings = { navigateToSettings() })
             formatDistance = ::formatDistance
+            onFeaturesDrawn = { (activity as? Activity)?.reportFullyDrawn() }
             onCameraIdle = { lat, lon, zoom ->
                 // Recorded so the next launch reopens what the user was looking
                 // at. The first idle is the stored camera itself, so this is a

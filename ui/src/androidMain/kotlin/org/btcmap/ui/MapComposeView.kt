@@ -116,6 +116,8 @@ class MapComposeView @JvmOverloads constructor(
 
     var onCameraIdle: ((Double, Double, Double) -> Unit)? by mutableStateOf(null)
 
+    var onFeaturesDrawn: (() -> Unit)? by mutableStateOf(null)
+
     var placeSheet: Boolean by mutableStateOf(true)
 
     var openTarget: Pair<Double, Double>? by mutableStateOf(null)
@@ -156,6 +158,7 @@ class MapComposeView @JvmOverloads constructor(
             openPlaceId = openPlaceId,
             reloadKey = reloadKey,
             onCameraIdle = onCameraIdle,
+            onFeaturesDrawn = onFeaturesDrawn,
             placeSheet = placeSheet,
             openTarget = openTarget,
             photos = photos,

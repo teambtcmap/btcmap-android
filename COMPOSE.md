@@ -39,11 +39,11 @@ Next, in rough order of value:
    went with the Views search; the shared `MapSearch` is its port and has no tests
    yet. `MarkerIconTest`'s glyph check went the same way (the shared
    `MarkerBitmapFactory.renderableGlyph` is private and needs a font in jvmTest).
-4. **Small parity gaps** left by the swap, all listed in slice 39: the map is no
-   longer reported fully drawn, tapping empty map no longer dismisses the place
-   sheet, an area search result opens the area screen instead of framing its
-   bbox, and the `showAttribution` setting no longer hides the map's own
-   attribution.
+4. **Small parity gaps** left by the swap, all listed in slice 39: tapping empty
+   map no longer dismisses the place sheet (the map exposes no map-tap callback;
+   `InteractionBindingsBuilder` has gesture bindings but no host click callback),
+   an area search result opens the area screen instead of framing its bbox, and
+   the `showAttribution` setting no longer hides the map's own attribution.
 
 ## Goal
 
@@ -1354,11 +1354,25 @@ instead **ported** to `:ui:jvmTest` as `ViewportBoundsTest` (minus the
 and the crossing-viewport `expand` case, which `VisibleBounds` refuses to
 construct). Porting the search and marker-glyph tests is listed as remaining work.
 
-Known gaps this leaves: the startup "fully drawn" report the Views map made; the
-place sheet no longer closes on a tap on empty map (the shared map has no no-hit
-callback); an area **search result** opens the area screen rather than framing the
-area's bbox as before; and the map's own attribution replaces the Views one, so
-the `showAttribution` setting no longer hides anything.
+Known gaps this leaves: the place sheet no longer closes on a tap on empty map
+(the shared map has no no-hit callback); an area **search result** opens the area
+screen rather than framing the area's bbox as before; and the map's own
+attribution replaces the Views one, so the `showAttribution` setting no longer
+hides anything. The startup "fully drawn" report the Views map made was restored
+in slice 40.
+
+### Phase 3, fortieth slice — done (the fully-drawn report)
+
+The swap lost the startup metric the Views map fed: Android's default
+fully-drawn moment is the first frame, which on the map is an empty one, so the
+app used to report it from the frame after the first non-empty feature snapshot.
+`MapScreen` now takes an `onFeaturesDrawn` callback and fires it once, on the
+frame after the marker layers are declared with a non-empty snapshot, and the
+fragment answers it with `reportFullyDrawn()`.
+
+Verified on the emulator: logcat shows
+`ActivityTaskManager: Fully drawn org.btcmap.debug/org.btcmap.Activity: +1s206ms`,
+which the app never logged while the map was empty.
 
 ## Working notes
 
