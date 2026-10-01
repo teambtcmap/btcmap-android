@@ -480,6 +480,18 @@ Compose. Removed the now-unused `BoostDuration` button-id mapping (and its unit
 test) and updated `BoostPaymentFlowTest` to drive the Compose form. No behavior
 change.
 
+### Phase 2, eleventh slice — done
+
+Migrated the activity feed tab (shared by Local and Saved) to a shared
+`ActivityFeedScreen` in `:ui`: rows with a Material Symbols icon, place name,
+subtitle and relative date, plus the loading, empty and error/retry states,
+hosted by an `ActivityFeedComposeView`. The fragment keeps the filter dialog
+(chips), the area/interval selection and the item navigation, and builds the rows
+(Android resources, plurals and relative time) in a small mapper. Deleted
+`ActivityFeedAdapter` and its item layout; retargeted the adapter-diff unit test
+to `feedKey()` and updated the feed instrumented tests. The filter dialog is
+still Views. No behavior change.
+
 ## Next
 
 Phase 2 continues: migrate the remaining non-map screens to `:ui` screen by

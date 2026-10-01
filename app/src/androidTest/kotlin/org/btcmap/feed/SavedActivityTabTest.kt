@@ -1,6 +1,5 @@
 package org.btcmap.feed
 
-import android.widget.TextView
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
@@ -15,6 +14,7 @@ import org.btcmap.R
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
 import org.btcmap.settings.authToken
+import org.btcmap.ui.ActivityFeedComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
@@ -111,7 +111,7 @@ class SavedActivityTabTest : AppTestCase() {
     }
 
     private fun emptyText(tab: SavedActivityFragment): String =
-        tab.requireView().findViewById<TextView>(R.id.emptyView).text.toString()
+        tab.requireView().findViewById<ActivityFeedComposeView>(R.id.feedList).emptyMessage.orEmpty()
 
     private fun countingDispatcher(calls: AtomicInteger) = object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse {

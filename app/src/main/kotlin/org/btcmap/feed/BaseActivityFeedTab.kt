@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +28,9 @@ import org.btcmap.place.toOsmUrl
 import org.btcmap.settings.ActivityInterval
 import org.btcmap.settings.activityIntervalDays
 import org.btcmap.settings.prefs
+import org.btcmap.ui.ActivityFeedComposeView
+import org.btcmap.ui.ActivityFeedState
+import org.btcmap.util.iconTypeface
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
 
@@ -59,6 +61,7 @@ abstract class BaseActivityFeedTab : Fragment() {
     private var loadJob: Job? = null
     private var showAreaChips: Boolean = false
     private var initialAreas: List<Area> = emptyList()
+    private var itemsByKey: Map<String, ActivityFeedItem> = emptyMap()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -72,20 +75,9 @@ abstract class BaseActivityFeedTab : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.list.layoutManager = LinearLayoutManager(requireContext())
-        val adapter = ActivityFeedAdapter { item ->
-            if (item.type == ActivityFeedItem.TYPE_PLACE_DELETED) {
-                openDeletedPlace(item.placeId)
-            } else {
-                requireActivity().supportFragmentManager.commit {
-                    setReorderingAllowed(true)
-                    replace(R.id.fragmentContainerView, PlaceFragment.create(item.placeId))
-                    addToBackStack(null)
-                }
-            }
-        }
-        binding.list.adapter = adapter
-        binding.list.setHasFixedSize(true)
+        binding.feedList.iconTypeface = iconTypeface
+        binding.feedList.onItemClick = { key -> itemsByKey[key]?.let(::openItem) }
+        binding.feedList.onRetry = { loadActivity() }
 
         showAreaChips = arguments?.getBoolean(ARG_SHOW_AREA_CHIPS, false) ?: false
         val ids = arguments?.getStringArrayList(ARG_INITIAL_AREA_IDS) ?: arrayListOf()
@@ -175,7 +167,8 @@ abstract class BaseActivityFeedTab : Fragment() {
 
     protected fun loadActivity() {
         loadJob?.cancel()
-        val adapter = binding.list.adapter as ActivityFeedAdapter
+        val feedList = _binding?.feedList ?: return
+        val context = requireContext()
 
         loadJob = viewLifecycleOwner.lifecycleScope.launch {
             // [loadScope] reads the local cache for the Saved tab, so it runs
@@ -184,13 +177,11 @@ abstract class BaseActivityFeedTab : Fragment() {
             // sync write.
             val scope = loadScope()
             if (scope == null || (scope.areaIds.isEmpty() && scope.placeIds.isEmpty())) {
-                showEmptyState(adapter)
+                showEmptyState(feedList)
                 return@launch
             }
 
-            binding.list.visibility = View.VISIBLE
-            binding.emptyView.visibility = View.GONE
-            binding.loading.visibility = View.VISIBLE
+            feedList.state = ActivityFeedState.Loading
 
             try {
                 val items = withContext(Dispatchers.IO) {
@@ -200,18 +191,27 @@ abstract class BaseActivityFeedTab : Fragment() {
                         prefs.activityIntervalDays,
                     )
                 }
-                binding.loading.visibility = View.GONE
                 if (items.isEmpty()) {
-                    showEmptyState(adapter)
+                    showEmptyState(feedList)
                 } else {
-                    binding.list.visibility = View.VISIBLE
-                    binding.emptyView.visibility = View.GONE
-                    binding.emptyView.setOnClickListener(null)
-                    adapter.submitList(items)
+                    itemsByKey = items.associateBy { it.feedKey() }
+                    feedList.state = ActivityFeedState.Content(items.map { it.toRow(context) })
                 }
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
-                showErrorState(adapter)
+                showErrorState(feedList)
+            }
+        }
+    }
+
+    private fun openItem(item: ActivityFeedItem) {
+        if (item.type == ActivityFeedItem.TYPE_PLACE_DELETED) {
+            openDeletedPlace(item.placeId)
+        } else {
+            requireActivity().supportFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace(R.id.fragmentContainerView, PlaceFragment.create(item.placeId))
+                addToBackStack(null)
             }
         }
     }
@@ -242,26 +242,19 @@ abstract class BaseActivityFeedTab : Fragment() {
         }
     }
 
-    private fun showEmptyState(adapter: ActivityFeedAdapter) {
-        adapter.submitList(emptyList())
-        binding.loading.visibility = View.GONE
-        binding.emptyView.visibility = View.VISIBLE
-        binding.emptyView.text = emptyMessage()
-        binding.emptyView.setOnClickListener(null)
-        binding.list.visibility = View.GONE
+    private fun showEmptyState(feedList: ActivityFeedComposeView) {
+        feedList.state = ActivityFeedState.Empty(emptyMessage(), retryable = false)
     }
 
-    private fun showErrorState(adapter: ActivityFeedAdapter) {
-        adapter.submitList(emptyList())
-        binding.loading.visibility = View.GONE
-        binding.emptyView.visibility = View.VISIBLE
-        binding.emptyView.text = getString(
-            R.string.failed_to_load_tap_to_retry,
-            getString(R.string.failed_to_load),
-            getString(R.string.tap_to_retry),
+    private fun showErrorState(feedList: ActivityFeedComposeView) {
+        feedList.state = ActivityFeedState.Empty(
+            message = getString(
+                R.string.failed_to_load_tap_to_retry,
+                getString(R.string.failed_to_load),
+                getString(R.string.tap_to_retry),
+            ),
+            retryable = true,
         )
-        binding.emptyView.setOnClickListener { loadActivity() }
-        binding.list.visibility = View.GONE
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

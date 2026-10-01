@@ -1,8 +1,9 @@
 package org.btcmap.feed
 
 import android.os.Bundle
-import android.view.View
-import android.widget.TextView
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
@@ -14,6 +15,8 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
+import org.btcmap.ui.ActivityFeedComposeView
+import org.btcmap.ui.FEED_RETRY_TAG
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
@@ -27,6 +30,9 @@ import java.util.concurrent.atomic.AtomicInteger
 class ActivityFeedErrorHandlingTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     @Test
     fun loadFailure_isNotShownAsEmptyState() {
@@ -70,15 +76,17 @@ class ActivityFeedErrorHandlingTest : AppTestCase() {
                 }
                 waitUntil { apiRule.server.requestCount >= 1 }
                 waitUntilOnMain {
-                    feed.requireView().findViewById<View>(R.id.loading).visibility == View.GONE
+                    !feed.requireView().findViewById<ActivityFeedComposeView>(R.id.feedList).loading
                 }
 
                 scenario.onActivity {
-                    val emptyView = feed.requireView().findViewById<TextView>(R.id.emptyView)
+                    val message = feed.requireView()
+                        .findViewById<ActivityFeedComposeView>(R.id.feedList)
+                        .emptyMessage
                     Assert.assertNotEquals(
                         "A failed load must not be presented as the empty state",
                         feed.emptyMessage(),
-                        emptyView.text.toString(),
+                        message,
                     )
                 }
             }
@@ -131,17 +139,15 @@ class ActivityFeedErrorHandlingTest : AppTestCase() {
                 }
 
                 waitUntilOnMain {
-                    val emptyView = feed.requireView().findViewById<TextView>(R.id.emptyView)
-                    emptyView.visibility == View.VISIBLE && emptyView.text.isNotBlank()
+                    feed.requireView().findViewById<ActivityFeedComposeView>(R.id.feedList)
+                        .emptyMessage?.isNotBlank() == true
                 }
 
-                scenario.onActivity {
-                    feed.requireView().findViewById<TextView>(R.id.emptyView).performClick()
-                }
+                composeTestRule.onNodeWithTag(FEED_RETRY_TAG).performClick()
 
                 waitUntilOnMain {
-                    val emptyView = feed.requireView().findViewById<TextView>(R.id.emptyView)
-                    emptyView.text.toString() == feed.emptyMessage()
+                    feed.requireView().findViewById<ActivityFeedComposeView>(R.id.feedList)
+                        .emptyMessage == feed.emptyMessage()
                 }
                 Assert.assertEquals(2, attempts.get())
             }

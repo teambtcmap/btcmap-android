@@ -3,9 +3,11 @@ package org.btcmap.feed
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.widget.Toolbar
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -17,10 +19,12 @@ import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.place.Place
 import org.btcmap.place.PlaceFragment
+import org.btcmap.ui.ActivityFeedComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.ZonedDateTime
@@ -29,6 +33,9 @@ import java.time.ZonedDateTime
 class ActivityFeedPlaceNavigationTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     @Test
     fun tappingRow_opensThePlaceWithItsPreviewMap() {
@@ -78,15 +85,12 @@ class ActivityFeedPlaceNavigationTest : AppTestCase() {
 
                 waitUntil { apiRule.server.requestCount >= 1 }
                 waitUntilOnMain {
-                    feed.requireView().findViewById<RecyclerView>(R.id.list).childCount > 0
+                    feed.requireView()
+                        .findViewById<ActivityFeedComposeView>(R.id.feedList)
+                        .rows.isNotEmpty()
                 }
 
-                scenario.onActivity {
-                    feed.requireView()
-                        .findViewById<RecyclerView>(R.id.list)
-                        .getChildAt(0)
-                        .performClick()
-                }
+                composeTestRule.onNodeWithText("Test Merchant").performClick()
 
                 waitUntilOnMain {
                     val current = activity.supportFragmentManager
