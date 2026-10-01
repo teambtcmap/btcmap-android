@@ -20,11 +20,19 @@ import org.btcmap.databinding.SettingsFragmentBinding
 import org.btcmap.db
 import org.btcmap.dbstats.DbStatsFragment
 import org.btcmap.imagestats.ImageStatsFragment
+import org.btcmap.ui.SettingsItem
 
 class SettingsFragment : Fragment() {
 
     private var _binding: SettingsFragmentBinding? = null
     private val binding get() = _binding!!
+
+    /**
+     * The account row's strings. Read off the main thread by [updateAccountUi],
+     * so they are cached here and folded into the row list by [refreshItems].
+     */
+    private var accountTitle = ""
+    private var accountSecondary = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,57 +48,20 @@ class SettingsFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
+        binding.settingsList.onItemClick = ::onItemClick
+        binding.settingsList.onItemCheckedChange = ::onItemCheckedChange
+
+        if (prefs.authorized) {
+            accountTitle = ""
+            accountSecondary = ""
+        } else {
+            accountTitle = getString(R.string.not_logged_in)
+            accountSecondary = getString(R.string.create_account)
+        }
+
         updateAccountUi()
         registerAuthResultListener { updateAccountUi() }
-
-        binding.accountButton.setOnClickListener {
-            if (prefs.authorized) {
-                parentFragmentManager.commit {
-                    setReorderingAllowed(true)
-                    replace<UserProfileFragment>(R.id.fragmentContainerView, null)
-                    addToBackStack(null)
-                }
-            } else {
-                showAuthDialog()
-            }
-        }
-
-        initMapStyleButton()
-        initVerifiedFilterButton()
-
-        binding.showAttribution.isChecked = prefs.showAttribution
-        binding.showAttribution.setOnCheckedChangeListener { _, isChecked ->
-            prefs.showAttribution = isChecked
-        }
-
-        binding.mapRotation.isChecked = prefs.mapRotationEnabled
-        binding.mapRotation.setOnCheckedChangeListener { _, isChecked ->
-            prefs.mapRotationEnabled = isChecked
-        }
-
-        binding.dbStatsButton.setOnClickListener {
-            parentFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<DbStatsFragment>(R.id.fragmentContainerView, null)
-                addToBackStack(null)
-            }
-        }
-
-        binding.imageStatsButton.setOnClickListener {
-            parentFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<ImageStatsFragment>(R.id.fragmentContainerView, null)
-                addToBackStack(null)
-            }
-        }
-
-        binding.customizeColorsButton.setOnClickListener {
-            parentFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<ColorSettingsFragment>(R.id.fragmentContainerView, null)
-                addToBackStack(null)
-            }
-        }
+        refreshItems()
     }
 
     override fun onDestroyView() {
@@ -98,68 +69,138 @@ class SettingsFragment : Fragment() {
         _binding = null
     }
 
-    private fun initMapStyleButton() {
-        binding.currentMapStyle.text = prefs.mapStyle.name(requireContext())
+    /** Rebuilds the row list from the current settings. */
+    private fun refreshItems() {
+        _binding ?: return
 
-        binding.mapStyleButton.setOnClickListener {
-            val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.map_style)
-                .setView(R.layout.map_style_dialog).show()
+        binding.settingsList.items = listOf(
+            SettingsItem.Action("account", accountTitle, accountSecondary),
+            SettingsItem.Action(
+                "mapStyle",
+                getString(R.string.map_style),
+                prefs.mapStyle.name(requireContext()),
+            ),
+            SettingsItem.Action(
+                "customizeColors",
+                getString(R.string.customize_colors),
+                getString(R.string.customize_colors_secondary),
+            ),
+            SettingsItem.Action(
+                "verifiedFilter",
+                getString(R.string.verified_filter),
+                prefs.verifiedFilterYears.toVerifiedFilterYears(requireContext()),
+            ),
+            SettingsItem.Toggle(
+                "showAttribution",
+                getString(R.string.show_attribution),
+                getString(R.string.show_attribution_secondary),
+                prefs.showAttribution,
+            ),
+            SettingsItem.Toggle(
+                "mapRotation",
+                getString(R.string.map_rotation),
+                getString(R.string.map_rotation_secondary),
+                prefs.mapRotationEnabled,
+            ),
+            SettingsItem.Action(
+                "dbStats",
+                getString(R.string.database_stats),
+                getString(R.string.database_stats_secondary),
+            ),
+            SettingsItem.Action(
+                "imageStats",
+                getString(R.string.image_stats),
+                getString(R.string.image_stats_secondary),
+            ),
+        )
+    }
 
-            val setupInterval = fun RadioButton?.(style: MapStyle) {
-                if (this == null) return
-
-                text = style.name(requireContext())
-                isChecked = prefs.mapStyle == style
-
-                setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) {
-                        prefs.mapStyle = style
-                        binding.currentMapStyle.text = text
-                        dialog.dismiss()
-                    }
+    private fun onItemClick(key: String) {
+        when (key) {
+            "account" -> {
+                if (prefs.authorized) {
+                    open { replace<UserProfileFragment>(R.id.fragmentContainerView, null) }
+                } else {
+                    showAuthDialog()
                 }
             }
-
-            setupInterval.apply {
-                invoke(dialog.findViewById(R.id.auto), MapStyle.Auto)
-                invoke(dialog.findViewById(R.id.liberty), MapStyle.Liberty)
-                invoke(dialog.findViewById(R.id.positron), MapStyle.Positron)
-                invoke(dialog.findViewById(R.id.bright), MapStyle.Bright)
-                invoke(dialog.findViewById(R.id.dark), MapStyle.Dark)
-                invoke(dialog.findViewById(R.id.dark_matter), MapStyle.DarkMatter)
-            }
+            "mapStyle" -> showMapStyleDialog()
+            "customizeColors" -> open { replace<ColorSettingsFragment>(R.id.fragmentContainerView, null) }
+            "verifiedFilter" -> showVerifiedFilterDialog()
+            "dbStats" -> open { replace<DbStatsFragment>(R.id.fragmentContainerView, null) }
+            "imageStats" -> open { replace<ImageStatsFragment>(R.id.fragmentContainerView, null) }
         }
     }
 
-    private fun initVerifiedFilterButton() {
-        binding.currentVerifiedFilter.text =
-            prefs.verifiedFilterYears.toVerifiedFilterYears(requireContext())
+    private fun onItemCheckedChange(key: String, checked: Boolean) {
+        when (key) {
+            "showAttribution" -> prefs.showAttribution = checked
+            "mapRotation" -> prefs.mapRotationEnabled = checked
+        }
+        refreshItems()
+    }
 
-        binding.verifiedFilterButton.setOnClickListener {
-            val dialog =
-                MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.verified_filter)
-                    .setView(R.layout.verified_filter_dialog).show()
+    private fun open(block: androidx.fragment.app.FragmentTransaction.() -> Unit) {
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            block()
+            addToBackStack(null)
+        }
+    }
 
-            val setupFilter = fun RadioButton?.(filter: Int) {
-                if (this == null) return
+    private fun showMapStyleDialog() {
+        val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.map_style)
+            .setView(R.layout.map_style_dialog).show()
 
-                text = filter.toVerifiedFilterYears(requireContext())
-                isChecked = prefs.verifiedFilterYears == filter
+        val setupStyle = fun RadioButton?.(style: MapStyle) {
+            if (this == null) return
 
-                setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) {
-                        prefs.verifiedFilterYears = filter
-                        binding.currentVerifiedFilter.text = text
-                        dialog.dismiss()
-                    }
+            text = style.name(requireContext())
+            isChecked = prefs.mapStyle == style
+
+            setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    prefs.mapStyle = style
+                    refreshItems()
+                    dialog.dismiss()
                 }
             }
+        }
 
-            setupFilter.apply {
-                invoke(dialog.findViewById(R.id.one_year), 1)
-                invoke(dialog.findViewById(R.id.two_years), 2)
-                invoke(dialog.findViewById(R.id.three_years), 3)
+        setupStyle.apply {
+            invoke(dialog.findViewById(R.id.auto), MapStyle.Auto)
+            invoke(dialog.findViewById(R.id.liberty), MapStyle.Liberty)
+            invoke(dialog.findViewById(R.id.positron), MapStyle.Positron)
+            invoke(dialog.findViewById(R.id.bright), MapStyle.Bright)
+            invoke(dialog.findViewById(R.id.dark), MapStyle.Dark)
+            invoke(dialog.findViewById(R.id.dark_matter), MapStyle.DarkMatter)
+        }
+    }
+
+    private fun showVerifiedFilterDialog() {
+        val dialog =
+            MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.verified_filter)
+                .setView(R.layout.verified_filter_dialog).show()
+
+        val setupFilter = fun RadioButton?.(filter: Int) {
+            if (this == null) return
+
+            text = filter.toVerifiedFilterYears(requireContext())
+            isChecked = prefs.verifiedFilterYears == filter
+
+            setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    prefs.verifiedFilterYears = filter
+                    refreshItems()
+                    dialog.dismiss()
+                }
             }
+        }
+
+        setupFilter.apply {
+            invoke(dialog.findViewById(R.id.one_year), 1)
+            invoke(dialog.findViewById(R.id.two_years), 2)
+            invoke(dialog.findViewById(R.id.three_years), 3)
         }
     }
 
@@ -181,14 +222,17 @@ class SettingsFragment : Fragment() {
                 }
             }
 
+            _binding ?: return@launch
+
             if (username != null) {
-                binding.accountStatus.text = getString(R.string.logged_in_as, username)
-                binding.accountSecondary.text = getString(R.string.click_to_see_your_profile)
+                accountTitle = getString(R.string.logged_in_as, username)
+                accountSecondary = getString(R.string.click_to_see_your_profile)
             } else {
-                binding.accountStatus.text = getString(R.string.not_logged_in)
-                binding.accountSecondary.text = getString(R.string.create_account)
+                accountTitle = getString(R.string.not_logged_in)
+                accountSecondary = getString(R.string.create_account)
             }
-            binding.accountSecondary.visibility = View.VISIBLE
+
+            refreshItems()
         }
     }
 }

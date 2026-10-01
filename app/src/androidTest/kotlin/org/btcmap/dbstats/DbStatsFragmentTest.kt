@@ -3,10 +3,13 @@ package org.btcmap.dbstats
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
@@ -32,6 +35,9 @@ import java.time.ZonedDateTime
 class DbStatsFragmentTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     @Test
     fun showsRowCountsForEachTable() {
@@ -147,7 +153,10 @@ class DbStatsFragmentTest : AppTestCase() {
                 activity.supportFragmentManager.executePendingTransactions()
             }
 
-            onView(withId(R.id.dbStatsButton)).perform(scrollTo(), click())
+            composeTestRule
+                .onNodeWithText(app.getString(R.string.database_stats))
+                .performScrollTo()
+                .performClick()
 
             waitUntilOnMain {
                 activity.supportFragmentManager

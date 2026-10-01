@@ -9,6 +9,9 @@ kotlin = "2.4.20"
 # Compose Multiplatform
 # https://github.com/JetBrains/compose-multiplatform/releases
 compose-plugin = "1.12.1"
+# AndroidX Compose UI, pinned to the version Compose Multiplatform resolves for
+# the Android target (used by the instrumented test artifacts).
+androidx-compose = "1.12.1"
 # Enables suspending functions
 # https://github.com/Kotlin/kotlinx.coroutines/releases
 coroutines = "1.11.0"
@@ -108,6 +111,8 @@ coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil"
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockwebserver = { module = "com.squareup.okhttp3:mockwebserver3-junit4", version.ref = "okhttp" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "androidx-compose" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "androidx-compose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

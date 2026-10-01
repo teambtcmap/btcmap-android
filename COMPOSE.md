@@ -397,6 +397,24 @@ Note: the Android-KMP library plugin does not package `androidMain/assets`, so
 the icon font stays in the app's assets (one copy shared by the Views code and
 Compose) and is supplied through the theme.
 
+### Phase 2, fourth slice — done
+
+Migrated `SettingsFragment` to a shared `SettingsScreen` in `:ui`: a data-driven
+`List<SettingsItem>` (`Action` rows and `Toggle` rows) rendered with Material 3
+`ListItem`, hosted through a `SettingsComposeView`. The fragment keeps the
+Android-only parts — navigation, the map-style and verified-filter dialogs — and
+rebuilds the row list when a setting changes.
+
+Added Compose UI test artifacts (`androidx.compose.ui:ui-test-junit4` and
+`ui-test-manifest`) and updated the "settings button opens the screen" cases in
+`DbStatsFragmentTest` and `ImageStatsFragmentTest` to click the Compose rows
+(`createEmptyComposeRule` + `onNodeWithText`), replacing the Espresso
+`R.id.dbStatsButton`/`imageStatsButton` lookups.
+
+Verified on the emulator: all eight rows render with their subtitles, the toggle
+switches flip and persist, the map-style dialog opens, and the Database row
+navigates to the stats screen. No behavior change.
+
 ## Next
 
 Phase 2 continues: migrate the remaining non-map screens to `:ui` screen by

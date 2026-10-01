@@ -2,11 +2,12 @@ package org.btcmap.imagestats
 
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ActivityScenario
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.scrollTo
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.material.appbar.MaterialToolbar
 import org.btcmap.Activity
@@ -17,11 +18,17 @@ import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ImageStatsFragmentTest : AppTestCase() {
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
+
+    private val context = ApplicationProvider.getApplicationContext<android.content.Context>()
 
     @Before
     fun setUp() {
@@ -102,7 +109,10 @@ class ImageStatsFragmentTest : AppTestCase() {
                 activity.supportFragmentManager.executePendingTransactions()
             }
 
-            onView(withId(R.id.imageStatsButton)).perform(scrollTo(), click())
+            composeTestRule
+                .onNodeWithText(context.getString(R.string.image_stats))
+                .performScrollTo()
+                .performClick()
 
             waitUntilOnMain {
                 activity.supportFragmentManager
