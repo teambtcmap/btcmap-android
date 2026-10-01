@@ -1,9 +1,9 @@
 # Migration Plan: Compose (Multiplatform) and a Shared Module
 
-Status: Phase 1 complete; Phase 2 (UI → Compose Multiplatform) in progress. The
-`:shared` module holds the whole portable core, `:ui` adds the Compose
-Multiplatform infrastructure, and the app builds, tests green, and runs on the
-emulator (see Progress).
+Status: Phase 1 (shared module) and Phase 2 (non-map UI to Compose Multiplatform)
+are complete — 14 slices, all verified on the emulator. Phase 3 (the map, and the
+desktop target) is planned below but not started; it is gated on
+`maplibre-compose` maturing (desktop is Alpha).
 
 ## Goal
 
@@ -102,10 +102,11 @@ Three Gradle modules:
   (`AppTheme`, `MaterialSymbol` and the migrated screens) plus a `:ui:run`
   desktop entry point.
 
-The Android UI is now partly Compose (see Progress) and partly Views; the map
-and the auth dialogs are still entirely Views. `:shared` has no Android
-dependency; the only Android-carrying logic left in `:app` is `area/AreaFormatting`
-(`R.string`) and `UserAgent` (`BuildConfig`).
+The Android UI is Compose **except for the map**: the still-Views pieces are the
+MapLibre `MapView` in `MapFragment` plus the embedded maps in `EventFragment` and
+`PlaceFragment`, and `AuthErrorDialogFragment` (a plain message dialog).
+`:shared` has no Android dependency; the only Android-carrying logic left in
+`:app` is `area/AreaFormatting` (`R.string`) and `UserAgent` (`BuildConfig`).
 
 ## Phases
 
@@ -174,22 +175,109 @@ Cheaper alternative: leave the working Android Views UI untouched and build a
 the shipping Android app, at the cost of maintaining two UIs. Only reasonable if
 desktop stays a secondary client.
 
-### Phase 3 — Map to MapLibre Compose
+### Phase 3 — Map to MapLibre Compose (and the desktop target)
 
-`maplibre/maplibre-compose` (the official MapLibre org wrapper for Compose
-Multiplatform) now targets Android, iOS, and Desktop (JVM) on one shared
-implementation and API. Desktop is **Alpha** and the API is explicitly unstable;
-desktop requires Java 25 and `--enable-native-access=ALL-UNNAMED`.
+**Not started.** The last and riskiest phase, gated on `maplibre-compose`
+maturing. The map is the app's core and the only part that cannot be shared
+without changing rendering stacks; everything else is already shared or platform
+glue.
 
-In scope for the rewrite:
+#### Library state (re-verify at implementation time)
 
-- `map/layer/*` (merchant, event, exchange layers)
-- `MarkerIcon`, `MarkerGeoJson`, `EventGeoJson`, viewport/geometry caches
-- `MapSetupController`, selection/search/bottom-sheet controllers
-- `OfflineMaps` and the bundled PMTiles basemap (no `AssetManager` on desktop —
-  needs a different cache strategy)
+- `org.maplibre.compose:maplibre-compose` **0.15.0** (Aug 2026). Android, iOS and
+  desktop now share one MapLibre Native (FFI) implementation and one public API;
+  the browser uses MapLibre GL JS.
+- Stability: **Android/iOS Beta, desktop Alpha**; the API is explicitly unstable
+  and minor releases contain breaking changes. **Pin an exact version.**
+- **Android:** the MapLibre Android SDK is no longer a transitive dependency;
+  add a render runtime (`maplibre-compose-runtime-vulkan-android` or
+  `-opengl-android`). The library raised minSdk to 24 (ours is 29). Location
+  moved to `location-runtime-gms` / `location-runtime-hms`.
+- **Desktop:** requires **Java 25** and `--enable-native-access=ALL-UNNAMED`; the
+  app must configure an app-wide cache and provide each Compose window's GPU
+  context. (The project's daemon toolchain is Java 21 and the app targets 17, so
+  the desktop target needs its own Java 25 toolchain.)
+- **Offline:** `org.maplibre.compose.offline` (`rememberOfflineManager`,
+  `OfflinePack`, `rememberOfflinePacksSource`) works on Android and desktop.
+- Compose compatibility: the library tracks `gradle-compose` / `androidx-compose`
+  1.12.0, matching our `compose-plugin` 1.12.1.
 
-Expected effort: **1–3 months** focused, solo. Very low confidence.
+#### What has to change
+
+The pure helpers in `:shared` (`MarkerGeoJson`, `EventGeoJson`, `AreaGeometry`,
+`MapArea`, the geometry/viewport caches, `OfflineBounds`/`OfflineRegionEstimates`)
+stay. What changes is layer construction and the map host:
+
+- `map/layer/*` — today they build `org.maplibre.android.style.layers.*` objects;
+  they must be rebuilt on the MapLibre Compose layer/expression DSL.
+- `MarkerIcon` and marker images — Android drawables added to the style become
+  `ImageBitmap` additions; the Material Symbols font can supply glyphs.
+- `MapSetupController`, `MapSelectionController`, `SearchController`,
+  `MapStatusBarController`, `BottomSheetController`, `ViewportCache`, and
+  `AreasAdapter` (the area chips) — reimplemented on the Compose map.
+- `LocationController` → the MapLibre Compose location engine.
+- `OfflineMaps` (`OfflineManager` regions) → the Compose `OfflineManager`.
+- The map screen becomes a shared composable in `:ui`; the Android
+  `MapFragment`/`MapView` and the MapLibre Android SDK dependency are removed, and
+  the embedded maps in `EventFragment`/`PlaceFragment` (and the area screen's
+  offline controls) use it too.
+- `:app` keeps only platform glue: permissions, location services, system bars,
+  insets, and the driver/bundle seeding.
+
+Two pieces need their own design:
+
+- **Basemap / offline assets.** The bundled PMTiles archive + `noCompress` +
+  `BundledBasemap` + `MapSetupController`'s uncapping of the bundled z0–z4 layers
+  have no direct desktop equivalent (no `AssetManager`). Either load the archive
+  through a `pmtiles://` source from the desktop cache, or fall back to hosted
+  tiles online-only. The `OfflinePacksSource` API can drive an offline-pack
+  management UI.
+- **Marker icon pipeline.** The app builds marker bitmaps from drawables + the
+  icon font at runtime; on Compose those become `ImageBitmap`s added to the style.
+
+#### Desktop target
+
+A new `:desktopApp` (JVM) sharing `:shared` and `:ui`:
+
+- Java 25 toolchain; run with `--enable-native-access=ALL-UNNAMED`.
+- A data directory for the database (no `Context`), plus settings and the icon
+  font (ship as a resource or download).
+- Coil 3 has a desktop backend, so images work; the map needs its GPU context and
+  an app-wide cache.
+- A shared `App` composable in `:ui` providing navigation and window scaffolding.
+- Native packaging (DMG/MSI/DEB) last.
+
+#### Sequencing (each step independently shippable)
+
+1. **Spike.** Add MapLibre Compose to `:ui` and render a map with the existing
+   style URI on **Android**, leaving the current `MapFragment` in place. Proves
+   the build, the Android render runtime, and CMP/map interop.
+2. **Markers and layers.** Port the merchant/event/exchange/boost layer pipeline
+   and the marker images.
+3. **Controllers and overlays.** Selection, search, bottom sheet, viewport
+   caches, and the area chips.
+4. **Offline and basemap.** Port `OfflineMaps` to the Compose `OfflineManager`;
+   settle the PMTiles strategy for desktop.
+5. **Swap the Android map** and delete the MapLibre Android SDK usage.
+6. **Desktop entry point** with navigation and the map; then packaging.
+
+#### Risks and unknowns
+
+- **API instability** — expect breakage between minor releases; pin 0.15.x and
+  budget for upgrades.
+- **Desktop is Alpha** and depends on Compose/Skia internals; the GPU-context and
+  cache wiring is new, and Java 25 is a toolchain jump.
+- **Feature gaps** — map snapshot isn't supported on any target (our app does not
+  use it); "Compose resource URIs" load styles/assets on Android/Web but not
+  desktop, which affects how the basemap style is bundled.
+- **PMTiles on desktop** and the offline-pack parity are open design questions.
+
+**Effort:** ~1–3 months focused, solo, **very low confidence**; the desktop track
+adds more and depends on MapLibre Compose leaving Alpha.
+
+**Recommendation:** start steps 1–2 only when Phase 3 is prioritised, and prefer
+waiting for a release where desktop leaves Alpha. The desktop target is not
+pressing, so there is no cost to waiting.
 
 ## Estimates
 
@@ -497,6 +585,40 @@ hosted by an `ActivityFeedComposeView`. The fragment keeps the filter dialog
 to `feedKey()` and updated the feed instrumented tests. The filter dialog is
 still Views. No behavior change.
 
+### Phase 2, twelfth slice — done
+
+Migrated the map-style and verified-filter dialogs from their XML radio layouts
+to a shared `RadioPickerContent` composable, hosted by a `RadioPickerComposeView`
+set into the `MaterialAlertDialog` via `setView`. Deleted
+`map_style_dialog.xml` and `verified_filter_dialog.xml`. The activity feed's chip
+filter dialog is still Views. No behavior change.
+
+### Phase 2, thirteenth slice — done
+
+Migrated the activity feed's filter dialog to a shared `ChipFilterContent` in
+`:ui` (area chips, multi-select; interval chips, single-select), hosted by a
+`ChipFilterComposeView` set into the `MaterialAlertDialog`. The fragment keeps
+the selection and reloads on each toggle; the dialog stays open until OK.
+Deleted `activity_feed_filter_dialog.xml`. This was the last non-auth Views
+dialog. No behavior change.
+
+### Phase 2, fourteenth slice — done
+
+Migrated the auth dialogs' content to Compose: the account chooser
+(`AuthChooserContent`) and the credential / change-password forms
+(`AuthFormContent` — text fields with password visibility toggles, inline errors
+and helpers), hosted by `AuthChooserComposeView` / `AuthFormComposeView` set into
+the `MaterialAlertDialog` (owner pattern). `AuthFormDialogFragment` now holds the
+field values and drives the Compose form; the typed values still live in
+`AuthFormViewModel` (retained across rotation, never saved) and results are
+delivered through `AuthFormResultViewModel` + `setFragmentResult` as before.
+Deleted the `account_choices`, `account`, `account_sign_up` and
+`change_password` layouts, and updated the auth instrumented tests
+(`AuthDialogValidationTest`, `SignInErrorTest`, `AuthRotationTest`,
+`ChangePasswordRotationTest`) to drive the Compose fields.
+`AuthErrorDialogFragment` (a plain message dialog) stays Views. No behavior
+change.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
@@ -535,8 +657,8 @@ Durable facts and conventions for continuing the migration.
   first); the CMP `compose.*` dependency accessors emit build-script deprecation
   warnings but work.
 - Migrating a screen usually retires its Views: delete the adapter and item
-  layout it used, and retarget the tests that read them. Keep the Views for
-  embedded/complex pieces (currently: the filter dialogs; the auth forms).
+  layout it used, and retarget the tests that read them. The only Views left are
+  the map itself (see Phase 3) and `AuthErrorDialogFragment`.
 
 ### Tests
 
@@ -573,49 +695,13 @@ Durable facts and conventions for continuing the migration.
 - Verify visually via `adb shell uiautomator dump` + pulling the XML; sample
   pixels with PIL for colour checks.
 
-### Phase 2, twelfth slice — done
-
-Migrated the map-style and verified-filter dialogs from their XML radio layouts
-to a shared `RadioPickerContent` composable, hosted by a `RadioPickerComposeView`
-set into the `MaterialAlertDialog` via `setView`. Deleted
-`map_style_dialog.xml` and `verified_filter_dialog.xml`. The activity feed's chip
-filter dialog is still Views. No behavior change.
-
-### Phase 2, thirteenth slice — done
-
-Migrated the activity feed's filter dialog to a shared `ChipFilterContent` in
-`:ui` (area chips, multi-select; interval chips, single-select), hosted by a
-`ChipFilterComposeView` set into the `MaterialAlertDialog`. The fragment keeps
-the selection and reloads on each toggle; the dialog stays open until OK.
-Deleted `activity_feed_filter_dialog.xml`. This was the last non-auth Views
-dialog. No behavior change.
-
-### Phase 2, fourteenth slice — done
-
-Migrated the auth dialogs' content to Compose: the account chooser
-(`AuthChooserContent`) and the credential / change-password forms
-(`AuthFormContent` — text fields with password visibility toggles, inline errors
-and helpers), hosted by `AuthChooserComposeView` / `AuthFormComposeView` set into
-the `MaterialAlertDialog` (owner pattern). `AuthFormDialogFragment` now holds the
-field values and drives the Compose form; the typed values still live in
-`AuthFormViewModel` (retained across rotation, never saved) and results are
-delivered through `AuthFormResultViewModel` + `setFragmentResult` as before.
-Deleted the `account_choices`, `account`, `account_sign_up` and
-`change_password` layouts, and updated the auth instrumented tests
-(`AuthDialogValidationTest`, `SignInErrorTest`, `AuthRotationTest`,
-`ChangePasswordRotationTest`) to drive the Compose fields.
-`AuthErrorDialogFragment` (a plain message dialog) stays Views. No behavior
-change.
-
 ## Next
 
-Phase 2's non-map UI is now complete: the auth dialogs were the last cluster.
-What remains is map-coupled and belongs in Phase 3 — `EventFragment` and
-`PlaceFragment` embed MapLibre `MapView`s, and `AreaFragment` is
-MapLibre/offline-chrome-heavy. `AuthErrorDialogFragment` (plain message dialog)
-and each screen's embedded `MapView` stay Views for now.
+Phases 1 and 2 are complete. The only remaining track is **Phase 3** (see its
+plan above): migrate the map to MapLibre Compose and add the desktop target.
+Nothing starts until Phase 3 is prioritised; it is gated on MapLibre Compose
+maturing (desktop is Alpha).
 
-For the desktop target: the `:ui:run` entry point still renders only
-`StatsScreen`; a JVM theme fallback exists but there is no desktop navigation or
-`MapView` equivalent. Phase 3 (map → MapLibre Compose) stays gated on that
-library maturing.
+Interim state: the `:ui:run` entry point renders only `StatsScreen`, so the
+shared UI can be iterated on desktop already, but there is no desktop navigation
+or map yet. `AuthErrorDialogFragment` and the embedded `MapView`s stay Views.
