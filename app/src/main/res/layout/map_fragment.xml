@@ -19,13 +19,10 @@
         android:background="@android:color/transparent"
         android:fitsSystemWindows="true">
 
-        <com.google.android.material.search.SearchBar
-            android:id="@+id/search_bar"
+        <org.btcmap.ui.SearchOverlayView
+            android:id="@+id/search"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/search_hint"
-            app:defaultScrollFlagsEnabled="false"
-            app:menu="@menu/map" />
+            android:layout_height="wrap_content" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -42,23 +39,6 @@
         android:textSize="12sp"
         android:visibility="gone" />
 
-    <com.google.android.material.search.SearchView
-        android:id="@+id/searchView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:hint="@string/search_hint"
-        app:layout_anchor="@id/search_bar">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/searchResults"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipToPadding="false"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:scrollbars="vertical" />
-
-    </com.google.android.material.search.SearchView>
 
     <FrameLayout
         android:id="@+id/placeBottomSheet"

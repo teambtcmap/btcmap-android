@@ -1,11 +1,9 @@
 package org.btcmap.map
 
 import androidx.appcompat.widget.Toolbar
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.material.search.SearchView
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
 import mockwebserver3.RecordedRequest
@@ -17,8 +15,11 @@ import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
 import org.btcmap.event.EventFragment
-import org.btcmap.search.SearchAdapter
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import org.btcmap.search.SearchAdapterItem
+import org.btcmap.ui.SearchOverlayView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
@@ -31,6 +32,9 @@ import java.time.ZonedDateTime
 
 @RunWith(AndroidJUnit4::class)
 class EventSearchTest : AppTestCase() {
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 
@@ -243,18 +247,10 @@ class EventSearchTest : AppTestCase() {
 
             ActivityScenario.launch(Activity::class.java).use { scenario ->
                 lateinit var mapFragment: MapFragment
-                lateinit var results: RecyclerView
-                lateinit var adapter: SearchAdapter
-
                 scenario.onActivity {
                     mapFragment = it.supportFragmentManager
                         .findFragmentById(R.id.fragmentContainerView) as MapFragment
-                    results = mapFragment.requireView().findViewById(R.id.searchResults)
-                    adapter = results.adapter as SearchAdapter
-                    mapFragment.requireView()
-                        .findViewById<SearchView>(R.id.searchView)
-                        .show()
-                    adapter.submitList(
+                    mapFragment.requireView().findViewById<SearchOverlayView>(R.id.search).results =
                         listOf(
                             SearchAdapterItem.Event(
                                 eventId = stored.id,
@@ -263,11 +259,9 @@ class EventSearchTest : AppTestCase() {
                                 distanceToUser = null,
                             )
                         )
-                    )
                 }
 
-                waitUntilOnMain { results.childCount == 1 }
-                scenario.onActivity { results.getChildAt(0).performClick() }
+                composeTestRule.onNodeWithText(stored.name).performClick()
 
                 waitUntilOnMain {
                     mapFragment.parentFragmentManager

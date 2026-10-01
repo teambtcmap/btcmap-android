@@ -946,6 +946,19 @@ Verified in the app: the `btcmap.org/event/165` deep link opens the event
 screen, which renders the bundled dark-matter style with the event marker, and
 the zoom buttons zoom the shared map.
 
+### Phase 3, nineteenth slice — done (step 5: the map search)
+
+The map screen's `SearchBar`/`SearchView` and its results adapter are gone:
+`map_fragment.xml` now uses the new `SearchOverlayView` (`:ui` androidMain),
+which hosts the shared `SearchOverlay`. The overlay gained the map menu's
+actions (`SearchActions`: add a place, open the settings) and a placeholder, and
+`MapFragment` feeds it the query (debounced before `SearchController` runs), the
+results and the row click. `SearchAdapter`, `search_adapter_item.xml` and its
+diff test are deleted; the instrumented search tests now click the Compose rows.
+
+Verified in the app: typing a place name lists it with its distance, and tapping
+the row clears the field and opens the place sheet.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

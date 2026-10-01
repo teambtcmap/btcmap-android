@@ -19,7 +19,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
-import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
@@ -58,7 +57,6 @@ import org.btcmap.event.toBundle
 import org.btcmap.place.AddPlaceFragment
 import org.btcmap.place.PlaceFragment
 import org.btcmap.place.isMerchant
-import org.btcmap.search.SearchAdapter
 import org.btcmap.search.SearchAdapterItem
 import org.btcmap.settings.SettingsFragment
 import org.btcmap.settings.apiUrl
@@ -192,12 +190,18 @@ class MapFragment : Fragment() {
             icon = binding.update,
         )
 
-        binding.searchBar.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.add_place -> openAddPlace()
-                R.id.settings -> navigateToSettings()
+        binding.search.onAddPlace = { openAddPlace() }
+        binding.search.onSettings = { navigateToSettings() }
+        binding.search.placeholder = getString(R.string.search_hint)
+        binding.search.iconTypeface = iconTypeface
+        binding.search.onResultClick = { row ->
+            binding.search.query = ""
+            binding.search.results = emptyList()
+            when (row) {
+                is SearchAdapterItem.Place -> openPlace(row)
+                is SearchAdapterItem.Area -> openArea(row)
+                is SearchAdapterItem.Event -> openEventById(row.eventId)
             }
-            true
         }
 
         binding.attribution.isVisible = prefs.showAttribution
@@ -326,27 +330,8 @@ class MapFragment : Fragment() {
             }
         }
 
-        val searchAdapter = SearchAdapter { row ->
-            binding.searchView.clearText()
-            binding.searchView.hide()
-
-            when (row) {
-                is SearchAdapterItem.Place -> openPlace(row)
-                is SearchAdapterItem.Area -> openArea(row)
-                is SearchAdapterItem.Event -> openEventById(row.eventId)
-            }
-        }
-
-        binding.searchResults.layoutManager = LinearLayoutManager(requireContext())
-        binding.searchResults.adapter = searchAdapter
-
-        searchController.results.onEach {
-            searchAdapter.submitList(it) {
-                // The diff commits after the collector may have been cancelled
-                // by view destruction, so the binding can be gone by now.
-                val layoutManager = _binding?.searchResults?.layoutManager ?: return@submitList
-                layoutManager.scrollToPosition(0)
-            }
+        searchController.results.onEach { results ->
+            _binding?.search?.results = results
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         // The chips are the shared composable now; the map screen only feeds it
@@ -385,8 +370,8 @@ class MapFragment : Fragment() {
             }
         }
 
-        binding.searchView.editText.doAfterTextChanged { searchString ->
-            val text = searchString.toString()
+        binding.search.onQueryChange = { text ->
+            binding.search.query = text
             searchDebounceJob?.cancel()
             searchDebounceJob = viewLifecycleOwner.lifecycleScope.launch {
                 delay(SEARCH_DEBOUNCE_MS)

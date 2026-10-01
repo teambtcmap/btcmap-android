@@ -4,7 +4,6 @@ import android.graphics.RectF
 import android.view.InputDevice
 import android.view.MotionEvent
 import androidx.appcompat.widget.Toolbar
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
@@ -16,16 +15,17 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.search.SearchBar
-import com.google.android.material.search.SearchView
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.place.Place
 import org.btcmap.map.layer.MERCHANT_MARKER_LAYER_ID
 import org.btcmap.place.PlaceFragment
-import org.btcmap.search.SearchAdapter
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import org.btcmap.search.SearchAdapterItem
+import org.btcmap.ui.SearchOverlayView
 import org.btcmap.settings.SettingsFragment
 import org.btcmap.settings.mapViewport
 import org.btcmap.util.AppTestCase
@@ -42,6 +42,9 @@ import org.maplibre.android.maps.MapView
 
 @RunWith(AndroidJUnit4::class)
 class MapPlaceSelectionTest : AppTestCase() {
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 
@@ -62,17 +65,11 @@ class MapPlaceSelectionTest : AppTestCase() {
 
         ActivityScenario.launch(Activity::class.java).use { scenario ->
             lateinit var mapFragment: MapFragment
-            lateinit var results: RecyclerView
 
             scenario.onActivity {
                 mapFragment = it.supportFragmentManager
                     .findFragmentById(R.id.fragmentContainerView) as MapFragment
-                results = mapFragment.requireView().findViewById(R.id.searchResults)
-                val adapter = results.adapter as SearchAdapter
-                mapFragment.requireView()
-                    .findViewById<SearchView>(R.id.searchView)
-                    .show()
-                adapter.submitList(
+                mapFragment.requireView().findViewById<SearchOverlayView>(R.id.search).results =
                     listOf(
                         SearchAdapterItem.Place(
                             placeId = ParisPlaces.target.id,
@@ -82,11 +79,9 @@ class MapPlaceSelectionTest : AppTestCase() {
                             boosted = false,
                         )
                     )
-                )
             }
 
-            waitUntilOnMain { results.childCount == 1 }
-            scenario.onActivity { results.getChildAt(0).performClick() }
+            composeTestRule.onNodeWithText(ParisPlaces.target.name.orEmpty()).performClick()
             waitUntilOnMain {
                 sheetState(mapFragment) == BottomSheetBehavior.STATE_HALF_EXPANDED
             }
@@ -118,18 +113,12 @@ class MapPlaceSelectionTest : AppTestCase() {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
             lateinit var activity: Activity
             lateinit var mapFragment: MapFragment
-            lateinit var results: RecyclerView
 
             scenario.onActivity {
                 activity = it
                 mapFragment = it.supportFragmentManager
                     .findFragmentById(R.id.fragmentContainerView) as MapFragment
-                results = mapFragment.requireView().findViewById(R.id.searchResults)
-                val adapter = results.adapter as SearchAdapter
-                mapFragment.requireView()
-                    .findViewById<SearchView>(R.id.searchView)
-                    .show()
-                adapter.submitList(
+                mapFragment.requireView().findViewById<SearchOverlayView>(R.id.search).results =
                     listOf(
                         SearchAdapterItem.Place(
                             placeId = ParisPlaces.target.id,
@@ -139,18 +128,16 @@ class MapPlaceSelectionTest : AppTestCase() {
                             boosted = false,
                         )
                     )
-                )
             }
 
-            waitUntilOnMain { results.childCount == 1 }
-            scenario.onActivity { results.getChildAt(0).performClick() }
+            composeTestRule.onNodeWithText(ParisPlaces.target.name.orEmpty()).performClick()
             waitUntilOnMain {
                 sheetState(mapFragment) == BottomSheetBehavior.STATE_HALF_EXPANDED
             }
 
             activity.runOnUiThread {
-                activity.findViewById<SearchBar>(R.id.search_bar)
-                    .menu.performIdentifierAction(R.id.settings, 0)
+                mapFragment.requireView().findViewById<SearchOverlayView>(R.id.search)
+                    .onSettings?.invoke()
             }
             waitUntilOnMain {
                 activity.supportFragmentManager

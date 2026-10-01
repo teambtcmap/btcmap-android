@@ -1,25 +1,30 @@
 package org.btcmap.map
 
 import androidx.appcompat.widget.Toolbar
-import androidx.recyclerview.widget.RecyclerView
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.search.SearchView
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.place.PlaceFragment
-import org.btcmap.search.SearchAdapter
 import org.btcmap.search.SearchAdapterItem
+import org.btcmap.ui.SearchOverlayView
 import org.btcmap.settings.mapViewport
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class MapPlaceSearchTest : AppTestCase() {
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     @Test
     fun tappingPlaceResult_loadsThePlaceFromTheCache_andOpensTheBottomSheet() {
@@ -28,32 +33,24 @@ class MapPlaceSearchTest : AppTestCase() {
 
         ActivityScenario.launch(Activity::class.java).use { scenario ->
             lateinit var mapFragment: MapFragment
-            lateinit var results: RecyclerView
-            lateinit var adapter: SearchAdapter
+            val name = ParisPlaces.target.name.orEmpty()
 
             scenario.onActivity {
                 mapFragment = it.supportFragmentManager
                     .findFragmentById(R.id.fragmentContainerView) as MapFragment
-                results = mapFragment.requireView().findViewById(R.id.searchResults)
-                adapter = results.adapter as SearchAdapter
-                mapFragment.requireView()
-                    .findViewById<SearchView>(R.id.searchView)
-                    .show()
-                adapter.submitList(
+                mapFragment.requireView().findViewById<SearchOverlayView>(R.id.search).results =
                     listOf(
                         SearchAdapterItem.Place(
                             placeId = ParisPlaces.target.id,
                             icon = ParisPlaces.target.icon,
-                            name = ParisPlaces.target.name.orEmpty(),
+                            name = name,
                             distanceToUser = null,
                             boosted = false,
                         )
                     )
-                )
             }
 
-            waitUntilOnMain { results.childCount == 1 }
-            scenario.onActivity { results.getChildAt(0).performClick() }
+            composeTestRule.onNodeWithText(name).performClick()
 
             // The row tap looks the place up on a background dispatcher and only
             // then opens the sheet, so this also covers that path.

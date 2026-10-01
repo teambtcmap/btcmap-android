@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -40,8 +41,11 @@ fun SearchOverlay(
     results: List<SearchAdapterItem>,
     onResultClick: (SearchAdapterItem) -> Unit,
     modifier: Modifier = Modifier,
+    placeholder: String = "Search",
+    actions: SearchActions? = null,
 ) {
     Column(modifier = modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
@@ -56,10 +60,20 @@ fun SearchOverlay(
                     )
                 }
             },
-            placeholder = { Text("Search") },
+            placeholder = { Text(placeholder) },
             shape = RoundedCornerShape(28.dp),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.weight(1f),
         )
+
+        if (actions != null) {
+            IconButton(onClick = actions.onAddPlace) {
+                MaterialSymbol(glyph = "add_location_alt", contentDescription = null)
+            }
+            IconButton(onClick = actions.onSettings) {
+                MaterialSymbol(glyph = "settings", contentDescription = null)
+            }
+        }
+        }
 
         if (results.isNotEmpty()) {
             Spacer(modifier = Modifier.size(8.dp))

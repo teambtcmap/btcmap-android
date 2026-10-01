@@ -3,10 +3,10 @@ package org.btcmap.map
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.material.search.SearchBar
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
+import org.btcmap.ui.SearchOverlayView
 import org.btcmap.settings.SettingsFragment
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
@@ -130,8 +130,10 @@ class MapFilterTest : AppTestCase() {
 
     private fun navigateToSettings(activity: Activity) {
         activity.runOnUiThread {
-            val searchBar = activity.findViewById<SearchBar>(R.id.search_bar)
-            searchBar.menu.performIdentifierAction(R.id.settings, 0)
+            val mapFragment = activity.supportFragmentManager
+                .findFragmentById(R.id.fragmentContainerView) as MapFragment
+            mapFragment.requireView().findViewById<SearchOverlayView>(R.id.search)
+                .onSettings?.invoke()
         }
     }
 
