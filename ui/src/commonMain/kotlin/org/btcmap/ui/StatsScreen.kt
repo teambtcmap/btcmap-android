@@ -1,6 +1,5 @@
 package org.btcmap.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,18 +13,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.btcmap.stats.StatsSection
@@ -34,36 +29,29 @@ import org.btcmap.stats.StatsSection
  * Renders a list of label/value cards, the shape shared by the database and
  * image stats screens.
  *
- * [iconFont] is the Material Symbols typeface used to render each section's
- * [StatsSection.icon] ligature; when it is null the icons are omitted.
+ * The theme and the icon font come from the surrounding [AppTheme]; the section
+ * icons are omitted when no icon font is provided.
  */
 @Composable
 fun StatsScreen(
     sections: List<StatsSection>,
-    iconFont: FontFamily? = null,
-    colorScheme: ColorScheme? = null,
     modifier: Modifier = Modifier,
 ) {
-    // The Android host passes the app's dynamic (Material You) scheme; the
-    // fallback keeps the screen themed when rendered without one (e.g. desktop).
-    val scheme = colorScheme
-        ?: if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-
-    MaterialTheme(colorScheme = scheme) {
-        LazyColumn(
-            modifier = modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(sections, key = { it.key }) { section ->
-                StatsCard(section, iconFont)
-            }
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        items(sections, key = { it.key }) { section ->
+            StatsCard(section)
         }
     }
 }
 
 @Composable
-private fun StatsCard(section: StatsSection, iconFont: FontFamily?) {
+private fun StatsCard(section: StatsSection) {
+    val iconFont = LocalIconFont.current
+
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(vertical = 4.dp)) {
             Row(

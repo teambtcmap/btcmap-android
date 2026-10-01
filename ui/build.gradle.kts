@@ -26,5 +26,15 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
         }
+
+        jvmMain.dependencies {
+            implementation(compose.desktop.currentOs)
+        }
+    }
+}
+
+compose.desktop {
+    application {
+        mainClass = "org.btcmap.ui.MainKt"
     }
 }

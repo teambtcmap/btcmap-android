@@ -3,9 +3,6 @@ package org.btcmap.ui
 import android.content.Context
 import android.graphics.Typeface
 import android.util.AttributeSet
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,16 +26,8 @@ class StatsComposeView @JvmOverloads constructor(
 
     @Composable
     override fun Content() {
-        val colorScheme = if (isSystemInDarkTheme()) {
-            dynamicDarkColorScheme(context)
-        } else {
-            dynamicLightColorScheme(context)
+        AppTheme(iconFont = iconTypeface?.let { FontFamily(it) }) {
+            StatsScreen(sections = sections)
         }
-
-        StatsScreen(
-            sections = sections,
-            iconFont = iconTypeface?.let { FontFamily(it) },
-            colorScheme = colorScheme,
-        )
     }
 }

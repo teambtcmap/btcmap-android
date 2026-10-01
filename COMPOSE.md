@@ -381,6 +381,22 @@ screens render the shared `StatsScreen`. Deleted `StatsAdapter` and the
 `sections` instead of a `RecyclerView` adapter (the DbStats test had been left
 runtime-broken by the first slice). No behavior change.
 
+### Phase 2, third slice — done
+
+Added a shared `AppTheme` in `:ui` (commonMain) that owns the Material 3 color
+scheme — `expect`/`actual`: dynamic (Material You) colors on Android, system
+light/dark on the JVM — and provides the Material Symbols typeface through a
+`LocalIconFont` `CompositionLocal`. `StatsScreen` no longer takes theme or font
+parameters; the Android host passes the app's typeface into `AppTheme`.
+
+Added a JVM entry point (`ui/src/jvmMain/.../Main.kt`, `:ui:run`) that renders
+the shared `StatsScreen` on desktop, so shared UI can be iterated on without a
+device.
+
+Note: the Android-KMP library plugin does not package `androidMain/assets`, so
+the icon font stays in the app's assets (one copy shared by the Views code and
+Compose) and is supplied through the theme.
+
 ## Next
 
 Phase 2 continues: migrate the remaining non-map screens to `:ui` screen by
