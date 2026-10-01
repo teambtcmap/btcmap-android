@@ -1142,6 +1142,17 @@ no system theme to read, so it always rendered light before.
 Still to do on desktop: the map style is the hosted light `liberty` one, so the
 map stays light in dark mode; it should follow the style setting.
 
+### Phase 3, thirtieth slice — done (desktop map style)
+
+`MapStyle`, its preference mapping and `Settings.mapStyle` moved from `:app` to
+`:shared` (same package, so Android is untouched); the Context-dependent
+`uri`/`name`/`offlineStyleUrl` stay with Android. A new `MapStyle.hostedStyleUrl`
+resolves the style a host without bundled assets should load, and the desktop map
+follows the system's dark mode through it.
+
+Verified in the window: the desktop map is now the **dark** hosted style in this
+dark session, with its markers, cluster and area chips.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

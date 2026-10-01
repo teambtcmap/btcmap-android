@@ -49,7 +49,9 @@ import org.btcmap.settings.KEY_AUTH_TOKEN
 import org.btcmap.settings.Settings
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authorized
+import org.btcmap.settings.hostedStyleUrl
 import org.btcmap.settings.mapRotationEnabled
+import org.btcmap.settings.mapStyle
 import org.btcmap.settings.showAttribution
 import org.btcmap.stats.StatsEntry
 import org.btcmap.stats.StatsSection
@@ -147,9 +149,14 @@ private fun runApp() = application {
                         modifier = androidx.compose.ui.Modifier.weight(1f),
                     ) {
                 if (screen == Screen.Map) {
+                // The desktop has no bundled asset styles, so it uses the hosted
+                // ones and follows the system's dark mode.
+                val styleUrl = settings.mapStyle.hostedStyleUrl(
+                    darkSystemTheme = androidx.compose.foundation.isSystemInDarkTheme(),
+                )
                 MapScreen(
                     db = db,
-                    styleUrl = "https://tiles.openfreemap.org/styles/liberty",
+                    styleUrl = styleUrl,
                     initialLat = 52.2333742,
                     initialLon = 21.0711489,
                     initialZoom = 13.0,

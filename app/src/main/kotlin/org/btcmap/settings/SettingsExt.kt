@@ -43,48 +43,6 @@ var Settings.mapViewport: LatLngBounds
         putFloat("lonWest", value.longitudeWest.toFloat())
     }
 
-var Settings.mapStyle: MapStyle
-    get() {
-        return mapStyleFromPrefValue(getString("mapStyle", "auto") ?: "auto")
-    }
-    set(value) {
-        putString("mapStyle", value.toPrefValue())
-    }
-
-enum class MapStyle {
-    Auto,
-    Liberty,
-    Positron,
-    Bright,
-    Dark,
-    DarkMatter,
-}
-
-private fun mapStyleFromPrefValue(pref: String): MapStyle {
-    return when (pref) {
-        "auto" -> MapStyle.Auto
-        "liberty" -> MapStyle.Liberty
-        "positron" -> MapStyle.Positron
-        "bright" -> MapStyle.Bright
-        "dark" -> MapStyle.Dark
-        // "carto_dark_matter" is the value a previous build stored; the style
-        // was rebased onto OpenFreeMap, so keep an existing choice on it.
-        "dark_matter", "carto_dark_matter" -> MapStyle.DarkMatter
-        else -> MapStyle.Auto
-    }
-}
-
-fun MapStyle.toPrefValue(): String {
-    return when (this) {
-        MapStyle.Auto -> "auto"
-        MapStyle.Liberty -> "liberty"
-        MapStyle.Positron -> "positron"
-        MapStyle.Bright -> "bright"
-        MapStyle.Dark -> "dark"
-        MapStyle.DarkMatter -> "dark_matter"
-    }
-}
-
 fun MapStyle.name(context: Context): String {
     return when (this) {
         MapStyle.Auto -> context.getString(R.string.style_auto)
