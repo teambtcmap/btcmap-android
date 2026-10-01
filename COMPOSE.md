@@ -89,19 +89,23 @@ MockWebServer), so that suite is effectively a prototype of the shared module.
 
 ## Current state
 
-- Two Gradle modules: `:app` (the Android app — all UI and platform glue) and
-  `:shared` (`commonMain`, with Android and JVM targets). ~193 Kotlin files,
-  ~21k lines total.
-- So far only `search/NameMatch` has been extracted (see Progress); the rest of
-  the layout below is still as it was before the migration started.
-- UI: Android Views + ViewBinding + Fragments, `RecyclerView`, Material
-  Components. No Compose.
-- ~100 files have no `android.*` / `androidx.*` import; ~90 are Android-coupled
-  UI.
-- Large Android-MapLibre-specific map stack: `MapFragment` (947 lines),
-  `MarkerIcon` (420), `OfflineMaps` (328), `map/layer/*`, `MapSetupController`,
-  bundled PMTiles basemap.
-- 96 unit-test files; tests are the default verification.
+Three Gradle modules:
+
+- **`:app`** — the Android application: all remaining Views UI, platform glue,
+  and the `AbstractComposeView` hosts for the migrated screens. It has no Compose
+  compiler.
+- **`:shared`** — Kotlin Multiplatform (Android + JVM): the whole portable core
+  (`api`, `db`, `i18n`, `sync`, `openinghours`, `stats`, `settings/Settings`, the
+  pure `util` files, the pure `map`/`offline`/`payment`/`imagestats` models, and
+  the `auth`/`http` interceptor support). 62 JVM test classes.
+- **`:ui`** — Kotlin Multiplatform (Android + JVM): Compose Multiplatform UI
+  (`AppTheme`, `MaterialSymbol` and the migrated screens) plus a `:ui:run`
+  desktop entry point.
+
+The Android UI is now partly Compose (see Progress) and partly Views; the map
+and the auth dialogs are still entirely Views. `:shared` has no Android
+dependency; the only Android-carrying logic left in `:app` is `area/AreaFormatting`
+(`R.string`) and `UserAgent` (`BuildConfig`).
 
 ## Phases
 
@@ -217,16 +221,17 @@ Scaling factors:
 - **Visibility churn.** Module extraction forces many `internal` declarations
   public; a large diff with little behaviour change.
 
-## Open decisions
+## Decisions
 
-These change the estimates and should be settled before starting Phase 2:
+Settled before Phase 2:
 
-1. Hours per week, and whether this is solo.
-2. Must the desktop app have an interactive map, or can it be a browse/search/
-   data client without one? (Removes Phase 3.)
-3. Does the Android UI ultimately move to Compose Multiplatform, or stay on
-   Views while desktop gets its own CMP UI? (Affects Phase 2 cost and UI
-   duplication.)
+1. **UI sharing** — the Android UI moves to Compose Multiplatform incrementally,
+   screen by screen, so Android and desktop share one UI (not a separate
+   desktop-only UI).
+2. **Desktop map** — the eventual desktop app needs the interactive map, so
+   Phase 3 (MapLibre Compose) stays in scope.
+3. No iOS target.
+4. No CI, and no automation of the bundled-asset refresh (see `AGENTS.md`).
 
 ## Progress
 
@@ -492,9 +497,88 @@ hosted by an `ActivityFeedComposeView`. The fragment keeps the filter dialog
 to `feedKey()` and updated the feed instrumented tests. The filter dialog is
 still Views. No behavior change.
 
+## Working notes
+
+Durable facts and conventions for continuing the migration.
+
+### Modules and hosting pattern
+
+- `:app` (Android application), `:shared` (KMP android+jvm, portable logic),
+  `:ui` (KMP android+jvm, Compose UI).
+- A migrated screen is a `@Composable` in `:ui`'s `commonMain` plus an
+  `AbstractComposeView` subclass in `:ui`'s `androidMain`. The subclass exposes
+  plain `var` properties (backed by `mutableStateOf`) and callbacks; the fragment
+  sets them. `:app` therefore needs no Compose compiler and stays on Views.
+  `Content()` wraps the screen in `AppTheme`.
+- Screens never touch Android resources: the fragment resolves strings (often via
+  a labels data class) and passes them in, so `:ui` stays resource-free.
+
+### Theme, icons, Compose gotchas
+
+- `AppTheme` (in `:ui`) provides the color scheme — dynamic
+  (`dynamicLight/DarkColorScheme`) on Android, light/dark on the JVM — the
+  Material Symbols typeface via `LocalIconFont`, and `LocalContentColor` set to
+  `onBackground` (`MaterialTheme` alone leaves it black, invisible on a dark
+  background).
+- The icon font is the app's asset (`app/src/main/assets/material-symbols-*.ttf`).
+  The Android-KMP library plugin does **not** package `androidMain/assets`, so it
+  cannot move into `:ui`. Hosts take a `Typeface?` and convert it to a
+  `FontFamily`; draw icons with the shared `MaterialSymbol` composable, which
+  hides the ligature from accessibility.
+- Recurring frictions: `internal` does not cross modules (widen to `public`);
+  Kotlin will not smart-cast a nullable property from another module (bind a local
+  first); the CMP `compose.*` dependency accessors emit build-script deprecation
+  warnings but work.
+- Migrating a screen usually retires its Views: delete the adapter and item
+  layout it used, and retarget the tests that read them. Keep the Views for
+  embedded/complex pieces (currently: the filter dialogs; the auth forms).
+
+### Tests
+
+- Instrumented tests that touch a migrated screen use `createEmptyComposeRule`
+  and `androidx.compose.ui.test` (`onNodeWithText`, `onNodeWithTag`,
+  `performClick`, `performTextInput`); Espresso cannot see Compose content. Assert
+  on the host view's exposed state (e.g. `state`, `sections`, `emptyMessage`,
+  `qr`, `rows`) where a `RecyclerView` adapter used to be read.
+- Add `testTag` constants in the `:ui` screen for anything a test must drive
+  (existing: `COMMENT_FIELD_TAG`, `COMMENT_CONTINUE_TAG`, `BOOST_CONTINUE_TAG`,
+  `BOOST_OPTION_TAG_PREFIX`, `FEED_RETRY_TAG`).
+- Instrumented tests are compile-checked but **not run** here (`AGENTS.md`); keep
+  them compiling and honest anyway.
+
+### Process (every slice)
+
+1. Implement in `:ui` and wire the `:app` fragment; keep behavior identical.
+2. Verify: `:shared:jvmTest`, `:app:testDebugUnitTest`, `:app:compileDebugKotlin`,
+   `:app:compileDebugAndroidTestKotlin`.
+3. Run it on the emulator (`./devtools app run`) and check the screen.
+4. Present a summary and **wait for an explicit go-ahead before committing**.
+5. On go-ahead: commit, push to `master`, bump `versionCode` by one and note it
+   in the message. No changelog entry for behavior-preserving refactors (matches
+   the repo's own precedent).
+
+### Emulator notes
+
+- `./devtools app run` builds, installs and launches; assume `emulator-5554` is
+  up (start it with `./devtools emulator start` if needed).
+- Reach a signed-in screen by seeding the session into the app DB:
+  `adb shell run-as org.btcmap.debug sqlite3 databases/btcmap.db` with keys
+  `auth_token` and `user` in table `pref`, then relaunch. Test account:
+  `test-diver` / `qwertyui`.
+- Verify visually via `adb shell uiautomator dump` + pulling the XML; sample
+  pixels with PIL for colour checks.
+
 ## Next
 
-Phase 2 continues: migrate the remaining non-map screens to `:ui` screen by
-screen, add a common theme for the desktop target (Android already passes its
-dynamic scheme), give `:ui` a JVM entry point, and (Phase 3, gated on MapLibre
-Compose maturing) move the map to Compose Multiplatform with the desktop target.
+The immediate next slice is the small Views dialogs — the **map-style** dialog,
+the **verified-filter** dialog and the **activity-feed filter** dialog (radio /
+chip pickers built with `MaterialAlertDialogBuilder`). Lowest-risk remaining
+work; finishes screens already migrated.
+
+Then, roughly in order: `AreaFragment`, `EventFragment`, the remaining place
+screens (`PlaceFragment` is the largest and MapLibre-heavy), and the deferred
+**auth dialogs** (form scaffolding + rotation tests) last.
+
+Still open for the desktop target: the `:ui:run` entry point renders only
+`StatsScreen` today; a JVM theme fallback exists but no desktop navigation. Phase
+3 (map → MapLibre Compose) stays gated on that library maturing.
