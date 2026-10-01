@@ -32,10 +32,11 @@ Next, in rough order of value:
    of the picker, camera and upload (they are the same helpers, but the launchers
    and the upload live in each host). When the place screen itself becomes
    Compose, the two should collapse into one.
-2. **Desktop polish** — the desktop can sign in (slice 47) and save a place
-   (slice 48). Left: the sheet actions that need a screen of their own (verify
-   and report, which post a place issue), the boost flow, posting comments, the
-   add-place and user-profile screens, and signing up and out.
+2. **Desktop polish** — the desktop can sign in (slice 47), save a place and
+   report one (slices 48 and 49). Left: the boost flow and posting comments (both
+   are paid in sats, so they need a wallet flow the desktop does not have), the
+   add-place and user-profile screens, evidence photos on a report, and signing
+   up and out.
 3. **Two tests the swap deleted are still to replace.** The search logic cases
    were ported in slice 44; what remains is `MarkerIconTest`'s glyph check (the
    shared `MarkerBitmapFactory.renderableGlyph` is private and needs the icon
@@ -1527,6 +1528,24 @@ which is where a session comes from.
 Verified by compiling and running the window, which rendered its first map frame
 with no exceptions and no errors in its log. The Save row itself cannot be
 clicked from here, since this Wayland session has no input-injection tool.
+
+### Phase 3, forty-ninth slice — done (the desktop reports a place)
+
+The sheet's Verify and Report buttons were dead. They now open the same desktop
+form, with the reason pre-chosen for Verify: the three reasons the app offers
+(verified, refused, out of business) with their explanations, an optional note,
+and Submit, which calls the shared `reportPlace` and then says the report was
+submitted. A signed-out user is sent to the Account page instead, as with Save.
+Evidence photos are not attached from here yet — the endpoint takes them
+optionally, so the form works without them.
+
+Comments and boost are still dead on purpose: both are paid in sats (a comment
+carries a small anti-spam fee), so they need a wallet flow rather than another
+form.
+
+Verified by rendering the form with the desktop's headless screenshot mode
+(`-Pscreenshot=report:...`); the submission itself needs a signed-in session and
+was not exercised.
 
 ## Working notes
 

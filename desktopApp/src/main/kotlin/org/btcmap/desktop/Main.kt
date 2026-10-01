@@ -47,6 +47,8 @@ import org.btcmap.ui.SettingsItem
 import org.btcmap.ui.SettingsScreen
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
+import org.btcmap.api.reportPlace
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.runtime.LaunchedEffect
@@ -159,6 +161,9 @@ private fun runApp() = application {
                     // The place the sheet is showing, and whether the account has
                     // it saved, which is what the sheet's Save row renders.
                     var selectedPlaceId by remember { mutableStateOf<Long?>(null) }
+                    // The place and reason a report was opened with, if any.
+                    var reportPlace by remember { mutableStateOf<Pair<Long, String>?>(null) }
+                    var reportType by remember { mutableStateOf<String?>(null) }
                     var bookmarked by remember { mutableStateOf(false) }
                     LaunchedEffect(selectedPlaceId) {
                         bookmarked = selectedPlaceId?.let { isPlaceSaved(db, it) } ?: false
@@ -210,6 +215,22 @@ private fun runApp() = application {
                             onPlaceSelected = { selectedPlaceId = it.id },
                             onPlaceAction = { place, action ->
                                 when (action) {
+                                    // Verify and Report are the same form, one
+                                    // with the reason already chosen.
+                                    PlaceAction.Verify, PlaceAction.Report -> {
+                                        if (settings.authorized) {
+                                            reportPlace = place.id to place.name.orEmpty()
+                                            reportType = if (action == PlaceAction.Verify) {
+                                                "verified"
+                                            } else {
+                                                null
+                                            }
+                                            route = Route.Report
+                                        } else {
+                                            route = Route.Account
+                                        }
+                                    }
+
                                     // Saving is the one sheet action that needs a
                                     // session but no screen of its own.
                                     PlaceAction.ToggleBookmark -> {
@@ -229,6 +250,14 @@ private fun runApp() = application {
                             onSelectEvent = {},
                             onSelectArea = {},
                             formatDistance = { meters -> "%.1f km".format(meters / 1000) },
+                        )
+
+                        Route.Report -> DesktopReportScreen(
+                            api = api,
+                            placeId = reportPlace?.first ?: 0L,
+                            placeName = reportPlace?.second ?: "",
+                            initialType = reportType,
+                            onBack = { route = Route.Map },
                         )
 
                         Route.Settings -> ScreenPage(
@@ -293,7 +322,7 @@ private fun ScreenPage(
 }
 
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Feed, Settings, Account }
+private enum class Route { Map, Feed, Settings, Account, Report }
 
 private const val SCREENSHOT_ARG = "--screenshot="
 
@@ -327,6 +356,22 @@ private fun renderScreen(spec: String) {
             Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
                 when (name) {
                     "settings" -> DesktopSettingsScreen(db, settings)
+                    "report" -> DesktopReportScreen(
+                        api = Api(
+                            httpClient = apiHttpClient(
+                                userAgent = USER_AGENT,
+                                token = { settings.getString(KEY_AUTH_TOKEN, null) },
+                                apiUrl = { API_URL.toHttpUrl() },
+                            ),
+                            baseUrl = { API_URL.toHttpUrl() },
+                            userAgent = USER_AGENT,
+                        ),
+                        placeId = 0L,
+                        placeName = "Report a place",
+                        initialType = "verified",
+                        onBack = {},
+                    )
+
                     "account" -> DesktopAccountScreen(
                         api = Api(
                             httpClient = apiHttpClient(
@@ -571,6 +616,112 @@ private suspend fun toggleSavedPlace(api: Api, db: Database, placeId: Long) {
         db.transaction {
             db.user.delete()
             db.user.insert(user)
+        }
+    }
+}
+
+/** The reasons a report can give, in the order the form offers them. */
+private val REPORT_TYPES = listOf(
+    Triple(
+        "verified",
+        "Verified - still accepts Bitcoin",
+        "You confirmed this place exists and currently accepts Bitcoin payments.",
+    ),
+    Triple(
+        "refused_sats",
+        "Refused Bitcoin payment",
+        "An attempt to pay with Bitcoin on-site was refused by the merchant.",
+    ),
+    Triple(
+        "out_of_business",
+        "Out of business",
+        "The place has been permanently closed or is no longer operating.",
+    ),
+)
+
+/**
+ * The desktop's report form for a place: the same three reasons the app offers,
+ * an optional note, and the shared `reportPlace` call. Evidence photos are not
+ * attached from here yet; the endpoint takes them optionally.
+ */
+@androidx.compose.runtime.Composable
+private fun DesktopReportScreen(
+    api: Api,
+    placeId: Long,
+    placeName: String,
+    initialType: String?,
+    onBack: () -> Unit,
+) {
+    var type by remember { mutableStateOf(initialType) }
+    var note by remember { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var submitted by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    ScreenPage(title = placeName.ifBlank { "Report a place" }, onBack = onBack) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(16.dp),
+        ) {
+            if (submitted) {
+                Text(text = "Report submitted.")
+                Button(onClick = onBack) { Text(text = "Back to the map") }
+                return@Column
+            }
+
+            Text(
+                text = "Let editors know the current state of this place. Your " +
+                    "report will be reviewed by the BTC Map community.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+
+            REPORT_TYPES.forEach { (value, label, description) ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(selected = type == value, onClick = { type = value })
+                    Column(modifier = Modifier.padding(start = 4.dp)) {
+                        Text(text = label)
+                        Text(
+                            text = description,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+            }
+
+            OutlinedTextField(
+                value = note,
+                onValueChange = { note = it },
+                label = { Text(text = "Additional notes (optional)") },
+                modifier = Modifier.padding(top = 8.dp),
+            )
+
+            error?.let { Text(text = it, color = MaterialTheme.colorScheme.error) }
+
+            Button(
+                enabled = type != null && !busy,
+                onClick = {
+                    val reason = type ?: return@Button
+                    busy = true
+                    error = null
+                    scope.launch {
+                        try {
+                            api.reportPlace(
+                                placeId = placeId,
+                                type = reason,
+                                comment = note.trim().takeIf { it.isNotEmpty() },
+                            )
+                            submitted = true
+                        } catch (t: Throwable) {
+                            error = t.message ?: t.toString()
+                        } finally {
+                            busy = false
+                        }
+                    }
+                },
+            ) {
+                Text(text = "Submit")
+            }
         }
     }
 }
