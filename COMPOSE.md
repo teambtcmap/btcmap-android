@@ -1465,6 +1465,18 @@ also where the default put it, and the fragment feeds it `prefs.showAttribution`
 Verified on the emulator: with the setting on the pill is drawn, and turning it
 off in Settings and returning to the map removes it.
 
+### Phase 3, forty-sixth slice — done (desktop feed rows open their place)
+
+The desktop feed listed rows that did nothing when clicked. A row names the place
+it is about (its key is "type:placeId:date"), so opening one now hands that id
+back to the map: the desktop sets the map's `openPlaceId` and switches to the map
+route, where the shared map selects the place, moves to it and opens its sheet.
+The map is rebuilt on the way back, so the effect always runs.
+
+Verified by compiling and running the desktop window, which rendered its first
+map frame; the click itself cannot be exercised from here, since this Wayland
+session has no input-injection tool.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

@@ -141,10 +141,15 @@ private fun runApp() = application {
                     // keeps no navigation of its own: the settings and the feed
                     // are full-window pages the map opens.
                     var route by remember { mutableStateOf(Route.Map) }
+                    // The place a feed row asked the map to show. Leaving the
+                    // map disposes it and coming back rebuilds it, so opening a
+                    // row always lands on the map with that place selected.
+                    var feedPlaceId by remember { mutableStateOf<Long?>(null) }
 
                     when (route) {
                         Route.Map -> MapScreen(
                             db = db,
+                            openPlaceId = feedPlaceId,
                             styleUrl = "https://tiles.openfreemap.org/styles/liberty",
                             // The bundled style, with its sprite and glyph URLs
                             // served from the app's resources (the style itself
@@ -204,7 +209,10 @@ private fun runApp() = application {
                             title = "Activity",
                             onBack = { route = Route.Map },
                         ) {
-                            DesktopFeedScreen(api = api, db = db)
+                            DesktopFeedScreen(api = api, db = db) { placeId ->
+                                feedPlaceId = placeId
+                                route = Route.Map
+                            }
                         }
                     }
                 }
@@ -291,7 +299,11 @@ private fun renderScreen(spec: String) {
  * shared area lookup for the ones around [FEED_LAT]/[FEED_LON].
  */
 @androidx.compose.runtime.Composable
-private fun DesktopFeedScreen(api: Api, db: Database) {
+/**
+ * The shared activity feed for the areas around the map's starting point. A row
+ * is about a place, so opening one hands its id back to the map.
+ */
+private fun DesktopFeedScreen(api: Api, db: Database, onOpenPlace: (Long) -> Unit) {
     var attempt by remember { mutableStateOf(0) }
     var state by remember { mutableStateOf<ActivityFeedState>(ActivityFeedState.Loading) }
 
@@ -302,10 +314,13 @@ private fun DesktopFeedScreen(api: Api, db: Database) {
 
     ActivityFeedScreen(
         state = state,
-        onItemClick = {},
+        onItemClick = { key -> placeIdOf(key)?.let(onOpenPlace) },
         onRetry = { attempt++ },
     )
 }
+
+/** The feed's row keys are "type:placeId:date", so a row names the place it is about. */
+private fun placeIdOf(key: String): Long? = key.split(':').getOrNull(1)?.toLongOrNull()
 
 private suspend fun loadFeed(api: Api, db: Database): ActivityFeedState {
     val aliases = areaAliases(db)
