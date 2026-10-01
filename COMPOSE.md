@@ -833,6 +833,17 @@ their dates below the action row.
 
 Durable facts and conventions for continuing the migration.
 
+### MapLibre Compose 0.18.0 layer quirks
+
+- Taking a marker kind's layers out of the declaration (an early return, or an
+  `if`) makes the other marker kinds stop drawing entirely. So does setting the
+  layer's own `visible` property, and so does emptying the hidden kind's source
+  features. The map screen therefore keeps all three kinds declared with real
+  data, and the show/hide toggle from the map's button group is not ported yet.
+- A never-true filter is not an escape hatch either: `const(false)` is rejected
+  as "filter value must be a non empty array" and `const(1).eq(const(0))` as
+  "filter property must be a string", both aborting the style.
+
 ### Modules and hosting pattern
 
 - `:app` (Android application), `:shared` (KMP android+jvm, portable logic),
