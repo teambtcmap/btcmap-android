@@ -1180,6 +1180,20 @@ mapping stays in `:app` because it needs Android plurals.
 Verified in the window: the feed lists a real recent entry ("Adrian GSM Fix —
 Added by Comino, 2 days ago").
 
+### Phase 3, thirty-third slice — done (bundled map styles on the desktop)
+
+`MapStyle.bundledStyleAsset` moved to `:shared` (Android's `uri(context)` now
+uses it), the build copies the Android `map-styles` assets into `:desktopApp`'s
+resources, and the desktop serves the style, its sprites and its glyphs from
+those resources: the style JSON is read in, its `asset://map-styles/` URLs are
+rewritten to an `app://` scheme, and a `MapResourceProvider` reads that scheme
+from the classpath (percent-decoding glyph paths, as on Android).
+
+Verified in the window: the log shows `bundled map style
+map-styles/dark-matter/style.json` and the map renders with its **bundled
+labels, sprites and glyphs**. The tile *sources* in the bundled styles are still
+hosted URLs, so offline tiles still need the PMTiles basemap port.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

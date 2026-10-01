@@ -57,9 +57,10 @@ import org.btcmap.settings.KEY_AUTH_TOKEN
 import org.btcmap.settings.Settings
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authorized
-import org.btcmap.settings.hostedStyleUrl
+import org.btcmap.settings.bundledStyleAsset
 import org.btcmap.settings.mapRotationEnabled
 import org.btcmap.settings.mapStyle
+import org.maplibre.compose.resource.MapResourceProvider
 import org.btcmap.settings.showAttribution
 import org.btcmap.stats.StatsEntry
 import org.btcmap.stats.StatsSection
@@ -67,6 +68,7 @@ import org.btcmap.ui.AppTheme
 import org.btcmap.ui.MapScreen
 import org.btcmap.ui.StatsScreen
 import java.io.File
+import java.net.URLDecoder
 
 /**
  * The desktop entry point. This stage opens the app database and settings in a
@@ -109,10 +111,13 @@ private fun runApp() = application {
 
     val iconFont = loadIconFont()
 
-    // The map needs an app-wide cache directory and, per window, its GPU
-    // context, before any map is created.
+    // The map needs an app-wide cache directory, its bundled resources and, per
+    // window, its GPU context, before any map is created.
     DefaultMapRuntime.configure(
-        MapRuntimeOptions(cacheFile = Path(home.cacheFile().absolutePath)),
+        MapRuntimeOptions(
+            cacheFile = Path(home.cacheFile().absolutePath),
+            resourceProvider = bundledMapResources(),
+        ),
     )
 
     Window(
@@ -165,12 +170,16 @@ private fun runApp() = application {
                 if (screen == Screen.Map) {
                 // The desktop has no bundled asset styles, so it uses the hosted
                 // ones and follows the system's dark mode.
-                val styleUrl = settings.mapStyle.hostedStyleUrl(
+                // The bundled style, with its sprite and glyph URLs served from
+                // the app's resources (the style itself references them with
+                // Android's asset:// scheme, which the Compose map cannot read).
+                val styleAsset = settings.mapStyle.bundledStyleAsset(
                     darkSystemTheme = androidx.compose.foundation.isSystemInDarkTheme(),
                 )
                 MapScreen(
                     db = db,
-                    styleUrl = styleUrl,
+                    styleUrl = "https://tiles.openfreemap.org/styles/liberty",
+                    styleJson = bundledStyleJson(styleAsset),
                     initialLat = 52.2333742,
                     initialLon = 21.0711489,
                     initialZoom = 13.0,
@@ -449,6 +458,32 @@ private fun loadIconFont(): FontFamily? {
 }
 
 private const val ICON_FONT_RESOURCE = "material-symbols.ttf"
+
+private const val BUNDLED_MAP_SCHEME = "app"
+
+/** Serves `app://map-styles/...` (sprites and glyphs) from the app resources. */
+private fun bundledMapResources(): MapResourceProvider =
+    MapResourceProvider(scheme = BUNDLED_MAP_SCHEME) { request ->
+        // Glyph paths arrive percent-encoded ("Noto%20Sans%20Italic").
+        val path = URLDecoder.decode(
+            request.url.removePrefix("$BUNDLED_MAP_SCHEME://"),
+            Charsets.UTF_8.name(),
+        )
+        resourceBytes(path) ?: throw java.io.FileNotFoundException(path)
+    }
+
+/** The bundled style at [assetPath], with its sprite and glyph URLs rewritten. */
+private fun bundledStyleJson(assetPath: String): String {
+    println("desktop: bundled map style $assetPath")
+    return (
+        resourceBytes(assetPath)?.decodeToString()
+            ?: error("missing bundled map style $assetPath")
+        ).replace("asset://map-styles/", "$BUNDLED_MAP_SCHEME://map-styles/")
+}
+
+private fun resourceBytes(path: String): ByteArray? =
+    Thread.currentThread().contextClassLoader.getResourceAsStream(path)?.readBytes()
+
 
 private val PLACE_SHEET_STRINGS = org.btcmap.ui.PlaceSheetStrings(
     directions = "Directions",

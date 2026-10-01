@@ -50,9 +50,26 @@ private fun mapStyleFromPrefValue(pref: String): MapStyle = when (pref) {
 private const val KEY_MAP_STYLE = "mapStyle"
 
 /**
+ * The bundled style asset for [this] style, relative to the assets/resources
+ * root. `Auto` follows [darkSystemTheme].
+ */
+fun MapStyle.bundledStyleAsset(darkSystemTheme: Boolean): String = when (this) {
+    MapStyle.Auto -> if (darkSystemTheme) {
+        "map-styles/dark-matter/style.json"
+    } else {
+        "map-styles/light/style.json"
+    }
+
+    MapStyle.Liberty -> "map-styles/liberty/style.json"
+    MapStyle.Positron -> "map-styles/positron/style.json"
+    MapStyle.Bright -> "map-styles/bright/style.json"
+    MapStyle.Dark -> "map-styles/dark/style.json"
+    MapStyle.DarkMatter -> "map-styles/dark-matter/style.json"
+}
+
+/**
  * The hosted style URL for [this] style, for a host without the bundled asset
- * styles (the desktop app). Android keeps using its assets; see
- * `org.btcmap.settings.uri`.
+ * styles. Android keeps using its assets; see `org.btcmap.settings.uri`.
  */
 fun MapStyle.hostedStyleUrl(darkSystemTheme: Boolean): String = when (this) {
     MapStyle.Auto -> if (darkSystemTheme) HOSTED_DARK_STYLE_URL else HOSTED_LIGHT_STYLE_URL

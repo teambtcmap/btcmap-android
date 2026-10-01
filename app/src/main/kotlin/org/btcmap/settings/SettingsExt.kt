@@ -55,35 +55,9 @@ fun MapStyle.name(context: Context): String {
 }
 
 fun MapStyle.uri(context: Context): String {
-    return when (this) {
-        MapStyle.Auto -> {
-            if (isNightMode(context)) {
-                "asset://map-styles/dark-matter/style.json"
-            } else {
-                "asset://map-styles/light/style.json"
-            }
-        }
-
-        MapStyle.Liberty -> "asset://map-styles/liberty/style.json"
-        MapStyle.Positron -> "asset://map-styles/positron/style.json"
-        MapStyle.Bright -> "asset://map-styles/bright/style.json"
-        MapStyle.Dark -> "asset://map-styles/dark/style.json"
-        MapStyle.DarkMatter -> "asset://map-styles/dark-matter/style.json"
-    }
+    return "asset://" + bundledStyleAsset(darkSystemTheme = isNightMode(context))
 }
 
-/**
- * The hosted style URL to hand to MapLibre's offline manager.
- *
- * Offline regions can only be created from an http(s) style: the native
- * downloader cannot resolve the bundled `asset://` styles. These URLs all draw
- * OpenFreeMap's tiles, the same ones the bundled styles draw, so a downloaded
- * region also serves the bundled style at render time. Dark Matter is rebased
- * onto OpenFreeMap, so it downloads through the Liberty style; the pack
- * therefore also serves whichever of the two was selected. Auto keeps the
- * light and dark hosted URLs so its light/dark variants stay one family, even
- * though its night variant renders the bundled Dark Matter.
- */
 fun MapStyle.offlineStyleUrl(context: Context): String {
     return when (this) {
         MapStyle.Auto -> if (isNightMode(context)) {
