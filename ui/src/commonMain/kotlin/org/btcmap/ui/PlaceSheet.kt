@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -178,23 +179,34 @@ private fun PlaceSheetContent(
         place.instagram?.let { InfoRow(glyph = "link", text = it.toString()) }
         place.openingHours?.takeIf { it.isNotBlank() }?.let { InfoRow(glyph = "schedule", text = it) }
 
+        var viewerIndex by remember { mutableStateOf<Int?>(null) }
+
         if (photos.isNotEmpty()) {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 modifier = Modifier.padding(top = 8.dp),
             ) {
-                items(photos) { url ->
+                itemsIndexed(photos) { index, url ->
                     AsyncImage(
                         model = url,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(72.dp)
-                            .clip(RoundedCornerShape(8.dp)),
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { viewerIndex = index },
                     )
                 }
             }
+        }
+
+        viewerIndex?.let { index ->
+            PlacePhotoViewer(
+                photos = photos,
+                initialIndex = index,
+                onDismiss = { viewerIndex = null },
+            )
         }
 
         OutlinedButton(

@@ -976,6 +976,31 @@ shows Save (bookmark glyph) above Directions/Share/View/Edit, and the photo
 strip renders — "Chit Hole Phuket Brewery" (which has six images) shows its
 thumbnails above the Add photo button.
 
+### Phase 3, twenty-first slice — done (place photo viewer)
+
+Tapping a thumbnail opens `PlacePhotoViewer`: a full-screen dialog paging
+through the place's photos with a close button, ported from
+`PlacePhotoViewerDialogFragment`. The sheet owns the viewer's state, so no host
+plumbing was needed.
+
+Verified on the emulator with "Chit Hole Phuket Brewery": tapping a thumbnail
+opens the photo full screen, a swipe pages to the next one, and the close button
+returns to the sheet.
+
+### Main map swap — blocked (assessed)
+
+`MapFragment` has ~46 references to the Views map and three features a swap
+would regress, so the main map cannot be swapped in one slice yet:
+
+- **Filter** (the merchants/events/exchanges buttons) shows one marker kind by
+  emptying the other two sources — exactly the case the recorded 0.18.0 quirk
+  breaks on the Compose map. A single shared source carrying a `kind` property,
+  with the layers filtered on it, is the likely fix and needs experimenting.
+- **Location** — `LocationController` is not ported; the Compose location API and
+  the permission flow still have to be wired.
+- **Offline/basemap** — the offline toggle and `BundledBasemapStyle`'s layer
+  uncapping have no Compose equivalent yet.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
