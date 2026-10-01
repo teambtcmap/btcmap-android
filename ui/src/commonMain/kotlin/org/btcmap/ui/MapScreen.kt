@@ -1,6 +1,8 @@
 package org.btcmap.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -51,10 +53,12 @@ import org.btcmap.ui.map.MarkerClickHandler
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.MerchantLayers
 import org.btcmap.ui.map.PlacePreviewMap
+import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.SearchOverlay
 import org.btcmap.ui.map.rememberSearchResults
 import org.btcmap.ui.map.rememberMapAreas
 import org.btcmap.ui.map.rememberViewportFeatures
+import androidx.compose.material3.FilledTonalIconButton
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.interaction.ClickResult
 import org.maplibre.compose.map.MaplibreMap
@@ -83,6 +87,8 @@ fun MapScreen(
     usingOpenFreeMap: Boolean,
     iconFont: FontFamily?,
     placeSheetStrings: PlaceSheetStrings,
+    searchActions: SearchActions? = null,
+    onOpenFeed: (() -> Unit)? = null,
     photos: List<String> = emptyList(),
     bookmarked: Boolean = false,
     onPlaceSelected: (Place) -> Unit = {},
@@ -288,15 +294,25 @@ fun MapScreen(
     AppTheme(iconFont = iconFont) {
         Box(modifier = modifier.fillMaxSize()) {
             MaplibreMap(modifier = Modifier.fillMaxSize(), state = state)
-            AreaChips(
-                areas = areas,
-                apiUrl = apiUrl,
-                palette = areaChipPalette,
-                onAreaClick = { onSelectArea(it.id) },
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 24.dp, bottom = 112.dp),
-            )
+            ) {
+                AreaChips(
+                    areas = areas,
+                    apiUrl = apiUrl,
+                    palette = areaChipPalette,
+                    onAreaClick = { onSelectArea(it.id) },
+                )
+                onOpenFeed?.let { openFeed ->
+                    FilledTonalIconButton(onClick = openFeed) {
+                        MaterialSymbol(glyph = "monitor_heart", contentDescription = null)
+                    }
+                }
+            }
             selectedPlace?.let { place ->
                 PlaceSheet(
                     place = place,
@@ -328,6 +344,7 @@ fun MapScreen(
                 onQueryChange = { searchQuery = it },
                 results = searchResults,
                 onResultClick = onSearchResultClick,
+                actions = searchActions,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(start = 16.dp, end = 16.dp, top = 56.dp, bottom = 16.dp),

@@ -22,9 +22,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getActivity
@@ -33,6 +34,7 @@ import org.btcmap.ui.ActivityFeedRow
 import org.btcmap.ui.ActivityFeedScreen
 import org.btcmap.ui.ActivityFeedState
 import org.btcmap.ui.MaterialSymbol
+import org.btcmap.ui.map.SearchActions
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import org.btcmap.ui.SettingsItem
@@ -130,108 +132,112 @@ private fun runApp() = application {
             AppTheme(iconFont = iconFont) {
                 // The window's own background is white, which shows through the
                 // transparent rows of screens like the settings list.
-                Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
-                val syncState by syncManager.state.collectAsState()
-                LaunchedEffect(Unit) { syncManager.start() }
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    val syncState by syncManager.state.collectAsState()
+                    LaunchedEffect(Unit) { syncManager.start() }
 
-                var screen by remember { mutableStateOf(Screen.Map) }
+                    // The map screen owns its own affordances (the search bar's
+                    // settings, the chips and the pulse button), so the desktop
+                    // keeps no navigation of its own: the settings and the feed
+                    // are full-window pages the map opens.
+                    var route by remember { mutableStateOf(Route.Map) }
 
-                Row(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
-                    NavigationRail {
-                        NavigationRailItem(
-                            selected = screen == Screen.Map,
-                            onClick = { screen = Screen.Map },
-                            icon = { MaterialSymbol(glyph = "map", contentDescription = null) },
-                            label = { Text("Map") },
+                    when (route) {
+                        Route.Map -> MapScreen(
+                            db = db,
+                            styleUrl = "https://tiles.openfreemap.org/styles/liberty",
+                            // The bundled style, with its sprite and glyph URLs
+                            // served from the app's resources (the style itself
+                            // references them with Android's asset:// scheme,
+                            // which the Compose map cannot read).
+                            styleJson = bundledStyleJson(
+                                settings.mapStyle.bundledStyleAsset(
+                                    darkSystemTheme = androidx.compose.foundation.isSystemInDarkTheme(),
+                                ),
+                            ),
+                            initialLat = 52.2333742,
+                            initialLon = 21.0711489,
+                            initialZoom = 13.0,
+                            minVerifiedAt = null,
+                            palette = MarkerPalette(
+                                markerBackground = Color(0xFFF7931A),
+                                markerIcon = Color.White,
+                                boostedMarkerBackground = Color(0xFF7B3FE4),
+                                boostedMarkerIcon = Color.White,
+                                badgeBackground = Color(0xFFE53935),
+                                badgeText = Color.White,
+                            ),
+                            areaChipPalette = AreaChipPalette(
+                                buttonBackground = Color(0xFF1B1B1B),
+                                buttonIcon = Color.White,
+                                badgeBackground = Color(0xFFE53935),
+                                badgeText = Color.White,
+                            ),
+                            apiUrl = API_URL,
+                            usingOpenFreeMap = true,
+                            iconFont = iconFont,
+                            placeSheetStrings = PLACE_SHEET_STRINGS,
+                            searchActions = SearchActions(onSettings = { route = Route.Settings }),
+                            onOpenFeed = { route = Route.Feed },
+                            onPlaceAction = { _, _ -> },
+                            onSelectEvent = {},
+                            onSelectArea = {},
+                            formatDistance = { meters -> "%.1f km".format(meters / 1000) },
                         )
-                        NavigationRailItem(
-                            selected = screen == Screen.Stats,
-                            onClick = { screen = Screen.Stats },
-                            icon = { MaterialSymbol(glyph = "insights", contentDescription = null) },
-                            label = { Text("Cache") },
-                        )
-                        NavigationRailItem(
-                            selected = screen == Screen.Feed,
-                            onClick = { screen = Screen.Feed },
-                            icon = { MaterialSymbol(glyph = "dynamic_feed", contentDescription = null) },
-                            label = { Text("Feed") },
-                        )
-                        NavigationRailItem(
-                            selected = screen == Screen.Settings,
-                            onClick = { screen = Screen.Settings },
-                            icon = { MaterialSymbol(glyph = "settings", contentDescription = null) },
-                            label = { Text("Settings") },
-                        )
+
+                        Route.Settings -> ScreenPage(
+                            title = "Settings",
+                            onBack = { route = Route.Map },
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            ) {
+                                Text(text = "Sync: $syncState")
+                                Button(onClick = { syncManager.start() }) { Text("Sync now") }
+                            }
+                            DesktopSettingsScreen(db, settings)
+                        }
+
+                        Route.Feed -> ScreenPage(
+                            title = "Activity",
+                            onBack = { route = Route.Map },
+                        ) {
+                            DesktopFeedScreen(api = api, db = db)
+                        }
                     }
-
-                    androidx.compose.foundation.layout.Box(
-                        modifier = androidx.compose.ui.Modifier.weight(1f),
-                    ) {
-                if (screen == Screen.Map) {
-                // The desktop has no bundled asset styles, so it uses the hosted
-                // ones and follows the system's dark mode.
-                // The bundled style, with its sprite and glyph URLs served from
-                // the app's resources (the style itself references them with
-                // Android's asset:// scheme, which the Compose map cannot read).
-                val styleAsset = settings.mapStyle.bundledStyleAsset(
-                    darkSystemTheme = androidx.compose.foundation.isSystemInDarkTheme(),
-                )
-                MapScreen(
-                    db = db,
-                    styleUrl = "https://tiles.openfreemap.org/styles/liberty",
-                    styleJson = bundledStyleJson(styleAsset),
-                    initialLat = 52.2333742,
-                    initialLon = 21.0711489,
-                    initialZoom = 13.0,
-                    minVerifiedAt = null,
-                    palette = MarkerPalette(
-                        markerBackground = Color(0xFFF7931A),
-                        markerIcon = Color.White,
-                        boostedMarkerBackground = Color(0xFF7B3FE4),
-                        boostedMarkerIcon = Color.White,
-                        badgeBackground = Color(0xFFE53935),
-                        badgeText = Color.White,
-                    ),
-                    areaChipPalette = AreaChipPalette(
-                        buttonBackground = Color(0xFF1B1B1B),
-                        buttonIcon = Color.White,
-                        badgeBackground = Color(0xFFE53935),
-                        badgeText = Color.White,
-                    ),
-                    apiUrl = "https://api.btcmap.org",
-                    usingOpenFreeMap = true,
-                    iconFont = iconFont,
-                    placeSheetStrings = PLACE_SHEET_STRINGS,
-                    onPlaceAction = { _, _ -> },
-                    onSelectEvent = {},
-                    onSelectArea = {},
-                    formatDistance = { meters -> "%.1f km".format(meters / 1000) },
-                )
-                } else if (screen == Screen.Feed) {
-                    DesktopFeedScreen(api = api, db = db)
-                } else if (screen == Screen.Settings) {
-                    DesktopSettingsScreen(db, settings)
-                } else {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = androidx.compose.ui.Modifier.padding(24.dp),
-                    ) {
-                        Text(text = "Sync: $syncState")
-                        Button(onClick = { syncManager.start() }) { Text("Sync now") }
-                    }
-                    val sections = remember(syncState) { statsSections(db, settings) }
-                    StatsScreen(sections = sections)
-                }
-                }
-                }
                 }
             }
         }
     }
 }
 
-/** The desktop app's screens. */
-private enum class Screen { Map, Feed, Stats, Settings }
+/** A screen the map opens, with a back affordance of its own. */
+@androidx.compose.runtime.Composable
+private fun ScreenPage(
+    title: String,
+    onBack: () -> Unit,
+    content: @androidx.compose.runtime.Composable () -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+        ) {
+            IconButton(onClick = onBack) {
+                MaterialSymbol(glyph = "arrow_back", contentDescription = null)
+            }
+            Text(text = title, style = MaterialTheme.typography.titleLarge)
+        }
+        content()
+    }
+}
+
+/** The desktop app's full-window pages. */
+private enum class Route { Map, Feed, Settings }
 
 private const val SCREENSHOT_ARG = "--screenshot="
 

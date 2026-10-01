@@ -52,7 +52,7 @@ class SearchOverlayView @JvmOverloads constructor(
                 results = results,
                 onResultClick = onResultClick,
                 placeholder = placeholder,
-                actions = if (addPlace != null && settings != null) {
+                actions = if (addPlace != null || settings != null) {
                     SearchActions(onAddPlace = addPlace, onSettings = settings)
                 } else {
                     null

@@ -60,11 +60,13 @@ fun SearchOverlay(
                             MaterialSymbol(glyph = "close", contentDescription = null)
                         }
                     }
-                    if (actions != null) {
-                        IconButton(onClick = actions.onAddPlace) {
+                    actions?.onAddPlace?.let { onAddPlace ->
+                        IconButton(onClick = onAddPlace) {
                             MaterialSymbol(glyph = "add_location_alt", contentDescription = null)
                         }
-                        IconButton(onClick = actions.onSettings) {
+                    }
+                    actions?.onSettings?.let { onSettings ->
+                        IconButton(onClick = onSettings) {
                             MaterialSymbol(glyph = "settings", contentDescription = null)
                         }
                     }
