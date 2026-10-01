@@ -841,6 +841,16 @@ session and the saved-places API.
 Verified on the emulator: opening "Swag42"'s sheet shows the overflow with all
 five items, and choosing View on OSM reports the action back.
 
+### Phase 3, twelfth slice — done (place sheet, stage 4: verification warning)
+
+The verification row in `PlaceSheet` is now tappable when the place is not
+verified or is outdated, and opens the "Verification needed" dialog with the
+matching explanation and an OK button. `MapStatusBarController` is left out on
+purpose: its whole job is the window insets, so it stays platform glue in
+`:app` rather than moving to `:ui`.
+
+Verified on the emulator: "Swag42" (last verified Feb 2024) opens the dialog.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

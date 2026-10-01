@@ -6,16 +6,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -100,13 +104,38 @@ private fun PlaceSheetContent(
 
         val outdated = place.isOutdated()
         val verifiedAt = place.verifiedAt
+        var warning by remember { mutableStateOf<String?>(null) }
+
         if (verifiedAt == null) {
-            InfoRow(glyph = "verified", text = strings.notVerified, tint = MaterialTheme.colorScheme.error)
+            InfoRow(
+                glyph = "verified",
+                text = strings.notVerified,
+                tint = MaterialTheme.colorScheme.error,
+                onClick = { warning = strings.verificationWarningNotVerified },
+            )
         } else {
             InfoRow(
                 glyph = "verified",
                 text = formatVerifiedAt(verifiedAt),
                 tint = if (outdated) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                onClick = if (outdated) {
+                    { warning = strings.verificationWarningOutdated }
+                } else {
+                    null
+                },
+            )
+        }
+
+        warning?.let { message ->
+            AlertDialog(
+                onDismissRequest = { warning = null },
+                title = { Text(text = strings.verificationWarningTitle) },
+                text = { Text(text = message) },
+                confirmButton = {
+                    TextButton(onClick = { warning = null }) {
+                        Text(text = strings.ok)
+                    }
+                },
             )
         }
 
@@ -196,10 +225,13 @@ private fun InfoRow(
     glyph: String,
     text: String,
     tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    onClick: (() -> Unit)? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier = Modifier
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         MaterialSymbol(glyph = glyph, contentDescription = null, tint = tint)
         Spacer(modifier = Modifier.width(20.dp))
