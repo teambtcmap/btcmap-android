@@ -64,6 +64,11 @@ class MapComposeView @JvmOverloads constructor(
 
     var placeSheetStrings: PlaceSheetStrings by mutableStateOf(
         PlaceSheetStrings(
+            directions = "",
+            share = "",
+            viewOnBtcmap = "",
+            viewOnOsm = "",
+            editOnOsm = "",
             notVerified = "",
             companionWarning = { it },
             verify = "",

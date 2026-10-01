@@ -32,6 +32,11 @@ class MapSpikeActivity : AppCompatActivity() {
             initialZoom = 13.0
             iconTypeface = org.btcmap.util.iconTypeface
             placeSheetStrings = PlaceSheetStrings(
+                directions = getString(R.string.directions),
+                share = getString(R.string.share),
+                viewOnBtcmap = getString(R.string.view_on_btcmap),
+                viewOnOsm = getString(R.string.view_on_osm),
+                editOnOsm = getString(R.string.edit_on_osm),
                 notVerified = getString(R.string.not_verified),
                 companionWarning = { getString(R.string.companion_warning, it) },
                 verify = getString(R.string.btn_verify),

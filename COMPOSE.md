@@ -829,6 +829,18 @@ formatter.
 Verified on the emulator: selecting "Bishops Brew" shows its two comments with
 their dates below the action row.
 
+### Phase 3, eleventh slice — done (place sheet, stage 3: overflow menu)
+
+`PlaceSheet` now has the toolbar overflow next to the place name, with
+Directions, Share, View on btcmap.org and — when the place has an OSM id —
+View/Edit on openstreetmap.org (the URLs come from the shared
+`Place.osmUrl`/`osmEditUrl`). The items raise the new `PlaceAction`s, which the
+host handles. The bookmark/save item is not ported: it needs an authorized
+session and the saved-places API.
+
+Verified on the emulator: opening "Swag42"'s sheet shows the overflow with all
+five items, and choosing View on OSM reports the action back.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

@@ -5,6 +5,11 @@ package org.btcmap.ui
  * resource-free.
  */
 data class PlaceSheetStrings(
+    val directions: String,
+    val share: String,
+    val viewOnBtcmap: String,
+    val viewOnOsm: String,
+    val editOnOsm: String,
     val notVerified: String,
     val companionWarning: (String) -> String,
     val verify: String,
