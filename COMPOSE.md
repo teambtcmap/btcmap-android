@@ -994,8 +994,14 @@ would regress, so the main map cannot be swapped in one slice yet:
 
 - **Filter** (the merchants/events/exchanges buttons) shows one marker kind by
   emptying the other two sources — exactly the case the recorded 0.18.0 quirk
-  breaks on the Compose map. A single shared source carrying a `kind` property,
-  with the layers filtered on it, is the likely fix and needs experimenting.
+  breaks on the Compose map. **Now confirmed experimentally**: hiding a kind by
+  keeping its layers and giving the hidden ones a valid never-matching filter
+  (`["==", "x", "y"]`) stops the *visible* kind drawing too, just like taking
+  the layers out or emptying the source. So no in-place hiding works in 0.18.0.
+  The way around it is to change the map's *shape* rather than hide anything:
+  either key the map state on the filter so the map is rebuilt with only the
+  selected kind declared, or feed one kind-tagged source and let each kind's
+  layers filter on the tag (untested). Both still need trying.
 - **Location** — `LocationController` is not ported; the Compose location API and
   the permission flow still have to be wired.
 - **Offline/basemap** — the offline toggle and `BundledBasemapStyle`'s layer
