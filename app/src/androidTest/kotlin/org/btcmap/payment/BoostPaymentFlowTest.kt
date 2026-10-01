@@ -1,7 +1,7 @@
 package org.btcmap.payment
 
-import android.widget.Button
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.fragment.app.Fragment
@@ -12,7 +12,6 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import mockwebserver3.Dispatcher
@@ -21,6 +20,9 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.boost.BoostFragment
+import org.btcmap.ui.BOOST_CONTINUE_TAG
+import org.btcmap.ui.BOOST_OPTION_TAG_PREFIX
+import org.btcmap.ui.BoostFormComposeView
 import org.btcmap.ui.InvoicePaymentComposeView
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
@@ -42,13 +44,17 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
     private fun invoiceShown(fragment: Fragment): Boolean =
         fragment.requireView().findViewById<InvoicePaymentComposeView>(R.id.invoicePayment).qr != null
 
+    private fun continueEnabled(fragment: Fragment): Boolean =
+        fragment.requireView().findViewById<BoostFormComposeView>(R.id.boostForm)
+            .state?.actionsEnabled == true
+
     @Test
     fun quoteLoads_enablesContinue() {
         apiRule.server.dispatcher = boostDispatcher()
 
         withBoost { _, fragment ->
             waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+                continueEnabled(fragment)
             }
         }
     }
@@ -60,19 +66,19 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
 
         withBoost { scenario, fragment ->
             waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+                continueEnabled(fragment)
             }
 
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
             waitUntil { dispatcher.orderRequests.get() == 1 }
             waitUntilOnMain {
                 invoiceShown(fragment) &&
-                    !fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+                    !continueEnabled(fragment)
             }
 
             // Even a stray tap on the now-disabled continue must not order again.
             scenario.onActivity {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).performClick()
+                composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
             }
             Thread.sleep(300)
             Assert.assertEquals(1, dispatcher.orderRequests.get())
@@ -86,9 +92,9 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
 
         withBoost { scenario, fragment ->
             waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+                continueEnabled(fragment)
             }
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
             waitUntil { dispatcher.orderRequests.get() == 1 }
             waitUntilOnMain { invoiceShown(fragment) }
 
@@ -111,9 +117,9 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
             scenario.onActivity { activity = it }
 
             waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+                continueEnabled(fragment)
             }
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
 
             waitUntilOnMain {
                 activity.supportFragmentManager.findFragmentByTag(BOOST_TAG) == null
@@ -128,11 +134,13 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
 
         withBoost { _, fragment ->
             waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+                continueEnabled(fragment)
             }
 
-            onView(withId(R.id.boost_12m)).perform(click())
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule
+                .onNodeWithTag(BOOST_OPTION_TAG_PREFIX + "TWELVE_MONTHS")
+                .performClick()
+            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
             waitUntil { dispatcher.orderBodies.isNotEmpty() }
 
             Assert.assertEquals(
@@ -154,9 +162,9 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
 
         withBoost { scenario, fragment ->
             waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+                continueEnabled(fragment)
             }
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
 
             waitUntil { dispatcher.invoiceRequests.get() == 1 }
             // Let the observer report the paid invoice. popBackStack is a no-op
@@ -183,9 +191,9 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
 
         withBoost { _, fragment ->
             waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+                continueEnabled(fragment)
             }
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
             waitUntil { dispatcher.orderRequests.get() == 1 }
             waitUntilOnMain { invoiceShown(fragment) }
 
@@ -194,7 +202,7 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
 
             waitUntilOnMain {
                 !invoiceShown(fragment) &&
-                    fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+                    continueEnabled(fragment)
             }
             Assert.assertEquals(
                 "starting over must not place an order by itself",
@@ -202,7 +210,7 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
                 dispatcher.orderRequests.get(),
             )
 
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
             waitUntil { dispatcher.orderRequests.get() == 2 }
         }
     }
@@ -245,18 +253,18 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
             scenario.onActivity { activity = it }
 
             waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+                continueEnabled(fragment)
             }
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
             waitUntilOnMain { invoiceShown(fragment) }
 
             composeTestRule.onNodeWithText(startOverLabel).performClick()
             onView(withText(R.string.start_over)).inRoot(isDialog()).perform(click())
             waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+                continueEnabled(fragment)
             }
 
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
 
             waitUntilOnMain {
                 activity.supportFragmentManager.findFragmentByTag(BOOST_TAG) == null
@@ -273,9 +281,9 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
 
         withBoost { _, fragment ->
             waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+                continueEnabled(fragment)
             }
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
 
             waitUntil {
                 try {
@@ -287,7 +295,7 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
                 }
             }
             waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
+                continueEnabled(fragment)
             }
             onView(withText(R.string.close)).inRoot(isDialog()).perform(click())
         }

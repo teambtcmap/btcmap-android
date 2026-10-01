@@ -471,6 +471,15 @@ and boost payment instrumented tests were updated to drive the Compose block
 (the add-comment test's form, left runtime-broken by the previous slice, was
 fixed too). No behavior change.
 
+### Phase 2, tenth slice — done
+
+Migrated `BoostFragment`'s form to a shared `BoostForm` in `:ui` (the
+disclosure, the duration choices with their quoted prices, and the continue
+button), hosted by a `BoostFormComposeView`, so the whole boost screen is
+Compose. Removed the now-unused `BoostDuration` button-id mapping (and its unit
+test) and updated `BoostPaymentFlowTest` to drive the Compose form. No behavior
+change.
+
 ## Next
 
 Phase 2 continues: migrate the remaining non-map screens to `:ui` screen by

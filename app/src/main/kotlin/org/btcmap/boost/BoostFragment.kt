@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioButton
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import org.btcmap.Activity
 import org.btcmap.R
@@ -20,6 +18,8 @@ import org.btcmap.payment.InvoicePaymentViewModel
 import org.btcmap.payment.PaymentInvoice
 import org.btcmap.payment.invoicePaymentViewModel
 import org.btcmap.payment.observeInvoicePayment
+import org.btcmap.ui.BoostFormUiState
+import org.btcmap.ui.BoostOption
 import java.text.NumberFormat
 
 class BoostFragment : Fragment() {
@@ -76,11 +76,12 @@ class BoostFragment : Fragment() {
             },
         )
 
-        binding.btnContinue.setOnClickListener {
-            val duration = selectedDuration() ?: return@setOnClickListener
-            viewModel.order {
-                val response = api().boostPlace(placeId = args.placeId, days = duration.days)
-                PaymentInvoice(id = response.invoiceId, bolt11 = response.invoice)
+        binding.boostForm.onContinue = { key ->
+            BoostDuration.entries.firstOrNull { it.name == key }?.let { duration ->
+                viewModel.order {
+                    val response = api().boostPlace(placeId = args.placeId, days = duration.days)
+                    PaymentInvoice(id = response.invoiceId, bolt11 = response.invoice)
+                }
             }
         }
 
@@ -92,55 +93,46 @@ class BoostFragment : Fragment() {
         payment: InvoicePaymentController,
     ) {
         val quote = state.quote
-        if (quote != null) {
-            BoostDuration.entries.forEach { duration ->
-                setDurationPrice(button(duration), duration, duration.priceSat(quote))
+        val options = BoostDuration.entries.map { duration ->
+            val label = getString(duration.labelRes)
+            val price = when {
+                quote != null -> getString(
+                    R.string.d_sat,
+                    NumberFormat.getNumberInstance().format(duration.priceSat(quote)),
+                )
+
+                state.loadingQuote -> getString(R.string.loading_quote)
+                else -> null
             }
-        } else if (state.loadingQuote) {
-            BoostDuration.entries.forEach { duration ->
-                setDurationLoading(button(duration), duration)
-            }
+            BoostOption(
+                key = duration.name,
+                label = price?.let { getString(R.string.duration_with_price, label, it) } ?: label,
+            )
         }
 
         // The options and continue button are locked until the quote is loaded,
         // while an order is in flight, and once an invoice exists, so a second
         // boost cannot be ordered (and charged) by tapping continue again.
-        val enabled = state.actionsEnabled
-        BoostDuration.entries.forEach { button(it).isEnabled = enabled }
-        binding.btnContinue.isEnabled = enabled
+        _binding?.boostForm?.state = BoostFormUiState(
+            description = getString(R.string.boost_description),
+            durationTitle = getString(R.string.boost_duration),
+            options = options,
+            continueLabel = getString(R.string.btn_continue),
+            selectedKey = BoostDuration.THREE_MONTHS.name,
+            optionsEnabled = state.actionsEnabled,
+            actionsEnabled = state.actionsEnabled,
+            // The invoice block replaces the order controls, so the continue
+            // button that started the order is hidden once one exists.
+            showContinue = state.invoice == null,
+        )
 
         val invoice = state.invoice
-        // The invoice block replaces the order controls, so the continue button
-        // that started the order is hidden once one exists.
-        binding.btnContinue.isVisible = invoice == null
         if (invoice == null) {
             payment.hide()
         } else {
             payment.show(invoice)
         }
     }
-
-    private fun setDurationPrice(button: RadioButton, duration: BoostDuration, priceSat: Long) {
-        val price = getString(R.string.d_sat, NumberFormat.getNumberInstance().format(priceSat))
-        button.text = getString(R.string.duration_with_price, getString(duration.labelRes), price)
-    }
-
-    private fun setDurationLoading(button: RadioButton, duration: BoostDuration) {
-        button.text = getString(
-            R.string.duration_with_price,
-            getString(duration.labelRes),
-            getString(R.string.loading_quote),
-        )
-    }
-
-    private fun button(duration: BoostDuration): RadioButton = when (duration) {
-        BoostDuration.ONE_MONTH -> binding.boost1m
-        BoostDuration.THREE_MONTHS -> binding.boost3m
-        BoostDuration.TWELVE_MONTHS -> binding.boost12m
-    }
-
-    private fun selectedDuration(): BoostDuration? =
-        BoostDuration.fromButtonId(binding.durationOptions.checkedRadioButtonId)
 
     override fun onDestroyView() {
         super.onDestroyView()

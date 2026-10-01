@@ -1,6 +1,5 @@
 package org.btcmap.boost
 
-import org.btcmap.R
 import org.btcmap.api.PlaceBoostQuoteResponse
 import org.junit.Assert
 import org.junit.Test
@@ -14,28 +13,10 @@ class BoostDurationTest {
     )
 
     @Test
-    fun fromButtonId_mapsEachOptionToItsDuration() {
-        Assert.assertEquals(
-            BoostDuration.ONE_MONTH,
-            BoostDuration.fromButtonId(R.id.boost_1m),
-        )
-        Assert.assertEquals(
-            BoostDuration.THREE_MONTHS,
-            BoostDuration.fromButtonId(R.id.boost_3m),
-        )
-        Assert.assertEquals(
-            BoostDuration.TWELVE_MONTHS,
-            BoostDuration.fromButtonId(R.id.boost_12m),
-        )
+    fun days_matchesEachDuration() {
         Assert.assertEquals(30L, BoostDuration.ONE_MONTH.days)
         Assert.assertEquals(90L, BoostDuration.THREE_MONTHS.days)
         Assert.assertEquals(365L, BoostDuration.TWELVE_MONTHS.days)
-    }
-
-    @Test
-    fun fromButtonId_returnsNullForAnUnknownOption() {
-        Assert.assertNull(BoostDuration.fromButtonId(R.id.duration_options))
-        Assert.assertNull(BoostDuration.fromButtonId(0))
     }
 
     @Test
