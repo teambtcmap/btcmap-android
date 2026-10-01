@@ -32,10 +32,10 @@ Next, in rough order of value:
    of the picker, camera and upload (they are the same helpers, but the launchers
    and the upload live in each host). When the place screen itself becomes
    Compose, the two should collapse into one.
-2. **Desktop polish** — now that the desktop can sign in (slice 47), the sheet
-   actions that need a session (verify, report, boost, comment, save) and the
-   add-place and user-profile screens are next; signing up, signing out and the
-   other account actions are still to do as well.
+2. **Desktop polish** — the desktop can sign in (slice 47) and save a place
+   (slice 48). Left: the sheet actions that need a screen of their own (verify
+   and report, which post a place issue), the boost flow, posting comments, the
+   add-place and user-profile screens, and signing up and out.
 3. **Two tests the swap deleted are still to replace.** The search logic cases
    were ported in slice 44; what remains is `MarkerIconTest`'s glyph check (the
    shared `MarkerBitmapFactory.renderableGlyph` is private and needs the icon
@@ -1495,6 +1495,20 @@ Verified by rendering the page with the desktop's headless screenshot mode
 (`-Pscreenshot=account:...`): the title, both fields, the disabled-until-filled
 Sign in button and the note render. Signing in itself was not exercised, as that
 needs real credentials.
+
+### Phase 3, forty-eighth slice — done (the desktop saves a place)
+
+Saving is the one sheet action that needs a session but no screen of its own, so
+it is the first of the actions the sign-in unblocked. The desktop now hands the
+shared sheet the `bookmarked` state of the place it opened — read from the cached
+user row — and handles `ToggleBookmark` by calling the shared `savePlace` or
+`removeSavedPlace` and caching the canonical list `getUser` returns. A signed-out
+save is not an error: the sheet's Save row takes the user to the Account page,
+which is where a session comes from.
+
+Verified by compiling and running the window, which rendered its first map frame
+with no exceptions and no errors in its log. The Save row itself cannot be
+clicked from here, since this Wayland session has no input-injection tool.
 
 ## Working notes
 

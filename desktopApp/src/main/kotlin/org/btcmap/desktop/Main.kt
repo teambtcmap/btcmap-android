@@ -60,6 +60,10 @@ import androidx.compose.ui.Modifier
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.api.Api
 import org.btcmap.api.signIn
+import org.btcmap.ui.PlaceAction
+import org.btcmap.api.savePlace
+import org.btcmap.api.removeSavedPlace
+import org.btcmap.api.getUser
 import org.btcmap.api.toDbUser
 import org.btcmap.api.apiHttpClient
 import org.btcmap.db.Database
@@ -151,6 +155,14 @@ private fun runApp() = application {
                     // keeps no navigation of its own: the settings and the feed
                     // are full-window pages the map opens.
                     var route by remember { mutableStateOf(Route.Map) }
+                    val scope = rememberCoroutineScope()
+                    // The place the sheet is showing, and whether the account has
+                    // it saved, which is what the sheet's Save row renders.
+                    var selectedPlaceId by remember { mutableStateOf<Long?>(null) }
+                    var bookmarked by remember { mutableStateOf(false) }
+                    LaunchedEffect(selectedPlaceId) {
+                        bookmarked = selectedPlaceId?.let { isPlaceSaved(db, it) } ?: false
+                    }
                     // The place a feed row asked the map to show. Leaving the
                     // map disposes it and coming back rebuilds it, so opening a
                     // row always lands on the map with that place selected.
@@ -194,7 +206,26 @@ private fun runApp() = application {
                             placeSheetStrings = PLACE_SHEET_STRINGS,
                             searchActions = SearchActions(onSettings = { route = Route.Settings }),
                             onOpenFeed = { route = Route.Feed },
-                            onPlaceAction = ::handlePlaceAction,
+                            bookmarked = bookmarked,
+                            onPlaceSelected = { selectedPlaceId = it.id },
+                            onPlaceAction = { place, action ->
+                                when (action) {
+                                    // Saving is the one sheet action that needs a
+                                    // session but no screen of its own.
+                                    PlaceAction.ToggleBookmark -> {
+                                        if (settings.authorized) {
+                                            scope.launch {
+                                                toggleSavedPlace(api, db, place.id)
+                                                bookmarked = isPlaceSaved(db, place.id)
+                                            }
+                                        } else {
+                                            route = Route.Account
+                                        }
+                                    }
+
+                                    else -> handlePlaceAction(place, action)
+                                }
+                            },
                             onSelectEvent = {},
                             onSelectArea = {},
                             formatDistance = { meters -> "%.1f km".format(meters / 1000) },
@@ -517,6 +548,32 @@ private const val DESKTOP_TOKEN_LABEL = "BTC Map desktop"
 
 private const val FEED_LAT = 52.2333742
 private const val FEED_LON = 21.0711489
+
+/**
+ * Whether the account has the place saved. The saved places live in the cached
+ * user row, which the sync and the save action both keep current.
+ */
+private suspend fun isPlaceSaved(db: Database, placeId: Long): Boolean =
+    withContext(Dispatchers.IO) {
+        db.user.select()?.savedPlaces?.any { it.id == placeId }
+    } ?: false
+
+/**
+ * Saves or unsaves the place and caches the canonical list the endpoint
+ * returns. The whole user is refetched, which is also what the app does when a
+ * saved id is neither cached nor named.
+ */
+private suspend fun toggleSavedPlace(api: Api, db: Database, placeId: Long) {
+    if (isPlaceSaved(db, placeId)) api.removeSavedPlace(placeId) else api.savePlace(placeId)
+
+    val user = api.getUser().toDbUser()
+    withContext(Dispatchers.IO) {
+        db.transaction {
+            db.user.delete()
+            db.user.insert(user)
+        }
+    }
+}
 
 /** The shared settings list, used by both the window and the screenshot mode. */
 @androidx.compose.runtime.Composable
