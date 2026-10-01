@@ -25,6 +25,8 @@ dependencies {
     implementation(project(":shared"))
     implementation(project(":ui"))
     implementation(compose.desktop.currentOs)
+    implementation(compose.material3)
+    implementation(libs.okhttp)
     implementation(libs.maplibre.compose)
     // Provides Dispatchers.Main on the AWT event thread, which the map's engine
     // callbacks need.

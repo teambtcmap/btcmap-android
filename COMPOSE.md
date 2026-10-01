@@ -1070,6 +1070,19 @@ Verified by the run log: `Rendered the first map frame with OPENGL on
 maplibre-linux-map-renderer, extent 480x702`. The window still cannot be
 screenshotted here.
 
+### Phase 3, twenty-sixth slice — done (step 6: sync and data on the desktop)
+
+The desktop app now syncs the shared cache: it builds the shared `Api` (OkHttp
+with the same interceptors, `api.btcmap.org`, a desktop user agent) and a
+`SyncManager`, starts a sync on launch and offers a Sync button, showing the
+state and the place count over the map.
+
+The desktop has no bundled snapshot to seed from (the seed importers read
+Android assets), so the no-op seeds make the first sync pull the whole delta
+history. That took about a minute and left 42,981 places, 1,008 areas, 2,843
+comments and 172 events in `~/.btcmap/btcmap.db`, so the map and the shared
+screens have real data.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

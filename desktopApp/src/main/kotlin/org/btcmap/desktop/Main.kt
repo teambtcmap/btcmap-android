@@ -18,7 +18,22 @@ import org.btcmap.ui.map.MarkerPalette
 import java.awt.Color as AwtColor
 import androidx.compose.ui.graphics.Color
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.btcmap.api.Api
+import org.btcmap.api.apiHttpClient
 import org.btcmap.db.Database
+import org.btcmap.sync.Sync
+import org.btcmap.sync.SyncManager
 import org.btcmap.settings.KEY_AUTH_TOKEN
 import org.btcmap.settings.Settings
 import org.btcmap.stats.StatsEntry
@@ -39,6 +54,25 @@ fun main() = application {
     val db = home.database()
     val settings = home.settings(db).apply { preload() }
 
+    // The desktop app has no bundled snapshot to seed from, so the sync pulls
+    // the whole delta history on first run.
+    val api = Api(
+        httpClient = apiHttpClient(
+            userAgent = USER_AGENT,
+            token = { settings.getString(KEY_AUTH_TOKEN, null) },
+            apiUrl = { API_URL.toHttpUrl() },
+        ),
+        baseUrl = { API_URL.toHttpUrl() },
+        userAgent = USER_AGENT,
+    )
+    val syncManager = SyncManager(
+        sync = { Sync(api, db) },
+        seedPlaces = { 0L },
+        seedEvents = { 0L },
+        seedComments = { 0L },
+        seedAreas = { 0L },
+    )
+
     val iconFont = loadIconFont()
 
     // The map needs an app-wide cache directory and, per window, its GPU
@@ -55,6 +89,10 @@ fun main() = application {
         val mapHost = rememberAwtComposeMapPresentationHost(window)
         ProvideMapPresentationHost(mapHost) {
             AppTheme(iconFont = iconFont) {
+                val syncState by syncManager.state.collectAsState()
+                LaunchedEffect(Unit) { syncManager.start() }
+
+                androidx.compose.foundation.layout.Box {
                 MapScreen(
                     db = db,
                     styleUrl = "https://tiles.openfreemap.org/styles/liberty",
@@ -85,10 +123,25 @@ fun main() = application {
                     onSelectArea = {},
                     formatDistance = { meters -> "%.1f km".format(meters / 1000) },
                 )
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(16.dp),
+                ) {
+                    Text(text = "Sync: $syncState")
+                    Button(onClick = { syncManager.start() }) { Text("Sync now") }
+                    Text(text = "Places: ${db.place.selectCount()}")
+                }
+                }
             }
         }
     }
 }
+
+private const val API_URL = "https://api.btcmap.org"
+private const val USER_AGENT = "btcmap-desktop"
 
 /** The per-user data directory the desktop app keeps its database in. */
 private class DesktopHome {
