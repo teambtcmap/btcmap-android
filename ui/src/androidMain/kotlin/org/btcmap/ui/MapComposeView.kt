@@ -32,6 +32,8 @@ class MapComposeView @JvmOverloads constructor(
 
     var styleUrl: String by mutableStateOf("https://tiles.openfreemap.org/styles/liberty")
 
+    var styleJson: String? by mutableStateOf(null)
+
     var apiUrl: String by mutableStateOf("https://api.btcmap.org")
 
     var initialLat: Double by mutableStateOf(0.0)
@@ -99,6 +101,7 @@ class MapComposeView @JvmOverloads constructor(
         MapScreen(
             db = db,
             styleUrl = styleUrl,
+            styleJson = styleJson,
             initialLat = initialLat,
             initialLon = initialLon,
             initialZoom = initialZoom,

@@ -34,6 +34,7 @@ import org.maplibre.spatialk.geojson.Position
 fun PlacePreviewMap(
     place: Place,
     styleUrl: String,
+    styleJson: String? = null,
     palette: MarkerPalette,
     usingOpenFreeMap: Boolean,
     iconFont: FontFamily?,
@@ -58,7 +59,7 @@ fun PlacePreviewMap(
     var imagesReady by remember { mutableStateOf(false) }
 
     val state = rememberMapState(
-        baseStyle = BaseStyle.Uri(styleUrl),
+        baseStyle = if (styleJson != null) BaseStyle.Json(styleJson) else BaseStyle.Uri(styleUrl),
         initialCameraPosition = CameraPosition(
             target = Position(place.lon, place.lat),
             zoom = PREVIEW_ZOOM,

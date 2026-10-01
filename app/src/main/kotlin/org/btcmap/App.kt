@@ -30,6 +30,7 @@ import org.btcmap.settings.prefs
 import org.btcmap.sync.Sync
 import org.btcmap.sync.SyncController
 import org.btcmap.sync.SyncManager
+import org.btcmap.ui.map.configureBundledMapResources
 import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.MapLibre
 import org.btcmap.settings.init as settingsInit
@@ -169,6 +170,9 @@ class App : Application(), SingletonImageLoader.Factory {
         // start before the first frame.
         initIconTypeface(this, ioScope)
         MapLibre.getInstance(this)
+        // The shared (Compose) map reads the bundled styles and their sprites
+        // and glyphs through its own resource provider.
+        configureBundledMapResources(this)
 
         // OfflineManager must be created on the UI thread; touching the lazy
         // here does that before the background refresh below uses it.

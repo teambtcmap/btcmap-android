@@ -895,6 +895,23 @@ connectivity change.
 Verified in the app itself (not the spike): the chips render on the Views map
 screen and a chip tap opens the area screen.
 
+### Phase 3, sixteenth slice — done (bundled styles for the Compose map)
+
+The Compose map can now use the app's bundled styles. `:ui`'s androidMain adds
+`configureBundledMapResources(context)`, which registers an `app://` resource
+provider serving the bundled sprites and glyphs from the assets, and
+`bundledStyleJson(context, assetPath)`, which reads a bundled style and rewrites
+its `asset://map-styles/` URLs to that scheme. `MapScreen` and
+`PlacePreviewMap` take `styleJson` and use `BaseStyle.Json` when it is set;
+`App` configures the provider once at startup.
+
+This was the blocker found in the previous slice: the Compose map cannot read
+`asset://` styles, so it drew only the background.
+
+Verified on the emulator: the spike renders the bundled **liberty** style with
+its tiles, labels, sprites and glyphs (no glyph or style load errors), and the
+place sheet's preview map renders the same bundled style.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

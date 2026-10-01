@@ -71,6 +71,7 @@ import java.time.ZonedDateTime
 fun MapScreen(
     db: Database,
     styleUrl: String,
+    styleJson: String? = null,
     initialLat: Double,
     initialLon: Double,
     initialZoom: Double,
@@ -146,7 +147,9 @@ fun MapScreen(
     val eventsGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
 
     val state = rememberMapState(
-        baseStyle = BaseStyle.Uri(styleUrl),
+        // The bundled styles are handed over as JSON: the Compose map cannot
+        // read the asset:// style the Android SDK uses.
+        baseStyle = if (styleJson != null) BaseStyle.Json(styleJson) else BaseStyle.Uri(styleUrl),
         initialCameraPosition = CameraPosition(
             target = Position(initialLon, initialLat),
             zoom = initialZoom,
@@ -297,6 +300,7 @@ fun MapScreen(
                         PlacePreviewMap(
                             place = place,
                             styleUrl = styleUrl,
+                            styleJson = styleJson,
                             palette = palette,
                             usingOpenFreeMap = usingOpenFreeMap,
                             iconFont = iconFont,

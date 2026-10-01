@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import org.btcmap.offline.OfflineAreaState
 import org.btcmap.offline.OfflineBounds
 import org.btcmap.ui.map.OfflinePacks
+import org.btcmap.ui.map.bundledStyleJson
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
@@ -34,6 +35,7 @@ class MapSpikeActivity : AppCompatActivity() {
             setViewTreeSavedStateRegistryOwner(this@MapSpikeActivity)
             setViewTreeViewModelStoreOwner(this@MapSpikeActivity)
             database = app.db
+            styleJson = bundledStyleJson(this@MapSpikeActivity, "map-styles/liberty/style.json")
             initialLat = CENTER_LAT
             initialLon = CENTER_LON
             initialZoom = 13.0
