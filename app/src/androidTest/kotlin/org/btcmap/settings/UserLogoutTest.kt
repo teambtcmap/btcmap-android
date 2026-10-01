@@ -1,6 +1,8 @@
 package org.btcmap.settings
 
-import android.view.View
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
@@ -11,6 +13,7 @@ import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.user.User
+import org.btcmap.ui.UserProfileComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.junit.Assert
@@ -24,6 +27,9 @@ class UserLogoutTest : AppTestCase() {
     private val app = ApplicationProvider.getApplicationContext<App>()
 
     private val prefs get() = preferencesRule.prefs
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     @Test
     fun logout_clearsLocalSessionAndRevokesTokenServerSide() {
@@ -51,16 +57,18 @@ class UserLogoutTest : AppTestCase() {
                 }
 
                 waitUntil {
-                    var shown = false
+                    var ready = false
                     scenario.onActivity {
-                        shown = profile.requireView().findViewById<View>(R.id.logoutButton) != null
+                        ready = profile.requireView()
+                            .findViewById<UserProfileComposeView>(R.id.userProfileList)
+                            .state != null
                     }
-                    shown
+                    ready
                 }
 
-                scenario.onActivity {
-                    profile.requireView().findViewById<View>(R.id.logoutButton).performClick()
-                }
+                composeTestRule
+                    .onNodeWithText(app.getString(R.string.logout))
+                    .performClick()
 
                 waitUntil { prefs.authToken == null && databaseRule.db.user.select() == null }
 

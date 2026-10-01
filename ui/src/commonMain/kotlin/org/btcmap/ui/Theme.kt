@@ -1,6 +1,7 @@
 package org.btcmap.ui
 
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -26,7 +27,15 @@ fun AppTheme(
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(LocalIconFont provides iconFont) {
-        MaterialTheme(colorScheme = platformColorScheme(), content = content)
+        MaterialTheme(colorScheme = platformColorScheme()) {
+            // MaterialTheme does not provide a content color, so a bare Text
+            // would fall back to black and vanish on a dark background. Set it
+            // to the scheme's onBackground for the whole tree.
+            CompositionLocalProvider(
+                LocalContentColor provides MaterialTheme.colorScheme.onBackground,
+                content = content,
+            )
+        }
     }
 }
 

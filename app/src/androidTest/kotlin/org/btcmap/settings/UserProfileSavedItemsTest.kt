@@ -1,9 +1,11 @@
 package org.btcmap.settings
 
-import android.view.View
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -15,10 +17,12 @@ import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
+import org.btcmap.ui.UserProfileComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.atomic.AtomicInteger
@@ -30,6 +34,9 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 @RunWith(AndroidJUnit4::class)
 class UserProfileSavedItemsTest : AppTestCase() {
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 
@@ -56,17 +63,17 @@ class UserProfileSavedItemsTest : AppTestCase() {
             }
         }
 
-        withProfile { scenario, profile ->
-            val list = profile.requireView()
-                .findViewById<RecyclerView>(R.id.savedPlacesList)
-            waitUntilOnMain { (list.adapter?.itemCount ?: 0) == 2 && list.getChildAt(0) != null }
+        withProfile { _, profile ->
+            val view = profile.requireView().findViewById<UserProfileComposeView>(R.id.userProfileList)
+            waitUntilOnMain { view.state?.savedPlaces?.size == 2 }
 
-            scenario.onActivity {
-                list.getChildAt(0).findViewById<View>(R.id.deleteButton).performClick()
-            }
+            composeTestRule
+                .onAllNodesWithContentDescription(app.getString(R.string.delete))
+                .onFirst()
+                .performClick()
 
             waitUntil { savedPlaceIds() == listOf(2L) }
-            waitUntilOnMain { list.adapter?.itemCount == 1 }
+            waitUntilOnMain { view.state?.savedPlaces?.size == 1 }
             Assert.assertEquals(0, userFetches.get())
         }
     }
@@ -86,17 +93,17 @@ class UserProfileSavedItemsTest : AppTestCase() {
             }
         }
 
-        withProfile { scenario, profile ->
-            val list = profile.requireView()
-                .findViewById<RecyclerView>(R.id.savedAreasList)
-            waitUntilOnMain { (list.adapter?.itemCount ?: 0) == 2 && list.getChildAt(0) != null }
+        withProfile { _, profile ->
+            val view = profile.requireView().findViewById<UserProfileComposeView>(R.id.userProfileList)
+            waitUntilOnMain { view.state?.savedAreas?.size == 2 }
 
-            scenario.onActivity {
-                list.getChildAt(0).findViewById<View>(R.id.deleteButton).performClick()
-            }
+            composeTestRule
+                .onAllNodesWithContentDescription(app.getString(R.string.delete))
+                .onFirst()
+                .performClick()
 
             waitUntil { savedAreaIds() == listOf(11L) }
-            waitUntilOnMain { list.adapter?.itemCount == 1 }
+            waitUntilOnMain { view.state?.savedAreas?.size == 1 }
         }
     }
 
@@ -123,14 +130,14 @@ class UserProfileSavedItemsTest : AppTestCase() {
             }
         }
 
-        withProfile { scenario, profile ->
-            val list = profile.requireView()
-                .findViewById<RecyclerView>(R.id.savedPlacesList)
-            waitUntilOnMain { (list.adapter?.itemCount ?: 0) == 1 && list.getChildAt(0) != null }
+        withProfile { _, profile ->
+            val view = profile.requireView().findViewById<UserProfileComposeView>(R.id.userProfileList)
+            waitUntilOnMain { view.state?.savedPlaces?.size == 1 }
 
-            scenario.onActivity {
-                list.getChildAt(0).findViewById<View>(R.id.deleteButton).performClick()
-            }
+            composeTestRule
+                .onAllNodesWithContentDescription(app.getString(R.string.delete))
+                .onFirst()
+                .performClick()
 
             waitUntil { savedPlaceIds() == listOf(2L) }
             waitUntil { userFetches.get() == 1 }

@@ -1,9 +1,11 @@
 package org.btcmap.settings
 
-import android.view.View
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
-import androidx.recyclerview.widget.RecyclerView
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.SQLiteStatement
@@ -20,6 +22,7 @@ import org.btcmap.R
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
+import org.btcmap.ui.UserProfileComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.assertNoUncaughtException
 import org.btcmap.util.waitUntilOnMain
@@ -32,6 +35,9 @@ import org.junit.runner.RunWith
 class UserProfileErrorHandlingTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     @Test
     fun deleteSavedPlace_whenRefreshFails_doesNotLeakUncaughtException() {
@@ -66,24 +72,18 @@ class UserProfileErrorHandlingTest : AppTestCase() {
                         replace(R.id.fragmentContainerView, profile, PROFILE_TAG)
                     }
                 }
-                lateinit var list: RecyclerView
-                scenario.onActivity {
-                    list = profile.requireView()
-                        .findViewById(R.id.savedPlacesList)
-                }
-                waitUntilOnMain {
-                    (list.adapter?.itemCount ?: 0) > 0 && list.getChildAt(0) != null
-                }
+                val view = profile.requireView()
+                    .findViewById<UserProfileComposeView>(R.id.userProfileList)
+                waitUntilOnMain { view.state?.savedPlaces?.isNotEmpty() == true }
 
                 assertNoUncaughtException(
                     "Exception escaped the user profile screen's coroutine to the uncaught handler",
                 ) {
-                    scenario.onActivity {
-                        driver.failing = true
-                        val delete = list.getChildAt(0).findViewById<View>(R.id.deleteButton)
-                        Assert.assertNotNull(delete)
-                        delete.performClick()
-                    }
+                    scenario.onActivity { driver.failing = true }
+                    composeTestRule
+                        .onAllNodesWithContentDescription(app.getString(R.string.delete))
+                        .onFirst()
+                        .performClick()
                 }
             }
         } finally {

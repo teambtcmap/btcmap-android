@@ -1,6 +1,8 @@
 package org.btcmap.settings
 
-import android.view.View
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
@@ -22,9 +24,11 @@ import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.user.User
+import org.btcmap.ui.UserProfileComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.TimeUnit
@@ -43,6 +47,9 @@ class ChangePasswordRotationTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
+
     @Test
     fun credentialsSubmittedAfterRotation_reachTheServer() {
         insertSignedInUser()
@@ -50,8 +57,8 @@ class ChangePasswordRotationTest : AppTestCase() {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                val profile = showProfile(scenario)
-                openChangePasswordDialog(scenario, profile)
+                showProfile(scenario)
+                openChangePasswordDialog()
                 fillPasswordFields()
 
                 scenario.recreate()
@@ -99,8 +106,8 @@ class ChangePasswordRotationTest : AppTestCase() {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                val profile = showProfile(scenario)
-                openChangePasswordDialog(scenario, profile)
+                showProfile(scenario)
+                openChangePasswordDialog()
                 fillPasswordFields()
 
                 onView(withId(android.R.id.button1)).inRoot(isDialog()).perform(click())
@@ -140,22 +147,18 @@ class ChangePasswordRotationTest : AppTestCase() {
             var ready = false
             scenario.onActivity {
                 ready = profile.requireView()
-                    .findViewById<View>(R.id.changePasswordButton) != null
+                    .findViewById<UserProfileComposeView>(R.id.userProfileList)
+                    .state != null
             }
             ready
         }
         return profile
     }
 
-    private fun openChangePasswordDialog(
-        scenario: ActivityScenario<Activity>,
-        profile: UserProfileFragment,
-    ) {
-        scenario.onActivity {
-            profile.requireView()
-                .findViewById<View>(R.id.changePasswordButton)
-                .performClick()
-        }
+    private fun openChangePasswordDialog() {
+        composeTestRule
+            .onNodeWithContentDescription(app.getString(R.string.change_password))
+            .performClick()
     }
 
     private fun fillPasswordFields() {

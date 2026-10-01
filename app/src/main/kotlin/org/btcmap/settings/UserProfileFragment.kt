@@ -6,11 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.Dispatchers
@@ -26,11 +23,14 @@ import org.btcmap.auth.showChangePasswordDialog
 import org.btcmap.db
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
-import org.btcmap.databinding.SavedItemBinding
 import org.btcmap.databinding.UserProfileFragmentBinding
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.saved.removeSavedArea
 import org.btcmap.saved.removeSavedPlace
+import org.btcmap.ui.SavedItemUi
+import org.btcmap.ui.UserProfileLabels
+import org.btcmap.ui.UserProfileUiState
+import org.btcmap.util.iconTypeface
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.setFieldError
 import org.btcmap.util.showError
@@ -55,65 +55,69 @@ class UserProfileFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        binding.logoutButton.setOnClickListener {
-            logout()
-        }
-
-        binding.changeUsernameButton.setOnClickListener {
-            showChangeUsernameDialog()
-        }
-
-        binding.changePasswordButton.setOnClickListener {
-            showChangePasswordDialog()
-        }
+        binding.userProfileList.iconTypeface = iconTypeface
+        binding.userProfileList.onEditUsername = { showChangeUsernameDialog() }
+        binding.userProfileList.onEditPassword = { showChangePasswordDialog() }
+        binding.userProfileList.onDeletePlace = { deleteSavedPlace(it) }
+        binding.userProfileList.onDeleteArea = { deleteSavedArea(it) }
+        binding.userProfileList.onLogOut = { logout() }
 
         registerChangePasswordResultListener {
             Toast.makeText(context, R.string.password_changed, Toast.LENGTH_SHORT).show()
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val user = withContext(Dispatchers.IO) { db().user.select() }
-            if (user == null) {
-                // With no cached account there is no usable session, so clear any
-                // leftover stored token instead of leaving it behind.
-                withContext(Dispatchers.IO) {
-                    prefs.clearSession(db())
-                }
-                parentFragmentManager.popBackStack()
-                return@launch
-            }
-            bindUser(user)
+            loadUser()
         }
     }
 
-    private suspend fun bindUser(user: User) {
-        binding.username.text = user.name
-        binding.password.text = getString(R.string.password_mask)
-        renderSavedItems(user)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
-    private suspend fun renderSavedItems(user: User) {
-        binding.savedPlacesList.layoutManager = LinearLayoutManager(requireContext())
-        binding.savedPlacesList.adapter = SavedItemsAdapter(
-            items = user.savedPlaces.withLocalizedPlaceNames(),
-            onDeleteClick = { placeId ->
-                deleteSavedPlace(placeId)
+    /** Reads the cached account and renders it, signing out if there is none. */
+    private suspend fun loadUser() {
+        val user = withContext(Dispatchers.IO) { db().user.select() }
+        if (user == null) {
+            // With no cached account there is no usable session, so clear any
+            // leftover stored token instead of leaving it behind.
+            withContext(Dispatchers.IO) {
+                prefs.clearSession(db())
             }
+            parentFragmentManager.popBackStack()
+            return
+        }
+        renderUser(user)
+    }
+
+    private suspend fun renderUser(user: User) {
+        val labels = UserProfileLabels(
+            username = getString(R.string.username),
+            password = getString(R.string.password),
+            savedPlaces = getString(R.string.saved_places),
+            savedAreas = getString(R.string.saved_areas),
+            noSavedPlaces = getString(R.string.no_saved_places),
+            noSavedAreas = getString(R.string.no_saved_areas),
+            logOut = getString(R.string.logout),
+            editUsername = getString(R.string.change_username),
+            editPassword = getString(R.string.change_password),
+            delete = getString(R.string.delete),
         )
 
-        binding.noSavedPlaces.isVisible = user.savedPlaces.isEmpty()
-        binding.savedPlacesList.isVisible = user.savedPlaces.isNotEmpty()
-
-        binding.savedAreasList.layoutManager = LinearLayoutManager(requireContext())
-        binding.savedAreasList.adapter = SavedItemsAdapter(
-            items = user.savedAreas.withLocalizedAreaNames(),
-            onDeleteClick = { areaId ->
-                deleteSavedArea(areaId)
-            }
+        val state = UserProfileUiState(
+            username = user.name,
+            password = getString(R.string.password_mask),
+            savedPlaces = user.savedPlaces
+                .withLocalizedPlaceNames()
+                .map { SavedItemUi(it.id, it.name) },
+            savedAreas = user.savedAreas
+                .withLocalizedAreaNames()
+                .map { SavedItemUi(it.id, it.name) },
+            labels = labels,
         )
 
-        binding.noSavedAreas.isVisible = user.savedAreas.isEmpty()
-        binding.savedAreasList.isVisible = user.savedAreas.isNotEmpty()
+        _binding?.userProfileList?.state = state
     }
 
     /**
@@ -184,7 +188,7 @@ class UserProfileFragment : Fragment() {
                         )
                     }
                 }
-                binding.username.text = user.name
+                loadUser()
                 Toast.makeText(context, R.string.username_changed, Toast.LENGTH_SHORT).show()
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
@@ -195,11 +199,6 @@ class UserProfileFragment : Fragment() {
                     .show()
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun logout() {
@@ -236,7 +235,7 @@ class UserProfileFragment : Fragment() {
     private fun deleteSavedPlace(placeId: Long) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                renderSavedItems(removeSavedPlace(placeId))
+                renderUser(removeSavedPlace(placeId))
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
@@ -247,44 +246,11 @@ class UserProfileFragment : Fragment() {
     private fun deleteSavedArea(areaId: Long) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                renderSavedItems(removeSavedArea(areaId))
+                renderUser(removeSavedArea(areaId))
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
             }
         }
-    }
-
-    /**
-     * Both saved lists render the same row, so one adapter serves places and
-     * areas and only the data and delete callback differ.
-     */
-    private class SavedItemsAdapter(
-        private val items: List<SavedItem>,
-        private val onDeleteClick: (Long) -> Unit,
-    ) : RecyclerView.Adapter<SavedItemsAdapter.ViewHolder>() {
-
-        class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val binding: SavedItemBinding = SavedItemBinding.bind(view)
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val binding = SavedItemBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false,
-            )
-            return ViewHolder(binding.root)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = items[position]
-            holder.binding.name.text = item.name
-            holder.binding.deleteButton.setOnClickListener {
-                onDeleteClick(item.id)
-            }
-        }
-
-        override fun getItemCount(): Int = items.size
     }
 }

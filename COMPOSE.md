@@ -423,6 +423,21 @@ fragment keeps the third-party color picker and the settings writes, and rebuild
 the rows after a pick. Deleted the now-unused `ColorSwatchView`. No behavior
 change.
 
+### Phase 2, sixth slice — done
+
+Migrated `UserProfileFragment` to a shared `UserProfileScreen` in `:ui`:
+sectioned account info, saved place and area lists with edit/delete icon actions
+(drawn from the Material Symbols font), and a logout button, hosted by a
+`UserProfileComposeView`. The fragment keeps navigation, the username/password
+dialogs, the sign-out flow and the API calls, and rebuilds the state after a
+change. Deleted the now-unused `SavedItemsAdapter` and `saved_item` layout, and
+updated the profile instrumented tests (`UserProfileSavedItemsTest`,
+`UserProfileErrorHandlingTest`, `UserLogoutTest`, `ChangePasswordRotationTest`)
+to drive the Compose view. Also fixed a theme gap this screen exposed:
+`MaterialTheme` does not set a content color, so bare `Text` fell back to black
+and vanished on a dark background; `AppTheme` now provides the scheme's
+`onBackground` as `LocalContentColor`. No behavior change.
+
 ## Next
 
 Phase 2 continues: migrate the remaining non-map screens to `:ui` screen by
