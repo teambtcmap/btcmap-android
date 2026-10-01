@@ -415,6 +415,14 @@ Verified on the emulator: all eight rows render with their subtitles, the toggle
 switches flip and persist, the map-style dialog opens, and the Database row
 navigates to the stats screen. No behavior change.
 
+### Phase 2, fifth slice — done
+
+Migrated `ColorSettingsFragment` to a shared `ColorSettingsScreen` in `:ui`:
+color rows with a rounded swatch, hosted by a `ColorSettingsComposeView`. The
+fragment keeps the third-party color picker and the settings writes, and rebuilds
+the rows after a pick. Deleted the now-unused `ColorSwatchView`. No behavior
+change.
+
 ## Next
 
 Phase 2 continues: migrate the remaining non-map screens to `:ui` screen by

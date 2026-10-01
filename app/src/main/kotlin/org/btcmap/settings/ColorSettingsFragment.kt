@@ -4,13 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.compose.ui.graphics.Color
 import androidx.fragment.app.Fragment
 import com.mrudultora.colorpicker.ColorPickerPopUp
 import com.mrudultora.colorpicker.ColorPickerPopUp.OnPickColorListener
 import org.btcmap.R
 import org.btcmap.databinding.ColorSettingsFragmentBinding
-import org.btcmap.view.ColorSwatchView
+import org.btcmap.ui.ColorItem
 
 /**
  * The map's customizable colors, one row per element, split off the main
@@ -35,81 +35,11 @@ class ColorSettingsFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        initColorRow(
-            changeView = binding.changeMarkerBackgroundColor,
-            swatch = binding.markerBackgroundColorSwatch,
-            value = binding.markerBackgroundColor,
-            get = { prefs.markerBackgroundColor(requireContext()) },
-            apply = { prefs.setMarkerBackgroundColor(it) },
-            showResetLabel = true,
-        )
+        binding.colorSettingsList.onItemClick = { key ->
+            specs()[key]?.let { showColorPicker(it) }
+        }
 
-        initColorRow(
-            changeView = binding.changeMarkerIconColor,
-            swatch = binding.markerIconColorSwatch,
-            value = binding.markerIconColor,
-            get = { prefs.markerIconColor(requireContext()) },
-            apply = { prefs.setMarkerIconColor(it) },
-            showResetLabel = true,
-        )
-
-        initColorRow(
-            changeView = binding.changeBoostedMarkerBackgroundColor,
-            swatch = binding.boostedMarkerBackgroundColorSwatch,
-            value = binding.boostedMarkerBackgroundColor,
-            get = { prefs.boostedMarkerBackgroundColor() },
-            apply = { prefs.setBoostedMarkerBackgroundColor(it) },
-            showResetLabel = true,
-        )
-
-        initColorRow(
-            changeView = binding.changeBoostedMarkerIconColor,
-            swatch = binding.boostedMarkerIconColorSwatch,
-            value = binding.boostedMarkerIconColor,
-            get = { prefs.boostedMarkerIconColor() },
-            apply = { prefs.setBoostedMarkerIconColor(it) },
-            showResetLabel = true,
-        )
-
-        initColorRow(
-            changeView = binding.changeBadgeBackgroundColor,
-            swatch = binding.badgeBackgroundColorSwatch,
-            value = binding.badgeBackgroundColor,
-            get = { prefs.badgeBackgroundColor(requireContext()) },
-            apply = { prefs.setBadgeBackgroundColor(it) },
-        )
-
-        initColorRow(
-            changeView = binding.changeBadgeTextColor,
-            swatch = binding.badgeTextColorSwatch,
-            value = binding.badgeTextColor,
-            get = { prefs.badgeTextColor(requireContext()) },
-            apply = { prefs.setBadgeTextColor(it) },
-        )
-
-        initColorRow(
-            changeView = binding.changeButtonBackgroundColor,
-            swatch = binding.buttonBackgroundColorSwatch,
-            value = binding.buttonBackgroundColor,
-            get = { prefs.buttonBackgroundColor(requireContext()) },
-            apply = { prefs.setButtonBackgroundColor(it) },
-        )
-
-        initColorRow(
-            changeView = binding.changeButtonIconColor,
-            swatch = binding.buttonIconColorSwatch,
-            value = binding.buttonIconColor,
-            get = { prefs.buttonIconColor(requireContext()) },
-            apply = { prefs.setButtonIconColor(it) },
-        )
-
-        initColorRow(
-            changeView = binding.changeButtonBorderColor,
-            swatch = binding.buttonBorderColorSwatch,
-            value = binding.buttonBorderColor,
-            get = { prefs.buttonBorderColor(requireContext()) },
-            apply = { prefs.setButtonBorderColor(it) },
-        )
+        refreshItems()
     }
 
     override fun onDestroyView() {
@@ -118,49 +48,105 @@ class ColorSettingsFragment : Fragment() {
     }
 
     /**
-     * Wires a color row: shows the current color and opens the picker on tap,
-     * where the negative button resets the color to its default. [showResetLabel]
-     * labels that button as a reset, matching the rows that do; the badge and
-     * button rows keep the picker's own label.
+     * One customizable color: the label, how to read it and how to change it.
+     * [showResetLabel] labels the picker's negative button as a reset, matching
+     * the marker colors; the badge and button rows keep the picker's own label.
      */
-    private fun initColorRow(
-        changeView: View,
-        swatch: ColorSwatchView,
-        value: TextView,
-        get: () -> Int,
-        apply: (Int?) -> Unit,
-        showResetLabel: Boolean = false,
-    ) {
-        bindColor(swatch, value, get())
+    private data class ColorSpec(
+        val titleRes: Int,
+        val get: () -> Int,
+        val apply: (Int?) -> Unit,
+        val showResetLabel: Boolean = false,
+    )
 
-        changeView.setOnClickListener {
-            val colorPickerPopUp = ColorPickerPopUp(context)
-            colorPickerPopUp.setShowAlpha(true)
-                .setDefaultColor(get())
-                .setOnPickColorListener(object : OnPickColorListener {
-                    override fun onColorPicked(color: Int) {
-                        apply(color)
-                        bindColor(swatch, value, color)
-                    }
+    private fun specs(): Map<String, ColorSpec> = linkedMapOf(
+        "markerBackgroundColor" to ColorSpec(
+            R.string.marker_background_color,
+            { prefs.markerBackgroundColor(requireContext()) },
+            { prefs.setMarkerBackgroundColor(it) },
+            showResetLabel = true,
+        ),
+        "markerIconColor" to ColorSpec(
+            R.string.marker_icon_color,
+            { prefs.markerIconColor(requireContext()) },
+            { prefs.setMarkerIconColor(it) },
+            showResetLabel = true,
+        ),
+        "boostedMarkerBackgroundColor" to ColorSpec(
+            R.string.boosted_marker_background,
+            { prefs.boostedMarkerBackgroundColor() },
+            { prefs.setBoostedMarkerBackgroundColor(it) },
+            showResetLabel = true,
+        ),
+        "boostedMarkerIconColor" to ColorSpec(
+            R.string.boosted_marker_icon,
+            { prefs.boostedMarkerIconColor() },
+            { prefs.setBoostedMarkerIconColor(it) },
+            showResetLabel = true,
+        ),
+        "badgeBackgroundColor" to ColorSpec(
+            R.string.badge_background,
+            { prefs.badgeBackgroundColor(requireContext()) },
+            { prefs.setBadgeBackgroundColor(it) },
+        ),
+        "badgeTextColor" to ColorSpec(
+            R.string.badge_text,
+            { prefs.badgeTextColor(requireContext()) },
+            { prefs.setBadgeTextColor(it) },
+        ),
+        "buttonBackgroundColor" to ColorSpec(
+            R.string.button_background,
+            { prefs.buttonBackgroundColor(requireContext()) },
+            { prefs.setButtonBackgroundColor(it) },
+        ),
+        "buttonIconColor" to ColorSpec(
+            R.string.button_icon,
+            { prefs.buttonIconColor(requireContext()) },
+            { prefs.setButtonIconColor(it) },
+        ),
+        "buttonBorderColor" to ColorSpec(
+            R.string.button_border,
+            { prefs.buttonBorderColor(requireContext()) },
+            { prefs.setButtonBorderColor(it) },
+        ),
+    )
 
-                    override fun onCancel() {
-                        colorPickerPopUp.dismissDialog()
-                    }
-                })
-                .show()
-            if (showResetLabel) {
-                colorPickerPopUp.negativeButton.setText(R.string.reset)
-            }
-            colorPickerPopUp.negativeButton.setOnClickListener {
-                apply(null)
-                bindColor(swatch, value, get())
-                colorPickerPopUp.dismissDialog()
-            }
+    private fun refreshItems() {
+        _binding ?: return
+
+        binding.colorSettingsList.items = specs().map { (key, spec) ->
+            val color = spec.get()
+            ColorItem(
+                key = key,
+                title = getString(spec.titleRes),
+                value = getString(R.string.color_hex, color.toHexString()),
+                color = Color(color),
+            )
         }
     }
 
-    private fun bindColor(swatch: ColorSwatchView, value: TextView, color: Int) {
-        swatch.setColor(color)
-        value.text = getString(R.string.color_hex, color.toHexString())
+    private fun showColorPicker(spec: ColorSpec) {
+        val colorPickerPopUp = ColorPickerPopUp(context)
+        colorPickerPopUp.setShowAlpha(true)
+            .setDefaultColor(spec.get())
+            .setOnPickColorListener(object : OnPickColorListener {
+                override fun onColorPicked(color: Int) {
+                    spec.apply(color)
+                    refreshItems()
+                }
+
+                override fun onCancel() {
+                    colorPickerPopUp.dismissDialog()
+                }
+            })
+            .show()
+        if (spec.showResetLabel) {
+            colorPickerPopUp.negativeButton.setText(R.string.reset)
+        }
+        colorPickerPopUp.negativeButton.setOnClickListener {
+            spec.apply(null)
+            refreshItems()
+            colorPickerPopUp.dismissDialog()
+        }
     }
 }
