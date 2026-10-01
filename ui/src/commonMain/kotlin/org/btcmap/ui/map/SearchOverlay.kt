@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,35 +46,41 @@ fun SearchOverlay(
     actions: SearchActions? = null,
 ) {
     Column(modifier = modifier) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
             singleLine = true,
             leadingIcon = { MaterialSymbol(glyph = "search", contentDescription = null) },
             trailingIcon = {
-                if (query.isNotEmpty()) {
-                    MaterialSymbol(
-                        glyph = "close",
-                        contentDescription = null,
-                        modifier = Modifier.clickable { onQueryChange("") },
-                    )
+                // The map's actions live inside the field, as the SearchBar's
+                // menu did, rather than beside it.
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (query.isNotEmpty()) {
+                        IconButton(onClick = { onQueryChange("") }) {
+                            MaterialSymbol(glyph = "close", contentDescription = null)
+                        }
+                    }
+                    if (actions != null) {
+                        IconButton(onClick = actions.onAddPlace) {
+                            MaterialSymbol(glyph = "add_location_alt", contentDescription = null)
+                        }
+                        IconButton(onClick = actions.onSettings) {
+                            MaterialSymbol(glyph = "settings", contentDescription = null)
+                        }
+                    }
                 }
             },
             placeholder = { Text(placeholder) },
             shape = RoundedCornerShape(28.dp),
-            modifier = Modifier.weight(1f),
+            // An outlined field's container is transparent by default, which
+            // lets the map show through the text; the field floats over the map,
+            // so it needs an opaque surface behind it.
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            ),
+            modifier = Modifier.fillMaxWidth(),
         )
-
-        if (actions != null) {
-            IconButton(onClick = actions.onAddPlace) {
-                MaterialSymbol(glyph = "add_location_alt", contentDescription = null)
-            }
-            IconButton(onClick = actions.onSettings) {
-                MaterialSymbol(glyph = "settings", contentDescription = null)
-            }
-        }
-        }
 
         if (results.isNotEmpty()) {
             Spacer(modifier = Modifier.size(8.dp))
