@@ -1012,6 +1012,20 @@ would regress, so the main map cannot be swapped in one slice yet:
 - **Offline/basemap** — the offline toggle and `BundledBasemapStyle`'s layer
   uncapping have no Compose equivalent yet.
 
+### Phase 3, twenty-second slice — done (step 6: the desktop module)
+
+A new `:desktopApp` JVM module (Kotlin JVM + Compose Desktop, toolchain 25,
+`--enable-native-access=ALL-UNNAMED`, packaged as DMG/MSI/DEB) renders the shared
+`StatsScreen`, so the module and the shared UI run end to end on the desktop.
+The Kotlin plugins are applied without versions because they are already on the
+build classpath, and the `run` task needs `javaHome` pointed at the Java 25
+toolchain — it otherwise launches the Gradle daemon's JVM and fails with
+`UnsupportedClassVersionError` (the app is class file 69).
+
+Verified: `:desktopApp:run` opens the window and stays up (killed by the test's
+timeout, no exception); the Android modules are unaffected, so the version code
+is unchanged. Navigation, the database and the map on desktop follow.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

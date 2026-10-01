@@ -36,3 +36,4 @@ rootProject.name = "BTC Map"
 include(":app")
 include(":shared")
 include(":ui")
+include(":desktopApp")
