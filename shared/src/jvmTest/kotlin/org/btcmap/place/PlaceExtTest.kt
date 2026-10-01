@@ -29,6 +29,25 @@ class PlaceExtTest {
     }
 
     @Test
+    fun btcmapUrl_buildsFromThePlaceId() {
+        Assert.assertEquals(
+            "https://btcmap.org/merchant/123",
+            place(boostedUntil = null).copy(id = 123).btcmapUrl(),
+        )
+    }
+
+    @Test
+    fun osmMapUrl_centresOnThePlace() {
+        val place = place(boostedUntil = null).copy(lat = 52.2333742, lon = 21.0711489)
+
+        Assert.assertEquals(
+            "https://www.openstreetmap.org/?mlat=52.2333742&mlon=21.0711489" +
+                "#map=17/52.2333742/21.0711489",
+            place.osmMapUrl(),
+        )
+    }
+
+    @Test
     fun osmUrl_buildsFromOsmId() {
         val place = place(boostedUntil = null).copy(osmId = "node:123")
 

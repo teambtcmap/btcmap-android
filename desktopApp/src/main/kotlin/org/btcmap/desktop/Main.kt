@@ -179,7 +179,7 @@ private fun runApp() = application {
                             placeSheetStrings = PLACE_SHEET_STRINGS,
                             searchActions = SearchActions(onSettings = { route = Route.Settings }),
                             onOpenFeed = { route = Route.Feed },
-                            onPlaceAction = { _, _ -> },
+                            onPlaceAction = ::handlePlaceAction,
                             onSelectEvent = {},
                             onSelectArea = {},
                             formatDistance = { meters -> "%.1f km".format(meters / 1000) },

@@ -29,6 +29,16 @@ fun SearchPlace.isBoosted(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
  */
 fun Place.isWithin(geometry: AreaGeometry): Boolean = geometry.contains(lat, lon)
 
+/** The place on btcmap.org, e.g. "https://btcmap.org/merchant/123". */
+fun Place.btcmapUrl(): String = "https://btcmap.org/merchant/$id"
+
+/**
+ * OpenStreetMap centred on the place. The Android app's directions action uses a
+ * `geo:` URI instead, which a desktop browser cannot act on.
+ */
+fun Place.osmMapUrl(): String =
+    "https://www.openstreetmap.org/?mlat=$lat&mlon=$lon#map=17/$lat/$lon"
+
 /**
  * The place's OpenStreetMap page, e.g. "https://www.openstreetmap.org/node/123".
  * Null when no OSM id is known.

@@ -32,7 +32,9 @@ Next, in rough order of value:
    because the shared sheet's twelve actions (verify, report, boost, photos,
    bookmark, comments) are implemented there. Porting them to the Compose sheet is
    the last big Android slice; `MapScreen.placeSheet = false` is the staging flag
-   that keeps the Views sheet in charge meanwhile.
+   that keeps the Views sheet in charge meanwhile. The link actions the desktop
+   now serves (slice 41) are the ones both hosts share via `Place.btcmapUrl` and
+   `Place.osmMapUrl`.
 2. **Desktop polish** — the add-place flow, the comments/user-profile screens and the
    auth forms on the desktop (they need a place/session context).
 3. **Port the deleted search tests.** `EventSearchTest`'s offline search cases
@@ -1373,6 +1375,25 @@ fragment answers it with `reportFullyDrawn()`.
 Verified on the emulator: logcat shows
 `ActivityTaskManager: Fully drawn org.btcmap.debug/org.btcmap.Activity: +1s206ms`,
 which the app never logged while the map was empty.
+
+### Phase 3, forty-first slice — done (the desktop place sheet's link actions)
+
+The desktop sheet's menu did nothing. It now opens what a desktop can serve on
+its own: **Directions** opens OpenStreetMap at the place, **View on btcmap**,
+**View on OpenStreetMap** and **Edit on OpenStreetMap** open their pages in the
+browser, and **Share** copies the btcmap link to the clipboard. The actions that
+need the app's forms or a signed-in session (verify, report, boost, comment,
+bookmark, add photo) still do nothing and say so in the log.
+
+The two links both hosts need moved to `:shared` next to the OSM ones —
+`Place.btcmapUrl()` and `Place.osmMapUrl()` — with tests in `PlaceExtTest`; the
+Android port will use them for its own menu. The desktop's `handlePlaceAction`
+logs every action, which is also how a headless run shows what the sheet asked
+for.
+
+Verified by `:shared:jvmTest` (the two link builders) and a desktop compile; the
+window's actions cannot be clicked from here, since this Wayland session has no
+input-injection tool.
 
 ## Working notes
 
