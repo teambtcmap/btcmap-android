@@ -1037,6 +1037,20 @@ Verified: running the app creates `~/.btcmap/btcmap.db` with the full schema at
 version 107, and the window stays up. The icon font is not loaded on desktop
 yet, so the stats cards pass no icon.
 
+### Phase 3, twenty-fourth slice — done (step 6: the desktop icon font)
+
+The desktop app now loads the Material Symbols typeface and passes it to
+`AppTheme`, so icons render as ligatures instead of raw text. While running from
+the sources the font comes from the Android asset directory, which Gradle hands
+over as `-Dbtcmap.iconFontDir` (`BTCMAP_ICON_FONT` overrides it, and the newest
+`material-symbols-*` file wins, so the versioned name does not have to be kept in
+sync). Packaging the font into the desktop distribution is still to do.
+
+Verified as far as this environment allows: the run logs the font it loaded
+(`.../app/src/main/assets/material-symbols-outlined-2026-08-28.ttf`) with no
+error. The desktop window cannot be screenshotted here (`import` fails on this
+X setup), so the rendering itself was not seen.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

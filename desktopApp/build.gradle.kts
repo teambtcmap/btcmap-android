@@ -39,6 +39,9 @@ compose.desktop {
         }.get().metadata.installationPath.asFile.absolutePath
         // MapLibre Native reaches its native libraries through the FFI.
         jvmArgs += "--enable-native-access=ALL-UNNAMED"
+        // Where the icon font (the Android asset) lives while running from the
+        // sources; packaging it into the distribution is still to do.
+        jvmArgs += "-Dbtcmap.iconFontDir=" + rootProject.file("app/src/main/assets").absolutePath
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "BTC Map"
