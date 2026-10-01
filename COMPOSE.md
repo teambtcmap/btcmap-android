@@ -28,10 +28,10 @@ Done and pushed:
 
 Next, in rough order of value:
 
-1. **Add photo on the map sheet** — the one action slice 42 could not port: the
-   picker, camera and upload live inside `PlaceFragment`, so the sheet's button
-   bridges to that screen meanwhile. Porting the flow (its picker/camera
-   launchers and the upload call) is what lets the bridge go.
+1. **Unify the two add-photo flows** — slice 43 gave the map sheet its own copy
+   of the picker, camera and upload (they are the same helpers, but the launchers
+   and the upload live in each host). When the place screen itself becomes
+   Compose, the two should collapse into one.
 2. **Desktop polish** — the add-place flow, the comments/user-profile screens and the
    auth forms on the desktop (they need a place/session context).
 3. **Port the deleted search tests.** `EventSearchTest`'s offline search cases
@@ -1422,6 +1422,25 @@ Verified on the emulator: tapping a marker opens the Compose sheet with its
 photos and a labelled action grid; Comments opened the add-comment form (the
 place has none) and Verify opened the report screen with the verified reason
 selected.
+
+### Phase 3, forty-third slice — done (add photo on the map sheet)
+
+`PlaceAction.AddPhoto` no longer bridges to the standalone place screen: the map
+sheet runs the flow itself, through the same helpers the place screen uses
+(`createPhotoCaptureTarget`, `Context.encodePhoto`, `api().addPlaceImage`). The
+source dialog offers **Take photo** and **Choose from gallery**, the camera and
+picker results are handled by the fragment's own launchers, the upload shows the
+progress dialog, and the sheet's photo strip refills from the place-images
+endpoint afterwards. Uploads need a signed-in user, so the action goes through
+the same auth hand-off as Save and Verify, carrying the place id.
+
+The flow is now written twice, in `PlaceFragment` and in `MapFragment`: the
+helpers are shared but the launchers and the upload are not. Collapsing them is
+for when the place screen itself becomes Compose.
+
+Verified on the emulator: Add photo opened the source dialog with both options,
+and Choose from gallery opened the system photo picker. The upload itself was not
+re-run, so as not to post a test photo to a live place.
 
 ## Working notes
 

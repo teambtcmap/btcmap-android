@@ -3,11 +3,16 @@ package org.btcmap.map
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.ui.graphics.Color
@@ -21,6 +26,7 @@ import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -28,6 +34,7 @@ import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.api
+import org.btcmap.api.addPlaceImage
 import org.btcmap.api.getEvent
 import org.btcmap.api.getPlaceCoordinates
 import org.btcmap.api.getPlaceImages
@@ -47,7 +54,6 @@ import org.btcmap.event.toBundle
 import org.btcmap.feed.ActivityFeedFragment
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.place.AddPlaceFragment
-import org.btcmap.place.PlaceFragment
 import org.btcmap.place.ReportPlaceFragment
 import org.btcmap.place.btcmapUrl
 import org.btcmap.place.osmEditUrl
@@ -80,9 +86,12 @@ import org.btcmap.ui.PlaceSheetStrings
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.bundledStyleJsonFor
 import org.btcmap.util.DeepLink
+import org.btcmap.util.createPhotoCaptureTarget
+import org.btcmap.util.encodePhoto
 import org.btcmap.util.iconTypeface
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
+import java.io.File
 import java.text.NumberFormat
 
 class MapFragment : Fragment() {
@@ -90,6 +99,31 @@ class MapFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var updateNotificationController: UpdateNotificationController? = null
+
+    /** The place an add-photo that is still being picked belongs to. */
+    private var photoPlaceId = 0L
+
+    private var pendingPhotoUri: Uri? = null
+
+    private var pendingPhotoFile: File? = null
+
+    private var uploadingDialog: AlertDialog? = null
+
+    private val pickPhoto = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) uploadPhoto(uri)
+    }
+
+    private val capturePhoto = registerForActivityResult(
+        ActivityResultContracts.TakePicture(),
+    ) { success ->
+        val uri = pendingPhotoUri
+        val file = pendingPhotoFile
+        pendingPhotoUri = null
+        pendingPhotoFile = null
+        if (success && uri != null) uploadPhoto(uri, file) else file?.delete()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -345,11 +379,7 @@ class MapFragment : Fragment() {
 
             PlaceAction.AddComment -> openAddComment(place)
 
-            // The photo picker, camera and upload live in the place screen, so
-            // this action hands over to it: the sheet's own photo strip and the
-            // upload form are wired together there. Porting them here is the
-            // next slice.
-            PlaceAction.AddPhoto -> navigate(PlaceFragment.create(place.id), null)
+            PlaceAction.AddPhoto -> requestAddPhoto(place)
         }
     }
 
@@ -370,6 +400,13 @@ class MapFragment : Fragment() {
                 }
             }
 
+            AUTH_ACTION_ADD_PHOTO -> {
+                val placeId = extras.getLong(EXTRA_PLACE_ID, 0L)
+                if (placeId <= 0L) return
+                photoPlaceId = placeId
+                showAddPhotoSourceDialog()
+            }
+
             AUTH_ACTION_OPEN_REPORT -> viewLifecycleOwner.lifecycleScope.launch {
                 val placeId = extras.getLong(EXTRA_PLACE_ID, 0L)
                 if (placeId <= 0L) return@launch
@@ -382,6 +419,108 @@ class MapFragment : Fragment() {
             // that needed it was adding a place.
             else -> addPlaceAfterAuth()
         }
+    }
+
+    /**
+     * Uploads require a signed-in user, so prompt for auth first if needed. The
+     * picker, camera and upload are the same helpers the place screen uses.
+     */
+    private fun requestAddPhoto(place: Place) {
+        photoPlaceId = place.id
+        if (prefs.authorized) {
+            showAddPhotoSourceDialog()
+        } else {
+            showAuthDialog(
+                Bundle().apply {
+                    putString(EXTRA_AUTH_ACTION, AUTH_ACTION_ADD_PHOTO)
+                    putLong(EXTRA_PLACE_ID, place.id)
+                    putString(EXTRA_PLACE_NAME, place.name.orEmpty())
+                },
+            )
+        }
+    }
+
+    private fun showAddPhotoSourceDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.add_photo)
+            .setItems(
+                arrayOf(
+                    getString(R.string.report_photo_take),
+                    getString(R.string.report_photo_choose),
+                ),
+            ) { _, which ->
+                when (which) {
+                    0 -> startCamera()
+                    1 -> pickPhoto.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                    )
+                }
+            }
+            .show()
+    }
+
+    private fun startCamera() {
+        val (uri, file) = createPhotoCaptureTarget()
+        pendingPhotoUri = uri
+        pendingPhotoFile = file
+
+        try {
+            capturePhoto.launch(uri)
+        } catch (e: ActivityNotFoundException) {
+            pendingPhotoUri = null
+            pendingPhotoFile = null
+            file.delete()
+            Toast.makeText(requireContext(), R.string.report_photo_no_camera, Toast.LENGTH_LONG)
+                .show()
+        }
+    }
+
+    /**
+     * Reads and re-encodes the picked photo, uploads it to the place and refills
+     * the sheet's strip. [cleanupFile] is the temporary capture backing a camera
+     * result; it is removed once the photo has been read.
+     */
+    private fun uploadPhoto(uri: Uri, cleanupFile: File? = null) {
+        val placeId = photoPlaceId
+        if (placeId <= 0L) {
+            cleanupFile?.delete()
+            return
+        }
+
+        val context = requireContext().applicationContext
+        showUploading()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val photo = context.encodePhoto(uri)
+                api().addPlaceImage(placeId, photo)
+                hideUploading()
+                withContext(Dispatchers.IO) { db().place.selectById(placeId) }
+                    ?.let { refreshSheet(it) }
+            } catch (t: Throwable) {
+                t.rethrowIfCancellation()
+                hideUploading()
+                showError(t)
+            } finally {
+                cleanupFile?.delete()
+            }
+        }
+    }
+
+    private fun showUploading() {
+        if (uploadingDialog?.isShowing == true) return
+
+        val view = layoutInflater.inflate(R.layout.account_progress_dialog, null)
+        view.findViewById<TextView>(R.id.progressMessage).text = getString(R.string.loading)
+        uploadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(view)
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun hideUploading() {
+        uploadingDialog?.dismiss()
+        uploadingDialog = null
     }
 
     private fun openReport(place: Place, defaultType: String?) {
@@ -648,5 +787,6 @@ class MapFragment : Fragment() {
 
         private const val AUTH_ACTION_TOGGLE_SAVED = "toggle-saved"
         private const val AUTH_ACTION_OPEN_REPORT = "open-report"
+        private const val AUTH_ACTION_ADD_PHOTO = "add-photo"
     }
 }
