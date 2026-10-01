@@ -81,6 +81,10 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <activity
+            android:name="org.btcmap.MapSpikeActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
@@ -6,15 +8,25 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(17)
+    // MapLibre Compose's desktop artifact is Java 25 bytecode, so the toolchain
+    // must be at least 25; the Android target still emits JVM 17 bytecode.
+    jvmToolchain(25)
 
     android {
         namespace = "org.btcmap.ui"
         compileSdk = 37
         minSdk = 29
+
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
     }
 
-    jvm()
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_25)
+        }
+    }
 
     sourceSets {
         commonMain.dependencies {
@@ -25,10 +37,16 @@ kotlin {
             api(compose.ui)
             implementation(compose.foundation)
             implementation(compose.material3)
+            implementation(libs.maplibre.compose)
+        }
+
+        androidMain.dependencies {
+            runtimeOnly(libs.maplibre.compose.runtime.opengl.android)
         }
 
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
+            runtimeOnly(libs.maplibre.compose.runtime.opengl.linux.x64)
         }
     }
 }
@@ -36,5 +54,6 @@ kotlin {
 compose.desktop {
     application {
         mainClass = "org.btcmap.ui.MainKt"
+        jvmArgs += "--enable-native-access=ALL-UNNAMED"
     }
 }

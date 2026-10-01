@@ -2,8 +2,8 @@
 
 Status: Phase 1 (shared module) and Phase 2 (non-map UI to Compose Multiplatform)
 are complete — 14 slices, all verified on the emulator. Phase 3 (the map, and the
-desktop target) is planned below but not started; it is gated on
-`maplibre-compose` maturing (desktop is Alpha).
+desktop target) is in progress: the Android spike renders a shared MapLibre
+Compose map (see Progress).
 
 ## Goal
 
@@ -618,6 +618,29 @@ Deleted the `account_choices`, `account`, `account_sign_up` and
 `ChangePasswordRotationTest`) to drive the Compose fields.
 `AuthErrorDialogFragment` (a plain message dialog) stays Views. No behavior
 change.
+
+### Phase 3, first slice — done (Android spike)
+
+Added `org.maplibre.compose:maplibre-compose` **0.18.0** to `:ui`'s `commonMain`
+and its OpenGL Android runtime (`maplibre-compose-runtime-opengl-android`), a
+shared `MapScreen` composable and a `MapComposeView` host. A temporary
+`MapSpikeActivity` in `:app` (manifest entry, launched with `adb shell am start`)
+proves rendering.
+
+Verified toolchain facts (worth not rediscovering):
+
+- `:ui` now uses `jvmToolchain(25)` (maplibre-compose's desktop artifact is Java
+  25 bytecode); the Android target overrides `jvmTarget` to **17** and the JVM
+  target to **25**. AGP 9.4 accepts the JDK 25 toolchain for the Android target.
+- On the emulator the OpenGL runtime renders: maplibre-compose logs
+  "Rendered the first map frame with OPENGL" and the GPU identifier; the demo
+  style shows the expected map colours (pixel-sampled).
+- The APK packages both `libmaplibre.so` (the existing Android SDK) and
+  maplibre-compose's natives with no duplicate-class conflict, so the two stacks
+  coexist during the migration.
+
+`MapSpikeActivity` is throwaway scaffolding; remove it once the shared map
+replaces `MapFragment`. Next: port the marker/layer pipeline (step 2).
 
 ## Working notes
 

@@ -54,6 +54,9 @@ okhttp = "5.5.0"
 # Map widget with vector support
 # https://github.com/maplibre/maplibre-native/releases
 maplibre = "13.6.1"
+# MapLibre for Compose Multiplatform (shared map, Phase 3)
+# https://github.com/maplibre/maplibre-compose/releases
+maplibre-compose = "0.18.0"
 # Used for displaying LN invoices
 # https://github.com/androidmads/QRGenerator/releases
 qrgenerator = "1.0.5"
@@ -103,6 +106,9 @@ material = { group = "com.google.android.material", name = "material", version.r
 okhttp-coroutines = { group = "com.squareup.okhttp3", name = "okhttp-coroutines", version.ref = "okhttp" }
 okhttp-brotli = { group = "com.squareup.okhttp3", name = "okhttp-brotli", version.ref = "okhttp" }
 maplibre = { module = "org.maplibre.gl:android-sdk", version.ref = "maplibre" }
+maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "maplibre-compose" }
+maplibre-compose-runtime-opengl-android = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-android", version.ref = "maplibre-compose" }
+maplibre-compose-runtime-opengl-linux-x64 = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-linux-x64", version.ref = "maplibre-compose" }
 qrgenerator = { module = "com.github.androidmads:QRGenerator", version.ref = "qrgenerator" }
 colorpicker = { module = "com.github.mrudultora:Colorpicker", version.ref = "colorpicker" }
 coil = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
