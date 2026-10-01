@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -30,10 +29,10 @@ import org.btcmap.db.table.place.TABLE as PLACE_TABLE
 import org.btcmap.db.table.preference.TABLE as PREF_TABLE
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.prefs
-import org.btcmap.stats.StatsAdapter
 import org.btcmap.stats.StatsEntry
 import org.btcmap.stats.StatsSection
 import org.btcmap.syncController
+import org.btcmap.util.iconTypeface
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
 import java.text.NumberFormat
@@ -70,9 +69,7 @@ class DbStatsFragment : Fragment() {
             }
         }
 
-        binding.statsList.layoutManager = LinearLayoutManager(requireContext())
-        val adapter = StatsAdapter()
-        binding.statsList.adapter = adapter
+        binding.statsList.iconTypeface = iconTypeface
 
         val database = db()
         val reader = DbStatsReader(database.conn)
@@ -138,7 +135,7 @@ class DbStatsFragment : Fragment() {
                         add(syncSection(state))
                         addAll(base)
                     }
-                }.collect { adapter.submitList(it) }
+                }.collect { binding.statsList.sections = it }
             }
         }
 

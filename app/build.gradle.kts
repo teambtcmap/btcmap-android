@@ -27,7 +27,7 @@ android {
         targetSdk {
             version = release(37)
         }
-        versionCode = 167
+        versionCode = 168
         versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -124,6 +124,7 @@ kotlin {
 
 dependencies {
     implementation(project(":shared"))
+    implementation(project(":ui"))
 
     implementation(libs.kotlinx.coroutines)
 

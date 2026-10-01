@@ -1,8 +1,9 @@
 # Migration Plan: Compose (Multiplatform) and a Shared Module
 
-Status: Phase 1 in progress. The `:shared` module exists and its first slice has
-landed; `:app` builds, the moved tests pass, and the app runs on the emulator
-(see Progress).
+Status: Phase 1 complete; Phase 2 (UI → Compose Multiplatform) in progress. The
+`:shared` module holds the whole portable core, `:ui` adds the Compose
+Multiplatform infrastructure, and the app builds, tests green, and runs on the
+emulator (see Progress).
 
 ## Goal
 
@@ -350,9 +351,30 @@ Everything else in `:app` imports `android.*`/`androidx.*`, MapLibre, Coil or
 Material — the UI, the map controllers, the asset seeding and the platform glue.
 `:shared` now holds the entire portable core.
 
+### Phase 2, first slice — done
+
+Added Compose Multiplatform: a `:ui` Kotlin Multiplatform module (Android + JVM)
+applying `org.jetbrains.compose` (1.12.1) and the Compose compiler plugin, with
+a Material 3 `StatsScreen` in `commonMain`. `:app` depends on `:ui` and hosts it
+through an `AbstractComposeView` (`StatsComposeView`) rather than a
+`ComposeView`/`setContent`, so `:app` needs no Compose compiler and can stay on
+Views while screens move one at a time.
+
+Piloted on `DbStatsFragment`: its `RecyclerView` + `StatsAdapter` list is now the
+Compose `StatsScreen`, with section icons rendered from the app's Material
+Symbols typeface (passed in as a `FontFamily`) and hidden from accessibility as
+before. The host passes the app's dynamic (Material You) `ColorScheme` into
+`StatsScreen`, so the cards follow the DayNight theme instead of always
+rendering light.
+
+Verified: `:ui` compiles for Android + JVM; `:shared:jvmTest` (62),
+`:app:testDebugUnitTest` (32), `:app:compileDebugKotlin`,
+`:app:compileDebugAndroidTestKotlin`; and on the emulator the screen renders its
+cards in both light and dark mode with no crash. No behavior change.
+
 ## Next
 
-The remaining tracks are Phase 2 (UI → Compose Multiplatform) and Phase 3 (map →
-MapLibre Compose), both gated on the open decisions above (hours/week, whether
-desktop needs the map, whether Android moves to CMP). Phase 1 needs no further
-work.
+Phase 2 continues: migrate the remaining non-map screens to `:ui` screen by
+screen, add a common theme for the desktop target (Android already passes its
+dynamic scheme), give `:ui` a JVM entry point, and (Phase 3, gated on MapLibre
+Compose maturing) move the map to Compose Multiplatform with the desktop target.
