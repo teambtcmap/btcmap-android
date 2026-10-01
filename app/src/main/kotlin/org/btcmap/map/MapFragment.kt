@@ -77,6 +77,7 @@ import org.btcmap.settings.mapZoom
 import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.markerIconColor
 import org.btcmap.settings.prefs
+import org.btcmap.settings.showAttribution
 import org.btcmap.settings.uri
 import org.btcmap.settings.verifiedFilterMinVerifiedAt
 import org.btcmap.sync.SyncState
@@ -249,6 +250,7 @@ class MapFragment : Fragment() {
                 save = getString(R.string.save),
                 addPhoto = getString(R.string.add_photo),
             )
+            showAttribution = prefs.showAttribution
             onPlaceSelected = ::onPlaceSelected
             onPlaceAction = ::onPlaceAction
             onEventSelected = { openEvent(it.toBundle()) }

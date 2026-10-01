@@ -42,8 +42,7 @@ Next, in rough order of value:
 4. **Small parity gaps** left by the swap, all listed in slice 39: tapping empty
    map no longer dismisses the place sheet (the map exposes no map-tap callback;
    `InteractionBindingsBuilder` has gesture bindings but no host click callback),
-   an area search result opens the area screen instead of framing its bbox, and
-   the `showAttribution` setting no longer hides the map's own attribution.
+   and an area search result opens the area screen instead of framing its bbox.
 
 ## Goal
 
@@ -1355,11 +1354,10 @@ and the crossing-viewport `expand` case, which `VisibleBounds` refuses to
 construct). Porting the search and marker-glyph tests is listed as remaining work.
 
 Known gaps this leaves: the place sheet no longer closes on a tap on empty map
-(the shared map has no no-hit callback); an area **search result** opens the area
-screen rather than framing the area's bbox as before; and the map's own
-attribution replaces the Views one, so the `showAttribution` setting no longer
-hides anything. The startup "fully drawn" report the Views map made was restored
-in slice 40.
+(the shared map has no no-hit callback); and an area **search result** opens the
+area screen rather than framing the area's bbox as before. The startup "fully
+drawn" report the Views map made was restored in slice 40, and `showAttribution`
+works again as of slice 45.
 
 ### Phase 3, fortieth slice — done (the fully-drawn report)
 
@@ -1455,6 +1453,17 @@ the bundled SQLite driver and Gson, since the rows the search reads are real
 table rows and one of them holds a Gson geometry column.
 
 Verified by running the five cases on the JVM.
+
+### Phase 3, forty-fifth slice — done (the attribution setting works again)
+
+The map's attribution pill is MapLibre Compose's default overlay, so the Views
+`TextView` went and the **Show attribution** setting had nothing left to hide.
+It does now: `MapScreen` takes a `showAttribution` flag and draws the pill
+itself through the map's overlay slot (`ExpandingAttributionButton`), which is
+also where the default put it, and the fragment feeds it `prefs.showAttribution`.
+
+Verified on the emulator: with the setting on the pill is drawn, and turning it
+off in Settings and returning to the map removes it.
 
 ## Working notes
 

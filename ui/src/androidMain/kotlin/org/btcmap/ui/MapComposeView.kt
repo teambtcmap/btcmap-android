@@ -120,6 +120,8 @@ class MapComposeView @JvmOverloads constructor(
 
     var placeSheet: Boolean by mutableStateOf(true)
 
+    var showAttribution: Boolean by mutableStateOf(true)
+
     var openTarget: Pair<Double, Double>? by mutableStateOf(null)
 
     @Composable
@@ -160,6 +162,7 @@ class MapComposeView @JvmOverloads constructor(
             onCameraIdle = onCameraIdle,
             onFeaturesDrawn = onFeaturesDrawn,
             placeSheet = placeSheet,
+            showAttribution = showAttribution,
             openTarget = openTarget,
             photos = photos,
             bookmarked = bookmarked,

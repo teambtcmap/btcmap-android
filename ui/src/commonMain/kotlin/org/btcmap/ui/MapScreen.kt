@@ -73,6 +73,7 @@ import org.maplibre.compose.map.MapEvent
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.StyleLoadState
 import org.maplibre.compose.map.rememberMapState
+import org.maplibre.compose.overlay.ExpandingAttributionButton
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.spatialk.geojson.Position
 import java.time.ZonedDateTime
@@ -109,6 +110,11 @@ fun MapScreen(
      * move.
      */
     reloadKey: Int = 0,
+    /**
+     * Whether the map draws its attribution. The app has a setting for this, so
+     * the pill is the map's own overlay rather than a fixed part of it.
+     */
+    showAttribution: Boolean = true,
     /** Reports where the camera came to rest, so the host can remember it. */
     onCameraIdle: ((Double, Double, Double) -> Unit)? = null,
     /**
@@ -440,7 +446,9 @@ fun MapScreen(
 
     AppTheme(iconFont = iconFont) {
         Box(modifier = modifier.fillMaxSize()) {
-            MaplibreMap(modifier = Modifier.fillMaxSize(), state = state)
+            MaplibreMap(modifier = Modifier.fillMaxSize(), state = state) {
+                if (showAttribution) ExpandingAttributionButton()
+            }
             Column(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
