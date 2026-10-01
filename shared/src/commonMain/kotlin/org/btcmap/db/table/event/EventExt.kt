@@ -15,4 +15,4 @@ import org.btcmap.db.table.area.AreaGeometry
  * [geometry] is passed in rather than parsed from an area so a caller that
  * tests many events against the same area parses the GeoJSON once.
  */
-internal fun Event.isWithin(geometry: AreaGeometry): Boolean = geometry.contains(lat, lon)
+fun Event.isWithin(geometry: AreaGeometry): Boolean = geometry.contains(lat, lon)

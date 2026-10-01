@@ -22,11 +22,11 @@ fun SearchPlace.getLocalizedName(): String = placeLocalizedName(name, localizedN
  * `name:<lang>` translation. Search matches against all of them, so a query in
  * any cached language finds the place even when the device language differs.
  */
-internal fun Place.getSearchableNames(): List<String> =
+fun Place.getSearchableNames(): List<String> =
     placeSearchableNames(name, localizedName)
 
 /** [getSearchableNames] for a search row. */
-internal fun SearchPlace.getSearchableNames(): List<String> =
+fun SearchPlace.getSearchableNames(): List<String> =
     placeSearchableNames(name, localizedName)
 
 private fun placeLocalizedName(name: String?, localizedName: JsonObject?): String =

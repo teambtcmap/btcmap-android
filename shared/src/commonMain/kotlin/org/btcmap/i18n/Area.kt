@@ -30,11 +30,11 @@ fun Area.getLocalizedDescription(): String? =
  * `name:<lang>` translation. Search matches against all of them, so a query in
  * any cached language finds the area even when the device language differs.
  */
-internal fun Area.getSearchableNames(): List<String> =
+fun Area.getSearchableNames(): List<String> =
     areaSearchableNames(name, localizedName)
 
 /** [getSearchableNames] for a search row. */
-internal fun SearchArea.getSearchableNames(): List<String> =
+fun SearchArea.getSearchableNames(): List<String> =
     areaSearchableNames(name, localizedName)
 
 private fun areaLocalizedName(name: String, localizedName: JsonObject?): String =

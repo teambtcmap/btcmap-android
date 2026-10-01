@@ -621,10 +621,11 @@ class PlaceFragment : Fragment() {
             binding.companionWarning.isVisible = false
         }
 
-        if (place.verifiedAt != null) {
+        val verifiedAt = place.verifiedAt
+        if (verifiedAt != null) {
             val date = DateUtils.getRelativeDateTimeString(
                 requireContext(),
-                place.verifiedAt.toLocalDate().toEpochDay() * 24 * 3600 * 1000,
+                verifiedAt.toLocalDate().toEpochDay() * 24 * 3600 * 1000,
                 DateUtils.SECOND_IN_MILLIS,
                 DateUtils.WEEK_IN_MILLIS,
                 0,
@@ -632,7 +633,7 @@ class PlaceFragment : Fragment() {
 
             binding.lastVerified.text = date
 
-            if (place.verifiedAt.isAfter(ZonedDateTime.now().minusYears(1))) {
+            if (verifiedAt.isAfter(ZonedDateTime.now().minusYears(1))) {
                 binding.lastVerified.isVisible = true
                 binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
                 binding.lastVerified.setOnClickListener(null)
@@ -698,19 +699,20 @@ class PlaceFragment : Fragment() {
             }
         }
 
-        if (place.line == null) {
+        val line = place.line
+        if (line == null) {
             binding.line.isVisible = false
         } else {
             binding.line.isVisible = true
-            if (place.line.queryParameter("accountId").isNullOrBlank()) {
-                binding.line.text = place.line.toString().replace("https://line.me/R/ti/p/@", "")
+            if (line.queryParameter("accountId").isNullOrBlank()) {
+                binding.line.text = line.toString().replace("https://line.me/R/ti/p/@", "")
             } else {
-                binding.line.text = place.line.queryParameter("accountId")
+                binding.line.text = line.queryParameter("accountId")
             }
             binding.line.styleAsLink()
             binding.line.setOnClickListener {
                 val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = place.line.toString().toUri()
+                intent.data = line.toString().toUri()
                 startActivity(intent)
             }
         }

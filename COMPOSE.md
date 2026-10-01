@@ -51,16 +51,21 @@ library swaps are required:
 | Gson (31 files) | Yes | keep; `kotlinx.serialization` only for Native |
 | `java.io.File` / `InputStream` | Yes | keep |
 | `java.util.concurrent` locks | Yes | keep |
-| `androidx.sqlite` + `AndroidSQLiteDriver` | Driver is platform-specific | `expect`/`actual`; use `BundledSQLiteDriver` on JVM |
+| `androidx.sqlite` + drivers | `androidx.sqlite` is multiplatform | no change; the driver is injected (`AndroidSQLiteDriver` in `:app`, `BundledSQLiteDriver` in tests) |
 
 The only real work is removing `android.*` / `androidx.*`: `Context` /
-`AssetManager` (bundle seeding), `AndroidSQLiteDriver`, and `Fragment`.
+`AssetManager` (bundle seeding) and `Fragment`.
 
 This was verified empirically (see Progress): with only Android and JVM
-targets, `commonMain` **accepts `java.*`** (the common metadata compilation is
-skipped) but **rejects `android.*`**. So the JVM-bound logic — `java.time`,
-Gson, OkHttp, `java.io` — moves to `commonMain` unchanged; only the Android
-references have to be cut.
+targets, `commonMain` **accepts `java.*` and JVM-only libraries such as Gson and
+OkHttp** (the common metadata compilation is skipped) but **rejects
+`android.*`**. So the JVM-bound logic — `java.time`, Gson, OkHttp, `java.io` —
+moves to `commonMain` unchanged, with Gson and OkHttp declared as ordinary
+`commonMain` dependencies; only the Android references have to be cut.
+
+The SQLite driver does **not** need `expect`/`actual`: `Database(driver, path)`
+already injects it, so `:app` passes `AndroidSQLiteDriver` and the JVM tests pass
+`BundledSQLiteDriver`.
 
 Caveat: such `commonMain` is not truly portable. Adding a Native or JS target
 later would need `kotlinx-datetime` / `kotlinx.serialization` or a JVM-only
@@ -121,7 +126,8 @@ Suggested order (least coupled first):
 
 `expect`/`actual` needed for:
 
-- SQLite driver (`AndroidSQLiteDriver` vs `BundledSQLiteDriver`) and DB path.
+- The database path (built from `Context` in `:app`); the driver itself is
+  injected, so no `expect`/`actual` is needed for it.
 - Legacy `SharedPreferences` import in settings.
 - Anything that reaches for `Context` / `AssetManager`.
 
@@ -267,11 +273,36 @@ were needed. Verified with `:shared:jvmTest`, `:app:compileDebugKotlin` and
 `:app:compileDebugAndroidTestKotlin` (the androidTest resolves the moved `stats`
 types from `:shared` with no extra dependency). No behavior change.
 
+### Phase 1, third slice — done
+
+Moved `db/**` and `i18n/**` (the latter because `db`'s tests use
+`getSearchableNames`) into `shared/src/commonMain/kotlin/...`, with the affected
+tests in `shared/src/jvmTest/...`. `:shared` gained `androidx.sqlite`, Gson and
+OkHttp as `commonMain` dependencies, plus `androidx.sqlite:sqlite-bundled-jvm` and
+JUnit for its JVM tests. No SQLite driver `expect`/`actual` was needed — the
+driver is injected.
+
+`db`'s only non-multiplatform dependency was `AreaGeometry`, which used the
+Android-only `org.maplibre.geojson` parser. It now walks the GeoJSON directly
+with Gson and keeps the existing point-in-polygon math, so the whole data layer
+is platform-independent. Visibility churn: `AreaGeometry`, `Area.geoJsonGeometry`,
+`Event.isWithin` and the four `getSearchableNames` overloads became public
+(`:app`'s `SearchController`, `map/` and `area/` use them). Two `:app` call sites
+(`Marker.isOutdated` and `PlaceFragment`'s `verifiedAt`/`line`) were rebound to
+locals, because Kotlin no longer smart-casts a nullable property across the
+module boundary.
+
+Verified: `:shared:jvmTest` (24 test classes), `:app:testDebugUnitTest`,
+`:app:compileDebugKotlin`, `:app:compileDebugAndroidTestKotlin`. No behavior
+change.
+
 ## Suggested next step
 
-Continue Phase 1 with `db/table/*` (schema, projections, queries), then
-`db/Database` and `db/StringExt`. This is the first slice that needs an
-`expect`/`actual` seam: the SQLite driver (`AndroidSQLiteDriver` vs
-`BundledSQLiteDriver`) and the database path. `Database(driver, path)` is
-already injected, so the driver is the main piece. Verify with `:shared:jvmTest`
-and the affected `:app` tests (`DatabaseTest`, the `*QueriesTest`).
+Continue Phase 1 with `sync/*` plus the portable parts of `api/*` and `util/*`
+(`sync` depends on `api`; `api` depends on `util` and on the `settings`
+singleton). The real design point is the `settings` seam: `api` reaches into
+`settings.prefs` for `authToken` and `apiUrl`, and `Settings` is backed by the app
+database with a legacy-`SharedPreferences` import — move that behind an injected
+accessor so `api`/`sync` can live in `:shared` while `:app` keeps the
+`Context`-bound pieces. Verify with the same four commands plus the affected
+`:app` tests.

@@ -17,8 +17,15 @@ kotlin {
     jvm()
 
     sourceSets {
+        commonMain.dependencies {
+            implementation(libs.androidx.sqlite)
+            implementation(libs.gson)
+            implementation(libs.okhttp.coroutines)
+        }
+
         jvmTest.dependencies {
             implementation(libs.junit)
+            implementation(libs.androidx.sqlite.bundled.jvm)
         }
     }
 }
