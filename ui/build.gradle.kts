@@ -39,6 +39,7 @@ kotlin {
             implementation(compose.material3)
             implementation(libs.maplibre.compose)
             implementation(libs.coil.compose)
+            implementation(libs.okhttp)
         }
 
         androidMain.dependencies {

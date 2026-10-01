@@ -62,7 +62,19 @@ class MapComposeView @JvmOverloads constructor(
 
     var iconTypeface: Typeface? by mutableStateOf(null)
 
-    var onPlaceSelected: (Place) -> Unit by mutableStateOf({})
+    var placeSheetStrings: PlaceSheetStrings by mutableStateOf(
+        PlaceSheetStrings(
+            notVerified = "",
+            companionWarning = { it },
+            verify = "",
+            report = "",
+            boost = "",
+            comments = { it.toString() },
+            addComment = "",
+        )
+    )
+
+    var onPlaceAction: (Place, PlaceAction) -> Unit by mutableStateOf({ _, _ -> })
 
     var onEventSelected: (Event) -> Unit by mutableStateOf({})
 
@@ -98,7 +110,8 @@ class MapComposeView @JvmOverloads constructor(
                 badgeText = markerBadgeTextColor,
             ),
             apiUrl = apiUrl,
-            onSelectPlace = onPlaceSelected,
+            placeSheetStrings = placeSheetStrings,
+            onPlaceAction = onPlaceAction,
             onSelectEvent = onEventSelected,
             onSelectArea = onAreaSelected,
             formatDistance = formatDistance,

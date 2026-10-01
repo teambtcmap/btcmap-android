@@ -7,6 +7,7 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import org.btcmap.ui.MapComposeView
+import org.btcmap.ui.PlaceSheetStrings
 import java.text.NumberFormat
 
 /**
@@ -30,8 +31,23 @@ class MapSpikeActivity : AppCompatActivity() {
             initialLon = CENTER_LON
             initialZoom = 13.0
             iconTypeface = org.btcmap.util.iconTypeface
-            onPlaceSelected = { place ->
-                Toast.makeText(this@MapSpikeActivity, "place ${place.id}: ${place.name}", Toast.LENGTH_SHORT).show()
+            placeSheetStrings = PlaceSheetStrings(
+                notVerified = getString(R.string.not_verified),
+                companionWarning = { getString(R.string.companion_warning, it) },
+                verify = getString(R.string.btn_verify),
+                report = getString(R.string.btn_report),
+                boost = getString(R.string.boost),
+                comments = { count ->
+                    if (count == 0L) {
+                        getString(R.string.comments)
+                    } else {
+                        getString(R.string.comments_d, count.toInt())
+                    }
+                },
+                addComment = getString(R.string.add_comment),
+            )
+            onPlaceAction = { place, action ->
+                Toast.makeText(this@MapSpikeActivity, "place ${place.id}: $action", Toast.LENGTH_SHORT).show()
             }
             onEventSelected = { event ->
                 Toast.makeText(this@MapSpikeActivity, "event ${event.id}: ${event.name}", Toast.LENGTH_SHORT).show()

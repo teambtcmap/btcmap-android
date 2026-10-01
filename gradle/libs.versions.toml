@@ -103,6 +103,7 @@ androidx-test-runner = { group = "androidx.test", name = "runner", version.ref =
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "android-test-espresso" }
 
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-coroutines = { group = "com.squareup.okhttp3", name = "okhttp-coroutines", version.ref = "okhttp" }
 okhttp-brotli = { group = "com.squareup.okhttp3", name = "okhttp-brotli", version.ref = "okhttp" }
 maplibre = { module = "org.maplibre.gl:android-sdk", version.ref = "maplibre" }

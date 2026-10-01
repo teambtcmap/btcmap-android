@@ -74,7 +74,8 @@ fun MapScreen(
     apiUrl: String,
     usingOpenFreeMap: Boolean,
     iconFont: FontFamily?,
-    onSelectPlace: (Place) -> Unit,
+    placeSheetStrings: PlaceSheetStrings,
+    onPlaceAction: (Place, PlaceAction) -> Unit,
     onSelectEvent: (Event) -> Unit,
     onSelectArea: (Long) -> Unit,
     formatDistance: (Double) -> String,
@@ -84,6 +85,8 @@ fun MapScreen(
     val density = LocalDensity.current
 
     val scope = rememberCoroutineScope()
+    var selectedPlace by remember { mutableStateOf<Place?>(null) }
+
     val onMarkerClick: MarkerClickHandler = { features ->
         val properties = features.firstOrNull()?.properties
         val id = properties?.get("id")?.jsonPrimitive?.longOrNull
@@ -96,7 +99,8 @@ fun MapScreen(
                 if (isEvent) {
                     withContext(Dispatchers.Default) { db.event.selectById(id) }?.let(onSelectEvent)
                 } else {
-                    withContext(Dispatchers.Default) { db.place.selectById(id) }?.let(onSelectPlace)
+                    withContext(Dispatchers.Default) { db.place.selectById(id) }
+                        ?.let { selectedPlace = it }
                 }
             }
             ClickResult.Consume
@@ -171,7 +175,7 @@ fun MapScreen(
         when (result) {
             is SearchAdapterItem.Place -> scope.launch {
                 withContext(Dispatchers.Default) { db.place.selectById(result.placeId) }
-                    ?.let(onSelectPlace)
+                    ?.let { selectedPlace = it }
             }
 
             is SearchAdapterItem.Event -> scope.launch {
@@ -263,6 +267,14 @@ fun MapScreen(
                     .align(Alignment.BottomEnd)
                     .padding(end = 24.dp, bottom = 112.dp),
             )
+            selectedPlace?.let { place ->
+                PlaceSheet(
+                    place = place,
+                    strings = placeSheetStrings,
+                    onAction = { onPlaceAction(place, it) },
+                    onDismiss = { selectedPlace = null },
+                )
+            }
             SearchOverlay(
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },

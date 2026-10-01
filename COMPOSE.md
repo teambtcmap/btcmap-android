@@ -801,6 +801,23 @@ Verified on the emulator: typing "bitcoin" lists the ranked local matches with
 their icons and distances, and tapping one selects it (event 165) and clears
 the field.
 
+### Phase 3, ninth slice — done (place sheet, stage 1)
+
+The first stage of the `PlaceFragment` bottom sheet:
+`ui/.../PlaceSheet.kt` renders a `ModalBottomSheet` with the place name, the
+companion warning, the verification state, the contact rows (address, phone,
+website, email, social, opening hours) and the Verify/Report/Boost/Comments and
+Add comment actions. `PlaceAction` and `PlaceSheetStrings` keep `:ui` free of
+the app's resources, and `MapScreen` opens the sheet when a place is selected
+(from a marker or a search result).
+
+Still to come from `PlaceFragment`: the photo list and upload, the preview map,
+the inline comment list, the toolbar overflow (view/edit on OSM, save), and the
+verification/outdated warnings.
+
+Verified on the emulator: selecting place 18048 ("Swag42") opens the sheet with
+its details and actions, and tapping Verify reports the action back.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
