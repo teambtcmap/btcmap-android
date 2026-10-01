@@ -7,6 +7,8 @@ enum class PlaceAction {
     ViewOnBtcmap,
     ViewOnOsm,
     EditOnOsm,
+    ToggleBookmark,
+    AddPhoto,
     Verify,
     Report,
     Boost,

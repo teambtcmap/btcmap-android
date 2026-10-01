@@ -10,6 +10,8 @@ import kotlinx.coroutines.launch
 import org.btcmap.offline.OfflineAreaState
 import org.btcmap.offline.OfflineBounds
 import org.btcmap.ui.map.OfflinePacks
+import org.btcmap.api.getPlaceImages
+import org.btcmap.api.placeImageUrl
 import org.btcmap.ui.map.bundledStyleJson
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
@@ -64,6 +66,8 @@ class MapSpikeActivity : AppCompatActivity() {
                 },
                 commentsTitle = { count -> getString(R.string.comments_d, count.toInt()) },
                 addComment = getString(R.string.add_comment),
+                save = getString(R.string.save),
+                addPhoto = getString(R.string.add_photo),
             )
             onPlaceAction = { place, action ->
                 Toast.makeText(this@MapSpikeActivity, "place ${place.id}: $action", Toast.LENGTH_SHORT).show()
@@ -75,6 +79,14 @@ class MapSpikeActivity : AppCompatActivity() {
                 Toast.makeText(this@MapSpikeActivity, "area $areaId", Toast.LENGTH_SHORT).show()
             }
             formatDistance = ::formatDistance
+        }
+        view.onPlaceSelected = { place ->
+            lifecycleScope.launch {
+                val images = runCatching { app.api.getPlaceImages(place.id) }.getOrDefault(emptyList())
+                view.photos = images.map {
+                    app.api.placeImageUrl(place.id, it.id, width = 144, height = 144)
+                }
+            }
         }
         setContentView(view)
 

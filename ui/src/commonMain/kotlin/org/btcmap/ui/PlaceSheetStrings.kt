@@ -22,4 +22,6 @@ data class PlaceSheetStrings(
     val comments: (Long) -> String,
     val commentsTitle: (Long) -> String,
     val addComment: String,
+    val save: String,
+    val addPhoto: String,
 )

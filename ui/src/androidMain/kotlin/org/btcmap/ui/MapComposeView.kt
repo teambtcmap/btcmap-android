@@ -83,8 +83,16 @@ class MapComposeView @JvmOverloads constructor(
             comments = { it.toString() },
             commentsTitle = { it.toString() },
             addComment = "",
+            save = "",
+            addPhoto = "",
         )
     )
+
+    var photos: List<String> by mutableStateOf(emptyList())
+
+    var bookmarked: Boolean by mutableStateOf(false)
+
+    var onPlaceSelected: (Place) -> Unit by mutableStateOf({})
 
     var onPlaceAction: (Place, PlaceAction) -> Unit by mutableStateOf({ _, _ -> })
 
@@ -124,6 +132,9 @@ class MapComposeView @JvmOverloads constructor(
             ),
             apiUrl = apiUrl,
             placeSheetStrings = placeSheetStrings,
+            photos = photos,
+            bookmarked = bookmarked,
+            onPlaceSelected = onPlaceSelected,
             onPlaceAction = onPlaceAction,
             onSelectEvent = onEventSelected,
             onSelectArea = onAreaSelected,

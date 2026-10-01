@@ -959,6 +959,23 @@ diff test are deleted; the instrumented search tests now click the Compose rows.
 Verified in the app: typing a place name lists it with its distance, and tapping
 the row clears the field and opens the place sheet.
 
+### Phase 3, twentieth slice — done (place sheet: photos and bookmark)
+
+`PlaceSheet` gained the two pieces the `PlaceFragment` sheet still had: an
+**Add photo** button and a photo strip (a `LazyRow` of thumbnails, `AsyncImage`,
+shown when there are photos), and a **Save** item at the top of the overflow
+whose bookmark glyph reflects the saved state. `MapScreen` takes the photos and
+the saved flag from the host and reports the selected place
+(`onPlaceSelected`), so the host can fetch them; the spike fetches a place's
+images through the shared API.
+
+The photo *viewer/pager* is still to port; the strip itself is verified below.
+
+Verified on the emulator: the sheet shows the Add photo button, the overflow
+shows Save (bookmark glyph) above Directions/Share/View/Edit, and the photo
+strip renders — "Chit Hole Phuket Brewery" (which has six images) shows its
+thumbnails above the Add photo button.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

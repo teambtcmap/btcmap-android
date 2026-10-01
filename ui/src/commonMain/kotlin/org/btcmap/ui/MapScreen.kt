@@ -83,6 +83,9 @@ fun MapScreen(
     usingOpenFreeMap: Boolean,
     iconFont: FontFamily?,
     placeSheetStrings: PlaceSheetStrings,
+    photos: List<String> = emptyList(),
+    bookmarked: Boolean = false,
+    onPlaceSelected: (Place) -> Unit = {},
     onPlaceAction: (Place, PlaceAction) -> Unit,
     onSelectEvent: (Event) -> Unit,
     onSelectArea: (Long) -> Unit,
@@ -120,8 +123,10 @@ fun MapScreen(
                 if (isEvent) {
                     withContext(Dispatchers.Default) { db.event.selectById(id) }?.let(onSelectEvent)
                 } else {
-                    withContext(Dispatchers.Default) { db.place.selectById(id) }
-                        ?.let { selectedPlace = it }
+                    withContext(Dispatchers.Default) { db.place.selectById(id) }?.let {
+                        selectedPlace = it
+                        onPlaceSelected(it)
+                    }
                 }
             }
             ClickResult.Consume
@@ -197,8 +202,10 @@ fun MapScreen(
         searchQuery = ""
         when (result) {
             is SearchAdapterItem.Place -> scope.launch {
-                withContext(Dispatchers.Default) { db.place.selectById(result.placeId) }
-                    ?.let { selectedPlace = it }
+                withContext(Dispatchers.Default) { db.place.selectById(result.placeId) }?.let {
+                    selectedPlace = it
+                    onPlaceSelected(it)
+                }
             }
 
             is SearchAdapterItem.Event -> scope.launch {
@@ -294,6 +301,8 @@ fun MapScreen(
                 PlaceSheet(
                     place = place,
                     comments = selectedComments,
+                    photos = photos,
+                    bookmarked = bookmarked,
                     strings = placeSheetStrings,
                     onAction = { onPlaceAction(place, it) },
                     onDismiss = { selectedPlace = null },

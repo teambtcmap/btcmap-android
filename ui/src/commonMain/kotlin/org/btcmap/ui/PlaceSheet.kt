@@ -1,6 +1,14 @@
 package org.btcmap.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -52,6 +60,8 @@ import java.time.format.FormatStyle
 fun PlaceSheet(
     place: Place,
     comments: List<CommentsAdapterItem>,
+    photos: List<String>,
+    bookmarked: Boolean,
     strings: PlaceSheetStrings,
     onAction: (PlaceAction) -> Unit,
     onDismiss: () -> Unit,
@@ -62,6 +72,8 @@ fun PlaceSheet(
         PlaceSheetContent(
             place = place,
             comments = comments,
+            photos = photos,
+            bookmarked = bookmarked,
             strings = strings,
             onAction = onAction,
             previewMap = previewMap,
@@ -73,6 +85,8 @@ fun PlaceSheet(
 private fun PlaceSheetContent(
     place: Place,
     comments: List<CommentsAdapterItem>,
+    photos: List<String>,
+    bookmarked: Boolean,
     strings: PlaceSheetStrings,
     onAction: (PlaceAction) -> Unit,
     previewMap: (@Composable () -> Unit)?,
@@ -94,7 +108,12 @@ private fun PlaceSheetContent(
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.weight(1f),
             )
-            PlaceOverflowMenu(place = place, strings = strings, onAction = onAction)
+            PlaceOverflowMenu(
+                place = place,
+                bookmarked = bookmarked,
+                strings = strings,
+                onAction = onAction,
+            )
         }
 
         previewMap?.invoke()
@@ -159,7 +178,33 @@ private fun PlaceSheetContent(
         place.instagram?.let { InfoRow(glyph = "link", text = it.toString()) }
         place.openingHours?.takeIf { it.isNotBlank() }?.let { InfoRow(glyph = "schedule", text = it) }
 
-        Spacer(modifier = Modifier.width(16.dp))
+        if (photos.isNotEmpty()) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                modifier = Modifier.padding(top = 8.dp),
+            ) {
+                items(photos) { url ->
+                    AsyncImage(
+                        model = url,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                    )
+                }
+            }
+        }
+
+        OutlinedButton(
+            onClick = { onAction(PlaceAction.AddPhoto) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+        ) {
+            Text(text = strings.addPhoto)
+        }
 
         ActionRow(
             startLabel = strings.verify,
@@ -193,6 +238,7 @@ private fun PlaceSheetContent(
 @Composable
 private fun PlaceOverflowMenu(
     place: Place,
+    bookmarked: Boolean,
     strings: PlaceSheetStrings,
     onAction: (PlaceAction) -> Unit,
 ) {
@@ -205,6 +251,10 @@ private fun PlaceOverflowMenu(
     }
 
     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        MenuItem(
+            label = strings.save,
+            glyph = if (bookmarked) "bookmark_added" else "bookmark",
+        ) { expanded = false; onAction(PlaceAction.ToggleBookmark) }
         MenuItem(strings.directions) { expanded = false; onAction(PlaceAction.Directions) }
         MenuItem(strings.share) { expanded = false; onAction(PlaceAction.Share) }
         MenuItem(strings.viewOnBtcmap) { expanded = false; onAction(PlaceAction.ViewOnBtcmap) }
@@ -218,9 +268,14 @@ private fun PlaceOverflowMenu(
 }
 
 @Composable
-private fun MenuItem(label: String, onClick: () -> Unit) {
+private fun MenuItem(
+    label: String,
+    glyph: String? = null,
+    onClick: () -> Unit,
+) {
     DropdownMenuItem(
         text = { Text(text = label) },
+        leadingIcon = glyph?.let { { MaterialSymbol(glyph = it, contentDescription = null) } },
         onClick = onClick,
     )
 }
