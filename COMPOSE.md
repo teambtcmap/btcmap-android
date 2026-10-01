@@ -1002,6 +1002,11 @@ would regress, so the main map cannot be swapped in one slice yet:
   either key the map state on the filter so the map is rebuilt with only the
   selected kind declared, or feed one kind-tagged source and let each kind's
   layers filter on the tag (untested). Both still need trying.
+  **The rebuild was tried and did not work either**: keying the map state on the
+  filter and declaring only the selected kind (a single `MerchantLayers`) drew
+  no markers at all, even though the map itself rendered. That is unexplained —
+  it may be the keying, or something about a lone layer set — but it means the
+  filter is not solved, and the main map swap stays blocked.
 - **Location** — `LocationController` is not ported; the Compose location API and
   the permission flow still have to be wired.
 - **Offline/basemap** — the offline toggle and `BundledBasemapStyle`'s layer
