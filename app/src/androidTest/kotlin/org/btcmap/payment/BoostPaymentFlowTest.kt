@@ -1,9 +1,12 @@
 package org.btcmap.payment
 
-import android.view.View
 import android.widget.Button
-import androidx.core.view.isVisible
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -18,14 +21,26 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.boost.BoostFragment
+import org.btcmap.ui.InvoicePaymentComposeView
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class BoostPaymentFlowTest : PaymentScreenTest() {
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
+
+    private val startOverLabel =
+        ApplicationProvider.getApplicationContext<android.content.Context>()
+            .getString(R.string.start_over)
+
+    private fun invoiceShown(fragment: Fragment): Boolean =
+        fragment.requireView().findViewById<InvoicePaymentComposeView>(R.id.invoicePayment).qr != null
 
     @Test
     fun quoteLoads_enablesContinue() {
@@ -51,7 +66,7 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
             onView(withId(R.id.btn_continue)).perform(click())
             waitUntil { dispatcher.orderRequests.get() == 1 }
             waitUntilOnMain {
-                fragment.requireView().findViewById<View>(R.id.qr).isVisible &&
+                invoiceShown(fragment) &&
                     !fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
             }
 
@@ -75,12 +90,12 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
             }
             onView(withId(R.id.btn_continue)).perform(click())
             waitUntil { dispatcher.orderRequests.get() == 1 }
-            waitUntilOnMain { fragment.requireView().findViewById<View>(R.id.qr).isVisible }
+            waitUntilOnMain { invoiceShown(fragment) }
 
             scenario.recreate()
 
             val recreated = restoredFragment(scenario, BOOST_TAG) as BoostFragment
-            waitUntilOnMain { recreated.requireView().findViewById<View>(R.id.qr).isVisible }
+            waitUntilOnMain { invoiceShown(recreated) }
             Assert.assertEquals("quote must not be refetched", 1, dispatcher.quoteRequests.get())
             Assert.assertEquals("order must not be replaced", 1, dispatcher.orderRequests.get())
         }
@@ -172,15 +187,14 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
             }
             onView(withId(R.id.btn_continue)).perform(click())
             waitUntil { dispatcher.orderRequests.get() == 1 }
-            waitUntilOnMain { fragment.requireView().findViewById<View>(R.id.qr).isVisible }
+            waitUntilOnMain { invoiceShown(fragment) }
 
-            onView(withId(R.id.start_over)).perform(click())
+            composeTestRule.onNodeWithText(startOverLabel).performClick()
             onView(withText(R.string.start_over)).inRoot(isDialog()).perform(click())
 
             waitUntilOnMain {
-                val view = fragment.requireView()
-                !view.findViewById<View>(R.id.qr).isVisible &&
-                    view.findViewById<Button>(R.id.btn_continue).isEnabled
+                !invoiceShown(fragment) &&
+                    fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
             }
             Assert.assertEquals(
                 "starting over must not place an order by itself",
@@ -234,9 +248,9 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
                 fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
             }
             onView(withId(R.id.btn_continue)).perform(click())
-            waitUntilOnMain { fragment.requireView().findViewById<View>(R.id.qr).isVisible }
+            waitUntilOnMain { invoiceShown(fragment) }
 
-            onView(withId(R.id.start_over)).perform(click())
+            composeTestRule.onNodeWithText(startOverLabel).performClick()
             onView(withText(R.string.start_over)).inRoot(isDialog()).perform(click())
             waitUntilOnMain {
                 fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled

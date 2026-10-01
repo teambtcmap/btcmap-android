@@ -459,6 +459,18 @@ the other payment screens — so this screen is a Compose form plus a Views paym
 block for now. Updated `CommentsFragmentTest` to drive the Compose field and
 button. No behavior change.
 
+### Phase 2, ninth slice — done
+
+Migrated the shared Lightning invoice block to Compose: an `InvoicePayment`
+composable (QR image, pay/copy, start-over) hosted by an
+`InvoicePaymentComposeView`. `InvoicePaymentController` now generates the QR
+bitmap (Android) and drives the Compose view, keeping the wallet intent, the
+clipboard and the start-over confirmation in `:app`. Both consumers (add-comment
+and boost) use it, the `invoice_payment` layout is deleted, and the add-comment
+and boost payment instrumented tests were updated to drive the Compose block
+(the add-comment test's form, left runtime-broken by the previous slice, was
+fixed too). No behavior change.
+
 ## Next
 
 Phase 2 continues: migrate the remaining non-map screens to `:ui` screen by

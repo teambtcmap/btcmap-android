@@ -6,30 +6,29 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.widget.Button
-import android.widget.ImageView
 import androidmads.library.qrgenearator.QRGContents
 import androidmads.library.qrgenearator.QRGEncoder
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.net.toUri
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.btcmap.Activity
 import org.btcmap.R
+import org.btcmap.ui.InvoicePaymentComposeView
+import org.btcmap.ui.InvoicePaymentLabels
 
 /**
  * Renders a Lightning invoice and wires its pay, copy and start-over actions.
  *
  * The merchant boost and comment flows show the same invoice UI, so the QR
  * generation, wallet intent and clipboard handling live here instead of being
- * duplicated by each caller.
+ * duplicated by each caller. The QR is generated here (Android only) and handed
+ * to the shared [InvoicePaymentComposeView].
  */
 internal class InvoicePaymentController(
     private val fragment: Fragment,
-    private val qr: ImageView,
-    private val payButton: Button,
-    private val copyButton: Button,
-    private val startOverButton: Button,
+    private val view: InvoicePaymentComposeView,
     private val paymentRequestLabel: String,
     private val onStartOver: () -> Unit,
 ) {
@@ -39,33 +38,32 @@ internal class InvoicePaymentController(
     private var shownInvoice: String? = null
 
     fun show(invoice: PaymentInvoice) {
+        view.labels = InvoicePaymentLabels(
+            qrDescription = fragment.getString(R.string.qr_code),
+            pay = fragment.getString(R.string.pay),
+            copy = fragment.getString(android.R.string.copy),
+            startOver = fragment.getString(R.string.start_over),
+        )
+        view.onPay = { openWallet(invoice.bolt11) }
+        view.onCopy = { copyToClipboard(invoice.bolt11) }
+        view.onStartOver = { confirmStartOver() }
+
         if (shownInvoice != invoice.bolt11) {
-            val qrEncoder = QRGEncoder(invoice.bolt11, null, QRGContents.Type.TEXT, QR_SIZE)
-            qrEncoder.colorBlack = Color.BLACK
-            qrEncoder.colorWhite = Color.WHITE
-            qr.setImageBitmap(qrEncoder.getBitmap(0))
+            view.qr = generateQr(invoice.bolt11)
             shownInvoice = invoice.bolt11
         }
-
-        qr.isVisible = true
-
-        payButton.isVisible = true
-        payButton.setOnClickListener { openWallet(invoice.bolt11) }
-
-        copyButton.isVisible = true
-        copyButton.setOnClickListener { copyToClipboard(invoice.bolt11) }
-
-        startOverButton.isVisible = true
-        startOverButton.setOnClickListener { confirmStartOver() }
     }
 
     fun hide() {
-        qr.isVisible = false
-        qr.setImageDrawable(null)
+        view.qr = null
         shownInvoice = null
-        payButton.isVisible = false
-        copyButton.isVisible = false
-        startOverButton.isVisible = false
+    }
+
+    private fun generateQr(invoice: String): ImageBitmap {
+        val qrEncoder = QRGEncoder(invoice, null, QRGContents.Type.TEXT, QR_SIZE)
+        qrEncoder.colorBlack = Color.BLACK
+        qrEncoder.colorWhite = Color.WHITE
+        return qrEncoder.getBitmap(0).asImageBitmap()
     }
 
     /**

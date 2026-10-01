@@ -72,10 +72,7 @@ class AddCommentFragment : Fragment() {
 
         val payment = InvoicePaymentController(
             fragment = this,
-            qr = binding.invoicePayment.qr,
-            payButton = binding.invoicePayment.payInvoice,
-            copyButton = binding.invoicePayment.copyInvoice,
-            startOverButton = binding.invoicePayment.startOver,
+            view = binding.invoicePayment,
             paymentRequestLabel = getString(R.string.btc_map_comment_payment_request),
             onStartOver = viewModel::startOver,
         )

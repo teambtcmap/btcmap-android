@@ -1,25 +1,28 @@
 package org.btcmap.payment
 
-import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import androidx.core.view.isVisible
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import androidx.fragment.app.Fragment
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
-import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.comment.AddCommentFragment
+import org.btcmap.ui.AddCommentFormComposeView
+import org.btcmap.ui.COMMENT_CONTINUE_TAG
+import org.btcmap.ui.COMMENT_FIELD_TAG
+import org.btcmap.ui.InvoicePaymentComposeView
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.atomic.AtomicBoolean
@@ -27,16 +30,26 @@ import java.util.concurrent.atomic.AtomicBoolean
 @RunWith(AndroidJUnit4::class)
 class AddCommentPaymentFlowTest : PaymentScreenTest() {
 
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
+
+    private fun invoiceShown(fragment: Fragment): Boolean =
+        fragment.requireView().findViewById<InvoicePaymentComposeView>(R.id.invoicePayment).qr != null
+
+    private fun actionsEnabled(fragment: Fragment): Boolean =
+        fragment.requireView().findViewById<AddCommentFormComposeView>(R.id.addCommentForm)
+            .state?.actionsEnabled == true
+
+    private fun inputEnabled(fragment: Fragment): Boolean =
+        fragment.requireView().findViewById<AddCommentFormComposeView>(R.id.addCommentForm)
+            .state?.inputEnabled == true
+
     @Test
     fun quoteLoads_enablesContinueAndKeepsInputEditable() {
         apiRule.server.dispatcher = commentDispatcher()
 
         withComment { _, fragment ->
-            waitUntilOnMain {
-                val view = fragment.requireView()
-                view.findViewById<Button>(R.id.btn_continue).isEnabled &&
-                    view.findViewById<EditText>(R.id.comment).isEnabled
-            }
+            waitUntilOnMain { actionsEnabled(fragment) && inputEnabled(fragment) }
         }
     }
 
@@ -46,10 +59,8 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
         apiRule.server.dispatcher = dispatcher
 
         withComment { _, fragment ->
-            waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
-            }
-            onView(withId(R.id.btn_continue)).perform(click())
+            waitUntilOnMain { actionsEnabled(fragment) }
+            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
             Thread.sleep(500)
             Assert.assertEquals(0, dispatcher.orderRequests.get())
         }
@@ -61,18 +72,13 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
         apiRule.server.dispatcher = dispatcher
 
         withComment { _, fragment ->
-            waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
-            }
-            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
-            onView(withId(R.id.btn_continue)).perform(click())
+            waitUntilOnMain { actionsEnabled(fragment) }
+            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
+            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
             waitUntil { dispatcher.orderRequests.get() == 1 }
             waitUntilOnMain {
-                val view = fragment.requireView()
-                view.findViewById<View>(R.id.qr).isVisible &&
-                    !view.findViewById<EditText>(R.id.comment).isEnabled &&
-                    !view.findViewById<Button>(R.id.btn_continue).isEnabled
+                invoiceShown(fragment) && !inputEnabled(fragment) && !actionsEnabled(fragment)
             }
         }
     }
@@ -86,11 +92,9 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
 
-            waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
-            }
-            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
-            onView(withId(R.id.btn_continue)).perform(click())
+            waitUntilOnMain { actionsEnabled(fragment) }
+            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
+            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
             waitUntilOnMain {
                 activity.supportFragmentManager.findFragmentByTag(COMMENT_TAG) == null
@@ -120,11 +124,9 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
                 ) { _, _ -> resultReceived.set(true) }
             }
 
-            waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
-            }
-            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
-            onView(withId(R.id.btn_continue)).perform(click())
+            waitUntilOnMain { actionsEnabled(fragment) }
+            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
+            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
             waitUntilOnMain {
                 activity.supportFragmentManager.findFragmentByTag(COMMENT_TAG) == null
@@ -144,11 +146,9 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
         )
 
         withComment { _, fragment ->
-            waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
-            }
-            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
-            onView(withId(R.id.btn_continue)).perform(click())
+            waitUntilOnMain { actionsEnabled(fragment) }
+            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
+            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
             waitUntil {
                 try {
@@ -159,11 +159,7 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
                     false
                 }
             }
-            waitUntilOnMain {
-                val view = fragment.requireView()
-                view.findViewById<EditText>(R.id.comment).isEnabled &&
-                    view.findViewById<Button>(R.id.btn_continue).isEnabled
-            }
+            waitUntilOnMain { inputEnabled(fragment) && actionsEnabled(fragment) }
             onView(withText(R.string.close)).inRoot(isDialog()).perform(click())
         }
     }
@@ -174,18 +170,16 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
         apiRule.server.dispatcher = dispatcher
 
         withComment { scenario, fragment ->
-            waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_continue).isEnabled
-            }
-            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
-            onView(withId(R.id.btn_continue)).perform(click())
+            waitUntilOnMain { actionsEnabled(fragment) }
+            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
+            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
             waitUntil { dispatcher.orderRequests.get() == 1 }
-            waitUntilOnMain { fragment.requireView().findViewById<View>(R.id.qr).isVisible }
+            waitUntilOnMain { invoiceShown(fragment) }
 
             scenario.recreate()
 
             val recreated = restoredFragment(scenario, COMMENT_TAG) as AddCommentFragment
-            waitUntilOnMain { recreated.requireView().findViewById<View>(R.id.qr).isVisible }
+            waitUntilOnMain { invoiceShown(recreated) }
             Assert.assertEquals("quote must not be refetched", 1, dispatcher.quoteRequests.get())
             Assert.assertEquals("order must not be replaced", 1, dispatcher.orderRequests.get())
         }
