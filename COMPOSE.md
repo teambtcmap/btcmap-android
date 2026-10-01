@@ -851,6 +851,17 @@ purpose: its whole job is the window insets, so it stays platform glue in
 
 Verified on the emulator: "Swag42" (last verified Feb 2024) opens the dialog.
 
+### Phase 3, thirteenth slice — done (place sheet, stage 5: preview map)
+
+`PlaceSheet` takes an optional preview-map slot and `MapScreen` fills it with
+`PlacePreviewMap`: a small, non-interactive `MaplibreMap` (`MapInteractions.None`,
+`MapUiOptions.None`) centred on the place and drawing its marker with the same
+bitmap factory as the main map. `MapUiOptions.None` does not hide the
+attribution or the logo in 0.18.0 (`PlatformUiOptions` exposes no flags in common
+code), so the preview shows the standard attribution bar for now.
+
+Verified on the emulator: opening "Swag42" shows its preview map with the marker.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

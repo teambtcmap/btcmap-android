@@ -2,6 +2,8 @@ package org.btcmap.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +49,7 @@ import org.btcmap.ui.map.MarkerBitmapFactory
 import org.btcmap.ui.map.MarkerClickHandler
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.MerchantLayers
+import org.btcmap.ui.map.PlacePreviewMap
 import org.btcmap.ui.map.SearchOverlay
 import org.btcmap.ui.map.rememberSearchResults
 import org.btcmap.ui.map.rememberMapAreas
@@ -290,6 +293,18 @@ fun MapScreen(
                     strings = placeSheetStrings,
                     onAction = { onPlaceAction(place, it) },
                     onDismiss = { selectedPlace = null },
+                    previewMap = {
+                        PlacePreviewMap(
+                            place = place,
+                            styleUrl = styleUrl,
+                            palette = palette,
+                            usingOpenFreeMap = usingOpenFreeMap,
+                            iconFont = iconFont,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(160.dp),
+                        )
+                    },
                 )
             }
             SearchOverlay(

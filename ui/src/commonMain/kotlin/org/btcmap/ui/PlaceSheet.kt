@@ -55,6 +55,7 @@ fun PlaceSheet(
     strings: PlaceSheetStrings,
     onAction: (PlaceAction) -> Unit,
     onDismiss: () -> Unit,
+    previewMap: (@Composable () -> Unit)? = null,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
@@ -63,6 +64,7 @@ fun PlaceSheet(
             comments = comments,
             strings = strings,
             onAction = onAction,
+            previewMap = previewMap,
         )
     }
 }
@@ -73,6 +75,7 @@ private fun PlaceSheetContent(
     comments: List<CommentsAdapterItem>,
     strings: PlaceSheetStrings,
     onAction: (PlaceAction) -> Unit,
+    previewMap: (@Composable () -> Unit)?,
 ) {
     Column(
         modifier = Modifier
@@ -93,6 +96,8 @@ private fun PlaceSheetContent(
             )
             PlaceOverflowMenu(place = place, strings = strings, onAction = onAction)
         }
+
+        previewMap?.invoke()
 
         place.requiredAppUrl?.let { requiredAppUrl ->
             InfoRow(
