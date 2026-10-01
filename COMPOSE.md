@@ -257,11 +257,21 @@ Verified toolchain facts (worth not rediscovering):
 - The `:app` Android variant of `:shared` is produced and consumed
   (`:shared:compileAndroidMain` + `bundleAndroidMainClassesToRuntimeJar`).
 
-Not yet done: `openinghours` can actually move too (it only needs `java.time`,
-which `commonMain` accepts here); it was not part of this first slice.
+### Phase 1, second slice — done
+
+Moved `openinghours` (all four files plus `OpeningHoursTest`) and the two pure
+`stats` data classes (`StatsEntry`, `StatsSection`) into
+`shared/src/commonMain/kotlin/...`; the test went to `shared/src/jvmTest/...`.
+`StatsAdapter` and every Fragment stayed in `:app`, and no visibility changes
+were needed. Verified with `:shared:jvmTest`, `:app:compileDebugKotlin` and
+`:app:compileDebugAndroidTestKotlin` (the androidTest resolves the moved `stats`
+types from `:shared` with no extra dependency). No behavior change.
 
 ## Suggested next step
 
-Continue Phase 1 with a larger, cohesive slice: move `openinghours` (all four
-files plus `OpeningHoursTest`) to `commonMain`, then `stats` and
-`db/table/*`. Each is verified with `:shared:jvmTest` and an `:app` test run.
+Continue Phase 1 with `db/table/*` (schema, projections, queries), then
+`db/Database` and `db/StringExt`. This is the first slice that needs an
+`expect`/`actual` seam: the SQLite driver (`AndroidSQLiteDriver` vs
+`BundledSQLiteDriver`) and the database path. `Database(driver, path)` is
+already injected, so the driver is the main piece. Verify with `:shared:jvmTest`
+and the affected `:app` tests (`DatabaseTest`, the `*QueriesTest`).
